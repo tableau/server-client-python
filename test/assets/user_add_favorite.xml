@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+    <favorites>
+        <favorite label="Test workbook fav">
+            <workbook id="a8076ca1-e9d8-495e-bae6-c684dbb55836" />
+        </favorite>
+        <favorite label="Test view fav">
+            <view id="d79634e1-6063-4ec9-95ff-50acbf609ff5" />
+        </favorite>
+        <favorite label="Test datasource fav">
+            <view id="1672c199-0155-4b49-ad35-1da91ac24579" />
+        </favorite>
+    </favorites>
+</tsResponse>

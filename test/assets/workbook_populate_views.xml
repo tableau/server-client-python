@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+    <views>
+        <view id="097dbe13-de89-445f-b2c3-02f28bd010c1" name="GDP per capita" contentUrl="RESTAPISample/sheets/GDPpercapita" />
+        <view id="2c1ab9d7-8d64-4cc6-b495-52e40c60c330" name="Country ranks" contentUrl="RESTAPISample/sheets/Countryranks" />
+        <view id="0599c28c-6d82-457e-a453-e52c1bdb00f5" name="Interest rates" contentUrl="RESTAPISample/sheets/Interestrates" />
+    </views>
+</tsResponse>

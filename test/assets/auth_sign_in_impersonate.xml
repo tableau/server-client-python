@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+    <credentials token="MJonFA6HDyy2C3oqR13fRGqE6cmgzwq3">
+        <site id="dad65087-b08b-4603-af4e-2887b8aafc67" contentUrl="" />
+        <user id="dd2239f6-ddf1-4107-981a-4cf94e415794" />
+    </credentials>
+</tsResponse>

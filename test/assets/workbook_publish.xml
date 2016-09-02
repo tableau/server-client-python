@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+	<workbook id="a8076ca1-e9d8-495e-bae6-c684dbb55836" name="RESTAPISample" contentUrl="RESTAPISample_0" showTabs="false" size="1" createdAt="2016-08-18T18:33:24Z" updatedAt="2016-08-18T20:31:34Z">
+		<project id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760" name="default" />
+		<owner id="5de011f8-5aa9-4d5b-b991-f462c8dd6bb7" />
+		<tags />
+		<views>
+			<view id="fe0b4e89-73f4-435e-952d-3a263fbfa56c" name="GDP per capita" contentUrl="RESTAPISample_0/sheets/GDPpercapita" />
+		</views>
+	</workbook>
+</tsResponse>

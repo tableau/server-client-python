@@ -1,0 +1,2 @@
+class UnpopulatedPropertyError(Exception):
+    pass

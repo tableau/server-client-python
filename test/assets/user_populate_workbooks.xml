@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+    <pagination pageNumber="1" pageSize="100" totalAvailable="1" />
+    <workbooks>
+        <workbook id="3cc6cd06-89ce-4fdc-b935-5294135d6d42" name="SafariSample" contentUrl="SafariSample" showTabs="false" size="26" createdAt="2016-07-26T20:34:56Z" updatedAt="2016-07-26T20:35:05Z">
+            <project id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760" name="default" />
+            <owner id="5de011f8-5aa9-4d5b-b991-f462c8dd6bb7" />
+            <tags>
+                <tag label="Safari" />
+                <tag label="Sample" />
+            </tags>
+        </workbook>
+    </workbooks>
+</tsResponse>

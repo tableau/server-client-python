@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+    <connections>
+        <connection id="37ca6ced-58d7-4dcf-99dc-f0a85223cbef" type="dataengine" serverAddress="" userName="">
+            <datasource id="4506225a-0d32-4ab1-82d3-c24e85f7afba" name="World Indicators" />
+        </connection>
+    </connections>
+</tsResponse>
