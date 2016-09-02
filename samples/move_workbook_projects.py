@@ -10,9 +10,6 @@
 import tableauserverapi as TSA
 import argparse
 
-# import logging
-# logging.basicConfig(level=logging.DEBUG)
-
 parser = argparse.ArgumentParser(description='Move one workbook from the default project to another.')
 parser.add_argument('server', help='server address')
 parser.add_argument('username', help='username to sign into server')
@@ -35,11 +32,16 @@ with server.auth.sign_in(tableau_auth):
     pagination_info, all_projects = server.projects.get()
     dest_project = next((project for project in all_projects if project.name == args.destination_project), None)
 
-    # Step 4: Update workbook with new project id
-    if all_workbooks:
-        print("Old project: {}".format(all_workbooks[0].project_name))
-        all_workbooks[0].project_id = dest_project.id
-        target_workbook = server.workbooks.update(all_workbooks[0])
-        print("New project: {}".format(target_workbook.project_name))
+    if dest_project is not None:
+        # Step 4: Update workbook with new project id
+        if all_workbooks:
+            print("Old project: {}".format(all_workbooks[0].project_name))
+            all_workbooks[0].project_id = dest_project.id
+            target_workbook = server.workbooks.update(all_workbooks[0])
+            print("New project: {}".format(target_workbook.project_name))
+        else:
+            error = "No workbook named {} found.".format(args.workbook_name)
+            raise LookupError(error)
     else:
-        print('No workbook named {} found.'.format(args.workbook_name))
+        error = "The default project could not be found."
+        raise LookupError(error)

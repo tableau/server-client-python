@@ -39,4 +39,5 @@ with server.auth.sign_in(tableau_auth):
         new_workbook = server.workbooks.publish(new_workbook, args.filepath, server.PublishMode.Overwrite)
         print("Workbook published. ID: {0}".format(new_workbook.id))
     else:
-        print("The default project could not be found.")
+        error = "The default project could not be found."
+        raise LookupError(error)
