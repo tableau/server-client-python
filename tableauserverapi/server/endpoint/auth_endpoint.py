@@ -1,5 +1,6 @@
 from endpoint import Endpoint
-from .. import RequestFactory, TableauAuth
+from .. import RequestFactory, NAMESPACE
+import xml.etree.ElementTree as ET
 import logging
 
 logger = logging.getLogger('tableau.endpoint.auth')
@@ -27,7 +28,11 @@ class Auth(Endpoint):
         server_response = self.parent_srv.session.post(url, data=signin_req,
                                                        **self.parent_srv.http_options)
         Endpoint._check_status(server_response)
-        TableauAuth.from_response(self.parent_srv, server_response.text)
+        parsed_response = ET.fromstring(server_response.text)
+        site_id = parsed_response.find('.//t:site', namespaces=NAMESPACE).get('id', None)
+        user_id = parsed_response.find('.//t:user', namespaces=NAMESPACE).get('id', None)
+        auth_token = parsed_response.find('t:credentials', namespaces=NAMESPACE).get('token', None)
+        self.parent_srv._set_auth(site_id, user_id, auth_token)
         logger.info('Signed into {0} as {1}'.format(self.parent_srv.server_address, auth_req.username))
         return Auth.contextmgr(self.sign_out)
 
