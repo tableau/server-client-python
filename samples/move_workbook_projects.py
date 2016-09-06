@@ -43,5 +43,5 @@ with server.auth.sign_in(tableau_auth):
             error = "No workbook named {} found.".format(args.workbook_name)
             raise LookupError(error)
     else:
-        error = "The default project could not be found."
+        error = "No project named {} found.".format(args.destination_project)
         raise LookupError(error)
