@@ -23,6 +23,32 @@ Download the `.zip` file. Unzip the file and then run the following command:
 pip install -e <directory containing setup.py>
 ```
 
+#### Installing the Development Version from Git
+
+*Only do this if you know you want the development version, no guarantee that we won't break APIs during development*
+
+```text
+pip install git+https://github.com/tableau/server-api-python.git@development
+```
+
+If you go this route, but want to switch back to the non-development version, you need to run the following command before installing the stable version:
+
+```text
+pip uninstall tableauserverapi
+```
+
+###Basics
+The following example shows the basic syntax for using the Server API to query a list of all workbooks and the associated pagination information on the default site:
+
+```python
+import tableauserverapi
+
+tableau_auth = tableauserverapi.TableauAuth('USERNAME', 'PASSWORD')
+server = tableauserverapi.Server('SERVER')
+
+with server.auth.sign_in(tableau_auth):
+    pagination_info, all_workbooks = server.workbooks.get()
+```
 
 ###Server API Samples
 * Can be run using the command prompt or terminal
