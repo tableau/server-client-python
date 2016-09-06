@@ -32,9 +32,8 @@ class AuthTests(unittest.TestCase):
             response_xml = file.read()
         with requests_mock.mock() as m:
             m.post(self.baseurl + '/signin', text=response_xml)
-            tableau_auth = TSA.TableauAuth('testuser',
-                                           'password',
-                                           impersonate_id='dd2239f6-ddf1-4107-981a-4cf94e415794')
+            tableau_auth = TSA.TableauAuth('testuser', 'password',
+                                           user_id_to_impersonate='dd2239f6-ddf1-4107-981a-4cf94e415794')
             self.server.auth.sign_in(tableau_auth)
 
         self.assertEqual('MJonFA6HDyy2C3oqR13fRGqE6cmgzwq3', self.server.auth_token)
