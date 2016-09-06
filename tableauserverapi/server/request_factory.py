@@ -10,9 +10,9 @@ def _add_multipart(parts):
         multipart_part = RequestField(name=name, data=data, filename=filename)
         multipart_part.make_multipart(content_type=content_type)
         mime_multipart_parts.append(multipart_part)
-    post_body, content_type = encode_multipart_formdata(mime_multipart_parts)
+    xml_request, content_type = encode_multipart_formdata(mime_multipart_parts)
     content_type = ''.join(('multipart/mixed',) + content_type.partition(';')[1:])
-    return post_body, content_type
+    return xml_request, content_type
 
 
 class AuthRequest(object):
@@ -23,9 +23,9 @@ class AuthRequest(object):
         credentials_element.attrib['password'] = auth_item.password
         site_element = ET.SubElement(credentials_element, 'site')
         site_element.attrib['contentUrl'] = auth_item.site
-        if auth_item.impersonate_id:
+        if auth_item.user_id_to_impersonate:
             user_element = ET.SubElement(credentials_element, 'user')
-            user_element.attrib['id'] = auth_item.impersonate_id
+            user_element.attrib['id'] = auth_item.user_id_to_impersonate
         return ET.tostring(xml_request)
 
 
