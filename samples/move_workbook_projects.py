@@ -9,6 +9,7 @@
 
 import tableauserverapi as TSA
 import argparse
+import logging
 
 parser = argparse.ArgumentParser(description='Move one workbook from the default project to another.')
 parser.add_argument('server', help='server address')
@@ -16,7 +17,17 @@ parser.add_argument('username', help='username to sign into server')
 parser.add_argument('password', help='password to sign into server')
 parser.add_argument('workbook_name', help='name of workbook to move')
 parser.add_argument('destination_project', help='name of project to move workbook into')
+parser.add_argument('--logging-level', choices=['debug', 'info'],
+                    help='desired logging level (set to error by default)')
 args = parser.parse_args()
+
+# Set logging level based on user input, or error by default
+if args.logging_level == 'debug':
+    logging.basicConfig(level=logging.DEBUG)
+elif args.logging_level == 'info':
+    logging.basicConfig(level=logging.INFO)
+else:
+    logging.basicConfig(level=logging.ERROR)
 
 # Step 1: Sign in to server
 tableau_auth = TSA.TableauAuth(args.username, args.password)
