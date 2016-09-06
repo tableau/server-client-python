@@ -13,18 +13,46 @@ class WorkbookItem(object):
         self._created_at = None
         self._id = None
         self._initial_tags = set()
-        self._project_name = None
         self._preview_image = None
+        self._project_id = None
+        self._project_name = None
+        self._show_tabs = None
         self._size = None
         self._updated_at = None
         self._views = None
-        self._show_tabs = None
-        self._project_id = None
-        self.show_tabs = show_tabs
         self.name = name
-        self.project_id = project_id
         self.owner_id = None
         self.tags = set()
+
+        # Invoke setter
+        self.project_id = project_id
+        self.show_tabs = show_tabs
+
+    @property
+    def connections(self):
+        if self._connections is None:
+            error = "Workbook item must be populated with connections first."
+            raise UnpopulatedPropertyError(error)
+        return self._connections
+
+    @property
+    def content_url(self):
+        return self._content_url
+
+    @property
+    def created_at(self):
+        return self._created_at
+
+    @property
+    def id(self):
+        return self._id
+
+    @property
+    def preview_image(self):
+        if self._preview_image is None:
+            error = "Workbook item must be populated with its preview image first."
+            raise UnpopulatedPropertyError(error)
+        return self._preview_image
 
     @property
     def project_id(self):
@@ -39,6 +67,10 @@ class WorkbookItem(object):
             self._project_id = value
 
     @property
+    def project_name(self):
+        return self._project_name
+
+    @property
     def show_tabs(self):
         return self._show_tabs
 
@@ -51,28 +83,12 @@ class WorkbookItem(object):
             self._show_tabs = value
 
     @property
-    def id(self):
-        return self._id
-
-    @property
-    def content_url(self):
-        return self._content_url
-
-    @property
     def size(self):
         return self._size
 
     @property
-    def created_at(self):
-        return self._created_at
-
-    @property
     def updated_at(self):
         return self._updated_at
-
-    @property
-    def project_name(self):
-        return self._project_name
 
     @property
     def views(self):
@@ -80,17 +96,6 @@ class WorkbookItem(object):
             error = "Workbook item must be populated with views first."
             raise UnpopulatedPropertyError(error)
         return self._views
-
-    @property
-    def connections(self):
-        if self._connections is None:
-            error = "Workbook item must be populated with connections first."
-            raise UnpopulatedPropertyError(error)
-        return self._connections
-
-    @property
-    def preview_image(self):
-        return self._preview_image
 
     def _set_connections(self, connections):
         self._connections = connections
@@ -106,21 +111,6 @@ class WorkbookItem(object):
 
     def _get_initial_tags(self):
         return self._initial_tags
-
-    @classmethod
-    def from_response(cls, resp):
-        all_workbook_items = list()
-        parsed_response = ET.fromstring(resp)
-        all_workbook_xml = parsed_response.findall('.//t:workbook', namespaces=NAMESPACE)
-        for workbook_xml in all_workbook_xml:
-            (id, name, content_url, created_at, updated_at, size, show_tabs,
-             project_id, project_name, owner_id, tags, views) = cls._parse_element(workbook_xml)
-
-            workbook_item = cls(project_id)
-            workbook_item._set_values(id, name, content_url, created_at, updated_at,
-                            size, show_tabs, None, project_name, owner_id, tags, views)
-            all_workbook_items.append(workbook_item)
-        return all_workbook_items
 
     def _parse_common_tags(self, workbook_xml):
         if not isinstance(workbook_xml, ET.Element):
@@ -161,6 +151,21 @@ class WorkbookItem(object):
             self._initial_tags = copy.copy(tags)
         if views:
             self._views = views
+
+    @classmethod
+    def from_response(cls, resp):
+        all_workbook_items = list()
+        parsed_response = ET.fromstring(resp)
+        all_workbook_xml = parsed_response.findall('.//t:workbook', namespaces=NAMESPACE)
+        for workbook_xml in all_workbook_xml:
+            (id, name, content_url, created_at, updated_at, size, show_tabs,
+             project_id, project_name, owner_id, tags, views) = cls._parse_element(workbook_xml)
+
+            workbook_item = cls(project_id)
+            workbook_item._set_values(id, name, content_url, created_at, updated_at,
+                            size, show_tabs, None, project_name, owner_id, tags, views)
+            all_workbook_items.append(workbook_item)
+        return all_workbook_items
 
     @staticmethod
     def _parse_element(workbook_xml):
@@ -203,5 +208,6 @@ class WorkbookItem(object):
             project_id, project_name, owner_id, tags, views
 
 
+# Used to convert string represented boolean to a boolean type
 def string_to_bool(s):
     return s.lower() == 'true'
