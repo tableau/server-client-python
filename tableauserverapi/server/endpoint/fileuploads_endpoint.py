@@ -1,5 +1,5 @@
-from endpoint import Endpoint
-from exceptions import MissingRequiredFieldError
+from .exceptions import MissingRequiredFieldError
+from .endpoint import Endpoint
 from .. import RequestFactory
 from ...models.fileupload_item import FileuploadItem
 import os.path

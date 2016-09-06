@@ -1,4 +1,4 @@
-from request_options import RequestOptions
+from .request_options import RequestOptions
 
 
 class Filter(object):

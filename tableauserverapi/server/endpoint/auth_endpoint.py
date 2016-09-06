@@ -1,4 +1,4 @@
-from endpoint import Endpoint
+from .endpoint import Endpoint
 from .. import RequestFactory, NAMESPACE
 import xml.etree.ElementTree as ET
 import logging

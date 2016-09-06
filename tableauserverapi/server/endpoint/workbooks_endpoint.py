@@ -1,5 +1,5 @@
-from endpoint import Endpoint
-from exceptions import MissingRequiredFieldError
+from .endpoint import Endpoint
+from .exceptions import MissingRequiredFieldError
 from .fileuploads_endpoint import Fileuploads
 from .. import RequestFactory, WorkbookItem, ConnectionItem, ViewItem, PaginationItem
 from ...models.tag_item import TagItem

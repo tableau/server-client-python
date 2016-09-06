@@ -1,4 +1,4 @@
-from exceptions import ServerResponseError
+from .exceptions import ServerResponseError
 import logging
 
 logger = logging.getLogger('tableau.endpoint')

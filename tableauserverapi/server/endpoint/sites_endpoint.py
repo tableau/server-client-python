@@ -1,5 +1,5 @@
-from endpoint import Endpoint
-from exceptions import MissingRequiredFieldError
+from .endpoint import Endpoint
+from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, SiteItem, PaginationItem
 import logging
 import copy
