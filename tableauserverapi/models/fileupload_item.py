@@ -4,8 +4,8 @@ from .. import NAMESPACE
 
 class FileuploadItem(object):
     def __init__(self):
-        self._upload_session_id = None
         self._file_size = None
+        self._upload_session_id = None
 
     @property
     def upload_session_id(self):

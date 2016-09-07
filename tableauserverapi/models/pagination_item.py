@@ -9,16 +9,16 @@ class PaginationItem(object):
         self._total_available = None
 
     @property
-    def total_available(self):
-        return self._total_available
-
-    @property
     def page_number(self):
         return self._page_number
 
     @property
     def page_size(self):
         return self._page_size
+
+    @property
+    def total_available(self):
+        return self._total_available
 
     @classmethod
     def from_response(cls, resp):

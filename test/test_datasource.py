@@ -23,8 +23,8 @@ class DatasourceTests(unittest.TestCase):
         self.baseurl = self.server.datasources._construct_url()
 
     def test_get(self):
-        with open(GET_XML, 'rb') as file:
-            response_xml = file.read()
+        with open(GET_XML, 'rb') as f:
+            response_xml = f.read()
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
             pagination_item, all_datasources = self.server.datasources.get()
@@ -56,8 +56,8 @@ class DatasourceTests(unittest.TestCase):
         self.assertRaises(TSA.NotSignedInError, self.server.datasources.get)
 
     def test_get_empty(self):
-        with open(GET_EMPTY_XML, 'rb') as file:
-            response_xml = file.read()
+        with open(GET_EMPTY_XML, 'rb') as f:
+            response_xml = f.read()
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
             pagination_item, all_datasources = self.server.datasources.get()
@@ -66,8 +66,8 @@ class DatasourceTests(unittest.TestCase):
         self.assertEqual([], all_datasources)
 
     def test_get_by_id(self):
-        with open(GET_BY_ID_XML, 'rb') as file:
-            response_xml = file.read()
+        with open(GET_BY_ID_XML, 'rb') as f:
+            response_xml = f.read()
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', text=response_xml)
             single_datasource = self.server.datasources.get_by_id('9dbd2263-16b5-46e1-9c43-a76bb8ab65fb')
@@ -84,8 +84,8 @@ class DatasourceTests(unittest.TestCase):
         self.assertEqual(set(['world', 'indicators', 'sample']), single_datasource.tags)
 
     def test_update(self):
-        with open(UPDATE_XML, 'rb') as file:
-            response_xml = file.read()
+        with open(UPDATE_XML, 'rb') as f:
+            response_xml = f.read()
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', text=response_xml)
             single_datasource = TSA.DatasourceItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
@@ -98,8 +98,8 @@ class DatasourceTests(unittest.TestCase):
         self.assertEqual('dd2239f6-ddf1-4107-981a-4cf94e415794', single_datasource.owner_id)
 
     def test_update_copy_fields(self):
-        with open(UPDATE_XML, 'rb') as file:
-            response_xml = file.read()
+        with open(UPDATE_XML, 'rb') as f:
+            response_xml = f.read()
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', text=response_xml)
             single_datasource = TSA.DatasourceItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
@@ -112,8 +112,8 @@ class DatasourceTests(unittest.TestCase):
         self.assertEqual(single_datasource._project_name, updated_datasource._project_name)
 
     def test_publish(self):
-        with open(PUBLISH_XML, 'rb') as file:
-            response_xml = file.read()
+        with open(PUBLISH_XML, 'rb') as f:
+            response_xml = f.read()
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
             new_datasource = TSA.DatasourceItem('SampleDS', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')

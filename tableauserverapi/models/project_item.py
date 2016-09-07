@@ -8,31 +8,18 @@ class ProjectItem(object):
         ManagedByOwner = 'ManagedByOwner'
 
     def __init__(self, name, description=None, content_permissions=None):
-        self._id = None
         self._content_permissions = None
+        self._id = None
         self._name = None
         self.description = description
+
+        # Invoke setter
         self.name = name
 
         if content_permissions:
             # In order to invoke the setter method to validate content_permissions,
             # _content_permissions must be initialized first.
             self.content_permissions = content_permissions
-
-    def is_default(self):
-        return self.name.lower() == 'default'
-
-    @property
-    def name(self):
-        return self._name
-
-    @name.setter
-    def name(self, value):
-        if not value:
-            error = 'Name must be defined.'
-            raise ValueError(error)
-        else:
-            self._name = value
 
     @property
     def content_permissions(self):
@@ -50,18 +37,20 @@ class ProjectItem(object):
     def id(self):
         return self._id
 
-    @classmethod
-    def from_response(cls, resp):
-        all_project_items = list()
-        parsed_response = ET.fromstring(resp)
-        all_project_xml = parsed_response.findall('.//t:project', namespaces=NAMESPACE)
+    @property
+    def name(self):
+        return self._name
 
-        for project_xml in all_project_xml:
-            (id, name, description, content_permissions) = cls._parse_element(project_xml)
-            project_item = cls(name)
-            project_item._set_values(id, name, description, content_permissions)
-            all_project_items.append(project_item)
-        return all_project_items
+    @name.setter
+    def name(self, value):
+        if not value:
+            error = 'Name must be defined.'
+            raise ValueError(error)
+        else:
+            self._name = value
+
+    def is_default(self):
+        return self.name.lower() == 'default'
 
     def _parse_common_tags(self, project_xml):
         if not isinstance(project_xml, ET.Element):
@@ -81,6 +70,19 @@ class ProjectItem(object):
             self.description = description
         if content_permissions:
             self._content_permissions = content_permissions
+
+    @classmethod
+    def from_response(cls, resp):
+        all_project_items = list()
+        parsed_response = ET.fromstring(resp)
+        all_project_xml = parsed_response.findall('.//t:project', namespaces=NAMESPACE)
+
+        for project_xml in all_project_xml:
+            (id, name, description, content_permissions) = cls._parse_element(project_xml)
+            project_item = cls(name)
+            project_item._set_values(id, name, description, content_permissions)
+            all_project_items.append(project_item)
+        return all_project_items
 
     @staticmethod
     def _parse_element(project_xml):

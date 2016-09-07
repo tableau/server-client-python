@@ -6,18 +6,39 @@ from .. import NAMESPACE
 
 class DatasourceItem(object):
     def __init__(self, project_id, name=None):
+        self._connections = None
         self._content_url = None
         self._created_at = None
         self._id = None
+        self._project_id = None
         self._project_name = None
         self._tags = set()
         self._type = None
         self._updated_at = None
-        self._connections = None
-        self._project_id = None
-        self.owner_id = None
-        self.project_id = project_id
         self.name = name
+        self.owner_id = None
+
+        # Invoke setter
+        self.project_id = project_id
+
+    @property
+    def connections(self):
+        if self._connections is None:
+            error = 'Datasource item must be populated with connections first.'
+            raise UnpopulatedPropertyError(error)
+        return self._connections
+
+    @property
+    def content_url(self):
+        return self._content_url
+
+    @property
+    def created_at(self):
+        return self._created_at
+
+    @property
+    def id(self):
+        return self._id
 
     @property
     def project_id(self):
@@ -32,26 +53,6 @@ class DatasourceItem(object):
             self._project_id = value
 
     @property
-    def id(self):
-        return self._id
-
-    @property
-    def type(self):
-        return self._type
-
-    @property
-    def content_url(self):
-        return self._content_url
-
-    @property
-    def created_at(self):
-        return self._created_at
-
-    @property
-    def updated_at(self):
-        return self._updated_at
-
-    @property
     def project_name(self):
         return self._project_name
 
@@ -60,29 +61,15 @@ class DatasourceItem(object):
         return self._tags
 
     @property
-    def connections(self):
-        if self._connections is None:
-            error = 'Datasource item must be populated with connections first.'
-            raise UnpopulatedPropertyError(error)
-        return self._connections
+    def type(self):
+        return self._type
+
+    @property
+    def updated_at(self):
+        return self._updated_at
 
     def _set_connections(self, connections):
         self._connections = connections
-
-    @classmethod
-    def from_response(cls, resp):
-        all_datasource_items = list()
-        parsed_response = ET.fromstring(resp)
-        all_datasource_xml = parsed_response.findall('.//t:datasource', namespaces=NAMESPACE)
-
-        for datasource_xml in all_datasource_xml:
-            (id, name, type, content_url, created_at, updated_at,
-             tags, project_id, project_name, owner_id) = cls._parse_element(datasource_xml)
-            datasource_item = cls(project_id)
-            datasource_item._set_values(id, name, type, content_url, created_at, updated_at,
-                            tags, None, project_name, owner_id)
-            all_datasource_items.append(datasource_item)
-        return all_datasource_items
 
     def _parse_common_tags(self, datasource_xml):
         if not isinstance(datasource_xml, ET.Element):
@@ -114,6 +101,21 @@ class DatasourceItem(object):
             self._project_name = project_name
         if owner_id:
             self.owner_id = owner_id
+
+    @classmethod
+    def from_response(cls, resp):
+        all_datasource_items = list()
+        parsed_response = ET.fromstring(resp)
+        all_datasource_xml = parsed_response.findall('.//t:datasource', namespaces=NAMESPACE)
+
+        for datasource_xml in all_datasource_xml:
+            (id, name, type, content_url, created_at, updated_at,
+             tags, project_id, project_name, owner_id) = cls._parse_element(datasource_xml)
+            datasource_item = cls(project_id)
+            datasource_item._set_values(id, name, type, content_url, created_at, updated_at,
+                            tags, None, project_name, owner_id)
+            all_datasource_items.append(datasource_item)
+        return all_datasource_items
 
     @staticmethod
     def _parse_element(datasource_xml):

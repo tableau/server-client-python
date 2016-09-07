@@ -4,23 +4,15 @@ from .. import NAMESPACE
 
 class ConnectionItem(object):
     def __init__(self):
-        self._id = None
-        self._type = None
         self._datasource_id = None
         self._datasource_name = None
+        self._id = None
+        self._type = None
+        self.embed_password = None
+        self.password = None
         self.server_address = None
         self.server_port = None
         self.username = None
-        self.password = None
-        self.embed_password = None
-
-    @property
-    def id(self):
-        return self._id
-
-    @property
-    def type(self):
-        return self._type
 
     @property
     def datasource_id(self):
@@ -29,6 +21,14 @@ class ConnectionItem(object):
     @property
     def datasource_name(self):
         return self._datasource_name
+
+    @property
+    def id(self):
+        return self._id
+
+    @property
+    def type(self):
+        return self._type
 
     @classmethod
     def from_response(cls, resp):

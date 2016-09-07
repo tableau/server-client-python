@@ -20,8 +20,8 @@ class ViewTests(unittest.TestCase):
         self.baseurl = self.server.views._construct_url()
 
     def test_get(self):
-        with open(GET_XML, 'rb') as file:
-            response_xml = file.read()
+        with open(GET_XML, 'rb') as f:
+            response_xml = f.read()
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/views', text=response_xml)
             pagination_item, all_views = self.server.views.get()
@@ -44,8 +44,8 @@ class ViewTests(unittest.TestCase):
         self.assertRaises(TSA.NotSignedInError, self.server.views.get)
 
     def test_populate_preview_image(self):
-        with open(POPULATE_PREVIEW_IMAGE, 'rb') as file:
-            response = file.read()
+        with open(POPULATE_PREVIEW_IMAGE, 'rb') as f:
+            response = f.read()
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/workbooks/3cc6cd06-89ce-4fdc-b935-5294135d6d42/'
                   'views/d79634e1-6063-4ec9-95ff-50acbf609ff5/previewImage', content=response)

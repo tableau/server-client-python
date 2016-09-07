@@ -25,8 +25,8 @@ class UserTests(unittest.TestCase):
         self.baseurl = self.server.users._construct_url()
 
     def test_get(self):
-        with open(GET_XML, 'rb') as file:
-            response_xml = file.read()
+        with open(GET_XML, 'rb') as f:
+            response_xml = f.read()
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
             pagination_item, all_users = self.server.users.get()
@@ -42,8 +42,8 @@ class UserTests(unittest.TestCase):
         self.assertEqual('Interactor', all_users[1].site_role)
 
     def test_get_empty(self):
-        with open(GET_EMPTY_XML, 'rb') as file:
-            response_xml = file.read()
+        with open(GET_EMPTY_XML, 'rb') as f:
+            response_xml = f.read()
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
             pagination_item, all_users = self.server.users.get()
@@ -56,8 +56,8 @@ class UserTests(unittest.TestCase):
         self.assertRaises(TSA.NotSignedInError, self.server.users.get)
 
     def test_get_by_id(self):
-        with open(GET_BY_ID_XML, 'rb') as file:
-            response_xml = file.read()
+        with open(GET_BY_ID_XML, 'rb') as f:
+            response_xml = f.read()
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/dd2239f6-ddf1-4107-981a-4cf94e415794', text=response_xml)
             single_user = self.server.users.get_by_id('dd2239f6-ddf1-4107-981a-4cf94e415794')
@@ -74,8 +74,8 @@ class UserTests(unittest.TestCase):
         self.assertRaises(ValueError, self.server.users.get_by_id, '')
 
     def test_update(self):
-        with open(UPDATE_XML, 'rb') as file:
-            response_xml = file.read()
+        with open(UPDATE_XML, 'rb') as f:
+            response_xml = f.read()
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/dd2239f6-ddf1-4107-981a-4cf94e415794', text=response_xml)
             single_user = TSA.UserItem('test', 'Viewer')
@@ -104,8 +104,8 @@ class UserTests(unittest.TestCase):
         self.assertRaises(ValueError, self.server.users.remove, '')
 
     def test_add(self):
-        with open(ADD_XML, 'rb') as file:
-            response_xml = file.read()
+        with open(ADD_XML, 'rb') as f:
+            response_xml = f.read()
         with requests_mock.mock() as m:
             m.post(self.baseurl + '', text=response_xml)
             new_user = TSA.UserItem(name='Cassie', site_role='Viewer', auth_setting='ServerDefault')
@@ -117,8 +117,8 @@ class UserTests(unittest.TestCase):
         self.assertEqual('ServerDefault', new_user.auth_setting)
 
     def test_populate_workbooks(self):
-        with open(POPULATE_WORKBOOKS_XML, 'rb') as file:
-            response_xml = file.read()
+        with open(POPULATE_WORKBOOKS_XML, 'rb') as f:
+            response_xml = f.read()
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/dd2239f6-ddf1-4107-981a-4cf94e415794/workbooks',
                   text=response_xml)

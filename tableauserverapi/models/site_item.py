@@ -13,66 +13,32 @@ class SiteItem(object):
 
     def __init__(self, name, content_url, admin_mode=None, user_quota=None, storage_quota=None,
                  disable_subscriptions=False, subscribe_others_enabled=True, revision_history_enabled=False):
-        self._id = None
-        self._status_reason = None
-        self._num_users = None
-        self._storage = None
         self._admin_mode = None
-        self._state = None
-        self._name = None
         self._content_url = None
-        self._subscribe_others_enabled = None
-        self._revision_history_enabled = None
         self._disable_subscriptions = None
-        self.subscribe_others_enabled = subscribe_others_enabled
-        self.revision_history_enabled = revision_history_enabled
-        self.disable_subscriptions = disable_subscriptions
+        self._id = None
+        self._name = None
+        self._num_users = None
+        self._revision_history_enabled = None
+        self._state = None
+        self._status_reason = None
+        self._storage = None
+        self._subscribe_others_enabled = None
         self.revision_limit = None
         self.user_quota = user_quota
         self.storage_quota = storage_quota
-        self.name = name
+
+        # Invoke setter
         self.content_url = content_url
+        self.disable_subscriptions = disable_subscriptions
+        self.name = name
+        self.revision_history_enabled = revision_history_enabled
+        self.subscribe_others_enabled = subscribe_others_enabled
 
         if admin_mode:
             # In order to invoke the setter method to validate admin_mode,
             # _admin_mode must be initialized first.
             self.admin_mode = admin_mode
-
-    @property
-    def subscribe_others_enabled(self):
-        return self._subscribe_others_enabled
-
-    @subscribe_others_enabled.setter
-    def subscribe_others_enabled(self, value):
-        if not isinstance(value, bool):
-            error = 'Boolean expected for subscribe_others_enabled flag.'
-            raise ValueError(error)
-        else:
-            self._subscribe_others_enabled = value
-
-    @property
-    def revision_history_enabled(self):
-        return self._revision_history_enabled
-
-    @revision_history_enabled.setter
-    def revision_history_enabled(self, value):
-        if not isinstance(value, bool):
-            error = 'Boolean expected for revision_history_enabled flag.'
-            raise ValueError(error)
-        else:
-            self._revision_history_enabled = value
-
-    @property
-    def disable_subscriptions(self):
-        return self._disable_subscriptions
-
-    @disable_subscriptions.setter
-    def disable_subscriptions(self, value):
-        if not isinstance(value, bool):
-            error = 'Boolean expected for disable_subscriptions flag.'
-            raise ValueError(error)
-        else:
-            self._disable_subscriptions = value
 
     @property
     def admin_mode(self):
@@ -87,16 +53,32 @@ class SiteItem(object):
             self._admin_mode = value
 
     @property
-    def state(self):
-        return self._state
+    def content_url(self):
+        return self._content_url
 
-    @state.setter
-    def state(self, value):
-        if not hasattr(SiteItem.State, value):
-            error = 'Invalid state defined.'
+    @content_url.setter
+    def content_url(self, value):
+        if value is None:
+            error = 'Content URL must be defined.'
             raise ValueError(error)
         else:
-            self._state = value
+            self._content_url = value
+
+    @property
+    def disable_subscriptions(self):
+        return self._disable_subscriptions
+
+    @disable_subscriptions.setter
+    def disable_subscriptions(self, value):
+        if not isinstance(value, bool):
+            error = 'Boolean expected for disable_subscriptions flag.'
+            raise ValueError(error)
+        else:
+            self._disable_subscriptions = value
+
+    @property
+    def id(self):
+        return self._id
 
     @property
     def name(self):
@@ -111,52 +93,55 @@ class SiteItem(object):
             self._name = value
 
     @property
-    def content_url(self):
-        return self._content_url
-
-    @content_url.setter
-    def content_url(self, value):
-        if value is None:
-            error = 'Content URL must be defined.'
-            raise ValueError(error)
-        else:
-            self._content_url = value
+    def num_users(self):
+        return self._num_users
 
     @property
-    def id(self):
-        return self._id
+    def revision_history_enabled(self):
+        return self._revision_history_enabled
+
+    @revision_history_enabled.setter
+    def revision_history_enabled(self, value):
+        if not isinstance(value, bool):
+            error = 'Boolean expected for revision_history_enabled flag.'
+            raise ValueError(error)
+        else:
+            self._revision_history_enabled = value
+
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, value):
+        if not hasattr(SiteItem.State, value):
+            error = 'Invalid state defined.'
+            raise ValueError(error)
+        else:
+            self._state = value
 
     @property
     def status_reason(self):
         return self._status_reason
 
     @property
-    def num_users(self):
-        return self._num_users
-
-    @property
     def storage(self):
         return self._storage
 
+    @property
+    def subscribe_others_enabled(self):
+        return self._subscribe_others_enabled
+
+    @subscribe_others_enabled.setter
+    def subscribe_others_enabled(self, value):
+        if not isinstance(value, bool):
+            error = 'Boolean expected for subscribe_others_enabled flag.'
+            raise ValueError(error)
+        else:
+            self._subscribe_others_enabled = value
+
     def is_default(self):
         return self.name.lower() == 'default'
-
-    @classmethod
-    def from_response(cls, resp):
-        all_site_items = list()
-        parsed_response = ET.fromstring(resp)
-        all_site_xml = parsed_response.findall('.//t:site', namespaces=NAMESPACE)
-        for site_xml in all_site_xml:
-            (id, name, content_url, status_reason, admin_mode, state, subscribe_others_enabled,
-               disable_subscriptions, revision_history_enabled, user_quota, storage_quota,
-               revision_limit, num_users, storage) = cls._parse_element(site_xml)
-
-            site_item = cls(name, content_url)
-            site_item._set_values(id, name, content_url, status_reason, admin_mode, state,
-                            subscribe_others_enabled, disable_subscriptions, revision_history_enabled,
-                            user_quota, storage_quota, revision_limit, num_users, storage)
-            all_site_items.append(site_item)
-        return all_site_items
 
     def _parse_common_tags(self, site_xml):
         if not isinstance(site_xml, ET.Element):
@@ -203,6 +188,23 @@ class SiteItem(object):
         if storage:
             self._storage = storage
 
+    @classmethod
+    def from_response(cls, resp):
+        all_site_items = list()
+        parsed_response = ET.fromstring(resp)
+        all_site_xml = parsed_response.findall('.//t:site', namespaces=NAMESPACE)
+        for site_xml in all_site_xml:
+            (id, name, content_url, status_reason, admin_mode, state, subscribe_others_enabled,
+                disable_subscriptions, revision_history_enabled, user_quota, storage_quota,
+                revision_limit, num_users, storage) = cls._parse_element(site_xml)
+
+            site_item = cls(name, content_url)
+            site_item._set_values(id, name, content_url, status_reason, admin_mode, state,
+                                  subscribe_others_enabled, disable_subscriptions, revision_history_enabled,
+                                  user_quota, storage_quota, revision_limit, num_users, storage)
+            all_site_items.append(site_item)
+        return all_site_items
+
     @staticmethod
     def _parse_element(site_xml):
         id = site_xml.get('id', None)
@@ -239,5 +241,6 @@ class SiteItem(object):
             revision_limit, num_users, storage
 
 
+# Used to convert string represented boolean to a boolean type
 def string_to_bool(s):
     return s.lower() == 'true'
