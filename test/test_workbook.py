@@ -242,7 +242,7 @@ class WorkbookTests(unittest.TestCase):
             m.post(self.baseurl, text=response_xml)
             new_workbook = TSA.WorkbookItem(name='Sample', show_tabs=False,
                                                project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
-            new_workbook = self.server.workbooks.publish(new_workbook, '../samples/SampleWB.twbx',
+            new_workbook = self.server.workbooks.publish(new_workbook, os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx'),
                                                          self.server.PublishMode.CreateNew)
 
         self.assertEqual('a8076ca1-e9d8-495e-bae6-c684dbb55836', new_workbook.id)
@@ -267,4 +267,5 @@ class WorkbookTests(unittest.TestCase):
     def test_publish_invalid_file_type(self):
         new_workbook = TSA.WorkbookItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
         self.assertRaises(ValueError, self.server.workbooks.publish,
-                          new_workbook, '../samples/SampleDS.tds', self.server.PublishMode.CreateNew)
+                          new_workbook, os.path.join(TEST_ASSET_DIR, 'SampleDS.tds'),
+                          self.server.PublishMode.CreateNew)

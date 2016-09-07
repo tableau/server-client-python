@@ -32,14 +32,18 @@ class UserTests(unittest.TestCase):
             pagination_item, all_users = self.server.users.get()
 
         self.assertEqual(2, pagination_item.total_available)
-        self.assertEqual('dd2239f6-ddf1-4107-981a-4cf94e415794', all_users[0].id)
-        self.assertEqual('alice', all_users[0].name)
-        self.assertEqual('Publisher', all_users[0].site_role)
-        self.assertEqual('2016-08-16T23:17:06Z', all_users[0].last_login)
+        self.assertEqual(2, len(all_users))
 
-        self.assertEqual('2a47bbf8-8900-4ebb-b0a4-2723bd7c46c3', all_users[1].id)
-        self.assertEqual('Bob', all_users[1].name)
-        self.assertEqual('Interactor', all_users[1].site_role)
+        self.assertTrue(any(user.id == 'dd2239f6-ddf1-4107-981a-4cf94e415794' for user in all_users))
+        single_user = next(user for user in all_users if user.id == 'dd2239f6-ddf1-4107-981a-4cf94e415794')
+        self.assertEqual('alice', single_user.name)
+        self.assertEqual('Publisher', single_user.site_role)
+        self.assertEqual('2016-08-16T23:17:06Z', single_user.last_login)
+
+        self.assertTrue(any(user.id == '2a47bbf8-8900-4ebb-b0a4-2723bd7c46c3' for user in all_users))
+        single_user = next(user for user in all_users if user.id == '2a47bbf8-8900-4ebb-b0a4-2723bd7c46c3')
+        self.assertEqual('Bob', single_user.name)
+        self.assertEqual('Interactor', single_user.site_role)
 
     def test_get_empty(self):
         with open(GET_EMPTY_XML, 'rb') as f:
@@ -49,7 +53,7 @@ class UserTests(unittest.TestCase):
             pagination_item, all_users = self.server.users.get()
 
         self.assertEqual(0, pagination_item.total_available)
-        self.assertEqual([], all_users)
+        self.assertEqual(set([]), all_users)
 
     def test_get_before_signin(self):
         self.server._auth_token = None

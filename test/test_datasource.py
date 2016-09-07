@@ -117,7 +117,8 @@ class DatasourceTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
             new_datasource = TSA.DatasourceItem('SampleDS', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
-            new_datasource = self.server.datasources.publish(new_datasource, '../samples/SampleDS.tds',
+            new_datasource = self.server.datasources.publish(new_datasource,
+                                                             os.path.join(TEST_ASSET_DIR, 'SampleDS.tds'),
                                                              mode=self.server.PublishMode.CreateNew)
 
         self.assertEqual('e76a1461-3b1d-4588-bf1b-17551a879ad9', new_datasource.id)
@@ -155,9 +156,9 @@ class DatasourceTests(unittest.TestCase):
     def test_publish_missing_mode(self):
         new_datasource = TSA.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
         self.assertRaises(ValueError, self.server.datasources.publish, new_datasource,
-                          '../samples/SampleDS.tds', None)
+                          os.path.join(TEST_ASSET_DIR, 'SampleDS.tds'), None)
 
     def test_publish_invalid_file_type(self):
         new_datasource = TSA.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
         self.assertRaises(ValueError, self.server.datasources.publish, new_datasource,
-                          '../samples/SampleWB.twbx', self.server.PublishMode.Append)
+                          os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx'), self.server.PublishMode.Append)
