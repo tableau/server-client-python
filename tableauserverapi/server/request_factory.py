@@ -62,6 +62,8 @@ class DatasourceRequest(object):
         parts = {'request_payload': ('', xml_request, 'text/xml')}
         return _add_multipart(parts)
 
+
+class FileuploadRequest(object):
     def chunk_req(self, chunk):
         parts = {'request_payload': ('', '', 'text/xml'),
                  'tableau_file': ('file', chunk, 'application/octet-stream')}
@@ -239,15 +241,11 @@ class WorkbookRequest(object):
         parts = {'request_payload': ('', xml_request, 'text/xml')}
         return _add_multipart(parts)
 
-    def chunk_req(self, chunk):
-        parts = {'request_payload': ('', '', 'text/xml'),
-                 'tableau_file': ('file', chunk, 'application/octet-stream')}
-        return _add_multipart(parts)
-
 
 class RequestFactory(object):
     Auth = AuthRequest()
     Datasource = DatasourceRequest()
+    Fileupload = FileuploadRequest()
     Group = GroupRequest()
     Permission = PermissionRequest()
     Project = ProjectRequest()

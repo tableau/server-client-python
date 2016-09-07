@@ -8,14 +8,11 @@ import logging
 import copy
 import cgi
 
-
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64   # 64MB
 
-# For when a workbook is over 64MB, break it into 5MB(standard chunk size) chunks
-CHUNK_SIZE = 1024 * 1024 * 5  # 5MB
-
 logger = logging.getLogger('tableau.endpoint.workbooks')
+
 
 class Workbooks(Endpoint):
     def __init__(self, parent_srv):
@@ -37,25 +34,6 @@ class Workbooks(Endpoint):
     def _delete_tag(self, workbook_id, tag_name):
         url = "{0}/{1}/tags/{2}".format(self._construct_url(), workbook_id, tag_name)
         self.delete_request(url)
-
-    def _upload_chunks(self, file_path):
-        file_upload = Fileuploads(self.parent_srv)
-        upload_id = file_upload.initiate()
-        chunks = self._read_chunks(file_path)
-        for chunk in chunks:
-            req_body, content_type = RequestFactory.Workbook.chunk_req(chunk)
-            fileupload_item = file_upload.append(req_body, content_type)
-            logger.info('Published {0}MB of workbook'.format(fileupload_item.file_size))
-        logger.info('Committing file upload...')
-        return upload_id
-
-    def _read_chunks(self, file_path):
-        with open(file_path, 'rb') as f:
-            while True:
-                chunked_content = f.read(CHUNK_SIZE)
-                if not chunked_content:
-                    break
-                yield chunked_content
 
     # Get all workbooks on site
     def get(self, req_options=None):
@@ -189,17 +167,17 @@ class Workbooks(Endpoint):
         # Determine if chunking is required (64MB is the limit for single upload method)
         if os.path.getsize(file_path) >= FILESIZE_LIMIT:
             logger.info('Publishing {0} to server with chunking method (workbook over 64MB)'.format(filename))
-            upload_session_id = self._upload_chunks(file_path)
+            upload_session_id = Fileuploads.upload_chunks(self.parent_srv, file_path)
             url = "{0}&uploadSessionId={1}".format(url, upload_session_id)
-            req_body, content_type = RequestFactory.Workbook.publish_req_chunked(workbook_item)
+            xml_request, content_type = RequestFactory.Workbook.publish_req_chunked(workbook_item)
         else:
             logger.info('Publishing {0} to server'.format(filename))
             with open(file_path, 'rb') as f:
                 file_contents = f.read()
-            req_body, content_type = RequestFactory.Workbook.publish_req(workbook_item,
-                                                                           filename,
-                                                                           file_contents)
-        server_response = self.post_multipart_request(url, req_body, content_type)
+            xml_request, content_type = RequestFactory.Workbook.publish_req(workbook_item,
+                                                                            filename,
+                                                                            file_contents)
+        server_response = self.post_request(url, xml_request, content_type)
         new_workbook = WorkbookItem.from_response(server_response.text)[0]
         logger.info('Published {0} (ID: {1})'.format(filename, new_workbook.id))
         return new_workbook
