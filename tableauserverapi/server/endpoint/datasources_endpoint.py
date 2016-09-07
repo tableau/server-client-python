@@ -7,12 +7,8 @@ import logging
 import copy
 import cgi
 
-
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64   # 64MB
-
-# For when a datasource is over 64MB, break it into 5MB(standard chunk size) chunks
-CHUNK_SIZE = 1024 * 1024 * 5  # 5MB
 
 ALLOWED_FILE_EXTENSIONS = ['tds', 'tdsx', 'tde']
 
@@ -27,26 +23,6 @@ class Datasources(Endpoint):
 
     def _construct_url(self):
         return self.baseurl.format(self.parent_srv.baseurl, self.parent_srv.site_id)
-
-    def _upload_chunks(self, file_path):
-        # RCH - move this so that it can be used by datasource and workbook
-        file_upload = Fileuploads(self.parent_srv)
-        upload_id = file_upload.initiate()
-        chunks = self._read_chunks(file_path)
-        for chunk in chunks:
-            req_body, content_type = RequestFactory.Datasource.chunk_req(chunk)
-            fileupload_item = file_upload.append(req_body, content_type)
-            print("\tPublished {0}MB of datasource".format(fileupload_item.file_size))
-        print("\tCommitting file upload...")
-        return upload_id
-
-    def _read_chunks(self, file_path):
-        with open(file_path, 'rb') as f:
-            while True:
-                chunked_content = f.read(CHUNK_SIZE)
-                if not chunked_content:
-                    break
-                yield chunked_content
 
     # Get all datasources
     def get(self, req_options=None):
@@ -144,17 +120,17 @@ class Datasources(Endpoint):
         # Determine if chunking is required (64MB is the limit for single upload method)
         if os.path.getsize(file_path) >= FILESIZE_LIMIT:
             logger.info('Publishing {0} to server with chunking method (datasource over 64MB)'.format(filename))
-            upload_session_id = self._upload_chunks(file_path)
+            upload_session_id = Fileuploads.upload_chunks(self.parent_srv, file_path)
             url = "{0}&uploadSessionId={1}".format(url, upload_session_id)
-            req_body, content_type = RequestFactory.Datasource.publish_req_chunked(datasource_item)
+            xml_request, content_type = RequestFactory.Datasource.publish_req_chunked(datasource_item)
         else:
             logger.info('Publishing {0} to server'.format(filename))
             with open(file_path, 'rb') as f:
                 file_contents = f.read()
-            req_body, content_type = RequestFactory.Datasource.publish_req(datasource_item,
-                                                                             filename,
-                                                                             file_contents)
-        server_response = self.post_multipart_request(url, req_body, content_type)
+            xml_request, content_type = RequestFactory.Datasource.publish_req(datasource_item,
+                                                                              filename,
+                                                                              file_contents)
+        server_response = self.post_request(url, xml_request, content_type)
         new_datasource = DatasourceItem.from_response(server_response.text)[0]
         logger.info('Published {0} (ID: {1})'.format(filename, new_datasource.id))
         return new_datasource
