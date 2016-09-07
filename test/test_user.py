@@ -26,7 +26,7 @@ class UserTests(unittest.TestCase):
 
     def test_get(self):
         with open(GET_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
             pagination_item, all_users = self.server.users.get()
@@ -43,7 +43,7 @@ class UserTests(unittest.TestCase):
 
     def test_get_empty(self):
         with open(GET_EMPTY_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
             pagination_item, all_users = self.server.users.get()
@@ -57,7 +57,7 @@ class UserTests(unittest.TestCase):
 
     def test_get_by_id(self):
         with open(GET_BY_ID_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/dd2239f6-ddf1-4107-981a-4cf94e415794', text=response_xml)
             single_user = self.server.users.get_by_id('dd2239f6-ddf1-4107-981a-4cf94e415794')
@@ -75,7 +75,7 @@ class UserTests(unittest.TestCase):
 
     def test_update(self):
         with open(UPDATE_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/dd2239f6-ddf1-4107-981a-4cf94e415794', text=response_xml)
             single_user = TSA.UserItem('test', 'Viewer')
@@ -105,7 +105,7 @@ class UserTests(unittest.TestCase):
 
     def test_add(self):
         with open(ADD_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.post(self.baseurl + '', text=response_xml)
             new_user = TSA.UserItem(name='Cassie', site_role='Viewer', auth_setting='ServerDefault')
@@ -118,7 +118,7 @@ class UserTests(unittest.TestCase):
 
     def test_populate_workbooks(self):
         with open(POPULATE_WORKBOOKS_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/dd2239f6-ddf1-4107-981a-4cf94e415794/workbooks',
                   text=response_xml)

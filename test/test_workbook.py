@@ -28,7 +28,7 @@ class WorkbookTests(unittest.TestCase):
 
     def test_get(self):
         with open(GET_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
             pagination_item, all_workbooks = self.server.workbooks.get()
@@ -63,7 +63,7 @@ class WorkbookTests(unittest.TestCase):
 
     def test_get_empty(self):
         with open(GET_EMPTY_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
             pagination_item, all_workbooks = self.server.workbooks.get()
@@ -73,7 +73,7 @@ class WorkbookTests(unittest.TestCase):
 
     def test_get_by_id(self):
         with open(GET_BY_ID_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42', text=response_xml)
             single_workbook = self.server.workbooks.get_by_id('3cc6cd06-89ce-4fdc-b935-5294135d6d42')
@@ -106,7 +106,7 @@ class WorkbookTests(unittest.TestCase):
 
     def test_update(self):
         with open(UPDATE_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/1f951daf-4061-451a-9df1-69a8062664f2', text=response_xml)
             single_workbook = TSA.WorkbookItem('1d0304cd-3796-429f-b815-7258370b9b74', show_tabs=True)
@@ -125,9 +125,9 @@ class WorkbookTests(unittest.TestCase):
 
     def test_update_copy_fields(self):
         with open(POPULATE_CONNECTIONS_XML, 'rb') as f:
-            connection_xml = f.read()
+            connection_xml = f.read().decode('utf-8')
         with open(UPDATE_XML, 'rb') as f:
-            update_xml = f.read()
+            update_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/1f951daf-4061-451a-9df1-69a8062664f2/connections', text=connection_xml)
             m.put(self.baseurl + '/1f951daf-4061-451a-9df1-69a8062664f2', text=update_xml)
@@ -144,9 +144,9 @@ class WorkbookTests(unittest.TestCase):
 
     def test_update_tags(self):
         with open(ADD_TAGS_XML, 'rb') as f:
-            add_tags_xml = f.read()
+            add_tags_xml = f.read().decode('utf-8')
         with open(UPDATE_XML, 'rb') as f:
-            update_xml = f.read()
+            update_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/1f951daf-4061-451a-9df1-69a8062664f2/tags', text=add_tags_xml)
             m.delete(self.baseurl + '/1f951daf-4061-451a-9df1-69a8062664f2/tags/b', status_code=204)
@@ -174,7 +174,7 @@ class WorkbookTests(unittest.TestCase):
 
     def test_populate_views(self):
         with open(POPULATE_VIEWS_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/1f951daf-4061-451a-9df1-69a8062664f2/views', text=response_xml)
             single_workbook = TSA.WorkbookItem('test')
@@ -200,7 +200,7 @@ class WorkbookTests(unittest.TestCase):
 
     def test_populate_connections(self):
         with open(POPULATE_CONNECTIONS_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/1f951daf-4061-451a-9df1-69a8062664f2/connections', text=response_xml)
             single_workbook = TSA.WorkbookItem('test')
@@ -237,7 +237,7 @@ class WorkbookTests(unittest.TestCase):
 
     def test_publish(self):
         with open(PUBLISH_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
             new_workbook = TSA.WorkbookItem(name='Sample', show_tabs=False,

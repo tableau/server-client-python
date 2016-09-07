@@ -24,7 +24,7 @@ class DatasourceTests(unittest.TestCase):
 
     def test_get(self):
         with open(GET_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
             pagination_item, all_datasources = self.server.datasources.get()
@@ -57,7 +57,7 @@ class DatasourceTests(unittest.TestCase):
 
     def test_get_empty(self):
         with open(GET_EMPTY_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
             pagination_item, all_datasources = self.server.datasources.get()
@@ -67,7 +67,7 @@ class DatasourceTests(unittest.TestCase):
 
     def test_get_by_id(self):
         with open(GET_BY_ID_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', text=response_xml)
             single_datasource = self.server.datasources.get_by_id('9dbd2263-16b5-46e1-9c43-a76bb8ab65fb')
@@ -85,7 +85,7 @@ class DatasourceTests(unittest.TestCase):
 
     def test_update(self):
         with open(UPDATE_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', text=response_xml)
             single_datasource = TSA.DatasourceItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
@@ -99,7 +99,7 @@ class DatasourceTests(unittest.TestCase):
 
     def test_update_copy_fields(self):
         with open(UPDATE_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', text=response_xml)
             single_datasource = TSA.DatasourceItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
@@ -113,7 +113,7 @@ class DatasourceTests(unittest.TestCase):
 
     def test_publish(self):
         with open(PUBLISH_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
             new_datasource = TSA.DatasourceItem('SampleDS', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')

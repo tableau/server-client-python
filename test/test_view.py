@@ -21,7 +21,7 @@ class ViewTests(unittest.TestCase):
 
     def test_get(self):
         with open(GET_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/views', text=response_xml)
             pagination_item, all_views = self.server.views.get()
