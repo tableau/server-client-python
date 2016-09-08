@@ -16,13 +16,20 @@
 
 import tableauserverapi as TSA
 import argparse
+import logging
 
 parser = argparse.ArgumentParser(description='Publish a workbook to server.')
 parser.add_argument('server', help='server address')
 parser.add_argument('username', help='username to sign into server')
 parser.add_argument('password', help='password to sign into server')
 parser.add_argument('filepath', help='filepath to the workbook to publish')
+parser.add_argument('--logging-level', choices=['debug', 'info', 'error'], default='error',
+                    help='desired logging level (set to error by default)')
 args = parser.parse_args()
+
+# Set logging level based on user input, or error by default
+logging_level = getattr(logging, args.logging_level.upper())
+logging.basicConfig(level=logging_level)
 
 # Step 1: Sign in to server.
 tableau_auth = TSA.TableauAuth(args.username, args.password)
@@ -39,4 +46,5 @@ with server.auth.sign_in(tableau_auth):
         new_workbook = server.workbooks.publish(new_workbook, args.filepath, server.PublishMode.Overwrite)
         print("Workbook published. ID: {0}".format(new_workbook.id))
     else:
-        print("The default project could not be found.")
+        error = "The default project could not be found."
+        raise LookupError(error)
