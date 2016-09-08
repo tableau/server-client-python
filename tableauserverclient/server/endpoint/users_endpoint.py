@@ -21,8 +21,8 @@ class Users(Endpoint):
         logger.info('Querying all users on site')
         url = self._construct_url()
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.text)
-        all_user_items = UserItem.from_response(server_response.text)
+        pagination_item = PaginationItem.from_response(server_response.content)
+        all_user_items = UserItem.from_response(server_response.content)
         return pagination_item, all_user_items
 
     # Gets 1 user by id
@@ -33,7 +33,7 @@ class Users(Endpoint):
         logger.info('Querying single user (ID: {0})'.format(user_id))
         url = "{0}/{1}".format(self._construct_url(), user_id)
         server_response = self.get_request(url)
-        return UserItem.from_response(server_response.text).pop()
+        return UserItem.from_response(server_response.content).pop()
 
     # Update user
     def update(self, user_item):
@@ -46,7 +46,7 @@ class Users(Endpoint):
         server_response = self.put_request(url, update_req)
         logger.info('Updated user item (ID: {0})'.format(user_item.id))
         updated_item = copy.copy(user_item)
-        return updated_item._parse_common_tags(server_response.text)
+        return updated_item._parse_common_tags(server_response.content)
 
     # Delete 1 user by id
     def remove(self, user_id):
@@ -62,7 +62,7 @@ class Users(Endpoint):
         url = self._construct_url()
         add_req = RequestFactory.User.add_req(user_item)
         server_response = self.post_request(url, add_req)
-        new_user = UserItem.from_response(server_response.text).pop()
+        new_user = UserItem.from_response(server_response.content).pop()
         logger.info('Added new user (ID: {0})'.format(user_item.id))
         return new_user
 
@@ -74,8 +74,8 @@ class Users(Endpoint):
         url = "{0}/{1}/workbooks".format(self._construct_url(), user_item.id)
         server_response = self.get_request(url, req_options)
         logger.info('Populated workbooks for user (ID: {0})'.format(user_item.id))
-        user_item._set_workbooks(WorkbookItem.from_response(server_response.text))
-        pagination_item = PaginationItem.from_response(server_response.text)
+        user_item._set_workbooks(WorkbookItem.from_response(server_response.content))
+        pagination_item = PaginationItem.from_response(server_response.content)
         return pagination_item
 
     def populate_favorites(self, user_item):
