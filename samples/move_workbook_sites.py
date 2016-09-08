@@ -7,7 +7,7 @@
 # To run the script, you must have installed Python 2.7.9 or later.
 ####
 
-import tableauserverapi as TSA
+import tableauserverclient as TSC
 import shutil
 import argparse
 import tempfile
@@ -32,16 +32,16 @@ logging_level = getattr(logging, args.logging_level.upper())
 logging.basicConfig(level=logging_level)
 
 # Step 1: Sign in to both sites on server
-tableau_auth = TSA.TableauAuth(args.username, password)
+tableau_auth = TSC.TableauAuth(args.username, password)
 
-source_server = TSA.Server(args.server)
-dest_server = TSA.Server(args.server)
+source_server = TSC.Server(args.server)
+dest_server = TSC.Server(args.server)
 
 with source_server.auth.sign_in(tableau_auth):
     # Step 2: Query workbook to move
-    req_option = TSA.RequestOptions()
-    req_option.filter.add(TSA.Filter(TSA.RequestOptions.Field.Name,
-                                     TSA.RequestOptions.Operator.Equals, args.workbook_name))
+    req_option = TSC.RequestOptions()
+    req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name,
+                                     TSC.RequestOptions.Operator.Equals, args.workbook_name))
     pagination_info, all_workbooks = source_server.workbooks.get(req_option)
 
     # Step 3: Download workbook to a temp directory
@@ -72,7 +72,7 @@ with source_server.auth.sign_in(tableau_auth):
 
                 # Step 6: If default project is found, form a new workbook item and publish.
                 if target_project is not None:
-                    new_workbook = TSA.WorkbookItem(name=args.workbook_name, project_id=target_project.id)
+                    new_workbook = TSC.WorkbookItem(name=args.workbook_name, project_id=target_project.id)
                     new_workbook = dest_server.workbooks.publish(new_workbook, workbook_path,
                                                                  mode=dest_server.PublishMode.Overwrite)
                     print("Successfully moved {0} ({1})".format(new_workbook.name, new_workbook.id))

@@ -4,13 +4,13 @@ except ImportError:
     from distutils.core import setup
 
 setup(
-    name='tableauserverapi',
+    name='tableauserverclient',
     version='0.1',
     author='Tableau Software',
     author_email='github@tableau.com',
-    url='https://github.com/tableau/server-api-python',
-    packages=['tableauserverapi', 'tableauserverapi.models', 'tableauserverapi.server',
-              'tableauserverapi.server.endpoint'],
+    url='https://github.com/tableau/server-client-python',
+    packages=['tableauserverclient', 'tableauserverclient.models', 'tableauserverclient.server',
+              'tableauserverclient.server.endpoint'],
     license='MIT',
     description='A Python module for working with the Tableau Server REST API.',
     test_suite='test',

@@ -7,7 +7,7 @@
 # To run the script, you must have installed Python 2.7.9 or later.
 ####
 
-import tableauserverapi as TSA
+import tableauserverclient as TSC
 import argparse
 import getpass
 import logging
@@ -28,13 +28,13 @@ logging_level = getattr(logging, args.logging_level.upper())
 logging.basicConfig(level=logging_level)
 
 # Step 1: Sign in to server
-tableau_auth = TSA.TableauAuth(args.username, password)
-server = TSA.Server(args.server)
+tableau_auth = TSC.TableauAuth(args.username, password)
+server = TSC.Server(args.server)
 with server.auth.sign_in(tableau_auth):
     # Step 2: Query workbook to move
-    req_option = TSA.RequestOptions()
-    req_option.filter.add(TSA.Filter(TSA.RequestOptions.Field.Name,
-                                     TSA.RequestOptions.Operator.Equals, args.workbook_name))
+    req_option = TSC.RequestOptions()
+    req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name,
+                                     TSC.RequestOptions.Operator.Equals, args.workbook_name))
     pagination_info, all_workbooks = server.workbooks.get(req_option)
 
     # Step 3: Find destination project

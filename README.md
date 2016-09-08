@@ -9,7 +9,7 @@ You must have Python installed. You can use either 2.7.X or 3.3 and later.
 #### Installing the latest stable version (preferred)
 
 ```text
-pip install tableauserverapi
+pip install tableauserverclient
 ```
 
 #### Installing From Source
@@ -31,17 +31,17 @@ pip install git+https://github.com/tableau/server-api-python.git@development
 If you go this route, but want to switch back to the non-development version, you need to run the following command before installing the stable version:
 
 ```text
-pip uninstall tableauserverapi
+pip uninstall tableauserverclient
 ```
 
 ###Basics
 The following example shows the basic syntax for using the Server API to query a list of all workbooks and the associated pagination information on the default site:
 
 ```python
-import tableauserverapi
+import tableauserverclient
 
-tableau_auth = tableauserverapi.TableauAuth('USERNAME', 'PASSWORD')
-server = tableauserverapi.Server('SERVER')
+tableau_auth = tableauserverclient.TableauAuth('USERNAME', 'PASSWORD')
+server = tableauserverclient.Server('SERVER')
 
 with server.auth.sign_in(tableau_auth):
     pagination_info, all_workbooks = server.workbooks.get()

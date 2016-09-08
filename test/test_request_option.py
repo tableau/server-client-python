@@ -1,7 +1,7 @@
 import unittest
 import os
 import requests_mock
-import tableauserverapi as TSA
+import tableauserverclient as TSC
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
@@ -14,7 +14,7 @@ FILTER_TAGS_IN = os.path.join(TEST_ASSET_DIR, 'request_option_filter_tags_in.xml
 
 class RequestOptionTests(unittest.TestCase):
     def setUp(self):
-        self.server = TSA.Server('http://test')
+        self.server = TSC.Server('http://test')
 
         # Fake signin
         self.server._site_id = 'dad65087-b08b-4603-af4e-2887b8aafc67'
@@ -27,7 +27,7 @@ class RequestOptionTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/views?pageNumber=1&pageSize=10', text=response_xml)
-            req_option = TSA.RequestOptions().page_size(10)
+            req_option = TSC.RequestOptions().page_size(10)
             pagination_item, all_views = self.server.views.get(req_option)
 
         self.assertEqual(1, pagination_item.page_number)
@@ -40,7 +40,7 @@ class RequestOptionTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/views?pageNumber=3', text=response_xml)
-            req_option = TSA.RequestOptions().page_number(3)
+            req_option = TSC.RequestOptions().page_number(3)
             pagination_item, all_views = self.server.views.get(req_option)
 
         self.assertEqual(3, pagination_item.page_number)
@@ -53,7 +53,7 @@ class RequestOptionTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/views?pageSize=5', text=response_xml)
-            req_option = TSA.RequestOptions().page_size(5)
+            req_option = TSC.RequestOptions().page_size(5)
             pagination_item, all_views = self.server.views.get(req_option)
 
         self.assertEqual(1, pagination_item.page_number)
@@ -66,9 +66,9 @@ class RequestOptionTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/workbooks?filter=name:eq:RESTAPISample', text=response_xml)
-            req_option = TSA.RequestOptions()
-            req_option.filter.add(TSA.Filter(TSA.RequestOptions.Field.Name,
-                                             TSA.RequestOptions.Operator.Equals, 'RESTAPISample'))
+            req_option = TSC.RequestOptions()
+            req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name,
+                                             TSC.RequestOptions.Operator.Equals, 'RESTAPISample'))
             pagination_item, matching_workbooks = self.server.workbooks.get(req_option)
 
         self.assertEqual(2, pagination_item.total_available)
@@ -80,8 +80,8 @@ class RequestOptionTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/workbooks?filter=tags:in:[sample,safari,weather]', text=response_xml)
-            req_option = TSA.RequestOptions()
-            req_option.filter.add(TSA.Filter(TSA.RequestOptions.Field.Tags, TSA.RequestOptions.Operator.In,
+            req_option = TSC.RequestOptions()
+            req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Tags, TSC.RequestOptions.Operator.In,
                                              ['sample', 'safari', 'weather']))
             pagination_item, matching_workbooks = self.server.workbooks.get(req_option)
 

@@ -1,7 +1,7 @@
 import unittest
 import os
 import requests_mock
-import tableauserverapi as TSA
+import tableauserverclient as TSC
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
@@ -14,7 +14,7 @@ PUBLISH_XML = os.path.join(TEST_ASSET_DIR, 'datasource_publish.xml')
 
 class DatasourceTests(unittest.TestCase):
     def setUp(self):
-        self.server = TSA.Server('http://test')
+        self.server = TSC.Server('http://test')
 
         # Fake signin
         self.server._site_id = 'dad65087-b08b-4603-af4e-2887b8aafc67'
@@ -53,7 +53,7 @@ class DatasourceTests(unittest.TestCase):
 
     def test_get_before_signin(self):
         self.server._auth_token = None
-        self.assertRaises(TSA.NotSignedInError, self.server.datasources.get)
+        self.assertRaises(TSC.NotSignedInError, self.server.datasources.get)
 
     def test_get_empty(self):
         with open(GET_EMPTY_XML, 'rb') as f:
@@ -88,7 +88,7 @@ class DatasourceTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', text=response_xml)
-            single_datasource = TSA.DatasourceItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
+            single_datasource = TSC.DatasourceItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
             single_datasource.owner_id = 'dd2239f6-ddf1-4107-981a-4cf94e415794'
             single_datasource._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
             single_datasource = self.server.datasources.update(single_datasource)
@@ -102,7 +102,7 @@ class DatasourceTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', text=response_xml)
-            single_datasource = TSA.DatasourceItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
+            single_datasource = TSC.DatasourceItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
             single_datasource._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
             single_datasource._tags = ['a', 'b', 'c']
             single_datasource._project_name = 'Tester'
@@ -116,7 +116,7 @@ class DatasourceTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
-            new_datasource = TSA.DatasourceItem('SampleDS', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+            new_datasource = TSC.DatasourceItem('SampleDS', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
             new_datasource = self.server.datasources.publish(new_datasource,
                                                              os.path.join(TEST_ASSET_DIR, 'SampleDS.tds'),
                                                              mode=self.server.PublishMode.CreateNew)
@@ -145,20 +145,20 @@ class DatasourceTests(unittest.TestCase):
         os.remove(file_path)
 
     def test_update_missing_id(self):
-        single_datasource = TSA.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
-        self.assertRaises(TSA.MissingRequiredFieldError, self.server.datasources.update, single_datasource)
+        single_datasource = TSC.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+        self.assertRaises(TSC.MissingRequiredFieldError, self.server.datasources.update, single_datasource)
 
     def test_publish_missing_path(self):
-        new_datasource = TSA.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+        new_datasource = TSC.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
         self.assertRaises(IOError, self.server.datasources.publish, new_datasource,
                           '', self.server.PublishMode.CreateNew)
 
     def test_publish_missing_mode(self):
-        new_datasource = TSA.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+        new_datasource = TSC.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
         self.assertRaises(ValueError, self.server.datasources.publish, new_datasource,
                           os.path.join(TEST_ASSET_DIR, 'SampleDS.tds'), None)
 
     def test_publish_invalid_file_type(self):
-        new_datasource = TSA.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+        new_datasource = TSC.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
         self.assertRaises(ValueError, self.server.datasources.publish, new_datasource,
                           os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx'), self.server.PublishMode.Append)
