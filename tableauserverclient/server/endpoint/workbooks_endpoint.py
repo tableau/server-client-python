@@ -30,7 +30,7 @@ class Workbooks(Endpoint):
         url = "{0}/{1}/tags".format(self._construct_url(), workbook_id)
         add_req = RequestFactory.Tag.add_req(tag_set)
         server_response = self.put_request(url, add_req)
-        return TagItem.from_response(server_response.text)
+        return TagItem.from_response(server_response.content)
 
     # Delete a workbook's tag by name
     def _delete_tag(self, workbook_id, tag_name):
@@ -42,8 +42,8 @@ class Workbooks(Endpoint):
         logger.info('Querying all workbooks on site')
         url = self._construct_url()
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.text)
-        all_workbook_items = WorkbookItem.from_response(server_response.text)
+        pagination_item = PaginationItem.from_response(server_response.content)
+        all_workbook_items = WorkbookItem.from_response(server_response.content)
         return pagination_item, all_workbook_items
 
     # Get 1 workbook
@@ -54,7 +54,7 @@ class Workbooks(Endpoint):
         logger.info('Querying single workbook (ID: {0})'.format(workbook_id))
         url = "{0}/{1}".format(self._construct_url(), workbook_id)
         server_response = self.get_request(url)
-        return WorkbookItem.from_response(server_response.text)[0]
+        return WorkbookItem.from_response(server_response.content)[0]
 
     # Delete 1 workbook by id
     def delete(self, workbook_id):
@@ -88,7 +88,7 @@ class Workbooks(Endpoint):
         server_response = self.put_request(url, update_req)
         logger.info('Updated workbook item (ID: {0}'.format(workbook_item.id))
         updated_workbook = copy.copy(workbook_item)
-        return updated_workbook._parse_common_tags(server_response.text)
+        return updated_workbook._parse_common_tags(server_response.content)
 
     # Download workbook contents with option of passing in filepath
     def download(self, workbook_id, filepath=None):
@@ -116,7 +116,7 @@ class Workbooks(Endpoint):
             raise MissingRequiredFieldError(error)
         url = "{0}/{1}/views".format(self._construct_url(), workbook_item.id)
         server_response = self.get_request(url)
-        workbook_item._set_views(ViewItem.from_response(server_response.text, workbook_id=workbook_item.id))
+        workbook_item._set_views(ViewItem.from_response(server_response.content, workbook_id=workbook_item.id))
         logger.info('Populated views for workbook (ID: {0}'.format(workbook_item.id))
 
     # Get all connections of workbook
@@ -126,7 +126,7 @@ class Workbooks(Endpoint):
             raise MissingRequiredFieldError(error)
         url = "{0}/{1}/connections".format(self._construct_url(), workbook_item.id)
         server_response = self.get_request(url)
-        workbook_item._set_connections(ConnectionItem.from_response(server_response.text))
+        workbook_item._set_connections(ConnectionItem.from_response(server_response.content))
         logger.info('Populated connections for workbook (ID: {0})'.format(workbook_item.id))
 
     # Get preview image of workbook
@@ -180,6 +180,6 @@ class Workbooks(Endpoint):
                                                                             filename,
                                                                             file_contents)
         server_response = self.post_request(url, xml_request, content_type)
-        new_workbook = WorkbookItem.from_response(server_response.text)[0]
+        new_workbook = WorkbookItem.from_response(server_response.content)[0]
         logger.info('Published {0} (ID: {1})'.format(filename, new_workbook.id))
         return new_workbook

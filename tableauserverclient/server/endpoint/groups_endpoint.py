@@ -20,8 +20,8 @@ class Groups(Endpoint):
         logger.info('Querying all groups on site')
         url = self._construct_url()
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.text)
-        all_group_items = GroupItem.from_response(server_response.text)
+        pagination_item = PaginationItem.from_response(server_response.content)
+        all_group_items = GroupItem.from_response(server_response.content)
         return pagination_item, all_group_items
 
     # Gets all users in a given group
@@ -31,8 +31,8 @@ class Groups(Endpoint):
             raise MissingRequiredFieldError(error)
         url = "{0}/{1}/users".format(self._construct_url(), group_item.id)
         server_response = self.get_request(url, req_options)
-        group_item._set_users(UserItem.from_response(server_response.text))
-        pagination_item = PaginationItem.from_response(server_response.text)
+        group_item._set_users(UserItem.from_response(server_response.content))
+        pagination_item = PaginationItem.from_response(server_response.content)
         logger.info('Populated users for group (ID: {0})'.format(group_item.id))
         return pagination_item
 
@@ -74,7 +74,7 @@ class Groups(Endpoint):
         url = "{0}/{1}/users".format(self._construct_url(), group_item.id)
         add_req = RequestFactory.Group.add_user_req(user_id)
         server_response = self.post_request(url, add_req)
-        new_user = UserItem.from_response(server_response.text).pop()
+        new_user = UserItem.from_response(server_response.content).pop()
         user_set.add(new_user)
         group_item._set_users(user_set)
         logger.info('Added user (id: {0}) to group (ID: {1})'.format(user_id, group_item.id))

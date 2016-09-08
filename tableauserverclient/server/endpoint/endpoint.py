@@ -13,7 +13,7 @@ class Endpoint(object):
     @staticmethod
     def _check_status(server_response):
         if server_response.status_code not in Success_codes:
-            raise ServerResponseError.from_response(server_response.text)
+            raise ServerResponseError.from_response(server_response.content)
 
     def get_request(self, url, request_object=None):
         if request_object is not None:
@@ -24,7 +24,7 @@ class Endpoint(object):
                                                       **self.parent_srv.http_options)
         self._check_status(server_response)
         if server_response.encoding:
-            logger.debug('Server response from {0}: \n\t{1}'.format(url, server_response.text))
+            logger.debug(u'Server response from {0}: \n\t{1}'.format(url, server_response.content.decode(server_response.encoding)))
         return server_response
 
     def delete_request(self, url):
@@ -42,7 +42,7 @@ class Endpoint(object):
                                                       **self.parent_srv.http_options)
         self._check_status(server_response)
         if server_response.encoding:
-            logger.debug('Server response from {0}: \n\t{1}'.format(url, server_response.text))
+            logger.debug(u'Server response from {0}: \n\t{1}'.format(url, server_response.content.decode(server_response.encoding)))
         return server_response
 
     def post_request(self, url, xml_request, content_type='text/xml'):
@@ -53,5 +53,5 @@ class Endpoint(object):
                                                        **self.parent_srv.http_options)
         self._check_status(server_response)
         if server_response.encoding:
-            logger.debug('Server response from {0}: \n\t{1}'.format(url, server_response.text))
+            logger.debug(u'Server response from {0}: \n\t{1}'.format(url, server_response.content.decode(server_response.encoding)))
         return server_response

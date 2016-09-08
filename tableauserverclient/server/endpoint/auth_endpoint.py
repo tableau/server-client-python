@@ -28,7 +28,7 @@ class Auth(Endpoint):
         server_response = self.parent_srv.session.post(url, data=signin_req,
                                                        **self.parent_srv.http_options)
         Endpoint._check_status(server_response)
-        parsed_response = ET.fromstring(server_response.text)
+        parsed_response = ET.fromstring(server_response.content)
         site_id = parsed_response.find('.//t:site', namespaces=NAMESPACE).get('id', None)
         user_id = parsed_response.find('.//t:user', namespaces=NAMESPACE).get('id', None)
         auth_token = parsed_response.find('t:credentials', namespaces=NAMESPACE).get('token', None)

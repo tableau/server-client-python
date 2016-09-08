@@ -29,8 +29,8 @@ class Datasources(Endpoint):
         logger.info('Querying all datasources on site')
         url = self._construct_url()
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.text)
-        all_datasource_items = DatasourceItem.from_response(server_response.text)
+        pagination_item = PaginationItem.from_response(server_response.content)
+        all_datasource_items = DatasourceItem.from_response(server_response.content)
         return pagination_item, all_datasource_items
 
     # Get 1 datasource by id
@@ -41,7 +41,7 @@ class Datasources(Endpoint):
         logger.info('Querying single datasource (ID: {0})'.format(datasource_id))
         url = "{0}/{1}".format(self._construct_url(), datasource_id)
         server_response = self.get_request(url)
-        return DatasourceItem.from_response(server_response.text)[0]
+        return DatasourceItem.from_response(server_response.content)[0]
 
     # Populate datasource item's connections
     def populate_connections(self, datasource_item):
@@ -50,7 +50,7 @@ class Datasources(Endpoint):
             raise MissingRequiredFieldError(error)
         url = '{0}/{1}/connections'.format(self._construct_url(), datasource_item.id)
         server_response = self.get_request(url)
-        datasource_item._set_connections(ConnectionItem.from_response(server_response.text))
+        datasource_item._set_connections(ConnectionItem.from_response(server_response.content))
         logger.info('Populated connections for datasource (ID: {0})'.format(datasource_item.id))
 
     # Delete 1 datasource by id
@@ -91,7 +91,7 @@ class Datasources(Endpoint):
         server_response = self.put_request(url, update_req)
         logger.info('Updated datasource item (ID: {0})'.format(datasource_item.id))
         updated_datasource = copy.copy(datasource_item)
-        return updated_datasource._parse_common_tags(server_response.text)
+        return updated_datasource._parse_common_tags(server_response.content)
 
     # Publish datasource
     def publish(self, datasource_item, file_path, mode):
@@ -131,6 +131,6 @@ class Datasources(Endpoint):
                                                                               filename,
                                                                               file_contents)
         server_response = self.post_request(url, xml_request, content_type)
-        new_datasource = DatasourceItem.from_response(server_response.text)[0]
+        new_datasource = DatasourceItem.from_response(server_response.content)[0]
         logger.info('Published {0} (ID: {1})'.format(filename, new_datasource.id))
         return new_datasource

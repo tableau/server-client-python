@@ -20,8 +20,8 @@ class Projects(Endpoint):
         logger.info('Querying all projects on site')
         url = self._construct_url()
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.text)
-        all_project_items = ProjectItem.from_response(server_response.text)
+        pagination_item = PaginationItem.from_response(server_response.content)
+        all_project_items = ProjectItem.from_response(server_response.content)
         return pagination_item, all_project_items
 
     def delete(self, project_id):
@@ -42,13 +42,13 @@ class Projects(Endpoint):
         server_response = self.put_request(url, update_req)
         logger.info('Updated project item (ID: {0})'.format(project_item.id))
         updated_project = copy.copy(project_item)
-        return updated_project._parse_common_tags(server_response.text)
+        return updated_project._parse_common_tags(server_response.content)
 
     def create(self, project_item):
         url = self._construct_url()
         create_req = RequestFactory.Project.create_req(project_item)
         server_response = self.post_request(url, create_req)
-        new_project = ProjectItem.from_response(server_response.text)[0]
+        new_project = ProjectItem.from_response(server_response.content)[0]
         logger.info('Created new project (ID: {0})'.format(new_project.id))
         return new_project
 
