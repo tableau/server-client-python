@@ -1,5 +1,5 @@
-# server-api-python
-Tableau Server API is a client library for the Tableau REST API. The Server API is delightful to use and easy to love because it requires writing much less code than working directly with the REST API.
+# server-client-python
+Tableau Server Client is a client library for the Tableau REST API. The Server Client is delightful to use and easy to love because it requires writing much less code than working directly with the REST API.
 
 This repository contains Python source and sample files.
 
@@ -25,7 +25,7 @@ pip install -e <directory containing setup.py>
 *Only do this if you know you want the development version, no guarantee that we won't break APIs during development*
 
 ```text
-pip install git+https://github.com/tableau/server-api-python.git@development
+pip install git+https://github.com/tableau/server-client-python.git@development
 ```
 
 If you go this route, but want to switch back to the non-development version, you need to run the following command before installing the stable version:
@@ -35,7 +35,7 @@ pip uninstall tableauserverclient
 ```
 
 ###Basics
-The following example shows the basic syntax for using the Server API to query a list of all workbooks and the associated pagination information on the default site:
+The following example shows the basic syntax for using the Server Client to query a list of all workbooks and the associated pagination information on the default site:
 
 ```python
 import tableauserverclient
@@ -47,7 +47,7 @@ with server.auth.sign_in(tableau_auth):
     pagination_info, all_workbooks = server.workbooks.get()
 ```
 
-###Server API Samples
+###Server Client Samples
 * Can be run using the command prompt or terminal
 
 Demo | Source Code | Description
