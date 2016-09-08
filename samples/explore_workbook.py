@@ -22,7 +22,7 @@ parser.add_argument('--username', '-u', required=True, help='username to sign in
 parser.add_argument('--publish', '-p', metavar='FILEPATH', help='path to workbook to publish')
 parser.add_argument('--download', '-d', metavar='FILEPATH', help='path to save downloaded workbook')
 parser.add_argument('--preview-image', '-i', metavar='FILEPATH', help='path to save populated preview image')
-parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], defualt='error',
+parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
                     help='desired logging level (set to error by default)')
 args = parser.parse_args()
 
