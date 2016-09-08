@@ -7,7 +7,7 @@ class ConnectionItem(object):
         self._datasource_id = None
         self._datasource_name = None
         self._id = None
-        self._type = None
+        self._connection_type = None
         self.embed_password = None
         self.password = None
         self.server_address = None
@@ -27,8 +27,8 @@ class ConnectionItem(object):
         return self._id
 
     @property
-    def type(self):
-        return self._type
+    def connection_type(self):
+        return self._connection_type
 
     @classmethod
     def from_response(cls, resp):
@@ -38,7 +38,7 @@ class ConnectionItem(object):
         for connection_xml in all_connection_xml:
             connection_item = cls()
             connection_item._id = connection_xml.get('id', None)
-            connection_item._type = connection_xml.get('type', None)
+            connection_item._connection_type = connection_xml.get('type', None)
             connection_item.server_address = connection_xml.get('serverAddress', None)
             connection_item.server_port = connection_xml.get('serverPort', None)
             connection_item.username = connection_xml.get('userName', None)

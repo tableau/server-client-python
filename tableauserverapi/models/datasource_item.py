@@ -13,7 +13,7 @@ class DatasourceItem(object):
         self._project_id = None
         self._project_name = None
         self._tags = set()
-        self._type = None
+        self._datasource_type = None
         self._updated_at = None
         self.name = name
         self.owner_id = None
@@ -61,8 +61,8 @@ class DatasourceItem(object):
         return self._tags
 
     @property
-    def type(self):
-        return self._type
+    def datasource_type(self):
+        return self._datasource_type
 
     @property
     def updated_at(self):
@@ -79,14 +79,14 @@ class DatasourceItem(object):
             self._set_values(None, None, None, None, None, updated_at, None, project_id, project_name, owner_id)
         return self
 
-    def _set_values(self, id, name, type, content_url, created_at,
+    def _set_values(self, id, name, datasource_type, content_url, created_at,
                     updated_at, tags, project_id, project_name, owner_id):
         if id is not None:
             self._id = id
         if name:
             self.name = name
-        if type:
-            self._type = type
+        if datasource_type:
+            self._datasource_type = datasource_type
         if content_url:
             self._content_url = content_url
         if created_at:
@@ -109,10 +109,10 @@ class DatasourceItem(object):
         all_datasource_xml = parsed_response.findall('.//t:datasource', namespaces=NAMESPACE)
 
         for datasource_xml in all_datasource_xml:
-            (id, name, type, content_url, created_at, updated_at,
+            (id, name, datasource_type, content_url, created_at, updated_at,
              tags, project_id, project_name, owner_id) = cls._parse_element(datasource_xml)
             datasource_item = cls(project_id)
-            datasource_item._set_values(id, name, type, content_url, created_at, updated_at,
+            datasource_item._set_values(id, name, datasource_type, content_url, created_at, updated_at,
                             tags, None, project_name, owner_id)
             all_datasource_items.append(datasource_item)
         return all_datasource_items
@@ -121,7 +121,7 @@ class DatasourceItem(object):
     def _parse_element(datasource_xml):
         id = datasource_xml.get('id', None)
         name = datasource_xml.get('name', None)
-        type = datasource_xml.get('type', None)
+        datasource_type = datasource_xml.get('type', None)
         content_url = datasource_xml.get('contentUrl', None)
         created_at = datasource_xml.get('createdAt', None)
         updated_at = datasource_xml.get('updatedAt', None)
@@ -143,4 +143,4 @@ class DatasourceItem(object):
         if owner_elem is not None:
             owner_id = owner_elem.get('id', None)
 
-        return id, name, type, content_url, created_at, updated_at, tags, project_id, project_name, owner_id
+        return id, name, datasource_type, content_url, created_at, updated_at, tags, project_id, project_name, owner_id

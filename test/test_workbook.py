@@ -208,7 +208,7 @@ class WorkbookTests(unittest.TestCase):
             self.server.workbooks.populate_connections(single_workbook)
 
         self.assertEqual('37ca6ced-58d7-4dcf-99dc-f0a85223cbef', single_workbook.connections[0].id)
-        self.assertEqual('dataengine', single_workbook.connections[0].type)
+        self.assertEqual('dataengine', single_workbook.connections[0].connection_type)
         self.assertEqual('4506225a-0d32-4ab1-82d3-c24e85f7afba', single_workbook.connections[0].datasource_id)
         self.assertEqual('World Indicators', single_workbook.connections[0].datasource_name)
 
