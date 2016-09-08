@@ -21,17 +21,13 @@ parser.add_argument('username', help='username to sign into server')
 parser.add_argument('password', help='password to sign into server')
 parser.add_argument('workbook_name', help='name of workbook to move')
 parser.add_argument('destination_site', help='name of site to move workbook into')
-parser.add_argument('--logging-level', choices=['debug', 'info'],
+parser.add_argument('--logging-level', choices=['debug', 'info', 'error'], default='error',
                     help='desired logging level (set to error by default)')
 args = parser.parse_args()
 
 # Set logging level based on user input, or error by default
-if args.logging_level == 'debug':
-    logging.basicConfig(level=logging.DEBUG)
-elif args.logging_level == 'info':
-    logging.basicConfig(level=logging.INFO)
-else:
-    logging.basicConfig(level=logging.ERROR)
+logging_level = getattr(logging, args.logging_level.upper())
+logging.basicConfig(level=logging_level)
 
 # Step 1: Sign in to both sites on server
 tableau_auth = TSA.TableauAuth(args.username, args.password)
@@ -54,9 +50,11 @@ with source_server.auth.sign_in(tableau_auth):
         try:
             workbook_path = source_server.workbooks.download(all_workbooks[0].id, tmpdir)
 
-            # Step 4: Check if destination site exists and sign in to the site
+            # Step 4: Check if destination site exists, then sign in to the site
             pagination_info, all_sites = source_server.sites.get()
-            if args.destination_site.lower() not in [site.content_url.lower() for site in all_sites]:
+            found_destination_site = any((True for site in all_sites if
+                                          args.destination_site.lower() == site.content_url.lower()))
+            if not found_destination_site:
                 error = "No site named {} found.".format(args.destination_site)
                 raise LookupError(error)
 

@@ -21,17 +21,13 @@ parser.add_argument('username', help='username to sign into server')
 parser.add_argument('password', help='password to sign into server')
 parser.add_argument('-publish', '-p', metavar='FILEPATH', help='path to datasource to publish')
 parser.add_argument('-download', '-d', metavar='FILEPATH', help='path to save downloaded datasource')
-parser.add_argument('--logging-level', choices=['debug', 'info'],
+parser.add_argument('--logging-level', choices=['debug', 'info', 'error'], default='error',
                     help='desired logging level (set to error by default)')
 args = parser.parse_args()
 
 # Set logging level based on user input, or error by default
-if args.logging_level == 'debug':
-    logging.basicConfig(level=logging.DEBUG)
-elif args.logging_level == 'info':
-    logging.basicConfig(level=logging.INFO)
-else:
-    logging.basicConfig(level=logging.ERROR)
+logging_level = getattr(logging, args.logging_level.upper())
+logging.basicConfig(level=logging_level)
 
 ##### SIGN IN #####
 tableau_auth = TSA.TableauAuth(args.username, args.password)
