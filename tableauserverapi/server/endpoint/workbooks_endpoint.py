@@ -11,6 +11,8 @@ import cgi
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64   # 64MB
 
+ALLOWED_FILE_EXTENSIONS = ['twb', 'twbx']
+
 logger = logging.getLogger('tableau.endpoint.workbooks')
 
 
@@ -152,8 +154,8 @@ class Workbooks(Endpoint):
         # If name is not defined, grab the name from the file to publish
         if not workbook_item.name:
             workbook_item.name = os.path.splitext(filename)[0]
-        if file_extension != 'twb' and file_extension != 'twbx':
-            error = "Only .twb and .twbx files can be published as workbooks."
+        if file_extension not in ALLOWED_FILE_EXTENSIONS:
+            error = "Only {} files can be published as workbooks.".format(', '.join(ALLOWED_FILE_EXTENSIONS))
             raise ValueError(error)
 
         # Construct the url with the defined mode
