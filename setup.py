@@ -6,7 +6,7 @@ except ImportError:
 setup(
     name='tableauserverclient',
     version='0.1',
-    author='Tableau Software',
+    author='Tableau',
     author_email='github@tableau.com',
     url='https://github.com/tableau/server-client-python',
     packages=['tableauserverclient', 'tableauserverclient.models', 'tableauserverclient.server',
