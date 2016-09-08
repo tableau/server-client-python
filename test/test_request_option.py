@@ -24,7 +24,7 @@ class RequestOptionTests(unittest.TestCase):
 
     def test_pagination(self):
         with open(PAGINATION_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/views?pageNumber=1&pageSize=10', text=response_xml)
             req_option = TSA.RequestOptions().page_size(10)
@@ -37,7 +37,7 @@ class RequestOptionTests(unittest.TestCase):
 
     def test_page_number(self):
         with open(PAGE_NUMBER_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/views?pageNumber=3', text=response_xml)
             req_option = TSA.RequestOptions().page_number(3)
@@ -50,7 +50,7 @@ class RequestOptionTests(unittest.TestCase):
 
     def test_page_size(self):
         with open(PAGE_SIZE_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/views?pageSize=5', text=response_xml)
             req_option = TSA.RequestOptions().page_size(5)
@@ -63,7 +63,7 @@ class RequestOptionTests(unittest.TestCase):
 
     def test_filter_equals(self):
         with open(FILTER_EQUALS, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/workbooks?filter=name:eq:RESTAPISample', text=response_xml)
             req_option = TSA.RequestOptions()
@@ -77,7 +77,7 @@ class RequestOptionTests(unittest.TestCase):
 
     def test_filter_tags_in(self):
         with open(FILTER_TAGS_IN, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/workbooks?filter=tags:in:[sample,safari,weather]', text=response_xml)
             req_option = TSA.RequestOptions()

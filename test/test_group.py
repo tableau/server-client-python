@@ -22,7 +22,7 @@ class GroupTests(unittest.TestCase):
 
     def test_get(self):
         with open(GET_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
             pagination_item, all_groups = self.server.groups.get()
@@ -46,7 +46,7 @@ class GroupTests(unittest.TestCase):
 
     def test_populate_users(self):
         with open(POPULATE_USERS, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users', text=response_xml)
             single_group = TSA.GroupItem(name='Test Group')
@@ -67,7 +67,7 @@ class GroupTests(unittest.TestCase):
 
     def test_remove_user(self):
         with open(POPULATE_USERS, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             url = self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users' \
                                  '/dd2239f6-ddf1-4107-981a-4cf94e415794'
@@ -83,7 +83,7 @@ class GroupTests(unittest.TestCase):
 
     def test_add_user(self):
         with open(ADD_USER, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.post(self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users', text=response_xml)
             single_group = TSA.GroupItem('test')
@@ -104,7 +104,7 @@ class GroupTests(unittest.TestCase):
 
     def test_add_user_missing_user_id(self):
         with open(POPULATE_USERS, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users', text=response_xml)
             single_group = TSA.GroupItem(name='Test Group')
@@ -126,7 +126,7 @@ class GroupTests(unittest.TestCase):
 
     def test_remove_user_missing_user_id(self):
         with open(POPULATE_USERS, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users', text=response_xml)
             single_group = TSA.GroupItem(name='Test Group')

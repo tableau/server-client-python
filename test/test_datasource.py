@@ -24,7 +24,7 @@ class DatasourceTests(unittest.TestCase):
 
     def test_get(self):
         with open(GET_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
             pagination_item, all_datasources = self.server.datasources.get()
@@ -57,7 +57,7 @@ class DatasourceTests(unittest.TestCase):
 
     def test_get_empty(self):
         with open(GET_EMPTY_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
             pagination_item, all_datasources = self.server.datasources.get()
@@ -67,7 +67,7 @@ class DatasourceTests(unittest.TestCase):
 
     def test_get_by_id(self):
         with open(GET_BY_ID_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', text=response_xml)
             single_datasource = self.server.datasources.get_by_id('9dbd2263-16b5-46e1-9c43-a76bb8ab65fb')
@@ -85,7 +85,7 @@ class DatasourceTests(unittest.TestCase):
 
     def test_update(self):
         with open(UPDATE_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', text=response_xml)
             single_datasource = TSA.DatasourceItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
@@ -99,7 +99,7 @@ class DatasourceTests(unittest.TestCase):
 
     def test_update_copy_fields(self):
         with open(UPDATE_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', text=response_xml)
             single_datasource = TSA.DatasourceItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
@@ -113,11 +113,12 @@ class DatasourceTests(unittest.TestCase):
 
     def test_publish(self):
         with open(PUBLISH_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
             new_datasource = TSA.DatasourceItem('SampleDS', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
-            new_datasource = self.server.datasources.publish(new_datasource, '../samples/SampleDS.tds',
+            new_datasource = self.server.datasources.publish(new_datasource,
+                                                             os.path.join(TEST_ASSET_DIR, 'SampleDS.tds'),
                                                              mode=self.server.PublishMode.CreateNew)
 
         self.assertEqual('e76a1461-3b1d-4588-bf1b-17551a879ad9', new_datasource.id)
@@ -155,9 +156,9 @@ class DatasourceTests(unittest.TestCase):
     def test_publish_missing_mode(self):
         new_datasource = TSA.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
         self.assertRaises(ValueError, self.server.datasources.publish, new_datasource,
-                          '../samples/SampleDS.tds', None)
+                          os.path.join(TEST_ASSET_DIR, 'SampleDS.tds'), None)
 
     def test_publish_invalid_file_type(self):
         new_datasource = TSA.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
         self.assertRaises(ValueError, self.server.datasources.publish, new_datasource,
-                          '../samples/SampleWB.twbx', self.server.PublishMode.Append)
+                          os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx'), self.server.PublishMode.Append)

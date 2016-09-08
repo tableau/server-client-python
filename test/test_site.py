@@ -22,7 +22,7 @@ class SiteTests(unittest.TestCase):
 
     def test_get(self):
         with open(GET_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
             pagination_item, all_sites = self.server.sites.get()
@@ -48,7 +48,7 @@ class SiteTests(unittest.TestCase):
 
     def test_get_by_id(self):
         with open(GET_BY_ID_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/dad65087-b08b-4603-af4e-2887b8aafc67', text=response_xml)
             single_site = self.server.sites.get_by_id('dad65087-b08b-4603-af4e-2887b8aafc67')
@@ -66,7 +66,7 @@ class SiteTests(unittest.TestCase):
 
     def test_update(self):
         with open(UPDATE_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/6b7179ba-b82b-4f0f-91ed-812074ac5da6', text=response_xml)
             single_site = TSA.SiteItem(name='Tableau', content_url='tableau',
@@ -90,7 +90,7 @@ class SiteTests(unittest.TestCase):
 
     def test_create(self):
         with open(CREATE_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
             new_site = TSA.SiteItem(name='Tableau', content_url='tableau',

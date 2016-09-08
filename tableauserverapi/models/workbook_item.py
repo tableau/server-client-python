@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
-from exceptions import UnpopulatedPropertyError
-from tag_item import TagItem
-from view_item import ViewItem
+from .exceptions import UnpopulatedPropertyError
+from .tag_item import TagItem
+from .view_item import ViewItem
 from .. import NAMESPACE
 import copy
 

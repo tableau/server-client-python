@@ -17,7 +17,7 @@ class AuthTests(unittest.TestCase):
 
     def test_sign_in(self):
         with open(SIGN_IN_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.post(self.baseurl + '/signin', text=response_xml)
             tableau_auth = TSA.TableauAuth('testuser', 'password', site='Samples')
@@ -29,7 +29,7 @@ class AuthTests(unittest.TestCase):
 
     def test_sign_in_impersonate(self):
         with open(SIGN_IN_IMPERSONATE_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.post(self.baseurl + '/signin', text=response_xml)
             tableau_auth = TSA.TableauAuth('testuser', 'password',
@@ -42,7 +42,7 @@ class AuthTests(unittest.TestCase):
 
     def test_sign_in_error(self):
         with open(SIGN_IN_ERROR_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.post(self.baseurl + '/signin', text=response_xml, status_code=401)
             tableau_auth = TSA.TableauAuth('testuser', 'wrongpassword')
@@ -50,7 +50,7 @@ class AuthTests(unittest.TestCase):
 
     def test_sign_in_without_auth(self):
         with open(SIGN_IN_ERROR_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.post(self.baseurl + '/signin', text=response_xml, status_code=401)
             tableau_auth = TSA.TableauAuth('', '')
@@ -58,7 +58,7 @@ class AuthTests(unittest.TestCase):
 
     def test_sign_out(self):
         with open(SIGN_IN_XML, 'rb') as f:
-            response_xml = f.read()
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.post(self.baseurl + '/signin', text=response_xml)
             m.post(self.baseurl + '/signout', text='')
