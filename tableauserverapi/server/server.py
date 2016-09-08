@@ -1,5 +1,5 @@
-from exceptions import NotSignedInError
-from endpoint import Sites, Views, Users, Groups, Workbooks, Datasources, Projects, Auth
+from .exceptions import NotSignedInError
+from .endpoint import Sites, Views, Users, Groups, Workbooks, Datasources, Projects, Auth
 import requests
 
 
@@ -34,10 +34,15 @@ class Server(object):
         self._http_options = dict()
 
     def _clear_auth(self):
-        self._auth_token = None
         self._site_id = None
         self._user_id = None
+        self._auth_token = None
         self._session = requests.Session()
+
+    def _set_auth(self, site_id, user_id, auth_token):
+        self._site_id = site_id
+        self._user_id = user_id
+        self._auth_token = auth_token
 
     @property
     def baseurl(self):

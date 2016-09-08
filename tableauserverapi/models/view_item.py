@@ -1,16 +1,21 @@
 import xml.etree.ElementTree as ET
+from .exceptions import UnpopulatedPropertyError
 from .. import NAMESPACE
 
 
 class ViewItem(object):
     def __init__(self):
+        self._content_url = None
         self._id = None
         self._name = None
-        self._content_url = None
-        self._total_views = None
-        self._workbook_id = None
         self._owner_id = None
         self._preview_image = None
+        self._total_views = None
+        self._workbook_id = None
+
+    @property
+    def content_url(self):
+        return self._content_url
 
     @property
     def id(self):
@@ -21,8 +26,15 @@ class ViewItem(object):
         return self._name
 
     @property
-    def content_url(self):
-        return self._content_url
+    def owner_id(self):
+        return self._owner_id
+
+    @property
+    def preview_image(self):
+        if self._preview_image is None:
+            error = "View item must be populated with its preview image first."
+            raise UnpopulatedPropertyError(error)
+        return self._preview_image
 
     @property
     def total_views(self):
@@ -31,14 +43,6 @@ class ViewItem(object):
     @property
     def workbook_id(self):
         return self._workbook_id
-
-    @property
-    def owner_id(self):
-        return self._owner_id
-
-    @property
-    def preview_image(self):
-        return self._preview_image
 
     @classmethod
     def from_response(cls, resp, workbook_id=''):

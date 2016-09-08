@@ -1,4 +1,4 @@
-from request_options import RequestOptions
+from .request_options import RequestOptions
 
 
 class Filter(object):
@@ -19,9 +19,9 @@ class Filter(object):
         return self._value
 
     @value.setter
-    def value(self, input):
-        if isinstance(input, list) and self.operator != RequestOptions.Operator.In:
+    def value(self, filter_value):
+        if isinstance(filter_value, list) and self.operator != RequestOptions.Operator.In:
             error = "Filter values can only be a list if the operator is 'in'."
             raise ValueError(error)
         else:
-            self._value = input
+            self._value = filter_value

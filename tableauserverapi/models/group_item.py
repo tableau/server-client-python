@@ -1,15 +1,25 @@
 import xml.etree.ElementTree as ET
-from exceptions import UnpopulatedPropertyError
+from .exceptions import UnpopulatedPropertyError
 from .. import NAMESPACE
 
 
 class GroupItem(object):
     def __init__(self, name):
-        self._id = None
         self._domain_name = None
-        self._users = None
+        self._id = None
         self._name = None
+        self._users = None
+
+        # Invoke setter
         self.name = name
+
+    @property
+    def domain_name(self):
+        return self._domain_name
+
+    @property
+    def id(self):
+        return self._id
 
     @property
     def name(self):
@@ -22,14 +32,6 @@ class GroupItem(object):
             raise ValueError(error)
         else:
             self._name = value
-
-    @property
-    def id(self):
-        return self._id
-
-    @property
-    def domain_name(self):
-        return self._domain_name
 
     @property
     def users(self):

@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from exceptions import UnpopulatedPropertyError
+from .exceptions import UnpopulatedPropertyError
 from .. import NAMESPACE
 
 
@@ -19,17 +19,19 @@ class UserItem(object):
         ServerDefault = 'ServerDefault'
 
     def __init__(self, name, site_role, auth_setting=None):
+        self._auth_setting = None
+        self._domain_name = None
+        self._external_auth_user_id = None
         self._id = None
         self._last_login = None
-        self._external_auth_user_id = None
-        self._domain_name = None
-        self._workbooks = None
         self._name = None
         self._site_role = None
-        self._auth_setting = None
+        self._workbooks = None
         self.email = None
         self.fullname = None
         self.password = None
+
+        # Invoke setter
         self.name = name
         self.site_role = site_role
 
@@ -37,6 +39,34 @@ class UserItem(object):
             # In order to invoke the setter method for auth_setting,
             # _auth_setting must be initialized first
             self.auth_setting = auth_setting
+
+    @property
+    def auth_setting(self):
+        return self._auth_setting
+
+    @auth_setting.setter
+    def auth_setting(self, value):
+        if not hasattr(UserItem.Auth, value):
+            error = 'Invalid auth setting defined.'
+            raise ValueError(error)
+        else:
+            self._auth_setting = value
+
+    @property
+    def domain_name(self):
+        return self._domain_name
+
+    @property
+    def external_auth_user_id(self):
+        return self._external_auth_user_id
+
+    @property
+    def id(self):
+        return self._id
+
+    @property
+    def last_login(self):
+        return self._last_login
 
     @property
     def name(self):
@@ -66,34 +96,6 @@ class UserItem(object):
             self._site_role = value
 
     @property
-    def auth_setting(self):
-        return self._auth_setting
-
-    @auth_setting.setter
-    def auth_setting(self, value):
-        if not hasattr(UserItem.Auth, value):
-            error = 'Invalid auth setting defined.'
-            raise ValueError(error)
-        else:
-            self._auth_setting = value
-
-    @property
-    def id(self):
-        return self._id
-
-    @property
-    def last_login(self):
-        return self._last_login
-
-    @property
-    def external_auth_user_id(self):
-        return self._external_auth_user_id
-
-    @property
-    def domain_name(self):
-        return self._domain_name
-
-    @property
     def workbooks(self):
         if self._workbooks is None:
             error = "User item must be populated with workbooks first."
@@ -102,20 +104,6 @@ class UserItem(object):
 
     def _set_workbooks(self, workbooks):
         self._workbooks = workbooks
-
-    @classmethod
-    def from_response(cls, resp):
-        all_user_items = set()
-        parsed_response = ET.fromstring(resp)
-        all_user_xml = parsed_response.findall('.//t:user', namespaces=NAMESPACE)
-        for user_xml in all_user_xml:
-            (id, name, site_role, last_login, external_auth_user_id,
-             fullname, email, auth_setting, domain_name) = cls._parse_element(user_xml)
-            user_item = cls(name, site_role)
-            user_item._set_values(id, name, site_role, last_login, external_auth_user_id,
-                            fullname, email, auth_setting, domain_name)
-            all_user_items.add(user_item)
-        return all_user_items
 
     def _parse_common_tags(self, user_xml):
         if not isinstance(user_xml, ET.Element):
@@ -145,6 +133,20 @@ class UserItem(object):
             self._auth_setting = auth_setting
         if domain_name:
             self._domain_name = domain_name
+
+    @classmethod
+    def from_response(cls, resp):
+        all_user_items = set()
+        parsed_response = ET.fromstring(resp)
+        all_user_xml = parsed_response.findall('.//t:user', namespaces=NAMESPACE)
+        for user_xml in all_user_xml:
+            (id, name, site_role, last_login, external_auth_user_id,
+             fullname, email, auth_setting, domain_name) = cls._parse_element(user_xml)
+            user_item = cls(name, site_role)
+            user_item._set_values(id, name, site_role, last_login, external_auth_user_id,
+                            fullname, email, auth_setting, domain_name)
+            all_user_items.add(user_item)
+        return all_user_items
 
     @staticmethod
     def _parse_element(user_xml):

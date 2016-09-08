@@ -1,5 +1,5 @@
-from endpoint import Endpoint
-from exceptions import MissingRequiredFieldError
+from .endpoint import Endpoint
+from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, UserItem, WorkbookItem, PaginationItem
 import logging
 import copy
@@ -33,7 +33,7 @@ class Users(Endpoint):
         logger.info('Querying single user (ID: {0})'.format(user_id))
         url = "{0}/{1}".format(self._construct_url(), user_id)
         server_response = self.get_request(url)
-        return UserItem.from_response(server_response.text)[0]
+        return UserItem.from_response(server_response.text).pop()
 
     # Update user
     def update(self, user_item):
@@ -62,7 +62,7 @@ class Users(Endpoint):
         url = self._construct_url()
         add_req = RequestFactory.User.add_req(user_item)
         server_response = self.post_request(url, add_req)
-        new_user = UserItem.from_response(server_response.text)[0]
+        new_user = UserItem.from_response(server_response.text).pop()
         logger.info('Added new user (ID: {0})'.format(user_item.id))
         return new_user
 

@@ -21,8 +21,8 @@ class ProjectTests(unittest.TestCase):
         self.baseurl = self.server.projects._construct_url()
 
     def test_get(self):
-        with open(GET_XML, 'rb') as file:
-            response_xml = file.read()
+        with open(GET_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
             pagination_item, all_projects = self.server.projects.get()
@@ -51,8 +51,8 @@ class ProjectTests(unittest.TestCase):
         self.assertRaises(ValueError, self.server.projects.delete, '')
 
     def test_update(self):
-        with open(UPDATE_XML, 'rb') as file:
-            response_xml = file.read()
+        with open(UPDATE_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/1d0304cd-3796-429f-b815-7258370b9b74', text=response_xml)
             single_project = TSA.ProjectItem(name='Test Project', content_permissions='LockedToProject',
@@ -66,8 +66,8 @@ class ProjectTests(unittest.TestCase):
         self.assertEqual('LockedToProject', single_project.content_permissions)
 
     def test_update_copy_fields(self):
-        with open(UPDATE_XML, 'rb') as file:
-            response_xml = file.read()
+        with open(UPDATE_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/1d0304cd-3796-429f-b815-7258370b9b74', text=response_xml)
             single_project = TSA.ProjectItem('test')
@@ -82,8 +82,8 @@ class ProjectTests(unittest.TestCase):
         self.assertRaises(TSA.MissingRequiredFieldError, self.server.projects.update, single_project)
 
     def test_create(self):
-        with open(CREATE_XML, 'rb') as file:
-            response_xml = file.read()
+        with open(CREATE_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
             new_project = TSA.ProjectItem(name='Test Project', description='Project created for testing')

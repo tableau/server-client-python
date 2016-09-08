@@ -27,8 +27,8 @@ class WorkbookTests(unittest.TestCase):
         self.baseurl = self.server.workbooks._construct_url()
 
     def test_get(self):
-        with open(GET_XML, 'rb') as file:
-            response_xml = file.read()
+        with open(GET_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
             pagination_item, all_workbooks = self.server.workbooks.get()
@@ -62,8 +62,8 @@ class WorkbookTests(unittest.TestCase):
         self.assertRaises(TSA.NotSignedInError, self.server.workbooks.get)
 
     def test_get_empty(self):
-        with open(GET_EMPTY_XML, 'rb') as file:
-            response_xml = file.read()
+        with open(GET_EMPTY_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
             pagination_item, all_workbooks = self.server.workbooks.get()
@@ -72,8 +72,8 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual([], all_workbooks)
 
     def test_get_by_id(self):
-        with open(GET_BY_ID_XML, 'rb') as file:
-            response_xml = file.read()
+        with open(GET_BY_ID_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42', text=response_xml)
             single_workbook = self.server.workbooks.get_by_id('3cc6cd06-89ce-4fdc-b935-5294135d6d42')
@@ -105,8 +105,8 @@ class WorkbookTests(unittest.TestCase):
         self.assertRaises(ValueError, self.server.workbooks.delete, '')
 
     def test_update(self):
-        with open(UPDATE_XML, 'rb') as file:
-            response_xml = file.read()
+        with open(UPDATE_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/1f951daf-4061-451a-9df1-69a8062664f2', text=response_xml)
             single_workbook = TSA.WorkbookItem('1d0304cd-3796-429f-b815-7258370b9b74', show_tabs=True)
@@ -124,10 +124,10 @@ class WorkbookTests(unittest.TestCase):
         self.assertRaises(TSA.MissingRequiredFieldError, self.server.workbooks.update, single_workbook)
 
     def test_update_copy_fields(self):
-        with open(POPULATE_CONNECTIONS_XML, 'rb') as file:
-            connection_xml = file.read()
-        with open(UPDATE_XML, 'rb') as file:
-            update_xml = file.read()
+        with open(POPULATE_CONNECTIONS_XML, 'rb') as f:
+            connection_xml = f.read().decode('utf-8')
+        with open(UPDATE_XML, 'rb') as f:
+            update_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/1f951daf-4061-451a-9df1-69a8062664f2/connections', text=connection_xml)
             m.put(self.baseurl + '/1f951daf-4061-451a-9df1-69a8062664f2', text=update_xml)
@@ -143,10 +143,10 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual(single_workbook._preview_image, updated_workbook._preview_image)
 
     def test_update_tags(self):
-        with open(ADD_TAGS_XML, 'rb') as file:
-            add_tags_xml = file.read()
-        with open(UPDATE_XML, 'rb') as file:
-            update_xml = file.read()
+        with open(ADD_TAGS_XML, 'rb') as f:
+            add_tags_xml = f.read().decode('utf-8')
+        with open(UPDATE_XML, 'rb') as f:
+            update_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/1f951daf-4061-451a-9df1-69a8062664f2/tags', text=add_tags_xml)
             m.delete(self.baseurl + '/1f951daf-4061-451a-9df1-69a8062664f2/tags/b', status_code=204)
@@ -173,8 +173,8 @@ class WorkbookTests(unittest.TestCase):
         self.assertRaises(ValueError, self.server.workbooks.download, '')
 
     def test_populate_views(self):
-        with open(POPULATE_VIEWS_XML, 'rb') as file:
-            response_xml = file.read()
+        with open(POPULATE_VIEWS_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/1f951daf-4061-451a-9df1-69a8062664f2/views', text=response_xml)
             single_workbook = TSA.WorkbookItem('test')
@@ -199,8 +199,8 @@ class WorkbookTests(unittest.TestCase):
         self.assertRaises(TSA.MissingRequiredFieldError, self.server.workbooks.populate_views, single_workbook)
 
     def test_populate_connections(self):
-        with open(POPULATE_CONNECTIONS_XML, 'rb') as file:
-            response_xml = file.read()
+        with open(POPULATE_CONNECTIONS_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/1f951daf-4061-451a-9df1-69a8062664f2/connections', text=response_xml)
             single_workbook = TSA.WorkbookItem('test')
@@ -208,7 +208,7 @@ class WorkbookTests(unittest.TestCase):
             self.server.workbooks.populate_connections(single_workbook)
 
         self.assertEqual('37ca6ced-58d7-4dcf-99dc-f0a85223cbef', single_workbook.connections[0].id)
-        self.assertEqual('dataengine', single_workbook.connections[0].type)
+        self.assertEqual('dataengine', single_workbook.connections[0].connection_type)
         self.assertEqual('4506225a-0d32-4ab1-82d3-c24e85f7afba', single_workbook.connections[0].datasource_id)
         self.assertEqual('World Indicators', single_workbook.connections[0].datasource_name)
 
@@ -219,8 +219,8 @@ class WorkbookTests(unittest.TestCase):
                           single_workbook)
 
     def test_populate_preview_image(self):
-        with open(POPULATE_PREVIEW_IMAGE, 'rb') as file:
-            response = file.read()
+        with open(POPULATE_PREVIEW_IMAGE, 'rb') as f:
+            response = f.read()
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/1f951daf-4061-451a-9df1-69a8062664f2/previewImage', content=response)
             single_workbook = TSA.WorkbookItem('test')
@@ -236,13 +236,13 @@ class WorkbookTests(unittest.TestCase):
                           single_workbook)
 
     def test_publish(self):
-        with open(PUBLISH_XML, 'rb') as file:
-            response_xml = file.read()
+        with open(PUBLISH_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
             new_workbook = TSA.WorkbookItem(name='Sample', show_tabs=False,
                                                project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
-            new_workbook = self.server.workbooks.publish(new_workbook, '../samples/SampleWB.twbx',
+            new_workbook = self.server.workbooks.publish(new_workbook, os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx'),
                                                          self.server.PublishMode.CreateNew)
 
         self.assertEqual('a8076ca1-e9d8-495e-bae6-c684dbb55836', new_workbook.id)
@@ -267,4 +267,5 @@ class WorkbookTests(unittest.TestCase):
     def test_publish_invalid_file_type(self):
         new_workbook = TSA.WorkbookItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
         self.assertRaises(ValueError, self.server.workbooks.publish,
-                          new_workbook, '../samples/SampleDS.tds', self.server.PublishMode.CreateNew)
+                          new_workbook, os.path.join(TEST_ASSET_DIR, 'SampleDS.tds'),
+                          self.server.PublishMode.CreateNew)
