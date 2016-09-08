@@ -1,7 +1,7 @@
 import unittest
 import os.path
 import requests_mock
-import tableauserverapi as TSA
+import tableauserverclient as TSC
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
@@ -13,7 +13,7 @@ CREATE_XML = os.path.join(TEST_ASSET_DIR, 'site_create.xml')
 
 class SiteTests(unittest.TestCase):
     def setUp(self):
-        self.server = TSA.Server('http://test')
+        self.server = TSC.Server('http://test')
 
         # Fake signin
         self.server._auth_token = 'j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM'
@@ -44,7 +44,7 @@ class SiteTests(unittest.TestCase):
 
     def test_get_before_signin(self):
         self.server._auth_token = None
-        self.assertRaises(TSA.NotSignedInError, self.server.sites.get)
+        self.assertRaises(TSC.NotSignedInError, self.server.sites.get)
 
     def test_get_by_id(self):
         with open(GET_BY_ID_XML, 'rb') as f:
@@ -69,8 +69,8 @@ class SiteTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/6b7179ba-b82b-4f0f-91ed-812074ac5da6', text=response_xml)
-            single_site = TSA.SiteItem(name='Tableau', content_url='tableau',
-                                       admin_mode=TSA.SiteItem.AdminMode.ContentAndUsers,
+            single_site = TSC.SiteItem(name='Tableau', content_url='tableau',
+                                       admin_mode=TSC.SiteItem.AdminMode.ContentAndUsers,
                                        user_quota=15, storage_quota=1000,
                                        disable_subscriptions=True)
             single_site._id = '6b7179ba-b82b-4f0f-91ed-812074ac5da6'
@@ -85,16 +85,16 @@ class SiteTests(unittest.TestCase):
         self.assertEqual(15, single_site.user_quota)
 
     def test_update_missing_id(self):
-        single_site = TSA.SiteItem('test', 'test')
-        self.assertRaises(TSA.MissingRequiredFieldError, self.server.sites.update, single_site)
+        single_site = TSC.SiteItem('test', 'test')
+        self.assertRaises(TSC.MissingRequiredFieldError, self.server.sites.update, single_site)
 
     def test_create(self):
         with open(CREATE_XML, 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
-            new_site = TSA.SiteItem(name='Tableau', content_url='tableau',
-                                    admin_mode=TSA.SiteItem.AdminMode.ContentAndUsers, user_quota=15,
+            new_site = TSC.SiteItem(name='Tableau', content_url='tableau',
+                                    admin_mode=TSC.SiteItem.AdminMode.ContentAndUsers, user_quota=15,
                                     storage_quota=1000, disable_subscriptions=True)
             new_site = self.server.sites.create(new_site)
 

@@ -1,7 +1,7 @@
 import unittest
 import os
 import requests_mock
-import tableauserverapi as TSA
+import tableauserverclient as TSC
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
@@ -11,7 +11,7 @@ POPULATE_PREVIEW_IMAGE = os.path.join(TEST_ASSET_DIR, 'Sample View Image.png')
 
 class ViewTests(unittest.TestCase):
     def setUp(self):
-        self.server = TSA.Server('http://test')
+        self.server = TSC.Server('http://test')
 
         # Fake sign in
         self.server._site_id = 'dad65087-b08b-4603-af4e-2887b8aafc67'
@@ -41,7 +41,7 @@ class ViewTests(unittest.TestCase):
 
     def test_get_before_signin(self):
         self.server._auth_token = None
-        self.assertRaises(TSA.NotSignedInError, self.server.views.get)
+        self.assertRaises(TSC.NotSignedInError, self.server.views.get)
 
     def test_populate_preview_image(self):
         with open(POPULATE_PREVIEW_IMAGE, 'rb') as f:
@@ -49,17 +49,17 @@ class ViewTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/workbooks/3cc6cd06-89ce-4fdc-b935-5294135d6d42/'
                   'views/d79634e1-6063-4ec9-95ff-50acbf609ff5/previewImage', content=response)
-            single_view = TSA.ViewItem()
+            single_view = TSC.ViewItem()
             single_view._id = 'd79634e1-6063-4ec9-95ff-50acbf609ff5'
             single_view._workbook_id = '3cc6cd06-89ce-4fdc-b935-5294135d6d42'
             self.server.views.populate_preview_image(single_view)
         self.assertEqual(response, single_view.preview_image)
 
     def test_populate_preview_image_missing_id(self):
-        single_view = TSA.ViewItem()
+        single_view = TSC.ViewItem()
         single_view._id = 'd79634e1-6063-4ec9-95ff-50acbf609ff5'
-        self.assertRaises(TSA.MissingRequiredFieldError, self.server.views.populate_preview_image, single_view)
+        self.assertRaises(TSC.MissingRequiredFieldError, self.server.views.populate_preview_image, single_view)
 
         single_view._id = None
         single_view._workbook_id = '3cc6cd06-89ce-4fdc-b935-5294135d6d42'
-        self.assertRaises(TSA.MissingRequiredFieldError, self.server.views.populate_preview_image, single_view)
+        self.assertRaises(TSC.MissingRequiredFieldError, self.server.views.populate_preview_image, single_view)

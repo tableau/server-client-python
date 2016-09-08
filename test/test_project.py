@@ -1,7 +1,7 @@
 import unittest
 import os
 import requests_mock
-import tableauserverapi as TSA
+import tableauserverclient as TSC
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
@@ -12,7 +12,7 @@ CREATE_XML = os.path.join(TEST_ASSET_DIR, 'project_create.xml')
 
 class ProjectTests(unittest.TestCase):
     def setUp(self):
-        self.server = TSA.Server('http://test')
+        self.server = TSC.Server('http://test')
 
         # Fake signin
         self.server._site_id = 'dad65087-b08b-4603-af4e-2887b8aafc67'
@@ -40,7 +40,7 @@ class ProjectTests(unittest.TestCase):
 
     def test_get_before_signin(self):
         self.server._auth_token = None
-        self.assertRaises(TSA.NotSignedInError, self.server.projects.get)
+        self.assertRaises(TSC.NotSignedInError, self.server.projects.get)
 
     def test_delete(self):
         with requests_mock.mock() as m:
@@ -55,7 +55,7 @@ class ProjectTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/1d0304cd-3796-429f-b815-7258370b9b74', text=response_xml)
-            single_project = TSA.ProjectItem(name='Test Project', content_permissions='LockedToProject',
+            single_project = TSC.ProjectItem(name='Test Project', content_permissions='LockedToProject',
                                              description='Project created for testing')
             single_project._id = '1d0304cd-3796-429f-b815-7258370b9b74'
             single_project = self.server.projects.update(single_project)
@@ -70,7 +70,7 @@ class ProjectTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/1d0304cd-3796-429f-b815-7258370b9b74', text=response_xml)
-            single_project = TSA.ProjectItem('test')
+            single_project = TSC.ProjectItem('test')
             single_project._id = '1d0304cd-3796-429f-b815-7258370b9b74'
             single_project._permissions = 'Test to check if permissions copied over.'
             updated_project = self.server.projects.update(single_project)
@@ -78,15 +78,15 @@ class ProjectTests(unittest.TestCase):
         self.assertEqual(single_project._permissions, updated_project._permissions)
 
     def test_update_missing_id(self):
-        single_project = TSA.ProjectItem('test')
-        self.assertRaises(TSA.MissingRequiredFieldError, self.server.projects.update, single_project)
+        single_project = TSC.ProjectItem('test')
+        self.assertRaises(TSC.MissingRequiredFieldError, self.server.projects.update, single_project)
 
     def test_create(self):
         with open(CREATE_XML, 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
-            new_project = TSA.ProjectItem(name='Test Project', description='Project created for testing')
+            new_project = TSC.ProjectItem(name='Test Project', description='Project created for testing')
             new_project.content_permissions = 'ManagedByOwner'
             new_project = self.server.projects.create(new_project)
 
@@ -96,4 +96,4 @@ class ProjectTests(unittest.TestCase):
         self.assertEqual('ManagedByOwner', new_project.content_permissions)
 
     def test_create_missing_name(self):
-        self.assertRaises(ValueError, TSA.ProjectItem, '')
+        self.assertRaises(ValueError, TSC.ProjectItem, '')

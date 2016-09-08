@@ -10,7 +10,7 @@
 ####
 
 
-import tableauserverapi as TSA
+import tableauserverclient as TSC
 import os.path
 import argparse
 import getpass
@@ -32,8 +32,8 @@ logging_level = getattr(logging, args.logging_level.upper())
 logging.basicConfig(level=logging_level)
 
 ##### SIGN IN #####
-tableau_auth = TSA.TableauAuth(args.username, password)
-server = TSA.Server(args.server)
+tableau_auth = TSC.TableauAuth(args.username, password)
+server = TSC.Server(args.server)
 with server.auth.sign_in(tableau_auth):
 
     # Query projects for use when demonstrating publishing and updating
@@ -43,7 +43,7 @@ with server.auth.sign_in(tableau_auth):
     # Publish datasource if publish flag is set (-publish, -p)
     if args.publish:
         if default_project is not None:
-            new_datasource = TSA.DatasourceItem(default_project.id)
+            new_datasource = TSC.DatasourceItem(default_project.id)
             new_datasource = server.datasources.publish(new_datasource, args.publish, server.PublishMode.Overwrite)
             print("Datasource published. ID: {}".format(new_datasource.id))
         else:

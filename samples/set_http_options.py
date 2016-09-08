@@ -8,7 +8,7 @@
 # To run the script, you must have installed Python 2.7.9 or later.
 ####
 
-import tableauserverapi as TSA
+import tableauserverclient as TSC
 import argparse
 import getpass
 import logging
@@ -27,8 +27,8 @@ logging_level = getattr(logging, args.logging_level.upper())
 logging.basicConfig(level=logging_level)
 
 # Step 1: Create required objects for sign in
-tableau_auth = TSA.TableauAuth(args.username, password)
-server = TSA.Server(args.server)
+tableau_auth = TSC.TableauAuth(args.username, password)
+server = TSC.Server(args.server)
 
 # Step 2: Set http options to disable verifying SSL
 server.add_http_options({'verify': False})

@@ -1,7 +1,7 @@
 import unittest
 import os
 import requests_mock
-import tableauserverapi as TSA
+import tableauserverclient as TSC
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
@@ -12,7 +12,7 @@ ADD_USER = os.path.join(TEST_ASSET_DIR, 'group_add_user.xml')
 
 class GroupTests(unittest.TestCase):
     def setUp(self):
-        self.server = TSA.Server('http://test')
+        self.server = TSC.Server('http://test')
 
         # Fake signin
         self.server._site_id = 'dad65087-b08b-4603-af4e-2887b8aafc67'
@@ -42,14 +42,14 @@ class GroupTests(unittest.TestCase):
 
     def test_get_before_signin(self):
         self.server._auth_token = None
-        self.assertRaises(TSA.NotSignedInError, self.server.groups.get)
+        self.assertRaises(TSC.NotSignedInError, self.server.groups.get)
 
     def test_populate_users(self):
         with open(POPULATE_USERS, 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users', text=response_xml)
-            single_group = TSA.GroupItem(name='Test Group')
+            single_group = TSC.GroupItem(name='Test Group')
             single_group._id = 'e7833b48-c6f7-47b5-a2a7-36e7dd232758'
             pagination_item = self.server.groups.populate_users(single_group)
 
@@ -73,7 +73,7 @@ class GroupTests(unittest.TestCase):
                                  '/dd2239f6-ddf1-4107-981a-4cf94e415794'
             m.delete(url, status_code=204)
             m.get(self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users', text=response_xml)
-            single_group = TSA.GroupItem('test')
+            single_group = TSC.GroupItem('test')
             single_group._id = 'e7833b48-c6f7-47b5-a2a7-36e7dd232758'
             self.server.groups.populate_users(single_group)
             self.assertEqual(1, len(single_group.users))
@@ -86,7 +86,7 @@ class GroupTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.post(self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users', text=response_xml)
-            single_group = TSA.GroupItem('test')
+            single_group = TSC.GroupItem('test')
             single_group._id = 'e7833b48-c6f7-47b5-a2a7-36e7dd232758'
             single_group._users = set()
             self.server.groups.add_user(single_group, '5de011f8-5aa9-4d5b-b991-f462c8dd6bb7')
@@ -98,8 +98,8 @@ class GroupTests(unittest.TestCase):
         self.assertEqual('ServerAdministrator', user.site_role)
 
     def test_add_user_before_populating(self):
-        single_group = TSA.GroupItem('test')
-        self.assertRaises(TSA.UnpopulatedPropertyError, self.server.groups.add_user, single_group,
+        single_group = TSC.GroupItem('test')
+        self.assertRaises(TSC.UnpopulatedPropertyError, self.server.groups.add_user, single_group,
                           '5de011f8-5aa9-4d5b-b991-f462c8dd6bb7')
 
     def test_add_user_missing_user_id(self):
@@ -107,21 +107,21 @@ class GroupTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users', text=response_xml)
-            single_group = TSA.GroupItem(name='Test Group')
+            single_group = TSC.GroupItem(name='Test Group')
             single_group._id = 'e7833b48-c6f7-47b5-a2a7-36e7dd232758'
             self.server.groups.populate_users(single_group)
 
         self.assertRaises(ValueError, self.server.groups.add_user, single_group, '')
 
     def test_add_user_missing_group_id(self):
-        single_group = TSA.GroupItem('test')
+        single_group = TSC.GroupItem('test')
         single_group._users = []
-        self.assertRaises(TSA.MissingRequiredFieldError, self.server.groups.add_user, single_group,
+        self.assertRaises(TSC.MissingRequiredFieldError, self.server.groups.add_user, single_group,
                           '5de011f8-5aa9-4d5b-b991-f462c8dd6bb7')
 
     def test_remove_user_before_populating(self):
-        single_group = TSA.GroupItem('test')
-        self.assertRaises(TSA.UnpopulatedPropertyError, self.server.groups.remove_user, single_group,
+        single_group = TSC.GroupItem('test')
+        self.assertRaises(TSC.UnpopulatedPropertyError, self.server.groups.remove_user, single_group,
                           '5de011f8-5aa9-4d5b-b991-f462c8dd6bb7')
 
     def test_remove_user_missing_user_id(self):
@@ -129,14 +129,14 @@ class GroupTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users', text=response_xml)
-            single_group = TSA.GroupItem(name='Test Group')
+            single_group = TSC.GroupItem(name='Test Group')
             single_group._id = 'e7833b48-c6f7-47b5-a2a7-36e7dd232758'
             self.server.groups.populate_users(single_group)
 
         self.assertRaises(ValueError, self.server.groups.remove_user, single_group, '')
 
     def test_remove_user_missing_group_id(self):
-        single_group = TSA.GroupItem('test')
+        single_group = TSC.GroupItem('test')
         single_group._users = []
-        self.assertRaises(TSA.MissingRequiredFieldError, self.server.groups.remove_user, single_group,
+        self.assertRaises(TSC.MissingRequiredFieldError, self.server.groups.remove_user, single_group,
                           '5de011f8-5aa9-4d5b-b991-f462c8dd6bb7')

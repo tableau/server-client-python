@@ -9,7 +9,7 @@
 # on top of the general operations.
 ####
 
-import tableauserverapi as TSA
+import tableauserverclient as TSC
 import os.path
 import copy
 import argparse
@@ -33,8 +33,8 @@ logging_level = getattr(logging, args.logging_level.upper())
 logging.basicConfig(level=logging_level)
 
 ##### SIGN IN #####
-tableau_auth = TSA.TableauAuth(args.username, password)
-server = TSA.Server(args.server)
+tableau_auth = TSC.TableauAuth(args.username, password)
+server = TSC.Server(args.server)
 with server.auth.sign_in(tableau_auth):
 
     # Publish workbook if publish flag is set (-publish, -p)
@@ -43,7 +43,7 @@ with server.auth.sign_in(tableau_auth):
         default_project = next((project for project in all_projects if project.is_default()), None)
 
         if default_project is not None:
-            new_workbook = TSA.WorkbookItem(default_project.id)
+            new_workbook = TSC.WorkbookItem(default_project.id)
             new_workbook = server.workbooks.publish(new_workbook, args.publish, server.PublishMode.Overwrite)
             print("Workbook published. ID: {}".format(new_workbook.id))
         else:

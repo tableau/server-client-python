@@ -14,7 +14,7 @@
 # To run the script, you must have installed Python 2.7.9 or later.
 ####
 
-import tableauserverapi as TSA
+import tableauserverclient as TSC
 import argparse
 import getpass
 import logging
@@ -34,8 +34,8 @@ logging_level = getattr(logging, args.logging_level.upper())
 logging.basicConfig(level=logging_level)
 
 # Step 1: Sign in to server.
-tableau_auth = TSA.TableauAuth(args.username, password)
-server = TSA.Server(args.server)
+tableau_auth = TSC.TableauAuth(args.username, password)
+server = TSC.Server(args.server)
 with server.auth.sign_in(tableau_auth):
 
     # Step 2: Get all the projects on server, then look for the default one.
@@ -44,7 +44,7 @@ with server.auth.sign_in(tableau_auth):
 
     # Step 3: If default project is found, form a new workbook item and publish.
     if default_project is not None:
-        new_workbook = TSA.WorkbookItem(default_project.id)
+        new_workbook = TSC.WorkbookItem(default_project.id)
         new_workbook = server.workbooks.publish(new_workbook, args.filepath, server.PublishMode.Overwrite)
         print("Workbook published. ID: {0}".format(new_workbook.id))
     else:

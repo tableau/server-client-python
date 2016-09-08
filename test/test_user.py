@@ -1,7 +1,7 @@
 import unittest
 import os
 import requests_mock
-import tableauserverapi as TSA
+import tableauserverclient as TSC
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
@@ -16,7 +16,7 @@ ADD_FAVORITE_XML = os.path.join(TEST_ASSET_DIR, 'user_add_favorite.xml')
 
 class UserTests(unittest.TestCase):
     def setUp(self):
-        self.server = TSA.Server('http://test')
+        self.server = TSC.Server('http://test')
 
         # Fake signin
         self.server._site_id = 'dad65087-b08b-4603-af4e-2887b8aafc67'
@@ -57,7 +57,7 @@ class UserTests(unittest.TestCase):
 
     def test_get_before_signin(self):
         self.server._auth_token = None
-        self.assertRaises(TSA.NotSignedInError, self.server.users.get)
+        self.assertRaises(TSC.NotSignedInError, self.server.users.get)
 
     def test_get_by_id(self):
         with open(GET_BY_ID_XML, 'rb') as f:
@@ -82,7 +82,7 @@ class UserTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/dd2239f6-ddf1-4107-981a-4cf94e415794', text=response_xml)
-            single_user = TSA.UserItem('test', 'Viewer')
+            single_user = TSC.UserItem('test', 'Viewer')
             single_user._id = 'dd2239f6-ddf1-4107-981a-4cf94e415794'
             single_user.name = 'Cassie'
             single_user.fullname = 'Cassie'
@@ -96,8 +96,8 @@ class UserTests(unittest.TestCase):
         self.assertEqual('Viewer', single_user.site_role)
 
     def test_update_missing_id(self):
-        single_user = TSA.UserItem('test', 'Interactor')
-        self.assertRaises(TSA.MissingRequiredFieldError, self.server.users.update, single_user)
+        single_user = TSC.UserItem('test', 'Interactor')
+        self.assertRaises(TSC.MissingRequiredFieldError, self.server.users.update, single_user)
 
     def test_remove(self):
         with requests_mock.mock() as m:
@@ -112,7 +112,7 @@ class UserTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.post(self.baseurl + '', text=response_xml)
-            new_user = TSA.UserItem(name='Cassie', site_role='Viewer', auth_setting='ServerDefault')
+            new_user = TSC.UserItem(name='Cassie', site_role='Viewer', auth_setting='ServerDefault')
             new_user = self.server.users.add(new_user)
 
         self.assertEqual('4cc4c17f-898a-4de4-abed-a1681c673ced', new_user.id)
@@ -126,7 +126,7 @@ class UserTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/dd2239f6-ddf1-4107-981a-4cf94e415794/workbooks',
                   text=response_xml)
-            single_user = TSA.UserItem('test', 'Interactor')
+            single_user = TSC.UserItem('test', 'Interactor')
             single_user._id = 'dd2239f6-ddf1-4107-981a-4cf94e415794'
             pagination_item = self.server.users.populate_workbooks(single_user)
 
@@ -145,5 +145,5 @@ class UserTests(unittest.TestCase):
         self.assertEqual(set(['Safari', 'Sample']), workbook_list[0].tags)
 
     def test_populate_workbooks_missing_id(self):
-        single_user = TSA.UserItem('test', 'Interactor')
-        self.assertRaises(TSA.MissingRequiredFieldError, self.server.users.populate_workbooks, single_user)
+        single_user = TSC.UserItem('test', 'Interactor')
+        self.assertRaises(TSC.MissingRequiredFieldError, self.server.users.populate_workbooks, single_user)
