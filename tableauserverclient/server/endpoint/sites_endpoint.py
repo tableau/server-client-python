@@ -21,9 +21,8 @@ class Sites(Endpoint):
         logger.info('Querying all sites on site')
         url = self._construct_url()
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.text)
         all_site_items = SiteItem.from_response(server_response.text)
-        return pagination_item, all_site_items
+        return all_site_items
 
     # Gets 1 site by id
     def get_by_id(self, site_id):

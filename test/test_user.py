@@ -29,9 +29,8 @@ class UserTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
-            pagination_item, all_users = self.server.users.get()
+            all_users = self.server.users.get()
 
-        self.assertEqual(2, pagination_item.total_available)
         self.assertEqual(2, len(all_users))
 
         self.assertTrue(any(user.id == 'dd2239f6-ddf1-4107-981a-4cf94e415794' for user in all_users))
@@ -50,9 +49,9 @@ class UserTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
-            pagination_item, all_users = self.server.users.get()
+            all_users = self.server.users.get()
 
-        self.assertEqual(0, pagination_item.total_available)
+        self.assertEqual(0, len(all_users))
         self.assertEqual(set(), all_users)
 
     def test_get_before_signin(self):

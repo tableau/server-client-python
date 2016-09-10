@@ -29,9 +29,8 @@ class Datasources(Endpoint):
         logger.info('Querying all datasources on site')
         url = self._construct_url()
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.text)
         all_datasource_items = DatasourceItem.from_response(server_response.text)
-        return pagination_item, all_datasource_items
+        return all_datasource_items
 
     # Get 1 datasource by id
     def get_by_id(self, datasource_id):
