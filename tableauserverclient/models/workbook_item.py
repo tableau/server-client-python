@@ -163,7 +163,7 @@ class WorkbookItem(object):
 
             workbook_item = cls(project_id)
             workbook_item._set_values(id, name, content_url, created_at, updated_at,
-                            size, show_tabs, None, project_name, owner_id, tags, views)
+                                      size, show_tabs, None, project_name, owner_id, tags, views)
             all_workbook_items.append(workbook_item)
         return all_workbook_items
 
