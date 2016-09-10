@@ -32,7 +32,7 @@ password = getpass.getpass("Password: ")
 logging_level = getattr(logging, args.logging_level.upper())
 logging.basicConfig(level=logging_level)
 
-##### SIGN IN #####
+# SIGN IN
 tableau_auth = TSC.TableauAuth(args.username, password)
 server = TSC.Server(args.server)
 with server.auth.sign_in(tableau_auth):

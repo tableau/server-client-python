@@ -89,11 +89,3 @@ class RequestOptionTests(unittest.TestCase):
         self.assertEqual(set(['weather']), matching_workbooks[0].tags)
         self.assertEqual(set(['safari']), matching_workbooks[1].tags)
         self.assertEqual(set(['sample']), matching_workbooks[2].tags)
-
-
-
-
-
-
-
-

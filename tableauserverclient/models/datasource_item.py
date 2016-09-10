@@ -113,7 +113,7 @@ class DatasourceItem(object):
              tags, project_id, project_name, owner_id) = cls._parse_element(datasource_xml)
             datasource_item = cls(project_id)
             datasource_item._set_values(id, name, datasource_type, content_url, created_at, updated_at,
-                            tags, None, project_name, owner_id)
+                                        tags, None, project_name, owner_id)
             all_datasource_items.append(datasource_item)
         return all_datasource_items
 
