@@ -20,9 +20,8 @@ class Projects(Endpoint):
         logger.info('Querying all projects on site')
         url = self._construct_url()
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.text)
         all_project_items = ProjectItem.from_response(server_response.text)
-        return pagination_item, all_project_items
+        return all_project_items
 
     def delete(self, project_id):
         if not project_id:

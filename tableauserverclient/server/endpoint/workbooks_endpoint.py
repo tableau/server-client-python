@@ -42,9 +42,8 @@ class Workbooks(Endpoint):
         logger.info('Querying all workbooks on site')
         url = self._construct_url()
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.text)
         all_workbook_items = WorkbookItem.from_response(server_response.text)
-        return pagination_item, all_workbook_items
+        return all_workbook_items
 
     # Get 1 workbook
     def get_by_id(self, workbook_id):

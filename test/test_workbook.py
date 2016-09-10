@@ -31,9 +31,9 @@ class WorkbookTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
-            pagination_item, all_workbooks = self.server.workbooks.get()
+            all_workbooks = self.server.workbooks.get()
 
-        self.assertEqual(2, pagination_item.total_available)
+        self.assertEqual(2, len(all_workbooks))
         self.assertEqual('6d13b0ca-043d-4d42-8c9d-3f3313ea3a00', all_workbooks[0].id)
         self.assertEqual('Superstore', all_workbooks[0].name)
         self.assertEqual('Superstore', all_workbooks[0].content_url)
@@ -66,9 +66,8 @@ class WorkbookTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
-            pagination_item, all_workbooks = self.server.workbooks.get()
+            all_workbooks = self.server.workbooks.get()
 
-        self.assertEqual(0, pagination_item.total_available)
         self.assertEqual([], all_workbooks)
 
     def test_get_by_id(self):

@@ -20,9 +20,8 @@ class Groups(Endpoint):
         logger.info('Querying all groups on site')
         url = self._construct_url()
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.text)
         all_group_items = GroupItem.from_response(server_response.text)
-        return pagination_item, all_group_items
+        return all_group_items
 
     # Gets all users in a given group
     def populate_users(self, group_item, req_options=None):

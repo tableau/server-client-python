@@ -25,9 +25,9 @@ class GroupTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
-            pagination_item, all_groups = self.server.groups.get()
+            all_groups = self.server.groups.get()
 
-        self.assertEqual(3, pagination_item.total_available)
+        self.assertEqual(3, len(all_groups))
         self.assertEqual('ef8b19c0-43b6-11e6-af50-63f5805dbe3c', all_groups[0].id)
         self.assertEqual('All Users', all_groups[0].name)
         self.assertEqual('local', all_groups[0].domain_name)

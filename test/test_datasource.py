@@ -27,9 +27,9 @@ class DatasourceTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
-            pagination_item, all_datasources = self.server.datasources.get()
+            all_datasources = self.server.datasources.get()
 
-        self.assertEqual(2, pagination_item.total_available)
+        self.assertEqual(2, len(all_datasources))
         self.assertEqual('e76a1461-3b1d-4588-bf1b-17551a879ad9', all_datasources[0].id)
         self.assertEqual('dataengine', all_datasources[0].datasource_type)
         self.assertEqual('SampleDS', all_datasources[0].content_url)
@@ -60,9 +60,8 @@ class DatasourceTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
-            pagination_item, all_datasources = self.server.datasources.get()
+            all_datasources = self.server.datasources.get()
 
-        self.assertEqual(0, pagination_item.total_available)
         self.assertEqual([], all_datasources)
 
     def test_get_by_id(self):
