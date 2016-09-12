@@ -31,11 +31,10 @@ password = getpass.getpass("Password: ")
 logging_level = getattr(logging, args.logging_level.upper())
 logging.basicConfig(level=logging_level)
 
-##### SIGN IN #####
+# SIGN IN
 tableau_auth = TSC.TableauAuth(args.username, password)
 server = TSC.Server(args.server)
 with server.auth.sign_in(tableau_auth):
-
     # Query projects for use when demonstrating publishing and updating
     pagination_item, all_projects = server.projects.get()
     default_project = next((project for project in all_projects if project.is_default()), None)
@@ -63,14 +62,3 @@ with server.auth.sign_in(tableau_auth):
         print("\nConnections for {}: ".format(sample_datasource.name))
         print(["{0}({1})".format(connection.id, connection.datasource_name)
                for connection in sample_datasource.connections])
-
-
-
-
-
-
-
-
-
-
-

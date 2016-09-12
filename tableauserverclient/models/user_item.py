@@ -144,7 +144,7 @@ class UserItem(object):
              fullname, email, auth_setting, domain_name) = cls._parse_element(user_xml)
             user_item = cls(name, site_role)
             user_item._set_values(id, name, site_role, last_login, external_auth_user_id,
-                            fullname, email, auth_setting, domain_name)
+                                  fullname, email, auth_setting, domain_name)
             all_user_items.add(user_item)
         return all_user_items
 

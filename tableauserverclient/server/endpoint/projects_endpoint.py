@@ -51,5 +51,3 @@ class Projects(Endpoint):
         new_project = ProjectItem.from_response(server_response.content)[0]
         logger.info('Created new project (ID: {0})'.format(new_project.id))
         return new_project
-
-
