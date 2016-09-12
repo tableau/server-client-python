@@ -27,7 +27,7 @@ class DatasourceTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
-            pagination_item, all_datasources = self.server.datasources.get()
+            all_datasources, pagination_item = self.server.datasources.get()
 
         self.assertEqual(2, pagination_item.total_available)
         self.assertEqual('e76a1461-3b1d-4588-bf1b-17551a879ad9', all_datasources[0].id)
@@ -60,7 +60,7 @@ class DatasourceTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
-            pagination_item, all_datasources = self.server.datasources.get()
+            all_datasources, pagination_item = self.server.datasources.get()
 
         self.assertEqual(0, pagination_item.total_available)
         self.assertEqual([], all_datasources)

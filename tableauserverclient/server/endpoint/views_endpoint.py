@@ -21,7 +21,7 @@ class Views(Endpoint):
         server_response = self.get_request(url, req_options)
         pagination_item = PaginationItem.from_response(server_response.content)
         all_view_items = ViewItem.from_response(server_response.content)
-        return pagination_item, all_view_items
+        return all_view_items, pagination_item
 
     def populate_preview_image(self, view_item):
         if not view_item.id or not view_item.workbook_id:

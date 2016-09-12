@@ -36,7 +36,7 @@ tableau_auth = TSC.TableauAuth(args.username, password)
 server = TSC.Server(args.server)
 with server.auth.sign_in(tableau_auth):
     # Query projects for use when demonstrating publishing and updating
-    pagination_item, all_projects = server.projects.get()
+    all_projects, pagination_item = server.projects.get()
     default_project = next((project for project in all_projects if project.is_default()), None)
 
     # Publish datasource if publish flag is set (-publish, -p)
@@ -49,7 +49,7 @@ with server.auth.sign_in(tableau_auth):
             print("Publish failed. Could not find the default project.")
 
     # Gets all datasource items
-    pagination_item, all_datasources = server.datasources.get()
+    all_datasources, pagination_item = server.datasources.get()
     print("\nThere are {} datasources on site: ".format(pagination_item.total_available))
     print([datasource.name for datasource in all_datasources])
 

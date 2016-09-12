@@ -25,7 +25,7 @@ class SiteTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
-            pagination_item, all_sites = self.server.sites.get()
+            all_sites, pagination_item = self.server.sites.get()
 
         self.assertEqual(2, pagination_item.total_available)
         self.assertEqual('dad65087-b08b-4603-af4e-2887b8aafc67', all_sites[0].id)

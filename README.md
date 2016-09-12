@@ -44,7 +44,7 @@ tableau_auth = tableauserverclient.TableauAuth('USERNAME', 'PASSWORD')
 server = tableauserverclient.Server('SERVER')
 
 with server.auth.sign_in(tableau_auth):
-    pagination_info, all_workbooks = server.workbooks.get()
+    all_workbooks, pagination_item = server.workbooks.get()
 ```
 
 ###Server Client Samples
