@@ -35,10 +35,10 @@ with server.auth.sign_in(tableau_auth):
     req_option = TSC.RequestOptions()
     req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name,
                                      TSC.RequestOptions.Operator.Equals, args.workbook_name))
-    pagination_info, all_workbooks = server.workbooks.get(req_option)
+    all_workbooks, pagination_item = server.workbooks.get(req_option)
 
     # Step 3: Find destination project
-    pagination_info, all_projects = server.projects.get()
+    all_projects, pagination_item = server.projects.get()
     dest_project = next((project for project in all_projects if project.name == args.destination_project), None)
 
     if dest_project is not None:

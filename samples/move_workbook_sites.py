@@ -42,7 +42,7 @@ with source_server.auth.sign_in(tableau_auth):
     req_option = TSC.RequestOptions()
     req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name,
                                      TSC.RequestOptions.Operator.Equals, args.workbook_name))
-    pagination_info, all_workbooks = source_server.workbooks.get(req_option)
+    all_workbooks, pagination_item = source_server.workbooks.get(req_option)
 
     # Step 3: Download workbook to a temp directory
     if len(all_workbooks) == 0:

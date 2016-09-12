@@ -24,7 +24,8 @@ class Endpoint(object):
                                                       **self.parent_srv.http_options)
         self._check_status(server_response)
         if server_response.encoding:
-            logger.debug(u'Server response from {0}: \n\t{1}'.format(url, server_response.content.decode(server_response.encoding)))
+            logger.debug(u'Server response from {0}: \n\t{1}'.format(
+                url, server_response.content.decode(server_response.encoding)))
         return server_response
 
     def delete_request(self, url):
@@ -42,7 +43,8 @@ class Endpoint(object):
                                                       **self.parent_srv.http_options)
         self._check_status(server_response)
         if server_response.encoding:
-            logger.debug(u'Server response from {0}: \n\t{1}'.format(url, server_response.content.decode(server_response.encoding)))
+            logger.debug(u'Server response from {0}: \n\t{1}'.format(
+                url, server_response.content.decode(server_response.encoding)))
         return server_response
 
     def post_request(self, url, xml_request, content_type='text/xml'):
@@ -53,5 +55,6 @@ class Endpoint(object):
                                                        **self.parent_srv.http_options)
         self._check_status(server_response)
         if server_response.encoding:
-            logger.debug(u'Server response from {0}: \n\t{1}'.format(url, server_response.content.decode(server_response.encoding)))
+            logger.debug(u'Server response from {0}: \n\t{1}'.format(
+                url, server_response.content.decode(server_response.encoding)))
         return server_response

@@ -29,7 +29,7 @@ class UserTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
-            pagination_item, all_users = self.server.users.get()
+            all_users, pagination_item = self.server.users.get()
 
         self.assertEqual(2, pagination_item.total_available)
         self.assertEqual(2, len(all_users))
@@ -50,7 +50,7 @@ class UserTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
-            pagination_item, all_users = self.server.users.get()
+            all_users, pagination_item = self.server.users.get()
 
         self.assertEqual(0, pagination_item.total_available)
         self.assertEqual(set(), all_users)

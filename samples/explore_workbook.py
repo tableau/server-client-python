@@ -40,7 +40,7 @@ with server.auth.sign_in(tableau_auth):
 
     # Publish workbook if publish flag is set (-publish, -p)
     if args.publish:
-        pagination_info, all_projects = server.projects.get()
+        all_projects, pagination_item = server.projects.get()
         default_project = next((project for project in all_projects if project.is_default()), None)
 
         if default_project is not None:
@@ -51,7 +51,7 @@ with server.auth.sign_in(tableau_auth):
             print('Publish failed. Could not find the default project.')
 
     # Gets all workbook items
-    pagination_item, all_workbooks = server.workbooks.get()
+    all_workbooks, pagination_item = server.workbooks.get()
     print("\nThere are {} workbooks on site: ".format(pagination_item.total_available))
     print([workbook.name for workbook in all_workbooks])
 

@@ -23,7 +23,7 @@ class Sites(Endpoint):
         server_response = self.get_request(url, req_options)
         pagination_item = PaginationItem.from_response(server_response.content)
         all_site_items = SiteItem.from_response(server_response.content)
-        return pagination_item, all_site_items
+        return all_site_items, pagination_item
 
     # Gets 1 site by id
     def get_by_id(self, site_id):

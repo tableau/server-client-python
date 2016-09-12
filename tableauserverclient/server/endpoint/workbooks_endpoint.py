@@ -44,7 +44,7 @@ class Workbooks(Endpoint):
         server_response = self.get_request(url, req_options)
         pagination_item = PaginationItem.from_response(server_response.content)
         all_workbook_items = WorkbookItem.from_response(server_response.content)
-        return pagination_item, all_workbook_items
+        return all_workbook_items, pagination_item
 
     # Get 1 workbook
     def get_by_id(self, workbook_id):

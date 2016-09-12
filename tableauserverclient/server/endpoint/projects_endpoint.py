@@ -22,7 +22,7 @@ class Projects(Endpoint):
         server_response = self.get_request(url, req_options)
         pagination_item = PaginationItem.from_response(server_response.content)
         all_project_items = ProjectItem.from_response(server_response.content)
-        return pagination_item, all_project_items
+        return all_project_items, pagination_item
 
     def delete(self, project_id):
         if not project_id:

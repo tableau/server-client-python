@@ -28,7 +28,7 @@ class RequestOptionTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/views?pageNumber=1&pageSize=10', text=response_xml)
             req_option = TSC.RequestOptions().page_size(10)
-            pagination_item, all_views = self.server.views.get(req_option)
+            all_views, pagination_item = self.server.views.get(req_option)
 
         self.assertEqual(1, pagination_item.page_number)
         self.assertEqual(10, pagination_item.page_size)
@@ -41,7 +41,7 @@ class RequestOptionTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/views?pageNumber=3', text=response_xml)
             req_option = TSC.RequestOptions().page_number(3)
-            pagination_item, all_views = self.server.views.get(req_option)
+            all_views, pagination_item = self.server.views.get(req_option)
 
         self.assertEqual(3, pagination_item.page_number)
         self.assertEqual(100, pagination_item.page_size)
@@ -54,7 +54,7 @@ class RequestOptionTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/views?pageSize=5', text=response_xml)
             req_option = TSC.RequestOptions().page_size(5)
-            pagination_item, all_views = self.server.views.get(req_option)
+            all_views, pagination_item = self.server.views.get(req_option)
 
         self.assertEqual(1, pagination_item.page_number)
         self.assertEqual(5, pagination_item.page_size)
@@ -69,7 +69,7 @@ class RequestOptionTests(unittest.TestCase):
             req_option = TSC.RequestOptions()
             req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name,
                                              TSC.RequestOptions.Operator.Equals, 'RESTAPISample'))
-            pagination_item, matching_workbooks = self.server.workbooks.get(req_option)
+            matching_workbooks, pagination_item = self.server.workbooks.get(req_option)
 
         self.assertEqual(2, pagination_item.total_available)
         self.assertEqual('RESTAPISample', matching_workbooks[0].name)
@@ -83,7 +83,7 @@ class RequestOptionTests(unittest.TestCase):
             req_option = TSC.RequestOptions()
             req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Tags, TSC.RequestOptions.Operator.In,
                                              ['sample', 'safari', 'weather']))
-            pagination_item, matching_workbooks = self.server.workbooks.get(req_option)
+            matching_workbooks, pagination_item = self.server.workbooks.get(req_option)
 
         self.assertEqual(3, pagination_item.total_available)
         self.assertEqual(set(['weather']), matching_workbooks[0].tags)

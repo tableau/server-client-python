@@ -31,7 +31,7 @@ class Datasources(Endpoint):
         server_response = self.get_request(url, req_options)
         pagination_item = PaginationItem.from_response(server_response.content)
         all_datasource_items = DatasourceItem.from_response(server_response.content)
-        return pagination_item, all_datasource_items
+        return all_datasource_items, pagination_item
 
     # Get 1 datasource by id
     def get_by_id(self, datasource_id):

@@ -25,7 +25,7 @@ class ProjectTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
-            pagination_item, all_projects = self.server.projects.get()
+            all_projects, pagination_item = self.server.projects.get()
 
         self.assertEqual(2, pagination_item.total_available)
         self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', all_projects[0].id)

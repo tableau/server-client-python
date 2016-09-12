@@ -24,7 +24,7 @@ class ViewTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/views', text=response_xml)
-            pagination_item, all_views = self.server.views.get()
+            all_views, pagination_item = self.server.views.get()
 
         self.assertEqual(2, pagination_item.total_available)
         self.assertEqual('d79634e1-6063-4ec9-95ff-50acbf609ff5', all_views[0].id)

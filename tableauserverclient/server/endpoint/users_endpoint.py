@@ -23,7 +23,7 @@ class Users(Endpoint):
         server_response = self.get_request(url, req_options)
         pagination_item = PaginationItem.from_response(server_response.content)
         all_user_items = UserItem.from_response(server_response.content)
-        return pagination_item, all_user_items
+        return all_user_items, pagination_item
 
     # Gets 1 user by id
     def get_by_id(self, user_id):

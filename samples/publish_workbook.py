@@ -39,7 +39,7 @@ server = TSC.Server(args.server)
 with server.auth.sign_in(tableau_auth):
 
     # Step 2: Get all the projects on server, then look for the default one.
-    pagination_info, all_projects = server.projects.get()
+    all_projects, pagination_item = server.projects.get()
     default_project = next((project for project in all_projects if project.is_default()), None)
 
     # Step 3: If default project is found, form a new workbook item and publish.
