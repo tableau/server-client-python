@@ -4,6 +4,7 @@ from .endpoint import Endpoint
 from .exceptions import ServerResponseError, MissingRequiredFieldError
 from .groups_endpoint import Groups
 from .projects_endpoint import Projects
+from .schedules_endpoint import Schedules
 from .sites_endpoint import Sites
 from .users_endpoint import Users
 from .views_endpoint import Views
