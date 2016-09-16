@@ -1,10 +1,10 @@
 ####
-# This script demonstrates how to use the Tableau Server API
+# This script demonstrates how to use the Tableau Server Client
 # to move a workbook from one site to another. It will find
 # a workbook that matches a given name, download the workbook,
 # and then publish it to the destination site.
 #
-# To run the script, you must have installed Python 2.7.9 or later.
+# To run the script, you must have installed Python 2.7.X or 3.3 and later.
 ####
 
 import tableauserverclient as TSC
@@ -74,7 +74,7 @@ with source_server.auth.sign_in(tableau_auth):
                 if target_project is not None:
                     new_workbook = TSC.WorkbookItem(name=args.workbook_name, project_id=target_project.id)
                     new_workbook = dest_server.workbooks.publish(new_workbook, workbook_path,
-                                                                 mode=dest_server.PublishMode.Overwrite)
+                                                                 mode=TSC.Server.PublishMode.Overwrite)
                     print("Successfully moved {0} ({1})".format(new_workbook.name, new_workbook.id))
                 else:
                     error = "The default project could not be found."

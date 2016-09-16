@@ -1,5 +1,5 @@
 ####
-# This script demonstrates how to use the Tableau Server API
+# This script demonstrates how to use the Tableau Server Client
 # to interact with datasources. It explores the different
 # functions that the Server API supports on datasources.
 #
@@ -43,7 +43,7 @@ with server.auth.sign_in(tableau_auth):
     if args.publish:
         if default_project is not None:
             new_datasource = TSC.DatasourceItem(default_project.id)
-            new_datasource = server.datasources.publish(new_datasource, args.publish, server.PublishMode.Overwrite)
+            new_datasource = server.datasources.publish(new_datasource, args.publish, TSC.Server.PublishMode.Overwrite)
             print("Datasource published. ID: {}".format(new_datasource.id))
         else:
             print("Publish failed. Could not find the default project.")

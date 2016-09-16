@@ -1,10 +1,10 @@
 ####
-# This script demonstrates how to use the Tableau Server API
+# This script demonstrates how to use the Tableau Server Client
 # to move a workbook from one project to another. It will find
 # a workbook that matches a given name and update it to be in
 # the desired project.
 #
-# To run the script, you must have installed Python 2.7.9 or later.
+# To run the script, you must have installed Python 2.7.X or 3.3 and later.
 ####
 
 import tableauserverclient as TSC
