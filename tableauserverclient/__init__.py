@@ -1,6 +1,6 @@
 from .namespace import NAMESPACE
 from .models import ConnectionItem, DatasourceItem,\
-    GroupItem, PaginationItem, ProjectItem, ScheduleItem, \
+    GroupItem, IntervalItem, PaginationItem, ProjectItem, ScheduleItem, \
     SiteItem, TableauAuth, UserItem, ViewItem, WorkbookItem, UnpopulatedPropertyError
 from .server import RequestOptions, Filter, Sort, Server, ServerResponseError,\
     MissingRequiredFieldError, NotSignedInError
