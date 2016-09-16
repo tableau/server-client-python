@@ -2,10 +2,7 @@
 # This script demonstrates how to set http options. It will set the option
 # to not verify SSL certificate, and query all workbooks on site.
 #
-# For more information, refer to the documentation on 'Publish Workbook'
-# (https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm)
-#
-# To run the script, you must have installed Python 2.7.9 or later.
+# To run the script, you must have installed Python 2.7.X or 3.3 and later.
 ####
 
 import tableauserverclient as TSC

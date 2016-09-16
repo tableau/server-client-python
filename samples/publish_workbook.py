@@ -1,5 +1,5 @@
 ####
-# This script demonstrates how to use the Tableau Server API
+# This script demonstrates how to use the Tableau Server Client
 # to publish a workbook to a Tableau server. It will publish
 # a specified workbook to the 'default' project of the given server.
 #
@@ -11,7 +11,7 @@
 # For more information, refer to the documentations on 'Publish Workbook'
 # (https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm)
 #
-# To run the script, you must have installed Python 2.7.9 or later.
+# To run the script, you must have installed Python 2.7.X or 3.3 and later.
 ####
 
 import tableauserverclient as TSC
@@ -45,7 +45,7 @@ with server.auth.sign_in(tableau_auth):
     # Step 3: If default project is found, form a new workbook item and publish.
     if default_project is not None:
         new_workbook = TSC.WorkbookItem(default_project.id)
-        new_workbook = server.workbooks.publish(new_workbook, args.filepath, server.PublishMode.Overwrite)
+        new_workbook = server.workbooks.publish(new_workbook, args.filepath, TSC.Server.PublishMode.Overwrite)
         print("Workbook published. ID: {0}".format(new_workbook.id))
     else:
         error = "The default project could not be found."

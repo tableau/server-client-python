@@ -1,5 +1,5 @@
 ####
-# This script demonstrates how to use the Tableau Server API
+# This script demonstrates how to use the Tableau Server Client
 # to interact with workbooks. It explores the different
 # functions that the Server API supports on workbooks.
 #
@@ -45,7 +45,7 @@ with server.auth.sign_in(tableau_auth):
 
         if default_project is not None:
             new_workbook = TSC.WorkbookItem(default_project.id)
-            new_workbook = server.workbooks.publish(new_workbook, args.publish, server.PublishMode.Overwrite)
+            new_workbook = server.workbooks.publish(new_workbook, args.publish, TSC.Server.PublishMode.Overwrite)
             print("Workbook published. ID: {}".format(new_workbook.id))
         else:
             print('Publish failed. Could not find the default project.')
