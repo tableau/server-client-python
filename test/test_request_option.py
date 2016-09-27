@@ -20,7 +20,7 @@ class RequestOptionTests(unittest.TestCase):
         self.server._site_id = 'dad65087-b08b-4603-af4e-2887b8aafc67'
         self.server._auth_token = 'j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM'
 
-        self.baseurl = '{0}/{1}'.format(self.server.sites._construct_url(), self.server._site_id)
+        self.baseurl = '{0}/{1}'.format(self.server.sites.baseurl, self.server._site_id)
 
     def test_pagination(self):
         with open(PAGINATION_XML, 'rb') as f:
