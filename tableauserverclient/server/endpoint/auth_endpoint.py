@@ -25,7 +25,6 @@ class Auth(Endpoint):
     def baseurl(self):
         return "{0}/auth".format(self.parent_srv.baseurl)
 
-
     def sign_in(self, auth_req):
         url = "{0}/{1}".format(self.baseurl, 'signin')
         signin_req = RequestFactory.Auth.signin_req(auth_req)
