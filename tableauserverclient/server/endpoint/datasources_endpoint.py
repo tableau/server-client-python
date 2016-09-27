@@ -18,16 +18,16 @@ logger = logging.getLogger('tableau.endpoint.datasources')
 class Datasources(Endpoint):
     def __init__(self, parent_srv):
         super(Endpoint, self).__init__()
-        self.baseurl = "{0}/sites/{1}/datasources"
         self.parent_srv = parent_srv
 
-    def _construct_url(self):
-        return self.baseurl.format(self.parent_srv.baseurl, self.parent_srv.site_id)
+    @property
+    def baseurl(self):
+        return "{0}/sites/{1}/datasources".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     # Get all datasources
     def get(self, req_options=None):
         logger.info('Querying all datasources on site')
-        url = self._construct_url()
+        url = self.baseurl
         server_response = self.get_request(url, req_options)
         pagination_item = PaginationItem.from_response(server_response.content)
         all_datasource_items = DatasourceItem.from_response(server_response.content)
@@ -39,7 +39,7 @@ class Datasources(Endpoint):
             error = "Datasource ID undefined."
             raise ValueError(error)
         logger.info('Querying single datasource (ID: {0})'.format(datasource_id))
-        url = "{0}/{1}".format(self._construct_url(), datasource_id)
+        url = "{0}/{1}".format(self.baseurl, datasource_id)
         server_response = self.get_request(url)
         return DatasourceItem.from_response(server_response.content)[0]
 
@@ -48,7 +48,7 @@ class Datasources(Endpoint):
         if not datasource_item.id:
             error = 'Datasource item missing ID. Datasource must be retrieved from server first.'
             raise MissingRequiredFieldError(error)
-        url = '{0}/{1}/connections'.format(self._construct_url(), datasource_item.id)
+        url = '{0}/{1}/connections'.format(self.baseurl, datasource_item.id)
         server_response = self.get_request(url)
         datasource_item._set_connections(ConnectionItem.from_response(server_response.content))
         logger.info('Populated connections for datasource (ID: {0})'.format(datasource_item.id))
@@ -58,7 +58,7 @@ class Datasources(Endpoint):
         if not datasource_id:
             error = "Datasource ID undefined."
             raise ValueError(error)
-        url = "{0}/{1}".format(self._construct_url(), datasource_id)
+        url = "{0}/{1}".format(self.baseurl, datasource_id)
         self.delete_request(url)
         logger.info('Deleted single datasource (ID: {0})'.format(datasource_id))
 
@@ -67,7 +67,7 @@ class Datasources(Endpoint):
         if not datasource_id:
             error = "Datasource ID undefined."
             raise ValueError(error)
-        url = "{0}/{1}/content".format(self._construct_url(), datasource_id)
+        url = "{0}/{1}/content".format(self.baseurl, datasource_id)
         server_response = self.get_request(url)
         _, params = cgi.parse_header(server_response.headers['Content-Disposition'])
         filename = os.path.basename(params['filename'])
@@ -86,7 +86,7 @@ class Datasources(Endpoint):
         if not datasource_item.id:
             error = 'Datasource item missing ID. Datasource must be retrieved from server first.'
             raise MissingRequiredFieldError(error)
-        url = "{0}/{1}".format(self._construct_url(), datasource_item.id)
+        url = "{0}/{1}".format(self.baseurl, datasource_item.id)
         update_req = RequestFactory.Datasource.update_req(datasource_item)
         server_response = self.put_request(url, update_req)
         logger.info('Updated datasource item (ID: {0})'.format(datasource_item.id))
@@ -113,7 +113,7 @@ class Datasources(Endpoint):
             raise ValueError(error)
 
         # Construct the url with the defined mode
-        url = "{0}?datasourceType={1}".format(self._construct_url(), file_extension)
+        url = "{0}?datasourceType={1}".format(self.baseurl, file_extension)
         if mode == self.parent_srv.PublishMode.Overwrite or mode == self.parent_srv.PublishMode.Append:
             url += '&{0}=true'.format(mode.lower())
 

@@ -19,28 +19,28 @@ logger = logging.getLogger('tableau.endpoint.workbooks')
 class Workbooks(Endpoint):
     def __init__(self, parent_srv):
         super(Endpoint, self).__init__()
-        self.baseurl = "{0}/sites/{1}/workbooks"
         self.parent_srv = parent_srv
 
-    def _construct_url(self):
-        return self.baseurl.format(self.parent_srv.baseurl, self.parent_srv.site_id)
+    @property
+    def baseurl(self):
+        return "{0}/sites/{1}/workbooks".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     # Add new tags to workbook
     def _add_tags(self, workbook_id, tag_set):
-        url = "{0}/{1}/tags".format(self._construct_url(), workbook_id)
+        url = "{0}/{1}/tags".format(self.baseurl, workbook_id)
         add_req = RequestFactory.Tag.add_req(tag_set)
         server_response = self.put_request(url, add_req)
         return TagItem.from_response(server_response.content)
 
     # Delete a workbook's tag by name
     def _delete_tag(self, workbook_id, tag_name):
-        url = "{0}/{1}/tags/{2}".format(self._construct_url(), workbook_id, tag_name)
+        url = "{0}/{1}/tags/{2}".format(self.baseurl, workbook_id, tag_name)
         self.delete_request(url)
 
     # Get all workbooks on site
     def get(self, req_options=None):
         logger.info('Querying all workbooks on site')
-        url = self._construct_url()
+        url = self.baseurl
         server_response = self.get_request(url, req_options)
         pagination_item = PaginationItem.from_response(server_response.content)
         all_workbook_items = WorkbookItem.from_response(server_response.content)
@@ -52,7 +52,7 @@ class Workbooks(Endpoint):
             error = "Workbook ID undefined."
             raise ValueError(error)
         logger.info('Querying single workbook (ID: {0})'.format(workbook_id))
-        url = "{0}/{1}".format(self._construct_url(), workbook_id)
+        url = "{0}/{1}".format(self.baseurl, workbook_id)
         server_response = self.get_request(url)
         return WorkbookItem.from_response(server_response.content)[0]
 
@@ -61,7 +61,7 @@ class Workbooks(Endpoint):
         if not workbook_id:
             error = "Workbook ID undefined."
             raise ValueError(error)
-        url = "{0}/{1}".format(self._construct_url(), workbook_id)
+        url = "{0}/{1}".format(self.baseurl, workbook_id)
         self.delete_request(url)
         logger.info('Deleted single workbook (ID: {0})'.format(workbook_id))
 
@@ -83,7 +83,7 @@ class Workbooks(Endpoint):
         logger.info('Updated workbook tags to {0}'.format(workbook_item.tags))
 
         # Update the workbook itself
-        url = "{0}/{1}".format(self._construct_url(), workbook_item.id)
+        url = "{0}/{1}".format(self.baseurl, workbook_item.id)
         update_req = RequestFactory.Workbook.update_req(workbook_item)
         server_response = self.put_request(url, update_req)
         logger.info('Updated workbook item (ID: {0}'.format(workbook_item.id))
@@ -95,7 +95,7 @@ class Workbooks(Endpoint):
         if not workbook_id:
             error = "Workbook ID undefined."
             raise ValueError(error)
-        url = "{0}/{1}/content".format(self._construct_url(), workbook_id)
+        url = "{0}/{1}/content".format(self.baseurl, workbook_id)
         server_response = self.get_request(url)
         _, params = cgi.parse_header(server_response.headers['Content-Disposition'])
         filename = os.path.basename(params['filename'])
@@ -114,7 +114,7 @@ class Workbooks(Endpoint):
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
-        url = "{0}/{1}/views".format(self._construct_url(), workbook_item.id)
+        url = "{0}/{1}/views".format(self.baseurl, workbook_item.id)
         server_response = self.get_request(url)
         workbook_item._set_views(ViewItem.from_response(server_response.content, workbook_id=workbook_item.id))
         logger.info('Populated views for workbook (ID: {0}'.format(workbook_item.id))
@@ -124,7 +124,7 @@ class Workbooks(Endpoint):
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
-        url = "{0}/{1}/connections".format(self._construct_url(), workbook_item.id)
+        url = "{0}/{1}/connections".format(self.baseurl, workbook_item.id)
         server_response = self.get_request(url)
         workbook_item._set_connections(ConnectionItem.from_response(server_response.content))
         logger.info('Populated connections for workbook (ID: {0})'.format(workbook_item.id))
@@ -134,7 +134,7 @@ class Workbooks(Endpoint):
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
-        url = "{0}/{1}/previewImage".format(self._construct_url(), workbook_item.id)
+        url = "{0}/{1}/previewImage".format(self.baseurl, workbook_item.id)
         server_response = self.get_request(url)
         workbook_item._set_preview_image(server_response.content)
         logger.info('Populated preview image for workbook (ID: {0})'.format(workbook_item.id))
@@ -159,7 +159,7 @@ class Workbooks(Endpoint):
             raise ValueError(error)
 
         # Construct the url with the defined mode
-        url = "{0}?workbookType={1}".format(self._construct_url(), file_extension)
+        url = "{0}?workbookType={1}".format(self.baseurl, file_extension)
         if mode == self.parent_srv.PublishMode.Overwrite:
             url += '&{0}=true'.format(mode.lower())
         elif mode == self.parent_srv.PublishMode.Append:
