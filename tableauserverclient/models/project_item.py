@@ -1,4 +1,6 @@
 import xml.etree.ElementTree as ET
+from .property_not_nullable_decorator import *
+from .property_type_decorator import *
 from .. import NAMESPACE
 
 
@@ -26,12 +28,9 @@ class ProjectItem(object):
         return self._content_permissions
 
     @content_permissions.setter
+    @property_type(ContentPermissions)
     def content_permissions(self, value):
-        if value and not hasattr(ProjectItem.ContentPermissions, value):
-            error = 'Invalid content permission defined.'
-            raise ValueError(error)
-        else:
-            self._content_permissions = value
+        self._content_permissions = value
 
     @property
     def id(self):
@@ -42,12 +41,9 @@ class ProjectItem(object):
         return self._name
 
     @name.setter
+    @property_not_nullable
     def name(self, value):
-        if not value:
-            error = 'Name must be defined.'
-            raise ValueError(error)
-        else:
-            self._name = value
+        self._name = value
 
     def is_default(self):
         return self.name.lower() == 'default'

@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
+from .property_not_nullable_decorator import *
 from .. import NAMESPACE
 
 
@@ -26,12 +27,9 @@ class GroupItem(object):
         return self._name
 
     @name.setter
+    @property_not_nullable
     def name(self, value):
-        if not value:
-            error = 'Name must be defined.'
-            raise ValueError(error)
-        else:
-            self._name = value
+        self._name = value
 
     @property
     def users(self):

@@ -1,5 +1,7 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
+from .property_type_decorator import *
+from .property_not_nullable_decorator import *
 from .. import NAMESPACE
 
 
@@ -45,12 +47,9 @@ class UserItem(object):
         return self._auth_setting
 
     @auth_setting.setter
+    @property_type(Auth)
     def auth_setting(self, value):
-        if not hasattr(UserItem.Auth, value):
-            error = 'Invalid auth setting defined.'
-            raise ValueError(error)
-        else:
-            self._auth_setting = value
+        self._auth_setting = value
 
     @property
     def domain_name(self):
@@ -73,27 +72,19 @@ class UserItem(object):
         return self._name
 
     @name.setter
+    @property_not_nullable
     def name(self, value):
-        if not value:
-            error = 'Name must be defined.'
-            raise ValueError(error)
-        else:
-            self._name = value
+        self._name = value
 
     @property
     def site_role(self):
         return self._site_role
 
     @site_role.setter
+    @property_not_nullable
+    @property_type(Roles)
     def site_role(self, value):
-        if not value:
-            error = 'Site role must be defined.'
-            raise ValueError(error)
-        elif not hasattr(UserItem.Roles, value):
-            error = 'Invalid site role defined.'
-            raise ValueError(error)
-        else:
-            self._site_role = value
+        self._site_role = value
 
     @property
     def workbooks(self):
