@@ -17,3 +17,4 @@ class WorkbookModelTests(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             workbook.show_tabs = None
+            
