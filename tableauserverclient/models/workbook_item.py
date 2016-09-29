@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
-from .property_decorators import *
+from .property_decorators import property_not_nullable, property_type_boolean
 from .tag_item import TagItem
 from .view_item import ViewItem
 from .. import NAMESPACE

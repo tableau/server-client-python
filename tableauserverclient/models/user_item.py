@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
-from .property_decorators import *
+from .property_decorators import property_type, property_not_empty, property_not_nullable
 from .. import NAMESPACE
 
 

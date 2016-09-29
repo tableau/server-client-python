@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from .property_decorators import *
+from .property_decorators import property_type, property_type_boolean, property_not_empty, property_not_nullable
 from .. import NAMESPACE
 
 
