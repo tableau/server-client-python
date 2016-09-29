@@ -17,4 +17,3 @@ class ProjectModelTests(unittest.TestCase):
         project = TSC.ProjectItem("proj")
         with self.assertRaises(ValueError):
             project.content_permissions = "Hello"
-

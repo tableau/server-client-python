@@ -3,7 +3,6 @@ import tableauserverclient as TSC
 
 
 class WorkbookModelTests(unittest.TestCase):
-
     def test_invalid_project_id(self):
         self.assertRaises(ValueError, TSC.WorkbookItem, None)
         workbook = TSC.WorkbookItem("10")
@@ -17,4 +16,3 @@ class WorkbookModelTests(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             workbook.show_tabs = None
-            
