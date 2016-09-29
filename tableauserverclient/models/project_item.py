@@ -1,6 +1,5 @@
 import xml.etree.ElementTree as ET
-from .property_not_nullable_decorator import *
-from .property_type_decorator import *
+from .property_decorators import *
 from .. import NAMESPACE
 
 
@@ -41,7 +40,7 @@ class ProjectItem(object):
         return self._name
 
     @name.setter
-    @property_not_nullable
+    @property_not_empty
     def name(self, value):
         self._name = value
 

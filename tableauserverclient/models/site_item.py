@@ -1,6 +1,5 @@
 import xml.etree.ElementTree as ET
-from .property_type_decorator import *
-from .property_not_nullable_decorator import *
+from .property_decorators import *
 from .. import NAMESPACE
 
 
@@ -78,7 +77,7 @@ class SiteItem(object):
         return self._name
 
     @name.setter
-    @property_not_nullable
+    @property_not_empty
     def name(self, value):
         self._name = value
 
@@ -100,7 +99,6 @@ class SiteItem(object):
         return self._state
 
     @state.setter
-    @property_not_nullable
     @property_type(State)
     def state(self, value):
         self._state = value
