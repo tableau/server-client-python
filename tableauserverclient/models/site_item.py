@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from .property_decorators import property_type, property_type_boolean, property_not_empty, property_not_nullable
+from .property_decorators import property_is_enum, property_is_boolean, property_not_empty, property_not_nullable
 from .. import NAMESPACE
 
 
@@ -46,7 +46,7 @@ class SiteItem(object):
         return self._admin_mode
 
     @admin_mode.setter
-    @property_type(AdminMode)
+    @property_is_enum(AdminMode)
     def admin_mode(self, value):
         self._admin_mode = value
 
@@ -64,7 +64,7 @@ class SiteItem(object):
         return self._disable_subscriptions
 
     @disable_subscriptions.setter
-    @property_type_boolean
+    @property_is_boolean
     def disable_subscriptions(self, value):
         self._disable_subscriptions = value
 
@@ -90,7 +90,7 @@ class SiteItem(object):
         return self._revision_history_enabled
 
     @revision_history_enabled.setter
-    @property_type_boolean
+    @property_is_boolean
     def revision_history_enabled(self, value):
         self._revision_history_enabled = value
 
@@ -99,7 +99,7 @@ class SiteItem(object):
         return self._state
 
     @state.setter
-    @property_type(State)
+    @property_is_enum(State)
     def state(self, value):
         self._state = value
 
@@ -116,7 +116,7 @@ class SiteItem(object):
         return self._subscribe_others_enabled
 
     @subscribe_others_enabled.setter
-    @property_type_boolean
+    @property_is_boolean
     def subscribe_others_enabled(self, value):
         self._subscribe_others_enabled = value
 

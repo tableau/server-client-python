@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from .property_decorators import property_type, property_not_empty
+from .property_decorators import property_is_enum, property_not_empty
 from .. import NAMESPACE
 
 
@@ -27,7 +27,7 @@ class ProjectItem(object):
         return self._content_permissions
 
     @content_permissions.setter
-    @property_type(ContentPermissions)
+    @property_is_enum(ContentPermissions)
     def content_permissions(self, value):
         self._content_permissions = value
 

@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
-from .property_decorators import property_not_nullable, property_type_boolean
+from .property_decorators import property_not_nullable, property_is_boolean
 from .tag_item import TagItem
 from .view_item import ViewItem
 from .. import NAMESPACE
@@ -73,7 +73,7 @@ class WorkbookItem(object):
         return self._show_tabs
 
     @show_tabs.setter
-    @property_type_boolean
+    @property_is_boolean
     def show_tabs(self, value):
         self._show_tabs = value
 

@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
-from .property_decorators import property_type, property_not_empty, property_not_nullable
+from .property_decorators import property_is_enum, property_not_empty, property_not_nullable
 from .. import NAMESPACE
 
 
@@ -46,7 +46,7 @@ class UserItem(object):
         return self._auth_setting
 
     @auth_setting.setter
-    @property_type(Auth)
+    @property_is_enum(Auth)
     def auth_setting(self, value):
         self._auth_setting = value
 
@@ -81,7 +81,7 @@ class UserItem(object):
 
     @site_role.setter
     @property_not_nullable
-    @property_type(Roles)
+    @property_is_enum(Roles)
     def site_role(self, value):
         self._site_role = value
 

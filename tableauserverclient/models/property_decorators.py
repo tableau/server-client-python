@@ -1,7 +1,7 @@
 from functools import wraps
 
 
-def property_type(enum_type):
+def property_is_enum(enum_type):
     def property_type_decorator(func):
         @wraps(func)
         def wrapper(self, value):
@@ -15,7 +15,7 @@ def property_type(enum_type):
     return property_type_decorator
 
 
-def property_type_boolean(func):
+def property_is_boolean(func):
     @wraps(func)
     def wrapper(self, value):
         if not isinstance(value, bool):
