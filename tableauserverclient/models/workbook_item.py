@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
+from .property_decorators import property_not_nullable, property_is_boolean
 from .tag_item import TagItem
 from .view_item import ViewItem
 from .. import NAMESPACE
@@ -59,12 +60,9 @@ class WorkbookItem(object):
         return self._project_id
 
     @project_id.setter
+    @property_not_nullable
     def project_id(self, value):
-        if value is None:
-            error = 'Project ID must be defined.'
-            raise ValueError(error)
-        else:
-            self._project_id = value
+        self._project_id = value
 
     @property
     def project_name(self):
@@ -75,12 +73,9 @@ class WorkbookItem(object):
         return self._show_tabs
 
     @show_tabs.setter
+    @property_is_boolean
     def show_tabs(self, value):
-        if not isinstance(value, bool):
-            error = 'Boolean expected for show tabs flag.'
-            raise ValueError(error)
-        else:
-            self._show_tabs = value
+        self._show_tabs = value
 
     @property
     def size(self):

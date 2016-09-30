@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
+from .property_decorators import property_not_nullable
 from .tag_item import TagItem
 from .. import NAMESPACE
 
@@ -45,12 +46,9 @@ class DatasourceItem(object):
         return self._project_id
 
     @project_id.setter
+    @property_not_nullable
     def project_id(self, value):
-        if value is None:
-            error = 'Project ID must be defined.'
-            raise ValueError(error)
-        else:
-            self._project_id = value
+        self._project_id = value
 
     @property
     def project_name(self):
