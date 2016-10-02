@@ -11,13 +11,14 @@ import logging
 
 import tableauserverclient as TSC
 
-parser = argparse.ArgumentParser(description='List workbooks on site, with option set to ignore SSL verification.')
-parser.add_argument('--server', '-s', required=True, help='server address')
-parser.add_argument('--username', '-u', required=True, help='username to sign into server')
-parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
-                    help='desired logging level (set to error by default)')
 
-if __name__ == '__main__':
+def main():
+
+    parser = argparse.ArgumentParser(description='List workbooks on site, with option set to ignore SSL verification.')
+    parser.add_argument('--server', '-s', required=True, help='server address')
+    parser.add_argument('--username', '-u', required=True, help='username to sign into server')
+    parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
+                        help='desired logging level (set to error by default)')
 
     args = parser.parse_args()
 
@@ -41,3 +42,7 @@ if __name__ == '__main__':
         print('{0} workbooks found. Showing {1}:'.format(pagination_item.total_available, pagination_item.page_size))
         for workbook in all_workbooks:
             print('\t{0} (ID: {1})'.format(workbook.name, workbook.id))
+
+
+if __name__ == '__main__':
+    main()

@@ -16,16 +16,15 @@ import logging
 import tableauserverclient as TSC
 
 
-parser = argparse.ArgumentParser(description='Explore datasource functions supported by the Server API.')
-parser.add_argument('--server', '-s', required=True, help='server address')
-parser.add_argument('--username', '-u', required=True, help='username to sign into server')
-parser.add_argument('--publish', '-p', metavar='FILEPATH', help='path to datasource to publish')
-parser.add_argument('--download', '-d', metavar='FILEPATH', help='path to save downloaded datasource')
-parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
-                    help='desired logging level (set to error by default)')
+def main():
 
-
-if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Explore datasource functions supported by the Server API.')
+    parser.add_argument('--server', '-s', required=True, help='server address')
+    parser.add_argument('--username', '-u', required=True, help='username to sign into server')
+    parser.add_argument('--publish', '-p', metavar='FILEPATH', help='path to datasource to publish')
+    parser.add_argument('--download', '-d', metavar='FILEPATH', help='path to save downloaded datasource')
+    parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
+                        help='desired logging level (set to error by default)')
 
     args = parser.parse_args()
 
@@ -67,3 +66,7 @@ if __name__ == '__main__':
             print("\nConnections for {}: ".format(sample_datasource.name))
             print(["{0}({1})".format(connection.id, connection.datasource_name)
                    for connection in sample_datasource.connections])
+
+
+if __name__ == '__main__':
+    main()

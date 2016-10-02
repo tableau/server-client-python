@@ -17,17 +17,17 @@ import os.path
 import tableauserverclient as TSC
 
 
-parser = argparse.ArgumentParser(description='Explore workbook functions supported by the Server API.')
-parser.add_argument('--server', '-s', required=True, help='server address')
-parser.add_argument('--username', '-u', required=True, help='username to sign into server')
-parser.add_argument('--publish', '-p', metavar='FILEPATH', help='path to workbook to publish')
-parser.add_argument('--download', '-d', metavar='FILEPATH', help='path to save downloaded workbook')
-parser.add_argument('--preview-image', '-i', metavar='FILENAME',
-                    help='filename (a .png file) to save the preview image')
-parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
-                    help='desired logging level (set to error by default)')
+def main():
 
-if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Explore workbook functions supported by the Server API.')
+    parser.add_argument('--server', '-s', required=True, help='server address')
+    parser.add_argument('--username', '-u', required=True, help='username to sign into server')
+    parser.add_argument('--publish', '-p', metavar='FILEPATH', help='path to workbook to publish')
+    parser.add_argument('--download', '-d', metavar='FILEPATH', help='path to save downloaded workbook')
+    parser.add_argument('--preview-image', '-i', metavar='FILENAME',
+                        help='filename (a .png file) to save the preview image')
+    parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
+                        help='desired logging level (set to error by default)')
 
     args = parser.parse_args()
 
@@ -101,3 +101,7 @@ if __name__ == '__main__':
                 with open(args.preview_image, 'wb') as f:
                     f.write(sample_workbook.preview_image)
                 print("\nDownloaded preview image of workbook to {}".format(os.path.abspath(args.preview_image)))
+
+
+if __name__ == '__main__':
+    main()

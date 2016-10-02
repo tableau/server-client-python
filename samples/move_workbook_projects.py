@@ -14,15 +14,15 @@ import logging
 import tableauserverclient as TSC
 
 
-parser = argparse.ArgumentParser(description='Move one workbook from the default project to another.')
-parser.add_argument('--server', '-s', required=True, help='server address')
-parser.add_argument('--username', '-u', required=True, help='username to sign into server')
-parser.add_argument('--workbook-name', '-w', required=True, help='name of workbook to move')
-parser.add_argument('--destination-project', '-d', required=True, help='name of project to move workbook into')
-parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
-                    help='desired logging level (set to error by default)')
+def main():
 
-if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Move one workbook from the default project to another.')
+    parser.add_argument('--server', '-s', required=True, help='server address')
+    parser.add_argument('--username', '-u', required=True, help='username to sign into server')
+    parser.add_argument('--workbook-name', '-w', required=True, help='name of workbook to move')
+    parser.add_argument('--destination-project', '-d', required=True, help='name of project to move workbook into')
+    parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
+                        help='desired logging level (set to error by default)')
 
     args = parser.parse_args()
 
@@ -60,3 +60,7 @@ if __name__ == '__main__':
         else:
             error = "No project named {} found.".format(args.destination_project)
             raise LookupError(error)
+
+
+if __name__ == '__main__':
+    main()

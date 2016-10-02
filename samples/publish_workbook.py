@@ -21,14 +21,14 @@ import logging
 import tableauserverclient as TSC
 
 
-parser = argparse.ArgumentParser(description='Publish a workbook to server.')
-parser.add_argument('--server', '-s', required=True, help='server address')
-parser.add_argument('--username', '-u', required=True, help='username to sign into server')
-parser.add_argument('--filepath', '-f', required=True, help='filepath to the workbook to publish')
-parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
-                    help='desired logging level (set to error by default)')
+def main():
 
-if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Publish a workbook to server.')
+    parser.add_argument('--server', '-s', required=True, help='server address')
+    parser.add_argument('--username', '-u', required=True, help='username to sign into server')
+    parser.add_argument('--filepath', '-f', required=True, help='filepath to the workbook to publish')
+    parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
+                        help='desired logging level (set to error by default)')
 
     args = parser.parse_args()
 
@@ -58,3 +58,7 @@ if __name__ == '__main__':
         else:
             error = "The default project could not be found."
             raise LookupError(error)
+
+
+if __name__ == '__main__':
+    main()
