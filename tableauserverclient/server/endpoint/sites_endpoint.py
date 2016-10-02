@@ -10,16 +10,16 @@ logger = logging.getLogger('tableau.endpoint.sites')
 class Sites(Endpoint):
     def __init__(self, parent_srv):
         super(Endpoint, self).__init__()
-        self.baseurl = "{0}/sites"
         self.parent_srv = parent_srv
 
-    def _construct_url(self):
-        return self.baseurl.format(self.parent_srv.baseurl)
+    @property
+    def baseurl(self):
+        return "{0}/sites".format(self.parent_srv.baseurl)
 
     # Gets all sites
     def get(self, req_options=None):
         logger.info('Querying all sites on site')
-        url = self._construct_url()
+        url = self.baseurl
         server_response = self.get_request(url, req_options)
         pagination_item = PaginationItem.from_response(server_response.content)
         all_site_items = SiteItem.from_response(server_response.content)
@@ -31,7 +31,7 @@ class Sites(Endpoint):
             error = "Site ID undefined."
             raise ValueError(error)
         logger.info('Querying single site (ID: {0})'.format(site_id))
-        url = "{0}/{1}".format(self._construct_url(), site_id)
+        url = "{0}/{1}".format(self.baseurl, site_id)
         server_response = self.get_request(url)
         return SiteItem.from_response(server_response.content)[0]
 
@@ -45,7 +45,7 @@ class Sites(Endpoint):
                 error = 'You cannot set admin_mode to ContentOnly and also set a user quota'
                 raise ValueError(error)
 
-        url = "{0}/{1}".format(self._construct_url(), site_item.id)
+        url = "{0}/{1}".format(self.baseurl, site_item.id)
         update_req = RequestFactory.Site.update_req(site_item)
         server_response = self.put_request(url, update_req)
         logger.info('Updated site item (ID: {0})'.format(site_item.id))
@@ -57,7 +57,7 @@ class Sites(Endpoint):
         if not site_id:
             error = "Site ID undefined."
             raise ValueError(error)
-        url = "{0}/{1}".format(self._construct_url(), site_id)
+        url = "{0}/{1}".format(self.baseurl, site_id)
         self.delete_request(url)
         logger.info('Deleted single site (ID: {0})'.format(site_id))
 
@@ -68,7 +68,7 @@ class Sites(Endpoint):
                 error = 'You cannot set admin_mode to ContentOnly and also set a user quota'
                 raise ValueError(error)
 
-        url = self._construct_url()
+        url = self.baseurl
         create_req = RequestFactory.Site.create_req(site_item)
         server_response = self.post_request(url, create_req)
         new_site = SiteItem.from_response(server_response.content)[0]
