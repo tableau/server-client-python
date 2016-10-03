@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from datetime import datetime, time
+from datetime import datetime
 from .. import NAMESPACE
 
 
@@ -34,14 +34,16 @@ class IntervalItem(object):
 
     @staticmethod
     def _validate_time(t):
-        if not hasattr(t, "hour") or not hasattr(t, "minute") or not hasattr(t, "second"):
+        units_of_time = {"hour", "minute", "second"}
+
+        if not any(hasattr(t, unit) for unit in units_of_time):
             error = "Invalid time object defined."
             raise ValueError(error)
 
     @classmethod
     def create_hourly(cls, start_time, end_time, interval_occurrence, interval_value):
         if interval_occurrence != IntervalItem.Occurrence.Hours and \
-                        interval_occurrence != IntervalItem.Occurrence.Minutes:
+                interval_occurrence != IntervalItem.Occurrence.Minutes:
             error = "Invalid interval type defined: {}.".format(interval_occurrence)
             raise ValueError(error)
         elif interval_occurrence == IntervalItem.Occurrence.Hours and interval_value not in [1, 2, 4, 6, 8, 12]:

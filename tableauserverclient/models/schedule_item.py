@@ -130,8 +130,18 @@ class ScheduleItem(object):
             (_, name, _, _, updated_at, _, frequency, next_run_at, end_schedule_at, execution_order,
              priority, interval_item) = self._parse_element(schedule_xml)
 
-            self._set_values(None, name, None, None, updated_at, None, frequency, next_run_at, end_schedule_at,
-                             execution_order, priority, interval_item)
+            self._set_values(id=None,
+                             name=name,
+                             state=None,
+                             created_at=None,
+                             updated_at=updated_at,
+                             schedule_type=None,
+                             frequency=frequency,
+                             next_run_at=next_run_at,
+                             end_schedule_at=end_schedule_at,
+                             execution_order=execution_order,
+                             priority=priority,
+                             interval_item=interval_item)
 
         return self
 
@@ -164,7 +174,7 @@ class ScheduleItem(object):
 
     @classmethod
     def from_response(cls, resp):
-        all_schedule_items = list()
+        all_schedule_items = []
         parsed_response = ET.fromstring(resp)
         all_schedule_xml = parsed_response.findall('.//t:schedule', namespaces=NAMESPACE)
         for schedule_xml in all_schedule_xml:
@@ -172,8 +182,20 @@ class ScheduleItem(object):
              end_schedule_at, execution_order, priority, interval_item) = cls._parse_element(schedule_xml)
 
             schedule_item = cls(name, priority, schedule_type, execution_order, interval_item)
-            schedule_item._set_values(id, None, state, created_at, updated_at, None, frequency, next_run_at,
-                                      end_schedule_at, None, None, None)
+
+            schedule_item._set_values(id=id,
+                                      name=None,
+                                      state=state,
+                                      created_at=created_at,
+                                      updated_at=updated_at,
+                                      schedule_type=None,
+                                      frequency=frequency,
+                                      next_run_at=next_run_at,
+                                      end_schedule_at=end_schedule_at,
+                                      execution_order=None,
+                                      priority=None,
+                                      interval_item=None)
+
             all_schedule_items.append(schedule_item)
         return all_schedule_items
 
