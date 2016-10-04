@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 from .interval_item import IntervalItem
+from .property_decorators import property_is_enum, property_is_boolean, property_not_empty, property_not_nullable
 from .. import NAMESPACE
 
 
@@ -49,12 +50,9 @@ class ScheduleItem(object):
         return self._execution_order
 
     @execution_order.setter
+    @property_is_enum(ExecutionOrder)
     def execution_order(self, value):
-        if value and not hasattr(ScheduleItem.ExecutionOrder, value):
-            error = "Invalid execution order defined: {}.".format(value)
-            raise ValueError(error)
-        else:
-            self._execution_order = value
+        self._execution_order = value
 
     @property
     def frequency(self):
@@ -69,12 +67,9 @@ class ScheduleItem(object):
         return self._name
 
     @name.setter
+    @property_not_nullable
     def name(self, value):
-        if not value:
-            error = "Name must be defined."
-            raise ValueError(error)
-        else:
-            self._name = value
+        self._name = value
 
     @property
     def next_run_at(self):
@@ -97,27 +92,19 @@ class ScheduleItem(object):
         return self._schedule_type
 
     @schedule_type.setter
+    @property_is_enum(Type)
+    @property_not_nullable
     def schedule_type(self, value):
-        if not value:
-            error = "Schedule type must be defined."
-            raise ValueError(error)
-        elif not hasattr(ScheduleItem.Type, value):
-            error = "Invalid schedule type defined: {}.".format(value)
-            raise ValueError(error)
-        else:
-            self._schedule_type = value
+        self._schedule_type = value
 
     @property
     def state(self):
         return self._state
 
     @state.setter
+    @property_is_enum(State)
     def state(self, value):
-        if not hasattr(ScheduleItem.State, value):
-            error = "Invalid state defined."
-            raise ValueError(error)
-        else:
-            self._state = value
+        self._state = value
 
     @property
     def updated_at(self):
