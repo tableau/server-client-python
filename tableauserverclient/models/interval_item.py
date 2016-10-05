@@ -11,8 +11,8 @@ class IntervalItem(object):
         Monthly = "Monthly"
 
     class Occurrence:
-        Hours = "Hours"
-        Minutes = "Minutes"
+        Hours = "hours"
+        Minutes = "minutes"
         WeekDay = "weekDay"
         MonthDay = "monthDay"
 
@@ -75,6 +75,20 @@ class IntervalItem(object):
 
 class HourlyInterval(IntervalItem):
     def __init__(self, start_time, end_time, interval_occurrence, interval_value):
+        self._validate_time(start_time)
+        self._validate_time(end_time)
+
+        if interval_occurrence != IntervalItem.Occurrence.Hours and \
+                interval_occurrence != IntervalItem.Occurrence.Minutes:
+            error = "Invalid interval type defined: {}.".format(interval_occurrence)
+            raise ValueError(error)
+        elif interval_occurrence == IntervalItem.Occurrence.Hours and int(interval_value) not in [1, 2, 4, 6, 8, 12]:
+            error = "Invalid hour value defined: {}.".format(interval_value)
+            raise ValueError(error)
+        elif interval_occurrence == IntervalItem.Occurrence.Minutes and int(interval_value) not in [15, 30]:
+            error = "Invalid minute value defined: {}".format(interval_value)
+            raise ValueError(error)
+
         self.start_time = start_time
         self.end_time = end_time
         self.frequency = IntervalItem.Frequency.Hourly
@@ -92,7 +106,8 @@ class DailyInterval(IntervalItem):
 class WeeklyInterval(IntervalItem):
     def __init__(self, start_time, *interval_values):
         self._validate_time(start_time)
-
+        if not all(hasattr(IntervalItem.Day, day) for day in interval_values):
+            raise ValueError("Invalid week day defined " + str(interval_values))
         self.start_time = start_time
         self.frequency = IntervalItem.Frequency.Weekly
         self.interval = [(IntervalItem.Occurrence.WeekDay, day) for day in interval_values]
@@ -102,44 +117,10 @@ class MonthlyInterval(IntervalItem):
     def __init__(self, start_time, interval_value):
         self._validate_time(start_time)
 
+        if (int(interval_value) < 1 or int(interval_value) > 31) and interval_value != IntervalItem.Day.LastDay:
+            error = "Invalid interval value defined for a monthly frequency: {}.".format(interval_value)
+            raise ValueError(error)
+
         self.start_time = start_time
         self.frequency = IntervalItem.Frequency.Monthly
         self.interval = [(IntervalItem.Occurrence.MonthDay, str(interval_value))]
-
-# @classmethod
-# def create_hourly(cls, start_time, end_time, interval_occurrence, interval_value):
-#     if interval_occurrence != IntervalItem.Occurrence.Hours and \
-#             interval_occurrence != IntervalItem.Occurrence.Minutes:
-#         error = "Invalid interval type defined: {}.".format(interval_occurrence)
-#         raise ValueError(error)
-#     elif interval_occurrence == IntervalItem.Occurrence.Hours and interval_value not in [1, 2, 4, 6, 8, 12]:
-#         error = "Invalid hour value defined: {}.".format(interval_value)
-#         raise ValueError(error)
-#     elif interval_occurrence == IntervalItem.Occurrence.Minutes and interval_value not in [15, 30]:
-#         error = "Invalid minute value defined: {}".format(interval_value)
-#         raise ValueError(error)
-
-#     cls._validate_time(start_time)
-#     cls._validate_time(end_time)
-#     interval = [(interval_occurrence.lower(), str(interval_value))]
-#     return cls(IntervalItem.Frequency.Hourly, interval, start_time, end_time)
-
-# @classmethod
-# def create_weekly(cls, start_time, *interval_value):
-#     interval = []
-#     for day in interval_value:
-#         if not hasattr(IntervalItem.Day, day):
-#             error = "Invalid week day defined: {}.".format(day)
-#             raise ValueError(error)
-#         interval.append((IntervalItem.Occurrence.WeekDay, day))
-#     cls._validate_time(start_time)
-#     return cls(IntervalItem.Frequency.Weekly, interval, start_time)
-
-# @classmethod
-# def create_monthly(cls, start_time, interval_value):
-#     if (interval_value < 1 or interval_value > 31) and interval_value != IntervalItem.Day.LastDay:
-#         error = "Invalid interval value defined for a monthly frequency: {}.".format(interval_value)
-#         raise ValueError(error)
-#     interval = [(IntervalItem.Occurrence.MonthDay, str(interval_value))]
-#     cls._validate_time(start_time)
-#     return cls(IntervalItem.Frequency.Monthly, interval, start_time)
