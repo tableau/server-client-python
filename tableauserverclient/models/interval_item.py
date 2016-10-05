@@ -55,7 +55,7 @@ class IntervalItem(object):
         for interval_elem in interval_elems:
             interval.extend(interval_elem.attrib.items())
 
-        ### If statement of doom until I think of a better way
+        # If statement of doom until I think of a better way
 
         if frequency == IntervalItem.Frequency.Daily:
             return DailyInterval(start_time)
@@ -80,12 +80,14 @@ class HourlyInterval(IntervalItem):
         self.frequency = IntervalItem.Frequency.Hourly
         self.interval = [(interval_occurrence.lower(), str(interval_value))]
 
+
 class DailyInterval(IntervalItem):
     def __init__(self, start_time, *args):
         self._validate_time(start_time)
 
         self.start_time = start_time
         self.frequency = IntervalItem.Frequency.Daily
+
 
 class WeeklyInterval(IntervalItem):
     def __init__(self, start_time, *interval_values):
@@ -94,6 +96,7 @@ class WeeklyInterval(IntervalItem):
         self.start_time = start_time
         self.frequency = IntervalItem.Frequency.Weekly
         self.interval = [(IntervalItem.Occurrence.WeekDay, day) for day in interval_values]
+
 
 class MonthlyInterval(IntervalItem):
     def __init__(self, start_time, interval_value):
@@ -140,5 +143,3 @@ class MonthlyInterval(IntervalItem):
 #     interval = [(IntervalItem.Occurrence.MonthDay, str(interval_value))]
 #     cls._validate_time(start_time)
 #     return cls(IntervalItem.Frequency.Monthly, interval, start_time)
-
-

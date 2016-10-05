@@ -123,8 +123,8 @@ class ScheduleTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
             weekly_interval = TSC.WeeklyInterval(time(9, 15), TSC.IntervalItem.Day.Monday,
-                                                             TSC.IntervalItem.Day.Wednesday,
-                                                             TSC.IntervalItem.Day.Friday)
+                                                 TSC.IntervalItem.Day.Wednesday,
+                                                 TSC.IntervalItem.Day.Friday)
             new_schedule = TSC.ScheduleItem("weekly-schedule-1", 80, TSC.ScheduleItem.Type.Extract,
                                             TSC.ScheduleItem.ExecutionOrder.Parallel, weekly_interval)
             new_schedule = self.server.schedules.create(new_schedule)
@@ -172,7 +172,7 @@ class ScheduleTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/7bea1766-1543-4052-9753-9d224bc069b5', text=response_xml)
             new_interval = TSC.WeeklyInterval(time(7), TSC.IntervalItem.Day.Monday,
-                                                          TSC.IntervalItem.Day.Friday)
+                                              TSC.IntervalItem.Day.Friday)
             single_schedule = TSC.ScheduleItem("weekly-schedule-1", 90, TSC.ScheduleItem.Type.Extract,
                                                TSC.ScheduleItem.ExecutionOrder.Parallel, new_interval)
             single_schedule._id = "7bea1766-1543-4052-9753-9d224bc069b5"
