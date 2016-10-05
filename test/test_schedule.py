@@ -73,8 +73,10 @@ class ScheduleTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
-            hourly_interval = TSC.IntervalItem.create_hourly(time(2, 30), time(23, 0),
-                                                             TSC.IntervalItem.Occurrence.Hours, 2)
+            hourly_interval = TSC.HourlyInterval(start_time=time(2, 30),
+                                                 end_time=time(23, 0),
+                                                 interval_occurrence=TSC.IntervalItem.Occurrence.Hours,
+                                                 interval_value=2)
             new_schedule = TSC.ScheduleItem("hourly-schedule-1", 50, TSC.ScheduleItem.Type.Extract,
                                             TSC.ScheduleItem.ExecutionOrder.Parallel, hourly_interval)
             new_schedule = self.server.schedules.create(new_schedule)
@@ -98,7 +100,7 @@ class ScheduleTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
-            daily_interval = TSC.IntervalItem.create_daily(time(4, 50))
+            daily_interval = TSC.DailyInterval(time(4, 50))
             new_schedule = TSC.ScheduleItem("daily-schedule-1", 90, TSC.ScheduleItem.Type.Subscription,
                                             TSC.ScheduleItem.ExecutionOrder.Serial, daily_interval)
             new_schedule = self.server.schedules.create(new_schedule)
@@ -120,7 +122,7 @@ class ScheduleTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
-            weekly_interval = TSC.IntervalItem.create_weekly(time(9, 15), TSC.IntervalItem.Day.Monday,
+            weekly_interval = TSC.WeeklyInterval(time(9, 15), TSC.IntervalItem.Day.Monday,
                                                              TSC.IntervalItem.Day.Wednesday,
                                                              TSC.IntervalItem.Day.Friday)
             new_schedule = TSC.ScheduleItem("weekly-schedule-1", 80, TSC.ScheduleItem.Type.Extract,
@@ -146,7 +148,7 @@ class ScheduleTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
-            monthly_interval = TSC.IntervalItem.create_monthly(time(7), 12)
+            monthly_interval = TSC.MonthlyInterval(time(7), 12)
             new_schedule = TSC.ScheduleItem("monthly-schedule-1", 20, TSC.ScheduleItem.Type.Extract,
                                             TSC.ScheduleItem.ExecutionOrder.Serial, monthly_interval)
             new_schedule = self.server.schedules.create(new_schedule)
@@ -169,7 +171,7 @@ class ScheduleTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/7bea1766-1543-4052-9753-9d224bc069b5', text=response_xml)
-            new_interval = TSC.IntervalItem.create_weekly(time(7), TSC.IntervalItem.Day.Monday,
+            new_interval = TSC.WeeklyInterval(time(7), TSC.IntervalItem.Day.Monday,
                                                           TSC.IntervalItem.Day.Friday)
             single_schedule = TSC.ScheduleItem("weekly-schedule-1", 90, TSC.ScheduleItem.Type.Extract,
                                                TSC.ScheduleItem.ExecutionOrder.Parallel, new_interval)

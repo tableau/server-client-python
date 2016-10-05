@@ -1,9 +1,10 @@
 from .namespace import NAMESPACE
 from .models import ConnectionItem, DatasourceItem,\
-    GroupItem, IntervalItem, PaginationItem, ProjectItem, ScheduleItem, \
+    GroupItem, PaginationItem, ProjectItem, ScheduleItem, \
     SiteItem, TableauAuth, UserItem, ViewItem, WorkbookItem, UnpopulatedPropertyError
 from .server import RequestOptions, Filter, Sort, Server, ServerResponseError,\
     MissingRequiredFieldError, NotSignedInError
+from .models.interval_item import *
 
 __version__ = '0.0.1'
 __VERSION__ = __version__
