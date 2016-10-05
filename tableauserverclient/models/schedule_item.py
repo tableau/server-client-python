@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 from .interval_item import IntervalItem
-from .property_decorators import property_is_enum, property_is_boolean, property_not_empty, property_not_nullable
+from .property_decorators import property_is_enum, property_not_nullable
 from .. import NAMESPACE
 
 

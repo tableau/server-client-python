@@ -75,42 +75,100 @@ class IntervalItem(object):
 
 class HourlyInterval(IntervalItem):
     def __init__(self, start_time, end_time, interval_occurrence, interval_value):
-        self._validate_time(start_time)
-        self._validate_time(end_time)
-
-        if interval_occurrence != IntervalItem.Occurrence.Hours and \
-                interval_occurrence != IntervalItem.Occurrence.Minutes:
-            error = "Invalid interval type defined: {}.".format(interval_occurrence)
-            raise ValueError(error)
-        elif interval_occurrence == IntervalItem.Occurrence.Hours and int(interval_value) not in [1, 2, 4, 6, 8, 12]:
-            error = "Invalid hour value defined: {}.".format(interval_value)
-            raise ValueError(error)
-        elif interval_occurrence == IntervalItem.Occurrence.Minutes and int(interval_value) not in [15, 30]:
-            error = "Invalid minute value defined: {}".format(interval_value)
-            raise ValueError(error)
 
         self.start_time = start_time
         self.end_time = end_time
         self.frequency = IntervalItem.Frequency.Hourly
-        self.interval = [(interval_occurrence.lower(), str(interval_value))]
+        self.interval = interval_occurrence.lower(), str(interval_value)
+
+    @property
+    def start_time(self):
+        return self._start_time
+
+    @start_time.setter
+    def start_time(self, value):
+        self._validate_time(value)
+
+        self._start_time = value
+
+    @property
+    def end_time(self):
+        return self._end_time
+
+    @end_time.setter
+    def end_time(self, value):
+        self._validate_time(value)
+        self._end_time = value
+
+    @property
+    def interval(self):
+        return self._interval
+
+    @interval.setter
+    def interval(self, intervals):
+        interval_occurrence, interval_value = intervals
+
+        Hours = IntervalItem.Occurrence.Hours
+        Minutes = IntervalItem.Occurrence.Minutes
+
+        VALID_HOUR_INTERVALS = {1, 2, 4, 6, 8, 12}
+        VALID_MIN_INTERVALS = {15, 30}
+
+        if interval_occurrence not in {Hours, Minutes}:
+            error = "Invalid interval type defined: {}.".format(interval_occurrence)
+            raise ValueError(error)
+        elif interval_occurrence == Hours and int(interval_value) not in VALID_HOUR_INTERVALS:
+            error = "Invalid hour value defined: {}.".format(interval_value)
+            raise ValueError(error)
+        elif interval_occurrence == Minutes and int(interval_value) not in VALID_MIN_INTERVALS:
+            error = "Invalid minute value defined: {}".format(interval_value)
+            raise ValueError(error)
+
+        self._interval = [(interval_occurrence.lower(), str(interval_value))]
 
 
 class DailyInterval(IntervalItem):
-    def __init__(self, start_time, *args):
-        self._validate_time(start_time)
-
+    def __init__(self, start_time):
         self.start_time = start_time
         self.frequency = IntervalItem.Frequency.Daily
+
+    @property
+    def start_time(self):
+        return self._start_time
+
+    @start_time.setter
+    def start_time(self, value):
+        self._validate_time(value)
+
+        self._start_time = value
 
 
 class WeeklyInterval(IntervalItem):
     def __init__(self, start_time, *interval_values):
-        self._validate_time(start_time)
-        if not all(hasattr(IntervalItem.Day, day) for day in interval_values):
-            raise ValueError("Invalid week day defined " + str(interval_values))
         self.start_time = start_time
         self.frequency = IntervalItem.Frequency.Weekly
-        self.interval = [(IntervalItem.Occurrence.WeekDay, day) for day in interval_values]
+        self.interval = interval_values
+
+    @property
+    def start_time(self):
+        return self._start_time
+
+    @start_time.setter
+    def start_time(self, value):
+        self._validate_time(value)
+
+        self._start_time = value
+
+    @property
+    def interval(self):
+        return self._interval
+
+    @interval.setter
+    def interval(self, interval_values):
+        if not all(hasattr(IntervalItem.Day, day) for day in interval_values):
+            raise ValueError("Invalid week day defined " + str(interval_values))
+
+        self._interval = [(IntervalItem.Occurrence.WeekDay, day) for day in interval_values]
 
 
 class MonthlyInterval(IntervalItem):
@@ -123,4 +181,26 @@ class MonthlyInterval(IntervalItem):
 
         self.start_time = start_time
         self.frequency = IntervalItem.Frequency.Monthly
-        self.interval = [(IntervalItem.Occurrence.MonthDay, str(interval_value))]
+        self.interval = str(interval_value)
+
+    @property
+    def start_time(self):
+        return self._start_time
+
+    @start_time.setter
+    def start_time(self, value):
+        self._validate_time(value)
+
+        self._start_time = value
+
+    @property
+    def interval(self):
+        return self._interval
+
+    @interval.setter
+    def interval(self, interval_value):
+        if (int(interval_value) < 1 or int(interval_value) > 31) and interval_value != IntervalItem.Day.LastDay:
+            error = "Invalid interval value defined for a monthly frequency: {}.".format(interval_value)
+            raise ValueError(error)
+
+        self._interval = [(IntervalItem.Occurrence.MonthDay, str(interval_value))]
