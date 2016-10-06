@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from .interval_item import IntervalItem
+from .interval_item import *
 from .property_decorators import property_is_enum, property_not_nullable
 from .. import NAMESPACE
 
@@ -187,6 +187,33 @@ class ScheduleItem(object):
         return all_schedule_items
 
     @staticmethod
+    def _parse_interval_item(parsed_response, frequency):
+        start_time = parsed_response.get("start", None)
+        start_time = datetime.strptime(start_time, "%H:%M:%S").time()
+        end_time = parsed_response.get("end", None)
+        if end_time is not None:
+            end_time = datetime.strptime(end_time, "%H:%M:%S").time()
+        interval_elems = parsed_response.findall(".//t:intervals/t:interval", namespaces=NAMESPACE)
+        interval = []
+        for interval_elem in interval_elems:
+            interval.extend(interval_elem.attrib.items())
+
+        if frequency == IntervalItem.Frequency.Daily:
+            return DailyInterval(start_time)
+
+        if frequency == IntervalItem.Frequency.Hourly:
+            interval_occurrence, interval_value = interval.pop()
+            return HourlyInterval(start_time, end_time, interval_occurrence, interval_value)
+
+        if frequency == IntervalItem.Frequency.Weekly:
+            interval_values = [i[1] for i in interval]
+            return WeeklyInterval(start_time, *interval_values)
+
+        if frequency == IntervalItem.Frequency.Monthly:
+            interval_occurrence, interval_value = interval.pop()
+            return MonthlyInterval(start_time, interval_value)
+
+    @staticmethod
     def _parse_element(schedule_xml):
         id = schedule_xml.get('id', None)
         name = schedule_xml.get('name', None)
@@ -206,7 +233,7 @@ class ScheduleItem(object):
         interval_item = None
         frequency_detail_elem = schedule_xml.find('.//t:frequencyDetails', namespaces=NAMESPACE)
         if frequency_detail_elem is not None:
-            interval_item = IntervalItem.from_xml_element(frequency_detail_elem, frequency)
+            interval_item = ScheduleItem._parse_interval_item(frequency_detail_elem, frequency)
 
         return id, name, state, created_at, updated_at, schedule_type,\
             frequency, next_run_at, end_schedule_at, execution_order, priority, interval_item

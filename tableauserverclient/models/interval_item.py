@@ -3,6 +3,14 @@ from datetime import datetime
 from .. import NAMESPACE
 
 
+def _validate_time(t):
+    units_of_time = {"hour", "minute", "second"}
+
+    if not any(hasattr(t, unit) for unit in units_of_time):
+        error = "Invalid time object defined."
+        raise ValueError(error)
+
+
 class IntervalItem(object):
     class Frequency:
         Hourly = "Hourly"
@@ -26,54 +34,8 @@ class IntervalItem(object):
         Saturday = "Saturday"
         LastDay = "LastDay"
 
-    end_time = None
-    frequency = None
-    interval = None
-    start_time = None
 
-    @staticmethod
-    def _validate_time(t):
-        units_of_time = {"hour", "minute", "second"}
-
-        if not any(hasattr(t, unit) for unit in units_of_time):
-            error = "Invalid time object defined."
-            raise ValueError(error)
-
-    @classmethod
-    def from_response(cls, resp, frequency):
-        cls.from_xml_element(ET.fromstring(resp), frequency)
-
-    @classmethod
-    def from_xml_element(cls, parsed_response, frequency):
-        start_time = parsed_response.get("start", None)
-        start_time = datetime.strptime(start_time, "%H:%M:%S").time()
-        end_time = parsed_response.get("end", None)
-        if end_time is not None:
-            end_time = datetime.strptime(end_time, "%H:%M:%S").time()
-        interval_elems = parsed_response.findall(".//t:intervals/t:interval", namespaces=NAMESPACE)
-        interval = []
-        for interval_elem in interval_elems:
-            interval.extend(interval_elem.attrib.items())
-
-        # If statement of doom until I think of a better way
-
-        if frequency == IntervalItem.Frequency.Daily:
-            return DailyInterval(start_time)
-
-        if frequency == IntervalItem.Frequency.Hourly:
-            interval_occurrence, interval_value = interval.pop()
-            return HourlyInterval(start_time, end_time, interval_occurrence, interval_value)
-
-        if frequency == IntervalItem.Frequency.Weekly:
-            interval_values = [i[1] for i in interval]
-            return WeeklyInterval(start_time, *interval_values)
-
-        if frequency == IntervalItem.Frequency.Monthly:
-            interval_occurrence, interval_value = interval.pop()
-            return MonthlyInterval(start_time, interval_value)
-
-
-class HourlyInterval(IntervalItem):
+class HourlyInterval(object):
     def __init__(self, start_time, end_time, interval_occurrence, interval_value):
 
         self.start_time = start_time
@@ -87,7 +49,7 @@ class HourlyInterval(IntervalItem):
 
     @start_time.setter
     def start_time(self, value):
-        self._validate_time(value)
+        _validate_time(value)
 
         self._start_time = value
 
@@ -97,7 +59,7 @@ class HourlyInterval(IntervalItem):
 
     @end_time.setter
     def end_time(self, value):
-        self._validate_time(value)
+        _validate_time(value)
         self._end_time = value
 
     @property
@@ -127,10 +89,12 @@ class HourlyInterval(IntervalItem):
         self._interval = [(interval_occurrence.lower(), str(interval_value))]
 
 
-class DailyInterval(IntervalItem):
+class DailyInterval(object):
     def __init__(self, start_time):
         self.start_time = start_time
         self.frequency = IntervalItem.Frequency.Daily
+        self.end_time = None
+        self.interval = None
 
     @property
     def start_time(self):
@@ -138,16 +102,16 @@ class DailyInterval(IntervalItem):
 
     @start_time.setter
     def start_time(self, value):
-        self._validate_time(value)
-
+        _validate_time(value)
         self._start_time = value
 
 
-class WeeklyInterval(IntervalItem):
+class WeeklyInterval(object):
     def __init__(self, start_time, *interval_values):
         self.start_time = start_time
         self.frequency = IntervalItem.Frequency.Weekly
         self.interval = interval_values
+        self.end_time = None
 
     @property
     def start_time(self):
@@ -155,8 +119,7 @@ class WeeklyInterval(IntervalItem):
 
     @start_time.setter
     def start_time(self, value):
-        self._validate_time(value)
-
+        _validate_time(value)
         self._start_time = value
 
     @property
@@ -171,17 +134,12 @@ class WeeklyInterval(IntervalItem):
         self._interval = [(IntervalItem.Occurrence.WeekDay, day) for day in interval_values]
 
 
-class MonthlyInterval(IntervalItem):
+class MonthlyInterval(object):
     def __init__(self, start_time, interval_value):
-        self._validate_time(start_time)
-
-        if (int(interval_value) < 1 or int(interval_value) > 31) and interval_value != IntervalItem.Day.LastDay:
-            error = "Invalid interval value defined for a monthly frequency: {}.".format(interval_value)
-            raise ValueError(error)
-
         self.start_time = start_time
         self.frequency = IntervalItem.Frequency.Monthly
         self.interval = str(interval_value)
+        self.end_time = None
 
     @property
     def start_time(self):
@@ -189,8 +147,7 @@ class MonthlyInterval(IntervalItem):
 
     @start_time.setter
     def start_time(self, value):
-        self._validate_time(value)
-
+        _validate_time(value)
         self._start_time = value
 
     @property
@@ -199,8 +156,20 @@ class MonthlyInterval(IntervalItem):
 
     @interval.setter
     def interval(self, interval_value):
-        if (int(interval_value) < 1 or int(interval_value) > 31) and interval_value != IntervalItem.Day.LastDay:
-            error = "Invalid interval value defined for a monthly frequency: {}.".format(interval_value)
-            raise ValueError(error)
+        error = "Invalid interval value for a monthly frequency: {}.".format(interval_value)
+
+        # This is weird because the value could be a str or an int
+        # The only valid str is 'LastDay' so we check that first. If that's not it
+        # try to convert it to an int, if that fails because it's an incorrect string
+        # like 'badstring' we catch and re-raise. Otherwise we convert to int and check
+        # that it's in range 1-31
+
+        if interval_value != "LastDay":
+            try:
+                if not (1 <= int(interval_value) <= 31):
+                    raise ValueError(error)
+            except ValueError as e:
+                if interval_value != "LastDay":
+                    raise ValueError(error)
 
         self._interval = [(IntervalItem.Occurrence.MonthDay, str(interval_value))]
