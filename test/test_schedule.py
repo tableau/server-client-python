@@ -23,7 +23,7 @@ class ScheduleTests(unittest.TestCase):
         self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"
         self.server._auth_token = "j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM"
 
-        self.baseurl = self.server.schedules._construct_url()
+        self.baseurl = self.server.schedules.baseurl
 
     def test_get(self):
         with open(GET_XML, "rb") as f:

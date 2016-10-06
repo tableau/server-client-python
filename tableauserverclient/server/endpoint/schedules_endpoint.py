@@ -10,15 +10,15 @@ logger = logging.getLogger('tableau.endpoint.schedules')
 class Schedules(Endpoint):
     def __init__(self, parent_srv):
         super(Endpoint, self).__init__()
-        self.baseurl = "{0}/schedules"
         self.parent_srv = parent_srv
 
-    def _construct_url(self):
-        return self.baseurl.format(self.parent_srv.baseurl)
+    @property
+    def baseurl(self):
+        return "{0}/schedules".format(self.parent_srv.baseurl)
 
     def get(self, req_options=None):
         logger.info("Querying all schedules")
-        url = self._construct_url()
+        url = self.baseurl
         server_response = self.get_request(url, req_options)
         pagination_item = PaginationItem.from_response(server_response.content)
         all_schedule_items = ScheduleItem.from_response(server_response.content)
@@ -28,7 +28,7 @@ class Schedules(Endpoint):
         if not schedule_id:
             error = "Schedule ID undefined"
             raise ValueError(error)
-        url = "{0}/{1}".format(self._construct_url(), schedule_id)
+        url = "{0}/{1}".format(self.baseurl, schedule_id)
         self.delete_request(url)
         logger.info("Deleted single schedule (ID: {0})".format(schedule_id))
 
@@ -40,7 +40,7 @@ class Schedules(Endpoint):
             error = "Interval item must be defined."
             raise MissingRequiredFieldError(error)
 
-        url = "{0}/{1}".format(self._construct_url(), schedule_item.id)
+        url = "{0}/{1}".format(self.baseurl, schedule_item.id)
         update_req = RequestFactory.Schedule.update_req(schedule_item)
         server_response = self.put_request(url, update_req)
         logger.info("Updated schedule item (ID: {})".format(schedule_item.id))
@@ -52,7 +52,7 @@ class Schedules(Endpoint):
             error = "Interval item must be defined."
             raise MissingRequiredFieldError(error)
 
-        url = self._construct_url()
+        url = self.baseurl
         create_req = RequestFactory.Schedule.create_req(schedule_item)
         server_response = self.post_request(url, create_req)
         new_schedule = ScheduleItem.from_response(server_response.content)[0]

@@ -146,7 +146,7 @@ class ScheduleRequest(object):
         if interval_item.interval:
             intervals_element = ET.SubElement(frequency_element, 'intervals')
             for interval in interval_item.interval:
-                (expression, value) = interval
+                expression, value = interval
                 single_interval_element = ET.SubElement(intervals_element, 'interval')
                 single_interval_element.attrib[expression] = value
         return ET.tostring(xml_request)
