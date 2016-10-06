@@ -46,3 +46,34 @@ def property_not_empty(func):
         return func(self, value)
 
     return wrapper
+
+
+def property_is_valid_time(func):
+    @wraps(func)
+    def wrapper(self, value):
+        units_of_time = {"hour", "minute", "second"}
+
+        if not any(hasattr(value, unit) for unit in units_of_time):
+            error = "Invalid time object defined."
+            raise ValueError(error)
+        return func(self, value)
+
+    return wrapper
+
+
+def property_is_int(min, max=2**31):
+    def property_type_decorator(func):
+        @wraps(func)
+        def wrapper(self, value):
+            if min is None:
+                return func(self, value)
+
+            if value < min or value > max:
+                error = "Invalid priority defined: {}.".format(value)
+                raise ValueError(error)
+
+            return func(self, value)
+
+        return wrapper
+
+    return property_type_decorator

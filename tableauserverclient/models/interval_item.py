@@ -1,14 +1,7 @@
 import xml.etree.ElementTree as ET
 from datetime import datetime
+from .property_decorators import property_is_valid_time
 from .. import NAMESPACE
-
-
-def _validate_time(t):
-    units_of_time = {"hour", "minute", "second"}
-
-    if not any(hasattr(t, unit) for unit in units_of_time):
-        error = "Invalid time object defined."
-        raise ValueError(error)
 
 
 class IntervalItem(object):
@@ -40,17 +33,16 @@ class HourlyInterval(object):
 
         self.start_time = start_time
         self.end_time = end_time
-        self.frequency = IntervalItem.Frequency.Hourly
-        self.interval = interval_occurrence.lower(), str(interval_value)
+        self._frequency = IntervalItem.Frequency.Hourly
+        self.interval = interval_occurrence, str(interval_value)
 
     @property
     def start_time(self):
         return self._start_time
 
     @start_time.setter
+    @property_is_valid_time
     def start_time(self, value):
-        _validate_time(value)
-
         self._start_time = value
 
     @property
@@ -58,8 +50,8 @@ class HourlyInterval(object):
         return self._end_time
 
     @end_time.setter
+    @property_is_valid_time
     def end_time(self, value):
-        _validate_time(value)
         self._end_time = value
 
     @property
@@ -75,24 +67,25 @@ class HourlyInterval(object):
 
         VALID_HOUR_INTERVALS = {1, 2, 4, 6, 8, 12}
         VALID_MIN_INTERVALS = {15, 30}
+        VALID_OCCUR_TYPES = {Hours, Minutes}
 
-        if interval_occurrence not in {Hours, Minutes}:
-            error = "Invalid interval type defined: {}.".format(interval_occurrence)
+        if interval_occurrence not in VALID_OCCUR_TYPES:
+            error = "Invalid interval type {} not in {}.".format(interval_occurrence, str(VALID_OCCUR_TYPES))
             raise ValueError(error)
         elif interval_occurrence == Hours and int(interval_value) not in VALID_HOUR_INTERVALS:
-            error = "Invalid hour value defined: {}.".format(interval_value)
+            error = "Invalid hour value {} not in {}".format(interval_value, str(VALID_HOUR_INTERVALS))
             raise ValueError(error)
         elif interval_occurrence == Minutes and int(interval_value) not in VALID_MIN_INTERVALS:
-            error = "Invalid minute value defined: {}".format(interval_value)
+            error = "Invalid minute value {} not in {}".format(interval_value, str(VALID_MIN_INTERVALS))
             raise ValueError(error)
 
-        self._interval = [(interval_occurrence.lower(), str(interval_value))]
+        self._interval = [(interval_occurrence, str(interval_value))]
 
 
 class DailyInterval(object):
     def __init__(self, start_time):
         self.start_time = start_time
-        self.frequency = IntervalItem.Frequency.Daily
+        self._frequency = IntervalItem.Frequency.Daily
         self.end_time = None
         self.interval = None
 
@@ -101,15 +94,15 @@ class DailyInterval(object):
         return self._start_time
 
     @start_time.setter
+    @property_is_valid_time
     def start_time(self, value):
-        _validate_time(value)
         self._start_time = value
 
 
 class WeeklyInterval(object):
     def __init__(self, start_time, *interval_values):
         self.start_time = start_time
-        self.frequency = IntervalItem.Frequency.Weekly
+        self._frequency = IntervalItem.Frequency.Weekly
         self.interval = interval_values
         self.end_time = None
 
@@ -118,8 +111,8 @@ class WeeklyInterval(object):
         return self._start_time
 
     @start_time.setter
+    @property_is_valid_time
     def start_time(self, value):
-        _validate_time(value)
         self._start_time = value
 
     @property
@@ -137,7 +130,7 @@ class WeeklyInterval(object):
 class MonthlyInterval(object):
     def __init__(self, start_time, interval_value):
         self.start_time = start_time
-        self.frequency = IntervalItem.Frequency.Monthly
+        self._frequency = IntervalItem.Frequency.Monthly
         self.interval = str(interval_value)
         self.end_time = None
 
@@ -146,8 +139,8 @@ class MonthlyInterval(object):
         return self._start_time
 
     @start_time.setter
+    @property_is_valid_time
     def start_time(self, value):
-        _validate_time(value)
         self._start_time = value
 
     @property

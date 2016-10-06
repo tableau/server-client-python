@@ -34,29 +34,40 @@ def main():
     server = TSC.Server(args.server)
     with server.auth.sign_in(tableau_auth):
         # Hourly Schedule
-        hourly_interval = TSC.HourlyInterval(time(2, 30), time(23, 0), TSC.IntervalItem.Occurrence.Hours, 2)
+        # This schedule will run every 2 hours between 2:30AM and 11:00PM
+        hourly_interval = TSC.HourlyInterval(start_time=time(2, 30),
+                                             end_time=time(23, 0),
+                                             interval_occurrence=TSC.IntervalItem.Occurrence.Hours,
+                                             interval_value=2)
+
         hourly_schedule = TSC.ScheduleItem("Hourly-Schedule", 50, TSC.ScheduleItem.Type.Extract,
                                            TSC.ScheduleItem.ExecutionOrder.Parallel, hourly_interval)
         hourly_schedule = server.schedules.create(hourly_schedule)
         print("Hourly schedule created (ID: {}).".format(hourly_schedule.id))
 
         # Daily Schedule
-        daily_interval = TSC.DailyInterval(time(5))
+        # This schedule will run every day at 5AM
+        daily_interval = TSC.DailyInterval(start_time=time(5))
         daily_schedule = TSC.ScheduleItem("Daily-Schedule", 60, TSC.ScheduleItem.Type.Subscription,
                                           TSC.ScheduleItem.ExecutionOrder.Serial, daily_interval)
         daily_schedule = server.schedules.create(daily_schedule)
         print("Daily schedule created (ID: {}).".format(daily_schedule.id))
 
         # Weekly Schedule
-        weekly_interval = TSC.WeeklyInterval(time(19, 15), TSC.IntervalItem.Day.Monday,
-                                             TSC.IntervalItem.Day.Wednesday, TSC.IntervalItem.Day.Friday)
+        # This schedule will wun every Monday, Wednesday, and Friday at 7:15PM
+        weekly_interval = TSC.WeeklyInterval(time(19, 15),
+                                             TSC.IntervalItem.Day.Monday,
+                                             TSC.IntervalItem.Day.Wednesday,
+                                             TSC.IntervalItem.Day.Friday)
         weekly_schedule = TSC.ScheduleItem("Weekly-Schedule", 70, TSC.ScheduleItem.Type.Extract,
                                            TSC.ScheduleItem.ExecutionOrder.Serial, weekly_interval)
         weekly_schedule = server.schedules.create(weekly_schedule)
         print("Weekly schedule created (ID: {}).".format(weekly_schedule.id))
 
         # Monthly Schedule
-        monthly_interval = TSC.MonthlyInterval(time(23, 30), 15)
+        # This schedule will run on the 15th of every month at 11:30PM
+        monthly_interval = TSC.MonthlyInterval(start_time=time(23, 30),
+                                               interval_value=15)
         monthly_schedule = TSC.ScheduleItem("Monthly-Schedule", 80, TSC.ScheduleItem.Type.Subscription,
                                             TSC.ScheduleItem.ExecutionOrder.Parallel, monthly_interval)
         monthly_schedule = server.schedules.create(monthly_schedule)

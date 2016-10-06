@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 from .interval_item import *
-from .property_decorators import property_is_enum, property_not_nullable
+from .property_decorators import property_is_enum, property_not_nullable, property_is_int
 from .. import NAMESPACE
 
 
@@ -80,12 +80,9 @@ class ScheduleItem(object):
         return self._priority
 
     @priority.setter
+    @property_is_int(1, 100)
     def priority(self, value):
-        if value < 1 or value > 100:
-            error = "Invalid priority defined: {}.".format(value)
-            raise ValueError(error)
-        else:
-            self._priority = value
+        self._priority = value
 
     @property
     def schedule_type(self):
