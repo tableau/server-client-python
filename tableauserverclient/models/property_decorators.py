@@ -61,15 +61,22 @@ def property_is_valid_time(func):
     return wrapper
 
 
-def property_is_int(min, max=2**31):
+def property_is_int(range):
     def property_type_decorator(func):
         @wraps(func)
         def wrapper(self, value):
-            if min is None:
-                return func(self, value)
+            error = "Invalid priority defined: {}.".format(value)
+
+            if range is None:
+                if isinstance(value, int):
+                    return func(self, value)
+                else:
+                    raise ValueError(error)
+
+            min, max = range
 
             if value < min or value > max:
-                error = "Invalid priority defined: {}.".format(value)
+
                 raise ValueError(error)
 
             return func(self, value)

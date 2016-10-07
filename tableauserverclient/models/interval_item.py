@@ -81,8 +81,6 @@ class DailyInterval(object):
     def __init__(self, start_time):
         self.start_time = start_time
         self._frequency = IntervalItem.Frequency.Daily
-        self.end_time = None
-        self.interval = None
 
     @property
     def start_time(self):
@@ -100,7 +98,6 @@ class WeeklyInterval(object):
         self.start_time = start_time
         self._frequency = IntervalItem.Frequency.Weekly
         self.interval = interval_values
-        self.end_time = None
 
     @property
     def start_time(self):
@@ -129,7 +126,6 @@ class MonthlyInterval(object):
         self.start_time = start_time
         self._frequency = IntervalItem.Frequency.Monthly
         self.interval = str(interval_value)
-        self.end_time = None
 
     @property
     def start_time(self):

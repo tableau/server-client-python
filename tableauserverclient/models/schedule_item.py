@@ -77,7 +77,7 @@ class ScheduleItem(object):
         return self._priority
 
     @priority.setter
-    @property_is_int(1, 100)
+    @property_is_int(range=(1, 100))
     def priority(self, value):
         self._priority = value
 
