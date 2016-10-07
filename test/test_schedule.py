@@ -89,7 +89,7 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual(TSC.ScheduleItem.ExecutionOrder.Parallel, new_schedule.execution_order)
         self.assertEqual(time(2, 30), new_schedule.interval_item.start_time)
         self.assertEqual(time(23), new_schedule.interval_item.end_time)
-        self.assertEqual([('hours', "8")], new_schedule.interval_item.interval)
+        self.assertEqual("8", new_schedule.interval_item.interval)
 
     def test_create_daily(self):
         with open(CREATE_DAILY_XML, "rb") as f:
@@ -134,7 +134,7 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual("2016-09-16T16:15:00Z", new_schedule.next_run_at)
         self.assertEqual(TSC.ScheduleItem.ExecutionOrder.Parallel, new_schedule.execution_order)
         self.assertEqual(time(9, 15), new_schedule.interval_item.start_time)
-        self.assertEqual([("weekDay", "Monday"), ("weekDay", "Wednesday"), ("weekDay", "Friday")],
+        self.assertEqual(("Monday", "Wednesday", "Friday"),
                          new_schedule.interval_item.interval)
 
     def test_create_monthly(self):
@@ -157,7 +157,7 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual("2016-10-12T14:00:00Z", new_schedule.next_run_at)
         self.assertEqual(TSC.ScheduleItem.ExecutionOrder.Serial, new_schedule.execution_order)
         self.assertEqual(time(7), new_schedule.interval_item.start_time)
-        self.assertEqual([('monthDay', "12")], new_schedule.interval_item.interval)
+        self.assertEqual("12", new_schedule.interval_item.interval)
 
     def test_update(self):
         with open(UPDATE_XML, "rb") as f:
@@ -179,5 +179,5 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual("2016-09-16T14:00:00Z", single_schedule.next_run_at)
         self.assertEqual(TSC.ScheduleItem.ExecutionOrder.Parallel, single_schedule.execution_order)
         self.assertEqual(time(7), single_schedule.interval_item.start_time)
-        self.assertEqual([("weekDay", "Monday"), ("weekDay", "Friday")],
+        self.assertEqual(("Monday", "Friday"),
                          single_schedule.interval_item.interval)

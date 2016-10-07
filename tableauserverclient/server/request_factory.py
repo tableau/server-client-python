@@ -147,7 +147,7 @@ class ScheduleRequest(object):
         if hasattr(interval_item, 'interval'):
             if interval_item.interval:
                 intervals_element = ET.SubElement(frequency_element, 'intervals')
-                for interval in interval_item.interval:
+                for interval in interval_item._interval_type_pairs():
                     expression, value = interval
                     single_interval_element = ET.SubElement(intervals_element, 'interval')
                     single_interval_element.attrib[expression] = value
@@ -174,7 +174,7 @@ class ScheduleRequest(object):
                 frequency_element.attrib['end'] = str(interval_item.end_time)
         intervals_element = ET.SubElement(frequency_element, 'intervals')
         if hasattr(interval_item, 'interval'):
-            for interval in interval_item.interval:
+            for interval in interval_item._interval_type_pairs():
                 (expression, value) = interval
                 single_interval_element = ET.SubElement(intervals_element, 'interval')
                 single_interval_element.attrib[expression] = value

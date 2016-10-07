@@ -37,7 +37,6 @@ def main():
         # This schedule will run every 2 hours between 2:30AM and 11:00PM
         hourly_interval = TSC.HourlyInterval(start_time=time(2, 30),
                                              end_time=time(23, 0),
-                                             interval_occurrence=TSC.IntervalItem.Occurrence.Hours,
                                              interval_value=2)
 
         hourly_schedule = TSC.ScheduleItem("Hourly-Schedule", 50, TSC.ScheduleItem.Type.Extract,
