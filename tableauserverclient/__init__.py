@@ -1,7 +1,8 @@
 from .namespace import NAMESPACE
 from .models import ConnectionItem, DatasourceItem,\
-    GroupItem, PaginationItem, ProjectItem, \
-    SiteItem, TableauAuth, UserItem, ViewItem, WorkbookItem, UnpopulatedPropertyError
+    GroupItem, PaginationItem, ProjectItem, ScheduleItem, \
+    SiteItem, TableauAuth, UserItem, ViewItem, WorkbookItem, UnpopulatedPropertyError, \
+    HourlyInterval, DailyInterval, WeeklyInterval, MonthlyInterval, IntervalItem
 from .server import RequestOptions, Filter, Sort, Server, ServerResponseError,\
     MissingRequiredFieldError, NotSignedInError
 

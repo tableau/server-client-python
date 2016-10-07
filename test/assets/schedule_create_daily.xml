@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+    <schedule id="907cae38-72fd-417c-892a-95540c4664cd" name="daily-schedule-1" state="Active" priority="90" createdAt="2016-09-15T21:01:09Z" updatedAt="2016-09-15T21:01:09Z" type="Subscription" frequency="Daily" nextRunAt="2016-09-16T11:45:00Z" executionOrder="Serial">
+        <frequencyDetails start="04:45:00" />
+    </schedule>
+</tsResponse>
