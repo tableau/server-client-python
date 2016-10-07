@@ -26,12 +26,12 @@ class IntervalItem(object):
 
 
 class HourlyInterval(object):
-    def __init__(self, start_time, end_time, interval_occurrence, interval_value):
+    def __init__(self, start_time, end_time, interval_value):
 
         self.start_time = start_time
         self.end_time = end_time
         self._frequency = IntervalItem.Frequency.Hourly
-        self.interval = interval_occurrence, str(interval_value)
+        self.interval = interval_value
 
     @property
     def start_time(self):
@@ -58,25 +58,21 @@ class HourlyInterval(object):
         return self._interval
 
     @interval.setter
-    def interval(self, intervals):
-        interval_occurrence, interval_value = intervals
+    def interval(self, interval):
+        VALID_INTERVALS = {.25, .5, 1, 2, 4, 6, 8, 12}
 
-        Hours = IntervalItem.Occurrence.Hours
-        Minutes = IntervalItem.Occurrence.Minutes
+        if float(interval) not in VALID_INTERVALS:
+            error = "Invalid interval {} not in {}".format(interval, str(VALID_INTERVALS))
+            raise ValueError(error)
 
-        VALID_HOUR_INTERVALS = {1, 2, 4, 6, 8, 12}
-        VALID_MIN_INTERVALS = {15, 30}
-        VALID_OCCUR_TYPES = {Hours, Minutes}
-
-        if interval_occurrence not in VALID_OCCUR_TYPES:
-            error = "Invalid interval type {} not in {}.".format(interval_occurrence, str(VALID_OCCUR_TYPES))
-            raise ValueError(error)
-        elif interval_occurrence == Hours and int(interval_value) not in VALID_HOUR_INTERVALS:
-            error = "Invalid hour value {} not in {}".format(interval_value, str(VALID_HOUR_INTERVALS))
-            raise ValueError(error)
-        elif interval_occurrence == Minutes and int(interval_value) not in VALID_MIN_INTERVALS:
-            error = "Invalid minute value {} not in {}".format(interval_value, str(VALID_MIN_INTERVALS))
-            raise ValueError(error)
+        # We use fractional hours for the two minute-based intervals.
+        # Need to convert to minutes from hours here
+        if interval in {.25, .5}:
+            interval_value = int(interval * 60)
+            interval_occurrence = IntervalItem.Occurrence.Minutes
+        else:
+            interval_value = interval
+            interval_occurrence = IntervalItem.Occurrence.Hours
 
         self._interval = [(interval_occurrence, str(interval_value))]
 

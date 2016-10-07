@@ -23,7 +23,6 @@ class ScheduleItem(object):
         self._created_at = None
         self._end_schedule_at = None
         self._execution_order = None
-        self._frequency = None
         self._id = None
         self._name = None
         self._next_run_at = None
@@ -55,10 +54,6 @@ class ScheduleItem(object):
     @property_is_enum(ExecutionOrder)
     def execution_order(self, value):
         self._execution_order = value
-
-    @property
-    def frequency(self):
-        return self._frequency
 
     @property
     def id(self):
@@ -113,7 +108,7 @@ class ScheduleItem(object):
         if not isinstance(schedule_xml, ET.Element):
             schedule_xml = ET.fromstring(schedule_xml).find('.//t:schedule', namespaces=NAMESPACE)
         if schedule_xml is not None:
-            (_, name, _, _, updated_at, _, frequency, next_run_at, end_schedule_at, execution_order,
+            (_, name, _, _, updated_at, _, next_run_at, end_schedule_at, execution_order,
              priority, interval_item) = self._parse_element(schedule_xml)
 
             self._set_values(id=None,
@@ -122,7 +117,6 @@ class ScheduleItem(object):
                              created_at=None,
                              updated_at=updated_at,
                              schedule_type=None,
-                             frequency=frequency,
                              next_run_at=next_run_at,
                              end_schedule_at=end_schedule_at,
                              execution_order=execution_order,
@@ -131,7 +125,7 @@ class ScheduleItem(object):
 
         return self
 
-    def _set_values(self, id, name, state, created_at, updated_at, schedule_type, frequency,
+    def _set_values(self, id, name, state, created_at, updated_at, schedule_type,
                     next_run_at, end_schedule_at, execution_order, priority, interval_item):
         if id is not None:
             self._id = id
@@ -145,8 +139,6 @@ class ScheduleItem(object):
             self._updated_at = updated_at
         if schedule_type:
             self._schedule_type = schedule_type
-        if frequency:
-            self._frequency = frequency
         if next_run_at:
             self._next_run_at = next_run_at
         if end_schedule_at:
@@ -164,7 +156,7 @@ class ScheduleItem(object):
         parsed_response = ET.fromstring(resp)
         all_schedule_xml = parsed_response.findall('.//t:schedule', namespaces=NAMESPACE)
         for schedule_xml in all_schedule_xml:
-            (id, name, state, created_at, updated_at, schedule_type, frequency, next_run_at,
+            (id, name, state, created_at, updated_at, schedule_type, next_run_at,
              end_schedule_at, execution_order, priority, interval_item) = cls._parse_element(schedule_xml)
 
             schedule_item = cls(name, priority, schedule_type, execution_order, interval_item)
@@ -175,7 +167,6 @@ class ScheduleItem(object):
                                       created_at=created_at,
                                       updated_at=updated_at,
                                       schedule_type=None,
-                                      frequency=frequency,
                                       next_run_at=next_run_at,
                                       end_schedule_at=end_schedule_at,
                                       execution_order=None,
@@ -202,7 +193,13 @@ class ScheduleItem(object):
 
         if frequency == IntervalItem.Frequency.Hourly:
             interval_occurrence, interval_value = interval.pop()
-            return HourlyInterval(start_time, end_time, interval_occurrence, interval_value)
+
+            # We use fractional hours for the two minute-based intervals.
+            # Need to convert to hours from minutes here
+            if interval_occurrence == IntervalItem.Occurrence.Minutes:
+                interval_value = float(interval_value / 60)
+
+            return HourlyInterval(start_time, end_time, interval_value)
 
         if frequency == IntervalItem.Frequency.Weekly:
             interval_values = [i[1] for i in interval]
@@ -234,5 +231,5 @@ class ScheduleItem(object):
         if frequency_detail_elem is not None:
             interval_item = ScheduleItem._parse_interval_item(frequency_detail_elem, frequency)
 
-        return id, name, state, created_at, updated_at, schedule_type,\
-            frequency, next_run_at, end_schedule_at, execution_order, priority, interval_item
+        return id, name, state, created_at, updated_at, schedule_type, \
+            next_run_at, end_schedule_at, execution_order, priority, interval_item

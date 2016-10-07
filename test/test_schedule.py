@@ -40,7 +40,6 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual("2016-07-06T20:19:00Z", all_schedules[0].created_at)
         self.assertEqual("2016-09-13T11:00:32Z", all_schedules[0].updated_at)
         self.assertEqual("Extract", all_schedules[0].schedule_type)
-        self.assertEqual("Weekly", all_schedules[0].frequency)
         self.assertEqual("2016-09-14T11:00:00Z", all_schedules[0].next_run_at)
 
         self.assertEqual("bcb79d07-6e47-472f-8a65-d7f51f40c36c", all_schedules[1].id)
@@ -50,7 +49,6 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual("2016-07-07T20:19:00Z", all_schedules[1].created_at)
         self.assertEqual("2016-09-12T16:39:38Z", all_schedules[1].updated_at)
         self.assertEqual("Subscription", all_schedules[1].schedule_type)
-        self.assertEqual("Weekly", all_schedules[1].frequency)
         self.assertEqual("2016-09-18T06:00:00Z", all_schedules[1].next_run_at)
 
     def test_get_empty(self):
@@ -75,7 +73,6 @@ class ScheduleTests(unittest.TestCase):
             m.post(self.baseurl, text=response_xml)
             hourly_interval = TSC.HourlyInterval(start_time=time(2, 30),
                                                  end_time=time(23, 0),
-                                                 interval_occurrence=TSC.IntervalItem.Occurrence.Hours,
                                                  interval_value=2)
             new_schedule = TSC.ScheduleItem("hourly-schedule-1", 50, TSC.ScheduleItem.Type.Extract,
                                             TSC.ScheduleItem.ExecutionOrder.Parallel, hourly_interval)
@@ -88,7 +85,6 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual("2016-09-15T20:47:33Z", new_schedule.created_at)
         self.assertEqual("2016-09-15T20:47:33Z", new_schedule.updated_at)
         self.assertEqual(TSC.ScheduleItem.Type.Extract, new_schedule.schedule_type)
-        self.assertEqual(TSC.IntervalItem.Frequency.Hourly, new_schedule.frequency)
         self.assertEqual("2016-09-16T01:30:00Z", new_schedule.next_run_at)
         self.assertEqual(TSC.ScheduleItem.ExecutionOrder.Parallel, new_schedule.execution_order)
         self.assertEqual(time(2, 30), new_schedule.interval_item.start_time)
@@ -112,7 +108,6 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual("2016-09-15T21:01:09Z", new_schedule.created_at)
         self.assertEqual("2016-09-15T21:01:09Z", new_schedule.updated_at)
         self.assertEqual(TSC.ScheduleItem.Type.Subscription, new_schedule.schedule_type)
-        self.assertEqual(TSC.IntervalItem.Frequency.Daily, new_schedule.frequency)
         self.assertEqual("2016-09-16T11:45:00Z", new_schedule.next_run_at)
         self.assertEqual(TSC.ScheduleItem.ExecutionOrder.Serial, new_schedule.execution_order)
         self.assertEqual(time(4, 45), new_schedule.interval_item.start_time)
@@ -136,7 +131,6 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual("2016-09-15T21:12:50Z", new_schedule.created_at)
         self.assertEqual("2016-09-15T21:12:50Z", new_schedule.updated_at)
         self.assertEqual(TSC.ScheduleItem.Type.Extract, new_schedule.schedule_type)
-        self.assertEqual(TSC.IntervalItem.Frequency.Weekly, new_schedule.frequency)
         self.assertEqual("2016-09-16T16:15:00Z", new_schedule.next_run_at)
         self.assertEqual(TSC.ScheduleItem.ExecutionOrder.Parallel, new_schedule.execution_order)
         self.assertEqual(time(9, 15), new_schedule.interval_item.start_time)
@@ -160,7 +154,6 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual("2016-09-15T21:16:56Z", new_schedule.created_at)
         self.assertEqual("2016-09-15T21:16:56Z", new_schedule.updated_at)
         self.assertEqual(TSC.ScheduleItem.Type.Extract, new_schedule.schedule_type)
-        self.assertEqual(TSC.IntervalItem.Frequency.Monthly, new_schedule.frequency)
         self.assertEqual("2016-10-12T14:00:00Z", new_schedule.next_run_at)
         self.assertEqual(TSC.ScheduleItem.ExecutionOrder.Serial, new_schedule.execution_order)
         self.assertEqual(time(7), new_schedule.interval_item.start_time)
@@ -183,7 +176,6 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual(90, single_schedule.priority)
         self.assertEqual("2016-09-15T23:50:02Z", single_schedule.updated_at)
         self.assertEqual(TSC.ScheduleItem.Type.Extract, single_schedule.schedule_type)
-        self.assertEqual(TSC.IntervalItem.Frequency.Weekly, single_schedule.frequency)
         self.assertEqual("2016-09-16T14:00:00Z", single_schedule.next_run_at)
         self.assertEqual(TSC.ScheduleItem.ExecutionOrder.Parallel, single_schedule.execution_order)
         self.assertEqual(time(7), single_schedule.interval_item.start_time)
