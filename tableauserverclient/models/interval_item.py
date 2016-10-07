@@ -1,7 +1,4 @@
-import xml.etree.ElementTree as ET
-from datetime import datetime
-from .property_decorators import property_is_valid_time
-from .. import NAMESPACE
+from .property_decorators import property_is_valid_time, property_not_nullable
 
 
 class IntervalItem(object):
@@ -12,8 +9,8 @@ class IntervalItem(object):
         Monthly = "Monthly"
 
     class Occurrence:
-        Hours = "hours"
         Minutes = "minutes"
+        Hours = "hours"
         WeekDay = "weekDay"
         MonthDay = "monthDay"
 
@@ -42,6 +39,7 @@ class HourlyInterval(object):
 
     @start_time.setter
     @property_is_valid_time
+    @property_not_nullable
     def start_time(self, value):
         self._start_time = value
 
@@ -51,6 +49,7 @@ class HourlyInterval(object):
 
     @end_time.setter
     @property_is_valid_time
+    @property_not_nullable
     def end_time(self, value):
         self._end_time = value
 
@@ -95,6 +94,7 @@ class DailyInterval(object):
 
     @start_time.setter
     @property_is_valid_time
+    @property_not_nullable
     def start_time(self, value):
         self._start_time = value
 
@@ -112,6 +112,7 @@ class WeeklyInterval(object):
 
     @start_time.setter
     @property_is_valid_time
+    @property_not_nullable
     def start_time(self, value):
         self._start_time = value
 
@@ -140,6 +141,7 @@ class MonthlyInterval(object):
 
     @start_time.setter
     @property_is_valid_time
+    @property_not_nullable
     def start_time(self, value):
         self._start_time = value
 
