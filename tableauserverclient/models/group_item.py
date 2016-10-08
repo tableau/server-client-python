@@ -8,10 +8,7 @@ class GroupItem(object):
     def __init__(self, name):
         self._domain_name = None
         self._id = None
-        self._name = None
         self._users = None
-
-        # Invoke setter
         self.name = name
 
     @property

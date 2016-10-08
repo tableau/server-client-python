@@ -16,11 +16,9 @@ class ServerResponseError(Exception):
     def from_response(cls, resp):
         # Check elements exist before .text
         parsed_response = ET.fromstring(resp)
-        error_response = cls(
-           parsed_response.find('t:error', namespaces=NAMESPACE).get('code', ''),
-           parsed_response.find('.//t:summary', namespaces=NAMESPACE).text,
-           parsed_response.find('.//t:detail', namespaces=NAMESPACE).text
-        )
+        error_response = cls(parsed_response.find('t:error', namespaces=NAMESPACE).get('code', ''),
+                             parsed_response.find('.//t:summary', namespaces=NAMESPACE).text,
+                             parsed_response.find('.//t:detail', namespaces=NAMESPACE).text)
         return error_response
 
 

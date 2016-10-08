@@ -15,17 +15,13 @@ class WorkbookItem(object):
         self._id = None
         self._initial_tags = set()
         self._preview_image = None
-        self._project_id = None
         self._project_name = None
-        self._show_tabs = None
         self._size = None
         self._updated_at = None
         self._views = None
         self.name = name
         self.owner_id = None
         self.tags = set()
-
-        # Invoke setter
         self.project_id = project_id
         self.show_tabs = show_tabs
 

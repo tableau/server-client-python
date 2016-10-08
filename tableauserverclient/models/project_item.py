@@ -11,16 +11,9 @@ class ProjectItem(object):
     def __init__(self, name, description=None, content_permissions=None):
         self._content_permissions = None
         self._id = None
-        self._name = None
         self.description = description
-
-        # Invoke setter
         self.name = name
-
-        if content_permissions:
-            # In order to invoke the setter method to validate content_permissions,
-            # _content_permissions must be initialized first.
-            self.content_permissions = content_permissions
+        self.content_permissions = content_permissions
 
     @property
     def content_permissions(self):

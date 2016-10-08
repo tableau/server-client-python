@@ -22,17 +22,11 @@ class ScheduleItem(object):
     def __init__(self, name, priority, schedule_type, execution_order, interval_item):
         self._created_at = None
         self._end_schedule_at = None
-        self._execution_order = None
         self._id = None
-        self._name = None
         self._next_run_at = None
-        self._priority = None
-        self._schedule_type = None
         self._state = None
         self._updated_at = None
         self.interval_item = interval_item
-
-        # Invoke setter
         self.execution_order = execution_order
         self.name = name
         self.priority = priority
