@@ -11,15 +11,12 @@ class DatasourceItem(object):
         self._content_url = None
         self._created_at = None
         self._id = None
-        self._project_id = None
         self._project_name = None
         self._tags = set()
         self._datasource_type = None
         self._updated_at = None
         self.name = name
         self.owner_id = None
-
-        # Invoke setter
         self.project_id = project_id
 
     @property

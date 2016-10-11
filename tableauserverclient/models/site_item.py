@@ -15,31 +15,20 @@ class SiteItem(object):
     def __init__(self, name, content_url, admin_mode=None, user_quota=None, storage_quota=None,
                  disable_subscriptions=False, subscribe_others_enabled=True, revision_history_enabled=False):
         self._admin_mode = None
-        self._content_url = None
-        self._disable_subscriptions = None
         self._id = None
-        self._name = None
         self._num_users = None
-        self._revision_history_enabled = None
         self._state = None
         self._status_reason = None
         self._storage = None
-        self._subscribe_others_enabled = None
         self.revision_limit = None
         self.user_quota = user_quota
         self.storage_quota = storage_quota
-
-        # Invoke setter
         self.content_url = content_url
         self.disable_subscriptions = disable_subscriptions
         self.name = name
         self.revision_history_enabled = revision_history_enabled
         self.subscribe_others_enabled = subscribe_others_enabled
-
-        if admin_mode:
-            # In order to invoke the setter method to validate admin_mode,
-            # _admin_mode must be initialized first.
-            self.admin_mode = admin_mode
+        self.admin_mode = admin_mode
 
     @property
     def admin_mode(self):

@@ -25,21 +25,13 @@ class UserItem(object):
         self._external_auth_user_id = None
         self._id = None
         self._last_login = None
-        self._name = None
-        self._site_role = None
         self._workbooks = None
         self.email = None
         self.fullname = None
         self.password = None
-
-        # Invoke setter
         self.name = name
         self.site_role = site_role
-
-        if auth_setting:
-            # In order to invoke the setter method for auth_setting,
-            # _auth_setting must be initialized first
-            self.auth_setting = auth_setting
+        self.auth_setting = auth_setting
 
     @property
     def auth_setting(self):
