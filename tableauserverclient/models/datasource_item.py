@@ -6,6 +6,18 @@ from .. import NAMESPACE
 
 
 class DatasourceItem(object):
+
+    ALLOWED_ATTRIBUTES = {'id': '_id',
+                          'name': 'name',
+                          'datasource_type': '_datasource_type',
+                          'content_url': '_content_url',
+                          'created_at': '_created_at',
+                          'updated_at': '_updated_at',
+                          'tags': '_tags',
+                          'project_id': 'project_id',
+                          'project_name': '_project_name',
+                          'owner_id': 'owner_id'}
+
     def __init__(self, project_id, name=None):
         self._connections = None
         self._content_url = None
@@ -70,32 +82,16 @@ class DatasourceItem(object):
         if not isinstance(datasource_xml, ET.Element):
             datasource_xml = ET.fromstring(datasource_xml).find('.//t:datasource', namespaces=NAMESPACE)
         if datasource_xml is not None:
-            (_, _, _, _, _, updated_at, _, project_id, project_name, owner_id) = self._parse_element(datasource_xml)
-            self._set_values(None, None, None, None, None, updated_at, None, project_id, project_name, owner_id)
+            attribs = self._parse_element(datasource_xml)
+            self._set_values(attribs)
         return self
 
-    def _set_values(self, id, name, datasource_type, content_url, created_at,
-                    updated_at, tags, project_id, project_name, owner_id):
-        if id is not None:
-            self._id = id
-        if name:
-            self.name = name
-        if datasource_type:
-            self._datasource_type = datasource_type
-        if content_url:
-            self._content_url = content_url
-        if created_at:
-            self._created_at = created_at
-        if updated_at:
-            self._updated_at = updated_at
-        if tags:
-            self._tags = tags
-        if project_id:
-            self.project_id = project_id
-        if project_name:
-            self._project_name = project_name
-        if owner_id:
-            self.owner_id = owner_id
+    def _set_values(self, ds_attributes):
+
+        for attribute in DatasourceItem.ALLOWED_ATTRIBUTES:
+            if attribute in ds_attributes and ds_attributes[attribute]:
+                setattr(self, DatasourceItem.ALLOWED_ATTRIBUTES[attribute], ds_attributes[attribute])
+
 
     @classmethod
     def from_response(cls, resp):
@@ -104,11 +100,9 @@ class DatasourceItem(object):
         all_datasource_xml = parsed_response.findall('.//t:datasource', namespaces=NAMESPACE)
 
         for datasource_xml in all_datasource_xml:
-            (id, name, datasource_type, content_url, created_at, updated_at,
-             tags, project_id, project_name, owner_id) = cls._parse_element(datasource_xml)
-            datasource_item = cls(project_id)
-            datasource_item._set_values(id, name, datasource_type, content_url, created_at, updated_at,
-                                        tags, None, project_name, owner_id)
+            attribs = cls._parse_element(datasource_xml)
+            datasource_item = cls(attribs['project_id'])
+            datasource_item._set_values(attribs)
             all_datasource_items.append(datasource_item)
         return all_datasource_items
 
@@ -138,4 +132,4 @@ class DatasourceItem(object):
         if owner_elem is not None:
             owner_id = owner_elem.get('id', None)
 
-        return id, name, datasource_type, content_url, created_at, updated_at, tags, project_id, project_name, owner_id
+        return {k: v for k, v in locals().items()}
