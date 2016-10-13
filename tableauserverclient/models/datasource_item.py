@@ -5,18 +5,27 @@ from .tag_item import TagItem
 from .. import NAMESPACE
 
 
+def _get_tags(datasource_xml):
+    tags = None
+    tags_elem = datasource_xml.find('.//t:tags', namespaces=NAMESPACE)
+    if tags_elem is not None:
+        tags = TagItem.from_xml_element(tags_elem)
+    return tags
+
+
 class DatasourceItem(object):
 
-    ALLOWED_ATTRIBUTES = {'id': '_id',
-                          'name': 'name',
-                          'datasource_type': '_datasource_type',
-                          'content_url': '_content_url',
-                          'created_at': '_created_at',
-                          'updated_at': '_updated_at',
-                          'tags': '_tags',
-                          'project_id': 'project_id',
-                          'project_name': '_project_name',
-                          'owner_id': 'owner_id'}
+    SCHEMA = {'_id': lambda x: x.get('id', None),
+              'name': lambda x: x.get('name', None),
+              '_datasource_type': lambda x: x.get('type', None),
+              '_content_url': lambda x: x.get('contentUrl', None),
+              '_created_at': lambda x: x.get('createdAt', None),
+              '_updated_at': lambda x: x.get('updatedAt', None),
+              '_tags': _get_tags,
+              'project_id': lambda x: x.find('.//t:project', namespaces=NAMESPACE).get('id', None),
+              '_project_name': lambda x: x.find('.//t:project', namespaces=NAMESPACE).get('name', None),
+              'owner_id': lambda x: x.find('.//t:owner', namespaces=NAMESPACE).get('id', None),
+              }
 
     def __init__(self, project_id, name=None):
         self._connections = None
@@ -82,16 +91,14 @@ class DatasourceItem(object):
         if not isinstance(datasource_xml, ET.Element):
             datasource_xml = ET.fromstring(datasource_xml).find('.//t:datasource', namespaces=NAMESPACE)
         if datasource_xml is not None:
-            attribs = self._parse_element(datasource_xml)
+            UPDATE_FIELDS = 'created_at', 'project_name', 'project_id', 'owner_id'
+            attribs = {k: v for k, v in self._parse_element(datasource_xml).items() if k in UPDATE_FIELDS}
             self._set_values(attribs)
         return self
 
     def _set_values(self, ds_attributes):
-
-        for attribute in DatasourceItem.ALLOWED_ATTRIBUTES:
-            if attribute in ds_attributes and ds_attributes[attribute]:
-                setattr(self, DatasourceItem.ALLOWED_ATTRIBUTES[attribute], ds_attributes[attribute])
-
+        for attribute in ds_attributes:
+            setattr(self, attribute, ds_attributes[attribute])
 
     @classmethod
     def from_response(cls, resp):
@@ -108,28 +115,8 @@ class DatasourceItem(object):
 
     @staticmethod
     def _parse_element(datasource_xml):
-        id = datasource_xml.get('id', None)
-        name = datasource_xml.get('name', None)
-        datasource_type = datasource_xml.get('type', None)
-        content_url = datasource_xml.get('contentUrl', None)
-        created_at = datasource_xml.get('createdAt', None)
-        updated_at = datasource_xml.get('updatedAt', None)
+        attribs = {}
+        for attribute, getter in DatasourceItem.SCHEMA.items():
+            attribs[attribute] = getter(datasource_xml)
 
-        tags = None
-        tags_elem = datasource_xml.find('.//t:tags', namespaces=NAMESPACE)
-        if tags_elem is not None:
-            tags = TagItem.from_xml_element(tags_elem)
-
-        project_id = None
-        project_name = None
-        project_elem = datasource_xml.find('.//t:project', namespaces=NAMESPACE)
-        if project_elem is not None:
-            project_id = project_elem.get('id', None)
-            project_name = project_elem.get('name', None)
-
-        owner_id = None
-        owner_elem = datasource_xml.find('.//t:owner', namespaces=NAMESPACE)
-        if owner_elem is not None:
-            owner_id = owner_elem.get('id', None)
-
-        return {k: v for k, v in locals().items()}
+        return attribs
