@@ -88,7 +88,8 @@ class Workbooks(Endpoint):
         server_response = self.put_request(url, update_req)
         logger.info('Updated workbook item (ID: {0}'.format(workbook_item.id))
         updated_workbook = copy.copy(workbook_item)
-        return updated_workbook._parse_common_tags(server_response.content)
+        return updated_workbook._parse_and_set_attribs(server_response.content,
+                                                       ('show_tabs', 'project_id', 'project_name', 'owner_id'))
 
     # Download workbook contents with option of passing in filepath
     def download(self, workbook_id, filepath=None):

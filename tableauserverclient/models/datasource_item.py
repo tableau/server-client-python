@@ -13,6 +13,24 @@ def _get_tags(datasource_xml):
     return tags
 
 
+def _get_project_id(datasource_xml):
+    project_elem = datasource_xml.find('.//t:project', namespaces=NAMESPACE)
+    if project_elem is not None:
+        return project_elem.get('id', None)
+
+
+def _get_project_name(datasource_xml):
+    project_elem = datasource_xml.find('.//t:project', namespaces=NAMESPACE)
+    if project_elem is not None:
+        return project_elem.get('name', None)
+
+
+def _get_owner_id(datasource_xml):
+    owner_elem = datasource_xml.find('.//t:owner', namespaces=NAMESPACE)
+    if owner_elem is not None:
+        return owner_elem.get('id', None)
+
+
 class DatasourceItem(object):
 
     SCHEMA = {'_id': lambda x: x.get('id', None),
@@ -22,9 +40,9 @@ class DatasourceItem(object):
               '_created_at': lambda x: x.get('createdAt', None),
               '_updated_at': lambda x: x.get('updatedAt', None),
               '_tags': _get_tags,
-              'project_id': lambda x: x.find('.//t:project', namespaces=NAMESPACE).get('id', None),
-              '_project_name': lambda x: x.find('.//t:project', namespaces=NAMESPACE).get('name', None),
-              'owner_id': lambda x: x.find('.//t:owner', namespaces=NAMESPACE).get('id', None),
+              'project_id': _get_project_id,
+              '_project_name': _get_project_name,
+              'owner_id': _get_owner_id
               }
 
     def __init__(self, project_id, name=None):
@@ -87,12 +105,11 @@ class DatasourceItem(object):
     def _set_connections(self, connections):
         self._connections = connections
 
-    def _parse_common_tags(self, datasource_xml):
+    def _parse_and_set_attribs(self, datasource_xml, attributes):
         if not isinstance(datasource_xml, ET.Element):
             datasource_xml = ET.fromstring(datasource_xml).find('.//t:datasource', namespaces=NAMESPACE)
         if datasource_xml is not None:
-            UPDATE_FIELDS = 'created_at', 'project_name', 'project_id', 'owner_id'
-            attribs = {k: v for k, v in self._parse_element(datasource_xml).items() if k in UPDATE_FIELDS}
+            attribs = {k: v for k, v in self._parse_xml(datasource_xml).items() if k in attributes}
             self._set_values(attribs)
         return self
 
@@ -107,14 +124,14 @@ class DatasourceItem(object):
         all_datasource_xml = parsed_response.findall('.//t:datasource', namespaces=NAMESPACE)
 
         for datasource_xml in all_datasource_xml:
-            attribs = cls._parse_element(datasource_xml)
+            attribs = DatasourceItem._parse_xml(datasource_xml)
             datasource_item = cls(attribs['project_id'])
             datasource_item._set_values(attribs)
             all_datasource_items.append(datasource_item)
         return all_datasource_items
 
     @staticmethod
-    def _parse_element(datasource_xml):
+    def _parse_xml(datasource_xml):
         attribs = {}
         for attribute, getter in DatasourceItem.SCHEMA.items():
             attribs[attribute] = getter(datasource_xml)
