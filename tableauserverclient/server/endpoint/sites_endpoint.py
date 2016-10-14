@@ -59,7 +59,12 @@ class Sites(Endpoint):
             raise ValueError(error)
         url = "{0}/{1}".format(self.baseurl, site_id)
         self.delete_request(url)
-        logger.info('Deleted single site (ID: {0})'.format(site_id))
+        # Deleting the site also signs you out on the Server.
+        # Here we check that you're deleting the site you are signed in to
+        # (Which is true now but may not always be) and then clear auth tokens
+        if site_id == self.parent_srv._site_id:
+            self.parent_srv._clear_auth()
+        logger.info('Deleted single site (ID: {0}) and signed out'.format(site_id))
 
     # Create new site
     def create(self, site_item):

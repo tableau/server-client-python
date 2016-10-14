@@ -41,6 +41,9 @@ class Auth(Endpoint):
 
     def sign_out(self):
         url = "{0}/{1}".format(self.baseurl, 'signout')
+        # If there are no auth tokens you're already signed out. No-op
+        if not self.parent_srv._auth_token:
+            return
         self.post_request(url, '')
         self.parent_srv._clear_auth()
         logger.info('Signed out')
