@@ -17,7 +17,7 @@ class SiteTests(unittest.TestCase):
 
         # Fake signin
         self.server._auth_token = 'j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM'
-
+        self.server._site_id = '0626857c-1def-4503-a7d8-7907c3ff9d9f'
         self.baseurl = self.server.sites.baseurl
 
     def test_get(self):

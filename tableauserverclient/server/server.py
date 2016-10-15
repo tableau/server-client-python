@@ -81,3 +81,6 @@ class Server(object):
     @property
     def session(self):
         return self._session
+
+    def is_signed_in(self):
+        return self._auth_token is not None
