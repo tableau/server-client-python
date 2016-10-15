@@ -62,6 +62,7 @@ class Sites(Endpoint):
         # If we deleted the site we are logged into
         # then we are automatically logged out
         if site_id == self.parent_srv.site_id:
+            logger.info('Deleting current site and clearing auth tokens')
             self.parent_srv._clear_auth()
         logger.info('Deleted single site (ID: {0}) and signed out'.format(site_id))
 
