@@ -1,3 +1,4 @@
+import re
 from functools import wraps
 
 
@@ -84,3 +85,17 @@ def property_is_int(range):
         return wrapper
 
     return property_type_decorator
+
+
+def property_matches(regex_to_match, error):
+
+    compiled_re = re.compile(regex_to_match)
+
+    def wrapper(func):
+        @wraps(func)
+        def validate_regex_decorator(self, value):
+            if not compiled_re.match(value):
+                raise ValueError(error)
+            return func(self, value)
+        return validate_regex_decorator
+    return wrapper
