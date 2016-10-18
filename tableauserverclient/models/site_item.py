@@ -1,6 +1,10 @@
 import xml.etree.ElementTree as ET
-from .property_decorators import property_is_enum, property_is_boolean, property_not_empty, property_not_nullable
+from .property_decorators import (property_is_enum, property_is_boolean, property_matches,
+                                  property_not_empty, property_not_nullable)
 from .. import NAMESPACE
+
+
+VALID_CONTENT_URL_RE = r"^[a-zA-Z0-9_\-]*$"
 
 
 class SiteItem(object):
@@ -45,6 +49,7 @@ class SiteItem(object):
 
     @content_url.setter
     @property_not_nullable
+    @property_matches(VALID_CONTENT_URL_RE)
     def content_url(self, value):
         self._content_url = value
 

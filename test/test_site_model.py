@@ -1,3 +1,5 @@
+# coding=utf-8
+
 import unittest
 import tableauserverclient as TSC
 
@@ -19,10 +21,21 @@ class SiteModelTests(unittest.TestCase):
             site.admin_mode = "Hello"
 
     def test_invalid_content_url(self):
-        self.assertRaises(ValueError, TSC.SiteItem, "site", None)
-        site = TSC.SiteItem("site", "url")
+
         with self.assertRaises(ValueError):
-            site.content_url = None
+            site = TSC.SiteItem(name="蚵仔煎", content_url="蚵仔煎")
+
+        with self.assertRaises(ValueError):
+            site = TSC.SiteItem(name="蚵仔煎", content_url=None)
+
+    def test_set_valid_content_url(self):
+        # Default Site
+        site = TSC.SiteItem(name="Default", content_url="")
+        self.assertEqual(site.content_url, "")
+
+        # Unicode Name and ascii content_url
+        site = TSC.SiteItem(name="蚵仔煎", content_url="omlette")
+        self.assertEqual(site.content_url, "omlette")
 
     def test_invalid_disable_subscriptions(self):
         site = TSC.SiteItem("site", "url")
