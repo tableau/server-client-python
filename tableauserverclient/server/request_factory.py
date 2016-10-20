@@ -77,6 +77,12 @@ class GroupRequest(object):
         user_element.attrib['id'] = user_id
         return ET.tostring(xml_request)
 
+    def create_req(self, group_item):
+        xml_request = ET.Element('tsRequest')
+        group_element = ET.SubElement(xml_request, 'group')
+        group_element.attrib['name'] = group_item.name
+        return ET.tostring(xml_request)
+
 
 class PermissionRequest(object):
     def _add_capability(self, parent_element, capability_set, mode):

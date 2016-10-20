@@ -46,6 +46,14 @@ class Groups(Endpoint):
         self.delete_request(url)
         logger.info('Deleted single group (ID: {0})'.format(group_id))
 
+    def create(self, group_item):
+        url = self.baseurl
+        create_req = RequestFactory.Group.create_req(group_item)
+        server_response = self.post_request(url, create_req)
+        new_group = GroupItem.from_response(server_response.content)[0]
+
+        return new_group
+
     # Removes 1 user from 1 group
     def remove_user(self, group_item, user_id):
         self._remove_user(group_item, user_id)
