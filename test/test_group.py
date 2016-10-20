@@ -1,3 +1,4 @@
+# encoding=utf-8
 import unittest
 import os
 import requests_mock
@@ -163,7 +164,7 @@ class GroupTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
-            group_to_create = TSC.GroupItem('test')
+            group_to_create = TSC.GroupItem(u'試供品')
             group = self.server.groups.create(group_to_create)
-            self.assertEqual(group.name, 'test')
+            self.assertEqual(group.name, u'試供品')
             self.assertEqual(group.id, '3e4a9ea0-a07a-4fe6-b50f-c345c8c81034')
