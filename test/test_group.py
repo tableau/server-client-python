@@ -1,3 +1,4 @@
+# encoding=utf-8
 import unittest
 import os
 import requests_mock
@@ -8,6 +9,8 @@ TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 GET_XML = os.path.join(TEST_ASSET_DIR, 'group_get.xml')
 POPULATE_USERS = os.path.join(TEST_ASSET_DIR, 'group_populate_users.xml')
 ADD_USER = os.path.join(TEST_ASSET_DIR, 'group_add_user.xml')
+CREATE_GROUP = os.path.join(TEST_ASSET_DIR, 'group_create.xml')
+CREATE_GROUP_ASYNC = os.path.join(TEST_ASSET_DIR, 'group_create_async.xml')
 
 
 class GroupTests(unittest.TestCase):
@@ -155,3 +158,13 @@ class GroupTests(unittest.TestCase):
         single_group._users = []
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.groups.remove_user, single_group,
                           '5de011f8-5aa9-4d5b-b991-f462c8dd6bb7')
+
+    def test_create_group(self):
+        with open(CREATE_GROUP, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.post(self.baseurl, text=response_xml)
+            group_to_create = TSC.GroupItem(u'試供品')
+            group = self.server.groups.create(group_to_create)
+            self.assertEqual(group.name, u'試供品')
+            self.assertEqual(group.id, '3e4a9ea0-a07a-4fe6-b50f-c345c8c81034')
