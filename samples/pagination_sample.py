@@ -16,14 +16,15 @@ import os.path
 
 import tableauserverclient as TSC
 
+
 class pagination_generator(object):
     """ This class returns a generator that will iterate over all of the results.
 
     server is the server object that will be used when calling the callback.  It will be passed
     to the callback on each iteration
 
-    Callback is expected to take a server object and a request options and return two values, an array of results, and the pagination item
-    from the current call.  This will be used to build subsequent requests.
+    Callback is expected to take a server object and a request options and return two values, an array of results,
+    and the pagination item from the current call.  This will be used to build subsequent requests.
     """
 
     def __init__(self, server, callback):
