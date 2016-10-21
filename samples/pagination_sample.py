@@ -1,6 +1,6 @@
 ####
 # This script demonstrates how to use pagination item that is returned as part
-# of mayn of the .get() method calls.
+# of many of the .get() method calls.
 #
 # This script will iterate over every workbook that exists on the server using the
 # pagination item to fetch additional pages as needed.
@@ -51,7 +51,7 @@ class pagination_generator(object):
 
 def main():
 
-    parser = argparse.ArgumentParser(description='Explore workbook functions supported by the Server API.')
+    parser = argparse.ArgumentParser(description='Return a list of all of the workbooks on your server')
     parser.add_argument('--server', '-s', required=True, help='server address')
     parser.add_argument('--username', '-u', required=True, help='username to sign into server')
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
