@@ -27,12 +27,11 @@ class pagination_generator(object):
     and the pagination item from the current call.  This will be used to build subsequent requests.
     """
 
-    def __init__(self, server, callback):
-        self._server = server
-        self._callback = callback
+    def __init__(self, fetch_more):
+        self._fetch_more = fetch_more
 
     def __call__(self):
-        current_item_list, last_pagination_item = self._callback(self._server, None)  # Prime the generator
+        current_item_list, last_pagination_item = self._fetch_more(None)  # Prime the generator
         count = 0
 
         while count < last_pagination_item.total_available:
@@ -45,7 +44,7 @@ class pagination_generator(object):
     def _load_next_page(self, current_item_list, last_pagination_item):
         next_page = last_pagination_item.page_number + 1
         opts = TSC.RequestOptions(pagenumber=next_page, pagesize=last_pagination_item.page_size)
-        current_item_list, last_pagination_item = self._callback(self._server, opts)
+        current_item_list, last_pagination_item = self._fetch_more(opts)
         return current_item_list, last_pagination_item
 
 
@@ -66,11 +65,12 @@ def main():
     logging.basicConfig(level=logging_level)
 
     # SIGN IN
+
     tableau_auth = TSC.TableauAuth(args.username, password)
     server = TSC.Server(args.server)
 
     with server.auth.sign_in(tableau_auth):
-        generator = pagination_generator(server, lambda srv, opts: srv.workbooks.get(req_options=opts))
+        generator = pagination_generator(server.workbooks.get)
         print("Your server contains the following workbooks:\n")
         for wb in generator():
             print(wb.name)
