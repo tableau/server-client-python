@@ -28,7 +28,6 @@ class UserItem(object):
         self._workbooks = None
         self.email = None
         self.fullname = None
-        self.password = None
         self.name = name
         self.site_role = site_role
         self.auth_setting = auth_setting

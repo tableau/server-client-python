@@ -233,7 +233,7 @@ class TagRequest(object):
 
 
 class UserRequest(object):
-    def update_req(self, user_item, password=''):
+    def update_req(self, user_item, password):
         xml_request = ET.Element('tsRequest')
         user_element = ET.SubElement(xml_request, 'user')
         if user_item.fullname:

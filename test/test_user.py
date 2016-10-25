@@ -87,7 +87,6 @@ class UserTests(unittest.TestCase):
             single_user.name = 'Cassie'
             single_user.fullname = 'Cassie'
             single_user.email = 'cassie@email.com'
-            single_user.password = 'password'
             single_user = self.server.users.update(single_user)
 
         self.assertEqual('Cassie', single_user.name)
