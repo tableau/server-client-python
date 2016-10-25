@@ -33,7 +33,7 @@ The following labels are only to be set or changed by the core team:
 
 * **bug** - A bug is an unintended behavior for existing functionality. It only relates to existing functionality and the behavior that is expected with that functionality.  We do not use **bug** to indicate priority.
 * **enhancement** - An enhancement is a new piece of functionality and is related to the fact that new code will need to be written in order to close this issue.  We do not use **enhancement** to indicate priority.
-* **CLARequired** - This label is used to indicate that the contribution will require the CLA is signed before we can accept a PR.  This label should not be used on Issues
+* **CLARequired** - This label is used to indicate that the contribution will require that the CLA is signed before we can accept a PR.  This label should not be used on Issues
 * **CLANotRequired** - This label is used to indicate that the contribution does not require a CLA to be signed.  This is used for minor fixes and usually around doc fixes or correcting strings.
 * **help wanted** - This label on an issue indicates it's a good choice for external contributors to take on. It usually means it's an issue that can be tackled by first time contributors.
 
@@ -42,8 +42,8 @@ community to help us prioritize enhancement and bug fixes that are
 causing pain from our users.  The short of it is, purple tags are ones that
 anyone can add to an issue:
 
-* **Critical** - This means that you won't be able to use the library until the issues has been resolved.  If an issue is already labeled as critical, but you want to show your support for it, add +1 comment to the issue.  This helps us know what issues are really impacting our users.
-* **Nice To Have** - This means that the issue doesn't block your usage of the library, but would make your life easier.  Like with critical, if the issue is already tagged with this, but you want to show your support, add +1 comment to the issue.
+* **Critical** - This means that you won't be able to use the library until the issues have been resolved.  If an issue is already labeled as critical, but you want to show your support for it, add a +1 comment to the issue.  This helps us know what issues are really impacting our users.
+* **Nice To Have** - This means that the issue doesn't block your usage of the library, but would make your life easier.  Like with critical, if the issue is already tagged with this, but you want to show your support, add a +1 comment to the issue.
 
 ## Fixes, Implementations, and Documentation
 
