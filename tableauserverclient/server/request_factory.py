@@ -30,12 +30,17 @@ class AuthRequest(object):
 
 
 class DatasourceRequest(object):
-    def _generate_xml(self, datasource_item):
+    def _generate_xml(self, datasource_item, connection_credentials=None):
         xml_request = ET.Element('tsRequest')
         datasource_element = ET.SubElement(xml_request, 'datasource')
         datasource_element.attrib['name'] = datasource_item.name
         project_element = ET.SubElement(datasource_element, 'project')
         project_element.attrib['id'] = datasource_item.project_id
+        if connection_credentials:
+            credentials_element = ET.SubElement(datasource_element,'connectionCredentials')
+            credentials_element.attrib['name'] = connection_credentials.name
+            credentials_element.attrib['password'] = connection_credentials.password
+            credentials_element.attrib['embed'] = str(connection_credentials.embed).lower()
         return ET.tostring(xml_request)
 
     def update_req(self, datasource_item):
@@ -49,15 +54,15 @@ class DatasourceRequest(object):
             owner_element.attrib['id'] = datasource_item.owner_id
         return ET.tostring(xml_request)
 
-    def publish_req(self, datasource_item, filename, file_contents):
-        xml_request = self._generate_xml(datasource_item)
+    def publish_req(self, datasource_item, filename, file_contents, connection_credentials=None):
+        xml_request = self._generate_xml(datasource_item, connection_credentials)
 
         parts = {'request_payload': ('', xml_request, 'text/xml'),
                  'tableau_datasource': (filename, file_contents, 'application/octet-stream')}
         return _add_multipart(parts)
 
-    def publish_req_chunked(self, datasource_item):
-        xml_request = self._generate_xml(datasource_item)
+    def publish_req_chunked(self, datasource_item, connection_credentials=None):
+        xml_request = self._generate_xml(datasource_item, connection_credentials)
 
         parts = {'request_payload': ('', xml_request, 'text/xml')}
         return _add_multipart(parts)
@@ -260,7 +265,7 @@ class UserRequest(object):
 
 
 class WorkbookRequest(object):
-    def _generate_xml(self, workbook_item):
+    def _generate_xml(self, workbook_item,connection_credentials=None):
         xml_request = ET.Element('tsRequest')
         workbook_element = ET.SubElement(xml_request, 'workbook')
         workbook_element.attrib['name'] = workbook_item.name
@@ -268,6 +273,11 @@ class WorkbookRequest(object):
             workbook_element.attrib['showTabs'] = str(workbook_item.show_tabs).lower()
         project_element = ET.SubElement(workbook_element, 'project')
         project_element.attrib['id'] = workbook_item.project_id
+        if connection_credentials:
+            credentials_element = ET.SubElement(workbook_element,'connectionCredentials')
+            credentials_element.attrib['name'] = connection_credentials.name
+            credentials_element.attrib['password'] = connection_credentials.password
+            credentials_element.attrib['embed'] = str(connection_credentials.embed).lower()
         return ET.tostring(xml_request)
 
     def update_req(self, workbook_item):
@@ -283,15 +293,15 @@ class WorkbookRequest(object):
             owner_element.attrib['id'] = workbook_item.owner_id
         return ET.tostring(xml_request)
 
-    def publish_req(self, workbook_item, filename, file_contents):
-        xml_request = self._generate_xml(workbook_item)
+    def publish_req(self, workbook_item, filename, file_contents, connection_credentials=None):
+        xml_request = self._generate_xml(workbook_item, connection_credentials)
 
         parts = {'request_payload': ('', xml_request, 'text/xml'),
                  'tableau_workbook': (filename, file_contents, 'application/octet-stream')}
         return _add_multipart(parts)
 
-    def publish_req_chunked(self, workbook_item):
-        xml_request = self._generate_xml(workbook_item)
+    def publish_req_chunked(self, workbook_item, connection_credentials=None):
+        xml_request = self._generate_xml(workbook_item, connection_credentials)
 
         parts = {'request_payload': ('', xml_request, 'text/xml')}
         return _add_multipart(parts)

@@ -1,3 +1,4 @@
+from .connection_credentials import ConnectionCredentials
 from .connection_item import ConnectionItem
 from .datasource_item import DatasourceItem
 from .exceptions import UnpopulatedPropertyError
