@@ -1,3 +1,6 @@
+from property_decorators import property_is_boolean
+
+
 class ConnectionCredentials(object):
     """Connection Credentials for Workbooks and Datasources publish request.
 
@@ -10,3 +13,12 @@ class ConnectionCredentials(object):
         self.name = name
         self.password = password
         self.embed = embed
+
+    @property
+    def embed(self):
+        return self._embed
+
+    @embed.setter
+    @property_is_boolean
+    def embed(self, value):
+        self._embed = value
