@@ -22,7 +22,7 @@ class AuthRequest(object):
         credentials_element.attrib['name'] = auth_item.username
         credentials_element.attrib['password'] = auth_item.password
         site_element = ET.SubElement(credentials_element, 'site')
-        site_element.attrib['contentUrl'] = auth_item.site
+        site_element.attrib['contentUrl'] = auth_item.site_id
         if auth_item.user_id_to_impersonate:
             user_element = ET.SubElement(credentials_element, 'user')
             user_element.attrib['id'] = auth_item.user_id_to_impersonate

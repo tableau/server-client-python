@@ -65,7 +65,7 @@ def main():
                     error = "No site named {} found.".format(args.destination_site)
                     raise LookupError(error)
 
-                tableau_auth.site = args.destination_site
+                tableau_auth.site_id = args.destination_site
 
                 # Signing into another site requires another server object
                 # because of the different auth token and site ID.

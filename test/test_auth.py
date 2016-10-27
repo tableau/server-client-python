@@ -20,7 +20,7 @@ class AuthTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.post(self.baseurl + '/signin', text=response_xml)
-            tableau_auth = TSC.TableauAuth('testuser', 'password', site='Samples')
+            tableau_auth = TSC.TableauAuth('testuser', 'password', site_id='Samples')
             self.server.auth.sign_in(tableau_auth)
 
         self.assertEqual('eIX6mvFsqyansa4KqEI1UwOpS8ggRs2l', self.server.auth_token)
