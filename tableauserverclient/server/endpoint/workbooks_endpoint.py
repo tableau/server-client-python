@@ -171,7 +171,8 @@ class Workbooks(Endpoint):
             logger.info('Publishing {0} to server with chunking method (workbook over 64MB)'.format(filename))
             upload_session_id = Fileuploads.upload_chunks(self.parent_srv, file_path)
             url = "{0}&uploadSessionId={1}".format(url, upload_session_id)
-            xml_request, content_type = RequestFactory.Workbook.publish_req_chunked(workbook_item, connection_credentials)
+            xml_request, content_type = RequestFactory.Workbook.publish_req_chunked(workbook_item,
+                                                                                    connection_credentials)
         else:
             logger.info('Publishing {0} to server'.format(filename))
             with open(file_path, 'rb') as f:

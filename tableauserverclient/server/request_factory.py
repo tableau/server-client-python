@@ -37,7 +37,7 @@ class DatasourceRequest(object):
         project_element = ET.SubElement(datasource_element, 'project')
         project_element.attrib['id'] = datasource_item.project_id
         if connection_credentials:
-            credentials_element = ET.SubElement(datasource_element,'connectionCredentials')
+            credentials_element = ET.SubElement(datasource_element, 'connectionCredentials')
             credentials_element.attrib['name'] = connection_credentials.name
             credentials_element.attrib['password'] = connection_credentials.password
             credentials_element.attrib['embed'] = str(connection_credentials.embed).lower()
@@ -265,7 +265,7 @@ class UserRequest(object):
 
 
 class WorkbookRequest(object):
-    def _generate_xml(self, workbook_item,connection_credentials=None):
+    def _generate_xml(self, workbook_item, connection_credentials=None):
         xml_request = ET.Element('tsRequest')
         workbook_element = ET.SubElement(xml_request, 'workbook')
         workbook_element.attrib['name'] = workbook_item.name
@@ -274,7 +274,7 @@ class WorkbookRequest(object):
         project_element = ET.SubElement(workbook_element, 'project')
         project_element.attrib['id'] = workbook_item.project_id
         if connection_credentials:
-            credentials_element = ET.SubElement(workbook_element,'connectionCredentials')
+            credentials_element = ET.SubElement(workbook_element, 'connectionCredentials')
             credentials_element.attrib['name'] = connection_credentials.name
             credentials_element.attrib['password'] = connection_credentials.password
             credentials_element.attrib['embed'] = str(connection_credentials.embed).lower()
