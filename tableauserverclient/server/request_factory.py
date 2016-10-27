@@ -77,6 +77,12 @@ class GroupRequest(object):
         user_element.attrib['id'] = user_id
         return ET.tostring(xml_request)
 
+    def create_req(self, group_item):
+        xml_request = ET.Element('tsRequest')
+        group_element = ET.SubElement(xml_request, 'group')
+        group_element.attrib['name'] = group_item.name
+        return ET.tostring(xml_request)
+
 
 class PermissionRequest(object):
     def _add_capability(self, parent_element, capability_set, mode):
@@ -129,6 +135,55 @@ class ProjectRequest(object):
         return ET.tostring(xml_request)
 
 
+class ScheduleRequest(object):
+    def create_req(self, schedule_item):
+        xml_request = ET.Element('tsRequest')
+        schedule_element = ET.SubElement(xml_request, 'schedule')
+        schedule_element.attrib['name'] = schedule_item.name
+        schedule_element.attrib['priority'] = str(schedule_item.priority)
+        schedule_element.attrib['type'] = schedule_item.schedule_type
+        schedule_element.attrib['executionOrder'] = schedule_item.execution_order
+        interval_item = schedule_item.interval_item
+        schedule_element.attrib['frequency'] = interval_item._frequency
+        frequency_element = ET.SubElement(schedule_element, 'frequencyDetails')
+        frequency_element.attrib['start'] = str(interval_item.start_time)
+        if hasattr(interval_item, 'end_time') and interval_item.end_time:
+            frequency_element.attrib['end'] = str(interval_item.end_time)
+        if hasattr(interval_item, 'interval') and interval_item.interval:
+            intervals_element = ET.SubElement(frequency_element, 'intervals')
+            for interval in interval_item._interval_type_pairs():
+                expression, value = interval
+                single_interval_element = ET.SubElement(intervals_element, 'interval')
+                single_interval_element.attrib[expression] = value
+        return ET.tostring(xml_request)
+
+    def update_req(self, schedule_item):
+        xml_request = ET.Element('tsRequest')
+        schedule_element = ET.SubElement(xml_request, 'schedule')
+        if schedule_item.name:
+            schedule_element.attrib['name'] = schedule_item.name
+        if schedule_item.priority:
+            schedule_element.attrib['priority'] = str(schedule_item.priority)
+        if schedule_item.execution_order:
+            schedule_element.attrib['executionOrder'] = schedule_item.execution_order
+        if schedule_item.state:
+            schedule_element.attrib['state'] = schedule_item.state
+        interval_item = schedule_item.interval_item
+        if interval_item._frequency:
+            schedule_element.attrib['frequency'] = interval_item._frequency
+        frequency_element = ET.SubElement(schedule_element, 'frequencyDetails')
+        frequency_element.attrib['start'] = str(interval_item.start_time)
+        if hasattr(interval_item, 'end_time') and interval_item.end_time:
+            frequency_element.attrib['end'] = str(interval_item.end_time)
+        intervals_element = ET.SubElement(frequency_element, 'intervals')
+        if hasattr(interval_item, 'interval'):
+            for interval in interval_item._interval_type_pairs():
+                (expression, value) = interval
+                single_interval_element = ET.SubElement(intervals_element, 'interval')
+                single_interval_element.attrib[expression] = value
+        return ET.tostring(xml_request)
+
+
 class SiteRequest(object):
     def update_req(self, site_item):
         xml_request = ET.Element('tsRequest')
@@ -178,7 +233,7 @@ class TagRequest(object):
 
 
 class UserRequest(object):
-    def update_req(self, user_item, password=''):
+    def update_req(self, user_item, password):
         xml_request = ET.Element('tsRequest')
         user_element = ET.SubElement(xml_request, 'user')
         if user_item.fullname:
@@ -249,6 +304,7 @@ class RequestFactory(object):
     Group = GroupRequest()
     Permission = PermissionRequest()
     Project = ProjectRequest()
+    Schedule = ScheduleRequest()
     Site = SiteRequest()
     Tag = TagRequest()
     User = UserRequest()

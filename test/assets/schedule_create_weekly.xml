@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+    <schedule id="1adff386-6be0-4958-9f81-a35e676932bf" name="weekly-schedule-1" state="Active" priority="80" createdAt="2016-09-15T21:12:50Z" updatedAt="2016-09-15T21:12:50Z" type="Extract" frequency="Weekly" nextRunAt="2016-09-16T16:15:00Z" executionOrder="Parallel">
+        <frequencyDetails start="09:15:00">
+            <intervals>
+                <interval weekDay="Monday" />
+                <interval weekDay="Wednesday" />
+                <interval weekDay="Friday" />
+            </intervals>
+        </frequencyDetails>
+    </schedule>
+</tsResponse>

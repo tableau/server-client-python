@@ -1,5 +1,10 @@
 import xml.etree.ElementTree as ET
+from .property_decorators import (property_is_enum, property_is_boolean, property_matches,
+                                  property_not_empty, property_not_nullable)
 from .. import NAMESPACE
+
+
+VALID_CONTENT_URL_RE = r"^[a-zA-Z0-9_\-]*$"
 
 
 class SiteItem(object):
@@ -14,67 +19,48 @@ class SiteItem(object):
     def __init__(self, name, content_url, admin_mode=None, user_quota=None, storage_quota=None,
                  disable_subscriptions=False, subscribe_others_enabled=True, revision_history_enabled=False):
         self._admin_mode = None
-        self._content_url = None
-        self._disable_subscriptions = None
         self._id = None
-        self._name = None
         self._num_users = None
-        self._revision_history_enabled = None
         self._state = None
         self._status_reason = None
         self._storage = None
-        self._subscribe_others_enabled = None
         self.revision_limit = None
         self.user_quota = user_quota
         self.storage_quota = storage_quota
-
-        # Invoke setter
         self.content_url = content_url
         self.disable_subscriptions = disable_subscriptions
         self.name = name
         self.revision_history_enabled = revision_history_enabled
         self.subscribe_others_enabled = subscribe_others_enabled
-
-        if admin_mode:
-            # In order to invoke the setter method to validate admin_mode,
-            # _admin_mode must be initialized first.
-            self.admin_mode = admin_mode
+        self.admin_mode = admin_mode
 
     @property
     def admin_mode(self):
         return self._admin_mode
 
     @admin_mode.setter
+    @property_is_enum(AdminMode)
     def admin_mode(self, value):
-        if value and not hasattr(SiteItem.AdminMode, value):
-            error = 'Invalid admin mode defined.'
-            raise ValueError(error)
-        else:
-            self._admin_mode = value
+        self._admin_mode = value
 
     @property
     def content_url(self):
         return self._content_url
 
     @content_url.setter
+    @property_not_nullable
+    @property_matches(VALID_CONTENT_URL_RE, "content_url can contain only letters, numbers, dashes, and underscores")
     def content_url(self, value):
-        if value is None:
-            error = 'Content URL must be defined.'
-            raise ValueError(error)
-        else:
-            self._content_url = value
+        self._content_url = value
 
     @property
     def disable_subscriptions(self):
         return self._disable_subscriptions
 
     @disable_subscriptions.setter
+    @property_is_boolean
     def disable_subscriptions(self, value):
-        if not isinstance(value, bool):
-            error = 'Boolean expected for disable_subscriptions flag.'
-            raise ValueError(error)
-        else:
-            self._disable_subscriptions = value
+        self._disable_subscriptions = value
 
     @property
     def id(self):
@@ -85,12 +71,9 @@ class SiteItem(object):
         return self._name
 
     @name.setter
+    @property_not_empty
     def name(self, value):
-        if not value:
-            error = 'Name must be defined.'
-            raise ValueError(error)
-        else:
-            self._name = value
+        self._name = value
 
     @property
     def num_users(self):
@@ -101,24 +84,18 @@ class SiteItem(object):
         return self._revision_history_enabled
 
     @revision_history_enabled.setter
+    @property_is_boolean
     def revision_history_enabled(self, value):
-        if not isinstance(value, bool):
-            error = 'Boolean expected for revision_history_enabled flag.'
-            raise ValueError(error)
-        else:
-            self._revision_history_enabled = value
+        self._revision_history_enabled = value
 
     @property
     def state(self):
         return self._state
 
     @state.setter
+    @property_is_enum(State)
     def state(self, value):
-        if not hasattr(SiteItem.State, value):
-            error = 'Invalid state defined.'
-            raise ValueError(error)
-        else:
-            self._state = value
+        self._state = value
 
     @property
     def status_reason(self):
@@ -133,12 +110,9 @@ class SiteItem(object):
         return self._subscribe_others_enabled
 
     @subscribe_others_enabled.setter
+    @property_is_boolean
     def subscribe_others_enabled(self, value):
-        if not isinstance(value, bool):
-            error = 'Boolean expected for subscribe_others_enabled flag.'
-            raise ValueError(error)
-        else:
-            self._subscribe_others_enabled = value
+        self._subscribe_others_enabled = value
 
     def is_default(self):
         return self.name.lower() == 'default'

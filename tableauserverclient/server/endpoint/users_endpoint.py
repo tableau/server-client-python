@@ -36,13 +36,13 @@ class Users(Endpoint):
         return UserItem.from_response(server_response.content).pop()
 
     # Update user
-    def update(self, user_item):
+    def update(self, user_item, password=None):
         if not user_item.id:
             error = "User item missing ID."
             raise MissingRequiredFieldError(error)
 
         url = "{0}/{1}".format(self.baseurl, user_item.id)
-        update_req = RequestFactory.User.update_req(user_item)
+        update_req = RequestFactory.User.update_req(user_item, password)
         server_response = self.put_request(url, update_req)
         logger.info('Updated user item (ID: {0})'.format(user_item.id))
         updated_item = copy.copy(user_item)

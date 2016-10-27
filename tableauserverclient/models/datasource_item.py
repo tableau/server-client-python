@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
+from .property_decorators import property_not_nullable
 from .tag_item import TagItem
 from .. import NAMESPACE
 
@@ -10,15 +11,12 @@ class DatasourceItem(object):
         self._content_url = None
         self._created_at = None
         self._id = None
-        self._project_id = None
         self._project_name = None
         self._tags = set()
         self._datasource_type = None
         self._updated_at = None
         self.name = name
         self.owner_id = None
-
-        # Invoke setter
         self.project_id = project_id
 
     @property
@@ -45,12 +43,9 @@ class DatasourceItem(object):
         return self._project_id
 
     @project_id.setter
+    @property_not_nullable
     def project_id(self, value):
-        if value is None:
-            error = 'Project ID must be defined.'
-            raise ValueError(error)
-        else:
-            self._project_id = value
+        self._project_id = value
 
     @property
     def project_name(self):
