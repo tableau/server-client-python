@@ -1,4 +1,4 @@
-from property_decorators import property_is_boolean
+from .property_decorators import property_is_boolean
 
 
 class ConnectionCredentials(object):
