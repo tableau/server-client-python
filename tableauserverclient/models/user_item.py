@@ -14,6 +14,7 @@ class UserItem(object):
         UnlicensedWithPublish = 'UnlicensedWithPublish'
         Viewer = 'Viewer'
         ViewerWithPublish = 'ViewerWithPublish'
+        Guest = 'Guest'
 
     class Auth:
         SAML = 'SAML'
