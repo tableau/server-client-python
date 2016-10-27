@@ -140,7 +140,7 @@ class Workbooks(Endpoint):
         logger.info('Populated preview image for workbook (ID: {0})'.format(workbook_item.id))
 
     # Publishes workbook. Chunking method if file over 64MB
-    def publish(self, workbook_item, file_path, mode):
+    def publish(self, workbook_item, file_path, mode, connection_credentials=None):
         if not os.path.isfile(file_path):
             error = "File path does not lead to an existing file."
             raise IOError(error)
@@ -171,14 +171,16 @@ class Workbooks(Endpoint):
             logger.info('Publishing {0} to server with chunking method (workbook over 64MB)'.format(filename))
             upload_session_id = Fileuploads.upload_chunks(self.parent_srv, file_path)
             url = "{0}&uploadSessionId={1}".format(url, upload_session_id)
-            xml_request, content_type = RequestFactory.Workbook.publish_req_chunked(workbook_item)
+            xml_request, content_type = RequestFactory.Workbook.publish_req_chunked(workbook_item,
+                                                                                    connection_credentials)
         else:
             logger.info('Publishing {0} to server'.format(filename))
             with open(file_path, 'rb') as f:
                 file_contents = f.read()
             xml_request, content_type = RequestFactory.Workbook.publish_req(workbook_item,
                                                                             filename,
-                                                                            file_contents)
+                                                                            file_contents,
+                                                                            connection_credentials)
         server_response = self.post_request(url, xml_request, content_type)
         new_workbook = WorkbookItem.from_response(server_response.content)[0]
         logger.info('Published {0} (ID: {1})'.format(filename, new_workbook.id))

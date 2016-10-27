@@ -1,5 +1,5 @@
 from .namespace import NAMESPACE
-from .models import ConnectionItem, DatasourceItem,\
+from .models import ConnectionCredentials, ConnectionItem, DatasourceItem,\
     GroupItem, PaginationItem, ProjectItem, ScheduleItem, \
     SiteItem, TableauAuth, UserItem, ViewItem, WorkbookItem, UnpopulatedPropertyError, \
     HourlyInterval, DailyInterval, WeeklyInterval, MonthlyInterval, IntervalItem
