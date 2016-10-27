@@ -2,7 +2,7 @@ class ConnectionCredentials(object):
     """Connection Credentials for Workbooks and Datasources publish request.
 
     Consider removing this object and other variables holding secrets
-    as soon as poobible after use to avoid them hanging around in memory.
+    as soon as possible after use to avoid them hanging around in memory.
 
     """
 
