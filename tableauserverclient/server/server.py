@@ -1,5 +1,5 @@
 from .exceptions import NotSignedInError
-from .endpoint import Sites, Views, Users, Groups, Workbooks, Datasources, Projects, Auth, Schedules
+from .endpoint import Sites, Views, Users, Groups, Workbooks, Datasources, Projects, Auth, Schedules, ServerInfo
 import requests
 
 
@@ -27,6 +27,7 @@ class Server(object):
         self.datasources = Datasources(self)
         self.projects = Projects(self)
         self.schedules = Schedules(self)
+        self.server_info = ServerInfo(self)
 
     def add_http_options(self, options_dict):
         self._http_options.update(options_dict)
