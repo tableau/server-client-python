@@ -31,6 +31,9 @@ class Endpoint(object):
 
         server_response = method(url, **parameters)
         self._check_status(server_response)
+
+        # This check is to determine if the response is a text response (xml or otherwise)
+        # so that we do not attempt to log bytes and other binary data.
         if server_response.encoding:
             logger.debug(u'Server response from {0}:\n\t{1}'.format(
                 url, server_response.content.decode(server_response.encoding)))
