@@ -8,10 +8,6 @@ logger = logging.getLogger('tableau.endpoint.schedules')
 
 
 class Schedules(Endpoint):
-    def __init__(self, parent_srv):
-        super(Endpoint, self).__init__()
-        self.parent_srv = parent_srv
-
     @property
     def baseurl(self):
         return "{0}/schedules".format(self.parent_srv.baseurl)

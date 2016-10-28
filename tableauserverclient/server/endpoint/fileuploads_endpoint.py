@@ -13,8 +13,7 @@ logger = logging.getLogger('tableau.endpoint.fileuploads')
 
 class Fileuploads(Endpoint):
     def __init__(self, parent_srv):
-        super(Endpoint, self).__init__()
-        self.parent_srv = parent_srv
+        super(Fileuploads, self).__init__(parent_srv)
         self.upload_id = ''
 
     @property

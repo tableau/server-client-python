@@ -17,10 +17,6 @@ class Auth(Endpoint):
         def __exit__(self, exc_type, exc_val, exc_tb):
             self._callback()
 
-    def __init__(self, parent_srv):
-        super(Endpoint, self).__init__()
-        self.parent_srv = parent_srv
-
     @property
     def baseurl(self):
         return "{0}/auth".format(self.parent_srv.baseurl)
