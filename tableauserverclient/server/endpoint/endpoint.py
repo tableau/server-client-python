@@ -12,7 +12,7 @@ class Endpoint(object):
         self.parent_srv = parent_srv
 
     @staticmethod
-    def _make_headers(token, content_type):
+    def _make_common_headers(token, content_type):
         retval = {}
         if token is not None:
             retval['x-tableau-auth'] = token
@@ -24,7 +24,7 @@ class Endpoint(object):
             url = request_object.apply_query_params(url)
         parameters = {}
         parameters.update(self.parent_srv.http_options)
-        parameters['headers'] = Endpoint._make_headers(token, content_type)
+        parameters['headers'] = Endpoint._make_common_headers(token, content_type)
 
         if content is not None:
             parameters['data'] = content
