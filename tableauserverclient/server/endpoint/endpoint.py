@@ -12,60 +12,55 @@ class Endpoint(object):
         self.parent_srv = None
 
     @staticmethod
-    def _check_status(server_response):
-        if server_response.status_code not in Success_codes:
-            raise ServerResponseError.from_response(server_response.content)
+    def _make_headers(token, content_type):
+        retval = {}
+        if token is not None:
+            retval['x-tableau-auth'] = token
+        if content_type is not None:
+            retval['content-type'] = content_type
 
-    def get_unauthenticated_request(self, url, request_object=None):
+    def _make_request(self, method, url, content=None, request_object=None, token=None, content_type =None):
         if request_object is not None:
             url = request_object.apply_query_params(url)
-        server_response = self.parent_srv.session.get(url, **self.parent_srv.http_options)
+        parameters = { }
+        parameters.update(self.parent_srv.http_options)
+        parameters['headers'] = Endpoint._make_headers(token, content_type)
+
+        if content is not None:
+            parameters['data'] = content
+
+        server_response = method(url, **parameters)
         self._check_status(server_response)
         if server_response.encoding:
             logger.debug(u'Server response from {0}:\n\t{1}'.format(
                 url, server_response.content.decode(server_response.encoding)))
         return server_response
 
+    @staticmethod
+    def _check_status(server_response):
+        if server_response.status_code not in Success_codes:
+            raise ServerResponseError.from_response(server_response.content)
+
+    def get_unauthenticated_request(self, url, request_object=None):
+        return self._make_request(self.parent_srv.session.get, url, request_object=request_object)
+
     def get_request(self, url, request_object=None):
-        if request_object is not None:
-            url = request_object.apply_query_params(url)
-        auth_token = self.parent_srv.auth_token
-        server_response = self.parent_srv.session.get(url,
-                                                      headers={'x-tableau-auth': auth_token},
-                                                      **self.parent_srv.http_options)
-        self._check_status(server_response)
-        if server_response.encoding:
-            logger.debug(u'Server response from {0}: \n\t{1}'.format(
-                url, server_response.content.decode(server_response.encoding)))
-        return server_response
+        return self._make_request(self.parent_srv.session.get, url, token=self.parent_srv.auth_token,
+                                  request_object=request_object)
 
     def delete_request(self, url):
-        auth_token = self.parent_srv.auth_token
-        server_response = self.parent_srv.session.delete(url,
-                                                         headers={'x-tableau-auth': auth_token},
-                                                         **self.parent_srv.http_options)
-        self._check_status(server_response)
+        # We don't return anything for a delete
+        self._make_request(self.parent_srv.session.delete, url, token=self.parent_srv.auth_token)
 
     def put_request(self, url, xml_request, content_type='text/xml'):
-        auth_token = self.parent_srv.auth_token
-        server_response = self.parent_srv.session.put(url, data=xml_request,
-                                                      headers={'x-tableau-auth': auth_token,
-                                                               'content-type': content_type},
-                                                      **self.parent_srv.http_options)
-        self._check_status(server_response)
-        if server_response.encoding:
-            logger.debug(u'Server response from {0}: \n\t{1}'.format(
-                url, server_response.content.decode(server_response.encoding)))
-        return server_response
+        return self._make_request(self.parent_srv.session.put, url,
+                                  content=xml_request,
+                                  token=self.parent_srv.auth_token,
+                                  content_type = content_type)
+
 
     def post_request(self, url, xml_request, content_type='text/xml'):
-        auth_token = self.parent_srv.auth_token
-        server_response = self.parent_srv.session.post(url, data=xml_request,
-                                                       headers={'x-tableau-auth': auth_token,
-                                                                'content-type': content_type},
-                                                       **self.parent_srv.http_options)
-        self._check_status(server_response)
-        if server_response.encoding:
-            logger.debug(u'Server response from {0}: \n\t{1}'.format(
-                url, server_response.content.decode(server_response.encoding)))
-        return server_response
+        return self._make_request(self.parent_srv.session.post, url,
+                                  content=xml_request,
+                                  token=self.parent_srv.auth_token,
+                                  content_type = content_type)
