@@ -16,10 +16,6 @@ logger = logging.getLogger('tableau.endpoint.datasources')
 
 
 class Datasources(Endpoint):
-    def __init__(self, parent_srv):
-        super(Endpoint, self).__init__()
-        self.parent_srv = parent_srv
-
     @property
     def baseurl(self):
         return "{0}/sites/{1}/datasources".format(self.parent_srv.baseurl, self.parent_srv.site_id)

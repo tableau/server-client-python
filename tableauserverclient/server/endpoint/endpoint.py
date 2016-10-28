@@ -8,8 +8,8 @@ Success_codes = [200, 201, 204]
 
 
 class Endpoint(object):
-    def __init__(self):
-        self.parent_srv = None
+    def __init__(self, parent_srv):
+        self.parent_srv = parent_srv
 
     @staticmethod
     def _make_headers(token, content_type):

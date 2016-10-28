@@ -7,6 +7,9 @@ logger = logging.getLogger('tableau.endpoint.auth')
 
 
 class Auth(Endpoint):
+    def __init__(self):
+        super(Auth, self).__init__(None)
+
     class contextmgr(object):
         def __init__(self, callback):
             self._callback = callback
