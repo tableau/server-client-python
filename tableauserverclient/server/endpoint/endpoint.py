@@ -1,6 +1,7 @@
 from .exceptions import ServerResponseError
 import logging
 
+
 logger = logging.getLogger('tableau.endpoint')
 
 Success_codes = [200, 201, 204]
@@ -14,6 +15,16 @@ class Endpoint(object):
     def _check_status(server_response):
         if server_response.status_code not in Success_codes:
             raise ServerResponseError.from_response(server_response.content)
+
+    def get_unauthenticated_request(self, url, request_object=None):
+        if request_object is not None:
+            url = request_object.apply_query_params(url)
+        server_response = self.parent_srv.session.get(url, **self.parent_srv.http_options)
+        self._check_status(server_response)
+        if server_response.encoding:
+            logger.debug(u'Server response from {0}:\n\t{1}'.format(
+                url, server_response.content.decode(server_response.encoding)))
+        return server_response
 
     def get_request(self, url, request_object=None):
         if request_object is not None:

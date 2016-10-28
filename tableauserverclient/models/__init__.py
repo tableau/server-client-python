@@ -7,6 +7,7 @@ from .interval_item import IntervalItem, DailyInterval, WeeklyInterval, MonthlyI
 from .pagination_item import PaginationItem
 from .project_item import ProjectItem
 from .schedule_item import ScheduleItem
+from .server_info_item import ServerInfoItem
 from .site_item import SiteItem
 from .tableau_auth import TableauAuth
 from .user_item import UserItem

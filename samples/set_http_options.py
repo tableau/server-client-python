@@ -35,6 +35,8 @@ def main():
     # Step 2: Set http options to disable verifying SSL
     server.add_http_options({'verify': False})
 
+    server.server_info.get()
+
     with server.auth.sign_in(tableau_auth):
 
         # Step 3: Query all workbooks and list them
