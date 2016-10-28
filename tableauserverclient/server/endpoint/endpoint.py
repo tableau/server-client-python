@@ -19,10 +19,10 @@ class Endpoint(object):
         if content_type is not None:
             retval['content-type'] = content_type
 
-    def _make_request(self, method, url, content=None, request_object=None, token=None, content_type =None):
+    def _make_request(self, method, url, content=None, request_object=None, token=None, content_type=None):
         if request_object is not None:
             url = request_object.apply_query_params(url)
-        parameters = { }
+        parameters = {}
         parameters.update(self.parent_srv.http_options)
         parameters['headers'] = Endpoint._make_headers(token, content_type)
 
@@ -59,11 +59,10 @@ class Endpoint(object):
         return self._make_request(self.parent_srv.session.put, url,
                                   content=xml_request,
                                   token=self.parent_srv.auth_token,
-                                  content_type = content_type)
-
+                                  content_type=content_type)
 
     def post_request(self, url, xml_request, content_type='text/xml'):
         return self._make_request(self.parent_srv.session.post, url,
                                   content=xml_request,
                                   token=self.parent_srv.auth_token,
-                                  content_type = content_type)
+                                  content_type=content_type)
