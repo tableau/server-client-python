@@ -1,45 +1,7 @@
 from .exceptions import NotSignedInError
 from .endpoint import Sites, Views, Users, Groups, Workbooks, Datasources, Projects, Auth, Schedules, ServerInfo
-from . import RequestOptions
 
 import requests
-
-
-class Pager(object):
-    """ This class returns a generator that will iterate over all of the results.
-
-    server is the server object that will be used when calling the callback.  It will be passed
-    to the callback on each iteration
-
-    Callback is expected to take a server object and a request options and return two values, an array of results,
-    and the pagination item from the current call.  This will be used to build subsequent requests.
-    """
-
-    def __init__(self, fetcher, opts=None):
-        self._fetcher = fetcher.get
-        self._options = opts
-
-    def __call__(self):
-        current_item_list, last_pagination_item = self._fetcher(self._options)
-        count = 0
-
-        while count < last_pagination_item.total_available:
-            if len(current_item_list) == 0:
-                current_item_list, last_pagination_item = self._load_next_page(current_item_list, last_pagination_item)
-
-            yield current_item_list.pop(0)
-            count += 1
-
-    def __iter__(self):
-        return self()
-
-    def _load_next_page(self, current_item_list, last_pagination_item):
-        next_page = last_pagination_item.page_number + 1
-        opts = RequestOptions(pagenumber=next_page, pagesize=last_pagination_item.page_size)
-        if self._options is not None:
-            opts.sort, opts.filter = self._options.sort, self._options.filter
-        current_item_list, last_pagination_item = self._fetcher(opts)
-        return current_item_list, last_pagination_item
 
 
 class Server(object):
