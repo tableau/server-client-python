@@ -51,10 +51,13 @@ def main():
         for wb in TSC.Pager(server.workbooks):
             print(wb.name)
 
-        # Pager can also be used in list comprehensions for compactness and easy
-        # filtering. Here we loop over the Pager and only keep workbooks where the
-        # name starts with the letter 'a'
-        # >>> [wb for wb in TSC.Pager(server.workbooks) if wb.name.startswith('a')]
+        # Pager can also be used in list comprehensions or generator expressions
+        # for compactness and easy filtering. Generator expressions will use less
+        # memory than list comprehsnsions. Consult the Python laguage documentation for
+        # best practices on which are best for your use case. Here we loop over the
+        # Pager and only keep workbooks where the name starts with the letter 'a'
+        # >>> [wb for wb in TSC.Pager(server.workbooks) if wb.name.startswith('a')] # List Comprehension
+        # >>> (wb for wb in TSC.Pager(server.workbooks) if wb.name.startswith('a')) # Generator Expression
 
         # Since Pager is a generator it follows the standard conventions and can
         # be fed to a list if you really need all the workbooks in memory at once.
