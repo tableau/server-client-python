@@ -37,11 +37,10 @@ class PagerTests(unittest.TestCase):
             m.get(self.baseurl + "?pageNumber=3&pageSize=1", text=page_3)
 
             # No options should get all 3
-            workbooks = TSC.Pager(self.server.workbooks)
-            self.assertTrue(len(list(workbooks)) == 3)
+            workbooks = list(TSC.Pager(self.server.workbooks))
+            self.assertTrue(len(workbooks) == 3)
 
             # Let's check that workbook items aren't duplicates
-            workbooks = TSC.Pager(self.server.workbooks)
             wb1, wb2, wb3 = workbooks
             self.assertEqual(wb1.name, 'Page1Workbook')
             self.assertEqual(wb2.name, 'Page2Workbook')
@@ -65,6 +64,8 @@ class PagerTests(unittest.TestCase):
             opts = TSC.RequestOptions(2, 1)
             workbooks = list(TSC.Pager(self.server.workbooks, opts))
             self.assertTrue(len(workbooks) == 2)
+
+            # Check that the workbooks are the 2 we think they should be
             wb2, wb3 = workbooks
             self.assertEqual(wb2.name, 'Page2Workbook')
             self.assertEqual(wb3.name, 'Page3Workbook')
