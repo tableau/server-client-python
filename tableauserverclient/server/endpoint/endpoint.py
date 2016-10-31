@@ -13,11 +13,13 @@ class Endpoint(object):
 
     @staticmethod
     def _make_common_headers(auth_token, content_type):
-        retval = {}
+        headers = {}
         if auth_token is not None:
-            retval['x-tableau-auth'] = auth_token
+            headers['x-tableau-auth'] = auth_token
         if content_type is not None:
-            retval['content-type'] = content_type
+            headers['content-type'] = content_type
+
+        return headers
 
     def _make_request(self, method, url, content=None, request_object=None, auth_token=None, content_type=None):
         if request_object is not None:
