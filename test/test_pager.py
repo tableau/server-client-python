@@ -55,9 +55,6 @@ class PagerTests(unittest.TestCase):
         with open(GET_XML_PAGE3, 'rb') as f:
             page_3 = f.read().decode('utf-8')
         with requests_mock.mock() as m:
-            # Register Pager with default request options
-            m.get(self.baseurl, text=page_1)
-
             # Register Pager with some pages
             m.get(self.baseurl + "?pageNumber=1&pageSize=1", text=page_1)
             m.get(self.baseurl + "?pageNumber=2&pageSize=1", text=page_2)
