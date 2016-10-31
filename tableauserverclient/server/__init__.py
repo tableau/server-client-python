@@ -8,4 +8,5 @@ from .. import ConnectionItem, DatasourceItem,\
 from .endpoint import Auth, Datasources, Endpoint, Groups, Projects, Schedules, \
     Sites, Users, Views, Workbooks, ServerResponseError, MissingRequiredFieldError
 from .server import Server
+from .pager import Pager
 from .exceptions import NotSignedInError

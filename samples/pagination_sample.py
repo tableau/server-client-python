@@ -17,37 +17,6 @@ import os.path
 import tableauserverclient as TSC
 
 
-class pagination_generator(object):
-    """ This class returns a generator that will iterate over all of the results.
-
-    server is the server object that will be used when calling the callback.  It will be passed
-    to the callback on each iteration
-
-    Callback is expected to take a server object and a request options and return two values, an array of results,
-    and the pagination item from the current call.  This will be used to build subsequent requests.
-    """
-
-    def __init__(self, fetch_more):
-        self._fetch_more = fetch_more
-
-    def __call__(self):
-        current_item_list, last_pagination_item = self._fetch_more(None)  # Prime the generator
-        count = 0
-
-        while count < last_pagination_item.total_available:
-            if len(current_item_list) == 0:
-                current_item_list, last_pagination_item = self._load_next_page(current_item_list, last_pagination_item)
-
-            yield current_item_list.pop(0)
-            count += 1
-
-    def _load_next_page(self, current_item_list, last_pagination_item):
-        next_page = last_pagination_item.page_number + 1
-        opts = TSC.RequestOptions(pagenumber=next_page, pagesize=last_pagination_item.page_size)
-        current_item_list, last_pagination_item = self._fetch_more(opts)
-        return current_item_list, last_pagination_item
-
-
 def main():
 
     parser = argparse.ArgumentParser(description='Return a list of all of the workbooks on your server')
@@ -70,10 +39,32 @@ def main():
     server = TSC.Server(args.server)
 
     with server.auth.sign_in(tableau_auth):
-        generator = pagination_generator(server.workbooks.get)
+
+        # Pager returns a generator that yields one item at a time fetching
+        # from Server only when necessary. Pager takes a server Endpoint as its
+        # first parameter. It will call 'get' on that endpoint. To get workbooks
+        # pass `server.workbooks`, to get users pass` server.users`, etc
+        # You can then loop over the generator to get the objects one at a time
+        # Here we print the workbook id for each workbook
+
         print("Your server contains the following workbooks:\n")
-        for wb in generator():
+        for wb in TSC.Pager(server.workbooks):
             print(wb.name)
+
+        # Pager can also be used in list comprehensions or generator expressions
+        # for compactness and easy filtering. Generator expressions will use less
+        # memory than list comprehsnsions. Consult the Python laguage documentation for
+        # best practices on which are best for your use case. Here we loop over the
+        # Pager and only keep workbooks where the name starts with the letter 'a'
+        # >>> [wb for wb in TSC.Pager(server.workbooks) if wb.name.startswith('a')] # List Comprehension
+        # >>> (wb for wb in TSC.Pager(server.workbooks) if wb.name.startswith('a')) # Generator Expression
+
+        # Since Pager is a generator it follows the standard conventions and can
+        # be fed to a list if you really need all the workbooks in memory at once.
+        # If you need everything, it may be faster to use a larger page size
+
+        # >>> request_options = TSC.RequestOptions(pagesize=1000)
+        # >>> all_workbooks = list(TSC.Pager(server.workbooks, request_options))
 
 if __name__ == '__main__':
     main()
