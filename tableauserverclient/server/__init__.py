@@ -7,5 +7,5 @@ from .. import ConnectionItem, DatasourceItem,\
     UserItem, ViewItem, WorkbookItem, NAMESPACE
 from .endpoint import Auth, Datasources, Endpoint, Groups, Projects, Schedules, \
     Sites, Users, Views, Workbooks, ServerResponseError, MissingRequiredFieldError
-from .server import Server
+from .server import Server, Pager
 from .exceptions import NotSignedInError
