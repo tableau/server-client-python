@@ -10,7 +10,6 @@ GET_XML_PAGE2 = os.path.join(TEST_ASSET_DIR, 'workbook_get_page_2.xml')
 GET_XML_PAGE3 = os.path.join(TEST_ASSET_DIR, 'workbook_get_page_3.xml')
 
 
-
 class PagerTests(unittest.TestCase):
     def setUp(self):
         self.server = TSC.Server('http://test')
@@ -48,8 +47,6 @@ class PagerTests(unittest.TestCase):
             self.assertEqual(wb2.name, 'Page2Workbook')
             self.assertEqual(wb3.name, 'Page3Workbook')
 
-
-
     def test_pager_with_options(self):
         with open(GET_XML_PAGE1, 'rb') as f:
             page_1 = f.read().decode('utf-8')
@@ -67,24 +64,25 @@ class PagerTests(unittest.TestCase):
             m.get(self.baseurl + "?pageNumber=3&pageSize=1", text=page_3)
             m.get(self.baseurl + "?pageNumber=1&pageSize=3", text=page_1)
 
-
             # Starting on page 2 should get 2 out of 3
-            opts = TSC.RequestOptions(2,1)
-            workbooks = TSC.Pager(self.server.workbooks, opts)
-            self.assertTrue(len(list(workbooks)) == 2)
+            opts = TSC.RequestOptions(2, 1)
+            workbooks = list(TSC.Pager(self.server.workbooks, opts))
+            self.assertTrue(len(workbooks) == 2)
+            wb2, wb3 = workbooks
+            self.assertEqual(wb2.name, 'Page2Workbook')
+            self.assertEqual(wb3.name, 'Page3Workbook')
 
             # Starting on 1 with pagesize of 3 should get all 3
-            opts = TSC.RequestOptions(1,3)
-            workbooks = TSC.Pager(self.server.workbooks, opts)
-            self.assertTrue(len(list(workbooks)) == 3)
+            opts = TSC.RequestOptions(1, 3)
+            workbooks = list(TSC.Pager(self.server.workbooks, opts))
+            self.assertTrue(len(workbooks) == 3)
+            wb1, wb2, wb3 = workbooks
+            self.assertEqual(wb1.name, 'Page1Workbook')
+            self.assertEqual(wb2.name, 'Page2Workbook')
+            self.assertEqual(wb3.name, 'Page3Workbook')
 
             # Starting on 3 with pagesize of 1 should get the last item
-            opts = TSC.RequestOptions(3,1)
-            workbooks = TSC.Pager(self.server.workbooks, opts)
-            self.assertTrue(len(list(workbooks)) == 1)
-
-            # Starting on 3 with pagesize of 1 should get the last item
-            opts = TSC.RequestOptions(3,1)
+            opts = TSC.RequestOptions(3, 1)
             workbooks = list(TSC.Pager(self.server.workbooks, opts))
             self.assertTrue(len(workbooks) == 1)
             # Should have the last workbook
