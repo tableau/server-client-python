@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+from .property_decorators import property_is_enum, property_not_empty
 from .. import NAMESPACE
 
 
@@ -10,28 +11,18 @@ class ProjectItem(object):
     def __init__(self, name, description=None, content_permissions=None):
         self._content_permissions = None
         self._id = None
-        self._name = None
         self.description = description
-
-        # Invoke setter
         self.name = name
-
-        if content_permissions:
-            # In order to invoke the setter method to validate content_permissions,
-            # _content_permissions must be initialized first.
-            self.content_permissions = content_permissions
+        self.content_permissions = content_permissions
 
     @property
     def content_permissions(self):
         return self._content_permissions
 
     @content_permissions.setter
+    @property_is_enum(ContentPermissions)
     def content_permissions(self, value):
-        if value and not hasattr(ProjectItem.ContentPermissions, value):
-            error = 'Invalid content permission defined.'
-            raise ValueError(error)
-        else:
-            self._content_permissions = value
+        self._content_permissions = value
 
     @property
     def id(self):
@@ -42,12 +33,9 @@ class ProjectItem(object):
         return self._name
 
     @name.setter
+    @property_not_empty
     def name(self, value):
-        if not value:
-            error = 'Name must be defined.'
-            raise ValueError(error)
-        else:
-            self._name = value
+        self._name = value
 
     def is_default(self):
         return self.name.lower() == 'default'

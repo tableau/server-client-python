@@ -17,10 +17,6 @@ class Auth(Endpoint):
         def __exit__(self, exc_type, exc_val, exc_tb):
             self._callback()
 
-    def __init__(self, parent_srv):
-        super(Endpoint, self).__init__()
-        self.parent_srv = parent_srv
-
     @property
     def baseurl(self):
         return "{0}/auth".format(self.parent_srv.baseurl)
@@ -41,6 +37,9 @@ class Auth(Endpoint):
 
     def sign_out(self):
         url = "{0}/{1}".format(self.baseurl, 'signout')
+        # If there are no auth tokens you're already signed out. No-op
+        if not self.parent_srv.is_signed_in():
+            return
         self.post_request(url, '')
         self.parent_srv._clear_auth()
         logger.info('Signed out')

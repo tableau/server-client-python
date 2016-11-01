@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
+from .property_decorators import property_is_enum, property_not_empty, property_not_nullable
 from .. import NAMESPACE
 
 
@@ -13,6 +14,7 @@ class UserItem(object):
         UnlicensedWithPublish = 'UnlicensedWithPublish'
         Viewer = 'Viewer'
         ViewerWithPublish = 'ViewerWithPublish'
+        Guest = 'Guest'
 
     class Auth:
         SAML = 'SAML'
@@ -24,33 +26,21 @@ class UserItem(object):
         self._external_auth_user_id = None
         self._id = None
         self._last_login = None
-        self._name = None
-        self._site_role = None
         self._workbooks = None
         self.email = None
         self.fullname = None
-        self.password = None
-
-        # Invoke setter
         self.name = name
         self.site_role = site_role
-
-        if auth_setting:
-            # In order to invoke the setter method for auth_setting,
-            # _auth_setting must be initialized first
-            self.auth_setting = auth_setting
+        self.auth_setting = auth_setting
 
     @property
     def auth_setting(self):
         return self._auth_setting
 
     @auth_setting.setter
+    @property_is_enum(Auth)
     def auth_setting(self, value):
-        if not hasattr(UserItem.Auth, value):
-            error = 'Invalid auth setting defined.'
-            raise ValueError(error)
-        else:
-            self._auth_setting = value
+        self._auth_setting = value
 
     @property
     def domain_name(self):
@@ -73,27 +63,19 @@ class UserItem(object):
         return self._name
 
     @name.setter
+    @property_not_empty
     def name(self, value):
-        if not value:
-            error = 'Name must be defined.'
-            raise ValueError(error)
-        else:
-            self._name = value
+        self._name = value
 
     @property
     def site_role(self):
         return self._site_role
 
     @site_role.setter
+    @property_not_nullable
+    @property_is_enum(Roles)
     def site_role(self, value):
-        if not value:
-            error = 'Site role must be defined.'
-            raise ValueError(error)
-        elif not hasattr(UserItem.Roles, value):
-            error = 'Invalid site role defined.'
-            raise ValueError(error)
-        else:
-            self._site_role = value
+        self._site_role = value
 
     @property
     def workbooks(self):

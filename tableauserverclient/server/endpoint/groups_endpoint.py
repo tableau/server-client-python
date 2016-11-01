@@ -1,5 +1,6 @@
 from .endpoint import Endpoint
 from .exceptions import MissingRequiredFieldError
+from ...models.exceptions import UnpopulatedPropertyError
 from .. import RequestFactory, GroupItem, UserItem, PaginationItem
 import logging
 
@@ -7,10 +8,6 @@ logger = logging.getLogger('tableau.endpoint.groups')
 
 
 class Groups(Endpoint):
-    def __init__(self, parent_srv):
-        super(Endpoint, self).__init__()
-        self.parent_srv = parent_srv
-
     @property
     def baseurl(self):
         return "{0}/sites/{1}/groups".format(self.parent_srv.baseurl, self.parent_srv.site_id)
@@ -45,9 +42,39 @@ class Groups(Endpoint):
         self.delete_request(url)
         logger.info('Deleted single group (ID: {0})'.format(group_id))
 
+    def create(self, group_item):
+        url = self.baseurl
+        create_req = RequestFactory.Group.create_req(group_item)
+        server_response = self.post_request(url, create_req)
+        return GroupItem.from_response(server_response.content)[0]
+
     # Removes 1 user from 1 group
     def remove_user(self, group_item, user_id):
-        user_set = group_item.users
+        self._remove_user(group_item, user_id)
+        try:
+            user_set = group_item.users
+            for user in user_set:
+                if user.id == user_id:
+                    user_set.remove(user)
+                    break
+        except UnpopulatedPropertyError:
+            # If we aren't populated, do nothing to the user list
+            pass
+        logger.info('Removed user (id: {0}) from group (ID: {1})'.format(user_id, group_item.id))
+
+    # Adds 1 user to 1 group
+    def add_user(self, group_item, user_id):
+        new_user = self._add_user(group_item, user_id)
+        try:
+            user_set = group_item.users
+            user_set.add(new_user)
+            group_item._set_users(user_set)
+        except UnpopulatedPropertyError:
+            # If we aren't populated, do nothing to the user list
+            pass
+        logger.info('Added user (id: {0}) to group (ID: {1})'.format(user_id, group_item.id))
+
+    def _remove_user(self, group_item, user_id):
         if not group_item.id:
             error = "Group item missing ID."
             raise MissingRequiredFieldError(error)
@@ -56,15 +83,8 @@ class Groups(Endpoint):
             raise ValueError(error)
         url = "{0}/{1}/users/{2}".format(self.baseurl, group_item.id, user_id)
         self.delete_request(url)
-        for user in user_set:
-            if user.id == user_id:
-                user_set.remove(user)
-                break
-        logger.info('Removed user (id: {0}) from group (ID: {1})'.format(user_id, group_item.id))
 
-    # Adds 1 user to 1 group
-    def add_user(self, group_item, user_id):
-        user_set = group_item.users
+    def _add_user(self, group_item, user_id):
         if not group_item.id:
             error = "Group item missing ID."
             raise MissingRequiredFieldError(error)
@@ -74,7 +94,4 @@ class Groups(Endpoint):
         url = "{0}/{1}/users".format(self.baseurl, group_item.id)
         add_req = RequestFactory.Group.add_user_req(user_id)
         server_response = self.post_request(url, add_req)
-        new_user = UserItem.from_response(server_response.content).pop()
-        user_set.add(new_user)
-        group_item._set_users(user_set)
-        logger.info('Added user (id: {0}) to group (ID: {1})'.format(user_id, group_item.id))
+        return UserItem.from_response(server_response.content).pop()

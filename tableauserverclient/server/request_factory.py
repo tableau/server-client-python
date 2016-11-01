@@ -22,7 +22,7 @@ class AuthRequest(object):
         credentials_element.attrib['name'] = auth_item.username
         credentials_element.attrib['password'] = auth_item.password
         site_element = ET.SubElement(credentials_element, 'site')
-        site_element.attrib['contentUrl'] = auth_item.site
+        site_element.attrib['contentUrl'] = auth_item.site_id
         if auth_item.user_id_to_impersonate:
             user_element = ET.SubElement(credentials_element, 'user')
             user_element.attrib['id'] = auth_item.user_id_to_impersonate
@@ -30,12 +30,17 @@ class AuthRequest(object):
 
 
 class DatasourceRequest(object):
-    def _generate_xml(self, datasource_item):
+    def _generate_xml(self, datasource_item, connection_credentials=None):
         xml_request = ET.Element('tsRequest')
         datasource_element = ET.SubElement(xml_request, 'datasource')
         datasource_element.attrib['name'] = datasource_item.name
         project_element = ET.SubElement(datasource_element, 'project')
         project_element.attrib['id'] = datasource_item.project_id
+        if connection_credentials:
+            credentials_element = ET.SubElement(datasource_element, 'connectionCredentials')
+            credentials_element.attrib['name'] = connection_credentials.name
+            credentials_element.attrib['password'] = connection_credentials.password
+            credentials_element.attrib['embed'] = 'true' if connection_credentials.embed else 'false'
         return ET.tostring(xml_request)
 
     def update_req(self, datasource_item):
@@ -49,15 +54,15 @@ class DatasourceRequest(object):
             owner_element.attrib['id'] = datasource_item.owner_id
         return ET.tostring(xml_request)
 
-    def publish_req(self, datasource_item, filename, file_contents):
-        xml_request = self._generate_xml(datasource_item)
+    def publish_req(self, datasource_item, filename, file_contents, connection_credentials=None):
+        xml_request = self._generate_xml(datasource_item, connection_credentials)
 
         parts = {'request_payload': ('', xml_request, 'text/xml'),
                  'tableau_datasource': (filename, file_contents, 'application/octet-stream')}
         return _add_multipart(parts)
 
-    def publish_req_chunked(self, datasource_item):
-        xml_request = self._generate_xml(datasource_item)
+    def publish_req_chunked(self, datasource_item, connection_credentials=None):
+        xml_request = self._generate_xml(datasource_item, connection_credentials)
 
         parts = {'request_payload': ('', xml_request, 'text/xml')}
         return _add_multipart(parts)
@@ -75,6 +80,12 @@ class GroupRequest(object):
         xml_request = ET.Element('tsRequest')
         user_element = ET.SubElement(xml_request, 'user')
         user_element.attrib['id'] = user_id
+        return ET.tostring(xml_request)
+
+    def create_req(self, group_item):
+        xml_request = ET.Element('tsRequest')
+        group_element = ET.SubElement(xml_request, 'group')
+        group_element.attrib['name'] = group_item.name
         return ET.tostring(xml_request)
 
 
@@ -129,6 +140,55 @@ class ProjectRequest(object):
         return ET.tostring(xml_request)
 
 
+class ScheduleRequest(object):
+    def create_req(self, schedule_item):
+        xml_request = ET.Element('tsRequest')
+        schedule_element = ET.SubElement(xml_request, 'schedule')
+        schedule_element.attrib['name'] = schedule_item.name
+        schedule_element.attrib['priority'] = str(schedule_item.priority)
+        schedule_element.attrib['type'] = schedule_item.schedule_type
+        schedule_element.attrib['executionOrder'] = schedule_item.execution_order
+        interval_item = schedule_item.interval_item
+        schedule_element.attrib['frequency'] = interval_item._frequency
+        frequency_element = ET.SubElement(schedule_element, 'frequencyDetails')
+        frequency_element.attrib['start'] = str(interval_item.start_time)
+        if hasattr(interval_item, 'end_time') and interval_item.end_time:
+            frequency_element.attrib['end'] = str(interval_item.end_time)
+        if hasattr(interval_item, 'interval') and interval_item.interval:
+            intervals_element = ET.SubElement(frequency_element, 'intervals')
+            for interval in interval_item._interval_type_pairs():
+                expression, value = interval
+                single_interval_element = ET.SubElement(intervals_element, 'interval')
+                single_interval_element.attrib[expression] = value
+        return ET.tostring(xml_request)
+
+    def update_req(self, schedule_item):
+        xml_request = ET.Element('tsRequest')
+        schedule_element = ET.SubElement(xml_request, 'schedule')
+        if schedule_item.name:
+            schedule_element.attrib['name'] = schedule_item.name
+        if schedule_item.priority:
+            schedule_element.attrib['priority'] = str(schedule_item.priority)
+        if schedule_item.execution_order:
+            schedule_element.attrib['executionOrder'] = schedule_item.execution_order
+        if schedule_item.state:
+            schedule_element.attrib['state'] = schedule_item.state
+        interval_item = schedule_item.interval_item
+        if interval_item._frequency:
+            schedule_element.attrib['frequency'] = interval_item._frequency
+        frequency_element = ET.SubElement(schedule_element, 'frequencyDetails')
+        frequency_element.attrib['start'] = str(interval_item.start_time)
+        if hasattr(interval_item, 'end_time') and interval_item.end_time:
+            frequency_element.attrib['end'] = str(interval_item.end_time)
+        intervals_element = ET.SubElement(frequency_element, 'intervals')
+        if hasattr(interval_item, 'interval'):
+            for interval in interval_item._interval_type_pairs():
+                (expression, value) = interval
+                single_interval_element = ET.SubElement(intervals_element, 'interval')
+                single_interval_element.attrib[expression] = value
+        return ET.tostring(xml_request)
+
+
 class SiteRequest(object):
     def update_req(self, site_item):
         xml_request = ET.Element('tsRequest')
@@ -178,7 +238,7 @@ class TagRequest(object):
 
 
 class UserRequest(object):
-    def update_req(self, user_item, password=''):
+    def update_req(self, user_item, password):
         xml_request = ET.Element('tsRequest')
         user_element = ET.SubElement(xml_request, 'user')
         if user_item.fullname:
@@ -205,7 +265,7 @@ class UserRequest(object):
 
 
 class WorkbookRequest(object):
-    def _generate_xml(self, workbook_item):
+    def _generate_xml(self, workbook_item, connection_credentials=None):
         xml_request = ET.Element('tsRequest')
         workbook_element = ET.SubElement(xml_request, 'workbook')
         workbook_element.attrib['name'] = workbook_item.name
@@ -213,6 +273,11 @@ class WorkbookRequest(object):
             workbook_element.attrib['showTabs'] = str(workbook_item.show_tabs).lower()
         project_element = ET.SubElement(workbook_element, 'project')
         project_element.attrib['id'] = workbook_item.project_id
+        if connection_credentials:
+            credentials_element = ET.SubElement(workbook_element, 'connectionCredentials')
+            credentials_element.attrib['name'] = connection_credentials.name
+            credentials_element.attrib['password'] = connection_credentials.password
+            credentials_element.attrib['embed'] = 'true' if connection_credentials.embed else 'false'
         return ET.tostring(xml_request)
 
     def update_req(self, workbook_item):
@@ -228,15 +293,15 @@ class WorkbookRequest(object):
             owner_element.attrib['id'] = workbook_item.owner_id
         return ET.tostring(xml_request)
 
-    def publish_req(self, workbook_item, filename, file_contents):
-        xml_request = self._generate_xml(workbook_item)
+    def publish_req(self, workbook_item, filename, file_contents, connection_credentials=None):
+        xml_request = self._generate_xml(workbook_item, connection_credentials)
 
         parts = {'request_payload': ('', xml_request, 'text/xml'),
                  'tableau_workbook': (filename, file_contents, 'application/octet-stream')}
         return _add_multipart(parts)
 
-    def publish_req_chunked(self, workbook_item):
-        xml_request = self._generate_xml(workbook_item)
+    def publish_req_chunked(self, workbook_item, connection_credentials=None):
+        xml_request = self._generate_xml(workbook_item, connection_credentials)
 
         parts = {'request_payload': ('', xml_request, 'text/xml')}
         return _add_multipart(parts)
@@ -249,6 +314,7 @@ class RequestFactory(object):
     Group = GroupRequest()
     Permission = PermissionRequest()
     Project = ProjectRequest()
+    Schedule = ScheduleRequest()
     Site = SiteRequest()
     Tag = TagRequest()
     User = UserRequest()

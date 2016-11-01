@@ -8,10 +8,6 @@ logger = logging.getLogger('tableau.endpoint.sites')
 
 
 class Sites(Endpoint):
-    def __init__(self, parent_srv):
-        super(Endpoint, self).__init__()
-        self.parent_srv = parent_srv
-
     @property
     def baseurl(self):
         return "{0}/sites".format(self.parent_srv.baseurl)
@@ -59,7 +55,12 @@ class Sites(Endpoint):
             raise ValueError(error)
         url = "{0}/{1}".format(self.baseurl, site_id)
         self.delete_request(url)
-        logger.info('Deleted single site (ID: {0})'.format(site_id))
+        # If we deleted the site we are logged into
+        # then we are automatically logged out
+        if site_id == self.parent_srv.site_id:
+            logger.info('Deleting current site and clearing auth tokens')
+            self.parent_srv._clear_auth()
+        logger.info('Deleted single site (ID: {0}) and signed out'.format(site_id))
 
     # Create new site
     def create(self, site_item):
