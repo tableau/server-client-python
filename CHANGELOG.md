@@ -5,7 +5,7 @@
 * Added Connection Credentials for publishing datasources/workbooks (#80)
 * Added Pager object for handling pagination results and sample (#72, #90)
 * Added ServerInfo endpoint (#84)
-* Deprecated `site_id` as a parameter to `TableauAuth` in favor of `site`
+* Deprecated `site` as a parameter to `TableauAuth` in favor of `site_id`
 * Code Cleanup
 * Bugfixes
 
