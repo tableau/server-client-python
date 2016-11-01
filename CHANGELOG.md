@@ -2,9 +2,10 @@
 
 * Added Initial Schedules Support (#48)
 * Added Initial Create Group endpoint (#69)
-* Added Connection Credentials for publishing datasources (#80)
+* Added Connection Credentials for publishing datasources/workbooks (#80)
 * Added Pager object for handling pagination results and sample (#72, #90)
 * Added ServerInfo endpoint (#84)
+* Deprecated `site_id` as a parameter to `TableauAuth` in favor of `site`
 * Code Cleanup
 * Bugfixes
 
