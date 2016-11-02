@@ -28,9 +28,9 @@ class RequestTests(unittest.TestCase):
                                                        auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
                                                        content_type='text/xml')
 
-            self.assertEqual(resp.request.query, 'pagenumber=13&pagesize=13')
-            self.assertEqual(resp.request.headers['x-tableau-auth'], 'j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM')
-            self.assertEqual(resp.request.headers['content-type'], 'text/xml')
+            self.assertEquals(resp.request.query, 'pagenumber=13&pagesize=13')
+            self.assertEquals(resp.request.headers['x-tableau-auth'], 'j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM')
+            self.assertEquals(resp.request.headers['content-type'], 'text/xml')
 
     def test_make_post_request(self):
         with requests_mock.mock() as m:
@@ -42,6 +42,6 @@ class RequestTests(unittest.TestCase):
                                                        request_object=None,
                                                        auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
                                                        content_type='multipart/mixed')
-            self.assertEqual(resp.request.headers['x-tableau-auth'], 'j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM')
-            self.assertEqual(resp.request.headers['content-type'], 'multipart/mixed')
-            self.assertEqual(resp.request.body, b'1337')
+            self.assertEquals(resp.request.headers['x-tableau-auth'], 'j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM')
+            self.assertEquals(resp.request.headers['content-type'], 'multipart/mixed')
+            self.assertEquals(resp.request.body, b'1337')
