@@ -54,7 +54,17 @@ The value that you want to filter on. This can be any valid string.
 
 ### Filtering example
 
-The following code displays only the workbooks where the name equals 'Superstore':
+The following code displays only the workbooks where the name equals Superstore:
+
+```py
+req_option = TSC.RequestOptions()
+req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name,
+                                 TSC.RequestOptions.Operator.Equals,
+                                 'Superstore'))
+matching_workbooks, pagination_item = server.workbooks.get(req_option)
+
+print(matching_workbooks[0].owner_id)
+```
 
 ```py
 req_option = TSC.RequestOptions()
@@ -78,10 +88,11 @@ The following code sorts the workbooks in ascending order:
 
 ```py
 req_option = TSC.RequestOptions()
-req_option.sort.add(TSC.Sort(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Direction.Asc))
+req_option.sort.add(TSC.Sort(TSC.RequestOptions.Field.Name,
+                             TSC.RequestOptions.Direction.Asc))
 matching_workbooks, pagination_item = server.workbooks.get(req_option)
 
 for wb in matching_workbooks:
-	print wb.name
+    print(wb.name)
 ```
 
