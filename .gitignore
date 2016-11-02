@@ -139,3 +139,7 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# Documentation
+docs/_site/
+docs/.jekyll-metadata
