@@ -57,3 +57,13 @@ Move Workbook | [move_workbook_projects.py](./samples/move_workbook_projects.py)
 Set HTTP Options | [set_http_options.py](./samples/set_http_options.py) | Sets HTTP options on server and downloads workbooks.
 Explore Datasource | [explore_datasource.py](./samples/explore_datasource.py) | Demonstrates working with Tableau Datasource. Queries all datasources, picks one and populates its connections, then updates the datasource. Has additional flags for publish and download.
 Explore Workbook | [explore_workbook.py](./samples/explore_workbook.py) | Demonstrates working with Tableau Workbook. Queries all workbooks, picks one and populates its connections/views, then updates the workbook. Has additional flags for publish, download, and getting the preview image. Note: if you don't have permissions on the workbook the script retrieves from the server, the script will result in a 403033 error. This is expected.
+Initialize Server | [initialize_server.py](./samples/initialize_server.py) | Shows how to intialize a Tableau Server with datasources and workbooks from the local file system.
+
+
+
+###Adding New Features
+
+1. Create an endpoint class for the new feature, following the structure of the other endpoints. Each endpoint usually has get, post, update, and delete operations that require making the url, creating the xml request if necesssary, sending the request and creating the target item object based on the server response.
+2. Create an item class for the new feature, following the structure of the other item classes. Each item has properties that correspond to what attributes are sent to/received from the server (refer to docs amd Postman for attributes). Some items also require constants for user input that are limited to specific strings. After making all the properties, make the parsing method that takes the server response and creates an instances of the target item. If the corresponding endpoint class has an update function, then parsing is broken into multiple parts (refer to another item like workbook or datasource for example).
+3. Add testing by getting real xml responses from the server, and asserting that all properties are parsed and set correctly.
+4. Add samples to show users how to use the new feature.
