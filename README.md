@@ -11,4 +11,3 @@ This repository contains Python source code and sample files.
 For more information on installing and using TSC, see the documentation:
 
 <https://tableau.github.io/server-client-python/docs/>
-
