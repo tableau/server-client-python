@@ -8,7 +8,7 @@ This topic describes how to contribute to the Tableau Server Client (Python) pro
 * TOC
 {:toc}
 
-## Submitting your first patch
+## Submit your first patch
 
 1. Make sure you have [signed the CLA](http://tableau.github.io/#contributor-license-agreement-cla)
 
@@ -71,7 +71,7 @@ This topic describes how to contribute to the Tableau Server Client (Python) pro
 1. That's it! When the PR has received :rocket:'s from members of the core team they will merge the PR
 
 
-## Adding new features
+## Add new features
 
 1. Create an endpoint class for the new feature, following the structure of the other endpoints. Each endpoint usually
    has get, post, update, and delete operations that require making the url, creating the XML request if necesssary,

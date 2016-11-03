@@ -17,7 +17,7 @@ Each of the samples requires the following arguments:
   prompted for a password for the user account that you enter.
 
 Additionally, some of the samples require that you enter other arguments when you run them. For more information about
-the arguments required by a particular sample, run the argument without arguments to see the help output.
+the arguments required by a particular sample, run the sample without arguments to see the help output.
 
 For example, if you run the following command:
 
@@ -28,7 +28,7 @@ python samples/publish_workbook.py
 You might see that you need to enter a server address, a user name, and a file path for the workbook that you want to
 publish.
 
-## List of samples
+## Samples list
 
 The following list describes the samples available in the repository:
 
@@ -44,8 +44,7 @@ The following list describes the samples available in the repository:
 
 * `move_workbook_sites.py`. Downloads a workbook, stores it in-memory, and uploads it to another site.
 
-* `pagination_sample.py`. Use the pagination item that is returned by many TSC calls to iterate over all the items on
-  the server.
+* `pagination_sample.py`. Use the Pager generator to iterate over all the items on the server.
 
 * `publish_workbook.py`. Publishes a Tableau workbook.
 

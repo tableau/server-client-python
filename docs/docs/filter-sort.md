@@ -66,14 +66,6 @@ matching_workbooks, pagination_item = server.workbooks.get(req_option)
 print(matching_workbooks[0].owner_id)
 ```
 
-```py
-req_option = TSC.RequestOptions()
-req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, 'Superstore'))
-matching_workbooks, pagination_item = server.workbooks.get(req_option)
-
-print(matching_workbooks[0].owner_id)
-```
-
 ## Sorting
 
 To sort on a field, you need to specify the direction in which you want to sort.

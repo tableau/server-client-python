@@ -26,7 +26,7 @@ server, you can make multiple calls to the `Pager` function. For example, you ca
 `Pager` function until there are no resources remaining. Note that the `Pager` generator only makes calls to the Tableau
 Server REST API when it runs out of resources--it does not make a call for each resource.
 
-**Tip**: For more informaiton on generators, see the [Python wiki](https://wiki.python.org/moin/Generators).
+**Tip**: For more information on generators, see the [Python wiki](https://wiki.python.org/moin/Generators).
 
 ### Set pagination options
 
@@ -69,5 +69,3 @@ can insert the elements into a list:
 ```py
 all_workbooks = list(TSC.Pager(server.workbooks))
 ```
-Note that the `pagesize` has been increased in this example to increase efficiency in this example.
-

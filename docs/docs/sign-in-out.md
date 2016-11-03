@@ -38,4 +38,4 @@ with server.auth.sign_in(tableau_auth):
     # Do awesome things here!
 ```
 
-When you use a `with` block, the TSC library signs you out of Tableau Server when you exit out of the `with` block.
+The TSC library signs you out of Tableau Server when you exit out of the `with` block.
