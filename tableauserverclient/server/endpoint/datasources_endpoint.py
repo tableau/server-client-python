@@ -87,7 +87,8 @@ class Datasources(Endpoint):
         server_response = self.put_request(url, update_req)
         logger.info('Updated datasource item (ID: {0})'.format(datasource_item.id))
         updated_datasource = copy.copy(datasource_item)
-        return updated_datasource._parse_common_tags(server_response.content)
+        return updated_datasource._parse_and_set_attribs(server_response.content,
+                                                         ('created_at', 'project_name', 'project_id', 'owner_id'))
 
     # Publish datasource
     def publish(self, datasource_item, file_path, mode, connection_credentials=None):
