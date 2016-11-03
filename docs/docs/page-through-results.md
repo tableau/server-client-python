@@ -42,7 +42,6 @@ all_workbooks = list(TSC.Pager(server.workbooks, request_options))
 
 You can also set the page number where you want to start like so:
 
-
 ```py
 request_options = TSC.RequestOptions(pagenumber=5)
 all_workbooks = list(TSC.Pager(server.workbooks, request_options))
@@ -50,10 +49,9 @@ all_workbooks = list(TSC.Pager(server.workbooks, request_options))
 
 ### Use list comprehensions and generator expressions
 
-The `Pager` generator can also be used in list comprehensions or generator expressions
-for compactness and easy filtering. Generator expressions will use less
-memory than list comprehsnsions. The following example shows how to use the `Pager` generator with list comprehensions
-and generator expressions:
+The `Pager` generator can also be used in list comprehensions or generator expressions for compactness and easy
+filtering. Generator expressions will use less memory than list comprehensions. The following example shows how to use
+the `Pager` generator with list comprehensions and generator expressions:
 
 ```py
 # List comprehension

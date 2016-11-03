@@ -17,12 +17,12 @@ Each of the samples requires the following arguments:
   prompted for a password for the user account that you enter.
 
 Additionally, some of the samples require that you enter other arguments when you run them. For more information about
-the arguments required by a particular sample, run the sample without arguments to see the help output.
+the arguments required by a particular sample, run the sample with the `-h` flag to see the help output.
 
 For example, if you run the following command:
 
 ```
-python samples/publish_workbook.py
+python samples/publish_workbook.py -h
 ```
 
 You might see that you need to enter a server address, a user name, and a file path for the workbook that you want to
@@ -34,11 +34,11 @@ The following list describes the samples available in the repository:
 
 * `create_group.py`. Create a user group.
 
-* `create_schedules.py`. Create scheduled extract refresh tasks and subscription tasks.
+* `create_schedules.py`. Create schedules for extract refreshes and subscriptions.
 
-* `explore_datasource.py`. Queries all datasources, selects a datasource, populates connections for the datasource, then updates the datasource.
+* `explore_datasource.py`. Queries datasources, selects a datasource, populates connections for the datasource, then updates the datasource.
 
-* `explore_workbook.py`. Queries all workbooks, selects a workbook, populates the connections and views for a workbook, then updates the workbook.
+* `explore_workbook.py`. Queries workbooks, selects a workbook, populates the connections and views for a workbook, then updates the workbook.
 
 * `move_workbook_projects.py`. Updates the properties of a workbook to move the workbook from one project to another.
 

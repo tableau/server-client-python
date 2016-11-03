@@ -19,7 +19,7 @@ This topic describes how to contribute to the Tableau Server Client (Python) pro
 1. Clone your fork:
 
    ```shell
-   git clone git@github.com:tableau/server-client-python.git
+   git clone git@github.com:<user-name>/server-client-python.git
    ```
 
 1. Run the tests to make sure everything is peachy:
@@ -74,11 +74,11 @@ This topic describes how to contribute to the Tableau Server Client (Python) pro
 ## Add new features
 
 1. Create an endpoint class for the new feature, following the structure of the other endpoints. Each endpoint usually
-   has get, post, update, and delete operations that require making the url, creating the XML request if necesssary,
+   has `get`, `post`, `update`, and `delete` operations that require making the url, creating the XML request if necesssary,
    sending the request, and creating the target item object based on the server response.
 
 1. Create an item class for the new feature, following the structure of the other item classes. Each item has properties
-   that correspond to what attributes are sent to/received from the server (refer to docs amd Postman for attributes).
+   that correspond to what attributes are sent to/received from the server (refer to docs and Postman for attributes).
    Some items also require constants for user input that are limited to specific strings. After making all the
    properties, make the parsing method that takes the server response and creates an instances of the target item. If
    the corresponding endpoint class has an update function, then parsing is broken into multiple parts (refer to another

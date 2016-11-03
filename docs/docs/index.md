@@ -36,15 +36,9 @@ Run the following command to install the latest stable version of TSC:
 pip install tableauserverclient
 ```
 
-### Install from the source code
+### Install from the development branch
 
-Run the following command to install directly from the TSC repository:
-
-```
-pip install git+https://github.com/tableau/server-client-python.git
-```
-
-Alternatively, you can install from the development branch for a preview of upcoming features. Run the following command
+You can install from the development branch for a preview of upcoming features. Run the following command
 to install from the development branch:
 
 ```

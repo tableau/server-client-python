@@ -18,12 +18,10 @@ server.auth.sign_in(tableau_auth)
 server.auth.sign_out()
 ```
 
-This code does the following things:
-
-* Creates an authentication object that stores your user name and password.
-* Creates a server object that stores the URL of your server.
-* Calls the `sign_in` function to pass the authentication object to the server object.
-* Call the `sign_out` function.
+<div class="alert alert-info">
+    <b>Note:</b> When you sign in, the TSC library manages the authenticated session for you, however it is still
+    limited by the maximum session length (of four hours) on Tableau Server.
+</div>
 
 
 Alternatively, for short programs, consider using a `with` block:

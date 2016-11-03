@@ -60,7 +60,7 @@ Sites.get_by_id(id)
 
 ### Get Sites
 
-Gets all the sites on the server.
+Gets the first 100 sites on the server. To get all the sites, use the Pager.
 
 ```py
 Sites.get()
@@ -104,7 +104,7 @@ self.server.projects.create(new_project)
 
 ### Get Projects
 
-Get a list of projects on the server.
+Get the first 100 projects on the server. To get all projects, use the Pager.
 
 ```py
 Projects.get()
@@ -132,7 +132,7 @@ Source files: server/endpoint/workbooks.py, models/workbook_item.py
 
 ### Get Workbooks
 
-Get all workbooks on the server.
+Get the first 100 workbooks on the server. To get all workbooks, use the Pager.
 
 ```py
 Workbooks.get()
@@ -164,8 +164,8 @@ Example:
 
 ```py
 wb_item = TSC.WorkbookItem(name='Sample',
-                                show_tabs=False,
-                                project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+                           show_tabs=False,
+                           project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
 
 server.workbooks.publish(wb_item,
                          os.path.join(YOUR_DIR, 'SampleWB.twbx'),
