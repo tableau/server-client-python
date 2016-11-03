@@ -1,16 +1,14 @@
-# server-client-python
-Tableau Server Client is a client library for the Tableau REST API. The Server Client is delightful to use and easy to love because it requires writing much less code than working directly with the REST API.
+# Tableau Server Client (Python)
 
-This repository contains Python source and sample files.
+Use the Tableau Server Client (TSC) library to increase your productivity as you interact with the Tableau Server REST API. With the TSC library you can do almost everything that you can do with the REST API, including:
 
-###Getting Started
-You must have Python installed. You can use either 2.7.X or 3.3 and later.
+* Publish workbooks and data sources.
+* Create users and groups.
+* Query projects, sites, and more.
 
-#### Installing the latest stable version (preferred)
+This repository contains Python source code and sample files.
 
-```text
-pip install tableauserverclient
-```
+For more information on installing and using TSC, see the documentation:
 
 #### Installing From Source
 
