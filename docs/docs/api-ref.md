@@ -50,15 +50,15 @@ new_site = TSC.SiteItem(name='Tableau', content_url='tableau', admin_mode=TSC.Si
 self.server.sites.create(new_site)
 ```
 
-### Query Site by ID
+### Get Site by ID
 
 Gets the site with the given ID.
 
 ```py
-Sites.get_by_id('a1b2c3d4')
+Sites.get_by_id(id)
 ```
 
-### Query Sites
+### Get Sites
 
 Gets all the sites on the server.
 
@@ -68,7 +68,7 @@ Sites.get()
 
 ### Update Site
 
-Modifies a site. The site item object includes the site ID and overrides all other settings.
+Modifies a site. The site item object must include the site ID and overrides all other settings.
 
 ```py
 Sites.update(site_item_object)
@@ -79,7 +79,7 @@ Sites.update(site_item_object)
 Deletes the site with the given ID.
 
 ```py
-Sites.delete('a1b2c3d4')
+Sites.delete(id)
 ```
 
 ## Projects
@@ -102,103 +102,160 @@ new_project.content_permissions = 'ManagedByOwner'
 self.server.projects.create(new_project)
 ```
 
-### Query Projects
+### Get Projects
+
+Get a list of projects on the server.
+
+```py
+Projects.get()
+```
 
 ### Update Project
 
+Modifies a project. The project item object must include the project ID and overrides all other settings.
+
+```py
+Projects.update(project_item_object)
+```
+
 ### Delete Project
 
+Deletes a project by ID.
 
-## Workbooks and views
+```py
+Projects.delete(id)
+```
 
-Source files: server/endpoint/workbooks.py, server/endpoint/views_endpoint.py, models/view_item.py
+## Workbooks
+
+Source files: server/endpoint/workbooks.py, models/workbook_item.py
+
+### Get Workbooks
+
+Get all workbooks on the server.
+
+```py
+Workbooks.get()
+```
+
+### Get Workbook by ID
+
+Gets a workbook with a given ID.
+
+```py
+Workbooks.get_by_id(id)
+```
 
 ### Publish Workbook
 
-### Add Tags to Workbook
+Publish a local workbook to Tableau Server.
 
-### Query Views for Workbook
+```py
+Workbooks.publish(workbook_item, file_path, publish_mode)
+```
 
-### Query View Preview Image
+Where the publish mode is one of the following:
 
-### Query Workbook
+* Append
+* Overwrite
+* CreateNew
 
-### Query Workbook Connections
+Example:
 
-### Query Workbook Preview Image
+```py
+wb_item = TSC.WorkbookItem(name='Sample',
+                                show_tabs=False,
+                                project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
 
-### Query Workbooks for Site
-
-### Query Workbooks for User
-
-### Download Workbook
+server.workbooks.publish(wb_item,
+                         os.path.join(YOUR_DIR, 'SampleWB.twbx'),
+                         self.server.PublishMode.CreateNew)
+```
 
 ### Update Workbook
 
-### Update Workbook Connection
+Modifies a workbook. The workbook item object must include the workbook ID and overrides all other settings.
+
+```py
+Workbooks.update(wb_item_object)
+```
 
 ### Delete Workbook
 
-### Delete Tag from Workbook
+Deletes a workbook with the given ID.
+
+```py
+Workbooks.delete(id)
+```
+
+### Download Workbook
+
+Downloads a workbook to the specified directory.
+
+```py
+Workbooks.download(id, file_path)
+```
+
+### Populate Views for a Workbook
+
+Populates a list of views for a workbook object. You must populate views before you can iterate through the views.
+
+```py
+Workbooks.populate_views(workbook_obj)
+```
+
+### Populate Connections for a Workbook
+
+Populates a list of connections for a given workbook. You must populate connections before you can iterate through the
+connections.
+
+```py
+Workbooks.populate_connections(workbook_obj)
+```
+
+### Populate a Preview Image for a Workbook
+
+Populates a preview image for a given workbook. You must populate the image before you can iterate through the
+connections.
+
+```py
+Workbooks.populate_connections(workbook_obj)
+```
+
+### Get Views for a Workbook
+
+Returns a list of views for a workbook. Before you get views, you must call populate_views.
+
+```
+workbook_obj.views
+```
+
+### Get Connections for a Workbook
+
+Returns a list of connections for a workbook. Before you get connections, you must call populate_connections.
+
+```
+workbook_obj.connections
+```
+
+
+
+## Views
+
+Source files: server/endpoint/views_endpoint.py, models/view_item.py
+
 
 
 ## Data sources
 
 Source files: server/endpoint/datasources_endpoint.py, models/datasource_item.py
 
-### Publish Datasource
 
-### Query Datasource
+## Users
 
-### Query Datasources
+Source files: server/endpoint/users_endpoint.py, models/user_item.py
 
-### Query Datasource Connections
+## Groups
 
-### Download Datasource
-
-### Update Datasource
-
-### Update Datasource Connection
-
-### Delete Datasource
-
-
-## Users and groups
-
-Source files: server/endpoint/users_endpoint.py, server/endpoint/groups_endpoint.py, models/user_item.py,
-models/group_item.py
-
-### Create Group
-
-### Add User to Group
-
-### Add User to Site
-
-### Get Users in Group
-
-### Get Users on Site
-
-### Query Groups
-
-### Query User On Site
-
-### Update Group
-
-### Update User
-
-### Remove User from Group
-
-### Remove User from Site
-
-### Delete Group
-
-
-
-## File Uploads
-
-Source files: server/endpoint/fileuploads_endpoint.py, models/fileupload_item.py
-
-### Initiate File Upload
-
-### Append to File Upload
+Source files: server/endpoint/groups_endpoint.py, models/group_item.py,
 
