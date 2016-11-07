@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+  <error code="404003">
+    <summary>Resource Not Found</summary>
+    <detail>Unknown resource '/2.4/serverInfo' specified in URI.</detail>
+  </error>
+</tsResponse>
