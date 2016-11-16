@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 
 from .interval_item import IntervalItem, HourlyInterval, DailyInterval, WeeklyInterval, MonthlyInterval
-from .property_decorators import property_is_enum, property_not_nullable, property_is_int
+from .property_decorators import property_is_enum, property_not_nullable, property_is_int, property_is_datetime
 from .. import NAMESPACE
 from ..datetime_helpers import parse_datetime
 
@@ -36,6 +36,11 @@ class ScheduleItem(object):
     @property
     def created_at(self):
         return self._created_at
+
+    @created_at.setter
+    @property_is_datetime
+    def created_at(self, value):
+        self._created_at = value
 
     @property
     def end_schedule_at(self):
@@ -98,6 +103,11 @@ class ScheduleItem(object):
     @property
     def updated_at(self):
         return self._updated_at
+
+    @updated_at.setter
+    @property_is_datetime
+    def updated_at(self, value):
+        self._updated_at = value
 
     def _parse_common_tags(self, schedule_xml):
         if not isinstance(schedule_xml, ET.Element):
