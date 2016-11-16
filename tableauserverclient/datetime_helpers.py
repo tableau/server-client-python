@@ -1,6 +1,5 @@
 import datetime
 
-
 # This code below is from the python documentation for tzinfo: https://docs.python.org/2.3/lib/datetime-tzinfo.html
 ZERO = datetime.timedelta(0)
 HOUR = datetime.timedelta(hours=1)
