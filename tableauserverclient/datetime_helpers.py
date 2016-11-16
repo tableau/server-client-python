@@ -4,8 +4,6 @@ import datetime
 ZERO = datetime.timedelta(0)
 HOUR = datetime.timedelta(hours=1)
 
-# A UTC class.
-
 
 class UTC(datetime.tzinfo):
     """UTC"""
@@ -21,7 +19,6 @@ class UTC(datetime.tzinfo):
 
 
 utc = UTC()
-
 TABLEAU_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
 
