@@ -8,7 +8,6 @@ except ImportError:
     ZERO = datetime.timedelta(0)
     HOUR = datetime.timedelta(hours=1)
 
-
     # A UTC class.
 
     class UTC(datetime.tzinfo):
@@ -22,7 +21,6 @@ except ImportError:
 
         def dst(self, dt):
             return ZERO
-
 
     utc = UTC()
 
