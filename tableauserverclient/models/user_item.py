@@ -2,6 +2,7 @@ import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_is_enum, property_not_empty, property_not_nullable
 from .. import NAMESPACE
+from ..datetime_helpers import parse_datetime
 
 
 class UserItem(object):
@@ -135,7 +136,7 @@ class UserItem(object):
         id = user_xml.get('id', None)
         name = user_xml.get('name', None)
         site_role = user_xml.get('siteRole', None)
-        last_login = user_xml.get('lastLogin', None)
+        last_login = parse_datetime(user_xml.get('lastLogin', None))
         external_auth_user_id = user_xml.get('externalAuthUserId', None)
         fullname = user_xml.get('fullName', None)
         email = user_xml.get('email', None)
