@@ -3,6 +3,7 @@ import unittest
 import os
 import requests_mock
 import tableauserverclient as TSC
+from tableauserverclient.datetime_helpers import format_datetime
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
@@ -61,7 +62,7 @@ class GroupTests(unittest.TestCase):
         self.assertEqual('dd2239f6-ddf1-4107-981a-4cf94e415794', user.id)
         self.assertEqual('alice', user.name)
         self.assertEqual('Publisher', user.site_role)
-        self.assertEqual('2016-08-16T23:17:06Z', user.last_login)
+        self.assertEqual('2016-08-16T23:17:06Z', format_datetime(user.last_login))
 
     def test_delete(self):
         with requests_mock.mock() as m:

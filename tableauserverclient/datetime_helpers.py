@@ -28,6 +28,9 @@ TABLEAU_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
 
 def parse_datetime(date):
+    if date is None:
+        return None
+
     return datetime.datetime.strptime(date, TABLEAU_DATE_FORMAT).replace(tzinfo=utc)
 
 
