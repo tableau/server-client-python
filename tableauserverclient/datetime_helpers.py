@@ -7,6 +7,7 @@ HOUR = datetime.timedelta(hours=1)
 
 # A UTC class.
 
+
 class UTC(datetime.tzinfo):
     """UTC"""
 
@@ -18,6 +19,7 @@ class UTC(datetime.tzinfo):
 
     def dst(self, dt):
         return ZERO
+
 
 utc = UTC()
 
