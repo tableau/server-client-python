@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
-from .property_decorators import property_not_nullable, property_is_boolean, property_is_datetime
+from .property_decorators import property_not_nullable, property_is_boolean
 from .tag_item import TagItem
 from .view_item import ViewItem
 from .. import NAMESPACE
@@ -40,11 +40,6 @@ class WorkbookItem(object):
     @property
     def created_at(self):
         return self._created_at
-
-    @created_at.setter
-    @property_is_datetime
-    def created_at(self, value):
-        self._created_at = value
 
     @property
     def id(self):
@@ -86,11 +81,6 @@ class WorkbookItem(object):
     @property
     def updated_at(self):
         return self._updated_at
-
-    @updated_at.setter
-    @property_is_datetime
-    def updated_at(self, value):
-        self._updated_at = value
 
     @property
     def views(self):
