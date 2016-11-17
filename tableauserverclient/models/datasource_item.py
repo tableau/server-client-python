@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
-from .property_decorators import property_not_nullable, property_is_datetime
+from .property_decorators import property_not_nullable
 from .tag_item import TagItem
 from .. import NAMESPACE
 from ..datetime_helpers import parse_datetime
@@ -34,11 +34,6 @@ class DatasourceItem(object):
     @property
     def created_at(self):
         return self._created_at
-
-    @created_at.setter
-    @property_is_datetime
-    def created_at(self, value):
-        self._created_at = value
 
     @property
     def id(self):
