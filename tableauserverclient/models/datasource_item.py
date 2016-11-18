@@ -3,6 +3,7 @@ from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_not_nullable
 from .tag_item import TagItem
 from .. import NAMESPACE
+from ..datetime_helpers import parse_datetime
 
 
 class DatasourceItem(object):
@@ -118,8 +119,8 @@ class DatasourceItem(object):
         name = datasource_xml.get('name', None)
         datasource_type = datasource_xml.get('type', None)
         content_url = datasource_xml.get('contentUrl', None)
-        created_at = datasource_xml.get('createdAt', None)
-        updated_at = datasource_xml.get('updatedAt', None)
+        created_at = parse_datetime(datasource_xml.get('createdAt', None))
+        updated_at = parse_datetime(datasource_xml.get('updatedAt', None))
 
         tags = None
         tags_elem = datasource_xml.find('.//t:tags', namespaces=NAMESPACE)

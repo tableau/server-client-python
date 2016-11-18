@@ -10,6 +10,7 @@ import getpass
 import logging
 import glob
 
+
 def main():
     parser = argparse.ArgumentParser(description='Initialize a server with content.')
     parser.add_argument('--server', '-s', required=True, help='server address')
@@ -47,11 +48,11 @@ def main():
         # Create the site if it doesn't exist
         if existing_site is None:
             print("Site not found: {0} Creating it...").format(args.site)
-            new_site = TSC.SiteItem(name=args.site, content_url=args.site.replace(" ", ""), admin_mode=TSC.SiteItem.AdminMode.ContentAndUsers)
+            new_site = TSC.SiteItem(name=args.site, content_url=args.site.replace(" ", ""),
+                                    admin_mode=TSC.SiteItem.AdminMode.ContentAndUsers)
             server.sites.create(new_site)
         else:
             print("Site {0} exists. Moving on...").format(args.site)
-
 
     ################################################################################
     # Step 3: Sign-in to our target site
@@ -81,6 +82,7 @@ def main():
         ################################################################################
         publish_datasources_to_site(server_upload, project, args.datasources_folder)
         publish_workbooks_to_site(server_upload, project, args.workbooks_folder)
+
 
 def publish_datasources_to_site(server_object, project, folder):
     path = folder + '/*.tds*'

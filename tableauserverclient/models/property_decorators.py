@@ -1,5 +1,12 @@
+import datetime
 import re
 from functools import wraps
+from ..datetime_helpers import parse_datetime
+try:
+    basestring
+except NameError:
+    # In case we are in python 3 the string check is different
+    basestring = str
 
 
 def property_is_enum(enum_type):
@@ -98,4 +105,26 @@ def property_matches(regex_to_match, error):
                 raise ValueError(error)
             return func(self, value)
         return validate_regex_decorator
+    return wrapper
+
+
+def property_is_datetime(func):
+    """ Takes the following datetime format and turns it into a datetime object:
+
+    2016-08-18T18:25:36Z
+
+    Because we return everything with Z as the timezone, we assume everything is in UTC and create
+    a timezone aware datetime.
+    """
+
+    @wraps(func)
+    def wrapper(self, value):
+        if isinstance(value, datetime.datetime):
+            return func(self, value)
+        if not isinstance(value, basestring):
+            raise ValueError("Cannot convert {} into a datetime, cannot update {}".format(value.__class__.__name__,
+                                                                                          func.__name__))
+
+        dt = parse_datetime(value)
+        return func(self, dt)
     return wrapper
