@@ -54,7 +54,7 @@ class UserTests(unittest.TestCase):
             all_users, pagination_item = self.server.users.get()
 
         self.assertEqual(0, pagination_item.total_available)
-        self.assertEqual(set(), all_users)
+        self.assertEqual([], all_users)
 
     def test_get_before_signin(self):
         self.server._auth_token = None

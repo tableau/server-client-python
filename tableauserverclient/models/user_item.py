@@ -119,7 +119,7 @@ class UserItem(object):
 
     @classmethod
     def from_response(cls, resp):
-        all_user_items = set()
+        all_user_items = []
         parsed_response = ET.fromstring(resp)
         all_user_xml = parsed_response.findall('.//t:user', namespaces=NAMESPACE)
         for user_xml in all_user_xml:
@@ -128,7 +128,7 @@ class UserItem(object):
             user_item = cls(name, site_role)
             user_item._set_values(id, name, site_role, last_login, external_auth_user_id,
                                   fullname, email, auth_setting, domain_name)
-            all_user_items.add(user_item)
+            all_user_items.append(user_item)
         return all_user_items
 
     @staticmethod
