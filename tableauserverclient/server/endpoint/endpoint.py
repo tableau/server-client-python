@@ -21,10 +21,11 @@ class Endpoint(object):
 
         return headers
 
-    def _make_request(self, method, url, content=None, request_object=None, auth_token=None, content_type=None):
+    def _make_request(self, method, url, content=None, request_object=None,
+                      auth_token=None, content_type=None, parameters=None):
         if request_object is not None:
             url = request_object.apply_query_params(url)
-        parameters = {}
+        parameters = parameters or {}
         parameters.update(self.parent_srv.http_options)
         parameters['headers'] = Endpoint._make_common_headers(auth_token, content_type)
 
@@ -49,9 +50,9 @@ class Endpoint(object):
     def get_unauthenticated_request(self, url, request_object=None):
         return self._make_request(self.parent_srv.session.get, url, request_object=request_object)
 
-    def get_request(self, url, request_object=None):
+    def get_request(self, url, request_object=None, parameters=None):
         return self._make_request(self.parent_srv.session.get, url, auth_token=self.parent_srv.auth_token,
-                                  request_object=request_object)
+                                  request_object=request_object, parameters=parameters)
 
     def delete_request(self, url):
         # We don't return anything for a delete

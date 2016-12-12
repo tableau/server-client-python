@@ -92,7 +92,7 @@ class Workbooks(Endpoint):
             error = "Workbook ID undefined."
             raise ValueError(error)
         url = "{0}/{1}/content".format(self.baseurl, workbook_id)
-        server_response = self.get_request(url)
+        server_response = self.get_request(url, parameters={"stream": True})
         _, params = cgi.parse_header(server_response.headers['Content-Disposition'])
         filename = os.path.basename(params['filename'])
         if filepath is None:
@@ -101,7 +101,10 @@ class Workbooks(Endpoint):
             filepath = os.path.join(filepath, filename)
 
         with open(filepath, 'wb') as f:
-            f.write(server_response.content)
+            chunk_size = 1024 * 1024 * 4  # 4MB
+            for chunk in server_response.iter_content(chunk_size):
+                f.write(chunk)
+            server_response.close()
         logger.info('Downloaded workbook to {0} (ID: {1})'.format(filepath, workbook_id))
         return os.path.abspath(filepath)
 
