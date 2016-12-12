@@ -7,6 +7,7 @@ import os
 import logging
 import copy
 import cgi
+from contextlib import closing
 
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64   # 64MB
@@ -92,19 +93,18 @@ class Workbooks(Endpoint):
             error = "Workbook ID undefined."
             raise ValueError(error)
         url = "{0}/{1}/content".format(self.baseurl, workbook_id)
-        server_response = self.get_request(url, parameters={"stream": True})
-        _, params = cgi.parse_header(server_response.headers['Content-Disposition'])
-        filename = os.path.basename(params['filename'])
-        if filepath is None:
-            filepath = filename
-        elif os.path.isdir(filepath):
-            filepath = os.path.join(filepath, filename)
 
-        with open(filepath, 'wb') as f:
-            chunk_size = 1024 * 1024 * 4  # 4MB
-            for chunk in server_response.iter_content(chunk_size):
-                f.write(chunk)
-            server_response.close()
+        with closing(self.get_request(url, parameters={"stream": True})) as server_response:
+            _, params = cgi.parse_header(server_response.headers['Content-Disposition'])
+            filename = os.path.basename(params['filename'])
+            if filepath is None:
+                filepath = filename
+            elif os.path.isdir(filepath):
+                filepath = os.path.join(filepath, filename)
+
+            with open(filepath, 'wb') as f:
+                for chunk in server_response.iter_content(1024):  # 1KB
+                    f.write(chunk)
         logger.info('Downloaded workbook to {0} (ID: {1})'.format(filepath, workbook_id))
         return os.path.abspath(filepath)
 
