@@ -1,6 +1,5 @@
 from .request_factory import RequestFactory
-from .request_options import RequestOptions
-from .image_request_options import ImageRequestOptions
+from .request_options import ImageRequestOptions, RequestOptions
 from .filter import Filter
 from .sort import Sort
 from .. import ConnectionItem, DatasourceItem,\
