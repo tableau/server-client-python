@@ -1,4 +1,7 @@
-class RequestOptions(object):
+from .request_options_base import RequestOptionsBase
+
+
+class RequestOptions(RequestOptionsBase):
     class Operator:
         Equals = 'eq'
         GreaterThan = 'gt'
