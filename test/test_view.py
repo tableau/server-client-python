@@ -63,3 +63,29 @@ class ViewTests(unittest.TestCase):
         single_view._id = None
         single_view._workbook_id = '3cc6cd06-89ce-4fdc-b935-5294135d6d42'
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.views.populate_preview_image, single_view)
+
+    def test_populate_image(self):
+        with open(POPULATE_PREVIEW_IMAGE, 'rb') as f:
+            response = f.read()
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + '/views/d79634e1-6063-4ec9-95ff-50acbf609ff5/image', content=response)
+            single_view = TSC.ViewItem()
+            single_view._id = 'd79634e1-6063-4ec9-95ff-50acbf609ff5'
+            self.server.views.populate_image(single_view)
+        self.assertEqual(response, single_view.image)
+
+    def test_populate_image_high_resolution(self):
+        with open(POPULATE_PREVIEW_IMAGE, 'rb') as f:
+            response = f.read()
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + '/views/d79634e1-6063-4ec9-95ff-50acbf609ff5/image?resolution=high', content=response)
+            single_view = TSC.ViewItem()
+            single_view._id = 'd79634e1-6063-4ec9-95ff-50acbf609ff5'
+            req_option = TSC.ImageRequestOptions(imageresolution=TSC.ImageRequestOptions.Resolution.High)
+            self.server.views.populate_image(single_view, req_option)
+        self.assertEqual(response, single_view.image)
+
+    def test_populate_image_missing_id(self):
+        single_view = TSC.ViewItem()
+        single_view._id = None
+        self.assertRaises(TSC.MissingRequiredFieldError, self.server.views.populate_image, single_view)
