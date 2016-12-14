@@ -2,6 +2,7 @@ class RequestOptionsBase(object):
     def apply_query_params(self, url):
         raise NotImplementedError()
 
+
 class RequestOptions(RequestOptionsBase):
     class Operator:
         Equals = 'eq'
@@ -54,6 +55,7 @@ class RequestOptions(RequestOptionsBase):
             params.append('filter={}'.format(','.join(ordered_filter_options)))
 
         return "{0}?{1}".format(url, '&'.join(params))
+
 
 class ImageRequestOptions(RequestOptionsBase):
     # if 'high' isn't specified, the REST API endpoint returns an image with standard resolution

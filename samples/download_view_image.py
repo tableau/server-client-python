@@ -55,7 +55,7 @@ def main():
             raise LookupError("View with the specified name was not found.")
         view_item = all_views[0]
 
-        #Step 3: Query the image endpoint and save the image to the specified location
+        # Step 3: Query the image endpoint and save the image to the specified location
         image_req_option = TSC.ImageRequestOptions(imageresolution=TSC.ImageRequestOptions.Resolution.High)
         server.views.populate_image(view_item, image_req_option)
 
