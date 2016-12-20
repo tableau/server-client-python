@@ -42,6 +42,7 @@ class DatasourceRequest(object):
             credentials_element.attrib['name'] = connection_credentials.name
             credentials_element.attrib['password'] = connection_credentials.password
             credentials_element.attrib['embed'] = 'true' if connection_credentials.embed else 'false'
+            credentials_element.attrib['oAuth'] = 'true' if connection_credentials.oauth else 'false'
         return ET.tostring(xml_request)
 
     def update_req(self, datasource_item):
@@ -279,6 +280,7 @@ class WorkbookRequest(object):
             credentials_element.attrib['name'] = connection_credentials.name
             credentials_element.attrib['password'] = connection_credentials.password
             credentials_element.attrib['embed'] = 'true' if connection_credentials.embed else 'false'
+            credentials_element.attrib['oAuth'] = 'true' if connection_credentials.oauth else 'false'
         return ET.tostring(xml_request)
 
     def update_req(self, workbook_item):

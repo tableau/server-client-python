@@ -9,10 +9,11 @@ class ConnectionCredentials(object):
 
     """
 
-    def __init__(self, name, password, embed=True):
+    def __init__(self, name, password, embed=True, oauth=True):
         self.name = name
         self.password = password
         self.embed = embed
+        self.oauth = oauth
 
     @property
     def embed(self):
@@ -22,3 +23,12 @@ class ConnectionCredentials(object):
     @property_is_boolean
     def embed(self, value):
         self._embed = value
+
+    @property
+    def oauth(self):
+        return self._oauth
+
+    @oauth.setter
+    @property_is_boolean
+    def oauth(self, value):
+        self._oauth = value
