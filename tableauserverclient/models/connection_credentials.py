@@ -9,7 +9,7 @@ class ConnectionCredentials(object):
 
     """
 
-    def __init__(self, name, password, embed=True, oauth=True):
+    def __init__(self, name, password, embed=True, oauth=False):
         self.name = name
         self.password = password
         self.embed = embed
