@@ -2,6 +2,7 @@ import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_is_enum, property_not_empty, property_not_nullable
 from .. import NAMESPACE
+from ..datetime_helpers import parse_datetime
 
 
 class UserItem(object):
@@ -118,7 +119,7 @@ class UserItem(object):
 
     @classmethod
     def from_response(cls, resp):
-        all_user_items = set()
+        all_user_items = []
         parsed_response = ET.fromstring(resp)
         all_user_xml = parsed_response.findall('.//t:user', namespaces=NAMESPACE)
         for user_xml in all_user_xml:
@@ -127,7 +128,7 @@ class UserItem(object):
             user_item = cls(name, site_role)
             user_item._set_values(id, name, site_role, last_login, external_auth_user_id,
                                   fullname, email, auth_setting, domain_name)
-            all_user_items.add(user_item)
+            all_user_items.append(user_item)
         return all_user_items
 
     @staticmethod
@@ -135,7 +136,7 @@ class UserItem(object):
         id = user_xml.get('id', None)
         name = user_xml.get('name', None)
         site_role = user_xml.get('siteRole', None)
-        last_login = user_xml.get('lastLogin', None)
+        last_login = parse_datetime(user_xml.get('lastLogin', None))
         external_auth_user_id = user_xml.get('externalAuthUserId', None)
         fullname = user_xml.get('fullName', None)
         email = user_xml.get('email', None)

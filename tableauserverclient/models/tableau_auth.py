@@ -18,3 +18,10 @@ class TableauAuth(object):
         warnings.warn('TableauAuth.site is deprecated, use TableauAuth.site_id instead.',
                       DeprecationWarning)
         return self.site_id
+
+    @site.setter
+    def site(self, value):
+        import warnings
+        warnings.warn('TableauAuth.site is deprecated, use TableauAuth.site_id instead.',
+                      DeprecationWarning)
+        self.site_id = value

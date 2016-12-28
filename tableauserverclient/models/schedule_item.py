@@ -4,6 +4,7 @@ from datetime import datetime
 from .interval_item import IntervalItem, HourlyInterval, DailyInterval, WeeklyInterval, MonthlyInterval
 from .property_decorators import property_is_enum, property_not_nullable, property_is_int
 from .. import NAMESPACE
+from ..datetime_helpers import parse_datetime
 
 
 class ScheduleItem(object):
@@ -208,12 +209,12 @@ class ScheduleItem(object):
         id = schedule_xml.get('id', None)
         name = schedule_xml.get('name', None)
         state = schedule_xml.get('state', None)
-        created_at = schedule_xml.get('createdAt', None)
-        updated_at = schedule_xml.get('updatedAt', None)
+        created_at = parse_datetime(schedule_xml.get('createdAt', None))
+        updated_at = parse_datetime(schedule_xml.get('updatedAt', None))
         schedule_type = schedule_xml.get('type', None)
         frequency = schedule_xml.get('frequency', None)
-        next_run_at = schedule_xml.get('nextRunAt', None)
-        end_schedule_at = schedule_xml.get('endScheduleAt', None)
+        next_run_at = parse_datetime(schedule_xml.get('nextRunAt', None))
+        end_schedule_at = parse_datetime(schedule_xml.get('endScheduleAt', None))
         execution_order = schedule_xml.get('executionOrder', None)
 
         priority = schedule_xml.get('priority', None)
