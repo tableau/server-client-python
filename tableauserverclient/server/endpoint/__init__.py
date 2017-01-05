@@ -1,7 +1,7 @@
 from .auth_endpoint import Auth
 from .datasources_endpoint import Datasources
 from .endpoint import Endpoint
-from .exceptions import ServerResponseError, MissingRequiredFieldError
+from .exceptions import ServerResponseError, MissingRequiredFieldError, ServerInfoEndpointNotFoundError
 from .groups_endpoint import Groups
 from .projects_endpoint import Projects
 from .schedules_endpoint import Schedules
