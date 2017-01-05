@@ -1,7 +1,18 @@
+import xml.etree.ElementTree as ET
+
 from .exceptions import NotSignedInError
-from .endpoint import Sites, Views, Users, Groups, Workbooks, Datasources, Projects, Auth, Schedules, ServerInfo
+from .endpoint import Sites, Views, Users, Groups, Workbooks, Datasources, Projects, Auth, \
+    Schedules, ServerInfo, ServerInfoEndpointNotFoundError
 
 import requests
+
+_PRODUCT_TO_REST_VERSION = {
+    '10.0': '2.3',
+    '9.3': '2.2',
+    '9.2': '2.1',
+    '9.1': '2.0',
+    '9.0': '2.0'
+}
 
 
 class Server(object):
@@ -46,6 +57,29 @@ class Server(object):
         self._site_id = site_id
         self._user_id = user_id
         self._auth_token = auth_token
+
+    def _get_legacy_version(self):
+        response = self._session.get(self.server_address + "/auth?format=xml")
+        info_xml = ET.fromstring(response.content)
+        prod_version = info_xml.find('.//product_version').text
+        version = _PRODUCT_TO_REST_VERSION.get(prod_version, '2.1')  # 2.1
+        return version
+
+    def _determine_highest_version(self):
+        try:
+            old_version = self.version
+            self.version = "2.4"
+            version = self.server_info.get().rest_api_version
+        except ServerInfoEndpointNotFoundError:
+            version = self._get_legacy_version()
+
+        finally:
+            self.version = old_version
+
+        return version
+
+    def use_highest_version(self):
+        self.version = self._determine_highest_version()
 
     @property
     def baseurl(self):
