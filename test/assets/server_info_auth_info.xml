@@ -1,0 +1,12 @@
+<authinfo>
+<version version="0.31">
+<api_version>0.31</api_version>
+<server_api_version>0.31</server_api_version>
+<document_version>9.2</document_version>
+<product_version>9.3</product_version>
+<external_version>9.3.4</external_version>
+<build>hello.16.1106.2025</build>
+<publishing_method>unrestricted</publishing_method>
+<mobile_api_version>2.6</mobile_api_version>
+</version>
+</authinfo>
