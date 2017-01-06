@@ -91,7 +91,7 @@ def api(version):
         None
 
     Example:
-    >>> @api(version=2.3)
+    >>> @api(version="2.3")
     >>> def get(self, req_options=None):
     >>>     ...
     '''
