@@ -28,3 +28,7 @@ class MissingRequiredFieldError(Exception):
 
 class ServerInfoEndpointNotFoundError(Exception):
     pass
+
+
+class EndpointUnavailableError(Exception):
+    pass
