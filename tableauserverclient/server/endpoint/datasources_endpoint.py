@@ -1,4 +1,4 @@
-from .endpoint import Endpoint
+from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from .fileuploads_endpoint import Fileuploads
 from .. import RequestFactory, DatasourceItem, PaginationItem, ConnectionItem
@@ -22,6 +22,7 @@ class Datasources(Endpoint):
         return "{0}/sites/{1}/datasources".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     # Get all datasources
+    @api(version="2.0")
     def get(self, req_options=None):
         logger.info('Querying all datasources on site')
         url = self.baseurl
@@ -31,6 +32,7 @@ class Datasources(Endpoint):
         return all_datasource_items, pagination_item
 
     # Get 1 datasource by id
+    @api(version="2.0")
     def get_by_id(self, datasource_id):
         if not datasource_id:
             error = "Datasource ID undefined."
@@ -41,6 +43,7 @@ class Datasources(Endpoint):
         return DatasourceItem.from_response(server_response.content)[0]
 
     # Populate datasource item's connections
+    @api(version="2.0")
     def populate_connections(self, datasource_item):
         if not datasource_item.id:
             error = 'Datasource item missing ID. Datasource must be retrieved from server first.'
@@ -51,6 +54,7 @@ class Datasources(Endpoint):
         logger.info('Populated connections for datasource (ID: {0})'.format(datasource_item.id))
 
     # Delete 1 datasource by id
+    @api(version="2.0")
     def delete(self, datasource_id):
         if not datasource_id:
             error = "Datasource ID undefined."
@@ -60,6 +64,7 @@ class Datasources(Endpoint):
         logger.info('Deleted single datasource (ID: {0})'.format(datasource_id))
 
     # Download 1 datasource by id
+    @api(version="2.0")
     def download(self, datasource_id, filepath=None):
         if not datasource_id:
             error = "Datasource ID undefined."
@@ -81,6 +86,7 @@ class Datasources(Endpoint):
         return os.path.abspath(filepath)
 
     # Update datasource
+    @api(version="2.0")
     def update(self, datasource_item):
         if not datasource_item.id:
             error = 'Datasource item missing ID. Datasource must be retrieved from server first.'
@@ -93,6 +99,7 @@ class Datasources(Endpoint):
         return updated_datasource._parse_common_tags(server_response.content)
 
     # Publish datasource
+    @api(version="2.0")
     def publish(self, datasource_item, file_path, mode, connection_credentials=None):
         if not os.path.isfile(file_path):
             error = "File path does not lead to an existing file."
