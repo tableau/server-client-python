@@ -2,6 +2,7 @@ import unittest
 import os
 import requests_mock
 import tableauserverclient as TSC
+from tableauserverclient.datetime_helpers import format_datetime
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
@@ -38,7 +39,7 @@ class UserTests(unittest.TestCase):
         single_user = next(user for user in all_users if user.id == 'dd2239f6-ddf1-4107-981a-4cf94e415794')
         self.assertEqual('alice', single_user.name)
         self.assertEqual('Publisher', single_user.site_role)
-        self.assertEqual('2016-08-16T23:17:06Z', single_user.last_login)
+        self.assertEqual('2016-08-16T23:17:06Z', format_datetime(single_user.last_login))
 
         self.assertTrue(any(user.id == '2a47bbf8-8900-4ebb-b0a4-2723bd7c46c3' for user in all_users))
         single_user = next(user for user in all_users if user.id == '2a47bbf8-8900-4ebb-b0a4-2723bd7c46c3')
@@ -53,7 +54,7 @@ class UserTests(unittest.TestCase):
             all_users, pagination_item = self.server.users.get()
 
         self.assertEqual(0, pagination_item.total_available)
-        self.assertEqual(set(), all_users)
+        self.assertEqual([], all_users)
 
     def test_get_before_signin(self):
         self.server._auth_token = None
@@ -71,7 +72,7 @@ class UserTests(unittest.TestCase):
         self.assertEqual('Alice', single_user.fullname)
         self.assertEqual('Publisher', single_user.site_role)
         self.assertEqual('ServerDefault', single_user.auth_setting)
-        self.assertEqual('2016-08-16T23:17:06Z', single_user.last_login)
+        self.assertEqual('2016-08-16T23:17:06Z', format_datetime(single_user.last_login))
         self.assertEqual('local', single_user.domain_name)
 
     def test_get_by_id_missing_id(self):
@@ -136,8 +137,8 @@ class UserTests(unittest.TestCase):
         self.assertEqual('SafariSample', workbook_list[0].content_url)
         self.assertEqual(False, workbook_list[0].show_tabs)
         self.assertEqual(26, workbook_list[0].size)
-        self.assertEqual('2016-07-26T20:34:56Z', workbook_list[0].created_at)
-        self.assertEqual('2016-07-26T20:35:05Z', workbook_list[0].updated_at)
+        self.assertEqual('2016-07-26T20:34:56Z', format_datetime(workbook_list[0].created_at))
+        self.assertEqual('2016-07-26T20:35:05Z', format_datetime(workbook_list[0].updated_at))
         self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', workbook_list[0].project_id)
         self.assertEqual('default', workbook_list[0].project_name)
         self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', workbook_list[0].owner_id)

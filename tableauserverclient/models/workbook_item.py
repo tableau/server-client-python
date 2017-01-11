@@ -4,6 +4,7 @@ from .property_decorators import property_not_nullable, property_is_boolean
 from .tag_item import TagItem
 from .view_item import ViewItem
 from .. import NAMESPACE
+from ..datetime_helpers import parse_datetime
 import copy
 
 
@@ -163,8 +164,8 @@ class WorkbookItem(object):
         id = workbook_xml.get('id', None)
         name = workbook_xml.get('name', None)
         content_url = workbook_xml.get('contentUrl', None)
-        created_at = workbook_xml.get('createdAt', None)
-        updated_at = workbook_xml.get('updatedAt', None)
+        created_at = parse_datetime(workbook_xml.get('createdAt', None))
+        updated_at = parse_datetime(workbook_xml.get('updatedAt', None))
 
         size = workbook_xml.get('size', None)
         if size:

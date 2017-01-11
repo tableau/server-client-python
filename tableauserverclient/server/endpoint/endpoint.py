@@ -1,6 +1,12 @@
-from .exceptions import ServerResponseError
+from .exceptions import ServerResponseError, EndpointUnavailableError
+from functools import wraps
+
 import logging
 
+try:
+    from distutils2.version import NormalizedVersion as Version
+except ImportError:
+    from distutils.version import LooseVersion as Version
 
 logger = logging.getLogger('tableau.endpoint')
 
@@ -21,10 +27,11 @@ class Endpoint(object):
 
         return headers
 
-    def _make_request(self, method, url, content=None, request_object=None, auth_token=None, content_type=None):
+    def _make_request(self, method, url, content=None, request_object=None,
+                      auth_token=None, content_type=None, parameters=None):
         if request_object is not None:
             url = request_object.apply_query_params(url)
-        parameters = {}
+        parameters = parameters or {}
         parameters.update(self.parent_srv.http_options)
         parameters['headers'] = Endpoint._make_common_headers(auth_token, content_type)
 
@@ -49,9 +56,9 @@ class Endpoint(object):
     def get_unauthenticated_request(self, url, request_object=None):
         return self._make_request(self.parent_srv.session.get, url, request_object=request_object)
 
-    def get_request(self, url, request_object=None):
+    def get_request(self, url, request_object=None, parameters=None):
         return self._make_request(self.parent_srv.session.get, url, auth_token=self.parent_srv.auth_token,
-                                  request_object=request_object)
+                                  request_object=request_object, parameters=parameters)
 
     def delete_request(self, url):
         # We don't return anything for a delete
@@ -68,3 +75,35 @@ class Endpoint(object):
                                   content=xml_request,
                                   auth_token=self.parent_srv.auth_token,
                                   content_type=content_type)
+
+
+def api(version):
+    '''Annotate the minimum supported version for an endpoint.
+
+    Checks the version on the server object and compares normalized versions.
+    It will raise an exception if the server version is > the version specified.
+
+    Args:
+        `version` minimum version that supports the endpoint. String.
+    Raises:
+        EndpointUnavailableError
+    Returns:
+        None
+
+    Example:
+    >>> @api(version="2.3")
+    >>> def get(self, req_options=None):
+    >>>     ...
+    '''
+    def _decorator(func):
+        @wraps(func)
+        def wrapper(self, *args, **kwargs):
+            server_version = Version(self.parent_srv.version)
+            minimum_supported = Version(version)
+            if server_version < minimum_supported:
+                error = "This endpoint is not available in API version {}. Requires {}".format(
+                    server_version, minimum_supported)
+                raise EndpointUnavailableError(error)
+            return func(self, *args, **kwargs)
+        return wrapper
+    return _decorator

@@ -2,6 +2,7 @@ import unittest
 import os
 import requests_mock
 import tableauserverclient as TSC
+from tableauserverclient.datetime_helpers import format_datetime
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
@@ -39,8 +40,8 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual('Superstore', all_workbooks[0].content_url)
         self.assertEqual(False, all_workbooks[0].show_tabs)
         self.assertEqual(1, all_workbooks[0].size)
-        self.assertEqual('2016-08-03T20:34:04Z', all_workbooks[0].created_at)
-        self.assertEqual('2016-08-04T17:56:41Z', all_workbooks[0].updated_at)
+        self.assertEqual('2016-08-03T20:34:04Z', format_datetime(all_workbooks[0].created_at))
+        self.assertEqual('2016-08-04T17:56:41Z', format_datetime(all_workbooks[0].updated_at))
         self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', all_workbooks[0].project_id)
         self.assertEqual('default', all_workbooks[0].project_name)
         self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', all_workbooks[0].owner_id)
@@ -50,8 +51,8 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual('SafariSample', all_workbooks[1].content_url)
         self.assertEqual(False, all_workbooks[1].show_tabs)
         self.assertEqual(26, all_workbooks[1].size)
-        self.assertEqual('2016-07-26T20:34:56Z', all_workbooks[1].created_at)
-        self.assertEqual('2016-07-26T20:35:05Z', all_workbooks[1].updated_at)
+        self.assertEqual('2016-07-26T20:34:56Z', format_datetime(all_workbooks[1].created_at))
+        self.assertEqual('2016-07-26T20:35:05Z', format_datetime(all_workbooks[1].updated_at))
         self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', all_workbooks[1].project_id)
         self.assertEqual('default', all_workbooks[1].project_name)
         self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', all_workbooks[1].owner_id)
@@ -83,8 +84,8 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual('SafariSample', single_workbook.content_url)
         self.assertEqual(False, single_workbook.show_tabs)
         self.assertEqual(26, single_workbook.size)
-        self.assertEqual('2016-07-26T20:34:56Z', single_workbook.created_at)
-        self.assertEqual('2016-07-26T20:35:05Z', single_workbook.updated_at)
+        self.assertEqual('2016-07-26T20:34:56Z', format_datetime(single_workbook.created_at))
+        self.assertEqual('2016-07-26T20:35:05Z', format_datetime(single_workbook.updated_at))
         self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', single_workbook.project_id)
         self.assertEqual('default', single_workbook.project_name)
         self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', single_workbook.owner_id)
@@ -250,8 +251,8 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual('RESTAPISample_0', new_workbook.content_url)
         self.assertEqual(False, new_workbook.show_tabs)
         self.assertEqual(1, new_workbook.size)
-        self.assertEqual('2016-08-18T18:33:24Z', new_workbook.created_at)
-        self.assertEqual('2016-08-18T20:31:34Z', new_workbook.updated_at)
+        self.assertEqual('2016-08-18T18:33:24Z', format_datetime(new_workbook.created_at))
+        self.assertEqual('2016-08-18T20:31:34Z', format_datetime(new_workbook.updated_at))
         self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', new_workbook.project_id)
         self.assertEqual('default', new_workbook.project_name)
         self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', new_workbook.owner_id)

@@ -4,6 +4,7 @@ python:
   - "3.3"
   - "3.4"
   - "3.5"
+  - "3.6"
   - "pypy"
 # command to install dependencies
 install:
@@ -14,4 +15,4 @@ script:
   # Tests
   - python setup.py test
   # pep8 - disabled for now until we can scrub the files to make sure we pass before turning it on
-  - pycodestyle .
+  - pycodestyle tableauserverclient test
