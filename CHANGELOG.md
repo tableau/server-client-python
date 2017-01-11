@@ -2,7 +2,7 @@
 
 * Return DateTime objects instead of strings (#102)
 * UserItem now is compatible with Pager (#107, #109)
-* Deprecated site_id in favor of site (#97)
+* Deprecated site in favor of site_id (#97)
 * Improved handling of large downloads (#105, #111)
 * Added support for oAuth when publishing (#117)
 * Added Testing against Py36 (#122, #123)
