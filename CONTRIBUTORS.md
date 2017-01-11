@@ -15,3 +15,5 @@ The following people have contributed to this project to make it possible, and w
 * [lgraber](https://github.com/lgraber)
 * [t8y8](https://github.com/t8y8)
 * [RussTheAerialist](https://github.com/RussTheAerialist)
+* [Ben Lower](https://github.com/benlower)
+* [Jared Dominguez](https://github.com/jdomingu)
