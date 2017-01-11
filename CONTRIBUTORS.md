@@ -5,6 +5,7 @@ The following people have contributed to this project to make it possible, and w
 ## Contributors
 
 * [geordielad](https://github.com/geordielad)
+* [Hugo Stijns)(https://github.com/hugoboos)
 * [kovner](https://github.com/kovner)
 
 
