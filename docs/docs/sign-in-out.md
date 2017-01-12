@@ -2,8 +2,21 @@
 title: Sign In and Out
 layout: docs
 ---
+## Signing in and out
+To sign in and out of Tableau Server, simply call `Auth.sign_in` as follows:
+```py
+import tableauserverclient as TSC
 
-To sign in and out of Tableau Server, call the `Auth.sign_in` and `Auth.sign_out` functions like so:
+tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
+server = TSC.Server('http://SERVER_URL')
+
+with server.auth.sign_in(tableau_auth):
+    # Do awesome things here!   
+
+# The Auth context manager will automatically call 'Auth.sign_out' on exiting the with block
+```
+
+Alternatively, call both `Auth.sign_in` and `Auth.sign_out` functions explicitly like so:
 
 ```py
 import tableauserverclient as TSC
@@ -23,22 +36,8 @@ server.auth.sign_out()
     limited by the maximum session length (of four hours) on Tableau Server.
 </div>
 
-
-Alternatively, for short programs, consider using a `with` block:
-
-```py
-import tableauserverclient as TSC
-
-tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
-server = TSC.Server('http://SERVER_URL')
-
-with server.auth.sign_in(tableau_auth):
-    # Do awesome things here!
-```
-
-The TSC library signs you out of Tableau Server when you exit out of the `with` block.
-
-If a self-signed certificate is used, certificate verification can be disabled using ```add_http_options```:
+### Disabling certificate verification and warnings
+If a self-signed certificate is used, certificate verification can be disabled with ```add_http_options```:
 
 ```py
 import tableauserverclient as TSC
@@ -59,4 +58,7 @@ These warnings can be disabled with the following line:
 requests.packages.urllib3.disable_warnings(InsecureRequestWa‌​rning)
 ```
 
-Instead of disabling warnings or certificate verification, we recommend using a Certificate Authority (CA) signed certificate. [Let's Encrypt](https://letsencrypt.org/) is a free, automated, and open Certificate Authority that can be used, although please note that no official Windows client currently exists.
+### A better way to avoid certificate warnings
+Instead of disabling warnings or certificate verification when using self-signed certificates, we recommend using a Certificate Authority (CA) signed certificate.
+
+In addition to standard Certificate Authorities, [Let's Encrypt](https://letsencrypt.org/) is an automated and open Certificate Authority that can be used for absolutely free. Please note that no official Windows client currently exists, and so certificates must be signed using a Linux machine or using a third-party Windows client.
