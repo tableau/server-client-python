@@ -53,12 +53,17 @@ C:\Program Files (x86)\Python35-32\lib\site-packages\requests\packages\urllib3\c
 InsecureRequestWarning)
 ```
 
-These warnings can be disabled with the following line:
+These warnings can be disabled by adding the following lines to your script:
 ```py
-requests.packages.urllib3.disable_warnings(InsecureRequestWa‌​rning)
+import requests
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 ```
 
 ### A better way to avoid certificate warnings
-Instead of disabling warnings or certificate verification when using self-signed certificates, we recommend using a Certificate Authority (CA) signed certificate.
+Instead of disabling warnings or certificate verification to avoid issues with self-signed certificates, the best practice is to use a certificate signed by a Certificate Authority.
 
-In addition to standard Certificate Authorities, [Let's Encrypt](https://letsencrypt.org/) is an automated and open Certificate Authority that can be used for absolutely free. Please note that no official Windows client currently exists, and so certificates must be signed using a Linux machine or using a third-party Windows client.
+If you have the ability to do so, we recommend the following Certificate Authorities:
+* [GlobalSign](https://www.globalsign.com/en/)
+* [Let's Encrypt](https://letsencrypt.org/) - a free, automated, and open Certificate Authority
+* [SSL.com](https://www.ssl.com/)
