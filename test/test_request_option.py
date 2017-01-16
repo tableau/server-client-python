@@ -96,11 +96,13 @@ class RequestOptionTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         # To ensure that this is deterministic, run this a few times
         with requests_mock.mock() as m:
-            url = self.baseurl + '/workbooks?pageNumber=1&pageSize=100&filter=name:eq:foo,tags:in:[sample,safari,weather]'
+            # Sometimes pep8 requires you to do things you might not otherwise do
+            url = ''.join(self.baseurl, '/workbooks?pageNumber=1&pageSize=100&',
+                          'filter=name:eq:foo,tags:in:[sample,safari,weather]')
             m.get(url, text=response_xml)
             req_option = TSC.RequestOptions()
             req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Tags, TSC.RequestOptions.Operator.In,
-                                 ['sample', 'safari', 'weather']))
+                                             ['sample', 'safari', 'weather']))
             req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, 'foo'))
             for _ in xrange(100):
                 matching_workbooks, pagination_item = self.server.workbooks.get(req_option)
