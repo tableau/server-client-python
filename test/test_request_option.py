@@ -97,8 +97,8 @@ class RequestOptionTests(unittest.TestCase):
         # To ensure that this is deterministic, run this a few times
         with requests_mock.mock() as m:
             # Sometimes pep8 requires you to do things you might not otherwise do
-            url = ''.join(self.baseurl, '/workbooks?pageNumber=1&pageSize=100&',
-                          'filter=name:eq:foo,tags:in:[sample,safari,weather]')
+            url = ''.join((self.baseurl, '/workbooks?pageNumber=1&pageSize=100&',
+                          'filter=name:eq:foo,tags:in:[sample,safari,weather]'))
             m.get(url, text=response_xml)
             req_option = TSC.RequestOptions()
             req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Tags, TSC.RequestOptions.Operator.In,
