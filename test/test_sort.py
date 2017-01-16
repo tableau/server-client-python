@@ -4,6 +4,7 @@ import requests
 import requests_mock
 import tableauserverclient as TSC
 
+
 class SortTests(unittest.TestCase):
     def setUp(self):
         self.server = TSC.Server('http://test')
@@ -97,7 +98,10 @@ class SortTests(unittest.TestCase):
     #                                                    auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
     #                                                    content_type='text/xml')
     #
-    #         self.assertEqual(resp.request.query, 'pagenumber=13&pagesize=13&filter=siterole:eq:publisher,lastlogin:gte:2017-01-15t00:00:00:00z')
+    #         expected = 'pagenumber=13&pagesize=13&filter=siterole:eq:publisher,lastlogin:gte:2017-01-15t00:00:00:00z'
+    #
+    #         self.assertEqual(resp.request.query, expected)
+
 
 if __name__ == '__main__':
     unittest.main()
