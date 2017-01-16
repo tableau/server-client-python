@@ -104,6 +104,6 @@ class RequestOptionTests(unittest.TestCase):
             req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Tags, TSC.RequestOptions.Operator.In,
                                              ['sample', 'safari', 'weather']))
             req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, 'foo'))
-            for _ in xrange(100):
+            for _ in range(100):
                 matching_workbooks, pagination_item = self.server.workbooks.get(req_option)
                 self.assertEqual(3, pagination_item.total_available)
