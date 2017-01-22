@@ -39,7 +39,7 @@ class SortTests(unittest.TestCase):
                        TSC.RequestOptions.Operator.Equals,
                        ['foo', 'bar'])
 
-        self.assertEquals("Filter values can only be a list if the operator is 'in'.", str(cm.exception)),
+        self.assertEqual("Filter values can only be a list if the operator is 'in'.", str(cm.exception)),
 
     def test_filter_in(self):
         with requests_mock.mock() as m:
@@ -77,30 +77,30 @@ class SortTests(unittest.TestCase):
 
             self.assertEqual(resp.request.query, 'pagenumber=13&pagesize=13&sort=name:asc')
 
-    # def test_filter_combo(self):
-    #     with requests_mock.mock() as m:
-    #         m.get(requests_mock.ANY)
-    #         url = "http://test/api/2.3/sites/dad65087-b08b-4603-af4e-2887b8aafc67/users"
-    #         opts = TSC.RequestOptions(pagesize=13, pagenumber=13)
-    #
-    #         opts.filter.add(TSC.Filter(TSC.RequestOptions.Field.LastLogin,
-    #                                    TSC.RequestOptions.Operator.GreaterThanOrEqual,
-    #                                    '2017-01-15T00:00:00:00Z'))
-    #
-    #         opts.filter.add(TSC.Filter(TSC.RequestOptions.Field.SiteRole,
-    #                                    TSC.RequestOptions.Operator.Equals,
-    #                                    'Publisher'))
-    #
-    #         resp = self.server.workbooks._make_request(requests.get,
-    #                                                    url,
-    #                                                    content=None,
-    #                                                    request_object=opts,
-    #                                                    auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
-    #                                                    content_type='text/xml')
-    #
-    #         expected = 'pagenumber=13&pagesize=13&filter=siterole:eq:publisher,lastlogin:gte:2017-01-15t00:00:00:00z'
-    #
-    #         self.assertEqual(resp.request.query, expected)
+    def test_filter_combo(self):
+        with requests_mock.mock() as m:
+            m.get(requests_mock.ANY)
+            url = "http://test/api/2.3/sites/dad65087-b08b-4603-af4e-2887b8aafc67/users"
+            opts = TSC.RequestOptions(pagesize=13, pagenumber=13)
+
+            opts.filter.add(TSC.Filter(TSC.RequestOptions.Field.LastLogin,
+                                       TSC.RequestOptions.Operator.GreaterThanOrEqual,
+                                       '2017-01-15T00:00:00:00Z'))
+
+            opts.filter.add(TSC.Filter(TSC.RequestOptions.Field.SiteRole,
+                                       TSC.RequestOptions.Operator.Equals,
+                                       'Publisher'))
+
+            resp = self.server.workbooks._make_request(requests.get,
+                                                       url,
+                                                       content=None,
+                                                       request_object=opts,
+                                                       auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
+                                                       content_type='text/xml')
+
+            expected = 'pagenumber=13&pagesize=13&filter=lastlogin:gte:2017-01-15t00:00:00:00z,siterole:eq:publisher'
+
+            self.assertEqual(resp.request.query, expected)
 
 
 if __name__ == '__main__':
