@@ -46,9 +46,13 @@ class RequestOptions(RequestOptionsBase):
         if self.page_size:
             params.append('pageSize={0}'.format(self.pagesize))
         if len(self.sort) > 0:
-            params.append('sort={}'.format(','.join(str(sort_item) for sort_item in self.sort)))
+            sort_options = (str(sort_item) for sort_item in self.sort)
+            ordered_sort_options = sorted(sort_options)
+            params.append('sort={}'.format(','.join(ordered_sort_options)))
         if len(self.filter) > 0:
-            params.append('filter={}'.format(','.join(str(filter_item) for filter_item in self.filter)))
+            filter_options = (str(filter_item) for filter_item in self.filter)
+            ordered_filter_options = sorted(filter_options)
+            params.append('filter={}'.format(','.join(ordered_filter_options)))
 
         return "{0}?{1}".format(url, '&'.join(params))
 
