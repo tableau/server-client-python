@@ -10,6 +10,7 @@ PAGE_NUMBER_XML = os.path.join(TEST_ASSET_DIR, 'request_option_page_number.xml')
 PAGE_SIZE_XML = os.path.join(TEST_ASSET_DIR, 'request_option_page_size.xml')
 FILTER_EQUALS = os.path.join(TEST_ASSET_DIR, 'request_option_filter_equals.xml')
 FILTER_TAGS_IN = os.path.join(TEST_ASSET_DIR, 'request_option_filter_tags_in.xml')
+FILTER_MULTIPLE = os.path.join(TEST_ASSET_DIR, 'request_option_filter_tags_in.xml')
 
 
 class RequestOptionTests(unittest.TestCase):
@@ -89,3 +90,20 @@ class RequestOptionTests(unittest.TestCase):
         self.assertEqual(set(['weather']), matching_workbooks[0].tags)
         self.assertEqual(set(['safari']), matching_workbooks[1].tags)
         self.assertEqual(set(['sample']), matching_workbooks[2].tags)
+
+    def test_multiple_filter_options(self):
+        with open(FILTER_MULTIPLE, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        # To ensure that this is deterministic, run this a few times
+        with requests_mock.mock() as m:
+            # Sometimes pep8 requires you to do things you might not otherwise do
+            url = ''.join((self.baseurl, '/workbooks?pageNumber=1&pageSize=100&',
+                          'filter=name:eq:foo,tags:in:[sample,safari,weather]'))
+            m.get(url, text=response_xml)
+            req_option = TSC.RequestOptions()
+            req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Tags, TSC.RequestOptions.Operator.In,
+                                             ['sample', 'safari', 'weather']))
+            req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, 'foo'))
+            for _ in range(100):
+                matching_workbooks, pagination_item = self.server.workbooks.get(req_option)
+                self.assertEqual(3, pagination_item.total_available)
