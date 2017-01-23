@@ -8,9 +8,6 @@ class TableauAuthModelTests(unittest.TestCase):
         with self.assertRaises(TypeError) as context_manager:
             TSC.TableauAuth()
 
-        self.assertEqual("__init__() missing 2 required positional arguments: 'username' and 'password'",
-                         str(context_manager.exception))
-
     def test_site_arg_raises_warning(self):
         with warnings.catch_warnings(record=True) as w:
             # Cause all warnings to always be triggered.
