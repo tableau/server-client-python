@@ -22,6 +22,7 @@ class Views(Endpoint):
     def baseurl(self):
         return "{0}/views".format(self.siteurl)
 
+    @api(version="2.2")
     def get(self, req_options=None):
         logger.info('Querying all views on site')
         server_response = self.get_request(self.baseurl, req_options)
