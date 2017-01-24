@@ -29,7 +29,7 @@ class Server(object):
         self._session = requests.Session()
         self._http_options = dict()
 
-        self.version = 2.3
+        self.version = "2.3"
         self.auth = Auth(self)
         self.views = Views(self)
         self.users = Users(self)

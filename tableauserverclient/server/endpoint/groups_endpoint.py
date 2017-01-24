@@ -1,4 +1,4 @@
-from .endpoint import Endpoint
+from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from ...models.exceptions import UnpopulatedPropertyError
 from .. import RequestFactory, GroupItem, UserItem, PaginationItem
@@ -13,6 +13,7 @@ class Groups(Endpoint):
         return "{0}/sites/{1}/groups".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     # Gets all groups
+    @api(version="2.0")
     def get(self, req_options=None):
         logger.info('Querying all groups on site')
         url = self.baseurl
@@ -22,6 +23,7 @@ class Groups(Endpoint):
         return all_group_items, pagination_item
 
     # Gets all users in a given group
+    @api(version="2.0")
     def populate_users(self, group_item, req_options=None):
         if not group_item.id:
             error = "Group item missing ID. Group must be retrieved from server first."
@@ -34,6 +36,7 @@ class Groups(Endpoint):
         return pagination_item
 
     # Deletes 1 group by id
+    @api(version="2.0")
     def delete(self, group_id):
         if not group_id:
             error = "Group ID undefined."
@@ -42,6 +45,8 @@ class Groups(Endpoint):
         self.delete_request(url)
         logger.info('Deleted single group (ID: {0})'.format(group_id))
 
+    # Create a 'local' Tableau group
+    @api(version="2.0")
     def create(self, group_item):
         url = self.baseurl
         create_req = RequestFactory.Group.create_req(group_item)
@@ -49,6 +54,7 @@ class Groups(Endpoint):
         return GroupItem.from_response(server_response.content)[0]
 
     # Removes 1 user from 1 group
+    @api(version="2.0")
     def remove_user(self, group_item, user_id):
         self._remove_user(group_item, user_id)
         try:
@@ -63,6 +69,7 @@ class Groups(Endpoint):
         logger.info('Removed user (id: {0}) from group (ID: {1})'.format(user_id, group_item.id))
 
     # Adds 1 user to 1 group
+    @api(version="2.0")
     def add_user(self, group_item, user_id):
         new_user = self._add_user(group_item, user_id)
         try:
