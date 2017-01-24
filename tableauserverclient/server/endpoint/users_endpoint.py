@@ -1,4 +1,4 @@
-from .endpoint import Endpoint
+from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, UserItem, WorkbookItem, PaginationItem
 import logging
@@ -13,6 +13,7 @@ class Users(Endpoint):
         return "{0}/sites/{1}/users".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     # Gets all users
+    @api(version="2.0")
     def get(self, req_options=None):
         logger.info('Querying all users on site')
         url = self.baseurl
@@ -22,6 +23,7 @@ class Users(Endpoint):
         return all_user_items, pagination_item
 
     # Gets 1 user by id
+    @api(version="2.0")
     def get_by_id(self, user_id):
         if not user_id:
             error = "User ID undefined."
@@ -32,6 +34,7 @@ class Users(Endpoint):
         return UserItem.from_response(server_response.content).pop()
 
     # Update user
+    @api(version="2.0")
     def update(self, user_item, password=None):
         if not user_item.id:
             error = "User item missing ID."
@@ -45,6 +48,7 @@ class Users(Endpoint):
         return updated_item._parse_common_tags(server_response.content)
 
     # Delete 1 user by id
+    @api(version="2.0")
     def remove(self, user_id):
         if not user_id:
             error = "User ID undefined."
@@ -54,6 +58,7 @@ class Users(Endpoint):
         logger.info('Removed single user (ID: {0})'.format(user_id))
 
     # Add new user to site
+    @api(version="2.0")
     def add(self, user_item):
         url = self.baseurl
         add_req = RequestFactory.User.add_req(user_item)
@@ -63,6 +68,7 @@ class Users(Endpoint):
         return new_user
 
     # Get workbooks for user
+    @api(version="2.0")
     def populate_workbooks(self, user_item, req_options=None):
         if not user_item.id:
             error = "User item missing ID."

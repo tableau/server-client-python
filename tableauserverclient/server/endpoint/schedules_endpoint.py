@@ -1,4 +1,4 @@
-from .endpoint import Endpoint
+from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, PaginationItem, ScheduleItem
 import logging
@@ -12,6 +12,7 @@ class Schedules(Endpoint):
     def baseurl(self):
         return "{0}/schedules".format(self.parent_srv.baseurl)
 
+    @api(version="2.3")
     def get(self, req_options=None):
         logger.info("Querying all schedules")
         url = self.baseurl
@@ -20,6 +21,7 @@ class Schedules(Endpoint):
         all_schedule_items = ScheduleItem.from_response(server_response.content)
         return all_schedule_items, pagination_item
 
+    @api(version="2.3")
     def delete(self, schedule_id):
         if not schedule_id:
             error = "Schedule ID undefined"
@@ -28,6 +30,7 @@ class Schedules(Endpoint):
         self.delete_request(url)
         logger.info("Deleted single schedule (ID: {0})".format(schedule_id))
 
+    @api(version="2.3")
     def update(self, schedule_item):
         if not schedule_item.id:
             error = "Schedule item missing ID."
@@ -43,6 +46,7 @@ class Schedules(Endpoint):
         updated_schedule = copy.copy(schedule_item)
         return updated_schedule._parse_common_tags(server_response.content)
 
+    @api(version="2.3")
     def create(self, schedule_item):
         if schedule_item.interval_item is None:
             error = "Interval item must be defined."

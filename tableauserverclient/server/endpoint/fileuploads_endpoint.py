@@ -1,5 +1,5 @@
 from .exceptions import MissingRequiredFieldError
-from .endpoint import Endpoint
+from .endpoint import Endpoint, api
 from .. import RequestFactory
 from ...models.fileupload_item import FileuploadItem
 import os.path
@@ -20,6 +20,7 @@ class Fileuploads(Endpoint):
     def baseurl(self):
         return "{0}/sites/{1}/fileUploads".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
+    @api(version="2.0")
     def initiate(self):
         url = self.baseurl
         server_response = self.post_request(url, '')
@@ -28,6 +29,7 @@ class Fileuploads(Endpoint):
         logger.info('Initiated file upload session (ID: {0})'.format(self.upload_id))
         return self.upload_id
 
+    @api(version="2.0")
     def append(self, xml_request, content_type):
         if not self.upload_id:
             error = "File upload session must be initiated first."
