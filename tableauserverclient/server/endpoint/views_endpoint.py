@@ -1,4 +1,4 @@
-from .endpoint import Endpoint
+from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, ViewItem, PaginationItem
@@ -22,6 +22,7 @@ class Views(Endpoint):
     def baseurl(self):
         return "{0}/views".format(self.siteurl)
 
+    @api(version="2.2")
     def get(self, req_options=None):
         logger.info('Querying all views on site')
         server_response = self.get_request(self.baseurl, req_options)
@@ -29,6 +30,7 @@ class Views(Endpoint):
         all_view_items = ViewItem.from_response(server_response.content)
         return all_view_items, pagination_item
 
+    @api(version="2.0")
     def populate_preview_image(self, view_item):
         if not view_item.id or not view_item.workbook_id:
             error = "View item missing ID or workbook ID."

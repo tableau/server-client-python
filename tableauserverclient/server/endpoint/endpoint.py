@@ -98,7 +98,7 @@ def api(version):
     def _decorator(func):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
-            server_version = Version(self.parent_srv.version)
+            server_version = Version(self.parent_srv.version or "0.0")
             minimum_supported = Version(version)
             if server_version < minimum_supported:
                 error = "This endpoint is not available in API version {}. Requires {}".format(

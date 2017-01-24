@@ -1,4 +1,4 @@
-from .endpoint import Endpoint
+from .endpoint import Endpoint, api
 from .exceptions import ServerResponseError, ServerInfoEndpointNotFoundError
 from ...models import ServerInfoItem
 import logging
@@ -11,6 +11,7 @@ class ServerInfo(Endpoint):
     def baseurl(self):
         return "{0}/serverInfo".format(self.parent_srv.baseurl)
 
+    @api(version="2.4")
     def get(self):
         """ Retrieve the server info for the server.  This is an unauthenticated call """
         try:
