@@ -1,4 +1,8 @@
+<<<<<<< 9b2b265b38a0e94edc49aef27a5f6f14900d2a77
 from .endpoint import Endpoint, api, parameter_added_in
+=======
+from .endpoint import Endpoint, api
+>>>>>>> Add api annotation to all current endpoints (#125)
 from .exceptions import MissingRequiredFieldError
 from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
