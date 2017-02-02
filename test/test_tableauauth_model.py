@@ -7,7 +7,7 @@ class TableauAuthModelTests(unittest.TestCase):
     def setUp(self):
         self.auth = TSC.TableauAuth('user',
                                     'password',
-                                    site_id='dad65087-b08b-4603-af4e-2887b8aafc67',
+                                    site_id='site1',
                                     user_id_to_impersonate='admin')
 
     def test_username_password_required(self):
