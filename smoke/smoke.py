@@ -27,7 +27,7 @@ class ReadOnlySmokeTests(SmokeTest):
         server.auth.sign_in(authz)
         server.auth.sign_out()
 
-    def test_sign_in_get_sign_out(self):
+    def test_get_calls(self):
 
         authz = TSC.TableauAuth(self.username, self.password)
         server = TSC.Server(self.server)
@@ -46,6 +46,15 @@ class ReadOnlySmokeTests(SmokeTest):
         for h in TSC.Pager(server.schedules):
             print(h.name)
 
+        for d in TSC.Pager(server.datasources):
+            print(d.name)
+
+        for v in TSC.Pager(server.views):
+            print(v.name)
+
+        for s in TSC.Pager(server.sites):
+            print(s.name)
+
         server.auth.sign_out()
 
 
@@ -59,10 +68,12 @@ class ReadWriteSmokeTests(SmokeTest):
         server1.auth.sign_in(authz)
 
         # Create the site
+        print("Creating test site...")
         new_site = TSC.SiteItem(name='SMOKE_TEST_SITE', content_url='sts')
         try:
-            server1.sites.create(new_site)
+            created_site = server1.sites.create(new_site)
         except TSC.server.endpoint.exceptions.ServerResponseError:
+            print("Site already existed. Deleting and recreating...")
             delete_me = next(s for s in TSC.Pager(server1.sites) if s.name == 'SMOKE_TEST_SITE')
 
             authz2 = TSC.TableauAuth(self.username, self.password, site_id='sts')
@@ -71,14 +82,16 @@ class ReadWriteSmokeTests(SmokeTest):
             server2.sites.delete(delete_me.id)
             server2.auth.sign_out()
 
-            server1.sites.create(new_site)
+            created_site = server1.sites.create(new_site)
 
         # Sign in to the new site
+        print("Sign in to test site...")
         authz2 = TSC.TableauAuth(self.username, self.password, site_id='sts')
         server2 = TSC.Server(self.server)
         server2.auth.sign_in(authz2)
 
         # Add users and verify
+        print("Creaing test users...")
         user_item = functools.partial(TSC.UserItem, site_role='Interactor')
         users_to_create = list(user_item(name="user{}".format(i)) for i in range(100))
 
@@ -92,6 +105,7 @@ class ReadWriteSmokeTests(SmokeTest):
         self.assertIn('user95', queried_users)
 
         # Create projects and verify
+        print("Creating test project...")
         new_project = TSC.ProjectItem(name='America')
         server2.projects.create(new_project)
         # It finally happened, sleep little one, sleep.
@@ -99,15 +113,42 @@ class ReadWriteSmokeTests(SmokeTest):
         found_project = next(p for p in TSC.Pager(server2.projects) if p.name == 'America')
         self.assertTrue(found_project.name == new_project.name)
 
+        print("Publishing test workbook...")
+        parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        twbx = os.path.join(parent_dir, 'test', 'assets', 'SampleWB.twbx')
+        wb_item = TSC.WorkbookItem(found_project.id, 'SMOKE_TEST_WB')
+        new_wb = server2.workbooks.publish(wb_item, twbx, 'Overwrite')
+
+        self.assertTrue(wb_item.name == new_wb.name)
+
+        # Sweet dreams my little solr
+        time.sleep(2)
+        found = next((w for w in TSC.Pager(server2.workbooks) if w.name == 'SMOKE_TEST_WB'), None)
+        self.assertIsNotNone(found)
+
+        # Check the views
+        print("Populating views from test workbook...")
+        server2.workbooks.populate_views(new_wb)
+        view_names = [v.name for v in new_wb.views]
+        self.assertAlmostEqual(len(view_names), 6)
+        self.assertIn('Interest rates', view_names)
+
+        # Cleanup
+        print("Deleting test site...")
+        server2.sites.delete(created_site.id)
+        print("Signing out...")
+        server2.auth.sign_out()
+        server1.auth.sign_out()
+
 
 if __name__ == "__main__":
     import argparse
     import sys
 
-    parser = argparse.ArgumentParser(description='Initialize a server with content.')
-    parser.add_argument('--server', '-s', default=None, help='server address')
-    parser.add_argument('--site-id', '-si', default=None, help='site to use')
-    parser.add_argument('--username', '-u', default=None, help='username to sign into server')
+    parser = argparse.ArgumentParser(description='Run basic smoke tests against a live Tableau Server instance')
+    parser.add_argument('--server', '-s', default=None, help='Server address')
+    parser.add_argument('--site-id', '-si', default=None, help='Site to use for ReadOnlySmokeTests')
+    parser.add_argument('--username', '-u', default=None, help='Username. Must be sysadmin for ReadWriteSmokeTests')
     parser.add_argument('unittest_args', nargs='*')
     args = parser.parse_args()
 
