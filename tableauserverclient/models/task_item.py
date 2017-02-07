@@ -13,8 +13,7 @@ class TaskItem(object):
 
     def __repr__(self):
         return "<Task#{id} {task_type} pri({priority}) failed({consecutive_failed_count}) schedule_id({" \
-               "schedule_id})>".format(
-            **self.__dict__)
+               "schedule_id})>".format(**self.__dict__)
 
     @classmethod
     def from_response(cls, xml):
