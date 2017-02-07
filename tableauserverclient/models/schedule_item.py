@@ -149,6 +149,7 @@ class ScheduleItem(object):
         if interval_item:
             self._interval_item = interval_item
 
+    @classmethod
     def from_response(cls, resp):
         parsed_response = ET.fromstring(resp)
         return cls.from_element(parsed_response)
