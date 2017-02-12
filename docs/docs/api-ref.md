@@ -289,6 +289,9 @@ id = group_list[i].id
 #Then you can populate the user list, with an optional page size
 server.groups.populate_users(publisher_id,200)
 
+#To see how many uses are in the group, to right-size your request
+server.groups.populate_users(publisher_id,200).total_available
+
 #Now you can take that same group and see the user objects
 group_list[i].users
 
