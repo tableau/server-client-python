@@ -257,5 +257,42 @@ Source files: server/endpoint/users_endpoint.py, models/user_item.py
 
 ## Groups
 
-Source files: server/endpoint/groups_endpoint.py, models/group_item.py,
+Get Groups
 
+```
+groups = server.groups.get()
+```
+Returns two objects - the groups and the pagination item. To access info about groups
+
+```
+group_list = groups[0]
+```
+
+The group object contains the same information as the standard XML from REST API. For Sites with more than one group, you can access each individual group like this.
+
+```
+#To see the attributes
+dir(group_list[i])
+
+#use these attributes (domain_name, id, name, users)
+group_list[i].attribute
+
+```
+
+Users is a special case, and cannot be populated without an additional step
+
+```
+
+#Get the group ID
+id = group_list[i].id
+
+#Then you can populate the user list, with an optional page size
+server.groups.populate_users(publisher_id,200)
+
+#Now you can take that same group and see the user objects
+group_list[i].users
+
+#These can be iterated over just like the groups, and you can query attributes the same way (auth_setting, domain_name, email, external_auth_user_id, from_response, fullname, id, last_login, name, site_role, workbooks)
+group_list[i].users[#].attribute
+ 
+```
