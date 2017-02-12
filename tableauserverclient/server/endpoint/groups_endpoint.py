@@ -22,11 +22,11 @@ class Groups(Endpoint):
         return all_group_items, pagination_item
 
     # Gets all users in a given group
-    def populate_users(self, group_item, req_options=None):
+    def populate_users(self, group_item,page_size,req_options=None):
         if not group_item.id:
             error = "Group item missing ID. Group must be retrieved from server first."
             raise MissingRequiredFieldError(error)
-        url = "{0}/{1}/users".format(self.baseurl, group_item.id)
+        url = "{0}/{1}/users?pageSize={2}".format(self.baseurl, group_item.id,page_size)
         server_response = self.get_request(url, req_options)
         group_item._set_users(UserItem.from_response(server_response.content))
         pagination_item = PaginationItem.from_response(server_response.content)
