@@ -164,6 +164,19 @@ class DatasourceTests(unittest.TestCase):
             self.assertTrue(os.path.exists(file_path))
         os.remove(file_path)
 
+    def test_download_extract_only(self):
+        # Pretend we're 2.5 for 'extract_only'
+        self.server.version = "2.5"
+        self.baseurl = self.server.datasources.baseurl
+
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/content?includeExtract=False',
+                  headers={'Content-Disposition': 'name="tableau_datasource"; filename="Sample datasource.tds"'},
+                  complete_qs=True)
+            file_path = self.server.datasources.download('9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', extract_only=True)
+            self.assertTrue(os.path.exists(file_path))
+        os.remove(file_path)
+
     def test_update_missing_id(self):
         single_datasource = TSC.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.datasources.update, single_datasource)
