@@ -1,4 +1,4 @@
-from .endpoint import Endpoint, api
+from .endpoint import Endpoint, api, parameter_added_in
 from .exceptions import MissingRequiredFieldError
 from .fileuploads_endpoint import Fileuploads
 from .. import RequestFactory, DatasourceItem, PaginationItem, ConnectionItem
@@ -65,11 +65,16 @@ class Datasources(Endpoint):
 
     # Download 1 datasource by id
     @api(version="2.0")
-    def download(self, datasource_id, filepath=None):
+    @parameter_added_in(version="2.5", parameters=['extract_only'])
+    def download(self, datasource_id, filepath=None, extract_only=False):
         if not datasource_id:
             error = "Datasource ID undefined."
             raise ValueError(error)
         url = "{0}/{1}/content".format(self.baseurl, datasource_id)
+
+        if extract_only:
+            url += "?includeExtract=False"
+
         with closing(self.get_request(url, parameters={'stream': True})) as server_response:
             _, params = cgi.parse_header(server_response.headers['Content-Disposition'])
             filename = os.path.basename(params['filename'])
