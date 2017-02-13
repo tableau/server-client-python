@@ -107,3 +107,37 @@ def api(version):
             return func(self, *args, **kwargs)
         return wrapper
     return _decorator
+
+
+def parameter_added_in(version, parameters):
+    '''Annotate minimum versions for new parameters or request options on an endpoint.
+
+    The api decorator documents when an endpoint was added, this decorator annotates
+    keyword arguments on endpoints that may control functionality added after an endpoint was introduced.
+
+    The REST API will ignore invalid parameters in most cases, so this raises a warning instead of throwing
+    an exception
+
+    Example:
+    >>> @api(version="2.0")
+    >>> @parameter_added_in(version="2.5", parameters=['extract_only'])
+    >>> def download(self, workbook_id, filepath=None, extract_only=False):
+    >>>     ...
+    '''
+    def _decorator(func):
+        @wraps(func)
+        def wrapper(self, *args, **kwargs):
+            params = set(parameters)
+            invalid_params = params & set(kwargs)
+
+            if invalid_params:
+                import warnings
+                server_version = Version(self.parent_srv.version or "0.0")
+                minimum_supported = Version(version)
+                if server_version < minimum_supported:
+                    error = "The parameter(s) {!r} are not available in {} and will be ignored. Added in {}".format(
+                        invalid_params, server_version, minimum_supported)
+                    warnings.warn(error)
+            return func(self, *args, **kwargs)
+        return wrapper
+    return _decorator
