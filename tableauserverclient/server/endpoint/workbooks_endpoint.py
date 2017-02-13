@@ -1,4 +1,4 @@
-from .endpoint import Endpoint, api
+from .endpoint import Endpoint, api, parameter_added_in
 from .exceptions import MissingRequiredFieldError
 from .fileuploads_endpoint import Fileuploads
 from .. import RequestFactory, WorkbookItem, ConnectionItem, ViewItem, PaginationItem
@@ -92,12 +92,16 @@ class Workbooks(Endpoint):
         return updated_workbook._parse_common_tags(server_response.content)
 
     # Download workbook contents with option of passing in filepath
+    @parameter_added_in(version="2.5", parameters=['extract_only'])
     @api(version="2.0")
-    def download(self, workbook_id, filepath=None):
+    def download(self, workbook_id, filepath=None, extract_only=False):
         if not workbook_id:
             error = "Workbook ID undefined."
             raise ValueError(error)
         url = "{0}/{1}/content".format(self.baseurl, workbook_id)
+
+        if extract_only:
+            url += "?includeExtract=False"
 
         with closing(self.get_request(url, parameters={"stream": True})) as server_response:
             _, params = cgi.parse_header(server_response.headers['Content-Disposition'])
