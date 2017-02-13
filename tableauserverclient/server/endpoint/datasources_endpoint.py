@@ -72,14 +72,14 @@ class Datasources(Endpoint):
 
     # Download 1 datasource by id
     @api(version="2.0")
-    @parameter_added_in(no_extract='2.5')
-    def download(self, datasource_id, filepath=None, no_extract=False):
+    @parameter_added_in(version="2.5", parameters=['extract_only'])
+    def download(self, datasource_id, filepath=None, extract_only=False):
         if not datasource_id:
             error = "Datasource ID undefined."
             raise ValueError(error)
         url = "{0}/{1}/content".format(self.baseurl, datasource_id)
 
-        if no_extract:
+        if extract_only:
             url += "?includeExtract=False"
 
         with closing(self.get_request(url, parameters={'stream': True})) as server_response:
