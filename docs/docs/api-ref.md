@@ -256,6 +256,36 @@ Source files: server/endpoint/datasources_endpoint.py, models/datasource_item.py
 Source files: server/endpoint/users_endpoint.py, models/user_item.py
 
 ## Groups
+Groups class contains following attributes: id, name, domain_name, and users. All but users can be accessed directly from Group class.
 
-Source files: server/endpoint/groups_endpoint.py, models/group_item.py,
+Get Groups
 
+```
+groups, _ = server.groups.get()
+```
+
+Viewing group attributes 
+
+```
+
+#Get the group ID
+id = groups[i].id
+
+```
+Accessing all users in a group requires an additional step
+
+```
+
+#Then you can populate the user list, with an optional page size
+server.groups.populate_users(id,200)
+
+#To see how many uses are in the group, to right-size your request
+server.groups.populate_users(id,200).total_available
+
+#Now you can take that same group and see the user objects
+group[i].users
+
+#These can be iterated over just like the groups, and you can query attributes the same way (auth_setting, domain_name, email, external_auth_user_id, from_response, fullname, id, last_login, name, site_role, workbooks)
+group_list[i].users[#].attribute
+ 
+```
