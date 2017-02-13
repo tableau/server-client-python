@@ -92,8 +92,8 @@ class Workbooks(Endpoint):
         return updated_workbook._parse_common_tags(server_response.content)
 
     # Download workbook contents with option of passing in filepath
-    @parameter_added_in(version="2.5", parameters=['extract_only'])
     @api(version="2.0")
+    @parameter_added_in(version="2.5", parameters=['extract_only'])
     def download(self, workbook_id, filepath=None, extract_only=False):
         if not workbook_id:
             error = "Workbook ID undefined."
