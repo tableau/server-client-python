@@ -119,8 +119,8 @@ def parameter_added_in(version, parameters):
     an exception
 
     Example:
-    >>> @parameter_added_in(version="2.5", parameters=['extract_only'])
     >>> @api(version="2.0")
+    >>> @parameter_added_in(version="2.5", parameters=['extract_only'])
     >>> def download(self, workbook_id, filepath=None, extract_only=False):
     >>>     ...
     '''
