@@ -128,7 +128,7 @@ def parameter_added_in(version, parameters):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
             params = set(parameters)
-            invalid_params = params & kwargs.keys()
+            invalid_params = params & set(kwargs)
 
             if invalid_params:
                 import warnings
