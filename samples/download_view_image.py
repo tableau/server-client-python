@@ -60,6 +60,7 @@ def main():
         workbook_item = all_workbooks[0]
 
         server.workbooks.populate_views(workbook_item)
+        view_item = None
 
         # Step 3: Find the view we want
         for v in workbook_item.views:
