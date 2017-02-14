@@ -109,34 +109,38 @@ def api(version):
     return _decorator
 
 
-def parameter_added_in(version, parameters):
+def parameter_added_in(**params):
     '''Annotate minimum versions for new parameters or request options on an endpoint.
 
     The api decorator documents when an endpoint was added, this decorator annotates
     keyword arguments on endpoints that may control functionality added after an endpoint was introduced.
 
     The REST API will ignore invalid parameters in most cases, so this raises a warning instead of throwing
-    an exception
+    an exception.
+
+    Args:
+        Key/value pairs of the form `parameter`=`version`. Kwargs.
+    Raises:
+        UserWarning
+    Returns:
+        None
 
     Example:
     >>> @api(version="2.0")
-    >>> @parameter_added_in(version="2.5", parameters=['extract_only'])
+    >>> @parameter_added_in(no_extract='2.5')
     >>> def download(self, workbook_id, filepath=None, extract_only=False):
     >>>     ...
     '''
     def _decorator(func):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
-            params = set(parameters)
-            invalid_params = params & set(kwargs)
-
-            if invalid_params:
-                import warnings
-                server_version = Version(self.parent_srv.version or "0.0")
-                minimum_supported = Version(version)
-                if server_version < minimum_supported:
-                    error = "The parameter(s) {!r} are not available in {} and will be ignored. Added in {}".format(
-                        invalid_params, server_version, minimum_supported)
+            import warnings
+            server_ver = Version(self.parent_srv.version or "0.0")
+            params_to_check = set(params) & set(kwargs)
+            for p in params_to_check:
+                min_ver = Version(str(params[p]))
+                if server_ver < min_ver:
+                    error = "{!r} not available in {}, it will be ignored. Added in {}".format(p, server_ver, min_ver)
                     warnings.warn(error)
             return func(self, *args, **kwargs)
         return wrapper
