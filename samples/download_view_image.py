@@ -22,6 +22,8 @@ def main():
     parser.add_argument('--site-id', '-si', required=False,
                         help='content url for site the view is on')
     parser.add_argument('--username', '-u', required=True, help='username to sign into server')
+    parser.add_argument('--workbook-name', '-w', required=True,
+                        help='name of workbook containing the view')
     parser.add_argument('--view-name', '-v', required=True,
                         help='name of view to download an image of')
     parser.add_argument('--filepath', '-f', required=True, help='filepath to save the image returned')
@@ -46,16 +48,28 @@ def main():
     server.version = 2.5
 
     with server.auth.sign_in(tableau_auth):
-        # Step 2: Query for the view that we want an image of
         req_option = TSC.RequestOptions()
-        req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name,
-                                         TSC.RequestOptions.Operator.Equals, args.view_name))
-        all_views, pagination_item = server.views.get(req_option)
-        if not all_views:
-            raise LookupError("View with the specified name was not found.")
-        view_item = all_views[0]
 
-        # Step 3: Query the image endpoint and save the image to the specified location
+        # Step 2: Query for the workbook that contains the view
+        req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name,
+                                         TSC.RequestOptions.Operator.Equals, args.workbook_name))
+        all_workbooks, pagination_item = server.workbooks.get(req_option)
+
+        if not all_workbooks:
+            raise LookupError("Workbook with the specificed name was not found.")
+        workbook_item = all_workbooks[0]
+
+        server.workbooks.populate_views(workbook_item)
+
+        # Step 3: Find the view we want
+        for v in workbook_item.views:
+            if v.name == args.view_name:
+                view_item = v
+
+        if not view_item:
+            raise LookupError("View with the specified name was not found.")
+
+        # Step 4: Query the image endpoint and save the image to the specified location
         image_req_option = TSC.ImageRequestOptions(imageresolution=TSC.ImageRequestOptions.Resolution.High)
         server.views.populate_image(view_item, image_req_option)
 
