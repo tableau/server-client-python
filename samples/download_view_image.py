@@ -56,13 +56,13 @@ def main():
         all_workbooks, pagination_item = server.workbooks.get(req_option)
 
         if not all_workbooks:
-            raise LookupError("Workbook with the specificed name was not found.")
+            raise RuntimeError("Workbook with the specificed name was not found.")
         workbook_item = all_workbooks[0]
 
         server.workbooks.populate_views(workbook_item)
         view_item = None
 
-        # Step 3: Find the view we want
+        # Step 3: Find the view we want (note: view names are case sensitive)
         for v in workbook_item.views:
             if v.name == args.view_name:
                 view_item = v
