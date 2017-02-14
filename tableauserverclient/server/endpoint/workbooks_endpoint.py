@@ -76,14 +76,14 @@ class Workbooks(Endpoint):
 
     # Download workbook contents with option of passing in filepath
     @api(version="2.0")
-    @parameter_added_in(version="2.5", parameters=['extract_only'])
-    def download(self, workbook_id, filepath=None, extract_only=False):
+    @parameter_added_in(no_extract='2.5')
+    def download(self, workbook_id, filepath=None, no_extract=False):
         if not workbook_id:
             error = "Workbook ID undefined."
             raise ValueError(error)
         url = "{0}/{1}/content".format(self.baseurl, workbook_id)
 
-        if extract_only:
+        if no_extract:
             url += "?includeExtract=False"
 
         with closing(self.get_request(url, parameters={"stream": True})) as server_response:
