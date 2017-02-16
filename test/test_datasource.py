@@ -6,12 +6,12 @@ from tableauserverclient.datetime_helpers import format_datetime
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
+ADD_TAGS_XML = os.path.join(TEST_ASSET_DIR, 'datasource_add_tags.xml')
 GET_XML = os.path.join(TEST_ASSET_DIR, 'datasource_get.xml')
 GET_EMPTY_XML = os.path.join(TEST_ASSET_DIR, 'datasource_get_empty.xml')
 GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, 'datasource_get_by_id.xml')
-UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'datasource_update.xml')
 PUBLISH_XML = os.path.join(TEST_ASSET_DIR, 'datasource_publish.xml')
-
+UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'datasource_update.xml')
 
 class DatasourceTests(unittest.TestCase):
     def setUp(self):
@@ -105,12 +105,30 @@ class DatasourceTests(unittest.TestCase):
             m.put(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', text=response_xml)
             single_datasource = TSC.DatasourceItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
             single_datasource._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
-            single_datasource._tags = ['a', 'b', 'c']
             single_datasource._project_name = 'Tester'
             updated_datasource = self.server.datasources.update(single_datasource)
 
         self.assertEqual(single_datasource.tags, updated_datasource.tags)
         self.assertEqual(single_datasource._project_name, updated_datasource._project_name)
+
+    def test_update_tags(self):
+        with open(ADD_TAGS_XML, 'rb') as f:
+            add_tags_xml = f.read().decode('utf-8')
+        with open(UPDATE_XML, 'rb') as f:
+            update_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.put(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/tags', text=add_tags_xml)
+            m.delete(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/tags/b', status_code=204)
+            m.delete(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/tags/d', status_code=204)
+            m.put(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', text=update_xml)
+            single_datasource = TSC.DatasourceItem('1d0304cd-3796-429f-b815-7258370b9b74')
+            single_datasource._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
+            single_datasource._initial_tags.update(['a', 'b', 'c', 'd'])
+            single_datasource.tags.update(['a', 'c', 'e'])
+            updated_datasource = self.server.datasources.update(single_datasource)
+
+        self.assertEqual(single_datasource.tags, updated_datasource.tags)
+        self.assertEqual(single_datasource._initial_tags, updated_datasource._initial_tags)
 
     def test_publish(self):
         with open(PUBLISH_XML, 'rb') as f:
