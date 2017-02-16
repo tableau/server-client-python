@@ -67,6 +67,16 @@ def main():
             print(["{0}({1})".format(connection.id, connection.datasource_name)
                    for connection in sample_datasource.connections])
 
+            # Add some tags to the datasource
+            original_tag_set = set(sample_datasource.tags)
+            sample_datasource.tags.update('a', 'b', 'c', 'd')
+            server.datasources.update(sample_datasource)
+            print("\nOld tag set: {}".format(original_tag_set))
+            print("New tag set: {}".format(sample_datasource.tags))
+
+            # Delete all tags that were added by setting tags to original
+            sample_datasource.tags = original_tag_set
+            server.datasources.update(sample_datasource)
 
 if __name__ == '__main__':
     main()
