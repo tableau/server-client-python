@@ -4,6 +4,7 @@ from .property_decorators import property_not_nullable
 from .tag_item import TagItem
 from .. import NAMESPACE
 from ..datetime_helpers import parse_datetime
+import copy
 
 
 class DatasourceItem(object):
@@ -12,13 +13,14 @@ class DatasourceItem(object):
         self._content_url = None
         self._created_at = None
         self._id = None
+        self._initial_tags = set()
         self._project_name = None
-        self._tags = set()
         self._datasource_type = None
         self._updated_at = None
         self.name = name
         self.owner_id = None
         self.project_id = project_id
+        self.tags = set()
 
     @property
     def connections(self):
@@ -53,10 +55,6 @@ class DatasourceItem(object):
         return self._project_name
 
     @property
-    def tags(self):
-        return self._tags
-
-    @property
     def datasource_type(self):
         return self._datasource_type
 
@@ -66,6 +64,12 @@ class DatasourceItem(object):
 
     def _set_connections(self, connections):
         self._connections = connections
+
+    def _set_initial_tags(self, initial_tags):
+        self._initial_tags = initial_tags
+
+    def _get_initial_tags(self):
+        return self._initial_tags
 
     def _parse_common_tags(self, datasource_xml):
         if not isinstance(datasource_xml, ET.Element):
@@ -90,7 +94,8 @@ class DatasourceItem(object):
         if updated_at:
             self._updated_at = updated_at
         if tags:
-            self._tags = tags
+            self.tags = tags
+            self._initial_tags = copy.copy(tags)
         if project_id:
             self.project_id = project_id
         if project_name:

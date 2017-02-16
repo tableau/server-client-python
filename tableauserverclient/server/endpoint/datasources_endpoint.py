@@ -3,6 +3,7 @@ from .exceptions import MissingRequiredFieldError
 from .fileuploads_endpoint import Fileuploads
 from .. import RequestFactory, DatasourceItem, PaginationItem, ConnectionItem
 from ...filesys_helpers import to_filename
+from ...models.tag_item import TagItem
 import os
 import logging
 import copy
@@ -21,6 +22,18 @@ class Datasources(Endpoint):
     @property
     def baseurl(self):
         return "{0}/sites/{1}/datasources".format(self.parent_srv.baseurl, self.parent_srv.site_id)
+
+    # Add new tags to datasource
+    def _add_tags(self, datasource_id, tag_set):
+        url = "{0}/{1}/tags".format(self.baseurl, datasource_id)
+        add_req = RequestFactory.Tag.add_req(tag_set)
+        server_response = self.put_request(url, add_req)
+        return TagItem.from_response(server_response.content)
+
+    # Delete a datasources's tag by name
+    def _delete_tag(self, datasource_id, tag_name):
+        url = "{0}/{1}/tags/{2}".format(self.baseurl, datasource_id, tag_name)
+        self.delete_request(url)
 
     # Get all datasources
     @api(version="2.0")
@@ -97,9 +110,24 @@ class Datasources(Endpoint):
         if not datasource_item.id:
             error = 'Datasource item missing ID. Datasource must be retrieved from server first.'
             raise MissingRequiredFieldError(error)
+
+        # Remove and add tags to match the datasource item's tag set
+        if datasource_item.tags != datasource_item._initial_tags:
+            add_set = datasource_item.tags - datasource_item._initial_tags
+            remove_set = datasource_item._initial_tags - datasource_item.tags
+            for tag in remove_set:
+                self._delete_tag(datasource_item.id, tag)
+            if add_set:
+                datasource_item.tags = self._add_tags(datasource_item.id, add_set)
+            datasource_item._initial_tags = copy.copy(datasource_item.tags)
+        logger.info('Updated datasource tags to {0}'.format(datasource_item.tags))
+
+        # Update the datasource itself        
         url = "{0}/{1}".format(self.baseurl, datasource_item.id)
         update_req = RequestFactory.Datasource.update_req(datasource_item)
+        print(update_req)
         server_response = self.put_request(url, update_req)
+        print(server_response)
         logger.info('Updated datasource item (ID: {0})'.format(datasource_item.id))
         updated_datasource = copy.copy(datasource_item)
         return updated_datasource._parse_common_tags(server_response.content)
