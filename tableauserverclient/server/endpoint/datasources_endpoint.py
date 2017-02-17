@@ -92,9 +92,7 @@ class Datasources(TaggedResourcesEndpoint):
         # Update the datasource itself        
         url = "{0}/{1}".format(self.baseurl, datasource_item.id)
         update_req = RequestFactory.Datasource.update_req(datasource_item)
-        print(update_req)
         server_response = self.put_request(url, update_req)
-        print(server_response)
         logger.info('Updated datasource item (ID: {0})'.format(datasource_item.id))
         updated_datasource = copy.copy(datasource_item)
         return updated_datasource._parse_common_tags(server_response.content)
