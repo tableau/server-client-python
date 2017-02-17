@@ -1,20 +1,20 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
-from .tagged_resource_item import TaggedResourceItem
 from .. import NAMESPACE
 
 
-class ViewItem(TaggedResourceItem):
+class ViewItem(object):
     def __init__(self):
-        super(ViewItem, self).__init__()  # Python2 compatible super
         self._content_url = None
         self._id = None
         self._image = None
+        self._initial_tags = set()
         self._name = None
         self._owner_id = None
         self._preview_image = None
         self._total_views = None
         self._workbook_id = None
+        self.tags = set()
 
     @property
     def content_url(self):
@@ -50,6 +50,12 @@ class ViewItem(TaggedResourceItem):
     @property
     def workbook_id(self):
         return self._workbook_id
+
+    def _get_initial_tags(self):
+        return self._initial_tags
+
+    def _set_initial_tags(self, initial_tags):
+        self._initial_tags = initial_tags
 
     @classmethod
     def from_response(cls, resp, workbook_id=''):
