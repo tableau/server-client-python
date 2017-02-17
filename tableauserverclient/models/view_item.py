@@ -50,19 +50,7 @@ class ViewItem(object):
     @property
     def workbook_id(self):
         return self._workbook_id
-
-    # Add new tags to workbook
-    def _add_tags(self, workbook_id, tag_set):
-        url = "{0}/{1}/tags".format(self.baseurl, workbook_id)
-        add_req = RequestFactory.Tag.add_req(tag_set)
-        server_response = self.put_request(url, add_req)
-        return TagItem.from_response(server_response.content)
-
-    # Delete a workbook's tag by name
-    def _delete_tag(self, workbook_id, tag_name):
-        url = "{0}/{1}/tags/{2}".format(self.baseurl, workbook_id, tag_name)
-        self.delete_request(url)
-
+        
     def _get_initial_tags(self):
         return self._initial_tags
 
