@@ -10,8 +10,9 @@ logger = logging.getLogger('tableau.endpoint.views')
 
 
 class Views(TaggedResourcesEndpoint):
+    # Used because populate_preview_image functionaliy requires workbook endpoint
     @property
-    def siteurl(self):
+    def siteurl(self): 
         return "{0}/sites/{1}".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
 
@@ -21,8 +22,7 @@ class Views(TaggedResourcesEndpoint):
 
     def get(self, req_options=None):
         logger.info('Querying all views on site')
-        url = self.baseurl
-        server_response = self.get_request(url, req_options)
+        server_response = self.get_request(self.baseurl, req_options)
         pagination_item = PaginationItem.from_response(server_response.content)
         all_view_items = ViewItem.from_response(server_response.content)
         return all_view_items, pagination_item
