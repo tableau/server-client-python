@@ -26,7 +26,7 @@ class ViewTests(unittest.TestCase):
         with open(GET_XML, 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
-            m.get(self.baseurl + '', text=response_xml)
+            m.get(self.baseurl, text=response_xml)
             all_views, pagination_item = self.server.views.get()
 
         self.assertEqual(2, pagination_item.total_available)
@@ -109,6 +109,5 @@ class ViewTests(unittest.TestCase):
             single_view.tags.update(['a', 'c', 'e'])
             updated_view = self.server.views.update(single_view)
 
-        print("asdfasdf" + str(single_view) + str(updated_view))
         self.assertEqual(single_view.tags, updated_view.tags)
         self.assertEqual(single_view._initial_tags, updated_view._initial_tags)

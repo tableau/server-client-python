@@ -1,7 +1,7 @@
 from .endpoint import Endpoint, api, parameter_added_in
 from .exceptions import MissingRequiredFieldError
 from .fileuploads_endpoint import Fileuploads
-from .tagged_resources_endpoint import TaggedResourcesEndpoint
+from .resource_tagger import ResourceTagger
 from .. import RequestFactory, WorkbookItem, ConnectionItem, ViewItem, PaginationItem
 from ...models.tag_item import TagItem
 from ...filesys_helpers import to_filename
@@ -20,7 +20,11 @@ ALLOWED_FILE_EXTENSIONS = ['twb', 'twbx']
 logger = logging.getLogger('tableau.endpoint.workbooks')
 
 
-class Workbooks(TaggedResourcesEndpoint):
+class Workbooks(Endpoint):
+    def __init__(self, parent_srv):
+        super(Workbooks, self).__init__(parent_srv)
+        self._m_resource_tagger = ResourceTagger(parent_srv)
+
     @property
     def baseurl(self):
         return "{0}/sites/{1}/workbooks".format(self.parent_srv.baseurl, self.parent_srv.site_id)
@@ -63,7 +67,7 @@ class Workbooks(TaggedResourcesEndpoint):
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
 
-        self._update_tags(self.baseurl, workbook_item)
+        self._m_resource_tagger._update_tags(self.baseurl, workbook_item)
 
         # Update the workbook itself
         url = "{0}/{1}".format(self.baseurl, workbook_item.id)
