@@ -7,7 +7,7 @@ import copy
 logger = logging.getLogger('tableau.endpoint')
 
 
-class TaggedResourcesEndpoint(Endpoint):
+class ResourceTagger(Endpoint):
     # Add new tags to resource
     def _add_tags(self, baseurl, resource_id, tag_set):
         url = "{0}/{1}/tags".format(baseurl, resource_id)

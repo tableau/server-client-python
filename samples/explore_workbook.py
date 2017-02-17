@@ -40,6 +40,7 @@ def main():
     # SIGN IN
     tableau_auth = TSC.TableauAuth(args.username, password)
     server = TSC.Server(args.server)
+    server.use_highest_version()
 
     overwrite_true = TSC.Server.PublishMode.Overwrite
 
@@ -91,7 +92,6 @@ def main():
             server.workbooks.update(sample_workbook)
 
             # Add tag to just one view
-            server.version = 2.6 # View tagging requires server version 2.6
             sample_view = sample_workbook.views[0]
             original_tag_set = set(sample_view.tags)
             sample_view.tags.add("view_tag")
