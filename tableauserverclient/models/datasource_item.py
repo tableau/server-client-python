@@ -10,7 +10,7 @@ import copy
 
 class DatasourceItem(TaggedResourceItem):
     def __init__(self, project_id, name=None):
-        super(DatasourceItem, self).__init__() #Python2 compatible super
+        super(DatasourceItem, self).__init__()  # Python2 compatible super
         self._connections = None
         self._content_url = None
         self._created_at = None

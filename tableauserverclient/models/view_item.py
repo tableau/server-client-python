@@ -6,7 +6,7 @@ from .. import NAMESPACE
 
 class ViewItem(TaggedResourceItem):
     def __init__(self):
-        super(ViewItem, self).__init__() #Python2 compatible super
+        super(ViewItem, self).__init__()  # Python2 compatible super
         self._content_url = None
         self._id = None
         self._image = None

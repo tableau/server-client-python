@@ -86,10 +86,10 @@ class Datasources(TaggedResourcesEndpoint):
         if not datasource_item.id:
             error = 'Datasource item missing ID. Datasource must be retrieved from server first.'
             raise MissingRequiredFieldError(error)
-        
+
         self._update_tags(self.baseurl, datasource_item)
 
-        # Update the datasource itself        
+        # Update the datasource itself
         url = "{0}/{1}".format(self.baseurl, datasource_item.id)
         update_req = RequestFactory.Datasource.update_req(datasource_item)
         server_response = self.put_request(url, update_req)

@@ -12,9 +12,9 @@ logger = logging.getLogger('tableau.endpoint.views')
 class Views(TaggedResourcesEndpoint):
     # Used because populate_preview_image functionaliy requires workbook endpoint
     @property
-    def siteurl(self): 
+    def siteurl(self):
         return "{0}/sites/{1}".format(self.parent_srv.baseurl, self.parent_srv.site_id)
-    
+
     @property
     def baseurl(self):
         return "{0}/views".format(self.siteurl)
@@ -41,8 +41,7 @@ class Views(TaggedResourcesEndpoint):
         if not view_item.id:
             error = "View item missing ID."
             raise MissingRequiredFieldError(error)
-        url = "{0}/{1}/image".format(self.baseurl,
-                                           view_item.id)
+        url = "{0}/{1}/image".format(self.baseurl, view_item.id)
         server_response = self.get_request(url, req_options)
         view_item._image = server_response.content
         logger.info("Populated image for view (ID: {0})".format(view_item.id))
