@@ -20,7 +20,7 @@ logger = logging.getLogger('tableau.endpoint.workbooks')
 class Workbooks(Endpoint):
     def __init__(self, parent_srv):
         super(Workbooks, self).__init__(parent_srv)
-        self._m_resource_tagger = ResourceTagger(parent_srv)
+        self._resource_tagger = ResourceTagger(parent_srv)
 
     @property
     def baseurl(self):
@@ -60,7 +60,7 @@ class Workbooks(Endpoint):
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
 
-        self._m_resource_tagger._update_tags(self.baseurl, workbook_item)
+        self._resource_tagger._update_tags(self.baseurl, workbook_item)
 
         # Update the workbook itself
         url = "{0}/{1}".format(self.baseurl, workbook_item.id)
