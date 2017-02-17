@@ -13,20 +13,20 @@ class ResourceTagger(Endpoint):
     def _add_tags(self, baseurl, resource_id, tag_set):
         url = "{0}/{1}/tags".format(baseurl, resource_id)
         add_req = RequestFactory.Tag.add_req(tag_set)
-        
+
         try:
             server_response = self.put_request(url, add_req)
         except ServerResponseError as e:
             if e.code == "404003":
                 error = "Adding tags to this resource type is only available with REST API version 2.6 and later."
                 raise EndpointUnavailableError(error)
-        
+
         return TagItem.from_response(server_response.content)
 
     # Delete a resource's tag by name
     def _delete_tag(self, baseurl, resource_id, tag_name):
         url = "{0}/{1}/tags/{2}".format(baseurl, resource_id, tag_name)
-        
+
         try:
             self.delete_request(url)
         except ServerResponseError as e:
