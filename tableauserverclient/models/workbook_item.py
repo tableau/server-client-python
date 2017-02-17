@@ -11,7 +11,7 @@ import copy
 
 class WorkbookItem(TaggedResourceItem):
     def __init__(self, project_id, name=None, show_tabs=False):
-        super(WorkbookItem, self).__init__() #Python2 compatible super
+        super(WorkbookItem, self).__init__()  # Python2 compatible super
         self._connections = None
         self._content_url = None
         self._created_at = None

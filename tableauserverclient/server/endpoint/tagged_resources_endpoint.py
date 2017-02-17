@@ -19,7 +19,7 @@ class TaggedResourcesEndpoint(Endpoint):
     def _delete_tag(self, baseurl, resource_id, tag_name):
         url = "{0}/{1}/tags/{2}".format(baseurl, resource_id, tag_name)
         self.delete_request(url)
-   
+
     # Remove and add tags to match the resource item's tag set
     def _update_tags(self, baseurl, resource_item):
         if resource_item.tags != resource_item._initial_tags:

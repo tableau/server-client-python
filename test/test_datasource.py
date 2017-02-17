@@ -13,6 +13,7 @@ GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, 'datasource_get_by_id.xml')
 PUBLISH_XML = os.path.join(TEST_ASSET_DIR, 'datasource_publish.xml')
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'datasource_update.xml')
 
+
 class DatasourceTests(unittest.TestCase):
     def setUp(self):
         self.server = TSC.Server('http://test')
