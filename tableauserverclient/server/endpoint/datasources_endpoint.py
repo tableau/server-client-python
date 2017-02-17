@@ -1,6 +1,7 @@
 from .endpoint import Endpoint, api, parameter_added_in
 from .exceptions import MissingRequiredFieldError
 from .fileuploads_endpoint import Fileuploads
+from .tagged_resources_endpoint import TaggedResourcesEndpoint
 from .. import RequestFactory, DatasourceItem, PaginationItem, ConnectionItem
 from ...filesys_helpers import to_filename
 from ...models.tag_item import TagItem
@@ -18,22 +19,10 @@ ALLOWED_FILE_EXTENSIONS = ['tds', 'tdsx', 'tde']
 logger = logging.getLogger('tableau.endpoint.datasources')
 
 
-class Datasources(Endpoint):
+class Datasources(TaggedResourcesEndpoint):
     @property
     def baseurl(self):
         return "{0}/sites/{1}/datasources".format(self.parent_srv.baseurl, self.parent_srv.site_id)
-
-    # Add new tags to datasource
-    def _add_tags(self, datasource_id, tag_set):
-        url = "{0}/{1}/tags".format(self.baseurl, datasource_id)
-        add_req = RequestFactory.Tag.add_req(tag_set)
-        server_response = self.put_request(url, add_req)
-        return TagItem.from_response(server_response.content)
-
-    # Delete a datasources's tag by name
-    def _delete_tag(self, datasource_id, tag_name):
-        url = "{0}/{1}/tags/{2}".format(self.baseurl, datasource_id, tag_name)
-        self.delete_request(url)
 
     # Get all datasources
     @api(version="2.0")
@@ -110,17 +99,8 @@ class Datasources(Endpoint):
         if not datasource_item.id:
             error = 'Datasource item missing ID. Datasource must be retrieved from server first.'
             raise MissingRequiredFieldError(error)
-
-        # Remove and add tags to match the datasource item's tag set
-        if datasource_item.tags != datasource_item._initial_tags:
-            add_set = datasource_item.tags - datasource_item._initial_tags
-            remove_set = datasource_item._initial_tags - datasource_item.tags
-            for tag in remove_set:
-                self._delete_tag(datasource_item.id, tag)
-            if add_set:
-                datasource_item.tags = self._add_tags(datasource_item.id, add_set)
-            datasource_item._initial_tags = copy.copy(datasource_item.tags)
-        logger.info('Updated datasource tags to {0}'.format(datasource_item.tags))
+        
+        self._update_tags(self.baseurl, datasource_item)
 
         # Update the datasource itself        
         url = "{0}/{1}".format(self.baseurl, datasource_item.id)

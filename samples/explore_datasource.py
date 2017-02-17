@@ -68,7 +68,7 @@ def main():
                    for connection in sample_datasource.connections])
 
             # Add some tags to the datasource
-            server.version = 2.6
+            server.version = 2.6 # Datasource tagging requires server version 2.6
             original_tag_set = set(sample_datasource.tags)
             sample_datasource.tags.update('a', 'b', 'c', 'd')
             server.datasources.update(sample_datasource)

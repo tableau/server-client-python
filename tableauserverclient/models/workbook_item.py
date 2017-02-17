@@ -2,19 +2,20 @@ import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_not_nullable, property_is_boolean
 from .tag_item import TagItem
+from .tagged_resource_item import TaggedResourceItem
 from .view_item import ViewItem
 from .. import NAMESPACE
 from ..datetime_helpers import parse_datetime
 import copy
 
 
-class WorkbookItem(object):
+class WorkbookItem(TaggedResourceItem):
     def __init__(self, project_id, name=None, show_tabs=False):
+        super(WorkbookItem, self).__init__() #Python2 compatible super
         self._connections = None
         self._content_url = None
         self._created_at = None
         self._id = None
-        self._initial_tags = set()
         self._preview_image = None
         self._project_name = None
         self._size = None
@@ -22,7 +23,6 @@ class WorkbookItem(object):
         self._views = None
         self.name = name
         self.owner_id = None
-        self.tags = set()
         self.project_id = project_id
         self.show_tabs = show_tabs
 
@@ -97,12 +97,6 @@ class WorkbookItem(object):
 
     def _set_preview_image(self, preview_image):
         self._preview_image = preview_image
-
-    def _set_initial_tags(self, initial_tags):
-        self._initial_tags = initial_tags
-
-    def _get_initial_tags(self):
-        return self._initial_tags
 
     def _parse_common_tags(self, workbook_xml):
         if not isinstance(workbook_xml, ET.Element):
