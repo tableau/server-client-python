@@ -22,7 +22,7 @@ logger = logging.getLogger('tableau.endpoint.datasources')
 class Datasources(Endpoint):
     def __init__(self, parent_srv):
         super(Datasources, self).__init__(parent_srv)
-        self._m_resource_tagger = ResourceTagger(parent_srv)
+        self._resource_tagger = ResourceTagger(parent_srv)
 
     @property
     def baseurl(self):
@@ -104,7 +104,7 @@ class Datasources(Endpoint):
             error = 'Datasource item missing ID. Datasource must be retrieved from server first.'
             raise MissingRequiredFieldError(error)
 
-        self._m_resource_tagger._update_tags(self.baseurl, datasource_item)
+        self._resource_tagger._update_tags(self.baseurl, datasource_item)
 
         # Update the datasource itself
         url = "{0}/{1}".format(self.baseurl, datasource_item.id)
