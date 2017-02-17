@@ -90,6 +90,17 @@ def main():
             sample_workbook.tags = original_tag_set
             server.workbooks.update(sample_workbook)
 
+            # Add tag to just one view
+            server.version = 2.6
+            sample_view = sample_workbook.views[0]
+            original_tag_set = set(sample_view.tags)
+            sample_view.tags.add("view_tag")
+            server.views.update(sample_view)
+
+            # Delete tag from just one view
+            sample_view.tags = original_tag_set
+            server.views.update(sample_view)
+
             if args.download:
                 # Download
                 path = server.workbooks.download(sample_workbook.id, args.download)
