@@ -1,5 +1,6 @@
 from .endpoint import Endpoint
 from .exceptions import MissingRequiredFieldError
+from .tagged_resources_endpoint import TaggedResourcesEndpoint
 from .. import RequestFactory, ViewItem, PaginationItem
 from ...models.tag_item import TagItem
 import logging
@@ -8,26 +9,18 @@ import copy
 logger = logging.getLogger('tableau.endpoint.views')
 
 
-class Views(Endpoint):
+class Views(TaggedResourcesEndpoint):
+    @property
+    def siteurl(self):
+        return "{0}/sites/{1}".format(self.parent_srv.baseurl, self.parent_srv.site_id)
+    
     @property
     def baseurl(self):
-        return "{0}/sites/{1}".format(self.parent_srv.baseurl, self.parent_srv.site_id)
-
-    # Add new tags to view
-    def _add_tags(self, view_id, tag_set):
-        url = "{0}/views/{1}/tags".format(self.baseurl, view_id)
-        add_req = RequestFactory.Tag.add_req(tag_set)
-        server_response = self.put_request(url, add_req)
-        return TagItem.from_response(server_response.content)
-
-    # Delete a view's tag by name
-    def _delete_tag(self, view_id, tag_name):
-        url = "{0}/views/{1}/tags/{2}".format(self.baseurl, view_id, tag_name)
-        self.delete_request(url)
+        return "{0}/views".format(self.siteurl)
 
     def get(self, req_options=None):
         logger.info('Querying all views on site')
-        url = "{0}/views".format(self.baseurl)
+        url = self.baseurl
         server_response = self.get_request(url, req_options)
         pagination_item = PaginationItem.from_response(server_response.content)
         all_view_items = ViewItem.from_response(server_response.content)
@@ -37,7 +30,7 @@ class Views(Endpoint):
         if not view_item.id or not view_item.workbook_id:
             error = "View item missing ID or workbook ID."
             raise MissingRequiredFieldError(error)
-        url = "{0}/workbooks/{1}/views/{2}/previewImage".format(self.baseurl,
+        url = "{0}/workbooks/{1}/views/{2}/previewImage".format(self.siteurl,
                                                                 view_item.workbook_id,
                                                                 view_item.id)
         server_response = self.get_request(url)
@@ -48,7 +41,7 @@ class Views(Endpoint):
         if not view_item.id:
             error = "View item missing ID."
             raise MissingRequiredFieldError(error)
-        url = "{0}/views/{1}/image".format(self.baseurl,
+        url = "{0}/{1}/image".format(self.baseurl,
                                            view_item.id)
         server_response = self.get_request(url, req_options)
         view_item._image = server_response.content
@@ -60,16 +53,7 @@ class Views(Endpoint):
             error = "View item missing ID. View must be retrieved from server first."
             raise MissingRequiredFieldError(error)
 
-        # Remove and add tags to match the view item's tag set
-        if view_item.tags != view_item._initial_tags:
-            add_set = view_item.tags - view_item._initial_tags
-            remove_set = view_item._initial_tags - view_item.tags
-            for tag in remove_set:
-                self._delete_tag(view_item.id, tag)
-            if add_set:
-                view_item.tags = self._add_tags(view_item.id, add_set)
-            view_item._initial_tags = copy.copy(view_item.tags)
-        logger.info('Updated view tags to {0}'.format(view_item.tags))
+        self._update_tags(self.baseurl, view_item)
 
         # Returning view item to stay consistent with datasource/view update functions
         return view_item

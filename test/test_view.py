@@ -20,12 +20,13 @@ class ViewTests(unittest.TestCase):
         self.server._auth_token = 'j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM'
 
         self.baseurl = self.server.views.baseurl
+        self.siteurl = self.server.views.siteurl
 
     def test_get(self):
         with open(GET_XML, 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
-            m.get(self.baseurl + '/views', text=response_xml)
+            m.get(self.baseurl + '', text=response_xml)
             all_views, pagination_item = self.server.views.get()
 
         self.assertEqual(2, pagination_item.total_available)
@@ -49,7 +50,7 @@ class ViewTests(unittest.TestCase):
         with open(POPULATE_PREVIEW_IMAGE, 'rb') as f:
             response = f.read()
         with requests_mock.mock() as m:
-            m.get(self.baseurl + '/workbooks/3cc6cd06-89ce-4fdc-b935-5294135d6d42/'
+            m.get(self.siteurl + '/workbooks/3cc6cd06-89ce-4fdc-b935-5294135d6d42/'
                   'views/d79634e1-6063-4ec9-95ff-50acbf609ff5/previewImage', content=response)
             single_view = TSC.ViewItem()
             single_view._id = 'd79634e1-6063-4ec9-95ff-50acbf609ff5'
@@ -70,7 +71,7 @@ class ViewTests(unittest.TestCase):
         with open(POPULATE_PREVIEW_IMAGE, 'rb') as f:
             response = f.read()
         with requests_mock.mock() as m:
-            m.get(self.baseurl + '/views/d79634e1-6063-4ec9-95ff-50acbf609ff5/image', content=response)
+            m.get(self.baseurl + '/d79634e1-6063-4ec9-95ff-50acbf609ff5/image', content=response)
             single_view = TSC.ViewItem()
             single_view._id = 'd79634e1-6063-4ec9-95ff-50acbf609ff5'
             self.server.views.populate_image(single_view)
@@ -80,7 +81,7 @@ class ViewTests(unittest.TestCase):
         with open(POPULATE_PREVIEW_IMAGE, 'rb') as f:
             response = f.read()
         with requests_mock.mock() as m:
-            m.get(self.baseurl + '/views/d79634e1-6063-4ec9-95ff-50acbf609ff5/image?resolution=high', content=response)
+            m.get(self.baseurl + '/d79634e1-6063-4ec9-95ff-50acbf609ff5/image?resolution=high', content=response)
             single_view = TSC.ViewItem()
             single_view._id = 'd79634e1-6063-4ec9-95ff-50acbf609ff5'
             req_option = TSC.ImageRequestOptions(imageresolution=TSC.ImageRequestOptions.Resolution.High)
@@ -98,10 +99,10 @@ class ViewTests(unittest.TestCase):
         with open(UPDATE_XML, 'rb') as f:
             update_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
-            m.put(self.baseurl + '/views/d79634e1-6063-4ec9-95ff-50acbf609ff5/tags', text=add_tags_xml)
-            m.delete(self.baseurl + '/views/d79634e1-6063-4ec9-95ff-50acbf609ff5/tags/b', status_code=204)
-            m.delete(self.baseurl + '/views/d79634e1-6063-4ec9-95ff-50acbf609ff5/tags/d', status_code=204)
-            m.put(self.baseurl + '/views/d79634e1-6063-4ec9-95ff-50acbf609ff5', text=update_xml)
+            m.put(self.baseurl + '/d79634e1-6063-4ec9-95ff-50acbf609ff5/tags', text=add_tags_xml)
+            m.delete(self.baseurl + '/d79634e1-6063-4ec9-95ff-50acbf609ff5/tags/b', status_code=204)
+            m.delete(self.baseurl + '/d79634e1-6063-4ec9-95ff-50acbf609ff5/tags/d', status_code=204)
+            m.put(self.baseurl + '/d79634e1-6063-4ec9-95ff-50acbf609ff5', text=update_xml)
             single_view = TSC.ViewItem()
             single_view._id = 'd79634e1-6063-4ec9-95ff-50acbf609ff5'
             single_view._initial_tags.update(['a', 'b', 'c', 'd'])
