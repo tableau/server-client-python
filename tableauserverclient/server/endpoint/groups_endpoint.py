@@ -25,15 +25,22 @@ class Groups(Endpoint):
     # Gets all users in a given group
     @api(version="2.0")
     def populate_users(self, group_item, req_options=None):
+        from .. import InternalPager
         if not group_item.id:
             error = "Group item missing ID. Group must be retrieved from server first."
             raise MissingRequiredFieldError(error)
+
+        all_users = InternalPager(self._get_users_for_group, group_item, request_opts=req_options)
+
+        group_item._set_users(list(all_users))
+
+    def _get_users_for_group(self, group_item, req_options=None):
         url = "{0}/{1}/users".format(self.baseurl, group_item.id)
         server_response = self.get_request(url, req_options)
-        group_item._set_users(UserItem.from_response(server_response.content))
+        user_item = UserItem.from_response(server_response.content)
         pagination_item = PaginationItem.from_response(server_response.content)
         logger.info('Populated users for group (ID: {0})'.format(group_item.id))
-        return pagination_item
+        return user_item, pagination_item
 
     # Deletes 1 group by id
     @api(version="2.0")

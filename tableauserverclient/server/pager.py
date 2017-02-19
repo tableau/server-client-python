@@ -47,3 +47,41 @@ class Pager(object):
             opts.sort, opts.filter = self._options.sort, self._options.filter
         current_item_list, last_pagination_item = self._endpoint(opts)
         return current_item_list, last_pagination_item
+
+class InternalPager(object):
+
+    def __init__(self, caller, *args, request_opts=None, **kwargs):
+        self._endpoint = caller
+        self._options = request_opts
+        self._funcargs = args
+        self._kwargs = kwargs
+        # If we have options we could be starting on any page, backfill the count
+        if self._options:
+            self._count = ((self._options.pagenumber - 1) * self._options.pagesize)
+        else:
+            self._count = 0
+
+    def __iter__(self):
+        # Fetch the first page
+        current_item_list, last_pagination_item = self._endpoint(*self._funcargs, **self._kwargs, req_options=self._options)
+
+        # Get the rest on demand as a generator
+        while self._count < last_pagination_item.total_available:
+            if len(current_item_list) == 0:
+                current_item_list, last_pagination_item = self._load_next_page(last_pagination_item)
+
+            try:
+                yield current_item_list.pop(0)
+                self._count += 1
+
+            except IndexError:
+                # The total count on Server changed while fetching exit gracefully
+                raise StopIteration
+
+    def _load_next_page(self, last_pagination_item):
+        next_page = last_pagination_item.page_number + 1
+        opts = RequestOptions(pagenumber=next_page, pagesize=last_pagination_item.page_size)
+        if self._options is not None:
+            opts.sort, opts.filter = self._options.sort, self._options.filter
+        current_item_list, last_pagination_item = self._endpoint(*self._funcargs, **self._kwargs, req_options=opts)
+        return current_item_list, last_pagination_item
