@@ -76,6 +76,7 @@ class ImageRequestOptions(RequestOptionsBase):
 
         return "{0}?{1}".format(url, '&'.join(params))
 
+
 class ImageRequestOptions(RequestOptionsBase):
     # if 'high' isn't specified, the REST API endpoint returns an image with standard resolution
     class Resolution:
