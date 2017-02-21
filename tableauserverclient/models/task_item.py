@@ -18,7 +18,8 @@ class TaskItem(object):
     @classmethod
     def from_response(cls, xml):
         parsed_response = ET.fromstring(xml)
-        all_tasks_xml = parsed_response.findall('.//t:task', namespaces=NAMESPACE)
+        all_tasks_xml = parsed_response.findall(
+            './/t:task/t:extractRefresh', namespaces=NAMESPACE)
 
         all_tasks = (TaskItem._parse_task(x) for x in all_tasks_xml)
 
