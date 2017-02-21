@@ -1,7 +1,7 @@
 from .endpoint import Endpoint
 from .exceptions import MissingRequiredFieldError
 from .fileuploads_endpoint import Fileuploads
-from .resource_tagger import ResourceTagger
+from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, DatasourceItem, PaginationItem, ConnectionItem
 import os
 import logging
@@ -20,7 +20,7 @@ logger = logging.getLogger('tableau.endpoint.datasources')
 class Datasources(Endpoint):
     def __init__(self, parent_srv):
         super(Datasources, self).__init__(parent_srv)
-        self._resource_tagger = ResourceTagger(parent_srv)
+        self._resource_tagger = _ResourceTagger(parent_srv)
 
     @property
     def baseurl(self):
@@ -91,7 +91,7 @@ class Datasources(Endpoint):
             error = 'Datasource item missing ID. Datasource must be retrieved from server first.'
             raise MissingRequiredFieldError(error)
 
-        self._resource_tagger._update_tags(self.baseurl, datasource_item)
+        self._resource_tagger.update_tags(self.baseurl, datasource_item)
 
         # Update the datasource itself
         url = "{0}/{1}".format(self.baseurl, datasource_item.id)
