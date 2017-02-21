@@ -51,12 +51,6 @@ class ViewItem(object):
     def workbook_id(self):
         return self._workbook_id
 
-    def _get_initial_tags(self):
-        return self._initial_tags
-
-    def _set_initial_tags(self, initial_tags):
-        self._initial_tags = initial_tags
-
     @classmethod
     def from_response(cls, resp, workbook_id=''):
         return cls.from_xml_element(ET.fromstring(resp), workbook_id)

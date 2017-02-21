@@ -8,7 +8,7 @@ import copy
 logger = logging.getLogger('tableau.endpoint.resource_tagger')
 
 
-class ResourceTagger(Endpoint):
+class _ResourceTagger(Endpoint):
     # Add new tags to resource
     def _add_tags(self, baseurl, resource_id, tag_set):
         url = "{0}/{1}/tags".format(baseurl, resource_id)
@@ -35,7 +35,7 @@ class ResourceTagger(Endpoint):
                 raise EndpointUnavailableError(error)
 
     # Remove and add tags to match the resource item's tag set
-    def _update_tags(self, baseurl, resource_item):
+    def update_tags(self, baseurl, resource_item):
         if resource_item.tags != resource_item._initial_tags:
             add_set = resource_item.tags - resource_item._initial_tags
             remove_set = resource_item._initial_tags - resource_item.tags
