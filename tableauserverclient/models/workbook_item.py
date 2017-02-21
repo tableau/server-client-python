@@ -89,12 +89,6 @@ class WorkbookItem(object):
             raise UnpopulatedPropertyError(error)
         return self._views
 
-    def _get_initial_tags(self):
-        return self._initial_tags
-
-    def _set_initial_tags(self, initial_tags):
-        self._initial_tags = initial_tags
-
     def _set_connections(self, connections):
         self._connections = connections
 

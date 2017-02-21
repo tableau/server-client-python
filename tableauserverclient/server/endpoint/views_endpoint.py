@@ -1,6 +1,6 @@
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
-from .resource_tagger import ResourceTagger
+from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, ViewItem, PaginationItem
 from ...models.tag_item import TagItem
 import logging
@@ -12,7 +12,7 @@ logger = logging.getLogger('tableau.endpoint.views')
 class Views(Endpoint):
     def __init__(self, parent_srv):
         super(Views, self).__init__(parent_srv)
-        self._resource_tagger = ResourceTagger(parent_srv)
+        self._resource_tagger = _ResourceTagger(parent_srv)
 
     # Used because populate_preview_image functionaliy requires workbook endpoint
     @property
@@ -57,7 +57,7 @@ class Views(Endpoint):
             error = "View item missing ID. View must be retrieved from server first."
             raise MissingRequiredFieldError(error)
 
-        self._resource_tagger._update_tags(self.baseurl, view_item)
+        self._resource_tagger.update_tags(self.baseurl, view_item)
 
         # Returning view item to stay consistent with datasource/view update functions
         return view_item
