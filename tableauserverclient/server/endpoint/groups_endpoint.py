@@ -25,14 +25,14 @@ class Groups(Endpoint):
     # Gets all users in a given group
     @api(version="2.0")
     def populate_users(self, group_item, req_options=None):
-        from .. import InternalPager
+        from .. import Pager
         if not group_item.id:
             error = "Group item missing ID. Group must be retrieved from server first."
             raise MissingRequiredFieldError(error)
 
-        all_users = InternalPager(self._get_users_for_group, group_item, request_opts=req_options)
-
-        group_item._set_users(list(all_users))
+        # TODO should this be a list or a Pager directly?
+        all_users = list(Pager(lambda options: self._get_users_for_group(group_item, options), req_options))
+        group_item._set_users(all_users)
 
     def _get_users_for_group(self, group_item, req_options=None):
         url = "{0}/{1}/users".format(self.baseurl, group_item.id)

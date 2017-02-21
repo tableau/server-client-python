@@ -55,10 +55,10 @@ class GroupTests(unittest.TestCase):
             m.get(self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users', text=response_xml)
             single_group = TSC.GroupItem(name='Test Group')
             single_group._id = 'e7833b48-c6f7-47b5-a2a7-36e7dd232758'
-            pagination_item = self.server.groups.populate_users(single_group)
+            self.server.groups.populate_users(single_group)
+            user = list(single_group.users).pop()
 
-        self.assertEqual(1, pagination_item.total_available)
-        user = single_group.users.pop()
+        self.assertEqual(1, len(single_group.users))
         self.assertEqual('dd2239f6-ddf1-4107-981a-4cf94e415794', user.id)
         self.assertEqual('alice', user.name)
         self.assertEqual('Publisher', user.site_role)
