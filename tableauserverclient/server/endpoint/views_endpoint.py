@@ -4,7 +4,6 @@ from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, ViewItem, PaginationItem
 from ...models.tag_item import TagItem
 import logging
-import copy
 
 logger = logging.getLogger('tableau.endpoint.views')
 
