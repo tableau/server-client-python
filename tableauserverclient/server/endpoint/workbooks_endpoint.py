@@ -1,8 +1,8 @@
 from .endpoint import Endpoint
 from .exceptions import MissingRequiredFieldError
 from .fileuploads_endpoint import Fileuploads
+from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, WorkbookItem, ConnectionItem, ViewItem, PaginationItem
-from ...models.tag_item import TagItem
 import os
 import logging
 import copy
@@ -18,21 +18,13 @@ logger = logging.getLogger('tableau.endpoint.workbooks')
 
 
 class Workbooks(Endpoint):
+    def __init__(self, parent_srv):
+        super(Workbooks, self).__init__(parent_srv)
+        self._resource_tagger = _ResourceTagger(parent_srv)
+
     @property
     def baseurl(self):
         return "{0}/sites/{1}/workbooks".format(self.parent_srv.baseurl, self.parent_srv.site_id)
-
-    # Add new tags to workbook
-    def _add_tags(self, workbook_id, tag_set):
-        url = "{0}/{1}/tags".format(self.baseurl, workbook_id)
-        add_req = RequestFactory.Tag.add_req(tag_set)
-        server_response = self.put_request(url, add_req)
-        return TagItem.from_response(server_response.content)
-
-    # Delete a workbook's tag by name
-    def _delete_tag(self, workbook_id, tag_name):
-        url = "{0}/{1}/tags/{2}".format(self.baseurl, workbook_id, tag_name)
-        self.delete_request(url)
 
     # Get all workbooks on site
     def get(self, req_options=None):
@@ -68,16 +60,7 @@ class Workbooks(Endpoint):
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
 
-        # Remove and add tags to match the workbook item's tag set
-        if workbook_item.tags != workbook_item._initial_tags:
-            add_set = workbook_item.tags - workbook_item._initial_tags
-            remove_set = workbook_item._initial_tags - workbook_item.tags
-            for tag in remove_set:
-                self._delete_tag(workbook_item.id, tag)
-            if add_set:
-                workbook_item.tags = self._add_tags(workbook_item.id, add_set)
-            workbook_item._initial_tags = copy.copy(workbook_item.tags)
-        logger.info('Updated workbook tags to {0}'.format(workbook_item.tags))
+        self._resource_tagger.update_tags(self.baseurl, workbook_item)
 
         # Update the workbook itself
         url = "{0}/{1}".format(self.baseurl, workbook_item.id)
