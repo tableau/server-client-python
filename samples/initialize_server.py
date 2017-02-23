@@ -68,6 +68,7 @@ def main():
         ################################################################################
         # Step 4: Create the project we need only if it doesn't exist
         ################################################################################
+        import time; time.sleep(2)  # sad panda...something about eventually consistent model
         all_projects = TSC.Pager(server_upload.projects)
         project = next((p for p in all_projects if p.name.lower() == args.project.lower()), None)
 
