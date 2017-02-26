@@ -180,6 +180,14 @@ Modifies a workbook. The workbook item object must include the workbook ID and o
 Workbooks.update(wb_item_object)
 ```
 
+### Update workbook connection
+
+Updates a workbook connection string. The workbook connections must be populated before they strings can be updated. 
+
+```py
+Workbooks.update_conn(workbook, workbook.connections[i]
+```
+
 ### Delete Workbook
 
 Deletes a workbook with the given ID.
