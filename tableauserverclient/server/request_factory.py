@@ -15,7 +15,6 @@ def _add_multipart(parts):
     content_type = ''.join(('multipart/mixed',) + content_type.partition(';')[1:])
     return xml_request, content_type
 
-
 class AuthRequest(object):
     def signin_req(self, auth_item):
         xml_request = ET.Element('tsRequest')
@@ -313,6 +312,13 @@ class WorkbookRequest(object):
         parts = {'request_payload': ('', xml_request, 'text/xml')}
         return _add_multipart(parts)
 
+class WorkbookConnection(object):
+    def update_req(self, connection_item):
+        xml_request = ET.Element('tsRequest')
+        connection_element = ET.SubElement(xml_request, 'connection')
+        connection_element.attrib['serverAddress'] = connection_item.server_address.lower()        
+        return ET.tostring(xml_request)
+
 
 class RequestFactory(object):
     Auth = AuthRequest()
@@ -326,3 +332,4 @@ class RequestFactory(object):
     Tag = TagRequest()
     User = UserRequest()
     Workbook = WorkbookRequest()
+    WorkbookConnection = WorkbookConnection()
