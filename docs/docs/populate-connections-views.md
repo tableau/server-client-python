@@ -34,6 +34,14 @@ server.workbooks.populate_connections(workbook)
 print([connection.datasource_name for connection in workbook.connections])
 ```
 
+## Update connections for workbooks
+
+```py
+server.workbooks.populate_connections(workbook)
+workbook.connections[i].server_address = 'new_endpoint'
+server.workbooks.update_conn(workbook, workbook.connections[i])
+```
+
 ## Populate connections for data sources
 
 ```py
