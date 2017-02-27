@@ -314,7 +314,7 @@ class WorkbookRequest(object):
         return _add_multipart(parts)
 
 
-    class WorkbookConnection(object):
+class WorkbookConnection(object):
     def update_req(self, connection_item):
         xml_request = ET.Element('tsRequest')
         connection_element = ET.SubElement(xml_request, 'connection')
