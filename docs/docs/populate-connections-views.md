@@ -43,7 +43,7 @@ conn_to_update.server_address = 'new_address'
 conn_to_update.server_port = 1234
 conn_to_update.username = 'username'
 conn_to_update.password = 'password'
-conn_to_update.embed_password = TRUE/FALSE
+conn_to_update.embed_password = True/False
 server.workbooks.update_conn(workbook, conn_to_update)
 ```
 
