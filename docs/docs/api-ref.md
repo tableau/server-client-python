@@ -185,7 +185,7 @@ Workbooks.update(wb_item_object)
 Updates a workbook connection string. The workbook connections must be populated before they strings can be updated. 
 
 ```py
-Workbooks.update_conn(workbook, workbook.connections[i]
+Workbooks.update_conn(workbook, workbook.connections[0])
 ```
 
 ### Delete Workbook
