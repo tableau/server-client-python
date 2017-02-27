@@ -38,8 +38,13 @@ print([connection.datasource_name for connection in workbook.connections])
 
 ```py
 server.workbooks.populate_connections(workbook)
-workbook.connections[i].server_address = 'new_endpoint'
-server.workbooks.update_conn(workbook, workbook.connections[i])
+conn_to_update = workbook.connections[0]
+conn_to_update.server_address = 'new_address'
+conn_to_update.server_port = 1234
+conn_to_update.username = 'username'
+conn_to_update.password = 'password'
+conn_to_update.embed_password = TRUE/FALSE
+server.workbooks.update_conn(workbook, conn_to_update)
 ```
 
 ## Populate connections for data sources
