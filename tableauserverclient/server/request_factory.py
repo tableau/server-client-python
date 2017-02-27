@@ -316,9 +316,17 @@ class WorkbookConnection(object):
     def update_req(self, connection_item):
         xml_request = ET.Element('tsRequest')
         connection_element = ET.SubElement(xml_request, 'connection')
-        connection_element.attrib['serverAddress'] = connection_item.server_address.lower()        
+        if connection_item.server_address:
+            connection_element.attrib['serverAddress'] = connection_item.server_address.lower()
+        if connection_item.server_port:
+            connection_element.attrib['port'] = connection_item.server_address
+        if connection_item.username:
+            connection_element.attrib['userName'] = connection_item.username
+        if connection_item.password:
+            connection_element.attrib['password'] = connection_item.password
+        if connection_item.embed_password:
+            connection_element.attrib['embedPassword'] = connection_item.embed_password
         return ET.tostring(xml_request)
-
 
 class RequestFactory(object):
     Auth = AuthRequest()
