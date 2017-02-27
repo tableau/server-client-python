@@ -321,7 +321,7 @@ class WorkbookRequest(object):
         if connection_item.server_address:
             connection_element.attrib['serverAddress'] = connection_item.server_address.lower()
         if connection_item.server_port:
-            connection_element.attrib['port'] = connection_item.server_address
+            connection_element.attrib['port'] = str(connection_item.server_port)
         if connection_item.username:
             connection_element.attrib['userName'] = connection_item.username
         if connection_item.password:
