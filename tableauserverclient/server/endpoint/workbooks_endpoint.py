@@ -91,6 +91,13 @@ class Workbooks(Endpoint):
         updated_workbook = copy.copy(workbook_item)
         return updated_workbook._parse_common_tags(server_response.content)
 
+    # Update workbook_connection
+    def update_conn(self, workbook_item, connection_item):
+        url = "{0}/{1}/connections/{2}".format(self.baseurl, workbook_item.id, connection_item.id)
+        update_req = RequestFactory.WorkbookConnection.update_req(connection_item)
+        server_response = self.put_request(url, update_req)
+        logger.info('Updated workbook item (ID: {0} & connection item {1}'.format(workbook_item.id, connection_item.id))
+
     # Download workbook contents with option of passing in filepath
     @api(version="2.0")
     @parameter_added_in(no_extract='2.5')
