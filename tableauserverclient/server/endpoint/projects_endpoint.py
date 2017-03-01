@@ -69,3 +69,22 @@ class Projects(Endpoint):
         logger.info('Added new permissions for project (ID: {0})'.format(
             new_permissions.grantee_id))
         return new_permissions
+
+    def add_default_permissions(self, project_item, permission_item, permission_type):
+        if not project_item.id:
+            error = "Project item missing ID."
+            raise MissingRequiredFieldError(error)
+        if not permission_item:
+            error = "Permission item missing."
+            raise MissingRequiredFieldError(error)
+        if not permission_type:
+            error = "Permission type missing. This is either `workbooks` or `datasources`"
+            raise MissingRequiredFieldError(error)
+        url = "{0}/{1}/default-permissions/{2}".format(self.baseurl, project_item.id,
+                                                       permission_type)
+        add_req = RequestFactory.Permission.add_req(permission_item)
+        server_response = self.put_request(url, add_req)
+        new_permissions = PermissionItem.from_response(server_response.content)[0]
+        logger.info('Added new default permissions for project (ID: {0})'.format(
+            new_permissions.grantee_id))
+        return new_permissions
