@@ -3,7 +3,8 @@ from .request_options import RequestOptions
 from .filter import Filter
 from .sort import Sort
 from .. import ConnectionItem, DatasourceItem,\
-    GroupItem, PaginationItem, ProjectItem, ScheduleItem, SiteItem, TableauAuth,\
+    GroupItem, PaginationItem, PermissionItem, ProjectItem, ScheduleItem, SiteItem, \
+    TableauAuth,\
     UserItem, ViewItem, WorkbookItem, NAMESPACE
 from .endpoint import Auth, Datasources, Endpoint, Groups, Projects, Schedules, \
     Sites, Users, Views, Workbooks, ServerResponseError, MissingRequiredFieldError
