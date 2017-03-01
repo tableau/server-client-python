@@ -114,7 +114,8 @@ class PermissionRequest(object):
 
         for group_capability in permission_item.group_capabilities:
             grantee_element = ET.SubElement(permissions_element, 'granteeCapabilities')
-            ET.SubElement(grantee_element, group_capability, id=group_capability.grantee_id)
+            grantee_capabilities_element = ET.SubElement(grantee_element, group_capability.Group)
+            grantee_capabilities_element.attrib['id'] = group_capability.grantee_id
             capabilities_element = ET.SubElement(grantee_element, 'capabilities')
             self._add_capability(capabilities_element, group_capability.allowed, group_capability.Allow)
             self._add_capability(capabilities_element, group_capability.denied, group_capability.Deny)
