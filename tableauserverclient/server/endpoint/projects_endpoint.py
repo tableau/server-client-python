@@ -1,3 +1,4 @@
+from tableauserverclient.models.permission_item import PermissionItem
 from .endpoint import Endpoint
 from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, ProjectItem, PaginationItem
@@ -19,6 +20,13 @@ class Projects(Endpoint):
         pagination_item = PaginationItem.from_response(server_response.content)
         all_project_items = ProjectItem.from_response(server_response.content)
         return all_project_items, pagination_item
+
+    def get_permissions(self, project_id, req_options=None):
+        logger.info('Querying project permissions on site')
+        url = "{0}/{1}/permissions".format(self.baseurl, project_id)
+        server_response = self.get_request(url, req_options)
+        all_project_items = PermissionItem.from_response(server_response.content)
+        return all_project_items
 
     def delete(self, project_id):
         if not project_id:
