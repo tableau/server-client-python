@@ -1,7 +1,6 @@
-from tableauserverclient.models.permission_item import PermissionItem
 from .endpoint import Endpoint
 from .exceptions import MissingRequiredFieldError
-from .. import RequestFactory, ProjectItem, PaginationItem
+from .. import RequestFactory, ProjectItem, PaginationItem, PermissionItem
 import logging
 import copy
 
@@ -55,3 +54,18 @@ class Projects(Endpoint):
         new_project = ProjectItem.from_response(server_response.content)[0]
         logger.info('Created new project (ID: {0})'.format(new_project.id))
         return new_project
+
+    def add_permissions(self, project_item, permission_item):
+        if not project_item.id:
+            error = "Project item missing ID."
+            raise MissingRequiredFieldError(error)
+        if not permission_item:
+            error = "Permission item missing."
+            raise MissingRequiredFieldError(error)
+        url = "{0}/{1}/permissions".format(self.baseurl, project_item.id)
+        add_req = RequestFactory.Permission.add_req(permission_item)
+        server_response = self.put_request(url, add_req)
+        new_permissions = PermissionItem.from_response(server_response.content)[0]
+        logger.info('Added new permissions for project (ID: {0})'.format(
+            new_permissions.grantee_id))
+        return new_permissions
