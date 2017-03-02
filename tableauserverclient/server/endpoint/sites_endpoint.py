@@ -34,6 +34,7 @@ class Sites(Endpoint):
         return SiteItem.from_response(server_response.content)[0]
 
     # Gets 1 site by name
+    @api(version="2.0")
     def get_by_name(self, site_name):
         if not site_name:
             error = "Site Name undefined."
