@@ -1,4 +1,4 @@
-from .endpoint import Endpoint
+from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, ProjectItem, PaginationItem, PermissionItem
 import logging
@@ -12,6 +12,7 @@ class Projects(Endpoint):
     def baseurl(self):
         return "{0}/sites/{1}/projects".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
+    @api(version="2.0")
     def get(self, req_options=None):
         logger.info('Querying all projects on site')
         url = self.baseurl
@@ -20,6 +21,7 @@ class Projects(Endpoint):
         all_project_items = ProjectItem.from_response(server_response.content)
         return all_project_items, pagination_item
 
+    @api(version="2.0")
     def get_permissions(self, project_id, req_options=None):
         logger.info('Querying project permissions on site')
         url = "{0}/{1}/permissions".format(self.baseurl, project_id)
@@ -27,6 +29,7 @@ class Projects(Endpoint):
         all_project_items = PermissionItem.from_response(server_response.content)
         return all_project_items
 
+    @api(version="2.0")
     def delete(self, project_id):
         if not project_id:
             error = "Project ID undefined."
@@ -35,6 +38,7 @@ class Projects(Endpoint):
         self.delete_request(url)
         logger.info('Deleted single project (ID: {0})'.format(project_id))
 
+    @api(version="2.0")
     def update(self, project_item):
         if not project_item.id:
             error = "Project item missing ID."
@@ -47,6 +51,7 @@ class Projects(Endpoint):
         updated_project = copy.copy(project_item)
         return updated_project._parse_common_tags(server_response.content)
 
+    @api(version="2.0")
     def create(self, project_item):
         url = self.baseurl
         create_req = RequestFactory.Project.create_req(project_item)
@@ -55,6 +60,7 @@ class Projects(Endpoint):
         logger.info('Created new project (ID: {0})'.format(new_project.id))
         return new_project
 
+    @api(version="2.0")
     def add_permissions(self, project_item, permission_item):
         if not project_item.id:
             error = "Project item missing ID."
@@ -70,6 +76,7 @@ class Projects(Endpoint):
             new_permissions.grantee_id))
         return new_permissions
 
+    @api(version="2.0")
     def add_default_permissions(self, project_item, permission_item, permission_type):
         if not project_item.id:
             error = "Project item missing ID."

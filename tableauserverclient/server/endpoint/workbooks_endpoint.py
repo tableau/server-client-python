@@ -1,4 +1,4 @@
-from .endpoint import Endpoint
+from .endpoint import Endpoint, api, parameter_added_in
 from .exceptions import MissingRequiredFieldError
 from .fileuploads_endpoint import Fileuploads
 from .. import RequestFactory, WorkbookItem, ConnectionItem, ViewItem, PaginationItem
@@ -35,6 +35,7 @@ class Workbooks(Endpoint):
         self.delete_request(url)
 
     # Get all workbooks on site
+    @api(version="2.0")
     def get(self, req_options=None):
         logger.info('Querying all workbooks on site')
         url = self.baseurl
@@ -44,6 +45,7 @@ class Workbooks(Endpoint):
         return all_workbook_items, pagination_item
 
     # Get 1 workbook
+    @api(version="2.0")
     def get_by_id(self, workbook_id):
         if not workbook_id:
             error = "Workbook ID undefined."
@@ -54,6 +56,7 @@ class Workbooks(Endpoint):
         return WorkbookItem.from_response(server_response.content)[0]
 
     # Delete 1 workbook by id
+    @api(version="2.0")
     def delete(self, workbook_id):
         if not workbook_id:
             error = "Workbook ID undefined."
@@ -63,6 +66,7 @@ class Workbooks(Endpoint):
         logger.info('Deleted single workbook (ID: {0})'.format(workbook_id))
 
     # Update workbook
+    @api(version="2.0")
     def update(self, workbook_item):
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
@@ -87,12 +91,24 @@ class Workbooks(Endpoint):
         updated_workbook = copy.copy(workbook_item)
         return updated_workbook._parse_common_tags(server_response.content)
 
+    # Update workbook_connection
+    def update_conn(self, workbook_item, connection_item):
+        url = "{0}/{1}/connections/{2}".format(self.baseurl, workbook_item.id, connection_item.id)
+        update_req = RequestFactory.WorkbookConnection.update_req(connection_item)
+        server_response = self.put_request(url, update_req)
+        logger.info('Updated workbook item (ID: {0} & connection item {1}'.format(workbook_item.id, connection_item.id))
+
     # Download workbook contents with option of passing in filepath
-    def download(self, workbook_id, filepath=None):
+    @api(version="2.0")
+    @parameter_added_in(no_extract='2.5')
+    def download(self, workbook_id, filepath=None, no_extract=False):
         if not workbook_id:
             error = "Workbook ID undefined."
             raise ValueError(error)
         url = "{0}/{1}/content".format(self.baseurl, workbook_id)
+
+        if no_extract:
+            url += "?includeExtract=False"
 
         with closing(self.get_request(url, parameters={"stream": True})) as server_response:
             _, params = cgi.parse_header(server_response.headers['Content-Disposition'])
@@ -109,6 +125,7 @@ class Workbooks(Endpoint):
         return os.path.abspath(filepath)
 
     # Get all views of workbook
+    @api(version="2.0")
     def populate_views(self, workbook_item):
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
@@ -119,6 +136,7 @@ class Workbooks(Endpoint):
         logger.info('Populated views for workbook (ID: {0}'.format(workbook_item.id))
 
     # Get all connections of workbook
+    @api(version="2.0")
     def populate_connections(self, workbook_item):
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
@@ -129,6 +147,7 @@ class Workbooks(Endpoint):
         logger.info('Populated connections for workbook (ID: {0})'.format(workbook_item.id))
 
     # Get preview image of workbook
+    @api(version="2.0")
     def populate_preview_image(self, workbook_item):
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
@@ -139,6 +158,7 @@ class Workbooks(Endpoint):
         logger.info('Populated preview image for workbook (ID: {0})'.format(workbook_item.id))
 
     # Publishes workbook. Chunking method if file over 64MB
+    @api(version="2.0")
     def publish(self, workbook_item, file_path, mode, connection_credentials=None):
         if not os.path.isfile(file_path):
             error = "File path does not lead to an existing file."

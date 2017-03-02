@@ -1,5 +1,6 @@
 ---
 layout: home
+indexed_by_search: false
 ---
 
 <header class="jumbotron hero-spacer text-center">
