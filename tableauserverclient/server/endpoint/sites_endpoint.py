@@ -33,6 +33,17 @@ class Sites(Endpoint):
         server_response = self.get_request(url)
         return SiteItem.from_response(server_response.content)[0]
 
+    # Gets 1 site by name
+    @api(version="2.0")
+    def get_by_name(self, site_name):
+        if not site_name:
+            error = "Site Name undefined."
+            raise ValueError(error)
+        logger.info('Querying single site (Name: {0})'.format(site_name))
+        url = "{0}/{1}?key=name".format(self.baseurl, site_name)
+        server_response = self.get_request(url)
+        return SiteItem.from_response(server_response.content)[0]
+
     # Update site
     @api(version="2.0")
     def update(self, site_item):
