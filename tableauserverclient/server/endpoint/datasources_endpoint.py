@@ -66,7 +66,7 @@ class Datasources(Endpoint):
     # Download 1 datasource by id
     @api(version="2.0")
     @parameter_added_in(no_extract='2.5')
-    def download(self, datasource_id, filepath=None, no_extract=False):
+    def _download(self, datasource_id, no_extract=False):
         if not datasource_id:
             error = "Datasource ID undefined."
             raise ValueError(error)
@@ -75,20 +75,28 @@ class Datasources(Endpoint):
         if no_extract:
             url += "?includeExtract=False"
 
-        with closing(self.get_request(url, parameters={'stream': True})) as server_response:
-            _, params = cgi.parse_header(server_response.headers['Content-Disposition'])
-            filename = os.path.basename(params['filename'])
-            if filepath is None:
-                filepath = filename
-            elif os.path.isdir(filepath):
-                filepath = os.path.join(filepath, filename)
+        return self.get_request(url, parameters={'stream': True})
+
+    # Download datasource with option of passing in filepath
+    def download_to_file(self, datasource_id, filepath=None, no_extract=False):
+        server_response = self._download(datasource_id, no_extract)
+        _, params = cgi.parse_header(server_response.headers['Content-Disposition'])
+        filename = os.path.basename(params['filename'])
+        if filepath is None:
+            filepath = filename
+        elif os.path.isdir(filepath):
+            filepath = os.path.join(filepath, filename)
 
             with open(filepath, 'wb') as f:
                 for chunk in server_response.iter_content(1024):  # 1KB
                     f.write(chunk)
-
         logger.info('Downloaded datasource to {0} (ID: {1})'.format(filepath, datasource_id))
         return os.path.abspath(filepath)
+
+    # Download datasource and return file contents directly
+    def download_to_memory(self, datasource_id, no_extract=False):
+        server_response = self._download(datasource_id, no_extract)
+        return server_response.content
 
     # Update datasource
     @api(version="2.0")
