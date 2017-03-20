@@ -1,6 +1,6 @@
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
-from .. import RequestFactory, ProjectItem, PaginationItem
+from .. import RequestFactory, ProjectItem, PaginationItem, PermissionItem
 import logging
 import copy
 
@@ -20,6 +20,14 @@ class Projects(Endpoint):
         pagination_item = PaginationItem.from_response(server_response.content)
         all_project_items = ProjectItem.from_response(server_response.content)
         return all_project_items, pagination_item
+
+    @api(version="2.0")
+    def get_permissions(self, project_id, req_options=None):
+        logger.info('Querying project permissions on site')
+        url = "{0}/{1}/permissions".format(self.baseurl, project_id)
+        server_response = self.get_request(url, req_options)
+        all_project_items = PermissionItem.from_response(server_response.content)
+        return all_project_items
 
     @api(version="2.0")
     def delete(self, project_id):
@@ -51,3 +59,39 @@ class Projects(Endpoint):
         new_project = ProjectItem.from_response(server_response.content)[0]
         logger.info('Created new project (ID: {0})'.format(new_project.id))
         return new_project
+
+    @api(version="2.0")
+    def add_permissions(self, project_item, permission_item):
+        if not project_item.id:
+            error = "Project item missing ID."
+            raise MissingRequiredFieldError(error)
+        if not permission_item:
+            error = "Permission item missing."
+            raise MissingRequiredFieldError(error)
+        url = "{0}/{1}/permissions".format(self.baseurl, project_item.id)
+        add_req = RequestFactory.Permission.add_req(permission_item)
+        server_response = self.put_request(url, add_req)
+        new_permissions = PermissionItem.from_response(server_response.content)[0]
+        logger.info('Added new permissions for project (ID: {0})'.format(
+            new_permissions.grantee_id))
+        return new_permissions
+
+    @api(version="2.0")
+    def add_default_permissions(self, project_item, permission_item, permission_type):
+        if not project_item.id:
+            error = "Project item missing ID."
+            raise MissingRequiredFieldError(error)
+        if not permission_item:
+            error = "Permission item missing."
+            raise MissingRequiredFieldError(error)
+        if not permission_type:
+            error = "Permission type missing. This is either `workbooks` or `datasources`"
+            raise MissingRequiredFieldError(error)
+        url = "{0}/{1}/default-permissions/{2}".format(self.baseurl, project_item.id,
+                                                       permission_type)
+        add_req = RequestFactory.Permission.add_req(permission_item)
+        server_response = self.put_request(url, add_req)
+        new_permissions = PermissionItem.from_response(server_response.content)[0]
+        logger.info('Added new default permissions for project (ID: {0})'.format(
+            new_permissions.grantee_id))
+        return new_permissions
