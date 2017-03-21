@@ -155,3 +155,29 @@ class Datasources(Endpoint):
         new_datasource = DatasourceItem.from_response(server_response.content)[0]
         logger.info('Published {0} (ID: {1})'.format(filename, new_datasource.id))
         return new_datasource
+
+    @api(version="2.0")
+    def publish_from_memory(self, datasource_item, datasource_string, mode, connection_credentials=None):
+        if not hasattr(self.parent_srv.PublishMode, mode):
+            error = 'Invalid mode defined.'
+            raise ValueError(error)
+
+        # If name is not defined, grab the name from the file to publish
+        if not datasource_item.name:
+            raise ValueError('Please set datasource_item.name')
+
+        # Construct the url with the defined mode
+        url = "{0}?datasourceType=tds".format(self.baseurl)
+        if mode == self.parent_srv.PublishMode.Overwrite or mode == self.parent_srv.PublishMode.Append:
+            url += '&{0}=true'.format(mode.lower())
+
+        filename = datasource_item.name + '.tds'
+        logger.info('Publishing {0} to server'.format(datasource_item.name))
+        xml_request, content_type = RequestFactory.Datasource.publish_req(datasource_item,
+                                                                          filename,
+                                                                          datasource_string,
+                                                                          connection_credentials)
+        server_response = self.post_request(url, xml_request, content_type)
+        new_datasource = DatasourceItem.from_response(server_response.content)[0]
+        logger.info('Published {0} (ID: {1})'.format(filename, new_datasource.id))
+        return new_datasource
