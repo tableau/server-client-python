@@ -30,6 +30,17 @@ class Projects(Endpoint):
         return all_project_items
 
     @api(version="2.0")
+    def get_default_permissions(self, project_id, permission_type, req_options=None):
+        if not permission_type:
+            raise MissingRequiredFieldError(
+                "Permission type missing. This is either `workbooks` or `datasources`")
+        logger.info('Querying default project {} permissions on site'.format(permission_type))
+        url = "{0}/{1}/default-permissions/{2}/".format(self.baseurl, project_id, permission_type)
+        server_response = self.get_request(url, req_options)
+        all_project_items = PermissionItem.from_response(server_response.content)
+        return all_project_items
+
+    @api(version="2.0")
     def delete(self, project_id):
         if not project_id:
             error = "Project ID undefined."
