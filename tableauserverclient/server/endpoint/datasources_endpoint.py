@@ -78,7 +78,7 @@ class Datasources(Endpoint):
         return self.get_request(url, parameters={'stream': True})
 
     # Download datasource with option of passing in filepath
-    def download_to_file(self, datasource_id, filepath=None, no_extract=False):
+    def download(self, datasource_id, filepath=None, no_extract=False):
         server_response = self._download(datasource_id, no_extract)
         _, params = cgi.parse_header(server_response.headers['Content-Disposition'])
         filename = os.path.basename(params['filename'])

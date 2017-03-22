@@ -113,7 +113,7 @@ class Workbooks(Endpoint):
         return self.get_request(url, parameters={"stream": True})
 
     # Download workbook with option of passing in filepath
-    def download_to_file(self, workbook_id, filepath=None, no_extract=False):
+    def download(self, workbook_id, filepath=None, no_extract=False):
         server_response = self._download(workbook_id, no_extract)
         _, params = cgi.parse_header(server_response.headers['Content-Disposition'])
         filename = os.path.basename(params['filename'])
