@@ -98,10 +98,10 @@ class Workbooks(Endpoint):
         server_response = self.put_request(url, update_req)
         logger.info('Updated workbook item (ID: {0} & connection item {1}'.format(workbook_item.id, connection_item.id))
 
-    # Download workbook contents with option of passing in filepath
+    # Download workbook, and return response object
     @api(version="2.0")
     @parameter_added_in(no_extract='2.5')
-    def download(self, workbook_id, filepath=None, no_extract=False):
+    def _download(self, workbook_id, no_extract=False):
         if not workbook_id:
             error = "Workbook ID undefined."
             raise ValueError(error)
@@ -110,19 +110,28 @@ class Workbooks(Endpoint):
         if no_extract:
             url += "?includeExtract=False"
 
-        with closing(self.get_request(url, parameters={"stream": True})) as server_response:
-            _, params = cgi.parse_header(server_response.headers['Content-Disposition'])
-            filename = os.path.basename(params['filename'])
-            if filepath is None:
-                filepath = filename
-            elif os.path.isdir(filepath):
-                filepath = os.path.join(filepath, filename)
+        return self.get_request(url, parameters={"stream": True})
+
+    # Download workbook with option of passing in filepath
+    def download(self, workbook_id, filepath=None, no_extract=False):
+        server_response = self._download(workbook_id, no_extract)
+        _, params = cgi.parse_header(server_response.headers['Content-Disposition'])
+        filename = os.path.basename(params['filename'])
+        if filepath is None:
+            filepath = filename
+        elif os.path.isdir(filepath):
+            filepath = os.path.join(filepath, filename)
 
             with open(filepath, 'wb') as f:
                 for chunk in server_response.iter_content(1024):  # 1KB
                     f.write(chunk)
         logger.info('Downloaded workbook to {0} (ID: {1})'.format(filepath, workbook_id))
         return os.path.abspath(filepath)
+
+    # Download workbook and return file contents directly
+    def download_to_memory(self, workbook_id, no_extract=False):
+        server_response = self._download(workbook_id, no_extract)
+        return server_response.content
 
     # Get all views of workbook
     @api(version="2.0")
@@ -200,6 +209,35 @@ class Workbooks(Endpoint):
                                                                             filename,
                                                                             file_contents,
                                                                             connection_credentials)
+        server_response = self.post_request(url, xml_request, content_type)
+        new_workbook = WorkbookItem.from_response(server_response.content)[0]
+        logger.info('Published {0} (ID: {1})'.format(filename, new_workbook.id))
+        return new_workbook
+
+    @api(version="2.0")
+    def publish_from_memory(self, workbook_item, workbook_string, mode, connection_credentials=None):
+        if not hasattr(self.parent_srv.PublishMode, mode):
+            error = 'Invalid mode defined.'
+            raise ValueError(error)
+
+        # If name is not defined, grab the name from the file to publish
+        if not workbook_item.name:
+            raise ValueError('Please set workbook_item.name')
+
+        # Construct the url with the defined mode
+        url = "{0}?workbookType=twb".format(self.baseurl)
+        if mode == self.parent_srv.PublishMode.Overwrite:
+            url += '&{0}=true'.format(mode.lower())
+        elif mode == self.parent_srv.PublishMode.Append:
+            error = 'Workbooks cannot be appended.'
+            raise ValueError(error)
+
+        filename = workbook_item.name + '.twb'
+        logger.info('Publishing {0} to server'.format(workbook_item.name))
+        xml_request, content_type = RequestFactory.Workbook.publish_req(workbook_item,
+                                                                        filename,
+                                                                        workbook_string,
+                                                                        connection_credentials)
         server_response = self.post_request(url, xml_request, content_type)
         new_workbook = WorkbookItem.from_response(server_response.content)[0]
         logger.info('Published {0} (ID: {1})'.format(filename, new_workbook.id))

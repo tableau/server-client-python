@@ -66,7 +66,7 @@ class Datasources(Endpoint):
     # Download 1 datasource by id
     @api(version="2.0")
     @parameter_added_in(no_extract='2.5')
-    def download(self, datasource_id, filepath=None, no_extract=False):
+    def _download(self, datasource_id, no_extract=False):
         if not datasource_id:
             error = "Datasource ID undefined."
             raise ValueError(error)
@@ -75,20 +75,28 @@ class Datasources(Endpoint):
         if no_extract:
             url += "?includeExtract=False"
 
-        with closing(self.get_request(url, parameters={'stream': True})) as server_response:
-            _, params = cgi.parse_header(server_response.headers['Content-Disposition'])
-            filename = os.path.basename(params['filename'])
-            if filepath is None:
-                filepath = filename
-            elif os.path.isdir(filepath):
-                filepath = os.path.join(filepath, filename)
+        return self.get_request(url, parameters={'stream': True})
+
+    # Download datasource with option of passing in filepath
+    def download(self, datasource_id, filepath=None, no_extract=False):
+        server_response = self._download(datasource_id, no_extract)
+        _, params = cgi.parse_header(server_response.headers['Content-Disposition'])
+        filename = os.path.basename(params['filename'])
+        if filepath is None:
+            filepath = filename
+        elif os.path.isdir(filepath):
+            filepath = os.path.join(filepath, filename)
 
             with open(filepath, 'wb') as f:
                 for chunk in server_response.iter_content(1024):  # 1KB
                     f.write(chunk)
-
         logger.info('Downloaded datasource to {0} (ID: {1})'.format(filepath, datasource_id))
         return os.path.abspath(filepath)
+
+    # Download datasource and return file contents directly
+    def download_to_memory(self, datasource_id, no_extract=False):
+        server_response = self._download(datasource_id, no_extract)
+        return server_response.content
 
     # Update datasource
     @api(version="2.0")
@@ -143,6 +151,32 @@ class Datasources(Endpoint):
                                                                               filename,
                                                                               file_contents,
                                                                               connection_credentials)
+        server_response = self.post_request(url, xml_request, content_type)
+        new_datasource = DatasourceItem.from_response(server_response.content)[0]
+        logger.info('Published {0} (ID: {1})'.format(filename, new_datasource.id))
+        return new_datasource
+
+    @api(version="2.0")
+    def publish_from_memory(self, datasource_item, datasource_string, mode, connection_credentials=None):
+        if not hasattr(self.parent_srv.PublishMode, mode):
+            error = 'Invalid mode defined.'
+            raise ValueError(error)
+
+        # If name is not defined, grab the name from the file to publish
+        if not datasource_item.name:
+            raise ValueError('Please set datasource_item.name')
+
+        # Construct the url with the defined mode
+        url = "{0}?datasourceType=tds".format(self.baseurl)
+        if mode == self.parent_srv.PublishMode.Overwrite or mode == self.parent_srv.PublishMode.Append:
+            url += '&{0}=true'.format(mode.lower())
+
+        filename = datasource_item.name + '.tds'
+        logger.info('Publishing {0} to server'.format(datasource_item.name))
+        xml_request, content_type = RequestFactory.Datasource.publish_req(datasource_item,
+                                                                          filename,
+                                                                          datasource_string,
+                                                                          connection_credentials)
         server_response = self.post_request(url, xml_request, content_type)
         new_datasource = DatasourceItem.from_response(server_response.content)[0]
         logger.info('Published {0} (ID: {1})'.format(filename, new_datasource.id))
