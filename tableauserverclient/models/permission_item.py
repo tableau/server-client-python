@@ -4,33 +4,31 @@ from .property_decorators import property_not_nullable
 from .. import NAMESPACE
 
 
-class CapabilityItem:
-    Group = 'group'
-    User = 'user'
+class CapabilityItem(object):
+    Allow = "Allow"
+    Deny = "Deny"
 
-    AddComment = "AddComment"  # Add Comment
+    AddComment = "AddComment"
     ChangeHierarchy = "ChangeHierarchy"
-    ChangePermissions = "ChangePermissions"  # Set Permissions
+    ChangePermissions = "ChangePermissions"
     Connect = "Connect"
     Delete = "Delete"
     ExportData = "ExportData"
     ExportImage = "ExportImage"
-    ExportXml = "ExportXml"  # Download
+    ExportXml = "ExportXml"
     Filter = "Filter"
-    ProjectLeader = "ProjectLeader"  # Project Leader
-    Read = "Read"  # View
-    ShareView = "ShareView"  # Share Customized
-    ViewComments = "ViewComments"  # View Comments
-    ViewUnderlyingData = "ViewUnderlyingData"  # View Underlying Data
-    WebAuthoring = "WebAuthoring"  # Web Edit
-    Write = "Write"  # Save
+    ProjectLeader = "ProjectLeader"
+    Read = "Read"
+    ShareView = "ShareView"
+    ViewComments = "ViewComments"
+    ViewUnderlyingData = "ViewUnderlyingData"
+    WebAuthoring = "WebAuthoring"
+    Write = "Write"
 
-    def __init__(self, grantee_id):
-        self.Allow = "Allow"
-        self.Deny = "Deny"
-        self._allowed = list()
-        self._denied = list()
-        self.grantee_id = grantee_id
+    def __init__(self):
+
+        self._allowed = set()
+        self._denied = set()
 
     @property
     def allowed(self):
@@ -38,7 +36,7 @@ class CapabilityItem:
 
     @allowed.setter
     def allowed(self, value):
-        self._allowed.extend(value)
+        self._allowed.add(value)
 
     @property
     def denied(self):
@@ -46,7 +44,7 @@ class CapabilityItem:
 
     @denied.setter
     def denied(self, value):
-        self._denied.extend(value)
+        self._denied.add(value)
 
 
 class PermissionItem(object):
@@ -56,7 +54,6 @@ class PermissionItem(object):
     def __init__(self):
         self._grantee_type = None
         self._grantee_id = None
-        self.permissions = {}
         self._user_capabilities = set()
         self._group_capabilities = set()
 
@@ -102,19 +99,24 @@ class PermissionItem(object):
         for grantee_xml in all_grantee_xml:
             permission_item = cls()
             all_capability_xml = grantee_xml.findall('.//t:capability', namespaces=NAMESPACE)
+            cap_items = CapabilityItem()
             for capability_xml in all_capability_xml:
                 name = capability_xml.get('name', None)
                 mode = capability_xml.get('mode', None)
-                permission_item.permissions[name] = mode
-
+                if mode == CapabilityItem.Allow:
+                    cap_items.allowed = name
+                elif mode == CapabilityItem.Deny:
+                    cap_items.denied = name
             group_elem = grantee_xml.find('.//t:group', namespaces=NAMESPACE)
             user_elem = grantee_xml.find('.//t:user', namespaces=NAMESPACE)
             if group_elem is not None:
                 permission_item._grantee_id = group_elem.get('id', None)
                 permission_item._grantee_type = permission_item.Group
+                permission_item.group_capabilities = cap_items
             elif user_elem is not None:
                 permission_item._grantee_id = user_elem.get('id', None)
                 permission_item._grantee_type = permission_item.User
+                permission_item.user_capabilities = cap_items
             all_permission_items.append(permission_item)
         return all_permission_items
 
