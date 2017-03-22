@@ -26,7 +26,6 @@ class CapabilityItem(object):
     Write = "Write"
 
     def __init__(self):
-
         self._allowed = set()
         self._denied = set()
 
