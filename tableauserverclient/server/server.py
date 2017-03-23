@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 
 from .exceptions import NotSignedInError
 from .endpoint import Sites, Views, Users, Groups, Workbooks, Datasources, Projects, Auth, \
-    Schedules, ServerInfo, ServerInfoEndpointNotFoundError
+    Schedules, ServerInfo, Tasks, ServerInfoEndpointNotFoundError
 
 import requests
 
@@ -40,6 +40,7 @@ class Server(object):
         self.projects = Projects(self)
         self.schedules = Schedules(self)
         self.server_info = ServerInfo(self)
+        self.tasks = Tasks(self)
 
     def add_http_options(self, options_dict):
         self._http_options.update(options_dict)
