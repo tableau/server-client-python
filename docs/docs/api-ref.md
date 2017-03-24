@@ -293,7 +293,7 @@ workbook_obj.connections
 ## Views
 
 Using the TSC library, you can get all the views on a site, or get the views for a workbook, or populate a view with preview images. 
-The view resources for Tableau Server are defined in the ViewItem class. The class corresponds to the view resources you can access using the Tableau Server REST API, for example, information about the name of the view, its id, and the id of the workbook it is associated with. The view methods are based upon the endpoints for views in the REST API and operate on the `ViewItem` class. 
+The view resources for Tableau Server are defined in the ViewItem class. The class corresponds to the view resources you can access using the Tableau Server REST API, for example, you can find the name of the view, its id, and the id of the workbook it is associated with. The view methods are based upon the endpoints for views in the REST API and operate on the `ViewItem` class. 
 
 
 <br>
@@ -409,7 +409,7 @@ See [ViewItem class](#viewitem-class)
 ## Data sources
 
 Using the TSC library, you can get all the data sources on a site, or get the data sources for a specific project. 
-The data source resources for Tableau Server are defined in the DatasourceItem class. The class corresponds to the data source resources you can access using the Tableau Server REST API, for example, information about the name of the data source, its type, and connections, and the project it is associated with. The data source methods are based upon the endpoints for data sources in the REST API and operate on the DatasourceItem class.  
+The data source resources for Tableau Server are defined in the `DatasourceItem` class. The class corresponds to the data source resources you can access using the Tableau Server REST API. For example, you can gather information about the name of the data source, its type, and connections, and the project it is associated with. The data source methods are based upon the endpoints for data sources in the REST API and operate on the `DatasourceItem` class.  
 
 <br>
 
@@ -772,7 +772,78 @@ Source files: server/endpoint/datasources_endpoint.py, models/datasource_item.py
 
 ## Users
 
-Source files: server/endpoint/users_endpoint.py, models/user_item.py
+Using the TSC library, you can get information about all the users on a site, and you can add or remove users, or update user information.
+
+The user resources for Tableau Server are defined in the `UserItem` class. The class corresponds to the user resources you can access using the Tableau Server REST API. The user methods are based upon the endpoints for users in the REST API and operate on the `UserItem` class.  
+
+
+### UserItem class
+
+```py
+UserItem(name, site_role, auth_setting=None)
+```
+
+**Attributes**
+
+`auth_setting` : This attribute is only returned for Tableau Online.
+`domain_name`  :  
+`external_auth_user_id` : 
+`id` :
+`last_login` : 
+`workbooks` :  The workbooks 
+`email` :  The email address of the user.
+`fullname` : The full name of the user.
+`name` :   The name of the user. This attribute is required when you are creating a `UserItem` instance.  
+`site_role` :  The role the user has on the site. This attribute is required with you are creating a `UserItem` instance. The `site_role` can be one of the following: `Interactor`, `Publisher`, `ServerAdministrator`, `SiteAdministrator`, `Unlicensed`, `UnlicensedWithPublish`, `Viewer`, `ViewerWithPublish`, `Guest`
+
+
+Source file: models/user_item.py
+
+<br> 
+<br>
+
+
+###  User Methods
+
+The Tableau Server Client provides several methods for interacting with user resources, or endpoints. These methods correspond to endpoints in the Tableau Server REST API.
+
+<br> 
+<br>
+
+#### add()
+
+```py
+users.get(req_options=None)
+```
+
+Returns all the users for the site. 
+
+**Parameters**
+
+`req_option` :  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific user, you could specify the name of the user or the user's id. 
+
+
+**Returns**
+
+Returns a list of `UserItem` objects and a `PaginationItem`  object.  Use these values to iterate through the results. 
+
+
+
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
+server = TSC.Server('http://SERVERURL')
+
+with server.auth.sign_in(tableau_auth):
+    all_users, pagination_item = server.users.get()
+    print("\nThere are {} user on site: ".format(pagination_item.total_available))
+    print([user.name for user in all_users])
+````
+
+Source file: server/endpoint/users_endpoint.py
 
 
 <br>   
