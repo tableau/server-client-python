@@ -21,12 +21,12 @@ class TaskItem(object):
         all_tasks_xml = parsed_response.findall(
             './/t:task/t:extractRefresh', namespaces=NAMESPACE)
 
-        all_tasks = (TaskItem._parse_task(x) for x in all_tasks_xml)
+        all_tasks = (TaskItem._parse_element(x) for x in all_tasks_xml)
 
         return list(all_tasks)
 
     @classmethod
-    def _parse_task(cls, element):
+    def _parse_element(cls, element):
         schedule = None
         schedule_element = element.find('.//t:schedule', namespaces=NAMESPACE)
         if schedule_element is not None:

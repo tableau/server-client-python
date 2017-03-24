@@ -34,7 +34,6 @@ class ScheduleItem(object):
         self.schedule_type = schedule_type
 
     def __repr__(self):
-        print(self.__dict__)
         return "<Schedule#{_id} \"{_name}\" {interval_item}>".format(**self.__dict__)
 
     @property
