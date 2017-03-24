@@ -1,5 +1,6 @@
 from ..datetime_helpers import format_datetime
 import xml.etree.ElementTree as ET
+from functools import wraps
 
 from requests.packages.urllib3.fields import RequestField
 from requests.packages.urllib3.filepost import encode_multipart_formdata
@@ -14,6 +15,14 @@ def _add_multipart(parts):
     xml_request, content_type = encode_multipart_formdata(mime_multipart_parts)
     content_type = ''.join(('multipart/mixed',) + content_type.partition(';')[1:])
     return xml_request, content_type
+
+
+def _tsrequest_wrapped(func):
+    def wrapper(self, *args, **kwargs):
+        xml_request = ET.Element('tsRequest')
+        func(xml_request, *args, **kwargs)
+        return ET.tostring(xml_request)
+    return wrapper
 
 
 class AuthRequest(object):
@@ -331,6 +340,13 @@ class WorkbookConnection(object):
         return ET.tostring(xml_request)
 
 
+class TaskRequest(object):
+    @_tsrequest_wrapped
+    def run_req(xml_request, task_item):
+        # Send an empty tsRequest
+        pass
+
+
 class RequestFactory(object):
     Auth = AuthRequest()
     Datasource = DatasourceRequest()
@@ -341,6 +357,7 @@ class RequestFactory(object):
     Schedule = ScheduleRequest()
     Site = SiteRequest()
     Tag = TagRequest()
+    Task = TaskRequest()
     User = UserRequest()
     Workbook = WorkbookRequest()
     WorkbookConnection = WorkbookConnection()
