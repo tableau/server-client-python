@@ -287,11 +287,16 @@ Returns a list of connections for a workbook. Before you get connections, you mu
 workbook_obj.connections
 ```
 
-
+<br>   
+<br>
 
 ## Views
-Get all the views on a site, or get the views for a specific workbook, or populate the preview image for a view.
-The methods are based upon the ViewItem class. 
+
+Using the TSC library, you can get all the views on a site, or get the views for a workbook, or populate a view with preview images. 
+The view resources for Tableau Server are defined in the ViewItem class. The class corresponds to the view resources you can access using the Tableau Server REST API, for example, information about the name of the view, its id, and the id of the workbook it is associated with. The view methods are based upon the endpoints for views in the REST API and operate on the `ViewItem` class. 
+
+
+<br>
 
 ### ViewItem class
 
@@ -320,14 +325,18 @@ Source file: models/view_item.py
 `workbook_id`  :  The id of the workbook associated with the view. 
 
 
-
+<br>   
+<br>
 
 
 ### View methods
 
-The Tableau Server Client provides two methods for interacting with view resources, or endpoints. These methods correspond to the [Query Views for Site](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Views_for_Site%3FTocPath%3DAPI%2520Reference%7C_____64) and [Query View Preview Image](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Workbook_Preview_Image%3FTocPath%3DAPI%2520Reference%7C_____69) endpoints in the Tableau Server REST API. 
+The Tableau Server Client provides two methods for interacting with view resources, or endpoints. These methods correspond to the endpoints for views in the Tableau Server REST API. 
 
 Source file: server/endpoint/views_endpoint.py
+
+<br>   
+<br>
 
 #### get()
 ```
@@ -335,6 +344,9 @@ Views.get(req_option=None)
 ```
 
 Returns the list of views items for a site. 
+
+
+REST API: [Query Views for Site](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Views_for_Site%3FTocPath%3DAPI%2520Reference%7C_____64){:target="_blank"}
 
 **Parameters**
 
@@ -360,6 +372,10 @@ with server.auth.sign_in(tableau_auth):
 
 See [ViewItem class](#viewitem-class)
 
+
+<br>   
+<br>
+
 #### populate_preview_image(*view_item*)
 
 ```py
@@ -371,6 +387,7 @@ Populates a preview image for a given view.
 
 This method gets the preview image (thumbnail) for the specified view item. The method uses the `view.id` and `workbook.id` to identify the preview image. The method populates the `view.preview_image` for the view. 
 
+REST API: [Query View Preview Image](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Workbook_Preview_Image%3FTocPath%3DAPI%2520Reference%7C_____69){:target="_blank"}
 
 **Parameters** 
 
@@ -386,18 +403,23 @@ None. The preview image is added to the view.
 
 See [ViewItem class](#viewitem-class)
 
-   
+<br>   
+<br>
+
 ## Data sources
 
 Using the TSC library, you can get all the data sources on a site, or get the data sources for a specific project. 
 The data source resources for Tableau Server are defined in the DatasourceItem class. The class corresponds to the data source resources you can access using the Tableau Server REST API, for example, information about the name of the data source, its type, and connections, and the project it is associated with. The data source methods are based upon the endpoints for data sources in the REST API and operate on the DatasourceItem class.  
 
+<br>
+
 ### DatasourceItem class
 
 ```py
-class DatasourceItem(object)
+DatasourceItem(project_id, name=None)
 ```
-The `DatasourceItem` represents the data source resources on Tableau Server. This is the information returned in the response to a REST API request for data sources. 
+
+The `DatasourceItem` represents the data source resources on Tableau Server. This is the information that can be sent or returned in the response to an REST API request for data sources.  When you create a new `DatasourceItem` instance, you must specify the `project_id` that the data source is associated with.
 
 **Attributes**
 
@@ -411,13 +433,27 @@ The `DatasourceItem` represents the data source resources on Tableau Server. Thi
 
 `id` : The identifier for the data source. You need this value to query a specific data source or to delete a data source with the `get_by_id` and `delete` methods. 
 
-`project_id` :  The identifer of the project associated with the data source. 
+`name`  : The name of the data source. If not specified, the name of the published data source file is used. 
+
+`project_id` :  The identifer of the project associated with the data source. When you must provide this identifier when create an instance of a `DatasourceItem`
 
 `project_name` :  The name of the project associated with the data source. 
 
 `tags` :  The tags that have been added to the data source. 
 
 `updated_at` :  The date and time when the data source was last updated. 
+
+
+**Example**
+
+```py
+    import tableauserverclient as TSC
+
+    # Create new datasource_item with project id '3a8b6148-493c-11e6-a621-6f3499394a39'
+
+    new_datasource = TSC.DatasourceItem('3a8b6148-493c-11e6-a621-6f3499394a39')
+```
+
 
 Source file:  models/datasource_item.py
 
@@ -427,6 +463,8 @@ Source file:  models/datasource_item.py
 ### Datasource methods
 
 The Tableau Server Client provides several methods for interacting with data source resources, or endpoints. These methods correspond to endpoints in the Tableau Server REST API. 
+
+Source file: server/endpoint/datasources_endpoint.py
 
 <br> 
 <br>
@@ -497,7 +535,7 @@ Returns all the data sources for the site.
 
 To get the connection information for each data source, you must first populate the `DatasourceItem` with connection information using the [populate_connections(*datasource_item*)](#populate-connections-datasource) method. For more information, see [Populate Connections and Views](populate-connections-views#populate-connections-for-data-sources)
 
-REST API: [Query Datasources](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Datasources%3FTocPath%3DAPI%2520Reference%7C_____49)
+REST API: [Query Datasources](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Datasources%3FTocPath%3DAPI%2520Reference%7C_____49){:target="_blank"}
 
 **Parameters**
 
@@ -538,7 +576,7 @@ datasources.get_by_id(datasource_id)
 
 Returns the specified data source item. 
 
-REST API: [Query Datasource](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Datasource%3FTocPath%3DAPI%2520Reference%7C_____46)
+REST API: [Query Datasource](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Datasource%3FTocPath%3DAPI%2520Reference%7C_____46){:target="_blank"}
 
 
 **Parameters**
@@ -572,6 +610,10 @@ print(datasource.name)
 
 #### populate_connections(*datasource_item*)
 
+```py
+datasources.populate_connections(datasource_item)
+```
+
 Populates the connections for the specified data source.
 
 
@@ -579,7 +621,7 @@ Populates the connections for the specified data source.
 
 This method retrieves the connection information for the specified data source. The REST API is designed to return only the information you ask for explicitly. When you query for all the data sources, the connection information is not included. Use this method to retrieve the connections. The method adds the list of data connections to the data source item (`datasource_item.connections`) populates the data source with the list of `ConnectionItem`.  
 
-REST API:  [Query Datasource Connections](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Datasource_Connections%3FTocPath%3DAPI%2520Reference%7C_____47)
+REST API:  [Query Datasource Connections](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Datasource_Connections%3FTocPath%3DAPI%2520Reference%7C_____47){:target="_blank"}
 
 **Parameters**
 
@@ -612,15 +654,118 @@ print([connection.datasource_name for connection in datasource.connections])
 <br>   
 <br>  
 
-#### publish(*datasource_item*)
+#### publish(*datasource_item*, *file_path*, *mode*, *connection_credentials=None*)
 
+```py
+datasources.publish(datasource_item, file_path, mode, connection_credentials=None)
+```
+
+Publishes a data source to a server, or appends data to an existing data source. 
+
+This method checks the size of the data source and automatically determines whether the publish the data source in multiple parts or in one opeation.  
+
+REST API: [Publish Datasource](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Publish_Datasource%3FTocPath%3DAPI%2520Reference%7C_____44){:target="_blank"}
+
+**Parameters**
+
+`datasource_item`  :  The `datasource_item` specifies the new data source you are adding, or the data source you are appending to. If you are adding a new data source, you need to create a new `datasource_item` with a `project_id` of an existing project. The name of the data source will be the name of the file, unless you also specify a name for the new data source when you create the instance. See [DatasourceItem](#datasourceitem-class).
+
+`file_path`  :  The path and name of the data source to publish. 
+
+`mode`     :  Specifies whether you are publishing a new data source (`CreateNew`), overwriting an existing data source (`Overwrite`), or appending data to a data source (`Append`). If you are appending to a data source, the data source on the server and the data source you are publishing must be be extracts (.tde files) and they must share the same schema. You can also use the publish mode attributes, for example: `TSC.Server.PublishMode.Overwrite`.
+
+`connection_credentials` : (Optional)  The credentials required to connect to the data source. The `ConnectionCredentials` object contains the authentication information for the data source (user name and password, and whether the credentials are embeded or OAuth is used). 
+ 
+
+
+**Exceptions**
+
+`File path does not lead to an existing file.`  :  Raises an error of the file path is incorrect or if the file is missing.
+
+`Invalid mode defined.`  :  Raises an error if the publish mode is not one of the defined options. 
+
+`Only .tds, tdsx, or .tde files can be published as datasources.`  :  Raises an error if the type of file specified is not supported.  
+
+
+**Returns**
+
+The `DatasourceItem` for the data source that was added or appened to. 
+
+
+**Example**
+
+```py
+    import tableauserverclient as TSC
+    # server = TSC.Server('server')
+    # project_id = '3a8b6148-493c-11e6-a621-6f3499394a39'
+    # file_path = 'C:\\temp\\WorldIndicators.tde'
+
+    ...
+
+    # Use the default project id to create new datsource_item
+    new_datasource = TSC.DatasourceItem(project_id)
+
+    # publish data source
+    new_datasource = server.datasources.publish(
+                    new_datasource, file_path, 'CreateNew')
+
+    ...
+```
 
 <br>   
 <br>  
 
 #### update(*datasource_item*)
 
+```py
+datasource.update(datasource_item)
+```
+
+Updates the owner, or project of the specified data source. 
+
+REST API: [Update Datasource](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Update_Datasource%3FTocPath%3DAPI%2520Reference%7C_____79){:target="_blank"}
+
+**Parameters**
+
+`datasource_item`  :  The `datasource_item` specifies the data source to update.
+
+
+
+**Exceptions**
+
+`Datasource item missing ID. Datasource must be retrieved from server first.` :  Raises an errror if the datasource_item is unspecified. Use the `Datasources.get()` method to retrieve that identifies for the data sources on the server.
+
+
+**Returns**
+
+An updated `DatasourceItem`.
+
+
+**Example**
+
+```py
+# from server-client-python/test/test_datasource.py
+
+    ...
+
+    single_datasource = TSC.DatasourceItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
+    single_datasource._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
+    single_datasource._tags = ['a', 'b', 'c']
+    single_datasource._project_name = 'Tester'
+    updated_datasource = self.server.datasources.update(single_datasource)
+
+     ...
+
+```
+
 Source files: server/endpoint/datasources_endpoint.py, models/datasource_item.py
+
+
+
+
+
+
+
 
 <br>   
 <br>  
