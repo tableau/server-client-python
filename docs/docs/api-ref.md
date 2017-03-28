@@ -338,9 +338,9 @@ Source file: server/endpoint/views_endpoint.py
 <br>   
 <br>
 
-#### get()
+#### views.get()
 ```
-Views.get(req_option=None)
+views.get(req_option=None)
 ```
 
 Returns the list of views items for a site. 
@@ -376,10 +376,10 @@ See [ViewItem class](#viewitem-class)
 <br>   
 <br>
 
-#### populate_preview_image(*view_item*)
+#### views.populate_preview_image(*view_item*)
 
 ```py
- Views.populate_preview_image(view_item)
+ views.populate_preview_image(view_item)
 
 ```
 
@@ -469,7 +469,7 @@ Source file: server/endpoint/datasources_endpoint.py
 <br> 
 <br>
 
-#### delete(*datasource_id*)
+#### ds.delete(*datasource_id*)
 
 ```py
 datasources.delete(datasource_id)
@@ -494,7 +494,7 @@ REST API: [Delete Datasource](http://onlinehelp.tableau.com/v0.0/api/rest_api/en
 <br>
 
 
-#### download(*datasource_id*, *filepath=None*)
+#### ds.download(*datasource_id*, *filepath=None*)
 
 ```py
 datasources.download(datasource_id, filepath=None)
@@ -525,7 +525,7 @@ REST API: [Download Datasource](http://onlinehelp.tableau.com/current/api/rest_a
 <br> 
 <br>
 
-#### get()
+#### ds.get()
 
 ```py
 datasources.get(req_options=None)
@@ -568,7 +568,7 @@ with server.auth.sign_in(tableau_auth):
 <br>  
 
 
-#### get_by_id(*datasource_id*)
+#### ds.get_by_id(*datasource_id*)
 
 ```py
 datasources.get_by_id(datasource_id)
@@ -597,7 +597,8 @@ The `DatasourceItem`.  See [DatasourceItem class](#datasourceitem-class)
 **Example**
 
 ```py
-datasource = server.datasources.get_by_id(server.datasources[1].id)
+
+datasource = server.datasources.get_by_id('59a57c0f-3905-4022-9e87-424fb05e9c0e')
 print(datasource.name)
 
 ```
@@ -608,7 +609,7 @@ print(datasource.name)
 
 <a name="populate-connections-datasource"></a>
 
-#### populate_connections(*datasource_item*)
+#### ds.populate_connections(*datasource_item*)
 
 ```py
 datasources.populate_connections(datasource_item)
@@ -643,18 +644,29 @@ None. A list of `ConnectionItem` objects are added to the data source (`datasour
 **Example**
 
 ```py
-datasource = server.datasources.get_by_id(server.datasources[1].id)
-print(datasource.name)
+# import tableauserverclient as TSC
+# server = TSC.Server('http://SERVERURL')
+# 
+   ... 
 
-server.datasources.populate_connections(datasource)
-print([connection.datasource_name for connection in datasource.connections])
+  all_datasources, pagination_item = server.datasources.get()
+  datasource = server.datasources.get_by_id(all_datasources[1].id)
+  print(datasource.name)
+
+  server.datasources.populate_connections(datasource)
+  print(datasource.connections[0].connection_type)
+  print(datasource.connections[0].id)
+  print(datasource.connections[0].server_address)
+
+  ...
+
 ```
 
 
 <br>   
 <br>  
 
-#### publish(*datasource_item*, *file_path*, *mode*, *connection_credentials=None*)
+#### ds.publish(*datasource_item*, *file_path*, *mode*, *connection_credentials=None*)
 
 ```py
 datasources.publish(datasource_item, file_path, mode, connection_credentials=None)
@@ -695,18 +707,20 @@ The `DatasourceItem` for the data source that was added or appened to.
 **Example**
 
 ```py
-    import tableauserverclient as TSC
-    # server = TSC.Server('server')
-    # project_id = '3a8b6148-493c-11e6-a621-6f3499394a39'
-    # file_path = 'C:\\temp\\WorldIndicators.tde'
 
-    ...
+  import tableauserverclient as TSC
+  server = TSC.Server('http://SERVERURL')
+    
+  ...
 
-    # Use the default project id to create new datsource_item
-    new_datasource = TSC.DatasourceItem(project_id)
+  project_id = '3a8b6148-493c-11e6-a621-6f3499394a39'
+  file_path = 'C:\\temp\\WorldIndicators.tde'
 
-    # publish data source
-    new_datasource = server.datasources.publish(
+  # Use the project id to create new datsource_item
+  new_datasource = TSC.DatasourceItem(project_id)
+
+  # publish data source (specifed in file_path)
+  new_datasource = server.datasources.publish(
                     new_datasource, file_path, 'CreateNew')
 
     ...
@@ -715,7 +729,7 @@ The `DatasourceItem` for the data source that was added or appened to.
 <br>   
 <br>  
 
-#### update(*datasource_item*)
+#### ds.update(*datasource_item*)
 
 ```py
 datasource.update(datasource_item)
@@ -785,17 +799,32 @@ UserItem(name, site_role, auth_setting=None)
 
 **Attributes**
 
-`auth_setting` : This attribute is only returned for Tableau Online.
-`domain_name`  :  
-`external_auth_user_id` : 
-`id` :
-`last_login` : 
-`workbooks` :  The workbooks 
-`email` :  The email address of the user.
-`fullname` : The full name of the user.
+`auth_setting` : (Optional) This attribute is only  for Tableau Online. The new authentication type for the user. You can assign the following values for this attribute: `SAML` (the user signs in using SAML) or `ServerDefault` (the user signs in using the authentication method that's set for the server). These values appear in the **Authentication** tab on the **Settings** page in Tableau Online -- the `SAML` attribute value corresponds to **Single sign-on**, and the `ServerDefault` value corresponds to **TableauID**.
+
+`domain_name`  :    The name of the site.   
+`external_auth_user_id` :   Represents ID stored in Tableau's single sign-on (SSO) system. The `externalAuthUserId` value is returned for Tableau Online. For other server configurations, this field contains null.    
+`id` :   The id of the user on the site.  
+`last_login` : The date and time the user last logged in.         
+`workbooks` :  The workbooks the user owns. You must run the populate_workbooks method to add the workbooks to the `UserItem`.  
+
+`email` :  The email address of the user.    
+`fullname` : The full name of the user.    
 `name` :   The name of the user. This attribute is required when you are creating a `UserItem` instance.  
 `site_role` :  The role the user has on the site. This attribute is required with you are creating a `UserItem` instance. The `site_role` can be one of the following: `Interactor`, `Publisher`, `ServerAdministrator`, `SiteAdministrator`, `Unlicensed`, `UnlicensedWithPublish`, `Viewer`, `ViewerWithPublish`, `Guest`
 
+
+**Example**
+
+```py
+# import tableauserverclient as TSC
+# server = TSC.Server('server')
+
+# create a new UserItem object.
+  newU = TSC.UserItem('Monty', 'Publisher')
+ 
+  print(newU.name, newU.site_role)
+
+```
 
 Source file: models/user_item.py
 
@@ -810,27 +839,71 @@ The Tableau Server Client provides several methods for interacting with user res
 <br> 
 <br>
 
-#### add()
+#### users.add(*user_item*)
 
 ```py
-users.get(req_options=None)
+users.add(user_item)
 ```
 
-Returns all the users for the site. 
+Adds the user to the site. 
+
+To add a new user to the site you need to first create a new `user_item` (from `UserItem` class). When you create a new user, you specify the name of the user and their site role. For Tableau Online, you also specify the `auth_setting` attribute in your request.  When you add user to Tableau Online, the name of the user must be the email address that is used to sign in to Tableau Online. After you add a user, Tableau Online sends the user an email invitation. The user can click the link in the invitation to sign in and update their full name and password.
+
+REST API: [Add User to Site](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Add_User_to_Site%3FTocPath%3DAPI%2520Reference%7C_____9){:target="_blank"}
 
 **Parameters**
 
-`req_option` :  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific user, you could specify the name of the user or the user's id. 
+`user_item` :  You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific user, you could specify the name of the user or the user's id. 
 
 
 **Returns**
 
-Returns a list of `UserItem` objects and a `PaginationItem`  object.  Use these values to iterate through the results. 
+Returns the new `UserItem` object.  
 
 
 
 
 **Example**
+
+```py
+# import tableauserverclient as TSC
+# server = TSC.Server('server')
+# login, etc.
+
+# create a new UserItem object.
+  newU = TSC.UserItem('Monty', 'Publisher')
+
+# add the new user to the site
+  newU = server.users.add(newU)
+  print(newU.name, newU.site_role)
+
+```
+
+### users.get()
+
+```py
+users.get(req_options=None)
+```
+
+Returns information about the users on the specified site.
+
+To get information about the workbooks a user owns or has view permission for, you must first populate the `UserItem` with workbook information using the [populate_workbooks(*user_item*)](#populate-workbooks-user) method. 
+
+
+REST API: [Get Uers on Site](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Get_Users_on_Site%3FTocPath%3DAPI%2520Reference%7C_____41){:target="_blank"}
+
+**Parameters**
+
+``req_option` :  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific user, you could specify the name of the user or the user's id. 
+
+
+**Returns**
+
+Returns a list of UserItem` objects and a `PaginationItem`  object.  Use these values to iterate through the results. 
+
+
+**Example**
+
 
 ```py
 import tableauserverclient as TSC
@@ -842,6 +915,131 @@ with server.auth.sign_in(tableau_auth):
     print("\nThere are {} user on site: ".format(pagination_item.total_available))
     print([user.name for user in all_users])
 ````
+
+
+#### users.get_by_id(*user_id*)
+
+
+```py
+users.get_by_id(user_id)
+```
+
+Returns information about the specified user.   
+
+REST API: [Query User On Site](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_User_On_Site%3FTocPath%3DAPI%2520Reference%7C_____61){:target="_blank"}
+
+
+**Parameters**
+
+`user_id`  :  The `user_id` specifies the user to query. 
+
+
+**Exceptions**
+
+`User ID undefined.`   :  Raises an exception if a valid `user_id` is not provided.
+
+
+**Returns**
+
+The `UserItem`.  See [UserItem class](#useritem-class)
+
+
+**Example**
+
+```py
+user1 = server.users.get_by_id('6de21c06-c936-47a1-8f92-ed2e9512e6ab')
+print(user1.name)
+
+```
+
+<br>   
+<br>  
+
+
+#### users.populate_favorites_
+  
+```py
+users.populate_favorites(user_item)
+```
+
+Returns the list of favorites (views, workbooks, and data sources) for a user.
+
+*Not currently implemented*
+
+<br>   
+<br> 
+
+
+#### users.populate_workbooks(*user_item*, *req_options=None*)
+
+```py
+users.populate_workbooks(user_item, req_options=None):
+```
+
+Returns information about the workbooks that the specified user owns and has Read (view) permissions for. 
+
+
+This method retrieves the workbook information for the specified user. The REST API is designed to return only the information you ask for explicitly. When you query for all the users, the workbook information for each user is not included. Use this method to retrieve information about the workbooks that the user owns or has Read (view) permissions. The method adds the list of workbooks to the user item object (`user_item.workbooks`).  
+
+REST API:  [Query Datasource Connections](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Datasource_Connections%3FTocPath%3DAPI%2520Reference%7C_____47){:target="_blank"}
+
+**Parameters**
+
+`user_item`  :  The `user_item` specifies the user to populate with workbook information.
+
+
+
+
+**Exceptions**
+
+`User item missing ID.` :  Raises an errror if the `user_item` is unspecified.
+
+
+**Returns**
+
+A list of `WorkbookItem` 
+
+A `PaginationItem` that points (`user_item.workbooks`). See [UserItem class](#useritem-class) 
+
+
+**Example**
+
+```py
+  pagn = server.users.populate_workbooks(all_users[0])
+  print("\nUser {0} owns or has READ permissions for {1} workbooks".format(all_users[0].name, pagn.total_available))
+  print("\nThe workbooks are:")
+  for workbook in all_users[0].workbooks :
+       print(workbook.name)
+```
+
+
+
+
+<br>   
+<br>
+
+#### users.remove(*user_id*)
+
+```py
+users.remove(user_id):
+        if not user_id:
+            error = "User ID undefined."
+```
+
+
+
+
+<br>   
+<br>
+
+
+#### users.update  
+
+```py
+users.update(user_item, password=None)
+```
+
+
 
 Source file: server/endpoint/users_endpoint.py
 
