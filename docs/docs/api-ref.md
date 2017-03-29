@@ -293,7 +293,7 @@ workbook_obj.connections
 ## Views
 
 Using the TSC library, you can get all the views on a site, or get the views for a workbook, or populate a view with preview images. 
-The view resources for Tableau Server are defined in the ViewItem class. The class corresponds to the view resources you can access using the Tableau Server REST API, for example, you can find the name of the view, its id, and the id of the workbook it is associated with. The view methods are based upon the endpoints for views in the REST API and operate on the `ViewItem` class. 
+The view resources for Tableau Server are defined in the `ViewItem` class. The class corresponds to the view resources you can access using the Tableau Server REST API, for example, you can find the name of the view, its id, and the id of the workbook it is associated with. The view methods are based upon the endpoints for views in the REST API and operate on the `ViewItem` class. 
 
 
 <br>
@@ -305,7 +305,7 @@ class ViewItem(object)
  
 ```
 
-The ViewItem class contains the members or attributes for the view resources on Tableau Server. The ViewItem class defines the information you can request or query from Tableau Server. The class members correspontd to the attributes of a server request or response payload. 
+The `ViewItem` class contains the members or attributes for the view resources on Tableau Server. The `ViewItem` class defines the information you can request or query from Tableau Server. The class members correspond to the attributes of a server request or response payload. 
 
 Source file: models/view_item.py
 
@@ -329,7 +329,7 @@ Source file: models/view_item.py
 <br>
 
 
-### View methods
+### Views methods
 
 The Tableau Server Client provides two methods for interacting with view resources, or endpoints. These methods correspond to the endpoints for views in the Tableau Server REST API. 
 
@@ -460,7 +460,7 @@ Source file:  models/datasource_item.py
 <br> 
 <br>
 
-### Datasource methods
+### Datasources methods
 
 The Tableau Server Client provides several methods for interacting with data source resources, or endpoints. These methods correspond to endpoints in the Tableau Server REST API. 
 
@@ -502,6 +502,7 @@ datasources.download(datasource_id, filepath=None)
 ```
 Downloads the specified data source in `.tdsx` format. 
 
+REST API: [Download Datasource](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Download_Datasource%3FTocPath%3DAPI%2520Reference%7C_____34){:target="_blank"}  
 
 **Parameters**
 
@@ -520,7 +521,7 @@ Downloads the specified data source in `.tdsx` format.
 The data source in `.tdsx` format. 
 
 
-REST API: [Download Datasource](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Download_Datasource%3FTocPath%3DAPI%2520Reference%7C_____34){:target="_blank"}  
+
   
 <br> 
 <br>
@@ -645,15 +646,19 @@ None. A list of `ConnectionItem` objects are added to the data source (`datasour
 
 ```py
 # import tableauserverclient as TSC
+
 # server = TSC.Server('http://SERVERURL')
 # 
    ... 
 
-  all_datasources, pagination_item = server.datasources.get()
-  datasource = server.datasources.get_by_id(all_datasources[1].id)
-  print(datasource.name)
+# get the data source
+  datasource = server.datasources.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
 
+
+# get the connection information 
   server.datasources.populate_connections(datasource)
+
+# print the information about the first connection item
   print(datasource.connections[0].connection_type)
   print(datasource.connections[0].id)
   print(datasource.connections[0].server_address)
@@ -797,6 +802,8 @@ The user resources for Tableau Server are defined in the `UserItem` class. The c
 UserItem(name, site_role, auth_setting=None)
 ```
 
+The `UserItem` class contains the members or attributes for the view resources on Tableau Server. The `UserItem` class defines the information you can request or query from Tableau Server. The class members correspond to the attributes of a server request or response payload. 
+
 **Attributes**
 
 `auth_setting` : (Optional) This attribute is only  for Tableau Online. The new authentication type for the user. You can assign the following values for this attribute: `SAML` (the user signs in using SAML) or `ServerDefault` (the user signs in using the authentication method that's set for the server). These values appear in the **Authentication** tab on the **Settings** page in Tableau Online -- the `SAML` attribute value corresponds to **Single sign-on**, and the `ServerDefault` value corresponds to **TableauID**.
@@ -832,10 +839,11 @@ Source file: models/user_item.py
 <br>
 
 
-###  User Methods
+###  Users Methods
 
 The Tableau Server Client provides several methods for interacting with user resources, or endpoints. These methods correspond to endpoints in the Tableau Server REST API.
 
+Source file: server/endpoint/users_endpoint.py
 <br> 
 <br>
 
@@ -871,7 +879,7 @@ Returns the new `UserItem` object.
 # login, etc.
 
 # create a new UserItem object.
-  newU = TSC.UserItem('Monty', 'Publisher')
+  newU = TSC.UserItem('Heather', 'Publisher')
 
 # add the new user to the site
   newU = server.users.add(newU)
@@ -879,7 +887,7 @@ Returns the new `UserItem` object.
 
 ```
 
-### users.get()
+### users.get
 
 ```py
 users.get(req_options=None)
@@ -899,7 +907,7 @@ REST API: [Get Uers on Site](http://onlinehelp.tableau.com/current/api/rest_api/
 
 **Returns**
 
-Returns a list of UserItem` objects and a `PaginationItem`  object.  Use these values to iterate through the results. 
+Returns a list of `UserItem` objects and a `PaginationItem`  object.  Use these values to iterate through the results. 
 
 
 **Example**
@@ -916,6 +924,8 @@ with server.auth.sign_in(tableau_auth):
     print([user.name for user in all_users])
 ````
 
+<br>
+<br>
 
 #### users.get_by_id(*user_id*)
 
@@ -947,8 +957,8 @@ The `UserItem`.  See [UserItem class](#useritem-class)
 **Example**
 
 ```py
-user1 = server.users.get_by_id('6de21c06-c936-47a1-8f92-ed2e9512e6ab')
-print(user1.name)
+  user1 = server.users.get_by_id('9f9e9d9c-8b8a-8f8e-7d7c-7b7a6f6d6e6d')
+  print(user1.name)
 
 ```
 
@@ -956,7 +966,7 @@ print(user1.name)
 <br>  
 
 
-#### users.populate_favorites_
+#### users.populate_favorites
   
 ```py
 users.populate_favorites(user_item)
@@ -1005,11 +1015,17 @@ A `PaginationItem` that points (`user_item.workbooks`). See [UserItem class](#us
 **Example**
 
 ```py
-  pagn = server.users.populate_workbooks(all_users[0])
-  print("\nUser {0} owns or has READ permissions for {1} workbooks".format(all_users[0].name, pagn.total_available))
+# first get all users, call server.users.get()
+# get workbooks for user[0]
+    ...
+
+  page_n = server.users.populate_workbooks(all_users[0])
+  print("\nUser {0} owns or has READ permissions for {1} workbooks".format(all_users[0].name, page_n.total_available))
   print("\nThe workbooks are:")
   for workbook in all_users[0].workbooks :
-       print(workbook.name)
+      print(workbook.name)
+
+    ...
 ```
 
 
@@ -1021,27 +1037,107 @@ A `PaginationItem` that points (`user_item.workbooks`). See [UserItem class](#us
 #### users.remove(*user_id*)
 
 ```py
-users.remove(user_id):
-        if not user_id:
-            error = "User ID undefined."
+users.remove(user_id)    
 ```
 
 
 
+Removes the specified user from the site. 
 
-<br>   
+REST API: [Remove User from Site](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Remove_User_from_Site%3FTocPath%3DAPI%2520Reference%7C_____74){:target="_blank"}
+
+
+**Parameters**
+
+`user_id`  :  The identifier (`id`) for the the user that you want to remove from the server. 
+
+
+**Exceptions**
+
+`User ID undefined`   :  Raises an exception if a valid `user_id` is not provided.
+
+
+**Example**
+
+```py
+#  Remove a user from the site
+
+#  import tableauserverclient as TSC
+#  tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
+#  server = TSC.Server('http://SERVERURL')
+
+   with server.auth.sign_in(tableau_auth):
+     server.users.remove('9f9e9d9c-8b8a-8f8e-7d7c-7b7a6f6d6e6d')
+
+```
+<br> 
 <br>
 
 
-#### users.update  
+
+
+#### users.update(*user_item*, *password=None*)  
 
 ```py
 users.update(user_item, password=None)
 ```
 
+Updates information about the specified user. 
+
+The information you can modify depends upon whether you are using Tableau Server or Tableau Online, and whether you have configured Tableau Server to use local authentication or Active Directory. For more information, see [Update User](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Update_User%3FTocPath%3DAPI%2520Reference%7C_____86){:target="_blank"}.
 
 
-Source file: server/endpoint/users_endpoint.py
+
+REST API: [Update User](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Update_User%3FTocPath%3DAPI%2520Reference%7C_____86){:target="_blank"}
+
+**Parameters**
+
+`user_item`  :  The `user_item` specifies the user to update.
+
+`password`  : (Optional) The new password for the user. 
+
+
+
+**Exceptions**
+
+`User item missing ID.` :  Raises an errror if the `user_item` is unspecified. 
+
+
+**Returns**
+
+An updated `UserItem`.    See [UserItem class](#useritem-class)
+
+
+**Example**
+
+```py
+
+#  import tableauserverclient as TSC
+#  tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
+#  server = TSC.Server('http://SERVERURL')
+
+ with server.auth.sign_in(tableau_auth):
+    
+  # create a new user_item
+    user1 = TSC.UserItem('temp', 'Viewer')
+     
+  # add new user
+    user1 = server.users.add(user1)
+    print(user1.name, user1.site_role, user1.id)
+
+  # modify user info
+    user1.name = 'Laura'
+    user1.fullname = 'Laura Rodriguez'
+    user1.email = 'laura@example.com'
+ 
+  # update user
+    user1 = server.users.update(user1)
+    print("\Updated user info:")
+    print(user1.name, user1.fullname, user1.email, user1.id)
+
+
+```
+
 
 
 <br>   
@@ -1049,10 +1145,341 @@ Source file: server/endpoint/users_endpoint.py
 
 ## Groups
 
-Source files: server/endpoint/groups_endpoint.py, models/group_item.py
+Using the TSC library, you can get information about all the groups on a site, you can add or remove groups, or add or remove users in a group.
 
+The group resources for Tableau Server are defined in the `GroupItem` class. The class corresponds to the user resources you can access using the Tableau Server REST API. The group methods are based upon the endpoints for groups in the REST API and operate on the `GroupItem` class.
+
+<br>   
+<br> 
+
+### GroupItem class
+
+```py
+GroupItem(name)
+```
+
+The `GroupItem` class contains the members or attributes for the view resources on Tableau Server. The `GroupItem` class defines the information you can request or query from Tableau Server. The class members correspond to the attributes of a server request or response payload.
+
+Source file: models/group_item.py
+
+**Attributes**
+
+`domain_name` :  The name of the Active Directory domain (`local` if local authentication is used).  
+`id` :  The id of the group.  
+`users`  :   The list of users (`UserItem`).  
+`name` :  The name of the group.  The `name` is required when you create an instance of a group.
+
+
+
+**Example**
+
+```py
+ newgroup = TSC.GroupItem('My Group')
+```
+
+
+
+
+<br>   
+<br> 
+
+### Groups methods
+
+The Tableau Server Client provides several methods for interacting with group resources, or endpoints. These methods correspond to endpoints in the Tableau Server REST API.
+
+
+
+Source file: server/endpoint/groups_endpoint.py
+
+<br>   
+<br> 
+
+#### groups.add_user
+
+```py
+groups.add_user(group_item, user_id):
+```
+
+Adds a user to the specified group. 
+
+
+REST API [Add User to Group](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Add_User_to_Group%3FTocPath%3DAPI%2520Reference%7C_____8){:target="_blank"}
+
+**Parameters**
+
+`group_item`  :  The `group_item` specifies the group to update.
+
+`user_id`  : The id of the user. 
+
+
+
+
+**Returns**
+
+None.    
+
+
+**Example**
+
+```py
+# Adding a user to a group
+# Using the second group on the site, aleady have all_groups
+# The id for Ian is '59a8a7b6-be3a-4d2d-1e9e-08a7b6b5b4ba'
+
+# add Ian to the second group
+  server.groups.add_user(all_groups[1], '59a8a7b6-be3a-4d2d-1e9e-08a7b6b5b4ba')
+
+# populate the GroupItem with the users 
+  pagination_item = server.groups.populate_users(all_groups[1])
+
+  for user in all_groups[1].users :
+      print(user.name)
+
+```
+
+<br>   
+<br>
+
+#### groups.create
+
+```py
+create(group_item)
+```
+
+Creates a new group in Tableau Server. 
+
+
+REST API: [Create Group](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Create_Group%3FTocPath%3DAPI%2520Reference%7C_____14){:target="_blank"}
+
+
+**Parameters**
+
+`group_item`  :  The `group_item` specifies the group to add. You first create a new instance of a `GroupItem` and pass that to this method.
+
+
+
+
+**Returns**
+Adds new `GroupItem`.    
+
+
+**Example**
+
+```py
+
+# Create a new group
+
+#  import tableauserverclient as TSC
+#  tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
+#  server = TSC.Server('http://SERVERURL')
+
+
+# create a new instance with the group name
+  newgroup = TSC.GroupItem('My Group')
+
+# call the create method
+  newgroup = server.groups.create(newgroup)
+
+# print the names of the groups on the server
+  all_groups, pagination_item = server.groups.get()
+  for group in all_groups :
+      print(group.name, group.id)
+```
+
+<br>   
+<br> 
+
+#### groups.delete
+
+```py
+groups.delete(group_id)
+```
+
+Deletes the group on the site. 
+
+REST API: [Delete Group](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Remove_User_from_Site%3FTocPath%3DAPI%2520Reference%7C_____74){:target="_blank"}
+
+
+**Parameters**
+
+`group_id`  :  The identifier (`id`) for the the group that you want to remove from the server. 
+
+
+**Exceptions**
+
+`Group ID undefined`   :  Raises an exception if a valid `group_id` is not provided.
+
+
+**Example**
+
+```py
+#  Delete a group from the site
+
+# import tableauserverclient as TSC
+# tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
+# server = TSC.Server('http://SERVERURL')
+
+  with server.auth.sign_in(tableau_auth):
+     server.groups.delete('1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d')
+
+```
+<br> 
+<br>
+
+#### groups.get
+
+```py
+groups.get(req_options=None)
+```
+
+Returns information about the groups on the site. 
+
+
+To get information about the users in a group, you must first populate the `GroupItem` with user information using the [groups.populate_users](api-ref#groupspopulateusers) method. 
+
+
+REST API: [Get Uers on Site](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Get_Users_on_Site%3FTocPath%3DAPI%2520Reference%7C_____41){:target="_blank"}
+
+**Parameters**
+
+`req_option` :  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific groups, you could specify the name of the group or the group id. 
+
+
+**Returns**
+
+Returns a list of `GroupItem` objects and a `PaginationItem`  object.  Use these values to iterate through the results. 
+
+
+**Example**
+
+
+```py
+# import tableauserverclient as TSC
+# tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
+# server = TSC.Server('http://SERVERURL')
+
+  with server.auth.sign_in(tableau_auth):
+
+       # get the groups on the server
+       all_groups, pagination_item = server.groups.get()
+
+       # print the names of the groups
+       for group in all_groups :
+           print(group.name, group.id)
+````
 
 
 <br>   
 <br>  
 
+#### groups.populate_users
+
+```py
+groups.populate_users(group_item, req_options=None)
+```
+
+Populates the `group_item` with the list of users. 
+
+
+REST API:  [Get Users in Group](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Get_Users_in_Group){:target="_blank"}
+
+**Parameters**
+
+`group_item`  :  The `group_item` specifies the group to populate with user information.
+
+`req_options` : (Optional) Additional request options to send to the endpoint. 
+
+
+
+**Exceptions**
+
+`Group item missing ID. Group must be retrieved from server first.` :  Raises an errror if the `group_item` is unspecified.
+
+
+**Returns**
+
+None. A list of `UserItem` objects are added to the group (`group_item.users`). 
+
+
+**Example**
+
+```py
+# import tableauserverclient as TSC
+
+# server = TSC.Server('http://SERVERURL')
+# 
+   ... 
+
+# get the group
+  mygroup = server.groups.get_by_id('1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d')
+
+
+# get the user information 
+  pagination_item = server.groups.populate_users(mygroup)
+
+
+# print the information about the first connection item
+  for user in mygroup.users :
+        print(user.name) 
+  
+
+
+
+```
+
+<br>   
+<br> 
+
+#### groups.remove_user
+
+```py
+groups.remove_user(group_item, user_id)
+```
+
+Removes a user from a group.
+
+
+
+
+REST API: [Remove User from Group](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Remove_User_from_Group%3FTocPath%3DAPI%2520Reference%7C_____73){:target="_blank"}
+
+
+**Parameters**
+
+`group_item`  :  The `group_item` specifies the group to remove the user from.
+
+`user_id` :  The id for the user. 
+
+
+
+**Exceptions**
+
+`Group must be populated with users first.` :  Raises an errror if the `group_item` is unpopulated.
+
+
+**Returns**
+
+None. The user is removed from the group. 
+
+
+**Example**
+
+```py
+#  Remove a user from the group
+
+# import tableauserverclient as TSC
+# tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
+# server = TSC.Server('http://SERVERURL')
+
+  with server.auth.sign_in(tableau_auth):
+
+     # get the group
+     mygroup = server.groups.get_by_id('1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d')
+
+     # remove user '9f9e9d9c-8b8a-8f8e-7d7c-7b7a6f6d6e6d'
+     server.groups.remove_user(mygroup, '9f9e9d9c-8b8a-8f8e-7d7c-7b7a6f6d6e6d')
+
+```
+
+<br>   
+<br>
