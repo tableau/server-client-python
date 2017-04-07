@@ -14,108 +14,613 @@ layout: docs
 
 ## Authentication
 
-Source files: server/endpoint/auth_endpoint.py, models/tableau_auth.py
+You can use the TSC library to manage authentication, so you can sign in and sign out of Tableau Server and Tableau Online. The authentication resources for Tableau Server are defined in the `TableauAuth` class and they correspond to the authentication attributes you can access using the Tableau Server REST API. 
 
-### Sign In
+<br>
+<br>  
+
+### TableauAuth class
+
+```py
+TableauAuth(username, password, site=None, site_id='', user_id_to_impersonate=None)
+```
+The `TableauAuth` class contains the attributes for the authentication resources. The `TableauAuth` class defines the information you can set in a  request or query from Tableau Server. The class members correspond to the attributes of a server request or response payload. To use this class, create a new instance, supplying user name, password, and site information if necessary, and pass the request object to the [Auth.sign_in](#auth.sign-in) method.
+
+**Attributes**  
+`username` : The name of the user whose credentials will be used to sign in.   
+`password` : The password of the user.   
+`site`  : (Deprecated) Use `site_id` instead.   
+`site_id` : This corresponds to the `contentUrl` attribute in the Tableau REST API. The `site_id` is the portion of the URL that follows the `/site/` in the URL. For example, "MarketingTeam" is the `site_id` in the following URL *MyServer*/#/site/**MarketingTeam**/projects. To specify the default site on Tableau Server, you can use an empty string **""**.  For Tableau Online, you must provide a value for the `site_id`.  
+`user_id_to_impersonate` :  Specifies the id (not the name) of the user to sign in as. 
+
+Source file: models/tableau_auth.py
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+# create a new instance of a TableauAuth object for authentication
+
+tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
+
+# create a server instance
+# pass the "tableau_auth" request object to server.auth.sign_in()
+```
+
+<br>
+<br>  
+
+### Auth methods
+The Tableau Server Client provides two methods for interacting with authentication resources. These methods correspond to the sign in and sign out endpoints in the Tableau Server REST API.
+
+
+Source file: server/endpoint/auth_endpoint.py
+
+<br>
+<br> 
+
+#### auth.sign in
+
+```py
+auth.sign_in(auth_req)
+```
 
 Signs you in to Tableau Server.
 
+
+The method signs into Tableau Server or Tableau Online and manages the authentication token. You call this method from the server object you create. For information about the server object, see [Server](#server). The authentication token keeps you signed in for 240 minutes, or until you call the `auth.sign_out` method. Before you use this method, you first need to create the sign-in request (`auth_req`) by creating an instance of the `TableauAuth`. To call this method, create a server object for your server. For more information, see [Sign in and Out](sign-in-out).
+
+REST API: [Sign In](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Sign_In%3FTocPath%3DAPI%2520Reference%7C_____77){:target="_blank"}
+
+**Parameters**
+
+`auth_req` : The `TableauAuth` object that holds the sign-in credentials for the site. 
+
+
+**Example**
+
 ```py
-Auth.sign_in(authentication_object)
+import tableauserverclient as TSC
+
+# create a auth request
+tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
+
+# create an instance for your server
+server = TSC.Server('http://SERVER_URL')
+
+# call the sign-in method with the request
+server.auth.sign_in(tableau_auth)
+
 ```
 
-### Sign Out
 
-Signs you out of Tableau Server.
+**See Also**  
+[Sign in and Out](sign-in-out)  
+[Server](#server)
+
+<br>
+<br>
+
+
+#### auth.sign out
 
 ```py
-Auth.sign_out()
+auth.sign_out()
+```
+Signs you out of the current session.
+
+The method takes care of invalidating the authentiction token. For more information, see [Sign in and Out](sign-in-out).
+
+REST API: [Sign Out](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Sign_Out%3FTocPath%3DAPI%2520Reference%7C_____78){:target="_blank"}
+
+**Example**
+
+```py
+
+server.auth.sign_out()
+
+
 ```
 
-## Connection
+
+
+
+**See Also**  
+[Sign in and Out](sign-in-out)  
+[Server](#server)
+
+<br>
+<br>
+
+
+
+
+## Connections
+
+The connections for Tableau Server data sources and workbooks are represented by a `ConnectionItem` class.  You can call data source and view methods to query or update the connection information.  The `ConnectionCredentials` class represents the connection information you can update. 
 
 ### ConnectionItem class
 
 ```py
-class ConnectionItem(object)
+ConnectionItem(object)
 ```
 
 **Attributes**
 
-`datasource_id` : 
+`datasource_id` :  The identifier of the data source. 
 
-`datasource_name` :
+`datasource_name` :  The name of the data source.
 
-`id`  : 
+`id`  :  The identifer of the connection.
 
-`connection_type`  : 
-
-`embed_password`  : 
-
-`password`  : 
-
-`server_address`   :  
-
-`server_port`   : 
-
-`username`    : 
+`connection_type`  :  The type of connection. 
 
 
-Source file: models/connection_item.py
+Source file: models/connection_item.py  
 
 <br>
 <br>
+
+
+
+### ConnectionCredentials class
+
+```py
+ConnectionCredentials(name, password, embed=True, oauth=False)
+```
+
+
+The `ConnectionCredentials` class corresponds to workbook and data source connections. 
+
+In the Tableau Server REST API, there are separate endopoints to query and update workbook and data source connections. 
+
+**Attributes**
+
+Attribute | Description
+:--- | :---
+`name`     | The username for the connection.
+`embed_password`  |  (Boolean) Determines whether to embed the passowrd (`True`) for the workbook or data source connection or not (`False`). 
+`password`  |  The password used for the connection.   
+`server_address`   |  The server address for the connection.   
+`server_port`   |  The port used by the server.  
+`ouath`  |  (Boolean) Specifies whether OAuth is used for the data source of workbook connection. For more information, see [OAuth Connections](https://onlinehelp.tableau.com/current/server/en-us/protected_auth.htm?Highlight=oauth%20connections){:target="_blank"}.  
+
+
+Source file: models/connection_credentials.py
+
+<br>
+<br>
+
+## Server
+
+In the Tableau REST API, the server (`http://MY-SERVER/`) is the base or core of the URI that makes up the various endpoints or methods for accessing resources on the server (views, workbooks, sites, users, data sources, etc.) 
+The TSC library provides a `Server` class that represents the server. You create a server instance to sign in to the server and to call the various methods for accessing resources.  
+
+
+<br>
+<br>  
+
+
+### Server class
+
+```py
+Server(server_address)
+```
+The `Server` class contains the attributes that represent the server on Tableau Server. After you create an instance of the `Server` class, you can sign in to the server and call methods to access all of the resources on the server.   
+
+**Attributes**
+
+`server_address`  :  Specifies the address of the Tableau Server or Tableau Online (for example, `http://MY-SERVER/`).  
+
+`version`   :  Specifies the version of the REST API to use (for example, `2.5`). When you use the TSC library to call methods that access Tableau Server, the `version` is passed to the endpoint as part of the URI (`https://MY-SERVER/api/2.5/`). Each release of Tableau Server supports specific versions of the REST API. New versions of the REST API are released with Tableau Server. By default, the value of `version` is set to 2.3, which corresponds to Tableau Server 10.0.  You can view or set this value. You might need to set this to a different value, for example, if you want to access features that are supported by the server and a later version of the REST API.  For more information, see [REST API Versions](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_concepts_versions.htm){:target="_blank"}  
+
+
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+
+# create a instance of server 
+server = TSC.Server('http://MY-SERVER')
+
+
+# change the REST API version to 2.5
+server.version = 2.5  
+
+
+```
+
+#### Server.*Resources* (Objects)  
+
+When you create an instance of the `Server` class, you have access to the resources on the server after you sign in. You can select these resources and their methods as members of the class, for example: `server.views.get()`  
+
+
+
+Resource   |  Description  |   
+ --- | ---|  
+*server*.auth   |   Sets authentication for sign in and sign out. See [Auth](#auththentication)  |
+*server*.views  |   Access the server views and methods.  See [Views](#views)  
+*server*.users  |   Access the user resources and methods.  See [Users](#users)  
+*server*.sites  |   Access the sites.  See [Sites](#sites)  
+*server*.groups   | Access the groups resources and methods. See [Groups](#groups)  
+*server*.workbooks  |  Access the resources and methods for workbooks. See [Workbooks](#workbooks)
+*server*.datasources  |  Access the resources and methods for data sources. See [Data Sources](#data-sources)
+*server*.projects  |   Access the resources and methods for projects. See [Projects](#projets)
+*server*.schedules  |  Access the resources and methods for schedules. See [Schedules](#Schedules)
+*server*.server_info  |  Access the resources and methods for server information. See [ServerInfo class](#serverinfo-class) 
+
+<br>
+<br>
+
+#### Server.PublishMode
+
+The `Server` class has `PublishMode` class that enumerates the options that specify what happens when you publish a workbook or data source. The options are `Overwrite`,  `Append`, or `CreateNew`. 
+
+
+**Properties**
+
+`PublishMode.Overwrite`  : The `Server` class has `PublishMode` class that you can set to specify what happens when you publish a workbook or data source. The options are `Overwrite`,  `Append`, or `CreateNew`. 
+
+**Example**
+
+```py
+ 
+ print(TSC.Server.PublishMode.Overwrite)
+ # prints 'Overwrite'
+ 
+ overwrite_true = TSC.Server.PublishMode.Overwrite
+
+ ...
+
+ # pass the PublishMode to the publish workbooks method
+ new_workbook = server.workbooks.publish(new_workbook, args.filepath, overwrite_true)
+
+
+```
+
+
+<br>
+<br>
+
+
+### ServerInfoItem class
+
+```py
+ServerInfoItem(product_version, build_number, rest_api_version)
+```
+The `ServerInfoItem` class contains the builid and version information for Tableau Server. The server information is accessed with the `server_info.get()` method, which returns an instance of the `ServerInfo` class. 
+
+**Attributes**
+
+`product_version`  :  Shows the version of the Tableau Server or Tableau Online (for example, 10.2.0).   
+`build_number`   :  Shows the specific build number (for example, 10200.17.0329.1446).
+`rest_api_version`  :  Shows the supported REST API version number. Note that this might be different from the default value specified for the server, with the `Server.version` attribute. To take advantage of new features, you should query the server and set the `Server.version` to match the supported REST API version number. 
+
+
+<br>
+<br>
+
+
+### ServerInfo methods
+
+The TSC library provides a method to access the build and version information from Tableau Server.   
+
+<br>   
+
+#### server_info.get
+
+```py
+server_info.get()
+ 
+```
+Retrieve the build and version information for the server.  
+
+This method makes an unauthenticated call, so no sign in or authentication token is required.  
+
+REST API: [Server Info](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Server_Info%3FTocPath%3DAPI%2520Reference%7C_____76){:target="_blank"}   
+  
+**Parameters**  
+ None 
+ 
+**Exceptions**
+
+`404003	UNKNOWN_RESOURCE`  :  Raises an exception if the server info endpoint is not found. 
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+
+# create a instance of server 
+server = TSC.Server('http://MY-SERVER')
+
+# set the version number > 2.3 
+# the server_info.get() method works in 2.4 and later
+server.version = '2.5'
+
+s_info = server.server_info.get()
+print("\nServer info:")
+print("\tProduct version: {0}".format(s_info.product_version))
+print("\tREST API version: {0}".format(s_info.rest_api_version))
+print("\tBuild number: {0}".format(s_info.build_number))
+
+``` 
+
+
+<br>
+<br>
+
 
 ## Sites
 
+Using the TSC library, you can query a site or sites on a server, or create or delete a site on the server.
+
+The site resources for Tableau Server and Tableau Online are defined in the `SiteItem` class. The class corresponds to the site resources you can access using the Tableau Server REST API. The site methods are based upon the endpoints for sites in the REST API and operate on the `SiteItem` class.
+
+<br>   
+<br> 
+
+### SiteItem class
+
+```py
+SiteItem(name, content_url, admin_mode=None, user_quota=None, storage_quota=None,
+                 disable_subscriptions=False, subscribe_others_enabled=True, revision_history_enabled=False)
+```
+
+The `SiteItem` class contains the members or attributes for the site resources on Tableau Server or Tableau Online. The `SiteItem` class defines the information you can request or query from Tableau Server or Tableau Online. The class members correspond to the attributes of a server request or response payload.
+
+**Attributes**
+
+Attribute | Description
+:--- | :---
+`name` | The name of the site. The name of the default site is "".  
+`content_url` | The path to the site.  
+`admin_mode` | (Optional) For Tableau Server only. Specify `ContentAndUsers` to allow site administrators to use the server interface and **tabcmd** commands to add and remove users. (Specifying this option does not give site administrators permissions to manage users using the REST API.) Specify `ContentOnly` to prevent site administrators from adding or removing users. (Server administrators can always add or remove users.)
+`user_quota`| (Optional) Specifies the maximum number of users for the site. If you do not specify this value, the limit depends on the type of licensing configured for the server. For user-based license, the maximum number of users is set by the license. For core-based licensing, there is no limit to the number of users. If you specify a maximum value, only licensed users are counted and server administrators are excluded.
+`storage_quota` | (Optional) 	Specifes the maximum amount of space for the new site, in megabytes. If you set a quota and the site exceeds it, publishers will be prevented from uploading new content until the site is under the limit again.
+`disable_subscriptions` | (Optional) Specify `true` to prevent users from being able to subscribe to workbooks on the specified site. The default is `false`.  
+`subscribe_others_enabled` | (Optional) Specify `false` to prevent server administrators, site administrators, and project or content owners from being able to subscribe other users to workbooks on the specified site. The default is `true`. 
+`revision_history_enabled` |  (Optional) Specify `true` to enable revision history for content resources (workbooks and datasources). The default is `false`.   
+`revision_limit` | (Optional) Specifies the number of revisions of a content source (workbook or data source) to allow. On Tableau Server, the default is 25.   
+`state` | Shows the current state of the site (`Active` or `Suspended`). 
+
+
+**Example**
+
+```py
+
+# create a new instance of a SiteItem
+
+new_site = TSC.SiteItem(name='Tableau', content_url='tableau', admin_mode='ContentAndUsers', user_quota=15, storage_quota=1000, disable_subscriptions=True)
+
+```
+
 Source files: server/endpoint/sites_endpoint.py, models/site_item.py
 
-### Create Site
-
-Creates a new site for the given site item object.
+### sites.create
 
 ```py
-Sites.create(new_site_item)
+sites.create(site_item)
 ```
 
-Example:
+Creates a new site on the server for the specified site item object. 
+
+Tableau Server only. 
+
+
+REST API: [Create Site](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Create_Site%3FTocPath%3DAPI%2520Reference%7C_____17){:target="_blank"}  
+
+
+
+**Parameters**  
+  
+`site_item` : The settings for the site that you want to create. You need to create an instance of `SiteItem` and pass the the `create` method.
+
+
+**Returns**  
+
+Returns a new instance of `SiteItem`.
+
+
+**Example**
 
 ```py
-new_site = TSC.SiteItem(name='Tableau', content_url='tableau', admin_mode=TSC.SiteItem.AdminMode.ContentAndUsers, user_quota=15, storage_quota=1000, disable_subscriptions=True)
-self.server.sites.create(new_site)
+import tableauserverclient as TSC
+
+# create an instance of server 
+server = TSC.Server('http://MY-SERVER')
+
+# create shortcut for admin mode
+content_users=TSC.SiteItem.AdminMode.ContentAndUsers
+
+# create a new SiteItem
+new_site = TSC.SiteItem(name='Tableau', content_url='tableau', admin_mode=content_users, user_quota=15, storage_quota=1000, disable_subscriptions=True)
+
+# call the sites create method with the SiteItem
+new_site = server.sites.create(new_site)
 ```
+<br>
+<br>  
 
-### Get Site by ID
 
-Gets the site with the given ID.
+### sites.get_by_id
 
 ```py
-Sites.get_by_id(id)
+sites.get_by_id(site_id)
 ```
 
-### Get Sites
+Queries the site with the given ID.
 
-Gets the first 100 sites on the server. To get all the sites, use the Pager.
+
+REST API: [Query  Site](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Site){:target="_blank"}    
+
+**Parameters**  
+
+`site_id`  | The id for the site you want to query. 
+
+
+**Exceptions**  
+
+`Site ID undefined.` | Raises an error if an id is not specified. 
+
+
+**Returns**  
+
+Returns the `SiteItem`.  
+  
+
+**Example**   
 
 ```py
-Sites.get()
+
+# import tableauserverclient as TSC
+# server = TSC.Server('http://MY-SERVER')
+# sign in, etc.
+
+ a_site = server.sites.get_by_id('9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d')
+ print("\nThe site with id '9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d' is: {0}".format(a_site.name)) 
+
 ```
 
-### Update Site
+<br>
+<br>
 
-Modifies a site. The site item object must include the site ID and overrides all other settings.
+### sites.get
 
 ```py
-Sites.update(site_item_object)
+sites.get()
 ```
 
-### Delete Site
+Queries all the sites on the server. 
 
-Deletes the site with the given ID.
+
+REST API: [Query Sites](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Sites%3FTocPath%3DAPI%2520Reference%7C_____58){:target="_blank"}  
+
+
+**Parameters**
+
+ None.
+
+**Returns**  
+ 
+Returns a list of all `SiteItem` objects and a `PaginationItem`. Use these values to iterate through the results. 
+
+
+**Example**
 
 ```py
-Sites.delete(id)
+# import tableauserverclient as TSC
+# server = TSC.Server('http://MY-SERVER')
+# sign in, etc.
+
+  # query the sites
+  all_sites, pagination_item = server.sites.get()
+
+  # print all the site names and ids
+  for site in TSC.Pager(server.sites):
+       print(site.id, site.name, site.content_url, site.state)
+
+
 ```
+
+<br>
+<br>
+
+
+### sites.update
+
+```py
+sites.update(site_item)
+```
+
+Modifies the settings for site. 
+
+
+The site item object must include the site ID and overrides all other settings.
+
+
+REST API: [Update Site](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Update_Site%3FTocPath%3DAPI%2520Reference%7C_____84){:target="_blank"}  
+
+
+**Parameters**
+
+`site_item` |  The site item that you want to update. The settings specified in the site item override the current site settings.  
+
+
+**Exceptions**
+
+Error | Description
+:--- | :---  
+`Site item missing ID.` |    The site id must be present and must match the id of the site you are updating.   
+`You cannot set admin_mode to ContentOnly and also set a user quota`  |  To set the `user_quota`, the `AdminMode` must be set to `ContentAndUsers`
+
+
+**Returns**  
+
+Returns the updated `site_item`.  
+
+
+**Example**  
+
+```py
+...
+
+# make some updates to an existing site_item
+site_item.name ="New name"
+
+# call update
+site_item = server.sites.update(site_item)
+
+...
+```
+
+<br>
+<br>
+
+
+
+
+### sites.delete
+
+
+```py
+Sites.delete(site_id)
+```
+
+Deletes the specified site.
+
+
+REST API: [Delete Site](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Delete_Site%3FTocPath%3DAPI%2520Reference%7C_____27){:target="_name"}  
+
+
+**Parameters**
+  
+
+`site_id`    |       The id of the site that you want to delete.   
+
+
+
+**Exceptions**
+
+Error  |  Description  
+:---  | :---   
+`Site ID Undefined.`   |    The site id must be present and must match the id of the site you are deleting.   
+
+**Example**
+```py
+
+# import tableauserverclient as TSC
+# server = TSC.Server('http://MY-SERVER')
+# sign in, etc.
+
+server.sites.delete('9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d')
+
+```
+
+<br>
+<br>
+
 
 ## Projects
 
@@ -338,7 +843,7 @@ Source file: server/endpoint/views_endpoint.py
 <br>   
 <br>
 
-#### views.get()
+#### views.get
 ```
 views.get(req_option=None)
 ```
@@ -376,7 +881,7 @@ See [ViewItem class](#viewitem-class)
 <br>   
 <br>
 
-#### views.populate_preview_image(*view_item*)
+#### views.populate_preview_image
 
 ```py
  views.populate_preview_image(view_item)
@@ -1147,7 +1652,7 @@ An updated `UserItem`.    See [UserItem class](#useritem-class)
 
 Using the TSC library, you can get information about all the groups on a site, you can add or remove groups, or add or remove users in a group.
 
-The group resources for Tableau Server are defined in the `GroupItem` class. The class corresponds to the user resources you can access using the Tableau Server REST API. The group methods are based upon the endpoints for groups in the REST API and operate on the `GroupItem` class.
+The group resources for Tableau Server are defined in the `GroupItem` class. The class corresponds to the group resources you can access using the Tableau Server REST API. The group methods are based upon the endpoints for groups in the REST API and operate on the `GroupItem` class.
 
 <br>   
 <br> 
