@@ -22,6 +22,12 @@ This topic describes how to contribute to the Tableau Server Client (Python) pro
    git clone git@github.com:<user-name>/server-client-python.git
    ```
 
+1. Switch to the development branch
+
+   ```shell
+   git checkout development
+   ```
+
 1. Run the tests to make sure everything is peachy:
 
    ```shell
