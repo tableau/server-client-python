@@ -21,7 +21,7 @@ class Server(object):
         Overwrite = 'Overwrite'
         CreateNew = 'CreateNew'
 
-    def __init__(self, server_address):
+    def __init__(self, server_address, use_server_version=False):
         self._server_address = server_address
         self._auth_token = None
         self._site_id = None
@@ -40,6 +40,9 @@ class Server(object):
         self.projects = Projects(self)
         self.schedules = Schedules(self)
         self.server_info = ServerInfo(self)
+
+        if use_server_version:
+            self.use_highest_version()
 
     def add_http_options(self, options_dict):
         self._http_options.update(options_dict)
