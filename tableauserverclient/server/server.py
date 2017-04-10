@@ -42,7 +42,7 @@ class Server(object):
         self.server_info = ServerInfo(self)
 
         if use_server_version:
-            self.use_highest_version()
+            self.use_server_version()
 
     def add_http_options(self, options_dict):
         self._http_options.update(options_dict)
