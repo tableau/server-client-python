@@ -145,6 +145,17 @@ class DatasourceTests(unittest.TestCase):
             self.assertTrue(os.path.exists(file_path))
         os.remove(file_path)
 
+    def test_download_sanitizes_name(self):
+        filename = "Name,With,Commas.tds"
+        disposition = 'name="tableau_workbook"; filename="{}"'.format(filename)
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + '/1f951daf-4061-451a-9df1-69a8062664f2/content',
+                  headers={'Content-Disposition': disposition})
+            file_path = self.server.datasources.download('1f951daf-4061-451a-9df1-69a8062664f2')
+            self.assertEqual(os.path.basename(file_path), "NameWithCommas.tds")
+            self.assertTrue(os.path.exists(file_path))
+        os.remove(file_path)
+
     def test_download_extract_only(self):
         # Pretend we're 2.5 for 'extract_only'
         self.server.version = "2.5"
