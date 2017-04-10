@@ -3,6 +3,7 @@ from .exceptions import MissingRequiredFieldError
 from .fileuploads_endpoint import Fileuploads
 from .. import RequestFactory, WorkbookItem, ConnectionItem, ViewItem, PaginationItem
 from ...models.tag_item import TagItem
+from ...filesys_helpers import to_filename
 import os
 import logging
 import copy
@@ -112,7 +113,7 @@ class Workbooks(Endpoint):
 
         with closing(self.get_request(url, parameters={"stream": True})) as server_response:
             _, params = cgi.parse_header(server_response.headers['Content-Disposition'])
-            filename = os.path.basename(params['filename'])
+            filename = to_filename(os.path.basename(params['filename']))
             if filepath is None:
                 filepath = filename
             elif os.path.isdir(filepath):
