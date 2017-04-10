@@ -2,6 +2,7 @@ from .endpoint import Endpoint, api, parameter_added_in
 from .exceptions import MissingRequiredFieldError
 from .fileuploads_endpoint import Fileuploads
 from .. import RequestFactory, DatasourceItem, PaginationItem, ConnectionItem
+from ...filesys_helpers import to_filename
 import os
 import logging
 import copy
@@ -77,7 +78,7 @@ class Datasources(Endpoint):
 
         with closing(self.get_request(url, parameters={'stream': True})) as server_response:
             _, params = cgi.parse_header(server_response.headers['Content-Disposition'])
-            filename = os.path.basename(params['filename'])
+            filename = to_filename(os.path.basename(params['filename']))
             if filepath is None:
                 filepath = filename
             elif os.path.isdir(filepath):
