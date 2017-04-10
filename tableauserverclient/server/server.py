@@ -81,8 +81,13 @@ class Server(object):
 
         return version
 
-    def use_highest_version(self):
+    def use_server_version(self):
         self.version = self._determine_highest_version()
+
+    def use_highest_version(self):
+        self.use_server_version()
+        import warnings
+        warnings.warn("use use_server_version instead", DeprecationWarning)
 
     @property
     def baseurl(self):
