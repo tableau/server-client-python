@@ -92,7 +92,7 @@ class GroupTests(unittest.TestCase):
             m.post(self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users', text=response_xml)
             single_group = TSC.GroupItem('test')
             single_group._id = 'e7833b48-c6f7-47b5-a2a7-36e7dd232758'
-            single_group._users = set()
+            single_group._users = []
             self.server.groups.add_user(single_group, '5de011f8-5aa9-4d5b-b991-f462c8dd6bb7')
 
         self.assertEqual(1, len(single_group.users))
