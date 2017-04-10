@@ -58,10 +58,10 @@ class Groups(Endpoint):
     def remove_user(self, group_item, user_id):
         self._remove_user(group_item, user_id)
         try:
-            user_set = group_item.users
-            for user in user_set:
+            users = group_item.users
+            for user in users:
                 if user.id == user_id:
-                    user_set.remove(user)
+                    users.remove(user)
                     break
         except UnpopulatedPropertyError:
             # If we aren't populated, do nothing to the user list
@@ -73,9 +73,9 @@ class Groups(Endpoint):
     def add_user(self, group_item, user_id):
         new_user = self._add_user(group_item, user_id)
         try:
-            user_set = group_item.users
-            user_set.add(new_user)
-            group_item._set_users(user_set)
+            users = group_item.users
+            users.append(new_user)
+            group_item._set_users(users)
         except UnpopulatedPropertyError:
             # If we aren't populated, do nothing to the user list
             pass
