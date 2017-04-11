@@ -27,11 +27,14 @@ TableauAuth(username, password, site=None, site_id='', user_id_to_impersonate=No
 The `TableauAuth` class contains the attributes for the authentication resources. The `TableauAuth` class defines the information you can set in a  request or query from Tableau Server. The class members correspond to the attributes of a server request or response payload. To use this class, create a new instance, supplying user name, password, and site information if necessary, and pass the request object to the [Auth.sign_in](#auth.sign-in) method.
 
 **Attributes**  
-`username` : The name of the user whose credentials will be used to sign in.   
-`password` : The password of the user.   
-`site`  : (Deprecated) Use `site_id` instead.   
-`site_id` : This corresponds to the `contentUrl` attribute in the Tableau REST API. The `site_id` is the portion of the URL that follows the `/site/` in the URL. For example, "MarketingTeam" is the `site_id` in the following URL *MyServer*/#/site/**MarketingTeam**/projects. To specify the default site on Tableau Server, you can use an empty string **""**.  For Tableau Online, you must provide a value for the `site_id`.  
-`user_id_to_impersonate` :  Specifies the id (not the name) of the user to sign in as. 
+
+Name | Description   
+:--- | :---   
+`username` | The name of the user whose credentials will be used to sign in.   
+`password` | The password of the user.   
+`site`  | (Deprecated) Use `site_id` instead.   
+`site_id` | This corresponds to the `contentUrl` attribute in the Tableau REST API. The `site_id` is the portion of the URL that follows the `/site/` in the URL. For example, "MarketingTeam" is the `site_id` in the following URL *MyServer*/#/site/**MarketingTeam**/projects. To specify the default site on Tableau Server, you can use an empty string **" "**.  For Tableau Online, you must provide a value for the `site_id`.  
+`user_id_to_impersonate` |  Specifies the id (not the name) of the user to sign in as.   
 
 Source file: models/tableau_auth.py
 
@@ -41,7 +44,7 @@ Source file: models/tableau_auth.py
 import tableauserverclient as TSC
 # create a new instance of a TableauAuth object for authentication
 
-tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
+tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD', site_id='CONTENTURL')
 
 # create a server instance
 # pass the "tableau_auth" request object to server.auth.sign_in()
@@ -396,9 +399,23 @@ new_site = TSC.SiteItem(name='Tableau', content_url='tableau', admin_mode='Conte
 
 ```
 
-Source files: server/endpoint/sites_endpoint.py, models/site_item.py
+Source file: models/site_item.py  
 
-### sites.create
+<br>
+<br>  
+
+
+### Sites methods
+
+The TSC library provides methods that operate on sites for Tableau Server and Tableau Online. These methods correspond to endpoints or methods for sites in the Tableau REST API.   
+
+
+Source file: server/endpoint/sites_endpoint.py  
+
+<br>
+
+
+#### sites.create
 
 ```py
 sites.create(site_item)
@@ -444,7 +461,7 @@ new_site = server.sites.create(new_site)
 <br>  
 
 
-### sites.get_by_id
+#### sites.get_by_id
 
 ```py
 sites.get_by_id(site_id)
@@ -486,7 +503,7 @@ Returns the `SiteItem`.
 <br>
 <br>
 
-### sites.get
+#### sites.get
 
 ```py
 sites.get()
@@ -528,7 +545,7 @@ Returns a list of all `SiteItem` objects and a `PaginationItem`. Use these value
 <br>
 
 
-### sites.update
+#### sites.update
 
 ```py
 sites.update(site_item)
@@ -581,7 +598,7 @@ site_item = server.sites.update(site_item)
 
 
 
-### sites.delete
+#### sites.delete
 
 
 ```py
@@ -607,7 +624,8 @@ Error  |  Description
 :---  | :---   
 `Site ID Undefined.`   |    The site id must be present and must match the id of the site you are deleting.   
 
-**Example**
+**Example**  
+
 ```py
 
 # import tableauserverclient as TSC
@@ -621,76 +639,332 @@ server.sites.delete('9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d')
 <br>
 <br>
 
+   
 
 ## Projects
 
+Using the TSC library, you can get information about all the projects on a site, or you can create, update projects, or remove projects.
+
+The project resources for Tableau are defined in the `ProjectItem` class. The class corresponds to the project resources you can access using the Tableau Server REST API. The project methods are based upon the endpoints for projects in the REST API and operate on the `ProjectItem` class.
+
+
+
+
+
+<br>  
+
+### ProjectItem class  
+
+```py
+
+ProjectItem(name, description=None, content_permissions=None)
+
+```
+The project resources for Tableau are defined in the `ProjectItem` class. The class corresponds to the project resources you can access using the Tableau Server REST API. 
+
+**Attributes**  
+
+Name  |  Description
+:--- | :---  
+`content_permissions`  |  Sets or shows the permissions for the content in the project. The options are either `LockedToProject` or `ManagedByOwner`.
+`name` | Name of the project.
+`description` | The description of the project. 
+`id`  | The project id.
+
+
+
+Source file: models/project_item.py  
+
+
+#### ProjectItem.ContentPermissions
+
+The `ProjectItem` class has a sub-class that defines the permissions for the project (`ProjectItem.ContentPermissions`).  The options are `LockedToProject` and `ManagedByOwner`.  For information on these content permissions, see [Lock Content Permissions to the Project](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Create_Project%3FTocPath%3DAPI%2520Reference%7C_____15){:target="_blank"}   
+
+Name | Description   
+:--- | :---   
+`ProjectItem.ContentPermissions.LockedToProject`    |     Locks all content permissions to the project.     
+`ProjectItem.ContentPermissions.ManagedByOwner`  |  Users can manage permissions for content that they own. This is the default.   
+
+**Example**
+
+```py  
+
+# import tableauserverclient as TSC
+# server = TSC.Server('http://MY-SERVER')
+# sign in, etc
+
+
+locked_true = TSC.ProjectItem.ContentPermissions.LockedToProject
+print(locked_true)
+# prints 'LockedToProject'
+
+by_owner = TSC.ProjectItem.ContentPermissions.ManagedByOwner
+print(by_owner)
+# prints 'ManagedByOwner'
+
+
+# pass the content_permissions to new instance of the project item. 
+new_project = TSC.ProjectItem(name='My Project', content_permissions=by_owner, description='Project example')
+
+```
+
+<br>
+<br>
+
+###  Projects methods  
+
+
+
+
 Source files: server/endpoint/projects_endpoint.py
 
-### Create Project
+<br>
+<br>  
 
-Creates a project for the given project item object.
 
-```py
-Projects.create(project_item_object)
-```
-
-Example:
+#### projects.create
 
 ```py
-new_project = TSC.ProjectItem(name='Test Project', description='Project created for testing')
-new_project.content_permissions = 'ManagedByOwner'
-self.server.projects.create(new_project)
-```
+projects.create(project_item)
+```  
 
-### Get Projects
+
+Creates a project on the specified site.
+
+To create a project, you first create a new instance of a `ProjectItem` and pass it to the create method. To specify the site to create the new project, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site.  See the [TableauAuth class](#tableauauth-class).  
+
+
+REST API: [Create Project](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Create_Project%3FTocPath%3DAPI%2520Reference%7C_____15){:target="_blank"}  
+
+**Parameters**
+
+Name | Description
+:--- | :--- 
+`project_item` | Specifies the properties for the project. The `project_item` is the request package. To create the request package, create a new instance of `ProjectItem`. 
+
+
+**Returns**
+Returns the new project item.  
+
+
+
+**Example**
 
 ```py
-Projects.get()
+import tableauserverclient as TSC
+tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD', site_id='CONTENTURL')
+server = TSC.Server('http://SERVER')
+
+with server.auth.sign_in(tableau_auth): 
+    # create project item
+    new_project = TSC.ProjectItem(name='Example Project', content_permissions='LockedToProject', description='Project created for testing')
+    # create the project 
+    new_project = server.projects.create(new_project)
+
 ```
 
-Get the first 100 projects on the server. To get all projects, use the Pager.
+<br>
+<br>  
 
-### Update Project
+
+#### projects.get
 
 ```py
-Projects.update(project_item)
+projects.get()  
+
 ```
 
-Modify a project. 
+Return a list of project items for a site. 
 
-You can use this method to update the project name, the project description, or the project permissions.
 
-##### Parameters
+To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site.  See the [TableauAuth class](#tableauauth-class).  
+
+REST API: [Query Projects](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Projects%3FTocPath%3DAPI%2520Reference%7C_____55){:target="_blank"}  
+
+
+**Parameters**  
+
+None.
+
+**Returns**  
+
+Returns a list of all `ProjectItem` objects and a `PaginationItem`. Use these values to iterate through the results.
+ 
+
+
+ **Example**  
+
+```py    
+import tableauserverclient as TSC  
+tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD', site_id='CONTENTURL')  
+server = TSC.Server('http://SERVER')  
+
+with server.auth.sign_in(tableau_auth): 
+        # get all projects on site
+        all_project_items, pagination_item = server.projects.get()
+        print([proj.name for proj in all_project_items])
+
+```
+
+<br>
+<br>  
+
+
+#### projects.update
+
+```py
+projects.update(project_item)
+```
+
+Modify the project settings. 
+
+You can use this method to update the project name, the project description, or the project permissions. To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site.  See the [TableauAuth class](#tableauauth-class).   
+
+REST API: [Update Project](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Update_Project%3FTocPath%3DAPI%2520Reference%7C_____82){:target="_blank"}  
+
+**Parameters**
 
 `project_item`
 
   The project item object must include the project ID. The values in the project item override the current project settings. 
 
-##### Returns
+
+**Exceptions**  
+
+`Project item missing ID.`  | Raises an exception if the project item does not have an ID. The project ID is sent to the server as part of the URI. 
+
+
+**Returns**
 
 Returns the updated project information. 
 
-See ProjectItem
+See [ProjectItem class]()
 
-### Delete Project
+```py
+# import tableauserverclient as TSC
+# server = TSC.Server('http://MY-SERVER')
+# sign in, etc
+
+  ...
+
+  all_project_items, pagination_item = server.projects.get()
+  print([prj.name for prj in all_project_items])
+
+  # update project item #7 with new name, etc.
+  all_projects[7].name ='New name'
+  all_projects[7].description = 'New description'      
+  
+  # call method to update project      
+  updated_proj = server.projects.update(all_projects[7])
+ 
+
+  
+
+```
+<br>
+<br> 
+  
+
+#### projects.delete
+
+```py
+projects.delete(project_id)
+```
 
 Deletes a project by ID.
 
+
+To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site.  See the [TableauAuth class](#tableauauth-class).  
+
+
+REST API: [Delete Project](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Delete_Project%3FTocPath%3DAPI%2520Reference%7C_____24){:target="_blank"}  
+
+
+**Parameters**
+
+`project_id`   | The ID of the project to delete. 
+
+**Exceptions**    
+
+`Project ID undefined.`  |  Raises an exception if the project item does not have an ID. The project ID is sent to the server as part of the URI. 
+
+
+**Example**  
+ 
 ```py
-Projects.delete(id)
-```
+# import tableauserverclient as TSC  
+# server = TSC.Server('http://MY-SERVER')  
+# sign in, etc.  
+
+ server.projects.delete('1f2f3e4e-5d6d-7c8c-9b0b-1a2a3f4f5e6e')
+
+```  
+
+
+<br>
+<br>  
+
+
 
 ## Workbooks
 
-Source files: server/endpoint/workbooks_endpoint.py, models/workbook_item.py
+Using the TSC library, you can get information about a specific workbook or all the workbooks on a site, and  you can publish, update, or delete workbooks.
 
-### Get Workbooks
+The project resources for Tableau are defined in the `WorkbookItem` class. The class corresponds to the workbook resources you can access using the Tableau REST API. The workbook methods are based upon the endpoints for projects in the REST API and operate on the `WorkbookItem` class.
 
-Get the first 100 workbooks on the server. To get all workbooks, use the Pager.
+
+
+
+
+<br>
+<br> 
+
+### WorkbookItem class  
+
+```py 
+ 
+ WorkbookItem(project_id, name=None, show_tabs=False)
+ 
+```
+The workbook resources for Tableau are defined in the `WorkbookItem` class. The class corresponds to the workbook resources you can access using the Tableau REST API. 
+
+
+**Attributes**  
+
+Name  |  Description
+:--- | :---  
+`content_permissions`  |  Sets or shows the permissions for the content in the project. The options are either `LockedToProject` or `ManagedByOwner`.
+`name` | Name of the project.
+`description` | The description of the project. 
+`id`  | The project id.
+
+
+
+Source file: models/workbook_item.py  
+
+<br>
+<br>  
+
+### Workbooks methods
+
+
+
+
+
+
+Source files: server/endpoint/workbooks_endpoint.py
+
+
+
+#### workbooks.get  
 
 ```py
 Workbooks.get()
 ```
+
+Get the first 100 workbooks on the server. To get all workbooks, use the Pager.
+
+
 
 ### Get Workbook by ID
 
@@ -926,27 +1200,20 @@ DatasourceItem(project_id, name=None)
 
 The `DatasourceItem` represents the data source resources on Tableau Server. This is the information that can be sent or returned in the response to an REST API request for data sources.  When you create a new `DatasourceItem` instance, you must specify the `project_id` that the data source is associated with.
 
-**Attributes**
+**Attributes**  
 
-`connections` :  The list of data connections (`ConnectionItem`) for the specified data source. You must first call the `populate_connections` method to access this data. See the [ConnectionItem class](#connectionitem-class).
-
-`content_url` :  The name of the data source as it would appear in a URL. 
-
-`created_at` :  The date and time when the data source was created.  
-
-`datasource_type` : The type of data source, for example, `sqlserver` or `excel-direct`. 
-
-`id` : The identifier for the data source. You need this value to query a specific data source or to delete a data source with the `get_by_id` and `delete` methods. 
-
-`name`  : The name of the data source. If not specified, the name of the published data source file is used. 
-
-`project_id` :  The identifer of the project associated with the data source. When you must provide this identifier when create an instance of a `DatasourceItem`
-
-`project_name` :  The name of the project associated with the data source. 
-
-`tags` :  The tags that have been added to the data source. 
-
-`updated_at` :  The date and time when the data source was last updated. 
+Name | Description  
+:--- | :--- 
+`connections` |  The list of data connections (`ConnectionItem`) for the specified data source. You must first call the `populate_connections` method to access this data. See the [ConnectionItem class](#connectionitem-class).
+`content_url` |  The name of the data source as it would appear in a URL. 
+`created_at` |  The date and time when the data source was created.  
+`datasource_type` | The type of data source, for example, `sqlserver` or `excel-direct`. 
+`id` |  The identifier for the data source. You need this value to query a specific data source or to delete a data source with the `get_by_id` and `delete` methods. 
+`name`  |  The name of the data source. If not specified, the name of the published data source file is used. 
+`project_id` |  The identifer of the project associated with the data source. When you must provide this identifier when create an instance of a `DatasourceItem`
+`project_name` |  The name of the project associated with the data source. 
+`tags` |  The tags that have been added to the data source. 
+`updated_at` |  The date and time when the data source was last updated. 
 
 
 **Example**
@@ -974,7 +1241,7 @@ Source file: server/endpoint/datasources_endpoint.py
 <br> 
 <br>
 
-#### ds.delete(*datasource_id*)
+#### datasources.delete  
 
 ```py
 datasources.delete(datasource_id)
@@ -999,7 +1266,7 @@ REST API: [Delete Datasource](http://onlinehelp.tableau.com/v0.0/api/rest_api/en
 <br>
 
 
-#### ds.download(*datasource_id*, *filepath=None*)
+#### datasources.download
 
 ```py
 datasources.download(datasource_id, filepath=None)
@@ -1031,7 +1298,7 @@ The data source in `.tdsx` format.
 <br> 
 <br>
 
-#### ds.get()
+#### datasources.get
 
 ```py
 datasources.get(req_options=None)
@@ -1074,7 +1341,7 @@ with server.auth.sign_in(tableau_auth):
 <br>  
 
 
-#### ds.get_by_id(*datasource_id*)
+#### datasources.get_by_id
 
 ```py
 datasources.get_by_id(datasource_id)
@@ -1115,7 +1382,7 @@ print(datasource.name)
 
 <a name="populate-connections-datasource"></a>
 
-#### ds.populate_connections(*datasource_item*)
+#### datasources.populate_connections
 
 ```py
 datasources.populate_connections(datasource_item)
@@ -1176,7 +1443,7 @@ None. A list of `ConnectionItem` objects are added to the data source (`datasour
 <br>   
 <br>  
 
-#### ds.publish(*datasource_item*, *file_path*, *mode*, *connection_credentials=None*)
+#### datasources.publish
 
 ```py
 datasources.publish(datasource_item, file_path, mode, connection_credentials=None)
@@ -1239,7 +1506,7 @@ The `DatasourceItem` for the data source that was added or appened to.
 <br>   
 <br>  
 
-#### ds.update(*datasource_item*)
+#### datasources.update
 
 ```py
 datasource.update(datasource_item)
@@ -1273,6 +1540,7 @@ An updated `DatasourceItem`.
     ...
 
     single_datasource = TSC.DatasourceItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
+    # need to specify the ID - this is a workaround. 
     single_datasource._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
     single_datasource._tags = ['a', 'b', 'c']
     single_datasource._project_name = 'Tester'
@@ -1281,13 +1549,6 @@ An updated `DatasourceItem`.
      ...
 
 ```
-
-Source files: server/endpoint/datasources_endpoint.py, models/datasource_item.py
-
-
-
-
-
 
 
 
@@ -1311,18 +1572,18 @@ The `UserItem` class contains the members or attributes for the view resources o
 
 **Attributes**
 
-`auth_setting` : (Optional) This attribute is only  for Tableau Online. The new authentication type for the user. You can assign the following values for this attribute: `SAML` (the user signs in using SAML) or `ServerDefault` (the user signs in using the authentication method that's set for the server). These values appear in the **Authentication** tab on the **Settings** page in Tableau Online -- the `SAML` attribute value corresponds to **Single sign-on**, and the `ServerDefault` value corresponds to **TableauID**.
-
-`domain_name`  :    The name of the site.   
-`external_auth_user_id` :   Represents ID stored in Tableau's single sign-on (SSO) system. The `externalAuthUserId` value is returned for Tableau Online. For other server configurations, this field contains null.    
-`id` :   The id of the user on the site.  
-`last_login` : The date and time the user last logged in.         
-`workbooks` :  The workbooks the user owns. You must run the populate_workbooks method to add the workbooks to the `UserItem`.  
-
-`email` :  The email address of the user.    
-`fullname` : The full name of the user.    
-`name` :   The name of the user. This attribute is required when you are creating a `UserItem` instance.  
-`site_role` :  The role the user has on the site. This attribute is required with you are creating a `UserItem` instance. The `site_role` can be one of the following: `Interactor`, `Publisher`, `ServerAdministrator`, `SiteAdministrator`, `Unlicensed`, `UnlicensedWithPublish`, `Viewer`, `ViewerWithPublish`, `Guest`
+Name | Description  
+:--- | :---  
+`auth_setting` | (Optional) This attribute is only  for Tableau Online. The new authentication type for the user. You can assign the following values for tis attribute: `SAML` (the user signs in using SAML) or `ServerDefault` (the user signs in using the authentication method that's set for the server). These values appear in the **Authentication** tab on the **Settings** page in Tableau Online -- the `SAML` attribute value corresponds to **Single sign-on**, and the `ServerDefault` value corresponds to **TableauID**.  
+`domain_name`  |    The name of the site.   
+`external_auth_user_id` |   Represents ID stored in Tableau's single sign-on (SSO) system. The `externalAuthUserId` value is returned for Tableau Online. For other server configurations, this field contains null.    
+`id` |   The id of the user on the site.  
+`last_login` | The date and time the user last logged in.         
+`workbooks` |  The workbooks the user owns. You must run the populate_workbooks method to add the workbooks to the `UserItem`.  
+`email` |  The email address of the user.    
+`fullname` | The full name of the user.    
+`name` |   The name of the user. This attribute is required when you are creating a `UserItem` instance.  
+`site_role` |  The role the user has on the site. This attribute is required with you are creating a `UserItem` instance. The `site_role` can be one of the following: `Interactor`, `Publisher`, `ServerAdministrator`, `SiteAdministrator`, `Unlicensed`, `UnlicensedWithPublish`, `Viewer`, `ViewerWithPublish`, `Guest`
 
 
 **Example**
@@ -1344,7 +1605,7 @@ Source file: models/user_item.py
 <br>
 
 
-###  Users Methods
+###  Users methods
 
 The Tableau Server Client provides several methods for interacting with user resources, or endpoints. These methods correspond to endpoints in the Tableau Server REST API.
 
@@ -1352,7 +1613,7 @@ Source file: server/endpoint/users_endpoint.py
 <br> 
 <br>
 
-#### users.add(*user_item*)
+#### users.add
 
 ```py
 users.add(user_item)
@@ -1392,7 +1653,7 @@ Returns the new `UserItem` object.
 
 ```
 
-### users.get
+#### users.get
 
 ```py
 users.get(req_options=None)
@@ -1432,8 +1693,7 @@ with server.auth.sign_in(tableau_auth):
 <br>
 <br>
 
-#### users.get_by_id(*user_id*)
-
+#### users.get_by_id
 
 ```py
 users.get_by_id(user_id)
@@ -1485,7 +1745,7 @@ Returns the list of favorites (views, workbooks, and data sources) for a user.
 <br> 
 
 
-#### users.populate_workbooks(*user_item*, *req_options=None*)
+#### users.populate_workbooks
 
 ```py
 users.populate_workbooks(user_item, req_options=None):
@@ -1539,7 +1799,7 @@ A `PaginationItem` that points (`user_item.workbooks`). See [UserItem class](#us
 <br>   
 <br>
 
-#### users.remove(*user_id*)
+#### users.remove
 
 ```py
 users.remove(user_id)    
@@ -1581,7 +1841,7 @@ REST API: [Remove User from Site](http://onlinehelp.tableau.com/current/api/rest
 
 
 
-#### users.update(*user_item*, *password=None*)  
+#### users.update  
 
 ```py
 users.update(user_item, password=None)
