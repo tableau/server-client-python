@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.6.xsd">
+	<tags>
+		<tag label="a" />
+		<tag label="b" />
+		<tag label="c" />
+		<tag label="d" />
+	</tags>
+</tsResponse>

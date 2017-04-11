@@ -1,9 +1,11 @@
 from .endpoint import Endpoint, api, parameter_added_in
 from .exceptions import MissingRequiredFieldError
 from .fileuploads_endpoint import Fileuploads
+from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, WorkbookItem, ConnectionItem, ViewItem, PaginationItem
 from ...models.tag_item import TagItem
 from ...filesys_helpers import to_filename
+
 import os
 import logging
 import copy
@@ -19,21 +21,13 @@ logger = logging.getLogger('tableau.endpoint.workbooks')
 
 
 class Workbooks(Endpoint):
+    def __init__(self, parent_srv):
+        super(Workbooks, self).__init__(parent_srv)
+        self._resource_tagger = _ResourceTagger(parent_srv)
+
     @property
     def baseurl(self):
         return "{0}/sites/{1}/workbooks".format(self.parent_srv.baseurl, self.parent_srv.site_id)
-
-    # Add new tags to workbook
-    def _add_tags(self, workbook_id, tag_set):
-        url = "{0}/{1}/tags".format(self.baseurl, workbook_id)
-        add_req = RequestFactory.Tag.add_req(tag_set)
-        server_response = self.put_request(url, add_req)
-        return TagItem.from_response(server_response.content)
-
-    # Delete a workbook's tag by name
-    def _delete_tag(self, workbook_id, tag_name):
-        url = "{0}/{1}/tags/{2}".format(self.baseurl, workbook_id, tag_name)
-        self.delete_request(url)
 
     # Get all workbooks on site
     @api(version="2.0")
@@ -73,16 +67,7 @@ class Workbooks(Endpoint):
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
 
-        # Remove and add tags to match the workbook item's tag set
-        if workbook_item.tags != workbook_item._initial_tags:
-            add_set = workbook_item.tags - workbook_item._initial_tags
-            remove_set = workbook_item._initial_tags - workbook_item.tags
-            for tag in remove_set:
-                self._delete_tag(workbook_item.id, tag)
-            if add_set:
-                workbook_item.tags = self._add_tags(workbook_item.id, add_set)
-            workbook_item._initial_tags = copy.copy(workbook_item.tags)
-        logger.info('Updated workbook tags to {0}'.format(workbook_item.tags))
+        self._resource_tagger.update_tags(self.baseurl, workbook_item)
 
         # Update the workbook itself
         url = "{0}/{1}".format(self.baseurl, workbook_item.id)
@@ -101,14 +86,14 @@ class Workbooks(Endpoint):
 
     # Download workbook contents with option of passing in filepath
     @api(version="2.0")
-    @parameter_added_in(no_extract='2.5')
-    def download(self, workbook_id, filepath=None, no_extract=False):
+    @parameter_added_in(version="2.5", parameters=['extract_only'])
+    def download(self, workbook_id, filepath=None, extract_only=False):
         if not workbook_id:
             error = "Workbook ID undefined."
             raise ValueError(error)
         url = "{0}/{1}/content".format(self.baseurl, workbook_id)
 
-        if no_extract:
+        if extract_only:
             url += "?includeExtract=False"
 
         with closing(self.get_request(url, parameters={"stream": True})) as server_response:

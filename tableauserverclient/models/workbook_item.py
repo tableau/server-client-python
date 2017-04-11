@@ -22,9 +22,9 @@ class WorkbookItem(object):
         self._views = None
         self.name = name
         self.owner_id = None
-        self.tags = set()
         self.project_id = project_id
         self.show_tabs = show_tabs
+        self.tags = set()
 
     @property
     def connections(self):
@@ -97,12 +97,6 @@ class WorkbookItem(object):
 
     def _set_preview_image(self, preview_image):
         self._preview_image = preview_image
-
-    def _set_initial_tags(self, initial_tags):
-        self._initial_tags = initial_tags
-
-    def _get_initial_tags(self):
-        return self._initial_tags
 
     def _parse_common_tags(self, workbook_xml):
         if not isinstance(workbook_xml, ET.Element):

@@ -1,8 +1,10 @@
 from .endpoint import Endpoint, api, parameter_added_in
 from .exceptions import MissingRequiredFieldError
 from .fileuploads_endpoint import Fileuploads
+from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, DatasourceItem, PaginationItem, ConnectionItem
 from ...filesys_helpers import to_filename
+from ...models.tag_item import TagItem
 import os
 import logging
 import copy
@@ -18,6 +20,10 @@ logger = logging.getLogger('tableau.endpoint.datasources')
 
 
 class Datasources(Endpoint):
+    def __init__(self, parent_srv):
+        super(Datasources, self).__init__(parent_srv)
+        self._resource_tagger = _ResourceTagger(parent_srv)
+
     @property
     def baseurl(self):
         return "{0}/sites/{1}/datasources".format(self.parent_srv.baseurl, self.parent_srv.site_id)
@@ -66,14 +72,14 @@ class Datasources(Endpoint):
 
     # Download 1 datasource by id
     @api(version="2.0")
-    @parameter_added_in(no_extract='2.5')
-    def download(self, datasource_id, filepath=None, no_extract=False):
+    @parameter_added_in(version="2.5", parameters=['extract_only'])
+    def download(self, datasource_id, filepath=None, extract_only=False):
         if not datasource_id:
             error = "Datasource ID undefined."
             raise ValueError(error)
         url = "{0}/{1}/content".format(self.baseurl, datasource_id)
 
-        if no_extract:
+        if extract_only:
             url += "?includeExtract=False"
 
         with closing(self.get_request(url, parameters={'stream': True})) as server_response:
@@ -97,6 +103,10 @@ class Datasources(Endpoint):
         if not datasource_item.id:
             error = 'Datasource item missing ID. Datasource must be retrieved from server first.'
             raise MissingRequiredFieldError(error)
+
+        self._resource_tagger.update_tags(self.baseurl, datasource_item)
+
+        # Update the datasource itself
         url = "{0}/{1}".format(self.baseurl, datasource_item.id)
         update_req = RequestFactory.Datasource.update_req(datasource_item)
         server_response = self.put_request(url, update_req)
