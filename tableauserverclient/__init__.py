@@ -6,9 +6,7 @@ from .models import ConnectionCredentials, ConnectionItem, DatasourceItem,\
 from .server import RequestOptions, Filter, Sort, Server, ServerResponseError,\
     MissingRequiredFieldError, NotSignedInError, Pager
 
-__version__ = '0.0.1'
-__VERSION__ = __version__
-
 from ._version import get_versions
 __version__ = get_versions()['version']
+__VERSION__ = __version__
 del get_versions
