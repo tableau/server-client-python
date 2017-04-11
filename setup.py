@@ -1,3 +1,4 @@
+import versioneer
 try:
     from setuptools import setup
 except ImportError:
@@ -5,7 +6,8 @@ except ImportError:
 
 setup(
     name='tableauserverclient',
-    version='0.3',
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     author='Tableau',
     author_email='github@tableau.com',
     url='https://github.com/tableau/server-client-python',
