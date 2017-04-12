@@ -8,9 +8,11 @@ layout: docs
     Until this reference is completed, we have noted the source files in the TSC library where you can get more information for individual endpoints.
 </div>
 
-* TOC
-{:toc}
-{:toc_levels(1,2,3)}
+* TOC  
+{:toc }
+<!-- {:toc ::options toc_levels="1,2"} -->
+
+<!-- {::toc_levels(1,2,3)} -->
 
 ## Authentication
 
@@ -145,18 +147,17 @@ The connections for Tableau Server data sources and workbooks are represented by
 ### ConnectionItem class
 
 ```py
-ConnectionItem(object)
+ConnectionItem()
 ```
 
-**Attributes**
+**Attributes**  
 
-`datasource_id` :  The identifier of the data source. 
-
-`datasource_name` :  The name of the data source.
-
-`id`  :  The identifer of the connection.
-
-`connection_type`  :  The type of connection. 
+Name   |  Description     
+ :--- | : ---    
+`datasource_id` |  The identifier of the data source. 
+`datasource_name` |  The name of the data source.
+`id`  |  The identifer of the connection.
+`connection_type`  |  The type of connection. 
 
 
 Source file: models/connection_item.py  
@@ -213,9 +214,10 @@ The `Server` class contains the attributes that represent the server on Tableau 
 
 **Attributes**
 
-`server_address`  :  Specifies the address of the Tableau Server or Tableau Online (for example, `http://MY-SERVER/`).  
-
-`version`   :  Specifies the version of the REST API to use (for example, `2.5`). When you use the TSC library to call methods that access Tableau Server, the `version` is passed to the endpoint as part of the URI (`https://MY-SERVER/api/2.5/`). Each release of Tableau Server supports specific versions of the REST API. New versions of the REST API are released with Tableau Server. By default, the value of `version` is set to 2.3, which corresponds to Tableau Server 10.0.  You can view or set this value. You might need to set this to a different value, for example, if you want to access features that are supported by the server and a later version of the REST API.  For more information, see [REST API Versions](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_concepts_versions.htm){:target="_blank"}  
+Attribute | Description
+:--- | :---
+`server_address`  |  Specifies the address of the Tableau Server or Tableau Online (for example, `http://MY-SERVER/`).  
+`version`   |  Specifies the version of the REST API to use (for example, `2.5`). When you use the TSC library to call methods that access Tableau Server, the `version` is passed to the endpoint as part of the URI (`https://MY-SERVER/api/2.5/`). Each release of Tableau Server supports specific versions of the REST API. New versions of the REST API are released with Tableau Server. By default, the value of `version` is set to 2.3, which corresponds to Tableau Server 10.0.  You can view or set this value. You might need to set this to a different value, for example, if you want to access features that are supported by the server and a later version of the REST API.  For more information, see [REST API Versions](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_concepts_versions.htm){:target="_blank"}  
 
 
 
@@ -234,14 +236,14 @@ server.version = 2.5
 
 ```
 
-#### Server.*Resources* (Objects)  
+#### Server.*Resources*  
 
 When you create an instance of the `Server` class, you have access to the resources on the server after you sign in. You can select these resources and their methods as members of the class, for example: `server.views.get()`  
 
 
 
-Resource   |  Description  |   
- --- | ---|  
+Resource   |  Description     
+ :--- | : ---    
 *server*.auth   |   Sets authentication for sign in and sign out. See [Auth](#auththentication)  |
 *server*.views  |   Access the server views and methods.  See [Views](#views)  
 *server*.users  |   Access the user resources and methods.  See [Users](#users)  
@@ -261,9 +263,14 @@ Resource   |  Description  |
 The `Server` class has `PublishMode` class that enumerates the options that specify what happens when you publish a workbook or data source. The options are `Overwrite`,  `Append`, or `CreateNew`. 
 
 
-**Properties**
+**Properties**  
 
-`PublishMode.Overwrite`  : The `Server` class has `PublishMode` class that you can set to specify what happens when you publish a workbook or data source. The options are `Overwrite`,  `Append`, or `CreateNew`. 
+Resource   |  Description     
+ :--- | : ---  
+`PublishMode.Overwrite`  | Overwrites the workbook or data source. 
+`PublishMode.Append` |  Appends to the workbook or data source.
+`PublishMode.CreateNew` |  Creates a new workbook or data source.  
+
 
 **Example**
 
@@ -294,11 +301,13 @@ ServerInfoItem(product_version, build_number, rest_api_version)
 ```
 The `ServerInfoItem` class contains the builid and version information for Tableau Server. The server information is accessed with the `server_info.get()` method, which returns an instance of the `ServerInfo` class. 
 
-**Attributes**
+**Attributes**  
 
-`product_version`  :  Shows the version of the Tableau Server or Tableau Online (for example, 10.2.0).   
-`build_number`   :  Shows the specific build number (for example, 10200.17.0329.1446).
-`rest_api_version`  :  Shows the supported REST API version number. Note that this might be different from the default value specified for the server, with the `Server.version` attribute. To take advantage of new features, you should query the server and set the `Server.version` to match the supported REST API version number. 
+Name  |  Description  
+:--- | :---    
+`product_version`  |  Shows the version of the Tableau Server or Tableau Online (for example, 10.2.0).   
+`build_number`   |  Shows the specific build number (for example, 10200.17.0329.1446).
+`rest_api_version`  |  Shows the supported REST API version number. Note that this might be different from the default value specified for the server, with the `Server.version` attribute. To take advantage of new features, you should query the server and set the `Server.version` to match the supported REST API version number.    
 
 
 <br>
@@ -328,7 +337,9 @@ REST API: [Server Info](https://onlinehelp.tableau.com/current/api/rest_api/en-u
  
 **Exceptions**
 
-`404003	UNKNOWN_RESOURCE`  :  Raises an exception if the server info endpoint is not found. 
+Error  |  Description  
+:--- | :---  
+`404003	UNKNOWN_RESOURCE`  |  Raises an exception if the server info endpoint is not found. 
 
 **Example**
 
@@ -405,7 +416,7 @@ Source file: models/site_item.py
 <br>  
 
 
-### Sites methods
+### Site methods
 
 The TSC library provides methods that operate on sites for Tableau Server and Tableau Online. These methods correspond to endpoints or methods for sites in the Tableau REST API.   
 
@@ -413,7 +424,7 @@ The TSC library provides methods that operate on sites for Tableau Server and Ta
 Source file: server/endpoint/sites_endpoint.py  
 
 <br>
-
+<br> 
 
 #### sites.create
 
@@ -432,7 +443,9 @@ REST API: [Create Site](https://onlinehelp.tableau.com/current/api/rest_api/en-u
 
 **Parameters**  
   
-`site_item` : The settings for the site that you want to create. You need to create an instance of `SiteItem` and pass the the `create` method.
+Name  |  Description  
+:--- | :---  
+`site_item` | The settings for the site that you want to create. You need to create an instance of `SiteItem` and pass the the `create` method.
 
 
 **Returns**  
@@ -474,6 +487,8 @@ REST API: [Query  Site](https://onlinehelp.tableau.com/current/api/rest_api/en-u
 
 **Parameters**  
 
+Name  |  Description  
+:--- | :---  
 `site_id`  | The id for the site you want to query. 
 
 
@@ -560,8 +575,10 @@ The site item object must include the site ID and overrides all other settings.
 REST API: [Update Site](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Update_Site%3FTocPath%3DAPI%2520Reference%7C_____84){:target="_blank"}  
 
 
-**Parameters**
+**Parameters**  
 
+Name  |  Description  
+:--- | :---  
 `site_item` |  The site item that you want to update. The settings specified in the site item override the current site settings.  
 
 
@@ -711,9 +728,9 @@ new_project = TSC.ProjectItem(name='My Project', content_permissions=by_owner, d
 <br>
 <br>
 
-###  Projects methods  
+###  Project methods  
 
-
+The project methods are based upon the endpoints for projects in the REST API and operate on the `ProjectItem` class.
 
 
 Source files: server/endpoint/projects_endpoint.py
@@ -824,9 +841,9 @@ REST API: [Update Project](http://onlinehelp.tableau.com/current/api/rest_api/en
 
 **Parameters**
 
-`project_item`
-
-  The project item object must include the project ID. The values in the project item override the current project settings. 
+Name  |  Description  
+:--- | :---  
+`project_item` |  The project item object must include the project ID. The values in the project item override the current project settings. 
 
 
 **Exceptions**  
@@ -882,10 +899,14 @@ REST API: [Delete Project](http://onlinehelp.tableau.com/current/api/rest_api/en
 
 **Parameters**
 
+Name  |  Description  
+:--- | :---  
 `project_id`   | The ID of the project to delete. 
 
 **Exceptions**    
 
+Error  |  Description  
+:--- | :---  
 `Project ID undefined.`  |  Raises an exception if the project item does not have an ID. The project ID is sent to the server as part of the URI. 
 
 
@@ -903,6 +924,55 @@ REST API: [Delete Project](http://onlinehelp.tableau.com/current/api/rest_api/en
 
 <br>
 <br>  
+
+
+## Requests
+
+The TSC library provides a `RequestOptions` class that you can use to filter and sort. 
+
+### RequestOptions class
+
+```py  
+RequestOptions(pagenumber=1, pagesize=100)
+
+```
+
+**Attributes**
+
+Name  |  Description  
+:--- | :---  
+`pagenumber` | The page number of the returned results. The defauilt value is 1.
+`pagesize` |  The number of items to return with each page (the default value is 100).
+`sort()`      | Returns a iterable set of `Sort` objects. 
+`filter()` | Returns an iterable set of `Filter` objects. 
+
+
+
+
+#### RequestOptions.Field class
+
+#### RequestOptions.Operator class
+<br>
+<br>  
+
+
+## Sort
+
+The `Sort` class is used with request options where you can filter and sort on the results returned from the server. 
+
+### Sort class
+
+```py
+sort(field, direction)
+``` 
+
+
+**Attributes**  
+
+Name  |  Description
+:--- | :---  
+`field`  |  Sets the field to sort on. The fields are defined in the `RequestOption` class. 
+`direction` | Name of the project.
 
 
 
@@ -926,144 +996,352 @@ The project resources for Tableau are defined in the `WorkbookItem` class. The c
  WorkbookItem(project_id, name=None, show_tabs=False)
  
 ```
-The workbook resources for Tableau are defined in the `WorkbookItem` class. The class corresponds to the workbook resources you can access using the Tableau REST API. 
+The workbook resources for Tableau are defined in the `WorkbookItem` class. The class corresponds to the workbook resources you can access using the Tableau REST API. Some workbook methods take an instance of the `WorkbookItem` class as arguments. The workbook item specifies the project
 
 
 **Attributes**  
 
 Name  |  Description
 :--- | :---  
-`content_permissions`  |  Sets or shows the permissions for the content in the project. The options are either `LockedToProject` or `ManagedByOwner`.
-`name` | Name of the project.
+`connections` |  The list of data connections (`ConnectionItem`) for the data sources used by the workbook. You must first call the [workbooks.populate_connections](#workbooks.populate_connections) method to access this data. See the [ConnectionItem class](#connectionitem-class).
+`content_url` |  The name of the data source as it would appear in a URL. 
+`created_at` |  The date and time when the data source was created.  
+`id` |  The identifier for the workbook. You need this value to query a specific workbook or to delete a workbook with the `get_by_id` and `delete` methods. 
+`name` | The name of the workbook. 
+`preview_image`  | The list of 
+`project_id`  | The project id.
+`project_name` | The name of the project.
+`tags` |  The tags that have been added to the workbook. 
+`updated_at` |  The date and time when the workbook was last updated.
+`views`   | The list of views (`ViewItem`) for the workbook. You must first call the [workbooks.populate_views](#workbooks.populate_viewss) method to access this data. See the [ViewItem class](#viewitem-class).
+
+
+
+`connections` |  The list of data connections (`ConnectionItem`) for the specified data source. You must first call the `populate_connections` method to access this data. See the [ConnectionItem class](#connectionitem-class).
+name` | Name of the project.
 `description` | The description of the project. 
-`id`  | The project id.
+`project_id`  | The project id.
+`show_tabs`  |  (Boolean)
+`connections` |  The list of data connections (`ConnectionItem`) for the specified data source. You must first call the [workbooks.populate_connections](#workbooks.populate_connections) method to access this data. See the [ConnectionItem class](#connectionitem-class).
+`content_url` |  The name of the data source as it would appear in a URL. 
+`created_at` |  The date and time when the data source was created.  
+
+`datasource_type` | The type of data source, for example, `sqlserver` or `excel-direct`. 
+`id` |  The identifier for the data source. You need this value to query a specific data source or to delete a data source with the `get_by_id` and `delete` methods. 
+`name`  |  The name of the workbook. If not specified, the name of the published workbook file is used. 
+`project_id` |  The identifer of the project associated with the workbook. When you must provide this identifier when create an instance of a `WorkbookItem`. 
+`project_name` |  The name of the project associated with the data source. 
+`tags` |  The tags that have been added to the data source. 
+`updated_at` |  The date and time when the data source was last updated. 
 
 
+    self._connections = None
+        self._content_url = None
+        self._created_at = None
+        self._id = None
+        self._initial_tags = set()
+        self._preview_image = None
+        self._project_name = None
+        self._size = None
+        self._updated_at = None
+        self._views = None
+        self.name = name
+        self.owner_id = None
+        self.tags = set()
+        self.project_id = project_id
+        self.show_tabs = show_tabs_
+
+
+
+
+
+
+**Example**
+
+```py 
+# creating a new instance of a WorkbookItem
+# 
+import tableauserverclient as TSC
+
+# Create new workbook_item with project id '3a8b6148-493c-11e6-a621-6f3499394a39'
+
+ new_workbook = TSC.WorkbookItem('3a8b6148-493c-11e6-a621-6f3499394a39')
+
+
+````
 
 Source file: models/workbook_item.py  
 
 <br>
 <br>  
 
-### Workbooks methods
+### Workbook methods
 
-
-
+The Tableau Server Client (TSC) library provides methods for interacting with workbooks. These methods correspond to endpoints in the Tableau Server REST API.  For example, you can use the library to publish, update, download, or delete workbooks on the site. 
+The methods operate on a workbook object (`WorkbookItem`) that represents the workbook resources. 
 
 
 
 Source files: server/endpoint/workbooks_endpoint.py
 
-
+<br>
+<br>
 
 #### workbooks.get  
 
 ```py
-Workbooks.get()
+workbooks.get(req_options=None)
 ```
 
-Get the first 100 workbooks on the server. To get all workbooks, use the Pager.
+Queries the server and returns information about the workbooks the site. 
 
 
 
-### Get Workbook by ID
 
-Gets a workbook with a given ID.
 
-```py
-Workbooks.get_by_id(id)
+REST API: [Query Workbooks for Site](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Workbooks_for_Site%3FTocPath%3DAPI%2520Reference%7C_____70){:target="_blank"}  
+
+
+**Parameters**
+
+Name | Description  
+:--- | :---  
+`req_option`  |  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific workbook, you could specify the name of the workbook or the name of the owner. See [Filter and Sort](filter-sort)
+
+
+**Returns**
+
+Returns a list of all `WorkbookItem` objects and a `PaginationItem`. Use these values to iterate through the results.
+
+
+**Example**
+
+```py  
+
+import tableauserverclient as TSC
+tableau_auth = TSC.TableauAuth('username', 'password', site_id='site')
+server = TSC.Server('http://servername')
+
+with server.auth.sign_in(tableau_auth):
+  all_workbook_items, pagination_item = server.workbooks.get()
+  print([workbook.name for workbook in all_workbooks])
+
+
+
 ```
 
-### Publish Workbook
+<br>
+<br>  
 
-Publish a local workbook to Tableau Server.
+
+
+#### workbooks.get_by_id
 
 ```py
-Workbooks.publish(workbook_item, file_path, publish_mode)
+workbooks.get_by_id(workbook_id)
 ```
 
-Where the publish mode is one of the following:
+Returns information about the specified workbook on the site.
 
-* Append
-* Overwrite
-* CreateNew
+REST API: [Query Workbook](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Workbook%3FTocPath%3DAPI%2520Reference%7C_____66){:target="_blank"}  
 
-Example:
+
+**Parameters**
+
+Name | Description  
+:--- | :---  
+`workbook_id`  |  The `workbook_id` specifies the workbook to query. The ID is a LUID (64-bit hexadecimal string).
+
+
+**Exceptions**
+
+`Workbook ID undefined`   :  Raises an exception if a `workbook_id` is not provided.
+
+
+**Returns**
+
+The `WorkbookItem`.  See [WorkbookItem class](#workbookitem-class)
+
+
+**Example**
 
 ```py
-wb_item = TSC.WorkbookItem(name='Sample',
-                           show_tabs=False,
-                           project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
 
-server.workbooks.publish(wb_item,
+workbook = server.workbooks.get_by_id('1a1b1c1d-2e2f-2a2b-3c3d-3e3f4a4b4c4d')
+print(workbook.name)
+
+```
+
+
+<br>   
+<br>  
+
+
+#### workbooks.publish
+
+```py
+workbooks.publish(workbook_item, file_path, publish_mode) 
+```
+
+Publish a workbook to the specified site. 
+
+**Note:** The REST API cannot automatically include
+extracts or other resources that the workbook uses. Therefore,
+ a .twb file that usess data from an Excel or csv file on a local computer cannot be published,
+unless you package the data and workbook in a .twbx file, or publish the data source separately.  
+
+For workbooks that are larger than 64 MB, the publish method automatically takes care of chunking the file in parts for uploading. Using this method is considerably more convenient than calling the publish REST APIs directly.  
+
+REST API: [Publish Workbook](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Publish_Workbook%3FTocPath%3DAPI%2520Reference%7C_____45){:target="_blank"}, [Initiate File Upload](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Initiate_File_Upload%3FTocPath%3DAPI%2520Reference%7C_____43){:target="_blank"}, [Append to File Upload](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Append_to_File_Upload%3FTocPath%3DAPI%2520Reference%7C_____13){:target="_blank"}    
+
+
+
+**Parameters**
+
+Name | Description  
+:--- | :--- 
+`workbook_item`  |  The `workbook_item` specifies the workbook you are publishing. When you are adding a workbook, you need to first create a new instance of a `workbook_item` that inlcudes a `project_id` of an existing project. The name of the workbook will be the name of the file, unless you also specify a name for the new workbook when you create the instance. See [WorkbookItem](#workbookitem-class).
+`file_path`  |  The path and name of the workbook to publish. 
+`mode`     |  Specifies whether you are publishing a new workbook (`CreateNew`) or overwriting an existing workbook (`Overwrite`).  You cannot appending workbooks.  You can also use the publish mode attributes, for example: `TSC.Server.PublishMode.Overwrite`.
+`connection_credentials` | (Optional)  The credentials (if required) to connect to the workbook's data source. The `ConnectionCredentials` object contains the authentication information for the data source (user name and password, and whether the credentials are embeded or OAuth is used). 
+ 
+
+
+**Exceptions**
+
+Error | Description  
+:--- | :--- 
+`File path does not lead to an existing file.`  |  Raises an error of the file path is incorrect or if the file is missing.
+`Invalid mode defined.`  |  Raises an error if the publish mode is not one of the defined options. 
+`Workbooks cannot be appended.` | The `mode` must be set to `Overwrite` or `CreateNew`.  
+`Only .twb or twbx files can be published as workbooks.`  |  Raises an error if the type of file specified is not supported. 
+
+See the REST API [Publish Workbook](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Publish_Workbook%3FTocPath%3DAPI%2520Reference%7C_____45){:target="_blank"} for additional error codes. 
+
+**Returns**
+
+The `WorkbookItem` for the workbook that was published. 
+ 
+
+**Example**
+
+```py
+
+import tableauserverclient as TSC
+import os
+tableau_auth = TSC.TableauAuth('username', 'password', site_id='site')
+server = TSC.Server('http://servername')
+
+with server.auth.sign_in(tableau_auth):
+   # create a workbook item
+   wb_item = TSC.WorkbookItem(name='Sample', project_id='3a8b6148-493c-11e6-a621-6f3499394a39')
+   # call the publish method with the workbook item
+   wb_item = server.workbooks.publish(wb_item,
                          os.path.join(YOUR_DIR, 'SampleWB.twbx'),
-                         self.server.PublishMode.CreateNew)
+                         'Overwrite')
 ```
 
-### Update Workbook
+<br>
+<br>  
+
+
+#### workbooks.update
+
+```py
+workbooks.update(wb_item_object)
+```
+
 
 Modifies a workbook. The workbook item object must include the workbook ID and overrides all other settings.
 
-```py
-Workbooks.update(wb_item_object)
+
 ```
 
-### Delete Workbook
+
+
+<br>
+<br> 
+
+
+
+#### workbooks.delete
 
 Deletes a workbook with the given ID.
 
 ```py
-Workbooks.delete(id)
+workbooks.delete(id)
 ```
 
-### Download Workbook
+<br>
+<br> 
+
+
+#### workbooks.download
 
 Downloads a workbook to the specified directory.
 
 ```py
-Workbooks.download(id, file_path)
+workbooks.download(id, file_path)
 ```
 
-### Populate Views for a Workbook
+<br>
+<br> 
+
+
+#### workbooks.populate_views
 
 Populates a list of views for a workbook object. You must populate views before you can iterate through the views.
 
 ```py
-Workbooks.populate_views(workbook_obj)
+workbooks.populate_views(workbook_obj)
 ```
 
-### Populate Connections for a Workbook
+<br>
+<br> 
+
+#### workbooks.populate_connections
 
 Populates a list of connections for a given workbook. You must populate connections before you can iterate through the
 connections.
 
 ```py
-Workbooks.populate_connections(workbook_obj)
+workbooks.populate_connections(workbook_obj)
 ```
 
-### Populate a Preview Image for a Workbook
+<br>
+<br> 
+
+
+#### workbooks.populate_preview_image
 
 Populates a preview image for a given workbook. You must populate the image before you can iterate through the
 connections.
 
 ```py
-Workbooks.populate_preview_image(workbook_obj)
+workbooks.populate_preview_image(workbook_obj)
 ```
 
-### Get Views for a Workbook
+<br>
+<br> 
+
+
+#### workbooks.views
 
 Returns a list of views for a workbook. Before you get views, you must call populate_views.
 
 ```py
-Workbooks.views
+workbooks.views
 ```
 
-### Get Connections for a Workbook
+<br>
+<br> 
+
+#### workbooks.connections
 
 Returns a list of connections for a workbook. Before you get connections, you must call populate_connections.
 
 ```py
-workbook_obj.connections
+workbooks.connections
 ```
 
 <br>   
@@ -1090,18 +1368,14 @@ Source file: models/view_item.py
 
 **Attributes**
 
-
-`id` : The identifier of the view item.  
- 
-`name`  : The name of the view. 
-
-`owner_id` :  The id for the owner of the view. 
-
-`preview_image` : The thumbnail image for the view. 
-
-`total_views`  :  The usage statistics for the view. Indicates the total number of times the view has been looked at. 
-
-`workbook_id`  :  The id of the workbook associated with the view. 
+Name | Description
+:--- | :---  
+`id` | The identifier of the view item.  
+`name`  | The name of the view. 
+`owner_id` |  The id for the owner of the view. 
+`preview_image` | The thumbnail image for the view. 
+`total_views`  |  The usage statistics for the view. Indicates the total number of times the view has been looked at. 
+`workbook_id`  |  The id of the workbook associated with the view. 
 
 
 <br>   
@@ -1127,9 +1401,12 @@ Returns the list of views items for a site.
 
 REST API: [Query Views for Site](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Views_for_Site%3FTocPath%3DAPI%2520Reference%7C_____64){:target="_blank"}
 
-**Parameters**
+**Parameters** 
 
-`req_option`  :   (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific view, you could specify the name of the view or its id. 
+Name | Description  
+:--- | :---  
+`req_option`  |  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific view, you could specify the name of the view or its id. 
+
 
 
 **Returns**
@@ -1250,9 +1527,11 @@ datasources.delete(datasource_id)
 Removes the specified data source from Tableau Server. 
 
 
-**Parameters**
+**Parameters**  
 
-`datasource_id`  :  The identifier (`id`) for the the `DatasourceItem` that you want to delete from the server. 
+Name | Description  
+:--- | :--- 
+`datasource_id`  |  The identifier (`id`) for the the `DatasourceItem` that you want to delete from the server. 
 
 
 **Exceptions**
@@ -1278,14 +1557,17 @@ REST API: [Download Datasource](http://onlinehelp.tableau.com/current/api/rest_a
 
 **Parameters**
 
-`datasource_id` :  The identifier (`id`) for the the `DatasourceItem` that you want to download from the server. 
-
-`filepath` :  (Optional) Downloads the file to the location you specify. If no location is specified (the default is `Filepath=None`), the file is downloaded to the current working directory. 
+Name | Description  
+:--- | :--- 
+`datasource_id` |  The identifier (`id`) for the the `DatasourceItem` that you want to download from the server. 
+`filepath` |  (Optional) Downloads the file to the location you specify. If no location is specified (the default is `Filepath=None`), the file is downloaded to the current working directory. 
 
 
 **Exceptions**
 
-`Datasource ID undefined`   :  Raises an exception if a valid `datasource_id` is not provided.
+Error | Description  
+:--- | :--- 
+`Datasource ID undefined`   |  Raises an exception if a valid `datasource_id` is not provided.
 
 
 **Returns**  
@@ -1312,7 +1594,9 @@ REST API: [Query Datasources](http://onlinehelp.tableau.com/current/api/rest_api
 
 **Parameters**
 
-`req_option` :  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific data source, you could specify the name of the project or its id. 
+Name | Description  
+:--- | :--- 
+`req_option` |  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific data source, you could specify the name of the project or its id. 
 
 
 **Returns**
@@ -1354,12 +1638,16 @@ REST API: [Query Datasource](http://onlinehelp.tableau.com/current/api/rest_api/
 
 **Parameters**
 
-`datasource_id`  :  The `datasource_id` specifies the data source to query. 
+Name | Description  
+:--- | :--- 
+`datasource_id`  |  The `datasource_id` specifies the data source to query. 
 
 
 **Exceptions**
 
-`Datasource ID undefined`   :  Raises an exception if a valid `datasource_id` is not provided.
+Error | Description  
+:--- | :--- 
+`Datasource ID undefined`   |  Raises an exception if a valid `datasource_id` is not provided.
 
 
 **Returns**
@@ -1399,14 +1687,18 @@ REST API:  [Query Datasource Connections](http://onlinehelp.tableau.com/current/
 
 **Parameters**
 
-`datasource_item`  :  The `datasource_item` specifies the data source to populate with connection information.
+Name | Description  
+:--- | :--- 
+`datasource_item`  |  The `datasource_item` specifies the data source to populate with connection information.
 
 
 
 
 **Exceptions**
 
-`Datasource item missing ID. Datasource must be retrieved from server first.` :  Raises an errror if the datasource_item is unspecified.
+Error | Description  
+:--- | :--- 
+`Datasource item missing ID. Datasource must be retrieved from server first.` |  Raises an errror if the datasource_item is unspecified.
 
 
 **Returns**
@@ -1457,23 +1749,22 @@ REST API: [Publish Datasource](http://onlinehelp.tableau.com/current/api/rest_ap
 
 **Parameters**
 
-`datasource_item`  :  The `datasource_item` specifies the new data source you are adding, or the data source you are appending to. If you are adding a new data source, you need to create a new `datasource_item` with a `project_id` of an existing project. The name of the data source will be the name of the file, unless you also specify a name for the new data source when you create the instance. See [DatasourceItem](#datasourceitem-class).
-
-`file_path`  :  The path and name of the data source to publish. 
-
-`mode`     :  Specifies whether you are publishing a new data source (`CreateNew`), overwriting an existing data source (`Overwrite`), or appending data to a data source (`Append`). If you are appending to a data source, the data source on the server and the data source you are publishing must be be extracts (.tde files) and they must share the same schema. You can also use the publish mode attributes, for example: `TSC.Server.PublishMode.Overwrite`.
-
-`connection_credentials` : (Optional)  The credentials required to connect to the data source. The `ConnectionCredentials` object contains the authentication information for the data source (user name and password, and whether the credentials are embeded or OAuth is used). 
+Name | Description  
+:--- | :--- 
+`datasource_item`  |  The `datasource_item` specifies the new data source you are adding, or the data source you are appending to. If you are adding a new data source, you need to create a new `datasource_item` with a `project_id` of an existing project. The name of the data source will be the name of the file, unless you also specify a name for the new data source when you create the instance. See [DatasourceItem](#datasourceitem-class).
+`file_path`  |  The path and name of the data source to publish. 
+`mode`     |  Specifies whether you are publishing a new data source (`CreateNew`), overwriting an existing data source (`Overwrite`), or appending data to a data source (`Append`). If you are appending to a data source, the data source on the server and the data source you are publishing must be be extracts (.tde files) and they must share the same schema. You can also use the publish mode attributes, for example: `TSC.Server.PublishMode.Overwrite`.
+`connection_credentials` | (Optional)  The credentials required to connect to the data source. The `ConnectionCredentials` object contains the authentication information for the data source (user name and password, and whether the credentials are embeded or OAuth is used). 
  
 
 
 **Exceptions**
 
-`File path does not lead to an existing file.`  :  Raises an error of the file path is incorrect or if the file is missing.
-
-`Invalid mode defined.`  :  Raises an error if the publish mode is not one of the defined options. 
-
-`Only .tds, tdsx, or .tde files can be published as datasources.`  :  Raises an error if the type of file specified is not supported.  
+Error | Description  
+:--- | :--- 
+`File path does not lead to an existing file.`  |  Raises an error of the file path is incorrect or if the file is missing.
+`Invalid mode defined.`  |  Raises an error if the publish mode is not one of the defined options. 
+`Only .tds, tdsx, or .tde files can be published as datasources.`  |  Raises an error if the type of file specified is not supported.  
 
 
 **Returns**
