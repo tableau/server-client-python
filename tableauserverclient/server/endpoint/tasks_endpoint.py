@@ -1,4 +1,4 @@
-from .endpoint import Endpoint
+from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from .. import TaskItem, PaginationItem, RequestFactory
 import logging
@@ -12,6 +12,7 @@ class Tasks(Endpoint):
         return "{0}/sites/{1}/tasks/extractRefreshes".format(self.parent_srv.baseurl,
                                                              self.parent_srv.site_id)
 
+    @api(version='2.6')
     def get(self, req_options=None):
         logger.info('Querying all tasks for the site')
         url = self.baseurl
@@ -21,6 +22,7 @@ class Tasks(Endpoint):
         all_extract_tasks = TaskItem.from_response(server_response.content)
         return all_extract_tasks, pagination_item
 
+    @api(version='2.6')
     def get_by_id(self, task_id):
         if not task_id:
             error = "No Task ID provided"
@@ -30,6 +32,7 @@ class Tasks(Endpoint):
         server_response = self.get_request(url)
         return TaskItem.from_response(server_response.content)[0]
 
+    @api(version='2.6')
     def run(self, task_item):
         if not task_item.id:
             error = "User item missing ID."
