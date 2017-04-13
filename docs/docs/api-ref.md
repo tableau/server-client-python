@@ -1008,49 +1008,14 @@ Name  |  Description
 `created_at` |  The date and time when the data source was created.  
 `id` |  The identifier for the workbook. You need this value to query a specific workbook or to delete a workbook with the `get_by_id` and `delete` methods. 
 `name` | The name of the workbook. 
-`preview_image`  | The list of 
+`owner_id` | The ID of the owner.
+`preview_image`  | The thumbnail image for the view. You must first call the [workbooks.populate_preview_image](#workbooks.populate_preview_image) method to access this data. 
 `project_id`  | The project id.
 `project_name` | The name of the project.
+`show_tabs`  |  (Boolean) Determines whether the workbook shows tabs for the view.
 `tags` |  The tags that have been added to the workbook. 
 `updated_at` |  The date and time when the workbook was last updated.
-`views`   | The list of views (`ViewItem`) for the workbook. You must first call the [workbooks.populate_views](#workbooks.populate_viewss) method to access this data. See the [ViewItem class](#viewitem-class).
-
-
-
-`connections` |  The list of data connections (`ConnectionItem`) for the specified data source. You must first call the `populate_connections` method to access this data. See the [ConnectionItem class](#connectionitem-class).
-name` | Name of the project.
-`description` | The description of the project. 
-`project_id`  | The project id.
-`show_tabs`  |  (Boolean)
-`connections` |  The list of data connections (`ConnectionItem`) for the specified data source. You must first call the [workbooks.populate_connections](#workbooks.populate_connections) method to access this data. See the [ConnectionItem class](#connectionitem-class).
-`content_url` |  The name of the data source as it would appear in a URL. 
-`created_at` |  The date and time when the data source was created.  
-
-`datasource_type` | The type of data source, for example, `sqlserver` or `excel-direct`. 
-`id` |  The identifier for the data source. You need this value to query a specific data source or to delete a data source with the `get_by_id` and `delete` methods. 
-`name`  |  The name of the workbook. If not specified, the name of the published workbook file is used. 
-`project_id` |  The identifer of the project associated with the workbook. When you must provide this identifier when create an instance of a `WorkbookItem`. 
-`project_name` |  The name of the project associated with the data source. 
-`tags` |  The tags that have been added to the data source. 
-`updated_at` |  The date and time when the data source was last updated. 
-
-
-    self._connections = None
-        self._content_url = None
-        self._created_at = None
-        self._id = None
-        self._initial_tags = set()
-        self._preview_image = None
-        self._project_name = None
-        self._size = None
-        self._updated_at = None
-        self._views = None
-        self.name = name
-        self.owner_id = None
-        self.tags = set()
-        self.project_id = project_id
-        self.show_tabs = show_tabs_
-
+`views`   | The list of views (`ViewItem`) for the workbook. You must first call the [workbooks.populate_views](#workbooks.populate_views) method to access this data. See the [ViewItem class](#viewitem-class).
 
 
 
@@ -1228,17 +1193,14 @@ The `WorkbookItem` for the workbook that was published.
 ```py
 
 import tableauserverclient as TSC
-import os
 tableau_auth = TSC.TableauAuth('username', 'password', site_id='site')
 server = TSC.Server('http://servername')
 
 with server.auth.sign_in(tableau_auth):
    # create a workbook item
-   wb_item = TSC.WorkbookItem(name='Sample', project_id='3a8b6148-493c-11e6-a621-6f3499394a39')
+   wb_item = TSC.WorkbookItem(name='Sample', project_id='1f2f3e4e-5d6d-7c8c-9b0b-1a2a3f4f5e6e')
    # call the publish method with the workbook item
-   wb_item = server.workbooks.publish(wb_item,
-                         os.path.join(YOUR_DIR, 'SampleWB.twbx'),
-                         'Overwrite')
+   wb_item = server.workbooks.publish(wb_item, 'SampleWB.twbx', 'Overwrite')
 ```
 
 <br>
@@ -1248,15 +1210,50 @@ with server.auth.sign_in(tableau_auth):
 #### workbooks.update
 
 ```py
-workbooks.update(wb_item_object)
+workbooks.update(workbook_item)
 ```
 
 
-Modifies a workbook. The workbook item object must include the workbook ID and overrides all other settings.
+Modifies an existing workbook. Use this method to change the owner or the project that the workbook belongs to, or to change whether the workbook shows views in tabs. The workbook item must include the workbook ID and overrides the existing settings.
+
+REST API: [Update Workbooks](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Update_Workbook%3FTocPath%3DAPI%2520Reference%7C_____87){:target="_blank"}
+
+**Parameters**
+
+Name | Description  
+:--- | :--- 
+`workbook_item`  |  The `workbook_item` specifies the settings for the workbook you are updating. You can change the `owner_id`, `project_id`, and the `show_tabs` values. See [WorkbookItem](#workbookitem-class).
+
+
+**Exceptions**
+
+Error | Description  
+:--- | :--- 
+`Workbook item missing ID. Workbook must be retrieved from server first.` | Raises an errror if the `workbook_item` is unspecified. Use the `workbooks.get()` or `workbooks.get_by_id()` methods to retreive the workbook item from the server. 
+
+
+```py  
+
+import tableauserverclient as TSC
+tableau_auth = TSC.TableauAuth('username', 'password', site_id='site')
+server = TSC.Server('http://servername')
+
+with server.auth.sign_in(tableau_auth):
+
+    # get the workbook item from the site
+    workbook = server.workbooks.get_by_id('1a1b1c1d-2e2f-2a2b-3c3d-3e3f4a4b4c4d')
+    print("\nUpdate {0} workbook. Project was {1}".format(workbook.name, workbook.project_name))
+
+
+    # make an change, for example a new project ID
+    workbook.project_id = '1f2f3e4e-5d6d-7c8c-9b0b-1a2a3f4f5e6e'
+
+    # call the update method
+    workbook = server.workbooks.update(workbook)
+    print("\nUpdated {0} workbook. Project is now {1}".format(workbook.name, workbook.project_name))
 
 
 ```
-
 
 
 <br>
@@ -1266,11 +1263,44 @@ Modifies a workbook. The workbook item object must include the workbook ID and o
 
 #### workbooks.delete
 
-Deletes a workbook with the given ID.
-
 ```py
-workbooks.delete(id)
+workbooks.delete(workbook_id)
 ```
+
+Deletes a workbook with the specified ID.
+
+
+
+To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site.  See the [TableauAuth class](#tableauauth-class).  
+
+
+REST API: [Delete Workbook](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Delete_Workbook%3FTocPath%3DAPI%2520Reference%7C_____31){:target="_blank"}  
+
+
+**Parameters**
+
+Name  |  Description  
+:--- | :---  
+`workbook_id`   | The ID of the workbook to delete.  
+
+**Exceptions**    
+
+Error  |  Description  
+:--- | :---  
+`Workbook ID undefined.`  |  Raises an exception if the project item does not have an ID. The project ID is sent to the server as part of the URI. 
+
+
+**Example**  
+ 
+```py
+# import tableauserverclient as TSC  
+# server = TSC.Server('http://MY-SERVER')  
+# tableau_auth sign in, etc.  
+
+ server.workbooks.delete('1a1b1c1d-2e2f-2a2b-3c3d-3e3f4a4b4c4d')
+
+```  
+
 
 <br>
 <br> 
@@ -1278,11 +1308,45 @@ workbooks.delete(id)
 
 #### workbooks.download
 
-Downloads a workbook to the specified directory.
+```py
+workbooks.download(workbook_id, filepath=None)
+```
+
+Downloads a workbook to the specified directory (optional).
+
+
+REST API: [Download Workbook](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Download_Workbook%3FTocPath%3DAPI%2520Reference%7C_____36){:target="_blank"}  
+
+
+**Parameters**
+
+Name | Description  
+:--- | :--- 
+`workbook_id` |  The ID for the the `WorkbookItem` that you want to download from the server. 
+`filepath` |  (Optional) Downloads the file to the location you specify. If no location is specified, the file is downloaded to the current working directory. The default is `Filepath=None`.
+
+
+**Exceptions**
+
+Error | Description  
+:--- | :--- 
+`Workbook ID undefined`   |  Raises an exception if a valid `datasource_id` is not provided.
+
+
+**Returns**  
+
+The file path to the downloaded workbook. 
+
+
+**Example**
 
 ```py
-workbooks.download(id, file_path)
-```
+
+  file_path = server.workbooks.download('1a1b1c1d-2e2f-2a2b-3c3d-3e3f4a4b4c4d')
+  print("\nDownloaded the file to {0}.".format(file_path))
+
+````
+
 
 <br>
 <br> 
@@ -1290,10 +1354,61 @@ workbooks.download(id, file_path)
 
 #### workbooks.populate_views
 
-Populates a list of views for a workbook object. You must populate views before you can iterate through the views.
+```py
+workbooks.populate_views(workbook_item)
+```
+
+Populates (or gets) a list of views for a workbook. 
+
+You must first call this method to populate views before you can iterate through the views.
+
+This method retrieves the view information for the specified workbook. The REST API is designed to return only the information you ask for explicitly. When you query for all the data sources, the view information is not included. Use this method to retrieve the views. The method adds the list of views to the workbook item (`workbook_item.views`). This is a list of `ViewItem`.  
+
+REST API:  [Query Views for Workbook](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Views_for_Workbook%3FTocPath%3DAPI%2520Reference%7C_____65){:target="_blank"}
+
+**Parameters**
+
+Name | Description  
+:--- | :--- 
+`workbook_item`  |  The `workbook_item` specifies the workbook to populate with views information. See [WorkbookItem class](#workbookitem-class).
+
+
+
+
+**Exceptions**
+
+Error | Description  
+:--- | :--- 
+`Workbook item missing ID. Workbook must be retrieved from server first.` |  Raises an errror if the `workbook_item` is unspecified. You can retreive the workbook items using the `workbooks.get()` and `workbooks.get_by_id()` methods. 
+
+
+**Returns**
+
+None. A list of `ViewItem` objects are added to the workbook (`workbook_item.views`). 
+
+
+**Example**
 
 ```py
-workbooks.populate_views(workbook_obj)
+# import tableauserverclient as TSC
+
+# server = TSC.Server('http://SERVERURL')
+# 
+   ... 
+
+# get the workbook item
+  workbook = server.workbooks.get_by_id('1a1b1c1d-2e2f-2a2b-3c3d-3e3f4a4b4c4d')
+
+
+# get the view information 
+  server.workbooks.populate_views(workbook)
+
+# print information about the views for the work item
+  print("\nThe views for {0}: ".format(workbook.name))
+  print([view.name for view in workbook.views])
+
+  ...
+
 ```
 
 <br>
@@ -1301,11 +1416,63 @@ workbooks.populate_views(workbook_obj)
 
 #### workbooks.populate_connections
 
-Populates a list of connections for a given workbook. You must populate connections before you can iterate through the
+```py 
+workbooks.populate_connections(workbook_item)
+```  
+
+Populates a list of data source connections for the specified workbook. 
+
+You must populate connections before you can iterate through the
 connections.
 
+This method retrieves the data source connection information for the specified workbook. The REST API is designed to return only the information you ask for explicitly. When you query all the workbooks, the data source connection information is not included. Use this method to retrieve the connection information for any data sources used by the workbook. The method adds the list of data connections to the workbook item (`workbook_item.connections`). This is a list of `ConnectionItem`.  
+
+REST API:  [Query Workbook Connections](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Workbook_Connections%3FTocPath%3DAPI%2520Reference%7C_____67){:target="_blank"}  
+
+**Parameters**
+
+Name | Description  
+:--- | :--- 
+`workbook_item`  |  The `workbook_item` specifies the workbook to populate with data connection information.
+
+
+
+
+**Exceptions**
+
+Error | Description  
+:--- | :--- 
+`Workbook item missing ID. Workbook must be retrieved from server first.` |  Raises an errror if the `workbook_item` is unspecified.
+
+
+**Returns**
+
+None. A list of `ConnectionItem` objects are added to the data source (`workbook_item.connections`). 
+
+
+**Example**
+
 ```py
-workbooks.populate_connections(workbook_obj)
+# import tableauserverclient as TSC
+
+# server = TSC.Server('http://SERVERURL')
+# 
+   ... 
+
+# get the workbook item
+  workbook = server.workbooks.get_by_id('1a1b1c1d-2e2f-2a2b-3c3d-3e3f4a4b4c4d')
+
+
+# get the connection information 
+  server.workbooks.populate_connections(workbook)
+
+# print information about the data connections for the workbook item
+  print("\nThe connections for {0}: ".format(workbook.name))
+  print([connection.id for connection in workbook.connections])
+
+
+  ...
+
 ```
 
 <br>
@@ -1314,38 +1481,60 @@ workbooks.populate_connections(workbook_obj)
 
 #### workbooks.populate_preview_image
 
-Populates a preview image for a given workbook. You must populate the image before you can iterate through the
-connections.
+```py
+workbooks.populate_preview_image(workbook_item)
+```
+
+This method gets the preview image (thumbnail) for the specified workbook item. 
+
+The method uses the `view.id` and `workbook.id` to identify the preview image. The method populates the `workbook_item.preview_image`. 
+
+REST API: [Query View Preview Image](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Workbook_Preview_Image%3FTocPath%3DAPI%2520Reference%7C_____69){:target="_blank"}
+
+**Parameters** 
+
+Name | Description  
+:--- | :---  
+`view_item`  |  The view item specifies the the `view.id` and `workbook.id` that identifies the preview image.
+
+**Exceptions** 
+
+Error | Description  
+:--- | :---  
+`View item missing ID or workbook ID` |  Raises an error if the ID for the view item or workbook is missing. 
+
+  
+
+**Returns**
+
+None. The preview image is added to the view. 
+
+
+
+**Example**
 
 ```py
-workbooks.populate_preview_image(workbook_obj)
+
+# import tableauserverclient as TSC
+
+# server = TSC.Server('http://SERVERURL')
+
+   ... 
+
+  # get the workbook item
+  workbook = server.workbooks.get_by_id('1a1b1c1d-2e2f-2a2b-3c3d-3e3f4a4b4c4d')
+
+  # add the png thumbnail to the workbook item
+  server.workbooks.populate_preview_image(workbook)
+
+
 ```
 
 <br>
 <br> 
 
 
-#### workbooks.views
 
-Returns a list of views for a workbook. Before you get views, you must call populate_views.
-
-```py
-workbooks.views
-```
-
-<br>
-<br> 
-
-#### workbooks.connections
-
-Returns a list of connections for a workbook. Before you get connections, you must call populate_connections.
-
-```py
-workbooks.connections
-```
-
-<br>   
-<br>
 
 ## Views
 
@@ -1439,7 +1628,7 @@ See [ViewItem class](#viewitem-class)
 
 ```
 
-Populates a preview image for a given view. 
+Populates a preview image for the specified view. 
 
 This method gets the preview image (thumbnail) for the specified view item. The method uses the `view.id` and `workbook.id` to identify the preview image. The method populates the `view.preview_image` for the view. 
 
@@ -1447,11 +1636,17 @@ REST API: [Query View Preview Image](http://onlinehelp.tableau.com/current/api/r
 
 **Parameters** 
 
-`view_item`  :  The view item specifies the the `view.id` and `workbook.id` that identifies the preview image.
+Name | Description  
+:--- | :---  
+`view_item`  |  The view item specifies the the `view.id` and `workbook.id` that identifies the preview image.
 
 **Exceptions** 
 
-`View item missing ID or workbook ID` :  Raises an error if the id for the view item or workbook is missing.   
+Error | Description  
+:--- | :---  
+`View item missing ID or workbook ID` |  Raises an error if the ID for the view item or workbook is missing. 
+
+  
 
 **Returns**
 
@@ -1572,9 +1767,16 @@ Error | Description
 
 **Returns**  
 
-The data source in `.tdsx` format. 
+The file path to the downloaded data source. The data source is downloaded in `.tdsx` format. 
 
+**Example**
 
+```py
+
+  file_path = server.datasources.download('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+  print("\nDownloaded the file to {0}.".format(file_path))
+
+````
 
   
 <br> 
@@ -1681,7 +1883,7 @@ Populates the connections for the specified data source.
 
 
 
-This method retrieves the connection information for the specified data source. The REST API is designed to return only the information you ask for explicitly. When you query for all the data sources, the connection information is not included. Use this method to retrieve the connections. The method adds the list of data connections to the data source item (`datasource_item.connections`) populates the data source with the list of `ConnectionItem`.  
+This method retrieves the connection information for the specified data source. The REST API is designed to return only the information you ask for explicitly. When you query for all the data sources, the connection information is not included. Use this method to retrieve the connections. The method adds the list of data connections to the data source item (`datasource_item.connections`). This is a list of `ConnectionItem` objects.  
 
 REST API:  [Query Datasource Connections](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Datasource_Connections%3FTocPath%3DAPI%2520Reference%7C_____47){:target="_blank"}
 
