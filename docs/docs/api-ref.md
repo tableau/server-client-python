@@ -3,16 +3,31 @@ title: API reference
 layout: docs
 ---
 
-<div class="alert alert-info">
+<!---<div class="alert alert-info">
     <b>Important:</b> More coming soon! This section is under active construction and might not reflect all the available functionality of the TSC library.
     Until this reference is completed, we have noted the source files in the TSC library where you can get more information for individual endpoints.
-</div>
+</div>    -->
+
+ 
+  
+The Tableau Server Client (TSC) is a Python library for the Tableau Server REST API. Using the TSC library, you can manage and change many of the Tableau Server and Tableau Online resources programmatically. You can use this library to create your own custom applications.
+
+The TSC API reference is organized by resource. The TSC library is modeled after the REST API. The methods, for example, `workbooks.get()`, correspond to the endpoints for resources, such as [workbooks](#workbooks), [users](#users), [views](#views), and [data sources](#data-sources). The model classes (for example, the [WorkbookItem class](#workbookitem-class) have attributes that represent the fields (`name`, `id`, `owner_id`) that are in the REST API request and response packages, or payloads. 
+
+|:---  |  
+| **Note:**  Some methods and features provided in the REST API might not be currently available in the TSC library.  In addition, the same limitations apply to the TSC library that apply to the REST API with respect to resources on Tableau Server and Tableau Online. For more information, see the [Tableau Server REST API Reference](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#API_Reference%3FTocPath%3DAPI%2520Reference%7C_____0){:target="_blank"}.|
+
+ 
 
 * TOC  
 {:toc }
 <!-- {:toc ::options toc_levels="1,2"} -->
 
 <!-- {::toc_levels(1,2,3)} -->
+
+<br>
+<br>
+
 
 ## Authentication
 
@@ -269,7 +284,9 @@ Name | Description
 
 **Exceptions**
 
-`Datasource ID undefined`   :  Raises an exception if a valid `datasource_id` is not provided.
+Error   |  Description     
+ :--- | : ---    
+`Datasource ID undefined`   | Raises an exception if a valid `datasource_id` is not provided.
 
 
 REST API: [Delete Datasource](http://onlinehelp.tableau.com/v0.0/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Delete_Datasource%3FTocPath%3DAPI%2520Reference%7C_____19){:target="_blank"}
@@ -549,7 +566,9 @@ REST API: [Update Datasource](http://onlinehelp.tableau.com/current/api/rest_api
 
 **Parameters**
 
-`datasource_item`  :  The `datasource_item` specifies the data source to update.
+Name   |  Description     
+ :--- | : ---    
+`datasource_item`  |  The `datasource_item` specifies the data source to update.
 
 
 
@@ -1174,6 +1193,8 @@ Name  |  Description
 
 **Exceptions**  
 
+Error   |  Description     
+ :--- | : ---    
 `Project item missing ID.`  | Raises an exception if the project item does not have an ID. The project ID is sent to the server as part of the URI. 
 
 
@@ -1228,6 +1249,9 @@ REST API: [Delete Project](http://onlinehelp.tableau.com/current/api/rest_api/en
 Name  |  Description  
 :--- | :---  
 `project_id`   | The ID of the project to delete. 
+
+  
+
 
 **Exceptions**    
 
@@ -1653,6 +1677,8 @@ Name  |  Description
 
 **Exceptions**  
 
+Error   |  Description     
+ :--- | : ---    
 `Site ID undefined.` | Raises an error if an id is not specified. 
 
 
@@ -1789,10 +1815,11 @@ REST API: [Delete Site](https://onlinehelp.tableau.com/current/api/rest_api/en-u
 
 **Parameters**
   
-
+Name   |  Description     
+ :--- | : ---    
 `site_id`    |       The id of the site that you want to delete.   
 
-
+ 
 
 **Exceptions**
 
@@ -1800,6 +1827,8 @@ Error  |  Description
 :---  | :---   
 `Site ID Undefined.`   |    The site id must be present and must match the id of the site you are deleting.   
 
+
+  
 **Example**  
 
 ```py
@@ -1939,7 +1968,9 @@ REST API: [Add User to Site](http://onlinehelp.tableau.com/current/api/rest_api/
 
 **Parameters**
 
-`user_item` :  You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific user, you could specify the name of the user or the user's id. 
+Name   |  Description     
+ :--- | : ---    
+`user_item` |  You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific user, you could specify the name of the user or the user's id. 
 
 
 **Returns**
@@ -1980,7 +2011,9 @@ REST API: [Get Uers on Site](http://onlinehelp.tableau.com/current/api/rest_api/
 
 **Parameters**
 
-``req_option` :  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific user, you could specify the name of the user or the user's id. 
+Name   |  Description     
+ :--- | : ---    
+`req_option` |  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific user, you could specify the name of the user or the user's id. 
 
 
 **Returns**
@@ -2018,12 +2051,16 @@ REST API: [Query User On Site](http://onlinehelp.tableau.com/current/api/rest_ap
 
 **Parameters**
 
-`user_id`  :  The `user_id` specifies the user to query. 
+Name   |  Description     
+ :--- | : ---    
+`user_id`  |  The `user_id` specifies the user to query. 
 
 
 **Exceptions**
 
-`User ID undefined.`   :  Raises an exception if a valid `user_id` is not provided.
+Error   |  Description     
+ :--- | : ---    
+`User ID undefined.`  |  Raises an exception if a valid `user_id` is not provided.
 
 
 **Returns**
@@ -2072,14 +2109,18 @@ REST API:  [Query Datasource Connections](http://onlinehelp.tableau.com/current/
 
 **Parameters**
 
-`user_item`  :  The `user_item` specifies the user to populate with workbook information.
+Name   |  Description     
+ :--- | : ---    
+`user_item`  |  The `user_item` specifies the user to populate with workbook information.
 
 
 
 
 **Exceptions**
 
-`User item missing ID.` :  Raises an errror if the `user_item` is unspecified.
+Error   |  Description     
+ :--- | : ---    
+`User item missing ID.` |  Raises an errror if the `user_item` is unspecified.
 
 
 **Returns**
@@ -2126,12 +2167,16 @@ REST API: [Remove User from Site](http://onlinehelp.tableau.com/current/api/rest
 
 **Parameters**
 
-`user_id`  :  The identifier (`id`) for the the user that you want to remove from the server. 
+Name   |  Description     
+ :--- | : ---    
+`user_id`  |  The identifier (`id`) for the the user that you want to remove from the server. 
 
 
 **Exceptions**
 
-`User ID undefined`   :  Raises an exception if a valid `user_id` is not provided.
+Error   |  Description     
+ :--- | : ---    
+`User ID undefined`   |  Raises an exception if a valid `user_id` is not provided.
 
 
 **Example**
@@ -2169,15 +2214,18 @@ REST API: [Update User](http://onlinehelp.tableau.com/current/api/rest_api/en-us
 
 **Parameters**
 
-`user_item`  :  The `user_item` specifies the user to update.
-
-`password`  : (Optional) The new password for the user. 
+Name   |  Description     
+ :--- | : ---    
+`user_item`  |  The `user_item` specifies the user to update.
+`password`  | (Optional) The new password for the user. 
 
 
 
 **Exceptions**
 
-`User item missing ID.` :  Raises an errror if the `user_item` is unspecified. 
+Error   |  Description     
+ :--- | : ---    
+`User item missing ID.` |  Raises an errror if the `user_item` is unspecified. 
 
 
 **Returns**
@@ -2326,6 +2374,7 @@ REST API: [Query View Preview Image](http://onlinehelp.tableau.com/current/api/r
 Name | Description  
 :--- | :---  
 `view_item`  |  The view item specifies the the `view.id` and `workbook.id` that identifies the preview image.
+ 
 
 **Exceptions** 
 
@@ -2493,7 +2542,9 @@ Name | Description
 
 **Exceptions**
 
-`Workbook ID undefined`   :  Raises an exception if a `workbook_id` is not provided.
+Error   |  Description     
+ :--- | : ---    
+`Workbook ID undefined`  |  Raises an exception if a `workbook_id` is not provided.
 
 
 **Returns**
@@ -2655,6 +2706,9 @@ REST API: [Delete Workbook](http://onlinehelp.tableau.com/current/api/rest_api/e
 Name  |  Description  
 :--- | :---  
 `workbook_id`   | The ID of the workbook to delete.  
+
+
+
 
 **Exceptions**    
 
@@ -2870,6 +2924,8 @@ Name | Description
 :--- | :---  
 `view_item`  |  The view item specifies the the `view.id` and `workbook.id` that identifies the preview image.
 
+
+   
 **Exceptions** 
 
 Error | Description  
