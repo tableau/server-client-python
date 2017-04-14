@@ -7,6 +7,10 @@ The following people have contributed to this project to make it possible, and w
 * [geordielad](https://github.com/geordielad)
 * [Hugo Stijns)(https://github.com/hugoboos)
 * [kovner](https://github.com/kovner)
+* [Talvalin](https://github.com/Talvalin)
+* [Chris Toomey](https://github.com/cmtoomey)
+* [Vathsala Achar](https://github.com/VathsalaAchar)
+* [Graeme Britz](https://github.com/grbritz)
 
 
 ## Core Team
@@ -17,3 +21,5 @@ The following people have contributed to this project to make it possible, and w
 * [RussTheAerialist](https://github.com/RussTheAerialist)
 * [Ben Lower](https://github.com/benlower)
 * [Jared Dominguez](https://github.com/jdomingu)
+* [Jackson Huang](https://github.com/jz-huang)
+* [Brendan Lee](https://github.com/lbrendanl)
