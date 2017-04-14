@@ -7,10 +7,10 @@ The following people have contributed to this project to make it possible, and w
 * [geordielad](https://github.com/geordielad)
 * [Hugo Stijns)(https://github.com/hugoboos)
 * [kovner](https://github.com/kovner)
-* [Graeme Britz](https://github.com/grbritz)
+* [Talvalin](https://github.com/Talvalin)
 * [Chris Toomey](https://github.com/cmtoomey)
 * [Vathsala Achar](https://github.com/VathsalaAchar)
-* [Talvalin](https://github.com/Talvalin)
+* [Graeme Britz](https://github.com/grbritz)
 
 
 ## Core Team
