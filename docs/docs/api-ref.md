@@ -3,10 +3,10 @@ title: API reference
 layout: docs
 ---
 
-<!---<div class="alert alert-info">
+<div class="alert alert-info">
     <b>Important:</b> More coming soon! This section is under active construction and might not reflect all the available functionality of the TSC library.
-    Until this reference is completed, we have noted the source files in the TSC library where you can get more information for individual endpoints.
-</div>    -->
+    <!--- Until this reference is completed, we have noted the source files in the TSC library where you can get more information for individual endpoints. --->
+</div> 
 
  
   
@@ -39,7 +39,7 @@ You can use the TSC library to manage authentication, so you can sign in and sig
 ### TableauAuth class
 
 ```py
-TableauAuth(username, password, site=None, site_id='', user_id_to_impersonate=None)
+TableauAuth(username, password, site_id='', user_id_to_impersonate=None)
 ```
 The `TableauAuth` class contains the attributes for the authentication resources. The `TableauAuth` class defines the information you can set in a  request or query from Tableau Server. The class members correspond to the attributes of a server request or response payload. To use this class, create a new instance, supplying user name, password, and site information if necessary, and pass the request object to the [Auth.sign_in](#auth.sign-in) method.
 
@@ -48,9 +48,8 @@ The `TableauAuth` class contains the attributes for the authentication resources
 Name | Description   
 :--- | :---   
 `username` | The name of the user whose credentials will be used to sign in.   
-`password` | The password of the user.   
-`site`  | (Deprecated) Use `site_id` instead.   
-`site_id` | This corresponds to the `contentUrl` attribute in the Tableau REST API. The `site_id` is the portion of the URL that follows the `/site/` in the URL. For example, "MarketingTeam" is the `site_id` in the following URL *MyServer*/#/site/**MarketingTeam**/projects. To specify the default site on Tableau Server, you can use an empty string **" "**.  For Tableau Online, you must provide a value for the `site_id`.  
+`password` | The password of the user.     
+`site_id` | This corresponds to the `contentUrl` attribute in the Tableau REST API. The `site_id` is the portion of the URL that follows the `/site/` in the URL. For example, "MarketingTeam" is the `site_id` in the following URL *MyServer*/#/site/**MarketingTeam**/projects. To specify the default site on Tableau Server, you can use an empty string **' '**.  For Tableau Online, you must provide a value for the `site_id`.  
 `user_id_to_impersonate` |  Specifies the id (not the name) of the user to sign in as.   
 
 Source file: models/tableau_auth.py
@@ -1400,7 +1399,7 @@ The `Server` class contains the attributes that represent the server on Tableau 
 Attribute | Description
 :--- | :---
 `server_address`  |  Specifies the address of the Tableau Server or Tableau Online (for example, `http://MY-SERVER/`).  
-`version`   |  Specifies the version of the REST API to use (for example, `2.5`). When you use the TSC library to call methods that access Tableau Server, the `version` is passed to the endpoint as part of the URI (`https://MY-SERVER/api/2.5/`). Each release of Tableau Server supports specific versions of the REST API. New versions of the REST API are released with Tableau Server. By default, the value of `version` is set to 2.3, which corresponds to Tableau Server 10.0.  You can view or set this value. You might need to set this to a different value, for example, if you want to access features that are supported by the server and a later version of the REST API.  For more information, see [REST API Versions](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_concepts_versions.htm){:target="_blank"}  
+`version`   |  Specifies the version of the REST API to use (for example, `'2.5'`). When you use the TSC library to call methods that access Tableau Server, the `version` is passed to the endpoint as part of the URI (`https://MY-SERVER/api/2.5/`). Each release of Tableau Server supports specific versions of the REST API. New versions of the REST API are released with Tableau Server. By default, the value of `version` is set to `'2.3'`, which corresponds to Tableau Server 10.0.  You can view or set this value. You might need to set this to a different value, for example, if you want to access features that are supported by the server and a later version of the REST API.  For more information, see [REST API Versions](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_concepts_versions.htm){:target="_blank"}  
 
 
 
@@ -1414,7 +1413,7 @@ server = TSC.Server('http://MY-SERVER')
 
 
 # change the REST API version to 2.5
-server.version = 2.5  
+server.version = '2.5'  
 
 
 ```
@@ -1656,6 +1655,48 @@ new_site = server.sites.create(new_site)
 <br>
 <br>  
 
+#### sites.get
+
+```py
+sites.get()
+```
+
+Queries all the sites on the server. 
+
+
+REST API: [Query Sites](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Sites%3FTocPath%3DAPI%2520Reference%7C_____58){:target="_blank"}  
+
+
+**Parameters**
+
+ None.
+
+**Returns**  
+ 
+Returns a list of all `SiteItem` objects and a `PaginationItem`. Use these values to iterate through the results. 
+
+
+**Example**
+
+```py
+# import tableauserverclient as TSC
+# server = TSC.Server('http://MY-SERVER')
+# sign in, etc.
+
+  # query the sites
+  all_sites, pagination_item = server.sites.get()
+
+  # print all the site names and ids
+  for site in TSC.Pager(server.sites):
+       print(site.id, site.name, site.content_url, site.state)
+
+
+```
+
+<br>
+<br>
+
+
 
 #### sites.get_by_id
 
@@ -1703,46 +1744,52 @@ Returns the `SiteItem`.
 <br>
 <br>
 
-#### sites.get
+#### sites.get_by_name
 
 ```py
-sites.get()
+sites.get_by_name(site_name)
 ```
 
-Queries all the sites on the server. 
+Queries the site with the specifed name.
 
 
-REST API: [Query Sites](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Sites%3FTocPath%3DAPI%2520Reference%7C_____58){:target="_blank"}  
+REST API: [Query  Site](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Site){:target="_blank"}    
+
+**Parameters**  
+
+Name  |  Description  
+:--- | :---  
+`site_name`  | The name of the site you want to query. 
 
 
-**Parameters**
+**Exceptions**  
 
- None.
+Error   |  Description     
+ :--- | : ---    
+`Site Name undefined.` | Raises an error if an name is not specified. 
+
 
 **Returns**  
- 
-Returns a list of all `SiteItem` objects and a `PaginationItem`. Use these values to iterate through the results. 
 
+Returns the `SiteItem`.  
+  
 
-**Example**
+**Example**   
 
 ```py
+
 # import tableauserverclient as TSC
 # server = TSC.Server('http://MY-SERVER')
 # sign in, etc.
 
-  # query the sites
-  all_sites, pagination_item = server.sites.get()
-
-  # print all the site names and ids
-  for site in TSC.Pager(server.sites):
-       print(site.id, site.name, site.content_url, site.state)
+ a_site = server.sites.get_by_name('MY_SITE')
 
 
 ```
 
 <br>
 <br>
+
 
 
 #### sites.update
