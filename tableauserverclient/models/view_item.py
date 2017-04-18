@@ -7,11 +7,14 @@ class ViewItem(object):
     def __init__(self):
         self._content_url = None
         self._id = None
+        self._image = None
+        self._initial_tags = set()
         self._name = None
         self._owner_id = None
         self._preview_image = None
         self._total_views = None
         self._workbook_id = None
+        self.tags = set()
 
     @property
     def content_url(self):
@@ -20,6 +23,10 @@ class ViewItem(object):
     @property
     def id(self):
         return self._id
+
+    @property
+    def image(self):
+        return self._image
 
     @property
     def name(self):

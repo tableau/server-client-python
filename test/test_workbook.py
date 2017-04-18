@@ -170,6 +170,31 @@ class WorkbookTests(unittest.TestCase):
             self.assertTrue(os.path.exists(file_path))
         os.remove(file_path)
 
+    def test_download_sanitizes_name(self):
+        filename = "Name,With,Commas.twbx"
+        disposition = 'name="tableau_workbook"; filename="{}"'.format(filename)
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + '/1f951daf-4061-451a-9df1-69a8062664f2/content',
+                  headers={'Content-Disposition': disposition})
+            file_path = self.server.workbooks.download('1f951daf-4061-451a-9df1-69a8062664f2')
+            self.assertEqual(os.path.basename(file_path), "NameWithCommas.twbx")
+            self.assertTrue(os.path.exists(file_path))
+        os.remove(file_path)
+
+    def test_download_extract_only(self):
+        # Pretend we're 2.5 for 'extract_only'
+        self.server.version = "2.5"
+        self.baseurl = self.server.workbooks.baseurl
+
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + '/1f951daf-4061-451a-9df1-69a8062664f2/content?includeExtract=False',
+                  headers={'Content-Disposition': 'name="tableau_workbook"; filename="RESTAPISample.twbx"'},
+                  complete_qs=True)
+            # Technically this shouldn't download a twbx, but we are interested in the qs, not the file
+            file_path = self.server.workbooks.download('1f951daf-4061-451a-9df1-69a8062664f2', no_extract=True)
+            self.assertTrue(os.path.exists(file_path))
+        os.remove(file_path)
+
     def test_download_missing_id(self):
         self.assertRaises(ValueError, self.server.workbooks.download, '')
 

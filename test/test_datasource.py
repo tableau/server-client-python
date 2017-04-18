@@ -6,11 +6,12 @@ from tableauserverclient.datetime_helpers import format_datetime
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
+ADD_TAGS_XML = os.path.join(TEST_ASSET_DIR, 'datasource_add_tags.xml')
 GET_XML = os.path.join(TEST_ASSET_DIR, 'datasource_get.xml')
 GET_EMPTY_XML = os.path.join(TEST_ASSET_DIR, 'datasource_get_empty.xml')
 GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, 'datasource_get_by_id.xml')
-UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'datasource_update.xml')
 PUBLISH_XML = os.path.join(TEST_ASSET_DIR, 'datasource_publish.xml')
+UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'datasource_update.xml')
 
 
 class DatasourceTests(unittest.TestCase):
@@ -105,12 +106,30 @@ class DatasourceTests(unittest.TestCase):
             m.put(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', text=response_xml)
             single_datasource = TSC.DatasourceItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
             single_datasource._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
-            single_datasource._tags = ['a', 'b', 'c']
             single_datasource._project_name = 'Tester'
             updated_datasource = self.server.datasources.update(single_datasource)
 
         self.assertEqual(single_datasource.tags, updated_datasource.tags)
         self.assertEqual(single_datasource._project_name, updated_datasource._project_name)
+
+    def test_update_tags(self):
+        with open(ADD_TAGS_XML, 'rb') as f:
+            add_tags_xml = f.read().decode('utf-8')
+        with open(UPDATE_XML, 'rb') as f:
+            update_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.put(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/tags', text=add_tags_xml)
+            m.delete(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/tags/b', status_code=204)
+            m.delete(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/tags/d', status_code=204)
+            m.put(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', text=update_xml)
+            single_datasource = TSC.DatasourceItem('1d0304cd-3796-429f-b815-7258370b9b74')
+            single_datasource._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
+            single_datasource._initial_tags.update(['a', 'b', 'c', 'd'])
+            single_datasource.tags.update(['a', 'c', 'e'])
+            updated_datasource = self.server.datasources.update(single_datasource)
+
+        self.assertEqual(single_datasource.tags, updated_datasource.tags)
+        self.assertEqual(single_datasource._initial_tags, updated_datasource._initial_tags)
 
     def test_publish(self):
         with open(PUBLISH_XML, 'rb') as f:
@@ -142,6 +161,30 @@ class DatasourceTests(unittest.TestCase):
             m.get(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/content',
                   headers={'Content-Disposition': 'name="tableau_datasource"; filename="Sample datasource.tds"'})
             file_path = self.server.datasources.download('9dbd2263-16b5-46e1-9c43-a76bb8ab65fb')
+            self.assertTrue(os.path.exists(file_path))
+        os.remove(file_path)
+
+    def test_download_sanitizes_name(self):
+        filename = "Name,With,Commas.tds"
+        disposition = 'name="tableau_workbook"; filename="{}"'.format(filename)
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + '/1f951daf-4061-451a-9df1-69a8062664f2/content',
+                  headers={'Content-Disposition': disposition})
+            file_path = self.server.datasources.download('1f951daf-4061-451a-9df1-69a8062664f2')
+            self.assertEqual(os.path.basename(file_path), "NameWithCommas.tds")
+            self.assertTrue(os.path.exists(file_path))
+        os.remove(file_path)
+
+    def test_download_extract_only(self):
+        # Pretend we're 2.5 for 'extract_only'
+        self.server.version = "2.5"
+        self.baseurl = self.server.datasources.baseurl
+
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/content?includeExtract=False',
+                  headers={'Content-Disposition': 'name="tableau_datasource"; filename="Sample datasource.tds"'},
+                  complete_qs=True)
+            file_path = self.server.datasources.download('9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', no_extract=True)
             self.assertTrue(os.path.exists(file_path))
         os.remove(file_path)
 

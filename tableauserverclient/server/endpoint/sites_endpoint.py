@@ -1,4 +1,4 @@
-from .endpoint import Endpoint
+from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, SiteItem, PaginationItem
 import logging
@@ -13,6 +13,7 @@ class Sites(Endpoint):
         return "{0}/sites".format(self.parent_srv.baseurl)
 
     # Gets all sites
+    @api(version="2.0")
     def get(self, req_options=None):
         logger.info('Querying all sites on site')
         url = self.baseurl
@@ -22,6 +23,7 @@ class Sites(Endpoint):
         return all_site_items, pagination_item
 
     # Gets 1 site by id
+    @api(version="2.0")
     def get_by_id(self, site_id):
         if not site_id:
             error = "Site ID undefined."
@@ -31,7 +33,19 @@ class Sites(Endpoint):
         server_response = self.get_request(url)
         return SiteItem.from_response(server_response.content)[0]
 
+    # Gets 1 site by name
+    @api(version="2.0")
+    def get_by_name(self, site_name):
+        if not site_name:
+            error = "Site Name undefined."
+            raise ValueError(error)
+        logger.info('Querying single site (Name: {0})'.format(site_name))
+        url = "{0}/{1}?key=name".format(self.baseurl, site_name)
+        server_response = self.get_request(url)
+        return SiteItem.from_response(server_response.content)[0]
+
     # Update site
+    @api(version="2.0")
     def update(self, site_item):
         if not site_item.id:
             error = "Site item missing ID."
@@ -49,6 +63,7 @@ class Sites(Endpoint):
         return update_site._parse_common_tags(server_response.content)
 
     # Delete 1 site object
+    @api(version="2.0")
     def delete(self, site_id):
         if not site_id:
             error = "Site ID undefined."
@@ -63,6 +78,7 @@ class Sites(Endpoint):
         logger.info('Deleted single site (ID: {0}) and signed out'.format(site_id))
 
     # Create new site
+    @api(version="2.0")
     def create(self, site_item):
         if site_item.admin_mode:
             if site_item.admin_mode == SiteItem.AdminMode.ContentOnly and site_item.user_quota:

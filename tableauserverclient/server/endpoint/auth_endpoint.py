@@ -1,4 +1,4 @@
-from .endpoint import Endpoint
+from .endpoint import Endpoint, api
 from .. import RequestFactory, NAMESPACE
 import xml.etree.ElementTree as ET
 import logging
@@ -21,6 +21,7 @@ class Auth(Endpoint):
     def baseurl(self):
         return "{0}/auth".format(self.parent_srv.baseurl)
 
+    @api(version="2.0")
     def sign_in(self, auth_req):
         url = "{0}/{1}".format(self.baseurl, 'signin')
         signin_req = RequestFactory.Auth.signin_req(auth_req)
@@ -35,6 +36,7 @@ class Auth(Endpoint):
         logger.info('Signed into {0} as {1}'.format(self.parent_srv.server_address, auth_req.username))
         return Auth.contextmgr(self.sign_out)
 
+    @api(version="2.0")
     def sign_out(self):
         url = "{0}/{1}".format(self.baseurl, 'signout')
         # If there are no auth tokens you're already signed out. No-op
