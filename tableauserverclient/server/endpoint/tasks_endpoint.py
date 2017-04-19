@@ -39,7 +39,6 @@ class Tasks(Endpoint):
             raise MissingRequiredFieldError(error)
 
         url = "{0}/{1}/runNow".format(self.baseurl, task_item.id)
-        print(url)
         run_req = RequestFactory.Task.run_req(task_item)
         server_response = self.post_request(url, run_req)
         return server_response.content
