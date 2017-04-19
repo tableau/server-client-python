@@ -1,3 +1,7 @@
+## 0.4.1 (18 April 2017)
+
+* Fix #177 to remove left in debugging print
+
 ## 0.4 (18 April 2017)
  
 Yikes, it's been too long.
