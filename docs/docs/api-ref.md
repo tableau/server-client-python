@@ -5,7 +5,7 @@ layout: docs
 
 <div class="alert alert-info">
     <b>Important:</b> More coming soon! This section is under active construction and might not reflect all the available functionality of the TSC library.
-    <!--- Until this reference is completed, we have noted the source files in the TSC library where you can get more information for individual endpoints. --->
+    
 </div> 
 
  
@@ -15,15 +15,12 @@ The Tableau Server Client (TSC) is a Python library for the Tableau Server REST 
 The TSC API reference is organized by resource. The TSC library is modeled after the REST API. The methods, for example, `workbooks.get()`, correspond to the endpoints for resources, such as [workbooks](#workbooks), [users](#users), [views](#views), and [data sources](#data-sources). The model classes (for example, the [WorkbookItem class](#workbookitem-class) have attributes that represent the fields (`name`, `id`, `owner_id`) that are in the REST API request and response packages, or payloads. 
 
 |:---  |  
-| **Note:**  Some methods and features provided in the REST API might not be currently available in the TSC library.  In addition, the same limitations apply to the TSC library that apply to the REST API with respect to resources on Tableau Server and Tableau Online. For more information, see the [Tableau Server REST API Reference](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#API_Reference%3FTocPath%3DAPI%2520Reference%7C_____0){:target="_blank"}.|
+| **Note:**  Some methods and features provided in the REST API might not be currently available in the TSC library (and in some cases, the opposite is true).  In addition, the same limitations apply to the TSC library that apply to the REST API with respect to resources on Tableau Server and Tableau Online. For more information, see the [Tableau Server REST API Reference](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#API_Reference%3FTocPath%3DAPI%2520Reference%7C_____0){:target="_blank"}.|
 
  
 
 * TOC  
 {:toc }
-<!-- {:toc ::options toc_levels="1,2"} -->
-
-<!-- {::toc_levels(1,2,3)} -->
 
 <br>
 <br>
@@ -41,7 +38,10 @@ You can use the TSC library to manage authentication, so you can sign in and sig
 ```py
 TableauAuth(username, password, site_id='', user_id_to_impersonate=None)
 ```
-The `TableauAuth` class contains the attributes for the authentication resources. The `TableauAuth` class defines the information you can set in a  request or query from Tableau Server. The class members correspond to the attributes of a server request or response payload. To use this class, create a new instance, supplying user name, password, and site information if necessary, and pass the request object to the [Auth.sign_in](#auth.sign-in) method.
+The `TableauAuth` class contains the attributes for the authentication resources. The `TableauAuth` class defines the information you can set in a  request or query from Tableau Server. The class members correspond to the attributes of a server request or response payload. To use this class, create a new instance, supplying user name, password, and site information if necessary, and pass the request object to the [Auth.sign_in](#auth.sign-in) method.  
+
+ 
+ **Note:** In the future, there might be support for additional forms of authorization and authentication (for example, OAuth). 
 
 **Attributes**  
 
@@ -49,7 +49,7 @@ Name | Description
 :--- | :---   
 `username` | The name of the user whose credentials will be used to sign in.   
 `password` | The password of the user.     
-`site_id` | This corresponds to the `contentUrl` attribute in the Tableau REST API. The `site_id` is the portion of the URL that follows the `/site/` in the URL. For example, "MarketingTeam" is the `site_id` in the following URL *MyServer*/#/site/**MarketingTeam**/projects. To specify the default site on Tableau Server, you can use an empty string **' '**.  For Tableau Online, you must provide a value for the `site_id`.  
+`site_id` | This corresponds to the `contentUrl` attribute in the Tableau REST API. The `site_id` is the portion of the URL that follows the `/site/` in the URL. For example, "MarketingTeam" is the `site_id` in the following URL *MyServer*/#/site/**MarketingTeam**/projects. To specify the default site on Tableau Server, you can use an empty string `''`  (single quotes, no space).  For Tableau Online, you must provide a value for the `site_id`.  
 `user_id_to_impersonate` |  Specifies the id (not the name) of the user to sign in as.   
 
 Source file: models/tableau_auth.py
@@ -297,7 +297,7 @@ REST API: [Delete Datasource](http://onlinehelp.tableau.com/v0.0/api/rest_api/en
 #### datasources.download
 
 ```py
-datasources.download(datasource_id, filepath=None)
+datasources.download(datasource_id, filepath=None, no_extract=False)
 
 ```
 Downloads the specified data source in `.tdsx` format. 
@@ -310,7 +310,7 @@ Name | Description
 :--- | :--- 
 `datasource_id` |  The identifier (`id`) for the the `DatasourceItem` that you want to download from the server. 
 `filepath` |  (Optional) Downloads the file to the location you specify. If no location is specified (the default is `Filepath=None`), the file is downloaded to the current working directory. 
-
+`no_extract` | (Optional) Specifies whether to download the file without the extract. When the data source has an extract, if you set the parameter `no_extract=True`, the extract is not included. You can use this parameter to improve performance if you are downloading data sources that have large extracts. The default is to include the extract, if present (`no_extract=False`). 
 
 **Exceptions**
 
@@ -2783,7 +2783,7 @@ Error  |  Description
 #### workbooks.download
 
 ```py
-workbooks.download(workbook_id, filepath=None)
+workbooks.download(workbook_id, filepath=None, no_extract=False)
 ```
 
 Downloads a workbook to the specified directory (optional).
@@ -2798,6 +2798,8 @@ Name | Description
 :--- | :--- 
 `workbook_id` |  The ID for the the `WorkbookItem` that you want to download from the server. 
 `filepath` |  (Optional) Downloads the file to the location you specify. If no location is specified, the file is downloaded to the current working directory. The default is `Filepath=None`.
+`no_extract` | (Optional) Specifies whether to download the file without the extract. When the workbook has an extract, if you set the parameter `no_extract=True`, the extract is not included. You can use this parameter to improve performance if you are downloading workbooks that have large extracts. The default is to include the extract, if present (`no_extract=False`). 
+
 
 
 **Exceptions**
