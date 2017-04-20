@@ -164,6 +164,10 @@ The connections for Tableau Server data sources and workbooks are represented by
 ConnectionItem()
 ```
 
+The `ConnectionItem` class corresponds to workbook and data source connections.
+
+In the Tableau Server REST API, there are separate endopoints to query and update workbook and data source connections. 
+
 **Attributes**  
 
 Name   |  Description     
@@ -172,7 +176,11 @@ Name   |  Description
 `datasource_name` |  The name of the data source.
 `id`  |  The identifer of the connection.
 `connection_type`  |  The type of connection. 
-
+`username`     | The username for the connection.  
+`password`  |  The password used for the connection.  
+`embed_password`  |  (Boolean) Determines whether to embed the passowrd (`True`) for the workbook or data source connection or not (`False`).  
+`server_address`   |  The server address for the connection.   
+`server_port`   |  The port used by the server.  
 
 Source file: models/connection_item.py  
 
@@ -3006,6 +3014,46 @@ None. The preview image is added to the view.
   server.workbooks.populate_preview_image(workbook)
 
 
+```  
+
+#### workbooks.update_connection
+
+```py
+workbooks.update_conn(workbook_item, connection_item)
+```  
+
+Updates a workbook connection information (server address, server port, user name, and password). 
+
+The workbook connections must be populated before the strings can be updated. See [workbooks.populate_connections](#workbooks.populate_connections)
+
+REST API:  [Update Workbook Connection](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Update_Workbook_Connection%3FTocPath%3DAPI%2520Reference%7C_____88){:target="_blank"}  
+
+**Parameters**
+
+Name | Description  
+:--- | :--- 
+`workbook_item`  |  The `workbook_item` specifies the workbook to populate with data connection information.
+`connection_item` | The `connection_item` that has the information you want to update.  
+
+
+
+**Returns**
+
+None. The connection information is updated with the information in the `ConnectionItem`. 
+
+
+
+
+**Example**
+
+```py  
+
+# update connection item user name and password
+workbook.connections[0].username = 'USERNAME'
+workbook.connections[0].password = 'PASSWORD'
+
+# call the update method
+server.workbooks.update_conn(workbook, workbook.connections[0])
 ```
 
 <br>
