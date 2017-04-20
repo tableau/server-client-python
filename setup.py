@@ -20,6 +20,6 @@ setup(
         'requests>=2.11,<2.12.0a0'
     ],
     tests_require=[
-        'requests-mock>=1.0,<1.1a0'
+        'requests_mock>=1.0,<1.1a0'
     ]
 )
