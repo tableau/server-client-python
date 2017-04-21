@@ -28,7 +28,7 @@ The TSC API reference is organized by resource. The TSC library is modeled after
 
 ## Authentication
 
-You can use the TSC library to manage authentication, so you can sign in and sign out of Tableau Server and Tableau Online. The authentication resources for Tableau Server are defined in the `TableauAuth` class and they correspond to the authentication attributes you can access using the Tableau Server REST API. 
+You can use the TSC library to sign in and sign out of Tableau Server and Tableau Online. The credentials for signing in are defined in the `TableauAuth` class and they correspond to the attributes you specify when you sign in using the Tableau Server REST API. 
 
 <br>
 <br>  
@@ -38,7 +38,7 @@ You can use the TSC library to manage authentication, so you can sign in and sig
 ```py
 TableauAuth(username, password, site_id='', user_id_to_impersonate=None)
 ```
-The `TableauAuth` class contains the attributes for the authentication resources. The `TableauAuth` class defines the information you can set in a  request or query from Tableau Server. The class members correspond to the attributes of a server request or response payload. To use this class, create a new instance, supplying user name, password, and site information if necessary, and pass the request object to the [Auth.sign_in](#auth.sign-in) method.  
+The `TableauAuth` class defines the information you can set in a sign-in request. The class members correspond to the attributes of a server request or response payload. To use this class, create a new instance, supplying user name, password, and site information if necessary, and pass the request object to the [Auth.sign_in](#auth.sign-in) method.  
 
  
  **Note:** In the future, there might be support for additional forms of authorization and authentication (for example, OAuth). 
@@ -63,7 +63,7 @@ import tableauserverclient as TSC
 tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD', site_id='CONTENTURL')
 
 # create a server instance
-# pass the "tableau_auth" request object to server.auth.sign_in()
+# pass the "tableau_auth" object to the server.auth.sign_in() method
 ```
 
 <br>
@@ -87,7 +87,7 @@ auth.sign_in(auth_req)
 Signs you in to Tableau Server.
 
 
-The method signs into Tableau Server or Tableau Online and manages the authentication token. You call this method from the server object you create. For information about the server object, see [Server](#server). The authentication token keeps you signed in for 240 minutes, or until you call the `auth.sign_out` method. Before you use this method, you first need to create the sign-in request (`auth_req`) by creating an instance of the `TableauAuth`. To call this method, create a server object for your server. For more information, see [Sign in and Out](sign-in-out).
+The method signs into Tableau Server or Tableau Online and manages the authentication token. You call this method from the server object you create. For information about the server object, see [Server](#server). The authentication token keeps you signed in for 240 minutes, or until you call the `auth.sign_out` method. Before you use this method, you first need to create the sign-in request (`auth_req`) object by creating an instance of the `TableauAuth`. To call this method, create a server object for your server. For more information, see [Sign in and Out](sign-in-out).
 
 REST API: [Sign In](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Sign_In%3FTocPath%3DAPI%2520Reference%7C_____77){:target="_blank"}
 
@@ -101,13 +101,13 @@ REST API: [Sign In](http://onlinehelp.tableau.com/current/api/rest_api/en-us/hel
 ```py
 import tableauserverclient as TSC
 
-# create a auth request
+# create an auth object
 tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
 
 # create an instance for your server
 server = TSC.Server('http://SERVER_URL')
 
-# call the sign-in method with the request
+# call the sign-in method with the auth object
 server.auth.sign_in(tableau_auth)
 
 ```
@@ -128,7 +128,7 @@ auth.sign_out()
 ```
 Signs you out of the current session.
 
-The method takes care of invalidating the authentiction token. For more information, see [Sign in and Out](sign-in-out).
+The `sign_out()` method takes care of invalidating the authentiction token. For more information, see [Sign in and Out](sign-in-out).
 
 REST API: [Sign Out](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Sign_Out%3FTocPath%3DAPI%2520Reference%7C_____78){:target="_blank"}
 
@@ -156,7 +156,7 @@ server.auth.sign_out()
 
 ## Connections
 
-The connections for Tableau Server data sources and workbooks are represented by a `ConnectionItem` class.  You can call data source and view methods to query or update the connection information.  The `ConnectionCredentials` class represents the connection information you can update. 
+The connections for Tableau Server data sources and workbooks are represented by a `ConnectionItem` class.  You can call data source and workbook methods to query or update the connection information.  The `ConnectionCredentials` class represents the connection information you can update. 
 
 ### ConnectionItem class
 
@@ -178,9 +178,9 @@ Name   |  Description
 `connection_type`  |  The type of connection. 
 `username`     | The username for the connection.  
 `password`  |  The password used for the connection.  
-`embed_password`  |  (Boolean) Determines whether to embed the passowrd (`True`) for the workbook or data source connection or not (`False`).  
+`embed_password`  |  (Boolean) Determines whether to embed the password (`True`) for the workbook or data source connection or not (`False`).  
 `server_address`   |  The server address for the connection.   
-`server_port`   |  The port used by the server.  
+`server_port`   |  The port used for the connection.  
 
 Source file: models/connection_item.py  
 
@@ -196,9 +196,9 @@ ConnectionCredentials(name, password, embed=True, oauth=False)
 ```
 
 
-The `ConnectionCredentials` class corresponds to workbook and data source connections. 
+The `ConnectionCredentials` class is used for workbook and data source publish requests.  
 
-In the Tableau Server REST API, there are separate endopoints to query and update workbook and data source connections. 
+
 
 **Attributes**
 
@@ -220,7 +220,7 @@ Source file: models/connection_credentials.py
 ## Data sources
 
 Using the TSC library, you can get all the data sources on a site, or get the data sources for a specific project. 
-The data source resources for Tableau Server are defined in the `DatasourceItem` class. The class corresponds to the data source resources you can access using the Tableau Server REST API. For example, you can gather information about the name of the data source, its type, and connections, and the project it is associated with. The data source methods are based upon the endpoints for data sources in the REST API and operate on the `DatasourceItem` class.  
+The data source resources for Tableau Server are defined in the `DatasourceItem` class. The class corresponds to the data source resources you can access using the Tableau Server REST API. For example, you can gather information about the name of the data source, its type, its connections, and the project it is associated with. The data source methods are based upon the endpoints for data sources in the REST API and operate on the `DatasourceItem` class.  
 
 <br>
 
@@ -318,7 +318,7 @@ Name | Description
 :--- | :--- 
 `datasource_id` |  The identifier (`id`) for the the `DatasourceItem` that you want to download from the server. 
 `filepath` |  (Optional) Downloads the file to the location you specify. If no location is specified (the default is `Filepath=None`), the file is downloaded to the current working directory. 
-`no_extract` | (Optional) Specifies whether to download the file without the extract. When the data source has an extract, if you set the parameter `no_extract=True`, the extract is not included. You can use this parameter to improve performance if you are downloading data sources that have large extracts. The default is to include the extract, if present (`no_extract=False`). 
+`no_extract` | (Optional) Specifies whether to download the file without the extract. When the data source has an extract, if you set the parameter `no_extract=True`, the extract is not included. You can use this parameter to improve performance if you are downloading data sources that have large extracts. The default is to include the extract, if present (`no_extract=False`). Available starting with Tableau Server REST API version 2.5.  
 
 **Exceptions**
 
@@ -546,7 +546,8 @@ The `DatasourceItem` for the data source that was added or appened to.
   ...
 
   project_id = '3a8b6148-493c-11e6-a621-6f3499394a39'
-  file_path = 'C:\\temp\\WorldIndicators.tde'
+  file_path = r'C:\temp\WorldIndicators.tde'
+  
 
   # Use the project id to create new datsource_item
   new_datasource = TSC.DatasourceItem(project_id)
@@ -591,19 +592,21 @@ An updated `DatasourceItem`.
 
 **Example**
 
-```py
-# from server-client-python/test/test_datasource.py
+```py   
+# import tableauserverclient as TSC
+# server = TSC.Server('http://SERVERURL')
+# sign in ...   
+  
+# get the data source item to update
+  datasource = server.datasources.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+  
+# do some updating 
+  datasource.name = 'New Name'
 
-    ...
+# call the update method with the data source item
+  updated_datasource = server.datasources.update(datasource)
 
-    single_datasource = TSC.DatasourceItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
-    # need to specify the ID - this is a workaround. 
-    single_datasource._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
-    single_datasource._tags = ['a', 'b', 'c']
-    single_datasource._project_name = 'Tester'
-    updated_datasource = self.server.datasources.update(single_datasource)
 
-     ...
 
 ```
 
@@ -667,7 +670,7 @@ The group resources for Tableau Server are defined in the `GroupItem` class. The
 GroupItem(name)
 ```
 
-The `GroupItem` class contains the members or attributes for the view resources on Tableau Server. The `GroupItem` class defines the information you can request or query from Tableau Server. The class members correspond to the attributes of a server request or response payload.
+The `GroupItem` class contains the attributes for the group resources on Tableau Server. The `GroupItem` class defines the information you can request or query from Tableau Server. The class members correspond to the attributes of a server request or response payload.
 
 Source file: models/group_item.py
 
@@ -686,6 +689,8 @@ Name | Description
 
 ```py
  newgroup = TSC.GroupItem('My Group')
+
+ # call groups.create() with new group
 ```
 
 
@@ -735,17 +740,17 @@ None.
 
 ```py
 # Adding a user to a group
-# Using the second group on the site, aleady have all_groups
+# 
+# get the group item
+  all_groups, pagination_item = server.groups.get()
+  mygroup = all_groups[1]
+
 # The id for Ian is '59a8a7b6-be3a-4d2d-1e9e-08a7b6b5b4ba'
 
-# add Ian to the second group
-  server.groups.add_user(all_groups[1], '59a8a7b6-be3a-4d2d-1e9e-08a7b6b5b4ba')
+# add Ian to the group
+  server.groups.add_user(mygroup, '59a8a7b6-be3a-4d2d-1e9e-08a7b6b5b4ba')
 
-# populate the GroupItem with the users 
-  pagination_item = server.groups.populate_users(all_groups[1])
 
-  for user in all_groups[1].users :
-      print(user.name)
 
 ```
 
@@ -883,7 +888,7 @@ Returns a list of `GroupItem` objects and a `PaginationItem`  object.  Use these
        # get the groups on the server
        all_groups, pagination_item = server.groups.get()
 
-       # print the names of the groups
+       # print the names of the first 100 groups
        for group in all_groups :
            print(group.name, group.id)
 ````
@@ -932,14 +937,14 @@ None. A list of `UserItem` objects are added to the group (`group_item.users`).
    ... 
 
 # get the group
-  mygroup = server.groups.get_by_id('1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d')
-
+  all_groups, pagination_item = server.groups.get()
+  mygroup = all_groups[1]
 
 # get the user information 
   pagination_item = server.groups.populate_users(mygroup)
 
 
-# print the information about the first connection item
+# print the names of the users
   for user in mygroup.users :
         print(user.name) 
   
@@ -2806,7 +2811,7 @@ Name | Description
 :--- | :--- 
 `workbook_id` |  The ID for the the `WorkbookItem` that you want to download from the server. 
 `filepath` |  (Optional) Downloads the file to the location you specify. If no location is specified, the file is downloaded to the current working directory. The default is `Filepath=None`.
-`no_extract` | (Optional) Specifies whether to download the file without the extract. When the workbook has an extract, if you set the parameter `no_extract=True`, the extract is not included. You can use this parameter to improve performance if you are downloading workbooks that have large extracts. The default is to include the extract, if present (`no_extract=False`). 
+`no_extract` | (Optional) Specifies whether to download the file without the extract. When the workbook has an extract, if you set the parameter `no_extract=True`, the extract is not included. You can use this parameter to improve performance if you are downloading workbooks that have large extracts. The default is to include the extract, if present (`no_extract=False`). Available starting with Tableau Server REST API version 2.5.
 
 
 
