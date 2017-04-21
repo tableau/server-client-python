@@ -55,6 +55,7 @@ class Server(object):
         self._site_id = None
         self._user_id = None
         self._auth_token = None
+        self._session.close()
         self._session = requests.Session()
 
     def _set_auth(self, site_id, user_id, auth_token):
