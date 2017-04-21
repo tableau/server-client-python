@@ -128,7 +128,7 @@ auth.sign_out()
 ```
 Signs you out of the current session.
 
-The `sign_out()` method takes care of invalidating the authentiction token. For more information, see [Sign in and Out](sign-in-out).
+The `sign_out()` method takes care of invalidating the authentication token. For more information, see [Sign in and Out](sign-in-out).
 
 REST API: [Sign Out](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Sign_Out%3FTocPath%3DAPI%2520Reference%7C_____78){:target="_blank"}
 
@@ -166,7 +166,7 @@ ConnectionItem()
 
 The `ConnectionItem` class corresponds to workbook and data source connections.
 
-In the Tableau Server REST API, there are separate endopoints to query and update workbook and data source connections. 
+In the Tableau Server REST API, there are separate endpoints to query and update workbook and data source connections. 
 
 **Attributes**  
 
@@ -174,7 +174,7 @@ Name   |  Description
  :--- | : ---    
 `datasource_id` |  The identifier of the data source. 
 `datasource_name` |  The name of the data source.
-`id`  |  The identifer of the connection.
+`id`  |  The identifier of the connection.
 `connection_type`  |  The type of connection. 
 `username`     | The username for the connection.  
 `password`  |  The password used for the connection.  
@@ -242,7 +242,7 @@ Name | Description
 `datasource_type` | The type of data source, for example, `sqlserver` or `excel-direct`. 
 `id` |  The identifier for the data source. You need this value to query a specific data source or to delete a data source with the `get_by_id` and `delete` methods. 
 `name`  |  The name of the data source. If not specified, the name of the published data source file is used. 
-`project_id` |  The identifer of the project associated with the data source. When you must provide this identifier when create an instance of a `DatasourceItem`
+`project_id` |  The identifier of the project associated with the data source. When you must provide this identifier when create an instance of a `DatasourceItem`
 `project_name` |  The name of the project associated with the data source. 
 `tags` |  The tags that have been added to the data source. 
 `updated_at` |  The date and time when the data source was last updated. 
@@ -286,7 +286,7 @@ Removes the specified data source from Tableau Server.
 
 Name | Description  
 :--- | :--- 
-`datasource_id`  |  The identifier (`id`) for the the `DatasourceItem` that you want to delete from the server. 
+`datasource_id`  |  The identifier (`id`) for the `DatasourceItem` that you want to delete from the server. 
 
 
 **Exceptions**
@@ -316,7 +316,7 @@ REST API: [Download Datasource](http://onlinehelp.tableau.com/current/api/rest_a
 
 Name | Description  
 :--- | :--- 
-`datasource_id` |  The identifier (`id`) for the the `DatasourceItem` that you want to download from the server. 
+`datasource_id` |  The identifier (`id`) for the `DatasourceItem` that you want to download from the server. 
 `filepath` |  (Optional) Downloads the file to the location you specify. If no location is specified (the default is `Filepath=None`), the file is downloaded to the current working directory. 
 `no_extract` | (Optional) Specifies whether to download the file without the extract. When the data source has an extract, if you set the parameter `no_extract=True`, the extract is not included. You can use this parameter to improve performance if you are downloading data sources that have large extracts. The default is to include the extract, if present (`no_extract=False`). Available starting with Tableau Server REST API version 2.5.  
 
@@ -462,7 +462,7 @@ Name | Description
 
 Error | Description  
 :--- | :--- 
-`Datasource item missing ID. Datasource must be retrieved from server first.` |  Raises an errror if the datasource_item is unspecified.
+`Datasource item missing ID. Datasource must be retrieved from server first.` |  Raises an error if the datasource_item is unspecified.
 
 
 **Returns**
@@ -533,7 +533,7 @@ Error | Description
 
 **Returns**
 
-The `DatasourceItem` for the data source that was added or appened to. 
+The `DatasourceItem` for the data source that was added or appended to. 
 
 
 **Example**
@@ -552,7 +552,7 @@ The `DatasourceItem` for the data source that was added or appened to.
   # Use the project id to create new datsource_item
   new_datasource = TSC.DatasourceItem(project_id)
 
-  # publish data source (specifed in file_path)
+  # publish data source (specified in file_path)
   new_datasource = server.datasources.publish(
                     new_datasource, file_path, 'CreateNew')
 
@@ -582,7 +582,9 @@ Name   |  Description
 
 **Exceptions**
 
-`Datasource item missing ID. Datasource must be retrieved from server first.` :  Raises an errror if the datasource_item is unspecified. Use the `Datasources.get()` method to retrieve that identifies for the data sources on the server.
+Error   |  Description     
+ :--- | : ---    
+`Datasource item missing ID. Datasource must be retrieved from server first.` |  Raises an error if the datasource_item is unspecified. Use the `Datasources.get()` method to retrieve that identifies for the data sources on the server.
 
 
 **Returns**
@@ -635,7 +637,7 @@ For more information, see [Filter and Sort](filter-sort).
 Filter(field, operator, value)
 ```
 
-The `Filter` class corresponds to the *filter expresions* in the Tableau REST API. 
+The `Filter` class corresponds to the *filter expressions* in the Tableau REST API. 
 
 
 
@@ -823,7 +825,7 @@ REST API: [Delete Group](http://onlinehelp.tableau.com/current/api/rest_api/en-u
 
 Name | Description  
 :--- | :--- 
-`group_id`  |  The identifier (`id`) for the the group that you want to remove from the server. 
+`group_id`  |  The identifier (`id`) for the group that you want to remove from the server. 
 
 
 **Exceptions**
@@ -867,7 +869,7 @@ REST API: [Get Uers on Site](http://onlinehelp.tableau.com/current/api/rest_api/
 
 Name | Description  
 :--- | :--- 
-`req_option` |  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific groups, you could specify the name of the group or the group id. 
+`req_option` |  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific group, you could specify the name of the group or the group id. 
 
 
 **Returns**
@@ -919,7 +921,7 @@ Name | Description
 
 **Exceptions**
 
-`Group item missing ID. Group must be retrieved from server first.` :  Raises an errror if the `group_item` is unspecified.
+`Group item missing ID. Group must be retrieved from server first.` :  Raises an error if the `group_item` is unspecified.
 
 
 **Returns**
@@ -983,7 +985,7 @@ Name | Description
 
 Error | Description  
 :--- | :--- 
-`Group must be populated with users first.` |  Raises an errror if the `group_item` is unpopulated.
+`Group must be populated with users first.` |  Raises an error if the `group_item` is unpopulated.
 
 
 **Returns**
@@ -1214,7 +1216,9 @@ Error   |  Description
 
 Returns the updated project information. 
 
-See [ProjectItem class]()
+See [ProjectItem class](#projectitem-class)
+
+**Example**  
 
 ```py
 # import tableauserverclient as TSC
@@ -1222,16 +1226,17 @@ See [ProjectItem class]()
 # sign in, etc
 
   ...
-
+  # get list of projects
   all_project_items, pagination_item = server.projects.get()
-  print([prj.name for prj in all_project_items])
+  
 
   # update project item #7 with new name, etc.
-  all_projects[7].name ='New name'
-  all_projects[7].description = 'New description'      
+  my_project = all_projects[7]
+  my_project.name ='New name'
+  my_project.description = 'New description'      
   
   # call method to update project      
-  updated_proj = server.projects.update(all_projects[7])
+  updated_project = server.projects.update(my_project)
  
 
   
@@ -1296,6 +1301,7 @@ You can use the `Sort` and `RequestOptions` classes to filter and sort the follo
 
 - Users
 - Datasources
+- Groups
 - Workbooks
 - Views 
 
@@ -1329,7 +1335,7 @@ Name  |  Description
 
 #### RequestOptions.Field class
 
-The `RequestOptions.Field` class corresponds to the fields used in filter expressions in the Tableau REST API. For more information, see [Fitering and Sorting](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_concepts_filtering_and_sorting.htm%3FTocPath%3DConcepts%7C_____7){:target="_blank"} in the Tableau REST API.  
+The `RequestOptions.Field` class corresponds to the fields used in filter expressions in the Tableau REST API. For more information, see [Filtering and Sorting](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_concepts_filtering_and_sorting.htm%3FTocPath%3DConcepts%7C_____7){:target="_blank"} in the Tableau REST API.  
 
 **Attributes**  
 
@@ -1494,7 +1500,7 @@ Resource   |  Description
 ```py
 ServerInfoItem(product_version, build_number, rest_api_version)
 ```
-The `ServerInfoItem` class contains the builid and version information for Tableau Server. The server information is accessed with the `server_info.get()` method, which returns an instance of the `ServerInfo` class. 
+The `ServerInfoItem` class contains the build and version information for Tableau Server. The server information is accessed with the `server_info.get()` method, which returns an instance of the `ServerInfo` class. 
 
 **Attributes**  
 
@@ -1587,7 +1593,7 @@ Attribute | Description
 `content_url` | The path to the site.  
 `admin_mode` | (Optional) For Tableau Server only. Specify `ContentAndUsers` to allow site administrators to use the server interface and **tabcmd** commands to add and remove users. (Specifying this option does not give site administrators permissions to manage users using the REST API.) Specify `ContentOnly` to prevent site administrators from adding or removing users. (Server administrators can always add or remove users.)
 `user_quota`| (Optional) Specifies the maximum number of users for the site. If you do not specify this value, the limit depends on the type of licensing configured for the server. For user-based license, the maximum number of users is set by the license. For core-based licensing, there is no limit to the number of users. If you specify a maximum value, only licensed users are counted and server administrators are excluded.
-`storage_quota` | (Optional) 	Specifes the maximum amount of space for the new site, in megabytes. If you set a quota and the site exceeds it, publishers will be prevented from uploading new content until the site is under the limit again.
+`storage_quota` | (Optional) 	Specifies the maximum amount of space for the new site, in megabytes. If you set a quota and the site exceeds it, publishers will be prevented from uploading new content until the site is under the limit again.
 `disable_subscriptions` | (Optional) Specify `true` to prevent users from being able to subscribe to workbooks on the specified site. The default is `false`.  
 `subscribe_others_enabled` | (Optional) Specify `false` to prevent server administrators, site administrators, and project or content owners from being able to subscribe other users to workbooks on the specified site. The default is `true`. 
 `revision_history_enabled` |  (Optional) Specify `true` to enable revision history for content resources (workbooks and datasources). The default is `false`.   
@@ -1640,7 +1646,7 @@ REST API: [Create Site](https://onlinehelp.tableau.com/current/api/rest_api/en-u
   
 Name  |  Description  
 :--- | :---  
-`site_item` | The settings for the site that you want to create. You need to create an instance of `SiteItem` and pass the the `create` method.
+`site_item` | The settings for the site that you want to create. You need to create an instance of `SiteItem` and pass the `create` method.
 
 
 **Returns**  
@@ -1763,7 +1769,7 @@ Returns the `SiteItem`.
 sites.get_by_name(site_name)
 ```
 
-Queries the site with the specifed name.
+Queries the site with the specified name.
 
 
 REST API: [Query  Site](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Site){:target="_blank"}    
@@ -1931,13 +1937,13 @@ sort(field, direction)
 Name  |  Description
 :--- | :---  
 `field`  |  Sets the field to sort on. The fields are defined in the `RequestOption` class. 
-`direction` | The direction to sort, either asscending (`Asc`) or descending (`Desc`). The options are defined in the `RequestOptions.Direction` class.
+`direction` | The direction to sort, either ascending (`Asc`) or descending (`Desc`). The options are defined in the `RequestOptions.Direction` class.
 
 **Example** 
 
 ```py 
 
-# create an new instance of a request option object
+# create a new instance of a request option object
 req_option = TSC.RequestOptions()
 
 # add the sort expression, sorting by name and direction
@@ -1975,7 +1981,7 @@ The `UserItem` class contains the members or attributes for the view resources o
 
 Name | Description  
 :--- | :---  
-`auth_setting` | (Optional) This attribute is only  for Tableau Online. The new authentication type for the user. You can assign the following values for tis attribute: `SAML` (the user signs in using SAML) or `ServerDefault` (the user signs in using the authentication method that's set for the server). These values appear in the **Authentication** tab on the **Settings** page in Tableau Online -- the `SAML` attribute value corresponds to **Single sign-on**, and the `ServerDefault` value corresponds to **TableauID**.  
+`auth_setting` | (Optional) This attribute is only for Tableau Online. The new authentication type for the user. You can assign the following values for tis attribute: `SAML` (the user signs in using SAML) or `ServerDefault` (the user signs in using the authentication method that's set for the server). These values appear in the **Authentication** tab on the **Settings** page in Tableau Online -- the `SAML` attribute value corresponds to **Single sign-on**, and the `ServerDefault` value corresponds to **TableauID**.  
 `domain_name`  |    The name of the site.   
 `external_auth_user_id` |   Represents ID stored in Tableau's single sign-on (SSO) system. The `externalAuthUserId` value is returned for Tableau Online. For other server configurations, this field contains null.    
 `id` |   The id of the user on the site.  
@@ -2067,7 +2073,7 @@ Returns information about the users on the specified site.
 To get information about the workbooks a user owns or has view permission for, you must first populate the `UserItem` with workbook information using the [populate_workbooks(*user_item*)](#populate-workbooks-user) method. 
 
 
-REST API: [Get Uers on Site](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Get_Users_on_Site%3FTocPath%3DAPI%2520Reference%7C_____41){:target="_blank"}
+REST API: [Get Users on Site](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Get_Users_on_Site%3FTocPath%3DAPI%2520Reference%7C_____41){:target="_blank"}
 
 **Parameters**
 
@@ -2078,7 +2084,7 @@ Name   |  Description
 
 **Returns**
 
-Returns a list of `UserItem` objects and a `PaginationItem`  object.  Use these values to iterate through the results. 
+Returns a list of `UserItem` objects and a `PaginationItem` object.  Use these values to iterate through the results. 
 
 
 **Example**
@@ -2180,7 +2186,7 @@ Name   |  Description
 
 Error   |  Description     
  :--- | : ---    
-`User item missing ID.` |  Raises an errror if the `user_item` is unspecified.
+`User item missing ID.` |  Raises an error if the `user_item` is unspecified.
 
 
 **Returns**
@@ -2229,7 +2235,7 @@ REST API: [Remove User from Site](http://onlinehelp.tableau.com/current/api/rest
 
 Name   |  Description     
  :--- | : ---    
-`user_id`  |  The identifier (`id`) for the the user that you want to remove from the server. 
+`user_id`  |  The identifier (`id`) for the user that you want to remove from the server. 
 
 
 **Exceptions**
@@ -2285,7 +2291,7 @@ Name   |  Description
 
 Error   |  Description     
  :--- | : ---    
-`User item missing ID.` |  Raises an errror if the `user_item` is unspecified. 
+`User item missing ID.` |  Raises an error if the `user_item` is unspecified. 
 
 
 **Returns**
@@ -2433,7 +2439,7 @@ REST API: [Query View Preview Image](http://onlinehelp.tableau.com/current/api/r
 
 Name | Description  
 :--- | :---  
-`view_item`  |  The view item specifies the the `view.id` and `workbook.id` that identifies the preview image.
+`view_item`  |  The view item specifies the `view.id` and `workbook.id` that identifies the preview image.
  
 
 **Exceptions** 
@@ -2636,7 +2642,7 @@ Publish a workbook to the specified site.
 
 **Note:** The REST API cannot automatically include
 extracts or other resources that the workbook uses. Therefore,
- a .twb file that usess data from an Excel or csv file on a local computer cannot be published,
+ a .twb file that uses data from an Excel or csv file on a local computer cannot be published,
 unless you package the data and workbook in a .twbx file, or publish the data source separately.  
 
 For workbooks that are larger than 64 MB, the publish method automatically takes care of chunking the file in parts for uploading. Using this method is considerably more convenient than calling the publish REST APIs directly.  
@@ -2649,7 +2655,7 @@ REST API: [Publish Workbook](http://onlinehelp.tableau.com/current/api/rest_api/
 
 Name | Description  
 :--- | :--- 
-`workbook_item`  |  The `workbook_item` specifies the workbook you are publishing. When you are adding a workbook, you need to first create a new instance of a `workbook_item` that inlcudes a `project_id` of an existing project. The name of the workbook will be the name of the file, unless you also specify a name for the new workbook when you create the instance. See [WorkbookItem](#workbookitem-class).
+`workbook_item`  |  The `workbook_item` specifies the workbook you are publishing. When you are adding a workbook, you need to first create a new instance of a `workbook_item` that includes a `project_id` of an existing project. The name of the workbook will be the name of the file, unless you also specify a name for the new workbook when you create the instance. See [WorkbookItem](#workbookitem-class).
 `file_path`  |  The path and name of the workbook to publish. 
 `mode`     |  Specifies whether you are publishing a new workbook (`CreateNew`) or overwriting an existing workbook (`Overwrite`).  You cannot appending workbooks.  You can also use the publish mode attributes, for example: `TSC.Server.PublishMode.Overwrite`.
 `connection_credentials` | (Optional)  The credentials (if required) to connect to the workbook's data source. The `ConnectionCredentials` object contains the authentication information for the data source (user name and password, and whether the credentials are embeded or OAuth is used). 
@@ -2713,7 +2719,7 @@ Name | Description
 
 Error | Description  
 :--- | :--- 
-`Workbook item missing ID. Workbook must be retrieved from server first.` | Raises an errror if the `workbook_item` is unspecified. Use the `workbooks.get()` or `workbooks.get_by_id()` methods to retreive the workbook item from the server. 
+`Workbook item missing ID. Workbook must be retrieved from server first.` | Raises an error if the `workbook_item` is unspecified. Use the `workbooks.get()` or `workbooks.get_by_id()` methods to retrieve the workbook item from the server. 
 
 
 ```py  
@@ -2809,7 +2815,7 @@ REST API: [Download Workbook](http://onlinehelp.tableau.com/current/api/rest_api
 
 Name | Description  
 :--- | :--- 
-`workbook_id` |  The ID for the the `WorkbookItem` that you want to download from the server. 
+`workbook_id` |  The ID for the `WorkbookItem` that you want to download from the server. 
 `filepath` |  (Optional) Downloads the file to the location you specify. If no location is specified, the file is downloaded to the current working directory. The default is `Filepath=None`.
 `no_extract` | (Optional) Specifies whether to download the file without the extract. When the workbook has an extract, if you set the parameter `no_extract=True`, the extract is not included. You can use this parameter to improve performance if you are downloading workbooks that have large extracts. The default is to include the extract, if present (`no_extract=False`). Available starting with Tableau Server REST API version 2.5.
 
@@ -2868,7 +2874,7 @@ Name | Description
 
 Error | Description  
 :--- | :--- 
-`Workbook item missing ID. Workbook must be retrieved from server first.` |  Raises an errror if the `workbook_item` is unspecified. You can retreive the workbook items using the `workbooks.get()` and `workbooks.get_by_id()` methods. 
+`Workbook item missing ID. Workbook must be retrieved from server first.` |  Raises an error if the `workbook_item` is unspecified. You can retrieve the workbook items using the `workbooks.get()` and `workbooks.get_by_id()` methods. 
 
 
 **Returns**
@@ -2931,7 +2937,7 @@ Name | Description
 
 Error | Description  
 :--- | :--- 
-`Workbook item missing ID. Workbook must be retrieved from server first.` |  Raises an errror if the `workbook_item` is unspecified.
+`Workbook item missing ID. Workbook must be retrieved from server first.` |  Raises an error if the `workbook_item` is unspecified.
 
 
 **Returns**
@@ -2984,7 +2990,7 @@ REST API: [Query View Preview Image](http://onlinehelp.tableau.com/current/api/r
 
 Name | Description  
 :--- | :---  
-`view_item`  |  The view item specifies the the `view.id` and `workbook.id` that identifies the preview image.
+`view_item`  |  The view item specifies the `view.id` and `workbook.id` that identifies the preview image.
 
 
    
