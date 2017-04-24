@@ -1,0 +1,6 @@
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.4.xsd">
+<serverInfo>
+<productVersion build="10100.16.1024.2100">10.1.0</productVersion>
+<restApiVersion>2.5</restApiVersion>
+</serverInfo>
+</tsResponse>

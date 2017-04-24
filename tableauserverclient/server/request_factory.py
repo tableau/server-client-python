@@ -1,5 +1,6 @@
 from ..datetime_helpers import format_datetime
 import xml.etree.ElementTree as ET
+from functools import wraps
 
 from requests.packages.urllib3.fields import RequestField
 from requests.packages.urllib3.filepost import encode_multipart_formdata
@@ -14,6 +15,14 @@ def _add_multipart(parts):
     xml_request, content_type = encode_multipart_formdata(mime_multipart_parts)
     content_type = ''.join(('multipart/mixed',) + content_type.partition(';')[1:])
     return xml_request, content_type
+
+
+def _tsrequest_wrapped(func):
+    def wrapper(self, *args, **kwargs):
+        xml_request = ET.Element('tsRequest')
+        func(xml_request, *args, **kwargs)
+        return ET.tostring(xml_request)
+    return wrapper
 
 
 class AuthRequest(object):
@@ -314,6 +323,30 @@ class WorkbookRequest(object):
         return _add_multipart(parts)
 
 
+class WorkbookConnection(object):
+    def update_req(self, connection_item):
+        xml_request = ET.Element('tsRequest')
+        connection_element = ET.SubElement(xml_request, 'connection')
+        if connection_item.server_address:
+            connection_element.attrib['serverAddress'] = connection_item.server_address.lower()
+        if connection_item.server_port:
+            connection_element.attrib['port'] = str(connection_item.server_port)
+        if connection_item.username:
+            connection_element.attrib['userName'] = connection_item.username
+        if connection_item.password:
+            connection_element.attrib['password'] = connection_item.password
+        if connection_item.embed_password:
+            connection_element.attrib['embedPassword'] = connection_item.embed_password
+        return ET.tostring(xml_request)
+
+
+class TaskRequest(object):
+    @_tsrequest_wrapped
+    def run_req(xml_request, task_item):
+        # Send an empty tsRequest
+        pass
+
+
 class RequestFactory(object):
     Auth = AuthRequest()
     Datasource = DatasourceRequest()
@@ -324,5 +357,7 @@ class RequestFactory(object):
     Schedule = ScheduleRequest()
     Site = SiteRequest()
     Tag = TagRequest()
+    Task = TaskRequest()
     User = UserRequest()
     Workbook = WorkbookRequest()
+    WorkbookConnection = WorkbookConnection()

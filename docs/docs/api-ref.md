@@ -440,10 +440,8 @@ print(datasource.name)
 datasources.populate_connections(datasource_item)
 ```
 
+
 Populates the connections for the specified data source.
-
-
-
 
 This method retrieves the connection information for the specified data source. The REST API is designed to return only the information you ask for explicitly. When you query for all the data sources, the connection information is not included. Use this method to retrieve the connections. The method adds the list of data connections to the data source item (`datasource_item.connections`). This is a list of `ConnectionItem` objects.  
 

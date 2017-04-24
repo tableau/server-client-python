@@ -40,6 +40,8 @@ The following list describes the samples available in the repository:
 
 * `explore_workbook.py`. Queries workbooks, selects a workbook, populates the connections and views for a workbook, then updates the workbook.
 
+* `download_view_image.py`. Queries for view based on name specified in filter, populates the image and saves the image to specified file path.
+
 * `move_workbook_projects.py`. Updates the properties of a workbook to move the workbook from one project to another.
 
 * `move_workbook_sites.py`. Downloads a workbook, stores it in-memory, and uploads it to another site.

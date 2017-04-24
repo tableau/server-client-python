@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 
 from .exceptions import NotSignedInError
 from .endpoint import Sites, Views, Users, Groups, Workbooks, Datasources, Projects, Auth, \
-    Schedules, ServerInfo, ServerInfoEndpointNotFoundError
+    Schedules, ServerInfo, Tasks, ServerInfoEndpointNotFoundError
 
 import requests
 
@@ -21,7 +21,7 @@ class Server(object):
         Overwrite = 'Overwrite'
         CreateNew = 'CreateNew'
 
-    def __init__(self, server_address):
+    def __init__(self, server_address, use_server_version=False):
         self._server_address = server_address
         self._auth_token = None
         self._site_id = None
@@ -29,7 +29,7 @@ class Server(object):
         self._session = requests.Session()
         self._http_options = dict()
 
-        self.version = 2.3
+        self.version = "2.3"
         self.auth = Auth(self)
         self.views = Views(self)
         self.users = Users(self)
@@ -40,6 +40,10 @@ class Server(object):
         self.projects = Projects(self)
         self.schedules = Schedules(self)
         self.server_info = ServerInfo(self)
+        self.tasks = Tasks(self)
+
+        if use_server_version:
+            self.use_server_version()
 
     def add_http_options(self, options_dict):
         self._http_options.update(options_dict)
@@ -78,8 +82,13 @@ class Server(object):
 
         return version
 
-    def use_highest_version(self):
+    def use_server_version(self):
         self.version = self._determine_highest_version()
+
+    def use_highest_version(self):
+        self.use_server_version()
+        import warnings
+        warnings.warn("use use_server_version instead", DeprecationWarning)
 
     @property
     def baseurl(self):
