@@ -45,6 +45,16 @@ anyone can add to an issue:
 * **Critical** - This means that you won't be able to use the library until the issues have been resolved.  If an issue is already labeled as critical, but you want to show your support for it, add a +1 comment to the issue.  This helps us know what issues are really impacting our users.
 * **Nice To Have** - This means that the issue doesn't block your usage of the library, but would make your life easier.  Like with critical, if the issue is already tagged with this, but you want to show your support, add a +1 comment to the issue.
 
+## Working an issue
+
+1. [Fork](https://github.com/tableau/server-client-python#fork-destination-box) (if you haven't already)
+2. Clone your fork (if you haven't already)
+3. `git checkout development  # Make sure you start from development`
+4. `git checkout -b [bugfix|feature]-[issue#]-[description]`
+5. Make your changes and `git commit`
+6. When you are ready to submit a PR, push branch to your fork
+7. [Create a Pull Request](https://github.com/tableau/server-client-python/pulls)
+
 ## Fixes, Implementations, and Documentation
 
 For all other things, please submit a PR that includes the fix, documentation, or new code that you are trying to contribute.  More information on
