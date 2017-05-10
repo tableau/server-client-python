@@ -70,11 +70,12 @@ def property_is_valid_time(func):
 
 
 def property_is_int(range, allowed=None):
-    '''Takes a range of ints and a list of possible exceptions to check against
-    when setting a property on a model. The range is a tuple of (min,max) and the
-    allowed list (empty by default) allows you to add exemptions outside the range.
-    This is useful for when we allow sentinel values outside the regular range.abs
-    Example: Revisions allow a range of 2-10000, but use -1 as 'unlimited'.
+    '''Takes a range of ints and a list of exemptions to check against
+    when setting a property on a model. The range is a tuple of (min, max) and the
+    allowed list (empty by default) allows values outside that range.
+    This is useful for when we use sentinel values.
+
+    Example: Revisions allow a range of 2-10000, but use -1 as a sentinel for 'unlimited'.
     '''
 
     if allowed is None:
