@@ -69,7 +69,17 @@ def property_is_valid_time(func):
     return wrapper
 
 
-def property_is_int(range):
+def property_is_int(range, allowed=None):
+    '''Takes a range of ints and a list of possible exceptions to check against
+    when setting a property on a model. The range is a tuple of (min,max) and the
+    allowed list (empty by default) allows you to add exemptions outside the range.
+    This is useful for when we allow sentinel values outside the regular range.abs
+    Example: Revisions allow a range of 2-10000, but use -1 as 'unlimited'.
+    '''
+
+    if allowed is None:
+        allowed = ()  # Empty tuple for fast no-op testing.
+
     def property_type_decorator(func):
         @wraps(func)
         def wrapper(self, value):
@@ -83,14 +93,11 @@ def property_is_int(range):
 
             min, max = range
 
-            if value < min or value > max:
-
+            if (value < min or value > max) and (value not in allowed):
                 raise ValueError(error)
 
             return func(self, value)
-
         return wrapper
-
     return property_type_decorator
 
 
