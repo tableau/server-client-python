@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 from .property_decorators import (property_is_enum, property_is_boolean, property_matches,
-                                  property_not_empty, property_not_nullable)
+                                  property_not_empty, property_not_nullable, property_is_int)
 from .. import NAMESPACE
 
 
@@ -17,14 +17,15 @@ class SiteItem(object):
         Suspended = 'Suspended'
 
     def __init__(self, name, content_url, admin_mode=None, user_quota=None, storage_quota=None,
-                 disable_subscriptions=False, subscribe_others_enabled=True, revision_history_enabled=False):
+                 disable_subscriptions=False, subscribe_others_enabled=True, revision_history_enabled=False,
+                 revision_limit=None):
         self._admin_mode = None
         self._id = None
         self._num_users = None
         self._state = None
         self._status_reason = None
         self._storage = None
-        self.revision_limit = None
+        self._revision_limit = None
         self.user_quota = user_quota
         self.storage_quota = storage_quota
         self.content_url = content_url
@@ -87,6 +88,15 @@ class SiteItem(object):
     @property_is_boolean
     def revision_history_enabled(self, value):
         self._revision_history_enabled = value
+
+    @property
+    def revision_limit(self):
+        return self._revision_limit
+
+    @revision_limit.setter
+    @property_is_int((2, 10000), allowed=[-1])
+    def revision_limit(self, value):
+        self._revision_limit = value
 
     @property
     def state(self):
