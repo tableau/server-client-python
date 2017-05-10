@@ -94,7 +94,7 @@ class SiteItem(object):
         return self._revision_limit
 
     @revision_limit.setter
-    @property_is_int((2,10000), allowed=[-1])
+    @property_is_int((2, 10000), allowed=[-1])
     def revision_limit(self, value):
         self._revision_limit = value
 
