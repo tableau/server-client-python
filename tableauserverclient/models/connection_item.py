@@ -3,16 +3,17 @@ from .. import NAMESPACE
 
 
 class ConnectionItem(object):
-    def __init__(self):
-        self._datasource_id = None
-        self._datasource_name = None
-        self._id = None
-        self._connection_type = None
-        self.embed_password = None
-        self.password = None
-        self.server_address = None
-        self.server_port = None
-        self.username = None
+    def __init__(self, datasource_id=None, _datasource_name=None, _id=None, _connection_type=None, embed_password=None,
+                 password=None, server_address=None, server_port=None, username=None):
+        self._datasource_id = datasource_id
+        self._datasource_name = _datasource_name
+        self._id = _id
+        self._connection_type = _connection_type
+        self.embed_password = embed_password
+        self.password = password
+        self.server_address = server_address
+        self.server_port = server_port
+        self.username = username
 
     @property
     def datasource_id(self):
@@ -29,6 +30,24 @@ class ConnectionItem(object):
     @property
     def connection_type(self):
         return self._connection_type
+
+    # def set_embed_password(self, embed_password):
+    #     self.embed_password = embed_password
+    #
+    # def set_password(self, password):
+    #     self.password = password
+    #
+    # def set_server_address(self, server_address):
+    #     self.server_address = server_address
+    #
+    # def set_server_port(self, server_port):
+    #     self.server_port = server_port
+    #
+    # def set_username(self, username):
+    #     self.username = username
+    #
+    # def _set_connection_type(self, connection_type):
+    #     self.connection_type = connection_type
 
     @classmethod
     def from_response(cls, resp):
