@@ -20,7 +20,7 @@ class Pager(object):
             self._options = RequestOptions()
 
         # Pager assumes deterministic order but solr doesn't guarantee sort order unless specified
-        if len(self._options.sort) == 0:
+        if not self._options.sort:
             self._options.sort.add(Sort(RequestOptions.Field.Name, RequestOptions.Direction.Asc))
 
     def __iter__(self):
