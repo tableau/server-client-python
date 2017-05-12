@@ -119,7 +119,8 @@ class Datasources(Endpoint):
         url = "{0}/{1}/connections/{2}".format(self.baseurl, datasource_item.id, datasource_item.connections[0].id)
         update_req = RequestFactory.DatasourceConnection.update_req(connection_item)
         server_response = self.put_request(url, update_req)
-        logger.info('Updated datasource item (ID: {0} & connection item {1}'.format(datasource_item.id, connection_item.id))
+        logger.info('Updated datasource item (ID: {0} & connection item {1}'.format(datasource_item.id,
+                                                                                    connection_item.id))
 
     # Publish datasource
     @api(version="2.0")
