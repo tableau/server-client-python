@@ -23,7 +23,6 @@ class Pager(object):
         if len(self._options.sort) == 0:
             self._options.sort.add(Sort(RequestOptions.Field.Name, RequestOptions.Direction.Asc))
 
-
     def __iter__(self):
         # Fetch the first page
         current_item_list, last_pagination_item = self._endpoint(self._options)
