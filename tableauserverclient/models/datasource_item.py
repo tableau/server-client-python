@@ -147,7 +147,7 @@ class DatasourceItem(object):
         created_at = parse_datetime(datasource_xml.get('createdAt', None))
         updated_at = parse_datetime(datasource_xml.get('updatedAt', None))
         certification_note = datasource_xml.get('certificationNote', None)
-        certified = str(datasource_xml.get('isCertified', None)).lower()  == 'true'
+        certified = str(datasource_xml.get('isCertified', None)).lower() == 'true'
 
         tags = None
         tags_elem = datasource_xml.find('.//t:tags', namespaces=NAMESPACE)
