@@ -101,6 +101,7 @@ class DatasourceTests(unittest.TestCase):
         self.assertEqual('1d0304cd-3796-429f-b815-7258370b9b74', single_datasource.project_id)
         self.assertEqual('dd2239f6-ddf1-4107-981a-4cf94e415794', single_datasource.owner_id)
         self.assertEqual(True, single_datasource.certified)
+        self.assertEqual("Warning, here be dragons.", single_datasource.certification_note)
 
     def test_update_copy_fields(self):
         with open(UPDATE_XML, 'rb') as f:

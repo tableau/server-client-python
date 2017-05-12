@@ -141,7 +141,6 @@ class DatasourceItem(object):
 
     @staticmethod
     def _parse_element(datasource_xml):
-        blorp = datasource_xml
         id_ = datasource_xml.get('id', None)
         name = datasource_xml.get('name', None)
         datasource_type = datasource_xml.get('type', None)
@@ -151,9 +150,7 @@ class DatasourceItem(object):
         certification_note = datasource_xml.get('certificationNote', None)
 
         certified = datasource_xml.get('isCertified', None)
-
-        if certified:
-            certified = str(certified).lower() == 'true'
+        certified = str(certified).lower() == 'true'
 
         tags = None
         tags_elem = datasource_xml.find('.//t:tags', namespaces=NAMESPACE)
