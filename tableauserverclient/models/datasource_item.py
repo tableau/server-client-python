@@ -118,10 +118,9 @@ class DatasourceItem(object):
             self._project_name = project_name
         if owner_id:
             self.owner_id = owner_id
-        if certified:
-            self.certified = certified
         if certification_note:
             self.certification_note = certification_note
+        self.certified = certified  # Always True/False, not conditional
 
     @classmethod
     def from_response(cls, resp):
@@ -148,9 +147,7 @@ class DatasourceItem(object):
         created_at = parse_datetime(datasource_xml.get('createdAt', None))
         updated_at = parse_datetime(datasource_xml.get('updatedAt', None))
         certification_note = datasource_xml.get('certificationNote', None)
-
-        certified = datasource_xml.get('isCertified', None)
-        certified = str(certified).lower() == 'true'
+        certified = str(datasource_xml.get('isCertified', None)).lower()  == 'true'
 
         tags = None
         tags_elem = datasource_xml.find('.//t:tags', namespaces=NAMESPACE)
