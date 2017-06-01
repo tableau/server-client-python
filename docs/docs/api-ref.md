@@ -2574,7 +2574,8 @@ tableau_auth = TSC.TableauAuth('username', 'password', site_id='site')
 server = TSC.Server('http://servername')
 
 with server.auth.sign_in(tableau_auth):
-  all_workbook_items, pagination_item = server.workbooks.get()
+  all_workbooks, pagination_item = server.workbooks.get()
+  # print names of first 100 workbooks
   print([workbook.name for workbook in all_workbooks])
 
 
