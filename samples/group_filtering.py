@@ -44,8 +44,8 @@ def main():
             group1 = TSC.GroupItem(group_name)
             group1 = server.groups.create(group1)
             print(group1)
-        except:
-            print('Group \'%s\' already existed' % group_name)
+        except TSC.ServerResponseError:
+             print('Group \'%s\' already existed' % group_name)
 
         group_name = 'SALES ROMANIA'
         # Try to create a group named "SALES ROMANIA"
@@ -53,16 +53,20 @@ def main():
             group2 = TSC.GroupItem(group_name)
             group2 = server.groups.create(group2)
             print(group2)
-        except:
+        except TSC.ServerResponseError:
             print('Group \'%s\' already existed' % group_name)
 
-        group_name = 'SALES+ROMANIA'
+        # URL Encode the name of the group that we want to filter on
+        # i.e. turn spaces into plus signs
+        filter_group_name = 'SALES+ROMANIA'
         options = TSC.RequestOptions()
         options.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name,
                               TSC.RequestOptions.Operator.Equals,
-                              group_name))
+                              filter_group_name))
 
         filtered_group_paged = server.groups.get(req_options=options)
+
+        # Return type is a tuple with the first entry as a list of matching groups
         print(filtered_group_paged[0][0].name)
 
         options = TSC.RequestOptions()
