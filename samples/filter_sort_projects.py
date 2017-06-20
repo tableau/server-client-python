@@ -1,7 +1,7 @@
 ####
 # This script demonstrates how to use the Tableau Server Client
-# to filter and sort on the projects present on site.
-# the desired project.
+# to filter and sort on the name of the projects present on site.
+#
 #
 # To run the script, you must have installed Python 2.7.X or 3.3 and later.
 ####
