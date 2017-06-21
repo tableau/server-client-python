@@ -13,8 +13,17 @@ import logging
 import tableauserverclient as TSC
 
 
-def main():
+def create_example_group(group_name='Example Group', server=None):
+    new_group = TSC.GroupItem(group_name)
+    try:
+        new_group = server.groups.create(new_group)
+        print('Created a new project called: \'%s\'' % group_name)
+        print(new_group)
+    except TSC.ServerResponseError:
+        print('Group \'%s\' already existed' % group_name)
 
+
+def main():
     parser = argparse.ArgumentParser(description='Filter on groups')
     parser.add_argument('--server', '-s', required=True, help='server address')
     parser.add_argument('--username', '-u', required=True, help='username to sign into server')
@@ -23,7 +32,6 @@ def main():
     parser.add_argument('-p', default=None)
     args = parser.parse_args()
 
-    password = ''
     if args.p is None:
         password = getpass.getpass("Password: ")
     else:
@@ -37,36 +45,30 @@ def main():
     server = TSC.Server(args.server)
 
     with server.auth.sign_in(tableau_auth):
-        server.version = '2.7'
+
+        # Determine and use the highest api version for the server
+        server.use_server_version()
+
         group_name = 'SALES NORTHWEST'
         # Try to create a group named "SALES NORTHWEST"
-        try:
-            group1 = TSC.GroupItem(group_name)
-            group1 = server.groups.create(group1)
-            print(group1)
-        except TSC.ServerResponseError:
-             print('Group \'%s\' already existed' % group_name)
+        create_example_group(group_name, server)
 
         group_name = 'SALES ROMANIA'
         # Try to create a group named "SALES ROMANIA"
-        try:
-            group2 = TSC.GroupItem(group_name)
-            group2 = server.groups.create(group2)
-            print(group2)
-        except TSC.ServerResponseError:
-            print('Group \'%s\' already existed' % group_name)
+        create_example_group(group_name, server)
 
         # URL Encode the name of the group that we want to filter on
         # i.e. turn spaces into plus signs
         filter_group_name = 'SALES+ROMANIA'
         options = TSC.RequestOptions()
         options.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name,
-                              TSC.RequestOptions.Operator.Equals,
-                              filter_group_name))
-
-        filtered_group_paged = server.groups.get(req_options=options)
+                                      TSC.RequestOptions.Operator.Equals,
+                                      filter_group_name))
 
         # Return type is a tuple with the first entry as a list of matching groups
+        filtered_group_paged = server.groups.get(req_options=options)
+
+        # Access the first list object of the first tuple return type
         print(filtered_group_paged[0][0].name)
 
         options = TSC.RequestOptions()
