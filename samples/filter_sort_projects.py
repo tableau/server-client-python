@@ -58,8 +58,10 @@ def main():
                                       TSC.RequestOptions.Operator.Equals,
                                       filter_project_name))
 
-        filter_projects_paged = server.projects.get(req_options=options)
-        print(filter_projects_paged[0][0].name)
+        filtered_projects, _ = server.projects.get(req_options=options)
+        # Result can either be a matching project or none
+        project_name = filtered_projects.pop().name if len(filtered_projects) != 0 else 'No project named \'' + str(filter_project_name) + '\' found '
+        print(project_name)
 
         create_example_project(_name='Example 1', _server=server)
         create_example_project(_name='Example 2', _server=server)
