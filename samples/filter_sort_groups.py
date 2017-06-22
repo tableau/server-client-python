@@ -65,11 +65,10 @@ def main():
                                       TSC.RequestOptions.Operator.Equals,
                                       filter_group_name))
 
-        # Return type is a tuple with the first entry as a list of matching groups
-        filtered_group_paged = server.groups.get(req_options=options)
-
-        # Access the first list object of the first tuple return type
-        print(filtered_group_paged[0][0].name)
+        filtered_groups, _ = server.groups.get(req_options=options)
+        # Result can either be a matching group or none
+        group_name = filtered_groups.pop().name if len(filtered_groups) != 0 else 'No project named \'' + str(filter_group_name) + '\' found '
+        print(group_name)
 
         options = TSC.RequestOptions()
         options.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name,
