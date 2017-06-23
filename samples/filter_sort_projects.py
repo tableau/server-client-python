@@ -12,16 +12,17 @@ import logging
 
 import tableauserverclient as TSC
 
-def create_example_project(_name='Example Project', _content_permissions='LockedToProject',
-                           _description='Project created for testing', _server=None):
 
-    new_project = TSC.ProjectItem(name=_name, content_permissions=_content_permissions,
-                                  description=_description)
+def create_example_project(name='Example Project', content_permissions='LockedToProject',
+                           description='Project created for testing', server=None):
+
+    new_project = TSC.ProjectItem(name=name, content_permissions=content_permissions,
+                                  description=description)
     try:
-        _server.projects.create(new_project)
-        print('Created a new project called: %s' % _name)
+        server.projects.create(new_project)
+        print('Created a new project called: %s' % name)
     except TSC.ServerResponseError:
-        print('We have already created this resource: %s' % _name)
+        print('We have already created this resource: %s' % name)
 
 
 def main():
@@ -49,7 +50,8 @@ def main():
     server = TSC.Server(args.server)
 
     with server.auth.sign_in(tableau_auth):
-        server.version = '2.7'
+        # Use highest Server REST API version available
+        server.use_server_version()
 
         filter_project_name = 'default'
         options = TSC.RequestOptions()
@@ -67,10 +69,10 @@ def main():
             error = "No project named '{}' found".format(filter_project_name)
             print(error)
 
-        create_example_project(_name='Example 1', _server=server)
-        create_example_project(_name='Example 2', _server=server)
-        create_example_project(_name='Example 3', _server=server)
-        create_example_project(_name='Proiect ca Exemplu', _server=server)
+        create_example_project(name='Example 1', server=server)
+        create_example_project(name='Example 2', server=server)
+        create_example_project(name='Example 3', server=server)
+        create_example_project(name='Proiect ca Exemplu', server=server)
 
         options = TSC.RequestOptions()
 
