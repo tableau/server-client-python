@@ -66,9 +66,13 @@ def main():
                                       filter_group_name))
 
         filtered_groups, _ = server.groups.get(req_options=options)
-        # Result can either be a matching group or none
-        group_name = filtered_groups.pop().name if len(filtered_groups) != 0 else 'No project named \'' + str(filter_group_name) + '\' found '
-        print(group_name)
+        # Result can either be a matching group or an empty list
+        if filtered_groups:
+            group_name = filtered_groups.pop().name
+            print(group_name)
+        else:
+            error = "No project named '{}' found".format(filter_group_name)
+            print(error)
 
         options = TSC.RequestOptions()
         options.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name,
