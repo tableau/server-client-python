@@ -305,7 +305,7 @@ REST API: [Delete Datasource](http://onlinehelp.tableau.com/v0.0/api/rest_api/en
 #### datasources.download
 
 ```py
-datasources.download(datasource_id, filepath=None, ~~no_extract=False~~, include_extract=True)
+datasources.download(datasource_id, filepath=None, no_extract=False)
 
 ```
 Downloads the specified data source in `.tdsx` format.
@@ -318,12 +318,8 @@ Name | Description
 :--- | :---
 `datasource_id` |  The identifier (`id`) for the `DatasourceItem` that you want to download from the server.
 `filepath` |  (Optional) Downloads the file to the location you specify. If no location is specified (the default is `Filepath=None`), the file is downloaded to the current working directory.
-`DEPRECATED: replace no_extract with include_extract; the default changes from no_extract=False to include_extract`
 ~~`no_extract`~~ | (Optional) Specifies whether to download the file without the extract. When the data source has an extract, if you set the parameter `no_extract=True`, the extract is not included. You can use this parameter to improve performance if you are downloading data sources that have large extracts. The default is to include the extract, if present (`no_extract=False`). Available starting with Tableau Server REST API version 2.5.  
 `include_extract` | (Optional) Specifies whether to download the file without the extract. When the data source has an extract, if you set the parameter `include_extract=False`, the extract is not included. You can use this parameter to improve performance if you are downloading data sources that have large extracts. The default is to include the extract, if present (`include_extract=True`). Available starting with Tableau Server REST API version 2.5.  
-
-
-
 **Exceptions**
 
 Error | Description  
@@ -2804,7 +2800,7 @@ Error  |  Description
 #### workbooks.download
 
 ```py
-workbooks.download(workbook_id, filepath=None, ~~no_extract=False~~, include_extract=True)
+workbooks.download(workbook_id, filepath=None, no_extract=False)
 ```
 
 Downloads a workbook to the specified directory (optional).
@@ -2819,10 +2815,8 @@ Name | Description
 :--- | :---
 `workbook_id` |  The ID for the `WorkbookItem` that you want to download from the server.
 `filepath` |  (Optional) Downloads the file to the location you specify. If no location is specified, the file is downloaded to the current working directory. The default is `Filepath=None`.
-`DEPRECATED: replace no_extract with include_extract; the default changes from no_extract=False to include_extract`
 ~~`no_extract`~~ | (Optional) Specifies whether to download the file without the extract. When the data source has an extract, if you set the parameter `no_extract=True`, the extract is not included. You can use this parameter to improve performance if you are downloading data sources that have large extracts. The default is to include the extract, if present (`no_extract=False`). Available starting with Tableau Server REST API version 2.5.  
 `include_extract` | (Optional) Specifies whether to download the file without the extract. When the data source has an extract, if you set the parameter `include_extract=False`, the extract is not included. You can use this parameter to improve performance if you are downloading data sources that have large extracts. The default is to include the extract, if present (`include_extract=True`). Available starting with Tableau Server REST API version 2.5.  
-
 
 
 **Exceptions**
