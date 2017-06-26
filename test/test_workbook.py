@@ -195,7 +195,7 @@ class WorkbookTests(unittest.TestCase):
             self.assertTrue(os.path.exists(file_path))
         os.remove(file_path)
 
-    def test_download_include_extract(self):
+    def test_download_include_extract_deprecated(self):
         # Pretend we're 2.5 for 'extract_only'
         self.server.version = "2.5"
         self.baseurl = self.server.workbooks.baseurl
