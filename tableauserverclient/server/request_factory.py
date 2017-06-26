@@ -222,6 +222,10 @@ class SiteRequest(object):
             site_element.attrib['disableSubscriptions'] = str(site_item.disable_subscriptions).lower()
         if site_item.subscribe_others_enabled:
             site_element.attrib['subscribeOthersEnabled'] = str(site_item.subscribe_others_enabled).lower()
+        if site_item.revision_limit:
+            site_element.attrib['revisionLimit'] = str(site_item.revision_limit)
+        if site_item.subscribe_others_enabled:
+            site_element.attrib['revisionHistoryEnabled'] = str(site_item.revision_history_enabled).lower()
         return ET.tostring(xml_request)
 
     def create_req(self, site_item):
