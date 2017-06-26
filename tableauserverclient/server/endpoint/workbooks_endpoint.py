@@ -99,7 +99,7 @@ class Workbooks(Endpoint):
             warnings.warn('no_extract is deprecated, use include_extract instead.', DeprecationWarning)
             include_extract = not no_extract
 
-        if no_extract or not include_extract:
+        if not include_extract:
             url += "?includeExtract=False"
 
         with closing(self.get_request(url, parameters={"stream": True})) as server_response:
