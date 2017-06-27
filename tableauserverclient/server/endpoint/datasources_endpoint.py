@@ -112,7 +112,7 @@ class Datasources(Endpoint):
         server_response = self.put_request(url, update_req)
         logger.info('Updated datasource item (ID: {0})'.format(datasource_item.id))
         updated_datasource = copy.copy(datasource_item)
-        return updated_datasource._parse_common_tags(server_response.content)
+        return updated_datasource._parse_common_elements(server_response.content)
 
     # Publish datasource
     @api(version="2.0")
