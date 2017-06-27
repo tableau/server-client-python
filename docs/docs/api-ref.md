@@ -319,9 +319,9 @@ Name | Description
 `datasource_id` |  The identifier (`id`) for the `DatasourceItem` that you want to download from the server.
 `filepath` |  (Optional) Downloads the file to the location you specify. If no location is specified (the default is `Filepath=None`), the file is downloaded to the current working directory.
 `include_extract` | (Optional) Specifies whether to download the file without the extract. When the data source has an extract, if you set the parameter `include_extract=False`, the extract is not included. You can use this parameter to improve performance if you are downloading data sources that have large extracts. The default is to include the extract, if present (`include_extract=True`). Available starting with Tableau Server REST API version 2.5.  
-**Exceptions**
 `no_extract` *deprecated* | (deprecated in favor of include_extract in version 0.5) (Optional) Specifies whether to download the file without the extract. When the data source has an extract, if you set the parameter `no_extract=True`, the extract is not included. You can use this parameter to improve performance if you are downloading data sources that have large extracts. The default is to include the extract, if present (`no_extract=False`). Available starting with Tableau Server REST API version 2.5.  
 
+**Exceptions**
 
 Error | Description  
 :--- | :---
