@@ -65,6 +65,12 @@ class DatasourceRequest(object):
         if datasource_item.owner_id:
             owner_element = ET.SubElement(datasource_element, 'owner')
             owner_element.attrib['id'] = datasource_item.owner_id
+
+        datasource_element.attrib['isCertified'] = str(datasource_item.certified).lower()
+
+        if datasource_item.certification_note:
+            datasource_element.attrib['certificationNote'] = str(datasource_item.certification_note)
+
         return ET.tostring(xml_request)
 
     def publish_req(self, datasource_item, filename, file_contents, connection_credentials=None):
