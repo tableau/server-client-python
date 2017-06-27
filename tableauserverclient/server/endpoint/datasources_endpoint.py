@@ -74,7 +74,7 @@ class Datasources(Endpoint):
     @api(version="2.0")
     @parameter_added_in(no_extract='2.5')
     @parameter_added_in(include_extract='2.5')
-    def download(self, datasource_id, filepath=None, no_extract=None, include_extract=True):
+    def download(self, datasource_id, filepath=None, include_extract=True, no_extract=None):
         if not datasource_id:
             error = "Datasource ID undefined."
             raise ValueError(error)
@@ -85,7 +85,7 @@ class Datasources(Endpoint):
             warnings.warn('no_extract is deprecated, use include_extract instead.', DeprecationWarning)
             include_extract = not no_extract
 
-        if no_extract or not include_extract:
+        if not include_extract:
             url += "?includeExtract=False"
 
         with closing(self.get_request(url, parameters={'stream': True})) as server_response:

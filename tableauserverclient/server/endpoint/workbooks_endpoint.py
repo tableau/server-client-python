@@ -88,7 +88,7 @@ class Workbooks(Endpoint):
     @api(version="2.0")
     @parameter_added_in(no_extract='2.5')
     @parameter_added_in(include_extract='2.5')
-    def download(self, workbook_id, filepath=None, no_extract=None, include_extract=True):
+    def download(self, workbook_id, filepath=None, include_extract=True, no_extract=None):
         if not workbook_id:
             error = "Workbook ID undefined."
             raise ValueError(error)
