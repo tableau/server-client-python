@@ -30,9 +30,12 @@ class Groups(Endpoint):
             error = "Group item missing ID. Group must be retrieved from server first."
             raise MissingRequiredFieldError(error)
 
-        # TODO should this be a list or a Pager directly?
-        all_users = list(Pager(lambda options: self._get_users_for_group(group_item, options), req_options))
-        group_item._set_users(all_users)
+        # populate_users (better named `iter_users`?) creates a new pager and wraps it in a lambda
+        # so we can call it again and again as needed. This is simplier than an object that manages it
+        # if they need to adjust request options they can call populate_users again, otherwise they can just 
+        # call `group_item.users` to get a new Pager, or list(group_item.users) if they need a list
+        user_pager = lambda: Pager(lambda options: self._get_users_for_group(group_item, options), req_options)
+        group_item._set_users(user_pager)
 
     def _get_users_for_group(self, group_item, req_options=None):
         url = "{0}/{1}/users".format(self.baseurl, group_item.id)
@@ -81,8 +84,6 @@ class Groups(Endpoint):
         new_user = self._add_user(group_item, user_id)
         try:
             users = group_item.users
-            users.append(new_user)
-            group_item._set_users(users)
         except UnpopulatedPropertyError:
             # If we aren't populated, do nothing to the user list
             pass

@@ -33,7 +33,8 @@ class GroupItem(object):
         if self._users is None:
             error = "Group must be populated with users first."
             raise UnpopulatedPropertyError(error)
-        return self._users
+        #  Each call to `.users` should create a new pager, this just runs the callable
+        return self._users()
 
     def _set_users(self, users):
         self._users = users

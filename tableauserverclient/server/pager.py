@@ -48,13 +48,13 @@ class Pager(object):
                 # The total count on Server changed while fetching exit gracefully
                 raise StopIteration
 
-    def __len__(self):
-        if not self._length:
-            # We have no length yet, so get the first page and then we'll know total size
-            # TODO This isn't needed if we convert to list
-            next(self.__iter__())
-            return self._length
-        return self._length
+    # def __len__(self):
+    #     if not self._length:
+    #         # We have no length yet, so get the first page and then we'll know total size
+    #         # TODO This isn't needed if we convert to list
+    #         next(self.__iter__())
+    #         return self._length
+    #     return self._length
 
     def _load_next_page(self, last_pagination_item):
         next_page = last_pagination_item.page_number + 1
