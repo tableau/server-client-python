@@ -30,11 +30,14 @@ class Groups(Endpoint):
             error = "Group item missing ID. Group must be retrieved from server first."
             raise MissingRequiredFieldError(error)
 
-        # populate_users (better named `iter_users`?) creates a new pager and wraps it in a lambda
-        # so we can call it again and again as needed. This is simplier than an object that manages it
-        # if they need to adjust request options they can call populate_users again, otherwise they can just 
+        # populate_users (better named `iter_users`?) creates a new pager and wraps it in a function
+        # so we can call it again as needed. This is simplier than an object that manages it for us.
+        # If they need to adjust request options they can call populate_users again, otherwise they can just
         # call `group_item.users` to get a new Pager, or list(group_item.users) if they need a list
-        user_pager = lambda: Pager(lambda options: self._get_users_for_group(group_item, options), req_options)
+
+        def user_pager():
+            return Pager(lambda options: self._get_users_for_group(group_item, options), req_options)
+
         group_item._set_users(user_pager)
 
     def _get_users_for_group(self, group_item, req_options=None):
