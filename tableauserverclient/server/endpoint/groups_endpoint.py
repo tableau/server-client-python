@@ -25,15 +25,28 @@ class Groups(Endpoint):
     # Gets all users in a given group
     @api(version="2.0")
     def populate_users(self, group_item, req_options=None):
+        from .. import Pager
         if not group_item.id:
             error = "Group item missing ID. Group must be retrieved from server first."
             raise MissingRequiredFieldError(error)
+
+        # populate_users (better named `iter_users`?) creates a new pager and wraps it in a function
+        # so we can call it again as needed. This is simplier than an object that manages it for us.
+        # If they need to adjust request options they can call populate_users again, otherwise they can just
+        # call `group_item.users` to get a new Pager, or list(group_item.users) if they need a list
+
+        def user_pager():
+            return Pager(lambda options: self._get_users_for_group(group_item, options), req_options)
+
+        group_item._set_users(user_pager)
+
+    def _get_users_for_group(self, group_item, req_options=None):
         url = "{0}/{1}/users".format(self.baseurl, group_item.id)
         server_response = self.get_request(url, req_options)
-        group_item._set_users(UserItem.from_response(server_response.content))
+        user_item = UserItem.from_response(server_response.content)
         pagination_item = PaginationItem.from_response(server_response.content)
         logger.info('Populated users for group (ID: {0})'.format(group_item.id))
-        return pagination_item
+        return user_item, pagination_item
 
     # Deletes 1 group by id
     @api(version="2.0")
@@ -74,8 +87,6 @@ class Groups(Endpoint):
         new_user = self._add_user(group_item, user_id)
         try:
             users = group_item.users
-            users.append(new_user)
-            group_item._set_users(users)
         except UnpopulatedPropertyError:
             # If we aren't populated, do nothing to the user list
             pass

@@ -9,8 +9,15 @@ class Pager(object):
     """
 
     def __init__(self, endpoint, request_opts=None):
-        self._endpoint = endpoint.get
+        if hasattr(endpoint, 'get'):
+            # The simpliest case is to take an Endpoint and call its get
+            self._endpoint = endpoint.get
+        else:
+            # but if they pass a callable then use that instead (used internally)
+            self._endpoint = endpoint
+
         self._options = request_opts
+        self._length = None
 
         # If we have options we could be starting on any page, backfill the count
         if self._options:
@@ -26,6 +33,7 @@ class Pager(object):
     def __iter__(self):
         # Fetch the first page
         current_item_list, last_pagination_item = self._endpoint(self._options)
+        self._length = int(last_pagination_item.total_available)
 
         # Get the rest on demand as a generator
         while self._count < last_pagination_item.total_available:
@@ -39,6 +47,14 @@ class Pager(object):
             except IndexError:
                 # The total count on Server changed while fetching exit gracefully
                 raise StopIteration
+
+    # def __len__(self):
+    #     if not self._length:
+    #         # We have no length yet, so get the first page and then we'll know total size
+    #         # TODO This isn't needed if we convert to list
+    #         next(self.__iter__())
+    #         return self._length
+    #     return self._length
 
     def _load_next_page(self, last_pagination_item):
         next_page = last_pagination_item.page_number + 1
