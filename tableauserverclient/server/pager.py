@@ -9,7 +9,13 @@ class Pager(object):
     """
 
     def __init__(self, endpoint, request_opts=None):
-        self._endpoint = endpoint.get
+        if hasattr(endpoint, 'get'):
+            # The simpliest case is to take an Endpoint and call its get
+            self._endpoint = endpoint.get
+        else:
+            # but if they pass a callable then use that instead (used internally)
+            self._endpoint = endpoint
+
         self._options = request_opts
 
         # If we have options we could be starting on any page, backfill the count
