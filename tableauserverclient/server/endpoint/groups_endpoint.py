@@ -71,22 +71,12 @@ class Groups(Endpoint):
     @api(version="2.0")
     def remove_user(self, group_item, user_id):
         self._remove_user(group_item, user_id)
-        try:
-            users = group_item.users
-        except UnpopulatedPropertyError:
-            # If we aren't populated, do nothing to the user list
-            pass
         logger.info('Removed user (id: {0}) from group (ID: {1})'.format(user_id, group_item.id))
 
     # Adds 1 user to 1 group
     @api(version="2.0")
     def add_user(self, group_item, user_id):
-        new_user = self._add_user(group_item, user_id)
-        try:
-            users = group_item.users
-        except UnpopulatedPropertyError:
-            # If we aren't populated, do nothing to the user list
-            pass
+        self._add_user(group_item, user_id)
         logger.info('Added user (id: {0}) to group (ID: {1})'.format(user_id, group_item.id))
 
     def _remove_user(self, group_item, user_id):
