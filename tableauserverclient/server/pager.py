@@ -4,11 +4,18 @@ from . import Sort
 
 class Pager(object):
     """
-    Generator that takes an endpoint with `.get` and lazily loads items from Server.
-    Supports all `RequestOptions` including starting on any page.
+    Generator that takes an endpoint (top level endpoints with `.get)` and lazily loads items from Server.
+    Supports all `RequestOptions` including starting on any page. Also used by models to load sub-models
+    (users in a group, views in a workbook, etc) by passing a different endpoint.
+
+    Will loop over anything that returns (List[ModelItem], PaginationItem).
     """
 
     def __init__(self, endpoint, request_opts=None):
+
+        if not callable(endpoint):
+            raise ValueError("Pager needs a server endpoint to page through.")
+
         if hasattr(endpoint, 'get'):
             # The simpliest case is to take an Endpoint and call its get
             self._endpoint = endpoint.get
