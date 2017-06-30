@@ -50,12 +50,12 @@ class GroupTests(unittest.TestCase):
         self.server._auth_token = None
         self.assertRaises(TSC.NotSignedInError, self.server.groups.get)
 
-
     def test_populate_users(self):
         with open(POPULATE_USERS, 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
-            m.get(self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users?pageNumber=1&pageSize=100&sort=name:asc', text=response_xml, complete_qs=True)
+            m.get(self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users?pageNumber=1&pageSize=100&sort=name:asc',
+                  text=response_xml, complete_qs=True)
             single_group = TSC.GroupItem(name='Test Group')
             single_group._id = 'e7833b48-c6f7-47b5-a2a7-36e7dd232758'
             self.server.groups.populate_users(single_group)
@@ -75,14 +75,14 @@ class GroupTests(unittest.TestCase):
     def test_remove_user(self):
         with open(POPULATE_USERS, 'rb') as f:
             response_xml_populate = f.read().decode('utf-8')
-        
+
         with open(POPULATE_USERS_EMPTY, 'rb') as f:
             response_xml_empty = f.read().decode('utf-8')
-        
+
         with requests_mock.mock() as m:
             url = self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users' \
                                  '/dd2239f6-ddf1-4107-981a-4cf94e415794'
-            
+
             m.delete(url, status_code=204)
             #  We register the get endpoint twice. The first time we have 1 user, the second we have 'removed' them.
             m.get(self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users', text=response_xml_populate)
@@ -92,7 +92,7 @@ class GroupTests(unittest.TestCase):
             self.server.groups.populate_users(single_group)
             self.assertEqual(1, len(list(single_group.users)))
             self.server.groups.remove_user(single_group, 'dd2239f6-ddf1-4107-981a-4cf94e415794')
-            
+
             m.get(self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users', text=response_xml_empty)
             self.assertEqual(0, len(list(single_group.users)))
 
