@@ -31,10 +31,7 @@ class Groups(Endpoint):
             error = "Group item missing ID. Group must be retrieved from server first."
             raise MissingRequiredFieldError(error)
 
-        # populate_users (better named `iter_users`?) creates a new pager and wraps it in a function
-        # so we can call it again as needed. This is simplier than an object that manages it for us.
-        # If they need to adjust request options they can call populate_users again, otherwise they can just
-        # call `group_item.users` to get a new Pager, or list(group_item.users) if they need a list
+        # Define an inner function that we bind to the model_item's `.user` property.
 
         def user_pager():
             return Pager(lambda options: self._get_users_for_group(group_item, options), req_options)
@@ -70,16 +67,6 @@ class Groups(Endpoint):
     # Removes 1 user from 1 group
     @api(version="2.0")
     def remove_user(self, group_item, user_id):
-        self._remove_user(group_item, user_id)
-        logger.info('Removed user (id: {0}) from group (ID: {1})'.format(user_id, group_item.id))
-
-    # Adds 1 user to 1 group
-    @api(version="2.0")
-    def add_user(self, group_item, user_id):
-        self._add_user(group_item, user_id)
-        logger.info('Added user (id: {0}) to group (ID: {1})'.format(user_id, group_item.id))
-
-    def _remove_user(self, group_item, user_id):
         if not group_item.id:
             error = "Group item missing ID."
             raise MissingRequiredFieldError(error)
@@ -88,8 +75,11 @@ class Groups(Endpoint):
             raise ValueError(error)
         url = "{0}/{1}/users/{2}".format(self.baseurl, group_item.id, user_id)
         self.delete_request(url)
+        logger.info('Removed user (id: {0}) from group (ID: {1})'.format(user_id, group_item.id))
 
-    def _add_user(self, group_item, user_id):
+    # Adds 1 user to 1 group
+    @api(version="2.0")
+    def add_user(self, group_item, user_id):
         if not group_item.id:
             error = "Group item missing ID."
             raise MissingRequiredFieldError(error)
@@ -100,3 +90,4 @@ class Groups(Endpoint):
         add_req = RequestFactory.Group.add_user_req(user_id)
         server_response = self.post_request(url, add_req)
         return UserItem.from_response(server_response.content).pop()
+        logger.info('Added user (id: {0}) to group (ID: {1})'.format(user_id, group_item.id))
