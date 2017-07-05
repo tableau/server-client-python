@@ -25,15 +25,26 @@ class Groups(Endpoint):
     # Gets all users in a given group
     @api(version="2.0")
     def populate_users(self, group_item, req_options=None):
+        from .. import Pager
+
         if not group_item.id:
             error = "Group item missing ID. Group must be retrieved from server first."
             raise MissingRequiredFieldError(error)
+
+        # Define an inner function that we bind to the model_item's `.user` property.
+
+        def user_pager():
+            return Pager(lambda options: self._get_users_for_group(group_item, options), req_options)
+
+        group_item._set_users(user_pager)
+
+    def _get_users_for_group(self, group_item, req_options=None):
         url = "{0}/{1}/users".format(self.baseurl, group_item.id)
         server_response = self.get_request(url, req_options)
-        group_item._set_users(UserItem.from_response(server_response.content))
+        user_item = UserItem.from_response(server_response.content)
         pagination_item = PaginationItem.from_response(server_response.content)
         logger.info('Populated users for group (ID: {0})'.format(group_item.id))
-        return pagination_item
+        return user_item, pagination_item
 
     # Deletes 1 group by id
     @api(version="2.0")
@@ -56,32 +67,6 @@ class Groups(Endpoint):
     # Removes 1 user from 1 group
     @api(version="2.0")
     def remove_user(self, group_item, user_id):
-        self._remove_user(group_item, user_id)
-        try:
-            users = group_item.users
-            for user in users:
-                if user.id == user_id:
-                    users.remove(user)
-                    break
-        except UnpopulatedPropertyError:
-            # If we aren't populated, do nothing to the user list
-            pass
-        logger.info('Removed user (id: {0}) from group (ID: {1})'.format(user_id, group_item.id))
-
-    # Adds 1 user to 1 group
-    @api(version="2.0")
-    def add_user(self, group_item, user_id):
-        new_user = self._add_user(group_item, user_id)
-        try:
-            users = group_item.users
-            users.append(new_user)
-            group_item._set_users(users)
-        except UnpopulatedPropertyError:
-            # If we aren't populated, do nothing to the user list
-            pass
-        logger.info('Added user (id: {0}) to group (ID: {1})'.format(user_id, group_item.id))
-
-    def _remove_user(self, group_item, user_id):
         if not group_item.id:
             error = "Group item missing ID."
             raise MissingRequiredFieldError(error)
@@ -90,8 +75,11 @@ class Groups(Endpoint):
             raise ValueError(error)
         url = "{0}/{1}/users/{2}".format(self.baseurl, group_item.id, user_id)
         self.delete_request(url)
+        logger.info('Removed user (id: {0}) from group (ID: {1})'.format(user_id, group_item.id))
 
-    def _add_user(self, group_item, user_id):
+    # Adds 1 user to 1 group
+    @api(version="2.0")
+    def add_user(self, group_item, user_id):
         if not group_item.id:
             error = "Group item missing ID."
             raise MissingRequiredFieldError(error)
@@ -102,3 +90,4 @@ class Groups(Endpoint):
         add_req = RequestFactory.Group.add_user_req(user_id)
         server_response = self.post_request(url, add_req)
         return UserItem.from_response(server_response.content).pop()
+        logger.info('Added user (id: {0}) to group (ID: {1})'.format(user_id, group_item.id))
