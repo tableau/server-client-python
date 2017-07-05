@@ -16,11 +16,13 @@ class Pager(object):
         if hasattr(endpoint, 'get'):
             # The simpliest case is to take an Endpoint and call its get
             self._endpoint = endpoint.get
-        else:
+        elif callable(endpoint):
             # but if they pass a callable then use that instead (used internally)
             self._endpoint = endpoint
-            if not callable(endpoint):
-                raise ValueError("Pager needs a server endpoint to page through.")
+        else:
+            # Didn't get something we can page over
+            raise ValueError("Pager needs a server endpoint to page through.")
+
         self._options = request_opts
 
         # If we have options we could be starting on any page, backfill the count
