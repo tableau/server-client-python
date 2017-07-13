@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse 
+    xmlns="http://tableau.com/api" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.6.xsd">
+    <tasks>
+        <task>
+            <extractRefresh id="f84901ac-72ad-4f9b-a87e-7a3500402ad6" priority="50" consecutiveFailedCount="0" type="REFRESH_EXTRACT">
+                <schedule id="b60b4efd-a6f7-4599-beb3-cb677e7abac1" name="Refresh daily [23:00 - 01:00, Pacific US]" state="Active" priority="50" createdAt="2016-02-11T01:42:55Z" updatedAt="2017-07-12T06:00:06Z" type="Extract" frequency="Daily" nextRunAt="2017-07-13T06:00:00Z" />
+                <workbook id="c7a9327e-1cda-4504-b026-ddb43b976d1d" />
+            </extractRefresh>
+        </task>
+        <task>
+            <extractRefresh id="6e8255f1-142b-4e17-bd9a-9fe6736812a1" priority="50" consecutiveFailedCount="0" type="REFRESH_EXTRACT">
+                <schedule id="82974721-6831-4c78-875c-b7c2d5237bc2" name="Refresh daily [15:00 - 17:00, Pacific US]" state="Active" priority="50" createdAt="2016-02-11T01:39:39Z" updatedAt="2017-07-12T22:00:05Z" type="Extract" frequency="Daily" nextRunAt="2017-07-13T22:00:00Z" />
+                <workbook id="61334430-fb0c-43af-a5a3-8db3323644b6" />
+            </extractRefresh>
+        </task>
+        <task>
+            <extractRefresh id="90cbc49a-b668-4355-9321-46f7fefd4197" priority="50" consecutiveFailedCount="0" type="REFRESH_EXTRACT">
+                <schedule id="c39a5a41-ab5b-4661-90f6-78384916748c" name="Refresh daily [00:00 - 02:00, Pacific US]" state="Active" priority="50" createdAt="2016-02-11T01:33:51Z" updatedAt="2017-07-12T07:00:08Z" type="Extract" frequency="Daily" nextRunAt="2017-07-13T07:00:00Z" />
+                <workbook id="952663f4-1bb4-4fed-91f8-5967f48c533a" />
+            </extractRefresh>
+        </task>
+    </tasks>
+</tsResponse>

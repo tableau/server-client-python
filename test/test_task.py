@@ -1,0 +1,43 @@
+from datetime import time
+import unittest
+import os
+import requests_mock
+import tableauserverclient as TSC
+from tableauserverclient.datetime_helpers import format_datetime
+
+TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
+
+GET_XML_NO_WORKBOOK = os.path.join(TEST_ASSET_DIR, "tasks_no_workbook.xml")
+GET_XML_WITH_WORKBOOK = os.path.join(TEST_ASSET_DIR, "tasks_with_workbook.xml")
+
+
+class TaskTests(unittest.TestCase):
+    def setUp(self):
+        self.server = TSC.Server("http://test")
+        self.server.version = '2.6'
+
+        # Fake Signin
+        self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"
+        self.server._auth_token = "j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM"
+
+        self.baseurl = self.server.tasks.baseurl
+
+    def test_get_tasks_with_no_workbook(self):
+        with open(GET_XML_NO_WORKBOOK, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            m.get(self.baseurl, text=response_xml)
+            all_tasks, pagination_item = self.server.tasks.get()
+
+        task = all_tasks[0]
+        self.assertEqual(None, task.workbook_id)
+
+    def test_get_tasks_with_workbook(self):
+        with open(GET_XML_WITH_WORKBOOK, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            m.get(self.baseurl, text=response_xml)
+            all_tasks, pagination_item = self.server.tasks.get()
+
+        task = all_tasks[0]
+        self.assertEqual('c7a9327e-1cda-4504-b026-ddb43b976d1d', task.workbook_id)

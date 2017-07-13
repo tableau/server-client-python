@@ -4,12 +4,13 @@ from .schedule_item import ScheduleItem
 
 
 class TaskItem(object):
-    def __init__(self, id_, task_type, priority, consecutive_failed_count=0, schedule_id=None):
+    def __init__(self, id_, task_type, priority, consecutive_failed_count=0, schedule_id=None, workbook_id=None):
         self.id = id_
         self.task_type = task_type
         self.priority = priority
         self.consecutive_failed_count = consecutive_failed_count
         self.schedule_id = schedule_id
+        self.workbook_id = workbook_id
 
     def __repr__(self):
         return "<Task#{id} {task_type} pri({priority}) failed({consecutive_failed_count}) schedule_id({" \
@@ -28,11 +29,15 @@ class TaskItem(object):
     @classmethod
     def _parse_element(cls, element):
         schedule = None
+        workbook = None
         schedule_element = element.find('.//t:schedule', namespaces=NAMESPACE)
+        workbook_element = element.find('.//t:workbook', namespaces=NAMESPACE)
         if schedule_element is not None:
             schedule = schedule_element.get('id', None)
+        if workbook_element is not None:
+            workbook = workbook_element.get('id', None)
         task_type = element.get('type', None)
         priority = int(element.get('priority', -1))
         consecutive_failed_count = int(element.get('consecutiveFailedCount', 0))
         id_ = element.get('id', None)
-        return cls(id_, task_type, priority, consecutive_failed_count, schedule)
+        return cls(id_, task_type, priority, consecutive_failed_count, schedule, workbook)
