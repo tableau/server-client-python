@@ -41,7 +41,7 @@ class TaskTests(unittest.TestCase):
 
         task = all_tasks[0]
         self.assertEqual('c7a9327e-1cda-4504-b026-ddb43b976d1d', task.target.id)
-        self.assertEqual('workbook', task.target.target_type)
+        self.assertEqual('workbook', task.target.type)
 
     def test_get_tasks_with_datasource(self):
         with open(GET_XML_WITH_DATASOURCE, "rb") as f:
@@ -52,7 +52,7 @@ class TaskTests(unittest.TestCase):
 
         task = all_tasks[0]
         self.assertEqual('c7a9327e-1cda-4504-b026-ddb43b976d1d', task.target.id)
-        self.assertEqual('datasource', task.target.target_type)
+        self.assertEqual('datasource', task.target.type)
 
     def test_get_tasks_with_workbook_and_datasource(self):
         with open(GET_XML_WITH_WORKBOOK_AND_DATASOURCE, "rb") as f:
@@ -61,6 +61,18 @@ class TaskTests(unittest.TestCase):
             m.get(self.baseurl, text=response_xml)
             all_tasks, pagination_item = self.server.tasks.get()
 
-        self.assertEqual('workbook', all_tasks[0].target.target_type)
-        self.assertEqual('datasource', all_tasks[1].target.target_type)
-        self.assertEqual('workbook', all_tasks[2].target.target_type)
+        self.assertEqual('workbook', all_tasks[0].target.type)
+        self.assertEqual('datasource', all_tasks[1].target.type)
+        self.assertEqual('workbook', all_tasks[2].target.type)
+
+    def test_get_task_with_schedule(self):
+        with open(GET_XML_WITH_WORKBOOK, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            m.get(self.baseurl, text=response_xml)
+            all_tasks, pagination_item = self.server.tasks.get()
+
+        task = all_tasks[0]
+        self.assertEqual('c7a9327e-1cda-4504-b026-ddb43b976d1d', task.target.id)
+        self.assertEqual('workbook', task.target.type)
+        self.assertEqual('b60b4efd-a6f7-4599-beb3-cb677e7abac1', task.schedule_id)

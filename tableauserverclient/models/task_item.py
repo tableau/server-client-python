@@ -10,6 +10,7 @@ class TaskItem(object):
         self.task_type = task_type
         self.priority = priority
         self.consecutive_failed_count = consecutive_failed_count
+        self.schedule_id = schedule_id
         self.target = target
 
     def __repr__(self):
