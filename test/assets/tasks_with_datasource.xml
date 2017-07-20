@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse 
+    xmlns="http://tableau.com/api" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.6.xsd">
+    <tasks>
+        <task>
+            <extractRefresh id="f84901ac-72ad-4f9b-a87e-7a3500402ad6" priority="50" consecutiveFailedCount="0" type="REFRESH_EXTRACT">
+                <schedule id="b60b4efd-a6f7-4599-beb3-cb677e7abac1" name="Refresh daily [23:00 - 01:00, Pacific US]" state="Active" priority="50" createdAt="2016-02-11T01:42:55Z" updatedAt="2017-07-12T06:00:06Z" type="Extract" frequency="Daily" nextRunAt="2017-07-13T06:00:00Z" />
+                <datasource id="c7a9327e-1cda-4504-b026-ddb43b976d1d" />
+            </extractRefresh>
+        </task>
+    </tasks>
+</tsResponse>
