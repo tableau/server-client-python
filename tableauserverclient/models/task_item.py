@@ -45,7 +45,6 @@ class TaskItem(object):
         if datasource_element is not None:
             datasource_id = datasource_element.get('id', None)
             target = Target(datasource_id, "datasource")
-        #
 
         task_type = element.get('type', None)
         priority = int(element.get('priority', -1))
