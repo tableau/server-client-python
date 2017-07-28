@@ -27,16 +27,23 @@ class ProjectTests(unittest.TestCase):
             m.get(self.baseurl, text=response_xml)
             all_projects, pagination_item = self.server.projects.get()
 
-        self.assertEqual(2, pagination_item.total_available)
+        self.assertEqual(3, pagination_item.total_available)
         self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', all_projects[0].id)
         self.assertEqual('default', all_projects[0].name)
         self.assertEqual('The default project that was automatically created by Tableau.',
                          all_projects[0].description)
         self.assertEqual('ManagedByOwner', all_projects[0].content_permissions)
+        self.assertEqual(None, all_projects[0].parent_id)
 
         self.assertEqual('1d0304cd-3796-429f-b815-7258370b9b74', all_projects[1].id)
         self.assertEqual('Tableau', all_projects[1].name)
         self.assertEqual('ManagedByOwner', all_projects[1].content_permissions)
+        self.assertEqual(None, all_projects[1].parent_id)
+
+        self.assertEqual('4cc52973-5e3a-4d1f-a4fb-5b5f73796edf', all_projects[2].id)
+        self.assertEqual('Tableau > Child 1', all_projects[2].name)
+        self.assertEqual('ManagedByOwner', all_projects[2].content_permissions)
+        self.assertEqual('1d0304cd-3796-429f-b815-7258370b9b74', all_projects[2].parent_id)
 
     def test_get_before_signin(self):
         self.server._auth_token = None
