@@ -14,6 +14,7 @@ class ProjectItem(object):
         self.description = description
         self.name = name
         self.content_permissions = content_permissions
+        self.parent_id = None
 
     @property
     def content_permissions(self):
