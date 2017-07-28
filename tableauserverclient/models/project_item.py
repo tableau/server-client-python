@@ -8,13 +8,13 @@ class ProjectItem(object):
         LockedToProject = 'LockedToProject'
         ManagedByOwner = 'ManagedByOwner'
 
-    def __init__(self, name, description=None, content_permissions=None):
+    def __init__(self, name, description=None, content_permissions=None, parent_id=None):
         self._content_permissions = None
         self._id = None
         self.description = description
         self.name = name
         self.content_permissions = content_permissions
-        self.parent_id = None
+        self.parent_id = parent_id
 
     @property
     def content_permissions(self):
@@ -46,11 +46,11 @@ class ProjectItem(object):
             project_xml = ET.fromstring(project_xml).find('.//t:project', namespaces=NAMESPACE)
 
         if project_xml is not None:
-            (_, name, description, content_permissions) = self._parse_element(project_xml)
-            self._set_values(None, name, description, content_permissions)
+            (_, name, description, content_permissions, parent_id) = self._parse_element(project_xml)
+            self._set_values(None, name, description, content_permissions, parent_id)
         return self
 
-    def _set_values(self, project_id, name, description, content_permissions):
+    def _set_values(self, project_id, name, description, content_permissions, parent_id):
         if project_id is not None:
             self._id = project_id
         if name:
@@ -59,6 +59,8 @@ class ProjectItem(object):
             self.description = description
         if content_permissions:
             self._content_permissions = content_permissions
+        if parent_id:
+            self.parent_id = parent_id
 
     @classmethod
     def from_response(cls, resp):
@@ -67,9 +69,9 @@ class ProjectItem(object):
         all_project_xml = parsed_response.findall('.//t:project', namespaces=NAMESPACE)
 
         for project_xml in all_project_xml:
-            (id, name, description, content_permissions) = cls._parse_element(project_xml)
+            (id, name, description, content_permissions, parent_id) = cls._parse_element(project_xml)
             project_item = cls(name)
-            project_item._set_values(id, name, description, content_permissions)
+            project_item._set_values(id, name, description, content_permissions, parent_id)
             all_project_items.append(project_item)
         return all_project_items
 
@@ -79,5 +81,6 @@ class ProjectItem(object):
         name = project_xml.get('name', None)
         description = project_xml.get('description', None)
         content_permissions = project_xml.get('contentPermissions', None)
+        parent_id = project_xml.get('parentId', None)
 
-        return id, name, description, content_permissions
+        return id, name, description, content_permissions, parent_id
