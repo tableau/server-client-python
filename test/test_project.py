@@ -98,12 +98,14 @@ class ProjectTests(unittest.TestCase):
             m.post(self.baseurl, text=response_xml)
             new_project = TSC.ProjectItem(name='Test Project', description='Project created for testing')
             new_project.content_permissions = 'ManagedByOwner'
+            new_project.parent_id = '9a8f2265-70f3-4494-96c5-e5949d7a1120'
             new_project = self.server.projects.create(new_project)
 
         self.assertEqual('ccbea03f-77c4-4209-8774-f67bc59c3cef', new_project.id)
         self.assertEqual('Test Project', new_project.name)
         self.assertEqual('Project created for testing', new_project.description)
         self.assertEqual('ManagedByOwner', new_project.content_permissions)
+        self.assertEqual('9a8f2265-70f3-4494-96c5-e5949d7a1120', new_project.parent_id)
 
     def test_create_missing_name(self):
         self.assertRaises(ValueError, TSC.ProjectItem, '')
