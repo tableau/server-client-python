@@ -1,6 +1,7 @@
 ####
 # This script demonstrates how to use the Tableau Server Client
-# to create new projects.
+# to create new projects, both at the root level and how to nest them using
+# parent_id.
 #
 #
 # To run the script, you must have installed Python 2.7.X or 3.3 and later.
@@ -51,12 +52,15 @@ def main():
         # Use highest Server REST API version available
         server.use_server_version()
 
+        # Without parent_id specified, projects are created at the top level.
         top_level_project = TSC.ProjectItem(name='Top Level Project')
         top_level_project = create_project(server, top_level_project)
 
+        # Specifying parent_id creates a nested projects.
         child_project = TSC.ProjectItem(name='Child Project', parent_id=top_level_project.id)
         child_project = create_project(server, child_project)
 
+        # Projects can be nested at any level.
         grand_child_project = TSC.ProjectItem(name='Grand Child Project', parent_id=child_project.id)
         grand_child_project = create_project(server, grand_child_project)
 
