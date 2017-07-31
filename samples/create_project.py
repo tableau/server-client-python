@@ -18,11 +18,10 @@ def create_project(server, project_item):
     try:
         project_item = server.projects.create(project_item)
         print('Created a new project called: %s' % project_item.name)
+        return project_item
     except TSC.ServerResponseError:
-        print('We have already created this resource: %s' % project_item.name)
-        # raise Exception('We have already created this resource: %s' % project_item.name)
+        print('We have already created this project: %s' % project_item.name)
         sys.exit()
-    return project_item
 
 def main():
     parser = argparse.ArgumentParser(description='Get all of the refresh tasks available on a server')
