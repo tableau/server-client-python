@@ -22,14 +22,14 @@ def create_project(server, project_item):
         return project_item
     except TSC.ServerResponseError:
         print('We have already created this project: %s' % project_item.name)
-        sys.exit()
+        sys.exit(1)
 
 def main():
     parser = argparse.ArgumentParser(description='Get all of the refresh tasks available on a server')
     parser.add_argument('--server', '-s', required=True, help='server address')
     parser.add_argument('--username', '-u', required=True, help='username to sign into server')
     parser.add_argument('--site', '-S', default=None)
-    parser.add_argument('-p', default=None)
+    parser.add_argument('-p', default=None, help='password')
 
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
                         help='desired logging level (set to error by default)')
