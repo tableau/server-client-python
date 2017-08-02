@@ -75,18 +75,6 @@ class ProjectTests(unittest.TestCase):
         self.assertEqual('LockedToProject', single_project.content_permissions)
         self.assertEqual('9a8f2265-70f3-4494-96c5-e5949d7a1120', single_project.parent_id)
 
-    def test_update_copy_fields(self):
-        with open(UPDATE_XML, 'rb') as f:
-            response_xml = f.read().decode('utf-8')
-        with requests_mock.mock() as m:
-            m.put(self.baseurl + '/1d0304cd-3796-429f-b815-7258370b9b74', text=response_xml)
-            single_project = TSC.ProjectItem('test')
-            single_project._id = '1d0304cd-3796-429f-b815-7258370b9b74'
-            single_project._some_field = 'Test to check if fields are copied over.'
-            updated_project = self.server.projects.update(single_project)
-
-        self.assertEqual(single_project._some_field, updated_project._some_field)
-
     def test_update_missing_id(self):
         single_project = TSC.ProjectItem('test')
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.projects.update, single_project)
