@@ -2,7 +2,6 @@ from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, ProjectItem, PaginationItem
 import logging
-import copy
 
 logger = logging.getLogger('tableau.endpoint.projects')
 
@@ -40,8 +39,8 @@ class Projects(Endpoint):
         update_req = RequestFactory.Project.update_req(project_item)
         server_response = self.put_request(url, update_req)
         logger.info('Updated project item (ID: {0})'.format(project_item.id))
-        updated_project = copy.copy(project_item)
-        return updated_project._parse_common_tags(server_response.content)
+        updated_project = ProjectItem.from_response(server_response.content)[0]
+        return updated_project
 
     @api(version="2.0")
     def create(self, project_item):

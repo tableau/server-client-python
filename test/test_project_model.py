@@ -17,3 +17,8 @@ class ProjectModelTests(unittest.TestCase):
         project = TSC.ProjectItem("proj")
         with self.assertRaises(ValueError):
             project.content_permissions = "Hello"
+
+    def test_parent_id(self):
+        project = TSC.ProjectItem("proj")
+        project.parent_id = "foo"
+        self.assertEqual(project.parent_id, "foo")

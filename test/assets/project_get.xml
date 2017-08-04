@@ -1,8 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
-    <pagination pageNumber="1" pageSize="100" totalAvailable="2" />
+    <pagination pageNumber="1" pageSize="100" totalAvailable="3" />
     <projects>
         <project id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760" name="default" description="The default project that was automatically created by Tableau." contentPermissions="ManagedByOwner" />
         <project id="1d0304cd-3796-429f-b815-7258370b9b74" name="Tableau" description="" contentPermissions="ManagedByOwner" />
+        <project id="4cc52973-5e3a-4d1f-a4fb-5b5f73796edf" name="Tableau > Child 1" description="" contentPermissions="ManagedByOwner" parentId="1d0304cd-3796-429f-b815-7258370b9b74" />
     </projects>
 </tsResponse>
