@@ -1,7 +1,12 @@
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
-from .. import RequestFactory, ProjectItem, PaginationItem
+from .. import RequestFactory, RequestOptions, Filter, Pager, ProjectItem, PaginationItem
 import logging
+
+try:
+    from distutils2.version import NormalizedVersion as Version
+except ImportError:
+    from distutils.version import LooseVersion as Version
 
 logger = logging.getLogger('tableau.endpoint.projects')
 
@@ -19,6 +24,20 @@ class Projects(Endpoint):
         pagination_item = PaginationItem.from_response(server_response.content)
         all_project_items = ProjectItem.from_response(server_response.content)
         return all_project_items, pagination_item
+
+    def get_default(self):
+        if (Version(self.parent_srv.version) < Version("2.7")):
+            for proj in Pager(self):
+                if proj.is_default():
+                    return proj
+
+            return None
+        else:
+            ro = RequestOptions()
+            ro.filter.add(Filter("name", "eq", "Default"))
+            items, _ = self.get(ro)
+            return items[0] if (len(items) > 0) else None
+
 
     @api(version="2.0")
     def delete(self, project_id):

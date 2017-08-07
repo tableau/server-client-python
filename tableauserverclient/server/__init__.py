@@ -5,8 +5,8 @@ from .sort import Sort
 from .. import ConnectionItem, DatasourceItem,\
     GroupItem, PaginationItem, ProjectItem, ScheduleItem, SiteItem, TableauAuth,\
     UserItem, ViewItem, WorkbookItem, TaskItem, NAMESPACE
+from .pager import Pager
 from .endpoint import Auth, Datasources, Endpoint, Groups, Projects, Schedules, \
     Sites, Users, Views, Workbooks, ServerResponseError, MissingRequiredFieldError
 from .server import Server
-from .pager import Pager
 from .exceptions import NotSignedInError
