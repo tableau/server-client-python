@@ -1,3 +1,6 @@
+from .filter import Filter
+from .sort import Sort
+
 class RequestOptionsBase(object):
     def apply_query_params(self, url):
         raise NotImplementedError()
@@ -24,6 +27,35 @@ class RequestOptions(RequestOptionsBase):
     class Direction:
         Desc = 'desc'
         Asc = 'asc'
+
+    class Builder:
+        def __init__(self):
+            self.__pagenumber = 1
+            self.__pagesize = 100
+            self.__filters = set()
+            self.__sorts = set()
+
+        def __getattr__(self, attr):
+            def fn(*args, **kwargs):
+                if (attr == '_sort'):
+                    self.__sorts.add(Sort(args[0], args[1]))
+                    return self
+                elif (attr == '_pagenumber'):
+                    self.__pagenumber = args[0]
+                    return self
+                elif (attr == '_pagesize'):
+                    self.__pagesize = args[0]
+                    return self
+                elif (attr == '_build'):
+                    ro = RequestOptions(self.__pagenumber, self.__pagesize)
+                    ro.filter = self.__filters
+                    ro.sort = self.__sorts
+                    return ro
+                else:
+                    self.__filters.add(Filter(attr, Filter.Operator.map(args[0]), args[1]))
+                    return self
+            return fn
+
 
     def __init__(self, pagenumber=1, pagesize=100):
         self.pagenumber = pagenumber
