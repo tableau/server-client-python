@@ -1,4 +1,5 @@
 import sys
+sys.path.append("~/git/server-client-python")
 
 import tableauserverclient as TSC
 
