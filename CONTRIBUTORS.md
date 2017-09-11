@@ -5,13 +5,14 @@ The following people have contributed to this project to make it possible, and w
 ## Contributors
 
 * [geordielad](https://github.com/geordielad)
-* [Hugo Stijns)(https://github.com/hugoboos)
+* [Hugo Stijns](https://github.com/hugoboos)
 * [kovner](https://github.com/kovner)
 * [Talvalin](https://github.com/Talvalin)
 * [Chris Toomey](https://github.com/cmtoomey)
 * [Vathsala Achar](https://github.com/VathsalaAchar)
 * [Graeme Britz](https://github.com/grbritz)
-
+* [Russ Goldin](https://github.com/tagyoureit)
+* [William Lang](http://github.com/williamlang)
 
 ## Core Team
 
