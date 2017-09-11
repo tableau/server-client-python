@@ -12,14 +12,15 @@ The following people have contributed to this project to make it possible, and w
 * [Vathsala Achar](https://github.com/VathsalaAchar)
 * [Graeme Britz](https://github.com/grbritz)
 * [Russ Goldin](https://github.com/tagyoureit)
-* [William Lang](http://github.com/williamlang)
+* [William Lang](https://github.com/williamlang)
+* [Jim Morris](https://github.com/jimbodriven)
 
 ## Core Team
 
-* [shinchris](https://github.com/shinchris)
-* [lgraber](https://github.com/lgraber)
-* [t8y8](https://github.com/t8y8)
-* [RussTheAerialist](https://github.com/RussTheAerialist)
+* [Shin Chris](https://github.com/shinchris)
+* [Lee Graber](https://github.com/lgraber)
+* [Tyler Doyle](https://github.com/t8y8)
+* [Russell Hay](https://github.com/RussTheAerialist)
 * [Ben Lower](https://github.com/benlower)
 * [Jared Dominguez](https://github.com/jdomingu)
 * [Jackson Huang](https://github.com/jz-huang)
