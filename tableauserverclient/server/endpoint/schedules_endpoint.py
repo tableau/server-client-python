@@ -18,7 +18,7 @@ class Schedules(Endpoint):
         url = self.baseurl
         server_response = self.get_request(url, req_options)
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
-        all_schedule_items = ScheduleItem.from_response(server_response.content)
+        all_schedule_items = ScheduleItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_schedule_items, pagination_item
 
     @api(version="2.3")
@@ -44,7 +44,7 @@ class Schedules(Endpoint):
         server_response = self.put_request(url, update_req)
         logger.info("Updated schedule item (ID: {})".format(schedule_item.id))
         updated_schedule = copy.copy(schedule_item)
-        return updated_schedule._parse_common_tags(server_response.content)
+        return updated_schedule._parse_common_tags(server_response.content, self.parent_srv.namespace)
 
     @api(version="2.3")
     def create(self, schedule_item):
@@ -55,6 +55,6 @@ class Schedules(Endpoint):
         url = self.baseurl
         create_req = RequestFactory.Schedule.create_req(schedule_item)
         server_response = self.post_request(url, create_req)
-        new_schedule = ScheduleItem.from_response(server_response.content)[0]
+        new_schedule = ScheduleItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         logger.info("Created new schedule (ID: {})".format(new_schedule.id))
         return new_schedule

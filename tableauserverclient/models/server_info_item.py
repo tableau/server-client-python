@@ -21,10 +21,10 @@ class ServerInfoItem(object):
         return self._rest_api_version
 
     @classmethod
-    def from_response(cls, resp):
+    def from_response(cls, resp, ns):
         parsed_response = ET.fromstring(resp)
-        product_version_tag = parsed_response.find('.//t:productVersion', namespaces=NAMESPACE)
-        rest_api_version_tag = parsed_response.find('.//t:restApiVersion', namespaces=NAMESPACE)
+        product_version_tag = parsed_response.find('.//t:productVersion', namespaces=ns)
+        rest_api_version_tag = parsed_response.find('.//t:restApiVersion', namespaces=ns)
 
         build_number = product_version_tag.get('build', None)
         product_version = product_version_tag.text
