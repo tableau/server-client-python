@@ -19,7 +19,7 @@ class Tasks(Endpoint):
         server_response = self.get_request(url, req_options)
 
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
-        all_extract_tasks = TaskItem.from_response(server_response.content)
+        all_extract_tasks = TaskItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_extract_tasks, pagination_item
 
     @api(version='2.6')
