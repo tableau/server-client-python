@@ -182,7 +182,7 @@ class WorkbookItem(object):
         tags = None
         tags_elem = workbook_xml.find('.//t:tags', namespaces=ns)
         if tags_elem is not None:
-            all_tags = TagItem.from_xml_element(tags_elem)
+            all_tags = TagItem.from_xml_element(tags_elem, ns)
             tags = all_tags
 
         views = None

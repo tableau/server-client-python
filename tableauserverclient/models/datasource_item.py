@@ -152,7 +152,7 @@ class DatasourceItem(object):
         tags = None
         tags_elem = datasource_xml.find('.//t:tags', namespaces=NAMESPACE)
         if tags_elem is not None:
-            tags = TagItem.from_xml_element(tags_elem)
+            tags = TagItem.from_xml_element(tags_elem, NAMESPACE)
 
         project_id = None
         project_name = None
