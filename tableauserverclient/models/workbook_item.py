@@ -3,7 +3,6 @@ from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_not_nullable, property_is_boolean
 from .tag_item import TagItem
 from .view_item import ViewItem
-from .. import NAMESPACE
 from ..datetime_helpers import parse_datetime
 import copy
 

@@ -1,6 +1,4 @@
 import xml.etree.ElementTree as ET
-from .. import NAMESPACE
-from .schedule_item import ScheduleItem
 from .target import Target
 
 

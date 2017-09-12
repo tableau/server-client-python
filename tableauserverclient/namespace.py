@@ -1,7 +1,7 @@
 OLD_NAMESPACE = 'http://tableausoftware.com/api'
 NEW_NAMESPACE = 'http://tableau.com/api'
 
-NAMESPACE = {'t': NEW_NAMESPACE}
+NAMESPACE = None
 
 
 def namespace():

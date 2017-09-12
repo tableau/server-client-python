@@ -3,7 +3,6 @@ from datetime import datetime
 
 from .interval_item import IntervalItem, HourlyInterval, DailyInterval, WeeklyInterval, MonthlyInterval
 from .property_decorators import property_is_enum, property_not_nullable, property_is_int
-from .. import NAMESPACE
 from ..datetime_helpers import parse_datetime
 
 
@@ -104,6 +103,7 @@ class ScheduleItem(object):
 
     def _parse_common_tags(self, schedule_xml, ns):
         if not isinstance(schedule_xml, ET.Element):
+            print(ns)
             schedule_xml = ET.fromstring(schedule_xml).find('.//t:schedule', namespaces=ns)
         if schedule_xml is not None:
             (_, name, _, _, updated_at, _, next_run_at, end_schedule_at, execution_order,
@@ -179,13 +179,13 @@ class ScheduleItem(object):
         return all_schedule_items
 
     @staticmethod
-    def _parse_interval_item(parsed_response, frequency):
+    def _parse_interval_item(parsed_response, frequency, ns):
         start_time = parsed_response.get("start", None)
         start_time = datetime.strptime(start_time, "%H:%M:%S").time()
         end_time = parsed_response.get("end", None)
         if end_time is not None:
             end_time = datetime.strptime(end_time, "%H:%M:%S").time()
-        interval_elems = parsed_response.findall(".//t:intervals/t:interval", namespaces=NAMESPACE)
+        interval_elems = parsed_response.findall(".//t:intervals/t:interval", namespaces=ns)
         interval = []
         for interval_elem in interval_elems:
             interval.extend(interval_elem.attrib.items())
@@ -231,7 +231,7 @@ class ScheduleItem(object):
         interval_item = None
         frequency_detail_elem = schedule_xml.find('.//t:frequencyDetails', namespaces=ns)
         if frequency_detail_elem is not None:
-            interval_item = ScheduleItem._parse_interval_item(frequency_detail_elem, frequency)
+            interval_item = ScheduleItem._parse_interval_item(frequency_detail_elem, frequency, ns)
 
         return id, name, state, created_at, updated_at, schedule_type, \
             next_run_at, end_schedule_at, execution_order, priority, interval_item

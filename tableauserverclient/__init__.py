@@ -1,4 +1,4 @@
-from .namespace import NAMESPACE
+from .namespace import NEW_NAMESPACE as DEFAULT_NAMESPACE, namespace
 from .models import ConnectionCredentials, ConnectionItem, DatasourceItem,\
     GroupItem, PaginationItem, ProjectItem, ScheduleItem, \
     SiteItem, TableauAuth, UserItem, ViewItem, WorkbookItem, UnpopulatedPropertyError, \

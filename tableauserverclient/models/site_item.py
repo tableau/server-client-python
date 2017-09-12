@@ -1,7 +1,6 @@
 import xml.etree.ElementTree as ET
 from .property_decorators import (property_is_enum, property_is_boolean, property_matches,
                                   property_not_empty, property_not_nullable, property_is_int)
-from .. import NAMESPACE
 
 
 VALID_CONTENT_URL_RE = r"^[a-zA-Z0-9_\-]*$"

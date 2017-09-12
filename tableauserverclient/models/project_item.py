@@ -1,6 +1,5 @@
 import xml.etree.ElementTree as ET
 from .property_decorators import property_is_enum, property_not_empty
-from .. import NAMESPACE
 
 
 class ProjectItem(object):
