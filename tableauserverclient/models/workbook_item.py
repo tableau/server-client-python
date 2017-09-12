@@ -188,7 +188,7 @@ class WorkbookItem(object):
         views = None
         views_elem = workbook_xml.find('.//t:views', namespaces=ns)
         if views_elem is not None:
-            views = ViewItem.from_xml_element(views_elem)
+            views = ViewItem.from_xml_element(views_elem, ns)
 
         return id, name, content_url, created_at, updated_at, size, show_tabs,\
             project_id, project_name, owner_id, tags, views

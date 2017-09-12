@@ -124,7 +124,9 @@ class Workbooks(Endpoint):
             raise MissingRequiredFieldError(error)
         url = "{0}/{1}/views".format(self.baseurl, workbook_item.id)
         server_response = self.get_request(url)
-        workbook_item._set_views(ViewItem.from_response(server_response.content, workbook_id=workbook_item.id))
+        workbook_item._set_views(ViewItem.from_response(server_response.content,
+                                                        self.parent_srv.namespace,
+                                                        workbook_id=workbook_item.id))
         logger.info('Populated views for workbook (ID: {0}'.format(workbook_item.id))
 
     # Get all connections of workbook
