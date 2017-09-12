@@ -35,7 +35,7 @@ class Datasources(Endpoint):
         url = self.baseurl
         server_response = self.get_request(url, req_options)
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
-        all_datasource_items = DatasourceItem.from_response(server_response.content)
+        all_datasource_items = DatasourceItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_datasource_items, pagination_item
 
     # Get 1 datasource by id
@@ -47,7 +47,7 @@ class Datasources(Endpoint):
         logger.info('Querying single datasource (ID: {0})'.format(datasource_id))
         url = "{0}/{1}".format(self.baseurl, datasource_id)
         server_response = self.get_request(url)
-        return DatasourceItem.from_response(server_response.content)[0]
+        return DatasourceItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     # Populate datasource item's connections
     @api(version="2.0")
@@ -118,7 +118,7 @@ class Datasources(Endpoint):
         server_response = self.put_request(url, update_req)
         logger.info('Updated datasource item (ID: {0})'.format(datasource_item.id))
         updated_datasource = copy.copy(datasource_item)
-        return updated_datasource._parse_common_elements(server_response.content)
+        return updated_datasource._parse_common_elements(server_response.content, self.parent_srv.namespace)
 
     # Publish datasource
     @api(version="2.0")
@@ -161,6 +161,6 @@ class Datasources(Endpoint):
                                                                               file_contents,
                                                                               connection_credentials)
         server_response = self.post_request(url, xml_request, content_type)
-        new_datasource = DatasourceItem.from_response(server_response.content)[0]
+        new_datasource = DatasourceItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         logger.info('Published {0} (ID: {1})'.format(filename, new_datasource.id))
         return new_datasource
