@@ -41,7 +41,7 @@ class Groups(Endpoint):
     def _get_users_for_group(self, group_item, req_options=None):
         url = "{0}/{1}/users".format(self.baseurl, group_item.id)
         server_response = self.get_request(url, req_options)
-        user_item = UserItem.from_response(server_response.content)
+        user_item = UserItem.from_response(server_response.content, self.parent_srv.namespace)
         pagination_item = PaginationItem.from_response(server_response.content)
         logger.info('Populated users for group (ID: {0})'.format(group_item.id))
         return user_item, pagination_item
@@ -89,5 +89,5 @@ class Groups(Endpoint):
         url = "{0}/{1}/users".format(self.baseurl, group_item.id)
         add_req = RequestFactory.Group.add_user_req(user_id)
         server_response = self.post_request(url, add_req)
-        return UserItem.from_response(server_response.content).pop()
+        return UserItem.from_response(server_response.content, self.parent_srv.namespace).pop()
         logger.info('Added user (id: {0}) to group (ID: {1})'.format(user_id, group_item.id))

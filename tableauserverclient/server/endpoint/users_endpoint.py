@@ -19,7 +19,7 @@ class Users(Endpoint):
         url = self.baseurl
         server_response = self.get_request(url, req_options)
         pagination_item = PaginationItem.from_response(server_response.content)
-        all_user_items = UserItem.from_response(server_response.content)
+        all_user_items = UserItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_user_items, pagination_item
 
     # Gets 1 user by id
@@ -31,7 +31,7 @@ class Users(Endpoint):
         logger.info('Querying single user (ID: {0})'.format(user_id))
         url = "{0}/{1}".format(self.baseurl, user_id)
         server_response = self.get_request(url)
-        return UserItem.from_response(server_response.content).pop()
+        return UserItem.from_response(server_response.content, self.parent_srv.namespace).pop()
 
     # Update user
     @api(version="2.0")
@@ -45,7 +45,7 @@ class Users(Endpoint):
         server_response = self.put_request(url, update_req)
         logger.info('Updated user item (ID: {0})'.format(user_item.id))
         updated_item = copy.copy(user_item)
-        return updated_item._parse_common_tags(server_response.content)
+        return updated_item._parse_common_tags(server_response.content, self.parent_srv.namespace)
 
     # Delete 1 user by id
     @api(version="2.0")
@@ -63,7 +63,7 @@ class Users(Endpoint):
         url = self.baseurl
         add_req = RequestFactory.User.add_req(user_item)
         server_response = self.post_request(url, add_req)
-        new_user = UserItem.from_response(server_response.content).pop()
+        new_user = UserItem.from_response(server_response.content, self.parent_srv.namespace).pop()
         logger.info('Added new user (ID: {0})'.format(user_item.id))
         return new_user
 

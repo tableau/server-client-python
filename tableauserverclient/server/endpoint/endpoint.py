@@ -1,5 +1,6 @@
 from .exceptions import ServerResponseError, EndpointUnavailableError
 from functools import wraps
+from ...namespace import set_namespace_from_xml
 
 import logging
 
@@ -39,6 +40,7 @@ class Endpoint(object):
             parameters['data'] = content
 
         server_response = method(url, **parameters)
+        set_namespace_from_xml(server_response.content)
         self._check_status(server_response)
 
         # This check is to determine if the response is a text response (xml or otherwise)
@@ -50,6 +52,7 @@ class Endpoint(object):
 
     @staticmethod
     def _check_status(server_response):
+        logger.debug(server_response.content)
         if server_response.status_code not in Success_codes:
             raise ServerResponseError.from_response(server_response.content)
 
