@@ -18,7 +18,7 @@ class Groups(Endpoint):
         logger.info('Querying all groups on site')
         url = self.baseurl
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.content)
+        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         all_group_items = GroupItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_group_items, pagination_item
 
@@ -42,7 +42,7 @@ class Groups(Endpoint):
         url = "{0}/{1}/users".format(self.baseurl, group_item.id)
         server_response = self.get_request(url, req_options)
         user_item = UserItem.from_response(server_response.content, self.parent_srv.namespace)
-        pagination_item = PaginationItem.from_response(server_response.content)
+        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         logger.info('Populated users for group (ID: {0})'.format(group_item.id))
         return user_item, pagination_item
 

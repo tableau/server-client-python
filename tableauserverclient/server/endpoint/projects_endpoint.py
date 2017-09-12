@@ -16,7 +16,7 @@ class Projects(Endpoint):
         logger.info('Querying all projects on site')
         url = self.baseurl
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.content)
+        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         all_project_items = ProjectItem.from_response(server_response.content)
         return all_project_items, pagination_item
 

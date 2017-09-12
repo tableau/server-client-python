@@ -35,7 +35,7 @@ class Workbooks(Endpoint):
         logger.info('Querying all workbooks on site')
         url = self.baseurl
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.content)
+        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         all_workbook_items = WorkbookItem.from_response(server_response.content)
         return all_workbook_items, pagination_item
 

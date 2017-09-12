@@ -34,7 +34,7 @@ class Datasources(Endpoint):
         logger.info('Querying all datasources on site')
         url = self.baseurl
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.content)
+        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         all_datasource_items = DatasourceItem.from_response(server_response.content)
         return all_datasource_items, pagination_item
 

@@ -18,7 +18,7 @@ class Sites(Endpoint):
         logger.info('Querying all sites on site')
         url = self.baseurl
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.content)
+        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         all_site_items = SiteItem.from_response(server_response.content)
         return all_site_items, pagination_item
 

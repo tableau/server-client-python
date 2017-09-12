@@ -18,7 +18,7 @@ class Users(Endpoint):
         logger.info('Querying all users on site')
         url = self.baseurl
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.content)
+        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         all_user_items = UserItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_user_items, pagination_item
 
@@ -77,7 +77,7 @@ class Users(Endpoint):
         server_response = self.get_request(url, req_options)
         logger.info('Populated workbooks for user (ID: {0})'.format(user_item.id))
         user_item._set_workbooks(WorkbookItem.from_response(server_response.content))
-        pagination_item = PaginationItem.from_response(server_response.content)
+        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         return pagination_item
 
     def populate_favorites(self, user_item):

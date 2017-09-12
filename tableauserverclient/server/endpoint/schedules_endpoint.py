@@ -17,7 +17,7 @@ class Schedules(Endpoint):
         logger.info("Querying all schedules")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.content)
+        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         all_schedule_items = ScheduleItem.from_response(server_response.content)
         return all_schedule_items, pagination_item
 
