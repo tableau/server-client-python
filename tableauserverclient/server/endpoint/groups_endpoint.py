@@ -19,7 +19,7 @@ class Groups(Endpoint):
         url = self.baseurl
         server_response = self.get_request(url, req_options)
         pagination_item = PaginationItem.from_response(server_response.content)
-        all_group_items = GroupItem.from_response(server_response.content)
+        all_group_items = GroupItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_group_items, pagination_item
 
     # Gets all users in a given group
@@ -62,7 +62,7 @@ class Groups(Endpoint):
         url = self.baseurl
         create_req = RequestFactory.Group.create_req(group_item)
         server_response = self.post_request(url, create_req)
-        return GroupItem.from_response(server_response.content)[0]
+        return GroupItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     # Removes 1 user from 1 group
     @api(version="2.0")
