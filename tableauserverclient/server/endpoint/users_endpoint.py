@@ -76,7 +76,7 @@ class Users(Endpoint):
         url = "{0}/{1}/workbooks".format(self.baseurl, user_item.id)
         server_response = self.get_request(url, req_options)
         logger.info('Populated workbooks for user (ID: {0})'.format(user_item.id))
-        user_item._set_workbooks(WorkbookItem.from_response(server_response.content))
+        user_item._set_workbooks(WorkbookItem.from_response(server_response.content, self.parent_srv.namespace))
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         return pagination_item
 

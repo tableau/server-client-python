@@ -36,7 +36,7 @@ class Workbooks(Endpoint):
         url = self.baseurl
         server_response = self.get_request(url, req_options)
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
-        all_workbook_items = WorkbookItem.from_response(server_response.content)
+        all_workbook_items = WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_workbook_items, pagination_item
 
     # Get 1 workbook
@@ -48,7 +48,7 @@ class Workbooks(Endpoint):
         logger.info('Querying single workbook (ID: {0})'.format(workbook_id))
         url = "{0}/{1}".format(self.baseurl, workbook_id)
         server_response = self.get_request(url)
-        return WorkbookItem.from_response(server_response.content)[0]
+        return WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     # Delete 1 workbook by id
     @api(version="2.0")
@@ -75,7 +75,7 @@ class Workbooks(Endpoint):
         server_response = self.put_request(url, update_req)
         logger.info('Updated workbook item (ID: {0}'.format(workbook_item.id))
         updated_workbook = copy.copy(workbook_item)
-        return updated_workbook._parse_common_tags(server_response.content)
+        return updated_workbook._parse_common_tags(server_response.content, self.parent_srv.namespace)
 
     # Update workbook_connection
     def update_conn(self, workbook_item, connection_item):
@@ -193,6 +193,6 @@ class Workbooks(Endpoint):
                                                                             file_contents,
                                                                             connection_credentials)
         server_response = self.post_request(url, xml_request, content_type)
-        new_workbook = WorkbookItem.from_response(server_response.content)[0]
+        new_workbook = WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         logger.info('Published {0} (ID: {1})'.format(filename, new_workbook.id))
         return new_workbook
