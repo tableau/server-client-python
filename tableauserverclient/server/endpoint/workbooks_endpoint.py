@@ -137,7 +137,7 @@ class Workbooks(Endpoint):
             raise MissingRequiredFieldError(error)
         url = "{0}/{1}/connections".format(self.baseurl, workbook_item.id)
         server_response = self.get_request(url)
-        workbook_item._set_connections(ConnectionItem.from_response(server_response.content))
+        workbook_item._set_connections(ConnectionItem.from_response(server_response.content, self.parent_srv.namespace))
         logger.info('Populated connections for workbook (ID: {0})'.format(workbook_item.id))
 
     # Get preview image of workbook
