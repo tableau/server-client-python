@@ -1,8 +1,6 @@
 OLD_NAMESPACE = 'http://tableausoftware.com/api'
 NEW_NAMESPACE = 'http://tableau.com/api'
 
-NAMESPACE = None
-
 class Namespace(object):
     def __init__(self):
         self._namespace = {'t': NEW_NAMESPACE}
@@ -28,16 +26,3 @@ class Namespace(object):
                     self._namespace = {'t': NEW_NAMESPACE}
                     self._detected = True
 
-
-def namespace():
-    return NAMESPACE
-
-
-def set_namespace_from_xml(raw_response):
-    global NAMESPACE
-    if NAMESPACE:
-        return
-
-    ns = Namespace()
-    ns.detect(raw_response)
-    NAMESPACE = ns()

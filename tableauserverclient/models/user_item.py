@@ -1,7 +1,6 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_is_enum, property_not_empty, property_not_nullable
-from .. import namespace
 from ..datetime_helpers import parse_datetime
 
 
