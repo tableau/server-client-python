@@ -42,7 +42,7 @@ class Server(object):
         self.schedules = Schedules(self)
         self.server_info = ServerInfo(self)
         self.tasks = Tasks(self)
-        self.namespace = namespace()
+        self._namespace = namespace
 
         if use_server_version:
             self.use_server_version()
@@ -95,6 +95,10 @@ class Server(object):
     @property
     def baseurl(self):
         return "{0}/api/{1}".format(self._server_address, str(self.version))
+
+    @property
+    def namespace(self):
+        return self._namespace()
 
     @property
     def auth_token(self):

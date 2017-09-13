@@ -17,7 +17,7 @@ UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'datasource_update.xml')
 class DatasourceTests(unittest.TestCase):
     def setUp(self):
         self.server = TSC.Server('http://test')
-        self.server.namespace = {'t': TSC.DEFAULT_NAMESPACE}
+        self.server._namespace = lambda: {'t': TSC.DEFAULT_NAMESPACE}
 
         # Fake signin
         self.server._site_id = 'dad65087-b08b-4603-af4e-2887b8aafc67'
