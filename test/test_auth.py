@@ -13,7 +13,6 @@ SIGN_IN_ERROR_XML = os.path.join(TEST_ASSET_DIR, 'auth_sign_in_error.xml')
 class AuthTests(unittest.TestCase):
     def setUp(self):
         self.server = TSC.Server('http://test')
-        self.server._namespace = lambda: {'t': TSC.DEFAULT_NAMESPACE}
         self.baseurl = self.server.auth.baseurl
 
     def test_sign_in(self):

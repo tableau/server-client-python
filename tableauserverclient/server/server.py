@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 
 from .exceptions import NotSignedInError
-from ..namespace import namespace, set_namespace_from_xml
+from ..namespace import Namespace
 from .endpoint import Sites, Views, Users, Groups, Workbooks, Datasources, Projects, Auth, \
     Schedules, ServerInfo, Tasks, ServerInfoEndpointNotFoundError
 
@@ -42,7 +42,7 @@ class Server(object):
         self.schedules = Schedules(self)
         self.server_info = ServerInfo(self)
         self.tasks = Tasks(self)
-        self._namespace = namespace
+        self._namespace = Namespace()
 
         if use_server_version:
             self.use_server_version()

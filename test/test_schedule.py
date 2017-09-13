@@ -19,7 +19,6 @@ UPDATE_XML = os.path.join(TEST_ASSET_DIR, "schedule_update.xml")
 class ScheduleTests(unittest.TestCase):
     def setUp(self):
         self.server = TSC.Server("http://test")
-        self.server._namespace = lambda: {'t': TSC.DEFAULT_NAMESPACE}
 
         # Fake Signin
         self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"
