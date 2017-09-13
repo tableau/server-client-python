@@ -1,5 +1,9 @@
+from xml.etree import ElementTree as ET
+import re
+
 OLD_NAMESPACE = 'http://tableausoftware.com/api'
 NEW_NAMESPACE = 'http://tableau.com/api'
+NAMESPACE_RE = re.compile(r'\{(.*?)\}')
 
 class Namespace(object):
     def __init__(self):
@@ -13,16 +17,13 @@ class Namespace(object):
         if self._detected:
             return
 
-        lines = (n for n in xml.split('\n') if n.startswith('<tsResponse'))
+        if not xml.startswith(b'<?xml'):
+            return  # Not an xml file, don't detect anything
 
-        for n in lines:
-            pieces = (p for p in n.split('xmlns') if p.startswith('='))
-            for piece in pieces:
-                ns = piece.replace('=', '').replace('"', '').strip()
-                if ns == OLD_NAMESPACE:
-                    self._namespace = {'t': OLD_NAMESPACE}
-                    self._detected = True
-                elif ns == NEW_NAMESPACE:
-                    self._namespace = {'t': NEW_NAMESPACE}
-                    self._detected = True
-
+        root = ET.fromstring(xml)
+        matches = NAMESPACE_RE.match(root.tag)
+        if matches:
+            detected_ns = matches.group(1)
+            if detected_ns in (OLD_NAMESPACE, NEW_NAMESPACE):
+                self._namespaces = {'t': detected_ns }
+                self._detected = True
