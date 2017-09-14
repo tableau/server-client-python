@@ -6,6 +6,10 @@ NEW_NAMESPACE = 'http://tableau.com/api'
 NAMESPACE_RE = re.compile(r'\{(.*?)\}')
 
 
+class UnknownNamespaceError(Exception):
+    pass
+
+
 class Namespace(object):
     def __init__(self):
         self._namespace = {'t': NEW_NAMESPACE}
@@ -26,5 +30,7 @@ class Namespace(object):
         if matches:
             detected_ns = matches.group(1)
             if detected_ns in (OLD_NAMESPACE, NEW_NAMESPACE):
-                self._namespaces = {'t': detected_ns}
+                self._namespace = {'t': detected_ns}
                 self._detected = True
+            else:
+                raise UnknownNamespaceError(detected_ns)
