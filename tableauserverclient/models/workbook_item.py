@@ -3,7 +3,6 @@ from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_not_nullable, property_is_boolean
 from .tag_item import TagItem
 from .view_item import ViewItem
-from .. import NAMESPACE
 from ..datetime_helpers import parse_datetime
 import copy
 
@@ -98,12 +97,12 @@ class WorkbookItem(object):
     def _set_preview_image(self, preview_image):
         self._preview_image = preview_image
 
-    def _parse_common_tags(self, workbook_xml):
+    def _parse_common_tags(self, workbook_xml, ns):
         if not isinstance(workbook_xml, ET.Element):
-            workbook_xml = ET.fromstring(workbook_xml).find('.//t:workbook', namespaces=NAMESPACE)
+            workbook_xml = ET.fromstring(workbook_xml).find('.//t:workbook', namespaces=ns)
         if workbook_xml is not None:
             (_, _, _, _, updated_at, _, show_tabs,
-             project_id, project_name, owner_id, _, _) = self._parse_element(workbook_xml)
+             project_id, project_name, owner_id, _, _) = self._parse_element(workbook_xml, ns)
 
             self._set_values(None, None, None, None, updated_at,
                              None, show_tabs, project_id, project_name, owner_id, None, None)
@@ -139,13 +138,13 @@ class WorkbookItem(object):
             self._views = views
 
     @classmethod
-    def from_response(cls, resp):
+    def from_response(cls, resp, ns):
         all_workbook_items = list()
         parsed_response = ET.fromstring(resp)
-        all_workbook_xml = parsed_response.findall('.//t:workbook', namespaces=NAMESPACE)
+        all_workbook_xml = parsed_response.findall('.//t:workbook', namespaces=ns)
         for workbook_xml in all_workbook_xml:
             (id, name, content_url, created_at, updated_at, size, show_tabs,
-             project_id, project_name, owner_id, tags, views) = cls._parse_element(workbook_xml)
+             project_id, project_name, owner_id, tags, views) = cls._parse_element(workbook_xml, ns)
 
             workbook_item = cls(project_id)
             workbook_item._set_values(id, name, content_url, created_at, updated_at,
@@ -154,7 +153,7 @@ class WorkbookItem(object):
         return all_workbook_items
 
     @staticmethod
-    def _parse_element(workbook_xml):
+    def _parse_element(workbook_xml, ns):
         id = workbook_xml.get('id', None)
         name = workbook_xml.get('name', None)
         content_url = workbook_xml.get('contentUrl', None)
@@ -169,26 +168,26 @@ class WorkbookItem(object):
 
         project_id = None
         project_name = None
-        project_tag = workbook_xml.find('.//t:project', namespaces=NAMESPACE)
+        project_tag = workbook_xml.find('.//t:project', namespaces=ns)
         if project_tag is not None:
             project_id = project_tag.get('id', None)
             project_name = project_tag.get('name', None)
 
         owner_id = None
-        owner_tag = workbook_xml.find('.//t:owner', namespaces=NAMESPACE)
+        owner_tag = workbook_xml.find('.//t:owner', namespaces=ns)
         if owner_tag is not None:
             owner_id = owner_tag.get('id', None)
 
         tags = None
-        tags_elem = workbook_xml.find('.//t:tags', namespaces=NAMESPACE)
+        tags_elem = workbook_xml.find('.//t:tags', namespaces=ns)
         if tags_elem is not None:
-            all_tags = TagItem.from_xml_element(tags_elem)
+            all_tags = TagItem.from_xml_element(tags_elem, ns)
             tags = all_tags
 
         views = None
-        views_elem = workbook_xml.find('.//t:views', namespaces=NAMESPACE)
+        views_elem = workbook_xml.find('.//t:views', namespaces=ns)
         if views_elem is not None:
-            views = ViewItem.from_xml_element(views_elem)
+            views = ViewItem.from_xml_element(views_elem, ns)
 
         return id, name, content_url, created_at, updated_at, size, show_tabs,\
             project_id, project_name, owner_id, tags, views

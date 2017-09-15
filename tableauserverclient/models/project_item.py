@@ -1,6 +1,5 @@
 import xml.etree.ElementTree as ET
 from .property_decorators import property_is_enum, property_not_empty
-from .. import NAMESPACE
 
 
 class ProjectItem(object):
@@ -63,10 +62,10 @@ class ProjectItem(object):
             self.parent_id = parent_id
 
     @classmethod
-    def from_response(cls, resp):
+    def from_response(cls, resp, ns):
         all_project_items = list()
         parsed_response = ET.fromstring(resp)
-        all_project_xml = parsed_response.findall('.//t:project', namespaces=NAMESPACE)
+        all_project_xml = parsed_response.findall('.//t:project', namespaces=ns)
 
         for project_xml in all_project_xml:
             (id, name, description, content_permissions, parent_id) = cls._parse_element(project_xml)

@@ -26,8 +26,8 @@ class Views(Endpoint):
     def get(self, req_options=None):
         logger.info('Querying all views on site')
         server_response = self.get_request(self.baseurl, req_options)
-        pagination_item = PaginationItem.from_response(server_response.content)
-        all_view_items = ViewItem.from_response(server_response.content)
+        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
+        all_view_items = ViewItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_view_items, pagination_item
 
     @api(version="2.0")

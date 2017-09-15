@@ -18,8 +18,8 @@ class Groups(Endpoint):
         logger.info('Querying all groups on site')
         url = self.baseurl
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.content)
-        all_group_items = GroupItem.from_response(server_response.content)
+        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
+        all_group_items = GroupItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_group_items, pagination_item
 
     # Gets all users in a given group
@@ -41,8 +41,8 @@ class Groups(Endpoint):
     def _get_users_for_group(self, group_item, req_options=None):
         url = "{0}/{1}/users".format(self.baseurl, group_item.id)
         server_response = self.get_request(url, req_options)
-        user_item = UserItem.from_response(server_response.content)
-        pagination_item = PaginationItem.from_response(server_response.content)
+        user_item = UserItem.from_response(server_response.content, self.parent_srv.namespace)
+        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         logger.info('Populated users for group (ID: {0})'.format(group_item.id))
         return user_item, pagination_item
 
@@ -62,7 +62,7 @@ class Groups(Endpoint):
         url = self.baseurl
         create_req = RequestFactory.Group.create_req(group_item)
         server_response = self.post_request(url, create_req)
-        return GroupItem.from_response(server_response.content)[0]
+        return GroupItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     # Removes 1 user from 1 group
     @api(version="2.0")
@@ -89,5 +89,5 @@ class Groups(Endpoint):
         url = "{0}/{1}/users".format(self.baseurl, group_item.id)
         add_req = RequestFactory.Group.add_user_req(user_id)
         server_response = self.post_request(url, add_req)
-        return UserItem.from_response(server_response.content).pop()
+        return UserItem.from_response(server_response.content, self.parent_srv.namespace).pop()
         logger.info('Added user (id: {0}) to group (ID: {1})'.format(user_id, group_item.id))

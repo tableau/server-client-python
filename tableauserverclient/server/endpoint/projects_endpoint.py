@@ -16,8 +16,8 @@ class Projects(Endpoint):
         logger.info('Querying all projects on site')
         url = self.baseurl
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.content)
-        all_project_items = ProjectItem.from_response(server_response.content)
+        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
+        all_project_items = ProjectItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_project_items, pagination_item
 
     @api(version="2.0")
@@ -39,7 +39,7 @@ class Projects(Endpoint):
         update_req = RequestFactory.Project.update_req(project_item)
         server_response = self.put_request(url, update_req)
         logger.info('Updated project item (ID: {0})'.format(project_item.id))
-        updated_project = ProjectItem.from_response(server_response.content)[0]
+        updated_project = ProjectItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return updated_project
 
     @api(version="2.0")
@@ -47,6 +47,6 @@ class Projects(Endpoint):
         url = self.baseurl
         create_req = RequestFactory.Project.create_req(project_item)
         server_response = self.post_request(url, create_req)
-        new_project = ProjectItem.from_response(server_response.content)[0]
+        new_project = ProjectItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         logger.info('Created new project (ID: {0})'.format(new_project.id))
         return new_project

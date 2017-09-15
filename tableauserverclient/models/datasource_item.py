@@ -2,7 +2,6 @@ import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_not_nullable, property_is_boolean
 from .tag_item import TagItem
-from .. import NAMESPACE
 from ..datetime_helpers import parse_datetime
 import copy
 
@@ -85,12 +84,12 @@ class DatasourceItem(object):
     def _set_connections(self, connections):
         self._connections = connections
 
-    def _parse_common_elements(self, datasource_xml):
+    def _parse_common_elements(self, datasource_xml, ns):
         if not isinstance(datasource_xml, ET.Element):
-            datasource_xml = ET.fromstring(datasource_xml).find('.//t:datasource', namespaces=NAMESPACE)
+            datasource_xml = ET.fromstring(datasource_xml).find('.//t:datasource', namespaces=ns)
         if datasource_xml is not None:
             (_, _, _, _, _, updated_at, _, project_id, project_name, owner_id,
-             certified, certification_note) = self._parse_element(datasource_xml)
+             certified, certification_note) = self._parse_element(datasource_xml, ns)
             self._set_values(None, None, None, None, None, updated_at, None, project_id,
                              project_name, owner_id, certified, certification_note)
         return self
@@ -123,15 +122,15 @@ class DatasourceItem(object):
         self.certified = certified  # Always True/False, not conditional
 
     @classmethod
-    def from_response(cls, resp):
+    def from_response(cls, resp, ns):
         all_datasource_items = list()
         parsed_response = ET.fromstring(resp)
-        all_datasource_xml = parsed_response.findall('.//t:datasource', namespaces=NAMESPACE)
+        all_datasource_xml = parsed_response.findall('.//t:datasource', namespaces=ns)
 
         for datasource_xml in all_datasource_xml:
             (id_, name, datasource_type, content_url, created_at, updated_at,
              tags, project_id, project_name, owner_id,
-             certified, certification_note) = cls._parse_element(datasource_xml)
+             certified, certification_note) = cls._parse_element(datasource_xml, ns)
             datasource_item = cls(project_id)
             datasource_item._set_values(id_, name, datasource_type, content_url, created_at, updated_at,
                                         tags, None, project_name, owner_id, certified, certification_note)
@@ -139,7 +138,7 @@ class DatasourceItem(object):
         return all_datasource_items
 
     @staticmethod
-    def _parse_element(datasource_xml):
+    def _parse_element(datasource_xml, ns):
         id_ = datasource_xml.get('id', None)
         name = datasource_xml.get('name', None)
         datasource_type = datasource_xml.get('type', None)
@@ -150,19 +149,19 @@ class DatasourceItem(object):
         certified = str(datasource_xml.get('isCertified', None)).lower() == 'true'
 
         tags = None
-        tags_elem = datasource_xml.find('.//t:tags', namespaces=NAMESPACE)
+        tags_elem = datasource_xml.find('.//t:tags', namespaces=ns)
         if tags_elem is not None:
-            tags = TagItem.from_xml_element(tags_elem)
+            tags = TagItem.from_xml_element(tags_elem, ns)
 
         project_id = None
         project_name = None
-        project_elem = datasource_xml.find('.//t:project', namespaces=NAMESPACE)
+        project_elem = datasource_xml.find('.//t:project', namespaces=ns)
         if project_elem is not None:
             project_id = project_elem.get('id', None)
             project_name = project_elem.get('name', None)
 
         owner_id = None
-        owner_elem = datasource_xml.find('.//t:owner', namespaces=NAMESPACE)
+        owner_elem = datasource_xml.find('.//t:owner', namespaces=ns)
         if owner_elem is not None:
             owner_id = owner_elem.get('id', None)
 

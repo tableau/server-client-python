@@ -16,7 +16,7 @@ class _ResourceTagger(Endpoint):
 
         try:
             server_response = self.put_request(url, add_req)
-            return TagItem.from_response(server_response.content)
+            return TagItem.from_response(server_response.content, self.parent_srv.namespace)
         except ServerResponseError as e:
             if e.code == "404003":
                 error = "Adding tags to this resource type is only available with REST API version 2.6 and later."
