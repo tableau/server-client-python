@@ -55,10 +55,10 @@ class PagerTests(unittest.TestCase):
             page_3 = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             # Register Pager with some pages
-            m.get(self.baseurl + "?pageNumber=1&pageSize=1&sort=name:asc", complete_qs=True, text=page_1)
-            m.get(self.baseurl + "?pageNumber=2&pageSize=1&sort=name:asc", complete_qs=True, text=page_2)
-            m.get(self.baseurl + "?pageNumber=3&pageSize=1&sort=name:asc", complete_qs=True, text=page_3)
-            m.get(self.baseurl + "?pageNumber=1&pageSize=3&sort=name:asc", complete_qs=True, text=page_1)
+            m.get(self.baseurl + "?pageNumber=1&pageSize=1", complete_qs=True, text=page_1)
+            m.get(self.baseurl + "?pageNumber=2&pageSize=1", complete_qs=True, text=page_2)
+            m.get(self.baseurl + "?pageNumber=3&pageSize=1", complete_qs=True, text=page_3)
+            m.get(self.baseurl + "?pageNumber=1&pageSize=3", complete_qs=True, text=page_1)
 
             # Starting on page 2 should get 2 out of 3
             opts = TSC.RequestOptions(2, 1)

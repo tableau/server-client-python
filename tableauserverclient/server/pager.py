@@ -32,10 +32,6 @@ class Pager(object):
             self._count = 0
             self._options = RequestOptions()
 
-        # Pager assumes deterministic order but solr doesn't guarantee sort order unless specified
-        if not self._options.sort:
-            self._options.sort.add(Sort(RequestOptions.Field.Name, RequestOptions.Direction.Asc))
-
     def __iter__(self):
         # Fetch the first page
         current_item_list, last_pagination_item = self._endpoint(self._options)

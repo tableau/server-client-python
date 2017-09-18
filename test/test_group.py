@@ -54,7 +54,7 @@ class GroupTests(unittest.TestCase):
         with open(POPULATE_USERS, 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
-            m.get(self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users?pageNumber=1&pageSize=100&sort=name:asc',
+            m.get(self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users?pageNumber=1&pageSize=100',
                   text=response_xml, complete_qs=True)
             single_group = TSC.GroupItem(name='Test Group')
             single_group._id = 'e7833b48-c6f7-47b5-a2a7-36e7dd232758'
