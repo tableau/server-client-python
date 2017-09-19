@@ -1,4 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
-    <project id="1d0304cd-3796-429f-b815-7258370b9b74" name="Test Project" description="Project created for testing" contentPermissions="LockedToProject" parentId="9a8f2265-70f3-4494-96c5-e5949d7a1120" />
+    <pagination pageNumber="1" pageSize="100" totalAvailable="1" />
+    <users>
+    </users>
 </tsResponse>

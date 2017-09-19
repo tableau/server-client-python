@@ -16,10 +16,14 @@ setup(
     license='MIT',
     description='A Python module for working with the Tableau Server REST API.',
     test_suite='test',
+    setup_requires=[
+        'pytest-runner'
+    ],
     install_requires=[
-        'requests>=2.11,<2.12.0a0'
+        'requests>=2.11,<3.0'
     ],
     tests_require=[
-        'requests-mock>=1.0,<1.1a0'
+        'requests-mock>=1.0,<2.0',
+        'pytest'
     ]
 )

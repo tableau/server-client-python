@@ -93,11 +93,15 @@ class DatasourceTests(unittest.TestCase):
             single_datasource = TSC.DatasourceItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
             single_datasource.owner_id = 'dd2239f6-ddf1-4107-981a-4cf94e415794'
             single_datasource._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
+            single_datasource.certified = True
+            single_datasource.certification_note = "Warning, here be dragons."
             single_datasource = self.server.datasources.update(single_datasource)
 
         self.assertEqual('9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', single_datasource.id)
         self.assertEqual('1d0304cd-3796-429f-b815-7258370b9b74', single_datasource.project_id)
         self.assertEqual('dd2239f6-ddf1-4107-981a-4cf94e415794', single_datasource.owner_id)
+        self.assertEqual(True, single_datasource.certified)
+        self.assertEqual("Warning, here be dragons.", single_datasource.certification_note)
 
     def test_update_copy_fields(self):
         with open(UPDATE_XML, 'rb') as f:
@@ -184,7 +188,7 @@ class DatasourceTests(unittest.TestCase):
             m.get(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/content?includeExtract=False',
                   headers={'Content-Disposition': 'name="tableau_datasource"; filename="Sample datasource.tds"'},
                   complete_qs=True)
-            file_path = self.server.datasources.download('9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', no_extract=True)
+            file_path = self.server.datasources.download('9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', include_extract=False)
             self.assertTrue(os.path.exists(file_path))
         os.remove(file_path)
 

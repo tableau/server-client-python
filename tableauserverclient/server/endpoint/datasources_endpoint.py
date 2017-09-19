@@ -34,8 +34,8 @@ class Datasources(Endpoint):
         logger.info('Querying all datasources on site')
         url = self.baseurl
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.content)
-        all_datasource_items = DatasourceItem.from_response(server_response.content)
+        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
+        all_datasource_items = DatasourceItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_datasource_items, pagination_item
 
     # Get 1 datasource by id
@@ -47,7 +47,7 @@ class Datasources(Endpoint):
         logger.info('Querying single datasource (ID: {0})'.format(datasource_id))
         url = "{0}/{1}".format(self.baseurl, datasource_id)
         server_response = self.get_request(url)
-        return DatasourceItem.from_response(server_response.content)[0]
+        return DatasourceItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     # Populate datasource item's connections
     @api(version="2.0")
@@ -73,13 +73,19 @@ class Datasources(Endpoint):
     # Download 1 datasource by id
     @api(version="2.0")
     @parameter_added_in(no_extract='2.5')
-    def download(self, datasource_id, filepath=None, no_extract=False):
+    @parameter_added_in(include_extract='2.5')
+    def download(self, datasource_id, filepath=None, include_extract=True, no_extract=None):
         if not datasource_id:
             error = "Datasource ID undefined."
             raise ValueError(error)
         url = "{0}/{1}/content".format(self.baseurl, datasource_id)
 
-        if no_extract:
+        if no_extract is False or no_extract is True:
+            import warnings
+            warnings.warn('no_extract is deprecated, use include_extract instead.', DeprecationWarning)
+            include_extract = not no_extract
+
+        if not include_extract:
             url += "?includeExtract=False"
 
         with closing(self.get_request(url, parameters={'stream': True})) as server_response:
@@ -112,7 +118,7 @@ class Datasources(Endpoint):
         server_response = self.put_request(url, update_req)
         logger.info('Updated datasource item (ID: {0})'.format(datasource_item.id))
         updated_datasource = copy.copy(datasource_item)
-        return updated_datasource._parse_common_tags(server_response.content)
+        return updated_datasource._parse_common_elements(server_response.content, self.parent_srv.namespace)
 
     # Publish datasource
     @api(version="2.0")
@@ -155,6 +161,6 @@ class Datasources(Endpoint):
                                                                               file_contents,
                                                                               connection_credentials)
         server_response = self.post_request(url, xml_request, content_type)
-        new_datasource = DatasourceItem.from_response(server_response.content)[0]
+        new_datasource = DatasourceItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         logger.info('Published {0} (ID: {1})'.format(filename, new_datasource.id))
         return new_datasource

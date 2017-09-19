@@ -1,7 +1,6 @@
 import xml.etree.ElementTree as ET
 from .property_decorators import (property_is_enum, property_is_boolean, property_matches,
-                                  property_not_empty, property_not_nullable)
-from .. import NAMESPACE
+                                  property_not_empty, property_not_nullable, property_is_int)
 
 
 VALID_CONTENT_URL_RE = r"^[a-zA-Z0-9_\-]*$"
@@ -17,14 +16,15 @@ class SiteItem(object):
         Suspended = 'Suspended'
 
     def __init__(self, name, content_url, admin_mode=None, user_quota=None, storage_quota=None,
-                 disable_subscriptions=False, subscribe_others_enabled=True, revision_history_enabled=False):
+                 disable_subscriptions=False, subscribe_others_enabled=True, revision_history_enabled=False,
+                 revision_limit=None):
         self._admin_mode = None
         self._id = None
         self._num_users = None
         self._state = None
         self._status_reason = None
         self._storage = None
-        self.revision_limit = None
+        self._revision_limit = None
         self.user_quota = user_quota
         self.storage_quota = storage_quota
         self.content_url = content_url
@@ -89,6 +89,15 @@ class SiteItem(object):
         self._revision_history_enabled = value
 
     @property
+    def revision_limit(self):
+        return self._revision_limit
+
+    @revision_limit.setter
+    @property_is_int((2, 10000), allowed=[-1])
+    def revision_limit(self, value):
+        self._revision_limit = value
+
+    @property
     def state(self):
         return self._state
 
@@ -117,13 +126,13 @@ class SiteItem(object):
     def is_default(self):
         return self.name.lower() == 'default'
 
-    def _parse_common_tags(self, site_xml):
+    def _parse_common_tags(self, site_xml, ns):
         if not isinstance(site_xml, ET.Element):
-            site_xml = ET.fromstring(site_xml).find('.//t:site', namespaces=NAMESPACE)
+            site_xml = ET.fromstring(site_xml).find('.//t:site', namespaces=ns)
         if site_xml is not None:
             (_, name, content_url, _, admin_mode, state,
              subscribe_others_enabled, disable_subscriptions, revision_history_enabled,
-             user_quota, storage_quota, revision_limit, num_users, storage) = self._parse_element(site_xml)
+             user_quota, storage_quota, revision_limit, num_users, storage) = self._parse_element(site_xml, ns)
 
             self._set_values(None, name, content_url, None, admin_mode, state, subscribe_others_enabled,
                              disable_subscriptions, revision_history_enabled, user_quota, storage_quota,
@@ -163,14 +172,14 @@ class SiteItem(object):
             self._storage = storage
 
     @classmethod
-    def from_response(cls, resp):
+    def from_response(cls, resp, ns):
         all_site_items = list()
         parsed_response = ET.fromstring(resp)
-        all_site_xml = parsed_response.findall('.//t:site', namespaces=NAMESPACE)
+        all_site_xml = parsed_response.findall('.//t:site', namespaces=ns)
         for site_xml in all_site_xml:
             (id, name, content_url, status_reason, admin_mode, state, subscribe_others_enabled,
                 disable_subscriptions, revision_history_enabled, user_quota, storage_quota,
-                revision_limit, num_users, storage) = cls._parse_element(site_xml)
+                revision_limit, num_users, storage) = cls._parse_element(site_xml, ns)
 
             site_item = cls(name, content_url)
             site_item._set_values(id, name, content_url, status_reason, admin_mode, state,
@@ -180,7 +189,7 @@ class SiteItem(object):
         return all_site_items
 
     @staticmethod
-    def _parse_element(site_xml):
+    def _parse_element(site_xml, ns):
         id = site_xml.get('id', None)
         name = site_xml.get('name', None)
         content_url = site_xml.get('contentUrl', None)
@@ -205,7 +214,7 @@ class SiteItem(object):
 
         num_users = None
         storage = None
-        usage_elem = site_xml.find('.//t:usage', namespaces=NAMESPACE)
+        usage_elem = site_xml.find('.//t:usage', namespaces=ns)
         if usage_elem is not None:
             num_users = usage_elem.get('numUsers', None)
             storage = usage_elem.get('storage', None)

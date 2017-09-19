@@ -16,12 +16,12 @@ class _ResourceTagger(Endpoint):
 
         try:
             server_response = self.put_request(url, add_req)
+            return TagItem.from_response(server_response.content, self.parent_srv.namespace)
         except ServerResponseError as e:
             if e.code == "404003":
                 error = "Adding tags to this resource type is only available with REST API version 2.6 and later."
                 raise EndpointUnavailableError(error)
-
-        return TagItem.from_response(server_response.content)
+            raise  # Some other error
 
     # Delete a resource's tag by name
     def _delete_tag(self, baseurl, resource_id, tag_name):

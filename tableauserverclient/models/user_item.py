@@ -1,7 +1,6 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_is_enum, property_not_empty, property_not_nullable
-from .. import NAMESPACE
 from ..datetime_helpers import parse_datetime
 
 
@@ -88,11 +87,11 @@ class UserItem(object):
     def _set_workbooks(self, workbooks):
         self._workbooks = workbooks
 
-    def _parse_common_tags(self, user_xml):
+    def _parse_common_tags(self, user_xml, ns):
         if not isinstance(user_xml, ET.Element):
-            user_xml = ET.fromstring(user_xml).find('.//t:user', namespaces=NAMESPACE)
+            user_xml = ET.fromstring(user_xml).find('.//t:user', namespaces=ns)
         if user_xml is not None:
-            (_, _, site_role, _, _, fullname, email, auth_setting, _) = self._parse_element(user_xml)
+            (_, _, site_role, _, _, fullname, email, auth_setting, _) = self._parse_element(user_xml, ns)
             self._set_values(None, None, site_role, None, None, fullname, email, auth_setting, None)
         return self
 
@@ -118,13 +117,13 @@ class UserItem(object):
             self._domain_name = domain_name
 
     @classmethod
-    def from_response(cls, resp):
+    def from_response(cls, resp, ns):
         all_user_items = []
         parsed_response = ET.fromstring(resp)
-        all_user_xml = parsed_response.findall('.//t:user', namespaces=NAMESPACE)
+        all_user_xml = parsed_response.findall('.//t:user', namespaces=ns)
         for user_xml in all_user_xml:
             (id, name, site_role, last_login, external_auth_user_id,
-             fullname, email, auth_setting, domain_name) = cls._parse_element(user_xml)
+             fullname, email, auth_setting, domain_name) = cls._parse_element(user_xml, ns)
             user_item = cls(name, site_role)
             user_item._set_values(id, name, site_role, last_login, external_auth_user_id,
                                   fullname, email, auth_setting, domain_name)
@@ -132,7 +131,7 @@ class UserItem(object):
         return all_user_items
 
     @staticmethod
-    def _parse_element(user_xml):
+    def _parse_element(user_xml, ns):
         id = user_xml.get('id', None)
         name = user_xml.get('name', None)
         site_role = user_xml.get('siteRole', None)
@@ -143,7 +142,7 @@ class UserItem(object):
         auth_setting = user_xml.get('authSetting', None)
 
         domain_name = None
-        domain_elem = user_xml.find('.//t:domain', namespaces=NAMESPACE)
+        domain_elem = user_xml.find('.//t:domain', namespaces=ns)
         if domain_elem is not None:
             domain_name = domain_elem.get('name', None)
 

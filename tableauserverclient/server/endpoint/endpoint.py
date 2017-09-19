@@ -39,6 +39,7 @@ class Endpoint(object):
             parameters['data'] = content
 
         server_response = method(url, **parameters)
+        self.parent_srv._namespace.detect(server_response.content)
         self._check_status(server_response)
 
         # This check is to determine if the response is a text response (xml or otherwise)
@@ -48,10 +49,10 @@ class Endpoint(object):
                 url, server_response.content.decode(server_response.encoding)))
         return server_response
 
-    @staticmethod
-    def _check_status(server_response):
+    def _check_status(self, server_response):
+        logger.debug(server_response.content)
         if server_response.status_code not in Success_codes:
-            raise ServerResponseError.from_response(server_response.content)
+            raise ServerResponseError.from_response(server_response.content, self.parent_srv.namespace)
 
     def get_unauthenticated_request(self, url, request_object=None):
         return self._make_request(self.parent_srv.session.get, url, request_object=request_object)

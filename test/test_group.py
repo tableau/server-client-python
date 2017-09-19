@@ -9,7 +9,9 @@ TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
 GET_XML = os.path.join(TEST_ASSET_DIR, 'group_get.xml')
 POPULATE_USERS = os.path.join(TEST_ASSET_DIR, 'group_populate_users.xml')
+POPULATE_USERS_EMPTY = os.path.join(TEST_ASSET_DIR, 'group_populate_users_empty.xml')
 ADD_USER = os.path.join(TEST_ASSET_DIR, 'group_add_user.xml')
+ADD_USER_POPULATE = os.path.join(TEST_ASSET_DIR, 'group_users_added.xml')
 CREATE_GROUP = os.path.join(TEST_ASSET_DIR, 'group_create.xml')
 CREATE_GROUP_ASYNC = os.path.join(TEST_ASSET_DIR, 'group_create_async.xml')
 
@@ -52,17 +54,18 @@ class GroupTests(unittest.TestCase):
         with open(POPULATE_USERS, 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
-            m.get(self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users', text=response_xml)
+            m.get(self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users?pageNumber=1&pageSize=100',
+                  text=response_xml, complete_qs=True)
             single_group = TSC.GroupItem(name='Test Group')
             single_group._id = 'e7833b48-c6f7-47b5-a2a7-36e7dd232758'
-            pagination_item = self.server.groups.populate_users(single_group)
+            self.server.groups.populate_users(single_group)
 
-        self.assertEqual(1, pagination_item.total_available)
-        user = single_group.users.pop()
-        self.assertEqual('dd2239f6-ddf1-4107-981a-4cf94e415794', user.id)
-        self.assertEqual('alice', user.name)
-        self.assertEqual('Publisher', user.site_role)
-        self.assertEqual('2016-08-16T23:17:06Z', format_datetime(user.last_login))
+            self.assertEqual(1, len(list(single_group.users)))
+            user = list(single_group.users).pop()
+            self.assertEqual('dd2239f6-ddf1-4107-981a-4cf94e415794', user.id)
+            self.assertEqual('alice', user.name)
+            self.assertEqual('Publisher', user.site_role)
+            self.assertEqual('2016-08-16T23:17:06Z', format_datetime(user.last_login))
 
     def test_delete(self):
         with requests_mock.mock() as m:
@@ -71,35 +74,46 @@ class GroupTests(unittest.TestCase):
 
     def test_remove_user(self):
         with open(POPULATE_USERS, 'rb') as f:
-            response_xml = f.read().decode('utf-8')
+            response_xml_populate = f.read().decode('utf-8')
+
+        with open(POPULATE_USERS_EMPTY, 'rb') as f:
+            response_xml_empty = f.read().decode('utf-8')
+
         with requests_mock.mock() as m:
             url = self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users' \
                                  '/dd2239f6-ddf1-4107-981a-4cf94e415794'
+
             m.delete(url, status_code=204)
-            m.get(self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users', text=response_xml)
+            #  We register the get endpoint twice. The first time we have 1 user, the second we have 'removed' them.
+            m.get(self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users', text=response_xml_populate)
+
             single_group = TSC.GroupItem('test')
             single_group._id = 'e7833b48-c6f7-47b5-a2a7-36e7dd232758'
             self.server.groups.populate_users(single_group)
-            self.assertEqual(1, len(single_group.users))
+            self.assertEqual(1, len(list(single_group.users)))
             self.server.groups.remove_user(single_group, 'dd2239f6-ddf1-4107-981a-4cf94e415794')
 
-        self.assertEqual(0, len(single_group.users))
+            m.get(self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users', text=response_xml_empty)
+            self.assertEqual(0, len(list(single_group.users)))
 
     def test_add_user(self):
         with open(ADD_USER, 'rb') as f:
-            response_xml = f.read().decode('utf-8')
+            response_xml_add = f.read().decode('utf-8')
+        with open(ADD_USER_POPULATE, 'rb') as f:
+            response_xml_populate = f.read().decode('utf-8')
         with requests_mock.mock() as m:
-            m.post(self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users', text=response_xml)
+            m.post(self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users', text=response_xml_add)
+            m.get(self.baseurl + '/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users', text=response_xml_populate)
             single_group = TSC.GroupItem('test')
             single_group._id = 'e7833b48-c6f7-47b5-a2a7-36e7dd232758'
-            single_group._users = []
-            self.server.groups.add_user(single_group, '5de011f8-5aa9-4d5b-b991-f462c8dd6bb7')
 
-        self.assertEqual(1, len(single_group.users))
-        user = single_group.users.pop()
-        self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', user.id)
-        self.assertEqual('testuser', user.name)
-        self.assertEqual('ServerAdministrator', user.site_role)
+            self.server.groups.add_user(single_group, '5de011f8-5aa9-4d5b-b991-f462c8dd6bb7')
+            self.server.groups.populate_users(single_group)
+            self.assertEqual(1, len(list(single_group.users)))
+            user = list(single_group.users).pop()
+            self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', user.id)
+            self.assertEqual('testuser', user.name)
+            self.assertEqual('ServerAdministrator', user.site_role)
 
     def test_add_user_before_populating(self):
         with open(GET_XML, 'rb') as f:

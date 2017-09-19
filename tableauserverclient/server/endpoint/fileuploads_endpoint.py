@@ -24,7 +24,7 @@ class Fileuploads(Endpoint):
     def initiate(self):
         url = self.baseurl
         server_response = self.post_request(url, '')
-        fileupload_item = FileuploadItem.from_response(server_response.content)
+        fileupload_item = FileuploadItem.from_response(server_response.content, self.parent_srv.namespace)
         self.upload_id = fileupload_item.upload_session_id
         logger.info('Initiated file upload session (ID: {0})'.format(self.upload_id))
         return self.upload_id
@@ -37,7 +37,7 @@ class Fileuploads(Endpoint):
         url = "{0}/{1}".format(self.baseurl, self.upload_id)
         server_response = self.put_request(url, xml_request, content_type)
         logger.info('Uploading a chunk to session (ID: {0})'.format(self.upload_id))
-        return FileuploadItem.from_response(server_response.content)
+        return FileuploadItem.from_response(server_response.content, self.parent_srv.namespace)
 
     def read_chunks(self, file_path):
         with open(file_path, 'rb') as f:
