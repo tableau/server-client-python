@@ -57,7 +57,7 @@ class Datasources(Endpoint):
             raise MissingRequiredFieldError(error)
         url = '{0}/{1}/connections'.format(self.baseurl, datasource_item.id)
         server_response = self.get_request(url)
-        datasource_item._set_connections(ConnectionItem.from_response(server_response.content))
+        datasource_item._set_connections(ConnectionItem.from_response(server_response.content, self.parent_srv.namespace))
         logger.info('Populated connections for datasource (ID: {0})'.format(datasource_item.id))
 
     # Delete 1 datasource by id
