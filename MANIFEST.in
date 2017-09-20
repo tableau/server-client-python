@@ -1,0 +1,4 @@
+include versioneer.py
+include tableauserverclient/_version.py
+include LICENSE
+include LICENSE.versioneer

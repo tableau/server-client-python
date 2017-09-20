@@ -1,4 +1,9 @@
-class RequestOptions(object):
+class RequestOptionsBase(object):
+    def apply_query_params(self, url):
+        raise NotImplementedError()
+
+
+class RequestOptions(RequestOptionsBase):
     class Operator:
         Equals = 'eq'
         GreaterThan = 'gt'
@@ -48,5 +53,45 @@ class RequestOptions(object):
             filter_options = (str(filter_item) for filter_item in self.filter)
             ordered_filter_options = sorted(filter_options)
             params.append('filter={}'.format(','.join(ordered_filter_options)))
+
+        return "{0}?{1}".format(url, '&'.join(params))
+
+
+class ImageRequestOptions(RequestOptionsBase):
+    # if 'high' isn't specified, the REST API endpoint returns an image with standard resolution
+    class Resolution:
+        High = 'high'
+
+    def __init__(self, imageresolution=None):
+        self.imageresolution = imageresolution
+
+    def image_resolution(self, imageresolution):
+        self.imageresolution = imageresolution
+        return self
+
+    def apply_query_params(self, url):
+        params = []
+        if self.image_resolution:
+            params.append('resolution={0}'.format(self.imageresolution))
+
+        return "{0}?{1}".format(url, '&'.join(params))
+
+
+class ImageRequestOptions(RequestOptionsBase):
+    # if 'high' isn't specified, the REST API endpoint returns an image with standard resolution
+    class Resolution:
+        High = 'high'
+
+    def __init__(self, imageresolution=None):
+        self.imageresolution = imageresolution
+
+    def image_resolution(self, imageresolution):
+        self.imageresolution = imageresolution
+        return self
+
+    def apply_query_params(self, url):
+        params = []
+        if self.image_resolution:
+            params.append('resolution={0}'.format(self.imageresolution))
 
         return "{0}?{1}".format(url, '&'.join(params))

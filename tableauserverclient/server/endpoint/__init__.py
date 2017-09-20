@@ -7,6 +7,7 @@ from .projects_endpoint import Projects
 from .schedules_endpoint import Schedules
 from .server_info_endpoint import ServerInfo
 from .sites_endpoint import Sites
+from .tasks_endpoint import Tasks
 from .users_endpoint import Users
 from .views_endpoint import Views
 from .workbooks_endpoint import Workbooks

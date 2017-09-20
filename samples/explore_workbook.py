@@ -40,6 +40,7 @@ def main():
     # SIGN IN
     tableau_auth = TSC.TableauAuth(args.username, password)
     server = TSC.Server(args.server)
+    server.use_highest_version()
 
     overwrite_true = TSC.Server.PublishMode.Overwrite
 
@@ -82,13 +83,25 @@ def main():
             sample_workbook.tags.update('a', 'b', 'c', 'd')
             sample_workbook.show_tabs = True
             server.workbooks.update(sample_workbook)
-            print("\nOld tag set: {}".format(original_tag_set))
-            print("New tag set: {}".format(sample_workbook.tags))
+            print("\nWorkbook's old tag set: {}".format(original_tag_set))
+            print("Workbook's new tag set: {}".format(sample_workbook.tags))
             print("Workbook tabbed: {}".format(sample_workbook.show_tabs))
 
             # Delete all tags that were added by setting tags to original
             sample_workbook.tags = original_tag_set
             server.workbooks.update(sample_workbook)
+
+            # Add tag to just one view
+            sample_view = sample_workbook.views[0]
+            original_tag_set = set(sample_view.tags)
+            sample_view.tags.add("view_tag")
+            server.views.update(sample_view)
+            print("\nView's old tag set: {}".format(original_tag_set))
+            print("View's new tag set: {}".format(sample_view.tags))
+
+            # Delete tag from just one view
+            sample_view.tags = original_tag_set
+            server.views.update(sample_view)
 
             if args.download:
                 # Download

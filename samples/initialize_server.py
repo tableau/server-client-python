@@ -11,7 +11,6 @@ import logging
 import tableauserverclient as TSC
 
 
-
 def main():
     parser = argparse.ArgumentParser(description='Initialize a server with content.')
     parser.add_argument('--server', '-s', required=True, help='server address')
@@ -68,7 +67,8 @@ def main():
         ################################################################################
         # Step 4: Create the project we need only if it doesn't exist
         ################################################################################
-        import time; time.sleep(2)  # sad panda...something about eventually consistent model
+        import time
+        time.sleep(2)  # sad panda...something about eventually consistent model
         all_projects = TSC.Pager(server_upload.projects)
         project = next((p for p in all_projects if p.name.lower() == args.project.lower()), None)
 

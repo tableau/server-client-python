@@ -3,7 +3,6 @@ from datetime import datetime
 
 from .interval_item import IntervalItem, HourlyInterval, DailyInterval, WeeklyInterval, MonthlyInterval
 from .property_decorators import property_is_enum, property_not_nullable, property_is_int
-from .. import NAMESPACE
 from ..datetime_helpers import parse_datetime
 
 
@@ -32,6 +31,9 @@ class ScheduleItem(object):
         self.name = name
         self.priority = priority
         self.schedule_type = schedule_type
+
+    def __repr__(self):
+        return "<Schedule#{_id} \"{_name}\" {interval_item}>".format(**self.__dict__)
 
     @property
     def created_at(self):
@@ -99,14 +101,15 @@ class ScheduleItem(object):
     def updated_at(self):
         return self._updated_at
 
-    def _parse_common_tags(self, schedule_xml):
+    def _parse_common_tags(self, schedule_xml, ns):
         if not isinstance(schedule_xml, ET.Element):
-            schedule_xml = ET.fromstring(schedule_xml).find('.//t:schedule', namespaces=NAMESPACE)
+            print(ns)
+            schedule_xml = ET.fromstring(schedule_xml).find('.//t:schedule', namespaces=ns)
         if schedule_xml is not None:
             (_, name, _, _, updated_at, _, next_run_at, end_schedule_at, execution_order,
-             priority, interval_item) = self._parse_element(schedule_xml)
+             priority, interval_item) = self._parse_element(schedule_xml, ns)
 
-            self._set_values(id=None,
+            self._set_values(id_=None,
                              name=name,
                              state=None,
                              created_at=None,
@@ -120,10 +123,10 @@ class ScheduleItem(object):
 
         return self
 
-    def _set_values(self, id, name, state, created_at, updated_at, schedule_type,
+    def _set_values(self, id_, name, state, created_at, updated_at, schedule_type,
                     next_run_at, end_schedule_at, execution_order, priority, interval_item):
-        if id is not None:
-            self._id = id
+        if id_ is not None:
+            self._id = id_
         if name:
             self._name = name
         if state:
@@ -146,17 +149,21 @@ class ScheduleItem(object):
             self._interval_item = interval_item
 
     @classmethod
-    def from_response(cls, resp):
-        all_schedule_items = []
+    def from_response(cls, resp, ns):
         parsed_response = ET.fromstring(resp)
-        all_schedule_xml = parsed_response.findall('.//t:schedule', namespaces=NAMESPACE)
+        return cls.from_element(parsed_response, ns)
+
+    @classmethod
+    def from_element(cls, parsed_response, ns):
+        all_schedule_items = []
+        all_schedule_xml = parsed_response.findall('.//t:schedule', namespaces=ns)
         for schedule_xml in all_schedule_xml:
-            (id, name, state, created_at, updated_at, schedule_type, next_run_at,
-             end_schedule_at, execution_order, priority, interval_item) = cls._parse_element(schedule_xml)
+            (id_, name, state, created_at, updated_at, schedule_type, next_run_at,
+             end_schedule_at, execution_order, priority, interval_item) = cls._parse_element(schedule_xml, ns)
 
             schedule_item = cls(name, priority, schedule_type, execution_order, interval_item)
 
-            schedule_item._set_values(id=id,
+            schedule_item._set_values(id_=id_,
                                       name=None,
                                       state=state,
                                       created_at=created_at,
@@ -172,13 +179,13 @@ class ScheduleItem(object):
         return all_schedule_items
 
     @staticmethod
-    def _parse_interval_item(parsed_response, frequency):
+    def _parse_interval_item(parsed_response, frequency, ns):
         start_time = parsed_response.get("start", None)
         start_time = datetime.strptime(start_time, "%H:%M:%S").time()
         end_time = parsed_response.get("end", None)
         if end_time is not None:
             end_time = datetime.strptime(end_time, "%H:%M:%S").time()
-        interval_elems = parsed_response.findall(".//t:intervals/t:interval", namespaces=NAMESPACE)
+        interval_elems = parsed_response.findall(".//t:intervals/t:interval", namespaces=ns)
         interval = []
         for interval_elem in interval_elems:
             interval.extend(interval_elem.attrib.items())
@@ -205,7 +212,7 @@ class ScheduleItem(object):
             return MonthlyInterval(start_time, interval_value)
 
     @staticmethod
-    def _parse_element(schedule_xml):
+    def _parse_element(schedule_xml, ns):
         id = schedule_xml.get('id', None)
         name = schedule_xml.get('name', None)
         state = schedule_xml.get('state', None)
@@ -222,9 +229,9 @@ class ScheduleItem(object):
             priority = int(priority)
 
         interval_item = None
-        frequency_detail_elem = schedule_xml.find('.//t:frequencyDetails', namespaces=NAMESPACE)
+        frequency_detail_elem = schedule_xml.find('.//t:frequencyDetails', namespaces=ns)
         if frequency_detail_elem is not None:
-            interval_item = ScheduleItem._parse_interval_item(frequency_detail_elem, frequency)
+            interval_item = ScheduleItem._parse_interval_item(frequency_detail_elem, frequency, ns)
 
         return id, name, state, created_at, updated_at, schedule_type, \
             next_run_at, end_schedule_at, execution_order, priority, interval_item

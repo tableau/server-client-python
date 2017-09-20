@@ -1,17 +1,19 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
-from .. import NAMESPACE
 
 
 class ViewItem(object):
     def __init__(self):
         self._content_url = None
         self._id = None
+        self._image = None
+        self._initial_tags = set()
         self._name = None
         self._owner_id = None
         self._preview_image = None
         self._total_views = None
         self._workbook_id = None
+        self.tags = set()
 
     @property
     def content_url(self):
@@ -20,6 +22,10 @@ class ViewItem(object):
     @property
     def id(self):
         return self._id
+
+    @property
+    def image(self):
+        return self._image
 
     @property
     def name(self):
@@ -45,18 +51,18 @@ class ViewItem(object):
         return self._workbook_id
 
     @classmethod
-    def from_response(cls, resp, workbook_id=''):
-        return cls.from_xml_element(ET.fromstring(resp), workbook_id)
+    def from_response(cls, resp, ns, workbook_id=''):
+        return cls.from_xml_element(ET.fromstring(resp), ns, workbook_id)
 
     @classmethod
-    def from_xml_element(cls, parsed_response, workbook_id=''):
+    def from_xml_element(cls, parsed_response, ns, workbook_id=''):
         all_view_items = list()
-        all_view_xml = parsed_response.findall('.//t:view', namespaces=NAMESPACE)
+        all_view_xml = parsed_response.findall('.//t:view', namespaces=ns)
         for view_xml in all_view_xml:
             view_item = cls()
-            usage_elem = view_xml.find('.//t:usage', namespaces=NAMESPACE)
-            workbook_elem = view_xml.find('.//t:workbook', namespaces=NAMESPACE)
-            owner_elem = view_xml.find('.//t:owner', namespaces=NAMESPACE)
+            usage_elem = view_xml.find('.//t:usage', namespaces=ns)
+            workbook_elem = view_xml.find('.//t:workbook', namespaces=ns)
+            owner_elem = view_xml.find('.//t:owner', namespaces=ns)
             view_item._id = view_xml.get('id', None)
             view_item._name = view_xml.get('name', None)
             view_item._content_url = view_xml.get('contentUrl', None)
