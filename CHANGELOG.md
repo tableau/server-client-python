@@ -1,4 +1,8 @@
-## 0.5 (11 Sept 2017)
+## 0.5.1 (21 Sept 2017
+
+* Fix a critical issue caused by #224 that was the result of lack of test coverage (#226)
+
+## 0.5 (20 Sept 2017)
 
 * Added revision settings to update site (#187)
 * Added support for certified data sources (#189)
