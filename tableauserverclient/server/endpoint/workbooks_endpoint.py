@@ -35,8 +35,8 @@ class Workbooks(Endpoint):
         logger.info('Querying all workbooks on site')
         url = self.baseurl
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.content)
-        all_workbook_items = WorkbookItem.from_response(server_response.content)
+        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
+        all_workbook_items = WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_workbook_items, pagination_item
 
     # Get 1 workbook
@@ -48,7 +48,7 @@ class Workbooks(Endpoint):
         logger.info('Querying single workbook (ID: {0})'.format(workbook_id))
         url = "{0}/{1}".format(self.baseurl, workbook_id)
         server_response = self.get_request(url)
-        return WorkbookItem.from_response(server_response.content)[0]
+        return WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     # Delete 1 workbook by id
     @api(version="2.0")
@@ -75,7 +75,7 @@ class Workbooks(Endpoint):
         server_response = self.put_request(url, update_req)
         logger.info('Updated workbook item (ID: {0}'.format(workbook_item.id))
         updated_workbook = copy.copy(workbook_item)
-        return updated_workbook._parse_common_tags(server_response.content)
+        return updated_workbook._parse_common_tags(server_response.content, self.parent_srv.namespace)
 
     # Update workbook_connection
     def update_conn(self, workbook_item, connection_item):
@@ -87,13 +87,19 @@ class Workbooks(Endpoint):
     # Download workbook contents with option of passing in filepath
     @api(version="2.0")
     @parameter_added_in(no_extract='2.5')
-    def download(self, workbook_id, filepath=None, no_extract=False):
+    @parameter_added_in(include_extract='2.5')
+    def download(self, workbook_id, filepath=None, include_extract=True, no_extract=None):
         if not workbook_id:
             error = "Workbook ID undefined."
             raise ValueError(error)
         url = "{0}/{1}/content".format(self.baseurl, workbook_id)
 
-        if no_extract:
+        if no_extract is False or no_extract is True:
+            import warnings
+            warnings.warn('no_extract is deprecated, use include_extract instead.', DeprecationWarning)
+            include_extract = not no_extract
+
+        if not include_extract:
             url += "?includeExtract=False"
 
         with closing(self.get_request(url, parameters={"stream": True})) as server_response:
@@ -118,7 +124,9 @@ class Workbooks(Endpoint):
             raise MissingRequiredFieldError(error)
         url = "{0}/{1}/views".format(self.baseurl, workbook_item.id)
         server_response = self.get_request(url)
-        workbook_item._set_views(ViewItem.from_response(server_response.content, workbook_id=workbook_item.id))
+        workbook_item._set_views(ViewItem.from_response(server_response.content,
+                                                        self.parent_srv.namespace,
+                                                        workbook_id=workbook_item.id))
         logger.info('Populated views for workbook (ID: {0}'.format(workbook_item.id))
 
     # Get all connections of workbook
@@ -129,7 +137,7 @@ class Workbooks(Endpoint):
             raise MissingRequiredFieldError(error)
         url = "{0}/{1}/connections".format(self.baseurl, workbook_item.id)
         server_response = self.get_request(url)
-        workbook_item._set_connections(ConnectionItem.from_response(server_response.content))
+        workbook_item._set_connections(ConnectionItem.from_response(server_response.content, self.parent_srv.namespace))
         logger.info('Populated connections for workbook (ID: {0})'.format(workbook_item.id))
 
     # Get preview image of workbook
@@ -187,6 +195,6 @@ class Workbooks(Endpoint):
                                                                             file_contents,
                                                                             connection_credentials)
         server_response = self.post_request(url, xml_request, content_type)
-        new_workbook = WorkbookItem.from_response(server_response.content)[0]
+        new_workbook = WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         logger.info('Published {0} (ID: {1})'.format(filename, new_workbook.id))
         return new_workbook

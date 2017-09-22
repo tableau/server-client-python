@@ -1,5 +1,4 @@
 import xml.etree.ElementTree as ET
-from .. import NAMESPACE
 
 
 class FileuploadItem(object):
@@ -16,9 +15,9 @@ class FileuploadItem(object):
         return self._file_size
 
     @classmethod
-    def from_response(cls, resp):
+    def from_response(cls, resp, ns):
         parsed_response = ET.fromstring(resp)
-        fileupload_elem = parsed_response.find('.//t:fileUpload', namespaces=NAMESPACE)
+        fileupload_elem = parsed_response.find('.//t:fileUpload', namespaces=ns)
         fileupload_item = cls()
         fileupload_item._upload_session_id = fileupload_elem.get('uploadSessionId', None)
         fileupload_item._file_size = fileupload_elem.get('fileSize', None)

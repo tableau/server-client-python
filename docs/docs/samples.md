@@ -34,6 +34,8 @@ The following list describes the samples available in the repository:
 
 * `create_group.py`. Create a user group.
 
+* `create_project.py`. Create new projects at the top level as well as nested projects.
+
 * `create_schedules.py`. Create schedules for extract refreshes and subscriptions.
 
 * `explore_datasource.py`. Queries datasources, selects a datasource, populates connections for the datasource, then updates the datasource.
@@ -54,4 +56,3 @@ The following list describes the samples available in the repository:
 
 **Note**: For all of the samples, ensure that your Tableau Server user account has permission to access the resources
 requested by the samples.
-

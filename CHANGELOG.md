@@ -1,3 +1,14 @@
+## 0.5 (11 Sept 2017)
+
+* Added revision settings to update site (#187)
+* Added support for certified data sources (#189)
+* Added support for include/exclude extract (#203)
+* Added auto-paging for group users (#204)
+* Added ability to add workbooks to a schedule (#206)
+* Added the ability to create nested projects (#208)
+* Fixed sort order when using pager (#192)
+* Docs Updates and new samples (#196, #199, #200, #201)
+
 ## 0.4.1 (18 April 2017)
 
 * Fix #177 to remove left in debugging print

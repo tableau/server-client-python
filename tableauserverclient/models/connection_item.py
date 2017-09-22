@@ -1,5 +1,4 @@
 import xml.etree.ElementTree as ET
-from .. import NAMESPACE
 
 
 class ConnectionItem(object):
@@ -31,10 +30,10 @@ class ConnectionItem(object):
         return self._connection_type
 
     @classmethod
-    def from_response(cls, resp):
+    def from_response(cls, resp, ns):
         all_connection_items = list()
         parsed_response = ET.fromstring(resp)
-        all_connection_xml = parsed_response.findall('.//t:connection', namespaces=NAMESPACE)
+        all_connection_xml = parsed_response.findall('.//t:connection', namespaces=ns)
         for connection_xml in all_connection_xml:
             connection_item = cls()
             connection_item._id = connection_xml.get('id', None)
@@ -42,7 +41,7 @@ class ConnectionItem(object):
             connection_item.server_address = connection_xml.get('serverAddress', None)
             connection_item.server_port = connection_xml.get('serverPort', None)
             connection_item.username = connection_xml.get('userName', None)
-            datasource_elem = connection_xml.find('.//t:datasource', namespaces=NAMESPACE)
+            datasource_elem = connection_xml.find('.//t:datasource', namespaces=ns)
             if datasource_elem is not None:
                 connection_item._datasource_id = datasource_elem.get('id', None)
                 connection_item._datasource_name = datasource_elem.get('name', None)
