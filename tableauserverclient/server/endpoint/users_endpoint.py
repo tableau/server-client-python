@@ -70,15 +70,24 @@ class Users(Endpoint):
     # Get workbooks for user
     @api(version="2.0")
     def populate_workbooks(self, user_item, req_options=None):
+        from .. import Pager
+
         if not user_item.id:
             error = "User item missing ID."
             raise MissingRequiredFieldError(error)
+
+        def wb_pager():
+            return Pager(lambda options: self._get_wbs_for_user(user_item, options), req_options)
+
+        user_item._set_workbooks(wb_pager)
+
+    def _get_wbs_for_user(self, user_item, req_options=None):
         url = "{0}/{1}/workbooks".format(self.baseurl, user_item.id)
         server_response = self.get_request(url, req_options)
         logger.info('Populated workbooks for user (ID: {0})'.format(user_item.id))
-        user_item._set_workbooks(WorkbookItem.from_response(server_response.content, self.parent_srv.namespace))
+        workbook_item = WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
-        return pagination_item
+        return workbook_item, pagination_item
 
     def populate_favorites(self, user_item):
         raise NotImplementedError('REST API currently does not support the ability to query favorites')
