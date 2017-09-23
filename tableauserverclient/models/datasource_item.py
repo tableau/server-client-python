@@ -28,7 +28,7 @@ class DatasourceItem(object):
         if self._connections is None:
             error = 'Datasource item must be populated with connections first.'
             raise UnpopulatedPropertyError(error)
-        return self._connections
+        return self._connections()
 
     @property
     def content_url(self):
