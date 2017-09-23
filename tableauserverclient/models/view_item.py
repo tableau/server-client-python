@@ -15,6 +15,12 @@ class ViewItem(object):
         self._workbook_id = None
         self.tags = set()
 
+    def _set_preview_image(self, preview_image):
+        self._preview_image = preview_image
+
+    def _set_image(self, image):
+        self._image = image
+
     @property
     def content_url(self):
         return self._content_url
@@ -25,7 +31,7 @@ class ViewItem(object):
 
     @property
     def image(self):
-        return self._image
+        return self._image()
 
     @property
     def name(self):
@@ -40,7 +46,7 @@ class ViewItem(object):
         if self._preview_image is None:
             error = "View item must be populated with its preview image first."
             raise UnpopulatedPropertyError(error)
-        return self._preview_image
+        return self._preview_image()
 
     @property
     def total_views(self):

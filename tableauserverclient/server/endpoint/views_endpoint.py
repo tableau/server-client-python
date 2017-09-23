@@ -35,21 +35,37 @@ class Views(Endpoint):
         if not view_item.id or not view_item.workbook_id:
             error = "View item missing ID or workbook ID."
             raise MissingRequiredFieldError(error)
+
+        def image_fetcher():
+            return self._get_preview_for_view(view_item)
+
+        view_item._set_preview_image(image_fetcher)
+        logger.info('Populated preview image for view (ID: {0})'.format(view_item.id))
+
+    def _get_preview_for_view(self, view_item):
         url = "{0}/workbooks/{1}/views/{2}/previewImage".format(self.siteurl,
                                                                 view_item.workbook_id,
                                                                 view_item.id)
         server_response = self.get_request(url)
-        view_item._preview_image = server_response.content
-        logger.info('Populated preview image for view (ID: {0})'.format(view_item.id))
+        image = server_response.content
+        return image
 
     def populate_image(self, view_item, req_options=None):
         if not view_item.id:
             error = "View item missing ID."
             raise MissingRequiredFieldError(error)
+
+        def image_fetcher():
+            return self._get_view_image(view_item, req_options)
+
+        view_item._set_image(image_fetcher)
+        logger.info("Populated image for view (ID: {0})".format(view_item.id))
+
+    def _get_view_image(self, view_item, req_options):
         url = "{0}/{1}/image".format(self.baseurl, view_item.id)
         server_response = self.get_request(url, req_options)
-        view_item._image = server_response.content
-        logger.info("Populated image for view (ID: {0})".format(view_item.id))
+        image = server_response.content
+        return image
 
     # Update view. Currently only tags can be updated
     def update(self, view_item):
