@@ -103,7 +103,6 @@ class ScheduleItem(object):
 
     def _parse_common_tags(self, schedule_xml, ns):
         if not isinstance(schedule_xml, ET.Element):
-            print(ns)
             schedule_xml = ET.fromstring(schedule_xml).find('.//t:schedule', namespaces=ns)
         if schedule_xml is not None:
             (_, name, _, _, updated_at, _, next_run_at, end_schedule_at, execution_order,
