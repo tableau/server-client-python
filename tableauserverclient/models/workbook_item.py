@@ -83,10 +83,20 @@ class WorkbookItem(object):
 
     @property
     def views(self):
+        # Views can be set in an initial workbook response OR by a call
+        # to Server. Without getting too fancy, I think we can rely on
+        # returning a list from the response, until they call
+        # populate_workbook, in which case we bind the fetcher and
+        # return a callable.
         if self._views is None:
             error = "Workbook item must be populated with views first."
             raise UnpopulatedPropertyError(error)
-        return self._views
+        elif callable(self._views):
+            # We've called `populate_views` on this model
+            return self._views()
+        else:
+            # We had views included in a WorkbookItem response
+            return self._views
 
     def _set_connections(self, connections):
         self._connections = connections
