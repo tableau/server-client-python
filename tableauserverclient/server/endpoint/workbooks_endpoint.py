@@ -135,10 +135,18 @@ class Workbooks(Endpoint):
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
-        url = "{0}/{1}/connections".format(self.baseurl, workbook_item.id)
-        server_response = self.get_request(url)
-        workbook_item._set_connections(ConnectionItem.from_response(server_response.content, self.parent_srv.namespace))
+
+        def connection_fetcher():
+             return self._get_workbook_connections(workbook_item)
+
+        workbook_item._set_connections(connection_fetcher)
         logger.info('Populated connections for workbook (ID: {0})'.format(workbook_item.id))
+
+    def _get_workbook_connections(self, workbook_item, req_options=None):
+        url = "{0}/{1}/connections".format(self.baseurl, workbook_item.id)
+        server_response = self.get_request(url, req_options)
+        connections = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
+        return connections
 
     # Get preview image of workbook
     @api(version="2.0")

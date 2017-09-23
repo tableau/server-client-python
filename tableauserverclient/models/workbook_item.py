@@ -30,7 +30,7 @@ class WorkbookItem(object):
         if self._connections is None:
             error = "Workbook item must be populated with connections first."
             raise UnpopulatedPropertyError(error)
-        return self._connections
+        return self._connections()
 
     @property
     def content_url(self):
