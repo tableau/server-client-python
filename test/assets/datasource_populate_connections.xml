@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.8.xsd">
+    <connections>
+        <connection id="be786ae0-d2bf-4a4b-9b34-e2de8d2d4488" type="textscan" serverAddress="" userName="" />
+        <connection id="970e24bc-e200-4841-a3e9-66e7d122d77e" type="sqlserver" serverAddress="database.com" userName="heero" />
+        <connection id="7d85b889-283b-42df-b23e-3c811e402f1f" type="textscan" serverAddress="forty-two.net" userName="duo" />
+    </connections>
+</tsResponse>
