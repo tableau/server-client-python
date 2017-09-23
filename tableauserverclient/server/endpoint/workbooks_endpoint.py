@@ -162,10 +162,18 @@ class Workbooks(Endpoint):
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
+
+        def image_fetcher():
+            return self._get_wb_preview_image(workbook_item)
+
+        workbook_item._set_preview_image(image_fetcher)
+        logger.info('Populated preview image for workbook (ID: {0})'.format(workbook_item.id))
+
+    def _get_wb_preview_image(self, workbook_item):
         url = "{0}/{1}/previewImage".format(self.baseurl, workbook_item.id)
         server_response = self.get_request(url)
-        workbook_item._set_preview_image(server_response.content)
-        logger.info('Populated preview image for workbook (ID: {0})'.format(workbook_item.id))
+        preview_image = server_response.content
+        return preview_image
 
     # Publishes workbook. Chunking method if file over 64MB
     @api(version="2.0")

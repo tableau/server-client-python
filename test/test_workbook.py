@@ -253,7 +253,7 @@ class WorkbookTests(unittest.TestCase):
             single_workbook._id = '1f951daf-4061-451a-9df1-69a8062664f2'
             self.server.workbooks.populate_preview_image(single_workbook)
 
-        self.assertEqual(response, single_workbook.preview_image)
+            self.assertEqual(response, single_workbook.preview_image)
 
     def test_populate_preview_image_missing_id(self):
         single_workbook = TSC.WorkbookItem('test')

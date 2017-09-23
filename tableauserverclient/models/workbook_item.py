@@ -49,7 +49,7 @@ class WorkbookItem(object):
         if self._preview_image is None:
             error = "Workbook item must be populated with its preview image first."
             raise UnpopulatedPropertyError(error)
-        return self._preview_image
+        return self._preview_image()
 
     @property
     def project_id(self):
