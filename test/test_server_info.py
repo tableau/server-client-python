@@ -39,7 +39,7 @@ class ServerInfoTests(unittest.TestCase):
             # Return a 404 for serverInfo so we can pretend this is an old Server
             m.get(self.server.server_address + "/api/2.4/serverInfo", text=si_response_xml, status_code=404)
             m.get(self.server.server_address + "/auth?format=xml", text=auth_response_xml)
-            self.server.use_highest_version()
+            self.server.use_server_version()
             self.assertEqual(self.server.version, '2.2')
 
     def test_server_info_use_highest_version_upgrades(self):
@@ -49,7 +49,7 @@ class ServerInfoTests(unittest.TestCase):
             m.get(self.server.server_address + "/api/2.4/serverInfo", text=si_response_xml)
             # Pretend we're old
             self.server.version = '2.0'
-            self.server.use_highest_version()
+            self.server.use_server_version()
             # Did we upgrade to 2.4?
             self.assertEqual(self.server.version, '2.4')
 

@@ -1,6 +1,7 @@
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, UserItem, WorkbookItem, PaginationItem
+from ..pager import Pager
 import logging
 import copy
 
@@ -70,8 +71,6 @@ class Users(Endpoint):
     # Get workbooks for user
     @api(version="2.0")
     def populate_workbooks(self, user_item, req_options=None):
-        from .. import Pager
-
         if not user_item.id:
             error = "User item missing ID."
             raise MissingRequiredFieldError(error)
