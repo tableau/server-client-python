@@ -47,7 +47,7 @@ class Pager(object):
 
             except IndexError:
                 # The total count on Server changed while fetching exit gracefully
-                raise StopIteration
+                return
 
     def _load_next_page(self, last_pagination_item):
         next_page = last_pagination_item.page_number + 1
