@@ -122,12 +122,20 @@ class Workbooks(Endpoint):
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
+
+        def view_fetcher():
+            return self._get_views_for_workbook(workbook_item)
+
+        workbook_item._set_views(view_fetcher)
+        logger.info('Populated views for workbook (ID: {0}'.format(workbook_item.id))
+
+    def _get_views_for_workbook(self, workbook_item):
         url = "{0}/{1}/views".format(self.baseurl, workbook_item.id)
         server_response = self.get_request(url)
-        workbook_item._set_views(ViewItem.from_response(server_response.content,
-                                                        self.parent_srv.namespace,
-                                                        workbook_id=workbook_item.id))
-        logger.info('Populated views for workbook (ID: {0}'.format(workbook_item.id))
+        views = ViewItem.from_response(server_response.content,
+                                       self.parent_srv.namespace,
+                                       workbook_id=workbook_item.id)
+        return views
 
     # Get all connections of workbook
     @api(version="2.0")
@@ -135,10 +143,18 @@ class Workbooks(Endpoint):
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
-        url = "{0}/{1}/connections".format(self.baseurl, workbook_item.id)
-        server_response = self.get_request(url)
-        workbook_item._set_connections(ConnectionItem.from_response(server_response.content, self.parent_srv.namespace))
+
+        def connection_fetcher():
+            return self._get_workbook_connections(workbook_item)
+
+        workbook_item._set_connections(connection_fetcher)
         logger.info('Populated connections for workbook (ID: {0})'.format(workbook_item.id))
+
+    def _get_workbook_connections(self, workbook_item, req_options=None):
+        url = "{0}/{1}/connections".format(self.baseurl, workbook_item.id)
+        server_response = self.get_request(url, req_options)
+        connections = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
+        return connections
 
     # Get preview image of workbook
     @api(version="2.0")
@@ -146,10 +162,18 @@ class Workbooks(Endpoint):
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
+
+        def image_fetcher():
+            return self._get_wb_preview_image(workbook_item)
+
+        workbook_item._set_preview_image(image_fetcher)
+        logger.info('Populated preview image for workbook (ID: {0})'.format(workbook_item.id))
+
+    def _get_wb_preview_image(self, workbook_item):
         url = "{0}/{1}/previewImage".format(self.baseurl, workbook_item.id)
         server_response = self.get_request(url)
-        workbook_item._set_preview_image(server_response.content)
-        logger.info('Populated preview image for workbook (ID: {0})'.format(workbook_item.id))
+        preview_image = server_response.content
+        return preview_image
 
     # Publishes workbook. Chunking method if file over 64MB
     @api(version="2.0")

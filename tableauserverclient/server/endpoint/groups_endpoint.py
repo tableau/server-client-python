@@ -2,6 +2,7 @@ from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from ...models.exceptions import UnpopulatedPropertyError
 from .. import RequestFactory, GroupItem, UserItem, PaginationItem
+from ..pager import Pager
 import logging
 
 logger = logging.getLogger('tableau.endpoint.groups')
@@ -25,8 +26,6 @@ class Groups(Endpoint):
     # Gets all users in a given group
     @api(version="2.0")
     def populate_users(self, group_item, req_options=None):
-        from .. import Pager
-
         if not group_item.id:
             error = "Group item missing ID. Group must be retrieved from server first."
             raise MissingRequiredFieldError(error)

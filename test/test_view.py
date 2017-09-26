@@ -56,7 +56,7 @@ class ViewTests(unittest.TestCase):
             single_view._id = 'd79634e1-6063-4ec9-95ff-50acbf609ff5'
             single_view._workbook_id = '3cc6cd06-89ce-4fdc-b935-5294135d6d42'
             self.server.views.populate_preview_image(single_view)
-        self.assertEqual(response, single_view.preview_image)
+            self.assertEqual(response, single_view.preview_image)
 
     def test_populate_preview_image_missing_id(self):
         single_view = TSC.ViewItem()
@@ -75,7 +75,7 @@ class ViewTests(unittest.TestCase):
             single_view = TSC.ViewItem()
             single_view._id = 'd79634e1-6063-4ec9-95ff-50acbf609ff5'
             self.server.views.populate_image(single_view)
-        self.assertEqual(response, single_view.image)
+            self.assertEqual(response, single_view.image)
 
     def test_populate_image_high_resolution(self):
         with open(POPULATE_PREVIEW_IMAGE, 'rb') as f:
@@ -86,7 +86,7 @@ class ViewTests(unittest.TestCase):
             single_view._id = 'd79634e1-6063-4ec9-95ff-50acbf609ff5'
             req_option = TSC.ImageRequestOptions(imageresolution=TSC.ImageRequestOptions.Resolution.High)
             self.server.views.populate_image(single_view, req_option)
-        self.assertEqual(response, single_view.image)
+            self.assertEqual(response, single_view.image)
 
     def test_populate_image_missing_id(self):
         single_view = TSC.ViewItem()

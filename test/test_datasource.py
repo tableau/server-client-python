@@ -10,6 +10,7 @@ ADD_TAGS_XML = os.path.join(TEST_ASSET_DIR, 'datasource_add_tags.xml')
 GET_XML = os.path.join(TEST_ASSET_DIR, 'datasource_get.xml')
 GET_EMPTY_XML = os.path.join(TEST_ASSET_DIR, 'datasource_get_empty.xml')
 GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, 'datasource_get_by_id.xml')
+POPULATE_CONNECTIONS_XML = os.path.join(TEST_ASSET_DIR, 'datasource_populate_connections.xml')
 PUBLISH_XML = os.path.join(TEST_ASSET_DIR, 'datasource_publish.xml')
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'datasource_update.xml')
 
@@ -134,6 +135,25 @@ class DatasourceTests(unittest.TestCase):
 
         self.assertEqual(single_datasource.tags, updated_datasource.tags)
         self.assertEqual(single_datasource._initial_tags, updated_datasource._initial_tags)
+
+    def test_populate_connections(self):
+        with open(POPULATE_CONNECTIONS_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/connections', text=response_xml)
+            single_datasource = TSC.DatasourceItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
+            single_datasource.owner_id = 'dd2239f6-ddf1-4107-981a-4cf94e415794'
+            single_datasource._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
+            self.server.datasources.populate_connections(single_datasource)
+
+            self.assertEqual('9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', single_datasource.id)
+
+            connections = single_datasource.connections
+            self.assertTrue(connections)
+            ds1, ds2, ds3 = connections
+            self.assertEqual(ds1.id, 'be786ae0-d2bf-4a4b-9b34-e2de8d2d4488')
+            self.assertEqual(ds2.id, '970e24bc-e200-4841-a3e9-66e7d122d77e')
+            self.assertEqual(ds3.id, '7d85b889-283b-42df-b23e-3c811e402f1f')
 
     def test_publish(self):
         with open(PUBLISH_XML, 'rb') as f:

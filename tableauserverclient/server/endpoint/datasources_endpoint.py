@@ -55,11 +55,18 @@ class Datasources(Endpoint):
         if not datasource_item.id:
             error = 'Datasource item missing ID. Datasource must be retrieved from server first.'
             raise MissingRequiredFieldError(error)
-        url = '{0}/{1}/connections'.format(self.baseurl, datasource_item.id)
-        server_response = self.get_request(url)
-        datasource_item._set_connections(
-            ConnectionItem.from_response(server_response.content, self.parent_srv.namespace))
+
+        def connections_fetcher():
+            return self._get_datasource_connections(datasource_item)
+
+        datasource_item._set_connections(connections_fetcher)
         logger.info('Populated connections for datasource (ID: {0})'.format(datasource_item.id))
+
+    def _get_datasource_connections(self, datasource_item, req_options=None):
+        url = '{0}/{1}/connections'.format(self.baseurl, datasource_item.id)
+        server_response = self.get_request(url, req_options)
+        connections = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
+        return connections
 
     # Delete 1 datasource by id
     @api(version="2.0")
