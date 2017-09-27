@@ -63,12 +63,12 @@ class ImageRequestOptions(RequestOptionsBase):
         High = 'high'
 
     def __init__(self, imageresolution=None):
-        self.imageresolution = imageresolution
+        self.image_resolution = imageresolution
 
     def apply_query_params(self, url):
         params = []
         if self.image_resolution:
-            params.append('resolution={0}'.format(self.imageresolution))
+            params.append('resolution={0}'.format(self.image_resolution))
 
         return "{0}?{1}".format(url, '&'.join(params))
 
