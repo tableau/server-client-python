@@ -39,6 +39,9 @@ class ViewItem(object):
 
     @property
     def image(self):
+        if self._image is None:
+            error = "View item must be populated with its png image first."
+            raise UnpopulatedPropertyError(error)
         return self._image()
 
     @property
