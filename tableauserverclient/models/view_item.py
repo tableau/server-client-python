@@ -55,6 +55,7 @@ class ViewItem(object):
             error = "View item must be populated with its preview image first."
             raise UnpopulatedPropertyError(error)
         return self._preview_image()
+
     @property
     def pdf(self):
         if self._pdf is None:
