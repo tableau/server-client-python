@@ -63,35 +63,47 @@ class ImageRequestOptions(RequestOptionsBase):
         High = 'high'
 
     def __init__(self, imageresolution=None):
-        self.imageresolution = imageresolution
-
-    def image_resolution(self, imageresolution):
-        self.imageresolution = imageresolution
-        return self
+        self.image_resolution = imageresolution
 
     def apply_query_params(self, url):
         params = []
         if self.image_resolution:
-            params.append('resolution={0}'.format(self.imageresolution))
+            params.append('resolution={0}'.format(self.image_resolution))
 
         return "{0}?{1}".format(url, '&'.join(params))
 
 
-class ImageRequestOptions(RequestOptionsBase):
+class PDFRequestOptions(RequestOptionsBase):
     # if 'high' isn't specified, the REST API endpoint returns an image with standard resolution
-    class Resolution:
-        High = 'high'
+    class PageType:
+        A3 = "a3"
+        A4 = "a4"
+        A5 = "a5"
+        B4 = "b4"
+        B5 = "b5"
+        Executive = "executive"
+        Folio = "folio"
+        Ledger = "ledger"
+        Legal = "legal"
+        Letter = "letter"
+        Note = "note"
+        Quarto = "quarto"
+        Tabloid = "tabloid"
 
-    def __init__(self, imageresolution=None):
-        self.imageresolution = imageresolution
+    class Orientation:
+        Portrait = "portrait"
+        Landscape = "landscape"
 
-    def image_resolution(self, imageresolution):
-        self.imageresolution = imageresolution
-        return self
+    def __init__(self, page_type=None, orientation=None):
+        self.page_type = page_type
+        self.orientation = orientation
 
     def apply_query_params(self, url):
         params = []
-        if self.image_resolution:
-            params.append('resolution={0}'.format(self.imageresolution))
+        if self.page_type:
+            params.append('type={0}'.format(self.page_type))
+
+        if self.orientation:
+            params.append('orientation={0}'.format(self.orientation))
 
         return "{0}?{1}".format(url, '&'.join(params))
