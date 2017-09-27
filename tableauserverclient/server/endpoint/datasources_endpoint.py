@@ -128,6 +128,14 @@ class Datasources(Endpoint):
         updated_datasource = copy.copy(datasource_item)
         return updated_datasource._parse_common_elements(server_response.content, self.parent_srv.namespace)
 
+    # Update datasource_connection
+    def update_conn(self, datasource_item, connection_item):
+        url = "{0}/{1}/connections/{2}".format(self.baseurl, datasource_item.id, datasource_item.connections[0].id)
+        update_req = RequestFactory.DatasourceConnection.update_req(connection_item)
+        server_response = self.put_request(url, update_req)
+        logger.info('Updated datasource item (ID: {0} & connection item {1}'.format(datasource_item.id,
+                                                                                    connection_item.id))
+
     # Publish datasource
     @api(version="2.0")
     def publish(self, datasource_item, file_path, mode, connection_credentials=None):
