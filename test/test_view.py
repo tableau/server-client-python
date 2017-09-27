@@ -100,7 +100,7 @@ class ViewTests(unittest.TestCase):
             single_view = TSC.ViewItem()
             single_view._id = 'd79634e1-6063-4ec9-95ff-50acbf609ff5'
 
-            size = TSC.PDFRequestOptions.OutputSize.Letter
+            size = TSC.PDFRequestOptions.PageType.Letter
             orientation = TSC.PDFRequestOptions.Orientation.Portrait
             req_option = TSC.PDFRequestOptions(size, orientation)
 

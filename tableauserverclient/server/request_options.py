@@ -75,7 +75,7 @@ class ImageRequestOptions(RequestOptionsBase):
 
 class PDFRequestOptions(RequestOptionsBase):
     # if 'high' isn't specified, the REST API endpoint returns an image with standard resolution
-    class OutputSize:
+    class PageType:
         A3 = "a3"
         A4 = "a4"
         A5 = "a5"
@@ -94,14 +94,14 @@ class PDFRequestOptions(RequestOptionsBase):
         Portrait = "portrait"
         Landscape = "landscape"
 
-    def __init__(self, output_size=None, orientation=None):
-        self.output_size = output_size
+    def __init__(self, page_type=None, orientation=None):
+        self.page_type = page_type
         self.orientation = orientation
 
     def apply_query_params(self, url):
         params = []
-        if self.output_size:
-            params.append('type={0}'.format(self.output_size))
+        if self.page_type:
+            params.append('type={0}'.format(self.page_type))
 
         if self.orientation:
             params.append('orientation={0}'.format(self.orientation))
