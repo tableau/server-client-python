@@ -11,6 +11,8 @@ class ViewItem(object):
         self._name = None
         self._owner_id = None
         self._preview_image = None
+        self._pdf = None
+        self._csv = None
         self._total_views = None
         self._workbook_id = None
         self.tags = set()
@@ -20,6 +22,12 @@ class ViewItem(object):
 
     def _set_image(self, image):
         self._image = image
+
+    def _set_pdf(self, pdf):
+        self._pdf = pdf
+
+    def _set_csv(self, csv):
+        self._csv = csv
 
     @property
     def content_url(self):
@@ -47,6 +55,19 @@ class ViewItem(object):
             error = "View item must be populated with its preview image first."
             raise UnpopulatedPropertyError(error)
         return self._preview_image()
+    @property
+    def pdf(self):
+        if self._pdf is None:
+            error = "View item must be populated with its pdf first."
+            raise UnpopulatedPropertyError(error)
+        return self._pdf()
+
+    @property
+    def csv(self):
+        if self._csv is None:
+            error = "View item must be populated with its csv first."
+            raise UnpopulatedPropertyError(error)
+        return self._csv()
 
     @property
     def total_views(self):
