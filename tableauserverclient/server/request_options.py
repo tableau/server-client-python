@@ -65,10 +65,6 @@ class ImageRequestOptions(RequestOptionsBase):
     def __init__(self, imageresolution=None):
         self.imageresolution = imageresolution
 
-    def image_resolution(self, imageresolution):
-        self.imageresolution = imageresolution
-        return self
-
     def apply_query_params(self, url):
         params = []
         if self.image_resolution:
@@ -77,21 +73,37 @@ class ImageRequestOptions(RequestOptionsBase):
         return "{0}?{1}".format(url, '&'.join(params))
 
 
-class ImageRequestOptions(RequestOptionsBase):
+class PDFRequestOptions(RequestOptionsBase):
     # if 'high' isn't specified, the REST API endpoint returns an image with standard resolution
-    class Resolution:
-        High = 'high'
+    class OutputSize:
+        A3 = "a3"
+        A4 = "a4"
+        A5 = "a5"
+        B4 = "b4"
+        B5 = "b5"
+        Executive = "executive"
+        Folio = "folio"
+        Ledger = "ledger"
+        Legal = "legal"
+        Letter = "letter"
+        Note = "note"
+        Quarto = "quarto"
+        Tabloid = "tabloid"
 
-    def __init__(self, imageresolution=None):
-        self.imageresolution = imageresolution
+    class Orientation:
+        Portrait = "protrait"
+        Landscape = "landscape"
 
-    def image_resolution(self, imageresolution):
-        self.imageresolution = imageresolution
-        return self
+    def __init__(self, output_size=None, orientation=None):
+        self.output_size = output_size
+        self.orientation = orientation
 
     def apply_query_params(self, url):
         params = []
-        if self.image_resolution:
-            params.append('resolution={0}'.format(self.imageresolution))
+        if self.output_size:
+            params.append('type={0}'.format(self.output_size))
+
+        if self.orientation:
+            params.append('type={0}'.format(self.orientation))
 
         return "{0}?{1}".format(url, '&'.join(params))
