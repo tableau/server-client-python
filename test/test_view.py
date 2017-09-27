@@ -8,6 +8,8 @@ TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 ADD_TAGS_XML = os.path.join(TEST_ASSET_DIR, 'view_add_tags.xml')
 GET_XML = os.path.join(TEST_ASSET_DIR, 'view_get.xml')
 POPULATE_PREVIEW_IMAGE = os.path.join(TEST_ASSET_DIR, 'Sample View Image.png')
+POPULATE_PDF = os.path.join(TEST_ASSET_DIR, 'populate_pdf.pdf')
+POPULATE_CSV = os.path.join(TEST_ASSET_DIR, 'populate_csv.csv')
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'workbook_update.xml')
 
 
@@ -88,6 +90,34 @@ class ViewTests(unittest.TestCase):
             req_option = TSC.ImageRequestOptions(imageresolution=TSC.ImageRequestOptions.Resolution.High)
             self.server.views.populate_image(single_view, req_option)
             self.assertEqual(response, single_view.image)
+
+    def test_populate_pdf(self):
+        with open(POPULATE_PDF, 'rb') as f:
+            response = f.read()
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + '/d79634e1-6063-4ec9-95ff-50acbf609ff5/pdf?type=letter&orientation=portrait',
+                  content=response)
+            single_view = TSC.ViewItem()
+            single_view._id = 'd79634e1-6063-4ec9-95ff-50acbf609ff5'
+
+            size = TSC.PDFRequestOptions.OutputSize.Letter
+            orientation = TSC.PDFRequestOptions.Orientation.Portrait
+            req_option = TSC.PDFRequestOptions(size, orientation)
+
+            self.server.views.populate_pdf(single_view, req_option)
+            self.assertEqual(response, single_view.pdf)
+
+    def test_populate_csv(self):
+        with open(POPULATE_CSV, 'rb') as f:
+            response = f.read()
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + '/d79634e1-6063-4ec9-95ff-50acbf609ff5/data', content=response)
+            single_view = TSC.ViewItem()
+            single_view._id = 'd79634e1-6063-4ec9-95ff-50acbf609ff5'
+            self.server.views.populate_csv(single_view)
+
+            csv_file = b"".join(single_view.csv)
+            self.assertEqual(response, csv_file)
 
     def test_populate_image_missing_id(self):
         single_view = TSC.ViewItem()

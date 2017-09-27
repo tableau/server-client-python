@@ -91,7 +91,7 @@ class PDFRequestOptions(RequestOptionsBase):
         Tabloid = "tabloid"
 
     class Orientation:
-        Portrait = "protrait"
+        Portrait = "portrait"
         Landscape = "landscape"
 
     def __init__(self, output_size=None, orientation=None):
@@ -104,6 +104,6 @@ class PDFRequestOptions(RequestOptionsBase):
             params.append('type={0}'.format(self.output_size))
 
         if self.orientation:
-            params.append('type={0}'.format(self.orientation))
+            params.append('orientation={0}'.format(self.orientation))
 
         return "{0}?{1}".format(url, '&'.join(params))
