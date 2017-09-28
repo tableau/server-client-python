@@ -30,7 +30,7 @@ class Tasks(Endpoint):
         logger.info("Querying a single task by id ({})".format(task_id))
         url = "{}/{}".format(self.baseurl, task_id)
         server_response = self.get_request(url)
-        return TaskItem.from_response(server_response.content)[0]
+        return TaskItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     @api(version='2.6')
     def run(self, task_item):
