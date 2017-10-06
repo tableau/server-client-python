@@ -1,6 +1,6 @@
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
-from .. import SubscriptionItem, PaginationItem
+from .. import RequestFactory, SubscriptionItem, PaginationItem
 import logging
 
 logger = logging.getLogger('tableau.endpoint.subscriptions')
@@ -18,8 +18,8 @@ class Subscriptions(Endpoint):
         url = self.baseurl
         server_response = self.get_request(url, req_options)
 
-        pagination_item = PaginationItem.from_response(server_response.content)
-        all_subscriptions = SubscriptionItem.from_response(server_response.content)
+        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
+        all_subscriptions = SubscriptionItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_subscriptions, pagination_item
 
     @api(version='2.3')
@@ -30,4 +30,22 @@ class Subscriptions(Endpoint):
         logger.info("Querying a single subscription by id ({})".format(subscription_id))
         url = "{}/{}".format(self.baseurl, subscription_id)
         server_response = self.get_request(url)
-        return SubscriptionItem.from_response(server_response.content)[0]
+        return SubscriptionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+
+    def create(self, subscription_item):
+        if not subscription_item:
+            error = "No Susbcription provided"
+            raise ValueError(error)
+        logger.info("Creating a subscription ({})".format(subscription_item))
+        url = self.baseurl
+        create_req = RequestFactory.Subscription.create_req(subscription_item)
+        server_response = self.post_request(url, create_req)
+        return SubscriptionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+
+    def delete(self, subscription_id):
+        if not subscription_id:
+            error = "Subscription ID undefined."
+            raise ValueError(error)
+        url = "{0}/{1}".format(self.baseurl, subscription_id)
+        self.delete_request(url)
+        logger.info('Deleted subscription (ID: {0})'.format(subscription_id))
