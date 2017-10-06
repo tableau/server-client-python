@@ -8,6 +8,7 @@ TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 GET_XML = os.path.join(TEST_ASSET_DIR, "subscription_get.xml")
 GET_XML_BY_ID = os.path.join(TEST_ASSET_DIR, "subscription_get_by_id.xml")
 
+
 class SubscriptionTests(unittest.TestCase):
     def setUp(self):
         self.server = TSC.Server("http://test")
