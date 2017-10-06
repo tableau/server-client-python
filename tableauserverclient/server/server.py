@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 from .exceptions import NotSignedInError
 from ..namespace import Namespace
 from .endpoint import Sites, Views, Users, Groups, Workbooks, Datasources, Projects, Auth, \
-    Schedules, ServerInfo, Tasks, Subscriptions, ServerInfoEndpointNotFoundError
+    Schedules, ServerInfo, Tasks, ServerInfoEndpointNotFoundError, Subscriptions
 
 import requests
 
