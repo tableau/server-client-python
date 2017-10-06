@@ -35,7 +35,7 @@ class SubscriptionTests(unittest.TestCase):
         self.assertEqual('Not Found Alert', subscription.subject)
         self.assertEqual('7617c389-cdca-4940-a66e-69956fcebf3e', subscription.schedule_id)
 
-    def test_get_single_subscription(self):
+    def test_get_subscription_by_id(self):
         with open(GET_XML_BY_ID, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:

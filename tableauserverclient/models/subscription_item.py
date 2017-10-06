@@ -29,9 +29,8 @@ class SubscriptionItem(object):
         all_subscriptions_xml = parsed_response.findall(
             './/t:subscription', namespaces=ns)
 
-        all_subscriptions = (SubscriptionItem._parse_element(x, ns) for x in all_subscriptions_xml)
-
-        return list(all_subscriptions)
+        all_subscriptions = [SubscriptionItem._parse_element(x, ns) for x in all_subscriptions_xml]
+        return all_subscriptions
 
     @classmethod
     def _parse_element(cls, element, ns):
