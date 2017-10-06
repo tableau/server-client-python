@@ -10,7 +10,7 @@ class Subscriptions(Endpoint):
     @property
     def baseurl(self):
         return "{0}/sites/{1}/subscriptions".format(self.parent_srv.baseurl,
-                                                             self.parent_srv.site_id)
+                                                    self.parent_srv.site_id)
 
     @api(version='2.3')
     def get(self, req_options=None):

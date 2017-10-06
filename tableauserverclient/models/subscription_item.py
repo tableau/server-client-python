@@ -2,6 +2,7 @@ import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
 from .target import Target
 
+
 class SubscriptionItem(object):
 
     def __init__(self, subject, schedule_id, user_id, target):
