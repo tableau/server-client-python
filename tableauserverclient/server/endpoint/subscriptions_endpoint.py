@@ -33,6 +33,7 @@ class Subscriptions(Endpoint):
         server_response = self.get_request(url)
         return SubscriptionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
+    @api(version='2.3')
     def create(self, subscription_item):
         if not subscription_item:
             error = "No Susbcription provided"
@@ -43,6 +44,7 @@ class Subscriptions(Endpoint):
         server_response = self.post_request(url, create_req)
         return SubscriptionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
+    @api(version='2.3')
     def delete(self, subscription_id):
         if not subscription_id:
             error = "Subscription ID undefined."
