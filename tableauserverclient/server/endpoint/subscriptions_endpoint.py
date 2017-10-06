@@ -19,7 +19,6 @@ class Subscriptions(Endpoint):
         server_response = self.get_request(url, req_options)
 
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
-        print(server_response.content)
         all_subscriptions = SubscriptionItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_subscriptions, pagination_item
 
