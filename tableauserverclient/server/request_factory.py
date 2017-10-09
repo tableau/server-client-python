@@ -278,7 +278,7 @@ class UserRequest(object):
 
 
 class WorkbookRequest(object):
-    def _generate_xml(self, workbook_item, connection_credentials=None):
+    def _generate_xml(self, workbook_item, connections=None):
         xml_request = ET.Element('tsRequest')
         workbook_element = ET.SubElement(xml_request, 'workbook')
         workbook_element.attrib['name'] = workbook_item.name
@@ -286,14 +286,22 @@ class WorkbookRequest(object):
             workbook_element.attrib['showTabs'] = str(workbook_item.show_tabs).lower()
         project_element = ET.SubElement(workbook_element, 'project')
         project_element.attrib['id'] = workbook_item.project_id
-        if connection_credentials:
-            credentials_element = ET.SubElement(workbook_element, 'connectionCredentials')
-            credentials_element.attrib['name'] = connection_credentials.name
-            credentials_element.attrib['password'] = connection_credentials.password
-            credentials_element.attrib['embed'] = 'true' if connection_credentials.embed else 'false'
-
-            if connection_credentials.oauth:
-                credentials_element.attrib['oAuth'] = 'true'
+        if connections is not None:
+            connections_element = ET.SubElement(workbook_element, 'connections')
+            for connection in connections:
+                if connection:
+                    connection_element = ET.SubElement(connections_element, 'connection')
+                    connection_element.attrib['serverAddress'] = connection.server_address
+                    if connection.server_port:
+                        connection_element.attrib['serverPort'] = connection.server_port
+                    if connection.connection_credentials:
+                        connection_credentials = connection.connection_credentials
+                        credentials_element = ET.SubElement(connection_element, 'connectionCredentials')
+                        credentials_element.attrib['name'] = connection_credentials.name
+                        credentials_element.attrib['password'] = connection_credentials.password
+                        credentials_element.attrib['embed'] = 'true' if connection_credentials.embed else 'false'
+                        if connection_credentials.oauth:
+                            credentials_element.attrib['oAuth'] = 'true'
         return ET.tostring(xml_request)
 
     def update_req(self, workbook_item):
@@ -309,15 +317,15 @@ class WorkbookRequest(object):
             owner_element.attrib['id'] = workbook_item.owner_id
         return ET.tostring(xml_request)
 
-    def publish_req(self, workbook_item, filename, file_contents, connection_credentials=None):
-        xml_request = self._generate_xml(workbook_item, connection_credentials)
+    def publish_req(self, workbook_item, filename, file_contents, connections=None):
+        xml_request = self._generate_xml(workbook_item, connections)
 
         parts = {'request_payload': ('', xml_request, 'text/xml'),
                  'tableau_workbook': (filename, file_contents, 'application/octet-stream')}
         return _add_multipart(parts)
 
-    def publish_req_chunked(self, workbook_item, connection_credentials=None):
-        xml_request = self._generate_xml(workbook_item, connection_credentials)
+    def publish_req_chunked(self, workbook_item, connections=None):
+        xml_request = self._generate_xml(workbook_item, connections)
 
         parts = {'request_payload': ('', xml_request, 'text/xml')}
         return _add_multipart(parts)
