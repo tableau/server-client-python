@@ -11,3 +11,4 @@ from .tasks_endpoint import Tasks
 from .users_endpoint import Users
 from .views_endpoint import Views
 from .workbooks_endpoint import Workbooks
+from .subscriptions_endpoint import Subscriptions

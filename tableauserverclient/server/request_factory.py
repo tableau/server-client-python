@@ -359,6 +359,24 @@ class TaskRequest(object):
         pass
 
 
+class SubscriptionRequest(object):
+    def create_req(self, subscription_item):
+        xml_request = ET.Element('tsRequest')
+        subscription_element = ET.SubElement(xml_request, 'subscription')
+        subscription_element.attrib['subject'] = subscription_item.subject
+
+        content_element = ET.SubElement(subscription_element, 'content')
+        content_element.attrib['id'] = subscription_item.target.id
+        content_element.attrib['type'] = subscription_item.target.type
+
+        schedule_element = ET.SubElement(subscription_element, 'schedule')
+        schedule_element.attrib['id'] = subscription_item.schedule_id
+
+        user_element = ET.SubElement(subscription_element, 'user')
+        user_element.attrib['id'] = subscription_item.user_id
+        return ET.tostring(xml_request)
+
+
 class RequestFactory(object):
     Auth = AuthRequest()
     Datasource = DatasourceRequest()
@@ -373,3 +391,4 @@ class RequestFactory(object):
     User = UserRequest()
     Workbook = WorkbookRequest()
     WorkbookConnection = WorkbookConnection()
+    Subscription = SubscriptionRequest()
