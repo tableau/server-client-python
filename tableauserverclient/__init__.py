@@ -1,6 +1,6 @@
 from .namespace import NEW_NAMESPACE as DEFAULT_NAMESPACE
 from .models import ConnectionCredentials, ConnectionItem, DatasourceItem,\
-    GroupItem, PaginationItem, ProjectItem, ScheduleItem, \
+    GroupItem, JobItem, PaginationItem, ProjectItem, ScheduleItem, \
     SiteItem, TableauAuth, UserItem, ViewItem, WorkbookItem, UnpopulatedPropertyError, \
     HourlyInterval, DailyInterval, WeeklyInterval, MonthlyInterval, IntervalItem, TaskItem, \
     SubscriptionItem

@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 from .exceptions import NotSignedInError
 from ..namespace import Namespace
 from .endpoint import Sites, Views, Users, Groups, Workbooks, Datasources, Projects, Auth, \
-    Schedules, ServerInfo, Tasks, ServerInfoEndpointNotFoundError, Subscriptions
+    Schedules, ServerInfo, Tasks, ServerInfoEndpointNotFoundError, Subscriptions, Jobs
 
 import requests
 
@@ -36,6 +36,7 @@ class Server(object):
         self.users = Users(self)
         self.sites = Sites(self)
         self.groups = Groups(self)
+        self.jobs = Jobs(self)
         self.workbooks = Workbooks(self)
         self.datasources = Datasources(self)
         self.projects = Projects(self)

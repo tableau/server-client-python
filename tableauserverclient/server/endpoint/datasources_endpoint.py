@@ -5,6 +5,7 @@ from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, DatasourceItem, PaginationItem, ConnectionItem
 from ...filesys_helpers import to_filename
 from ...models.tag_item import TagItem
+from ...models.job_item import JobItem
 import os
 import logging
 import copy
@@ -127,6 +128,13 @@ class Datasources(Endpoint):
         logger.info('Updated datasource item (ID: {0})'.format(datasource_item.id))
         updated_datasource = copy.copy(datasource_item)
         return updated_datasource._parse_common_elements(server_response.content, self.parent_srv.namespace)
+
+    def refresh(self, datasource_item):
+        url = "{0}/{1}/refresh".format(self.baseurl, datasource_item.id)
+        empty_req = RequestFactory.Empty.empty_req()
+        server_response = self.post_request(url, empty_req)
+        new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        return new_job
 
     # Publish datasource
     @api(version="2.0")

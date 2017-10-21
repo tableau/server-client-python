@@ -3,6 +3,7 @@ from .datasources_endpoint import Datasources
 from .endpoint import Endpoint
 from .exceptions import ServerResponseError, MissingRequiredFieldError, ServerInfoEndpointNotFoundError
 from .groups_endpoint import Groups
+from .jobs_endpoint import Jobs
 from .projects_endpoint import Projects
 from .schedules_endpoint import Schedules
 from .server_info_endpoint import ServerInfo
