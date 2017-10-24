@@ -130,7 +130,9 @@ class Workbooks(Endpoint):
         logger.info('Populated views for workbook (ID: {0}'.format(workbook_item.id))
 
     def _get_views_for_workbook(self, workbook_item, usage):
-        url = "{0}/{1}/views?includeUsageStatistics={2}".format(self.baseurl, workbook_item.id, usage)
+        url = "{0}/{1}/views".format(self.baseurl, workbook_item.id, usage)
+        if usage:
+            url += "?includeUsageStatistics=true"
         server_response = self.get_request(url)
         views = ViewItem.from_response(server_response.content,
                                        self.parent_srv.namespace,
