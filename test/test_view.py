@@ -46,7 +46,7 @@ class ViewTests(unittest.TestCase):
         self.assertEqual('6d13b0ca-043d-4d42-8c9d-3f3313ea3a00', all_views[1].workbook_id)
         self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', all_views[1].owner_id)
 
-    def test_get_usage(self):
+    def test_get_with_usage(self):
         with open(GET_XML_USAGE, 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:

@@ -221,7 +221,7 @@ class WorkbookTests(unittest.TestCase):
             self.assertEqual('Interest rates', views_list[2].name)
             self.assertEqual('RESTAPISample/sheets/Interestrates', views_list[2].content_url)
 
-    def test_populate_views_usage(self):
+    def test_populate_views_with_usage(self):
         with open(POPULATE_VIEWS_USAGE_XML, 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
