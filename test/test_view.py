@@ -7,6 +7,7 @@ TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
 ADD_TAGS_XML = os.path.join(TEST_ASSET_DIR, 'view_add_tags.xml')
 GET_XML = os.path.join(TEST_ASSET_DIR, 'view_get.xml')
+GET_XML_USAGE = os.path.join(TEST_ASSET_DIR, 'view_get_usage.xml')
 POPULATE_PREVIEW_IMAGE = os.path.join(TEST_ASSET_DIR, 'Sample View Image.png')
 POPULATE_PDF = os.path.join(TEST_ASSET_DIR, 'populate_pdf.pdf')
 POPULATE_CSV = os.path.join(TEST_ASSET_DIR, 'populate_csv.csv')
@@ -44,6 +45,28 @@ class ViewTests(unittest.TestCase):
         self.assertEqual('Superstore/sheets/Overview', all_views[1].content_url)
         self.assertEqual('6d13b0ca-043d-4d42-8c9d-3f3313ea3a00', all_views[1].workbook_id)
         self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', all_views[1].owner_id)
+
+    def test_get_usage(self):
+        with open(GET_XML_USAGE, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.get(self.baseurl, text=response_xml)
+            all_views, pagination_item = self.server.views.get(usage=True)
+
+        self.assertEqual(2, pagination_item.total_available)
+        self.assertEqual('d79634e1-6063-4ec9-95ff-50acbf609ff5', all_views[0].id)
+        self.assertEqual('ENDANGERED SAFARI', all_views[0].name)
+        self.assertEqual('SafariSample/sheets/ENDANGEREDSAFARI', all_views[0].content_url)
+        self.assertEqual('3cc6cd06-89ce-4fdc-b935-5294135d6d42', all_views[0].workbook_id)
+        self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', all_views[0].owner_id)
+        self.assertEqual(7, all_views[0].total_views)
+
+        self.assertEqual('fd252f73-593c-4c4e-8584-c032b8022adc', all_views[1].id)
+        self.assertEqual('Overview', all_views[1].name)
+        self.assertEqual('Superstore/sheets/Overview', all_views[1].content_url)
+        self.assertEqual('6d13b0ca-043d-4d42-8c9d-3f3313ea3a00', all_views[1].workbook_id)
+        self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', all_views[1].owner_id)
+        self.assertEqual(13, all_views[1].total_views)
 
     def test_get_before_signin(self):
         self.server._auth_token = None
