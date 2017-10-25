@@ -246,7 +246,6 @@ class WorkbookTests(unittest.TestCase):
             self.assertEqual('RESTAPISample/sheets/Interestrates', views_list[2].content_url)
             self.assertEqual(0, views_list[2].total_views)
 
-
     def test_populate_views_missing_id(self):
         single_workbook = TSC.WorkbookItem('test')
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.workbooks.populate_views, single_workbook)
