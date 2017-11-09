@@ -30,3 +30,7 @@ class ServerInfoItem(object):
         rest_api_version = rest_api_version_tag.text
 
         return cls(product_version, build_number, rest_api_version)
+
+    def __repr__(self):
+        return "<ServerInfo build={_build_number} product_version={_product_version} rest={" \
+               "_rest_api_version}>".format(**self.__dict__)
