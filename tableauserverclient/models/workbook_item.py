@@ -5,6 +5,7 @@ from .tag_item import TagItem
 from .view_item import ViewItem
 from ..datetime_helpers import parse_datetime
 import copy
+import re
 
 
 class WorkbookItem(object):
@@ -202,7 +203,35 @@ class WorkbookItem(object):
         return id, name, content_url, created_at, updated_at, size, show_tabs,\
             project_id, project_name, owner_id, tags, views
 
+    @classmethod
+    def from_swagger(cls, swag):
+        special_values = {
+            'project': lambda x: {'project_id': x['id'], 'project_name': x['name']},
+            'owner': lambda x: {'owner_id': x['id']}
+        }
+
+        print(swag)
+        retval = cls(swag['project']['id'])
+
+        values = {'views': None}
+        for key, prop, value in ((k, camel_to_snake(k), v) for k, v in swag.items()):
+            if key in special_values:
+                values.update(**special_values[key](value))
+            else:
+                values[prop] = value
+        print(values.keys())
+        retval._set_values(**values)
+
+        return retval
+
 
 # Used to convert string represented boolean to a boolean type
 def string_to_bool(s):
     return s.lower() == 'true'
+
+
+CAMEL = re.compile('([A-Z])')
+
+
+def camel_to_snake(x):
+    return re.sub(CAMEL, r'_\1', x).lower()

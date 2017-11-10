@@ -71,7 +71,7 @@ class Server(object):
         self._site_id = site_id
         self._user_id = user_id
         self._auth_token = auth_token
-        tsc_swagger.configuration.api_key['x-tableau-auth'] = auth_token
+        tsc_swagger.configuration.api_key['x-Tableau-auth'] = auth_token
 
     def _get_legacy_version(self):
         response = self._session.get(self.server_address + "/auth?format=xml")
