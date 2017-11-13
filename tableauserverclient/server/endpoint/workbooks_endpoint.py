@@ -37,7 +37,7 @@ class Workbooks(Endpoint):
         client = tsc_swagger.DefaultApi()
         response = client.sites_site_id_workbooks_get(self.parent_srv.site_id)
         pagination_item = PaginationItem.from_swagger(response.pagination)
-        all_workbook_items = [WorkbookItem.from_swagger(x) for x in response.workbooks['workbook']]
+        all_workbook_items = [WorkbookItem.from_swagger(x) for x in response.workbooks.get('workbook', [])]
         print((all_workbook_items))
         
         # url = self.baseurl
