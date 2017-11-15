@@ -12,6 +12,11 @@ class Schedules(Endpoint):
     def baseurl(self):
         return "{0}/schedules".format(self.parent_srv.baseurl)
 
+    @property
+    def siteurl(self):
+        return "{0}/sites/{1}/schedules".format(self.parent_srv.baseurl, self.parent_srv.site_id)
+
+
     @api(version="2.3")
     def get(self, req_options=None):
         logger.info("Querying all schedules")
@@ -21,6 +26,7 @@ class Schedules(Endpoint):
         all_schedule_items = ScheduleItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_schedule_items, pagination_item
 
+
     @api(version="2.3")
     def delete(self, schedule_id):
         if not schedule_id:
@@ -29,6 +35,7 @@ class Schedules(Endpoint):
         url = "{0}/{1}".format(self.baseurl, schedule_id)
         self.delete_request(url)
         logger.info("Deleted single schedule (ID: {0})".format(schedule_id))
+
 
     @api(version="2.3")
     def update(self, schedule_item):
@@ -46,6 +53,7 @@ class Schedules(Endpoint):
         updated_schedule = copy.copy(schedule_item)
         return updated_schedule._parse_common_tags(server_response.content, self.parent_srv.namespace)
 
+
     @api(version="2.3")
     def create(self, schedule_item):
         if schedule_item.interval_item is None:
@@ -58,3 +66,13 @@ class Schedules(Endpoint):
         new_schedule = ScheduleItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         logger.info("Created new schedule (ID: {})".format(new_schedule.id))
         return new_schedule
+
+
+    @api(version="2.8")
+    def add_workbook(self, schedule_id, workbook_id):
+        url = "{0}/{1}/workbooks".format(self.siteurl, schedule_id)
+        print(url)
+        add_req = RequestFactory.Schedule.add_workbook_req(workbook_id)
+        server_response = self.put_request(url, add_req)
+        logger.info("Added workbook {} to schedule {}".format(workbook_id, schedule_id))
+        print(server_response.content)

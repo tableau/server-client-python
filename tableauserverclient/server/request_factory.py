@@ -209,6 +209,23 @@ class ScheduleRequest(object):
                 single_interval_element.attrib[expression] = value
         return ET.tostring(xml_request)
 
+    def add_workbook_req(self, workbook_id):
+        """
+        <task>
+          <extractRefresh>
+            <workbook id="..."/>
+          </extractRefresh>
+        </task>
+
+        """
+        xml_request = ET.Element('tsRequest')
+        task_element = ET.SubElement(xml_request, 'task')
+        refresh = ET.SubElement(task_element, 'extractRefresh')
+        workbook = ET.SubElement(refresh, "workbook")
+        workbook.attrib['id'] = workbook_id
+
+        return ET.tostring(xml_request)
+
 
 class SiteRequest(object):
     def update_req(self, site_item):
