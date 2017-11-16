@@ -12,7 +12,9 @@ def usage(args):
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
                         help='desired logging level (set to error by default)')
     parser.add_argument('--password', '-p', default=None)
-    parser.add_argument('workbook')
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--workbook', '-w')
+    group.add_argument('--datasource', '-d')
     parser.add_argument('schedule')
 
     return parser.parse_args(args)
@@ -39,9 +41,8 @@ def get_schedule_by_name(server, name):
     return schedules.pop()
 
 
-def assign_workbook_to_schedule(server, workbook, schedule):
-    retval = server.schedules.add_workbook(schedule.id, workbook.id)
-    print(retval)
+def assign_to_schedule(server, workbook_or_datasource, schedule):
+    retval = server.schedules.add_to_schedule(schedule.id, workbook_or_datasource)
     
 
 def run(args):
@@ -61,7 +62,7 @@ def run(args):
         workbook = get_workbook_by_name(server, args.workbook)
         schedule = get_schedule_by_name(server, args.schedule)
 
-        assign_workbook_to_schedule(server, workbook, schedule)
+        assign_to_schedule(server, workbook, schedule)
 
 
 def main():

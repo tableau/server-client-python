@@ -1,6 +1,7 @@
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, PaginationItem, ScheduleItem
+from ...type_helpers import item_type
 import logging
 import copy
 
@@ -69,10 +70,21 @@ class Schedules(Endpoint):
 
 
     @api(version="2.8")
-    def add_workbook(self, schedule_id, workbook_id):
-        url = "{0}/{1}/workbooks".format(self.siteurl, schedule_id)
-        print(url)
-        add_req = RequestFactory.Schedule.add_workbook_req(workbook_id)
+    def add_to_schedule(self, schedule_id, workbook_or_datasource):
+        type_ = item_type(workbook_or_datasource)
+        id_ = getattr(workbook_or_datasource, 'id', None)
+        req_factory = getattr(RequestFactory.Schedule, 'add_{}_req'.format(type_), None)
+        if id_ is None:
+            # TODO: Raise an error
+            return False
+        if req_factory is None:
+            # TODO: Raise an error
+            return False
+
+        url = "{0}/{1}/{2}s".format(self.siteurl, schedule_id, type_)
+
+        add_req = req_factory(id_)
         server_response = self.put_request(url, add_req)
-        logger.info("Added workbook {} to schedule {}".format(workbook_id, schedule_id))
-        print(server_response.content)
+        # TOOD: Assert that server_response is 2xx, otherwise, throw an error
+        logger.info("Added {0} {1} to schedule {2}".format(type_, id_, schedule_id))
+        return True
