@@ -209,11 +209,11 @@ class ScheduleRequest(object):
                 single_interval_element.attrib[expression] = value
         return ET.tostring(xml_request)
 
-    def add_workbook_req(self, workbook_id):
+    def _add_to_req(self, id_, type_):
         """
         <task>
           <extractRefresh>
-            <workbook id="..."/>
+            <workbook/datasource id="..."/>
           </extractRefresh>
         </task>
 
@@ -221,10 +221,16 @@ class ScheduleRequest(object):
         xml_request = ET.Element('tsRequest')
         task_element = ET.SubElement(xml_request, 'task')
         refresh = ET.SubElement(task_element, 'extractRefresh')
-        workbook = ET.SubElement(refresh, "workbook")
-        workbook.attrib['id'] = workbook_id
+        workbook = ET.SubElement(refresh, type_)
+        workbook.attrib['id'] = id_
 
         return ET.tostring(xml_request)
+
+    def add_workbook_req(self, id_):
+        return self._add_to_req(id_, "workbook")
+
+    def add_datasource_req(self, id_):
+        return self._add_to_req(id_, "datasource")
 
 
 class SiteRequest(object):

@@ -1,6 +1,6 @@
-from .endpoint import Endpoint, api
+from .endpoint import Endpoint, api, item_must_be_of_type
 from .exceptions import MissingRequiredFieldError
-from .. import RequestFactory, PaginationItem, ScheduleItem
+from .. import RequestFactory, PaginationItem, ScheduleItem, WorkbookItem, DatasourceItem
 from ...type_helpers import item_type
 import logging
 import copy
@@ -70,16 +70,15 @@ class Schedules(Endpoint):
 
 
     @api(version="2.8")
+    @item_must_be_of_type(workbook_or_datasource=[WorkbookItem, DatasourceItem])
     def add_to_schedule(self, schedule_id, workbook_or_datasource):
         type_ = item_type(workbook_or_datasource)
-        id_ = getattr(workbook_or_datasource, 'id', None)
+
+        # id will exist because item_must_be_of_type ensures this
+        id_ = workbook_or_datasource.id
         req_factory = getattr(RequestFactory.Schedule, 'add_{}_req'.format(type_), None)
-        if id_ is None:
-            # TODO: Raise an error
-            return False
         if req_factory is None:
-            # TODO: Raise an error
-            return False
+            raise RuntimeError("Unable to find request factory for {}".format(type_))
 
         url = "{0}/{1}/{2}s".format(self.siteurl, schedule_id, type_)
 

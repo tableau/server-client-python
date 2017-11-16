@@ -35,6 +35,13 @@ def get_workbook_by_name(server, name):
     return workbooks.pop()
 
 
+def get_datasource_by_name(server, name):
+    request_filter = make_filter(Name=name)
+    datasources, _ = server.datasources.get(request_filter)
+    assert len(datasources) == 1
+    return datasources.pop()
+
+
 def get_schedule_by_name(server, name):
     schedules = [x for x in TSC.Pager(server.schedules) if x.name == name]
     assert len(schedules) == 1
@@ -42,7 +49,7 @@ def get_schedule_by_name(server, name):
 
 
 def assign_to_schedule(server, workbook_or_datasource, schedule):
-    retval = server.schedules.add_to_schedule(schedule.id, workbook_or_datasource)
+    server.schedules.add_to_schedule(schedule.id, workbook_or_datasource)
     
 
 def run(args):
@@ -59,10 +66,13 @@ def run(args):
     server = TSC.Server(args.server, use_server_version=True)
 
     with server.auth.sign_in(tableau_auth):
-        workbook = get_workbook_by_name(server, args.workbook)
+        if args.workbook:
+            item = get_workbook_by_name(server, args.workbook)
+        else:
+            item = get_datasource_by_name(server, args.datasource)
         schedule = get_schedule_by_name(server, args.schedule)
 
-        assign_to_schedule(server, workbook, schedule)
+        assign_to_schedule(server, item, schedule)
 
 
 def main():
