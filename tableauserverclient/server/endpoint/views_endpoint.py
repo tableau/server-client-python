@@ -24,9 +24,12 @@ class Views(Endpoint):
         return "{0}/views".format(self.siteurl)
 
     @api(version="2.2")
-    def get(self, req_options=None):
+    def get(self, req_options=None, usage=False):
         logger.info('Querying all views on site')
-        server_response = self.get_request(self.baseurl, req_options)
+        url = self.baseurl
+        if usage:
+            url += "?includeUsageStatistics=true"
+        server_response = self.get_request(url, req_options)
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         all_view_items = ViewItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_view_items, pagination_item

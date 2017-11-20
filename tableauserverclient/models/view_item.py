@@ -75,6 +75,9 @@ class ViewItem(object):
 
     @property
     def total_views(self):
+        if self._total_views is None:
+            error = "Usage statistics must be requested when querying for view."
+            raise UnpopulatedPropertyError(error)
         return self._total_views
 
     @property

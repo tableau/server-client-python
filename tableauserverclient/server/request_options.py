@@ -41,6 +41,11 @@ class RequestOptions(RequestOptionsBase):
 
     def apply_query_params(self, url):
         params = []
+
+        if '?' in url:
+            url, existing_params = url.split('?')
+            params.append(existing_params)
+
         if self.page_number:
             params.append('pageNumber={0}'.format(self.pagenumber))
         if self.page_size:

@@ -118,19 +118,21 @@ class Workbooks(Endpoint):
 
     # Get all views of workbook
     @api(version="2.0")
-    def populate_views(self, workbook_item):
+    def populate_views(self, workbook_item, usage=False):
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
 
         def view_fetcher():
-            return self._get_views_for_workbook(workbook_item)
+            return self._get_views_for_workbook(workbook_item, usage)
 
         workbook_item._set_views(view_fetcher)
         logger.info('Populated views for workbook (ID: {0}'.format(workbook_item.id))
 
-    def _get_views_for_workbook(self, workbook_item):
+    def _get_views_for_workbook(self, workbook_item, usage):
         url = "{0}/{1}/views".format(self.baseurl, workbook_item.id)
+        if usage:
+            url += "?includeUsageStatistics=true"
         server_response = self.get_request(url)
         views = ViewItem.from_response(server_response.content,
                                        self.parent_srv.namespace,
