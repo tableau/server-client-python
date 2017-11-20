@@ -68,9 +68,9 @@ class ViewTests(unittest.TestCase):
                                           ["foo", "bar"]))
             all_views, pagination_item = self.server.views.get(req_options=options, usage=True)
 
-        self.assertEqual("foo", all_views[0].name)
+        self.assertEqual("ENDANGERED SAFARI", all_views[0].name)
         self.assertEqual(7, all_views[0].total_views)
-        self.assertEqual("bar", all_views[1].name)
+        self.assertEqual("Overview", all_views[1].name)
         self.assertEqual(13, all_views[1].total_views)
 
     def test_get_before_signin(self):
