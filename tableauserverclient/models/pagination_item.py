@@ -2,10 +2,10 @@ import xml.etree.ElementTree as ET
 
 
 class PaginationItem(object):
-    def __init__(self):
-        self._page_number = None
-        self._page_size = None
-        self._total_available = None
+    def __init__(self, page_number=None, page_size=None, total_available=None):
+        self._page_number = page_number
+        self._page_size = page_size
+        self._total_available = total_available
 
     @property
     def page_number(self):
@@ -29,3 +29,8 @@ class PaginationItem(object):
             pagination_item._page_size = int(pagination_xml.get('pageSize', '-1'))
             pagination_item._total_available = int(pagination_xml.get('totalAvailable', '-1'))
         return pagination_item
+
+    @classmethod
+    def from_swagger(cls, swag):
+        # This entire class could go away with SWAGGER
+        return swag

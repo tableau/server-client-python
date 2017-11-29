@@ -11,6 +11,7 @@ import logging
 import copy
 import cgi
 from contextlib import closing
+import tsc_swagger
 
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64   # 64MB
@@ -33,10 +34,16 @@ class Workbooks(Endpoint):
     @api(version="2.0")
     def get(self, req_options=None):
         logger.info('Querying all workbooks on site')
-        url = self.baseurl
-        server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
-        all_workbook_items = WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)
+        client = tsc_swagger.DefaultApi()
+        response = client.sites_site_id_workbooks_get(self.parent_srv.site_id)
+        pagination_item = PaginationItem.from_swagger(response.pagination)
+        all_workbook_items = [WorkbookItem.from_swagger(x) for x in response.workbooks.get('workbook', [])]
+        print((all_workbook_items))
+        
+        # url = self.baseurl
+        # server_response = self.get_request(url, req_options)
+        # pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
+        # all_workbook_items = WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_workbook_items, pagination_item
 
     # Get 1 workbook

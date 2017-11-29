@@ -4,6 +4,7 @@ from .exceptions import NotSignedInError
 from ..namespace import Namespace
 from .endpoint import Sites, Views, Users, Groups, Workbooks, Datasources, Projects, Auth, \
     Schedules, ServerInfo, Tasks, ServerInfoEndpointNotFoundError, Subscriptions
+import tsc_swagger
 
 import requests
 
@@ -30,7 +31,7 @@ class Server(object):
         self._session = requests.Session()
         self._http_options = dict()
 
-        self.version = "2.3"
+        self._version = "2.3"
         self.auth = Auth(self)
         self.views = Views(self)
         self.users = Users(self)
@@ -44,6 +45,8 @@ class Server(object):
         self.tasks = Tasks(self)
         self.subscriptions = Subscriptions(self)
         self._namespace = Namespace()
+        tsc_swagger.configuration.host = self.baseurl
+        self._api = tsc_swagger.DefaultApi()
 
         if use_server_version:
             self.use_server_version()
@@ -53,6 +56,10 @@ class Server(object):
 
     def clear_http_options(self):
         self._http_options = dict()
+
+    @property
+    def _swagger_configuration(self):
+        return tsc_swagger.configuration
 
     def _clear_auth(self):
         self._site_id = None
@@ -64,6 +71,7 @@ class Server(object):
         self._site_id = site_id
         self._user_id = user_id
         self._auth_token = auth_token
+        tsc_swagger.configuration.api_key['x-Tableau-auth'] = auth_token
 
     def _get_legacy_version(self):
         response = self._session.get(self.server_address + "/auth?format=xml")
@@ -76,6 +84,7 @@ class Server(object):
         try:
             old_version = self.version
             self.version = "2.4"
+            print(self.server_info.get())
             version = self.server_info.get().rest_api_version
         except ServerInfoEndpointNotFoundError:
             version = self._get_legacy_version()
@@ -121,6 +130,16 @@ class Server(object):
             error = 'Missing user ID. You must sign in first.'
             raise NotSignedInError(error)
         return self._user_id
+
+    @property
+    def version(self):
+        return self._version
+
+    @version.setter
+    def version(self, ver):
+        self._version = ver
+        tsc_swagger.configuration.host = self.baseurl
+        tsc_swagger.configuration.api_client.host = self.baseurl
 
     @property
     def server_address(self):
