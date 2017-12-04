@@ -145,7 +145,14 @@ class Workbooks(Endpoint):
 
     # Publishes workbook. Chunking method if file over 64MB
     @api(version="2.0")
-    def publish(self, workbook_item, file_path, mode, connection_credentials=None):
+    # @parameter_added_in(connections='2.8')
+    def publish(self, workbook_item, file_path, mode, connection_credentials=None, connections=None):
+
+        if connection_credentials is not None:
+            import warnings
+            warnings.warn("connection_credendials is being deprecated. Use connections instead, see http://...",
+                          DeprecationWarning)
+
         if not os.path.isfile(file_path):
             error = "File path does not lead to an existing file."
             raise IOError(error)
@@ -177,7 +184,7 @@ class Workbooks(Endpoint):
             upload_session_id = Fileuploads.upload_chunks(self.parent_srv, file_path)
             url = "{0}&uploadSessionId={1}".format(url, upload_session_id)
             xml_request, content_type = RequestFactory.Workbook.publish_req_chunked(workbook_item,
-                                                                                    connection_credentials)
+                                                                                    connections=connections)
         else:
             logger.info('Publishing {0} to server'.format(filename))
             with open(file_path, 'rb') as f:
@@ -185,7 +192,7 @@ class Workbooks(Endpoint):
             xml_request, content_type = RequestFactory.Workbook.publish_req(workbook_item,
                                                                             filename,
                                                                             file_contents,
-                                                                            connection_credentials)
+                                                                            connections=connections)
         server_response = self.post_request(url, xml_request, content_type)
         new_workbook = WorkbookItem.from_response(server_response.content)[0]
         logger.info('Published {0} (ID: {1})'.format(filename, new_workbook.id))

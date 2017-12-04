@@ -19,6 +19,7 @@ import getpass
 import logging
 
 import tableauserverclient as TSC
+from tableauserverclient import ConnectionCredentials, ConnectionItem
 
 
 def main():
@@ -49,11 +50,24 @@ def main():
         # Step 2: Get all the projects on server, then look for the default one.
         all_projects, pagination_item = server.projects.get()
         default_project = next((project for project in all_projects if project.is_default()), None)
+        connection2 = ConnectionItem()
+        connection2.server_address = "db2.test.tsi.lan"
+        connection2.server_port = "50000"
+        connection2.connection_credentials = ConnectionCredentials("test", "p@ssw0rd", True)
+        connection1 = ConnectionItem()
+        connection1.server_address = "mssql.test.tsi.lan"
+        connection1.connection_credentials = ConnectionCredentials("test", "password", True)
+        all_connections = list()
+        all_connections.append(connection1)
+        all_connections.append(connection2)
 
         # Step 3: If default project is found, form a new workbook item and publish.
         if default_project is not None:
             new_workbook = TSC.WorkbookItem(default_project.id)
-            new_workbook = server.workbooks.publish(new_workbook, args.filepath, overwrite_true)
+            new_workbook = server.workbooks.publish(new_workbook,
+                                                    args.filepath,
+                                                    overwrite_true,
+                                                    connections=all_connections)
             print("Workbook published. ID: {0}".format(new_workbook.id))
         else:
             error = "The default project could not be found."

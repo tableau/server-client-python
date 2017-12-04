@@ -13,6 +13,7 @@ class ConnectionItem(object):
         self.server_address = None
         self.server_port = None
         self.username = None
+        self.connection_credentials = None
 
     @property
     def datasource_id(self):
