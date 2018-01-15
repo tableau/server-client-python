@@ -45,16 +45,16 @@ class JobItem(object):
         all_tasks_xml = parsed_response.findall(
             './/t:job', namespaces=ns)
 
-        all_tasks = (JobItem._parse_element(x, ns) for x in all_tasks_xml)
+        all_tasks = [JobItem._parse_element(x, ns) for x in all_tasks_xml]
 
-        return list(all_tasks)
+        return all_tasks
 
     @classmethod
     def _parse_element(cls, element, ns):
         id_ = element.get('id', None)
-        type = element.get('type', None)
+        type_ = element.get('type', None)
         created_at = element.get('createdAt', None)
         started_at = element.get('startedAt', None)
         completed_at = element.get('completedAt', None)
         finish_code = element.get('finishCode', -1)
-        return cls(id_, type, created_at, started_at, completed_at, finish_code)
+        return cls(id_, type_, created_at, started_at, completed_at, finish_code)
