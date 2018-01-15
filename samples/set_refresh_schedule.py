@@ -50,7 +50,7 @@ def get_schedule_by_name(server, name):
 
 def assign_to_schedule(server, workbook_or_datasource, schedule):
     server.schedules.add_to_schedule(schedule.id, workbook_or_datasource)
-    
+
 
 def run(args):
     password = args.password

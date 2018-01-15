@@ -111,9 +111,6 @@ def api(version):
 
 
 def item_must_be_of_type(**params):
-
-    params = {k: [item_class.__name__ for item_class in v] for k, v in params.items()}
-    
     """Annotate that a parameter must by of a specific item type for an endpoint.
 
     Args:
@@ -123,6 +120,8 @@ def item_must_be_of_type(**params):
     Returns:
           None
     """
+    params = {k: [item_class.__name__ for item_class in v] for k, v in params.items()}
+
     def _decorator(func):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
