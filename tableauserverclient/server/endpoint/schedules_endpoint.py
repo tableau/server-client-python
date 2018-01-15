@@ -1,4 +1,4 @@
-from .endpoint import Endpoint, api, item_must_be_of_type
+from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, PaginationItem, ScheduleItem, WorkbookItem, DatasourceItem
 from ...type_helpers import item_type
@@ -65,20 +65,24 @@ class Schedules(Endpoint):
         return new_schedule
 
     @api(version="2.8")
-    @item_must_be_of_type(workbook_or_datasource=[WorkbookItem, DatasourceItem])
-    def add_to_schedule(self, schedule_id, workbook_or_datasource):
-        type_ = item_type(workbook_or_datasource)
+    def add_to_schedule(self, schedule_id, workbook=None, datasource=None):
 
-        # id will exist because item_must_be_of_type ensures this
-        id_ = workbook_or_datasource.id
-        req_factory = getattr(RequestFactory.Schedule, 'add_{}_req'.format(type_), None)
-        if req_factory is None:
-            raise RuntimeError("Unable to find request factory for {}".format(type_))
+        def add_to(resource, type_, req_factory):
+            id_ = resource.id
+            url = "{0}/{1}/{2}s".format(self.siteurl, schedule_id, type_)
+            add_req = req_factory(id_)
+            _ = self.put_request(url, add_req)
+            # TODO: Assert that server_response is 2xx, otherwise, throw an error
+            logger.info("Added {} to {} to schedule {}".format(type_, id_, schedule_id))
+            return True
 
-        url = "{0}/{1}/{2}s".format(self.siteurl, schedule_id, type_)
+        items = []
 
-        add_req = req_factory(id_)
-        server_response = self.put_request(url, add_req)
-        # TOOD: Assert that server_response is 2xx, otherwise, throw an error
-        logger.info("Added {0} {1} to schedule {2}".format(type_, id_, schedule_id))
-        return True
+        if workbook is not None:
+            items.append((workbook, "workbook", RequestFactory.Schedule.add_workbook_req))
+        if datasource is not None:
+            items.append((datasource, "datasource", RequestFactory.Schedule.add_datasource_req))
+
+        results = (add_to(*x) for x in items)
+
+        return all(results)

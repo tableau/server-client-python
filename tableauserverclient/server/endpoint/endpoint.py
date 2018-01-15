@@ -110,34 +110,6 @@ def api(version):
     return _decorator
 
 
-def item_must_be_of_type(**params):
-    """Annotate that a parameter must by of a specific item type for an endpoint.
-
-    Args:
-          Key/value pairs of the form `parameter`=`iterable of Item classes`
-    Raises:
-          ItemTypeNotAllowed
-    Returns:
-          None
-    """
-    params = {k: [item_class.__name__ for item_class in v] for k, v in params.items()}
-
-    def _decorator(func):
-        @wraps(func)
-        def wrapper(self, *args, **kwargs):
-            params_to_check = set(params) & set(kwargs)
-            for p in params_to_check:
-                value = type(kwargs[p]).__name__
-                if value not in params[p]:
-                    error = "Item {0} is not of the required types. Must be {}".format(
-                        p, ", ".join(params[p])
-                    )
-                    raise ItemTypeNotAllowed(error)
-            return func(self, *args, **kwargs)
-        return wrapper
-    return _decorator
-
-
 def parameter_added_in(**params):
     '''Annotate minimum versions for new parameters or request options on an endpoint.
 
