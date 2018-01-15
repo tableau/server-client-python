@@ -2575,7 +2575,7 @@ server = TSC.Server('http://servername')
 
 with server.auth.sign_in(tableau_auth):
   all_workbook_items, pagination_item = server.workbooks.get()
-  print([workbook.name for workbook in all_workbooks])
+  print([workbook.name for workbook in all_workbook_items])
 
 
 
