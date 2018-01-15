@@ -4,6 +4,7 @@ from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, WorkbookItem, ConnectionItem, ViewItem, PaginationItem
 from ...models.tag_item import TagItem
+from ...models.job_item import JobItem
 from ...filesys_helpers import to_filename
 
 import os
@@ -49,6 +50,14 @@ class Workbooks(Endpoint):
         url = "{0}/{1}".format(self.baseurl, workbook_id)
         server_response = self.get_request(url)
         return WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+
+    @api(version="2.8")
+    def refresh(self, workbook_id):
+        url = "{0}/{1}/refresh".format(self.baseurl, workbook_id)
+        empty_req = RequestFactory.Empty.empty_req()
+        server_response = self.post_request(url, empty_req)
+        new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        return new_job
 
     # Delete 1 workbook by id
     @api(version="2.0")

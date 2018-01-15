@@ -377,9 +377,16 @@ class SubscriptionRequest(object):
         return ET.tostring(xml_request)
 
 
+class EmptyRequest(object):
+    @_tsrequest_wrapped
+    def empty_req(xml_request):
+        pass
+
+
 class RequestFactory(object):
     Auth = AuthRequest()
     Datasource = DatasourceRequest()
+    Empty = EmptyRequest()
     Fileupload = FileuploadRequest()
     Group = GroupRequest()
     Permission = PermissionRequest()
