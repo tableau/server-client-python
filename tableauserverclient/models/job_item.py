@@ -3,7 +3,7 @@ from .target import Target
 
 
 class JobItem(object):
-    def __init__(self, id_, job_type, created_at, started_at = None, completed_at = None, finish_code = 0):
+    def __init__(self, id_, job_type, created_at, started_at=None, completed_at=None, finish_code=0):
         self._id = id_
         self._type = job_type
         self._created_at = created_at
