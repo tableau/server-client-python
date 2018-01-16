@@ -189,7 +189,6 @@ class ScheduleTests(unittest.TestCase):
     def test_add_workbook(self):
         self.server.version = "2.8"
         baseurl = "{}/sites/{}/schedules".format(self.server.baseurl, self.server.site_id)
-        print(baseurl)
 
         with open(WORKBOOK_GET_BY_ID_XML, "rb") as f:
             workbook_response = f.read().decode("utf-8")
@@ -199,12 +198,11 @@ class ScheduleTests(unittest.TestCase):
             m.put(baseurl + '/foo/workbooks', text="OK")
             workbook = self.server.workbooks.get_by_id("bar")
             result = self.server.schedules.add_to_schedule('foo', workbook=workbook)
-        self.assert_(result, "Added properly")
+        self.assertEquals(0, len(result), "Added properly")
 
     def test_add_datasource(self):
         self.server.version = "2.8"
         baseurl = "{}/sites/{}/schedules".format(self.server.baseurl, self.server.site_id)
-        print(baseurl)
 
         with open(DATASOURCE_GET_BY_ID_XML, "rb") as f:
             datasource_response = f.read().decode("utf-8")
@@ -214,4 +212,4 @@ class ScheduleTests(unittest.TestCase):
             m.put(baseurl + '/foo/datasources', text="OK")
             datasource = self.server.datasources.get_by_id("bar")
             result = self.server.schedules.add_to_schedule('foo', datasource=datasource)
-        self.assert_(result, "Added properly")
+        self.assertEquals(0, len(result), "Added properly")

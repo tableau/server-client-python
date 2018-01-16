@@ -1,11 +1,14 @@
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, PaginationItem, ScheduleItem, WorkbookItem, DatasourceItem
-from ...type_helpers import item_type
 import logging
 import copy
+from collections import namedtuple
 
 logger = logging.getLogger('tableau.endpoint.schedules')
+# Oh to have a first class Result concept in Python...
+AddResponse = namedtuple('AddResponse', ('result', 'error'))
+OK = AddResponse(result=True, error=None)
 
 
 class Schedules(Endpoint):
@@ -71,10 +74,12 @@ class Schedules(Endpoint):
             id_ = resource.id
             url = "{0}/{1}/{2}s".format(self.siteurl, schedule_id, type_)
             add_req = req_factory(id_)
-            _ = self.put_request(url, add_req)
-            # TODO: Assert that server_response is 2xx, otherwise, throw an error
+            response = self.put_request(url, add_req)
+            if response.status_code < 200 or response.status_code >= 300:
+                return AddResponse(result=False,
+                                   error="Status {}: {}".format(response.status_code, response.reason))
             logger.info("Added {} to {} to schedule {}".format(type_, id_, schedule_id))
-            return True
+            return OK
 
         items = []
 
@@ -84,5 +89,4 @@ class Schedules(Endpoint):
             items.append((datasource, "datasource", RequestFactory.Schedule.add_datasource_req))
 
         results = (add_to(*x) for x in items)
-
-        return all(results)
+        return filter(lambda x: not x.result, results)
