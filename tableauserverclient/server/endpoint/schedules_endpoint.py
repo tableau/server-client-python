@@ -1,16 +1,24 @@
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
-from .. import RequestFactory, PaginationItem, ScheduleItem
+from .. import RequestFactory, PaginationItem, ScheduleItem, WorkbookItem, DatasourceItem
 import logging
 import copy
+from collections import namedtuple
 
 logger = logging.getLogger('tableau.endpoint.schedules')
+# Oh to have a first class Result concept in Python...
+AddResponse = namedtuple('AddResponse', ('result', 'error'))
+OK = AddResponse(result=True, error=None)
 
 
 class Schedules(Endpoint):
     @property
     def baseurl(self):
         return "{0}/schedules".format(self.parent_srv.baseurl)
+
+    @property
+    def siteurl(self):
+        return "{0}/sites/{1}/schedules".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     @api(version="2.3")
     def get(self, req_options=None):
@@ -58,3 +66,28 @@ class Schedules(Endpoint):
         new_schedule = ScheduleItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         logger.info("Created new schedule (ID: {})".format(new_schedule.id))
         return new_schedule
+
+    @api(version="2.8")
+    def add_to_schedule(self, schedule_id, workbook=None, datasource=None):
+
+        def add_to(resource, type_, req_factory):
+            id_ = resource.id
+            url = "{0}/{1}/{2}s".format(self.siteurl, schedule_id, type_)
+            add_req = req_factory(id_)
+            response = self.put_request(url, add_req)
+            if response.status_code < 200 or response.status_code >= 300:
+                return AddResponse(result=False,
+                                   error="Status {}: {}".format(response.status_code, response.reason))
+            logger.info("Added {} to {} to schedule {}".format(type_, id_, schedule_id))
+            return OK
+
+        items = []
+
+        if workbook is not None:
+            items.append((workbook, "workbook", RequestFactory.Schedule.add_workbook_req))
+        if datasource is not None:
+            items.append((datasource, "datasource", RequestFactory.Schedule.add_datasource_req))
+
+        results = (add_to(*x) for x in items)
+        # list() is needed for python 3.x compatibility
+        return list(filter(lambda x: not x.result, results))

@@ -1,4 +1,4 @@
-from .exceptions import ServerResponseError, EndpointUnavailableError
+from .exceptions import ServerResponseError, EndpointUnavailableError, ItemTypeNotAllowed
 from functools import wraps
 
 import logging

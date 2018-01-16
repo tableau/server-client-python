@@ -15,6 +15,9 @@ CREATE_WEEKLY_XML = os.path.join(TEST_ASSET_DIR, "schedule_create_weekly.xml")
 CREATE_MONTHLY_XML = os.path.join(TEST_ASSET_DIR, "schedule_create_monthly.xml")
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, "schedule_update.xml")
 
+WORKBOOK_GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, 'workbook_get_by_id.xml')
+DATASOURCE_GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, 'datasource_get_by_id.xml')
+
 
 class ScheduleTests(unittest.TestCase):
     def setUp(self):
@@ -182,3 +185,31 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual(time(7), single_schedule.interval_item.start_time)
         self.assertEqual(("Monday", "Friday"),
                          single_schedule.interval_item.interval)
+
+    def test_add_workbook(self):
+        self.server.version = "2.8"
+        baseurl = "{}/sites/{}/schedules".format(self.server.baseurl, self.server.site_id)
+
+        with open(WORKBOOK_GET_BY_ID_XML, "rb") as f:
+            workbook_response = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            #  TODO: Replace with real response
+            m.get(self.server.workbooks.baseurl + '/bar', text=workbook_response)
+            m.put(baseurl + '/foo/workbooks', text="OK")
+            workbook = self.server.workbooks.get_by_id("bar")
+            result = self.server.schedules.add_to_schedule('foo', workbook=workbook)
+        self.assertEquals(0, len(result), "Added properly")
+
+    def test_add_datasource(self):
+        self.server.version = "2.8"
+        baseurl = "{}/sites/{}/schedules".format(self.server.baseurl, self.server.site_id)
+
+        with open(DATASOURCE_GET_BY_ID_XML, "rb") as f:
+            datasource_response = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            #  TODO: Replace with real response
+            m.get(self.server.datasources.baseurl + '/bar', text=datasource_response)
+            m.put(baseurl + '/foo/datasources', text="OK")
+            datasource = self.server.datasources.get_by_id("bar")
+            result = self.server.schedules.add_to_schedule('foo', datasource=datasource)
+        self.assertEquals(0, len(result), "Added properly")
