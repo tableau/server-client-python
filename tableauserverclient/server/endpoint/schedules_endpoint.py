@@ -89,4 +89,5 @@ class Schedules(Endpoint):
             items.append((datasource, "datasource", RequestFactory.Schedule.add_datasource_req))
 
         results = (add_to(*x) for x in items)
-        return filter(lambda x: not x.result, results)
+        # list() is needed for python 3.x compatibility
+        return list(filter(lambda x: not x.result, results))
