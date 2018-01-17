@@ -167,7 +167,6 @@ class DatasourceTests(unittest.TestCase):
             self.assertEqual(connection.connection_type, new_connection.connection_type)
             self.assertEqual('foo', new_connection.username)
 
-
     def test_publish(self):
         response_xml = read_xml_asset(PUBLISH_XML)
         with requests_mock.mock() as m:
