@@ -101,7 +101,7 @@ class DatasourceTests(unittest.TestCase):
         self.assertEqual("Warning, here be dragons.", single_datasource.certification_note)
 
     def test_update_copy_fields(self):
-        with open(UPDATE_XML, 'rb') as f:
+        with open(asset(UPDATE_XML), 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', text=response_xml)
@@ -162,9 +162,11 @@ class DatasourceTests(unittest.TestCase):
 
             connection = single_datasource.connections[0]
             connection.username = 'foo'
-            response = self.server.datasources.update_connection(single_datasource, connection)
-            print(response.content)
-            self.fail('not done')
+            new_connection = self.server.datasources.update_connection(single_datasource, connection)
+            self.assertEqual(connection.id, new_connection.id)
+            self.assertEqual(connection.connection_type, new_connection.connection_type)
+            self.assertEqual('foo', new_connection.username)
+
 
     def test_publish(self):
         response_xml = read_xml_asset(PUBLISH_XML)

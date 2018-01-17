@@ -92,9 +92,11 @@ class Workbooks(Endpoint):
         url = "{0}/{1}/connections/{2}".format(self.baseurl, workbook_item.id, connection_item.id)
         update_req = RequestFactory.Connection.update_req(connection_item)
         server_response = self.put_request(url, update_req)
+        connection = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+
         logger.info('Updated workbook item (ID: {0} & connection item {1}'.format(workbook_item.id,
                                                                                   connection_item.id))
-        return server_response  # TODO: What should we return here, it wasn't returning anything
+        return connection
 
     # Download workbook contents with option of passing in filepath
     @api(version="2.0")
