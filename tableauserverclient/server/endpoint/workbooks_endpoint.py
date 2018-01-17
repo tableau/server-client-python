@@ -86,12 +86,23 @@ class Workbooks(Endpoint):
         updated_workbook = copy.copy(workbook_item)
         return updated_workbook._parse_common_tags(server_response.content, self.parent_srv.namespace)
 
+    @api(version="2.3")
+    def update_conn(self, *args, **kwargs):
+        import warnings
+        warnings.warn('update_conn is deprecated, please use update_connection instead')
+        return self.update_connection(*args, **kwargs)
+
     # Update workbook_connection
-    def update_conn(self, workbook_item, connection_item):
+    @api(version="2.3")
+    def update_connection(self, workbook_item, connection_item):
         url = "{0}/{1}/connections/{2}".format(self.baseurl, workbook_item.id, connection_item.id)
-        update_req = RequestFactory.WorkbookConnection.update_req(connection_item)
+        update_req = RequestFactory.Connection.update_req(connection_item)
         server_response = self.put_request(url, update_req)
-        logger.info('Updated workbook item (ID: {0} & connection item {1}'.format(workbook_item.id, connection_item.id))
+        connection = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+
+        logger.info('Updated workbook item (ID: {0} & connection item {1}'.format(workbook_item.id,
+                                                                                  connection_item.id))
+        return connection
 
     # Download workbook contents with option of passing in filepath
     @api(version="2.0")

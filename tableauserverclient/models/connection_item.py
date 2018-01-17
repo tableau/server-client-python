@@ -29,6 +29,10 @@ class ConnectionItem(object):
     def connection_type(self):
         return self._connection_type
 
+    def __repr__(self):
+        return "<ConnectionItem#{_id} embed={embed_password} type={_connection_type} username={username}>"\
+            .format(**self.__dict__)
+
     @classmethod
     def from_response(cls, resp, ns):
         all_connection_items = list()

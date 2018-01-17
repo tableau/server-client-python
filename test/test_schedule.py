@@ -198,7 +198,7 @@ class ScheduleTests(unittest.TestCase):
             m.put(baseurl + '/foo/workbooks', text="OK")
             workbook = self.server.workbooks.get_by_id("bar")
             result = self.server.schedules.add_to_schedule('foo', workbook=workbook)
-        self.assertEquals(0, len(result), "Added properly")
+        self.assertEqual(0, len(result), "Added properly")
 
     def test_add_datasource(self):
         self.server.version = "2.8"
@@ -212,4 +212,4 @@ class ScheduleTests(unittest.TestCase):
             m.put(baseurl + '/foo/datasources', text="OK")
             datasource = self.server.datasources.get_by_id("bar")
             result = self.server.schedules.add_to_schedule('foo', datasource=datasource)
-        self.assertEquals(0, len(result), "Added properly")
+        self.assertEqual(0, len(result), "Added properly")
