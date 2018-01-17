@@ -1,7 +1,7 @@
 ## 0.6 (17 Jan 2018)
 
 * Added support for add a datasource/workbook refresh to a schedule (#244)
-* Added support for updating datasource connections (#) 
+* Added support for updating datasource connections (#253) 
 * Added Refresh Now for datasource and workbooks (#250)
 * Fixed Typos in the docs (#251)
 
