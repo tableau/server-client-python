@@ -20,7 +20,7 @@ def _add_multipart(parts):
 def _tsrequest_wrapped(func):
     def wrapper(self, *args, **kwargs):
         xml_request = ET.Element('tsRequest')
-        func(xml_request, *args, **kwargs)
+        func(self, xml_request, *args, **kwargs)
         return ET.tostring(xml_request)
     return wrapper
 
@@ -358,9 +358,9 @@ class WorkbookRequest(object):
         return _add_multipart(parts)
 
 
-class WorkbookConnection(object):
-    def update_req(self, connection_item):
-        xml_request = ET.Element('tsRequest')
+class Connection(object):
+    @_tsrequest_wrapped
+    def update_req(self, xml_request, connection_item):
         connection_element = ET.SubElement(xml_request, 'connection')
         if connection_item.server_address:
             connection_element.attrib['serverAddress'] = connection_item.server_address.lower()
@@ -371,13 +371,12 @@ class WorkbookConnection(object):
         if connection_item.password:
             connection_element.attrib['password'] = connection_item.password
         if connection_item.embed_password:
-            connection_element.attrib['embedPassword'] = connection_item.embed_password
-        return ET.tostring(xml_request)
+            connection_element.attrib['embedPassword'] = str(connection_item.embed_password)
 
 
 class TaskRequest(object):
     @_tsrequest_wrapped
-    def run_req(xml_request, task_item):
+    def run_req(self, xml_request, task_item):
         # Send an empty tsRequest
         pass
 
@@ -408,6 +407,7 @@ class EmptyRequest(object):
 
 class RequestFactory(object):
     Auth = AuthRequest()
+    Connection = Connection()
     Datasource = DatasourceRequest()
     Empty = EmptyRequest()
     Fileupload = FileuploadRequest()
@@ -420,5 +420,4 @@ class RequestFactory(object):
     Task = TaskRequest()
     User = UserRequest()
     Workbook = WorkbookRequest()
-    WorkbookConnection = WorkbookConnection()
     Subscription = SubscriptionRequest()

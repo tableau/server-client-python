@@ -129,6 +129,17 @@ class Datasources(Endpoint):
         updated_datasource = copy.copy(datasource_item)
         return updated_datasource._parse_common_elements(server_response.content, self.parent_srv.namespace)
 
+    # Update datasource connections
+    @api(version="2.3")
+    def update_connection(self, datasource_item, connection_item):
+        url = "{0}/{1}/connections/{2}".format(self.baseurl, datasource_item.id, connection_item.id)
+
+        update_req = RequestFactory.Connection.update_req(connection_item)
+        server_response = self.put_request(url, update_req)
+        logger.info('Updated datasource item (ID: {0} & connection item {1}'.format(datasource_item.id,
+                                                                                    connection_item.id))
+        return server_response  # TODO: What should we return here?
+
     def refresh(self, datasource_item):
         url = "{0}/{1}/refresh".format(self.baseurl, datasource_item.id)
         empty_req = RequestFactory.Empty.empty_req()
