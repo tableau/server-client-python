@@ -4,6 +4,7 @@ from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, WorkbookItem, ConnectionItem, ViewItem, PaginationItem
 from ...models.tag_item import TagItem
+from ...models.job_item import JobItem
 from ...filesys_helpers import to_filename
 
 import os
@@ -50,6 +51,14 @@ class Workbooks(Endpoint):
         server_response = self.get_request(url)
         return WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
+    @api(version="2.8")
+    def refresh(self, workbook_id):
+        url = "{0}/{1}/refresh".format(self.baseurl, workbook_id)
+        empty_req = RequestFactory.Empty.empty_req()
+        server_response = self.post_request(url, empty_req)
+        new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        return new_job
+
     # Delete 1 workbook by id
     @api(version="2.0")
     def delete(self, workbook_id):
@@ -77,12 +86,23 @@ class Workbooks(Endpoint):
         updated_workbook = copy.copy(workbook_item)
         return updated_workbook._parse_common_tags(server_response.content, self.parent_srv.namespace)
 
+    @api(version="2.3")
+    def update_conn(self, *args, **kwargs):
+        import warnings
+        warnings.warn('update_conn is deprecated, please use update_connection instead')
+        return self.update_connection(*args, **kwargs)
+
     # Update workbook_connection
-    def update_conn(self, workbook_item, connection_item):
+    @api(version="2.3")
+    def update_connection(self, workbook_item, connection_item):
         url = "{0}/{1}/connections/{2}".format(self.baseurl, workbook_item.id, connection_item.id)
-        update_req = RequestFactory.WorkbookConnection.update_req(connection_item)
+        update_req = RequestFactory.Connection.update_req(connection_item)
         server_response = self.put_request(url, update_req)
-        logger.info('Updated workbook item (ID: {0} & connection item {1}'.format(workbook_item.id, connection_item.id))
+        connection = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+
+        logger.info('Updated workbook item (ID: {0} & connection item {1}'.format(workbook_item.id,
+                                                                                  connection_item.id))
+        return connection
 
     # Download workbook contents with option of passing in filepath
     @api(version="2.0")
@@ -118,16 +138,26 @@ class Workbooks(Endpoint):
 
     # Get all views of workbook
     @api(version="2.0")
-    def populate_views(self, workbook_item):
+    def populate_views(self, workbook_item, usage=False):
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
-        url = "{0}/{1}/views".format(self.baseurl, workbook_item.id)
-        server_response = self.get_request(url)
-        workbook_item._set_views(ViewItem.from_response(server_response.content,
-                                                        self.parent_srv.namespace,
-                                                        workbook_id=workbook_item.id))
+
+        def view_fetcher():
+            return self._get_views_for_workbook(workbook_item, usage)
+
+        workbook_item._set_views(view_fetcher)
         logger.info('Populated views for workbook (ID: {0}'.format(workbook_item.id))
+
+    def _get_views_for_workbook(self, workbook_item, usage):
+        url = "{0}/{1}/views".format(self.baseurl, workbook_item.id)
+        if usage:
+            url += "?includeUsageStatistics=true"
+        server_response = self.get_request(url)
+        views = ViewItem.from_response(server_response.content,
+                                       self.parent_srv.namespace,
+                                       workbook_id=workbook_item.id)
+        return views
 
     # Get all connections of workbook
     @api(version="2.0")
@@ -135,10 +165,18 @@ class Workbooks(Endpoint):
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
-        url = "{0}/{1}/connections".format(self.baseurl, workbook_item.id)
-        server_response = self.get_request(url)
-        workbook_item._set_connections(ConnectionItem.from_response(server_response.content, self.parent_srv.namespace))
+
+        def connection_fetcher():
+            return self._get_workbook_connections(workbook_item)
+
+        workbook_item._set_connections(connection_fetcher)
         logger.info('Populated connections for workbook (ID: {0})'.format(workbook_item.id))
+
+    def _get_workbook_connections(self, workbook_item, req_options=None):
+        url = "{0}/{1}/connections".format(self.baseurl, workbook_item.id)
+        server_response = self.get_request(url, req_options)
+        connections = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
+        return connections
 
     # Get preview image of workbook
     @api(version="2.0")
@@ -146,10 +184,18 @@ class Workbooks(Endpoint):
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
+
+        def image_fetcher():
+            return self._get_wb_preview_image(workbook_item)
+
+        workbook_item._set_preview_image(image_fetcher)
+        logger.info('Populated preview image for workbook (ID: {0})'.format(workbook_item.id))
+
+    def _get_wb_preview_image(self, workbook_item):
         url = "{0}/{1}/previewImage".format(self.baseurl, workbook_item.id)
         server_response = self.get_request(url)
-        workbook_item._set_preview_image(server_response.content)
-        logger.info('Populated preview image for workbook (ID: {0})'.format(workbook_item.id))
+        preview_image = server_response.content
+        return preview_image
 
     # Publishes workbook. Chunking method if file over 64MB
     @api(version="2.0")

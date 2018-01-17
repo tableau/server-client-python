@@ -14,6 +14,7 @@ The following people have contributed to this project to make it possible, and w
 * [Russ Goldin](https://github.com/tagyoureit)
 * [William Lang](https://github.com/williamlang)
 * [Jim Morris](https://github.com/jimbodriven)
+* [BingoDinkus](https://github.com/BingoDinkus)
 
 ## Core Team
 

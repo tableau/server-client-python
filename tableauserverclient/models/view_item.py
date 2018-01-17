@@ -11,9 +11,23 @@ class ViewItem(object):
         self._name = None
         self._owner_id = None
         self._preview_image = None
+        self._pdf = None
+        self._csv = None
         self._total_views = None
         self._workbook_id = None
         self.tags = set()
+
+    def _set_preview_image(self, preview_image):
+        self._preview_image = preview_image
+
+    def _set_image(self, image):
+        self._image = image
+
+    def _set_pdf(self, pdf):
+        self._pdf = pdf
+
+    def _set_csv(self, csv):
+        self._csv = csv
 
     @property
     def content_url(self):
@@ -25,7 +39,10 @@ class ViewItem(object):
 
     @property
     def image(self):
-        return self._image
+        if self._image is None:
+            error = "View item must be populated with its png image first."
+            raise UnpopulatedPropertyError(error)
+        return self._image()
 
     @property
     def name(self):
@@ -40,10 +57,27 @@ class ViewItem(object):
         if self._preview_image is None:
             error = "View item must be populated with its preview image first."
             raise UnpopulatedPropertyError(error)
-        return self._preview_image
+        return self._preview_image()
+
+    @property
+    def pdf(self):
+        if self._pdf is None:
+            error = "View item must be populated with its pdf first."
+            raise UnpopulatedPropertyError(error)
+        return self._pdf()
+
+    @property
+    def csv(self):
+        if self._csv is None:
+            error = "View item must be populated with its csv first."
+            raise UnpopulatedPropertyError(error)
+        return self._csv()
 
     @property
     def total_views(self):
+        if self._total_views is None:
+            error = "Usage statistics must be requested when querying for view."
+            raise UnpopulatedPropertyError(error)
         return self._total_views
 
     @property

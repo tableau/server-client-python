@@ -1,4 +1,4 @@
-from .exceptions import ServerResponseError, EndpointUnavailableError
+from .exceptions import ServerResponseError, EndpointUnavailableError, ItemTypeNotAllowed
 from functools import wraps
 
 import logging
@@ -10,7 +10,7 @@ except ImportError:
 
 logger = logging.getLogger('tableau.endpoint')
 
-Success_codes = [200, 201, 204]
+Success_codes = [200, 201, 202, 204]
 
 
 class Endpoint(object):

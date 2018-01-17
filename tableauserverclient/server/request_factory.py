@@ -20,7 +20,7 @@ def _add_multipart(parts):
 def _tsrequest_wrapped(func):
     def wrapper(self, *args, **kwargs):
         xml_request = ET.Element('tsRequest')
-        func(xml_request, *args, **kwargs)
+        func(self, xml_request, *args, **kwargs)
         return ET.tostring(xml_request)
     return wrapper
 
@@ -209,6 +209,29 @@ class ScheduleRequest(object):
                 single_interval_element.attrib[expression] = value
         return ET.tostring(xml_request)
 
+    def _add_to_req(self, id_, type_):
+        """
+        <task>
+          <extractRefresh>
+            <workbook/datasource id="..."/>
+          </extractRefresh>
+        </task>
+
+        """
+        xml_request = ET.Element('tsRequest')
+        task_element = ET.SubElement(xml_request, 'task')
+        refresh = ET.SubElement(task_element, 'extractRefresh')
+        workbook = ET.SubElement(refresh, type_)
+        workbook.attrib['id'] = id_
+
+        return ET.tostring(xml_request)
+
+    def add_workbook_req(self, id_):
+        return self._add_to_req(id_, "workbook")
+
+    def add_datasource_req(self, id_):
+        return self._add_to_req(id_, "datasource")
+
 
 class SiteRequest(object):
     def update_req(self, site_item):
@@ -335,9 +358,9 @@ class WorkbookRequest(object):
         return _add_multipart(parts)
 
 
-class WorkbookConnection(object):
-    def update_req(self, connection_item):
-        xml_request = ET.Element('tsRequest')
+class Connection(object):
+    @_tsrequest_wrapped
+    def update_req(self, xml_request, connection_item):
         connection_element = ET.SubElement(xml_request, 'connection')
         if connection_item.server_address:
             connection_element.attrib['serverAddress'] = connection_item.server_address.lower()
@@ -348,20 +371,45 @@ class WorkbookConnection(object):
         if connection_item.password:
             connection_element.attrib['password'] = connection_item.password
         if connection_item.embed_password:
-            connection_element.attrib['embedPassword'] = connection_item.embed_password
-        return ET.tostring(xml_request)
+            connection_element.attrib['embedPassword'] = str(connection_item.embed_password)
 
 
 class TaskRequest(object):
     @_tsrequest_wrapped
-    def run_req(xml_request, task_item):
+    def run_req(self, xml_request, task_item):
         # Send an empty tsRequest
+        pass
+
+
+class SubscriptionRequest(object):
+    def create_req(self, subscription_item):
+        xml_request = ET.Element('tsRequest')
+        subscription_element = ET.SubElement(xml_request, 'subscription')
+        subscription_element.attrib['subject'] = subscription_item.subject
+
+        content_element = ET.SubElement(subscription_element, 'content')
+        content_element.attrib['id'] = subscription_item.target.id
+        content_element.attrib['type'] = subscription_item.target.type
+
+        schedule_element = ET.SubElement(subscription_element, 'schedule')
+        schedule_element.attrib['id'] = subscription_item.schedule_id
+
+        user_element = ET.SubElement(subscription_element, 'user')
+        user_element.attrib['id'] = subscription_item.user_id
+        return ET.tostring(xml_request)
+
+
+class EmptyRequest(object):
+    @_tsrequest_wrapped
+    def empty_req(xml_request):
         pass
 
 
 class RequestFactory(object):
     Auth = AuthRequest()
+    Connection = Connection()
     Datasource = DatasourceRequest()
+    Empty = EmptyRequest()
     Fileupload = FileuploadRequest()
     Group = GroupRequest()
     Permission = PermissionRequest()
@@ -372,4 +420,4 @@ class RequestFactory(object):
     Task = TaskRequest()
     User = UserRequest()
     Workbook = WorkbookRequest()
-    WorkbookConnection = WorkbookConnection()
+    Subscription = SubscriptionRequest()

@@ -13,6 +13,7 @@ GET_XML = os.path.join(TEST_ASSET_DIR, 'workbook_get.xml')
 POPULATE_CONNECTIONS_XML = os.path.join(TEST_ASSET_DIR, 'workbook_populate_connections.xml')
 POPULATE_PREVIEW_IMAGE = os.path.join(TEST_ASSET_DIR, 'RESTAPISample Image.png')
 POPULATE_VIEWS_XML = os.path.join(TEST_ASSET_DIR, 'workbook_populate_views.xml')
+POPULATE_VIEWS_USAGE_XML = os.path.join(TEST_ASSET_DIR, 'workbook_populate_views_usage.xml')
 PUBLISH_XML = os.path.join(TEST_ASSET_DIR, 'workbook_publish.xml')
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'workbook_update.xml')
 
@@ -207,18 +208,36 @@ class WorkbookTests(unittest.TestCase):
             single_workbook._id = '1f951daf-4061-451a-9df1-69a8062664f2'
             self.server.workbooks.populate_views(single_workbook)
 
-        views_list = single_workbook.views
-        self.assertEqual('097dbe13-de89-445f-b2c3-02f28bd010c1', views_list[0].id)
-        self.assertEqual('GDP per capita', views_list[0].name)
-        self.assertEqual('RESTAPISample/sheets/GDPpercapita', views_list[0].content_url)
+            views_list = single_workbook.views
+            self.assertEqual('097dbe13-de89-445f-b2c3-02f28bd010c1', views_list[0].id)
+            self.assertEqual('GDP per capita', views_list[0].name)
+            self.assertEqual('RESTAPISample/sheets/GDPpercapita', views_list[0].content_url)
 
-        self.assertEqual('2c1ab9d7-8d64-4cc6-b495-52e40c60c330', views_list[1].id)
-        self.assertEqual('Country ranks', views_list[1].name)
-        self.assertEqual('RESTAPISample/sheets/Countryranks', views_list[1].content_url)
+            self.assertEqual('2c1ab9d7-8d64-4cc6-b495-52e40c60c330', views_list[1].id)
+            self.assertEqual('Country ranks', views_list[1].name)
+            self.assertEqual('RESTAPISample/sheets/Countryranks', views_list[1].content_url)
 
-        self.assertEqual('0599c28c-6d82-457e-a453-e52c1bdb00f5', views_list[2].id)
-        self.assertEqual('Interest rates', views_list[2].name)
-        self.assertEqual('RESTAPISample/sheets/Interestrates', views_list[2].content_url)
+            self.assertEqual('0599c28c-6d82-457e-a453-e52c1bdb00f5', views_list[2].id)
+            self.assertEqual('Interest rates', views_list[2].name)
+            self.assertEqual('RESTAPISample/sheets/Interestrates', views_list[2].content_url)
+
+    def test_populate_views_with_usage(self):
+        with open(POPULATE_VIEWS_USAGE_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + '/1f951daf-4061-451a-9df1-69a8062664f2/views?includeUsageStatistics=true',
+                  text=response_xml)
+            single_workbook = TSC.WorkbookItem('test')
+            single_workbook._id = '1f951daf-4061-451a-9df1-69a8062664f2'
+            self.server.workbooks.populate_views(single_workbook, usage=True)
+
+            views_list = single_workbook.views
+            self.assertEqual('097dbe13-de89-445f-b2c3-02f28bd010c1', views_list[0].id)
+            self.assertEqual(2, views_list[0].total_views)
+            self.assertEqual('2c1ab9d7-8d64-4cc6-b495-52e40c60c330', views_list[1].id)
+            self.assertEqual(37, views_list[1].total_views)
+            self.assertEqual('0599c28c-6d82-457e-a453-e52c1bdb00f5', views_list[2].id)
+            self.assertEqual(0, views_list[2].total_views)
 
     def test_populate_views_missing_id(self):
         single_workbook = TSC.WorkbookItem('test')
@@ -233,10 +252,10 @@ class WorkbookTests(unittest.TestCase):
             single_workbook._id = '1f951daf-4061-451a-9df1-69a8062664f2'
             self.server.workbooks.populate_connections(single_workbook)
 
-        self.assertEqual('37ca6ced-58d7-4dcf-99dc-f0a85223cbef', single_workbook.connections[0].id)
-        self.assertEqual('dataengine', single_workbook.connections[0].connection_type)
-        self.assertEqual('4506225a-0d32-4ab1-82d3-c24e85f7afba', single_workbook.connections[0].datasource_id)
-        self.assertEqual('World Indicators', single_workbook.connections[0].datasource_name)
+            self.assertEqual('37ca6ced-58d7-4dcf-99dc-f0a85223cbef', single_workbook.connections[0].id)
+            self.assertEqual('dataengine', single_workbook.connections[0].connection_type)
+            self.assertEqual('4506225a-0d32-4ab1-82d3-c24e85f7afba', single_workbook.connections[0].datasource_id)
+            self.assertEqual('World Indicators', single_workbook.connections[0].datasource_name)
 
     def test_populate_connections_missing_id(self):
         single_workbook = TSC.WorkbookItem('test')
@@ -253,7 +272,7 @@ class WorkbookTests(unittest.TestCase):
             single_workbook._id = '1f951daf-4061-451a-9df1-69a8062664f2'
             self.server.workbooks.populate_preview_image(single_workbook)
 
-        self.assertEqual(response, single_workbook.preview_image)
+            self.assertEqual(response, single_workbook.preview_image)
 
     def test_populate_preview_image_missing_id(self):
         single_workbook = TSC.WorkbookItem('test')

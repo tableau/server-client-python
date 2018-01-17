@@ -31,3 +31,7 @@ class ServerInfoEndpointNotFoundError(Exception):
 
 class EndpointUnavailableError(Exception):
     pass
+
+
+class ItemTypeNotAllowed(Exception):
+    pass

@@ -24,6 +24,7 @@ def create_project(server, project_item):
         print('We have already created this project: %s' % project_item.name)
         sys.exit(1)
 
+
 def main():
     parser = argparse.ArgumentParser(description='Get all of the refresh tasks available on a server')
     parser.add_argument('--server', '-s', required=True, help='server address')
@@ -63,6 +64,7 @@ def main():
         # Projects can be nested at any level.
         grand_child_project = TSC.ProjectItem(name='Grand Child Project', parent_id=child_project.id)
         grand_child_project = create_project(server, grand_child_project)
+
 
 if __name__ == '__main__':
     main()

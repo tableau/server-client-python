@@ -5,6 +5,7 @@ from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, DatasourceItem, PaginationItem, ConnectionItem
 from ...filesys_helpers import to_filename
 from ...models.tag_item import TagItem
+from ...models.job_item import JobItem
 import os
 import logging
 import copy
@@ -14,7 +15,7 @@ from contextlib import closing
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64   # 64MB
 
-ALLOWED_FILE_EXTENSIONS = ['tds', 'tdsx', 'tde']
+ALLOWED_FILE_EXTENSIONS = ['tds', 'tdsx', 'tde', 'hyper']
 
 logger = logging.getLogger('tableau.endpoint.datasources')
 
@@ -55,11 +56,18 @@ class Datasources(Endpoint):
         if not datasource_item.id:
             error = 'Datasource item missing ID. Datasource must be retrieved from server first.'
             raise MissingRequiredFieldError(error)
-        url = '{0}/{1}/connections'.format(self.baseurl, datasource_item.id)
-        server_response = self.get_request(url)
-        datasource_item._set_connections(
-            ConnectionItem.from_response(server_response.content, self.parent_srv.namespace))
+
+        def connections_fetcher():
+            return self._get_datasource_connections(datasource_item)
+
+        datasource_item._set_connections(connections_fetcher)
         logger.info('Populated connections for datasource (ID: {0})'.format(datasource_item.id))
+
+    def _get_datasource_connections(self, datasource_item, req_options=None):
+        url = '{0}/{1}/connections'.format(self.baseurl, datasource_item.id)
+        server_response = self.get_request(url, req_options)
+        connections = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
+        return connections
 
     # Delete 1 datasource by id
     @api(version="2.0")
@@ -120,6 +128,26 @@ class Datasources(Endpoint):
         logger.info('Updated datasource item (ID: {0})'.format(datasource_item.id))
         updated_datasource = copy.copy(datasource_item)
         return updated_datasource._parse_common_elements(server_response.content, self.parent_srv.namespace)
+
+    # Update datasource connections
+    @api(version="2.3")
+    def update_connection(self, datasource_item, connection_item):
+        url = "{0}/{1}/connections/{2}".format(self.baseurl, datasource_item.id, connection_item.id)
+
+        update_req = RequestFactory.Connection.update_req(connection_item)
+        server_response = self.put_request(url, update_req)
+        connection = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+
+        logger.info('Updated datasource item (ID: {0} & connection item {1}'.format(datasource_item.id,
+                                                                                    connection_item.id))
+        return connection
+
+    def refresh(self, datasource_item):
+        url = "{0}/{1}/refresh".format(self.baseurl, datasource_item.id)
+        empty_req = RequestFactory.Empty.empty_req()
+        server_response = self.post_request(url, empty_req)
+        new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        return new_job
 
     # Publish datasource
     @api(version="2.0")

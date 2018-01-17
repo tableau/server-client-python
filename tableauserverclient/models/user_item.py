@@ -82,7 +82,7 @@ class UserItem(object):
         if self._workbooks is None:
             error = "User item must be populated with workbooks first."
             raise UnpopulatedPropertyError(error)
-        return self._workbooks
+        return self._workbooks()
 
     def _set_workbooks(self, workbooks):
         self._workbooks = workbooks

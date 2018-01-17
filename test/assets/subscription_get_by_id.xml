@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse
+    xmlns="http://tableau.com/api"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.6.xsd">
+    <subscription id="382e9a6e-0c08-4a95-b6c1-c14df7bac3e4" subject="Not Found Alert">
+        <content id="cdd716ca-5818-470e-8bec-086885dbadee" type="View" />
+        <schedule id="7617c389-cdca-4940-a66e-69956fcebf3e" name="Subscribe daily [00:00 - 04:00, Pacific US] [migrated at 1490824351877]" />
+        <user id="c0d5fc44-ad8c-4957-bec0-b70ed0f8df1e" name="jonsnow@winterfell.com" />
+    </subscription>
+</tsResponse>

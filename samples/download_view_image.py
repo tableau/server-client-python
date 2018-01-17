@@ -64,5 +64,6 @@ def main():
 
         print("View image saved to {0}".format(args.filepath))
 
+
 if __name__ == '__main__':
     main()
