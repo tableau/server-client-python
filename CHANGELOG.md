@@ -1,3 +1,7 @@
+## 0.6.1 (26 Jan 2018)
+
+* Fixed #257 where refreshing extracts does not work due to a missing "self"
+
 ## 0.6 (17 Jan 2018)
 
 * Added support for add a datasource/workbook refresh to a schedule (#244)
