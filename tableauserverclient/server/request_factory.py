@@ -401,7 +401,7 @@ class SubscriptionRequest(object):
 
 class EmptyRequest(object):
     @_tsrequest_wrapped
-    def empty_req(xml_request):
+    def empty_req(self, xml_request):
         pass
 
 
