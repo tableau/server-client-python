@@ -62,12 +62,36 @@ class RequestOptions(RequestOptionsBase):
         return "{0}?{1}".format(url, '&'.join(params))
 
 
-class ImageRequestOptions(RequestOptionsBase):
+class _FilterOptionsBase(RequestOptionsBase):
+    def __init__(self):
+        self.view_filters = []
+
+    def apply_query_params(self, url):
+        raise NotImplementedError()
+
+    def vf(self, name, value):
+        self.view_filters.append((name, value))
+        return self
+
+    def _append_view_filters(self, params):
+        for name, value in self.view_filters:
+            params.append('vf_{}={}'.format(name, value))
+
+
+class CSVRequestOptions(_FilterOptionsBase):
+    def apply_query_params(self, url):
+        params =['Stream=True']
+        self._append_view_filters(params)
+        return "{0}?{1}".format(url, '&'.join(params))
+
+
+class ImageRequestOptions(_FilterOptionsBase):
     # if 'high' isn't specified, the REST API endpoint returns an image with standard resolution
     class Resolution:
         High = 'high'
 
     def __init__(self, imageresolution=None):
+        super(ImageRequestOptions, self).__init__()
         self.image_resolution = imageresolution
 
     def apply_query_params(self, url):
@@ -75,11 +99,12 @@ class ImageRequestOptions(RequestOptionsBase):
         if self.image_resolution:
             params.append('resolution={0}'.format(self.image_resolution))
 
+        self._append_view_filters(params)
+
         return "{0}?{1}".format(url, '&'.join(params))
 
 
-class PDFRequestOptions(RequestOptionsBase):
-    # if 'high' isn't specified, the REST API endpoint returns an image with standard resolution
+class PDFRequestOptions(_FilterOptionsBase):
     class PageType:
         A3 = "a3"
         A4 = "a4"
@@ -100,6 +125,7 @@ class PDFRequestOptions(RequestOptionsBase):
         Landscape = "landscape"
 
     def __init__(self, page_type=None, orientation=None):
+        super(PDFRequestOptions, self).__init__()
         self.page_type = page_type
         self.orientation = orientation
 
@@ -110,5 +136,7 @@ class PDFRequestOptions(RequestOptionsBase):
 
         if self.orientation:
             params.append('orientation={0}'.format(self.orientation))
+
+        self._append_view_filters(params)
 
         return "{0}?{1}".format(url, '&'.join(params))
