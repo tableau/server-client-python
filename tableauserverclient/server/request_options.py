@@ -80,7 +80,7 @@ class _FilterOptionsBase(RequestOptionsBase):
 
 class CSVRequestOptions(_FilterOptionsBase):
     def apply_query_params(self, url):
-        params = ['Stream=True']
+        params = []
         self._append_view_filters(params)
         return "{0}?{1}".format(url, '&'.join(params))
 
