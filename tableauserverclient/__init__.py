@@ -4,7 +4,7 @@ from .models import ConnectionCredentials, ConnectionItem, DatasourceItem,\
     SiteItem, TableauAuth, UserItem, ViewItem, WorkbookItem, UnpopulatedPropertyError, \
     HourlyInterval, DailyInterval, WeeklyInterval, MonthlyInterval, IntervalItem, TaskItem, \
     SubscriptionItem
-from .server import RequestOptions, ImageRequestOptions, PDFRequestOptions, Filter, Sort, \
+from .server import RequestOptions, CSVRequestOptions, ImageRequestOptions, PDFRequestOptions, Filter, Sort, \
     Server, ServerResponseError, MissingRequiredFieldError, NotSignedInError, Pager
 from ._version import get_versions
 __version__ = get_versions()['version']
