@@ -105,7 +105,8 @@ class Views(Endpoint):
     def _get_view_csv(self, view_item, req_options):
         url = "{0}/{1}/data".format(self.baseurl, view_item.id)
 
-        with closing(self.get_request(url, req_options, {"stream": True})) as server_response:
+        with closing(self.get_request(url,
+              reqquest_object=req_options, parameters={"stream": True})) as server_response:
             csv = server_response.iter_content(1024)
         return csv
 
