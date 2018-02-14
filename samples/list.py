@@ -7,7 +7,6 @@
 import argparse
 import getpass
 import logging
-import requests
 
 import tableauserverclient as TSC
 
