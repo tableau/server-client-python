@@ -7,6 +7,7 @@
 import argparse
 import getpass
 import logging
+import requests
 
 import tableauserverclient as TSC
 
@@ -21,7 +22,7 @@ def main():
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
                         help='desired logging level (set to error by default)')
 
-    parser.add_argument('resource_type', choices=['workbook', 'datasource'])
+    parser.add_argument('resource_type', choices=['workbook', 'datasource', 'view'])
 
     args = parser.parse_args()
 
@@ -40,7 +41,8 @@ def main():
     with server.auth.sign_in(tableau_auth):
         endpoint = {
             'workbook': server.workbooks,
-            'datasource': server.datasources
+            'datasource': server.datasources,
+            'view': server.views
         }.get(args.resource_type)
 
         for resource in TSC.Pager(endpoint.get):
