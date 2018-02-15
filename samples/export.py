@@ -6,7 +6,7 @@ import tableauserverclient as TSC
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Get all of the refresh tasks available on a server')
+    parser = argparse.ArgumentParser(description='Export a view as an image, pdf, or csv')
     parser.add_argument('--server', '-s', required=True, help='server address')
     parser.add_argument('--username', '-u', required=True, help='username to sign into server')
     parser.add_argument('--site', '-S', default=None)
@@ -44,8 +44,13 @@ def main():
         views = filter(lambda x: x.id == args.resource_id,
                        TSC.Pager(server.views.get))
         view = views.pop()
-        (populate_name, option_factory_name, member_name, extension) = args.type
-        populate = getattr(server.views, populate_name)
+
+        # We have a number of different types and functions for each different export type.
+        # We encode that information above in the const=(...) parameter to the add_argument function to make
+        # the code automatically adapt for the type of export the user is doing.
+        # We unroll that information into methods we can call, or objects we can create by using getattr()
+        (populate_func_name, option_factory_name, member_name, extension) = args.type
+        populate = getattr(server.views, populate_func_name)
         option_factory = getattr(TSC, option_factory_name)
 
         if args.filter:
