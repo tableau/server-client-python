@@ -14,9 +14,9 @@ import tableauserverclient as TSC
 def main():
     parser = argparse.ArgumentParser(description='Get all of the refresh tasks available on a server')
     parser.add_argument('--server', '-s', required=True, help='server address')
+    parser.add_argument('--site', '-S', default=None, help='site to log into, do not specify for default site')
     parser.add_argument('--username', '-u', required=True, help='username to sign into server')
-    parser.add_argument('--site', '-S', default=None)
-    parser.add_argument('-p', default=None)
+    parser.add_argument('--password', '-p', default=None, help='password for the user')
 
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
                         help='desired logging level (set to error by default)')
@@ -25,10 +25,10 @@ def main():
 
     args = parser.parse_args()
 
-    if args.p is None:
+    if args.password is None:
         password = getpass.getpass("Password: ")
     else:
-        password = args.p
+        password = args.password
 
     # Set logging level based on user input, or error by default
     logging_level = getattr(logging, args.logging_level.upper())

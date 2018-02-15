@@ -51,26 +51,21 @@ def cleanup(tempdir):
 def main():
     parser = argparse.ArgumentParser(description='Export to PDF all of the views in a workbook')
     parser.add_argument('--server', '-s', required=True, help='server address')
+    parser.add_argument('--site', '-S', default=None, help='Site to log into, do not specify for default site')
     parser.add_argument('--username', '-u', required=True, help='username to sign into server')
-    parser.add_argument('--site', '-S', default=None)
-    parser.add_argument('-p', default=None)
-
+    parser.add_argument('--password', '-p', default=None, help='password for the user')
+    
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
                         help='desired logging level (set to error by default)')
-    parser.add_argument('--file', '-f', help='filename to store the exported data')
-    parser.add_argument('resource_id', help='LUID for the view')
+    parser.add_argument('--file', '-f', default='out.pdf', help='filename to store the exported data')
+    parser.add_argument('resource_id', help='LUID for the workbook')
 
     args = parser.parse_args()
 
-    if args.p is None:
+    if args.password is None:
         password = getpass.getpass("Password: ")
     else:
-        password = args.p
-
-    if args.file:
-        filename = args.file
-    else:
-        filename = 'out.pdf'
+        password = args.password
 
     # Set logging level based on user input, or error by default
     logging_level = getattr(logging, args.logging_level.upper())
@@ -90,7 +85,7 @@ def main():
             view_list = (x.id for x in get_list(args.resource_id))
             downloaded = (download(x) for x in view_list)
             output = reduce(combine_into, downloaded, PyPDF2.PdfFileMerger())
-            with file(filename, 'wb') as f:
+            with file(args.file, 'wb') as f:
                 output.write(f)
     finally:
         cleanup(tempdir)
