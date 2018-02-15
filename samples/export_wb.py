@@ -28,10 +28,9 @@ def get_views_for_workbook(server, workbook_id):  # -> Iterable of views
     return workbook.views
 
 
-def download_pdf(server, views, tempdir, view_id):  # -> Filename to downloaded pdf
-    logging.info("Exporting {}".format(view_id))
-    view = next((x for x in views if x.id == view_id))
-    destination_filename = os.path.join(tempdir, view_id)
+def download_pdf(server, tempdir, view):  # -> Filename to downloaded pdf
+    logging.info("Exporting {}".format(view.id))
+    destination_filename = os.path.join(tempdir, view.id)
     server.views.populate_pdf(view)
     with file(destination_filename, 'wb') as f:
         f.write(view.pdf)
@@ -78,12 +77,10 @@ def main():
     server = TSC.Server(args.server, use_server_version=True)
     try:
         with server.auth.sign_in(tableau_auth):
-            views = list(TSC.Pager(server.views))
             get_list = functools.partial(get_views_for_workbook, server)
-            download = functools.partial(download_pdf, server, views, tempdir)
+            download = functools.partial(download_pdf, server, tempdir)
 
-            view_list = (x.id for x in get_list(args.resource_id))
-            downloaded = (download(x) for x in view_list)
+            downloaded = (download(x) for x in get_list(args.resource_id))
             output = reduce(combine_into, downloaded, PyPDF2.PdfFileMerger())
             with file(args.file, 'wb') as f:
                 output.write(f)
