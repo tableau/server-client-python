@@ -53,7 +53,7 @@ def main():
     parser.add_argument('--site', '-S', default=None, help='Site to log into, do not specify for default site')
     parser.add_argument('--username', '-u', required=True, help='username to sign into server')
     parser.add_argument('--password', '-p', default=None, help='password for the user')
-    
+
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
                         help='desired logging level (set to error by default)')
     parser.add_argument('--file', '-f', default='out.pdf', help='filename to store the exported data')
