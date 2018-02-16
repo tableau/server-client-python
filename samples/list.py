@@ -12,7 +12,7 @@ import tableauserverclient as TSC
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Get all of the refresh tasks available on a server')
+    parser = argparse.ArgumentParser(description='List out the names and LUIDs for different resource types')
     parser.add_argument('--server', '-s', required=True, help='server address')
     parser.add_argument('--username', '-u', required=True, help='username to sign into server')
     parser.add_argument('--site', '-S', default=None)
@@ -21,7 +21,7 @@ def main():
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
                         help='desired logging level (set to error by default)')
 
-    parser.add_argument('resource_type', choices=['workbook', 'datasource'])
+    parser.add_argument('resource_type', choices=['workbook', 'datasource', 'view'])
 
     args = parser.parse_args()
 
@@ -40,7 +40,8 @@ def main():
     with server.auth.sign_in(tableau_auth):
         endpoint = {
             'workbook': server.workbooks,
-            'datasource': server.datasources
+            'datasource': server.datasources,
+            'view': server.views
         }.get(args.resource_type)
 
         for resource in TSC.Pager(endpoint.get):
