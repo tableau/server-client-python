@@ -1031,7 +1031,7 @@ The project resources for Tableau are defined in the `ProjectItem` class. The cl
 
 ```py
 
-ProjectItem(name, description=None, content_permissions=None)
+ProjectItem(name, description=None, content_permissions=None, parent_id=None)
 
 ```
 The project resources for Tableau are defined in the `ProjectItem` class. The class corresponds to the project resources you can access using the Tableau Server REST API. 
@@ -1044,6 +1044,7 @@ Name  |  Description
 `name` | Name of the project.
 `description` | The description of the project. 
 `id`  | The project id.
+`parent_id`  | The parent project id.
 
 
 
