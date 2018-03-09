@@ -43,7 +43,7 @@ def main():
     tableau_auth = TSC.TableauAuth(args.username, password, site_id=site_id)
     server = TSC.Server(args.server)
     # The new endpoint was introduced in Version 2.5
-    server.version = 2.5
+    server.version = "2.5"
 
     with server.auth.sign_in(tableau_auth):
         # Step 2: Query for the view that we want an image of

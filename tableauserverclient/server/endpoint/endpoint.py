@@ -27,6 +27,17 @@ class Endpoint(object):
 
         return headers
 
+    @staticmethod
+    def _safe_to_log(server_response):
+        '''Checks if the server_response content is not xml (eg binary image or zip)
+        and and replaces it with a constant
+        '''
+        ALLOWED_CONTENT_TYPES = ('application/xml',)
+        if server_response.headers.get('Content-Type', None) not in ALLOWED_CONTENT_TYPES:
+            return '[Truncated File Contents]'
+        else:
+            return server_response.content
+
     def _make_request(self, method, url, content=None, request_object=None,
                       auth_token=None, content_type=None, parameters=None):
         if request_object is not None:
@@ -50,7 +61,7 @@ class Endpoint(object):
         return server_response
 
     def _check_status(self, server_response):
-        logger.debug(server_response.content)
+        logger.debug(self._safe_to_log(server_response))
         if server_response.status_code not in Success_codes:
             raise ServerResponseError.from_response(server_response.content, self.parent_srv.namespace)
 
