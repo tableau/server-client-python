@@ -246,7 +246,9 @@ class Workbooks(Endpoint):
             xml_request, content_type = RequestFactory.Workbook.publish_req(workbook_item,
                                                                             filename,
                                                                             file_contents,
-                                                                            connections=connections)
+                                                                            connections=connections,
+                                                                            connection_credentials=connection_credentials)
+        logger.debug('Request xml: {0} '.format(xml_request[:1000]))
         server_response = self.post_request(url, xml_request, content_type)
         new_workbook = WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         logger.info('Published {0} (ID: {1})'.format(filename, new_workbook.id))

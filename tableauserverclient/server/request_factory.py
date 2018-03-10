@@ -313,7 +313,7 @@ class UserRequest(object):
 
 
 class WorkbookRequest(object):
-    def _generate_xml(self, workbook_item, connections=None):
+    def _generate_xml(self, workbook_item, connections=None, connection_credentials=None):
         xml_request = ET.Element('tsRequest')
         workbook_element = ET.SubElement(xml_request, 'workbook')
         workbook_element.attrib['name'] = workbook_item.name
@@ -321,23 +321,43 @@ class WorkbookRequest(object):
             workbook_element.attrib['showTabs'] = str(workbook_item.show_tabs).lower()
         project_element = ET.SubElement(workbook_element, 'project')
         project_element.attrib['id'] = workbook_item.project_id
+
+        if connection_credentials is not None:
+            if connections is not Nont:
+                raise RuntimeError("Can't have both set.")
+
+            import warnings
+            warnings.warn('Probably not a good idea')
+
+            connections = [connection_credentials]
+
         if connections is not None:
-            connections_element = ET.SubElement(workbook_element, 'connections')
-            for connection in connections:
-                if connection:
-                    connection_element = ET.SubElement(connections_element, 'connection')
-                    connection_element.attrib['serverAddress'] = connection.server_address
-                    if connection.server_port:
-                        connection_element.attrib['serverPort'] = connection.server_port
-                    if connection.connection_credentials:
-                        connection_credentials = connection.connection_credentials
-                        credentials_element = ET.SubElement(connection_element, 'connectionCredentials')
-                        credentials_element.attrib['name'] = connection_credentials.name
-                        credentials_element.attrib['password'] = connection_credentials.password
-                        credentials_element.attrib['embed'] = 'true' if connection_credentials.embed else 'false'
-                        if connection_credentials.oauth:
-                            credentials_element.attrib['oAuth'] = 'true'
+
+            if len(connections) == 1: #  If this is only one, use the back-compact safe bare connCreds
+                self._make_credentials_element(workbook_element, connection_credentials)
+
+            else:
+                connections_element = ET.SubElement(workbook_element, 'connections')
+                for connection in connections:
+                    self._make_connections_element(connections_element, connection)
         return ET.tostring(xml_request)
+
+    def _make_connections_element(self, connections_element, connection):
+        connection_element = ET.SubElement(connections_element, 'connection')
+        connection_element.attrib['serverAddress'] = connection.server_address
+        if connection.server_port:
+            connection_element.attrib['serverPort'] = connection.server_port
+        if connection.connection_credentials:
+            connection_credentials = connection.connection_credentials
+            self._make_credentials_element(connection_element, connection_credentials)
+
+    def _make_credentials_element(self, parent_element, connection_credentials):
+        credentials_element = ET.SubElement(parent_element, 'connectionCredentials')
+        credentials_element.attrib['name'] = connection_credentials.name
+        credentials_element.attrib['password'] = connection_credentials.password
+        credentials_element.attrib['embed'] = 'true' if connection_credentials.embed else 'false'
+        if connection_credentials.oauth:
+            credentials_element.attrib['oAuth'] = 'true'
 
     def update_req(self, workbook_item):
         xml_request = ET.Element('tsRequest')
@@ -352,8 +372,8 @@ class WorkbookRequest(object):
             owner_element.attrib['id'] = workbook_item.owner_id
         return ET.tostring(xml_request)
 
-    def publish_req(self, workbook_item, filename, file_contents, connections=None):
-        xml_request = self._generate_xml(workbook_item, connections)
+    def publish_req(self, workbook_item, filename, file_contents, connection_credentials=None, connections=None):
+        xml_request = self._generate_xml(workbook_item, connections, connection_credentials)
 
         parts = {'request_payload': ('', xml_request, 'text/xml'),
                  'tableau_workbook': (filename, file_contents, 'application/octet-stream')}
