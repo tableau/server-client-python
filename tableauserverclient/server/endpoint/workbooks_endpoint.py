@@ -199,7 +199,7 @@ class Workbooks(Endpoint):
 
     # Publishes workbook. Chunking method if file over 64MB
     @api(version="2.0")
-    # @parameter_added_in(connections='2.8')
+    @parameter_added_in(connections='2.8')
     def publish(self, workbook_item, file_path, mode, connection_credentials=None, connections=None):
 
         if connection_credentials is not None:
@@ -243,11 +243,12 @@ class Workbooks(Endpoint):
             logger.info('Publishing {0} to server'.format(filename))
             with open(file_path, 'rb') as f:
                 file_contents = f.read()
+            conn_creds = connection_credentials
             xml_request, content_type = RequestFactory.Workbook.publish_req(workbook_item,
                                                                             filename,
                                                                             file_contents,
-                                                                            connections=connections,
-                                                                            connection_credentials=connection_credentials)
+                                                                            connection_credentials=conn_creds,
+                                                                            connections=connections)
         logger.debug('Request xml: {0} '.format(xml_request[:1000]))
         server_response = self.post_request(url, xml_request, content_type)
         new_workbook = WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]

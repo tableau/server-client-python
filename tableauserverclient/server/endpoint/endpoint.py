@@ -34,7 +34,6 @@ class Endpoint(object):
         '''
         ALLOWED_CONTENT_TYPES = ('application/xml', 'application/xml;charset=utf-8')
         if server_response.headers.get('Content-Type', None) not in ALLOWED_CONTENT_TYPES:
-            print(server_response.headers)
             return '[Truncated File Contents]'
         else:
             return server_response.content[:300]
