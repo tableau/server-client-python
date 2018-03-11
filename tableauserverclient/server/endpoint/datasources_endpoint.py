@@ -151,7 +151,8 @@ class Datasources(Endpoint):
 
     # Publish datasource
     @api(version="2.0")
-    def publish(self, datasource_item, file_path, mode, connections=None):
+    @parameter_added_in(connections="2.8")
+    def publish(self, datasource_item, file_path, mode, connection_credentials=None, connections=None):
         if not os.path.isfile(file_path):
             error = "File path does not lead to an existing file."
             raise IOError(error)
@@ -180,6 +181,7 @@ class Datasources(Endpoint):
             upload_session_id = Fileuploads.upload_chunks(self.parent_srv, file_path)
             url = "{0}&uploadSessionId={1}".format(url, upload_session_id)
             xml_request, content_type = RequestFactory.Datasource.publish_req_chunked(datasource_item,
+                                                                                      connection_credentials,
                                                                                       connections)
         else:
             logger.info('Publishing {0} to server'.format(filename))
@@ -188,6 +190,7 @@ class Datasources(Endpoint):
             xml_request, content_type = RequestFactory.Datasource.publish_req(datasource_item,
                                                                               filename,
                                                                               file_contents,
+                                                                              connection_credentials,
                                                                               connections)
         server_response = self.post_request(url, xml_request, content_type)
         new_datasource = DatasourceItem.from_response(server_response.content, self.parent_srv.namespace)[0]
