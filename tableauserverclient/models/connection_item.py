@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+from .connection_credentials import ConnectionCredentials
 
 
 class ConnectionItem(object):
@@ -51,4 +52,33 @@ class ConnectionItem(object):
                 connection_item._datasource_id = datasource_elem.get('id', None)
                 connection_item._datasource_name = datasource_elem.get('name', None)
             all_connection_items.append(connection_item)
+        return all_connection_items
+
+    @classmethod
+    def from_xml_element(cls, parsed_response, ns):
+        '''
+        <connections>
+            <connection serverAddress="mysql.test.com">
+                <connectionCredentials embed="true" name="test" password="secret" />
+            </connection>
+            <connection serverAddress="pgsql.test.com">
+                <connectionCredentials embed="true" name="test" password="secret" />
+                </connection>
+        </connections>
+        '''
+        all_connection_items = list()
+        all_connection_xml = parsed_response.findall('.//t:connection', namespaces=ns)
+
+        for connection_xml in all_connection_xml:
+            connection_item = cls()
+
+            connection_item.server_address = connection_xml.get('serverAddress', None)
+            connection_item.server_port = connection_xml.get('serverPort', None)
+
+            connection_credentials = connection_xml.find('.//t:connectionCredentials', namespaces=ns)
+
+            if connection_credentials is not None:
+
+                connection_item.connection_credentials = ConnectionCredentials.from_xml_element(connection_credentials)
+
         return all_connection_items

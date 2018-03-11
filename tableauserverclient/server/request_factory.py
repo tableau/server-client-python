@@ -32,7 +32,7 @@ def _add_connections_element(connections_element, connection):
         connection_element.attrib['serverPort'] = connection.server_port
     if connection.connection_credentials:
         connection_credentials = connection.connection_credentials
-        self._add_credentials_element(connection_element, connection_credentials)
+        _add_credentials_element(connection_element, connection_credentials)
 
 
 def _add_credentials_element(parent_element, connection_credentials):
@@ -65,15 +65,7 @@ class DatasourceRequest(object):
         datasource_element.attrib['name'] = datasource_item.name
         project_element = ET.SubElement(datasource_element, 'project')
         project_element.attrib['id'] = datasource_item.project_id
-        # if connection_credentials:
-        #     credentials_element = ET.SubElement(datasource_element, 'connectionCredentials')
-        #     credentials_element.attrib['name'] = connection_credentials.name
-        #     credentials_element.attrib['password'] = connection_credentials.password
-        #     credentials_element.attrib['embed'] = 'true' if connection_credentials.embed else 'false'
 
-        #     if connection_credentials.oauth:
-        #         credentials_element.attrib['oAuth'] = 'true'
-        # return ET.tostring(xml_request)
         if connection_credentials is not None and connections is not None:
             raise RuntimeError('You cannot set both `connections` and `connection_credentials`')
 
