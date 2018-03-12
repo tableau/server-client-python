@@ -254,8 +254,9 @@ class DatasourceTests(unittest.TestCase):
         connection2.connection_credentials = TSC.ConnectionCredentials('test', 'secret', True)
 
         response = RequestFactory.Datasource._generate_xml(new_datasource, connections=[connection1, connection2])
-        connection_results = ET.fromstring(response).findall('.//connection') #  Can't use ConnectionItem parser due to xml namespace problems
-        
+        # Can't use ConnectionItem parser due to xml namespace problems
+        connection_results = ET.fromstring(response).findall('.//connection')
+
         self.assertEqual(connection_results[0].get('serverAddress', None), 'mysql.test.com')
         self.assertEqual(connection_results[0].find('connectionCredentials').get('name', None), 'test')
         self.assertEqual(connection_results[1].get('serverAddress', None), 'pgsql.test.com')
@@ -266,7 +267,9 @@ class DatasourceTests(unittest.TestCase):
         connection_creds = TSC.ConnectionCredentials('test', 'secret', True)
 
         response = RequestFactory.Datasource._generate_xml(new_datasource, connection_credentials=connection_creds)
-        credentials = ET.fromstring(response).findall('.//connectionCredentials') #  Can't use ConnectionItem parser due to xml namespace problems
+        #  Can't use ConnectionItem parser due to xml namespace problems
+        credentials = ET.fromstring(response).findall('.//connectionCredentials')
+
         self.assertEqual(len(credentials), 1)
         self.assertEqual(credentials[0].get('name', None), 'test')
         self.assertEqual(credentials[0].get('password', None), 'secret')
@@ -274,12 +277,14 @@ class DatasourceTests(unittest.TestCase):
 
     def test_credentials_and_multi_connect_raises_exception(self):
         new_datasource = TSC.DatasourceItem(name='Sample', project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
-        
+
         connection_creds = TSC.ConnectionCredentials('test', 'secret', True)
-        
+
         connection1 = TSC.ConnectionItem()
         connection1.server_address = 'mysql.test.com'
         connection1.connection_credentials = TSC.ConnectionCredentials('test', 'secret', True)
-        
+
         with self.assertRaises(RuntimeError):
-            response = RequestFactory.Datasource._generate_xml(new_datasource, connection_credentials=connection_creds, connections=[connection1])
+            response = RequestFactory.Datasource._generate_xml(new_datasource,
+                                                               connection_credentials=connection_creds,
+                                                               connections=[connection1])
