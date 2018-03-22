@@ -55,6 +55,13 @@ class Groups(Endpoint):
         self.delete_request(url)
         logger.info('Deleted single group (ID: {0})'.format(group_id))
 
+    @api(version="2.0")
+    def update(self, group_item, default_site_role=UserItem.Roles.Unlicensed):
+        url = "{0}/{1}".format(self.baseurl, group_item.id)
+        update_req = RequestFactory.Group.update_req(group_item, default_site_role)
+        server_response = self.put_request(url, update_req)
+        logger.info('Updated group item (ID: {0})'.format(group_item.id))
+
     # Create a 'local' Tableau group
     @api(version="2.0")
     def create(self, group_item):
