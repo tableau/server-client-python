@@ -857,7 +857,7 @@ groups.update(group_item, default_site_role=UserItem.Roles.Unlicensed)
 
 Updates the group on the site.
 If domain_name = 'local' then update only the name of the group.
-If not - update group from domain.
+If not - update group from the Active Directory with domain_name.
 
 REST API: [Delete Group](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Update_Group%3FTocPath%3DAPI%2520Reference%7C_____95){:target="_blank"}
 
@@ -867,6 +867,7 @@ REST API: [Delete Group](http://onlinehelp.tableau.com/current/api/rest_api/en-u
 Name | Description
 :--- | :---
 `group_item`  | the group_item specifies the group to update.
+`default_site_role` | if group updates from Active Directory then this is the default role for the new users.
 
 
 **Exceptions**
