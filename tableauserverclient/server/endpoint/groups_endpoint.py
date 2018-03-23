@@ -57,6 +57,9 @@ class Groups(Endpoint):
 
     @api(version="2.0")
     def update(self, group_item, default_site_role=UserItem.Roles.Unlicensed):
+        if not group_item.id:
+            error = "Group item missing ID."
+            raise MissingRequiredFieldError(error)
         url = "{0}/{1}".format(self.baseurl, group_item.id)
         update_req = RequestFactory.Group.update_req(group_item, default_site_role)
         server_response = self.put_request(url, update_req)
