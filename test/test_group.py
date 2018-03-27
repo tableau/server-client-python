@@ -14,7 +14,7 @@ ADD_USER = os.path.join(TEST_ASSET_DIR, 'group_add_user.xml')
 ADD_USER_POPULATE = os.path.join(TEST_ASSET_DIR, 'group_users_added.xml')
 CREATE_GROUP = os.path.join(TEST_ASSET_DIR, 'group_create.xml')
 CREATE_GROUP_ASYNC = os.path.join(TEST_ASSET_DIR, 'group_create_async.xml')
-
+UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'group_update.xml')
 
 class GroupTests(unittest.TestCase):
     def setUp(self):
@@ -183,3 +183,16 @@ class GroupTests(unittest.TestCase):
             group = self.server.groups.create(group_to_create)
             self.assertEqual(group.name, u'試供品')
             self.assertEqual(group.id, '3e4a9ea0-a07a-4fe6-b50f-c345c8c81034')
+
+    def test_update(self):
+        with open(UPDATE_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.put(self.baseurl + '/ef8b19c0-43b6-11e6-af50-63f5805dbe3c', text=response_xml)
+            group = TSC.GroupItem(name='Test Group')
+            group._domain_name = 'local'
+            group._id = 'ef8b19c0-43b6-11e6-af50-63f5805dbe3c'
+            group = self.server.groups.update(group)
+
+        self.assertEqual('ef8b19c0-43b6-11e6-af50-63f5805dbe3c', group.id)
+        self.assertEqual('Group updated name', group.name)

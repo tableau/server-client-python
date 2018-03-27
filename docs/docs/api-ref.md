@@ -859,7 +859,7 @@ Updates the group on the site.
 If domain_name = 'local' then update only the name of the group.
 If not - update group from the Active Directory with domain_name.
 
-REST API: [Delete Group](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Update_Group%3FTocPath%3DAPI%2520Reference%7C_____95){:target="_blank"}
+REST API: [Update Group](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Update_Group%3FTocPath%3DAPI%2520Reference%7C_____95){:target="_blank"}
 
 
 **Parameters**

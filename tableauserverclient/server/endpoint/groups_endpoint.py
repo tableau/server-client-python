@@ -7,6 +7,7 @@ import logging
 
 logger = logging.getLogger('tableau.endpoint.groups')
 
+UNLICENSED_USER = UserItem.Roles.Unlicensed
 
 class Groups(Endpoint):
     @property
@@ -56,7 +57,7 @@ class Groups(Endpoint):
         logger.info('Deleted single group (ID: {0})'.format(group_id))
 
     @api(version="2.0")
-    def update(self, group_item, default_site_role=UserItem.Roles.Unlicensed):
+    def update(self, group_item, default_site_role=UNLICENSED_USER):
         if not group_item.id:
             error = "Group item missing ID."
             raise MissingRequiredFieldError(error)
@@ -64,6 +65,8 @@ class Groups(Endpoint):
         update_req = RequestFactory.Group.update_req(group_item, default_site_role)
         server_response = self.put_request(url, update_req)
         logger.info('Updated group item (ID: {0})'.format(group_item.id))
+        updated_group = GroupItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        return updated_group
 
     # Create a 'local' Tableau group
     @api(version="2.0")
