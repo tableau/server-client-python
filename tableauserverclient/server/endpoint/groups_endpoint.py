@@ -9,6 +9,7 @@ logger = logging.getLogger('tableau.endpoint.groups')
 
 UNLICENSED_USER = UserItem.Roles.Unlicensed
 
+
 class Groups(Endpoint):
     @property
     def baseurl(self):
