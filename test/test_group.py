@@ -16,6 +16,7 @@ CREATE_GROUP = os.path.join(TEST_ASSET_DIR, 'group_create.xml')
 CREATE_GROUP_ASYNC = os.path.join(TEST_ASSET_DIR, 'group_create_async.xml')
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'group_update.xml')
 
+
 class GroupTests(unittest.TestCase):
     def setUp(self):
         self.server = TSC.Server('http://test')
