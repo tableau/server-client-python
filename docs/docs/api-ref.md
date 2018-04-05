@@ -1044,7 +1044,6 @@ Name  |  Description
 `name` | Name of the project.
 `description` | The description of the project. 
 `id`  | The project id.
-`parent_id`  | The parent project id.
 
 
 
