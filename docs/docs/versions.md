@@ -32,10 +32,7 @@ import tableauserverclient as TSC
 
 server = TSC.Server('http://SERVER_URL')
 
-
 server.version = '2.6'
-
-
 
 ```
 
@@ -49,3 +46,5 @@ The current version of TSC only supports the following REST API and Tableau Serv
 |2.4|10.1|
 |2.5|10.2|
 |2.6|10.3|
+|2.7|10.4|
+|2.8|10.5|
