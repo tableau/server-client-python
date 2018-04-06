@@ -161,10 +161,14 @@ class DatasourceTests(unittest.TestCase):
             self.server.datasources.populate_connections(single_datasource)
 
             connection = single_datasource.connections[0]
+            connection.server_address = 'bar'
+            connection.server_port = '9876'
             connection.username = 'foo'
             new_connection = self.server.datasources.update_connection(single_datasource, connection)
             self.assertEqual(connection.id, new_connection.id)
             self.assertEqual(connection.connection_type, new_connection.connection_type)
+            self.assertEquals('bar', new_connection.server_address)
+            self.assertEquals('9876', new_connection.server_port)
             self.assertEqual('foo', new_connection.username)
 
     def test_publish(self):
