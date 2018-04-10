@@ -32,15 +32,9 @@ import tableauserverclient as TSC
 
 server = TSC.Server('http://SERVER_URL')
 
-<<<<<<< HEAD
-server.version = 2.4
-=======
 
 server.version = '2.6'
 
-
-
->>>>>>> 87acd20... Update versions.md (#195)
 ```
 
 ## Supported versions
