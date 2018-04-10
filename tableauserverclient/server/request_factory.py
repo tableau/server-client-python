@@ -334,6 +334,8 @@ class WorkbookRequest(object):
     def update_req(self, workbook_item):
         xml_request = ET.Element('tsRequest')
         workbook_element = ET.SubElement(xml_request, 'workbook')
+        if workbook_item.name:
+            workbook_element.attrib['name'] = workbook_item.name
         if workbook_item.show_tabs:
             workbook_element.attrib['showTabs'] = str(workbook_item.show_tabs).lower()
         if workbook_item.project_id:
