@@ -11,6 +11,7 @@ class ViewItem(object):
         self._name = None
         self._owner_id = None
         self._preview_image = None
+        self._project_id = None
         self._pdf = None
         self._csv = None
         self._total_views = None
@@ -60,6 +61,10 @@ class ViewItem(object):
         return self._preview_image()
 
     @property
+    def project_id(self):
+        return self._project_id
+
+    @property
     def pdf(self):
         if self._pdf is None:
             error = "View item must be populated with its pdf first."
@@ -97,6 +102,7 @@ class ViewItem(object):
             usage_elem = view_xml.find('.//t:usage', namespaces=ns)
             workbook_elem = view_xml.find('.//t:workbook', namespaces=ns)
             owner_elem = view_xml.find('.//t:owner', namespaces=ns)
+            project_elem = view_xml.find('.//t:project', namespaces=ns)
             view_item._id = view_xml.get('id', None)
             view_item._name = view_xml.get('name', None)
             view_item._content_url = view_xml.get('contentUrl', None)
@@ -107,10 +113,14 @@ class ViewItem(object):
 
             if owner_elem is not None:
                 view_item._owner_id = owner_elem.get('id', None)
-            all_view_items.append(view_item)
+
+            if project_elem is not None:
+                view_item._project_id = project_elem.get('id', None)
 
             if workbook_id:
                 view_item._workbook_id = workbook_id
             elif workbook_elem is not None:
                 view_item._workbook_id = workbook_elem.get('id', None)
+
+            all_view_items.append(view_item)
         return all_view_items
