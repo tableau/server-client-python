@@ -14,12 +14,22 @@ class RequestOptions(RequestOptionsBase):
 
     class Field:
         CreatedAt = 'createdAt'
+        DomainName = 'domainName'
+        DomainNickname = 'domainNickname'
+        HitsTotal = 'hitsTotal'
+        IsLocal = 'isLocal'
         LastLogin = 'lastLogin'
+        MinimumSiteRole = 'minimumSiteRole'
         Name = 'name'
+        OwnerDomain = 'ownerDomain'
+        OwnerEmail = 'ownerEmail'
         OwnerName = 'ownerName'
+        ProjectName = 'projectName'
         SiteRole = 'siteRole'
         Tags = 'tags'
+        Type = 'type'
         UpdatedAt = 'updatedAt'
+        UserCount = 'userCount'
 
     class Direction:
         Desc = 'desc'
