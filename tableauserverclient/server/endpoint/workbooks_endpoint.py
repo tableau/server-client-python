@@ -204,8 +204,7 @@ class Workbooks(Endpoint):
 
         if connection_credentials is not None:
             import warnings
-            warnings.warn("connection_credentials is being deprecated. Use connections instead, " + \
-            "see https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Publish_Workbook",
+            warnings.warn("connection_credentials is being deprecated. Use connections instead",
                           DeprecationWarning)
 
         if not os.path.isfile(file_path):
