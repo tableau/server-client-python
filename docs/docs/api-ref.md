@@ -849,6 +849,52 @@ Error | Description
 <br> 
 <br>
 
+#### groups.update
+
+```py
+groups.update(group_item, default_site_role=UserItem.Roles.Unlicensed)
+```
+
+Updates the group on the site.
+If domain_name = 'local' then update only the name of the group.
+If not - update group from the Active Directory with domain_name.
+
+REST API: [Update Group](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Update_Group%3FTocPath%3DAPI%2520Reference%7C_____95){:target="_blank"}
+
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`group_item`  | the group_item specifies the group to update.
+`default_site_role` | if group updates from Active Directory then this is the default role for the new users.
+
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`Group item missing ID`  |  Raises an exception if a valid `group_item.id` is not provided.
+
+
+**Example**
+
+```py
+#  Update a group
+
+# import tableauserverclient as TSC
+# tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
+# server = TSC.Server('http://SERVERURL')
+
+  with server.auth.sign_in(tableau_auth):
+    all_groups, pagination_item = server.groups.get()
+
+    for group in all_groups:
+        server.groups.update(group)
+```
+<br>
+<br>
+
 #### groups.get
 
 ```py

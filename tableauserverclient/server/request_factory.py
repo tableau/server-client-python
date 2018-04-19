@@ -107,6 +107,17 @@ class GroupRequest(object):
         group_element.attrib['name'] = group_item.name
         return ET.tostring(xml_request)
 
+    def update_req(self, group_item, default_site_role):
+        xml_request = ET.Element('tsRequest')
+        group_element = ET.SubElement(xml_request, 'group')
+        group_element.attrib['name'] = group_item.name
+        if group_item.domain_name != 'local':
+            project_element = ET.SubElement(group_element, 'import')
+            project_element.attrib['source'] = "ActiveDirectory"
+            project_element.attrib['domainName'] = group_item.domain_name
+            project_element.attrib['siteRole'] = default_site_role
+        return ET.tostring(xml_request)
+
 
 class PermissionRequest(object):
     def _add_capability(self, parent_element, capability_set, mode):
