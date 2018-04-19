@@ -36,7 +36,7 @@ class Endpoint(object):
         if server_response.headers.get('Content-Type', None) not in ALLOWED_CONTENT_TYPES:
             return '[Truncated File Contents]'
         else:
-            return server_response.content[:300]
+            return server_response.content
 
     def _make_request(self, method, url, content=None, request_object=None,
                       auth_token=None, content_type=None, parameters=None):

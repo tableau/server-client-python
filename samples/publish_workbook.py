@@ -50,13 +50,16 @@ def main():
         # Step 2: Get all the projects on server, then look for the default one.
         all_projects, pagination_item = server.projects.get()
         default_project = next((project for project in all_projects if project.is_default()), None)
-        connection2 = ConnectionItem()
-        connection2.server_address = "db2.test.tsi.lan"
-        connection2.server_port = "50000"
-        connection2.connection_credentials = ConnectionCredentials("test", "p@ssw0rd", True)
+
         connection1 = ConnectionItem()
-        connection1.server_address = "mssql.test.tsi.lan"
+        connection1.server_address = "mssql.test.com"
         connection1.connection_credentials = ConnectionCredentials("test", "password", True)
+
+        connection2 = ConnectionItem()
+        connection2.server_address = "postgres.test.com"
+        connection2.server_port = "5432"
+        connection2.connection_credentials = ConnectionCredentials("test", "password", True)
+
         all_connections = list()
         all_connections.append(connection1)
         all_connections.append(connection2)

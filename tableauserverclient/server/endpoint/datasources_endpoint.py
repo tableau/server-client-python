@@ -151,7 +151,7 @@ class Datasources(Endpoint):
 
     # Publish datasource
     @api(version="2.0")
-    @parameter_added_in(connections="2.8")
+    @parameter_added_in(connections="99.99")
     def publish(self, datasource_item, file_path, mode, connection_credentials=None, connections=None):
         if not os.path.isfile(file_path):
             error = "File path does not lead to an existing file."
