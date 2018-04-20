@@ -199,7 +199,14 @@ class Workbooks(Endpoint):
 
     # Publishes workbook. Chunking method if file over 64MB
     @api(version="2.0")
-    def publish(self, workbook_item, file_path, mode, connection_credentials=None):
+    @parameter_added_in(connections='2.8')
+    def publish(self, workbook_item, file_path, mode, connection_credentials=None, connections=None):
+
+        if connection_credentials is not None:
+            import warnings
+            warnings.warn("connection_credentials is being deprecated. Use connections instead",
+                          DeprecationWarning)
+
         if not os.path.isfile(file_path):
             error = "File path does not lead to an existing file."
             raise IOError(error)
@@ -230,16 +237,21 @@ class Workbooks(Endpoint):
             logger.info('Publishing {0} to server with chunking method (workbook over 64MB)'.format(filename))
             upload_session_id = Fileuploads.upload_chunks(self.parent_srv, file_path)
             url = "{0}&uploadSessionId={1}".format(url, upload_session_id)
+            conn_creds = connection_credentials
             xml_request, content_type = RequestFactory.Workbook.publish_req_chunked(workbook_item,
-                                                                                    connection_credentials)
+                                                                                    connection_credentials=conn_creds,
+                                                                                    connections=connections)
         else:
             logger.info('Publishing {0} to server'.format(filename))
             with open(file_path, 'rb') as f:
                 file_contents = f.read()
+            conn_creds = connection_credentials
             xml_request, content_type = RequestFactory.Workbook.publish_req(workbook_item,
                                                                             filename,
                                                                             file_contents,
-                                                                            connection_credentials)
+                                                                            connection_credentials=conn_creds,
+                                                                            connections=connections)
+        logger.debug('Request xml: {0} '.format(xml_request[:1000]))
         server_response = self.post_request(url, xml_request, content_type)
         new_workbook = WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         logger.info('Published {0} (ID: {1})'.format(filename, new_workbook.id))

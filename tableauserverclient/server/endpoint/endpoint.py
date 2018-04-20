@@ -32,7 +32,7 @@ class Endpoint(object):
         '''Checks if the server_response content is not xml (eg binary image or zip)
         and and replaces it with a constant
         '''
-        ALLOWED_CONTENT_TYPES = ('application/xml',)
+        ALLOWED_CONTENT_TYPES = ('application/xml', 'application/xml;charset=utf-8')
         if server_response.headers.get('Content-Type', None) not in ALLOWED_CONTENT_TYPES:
             return '[Truncated File Contents]'
         else:
