@@ -8,7 +8,14 @@ This topic describes how to contribute to the Tableau Server Client (Python) pro
 * TOC
 {:toc}
 
+---
+
 ## Submit your first patch
+
+
+This section will get you started with the basic workflow, describing how to create your own fork of the repository and how to open a pull request (PR) to add your contributions to the **development** branch.
+
+### Get the source code and set up your branch
 
 1. Make sure you have [signed the CLA](http://tableau.github.io/#contributor-license-agreement-cla)
 
@@ -36,45 +43,47 @@ This topic describes how to contribute to the Tableau Server Client (Python) pro
    git checkout -b 13-feature-new-stuff
    ```
 
-1. Code and commit!
+### Code and commit
 
-   Here's a quick checklist for ensuring a good pull request:
+   Here's a quick checklist to follow when coding to ensure a good pull request (PR):
 
-   - Only touch the minimal amount of files possible while still accomplishing the goal.
+   - Only touch the fewest number of files possible while still accomplishing the goal.
    - Ensure all indentation is done as 4-spaces and your editor is set to unix line endings.
-   - The code matches PEP8 style guides. If you cloned the repo you can run `pycodestyle .`
+   - The code matches PEP8 style guides. If you cloned the repo you can run `pycodestyle server-client-python test samples`
    - Keep commit messages clean and descriptive.
      If the PR is accepted it will get 'Squashed' into a single commit before merging, the commit messages will be used to generate the Merge commit message.
 
-1. Add tests.
+### Add tests
 
    All of our tests live under the `test/` folder in the repository.
-   We use `unittest` and the built-in test runner `python setup.py test`.
-   If a test needs a static file, like a twb/twbx, it should live under `test/assets/`
+   We use `pytest` and the built-in test runner `python setup.py test`.
+   If a test needs a static file, like a .twb/.twbx, it should live under `test/assets/`
 
-1. Update the documentation.
-
-   Our documentation is written in markdown and built with Jekyll on Github Pages. All of the documentation source files can be found in `docs/docs`.
+### Update the documentation
 
    When adding a new feature or improving existing functionality we may ask that you update the documentation along with your code.
 
-   If you are just making a PR for documentation updates (adding new docs, fixing typos, improving wording) the easiest method is to use the built in `Edit this file` in the Github UI
+   Our documentation is written in markdown and built with Jekyll on GitHub Pages. All of the documentation source files can be found in `/docs` folder in the **gh-pages** branch. The docs are hosted on the following URL: [https://tableau.github.io/server-client-python](https://tableau.github.io/server-client-python)
 
-1. Submit to your fork.
+   If you are just making documentation updates (adding new docs, fixing typos, improving wording) the easiest method is to use the built-in `Edit this file` feature right in GitHub (click the pencil icon). If you are viewing one of the pages on [https://tableau.github.io/server-client-python](https://tableau.github.io/server-client-python), clicking the **Edit this page** link at the top of the page will take you to the same place. 
 
-1. Make a PR as described [here](https://help.github.com/articles/creating-a-pull-request-from-a-fork/) against the 'development' branch.
+### Commit changes to your fork and open a PR
+
+1. Make a PR as described [here](https://help.github.com/articles/creating-a-pull-request-from-a-fork/) against the **development** branch for code changes, or against **gh-pages** for documentation updates.
 
 1. Wait for a review and address any feedback.
    While we try and stay on top of all issues and PRs it might take a few days for someone to respond. Politely pinging
    the PR after a few days with no response is OK, we'll try and respond with a timeline as soon as we are able.
 
-1. That's it! When the PR has received :rocket:'s from members of the core team they will merge the PR
+1. That's it! When the PR has received ![](https://assets-cdn.github.com/images/icons/emoji/unicode/1f680.png){:height="5%" width="5%"} (:rocket:'s) from members of the core team they will merge the PR
+
+---
 
 
 ## Add new features
 
 1. Create an endpoint class for the new feature, following the structure of the other endpoints. Each endpoint usually
-   has `get`, `post`, `update`, and `delete` operations that require making the url, creating the XML request if necesssary,
+   has `get`, `post`, `update`, and `delete` operations that require making the url, creating the XML request if necessary,
    sending the request, and creating the target item object based on the server response.
 
 1. Create an item class for the new feature, following the structure of the other item classes. Each item has properties
