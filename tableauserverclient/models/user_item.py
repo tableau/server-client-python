@@ -17,7 +17,7 @@ class UserItem(object):
         Guest = 'Guest'
 
         Creator = 'Creator'
-        Explorer ='Explorer'
+        Explorer = 'Explorer'
         ExplorerCanPublish = 'ExplorerCanPublish'
         ReadOnly = 'ReadOnly'
         SiteAdministratorCreator = 'SiteAdministratorCreator'
