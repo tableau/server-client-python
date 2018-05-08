@@ -23,7 +23,6 @@ class UserItem(object):
         SiteAdministratorCreator = 'SiteAdministratorCreator'
         SiteAdministratorExplorer = 'SiteAdministratorExplorer'
         UnlicensedWithPublish = 'UnlicensedWithPublish'
-        ViewerWithPublish = 'ViewerWithPublish'
 
     class Auth:
         SAML = 'SAML'
