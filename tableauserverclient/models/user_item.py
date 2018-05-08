@@ -16,6 +16,14 @@ class UserItem(object):
         ViewerWithPublish = 'ViewerWithPublish'
         Guest = 'Guest'
 
+        Creator = 'Creator'
+        Explorer = 'Explorer'
+        ExplorerCanPublish = 'ExplorerCanPublish'
+        ReadOnly = 'ReadOnly'
+        SiteAdministratorCreator = 'SiteAdministratorCreator'
+        SiteAdministratorExplorer = 'SiteAdministratorExplorer'
+        UnlicensedWithPublish = 'UnlicensedWithPublish'
+
     class Auth:
         SAML = 'SAML'
         ServerDefault = 'ServerDefault'
@@ -147,3 +155,6 @@ class UserItem(object):
             domain_name = domain_elem.get('name', None)
 
         return id, name, site_role, last_login, external_auth_user_id, fullname, email, auth_setting, domain_name
+
+    def __repr__(self):
+        return "<User {} name={} role={}>".format(self.id, self.name, self.site_role)
