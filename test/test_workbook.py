@@ -14,6 +14,7 @@ GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, 'workbook_get_by_id.xml')
 GET_EMPTY_XML = os.path.join(TEST_ASSET_DIR, 'workbook_get_empty.xml')
 GET_XML = os.path.join(TEST_ASSET_DIR, 'workbook_get.xml')
 POPULATE_CONNECTIONS_XML = os.path.join(TEST_ASSET_DIR, 'workbook_populate_connections.xml')
+POPULATE_PERMISSIONS_XML = os.path.join(TEST_ASSET_DIR, 'workbook_populate_permissions.xml')
 POPULATE_PREVIEW_IMAGE = os.path.join(TEST_ASSET_DIR, 'RESTAPISample Image.png')
 POPULATE_VIEWS_XML = os.path.join(TEST_ASSET_DIR, 'workbook_populate_views.xml')
 POPULATE_VIEWS_USAGE_XML = os.path.join(TEST_ASSET_DIR, 'workbook_populate_views_usage.xml')
@@ -261,6 +262,41 @@ class WorkbookTests(unittest.TestCase):
             self.assertEqual('dataengine', single_workbook.connections[0].connection_type)
             self.assertEqual('4506225a-0d32-4ab1-82d3-c24e85f7afba', single_workbook.connections[0].datasource_id)
             self.assertEqual('World Indicators', single_workbook.connections[0].datasource_name)
+
+    def test_populate_permissions(self):
+        with open(POPULATE_PERMISSIONS_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + '/21778de4-b7b9-44bc-a599-1506a2639ace/permissions', text=response_xml)
+            single_workbook = TSC.WorkbookItem('test')
+            single_workbook._id = '21778de4-b7b9-44bc-a599-1506a2639ace'
+
+            self.server.workbooks.populate_permissions(single_workbook)
+            permissions = single_workbook.permissions
+
+            grantee_type = TSC.Permission.GranteeType.Group
+            object_id = '5e5e1978-71fa-11e4-87dd-7382f5c437af'
+            key = (grantee_type, object_id)
+            self.assertEqual(permissions.capabilities[key].type, TSC.Permission.GranteeType.Group)
+            self.assertEqual(permissions.capabilities[key].object_id, '5e5e1978-71fa-11e4-87dd-7382f5c437af')
+            self.assertDictEqual(permissions.capabilities[key].map, {
+                TSC.Permission.WorkbookCapabilityType.WebAuthoring: TSC.Permission.CapabilityMode.Allow,
+                TSC.Permission.WorkbookCapabilityType.Read: TSC.Permission.CapabilityMode.Allow,
+                TSC.Permission.WorkbookCapabilityType.Filter: TSC.Permission.CapabilityMode.Allow,
+                TSC.Permission.WorkbookCapabilityType.AddComment: TSC.Permission.CapabilityMode.Allow
+            })
+
+            grantee_type = TSC.Permission.GranteeType.User
+            object_id = '7c37ee24-c4b1-42b6-a154-eaeab7ee330a'
+            key = (grantee_type, object_id)
+            self.assertEqual(permissions.capabilities[key].type, TSC.Permission.GranteeType.User)
+            self.assertEqual(permissions.capabilities[key].object_id, '7c37ee24-c4b1-42b6-a154-eaeab7ee330a')
+            self.assertDictEqual(permissions.capabilities[key].map, {
+                TSC.Permission.WorkbookCapabilityType.ExportImage: TSC.Permission.CapabilityMode.Allow,
+                TSC.Permission.WorkbookCapabilityType.ShareView: TSC.Permission.CapabilityMode.Allow,
+                TSC.Permission.WorkbookCapabilityType.ExportData: TSC.Permission.CapabilityMode.Deny,
+                TSC.Permission.WorkbookCapabilityType.ViewComments: TSC.Permission.CapabilityMode.Deny
+            })
 
     def test_populate_connections_missing_id(self):
         single_workbook = TSC.WorkbookItem('test')

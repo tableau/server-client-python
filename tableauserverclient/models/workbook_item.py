@@ -3,6 +3,7 @@ from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_not_nullable, property_is_boolean
 from .tag_item import TagItem
 from .view_item import ViewItem
+from .permissions_item import PermissionsItem
 from ..datetime_helpers import parse_datetime
 import copy
 
@@ -24,6 +25,7 @@ class WorkbookItem(object):
         self.project_id = project_id
         self.show_tabs = show_tabs
         self.tags = set()
+        self._permissions = None
 
     @property
     def connections(self):
@@ -31,6 +33,13 @@ class WorkbookItem(object):
             error = "Workbook item must be populated with connections first."
             raise UnpopulatedPropertyError(error)
         return self._connections()
+
+    @property
+    def permissions(self):
+        if self._permissions is None:
+            error = "Workbook item must be populated with permissions first."
+            raise UnpopulatedPropertyError(error)
+        return self._permissions()
 
     @property
     def content_url(self):
@@ -100,6 +109,9 @@ class WorkbookItem(object):
 
     def _set_connections(self, connections):
         self._connections = connections
+
+    def _set_permissions(self, permissions):
+        self._permissions = permissions
 
     def _set_views(self, views):
         self._views = views

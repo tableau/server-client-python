@@ -1,4 +1,5 @@
-from .endpoint import Endpoint, api, parameter_added_in
+from .endpoint import api, parameter_added_in, Endpoint
+from .permissions_endpoint import _PermissionsEndpoint
 from .exceptions import MissingRequiredFieldError
 from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
@@ -25,6 +26,7 @@ class Workbooks(Endpoint):
     def __init__(self, parent_srv):
         super(Workbooks, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)
+        self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
 
     @property
     def baseurl(self):
@@ -196,6 +198,18 @@ class Workbooks(Endpoint):
         server_response = self.get_request(url)
         preview_image = server_response.content
         return preview_image
+
+    @api(version='2.0')
+    def populate_permissions(self, item):
+        self._permissions.populate(item)
+
+    @api(version='2.0')
+    def update_permission(self, item, permission_item):
+        self._permissions.update(item, permission_item)
+
+    @api(version='2.0')
+    def delete_permission(self, item, capability_item):
+        self._permissions.delete(item, capability_item)
 
     # Publishes workbook. Chunking method if file over 64MB
     @api(version="2.0")
