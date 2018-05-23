@@ -1,5 +1,8 @@
 from .endpoint import Endpoint, api, parameter_added_in
 from .exceptions import InternalServerError, MissingRequiredFieldError
+from .endpoint import api, parameter_added_in, Endpoint
+from .permissions_endpoint import _PermissionsEndpoint
+from .exceptions import MissingRequiredFieldError
 from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, DatasourceItem, PaginationItem, ConnectionItem
@@ -24,6 +27,7 @@ class Datasources(Endpoint):
     def __init__(self, parent_srv):
         super(Datasources, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)
+        self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
 
     @property
     def baseurl(self):
@@ -196,6 +200,7 @@ class Datasources(Endpoint):
                                                                               file_contents,
                                                                               connection_credentials,
                                                                               connections)
+<<<<<<< HEAD
 
         # Send the publishing request to server
         try:
@@ -213,3 +218,21 @@ class Datasources(Endpoint):
             new_datasource = DatasourceItem.from_response(server_response.content, self.parent_srv.namespace)[0]
             logger.info('Published {0} (ID: {1})'.format(filename, new_datasource.id))
             return new_datasource
+=======
+        server_response = self.post_request(url, xml_request, content_type)
+        new_datasource = DatasourceItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        logger.info('Published {0} (ID: {1})'.format(filename, new_datasource.id))
+        return new_datasource
+
+    @api(version='2.0')
+    def populate_permissions(self, item):
+        self._permissions.populate(item)
+
+    @api(version='2.0')
+    def update_permission(self, item, permission_item):
+        self._permissions.update(item, permission_item)
+
+    @api(version='2.0')
+    def delete_permission(self, item, capability_item):
+        self._permissions.delete(item, capability_item)
+>>>>>>> adding permissions support for workbook, datasource, project
