@@ -141,4 +141,3 @@ class BackgroundJobItem(object):
         subtitle = element.get('subtitle', None)
 
         return cls(id_, created_at, priority, type_, status, title, subtitle, started_at, ended_at)
-

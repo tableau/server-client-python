@@ -23,7 +23,6 @@ class Jobs(Endpoint):
         jobs = BackgroundJobItem.from_response(server_response.content, self.parent_srv.namespace)
         return jobs, pagination_item
 
-
     @api(version='2.6')
     def get_by_id(self, job_id):
         logger.info('Query for information about job ' + job_id)
