@@ -1,9 +1,9 @@
 import unittest
 import os
 from datetime import datetime
+from tableauserverclient.datetime_helpers import utc
 import requests_mock
 import tableauserverclient as TSC
-from tableauserverclient.datetime_helpers import utc
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
@@ -31,6 +31,7 @@ class JobTests(unittest.TestCase):
             created_at = datetime(2018, 5, 22, 13, 0, 29, tzinfo=utc)
             started_at = datetime(2018, 5, 22, 13, 0, 37, tzinfo=utc)
             ended_at = datetime(2018, 5, 22, 13, 0, 45, tzinfo=utc)
+
             self.assertEquals(1, pagination_item.total_available)
             self.assertEquals('2eef4225-aa0c-41c4-8662-a76d89ed7336', job.id)
             self.assertEquals('Success', job.status)
