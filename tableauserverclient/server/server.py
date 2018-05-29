@@ -4,8 +4,14 @@ from .exceptions import NotSignedInError
 from ..namespace import Namespace
 from .endpoint import Sites, Views, Users, Groups, Workbooks, Datasources, Projects, Auth, \
     Schedules, ServerInfo, Tasks, ServerInfoEndpointNotFoundError, Subscriptions, Jobs
+from .endpoint.exceptions import EndpointUnavailableError
 
 import requests
+
+try:
+    from distutils2.version import NormalizedVersion as Version
+except ImportError:
+    from distutils.version import LooseVersion as Version
 
 _PRODUCT_TO_REST_VERSION = {
     '10.0': '2.3',
@@ -93,6 +99,14 @@ class Server(object):
         self.use_server_version()
         import warnings
         warnings.warn("use use_server_version instead", DeprecationWarning)
+
+    def assert_at_least_version(self, version):
+        server_version = Version(self.version or "0.0")
+        minimum_supported = Version(version)
+        if server_version < minimum_supported:
+            error = "This endpoint is not available in API version {}. Requires {}".format(
+                server_version, minimum_supported)
+            raise EndpointUnavailableError(error)
 
     @property
     def baseurl(self):

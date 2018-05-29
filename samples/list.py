@@ -21,7 +21,7 @@ def main():
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
                         help='desired logging level (set to error by default)')
 
-    parser.add_argument('resource_type', choices=['workbook', 'datasource', 'view'])
+    parser.add_argument('resource_type', choices=['workbook', 'datasource', 'project', 'view', 'job'])
 
     args = parser.parse_args()
 
@@ -41,7 +41,9 @@ def main():
         endpoint = {
             'workbook': server.workbooks,
             'datasource': server.datasources,
-            'view': server.views
+            'view': server.views,
+            'job': server.jobs,
+            'project': server.projects,
         }.get(args.resource_type)
 
         for resource in TSC.Pager(endpoint.get):
