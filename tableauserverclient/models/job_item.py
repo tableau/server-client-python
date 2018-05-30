@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+from ..datetime_helpers import parse_datetime
 from .target import Target
 
 
@@ -86,7 +87,8 @@ class BackgroundJobItem(object):
 
     @property
     def name(self):
-        """For APi consistency"""
+        """For API consistency - all other resource endpoints have a name attribute which is used to display what
+        they are.  Alias title as name to allow consistent handling of resources in the list sample."""
         return self._title
 
     @property
@@ -133,9 +135,9 @@ class BackgroundJobItem(object):
         id_ = element.get('id', None)
         type_ = element.get('jobType', None)
         status = element.get('status', None)
-        created_at = element.get('createdAt', None)
-        started_at = element.get('startedAt', None)
-        ended_at = element.get('endedAt', None)
+        created_at = parse_datetime(element.get('createdAt', None))
+        started_at = parse_datetime(element.get('startedAt', None))
+        ended_at = parse_datetime(element.get('endedAt', None))
         priority = element.get('priority', None)
         title = element.get('title', None)
         subtitle = element.get('subtitle', None)

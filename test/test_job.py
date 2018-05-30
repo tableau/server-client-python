@@ -1,7 +1,9 @@
 import unittest
 import os
+from datetime import datetime
 import requests_mock
 import tableauserverclient as TSC
+from tableauserverclient.datetime_helpers import utc
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
@@ -26,16 +28,17 @@ class JobTests(unittest.TestCase):
             m.get(self.baseurl, text=response_xml)
             all_jobs, pagination_item = self.server.jobs.get()
             job = all_jobs[0]
+            created_at = datetime(2018, 5, 22, 13, 0, 29, tzinfo=utc)
+            started_at = datetime(2018, 5, 22, 13, 0, 37, tzinfo=utc)
+            ended_at = datetime(2018, 5, 22, 13, 0, 45, tzinfo=utc)
             self.assertEquals(1, pagination_item.total_available)
             self.assertEquals('2eef4225-aa0c-41c4-8662-a76d89ed7336', job.id)
             self.assertEquals('Success', job.status)
             self.assertEquals('50', job.priority)
             self.assertEquals('single_subscription_notify', job.type)
-            """
-                    <backgroundJob id="2eef4225-aa0c-41c4-8662-a76d89ed7336" status="Success"
-                       createdAt="2018-05-22T13:00:29Z" startedAt="2018-05-22T13:00:37Z" endedAt="2018-05-22T13:00:45Z"
-                       priority="50" jobType="single_subscription_notify"/>
-            """
+            self.assertEquals(created_at, job.created_at)
+            self.assertEquals(started_at, job.started_at)
+            self.assertEquals(ended_at, job.ended_at)
 
     def test_get_before_signin(self):
         self.server._auth_token = None
