@@ -1,9 +1,9 @@
 import unittest
 import os
 from datetime import datetime
-from tableauserverclient.datetime_helpers import utc
 import requests_mock
 import tableauserverclient as TSC
+from tableauserverclient.datetime_helpers import utc
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
