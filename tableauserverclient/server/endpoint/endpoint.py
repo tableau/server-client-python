@@ -76,7 +76,7 @@ class Endpoint(object):
         # We don't return anything for a delete
         self._make_request(self.parent_srv.session.delete, url, auth_token=self.parent_srv.auth_token)
 
-    def put_request(self, url, xml_request, content_type='text/xml'):
+    def put_request(self, url, xml_request=None, content_type='text/xml'):
         return self._make_request(self.parent_srv.session.put, url,
                                   content=xml_request,
                                   auth_token=self.parent_srv.auth_token,

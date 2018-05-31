@@ -44,3 +44,8 @@ class JobTests(unittest.TestCase):
     def test_get_before_signin(self):
         self.server._auth_token = None
         self.assertRaises(TSC.NotSignedInError, self.server.jobs.get)
+
+    def test_cancel(self):
+        with requests_mock.mock() as m:
+            m.put(self.baseurl + '/ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', status_code=204)
+            self.server.jobs.cancel('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
