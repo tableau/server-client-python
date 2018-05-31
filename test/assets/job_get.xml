@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.1.xsd">
+    <pagination pageNumber="1" pageSize="100" totalAvailable="1"/>
+    <backgroundJobs>
+        <backgroundJob id="2eef4225-aa0c-41c4-8662-a76d89ed7336" status="Success"
+                       createdAt="2018-05-22T13:00:29Z" startedAt="2018-05-22T13:00:37Z" endedAt="2018-05-22T13:00:45Z"
+                       priority="50" jobType="single_subscription_notify"/>
+    </backgroundJobs>
+</tsResponse>
