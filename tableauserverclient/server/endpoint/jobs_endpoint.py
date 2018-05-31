@@ -20,7 +20,7 @@ class Jobs(Endpoint):
             return self.get_by_id(job_id)
         if isinstance(job_id, RequestOptionsBase):
             req_options = job_id
-            
+
         self.parent_srv.assert_at_least_version('3.1')
         server_response = self.get_request(self.baseurl, req_options)
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
