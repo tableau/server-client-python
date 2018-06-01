@@ -31,6 +31,7 @@ class JobTests(unittest.TestCase):
             created_at = datetime(2018, 5, 22, 13, 0, 29, tzinfo=utc)
             started_at = datetime(2018, 5, 22, 13, 0, 37, tzinfo=utc)
             ended_at = datetime(2018, 5, 22, 13, 0, 45, tzinfo=utc)
+
             self.assertEquals(1, pagination_item.total_available)
             self.assertEquals('2eef4225-aa0c-41c4-8662-a76d89ed7336', job.id)
             self.assertEquals('Success', job.status)
@@ -43,3 +44,8 @@ class JobTests(unittest.TestCase):
     def test_get_before_signin(self):
         self.server._auth_token = None
         self.assertRaises(TSC.NotSignedInError, self.server.jobs.get)
+
+    def test_cancel(self):
+        with requests_mock.mock() as m:
+            m.put(self.baseurl + '/ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', status_code=204)
+            self.server.jobs.cancel('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')

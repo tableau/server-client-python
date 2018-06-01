@@ -1,5 +1,6 @@
 from .endpoint import Endpoint, api
 from .. import JobItem, BackgroundJobItem, PaginationItem
+from ..request_options import RequestOptionsBase
 import logging
 
 logger = logging.getLogger('tableau.endpoint.jobs')
@@ -17,11 +18,19 @@ class Jobs(Endpoint):
             import warnings
             warnings.warn("Jobs.get(job_id) is deprecated, update code to use Jobs.get_by_id(job_id)")
             return self.get_by_id(job_id)
+        if isinstance(job_id, RequestOptionsBase):
+            req_options = job_id
+
         self.parent_srv.assert_at_least_version('3.1')
         server_response = self.get_request(self.baseurl, req_options)
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         jobs = BackgroundJobItem.from_response(server_response.content, self.parent_srv.namespace)
         return jobs, pagination_item
+
+    @api(version='3.1')
+    def cancel(self, job_id):
+        url = '{0}/{1}'.format(self.baseurl, job_id)
+        return self.put_request(url)
 
     @api(version='2.6')
     def get_by_id(self, job_id):
