@@ -1,5 +1,5 @@
 ####
-# This script demonstrates how to list all of the workbooks or datasources
+# This script demonstrates how to kill all of the running jobs
 #
 # To run the script, you must have installed Python 2.7.X or 3.3 and later.
 ####
@@ -12,7 +12,7 @@ import tableauserverclient as TSC
 
 
 def main():
-    parser = argparse.ArgumentParser(description='List out the names and LUIDs for different resource types')
+    parser = argparse.ArgumentParser(description='Cancel all of the running background jobs')
     parser.add_argument('--server', '-s', required=True, help='server address')
     parser.add_argument('--site', '-S', default=None, help='site to log into, do not specify for default site')
     parser.add_argument('--username', '-u', required=True, help='username to sign into server')
@@ -39,7 +39,7 @@ def main():
         req = TSC.RequestOptions()
 
         req.filter.add(TSC.Filter("progress", TSC.RequestOptions.Operator.LessThanOrEqual, 0))
-        for job in TSC.Pager(server.jobs.get, request_opts=req):
+        for job in TSC.Pager(server.jobs, request_opts=req):
             print(server.jobs.cancel(job.id), job.id, job.status, job.type)
 
 
