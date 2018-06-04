@@ -49,7 +49,7 @@ This section will get you started with the basic workflow, describing how to cre
 
    - Only touch the fewest number of files possible while still accomplishing the goal.
    - Ensure all indentation is done as 4-spaces and your editor is set to unix line endings.
-   - The code matches PEP8 style guides. If you cloned the repo you can run `pycodestyle server-client-python test samples`
+   - The code matches PEP8 style guides. If you cloned the repo you can run `pycodestyle tableauserverclient test samples`
    - Keep commit messages clean and descriptive.
      If the PR is accepted it will get 'Squashed' into a single commit before merging, the commit messages will be used to generate the Merge commit message.
 
