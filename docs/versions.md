@@ -44,9 +44,8 @@ import tableauserverclient as TSC
 
 server = TSC.Server('http://SERVER_URL')
 
- 
-server.version = '2.6'
 
+server.version = '2.6'
 
 ```
 
