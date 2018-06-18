@@ -31,7 +31,7 @@ class Server(object):
         self._session = requests.Session()
         self._http_options = dict()
 
-        self.version = "3.0"
+        self.version = "2.3"
         self.auth = Auth(self)
         self.views = Views(self)
         self.users = Users(self)
@@ -77,7 +77,7 @@ class Server(object):
     def _determine_highest_version(self):
         try:
             old_version = self.version
-            self.version = "3.0"
+            self.version = "2.4"
             version = self.server_info.get().rest_api_version
         except ServerInfoEndpointNotFoundError:
             version = self._get_legacy_version()
