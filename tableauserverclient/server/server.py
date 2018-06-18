@@ -8,6 +8,7 @@ from .endpoint import Sites, Views, Users, Groups, Workbooks, Datasources, Proje
 import requests
 
 _PRODUCT_TO_REST_VERSION = {
+    '2018.1': '3.0',
     '10.0': '2.3',
     '9.3': '2.2',
     '9.2': '2.1',
@@ -30,7 +31,7 @@ class Server(object):
         self._session = requests.Session()
         self._http_options = dict()
 
-        self.version = "2.3"
+        self.version = "3.0"
         self.auth = Auth(self)
         self.views = Views(self)
         self.users = Users(self)
@@ -76,7 +77,7 @@ class Server(object):
     def _determine_highest_version(self):
         try:
             old_version = self.version
-            self.version = "2.4"
+            self.version = "3.0"
             version = self.server_info.get().rest_api_version
         except ServerInfoEndpointNotFoundError:
             version = self._get_legacy_version()
