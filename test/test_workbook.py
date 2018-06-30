@@ -313,7 +313,7 @@ class WorkbookTests(unittest.TestCase):
             new_workbook = TSC.WorkbookItem(name='Sample', show_tabs=False,
                                             project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
             new_job = self.server.workbooks.publish(new_workbook, os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx'),
-                                                         self.server.PublishMode.CreateNew, True)
+                                                    self.server.PublishMode.CreateNew, True)
 
         self.assertEqual('7c3d599e-949f-44c3-94a1-f30ba85757e4', new_job.id)
         self.assertEqual('PublishWorkbook', new_job.type)
@@ -324,7 +324,7 @@ class WorkbookTests(unittest.TestCase):
     def test_publish_invalid_file(self):
         new_workbook = TSC.WorkbookItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
         self.assertRaises(IOError, self.server.workbooks.publish, new_workbook, '.',
-                                   self.server.PublishMode.CreateNew)
+                          self.server.PublishMode.CreateNew)
 
     def test_publish_invalid_file_type(self):
         new_workbook = TSC.WorkbookItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
