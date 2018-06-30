@@ -2,6 +2,7 @@ import xml.etree.ElementTree as ET
 from .target import Target
 from ..datetime_helpers import parse_datetime
 
+
 class JobItem(object):
     def __init__(self, id_, job_type, progress, created_at, started_at=None, completed_at=None, finish_code=0):
         self._id = id_

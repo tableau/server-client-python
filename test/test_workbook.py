@@ -319,7 +319,6 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual('PublishWorkbook', new_job.type)
         self.assertEqual('0', new_job.progress)
         self.assertEqual('2018-06-29T23:22:32Z', format_datetime(new_job.created_at))
-        self.assertEqual('2016-08-18T18:33:24Z', format_datetime(new_workbook.created_at))
         self.assertEqual('1', new_job.finish_code)
 
     def test_publish_invalid_file(self):
