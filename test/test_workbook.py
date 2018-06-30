@@ -15,6 +15,7 @@ POPULATE_PREVIEW_IMAGE = os.path.join(TEST_ASSET_DIR, 'RESTAPISample Image.png')
 POPULATE_VIEWS_XML = os.path.join(TEST_ASSET_DIR, 'workbook_populate_views.xml')
 POPULATE_VIEWS_USAGE_XML = os.path.join(TEST_ASSET_DIR, 'workbook_populate_views_usage.xml')
 PUBLISH_XML = os.path.join(TEST_ASSET_DIR, 'workbook_publish.xml')
+PUBLISH_ASYNC_XML = os.path.join(TEST_ASSET_DIR, 'workbook_publish_async.xml')
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'workbook_update.xml')
 
 
@@ -304,10 +305,26 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual('GDP per capita', new_workbook.views[0].name)
         self.assertEqual('RESTAPISample_0/sheets/GDPpercapita', new_workbook.views[0].content_url)
 
+    def test_publish_async(self):
+        with open(PUBLISH_ASYNC_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.post(self.baseurl, text=response_xml)
+            new_workbook = TSC.WorkbookItem(name='Sample', show_tabs=False,
+                                            project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+            new_job = self.server.workbooks.publish(new_workbook, os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx'),
+                                                         self.server.PublishMode.CreateNew, True)
+
+        self.assertEqual('7c3d599e-949f-44c3-94a1-f30ba85757e4', new_job.id)
+        self.assertEqual('PublishWorkbook', new_job.type)
+        self.assertEqual('0', new_job.progress)
+        self.assertEqual('2018-06-29T23:22:32Z', format_datetime(new_job.created_at))
+        self.assertEqual('1', new_job.finish_code)
+
     def test_publish_invalid_file(self):
         new_workbook = TSC.WorkbookItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
-        self.assertRaises(IOError, self.server.workbooks.publish, new_workbook,
-                          '.', self.server.PublishMode.CreateNew)
+        raises = self.assertRaises(IOError, self.server.workbooks.publish, new_workbook, '.',
+                                   self.server.PublishMode.CreateNew)
 
     def test_publish_invalid_file_type(self):
         new_workbook = TSC.WorkbookItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
