@@ -200,7 +200,7 @@ class Workbooks(Endpoint):
     # Publishes workbook. Chunking method if file over 64MB
     @api(version="2.0")
     @parameter_added_in(as_job='3.0')
-    def publish(self, workbook_item, file_path, mode, as_job=False, connection_credentials=None):
+    def publish(self, workbook_item, file_path, mode, connection_credentials=None, as_job=False):
         if not os.path.isfile(file_path):
             error = "File path does not lead to an existing file."
             raise IOError(error)
@@ -226,7 +226,7 @@ class Workbooks(Endpoint):
             error = 'Workbooks cannot be appended.'
             raise ValueError(error)
 
-        if as_job is True:
+        if as_job:
             url += '&{0}=true'.format('asJob')
 
         # Determine if chunking is required (64MB is the limit for single upload method)
@@ -245,7 +245,7 @@ class Workbooks(Endpoint):
                                                                             file_contents,
                                                                             connection_credentials)
         server_response = self.post_request(url, xml_request, content_type)
-        if as_job is True:
+        if as_job:
             new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
             logger.info('Published {0} (JOB_ID: {1}'.format(filename, new_job.id))
             return new_job
