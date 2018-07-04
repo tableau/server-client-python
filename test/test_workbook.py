@@ -286,10 +286,17 @@ class WorkbookTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
-            new_workbook = TSC.WorkbookItem(name='Sample', show_tabs=False,
+
+            new_workbook = TSC.WorkbookItem(name='Sample',
+                                            show_tabs=False,
                                             project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
-            new_workbook = self.server.workbooks.publish(new_workbook, os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx'),
-                                                         self.server.PublishMode.CreateNew)
+
+            sample_workbok = os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx')
+            publish_mode = self.server.PublishMode.CreateNew
+
+            new_workbook = self.server.workbooks.publish(new_workbook,
+                                                         sample_workbok,
+                                                         publish_mode)
 
         self.assertEqual('a8076ca1-e9d8-495e-bae6-c684dbb55836', new_workbook.id)
         self.assertEqual('RESTAPISample', new_workbook.name)
@@ -310,10 +317,18 @@ class WorkbookTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
-            new_workbook = TSC.WorkbookItem(name='Sample', show_tabs=False,
+
+            new_workbook = TSC.WorkbookItem(name='Sample',
+                                            show_tabs=False,
                                             project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
-            new_job = self.server.workbooks.publish(new_workbook, os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx'),
-                                                    self.server.PublishMode.CreateNew, True)
+
+            sample_workbok = os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx')
+            publish_mode = self.server.PublishMode.CreateNew
+
+            new_job = self.server.workbooks.publish(new_workbook,
+                                                    sample_workbok,
+                                                    publish_mode,
+                                                    as_job=True)
 
         self.assertEqual('7c3d599e-949f-44c3-94a1-f30ba85757e4', new_job.id)
         self.assertEqual('PublishWorkbook', new_job.type)

@@ -55,10 +55,10 @@ def main():
         if default_project is not None:
             new_workbook = TSC.WorkbookItem(default_project.id)
             if args.as_job:
-                new_job = server.workbooks.publish(new_workbook, args.filepath, overwrite_true, args.as_job)
+                new_job = server.workbooks.publish(new_workbook, args.filepath, overwrite_true, as_job=args.as_job)
                 print("Workbook published. JOB ID: {0}".format(new_job.id))
             else:
-                new_workbook = server.workbooks.publish(new_workbook, args.filepath, overwrite_true, args.as_job)
+                new_workbook = server.workbooks.publish(new_workbook, args.filepath, overwrite_true, as_job=args.as_job)
                 print("Workbook published. ID: {0}".format(new_workbook.id))
         else:
             error = "The default project could not be found."

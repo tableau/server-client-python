@@ -173,9 +173,11 @@ class DatasourceTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
             new_datasource = TSC.DatasourceItem('SampleDS', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+            publish_mode = self.server.PublishMode.CreateNew
+
             new_datasource = self.server.datasources.publish(new_datasource,
                                                              asset('SampleDS.tds'),
-                                                             mode=self.server.PublishMode.CreateNew)
+                                                             mode=publish_mode)
 
         self.assertEqual('e76a1461-3b1d-4588-bf1b-17551a879ad9', new_datasource.id)
         self.assertEqual('SampleDS', new_datasource.name)
@@ -192,9 +194,11 @@ class DatasourceTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
             new_datasource = TSC.DatasourceItem('SampleDS', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+            publish_mode = self.server.PublishMode.CreateNew
+
             new_job = self.server.datasources.publish(new_datasource,
                                                       asset('SampleDS.tds'),
-                                                      mode=self.server.PublishMode.CreateNew,
+                                                      mode=publish_mode,
                                                       as_job=True)
 
         self.assertEqual('9a373058-af5f-4f83-8662-98b3e0228a73', new_job.id)
