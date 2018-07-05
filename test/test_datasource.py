@@ -11,6 +11,7 @@ GET_EMPTY_XML = 'datasource_get_empty.xml'
 GET_BY_ID_XML = 'datasource_get_by_id.xml'
 POPULATE_CONNECTIONS_XML = 'datasource_populate_connections.xml'
 PUBLISH_XML = 'datasource_publish.xml'
+PUBLISH_XML_ASYNC = 'datasource_publish_async.xml'
 UPDATE_XML = 'datasource_update.xml'
 UPDATE_CONNECTION_XML = 'datasource_connection_update.xml'
 
@@ -172,9 +173,11 @@ class DatasourceTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
             new_datasource = TSC.DatasourceItem('SampleDS', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+            publish_mode = self.server.PublishMode.CreateNew
+
             new_datasource = self.server.datasources.publish(new_datasource,
                                                              asset('SampleDS.tds'),
-                                                             mode=self.server.PublishMode.CreateNew)
+                                                             mode=publish_mode)
 
         self.assertEqual('e76a1461-3b1d-4588-bf1b-17551a879ad9', new_datasource.id)
         self.assertEqual('SampleDS', new_datasource.name)
@@ -185,6 +188,24 @@ class DatasourceTests(unittest.TestCase):
         self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', new_datasource.project_id)
         self.assertEqual('default', new_datasource.project_name)
         self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', new_datasource.owner_id)
+
+    def test_publish_async(self):
+        response_xml = read_xml_asset(PUBLISH_XML_ASYNC)
+        with requests_mock.mock() as m:
+            m.post(self.baseurl, text=response_xml)
+            new_datasource = TSC.DatasourceItem('SampleDS', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+            publish_mode = self.server.PublishMode.CreateNew
+
+            new_job = self.server.datasources.publish(new_datasource,
+                                                      asset('SampleDS.tds'),
+                                                      mode=publish_mode,
+                                                      as_job=True)
+
+        self.assertEqual('9a373058-af5f-4f83-8662-98b3e0228a73', new_job.id)
+        self.assertEqual('PublishDatasource', new_job.type)
+        self.assertEqual('0', new_job.progress)
+        self.assertEqual('2018-06-30T00:54:54Z', format_datetime(new_job.created_at))
+        self.assertEqual('1', new_job.finish_code)
 
     def test_delete(self):
         with requests_mock.mock() as m:
