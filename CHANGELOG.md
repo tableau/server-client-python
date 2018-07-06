@@ -1,3 +1,20 @@
+## 0.7 (2 Jul 2018)
+
+* Added cancel job (#299)
+* Added Get background jobs (#298)
+* Added Multi-credential support (#276)
+* Added Update Groups (#279)
+* Adding project_id to view (#285)
+* Added ability to rename workbook using `update workbook` (#284)
+* Added Sample for exporting full pdf using pdf page combining (#267)
+* Added Sample for exporting data, images, and single view pdfs (#263)
+* Added view filters to the populate request options (#260)
+* Add Async publishing for workbook and datasource endpoints (#311)
+* Fixed ability to update datasource server connection port (#283)
+* Fixed next project handling (#267)
+* Cleanup debugging output to strip out non-xml response
+* Improved refresh sample for readability (#288)
+
 ## 0.6.1 (26 Jan 2018)
 
 * Fixed #257 where refreshing extracts does not work due to a missing "self"
