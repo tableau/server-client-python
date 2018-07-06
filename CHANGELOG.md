@@ -9,6 +9,7 @@
 * Added Sample for exporting full pdf using pdf page combining (#267)
 * Added Sample for exporting data, images, and single view pdfs (#263)
 * Added view filters to the populate request options (#260)
+* Add Async publishing for workbook and datasource endpoints (#311)
 * Fixed ability to update datasource server connection port (#283)
 * Fixed next project handling (#267)
 * Cleanup debugging output to strip out non-xml response
