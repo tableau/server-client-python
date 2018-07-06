@@ -15,6 +15,7 @@ The following people have contributed to this project to make it possible, and w
 * [William Lang](https://github.com/williamlang)
 * [Jim Morris](https://github.com/jimbodriven)
 * [BingoDinkus](https://github.com/BingoDinkus)
+* [Sergey Sotnichenko](https://github.com/sotnich)
 
 ## Core Team
 
