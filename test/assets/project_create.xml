@@ -1,4 +1,4 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
-    <project id="ccbea03f-77c4-4209-8774-f67bc59c3cef" name="Test Project" description="Project created for testing" contentPermissions="ManagedByOwner" parentId="9a8f2265-70f3-4494-96c5-e5949d7a1120" />
+    <project id="ccbea03f-77c4-4209-8774-f67bc59c3cef" name="Test Project" description="Project created for testing" contentPermissions="ManagedByOwner" parentProjectId="9a8f2265-70f3-4494-96c5-e5949d7a1120" />
 </tsResponse>

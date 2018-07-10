@@ -27,6 +27,17 @@ class Endpoint(object):
 
         return headers
 
+    @staticmethod
+    def _safe_to_log(server_response):
+        """Checks if the server_response content is not xml (eg binary image or zip)
+        and replaces it with a constant
+        """
+        ALLOWED_CONTENT_TYPES = ('application/xml', 'application/xml;charset=utf-8')
+        if server_response.headers.get('Content-Type', None) not in ALLOWED_CONTENT_TYPES:
+            return '[Truncated File Contents]'
+        else:
+            return server_response.content
+
     def _make_request(self, method, url, content=None, request_object=None,
                       auth_token=None, content_type=None, parameters=None):
         if request_object is not None:
@@ -50,7 +61,7 @@ class Endpoint(object):
         return server_response
 
     def _check_status(self, server_response):
-        logger.debug(server_response.content)
+        logger.debug(self._safe_to_log(server_response))
         if server_response.status_code not in Success_codes:
             raise ServerResponseError.from_response(server_response.content, self.parent_srv.namespace)
 
@@ -65,7 +76,7 @@ class Endpoint(object):
         # We don't return anything for a delete
         self._make_request(self.parent_srv.session.delete, url, auth_token=self.parent_srv.auth_token)
 
-    def put_request(self, url, xml_request, content_type='text/xml'):
+    def put_request(self, url, xml_request=None, content_type='text/xml'):
         return self._make_request(self.parent_srv.session.put, url,
                                   content=xml_request,
                                   auth_token=self.parent_srv.auth_token,
@@ -79,7 +90,7 @@ class Endpoint(object):
 
 
 def api(version):
-    '''Annotate the minimum supported version for an endpoint.
+    """Annotate the minimum supported version for an endpoint.
 
     Checks the version on the server object and compares normalized versions.
     It will raise an exception if the server version is > the version specified.
@@ -95,23 +106,18 @@ def api(version):
     >>> @api(version="2.3")
     >>> def get(self, req_options=None):
     >>>     ...
-    '''
+    """
     def _decorator(func):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
-            server_version = Version(self.parent_srv.version or "0.0")
-            minimum_supported = Version(version)
-            if server_version < minimum_supported:
-                error = "This endpoint is not available in API version {}. Requires {}".format(
-                    server_version, minimum_supported)
-                raise EndpointUnavailableError(error)
+            self.parent_srv.assert_at_least_version(version)
             return func(self, *args, **kwargs)
         return wrapper
     return _decorator
 
 
 def parameter_added_in(**params):
-    '''Annotate minimum versions for new parameters or request options on an endpoint.
+    """Annotate minimum versions for new parameters or request options on an endpoint.
 
     The api decorator documents when an endpoint was added, this decorator annotates
     keyword arguments on endpoints that may control functionality added after an endpoint was introduced.
@@ -131,7 +137,7 @@ def parameter_added_in(**params):
     >>> @parameter_added_in(no_extract='2.5')
     >>> def download(self, workbook_id, filepath=None, extract_only=False):
     >>>     ...
-    '''
+    """
     def _decorator(func):
         @wraps(func)
         def wrapper(self, *args, **kwargs):

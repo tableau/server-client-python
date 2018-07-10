@@ -2,7 +2,10 @@ import unittest
 import os
 import requests_mock
 import tableauserverclient as TSC
+import xml.etree.ElementTree as ET
+
 from tableauserverclient.datetime_helpers import format_datetime
+from tableauserverclient.server.request_factory import RequestFactory
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
@@ -115,12 +118,14 @@ class WorkbookTests(unittest.TestCase):
             single_workbook = TSC.WorkbookItem('1d0304cd-3796-429f-b815-7258370b9b74', show_tabs=True)
             single_workbook._id = '1f951daf-4061-451a-9df1-69a8062664f2'
             single_workbook.owner_id = 'dd2239f6-ddf1-4107-981a-4cf94e415794'
+            single_workbook.name = 'renamedWorkbook'
             single_workbook = self.server.workbooks.update(single_workbook)
 
         self.assertEqual('1f951daf-4061-451a-9df1-69a8062664f2', single_workbook.id)
         self.assertEqual(True, single_workbook.show_tabs)
         self.assertEqual('1d0304cd-3796-429f-b815-7258370b9b74', single_workbook.project_id)
         self.assertEqual('dd2239f6-ddf1-4107-981a-4cf94e415794', single_workbook.owner_id)
+        self.assertEqual('renamedWorkbook', single_workbook.name)
 
     def test_update_missing_id(self):
         single_workbook = TSC.WorkbookItem('test')
@@ -346,3 +351,50 @@ class WorkbookTests(unittest.TestCase):
         self.assertRaises(ValueError, self.server.workbooks.publish,
                           new_workbook, os.path.join(TEST_ASSET_DIR, 'SampleDS.tds'),
                           self.server.PublishMode.CreateNew)
+
+    def test_publish_multi_connection(self):
+        new_workbook = TSC.WorkbookItem(name='Sample', show_tabs=False,
+                                        project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+        connection1 = TSC.ConnectionItem()
+        connection1.server_address = 'mysql.test.com'
+        connection1.connection_credentials = TSC.ConnectionCredentials('test', 'secret', True)
+        connection2 = TSC.ConnectionItem()
+        connection2.server_address = 'pgsql.test.com'
+        connection2.connection_credentials = TSC.ConnectionCredentials('test', 'secret', True)
+
+        response = RequestFactory.Workbook._generate_xml(new_workbook, connections=[connection1, connection2])
+        # Can't use ConnectionItem parser due to xml namespace problems
+        connection_results = ET.fromstring(response).findall('.//connection')
+
+        self.assertEqual(connection_results[0].get('serverAddress', None), 'mysql.test.com')
+        self.assertEqual(connection_results[0].find('connectionCredentials').get('name', None), 'test')
+        self.assertEqual(connection_results[1].get('serverAddress', None), 'pgsql.test.com')
+        self.assertEqual(connection_results[1].find('connectionCredentials').get('password', None), 'secret')
+
+    def test_publish_single_connection(self):
+        new_workbook = TSC.WorkbookItem(name='Sample', show_tabs=False,
+                                        project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+        connection_creds = TSC.ConnectionCredentials('test', 'secret', True)
+
+        response = RequestFactory.Workbook._generate_xml(new_workbook, connection_credentials=connection_creds)
+        # Can't use ConnectionItem parser due to xml namespace problems
+        credentials = ET.fromstring(response).findall('.//connectionCredentials')
+        self.assertEqual(len(credentials), 1)
+        self.assertEqual(credentials[0].get('name', None), 'test')
+        self.assertEqual(credentials[0].get('password', None), 'secret')
+        self.assertEqual(credentials[0].get('embed', None), 'true')
+
+    def test_credentials_and_multi_connect_raises_exception(self):
+        new_workbook = TSC.WorkbookItem(name='Sample', show_tabs=False,
+                                        project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+
+        connection_creds = TSC.ConnectionCredentials('test', 'secret', True)
+
+        connection1 = TSC.ConnectionItem()
+        connection1.server_address = 'mysql.test.com'
+        connection1.connection_credentials = TSC.ConnectionCredentials('test', 'secret', True)
+
+        with self.assertRaises(RuntimeError):
+            response = RequestFactory.Workbook._generate_xml(new_workbook,
+                                                             connection_credentials=connection_creds,
+                                                             connections=[connection1])
