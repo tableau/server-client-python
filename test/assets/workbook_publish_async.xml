@@ -1,0 +1,4 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.0.xsd">
+	<job id="7c3d599e-949f-44c3-94a1-f30ba85757e4" mode="Asynchronous" type="PublishWorkbook" progress="0" createdAt="2018-06-29T23:22:32Z" finishCode="1"/>
+</tsResponse>

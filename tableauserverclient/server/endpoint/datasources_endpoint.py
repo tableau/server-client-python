@@ -151,8 +151,9 @@ class Datasources(Endpoint):
 
     # Publish datasource
     @api(version="2.0")
-    @parameter_added_in(connections="99.99")
-    def publish(self, datasource_item, file_path, mode, connection_credentials=None, connections=None):
+    @parameter_added_in(connections="2.8")
+    @parameter_added_in(as_job='3.0')
+    def publish(self, datasource_item, file_path, mode, connection_credentials=None, connections=None, as_job=False):
         if not os.path.isfile(file_path):
             error = "File path does not lead to an existing file."
             raise IOError(error)
@@ -175,6 +176,9 @@ class Datasources(Endpoint):
         if mode == self.parent_srv.PublishMode.Overwrite or mode == self.parent_srv.PublishMode.Append:
             url += '&{0}=true'.format(mode.lower())
 
+        if as_job:
+            url += '&{0}=true'.format('asJob')
+
         # Determine if chunking is required (64MB is the limit for single upload method)
         if os.path.getsize(file_path) >= FILESIZE_LIMIT:
             logger.info('Publishing {0} to server with chunking method (datasource over 64MB)'.format(filename))
@@ -193,6 +197,12 @@ class Datasources(Endpoint):
                                                                               connection_credentials,
                                                                               connections)
         server_response = self.post_request(url, xml_request, content_type)
-        new_datasource = DatasourceItem.from_response(server_response.content, self.parent_srv.namespace)[0]
-        logger.info('Published {0} (ID: {1})'.format(filename, new_datasource.id))
-        return new_datasource
+
+        if as_job:
+            new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+            logger.info('Published {0} (JOB_ID: {1}'.format(filename, new_job.id))
+            return new_job
+        else:
+            new_datasource = DatasourceItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+            logger.info('Published {0} (ID: {1})'.format(filename, new_datasource.id))
+            return new_datasource

@@ -199,8 +199,9 @@ class Workbooks(Endpoint):
 
     # Publishes workbook. Chunking method if file over 64MB
     @api(version="2.0")
+    @parameter_added_in(as_job='3.0')
     @parameter_added_in(connections='2.8')
-    def publish(self, workbook_item, file_path, mode, connection_credentials=None, connections=None):
+    def publish(self, workbook_item, file_path, mode, connection_credentials=None, connections=None, as_job=False):
 
         if connection_credentials is not None:
             import warnings
@@ -232,6 +233,9 @@ class Workbooks(Endpoint):
             error = 'Workbooks cannot be appended.'
             raise ValueError(error)
 
+        if as_job:
+            url += '&{0}=true'.format('asJob')
+
         # Determine if chunking is required (64MB is the limit for single upload method)
         if os.path.getsize(file_path) >= FILESIZE_LIMIT:
             logger.info('Publishing {0} to server with chunking method (workbook over 64MB)'.format(filename))
@@ -253,6 +257,11 @@ class Workbooks(Endpoint):
                                                                             connections=connections)
         logger.debug('Request xml: {0} '.format(xml_request[:1000]))
         server_response = self.post_request(url, xml_request, content_type)
-        new_workbook = WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
-        logger.info('Published {0} (ID: {1})'.format(filename, new_workbook.id))
-        return new_workbook
+        if as_job:
+            new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+            logger.info('Published {0} (JOB_ID: {1}'.format(filename, new_job.id))
+            return new_job
+        else:
+            new_workbook = WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+            logger.info('Published {0} (ID: {1})'.format(filename, new_workbook.id))
+            return new_workbook

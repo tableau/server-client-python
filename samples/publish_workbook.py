@@ -30,6 +30,7 @@ def main():
     parser.add_argument('--filepath', '-f', required=True, help='filepath to the workbook to publish')
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
                         help='desired logging level (set to error by default)')
+    parser.add_argument('--as-job', '-a', help='Publishing asynchronously', action='store_true')
 
     args = parser.parse_args()
 
@@ -67,11 +68,14 @@ def main():
         # Step 3: If default project is found, form a new workbook item and publish.
         if default_project is not None:
             new_workbook = TSC.WorkbookItem(default_project.id)
-            new_workbook = server.workbooks.publish(new_workbook,
-                                                    args.filepath,
-                                                    overwrite_true,
-                                                    connections=all_connections)
-            print("Workbook published. ID: {0}".format(new_workbook.id))
+            if args.as_job:
+                new_job = server.workbooks.publish(new_workbook, args.filepath, overwrite_true,
+                                                   connections=all_connections, as_job=args.as_job)
+                print("Workbook published. JOB ID: {0}".format(new_job.id))
+            else:
+                new_workbook = server.workbooks.publish(new_workbook, args.filepath, overwrite_true,
+                                                        connections=all_connections, as_job=args.as_job)
+                print("Workbook published. ID: {0}".format(new_workbook.id))
         else:
             error = "The default project could not be found."
             raise LookupError(error)
