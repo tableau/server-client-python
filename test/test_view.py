@@ -39,12 +39,14 @@ class ViewTests(unittest.TestCase):
         self.assertEqual('SafariSample/sheets/ENDANGEREDSAFARI', all_views[0].content_url)
         self.assertEqual('3cc6cd06-89ce-4fdc-b935-5294135d6d42', all_views[0].workbook_id)
         self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', all_views[0].owner_id)
+        self.assertEqual('5241e88d-d384-4fd7-9c2f-648b5247efc5', all_views[0].project_id)
 
         self.assertEqual('fd252f73-593c-4c4e-8584-c032b8022adc', all_views[1].id)
         self.assertEqual('Overview', all_views[1].name)
         self.assertEqual('Superstore/sheets/Overview', all_views[1].content_url)
         self.assertEqual('6d13b0ca-043d-4d42-8c9d-3f3313ea3a00', all_views[1].workbook_id)
         self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', all_views[1].owner_id)
+        self.assertEqual('5b534f74-3226-11e8-b47a-cb2e00f738a3', all_views[1].project_id)
 
     def test_get_with_usage(self):
         with open(GET_XML_USAGE, 'rb') as f:

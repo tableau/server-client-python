@@ -80,6 +80,6 @@ class ProjectItem(object):
         name = project_xml.get('name', None)
         description = project_xml.get('description', None)
         content_permissions = project_xml.get('contentPermissions', None)
-        parent_id = project_xml.get('parentId', None)
+        parent_id = project_xml.get('parentProjectId', None)
 
         return id, name, description, content_permissions, parent_id

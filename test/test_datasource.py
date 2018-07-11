@@ -1,8 +1,10 @@
 import unittest
 import os
 import requests_mock
+import xml.etree.ElementTree as ET
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
+from tableauserverclient.server.request_factory import RequestFactory
 from ._utils import read_xml_asset, read_xml_assets, asset
 
 ADD_TAGS_XML = 'datasource_add_tags.xml'
@@ -162,10 +164,14 @@ class DatasourceTests(unittest.TestCase):
             self.server.datasources.populate_connections(single_datasource)
 
             connection = single_datasource.connections[0]
+            connection.server_address = 'bar'
+            connection.server_port = '9876'
             connection.username = 'foo'
             new_connection = self.server.datasources.update_connection(single_datasource, connection)
             self.assertEqual(connection.id, new_connection.id)
             self.assertEqual(connection.connection_type, new_connection.connection_type)
+            self.assertEquals('bar', new_connection.server_address)
+            self.assertEquals('9876', new_connection.server_port)
             self.assertEqual('foo', new_connection.username)
 
     def test_publish(self):
@@ -262,3 +268,48 @@ class DatasourceTests(unittest.TestCase):
         new_datasource = TSC.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
         self.assertRaises(ValueError, self.server.datasources.publish, new_datasource,
                           asset('SampleWB.twbx'), self.server.PublishMode.Append)
+
+    def test_publish_multi_connection(self):
+        new_datasource = TSC.DatasourceItem(name='Sample', project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+        connection1 = TSC.ConnectionItem()
+        connection1.server_address = 'mysql.test.com'
+        connection1.connection_credentials = TSC.ConnectionCredentials('test', 'secret', True)
+        connection2 = TSC.ConnectionItem()
+        connection2.server_address = 'pgsql.test.com'
+        connection2.connection_credentials = TSC.ConnectionCredentials('test', 'secret', True)
+
+        response = RequestFactory.Datasource._generate_xml(new_datasource, connections=[connection1, connection2])
+        # Can't use ConnectionItem parser due to xml namespace problems
+        connection_results = ET.fromstring(response).findall('.//connection')
+
+        self.assertEqual(connection_results[0].get('serverAddress', None), 'mysql.test.com')
+        self.assertEqual(connection_results[0].find('connectionCredentials').get('name', None), 'test')
+        self.assertEqual(connection_results[1].get('serverAddress', None), 'pgsql.test.com')
+        self.assertEqual(connection_results[1].find('connectionCredentials').get('password', None), 'secret')
+
+    def test_publish_single_connection(self):
+        new_datasource = TSC.DatasourceItem(name='Sample', project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+        connection_creds = TSC.ConnectionCredentials('test', 'secret', True)
+
+        response = RequestFactory.Datasource._generate_xml(new_datasource, connection_credentials=connection_creds)
+        #  Can't use ConnectionItem parser due to xml namespace problems
+        credentials = ET.fromstring(response).findall('.//connectionCredentials')
+
+        self.assertEqual(len(credentials), 1)
+        self.assertEqual(credentials[0].get('name', None), 'test')
+        self.assertEqual(credentials[0].get('password', None), 'secret')
+        self.assertEqual(credentials[0].get('embed', None), 'true')
+
+    def test_credentials_and_multi_connect_raises_exception(self):
+        new_datasource = TSC.DatasourceItem(name='Sample', project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+
+        connection_creds = TSC.ConnectionCredentials('test', 'secret', True)
+
+        connection1 = TSC.ConnectionItem()
+        connection1.server_address = 'mysql.test.com'
+        connection1.connection_credentials = TSC.ConnectionCredentials('test', 'secret', True)
+
+        with self.assertRaises(RuntimeError):
+            response = RequestFactory.Datasource._generate_xml(new_datasource,
+                                                               connection_credentials=connection_creds,
+                                                               connections=[connection1])
