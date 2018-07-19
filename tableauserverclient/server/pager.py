@@ -36,6 +36,13 @@ class Pager(object):
         # Fetch the first page
         current_item_list, last_pagination_item = self._endpoint(self._options)
 
+        if last_pagination_item.total_available is None:
+            # This endpoint does not support pagination, drain the list and return
+            while current_item_list:
+                yield current_item_list.pop(0)
+
+            return
+
         # Get the rest on demand as a generator
         while self._count < last_pagination_item.total_available:
             if len(current_item_list) == 0:
