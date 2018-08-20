@@ -391,7 +391,7 @@ class WorkbookRequest(object):
                  'tableau_workbook': (filename, file_contents, 'application/octet-stream')}
         return _add_multipart(parts)
 
-    def publish_req_chunked(self, workbook_item, connections=None):
+    def publish_req_chunked(self, workbook_item, connection_credentials=None, connections=None):
         xml_request = self._generate_xml(workbook_item,
                                          connection_credentials=connection_credentials,
                                          connections=connections)
