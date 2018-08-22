@@ -3,6 +3,8 @@ import os
 import requests_mock
 import tableauserverclient as TSC
 
+from tableauserverclient.datetime_helpers import format_datetime
+
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
 ADD_TAGS_XML = os.path.join(TEST_ASSET_DIR, 'view_add_tags.xml')
@@ -40,6 +42,10 @@ class ViewTests(unittest.TestCase):
         self.assertEqual('3cc6cd06-89ce-4fdc-b935-5294135d6d42', all_views[0].workbook_id)
         self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', all_views[0].owner_id)
         self.assertEqual('5241e88d-d384-4fd7-9c2f-648b5247efc5', all_views[0].project_id)
+        self.assertIsNone(all_views[0].created_at)
+        self.assertIsNone(all_views[0].updated_at)
+        self.assertIsNone(all_views[0].favorites_total)
+        self.assertIsNone(all_views[0].sheet_type)
 
         self.assertEqual('fd252f73-593c-4c4e-8584-c032b8022adc', all_views[1].id)
         self.assertEqual('Overview', all_views[1].name)
@@ -47,6 +53,10 @@ class ViewTests(unittest.TestCase):
         self.assertEqual('6d13b0ca-043d-4d42-8c9d-3f3313ea3a00', all_views[1].workbook_id)
         self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', all_views[1].owner_id)
         self.assertEqual('5b534f74-3226-11e8-b47a-cb2e00f738a3', all_views[1].project_id)
+        self.assertEqual('2002-05-30T09:00:00Z', format_datetime(all_views[1].created_at))
+        self.assertEqual('2002-06-05T08:00:59Z', format_datetime(all_views[1].updated_at))
+        self.assertEqual(2, all_views[1].favorites_total)
+        self.assertEqual('story', all_views[1].sheet_type)
 
     def test_get_with_usage(self):
         with open(GET_XML_USAGE, 'rb') as f:
@@ -57,8 +67,17 @@ class ViewTests(unittest.TestCase):
 
         self.assertEqual('d79634e1-6063-4ec9-95ff-50acbf609ff5', all_views[0].id)
         self.assertEqual(7, all_views[0].total_views)
+        self.assertIsNone(all_views[0].created_at)
+        self.assertIsNone(all_views[0].updated_at)
+        self.assertIsNone(all_views[0].favorites_total)
+        self.assertIsNone(all_views[0].sheet_type)
+
         self.assertEqual('fd252f73-593c-4c4e-8584-c032b8022adc', all_views[1].id)
         self.assertEqual(13, all_views[1].total_views)
+        self.assertEqual('2002-05-30T09:00:00Z', format_datetime(all_views[1].created_at))
+        self.assertEqual('2002-06-05T08:00:59Z', format_datetime(all_views[1].updated_at))
+        self.assertEqual(2, all_views[1].favorites_total)
+        self.assertEqual('story', all_views[1].sheet_type)
 
     def test_get_with_usage_and_filter(self):
         with open(GET_XML_USAGE, 'rb') as f:
