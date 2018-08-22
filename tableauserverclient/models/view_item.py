@@ -1,10 +1,13 @@
 import xml.etree.ElementTree as ET
+from ..datetime_helpers import parse_datetime
 from .exceptions import UnpopulatedPropertyError
 
 
 class ViewItem(object):
     def __init__(self):
         self._content_url = None
+        self._created_at = None
+        self._favorites_total = None
         self._id = None
         self._image = None
         self._initial_tags = set()
@@ -15,6 +18,8 @@ class ViewItem(object):
         self._pdf = None
         self._csv = None
         self._total_views = None
+        self._sheet_type = None
+        self._updated_at = None
         self._workbook_id = None
         self.tags = set()
 
@@ -33,6 +38,14 @@ class ViewItem(object):
     @property
     def content_url(self):
         return self._content_url
+
+    @property
+    def created_at(self):
+        return self._created_at
+
+    @property
+    def favorites_total(self):
+        return self._favorites_total
 
     @property
     def id(self):
@@ -79,11 +92,19 @@ class ViewItem(object):
         return self._csv()
 
     @property
+    def sheet_type(self):
+        return self._sheet_type
+
+    @property
     def total_views(self):
         if self._total_views is None:
             error = "Usage statistics must be requested when querying for view."
             raise UnpopulatedPropertyError(error)
         return self._total_views
+
+    @property
+    def updated_at(self):
+        return self._updated_at
 
     @property
     def workbook_id(self):
@@ -103,9 +124,17 @@ class ViewItem(object):
             workbook_elem = view_xml.find('.//t:workbook', namespaces=ns)
             owner_elem = view_xml.find('.//t:owner', namespaces=ns)
             project_elem = view_xml.find('.//t:project', namespaces=ns)
+            favoritesTotal = view_xml.get('favoritesTotal', None)
+            view_item._created_at = parse_datetime(view_xml.get('createdAt', None))
+            view_item._updated_at = parse_datetime(view_xml.get('updatedAt', None))
             view_item._id = view_xml.get('id', None)
             view_item._name = view_xml.get('name', None)
             view_item._content_url = view_xml.get('contentUrl', None)
+            view_item._sheet_type = view_xml.get('sheetType', None)
+
+            if favoritesTotal:
+                view_item._favorites_total = int(favoritesTotal)
+
             if usage_elem is not None:
                 total_view = usage_elem.get('totalViewCount', None)
                 if total_view:
