@@ -44,7 +44,6 @@ class ViewTests(unittest.TestCase):
         self.assertEqual('5241e88d-d384-4fd7-9c2f-648b5247efc5', all_views[0].project_id)
         self.assertIsNone(all_views[0].created_at)
         self.assertIsNone(all_views[0].updated_at)
-        self.assertIsNone(all_views[0].favorites_total)
         self.assertIsNone(all_views[0].sheet_type)
 
         self.assertEqual('fd252f73-593c-4c4e-8584-c032b8022adc', all_views[1].id)
@@ -55,7 +54,6 @@ class ViewTests(unittest.TestCase):
         self.assertEqual('5b534f74-3226-11e8-b47a-cb2e00f738a3', all_views[1].project_id)
         self.assertEqual('2002-05-30T09:00:00Z', format_datetime(all_views[1].created_at))
         self.assertEqual('2002-06-05T08:00:59Z', format_datetime(all_views[1].updated_at))
-        self.assertEqual(2, all_views[1].favorites_total)
         self.assertEqual('story', all_views[1].sheet_type)
 
     def test_get_with_usage(self):
@@ -69,14 +67,12 @@ class ViewTests(unittest.TestCase):
         self.assertEqual(7, all_views[0].total_views)
         self.assertIsNone(all_views[0].created_at)
         self.assertIsNone(all_views[0].updated_at)
-        self.assertIsNone(all_views[0].favorites_total)
         self.assertIsNone(all_views[0].sheet_type)
 
         self.assertEqual('fd252f73-593c-4c4e-8584-c032b8022adc', all_views[1].id)
         self.assertEqual(13, all_views[1].total_views)
         self.assertEqual('2002-05-30T09:00:00Z', format_datetime(all_views[1].created_at))
         self.assertEqual('2002-06-05T08:00:59Z', format_datetime(all_views[1].updated_at))
-        self.assertEqual(2, all_views[1].favorites_total)
         self.assertEqual('story', all_views[1].sheet_type)
 
     def test_get_with_usage_and_filter(self):
