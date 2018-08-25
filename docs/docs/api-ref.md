@@ -2405,11 +2405,15 @@ Source file: models/view_item.py
 
 Name | Description
 :--- | :---  
+`created_at` |  The date and time when the view was created.  
+`favorites_total` |  The number of times the view was marked down as favorite.  
 `id` | The identifier of the view item.  
 `name`  | The name of the view. 
 `owner_id` |  The id for the owner of the view. 
 `preview_image` | The thumbnail image for the view. 
+`sheet_type`  |  The type of the view which is either a worksheet, a dashboard or a story. 
 `total_views`  |  The usage statistics for the view. Indicates the total number of times the view has been looked at. 
+`updated_at` |  The date and time when the view was last updated.  
 `workbook_id`  |  The id of the workbook associated with the view. 
 
 
