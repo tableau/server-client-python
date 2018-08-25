@@ -2406,7 +2406,6 @@ Source file: models/view_item.py
 Name | Description
 :--- | :---  
 `created_at` |  The date and time when the view was created.  
-`favorites_total` |  The number of times the view was marked down as favorite.  
 `id` | The identifier of the view item.  
 `name`  | The name of the view. 
 `owner_id` |  The id for the owner of the view. 
