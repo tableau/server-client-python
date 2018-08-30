@@ -61,20 +61,20 @@ class CapabilityItem(object):
         return self._object_id
 
 
-class PermissionsItem(object):
+class PermissionsRuleItem(object):
     def __init__(self):
-        self._capabilities = None
+        self._rules = None
 
-    def _set_values(self, capabilities):
-        self._capabilities = capabilities
+    def _set_values(self, rules):
+        self._rules = rules
 
     @property
-    def capabilities(self):
-        return self._capabilities
+    def rules(self):
+        return self._rules
 
     @classmethod
     def from_response(cls, resp, ns=None):
-        permissions = PermissionsItem()
+        permissions = PermissionsRuleItem()
         parsed_response = ET.fromstring(resp)
 
         capabilities = {}
@@ -118,3 +118,8 @@ class PermissionsItem(object):
 
         permissions._set_values(capabilities)
         return permissions
+
+
+## Compat Tests
+
+PermissionsItem = PermissionsRuleItem
