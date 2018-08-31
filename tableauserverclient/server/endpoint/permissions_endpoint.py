@@ -31,7 +31,7 @@ class _PermissionsEndpoint(Endpoint):
         response = self.put_request(url, update_req)
         permissions = PermissionsItem.from_response(response.content,
                                                     self.parent_srv.namespace)
-
+        breakpoint()
         logger.info('Updated permissions for item {0}'.format(item.id))
 
         return permissions

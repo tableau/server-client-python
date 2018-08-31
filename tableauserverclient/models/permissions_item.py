@@ -8,31 +8,22 @@ logger = logging.getLogger('tableau.models.permissions_item')
 
 
 class Permission:
-    class GranteeType:
-        User = 'user'
-        Group = 'group'
 
     class CapabilityMode:
         Allow = 'Allow'
         Deny = 'Deny'
 
-    class DatasourceCapabilityType:
-        ChangePermissions = 'ChangePermissions'
-        Connect = 'Connect'
-        Delete = 'Delete'
-        ExportXml = 'ExportXml'
-        Read = 'Read'
-        Write = 'Write'
-
-    class WorkbookCapabilityType:
+    class CapabilityType:
         AddComment = 'AddComment'
         ChangeHierarchy = 'ChangeHierarchy'
         ChangePermissions = 'ChangePermissions'
+        Connect = 'Connect'
         Delete = 'Delete'
         ExportData = 'ExportData'
         ExportImage = 'ExportImage'
         ExportXml = 'ExportXml'
         Filter = 'Filter'
+        ProjectLeader = 'ProjectLeader'
         Read = 'Read'
         ShareView = 'ShareView'
         ViewComments = 'ViewComments'
@@ -40,17 +31,15 @@ class Permission:
         WebAuthoring = 'WebAuthoring'
         Write = 'Write'
 
-    class ProjectCapabilityType:
-        ProjectLeader = 'ProjectLeader'
-        Read = 'Read'
-        Write = 'Write'
 
 
-class CapabilityItem(object):
-    def __init__(self, type=None, object_id=None, map={}):
+
+class PermissionsRule(object):
+    def __init__(self, type=None, object_id=None, caps_map={}):  # Dict[Capability: Mode]
         self._type = type
         self._object_id = object_id
-        self.map = map
+        self.caps_map = caps_map  # Dict[Capability: Mode]
+        self.map = self.caps_map
 
     @property
     def type(self):
@@ -60,8 +49,13 @@ class CapabilityItem(object):
     def object_id(self):
         return self._object_id
 
+class PermissionsGrantee():
+    def __init__(self, grantee_xml):
+        self.type = None
+        grantee_id = grantee_element.get('id', None)
+        self.typegrantee_type = grantee_element.tag.split('}')[1]
 
-class PermissionsRuleItem(object):
+class PermissionsCollection(object):
     def __init__(self):
         self._rules = None
 
@@ -74,33 +68,22 @@ class PermissionsRuleItem(object):
 
     @classmethod
     def from_response(cls, resp, ns=None):
-        permissions = PermissionsRuleItem()
+        permissions = PermissionsCollection()
         parsed_response = ET.fromstring(resp)
+
+        breakpoint()
 
         capabilities = {}
         all_xml = parsed_response.findall('.//t:granteeCapabilities',
                                           namespaces=ns)
 
         for grantee_capability_xml in all_xml:
-            grantee_id = None
-            grantee_type = None
             capability_map = {}
 
-            try:
-                grantee_id = grantee_capability_xml.find('.//t:group',
-                                                         namespaces=ns)\
-                                                    .get('id')
-                grantee_type = Permission.GranteeType.Group
-            except AttributeError:
-                pass
-            try:
-                grantee_id = grantee_capability_xml.find('.//t:user',
-                                                         namespaces=ns)\
-                                                    .get('id')
-                grantee_type = Permission.GranteeType.User
-            except AttributeError:
-                pass
-
+            grantee_element = grantee_capability_xml.findall('.//*[@id]', namespaces=ns).pop()
+            grantee_id = grantee_element.get('id', None)
+            grantee_type = grantee_element.tag.split('}')[1]
+    
             if grantee_id is None:
                 logger.error('Cannot find grantee type in response')
                 raise UnknownGranteeTypeError()
@@ -122,4 +105,5 @@ class PermissionsRuleItem(object):
 
 ## Compat Tests
 
-PermissionsItem = PermissionsRuleItem
+PermissionsItem = PermissionsCollection
+CapabilityItem = PermissionsRule

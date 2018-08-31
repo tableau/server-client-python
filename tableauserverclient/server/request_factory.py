@@ -149,6 +149,7 @@ class PermissionRequest(object):
         item_element.attrib['id'] = item.id
 
         self._add_all_capabilities(permissions_element, permission_item.capabilities)
+        print(ET.tostring(xml_request))
         return ET.tostring(xml_request)
 
     def _add_all_capabilities(self, permissions_element, capabilities_map):
