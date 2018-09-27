@@ -108,14 +108,22 @@ class ImageRequestOptions(_FilterOptionsBase):
     class Resolution:
         High = 'high'
 
-    def __init__(self, imageresolution=None):
+    # if 'yes' isn't specified, the REST API endpoint return an image from the cache that might be outdated
+    class Refresh:
+        Yes = 'yes'
+
+    def __init__(self, imageresolution=None, refresh=None):
         super(ImageRequestOptions, self).__init__()
         self.image_resolution = imageresolution
+        self.refresh = refresh
 
     def apply_query_params(self, url):
         params = []
         if self.image_resolution:
             params.append('resolution={0}'.format(self.image_resolution))
+
+        if self.refresh:
+            params.append('refresh={0}'.format(self.refresh))
 
         self._append_view_filters(params)
 
