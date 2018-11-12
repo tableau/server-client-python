@@ -25,6 +25,7 @@ def main():
     parser.add_argument('--view-name', '-v', required=True,
                         help='name of view to download an image of')
     parser.add_argument('--filepath', '-f', required=True, help='filepath to save the image returned')
+    parser.add_argument('--maxage', '-m', required=False, help='max age of the image in the cache in minutes.')
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
                         help='desired logging level (set to error by default)')
 
@@ -55,8 +56,12 @@ def main():
             raise LookupError("View with the specified name was not found.")
         view_item = all_views[0]
 
+        max_age = args.maxage
+        if not max_age:
+           max_age = 1
+
         # Step 3: Query the image endpoint and save the image to the specified location
-        image_req_option = TSC.ImageRequestOptions(imageresolution=TSC.ImageRequestOptions.Resolution.High)
+        image_req_option = TSC.ImageRequestOptions(imageresolution=TSC.ImageRequestOptions.Resolution.High, maxage = max_age)
         server.views.populate_image(view_item, image_req_option)
 
         with open(args.filepath, "wb") as image_file:
