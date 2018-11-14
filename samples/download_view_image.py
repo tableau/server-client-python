@@ -58,10 +58,10 @@ def main():
 
         max_age = args.maxage
         if not max_age:
-           max_age = 1
+            max_age = 1
 
-        # Step 3: Query the image endpoint and save the image to the specified location
-        image_req_option = TSC.ImageRequestOptions(imageresolution=TSC.ImageRequestOptions.Resolution.High, maxage = max_age)
+        image_req_option = TSC.ImageRequestOptions(imageresolution=TSC.ImageRequestOptions.Resolution.High,
+                                                   maxage=max_age)
         server.views.populate_image(view_item, image_req_option)
 
         with open(args.filepath, "wb") as image_file:
