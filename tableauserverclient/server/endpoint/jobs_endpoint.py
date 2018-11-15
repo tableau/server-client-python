@@ -3,6 +3,12 @@ from .. import JobItem, BackgroundJobItem, PaginationItem
 from ..request_options import RequestOptionsBase
 import logging
 
+try:
+    basestring
+except NameError:
+    # In case we are in python 3 the string check is different
+    basestring = str
+
 logger = logging.getLogger('tableau.endpoint.jobs')
 
 
