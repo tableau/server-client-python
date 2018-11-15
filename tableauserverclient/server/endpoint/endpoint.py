@@ -1,4 +1,4 @@
-from .exceptions import ServerResponseError, EndpointUnavailableError, ItemTypeNotAllowed
+from .exceptions import ServerResponseError, InternalServerError
 from functools import wraps
 
 import logging
@@ -62,7 +62,9 @@ class Endpoint(object):
 
     def _check_status(self, server_response):
         logger.debug(self._safe_to_log(server_response))
-        if server_response.status_code not in Success_codes:
+        if server_response.status_code >= 500:
+            raise InternalServerError(server_response)
+        elif server_response.status_code not in Success_codes:
             raise ServerResponseError.from_response(server_response.content, self.parent_srv.namespace)
 
     def get_unauthenticated_request(self, url, request_object=None):

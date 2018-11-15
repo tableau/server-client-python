@@ -21,6 +21,15 @@ class ServerResponseError(Exception):
         return error_response
 
 
+class InternalServerError(Exception):
+    def __init__(self, server_response):
+        self.code = server_response.status_code
+        self.content = server_response.content
+
+    def __str__(self):
+        return "\n\nError status code: {0}\n{1}".format(self.code, self.content)
+
+
 class MissingRequiredFieldError(Exception):
     pass
 
