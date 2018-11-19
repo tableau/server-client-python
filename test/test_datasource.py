@@ -4,6 +4,7 @@ import requests_mock
 import xml.etree.ElementTree as ET
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
+from tableauserverclient.server.endpoint.exceptions import InternalServerError
 from tableauserverclient.server.request_factory import RequestFactory
 from ._utils import read_xml_asset, read_xml_assets, asset
 
@@ -313,3 +314,13 @@ class DatasourceTests(unittest.TestCase):
             response = RequestFactory.Datasource._generate_xml(new_datasource,
                                                                connection_credentials=connection_creds,
                                                                connections=[connection1])
+
+    def test_synchronous_publish_timeout_error(self):
+        with requests_mock.mock() as m:
+            m.register_uri('POST', self.baseurl, status_code=504)
+
+            new_datasource = TSC.DatasourceItem(project_id='')
+            publish_mode = self.server.PublishMode.CreateNew
+
+            self.assertRaisesRegex(InternalServerError, 'Please use asynchronous publishing to avoid timeouts.',
+                                   self.server.datasources.publish, new_datasource, asset('SampleDS.tds'), publish_mode)

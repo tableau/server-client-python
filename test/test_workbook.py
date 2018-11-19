@@ -5,7 +5,9 @@ import tableauserverclient as TSC
 import xml.etree.ElementTree as ET
 
 from tableauserverclient.datetime_helpers import format_datetime
+from tableauserverclient.server.endpoint.exceptions import InternalServerError
 from tableauserverclient.server.request_factory import RequestFactory
+from ._utils import asset
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
@@ -296,11 +298,11 @@ class WorkbookTests(unittest.TestCase):
                                             show_tabs=False,
                                             project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
 
-            sample_workbok = os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx')
+            sample_workbook = os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx')
             publish_mode = self.server.PublishMode.CreateNew
 
             new_workbook = self.server.workbooks.publish(new_workbook,
-                                                         sample_workbok,
+                                                         sample_workbook,
                                                          publish_mode)
 
         self.assertEqual('a8076ca1-e9d8-495e-bae6-c684dbb55836', new_workbook.id)
@@ -327,11 +329,11 @@ class WorkbookTests(unittest.TestCase):
                                             show_tabs=False,
                                             project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
 
-            sample_workbok = os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx')
+            sample_workbook = os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx')
             publish_mode = self.server.PublishMode.CreateNew
 
             new_job = self.server.workbooks.publish(new_workbook,
-                                                    sample_workbok,
+                                                    sample_workbook,
                                                     publish_mode,
                                                     as_job=True)
 
@@ -398,3 +400,13 @@ class WorkbookTests(unittest.TestCase):
             response = RequestFactory.Workbook._generate_xml(new_workbook,
                                                              connection_credentials=connection_creds,
                                                              connections=[connection1])
+
+    def test_synchronous_publish_timeout_error(self):
+        with requests_mock.mock() as m:
+            m.register_uri('POST', self.baseurl, status_code=504)
+
+            new_workbook = TSC.WorkbookItem(project_id='')
+            publish_mode = self.server.PublishMode.CreateNew
+
+            self.assertRaisesRegex(InternalServerError, 'Please use asynchronous publishing to avoid timeouts',
+                                   self.server.workbooks.publish, new_workbook, asset('SampleWB.twbx'), publish_mode)

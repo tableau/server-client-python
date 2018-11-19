@@ -5,6 +5,8 @@ import requests_mock
 
 import tableauserverclient as TSC
 
+from tableauserverclient.server.endpoint.exceptions import InternalServerError
+
 
 class RequestTests(unittest.TestCase):
     def setUp(self):
@@ -45,3 +47,11 @@ class RequestTests(unittest.TestCase):
             self.assertEqual(resp.request.headers['x-tableau-auth'], 'j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM')
             self.assertEqual(resp.request.headers['content-type'], 'multipart/mixed')
             self.assertEqual(resp.request.body, b'1337')
+
+    # Test that 500 server errors are handled properly
+    def test_internal_server_error(self):
+        self.server.version = "3.2"
+        server_response = "500: Internal Server Error"
+        with requests_mock.mock() as m:
+            m.register_uri('GET', self.server.server_info.baseurl, status_code=500, text=server_response)
+            self.assertRaisesRegex(InternalServerError, server_response, self.server.server_info.get)
