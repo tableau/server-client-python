@@ -323,4 +323,5 @@ class DatasourceTests(unittest.TestCase):
             publish_mode = self.server.PublishMode.CreateNew
 
             self.assertRaisesRegexp(InternalServerError, 'Please use asynchronous publishing to avoid timeouts.',
-                                   self.server.datasources.publish, new_datasource, asset('SampleDS.tds'), publish_mode)
+                                    self.server.datasources.publish, new_datasource,
+                                    asset('SampleDS.tds'), publish_mode)
