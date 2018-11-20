@@ -322,5 +322,5 @@ class DatasourceTests(unittest.TestCase):
             new_datasource = TSC.DatasourceItem(project_id='')
             publish_mode = self.server.PublishMode.CreateNew
 
-            self.assertRaisesRegex(InternalServerError, 'Please use asynchronous publishing to avoid timeouts.',
+            self.assertRaisesRegexp(InternalServerError, 'Please use asynchronous publishing to avoid timeouts.',
                                    self.server.datasources.publish, new_datasource, asset('SampleDS.tds'), publish_mode)

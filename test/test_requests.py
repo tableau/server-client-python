@@ -54,4 +54,4 @@ class RequestTests(unittest.TestCase):
         server_response = "500: Internal Server Error"
         with requests_mock.mock() as m:
             m.register_uri('GET', self.server.server_info.baseurl, status_code=500, text=server_response)
-            self.assertRaisesRegex(InternalServerError, server_response, self.server.server_info.get)
+            self.assertRaisesRegexp(InternalServerError, server_response, self.server.server_info.get)
