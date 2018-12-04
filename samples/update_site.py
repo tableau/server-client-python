@@ -3,6 +3,7 @@ import logging
 import getpass
 import tableauserverclient as TSC
 
+
 def main():
     parser = argparse.ArgumentParser(description='Update site settings.')
     parser.add_argument('--server', '-s', required=True, help='server address')
@@ -30,7 +31,6 @@ def main():
         password = args.password
     else:
         password = getpass.getpass("Password: ")
-
 
     logging_level = getattr(logging, args.logging_level.upper())
     logging.basicConfig(level=logging_level)
