@@ -17,7 +17,7 @@ class SiteItem(object):
 
     def __init__(self, name, content_url, admin_mode=None, user_quota=None, storage_quota=None,
                  disable_subscriptions=False, subscribe_others_enabled=True, revision_history_enabled=False,
-                 revision_limit=None):
+                 revision_limit=None, materialized_views_enabled=False):
         self._admin_mode = None
         self._id = None
         self._num_users = None
@@ -33,6 +33,7 @@ class SiteItem(object):
         self.revision_history_enabled = revision_history_enabled
         self.subscribe_others_enabled = subscribe_others_enabled
         self.admin_mode = admin_mode
+        self.materialized_views_enabled = materialized_views_enabled
 
     @property
     def admin_mode(self):
@@ -123,6 +124,15 @@ class SiteItem(object):
     def subscribe_others_enabled(self, value):
         self._subscribe_others_enabled = value
 
+    @property
+    def materialized_views_enabled(self):
+        return self._materialized_views_enabled
+
+    @materialized_views_enabled.setter
+    @property_is_boolean
+    def materialized_views_enabled(self, value):
+        self._materialized_views_enabled = value
+
     def is_default(self):
         return self.name.lower() == 'default'
 
@@ -132,16 +142,17 @@ class SiteItem(object):
         if site_xml is not None:
             (_, name, content_url, _, admin_mode, state,
              subscribe_others_enabled, disable_subscriptions, revision_history_enabled,
-             user_quota, storage_quota, revision_limit, num_users, storage) = self._parse_element(site_xml, ns)
+             user_quota, storage_quota, revision_limit, num_users, storage,
+             materialized_views_enabled) = self._parse_element(site_xml, ns)
 
             self._set_values(None, name, content_url, None, admin_mode, state, subscribe_others_enabled,
                              disable_subscriptions, revision_history_enabled, user_quota, storage_quota,
-                             revision_limit, num_users, storage)
+                             revision_limit, num_users, storage, materialized_views_enabled)
         return self
 
     def _set_values(self, id, name, content_url, status_reason, admin_mode, state,
                     subscribe_others_enabled, disable_subscriptions, revision_history_enabled,
-                    user_quota, storage_quota, revision_limit, num_users, storage):
+                    user_quota, storage_quota, revision_limit, num_users, storage, materialized_views_enabled):
         if id is not None:
             self._id = id
         if name:
@@ -170,6 +181,8 @@ class SiteItem(object):
             self._num_users = num_users
         if storage:
             self._storage = storage
+        if materialized_views_enabled:
+            self._materialized_views_enabled = materialized_views_enabled
 
     @classmethod
     def from_response(cls, resp, ns):
@@ -179,12 +192,13 @@ class SiteItem(object):
         for site_xml in all_site_xml:
             (id, name, content_url, status_reason, admin_mode, state, subscribe_others_enabled,
                 disable_subscriptions, revision_history_enabled, user_quota, storage_quota,
-                revision_limit, num_users, storage) = cls._parse_element(site_xml, ns)
+                revision_limit, num_users, storage, materialized_views_enabled) = cls._parse_element(site_xml, ns)
 
             site_item = cls(name, content_url)
             site_item._set_values(id, name, content_url, status_reason, admin_mode, state,
                                   subscribe_others_enabled, disable_subscriptions, revision_history_enabled,
-                                  user_quota, storage_quota, revision_limit, num_users, storage)
+                                  user_quota, storage_quota, revision_limit, num_users, storage,
+                                  materialized_views_enabled)
             all_site_items.append(site_item)
         return all_site_items
 
@@ -219,9 +233,11 @@ class SiteItem(object):
             num_users = usage_elem.get('numUsers', None)
             storage = usage_elem.get('storage', None)
 
+        materialized_views_enabled = site_xml.get('materializedViewsEnabled', None)
+
         return id, name, content_url, status_reason, admin_mode, state, subscribe_others_enabled,\
             disable_subscriptions, revision_history_enabled, user_quota, storage_quota,\
-            revision_limit, num_users, storage
+            revision_limit, num_users, storage, materialized_views_enabled
 
 
 # Used to convert string represented boolean to a boolean type
