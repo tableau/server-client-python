@@ -19,6 +19,7 @@ class WorkbookItem(object):
         self._size = None
         self._updated_at = None
         self._views = None
+        self.project_path = 'Default'
         self.name = name
         self.owner_id = None
         self.project_id = project_id
@@ -98,6 +99,15 @@ class WorkbookItem(object):
             # We had views included in a WorkbookItem response
             return self._views
 
+    @property
+    def project_path(self):
+        return self._project_path
+
+    @project_path.setter
+    @property_not_nullable
+    def project_path(self, value):
+        self._project_path = value
+
     def _set_connections(self, connections):
         self._connections = connections
 
@@ -154,7 +164,7 @@ class WorkbookItem(object):
         all_workbook_xml = parsed_response.findall('.//t:workbook', namespaces=ns)
         for workbook_xml in all_workbook_xml:
             (id, name, content_url, created_at, updated_at, size, show_tabs,
-             project_id, project_name, owner_id, tags, views) = cls._parse_element(workbook_xml, ns)
+             project_id, project_name, owner_id, tags, views, project_path) = cls._parse_element(workbook_xml, ns)
 
             workbook_item = cls(project_id)
             workbook_item._set_values(id, name, content_url, created_at, updated_at,
@@ -182,6 +192,7 @@ class WorkbookItem(object):
         if project_tag is not None:
             project_id = project_tag.get('id', None)
             project_name = project_tag.get('name', None)
+            project_path = project_tag.get('path', None)
 
         owner_id = None
         owner_tag = workbook_xml.find('.//t:owner', namespaces=ns)
@@ -200,7 +211,7 @@ class WorkbookItem(object):
             views = ViewItem.from_xml_element(views_elem, ns)
 
         return id, name, content_url, created_at, updated_at, size, show_tabs,\
-            project_id, project_name, owner_id, tags, views
+            project_id, project_name, owner_id, tags, views, project_path
 
 
 # Used to convert string represented boolean to a boolean type

@@ -265,3 +265,20 @@ class Workbooks(Endpoint):
             new_workbook = WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
             logger.info('Published {0} (ID: {1})'.format(filename, new_workbook.id))
             return new_workbook
+
+    # enable/disable materialized views on a list of workbooks
+    @api(version="2.3")
+    def materialize(self, workbook_items, mode):
+        url = "{0}/materializedViews".format(self.baseurl)
+        update_req = RequestFactory.Workbook.materialize_req(workbook_items, mode)
+        server_response = self.put_request(url, update_req)
+        return server_response.content
+
+    # show workbook materialization status
+    @api(version="2.3")
+    def get_materialization_status(self, workbook_status):
+        url = "{0}/materializedViews/workbookStatus".format(self.baseurl)
+        server_response = self.get_request(url)
+        new_workbook_list = WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)
+        workbook_status.extend(new_workbook_list)
+        return new_workbook_list
