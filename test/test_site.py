@@ -91,7 +91,8 @@ class SiteTests(unittest.TestCase):
             single_site = TSC.SiteItem(name='Tableau', content_url='tableau',
                                        admin_mode=TSC.SiteItem.AdminMode.ContentAndUsers,
                                        user_quota=15, storage_quota=1000,
-                                       disable_subscriptions=True, revision_history_enabled=False)
+                                       disable_subscriptions=True, revision_history_enabled=False,
+                                       materialized_views_enabled=False)
             single_site._id = '6b7179ba-b82b-4f0f-91ed-812074ac5da6'
             single_site = self.server.sites.update(single_site)
 
