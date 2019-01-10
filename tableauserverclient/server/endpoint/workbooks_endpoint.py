@@ -31,7 +31,7 @@ class Workbooks(Endpoint):
         return "{0}/sites/{1}/workbooks".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     # Get all workbooks on site
-    @api(version="2.0")
+    @api(version="3.3")
     def get(self, req_options=None):
         logger.info('Querying all workbooks on site')
         url = self.baseurl
@@ -41,7 +41,7 @@ class Workbooks(Endpoint):
         return all_workbook_items, pagination_item
 
     # Get 1 workbook
-    @api(version="2.0")
+    @api(version="3.3")
     def get_by_id(self, workbook_id):
         if not workbook_id:
             error = "Workbook ID undefined."
@@ -70,7 +70,7 @@ class Workbooks(Endpoint):
         logger.info('Deleted single workbook (ID: {0})'.format(workbook_id))
 
     # Update workbook
-    @api(version="2.0")
+    @api(version="3.3")
     def update(self, workbook_item):
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
@@ -273,20 +273,3 @@ class Workbooks(Endpoint):
             new_workbook = WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
             logger.info('Published {0} (ID: {1})'.format(filename, new_workbook.id))
             return new_workbook
-
-    # enable/disable materialized views on a list of workbooks
-    @api(version="2.3")
-    def materialize(self, workbook_items, mode):
-        url = "{0}/materializedViews".format(self.baseurl)
-        update_req = RequestFactory.Workbook.materialize_req(workbook_items, mode)
-        server_response = self.put_request(url, update_req)
-        return server_response.content
-
-    # show workbook materialization status
-    @api(version="2.3")
-    def get_materialization_status(self, workbook_status):
-        url = "{0}/materializedViews/workbookStatus".format(self.baseurl)
-        server_response = self.get_request(url)
-        new_workbook_list = WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)
-        workbook_status.extend(new_workbook_list)
-        return new_workbook_list

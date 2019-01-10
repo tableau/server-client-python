@@ -249,7 +249,6 @@ class ScheduleRequest(object):
             <workbook/datasource id="..."/>
           </extractRefresh>
         </task>
-
         """
         xml_request = ET.Element('tsRequest')
         task_element = ET.SubElement(xml_request, 'task')
@@ -382,6 +381,8 @@ class WorkbookRequest(object):
         if workbook_item.owner_id:
             owner_element = ET.SubElement(workbook_element, 'owner')
             owner_element.attrib['id'] = workbook_item.owner_id
+        if workbook_item.materialized_views_enabled is not None:
+            workbook_element.attrib['materializedViewsEnabled'] = str(workbook_item.materialized_views_enabled).lower()
         return ET.tostring(xml_request)
 
     def publish_req(self, workbook_item, filename, file_contents, connection_credentials=None, connections=None):
@@ -400,20 +401,6 @@ class WorkbookRequest(object):
 
         parts = {'request_payload': ('', xml_request, 'text/xml')}
         return _add_multipart(parts)
-
-    # TODO: What if we don't have project id and workbook name
-    def materialize_req(self, workbook_items, mode):
-        xml_request = ET.Element('tsRequest')
-        workbooks_element = ET.SubElement(xml_request, 'workbooks')
-        workbooks_element.attrib['shouldEnableMaterializedViews'] = str(mode).lower()
-        for workbook_item in workbook_items:
-            workbook_element = ET.SubElement(workbooks_element, 'workbook')
-            if workbook_item.name:
-                workbook_element.attrib['name'] = workbook_item.name
-            if workbook_item.project_path:
-                project_element = ET.SubElement(workbook_element, 'project')
-                project_element.attrib['path'] = workbook_item.project_path
-        return ET.tostring(xml_request)
 
 
 class Connection(object):
