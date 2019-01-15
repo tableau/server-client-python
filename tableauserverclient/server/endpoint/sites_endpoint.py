@@ -47,7 +47,7 @@ class Sites(Endpoint):
     # Gets 1 site by content url
     @api(version="3.3")
     def get_by_content_url(self, content_url):
-        if not content_url:
+        if content_url is None:
             error = "Content URL undefined."
             raise ValueError(error)
         logger.info('Querying single site (Content URL: {0})'.format(content_url))
