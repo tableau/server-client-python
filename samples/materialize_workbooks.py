@@ -31,6 +31,7 @@ def main():
     logging.basicConfig(level=logging_level)
 
     enable_materialized_views = args.mode == "enable"
+    site_id = args.site_id if args.site_id is not None else ""
 
     if args.type is not None and args.mode is None:
         print("Use '--mode <enable/disable>' to specify how you want to change materialized views settings.")
@@ -47,27 +48,25 @@ def main():
 
     if args.type is not None and enable_materialized_views is not None:
         if args.type == 'site':
-            tableau_auth = TSC.TableauAuth(args.username, password, site_id=args.site_id)
+            tableau_auth = TSC.TableauAuth(args.username, password, site_id=site_id)
             server = TSC.Server(args.server)
 
             with server.auth.sign_in(tableau_auth):
-                site_to_update = server.sites.get_by_content_url(args.site_id)
+                site_to_update = server.sites.get_by_content_url(site_id)
                 site_to_update.materialized_views_enabled = enable_materialized_views
 
                 server.sites.update(site_to_update)
-                print("Site updated. ID: {0}".format(args.site_id))
+                print("Site updated. ID: {0}".format(site_id))
             print
 
         elif args.type == 'workbook':
-            tableau_auth = TSC.TableauAuth(args.username, password, site_id=args.site_id)
+            tableau_auth = TSC.TableauAuth(args.username, password, site_id=site_id)
             server = TSC.Server(args.server)
 
             # Now it updates all the workbooks in the site
             # To update selected ones pass filter into 'workbooks = server.workbooks.get()[0]'
             with server.auth.sign_in(tableau_auth):
-                workbooks = server.workbooks.get()[0]
-
-                for workbook in workbooks:
+                for workbook in TSC.Pager(server.workbooks):
                     workbook.materialized_views_enabled = enable_materialized_views
 
                     server.workbooks.update(workbook)
@@ -75,21 +74,18 @@ def main():
             print
 
     if args.status:
-        tableau_auth = TSC.TableauAuth(args.username, password, site_id=args.site_id)
+        tableau_auth = TSC.TableauAuth(args.username, password, site_id=site_id)
         server = TSC.Server(args.server)
 
         with server.auth.sign_in(tableau_auth):
-            all_sites = server.sites.get()[0]
-            all_workbooks = server.workbooks.get()[0]
-
             print("enabled sites:")
-            for site in all_sites:
+            for site in TSC.Pager(server.sites):
                 if site.materialized_views_enabled:
                     print "Site name: ", site.name
             print
 
             print("enabled workbooks:")
-            for workbook in all_workbooks:
+            for workbook in TSC.Pager(server.workbooks):
                 if workbook.materialized_views_enabled:
                     print "Workbook name: ", workbook.name
             print
