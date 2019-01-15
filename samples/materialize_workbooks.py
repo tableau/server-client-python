@@ -31,8 +31,9 @@ def main():
     logging_level = getattr(logging, args.logging_level.upper())
     logging.basicConfig(level=logging_level)
 
-    enable_materialized_views = args.mode == "enable"
+    # site content url is the TSC term for site id
     site_content_url = args.site_id if args.site_id is not None else ""
+    enable_materialized_views = args.mode == "enable"
 
     if args.type is not None and args.mode is None:
         print("Use '--mode <enable/disable>' to specify how you want to change materialized views settings.")
@@ -57,7 +58,7 @@ def main():
                 site_to_update.materialized_views_enabled = enable_materialized_views
 
                 server.sites.update(site_to_update)
-                print("Site updated. ID: {0}".format(site_content_url))
+                print "Updated materialized views settings for site: ", site_to_update.name
             print
 
         elif args.type == 'workbook':
@@ -66,36 +67,38 @@ def main():
 
             # Now it updates all the workbooks in the site
             # To update selected ones pass filter into 'workbooks = server.workbooks.get()[0]'
+            # This only updates the workbooks in the site you are signing into
             with server.auth.sign_in(tableau_auth):
                 for workbook in TSC.Pager(server.workbooks):
                     workbook.materialized_views_enabled = enable_materialized_views
 
                     server.workbooks.update(workbook)
-                    print "workbook updated: ", workbook.name
+                    print "Updated materialized views settings for workbook:", workbook.name
             print
 
     if args.status:
         tableau_auth = TSC.TableauAuth(args.username, password, site_id=site_content_url)
         server = TSC.Server(args.server)
 
-        enabled_site_content_urls = set()
+        enabled_sites = set()
         with server.auth.sign_in(tableau_auth):
             # For server admin, this will prints all the materialized views enabled sites
             # For other users, this only prints the status of the site they belong to
-            print("enabled sites:")
+            print("Materialized views is enabled on sites:")
             for site in TSC.Pager(server.sites):
                 if site.materialized_views_enabled:
-                    enabled_site_content_urls.add(site.content_url)
-                    print "Site name: ", site.name
+                    enabled_sites.add(site)
+                    print "Site name:", site.name
             print
 
-        print("enabled workbooks:")
-        for site_content_url in enabled_site_content_urls:
-            site_auth = TSC.TableauAuth(args.username, password, site_content_url)
+        print("Materialized views is enabled on workbooks:")
+        # Individual workbooks can be enabled only when the sites they belong to are enabled too
+        for site in enabled_sites:
+            site_auth = TSC.TableauAuth(args.username, password, site.content_url)
             with server.auth.sign_in(site_auth):
                 for workbook in TSC.Pager(server.workbooks):
                     if workbook.materialized_views_enabled:
-                        print "Workbook name: ", workbook.name, " site id: ", site_content_url
+                        print workbook.name, "from site:", site.name
         print
 
 
