@@ -187,7 +187,7 @@ class ScheduleTests(unittest.TestCase):
                          single_schedule.interval_item.interval)
 
     def test_add_workbook(self):
-        self.server.version = "2.8"
+        self.server.version = "3.3"
         baseurl = "{}/sites/{}/schedules".format(self.server.baseurl, self.server.site_id)
 
         with open(WORKBOOK_GET_BY_ID_XML, "rb") as f:
