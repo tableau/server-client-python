@@ -58,7 +58,7 @@ def main():
                 site_to_update.materialized_views_enabled = enable_materialized_views
 
                 server.sites.update(site_to_update)
-                print "Updated materialized views settings for site: ", site_to_update.name
+                print "Updated materialized views settings for site:", site_to_update.name
             print
 
         elif args.type == 'workbook':
@@ -73,7 +73,8 @@ def main():
                     workbook.materialized_views_enabled = enable_materialized_views
 
                     server.workbooks.update(workbook)
-                    print "Updated materialized views settings for workbook:", workbook.name
+                    site = server.sites.get_by_content_url(site_content_url)
+                    print "Updated materialized views settings for workbook:", workbook.name, "from site:", site.name
             print
 
     if args.status:
@@ -98,8 +99,7 @@ def main():
             with server.auth.sign_in(site_auth):
                 for workbook in TSC.Pager(server.workbooks):
                     if workbook.materialized_views_enabled:
-                        print workbook.name, "from site:", site.name
-        print
+                        print "Workbook:", workbook.name, "from site:", site.name
 
 
 if __name__ == "__main__":

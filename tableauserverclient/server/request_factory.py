@@ -249,6 +249,7 @@ class ScheduleRequest(object):
             <workbook/datasource id="..."/>
           </extractRefresh>
         </task>
+
         """
         xml_request = ET.Element('tsRequest')
         task_element = ET.SubElement(xml_request, 'task')
