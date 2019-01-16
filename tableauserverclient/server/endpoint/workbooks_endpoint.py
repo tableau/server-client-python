@@ -178,6 +178,25 @@ class Workbooks(Endpoint):
         connections = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
         return connections
 
+    # Get the pdf of the entire workbook if its tabs are enabled, pdf of the default view if its tabs are disabled
+    @api(version="3.4")
+    def populate_pdf(self, workbook_item, req_options=None):
+        if not workbook_item.id:
+            error = "Workbook item missing ID."
+            raise MissingRequiredFieldError(error)
+
+        def pdf_fetcher():
+            return self._get_wb_pdf(workbook_item, req_options)
+
+        workbook_item._set_pdf(pdf_fetcher)
+        logger.info("Populated pdf for workbook (ID: {0})".format(workbook_item.id))
+
+    def _get_wb_pdf(self, workbook_item, req_options):
+        url = "{0}/{1}/pdf".format(self.baseurl, workbook_item.id)
+        server_response = self.get_request(url, req_options)
+        pdf = server_response.content
+        return pdf
+
     # Get preview image of workbook
     @api(version="2.0")
     def populate_preview_image(self, workbook_item):

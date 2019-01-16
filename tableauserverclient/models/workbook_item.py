@@ -14,6 +14,7 @@ class WorkbookItem(object):
         self._created_at = None
         self._id = None
         self._initial_tags = set()
+        self._pdf = None
         self._preview_image = None
         self._project_name = None
         self._size = None
@@ -43,6 +44,13 @@ class WorkbookItem(object):
     @property
     def id(self):
         return self._id
+
+    @property
+    def pdf(self):
+        if self._pdf is None:
+            error = "Workbook item must be populated with its pdf first."
+            raise UnpopulatedPropertyError(error)
+        return self._pdf()
 
     @property
     def preview_image(self):
@@ -103,6 +111,9 @@ class WorkbookItem(object):
 
     def _set_views(self, views):
         self._views = views
+
+    def _set_pdf(self, pdf):
+        self._pdf = pdf
 
     def _set_preview_image(self, preview_image):
         self._preview_image = preview_image
