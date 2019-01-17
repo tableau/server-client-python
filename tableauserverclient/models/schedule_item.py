@@ -10,6 +10,7 @@ class ScheduleItem(object):
     class Type:
         Extract = "Extract"
         Subscription = "Subscription"
+        Flow = "Flow"
 
     class ExecutionOrder:
         Parallel = "Parallel"

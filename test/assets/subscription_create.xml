@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.3.xsd">
+    <subscription id="78e9318d-2d29-4d67-b60f-3f2f5fd89ecc" subject="sub_name">
+        <content id="960e61f2-1838-40b2-bba2-340c9492f943" type="Workbook"/>
+        <schedule id="4906c453-d5ec-4972-9ff4-789b629bdfa2" name="Monday morning"/>
+        <user id="8d30c8de-0a5f-4bee-b266-c621b4f3eed0" name="user1"/>
+    </subscription>
+</tsResponse>
