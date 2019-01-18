@@ -282,14 +282,16 @@ class SiteRequest(object):
             site_element.attrib['state'] = site_item.state
         if site_item.storage_quota:
             site_element.attrib['storageQuota'] = str(site_item.storage_quota)
-        if site_item.disable_subscriptions:
+        if site_item.disable_subscriptions is not None:
             site_element.attrib['disableSubscriptions'] = str(site_item.disable_subscriptions).lower()
-        if site_item.subscribe_others_enabled:
+        if site_item.subscribe_others_enabled is not None:
             site_element.attrib['subscribeOthersEnabled'] = str(site_item.subscribe_others_enabled).lower()
         if site_item.revision_limit:
             site_element.attrib['revisionLimit'] = str(site_item.revision_limit)
-        if site_item.subscribe_others_enabled:
+        if site_item.revision_history_enabled is not None:
             site_element.attrib['revisionHistoryEnabled'] = str(site_item.revision_history_enabled).lower()
+        if site_item.materialized_views_enabled is not None:
+            site_element.attrib['materializedViewsEnabled'] = str(site_item.materialized_views_enabled).lower()
         return ET.tostring(xml_request)
 
     def create_req(self, site_item):
@@ -380,6 +382,8 @@ class WorkbookRequest(object):
         if workbook_item.owner_id:
             owner_element = ET.SubElement(workbook_element, 'owner')
             owner_element.attrib['id'] = workbook_item.owner_id
+        if workbook_item.materialized_views_enabled is not None:
+            workbook_element.attrib['materializedViewsEnabled'] = str(workbook_item.materialized_views_enabled).lower()
         return ET.tostring(xml_request)
 
     def publish_req(self, workbook_item, filename, file_contents, connection_credentials=None, connections=None):

@@ -31,7 +31,7 @@ class Workbooks(Endpoint):
         return "{0}/sites/{1}/workbooks".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     # Get all workbooks on site
-    @api(version="2.0")
+    @api(version="3.3")
     def get(self, req_options=None):
         logger.info('Querying all workbooks on site')
         url = self.baseurl
@@ -41,7 +41,7 @@ class Workbooks(Endpoint):
         return all_workbook_items, pagination_item
 
     # Get 1 workbook
-    @api(version="2.0")
+    @api(version="3.3")
     def get_by_id(self, workbook_id):
         if not workbook_id:
             error = "Workbook ID undefined."
@@ -70,7 +70,7 @@ class Workbooks(Endpoint):
         logger.info('Deleted single workbook (ID: {0})'.format(workbook_id))
 
     # Update workbook
-    @api(version="2.0")
+    @api(version="3.3")
     def update(self, workbook_item):
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."

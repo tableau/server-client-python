@@ -201,7 +201,7 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual(0, len(result), "Added properly")
 
     def test_add_datasource(self):
-        self.server.version = "2.8"
+        self.server.version = "3.3"
         baseurl = "{}/sites/{}/schedules".format(self.server.baseurl, self.server.site_id)
 
         with open(DATASOURCE_GET_BY_ID_XML, "rb") as f:
