@@ -2048,6 +2048,7 @@ Attribute | Description
 `revision_history_enabled` |  (Optional) Specify `true` to enable revision history for content resources (workbooks and datasources). The default is `false`.   
 `revision_limit` | (Optional) Specifies the number of revisions of a content source (workbook or data source) to allow. On Tableau Server, the default is 25.   
 `state` | Shows the current state of the site (`Active` or `Suspended`). 
+`materialized_views_enabled` | (Optional) Specify `true` to enable materialized views for the site, available from version 3.3.
 
 
 **Example**
@@ -3175,6 +3176,7 @@ Name  |  Description
 `tags` |  The tags that have been added to the workbook. 
 `updated_at` |  The date and time when the workbook was last updated.
 `views`   | The list of views (`ViewItem`) for the workbook. You must first call the [workbooks.populate_views](#workbooks.populate_views) method to access this data. See the [ViewItem class](#viewitem-class).
+`materialized_views_enabled` | Specify `true` to enable materialized views for the workbook, available from version 3.3.
 
 
 
