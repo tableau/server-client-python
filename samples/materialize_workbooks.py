@@ -117,11 +117,8 @@ def update_project_by_path(args, enable_materialized_views, password, site_conte
     with server.auth.sign_in(tableau_auth):
         projects = [project for project in TSC.Pager(server.projects) if project.name == project_name]
 
-        if len(projects) > 1:
-            possible_paths = get_project_paths(server, projects)
-            update_project(possible_paths[args.project_path], server, enable_materialized_views)
-        else:
-            update_project(projects[0], server, enable_materialized_views)
+        possible_paths = get_project_paths(server, projects)
+        update_project(possible_paths[args.project_path], server, enable_materialized_views)
 
 
 def update_project_by_name(args, enable_materialized_views, password, site_content_url):
@@ -185,17 +182,12 @@ def update_workbooks_by_paths(all_projects, enable_materialized_views, server, w
                                          TSC.RequestOptions.Operator.Equals,
                                          workbook_name))
         workbooks = list(TSC.Pager(server.workbooks, req_option))
-        if len(workbooks) == 1:
-            workbooks[0].materialized_views_enabled = enable_materialized_views
-            server.workbooks.update(workbooks[0])
-            print("Updated materialized views settings for workbook: {}".format(workbooks[0].name))
-        else:
-            for workbook in workbooks:
-                path = find_project_path(all_projects[workbook.project_id], all_projects, "")
-                if path in workbook_paths:
-                    workbook.materialized_views_enabled = enable_materialized_views
-                    server.workbooks.update(workbook)
-                    print("Updated materialized views settings for workbook: {}".format(path + '/' + workbook.name))
+        for workbook in workbooks:
+            path = find_project_path(all_projects[workbook.project_id], all_projects, "")
+            if path in workbook_paths:
+                workbook.materialized_views_enabled = enable_materialized_views
+                server.workbooks.update(workbook)
+                print("Updated materialized views settings for workbook: {}".format(path + '/' + workbook.name))
         print('\n')
 
 
