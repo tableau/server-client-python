@@ -61,7 +61,7 @@ def main():
 
 def find_project_path(project, all_projects, path):
     path = project.name if len(path) == 0 else project.name + '/' + path
-    
+
     if project.parent_id is None:
         return path
     else:
