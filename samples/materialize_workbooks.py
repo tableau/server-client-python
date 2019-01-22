@@ -40,7 +40,7 @@ def main():
     enable_materialized_views = args.mode == "enable"
 
     if (args.type is None) != (args.mode is None):
-        print "Use '--type <content type> --mode <enable/disable>' to update materialized views settings."
+        print("Use '--type <content type> --mode <enable/disable>' to update materialized views settings.")
         return
 
     if args.type == 'site':
@@ -61,10 +61,7 @@ def main():
 
 def find_project_path(project, all_projects, path):
     path = project.name if len(path) == 0 else project.name + '/' + path
-    # if len(path) == 0:
-    #     path = project.name
-    # else:
-    #     path = project.name + '/' + path
+    
     if project.parent_id is None:
         return path
     else:
@@ -83,7 +80,7 @@ def get_project_paths(server, projects):
 
 def print_paths(paths):
     for path in paths.keys():
-        print path
+        print(path)
 
 
 def show_materialized_views_status(args, password, site_content_url):
@@ -93,26 +90,26 @@ def show_materialized_views_status(args, password, site_content_url):
     with server.auth.sign_in(tableau_auth):
         # For server admin, this will prints all the materialized views enabled sites
         # For other users, this only prints the status of the site they belong to
-        print "Materialized views is enabled on sites:"
+        print("Materialized views is enabled on sites:")
         for site in TSC.Pager(server.sites):
             if site.materialized_views_enabled:
                 enabled_sites.add(site)
-                print "Site name:", site.name
-        print '\n'
+                print("Site name: {}".format(site.name))
+        print('\n')
 
-    print "Materialized views is enabled on workbooks:"
+    print("Materialized views is enabled on workbooks:")
     # Individual workbooks can be enabled only when the sites they belong to are enabled too
     for site in enabled_sites:
         site_auth = TSC.TableauAuth(args.username, password, site.content_url)
         with server.auth.sign_in(site_auth):
             for workbook in TSC.Pager(server.workbooks):
                 if workbook.materialized_views_enabled:
-                    print "Workbook:", workbook.name, "from site:", site.name
+                    print("Workbook: {} from site: {}".format(workbook.name, site.name))
 
 
 def update_project_by_path(args, enable_materialized_views, password, site_content_url):
     if args.project_path is None:
-        print "Use --project_path <project path> to specify the path of the project"
+        print("Use --project_path <project path> to specify the path of the project")
         return
     tableau_auth = TSC.TableauAuth(args.username, password, site_content_url)
     server = TSC.Server(args.server, use_server_version=True)
@@ -129,7 +126,7 @@ def update_project_by_path(args, enable_materialized_views, password, site_conte
 
 def update_project_by_name(args, enable_materialized_views, password, site_content_url):
     if args.project_name is None:
-        print "Use --project-name <project name> to specify the name of the project"
+        print("Use --project-name <project name> to specify the name of the project")
         return
     tableau_auth = TSC.TableauAuth(args.username, password, site_content_url)
     server = TSC.Server(args.server, use_server_version=True)
@@ -139,10 +136,10 @@ def update_project_by_name(args, enable_materialized_views, password, site_conte
 
         if len(projects) > 1:
             possible_paths = get_project_paths(server, projects)
-            print "Project name is not unique, use '--project_path <path>'"
-            print "Possible project paths:"
+            print("Project name is not unique, use '--project_path <path>'")
+            print("Possible project paths:")
             print_paths(possible_paths)
-            print '\n'
+            print('\n')
             return
         else:
             update_project(projects[0], server, enable_materialized_views)
@@ -153,8 +150,9 @@ def update_project(project, server, enable_materialized_views):
         if workbook.project_id == project.id:
             workbook.materialized_views_enabled = enable_materialized_views
             server.workbooks.update(workbook)
-    print "Updated materialized views settings for project:", project.name
-    print '\n'
+
+    print("Updated materialized views settings for project: {}".format(project.name))
+    print('\n')
 
 
 def parse_workbook_path(file_path):
@@ -168,11 +166,8 @@ def parse_workbook_path(file_path):
 
 def update_workbook(args, enable_materialized_views, password, site_content_url):
     if args.file_path is None:
-        print "Use '--file-path <file path>' to specify the path of a list of workbooks"
-        print "In the file, each line is a path to a workbook, for example:"
-        print "project1/project2/workbook_name_1"
-        print "project3/workbook_name_2"
-        print '\n'
+        print("Use '--file-path <file path>' to specify the path of a list of workbooks")
+        print('\n')
         return
 
     tableau_auth = TSC.TableauAuth(args.username, password, site_id=site_content_url)
@@ -193,15 +188,15 @@ def update_workbooks_by_paths(all_projects, enable_materialized_views, server, w
         if len(workbooks) == 1:
             workbooks[0].materialized_views_enabled = enable_materialized_views
             server.workbooks.update(workbooks[0])
-            print "Updated materialized views settings for workbook:", workbooks[0].name
+            print("Updated materialized views settings for workbook: {}".format(workbooks[0].name))
         else:
             for workbook in workbooks:
                 path = find_project_path(all_projects[workbook.project_id], all_projects, "")
                 if path in workbook_paths:
                     workbook.materialized_views_enabled = enable_materialized_views
                     server.workbooks.update(workbook)
-                    print "Updated materialized views settings for workbook:", path + '/' + workbook.name
-        print '\n'
+                    print("Updated materialized views settings for workbook: {}".format(path + '/' + workbook.name))
+        print('\n')
 
 
 def update_site(args, enable_materialized_views, password, site_content_url):
@@ -212,8 +207,8 @@ def update_site(args, enable_materialized_views, password, site_content_url):
         site_to_update.materialized_views_enabled = enable_materialized_views
 
         server.sites.update(site_to_update)
-        print "Updated materialized views settings for site:", site_to_update.name
-    print '\n'
+        print("Updated materialized views settings for site: {}".format(site_to_update.name))
+    print('\n')
 
 
 if __name__ == "__main__":
