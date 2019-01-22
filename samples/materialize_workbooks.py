@@ -23,7 +23,7 @@ def main():
                         help='type of content you want to update materialized views settings on')
     parser.add_argument('--file-path', '-fp', required=False, help='path to a list of workbooks')
     parser.add_argument('--project-name', '-pn', required=False, help='name of the project')
-    parser.add_argument('--project-path', '-pp', required =False, help="path of the project")
+    parser.add_argument('--project-path', '-pp', required=False, help="path of the project")
 
     args = parser.parse_args()
 
@@ -60,7 +60,11 @@ def main():
 
 
 def find_project_path(project, all_projects, path):
-    path = project.name + '/' + path
+    path = project.name if len(path) == 0 else project.name + '/' + path
+    # if len(path) == 0:
+    #     path = project.name
+    # else:
+    #     path = project.name + '/' + path
     if project.parent_id is None:
         return path
     else:
@@ -73,7 +77,7 @@ def get_project_paths(server, projects):
 
     result = dict()
     for project in projects:
-        result[find_project_path(project, all_projects, "")[:-1]] = project
+        result[find_project_path(project, all_projects, "")] = project
     return result
 
 
@@ -192,7 +196,7 @@ def update_workbooks_by_paths(all_projects, enable_materialized_views, server, w
             print "Updated materialized views settings for workbook:", workbooks[0].name
         else:
             for workbook in workbooks:
-                path = find_project_path(all_projects[workbook.project_id], all_projects, "")[:-1]
+                path = find_project_path(all_projects[workbook.project_id], all_projects, "")
                 if path in workbook_paths:
                     workbook.materialized_views_enabled = enable_materialized_views
                     server.workbooks.update(workbook)
