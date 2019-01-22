@@ -44,16 +44,20 @@ def main():
         return
 
     if args.type == 'site':
-        update_site(args, enable_materialized_views, password, site_content_url)
+        if not update_site(args, enable_materialized_views, password, site_content_url):
+            return
 
     elif args.type == 'workbook':
-        update_workbook(args, enable_materialized_views, password, site_content_url)
+        if not update_workbook(args, enable_materialized_views, password, site_content_url):
+            return
 
     elif args.type == 'project_name':
-        update_project_by_name(args, enable_materialized_views, password, site_content_url)
+        if not update_project_by_name(args, enable_materialized_views, password, site_content_url):
+            return
 
     elif args.type == 'project_path':
-        update_project_by_path(args, enable_materialized_views, password, site_content_url)
+        if not update_project_by_path(args, enable_materialized_views, password, site_content_url):
+            return
 
     if args.status:
         show_materialized_views_status(args, password, site_content_url)
@@ -110,7 +114,7 @@ def show_materialized_views_status(args, password, site_content_url):
 def update_project_by_path(args, enable_materialized_views, password, site_content_url):
     if args.project_path is None:
         print("Use --project_path <project path> to specify the path of the project")
-        return
+        return False
     tableau_auth = TSC.TableauAuth(args.username, password, site_content_url)
     server = TSC.Server(args.server, use_server_version=True)
     project_name = args.project_path.split('/')[-1]
@@ -119,12 +123,13 @@ def update_project_by_path(args, enable_materialized_views, password, site_conte
 
         possible_paths = get_project_paths(server, projects)
         update_project(possible_paths[args.project_path], server, enable_materialized_views)
+    return True
 
 
 def update_project_by_name(args, enable_materialized_views, password, site_content_url):
     if args.project_name is None:
         print("Use --project-name <project name> to specify the name of the project")
-        return
+        return False
     tableau_auth = TSC.TableauAuth(args.username, password, site_content_url)
     server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
@@ -137,9 +142,10 @@ def update_project_by_name(args, enable_materialized_views, password, site_conte
             print("Possible project paths:")
             print_paths(possible_paths)
             print('\n')
-            return
+            return False
         else:
             update_project(projects[0], server, enable_materialized_views)
+    return True
 
 
 def update_project(project, server, enable_materialized_views):
@@ -165,14 +171,14 @@ def update_workbook(args, enable_materialized_views, password, site_content_url)
     if args.file_path is None:
         print("Use '--file-path <file path>' to specify the path of a list of workbooks")
         print('\n')
-        return
-
+        return False
     tableau_auth = TSC.TableauAuth(args.username, password, site_id=site_content_url)
     server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
         workbook_path_mapping = parse_workbook_path(args.file_path)
         all_projects = {project.id: project for project in TSC.Pager(server.projects)}
         update_workbooks_by_paths(all_projects, enable_materialized_views, server, workbook_path_mapping)
+    return True
 
 
 def update_workbooks_by_paths(all_projects, enable_materialized_views, server, workbook_path_mapping):
@@ -201,6 +207,7 @@ def update_site(args, enable_materialized_views, password, site_content_url):
         server.sites.update(site_to_update)
         print("Updated materialized views settings for site: {}".format(site_to_update.name))
     print('\n')
+    return True
 
 
 if __name__ == "__main__":
