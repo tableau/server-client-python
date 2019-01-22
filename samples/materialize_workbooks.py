@@ -51,17 +51,18 @@ def main():
 
 def show_materialized_views_status(args, password, site_content_url):
     tableau_auth = TSC.TableauAuth(args.username, password, site_id=site_content_url)
-    server = TSC.Server(args.server)
+    server = TSC.Server(args.server, use_server_version=True)
     enabled_sites = set()
     with server.auth.sign_in(tableau_auth):
         # For server admin, this will prints all the materialized views enabled sites
         # For other users, this only prints the status of the site they belong to
-        print("Materialized views is enabled on sites:")
+        print "Materialized views is enabled on sites:"
         for site in TSC.Pager(server.sites):
             if site.materialized_views_enabled:
                 enabled_sites.add(site)
                 print "Site name:", site.name
-        print
+        print '\n'
+
     print("Materialized views is enabled on workbooks:")
     # Individual workbooks can be enabled only when the sites they belong to are enabled too
     for site in enabled_sites:
@@ -74,7 +75,7 @@ def show_materialized_views_status(args, password, site_content_url):
 
 def update_workbook(args, enable_materialized_views, password, site_content_url):
     tableau_auth = TSC.TableauAuth(args.username, password, site_id=site_content_url)
-    server = TSC.Server(args.server)
+    server = TSC.Server(args.server, use_server_version=True)
     # Now it updates all the workbooks in the site
     # To update selected ones please use filter:
     # https://github.com/tableau/server-client-python/blob/master/docs/docs/filter-sort.md
@@ -86,19 +87,19 @@ def update_workbook(args, enable_materialized_views, password, site_content_url)
             server.workbooks.update(workbook)
             site = server.sites.get_by_content_url(site_content_url)
             print "Updated materialized views settings for workbook:", workbook.name, "from site:", site.name
-    print
+    print '\n'
 
 
 def update_site(args, enable_materialized_views, password, site_content_url):
     tableau_auth = TSC.TableauAuth(args.username, password, site_id=site_content_url)
-    server = TSC.Server(args.server)
+    server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
         site_to_update = server.sites.get_by_content_url(site_content_url)
         site_to_update.materialized_views_enabled = enable_materialized_views
 
         server.sites.update(site_to_update)
         print "Updated materialized views settings for site:", site_to_update.name
-    print
+    print '\n'
 
 
 if __name__ == "__main__":

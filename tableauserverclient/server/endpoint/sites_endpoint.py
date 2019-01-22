@@ -56,7 +56,7 @@ class Sites(Endpoint):
         return SiteItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     # Update site
-    @api(version="3.3")
+    @api(version="2.0")
     def update(self, site_item):
         if not site_item.id:
             error = "Site item missing ID."
