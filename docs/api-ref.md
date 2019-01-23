@@ -1889,7 +1889,7 @@ When you create an instance of the `Server` class, you have access to the resour
 
 Resource   |  Description     
  :--- | : ---    
-*server*.auth   |   Sets authentication for sign in and sign out. See [Auth](#auththentication)  |
+*server*.auth   |   Sets authentication for sign in and sign out. See [Auth](#authentication)  |
 *server*.views  |   Access the server views and methods.  See [Views](#views)  
 *server*.users  |   Access the user resources and methods.  See [Users](#users)  
 *server*.sites  |   Access the sites.  See [Sites](#sites)  
