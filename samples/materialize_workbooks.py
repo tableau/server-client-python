@@ -21,7 +21,8 @@ def main():
     parser.add_argument('--type', '-t', required=False, choices=['site', 'workbook', 'project_name',
                                                                  'project_id', 'project_path'],
                         help='type of content you want to update materialized views settings on')
-    parser.add_argument('--file-path', '-fp', required=False, help='path to a list of workbooks')
+    parser.add_argument('--path-list', '-pl', required=False, help='path to a list of workbook paths')
+    parser.add_argument('--name-list', '-nl', required=False, help='path to a list of workbook names')
     parser.add_argument('--project-name', '-pn', required=False, help='name of the project')
     parser.add_argument('--project-path', '-pp', required=False, help="path of the project")
 
@@ -168,16 +169,19 @@ def parse_workbook_path(file_path):
 
 
 def update_workbook(args, enable_materialized_views, password, site_content_url):
-    if args.file_path is None:
-        print("Use '--file-path <file path>' to specify the path of a list of workbooks")
+    if args.path_list is None and args.name_list is None:
+        print("Use '--path-list <filename>' or '--name-list <filename>' to specify the path of a list of workbooks")
         print('\n')
         return False
     tableau_auth = TSC.TableauAuth(args.username, password, site_id=site_content_url)
     server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
-        workbook_path_mapping = parse_workbook_path(args.file_path)
-        all_projects = {project.id: project for project in TSC.Pager(server.projects)}
-        update_workbooks_by_paths(all_projects, enable_materialized_views, server, workbook_path_mapping)
+        if args.path_list is not None:
+            workbook_path_mapping = parse_workbook_path(args.path_list)
+            all_projects = {project.id: project for project in TSC.Pager(server.projects)}
+            update_workbooks_by_paths(all_projects, enable_materialized_views, server, workbook_path_mapping)
+        elif args.name_list is not None:
+            update_workbooks_by_names(args.name_list, server, enable_materialized_views)
     return True
 
 
@@ -194,7 +198,22 @@ def update_workbooks_by_paths(all_projects, enable_materialized_views, server, w
                 workbook.materialized_views_enabled = enable_materialized_views
                 server.workbooks.update(workbook)
                 print("Updated materialized views settings for workbook: {}".format(path + '/' + workbook.name))
-        print('\n')
+    print('\n')
+
+
+def update_workbooks_by_names(name_list, server, enable_materialized_views):
+    workbook_names = open(name_list, 'r')
+    for workbook_name in workbook_names:
+        req_option = TSC.RequestOptions()
+        req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name,
+                                         TSC.RequestOptions.Operator.Equals,
+                                         workbook_name.rstrip()))
+        workbooks = list(TSC.Pager(server.workbooks, req_option))
+        for workbook in workbooks:
+            workbook.materialized_views_enabled = enable_materialized_views
+            server.workbooks.update(workbook)
+            print("Updated materialized views settings for workbook: {}".format(workbook.name))
+    print('\n')
 
 
 def update_site(args, enable_materialized_views, password, site_content_url):
