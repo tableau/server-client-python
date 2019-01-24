@@ -24,6 +24,7 @@ class WorkbookItem(object):
         self.project_id = project_id
         self.show_tabs = show_tabs
         self.tags = set()
+        self.materialized_views_enabled = None
 
     @property
     def connections(self):
@@ -112,15 +113,18 @@ class WorkbookItem(object):
             workbook_xml = ET.fromstring(workbook_xml).find('.//t:workbook', namespaces=ns)
         if workbook_xml is not None:
             (_, _, _, _, updated_at, _, show_tabs,
-             project_id, project_name, owner_id, _, _) = self._parse_element(workbook_xml, ns)
+             project_id, project_name, owner_id, _, _,
+             materialized_views_enabled) = self._parse_element(workbook_xml, ns)
 
             self._set_values(None, None, None, None, updated_at,
-                             None, show_tabs, project_id, project_name, owner_id, None, None)
+                             None, show_tabs, project_id, project_name, owner_id, None, None,
+                             materialized_views_enabled)
 
         return self
 
     def _set_values(self, id, name, content_url, created_at, updated_at,
-                    size, show_tabs, project_id, project_name, owner_id, tags, views):
+                    size, show_tabs, project_id, project_name, owner_id, tags, views,
+                    materialized_views_enabled):
         if id is not None:
             self._id = id
         if name:
@@ -146,6 +150,8 @@ class WorkbookItem(object):
             self._initial_tags = copy.copy(tags)
         if views:
             self._views = views
+        if materialized_views_enabled is not None:
+            self.materialized_views_enabled = materialized_views_enabled
 
     @classmethod
     def from_response(cls, resp, ns):
@@ -154,11 +160,13 @@ class WorkbookItem(object):
         all_workbook_xml = parsed_response.findall('.//t:workbook', namespaces=ns)
         for workbook_xml in all_workbook_xml:
             (id, name, content_url, created_at, updated_at, size, show_tabs,
-             project_id, project_name, owner_id, tags, views) = cls._parse_element(workbook_xml, ns)
+             project_id, project_name, owner_id, tags, views,
+             materialized_views_enabled) = cls._parse_element(workbook_xml, ns)
 
             workbook_item = cls(project_id)
             workbook_item._set_values(id, name, content_url, created_at, updated_at,
-                                      size, show_tabs, None, project_name, owner_id, tags, views)
+                                      size, show_tabs, None, project_name, owner_id, tags, views,
+                                      materialized_views_enabled)
             all_workbook_items.append(workbook_item)
         return all_workbook_items
 
@@ -199,8 +207,10 @@ class WorkbookItem(object):
         if views_elem is not None:
             views = ViewItem.from_xml_element(views_elem, ns)
 
+        materialized_views_enabled = string_to_bool(workbook_xml.get('materializedViewsEnabled', ''))
+
         return id, name, content_url, created_at, updated_at, size, show_tabs,\
-            project_id, project_name, owner_id, tags, views
+            project_id, project_name, owner_id, tags, views, materialized_views_enabled
 
 
 # Used to convert string represented boolean to a boolean type

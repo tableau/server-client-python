@@ -44,6 +44,17 @@ class Sites(Endpoint):
         server_response = self.get_request(url)
         return SiteItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
+    # Gets 1 site by content url
+    @api(version="2.0")
+    def get_by_content_url(self, content_url):
+        if content_url is None:
+            error = "Content URL undefined."
+            raise ValueError(error)
+        logger.info('Querying single site (Content URL: {0})'.format(content_url))
+        url = "{0}/{1}?key=contentUrl".format(self.baseurl, content_url)
+        server_response = self.get_request(url)
+        return SiteItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+
     # Update site
     @api(version="2.0")
     def update(self, site_item):
