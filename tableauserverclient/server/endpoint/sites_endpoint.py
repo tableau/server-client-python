@@ -45,7 +45,7 @@ class Sites(Endpoint):
         return SiteItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     # Gets 1 site by content url
-    @api(version="3.3")
+    @api(version="2.0")
     def get_by_content_url(self, content_url):
         if content_url is None:
             error = "Content URL undefined."
