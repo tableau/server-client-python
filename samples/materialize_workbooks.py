@@ -44,27 +44,36 @@ def main():
         print("Use '--type <content type> --mode <enable/disable>' to update materialized views settings.")
         return
 
+    # enable/disable materialized views for site
     if args.type == 'site':
         if not update_site(args, enable_materialized_views, password, site_content_url):
             return
 
+    # enable/disable materialized views for workbook
+    # works only when the site the workbooks belong to are enabled too
     elif args.type == 'workbook':
         if not update_workbook(args, enable_materialized_views, password, site_content_url):
             return
 
+    # enable/disable materialized views for project by project name
+    # will show possible projects when project name is not unique
     elif args.type == 'project_name':
         if not update_project_by_name(args, enable_materialized_views, password, site_content_url):
             return
 
+    # enable/disable materialized views for proejct by project path, for example: project1/project2
     elif args.type == 'project_path':
         if not update_project_by_path(args, enable_materialized_views, password, site_content_url):
             return
 
+    # show enabled sites and workbooks
     if args.status:
         show_materialized_views_status(args, password, site_content_url)
 
 
 def find_project_path(project, all_projects, path):
+    # project stores the id of it's parent
+    # this method is to run recursively to find the path from root project to given project
     path = project.name if len(path) == 0 else project.name + '/' + path
 
     if project.parent_id is None:
@@ -96,6 +105,8 @@ def show_materialized_views_status(args, password, site_content_url):
         # For server admin, this will prints all the materialized views enabled sites
         # For other users, this only prints the status of the site they belong to
         print("Materialized views is enabled on sites:")
+        # only server admins can get all the sites in the server
+        # other users can only get the site they are in
         for site in TSC.Pager(server.sites):
             if site.materialized_views_enabled:
                 enabled_sites.add(site)
@@ -160,6 +171,7 @@ def update_project(project, server, enable_materialized_views):
 
 
 def parse_workbook_path(file_path):
+    # parse the list of project path of workbooks
     workbook_paths = open(file_path, 'r')
     workbook_path_mapping = defaultdict(list)
     for workbook_path in workbook_paths:
