@@ -3030,13 +3030,13 @@ Source file: models/view_item.py
 Name | Description
 :--- | :---  
 `content_url` | The name of the view as it would appear in a URL.
-`csv` | The CSV data of the view. You must first call the [views.populate_csv](#views.populate_csv) method to access the CSV data.
+`csv` | The CSV data of the view. You must first call the `views.populate_csv` method to access the CSV data.
 `id` | The identifier of the view item.  
-`image` | The image of the view. You must first call the [views.populate_image](#views.populate_image) method to access the image.
+`image` | The image of the view. You must first call the `views.populate_image`method to access the image.
 `name`  | The name of the view.
 `owner_id` |  The ID for the owner of the view.
-`pdf` | The PDF of the view. You must first call the [views.populate_pdf](#views.populate_pdf) method to access the PDF content.
-`preview_image` | The thumbnail image for the view. You must first call the [views.populate_preview_image](#views.populate_preview_image) method to access the preview image.
+`pdf` | The PDF of the view. You must first call the `views.populate_pdf` method to access the PDF content.
+`preview_image` | The thumbnail image for the view. You must first call the `views.populate_preview_image` method to access the preview image.
 `project_id` | The ID of the project that contains the view.
 `total_views`  |  The usage statistics for the view. Indicates the total number of times the view has been looked at.
 `workbook_id`  |  The ID of the workbook associated with the view.
@@ -3128,7 +3128,7 @@ This endpoint is available with REST API version 2.0 and up.
 
 Name | Description  
 :--- | :---  
-`view_item`  |  Specified the view to populate.
+`view_item`  |  Specifies the view to populate.
 
 
 **Exceptions**
@@ -3169,7 +3169,7 @@ This endpoint is available with REST API version 2.5 and up.
 Name | description
 :--- | :---
 `view_item` | Specifies the view to populate.
-`req_options` | (Optional) You can pass in a request object to specify a high resolution image. By default, the image will be in low resolution.
+`req_options` | (Optional) You can pass in a request object to specify a high resolution image. By default, the image will be in low resolution. See [ImageRequestOptions class](#imagerequestoptions-class)
 
 **Exceptions**
 
@@ -3180,14 +3180,6 @@ Error | Description
 **Returns**
 
 None. The image is added to the `view_item` and can be accessed by its `image` field.
-
-**Example**
-
-Creating a request option for high resolution image:
-```py
-req_options = TSC.ImageRequestOptions(imageresolution=TSC.ImageRequestOptions.Resolution.High)
-server.views.populate_image(view_item, req_options=req_options)
-```
 
 See [ViewItem class](#viewitem-class)
 
@@ -3250,7 +3242,7 @@ This endpoint is available with REST API version 2.7 and up.
 Name | description
 :--- | :---
 `view_item` | Specifies the view to populate.
-`req_options` | (Optional) You can pass in a request object to specify the page type and orientation of the PDF content. If not specified, PDF content will have default page type and orientation.
+`req_options` | (Optional) You can pass in a request object to specify the page type and orientation of the PDF content. If not specified, PDF content will have default page type and orientation. See [PDFRequestOptions class](#pdfrequestoptions-class)
 
 **Exceptions**
 
@@ -3261,15 +3253,6 @@ Error | Description
 **Returns**
 
 None. The PDF content is added to the `view_item` and can be accessed by its `pdf` field.
-
-**Example**
-
-Creating a request option for page type and orientation:
-```py
-req_options = TSC.PDFRequestOptions(page_type=TSC.PDFRequestOptions.PageType.A5,
-                                    orientation=TSC.PDFRequestOptions.Orientation.Landscape)
-server.views.populate_pdf(view_item, req_options=req_options)                          
-```
 
 See [ViewItem class](#viewitem-class)
 
