@@ -3169,7 +3169,7 @@ This endpoint is available with REST API version 2.5 and up.
 Name | description
 :--- | :---
 `view_item` | Specifies the view to populate.
-`req_options` | (Optional) You can pass in a request object to specify a high resolution image. By default, the image will be in low resolution. See [ImageRequestOptions class](#imagerequestoptions-class)
+`req_options` | (Optional) You can pass in a request object to specify a high resolution image. By default, the image will be in low resolution. See [ImageRequestOptions class](#imagerequestoptions-class) for more details.
 
 **Exceptions**
 
@@ -3242,7 +3242,7 @@ This endpoint is available with REST API version 2.7 and up.
 Name | description
 :--- | :---
 `view_item` | Specifies the view to populate.
-`req_options` | (Optional) You can pass in a request object to specify the page type and orientation of the PDF content. If not specified, PDF content will have default page type and orientation. See [PDFRequestOptions class](#pdfrequestoptions-class)
+`req_options` | (Optional) You can pass in a request object to specify the page type and orientation of the PDF content. If not specified, PDF content will have default page type and orientation. See [PDFRequestOptions class](#pdfrequestoptions-class) for more details.
 
 **Exceptions**
 
