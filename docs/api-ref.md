@@ -3009,20 +3009,19 @@ An updated `UserItem`.    See [UserItem class](#useritem-class)
 
 ## Views
 
-Using the TSC library, you can get all the views on a site, or get the views for a workbook, or populate a view with preview images. 
-The view resources for Tableau Server are defined in the `ViewItem` class. The class corresponds to the view resources you can access using the Tableau Server REST API, for example, you can find the name of the view, its id, and the id of the workbook it is associated with. The view methods are based upon the endpoints for views in the REST API and operate on the `ViewItem` class. 
+Using the TSC library, you can get information about views in a site or a workbook.
 
+The view resources for Tableau Server are defined in the `ViewItem` class. The class corresponds to the view resources you can access using the Tableau Server REST API. The view methods are based upon the endpoints for views in the REST API and operate on the `ViewItem` class.
 
 <br>
 
 ### ViewItem class
 
 ```
-class ViewItem(object)
- 
+ViewItem()
 ```
 
-The `ViewItem` class contains the members or attributes for the view resources on Tableau Server. The `ViewItem` class defines the information you can request or query from Tableau Server. The class members correspond to the attributes of a server request or response payload. 
+The `ViewItem` class contains the members or attributes for the view resources on Tableau Server. The `ViewItem` class defines the information you can request or query from Tableau Server. The class members correspond to the attributes of a server request or response payload.
 
 Source file: models/view_item.py
 
@@ -3030,12 +3029,17 @@ Source file: models/view_item.py
 
 Name | Description
 :--- | :---  
+`content_url` | The name of the view as it would appear in a URL.
+`csv` | The CSV data of the view. You must first call the [views.populate_csv](#views.populate_csv) method to access the CSV data.
 `id` | The identifier of the view item.  
-`name`  | The name of the view. 
-`owner_id` |  The id for the owner of the view. 
-`preview_image` | The thumbnail image for the view. 
-`total_views`  |  The usage statistics for the view. Indicates the total number of times the view has been looked at. 
-`workbook_id`  |  The id of the workbook associated with the view. 
+`image` | The image of the view. You must first call the [views.populate_image](#views.populate_image) method to access the image.
+`name`  | The name of the view.
+`owner_id` |  The ID for the owner of the view.
+`pdf` | The PDF of the view. You must first call the [views.populate_pdf](#views.populate_pdf) method to access the PDF content.
+`preview_image` | The thumbnail image for the view. You must first call the [views.populate_preview_image](#views.populate_preview_image) method to access the preview image.
+`project_id` | The ID of the project that contains the view.
+`total_views`  |  The usage statistics for the view. Indicates the total number of times the view has been looked at.
+`workbook_id`  |  The ID of the workbook associated with the view.
 
 
 <br>   
@@ -3044,7 +3048,7 @@ Name | Description
 
 ### Views methods
 
-The Tableau Server Client provides two methods for interacting with view resources, or endpoints. These methods correspond to the endpoints for views in the Tableau Server REST API. 
+The Tableau Server Client provides methods for interacting with view resources, or endpoints. These methods correspond to the endpoints for views in the Tableau Server REST API.
 
 Source file: server/endpoint/views_endpoint.py
 
@@ -3053,26 +3057,30 @@ Source file: server/endpoint/views_endpoint.py
 
 #### views.get
 ```
-views.get(req_option=None, usage=False)
+views.get(req_options=None, usage=False)
 ```
 
-Returns the list of views items for a site. 
+Returns the list of views items for a site.
 
 
-REST API: [Query Views for Site](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Views_for_Site%3FTocPath%3DAPI%2520Reference%7C_____64){:target="_blank"}
+REST API: [Query Views for Site](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_views_for_site){:target="_blank"}
 
-**Parameters** 
+**Version**
+
+This endpoint is available with REST API version 2.0 and up.
+
+**Parameters**
 
 Name | Description  
 :--- | :---  
-`req_option`  |  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific view, you could specify the name of the view or its id. 
+`req_option`  |  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific view, you could specify the name of the view or its ID.
 `usage` | (Optional) If true (`usage=True`) returns the usage statistics for the views. The default is `usage=False`.  
 
 
 
 **Returns**
 
-Returns a list of all `ViewItem` objects and a `PaginationItem`. Use these values to iterate through the results. 
+Returns a list of all `ViewItem` objects and a `PaginationItem`. Use these values to iterate through the results.
 
 **Example**
 
@@ -3082,10 +3090,17 @@ tableau_auth = TSC.TableauAuth('username', 'password')
 server = TSC.Server('http://servername')
 
 with server.auth.sign_in(tableau_auth):
-  all_views, pagination_item = server.views.get()
-  print([view.name for view in all_views])
+    all_views, pagination_item = server.views.get()
+    print([view.name for view in all_views])
+```
 
-````
+**Example using Pager**
+
+You can also use the provided Pager generator to get all views on site, without having to page through the results.
+```py
+for view in TSC.Pager(server.views):
+    print(view.name)
+```
 
 See [ViewItem class](#viewitem-class)
 
@@ -3097,37 +3112,168 @@ See [ViewItem class](#viewitem-class)
 
 ```py
  views.populate_preview_image(view_item)
-
 ```
 
-Populates a preview image for the specified view. 
+Populates a preview image for the specified view.
 
-This method gets the preview image (thumbnail) for the specified view item. The method uses the `view.id` and `workbook.id` to identify the preview image. The method populates the `view.preview_image` for the view. 
+This method gets the preview image (thumbnail) for the specified view item. The method uses the `id` and `workbook_id` fields to query the preview image. The method populates the `preview_image` for the view.
 
-REST API: [Query View Preview Image](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Workbook_Preview_Image%3FTocPath%3DAPI%2520Reference%7C_____69){:target="_blank"}
+REST API: [Query View Preview Image](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_view_with_preview){:target="_blank"}
 
-**Parameters** 
+**Version**
+
+This endpoint is available with REST API version 2.0 and up.
+
+**Parameters**
 
 Name | Description  
 :--- | :---  
-`view_item`  |  The view item specifies the `view.id` and `workbook.id` that identifies the preview image.
- 
+`view_item`  |  Specified the view to populate.
 
-**Exceptions** 
+
+**Exceptions**
 
 Error | Description  
 :--- | :---  
-`View item missing ID or workbook ID` |  Raises an error if the ID for the view item or workbook is missing. 
+`View item missing ID or workbook ID` |  Raises an error if the ID of the view or workbook is missing.
 
-  
+
 
 **Returns**
 
-None. The preview image is added to the view. 
+None. The preview image is added to `view_item` and can be accessed by its `preview_image` field.
 
 See [ViewItem class](#viewitem-class)
 
 <br>   
+<br>
+
+#### views.populate_image
+
+```py
+views.populate_image(view_item, req_options=None)
+```
+
+Populates the image of the specified view.
+
+This method uses the `id` field to query the image, and populates the image content as the `image` field.
+
+REST API: [Query View Image](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_view_image){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 2.5 and up.
+
+**Parameters**
+
+Name | description
+:--- | :---
+`view_item` | Specifies the view to populate.
+`req_options` | (Optional) You can pass in a request object to specify a high resolution image. By default, the image will be in low resolution.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`View item missing ID` | Raises an error if the ID of the view is missing.
+
+**Returns**
+
+None. The image is added to the `view_item` and can be accessed by its `image` field.
+
+**Example**
+
+Creating a request option for high resolution image:
+```py
+req_options = TSC.ImageRequestOptions(imageresolution=TSC.ImageRequestOptions.Resolution.High)
+server.views.populate_image(view_item, req_options=req_options)
+```
+
+See [ViewItem class](#viewitem-class)
+
+<br>
+<br>
+
+#### views.populate_csv
+```
+views.populate_csv(view_item)
+```
+
+Populates the CSV data of the specified view.
+
+This method uses the `id` field to query the CSV data, and populates the data as the `csv` field.
+
+REST API: [Query View Data](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_view_data){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 2.7 and up.
+
+**Parameters**
+
+Name | description
+:--- | :---
+`view_item` | Specifies the view to populate.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`View item missing ID` | Raises an error if the ID of the view is missing.
+
+**Returns**
+
+None. The CSV data is added to the `view_item` and can be accessed by its `csv` field.
+
+See [ViewItem class](#viewitem-class)
+
+<br>
+<br>
+
+#### views.populate_pdf
+```
+views.populate_pdf(view_item, req_options=None)
+```
+
+Populates the PDF content of the specified view.
+
+This method uses the `id` field to query the PDF content, and populates the content as the `pdf` field.
+
+REST API: [Query View PDF](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_view_pdf){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 2.7 and up.
+
+**Parameters**
+
+Name | description
+:--- | :---
+`view_item` | Specifies the view to populate.
+`req_options` | (Optional) You can pass in a request object to specify the page type and orientation of the PDF content. If not specified, PDF content will have default page type and orientation.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`View item missing ID` | Raises an error if the ID of the view is missing.
+
+**Returns**
+
+None. The PDF content is added to the `view_item` and can be accessed by its `pdf` field.
+
+**Example**
+
+Creating a request option for page type and orientation:
+```py
+req_options = TSC.PDFRequestOptions(page_type=TSC.PDFRequestOptions.PageType.A5,
+                                    orientation=TSC.PDFRequestOptions.Orientation.Landscape)
+server.views.populate_pdf(view_item, req_options=req_options)                          
+```
+
+See [ViewItem class](#viewitem-class)
+
+<br>
 <br>
 
 
