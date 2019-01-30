@@ -14,6 +14,7 @@ GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, 'workbook_get_by_id.xml')
 GET_EMPTY_XML = os.path.join(TEST_ASSET_DIR, 'workbook_get_empty.xml')
 GET_XML = os.path.join(TEST_ASSET_DIR, 'workbook_get.xml')
 POPULATE_CONNECTIONS_XML = os.path.join(TEST_ASSET_DIR, 'workbook_populate_connections.xml')
+POPULATE_PDF = os.path.join(TEST_ASSET_DIR, 'populate_pdf.pdf')
 POPULATE_PREVIEW_IMAGE = os.path.join(TEST_ASSET_DIR, 'RESTAPISample Image.png')
 POPULATE_VIEWS_XML = os.path.join(TEST_ASSET_DIR, 'workbook_populate_views.xml')
 POPULATE_VIEWS_USAGE_XML = os.path.join(TEST_ASSET_DIR, 'workbook_populate_views_usage.xml')
@@ -270,6 +271,24 @@ class WorkbookTests(unittest.TestCase):
         self.assertRaises(TSC.MissingRequiredFieldError,
                           self.server.workbooks.populate_connections,
                           single_workbook)
+
+    def test_populate_pdf(self):
+        self.server.version = "3.4"
+        self.baseurl = self.server.workbooks.baseurl
+        with open(POPULATE_PDF, "rb") as f:
+            response = f.read()
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/pdf?type=a5&orientation=landscape",
+                  content=response)
+            single_workbook = TSC.WorkbookItem('test')
+            single_workbook._id = '1f951daf-4061-451a-9df1-69a8062664f2'
+
+            type = TSC.PDFRequestOptions.PageType.A5
+            orientation = TSC.PDFRequestOptions.Orientation.Landscape
+            req_option = TSC.PDFRequestOptions(type, orientation)
+
+            self.server.workbooks.populate_pdf(single_workbook, req_option)
+            self.assertEqual(response, single_workbook.pdf)
 
     def test_populate_preview_image(self):
         with open(POPULATE_PREVIEW_IMAGE, 'rb') as f:
