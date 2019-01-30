@@ -44,7 +44,7 @@ def main():
             resource = server.workbooks.get_by_id(args.resource_id)
 
             # trigger the refresh, you'll get a job id back which can be used to poll for when the refresh is done
-            results = server.workbooks.refresh(resource)
+            results = server.workbooks.refresh(args.resource_id)
         else:
             # Get the datasource by its Id to make sure it exists
             resource = server.datasources.get_by_id(args.resource_id)
