@@ -18,8 +18,7 @@ def main():
                         help='set to Default site by default')
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
                         help='desired logging level (set to error by default)')
-    parser.add_argument('--type', '-t', required=False, choices=['site', 'workbook', 'project_name',
-                                                                 'project_id', 'project_path'],
+    parser.add_argument('--type', '-t', required=False, choices=['site', 'workbook', 'project_name', 'project_path'],
                         help='type of content you want to update materialized views settings on')
     parser.add_argument('--path-list', '-pl', required=False, help='path to a list of workbook paths')
     parser.add_argument('--name-list', '-nl', required=False, help='path to a list of workbook names')
@@ -136,7 +135,9 @@ def update_project_by_path(args, materialized_views_mode, password, site_content
         if not assert_site_enabled_for_materialized_views(server, site_content_url):
             return False
         projects = [project for project in TSC.Pager(server.projects) if project.name == project_name]
-
+        if not assert_project_valid(args, args.project_path, projects):
+            return False
+        
         possible_paths = get_project_paths(server, projects)
         update_project(possible_paths[args.project_path], server, materialized_views_mode)
     return True
@@ -153,6 +154,8 @@ def update_project_by_name(args, materialized_views_config, password, site_conte
             return False
         # get all projects with given name
         projects = [project for project in TSC.Pager(server.projects) if project.name == args.project_name]
+        if not assert_project_valid(args, args.project_name, projects):
+            return False
 
         if len(projects) > 1:
             possible_paths = get_project_paths(server, projects)
@@ -283,6 +286,13 @@ def assert_site_enabled_for_materialized_views(server, site_content_url):
     parent_site = server.sites.get_by_content_url(site_content_url)
     if parent_site.materialized_views_mode == "disable":
         print('Cannot update workbook/project because site is disabled for materialized views')
+        return False
+    return True
+
+
+def assert_project_valid(args, project_name, projects):
+    if len(projects) == 0:
+        print("Cannot find project: {}".format(project_name))
         return False
     return True
 
