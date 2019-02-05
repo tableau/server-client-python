@@ -135,9 +135,9 @@ def update_project_by_path(args, materialized_views_mode, password, site_content
         if not assert_site_enabled_for_materialized_views(server, site_content_url):
             return False
         projects = [project for project in TSC.Pager(server.projects) if project.name == project_name]
-        if not assert_project_valid(args, args.project_path, projects):
+        if not assert_project_valid(args.project_path, projects):
             return False
-        
+
         possible_paths = get_project_paths(server, projects)
         update_project(possible_paths[args.project_path], server, materialized_views_mode)
     return True
@@ -154,7 +154,7 @@ def update_project_by_name(args, materialized_views_config, password, site_conte
             return False
         # get all projects with given name
         projects = [project for project in TSC.Pager(server.projects) if project.name == args.project_name]
-        if not assert_project_valid(args, args.project_name, projects):
+        if not assert_project_valid(args.project_name, projects):
             return False
 
         if len(projects) > 1:
@@ -290,7 +290,7 @@ def assert_site_enabled_for_materialized_views(server, site_content_url):
     return True
 
 
-def assert_project_valid(args, project_name, projects):
+def assert_project_valid(project_name, projects):
     if len(projects) == 0:
         print("Cannot find project: {}".format(project_name))
         return False

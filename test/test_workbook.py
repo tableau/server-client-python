@@ -119,7 +119,8 @@ class WorkbookTests(unittest.TestCase):
             single_workbook._id = '1f951daf-4061-451a-9df1-69a8062664f2'
             single_workbook.owner_id = 'dd2239f6-ddf1-4107-981a-4cf94e415794'
             single_workbook.name = 'renamedWorkbook'
-            single_workbook.materialized_views_enabled = True
+            single_workbook.materialized_views_config = {'materialized_views_enabled': True,
+                                                         'run_materialization_now': False}
             single_workbook = self.server.workbooks.update(single_workbook)
 
         self.assertEqual('1f951daf-4061-451a-9df1-69a8062664f2', single_workbook.id)
@@ -127,7 +128,8 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual('1d0304cd-3796-429f-b815-7258370b9b74', single_workbook.project_id)
         self.assertEqual('dd2239f6-ddf1-4107-981a-4cf94e415794', single_workbook.owner_id)
         self.assertEqual('renamedWorkbook', single_workbook.name)
-        self.assertEqual(True, single_workbook.materialized_views_mode)
+        self.assertEqual(True, single_workbook.materialized_views_config['materialized_views_enabled'])
+        self.assertEqual(False, single_workbook.materialized_views_config['run_materialization_now'])
 
     def test_update_missing_id(self):
         single_workbook = TSC.WorkbookItem('test')
