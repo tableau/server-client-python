@@ -127,7 +127,7 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual('1d0304cd-3796-429f-b815-7258370b9b74', single_workbook.project_id)
         self.assertEqual('dd2239f6-ddf1-4107-981a-4cf94e415794', single_workbook.owner_id)
         self.assertEqual('renamedWorkbook', single_workbook.name)
-        self.assertEqual(True, single_workbook.materialized_views_enabled)
+        self.assertEqual(True, single_workbook.materialized_views_mode)
 
     def test_update_missing_id(self):
         single_workbook = TSC.WorkbookItem('test')

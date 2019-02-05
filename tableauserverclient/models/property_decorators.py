@@ -136,3 +136,19 @@ def property_is_datetime(func):
         dt = parse_datetime(value)
         return func(self, dt)
     return wrapper
+
+
+def property_is_materialized_views_config(func):
+    @wraps(func)
+    def wrapper(self, value):
+        if not isinstance(value, dict):
+            raise ValueError("{} is not type 'dict', cannot update {})".format(value.__class__.__name__,
+                                                                              func.__name__))
+        if len(value) != 2 or not all(attr in value.keys() for attr in ('materialized_views_enabled',
+                                                                        'run_materialization_now')):
+            error = "{} should have 2 keys ".format(func.__name__)
+            error += "'materialized_views_enabled' and 'run_materialization_now'"
+            error += "instead you have {}".format(value.keys())
+            raise ValueError(error)
+        return func(self, value)
+    return wrapper
