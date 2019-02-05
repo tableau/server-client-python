@@ -10,7 +10,6 @@ def main():
     parser.add_argument('--server', '-s', required=True, help='Tableau server address')
     parser.add_argument('--username', '-u', required=True, help='username to sign into server')
     parser.add_argument('--password', '-p', required=False, help='password to sign into server')
-    # TODO: for workbook, only disable and enable
     parser.add_argument('--mode', '-m', required=False, choices=['disable', 'enable', 'enable_all', 'enable_selective'],
                         help='enable/disable materialized views for sites/workbooks')
     parser.add_argument('--status', '-st', required=False, action='store_true',
@@ -134,6 +133,8 @@ def update_project_by_path(args, materialized_views_mode, password, site_content
     server = TSC.Server(args.server, use_server_version=True)
     project_name = args.project_path.split('/')[-1]
     with server.auth.sign_in(tableau_auth):
+        if not assert_site_enabled_for_materialized_views(server, site_content_url):
+            return False
         projects = [project for project in TSC.Pager(server.projects) if project.name == project_name]
 
         possible_paths = get_project_paths(server, projects)
@@ -148,6 +149,8 @@ def update_project_by_name(args, materialized_views_config, password, site_conte
     tableau_auth = TSC.TableauAuth(args.username, password, site_content_url)
     server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
+        if not assert_site_enabled_for_materialized_views(server, site_content_url):
+            return False
         # get all projects with given name
         projects = [project for project in TSC.Pager(server.projects) if project.name == args.project_name]
 
@@ -191,6 +194,8 @@ def update_workbook(args, materialized_views_config, password, site_content_url)
     tableau_auth = TSC.TableauAuth(args.username, password, site_id=site_content_url)
     server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
+        if not assert_site_enabled_for_materialized_views(server, site_content_url):
+            return False
         if args.path_list is not None:
             workbook_path_mapping = parse_workbook_path(args.path_list)
             all_projects = {project.id: project for project in TSC.Pager(server.projects)}
@@ -272,6 +277,15 @@ def assert_options_valid(args):
         print("Use '--type <content type> --mode <mode>' to update materialized views settings.")
         return False
     return True
+
+
+def assert_site_enabled_for_materialized_views(server, site_content_url):
+    parent_site = server.sites.get_by_content_url(site_content_url)
+    if parent_site.materialized_views_mode == "disable":
+        print('Cannot update workbook/project because site is disabled for materialized views')
+        return False
+    return True
+
 
 if __name__ == "__main__":
     main()
