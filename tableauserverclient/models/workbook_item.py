@@ -217,7 +217,7 @@ class WorkbookItem(object):
         if views_elem is not None:
             views = ViewItem.from_xml_element(views_elem, ns)
 
-        materialized_views_config = dict()
+        materialized_views_config = {'materialized_views_enabled': None, 'run_materialization_now': None}
         materialized_views_elem = workbook_xml.find('.//t:materializedViewsEnablementConfig', namespaces=ns)
         if materialized_views_elem is not None:
             materialized_views_config = parse_materialized_views_config(materialized_views_elem)
