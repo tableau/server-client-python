@@ -255,7 +255,6 @@ def update_site(args, password, site_content_url):
 
 
 def create_materialized_views_config(args):
-    # TODO: if clean up now and enable all for site is both True, then abort
     materialized_views_config = dict()
     materialized_views_config['materialized_views_enabled'] = args.mode == "enable"
     materialized_views_config['run_materialization_now'] = True if args.materialize_now else False

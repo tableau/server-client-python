@@ -17,7 +17,7 @@ class SiteItem(object):
 
     def __init__(self, name, content_url, admin_mode=None, user_quota=None, storage_quota=None,
                  disable_subscriptions=False, subscribe_others_enabled=True, revision_history_enabled=False,
-                 revision_limit=None, materialized_views_mode=False):
+                 revision_limit=None, materialized_views_mode=None):
         self._admin_mode = None
         self._id = None
         self._num_users = None

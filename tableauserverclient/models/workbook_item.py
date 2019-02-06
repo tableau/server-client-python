@@ -24,8 +24,8 @@ class WorkbookItem(object):
         self.project_id = project_id
         self.show_tabs = show_tabs
         self.tags = set()
-        self.materialized_views_config = {'materialized_views_enabled': False,
-                                          'run_materialization_now': False}
+        self.materialized_views_config = {'materialized_views_enabled': None,
+                                          'run_materialization_now': None}
 
     @property
     def connections(self):
@@ -218,7 +218,7 @@ class WorkbookItem(object):
             views = ViewItem.from_xml_element(views_elem, ns)
 
         materialized_views_config = dict()
-        materialized_views_elem = workbook_xml.find('.//t:materializedViewsConfig', namespaces=ns)
+        materialized_views_elem = workbook_xml.find('.//t:materializedViewsEnablementConfig', namespaces=ns)
         if materialized_views_elem is not None:
             materialized_views_config = parse_materialized_views_config(materialized_views_elem)
 
