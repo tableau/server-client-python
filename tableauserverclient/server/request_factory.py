@@ -386,7 +386,7 @@ class WorkbookRequest(object):
             materialized_views_config = workbook_item.materialized_views_config
             materialized_views_element = ET.SubElement(workbook_element, 'materializedViewsEnablementConfig')
             materialized_views_element.attrib['materializedViewsEnabled'] = str(materialized_views_config
-                                                                           ["materialized_views_enabled"]).lower()
+                                                                                ["materialized_views_enabled"]).lower()
             materialized_views_element.attrib['runMaterializationNow'] = str(materialized_views_config
                                                                              ["run_materialization_now"]).lower()
 
