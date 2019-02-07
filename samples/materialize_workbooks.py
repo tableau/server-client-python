@@ -170,13 +170,21 @@ def update_project_by_name(args, materialized_views_config, password, site_conte
 
 
 def update_project(project, server, materialized_views_config):
+    all_projects = list(TSC.Pager(server.projects))
+    project_ids = find_project_ids_to_update(all_projects, project, server)
     for workbook in TSC.Pager(server.workbooks):
-        if workbook.project_id == project.id:
+        if workbook.project_id in project_ids:
             workbook.materialized_views_config = materialized_views_config
             server.workbooks.update(workbook)
 
     print("Updated materialized views settings for project: {}".format(project.name))
     print('\n')
+
+
+def find_project_ids_to_update(all_projects, project, server):
+    projects_to_update = []
+    find_projects_to_update(project, server, all_projects, projects_to_update)
+    return set([project_to_update.id for project_to_update in projects_to_update])
 
 
 def parse_workbook_path(file_path):
@@ -294,6 +302,17 @@ def assert_project_valid(project_name, projects):
         print("Cannot find project: {}".format(project_name))
         return False
     return True
+
+
+def find_projects_to_update(project, server, all_projects, projects_to_update):
+    # Use recursion to find all the sub-projects and enable/disable the workbooks in them
+    projects_to_update.append(project)
+    children_projects = [child for child in all_projects if child.parent_id == project.id]
+    if len(children_projects) == 0:
+        return
+
+    for child in children_projects:
+        find_projects_to_update(child, server, all_projects, projects_to_update)
 
 
 if __name__ == "__main__":
