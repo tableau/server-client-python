@@ -387,8 +387,8 @@ class WorkbookRequest(object):
             materialized_views_element = ET.SubElement(workbook_element, 'materializedViewsEnablementConfig')
             materialized_views_element.attrib['materializedViewsEnabled'] = str(materialized_views_config
                                                                                 ["materialized_views_enabled"]).lower()
-            materialized_views_element.attrib['runMaterializationNow'] = str(materialized_views_config
-                                                                             ["run_materialization_now"]).lower()
+            materialized_views_element.attrib['materializeNow'] = str(materialized_views_config
+                                                                      ["run_materialization_now"]).lower()
 
         return ET.tostring(xml_request)
 
