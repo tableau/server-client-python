@@ -3,7 +3,26 @@ title: Sign In and Out
 layout: docs
 ---
 ## Signing in and out
-To sign in and out of Tableau Server, call the `Auth.sign_in` and `Auth.sign_out` functions like so:
+
+
+### Tableau Server
+In most cases, consider using a `with` block to sign in:
+```py
+import tableauserverclient as TSC
+
+tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
+server = TSC.Server('http://SERVER_URL')
+
+# optionally override the REST API version
+# server.version = '3.0'
+
+with server.auth.sign_in(tableau_auth):
+    # Do awesome things here!
+
+# No need to call auth.sign_out() as the Auth context manager will handle that on exiting the with block.
+```
+
+Alternatively, call the `Auth.sign_in` and `Auth.sign_out` functions to sign in and out of Tableau Server like so:
 
 ```py
 import tableauserverclient as TSC
@@ -13,23 +32,26 @@ server = TSC.Server('http://SERVER_URL')
 
 server.auth.sign_in(tableau_auth)
 
-# Do awesome things here!
-
 server.auth.sign_out()
 ```
 
-Alternatively, for short programs, consider using a `with` block:
+### Tableau Online
+
+You will need to know your **Site ID** and **Site Name** in order to build credentials for Tableau Online. Here's how you can specify them:
 
 ```py
 import tableauserverclient as TSC
 
-tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
-server = TSC.Server('http://SERVER_URL')
+tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD', site_id='SITE_ID')
+server = TSC.Server('https://SITE_NAME.online.tableau.com/')
+
+# optionally override the REST API version
+# server.version = '3.0'
 
 with server.auth.sign_in(tableau_auth):
     # Do awesome things here!
 
-# No need to call auth.sign_out() as the Auth context manager will handle that on exiting the with block
+# No need to call auth.sign_out() as the Auth context manager will handle that on exiting the with block.
 ```
 
 <div class="alert alert-info">
