@@ -189,7 +189,8 @@ def find_project_ids_to_update(all_projects, project, server):
 
 def parse_workbook_path(file_path):
     # parse the list of project path of workbooks
-    workbook_paths = open(file_path, 'r')
+    workbook_paths = sanitize_workbook_list(file_path, "path")
+
     workbook_path_mapping = defaultdict(list)
     for workbook_path in workbook_paths:
         workbook_project = workbook_path.rstrip().split('/')
@@ -223,23 +224,30 @@ def update_workbooks_by_paths(all_projects, materialized_views_config, server, w
                                          TSC.RequestOptions.Operator.Equals,
                                          workbook_name))
         workbooks = list(TSC.Pager(server.workbooks, req_option))
+        all_paths = set(workbook_paths[:])
         for workbook in workbooks:
             path = find_project_path(all_projects[workbook.project_id], all_projects, "")
             if path in workbook_paths:
+                all_paths.remove(path)
                 workbook.materialized_views_config = materialized_views_config
                 server.workbooks.update(workbook)
                 print("Updated materialized views settings for workbook: {}".format(path + '/' + workbook.name))
+
+        for path in all_paths:
+            print("Cannot find workbook path: {}").format(path + '/' + workbook_name)
     print('\n')
 
 
 def update_workbooks_by_names(name_list, server, materialized_views_config):
-    workbook_names = open(name_list, 'r')
+    workbook_names = sanitize_workbook_list(name_list, "name")
     for workbook_name in workbook_names:
         req_option = TSC.RequestOptions()
         req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name,
                                          TSC.RequestOptions.Operator.Equals,
                                          workbook_name.rstrip()))
         workbooks = list(TSC.Pager(server.workbooks, req_option))
+        if len(workbooks) == 0:
+            print("Cannot find workbook name: {}".format(workbook_name))
         for workbook in workbooks:
             workbook.materialized_views_config = materialized_views_config
             server.workbooks.update(workbook)
@@ -313,6 +321,15 @@ def find_projects_to_update(project, server, all_projects, projects_to_update):
 
     for child in children_projects:
         find_projects_to_update(child, server, all_projects, projects_to_update)
+
+
+def sanitize_workbook_list(file_name, file_type):
+    if file_type == "name":
+        name_list = open(file_name, "r")
+        return [workbook.rstrip() for workbook in name_list if not workbook.isspace()]
+    if file_type == "path":
+        path_list = open(file_name, "r")
+        return [workbook.rstrip() for workbook in path_list if not workbook.isspace()]
 
 
 if __name__ == "__main__":
