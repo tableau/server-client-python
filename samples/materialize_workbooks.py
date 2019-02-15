@@ -328,6 +328,7 @@ def find_projects_to_update(project, all_projects, projects_to_update):
 
 def sanitize_workbook_list(file_name, file_type):
     if not os.path.isfile(file_name):
+        print("Invalid file name '{}'".format(file_name))
         return []
     file_list = open(file_name, "r")
 
