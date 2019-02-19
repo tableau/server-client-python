@@ -1,6 +1,7 @@
 import argparse
 import getpass
 import logging
+import os
 import tableauserverclient as TSC
 from collections import defaultdict
 
@@ -124,7 +125,7 @@ def show_materialized_views_status(args, password, site_content_url):
                     print("Workbook: {} from site: {}".format(workbook.name, site.name))
 
 
-def update_project_by_path(args, materialized_views_mode, password, site_content_url):
+def update_project_by_path(args, materialized_views_config, password, site_content_url):
     if args.project_path is None:
         print("Use --project_path <project path> to specify the path of the project")
         return False
@@ -139,7 +140,7 @@ def update_project_by_path(args, materialized_views_mode, password, site_content
             return False
 
         possible_paths = get_project_paths(server, projects)
-        update_project(possible_paths[args.project_path], server, materialized_views_mode)
+        update_project(possible_paths[args.project_path], server, materialized_views_config)
     return True
 
 
@@ -171,7 +172,7 @@ def update_project_by_name(args, materialized_views_config, password, site_conte
 
 def update_project(project, server, materialized_views_config):
     all_projects = list(TSC.Pager(server.projects))
-    project_ids = find_project_ids_to_update(all_projects, project, server)
+    project_ids = find_project_ids_to_update(all_projects, project)
     for workbook in TSC.Pager(server.workbooks):
         if workbook.project_id in project_ids:
             workbook.materialized_views_config = materialized_views_config
@@ -181,15 +182,16 @@ def update_project(project, server, materialized_views_config):
     print('\n')
 
 
-def find_project_ids_to_update(all_projects, project, server):
+def find_project_ids_to_update(all_projects, project):
     projects_to_update = []
-    find_projects_to_update(project, server, all_projects, projects_to_update)
+    find_projects_to_update(project, all_projects, projects_to_update)
     return set([project_to_update.id for project_to_update in projects_to_update])
 
 
 def parse_workbook_path(file_path):
     # parse the list of project path of workbooks
-    workbook_paths = open(file_path, 'r')
+    workbook_paths = sanitize_workbook_list(file_path, "path")
+
     workbook_path_mapping = defaultdict(list)
     for workbook_path in workbook_paths:
         workbook_project = workbook_path.rstrip().split('/')
@@ -223,23 +225,32 @@ def update_workbooks_by_paths(all_projects, materialized_views_config, server, w
                                          TSC.RequestOptions.Operator.Equals,
                                          workbook_name))
         workbooks = list(TSC.Pager(server.workbooks, req_option))
+        all_paths = set(workbook_paths[:])
         for workbook in workbooks:
             path = find_project_path(all_projects[workbook.project_id], all_projects, "")
             if path in workbook_paths:
+                all_paths.remove(path)
                 workbook.materialized_views_config = materialized_views_config
                 server.workbooks.update(workbook)
                 print("Updated materialized views settings for workbook: {}".format(path + '/' + workbook.name))
+
+        for path in all_paths:
+            print("Cannot find workbook path: {}, each line should only contain one workbook path"
+                  .format(path + '/' + workbook_name))
     print('\n')
 
 
 def update_workbooks_by_names(name_list, server, materialized_views_config):
-    workbook_names = open(name_list, 'r')
+    workbook_names = sanitize_workbook_list(name_list, "name")
     for workbook_name in workbook_names:
         req_option = TSC.RequestOptions()
         req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name,
                                          TSC.RequestOptions.Operator.Equals,
                                          workbook_name.rstrip()))
         workbooks = list(TSC.Pager(server.workbooks, req_option))
+        if len(workbooks) == 0:
+            print("Cannot find workbook name: {}, each line should only contain one workbook name"
+                  .format(workbook_name))
         for workbook in workbooks:
             workbook.materialized_views_config = materialized_views_config
             server.workbooks.update(workbook)
@@ -304,7 +315,7 @@ def assert_project_valid(project_name, projects):
     return True
 
 
-def find_projects_to_update(project, server, all_projects, projects_to_update):
+def find_projects_to_update(project, all_projects, projects_to_update):
     # Use recursion to find all the sub-projects and enable/disable the workbooks in them
     projects_to_update.append(project)
     children_projects = [child for child in all_projects if child.parent_id == project.id]
@@ -312,7 +323,19 @@ def find_projects_to_update(project, server, all_projects, projects_to_update):
         return
 
     for child in children_projects:
-        find_projects_to_update(child, server, all_projects, projects_to_update)
+        find_projects_to_update(child, all_projects, projects_to_update)
+
+
+def sanitize_workbook_list(file_name, file_type):
+    if not os.path.isfile(file_name):
+        print("Invalid file name '{}'".format(file_name))
+        return []
+    file_list = open(file_name, "r")
+
+    if file_type == "name":
+        return [workbook.rstrip() for workbook in file_list if not workbook.isspace()]
+    if file_type == "path":
+        return [workbook.rstrip() for workbook in file_list if not workbook.isspace()]
 
 
 if __name__ == "__main__":
