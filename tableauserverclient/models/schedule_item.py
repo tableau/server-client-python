@@ -9,6 +9,7 @@ from ..datetime_helpers import parse_datetime
 class ScheduleItem(object):
     class Type:
         Extract = "Extract"
+        Flow = "Flow"
         Subscription = "Subscription"
 
     class ExecutionOrder:
