@@ -26,7 +26,7 @@ def property_is_enum(enum_type):
 def property_is_boolean(func):
     @wraps(func)
     def wrapper(self, value):
-        if not isinstance(value, bool):
+        if value is not None and not isinstance(value, bool):
             error = "Boolean expected for {0} flag.".format(func.__name__)
             raise ValueError(error)
         return func(self, value)
@@ -69,7 +69,27 @@ def property_is_valid_time(func):
     return wrapper
 
 
-def property_is_int(range, allowed=None):
+def property_is_positive_int(allowed=None):
+    ''' Ensures that a property must be a positive integer (e.g. site storage quota).
+    Also takes in a list of allowed values to override the rule. This is useful for
+    when a property can use sentinel values.
+    '''
+    if allowed is None:
+        allowed = ()    # Empty tuple for fast no-op testing.
+
+    def property_type_decorator(func):
+        @wraps(func)
+        def wrapper(self, value):
+            if value is not None:
+                if not isinstance(value, int) or (value < 0 and value not in allowed):
+                    error = "Positive int expected for {0} flag.".format(func.__name__)
+                    raise ValueError(error)
+            return func(self, value)
+        return wrapper
+    return property_type_decorator
+
+
+def property_is_int_range(range, allowed=None):
     '''Takes a range of ints and a list of exemptions to check against
     when setting a property on a model. The range is a tuple of (min, max) and the
     allowed list (empty by default) allows values outside that range.
@@ -94,8 +114,9 @@ def property_is_int(range, allowed=None):
 
             min, max = range
 
-            if (value < min or value > max) and (value not in allowed):
-                raise ValueError(error)
+            if value is not None:
+                if not isinstance(value, int) or ((value < min or value > max) and value not in allowed):
+                    raise ValueError(error)
 
             return func(self, value)
         return wrapper

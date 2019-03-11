@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 
 from .interval_item import IntervalItem, HourlyInterval, DailyInterval, WeeklyInterval, MonthlyInterval
-from .property_decorators import property_is_enum, property_not_nullable, property_is_int
+from .property_decorators import property_is_enum, property_not_nullable, property_is_int_range
 from ..datetime_helpers import parse_datetime
 
 
@@ -75,7 +75,7 @@ class ScheduleItem(object):
         return self._priority
 
     @priority.setter
-    @property_is_int(range=(1, 100))
+    @property_is_int_range(range=(1, 100))
     def priority(self, value):
         self._priority = value
 

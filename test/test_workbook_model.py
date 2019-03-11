@@ -13,6 +13,3 @@ class WorkbookModelTests(unittest.TestCase):
         workbook = TSC.WorkbookItem("10")
         with self.assertRaises(ValueError):
             workbook.show_tabs = "Hello"
-
-        with self.assertRaises(ValueError):
-            workbook.show_tabs = None

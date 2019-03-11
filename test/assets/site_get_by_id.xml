@@ -1,4 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
-    <site id="dad65087-b08b-4603-af4e-2887b8aafc67" name="Default" contentUrl="" adminMode="ContentOnly" disableSubscriptions="false" state="Active" revisionHistoryEnabled="false" subscribeOthersEnabled="true" />
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.4.xsd">
+    <site id="d90660db-058f-4b1d-99f3-12c8217601f0" name="site1" contentUrl="site1" adminMode="ContentAndUsers" userQuota="6" storageQuota="25000" disableSubscriptions="false" state="Active" revisionHistoryEnabled="true" revisionLimit="2" subscribeOthersEnabled="true" guestAccessEnabled="true" cacheWarmupEnabled="true" commentingEnabled="true" flowsEnabled="true" extractEncryptionMode="disabled" materializedViewsMode="disable">
+        <usage numUsers="8" numCreators="5" numExplorers="1" numViewers="2" storage="9"/>
+    </site>
 </tsResponse>

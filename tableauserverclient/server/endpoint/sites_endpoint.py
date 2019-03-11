@@ -24,34 +24,40 @@ class Sites(Endpoint):
 
     # Gets 1 site by id
     @api(version="2.0")
-    def get_by_id(self, site_id):
+    def get_by_id(self, site_id, include_usage=False):
         if not site_id:
             error = "Site ID undefined."
             raise ValueError(error)
         logger.info('Querying single site (ID: {0})'.format(site_id))
         url = "{0}/{1}".format(self.baseurl, site_id)
+        if include_usage:
+            url += '?includeUsage=True'
         server_response = self.get_request(url)
         return SiteItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     # Gets 1 site by name
     @api(version="2.0")
-    def get_by_name(self, site_name):
+    def get_by_name(self, site_name, include_usage=False):
         if not site_name:
             error = "Site Name undefined."
             raise ValueError(error)
         logger.info('Querying single site (Name: {0})'.format(site_name))
         url = "{0}/{1}?key=name".format(self.baseurl, site_name)
+        if include_usage:
+            url += '?includeUsage=True'
         server_response = self.get_request(url)
         return SiteItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     # Gets 1 site by content url
     @api(version="2.0")
-    def get_by_content_url(self, content_url):
+    def get_by_content_url(self, content_url, include_usage=False):
         if content_url is None:
             error = "Content URL undefined."
             raise ValueError(error)
         logger.info('Querying single site (Content URL: {0})'.format(content_url))
         url = "{0}/{1}?key=contentUrl".format(self.baseurl, content_url)
+        if include_usage:
+            url += '?includeUsage=True'
         server_response = self.get_request(url)
         return SiteItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
@@ -71,7 +77,7 @@ class Sites(Endpoint):
         server_response = self.put_request(url, update_req)
         logger.info('Updated site item (ID: {0})'.format(site_item.id))
         update_site = copy.copy(site_item)
-        return update_site._parse_common_tags(server_response.content, self.parent_srv.namespace)
+        return update_site._parse_updated_tags(server_response.content, self.parent_srv.namespace)
 
     # Delete 1 site object
     @api(version="2.0")

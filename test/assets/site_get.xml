@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
-    <pagination pageNumber="1" pageSize="100" totalAvailable="2" />
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.4.xsd">
+    <pagination pageNumber="1" pageSize="100" totalAvailable="2"/>
     <sites>
-        <site id="dad65087-b08b-4603-af4e-2887b8aafc67" name="Default" contentUrl="" adminMode="ContentOnly" state="Active" revisionHistoryEnabled="false" subscribeOthersEnabled="true" />
-        <site id="6b7179ba-b82b-4f0f-91ed-812074ac5da6" name="Samples" contentUrl="Samples" adminMode="ContentOnly" state="Active" revisionHistoryEnabled="false" subscribeOthersEnabled="true" />
+        <site id="684a12a0-de63-413e-a711-0f31c60f7239" name="Default" contentUrl="" adminMode="ContentAndUsers" userQuota="6" disableSubscriptions="false" state="Active" revisionHistoryEnabled="true" revisionLimit="25" subscribeOthersEnabled="true" guestAccessEnabled="true" cacheWarmupEnabled="true" commentingEnabled="true" flowsEnabled="true" extractEncryptionMode="disabled" materializedViewsMode="disable"/>
+        <site id="d90660db-058f-4b1d-99f3-12c8217601f0" name="site1" contentUrl="site1" adminMode="ContentOnly" storageQuota="25000" disableSubscriptions="true" state="Suspended" revisionHistoryEnabled="false" revisionLimit="2" subscribeOthersEnabled="false" guestAccessEnabled="false" cacheWarmupEnabled="false" commentingEnabled="false" flowsEnabled="false" extractEncryptionMode="disabled" materializedViewsMode="enable_all"/>
     </sites>
 </tsResponse>

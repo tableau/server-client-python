@@ -269,45 +269,55 @@ class ScheduleRequest(object):
 class SiteRequest(object):
     def update_req(self, site_item):
         xml_request = ET.Element('tsRequest')
-        site_element = ET.SubElement(xml_request, 'site')
-        if site_item.name:
-            site_element.attrib['name'] = site_item.name
-        if site_item.content_url:
-            site_element.attrib['contentUrl'] = site_item.content_url
-        if site_item.admin_mode:
-            site_element.attrib['adminMode'] = site_item.admin_mode
-        if site_item.user_quota:
-            site_element.attrib['userQuota'] = str(site_item.user_quota)
-        if site_item.state:
+        site_element = self._get_common_req(site_item)
+        if site_item.state is not None:
             site_element.attrib['state'] = site_item.state
-        if site_item.storage_quota:
-            site_element.attrib['storageQuota'] = str(site_item.storage_quota)
-        if site_item.disable_subscriptions:
-            site_element.attrib['disableSubscriptions'] = str(site_item.disable_subscriptions).lower()
-        if site_item.subscribe_others_enabled:
-            site_element.attrib['subscribeOthersEnabled'] = str(site_item.subscribe_others_enabled).lower()
-        if site_item.revision_limit:
-            site_element.attrib['revisionLimit'] = str(site_item.revision_limit)
-        if site_item.subscribe_others_enabled:
-            site_element.attrib['revisionHistoryEnabled'] = str(site_item.revision_history_enabled).lower()
-        if site_item.materialized_views_mode is not None:
-            site_element.attrib['materializedViewsMode'] = str(site_item.materialized_views_mode).lower()
+        xml_request.append(site_element)
         return ET.tostring(xml_request)
 
     def create_req(self, site_item):
         xml_request = ET.Element('tsRequest')
-        site_element = ET.SubElement(xml_request, 'site')
+        site_element = self._get_common_req(site_item)
+        xml_request.append(site_element)
+        return ET.tostring(xml_request)
+
+    def _get_common_req(self, site_item):
+        site_element = ET.Element('site')
         site_element.attrib['name'] = site_item.name
         site_element.attrib['contentUrl'] = site_item.content_url
-        if site_item.admin_mode:
+        if site_item.admin_mode is not None:
             site_element.attrib['adminMode'] = site_item.admin_mode
-        if site_item.user_quota:
-            site_element.attrib['userQuota'] = str(site_item.user_quota)
-        if site_item.storage_quota:
-            site_element.attrib['storageQuota'] = str(site_item.storage_quota)
-        if site_item.disable_subscriptions:
+        if site_item.cache_warmup_enabled is not None:
+            site_element.attrib['cacheWarmupEnabled'] = str(site_item.cache_warmup_enabled).lower()
+        if site_item.commenting_enabled is not None:
+            site_element.attrib['commentingEnabled'] = str(site_item.commenting_enabled).lower()
+        if site_item.disable_subscriptions is not None:
             site_element.attrib['disableSubscriptions'] = str(site_item.disable_subscriptions).lower()
-        return ET.tostring(xml_request)
+        if site_item.extract_encryption_mode is not None:
+            site_element.attrib['extractEncryptionMode'] = site_item.extract_encryption_mode
+        if site_item.flows_enabled is not None:
+            site_element.attrib['flowsEnabled'] = str(site_item.flows_enabled).lower()
+        if site_item.guest_access_enabled is not None:
+            site_element.attrib['guestAccessEnabled'] = str(site_item.guest_access_enabled).lower()
+        if site_item.materialized_views_mode is not None:
+            site_element.attrib['materializedViewsMode'] = str(site_item.materialized_views_mode).lower()
+        if site_item.revision_history_enabled is not None:
+            site_element.attrib['revisionHistoryEnabled'] = str(site_item.revision_history_enabled).lower()
+        if site_item.revision_limit is not None:
+            site_element.attrib['revisionLimit'] = str(site_item.revision_limit)
+        if site_item.storage_quota is not None:
+            site_element.attrib['storageQuota'] = str(site_item.storage_quota)
+        if site_item.subscribe_others_enabled is not None:
+            site_element.attrib['subscribeOthersEnabled'] = str(site_item.subscribe_others_enabled).lower()
+        if site_item.tier_creator_capacity is not None:
+            site_element.attrib['tierCreatorCapacity'] = str(site_item.tier_creator_capacity)
+        if site_item.tier_explorer_capacity is not None:
+            site_element.attrib['tierExplorerCapacity'] = str(site_item.tier_explorer_capacity)
+        if site_item.tier_viewer_capacity is not None:
+            site_element.attrib['tierViewerCapacity'] = str(site_item.tier_viewer_capacity)
+        if site_item.user_quota is not None:
+            site_element.attrib['userQuota'] = str(site_item.user_quota)
+        return site_element
 
 
 class TagRequest(object):
