@@ -1497,7 +1497,7 @@ Resource   |  Description
 *server*.groups   | Access the groups resources and methods. See [Groups](#groups)  
 *server*.workbooks  |  Access the resources and methods for workbooks. See [Workbooks](#workbooks)
 *server*.datasources  |  Access the resources and methods for data sources. See [Data Sources](#data-sources)
-*server*.projects  |   Access the resources and methods for projects. See [Projects](#projets)
+*server*.projects  |   Access the resources and methods for projects. See [Projects](#projects)
 *server*.schedules  |  Access the resources and methods for schedules. See [Schedules](#Schedules)
 *server*.server_info  |  Access the resources and methods for server information. See [ServerInfo class](#serverinfo-class) 
 
