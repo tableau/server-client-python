@@ -23,7 +23,7 @@
 
     function displaySearchHeading(query) {
         var heading = document.getElementById("searchHeading");
-        heading.innerHTML = "Search results for: " + query;
+        heading.textContent = "Search results for: " + query;
     }
 
     // Get the raw search results
