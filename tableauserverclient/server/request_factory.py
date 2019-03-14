@@ -170,18 +170,7 @@ class PermissionRequest(object):
 
 
 class ProjectRequest(object):
-    def update_req(self, project_item):
-        xml_request = ET.Element('tsRequest')
-        project_element = ET.SubElement(xml_request, 'project')
-        if project_item.name:
-            project_element.attrib['name'] = project_item.name
-        if project_item.description:
-            project_element.attrib['description'] = project_item.description
-        if project_item.content_permissions:
-            project_element.attrib['contentPermissions'] = project_item.content_permissions
-        return ET.tostring(xml_request)
-
-    def create_req(self, project_item):
+    def common_req(self, project_item):
         xml_request = ET.Element('tsRequest')
         project_element = ET.SubElement(xml_request, 'project')
         project_element.attrib['name'] = project_item.name

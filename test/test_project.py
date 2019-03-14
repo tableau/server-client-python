@@ -2,6 +2,7 @@ import unittest
 import os
 import requests_mock
 import tableauserverclient as TSC
+from tableauserverclient.datetime_helpers import format_datetime
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
@@ -27,23 +28,30 @@ class ProjectTests(unittest.TestCase):
             m.get(self.baseurl, text=response_xml)
             all_projects, pagination_item = self.server.projects.get()
 
-        self.assertEqual(3, pagination_item.total_available)
-        self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', all_projects[0].id)
-        self.assertEqual('default', all_projects[0].name)
-        self.assertEqual('The default project that was automatically created by Tableau.',
-                         all_projects[0].description)
-        self.assertEqual('ManagedByOwner', all_projects[0].content_permissions)
-        self.assertEqual(None, all_projects[0].parent_id)
+        self.assertEqual(2, pagination_item.total_available)
+        pr1 = all_projects[0]
+        pr2 = all_projects[1]
 
-        self.assertEqual('1d0304cd-3796-429f-b815-7258370b9b74', all_projects[1].id)
-        self.assertEqual('Tableau', all_projects[1].name)
-        self.assertEqual('ManagedByOwner', all_projects[1].content_permissions)
-        self.assertEqual(None, all_projects[1].parent_id)
+        self.assertEqual('bdd975c6-4042-11e9-a712-975dc31937aa', pr1.id)
+        self.assertEqual('Default', pr1.name)
+        self.assertEqual('The default project that was automatically created by Tableau.', pr1.description)
+        self.assertEqual(True, pr1.top_level_project)
+        self.assertEqual('2019-03-06T19:04:57Z', format_datetime(pr1.created_at))
+        self.assertEqual('2019-03-06T19:04:58Z', format_datetime(pr1.updated_at))
+        self.assertEqual('ManagedByOwner', pr1.content_permissions)
+        self.assertEqual('f9e32d4b-ca36-43bb-bc58-29ad45b10be5', pr1.owner_id)
+        self.assertEqual('_system', pr1.owner_name)
 
-        self.assertEqual('4cc52973-5e3a-4d1f-a4fb-5b5f73796edf', all_projects[2].id)
-        self.assertEqual('Tableau > Child 1', all_projects[2].name)
-        self.assertEqual('ManagedByOwner', all_projects[2].content_permissions)
-        self.assertEqual('1d0304cd-3796-429f-b815-7258370b9b74', all_projects[2].parent_id)
+        self.assertEqual('7e593a18-c6e2-469c-9aca-4b2782693777', pr2.id)
+        self.assertEqual('update', pr2.name)
+        self.assertEqual('upd', pr2.description)
+        self.assertEqual(False, pr2.top_level_project)
+        self.assertEqual('bdd975c6-4042-11e9-a712-975dc31937aa', pr2.parent_id)
+        self.assertEqual('2019-03-13T22:18:18Z', format_datetime(pr2.created_at))
+        self.assertEqual('2019-03-14T17:13:40Z', format_datetime(pr2.updated_at))
+        self.assertEqual('ManagedByOwner', pr2.content_permissions)
+        self.assertEqual('344356bd-a847-4d6c-8370-8b2821498cdb', pr2.owner_id)
+        self.assertEqual('testadmin', pr2.owner_name)
 
     def test_get_before_signin(self):
         self.server._auth_token = None

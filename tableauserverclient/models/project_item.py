@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
-from .property_decorators import property_is_enum, property_not_empty
+from .property_decorators import property_is_enum, property_not_empty, property_not_nullable
+from ..datetime_helpers import parse_datetime
 
 
 class ProjectItem(object):
@@ -8,11 +9,16 @@ class ProjectItem(object):
         ManagedByOwner = 'ManagedByOwner'
 
     def __init__(self, name, description=None, content_permissions=None, parent_id=None):
-        self._content_permissions = None
+        self._created_at = None
         self._id = None
+        self._owner_id = None
+        self._owner_name = None
+        self._top_level_project = None
+        self._updated_at = None
+
+        self.content_permissions = content_permissions
         self.description = description
         self.name = name
-        self.content_permissions = content_permissions
         self.parent_id = parent_id
 
     @property
@@ -25,6 +31,18 @@ class ProjectItem(object):
         self._content_permissions = value
 
     @property
+    def created_at(self):
+        return self._created_at
+
+    @property
+    def description(self):
+        return self._description
+
+    @description.setter
+    def description(self, value):
+        self._description = value
+
+    @property
     def id(self):
         return self._id
 
@@ -34,32 +52,62 @@ class ProjectItem(object):
 
     @name.setter
     @property_not_empty
+    @property_not_nullable
     def name(self, value):
         self._name = value
+
+    @property
+    def owner_id(self):
+        return self._owner_id
+
+    @property
+    def owner_name(self):
+        return self._owner_name
+
+    @property
+    def parent_id(self):
+        return self._parent_id
+
+    @parent_id.setter
+    def parent_id(self, value):
+        self._parent_id = value
+
+    @property
+    def top_level_project(self):
+        return self._top_level_project
+
+    @property
+    def updated_at(self):
+        return self._updated_at
 
     def is_default(self):
         return self.name.lower() == 'default'
 
-    def _parse_common_tags(self, project_xml):
-        if not isinstance(project_xml, ET.Element):
-            project_xml = ET.fromstring(project_xml).find('.//t:project', namespaces=NAMESPACE)
-
-        if project_xml is not None:
-            (_, name, description, content_permissions, parent_id) = self._parse_element(project_xml)
-            self._set_values(None, name, description, content_permissions, parent_id)
-        return self
-
-    def _set_values(self, project_id, name, description, content_permissions, parent_id):
-        if project_id is not None:
-            self._id = project_id
-        if name:
-            self._name = name
-        if description:
-            self.description = description
-        if content_permissions:
-            self._content_permissions = content_permissions
-        if parent_id:
-            self.parent_id = parent_id
+    def _set_values(self, project_fields):
+        if 'contentPermissions' in project_fields:
+            self._content_permissions = project_fields['contentPermissions']
+        if 'createdAt' in project_fields:
+            self._created_at = parse_datetime(project_fields['createdAt'])
+        if 'description' in project_fields:
+            self._description = project_fields['description']
+        if 'id' in project_fields:
+            self._id = project_fields['id']
+        if 'name' in project_fields:
+            self._name = project_fields['name']
+        if 'parentProjectId' in project_fields:
+            self._parent_id = project_fields['parentProjectId']
+        if 'topLevelProject' in project_fields:
+            self._top_level_project = string_to_bool(project_fields['topLevelProject'])
+        if 'updatedAt' in project_fields:
+            self._updated_at = parse_datetime(project_fields['updatedAt'])
+        if 'owner' in project_fields:
+            owner_fields = project_fields['owner']
+            if 'id' in owner_fields:
+                self._owner_id = owner_fields['id']
+            if 'name' in owner_fields:
+                self._owner_name = owner_fields['name']
+        if self.parent_id is not None:
+            self._top_level_project = False
 
     @classmethod
     def from_response(cls, resp, ns):
@@ -68,18 +116,23 @@ class ProjectItem(object):
         all_project_xml = parsed_response.findall('.//t:project', namespaces=ns)
 
         for project_xml in all_project_xml:
-            (id, name, description, content_permissions, parent_id) = cls._parse_element(project_xml)
-            project_item = cls(name)
-            project_item._set_values(id, name, description, content_permissions, parent_id)
+            project_fields = cls._parse_element(project_xml, ns)
+            project_item = cls(project_fields['name'])
+            project_item._set_values(project_fields)
             all_project_items.append(project_item)
         return all_project_items
 
     @staticmethod
-    def _parse_element(project_xml):
-        id = project_xml.get('id', None)
-        name = project_xml.get('name', None)
-        description = project_xml.get('description', None)
-        content_permissions = project_xml.get('contentPermissions', None)
-        parent_id = project_xml.get('parentProjectId', None)
+    def _parse_element(project_xml, ns):
+        project_fields = project_xml.attrib
+        owner_elem = project_xml.find('.//t:owner', namespaces=ns)
+        if owner_elem is not None:
+            owner_fields = owner_elem.attrib
+            project_fields['owner'] = owner_fields
 
-        return id, name, description, content_permissions, parent_id
+        return project_fields
+
+
+# Used to convert string represented boolean to a boolean type
+def string_to_bool(s):
+    return s.lower() == 'true'
