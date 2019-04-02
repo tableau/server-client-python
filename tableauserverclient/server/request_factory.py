@@ -422,8 +422,8 @@ class Connection(object):
             connection_element.attrib['userName'] = connection_item.username
         if connection_item.password:
             connection_element.attrib['password'] = connection_item.password
-        if connection_item.embed_password:
-            connection_element.attrib['embedPassword'] = str(connection_item.embed_password)
+        if connection_item.embed_password is not None:
+            connection_element.attrib['embedPassword'] = str(connection_item.embed_password).lower()
 
 
 class TaskRequest(object):

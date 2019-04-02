@@ -141,15 +141,21 @@ class DatasourceTests(unittest.TestCase):
             single_datasource.owner_id = 'dd2239f6-ddf1-4107-981a-4cf94e415794'
             single_datasource._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
             self.server.datasources.populate_connections(single_datasource)
-
             self.assertEqual('9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', single_datasource.id)
-
             connections = single_datasource.connections
-            self.assertTrue(connections)
-            ds1, ds2, ds3 = connections
-            self.assertEqual(ds1.id, 'be786ae0-d2bf-4a4b-9b34-e2de8d2d4488')
-            self.assertEqual(ds2.id, '970e24bc-e200-4841-a3e9-66e7d122d77e')
-            self.assertEqual(ds3.id, '7d85b889-283b-42df-b23e-3c811e402f1f')
+
+        self.assertTrue(connections)
+        ds1, ds2 = connections
+        self.assertEqual('be786ae0-d2bf-4a4b-9b34-e2de8d2d4488', ds1.id)
+        self.assertEqual('textscan', ds1.connection_type)
+        self.assertEqual('forty-two.net', ds1.server_address)
+        self.assertEqual('duo', ds1.username)
+        self.assertEqual(True, ds1.embed_password)
+        self.assertEqual('970e24bc-e200-4841-a3e9-66e7d122d77e', ds2.id)
+        self.assertEqual('sqlserver', ds2.connection_type)
+        self.assertEqual('database.com', ds2.server_address)
+        self.assertEqual('heero', ds2.username)
+        self.assertEqual(False, ds2.embed_password)
 
     def test_update_connection(self):
         populate_xml, response_xml = read_xml_assets(POPULATE_CONNECTIONS_XML, UPDATE_CONNECTION_XML)
