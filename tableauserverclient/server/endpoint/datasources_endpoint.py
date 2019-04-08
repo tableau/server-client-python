@@ -1,5 +1,5 @@
 from .endpoint import Endpoint, api, parameter_added_in
-from .exceptions import MissingRequiredFieldError
+from .exceptions import InternalServerError, MissingRequiredFieldError
 from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, DatasourceItem, PaginationItem, ConnectionItem
@@ -196,7 +196,14 @@ class Datasources(Endpoint):
                                                                               file_contents,
                                                                               connection_credentials,
                                                                               connections)
-        server_response = self.post_request(url, xml_request, content_type)
+
+        # Send the publishing request to server
+        try:
+            server_response = self.post_request(url, xml_request, content_type)
+        except InternalServerError as err:
+            if err.code == 504 and not as_job:
+                err.content = "Timeout error while publishing. Please use asynchronous publishing to avoid timeouts."
+            raise err
 
         if as_job:
             new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]

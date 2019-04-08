@@ -44,6 +44,7 @@ class ConnectionItem(object):
             connection_item = cls()
             connection_item._id = connection_xml.get('id', None)
             connection_item._connection_type = connection_xml.get('type', None)
+            connection_item.embed_password = string_to_bool(connection_xml.get('embedPassword', ''))
             connection_item.server_address = connection_xml.get('serverAddress', None)
             connection_item.server_port = connection_xml.get('serverPort', None)
             connection_item.username = connection_xml.get('userName', None)
@@ -82,3 +83,8 @@ class ConnectionItem(object):
                 connection_item.connection_credentials = ConnectionCredentials.from_xml_element(connection_credentials)
 
         return all_connection_items
+
+
+# Used to convert string represented boolean to a boolean type
+def string_to_bool(s):
+    return s.lower() == 'true'

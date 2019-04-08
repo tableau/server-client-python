@@ -1,5 +1,5 @@
 from .endpoint import Endpoint, api, parameter_added_in
-from .exceptions import MissingRequiredFieldError
+from .exceptions import InternalServerError, MissingRequiredFieldError
 from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, WorkbookItem, ConnectionItem, ViewItem, PaginationItem
@@ -178,6 +178,25 @@ class Workbooks(Endpoint):
         connections = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
         return connections
 
+    # Get the pdf of the entire workbook if its tabs are enabled, pdf of the default view if its tabs are disabled
+    @api(version="3.4")
+    def populate_pdf(self, workbook_item, req_options=None):
+        if not workbook_item.id:
+            error = "Workbook item missing ID."
+            raise MissingRequiredFieldError(error)
+
+        def pdf_fetcher():
+            return self._get_wb_pdf(workbook_item, req_options)
+
+        workbook_item._set_pdf(pdf_fetcher)
+        logger.info("Populated pdf for workbook (ID: {0})".format(workbook_item.id))
+
+    def _get_wb_pdf(self, workbook_item, req_options):
+        url = "{0}/{1}/pdf".format(self.baseurl, workbook_item.id)
+        server_response = self.get_request(url, req_options)
+        pdf = server_response.content
+        return pdf
+
     # Get preview image of workbook
     @api(version="2.0")
     def populate_preview_image(self, workbook_item):
@@ -256,7 +275,15 @@ class Workbooks(Endpoint):
                                                                             connection_credentials=conn_creds,
                                                                             connections=connections)
         logger.debug('Request xml: {0} '.format(xml_request[:1000]))
-        server_response = self.post_request(url, xml_request, content_type)
+
+        # Send the publishing request to server
+        try:
+            server_response = self.post_request(url, xml_request, content_type)
+        except InternalServerError as err:
+            if err.code == 504 and not as_job:
+                err.content = "Timeout error while publishing. Please use asynchronous publishing to avoid timeouts."
+            raise err
+
         if as_job:
             new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
             logger.info('Published {0} (JOB_ID: {1}'.format(filename, new_job.id))

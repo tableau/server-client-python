@@ -102,7 +102,7 @@ class DatasourceRequest(object):
                  'tableau_datasource': (filename, file_contents, 'application/octet-stream')}
         return _add_multipart(parts)
 
-    def publish_req_chunked(self, datasource_item, connection_credentials=None):
+    def publish_req_chunked(self, datasource_item, connection_credentials=None, connections=None):
         xml_request = self._generate_xml(datasource_item, connection_credentials, connections)
 
         parts = {'request_payload': ('', xml_request, 'text/xml')}
@@ -290,6 +290,8 @@ class SiteRequest(object):
             site_element.attrib['revisionLimit'] = str(site_item.revision_limit)
         if site_item.subscribe_others_enabled:
             site_element.attrib['revisionHistoryEnabled'] = str(site_item.revision_history_enabled).lower()
+        if site_item.materialized_views_mode is not None:
+            site_element.attrib['materializedViewsMode'] = str(site_item.materialized_views_mode).lower()
         return ET.tostring(xml_request)
 
     def create_req(self, site_item):
@@ -380,6 +382,14 @@ class WorkbookRequest(object):
         if workbook_item.owner_id:
             owner_element = ET.SubElement(workbook_element, 'owner')
             owner_element.attrib['id'] = workbook_item.owner_id
+        if workbook_item.materialized_views_config is not None:
+            materialized_views_config = workbook_item.materialized_views_config
+            materialized_views_element = ET.SubElement(workbook_element, 'materializedViewsEnablementConfig')
+            materialized_views_element.attrib['materializedViewsEnabled'] = str(materialized_views_config
+                                                                                ["materialized_views_enabled"]).lower()
+            materialized_views_element.attrib['materializeNow'] = str(materialized_views_config
+                                                                      ["run_materialization_now"]).lower()
+
         return ET.tostring(xml_request)
 
     def publish_req(self, workbook_item, filename, file_contents, connection_credentials=None, connections=None):
@@ -391,7 +401,7 @@ class WorkbookRequest(object):
                  'tableau_workbook': (filename, file_contents, 'application/octet-stream')}
         return _add_multipart(parts)
 
-    def publish_req_chunked(self, workbook_item, connections=None):
+    def publish_req_chunked(self, workbook_item, connection_credentials=None, connections=None):
         xml_request = self._generate_xml(workbook_item,
                                          connection_credentials=connection_credentials,
                                          connections=connections)
@@ -412,8 +422,8 @@ class Connection(object):
             connection_element.attrib['userName'] = connection_item.username
         if connection_item.password:
             connection_element.attrib['password'] = connection_item.password
-        if connection_item.embed_password:
-            connection_element.attrib['embedPassword'] = str(connection_item.embed_password)
+        if connection_item.embed_password is not None:
+            connection_element.attrib['embedPassword'] = str(connection_item.embed_password).lower()
 
 
 class TaskRequest(object):

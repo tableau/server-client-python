@@ -1,3 +1,15 @@
+## 0.8 (8 Apr 2019)
+
+* Added Max Age to download view image request (#360)
+* Added Materialized Views (#378, #394, #396)
+* Added PDF export of Workbook (#376)
+* Added Support User Role (#392)
+* Added Flows (#403)
+* Updated Pager to handle un-paged results (#322)
+* Fixed checked upload (#309, #319, #326, #329)
+* Fixed embed_password field on publish (#416)
+
+
 ## 0.7 (2 Jul 2018)
 
 * Added cancel job (#299)

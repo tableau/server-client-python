@@ -5,7 +5,9 @@ import tableauserverclient as TSC
 import xml.etree.ElementTree as ET
 
 from tableauserverclient.datetime_helpers import format_datetime
+from tableauserverclient.server.endpoint.exceptions import InternalServerError
 from tableauserverclient.server.request_factory import RequestFactory
+from ._utils import asset
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
@@ -14,6 +16,7 @@ GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, 'workbook_get_by_id.xml')
 GET_EMPTY_XML = os.path.join(TEST_ASSET_DIR, 'workbook_get_empty.xml')
 GET_XML = os.path.join(TEST_ASSET_DIR, 'workbook_get.xml')
 POPULATE_CONNECTIONS_XML = os.path.join(TEST_ASSET_DIR, 'workbook_populate_connections.xml')
+POPULATE_PDF = os.path.join(TEST_ASSET_DIR, 'populate_pdf.pdf')
 POPULATE_PREVIEW_IMAGE = os.path.join(TEST_ASSET_DIR, 'RESTAPISample Image.png')
 POPULATE_VIEWS_XML = os.path.join(TEST_ASSET_DIR, 'workbook_populate_views.xml')
 POPULATE_VIEWS_USAGE_XML = os.path.join(TEST_ASSET_DIR, 'workbook_populate_views_usage.xml')
@@ -119,6 +122,8 @@ class WorkbookTests(unittest.TestCase):
             single_workbook._id = '1f951daf-4061-451a-9df1-69a8062664f2'
             single_workbook.owner_id = 'dd2239f6-ddf1-4107-981a-4cf94e415794'
             single_workbook.name = 'renamedWorkbook'
+            single_workbook.materialized_views_config = {'materialized_views_enabled': True,
+                                                         'run_materialization_now': False}
             single_workbook = self.server.workbooks.update(single_workbook)
 
         self.assertEqual('1f951daf-4061-451a-9df1-69a8062664f2', single_workbook.id)
@@ -126,6 +131,8 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual('1d0304cd-3796-429f-b815-7258370b9b74', single_workbook.project_id)
         self.assertEqual('dd2239f6-ddf1-4107-981a-4cf94e415794', single_workbook.owner_id)
         self.assertEqual('renamedWorkbook', single_workbook.name)
+        self.assertEqual(True, single_workbook.materialized_views_config['materialized_views_enabled'])
+        self.assertEqual(False, single_workbook.materialized_views_config['run_materialization_now'])
 
     def test_update_missing_id(self):
         single_workbook = TSC.WorkbookItem('test')
@@ -269,6 +276,24 @@ class WorkbookTests(unittest.TestCase):
                           self.server.workbooks.populate_connections,
                           single_workbook)
 
+    def test_populate_pdf(self):
+        self.server.version = "3.4"
+        self.baseurl = self.server.workbooks.baseurl
+        with open(POPULATE_PDF, "rb") as f:
+            response = f.read()
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/pdf?type=a5&orientation=landscape",
+                  content=response)
+            single_workbook = TSC.WorkbookItem('test')
+            single_workbook._id = '1f951daf-4061-451a-9df1-69a8062664f2'
+
+            type = TSC.PDFRequestOptions.PageType.A5
+            orientation = TSC.PDFRequestOptions.Orientation.Landscape
+            req_option = TSC.PDFRequestOptions(type, orientation)
+
+            self.server.workbooks.populate_pdf(single_workbook, req_option)
+            self.assertEqual(response, single_workbook.pdf)
+
     def test_populate_preview_image(self):
         with open(POPULATE_PREVIEW_IMAGE, 'rb') as f:
             response = f.read()
@@ -296,11 +321,11 @@ class WorkbookTests(unittest.TestCase):
                                             show_tabs=False,
                                             project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
 
-            sample_workbok = os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx')
+            sample_workbook = os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx')
             publish_mode = self.server.PublishMode.CreateNew
 
             new_workbook = self.server.workbooks.publish(new_workbook,
-                                                         sample_workbok,
+                                                         sample_workbook,
                                                          publish_mode)
 
         self.assertEqual('a8076ca1-e9d8-495e-bae6-c684dbb55836', new_workbook.id)
@@ -327,11 +352,11 @@ class WorkbookTests(unittest.TestCase):
                                             show_tabs=False,
                                             project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
 
-            sample_workbok = os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx')
+            sample_workbook = os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx')
             publish_mode = self.server.PublishMode.CreateNew
 
             new_job = self.server.workbooks.publish(new_workbook,
-                                                    sample_workbok,
+                                                    sample_workbook,
                                                     publish_mode,
                                                     as_job=True)
 
@@ -398,3 +423,13 @@ class WorkbookTests(unittest.TestCase):
             response = RequestFactory.Workbook._generate_xml(new_workbook,
                                                              connection_credentials=connection_creds,
                                                              connections=[connection1])
+
+    def test_synchronous_publish_timeout_error(self):
+        with requests_mock.mock() as m:
+            m.register_uri('POST', self.baseurl, status_code=504)
+
+            new_workbook = TSC.WorkbookItem(project_id='')
+            publish_mode = self.server.PublishMode.CreateNew
+
+            self.assertRaisesRegexp(InternalServerError, 'Please use asynchronous publishing to avoid timeouts',
+                                    self.server.workbooks.publish, new_workbook, asset('SampleWB.twbx'), publish_mode)

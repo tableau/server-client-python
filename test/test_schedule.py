@@ -36,24 +36,37 @@ class ScheduleTests(unittest.TestCase):
             m.get(self.baseurl, text=response_xml)
             all_schedules, pagination_item = self.server.schedules.get()
 
-        self.assertEqual(2, pagination_item.total_available)
-        self.assertEqual("c9cff7f9-309c-4361-99ff-d4ba8c9f5467", all_schedules[0].id)
-        self.assertEqual("Weekday early mornings", all_schedules[0].name)
-        self.assertEqual("Active", all_schedules[0].state)
-        self.assertEqual(50, all_schedules[0].priority)
-        self.assertEqual("2016-07-06T20:19:00Z", format_datetime(all_schedules[0].created_at))
-        self.assertEqual("2016-09-13T11:00:32Z", format_datetime(all_schedules[0].updated_at))
-        self.assertEqual("Extract", all_schedules[0].schedule_type)
-        self.assertEqual("2016-09-14T11:00:00Z", format_datetime(all_schedules[0].next_run_at))
+        extract = all_schedules[0]
+        subscription = all_schedules[1]
+        flow = all_schedules[2]
 
-        self.assertEqual("bcb79d07-6e47-472f-8a65-d7f51f40c36c", all_schedules[1].id)
-        self.assertEqual("Saturday night", all_schedules[1].name)
-        self.assertEqual("Active", all_schedules[1].state)
-        self.assertEqual(80, all_schedules[1].priority)
-        self.assertEqual("2016-07-07T20:19:00Z", format_datetime(all_schedules[1].created_at))
-        self.assertEqual("2016-09-12T16:39:38Z", format_datetime(all_schedules[1].updated_at))
-        self.assertEqual("Subscription", all_schedules[1].schedule_type)
-        self.assertEqual("2016-09-18T06:00:00Z", format_datetime(all_schedules[1].next_run_at))
+        self.assertEqual(2, pagination_item.total_available)
+        self.assertEqual("c9cff7f9-309c-4361-99ff-d4ba8c9f5467", extract.id)
+        self.assertEqual("Weekday early mornings", extract.name)
+        self.assertEqual("Active", extract.state)
+        self.assertEqual(50, extract.priority)
+        self.assertEqual("2016-07-06T20:19:00Z", format_datetime(extract.created_at))
+        self.assertEqual("2016-09-13T11:00:32Z", format_datetime(extract.updated_at))
+        self.assertEqual("Extract", extract.schedule_type)
+        self.assertEqual("2016-09-14T11:00:00Z", format_datetime(extract.next_run_at))
+
+        self.assertEqual("bcb79d07-6e47-472f-8a65-d7f51f40c36c", subscription.id)
+        self.assertEqual("Saturday night", subscription.name)
+        self.assertEqual("Active", subscription.state)
+        self.assertEqual(80, subscription.priority)
+        self.assertEqual("2016-07-07T20:19:00Z", format_datetime(subscription.created_at))
+        self.assertEqual("2016-09-12T16:39:38Z", format_datetime(subscription.updated_at))
+        self.assertEqual("Subscription", subscription.schedule_type)
+        self.assertEqual("2016-09-18T06:00:00Z", format_datetime(subscription.next_run_at))
+
+        self.assertEqual("f456e8f2-aeb2-4a8e-b823-00b6f08640f0", flow.id)
+        self.assertEqual("First of the month 1:00AM", flow.name)
+        self.assertEqual("Active", flow.state)
+        self.assertEqual(50, flow.priority)
+        self.assertEqual("2019-02-19T18:52:19Z", format_datetime(flow.created_at))
+        self.assertEqual("2019-02-19T18:55:51Z", format_datetime(flow.updated_at))
+        self.assertEqual("Flow", flow.schedule_type)
+        self.assertEqual("2019-03-01T09:00:00Z", format_datetime(flow.next_run_at))
 
     def test_get_empty(self):
         with open(GET_EMPTY_XML, "rb") as f:

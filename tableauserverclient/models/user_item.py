@@ -22,7 +22,9 @@ class UserItem(object):
         ReadOnly = 'ReadOnly'
         SiteAdministratorCreator = 'SiteAdministratorCreator'
         SiteAdministratorExplorer = 'SiteAdministratorExplorer'
-        UnlicensedWithPublish = 'UnlicensedWithPublish'
+
+        # Online only
+        SupportUser = 'SupportUser'
 
     class Auth:
         SAML = 'SAML'

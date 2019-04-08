@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
-from .property_decorators import property_not_nullable, property_is_boolean
+from .property_decorators import property_not_nullable, property_is_boolean, property_is_materialized_views_config
 from .tag_item import TagItem
 from .view_item import ViewItem
 from ..datetime_helpers import parse_datetime
@@ -14,6 +14,7 @@ class WorkbookItem(object):
         self._created_at = None
         self._id = None
         self._initial_tags = set()
+        self._pdf = None
         self._preview_image = None
         self._project_name = None
         self._size = None
@@ -24,6 +25,8 @@ class WorkbookItem(object):
         self.project_id = project_id
         self.show_tabs = show_tabs
         self.tags = set()
+        self.materialized_views_config = {'materialized_views_enabled': None,
+                                          'run_materialization_now': None}
 
     @property
     def connections(self):
@@ -43,6 +46,13 @@ class WorkbookItem(object):
     @property
     def id(self):
         return self._id
+
+    @property
+    def pdf(self):
+        if self._pdf is None:
+            error = "Workbook item must be populated with its pdf first."
+            raise UnpopulatedPropertyError(error)
+        return self._pdf()
 
     @property
     def preview_image(self):
@@ -98,11 +108,23 @@ class WorkbookItem(object):
             # We had views included in a WorkbookItem response
             return self._views
 
+    @property
+    def materialized_views_config(self):
+        return self._materialized_views_config
+
+    @materialized_views_config.setter
+    @property_is_materialized_views_config
+    def materialized_views_config(self, value):
+        self._materialized_views_config = value
+
     def _set_connections(self, connections):
         self._connections = connections
 
     def _set_views(self, views):
         self._views = views
+
+    def _set_pdf(self, pdf):
+        self._pdf = pdf
 
     def _set_preview_image(self, preview_image):
         self._preview_image = preview_image
@@ -112,15 +134,18 @@ class WorkbookItem(object):
             workbook_xml = ET.fromstring(workbook_xml).find('.//t:workbook', namespaces=ns)
         if workbook_xml is not None:
             (_, _, _, _, updated_at, _, show_tabs,
-             project_id, project_name, owner_id, _, _) = self._parse_element(workbook_xml, ns)
+             project_id, project_name, owner_id, _, _,
+             materialized_views_config) = self._parse_element(workbook_xml, ns)
 
             self._set_values(None, None, None, None, updated_at,
-                             None, show_tabs, project_id, project_name, owner_id, None, None)
+                             None, show_tabs, project_id, project_name, owner_id, None, None,
+                             materialized_views_config)
 
         return self
 
     def _set_values(self, id, name, content_url, created_at, updated_at,
-                    size, show_tabs, project_id, project_name, owner_id, tags, views):
+                    size, show_tabs, project_id, project_name, owner_id, tags, views,
+                    materialized_views_config):
         if id is not None:
             self._id = id
         if name:
@@ -146,6 +171,8 @@ class WorkbookItem(object):
             self._initial_tags = copy.copy(tags)
         if views:
             self._views = views
+        if materialized_views_config is not None:
+            self.materialized_views_config = materialized_views_config
 
     @classmethod
     def from_response(cls, resp, ns):
@@ -154,11 +181,13 @@ class WorkbookItem(object):
         all_workbook_xml = parsed_response.findall('.//t:workbook', namespaces=ns)
         for workbook_xml in all_workbook_xml:
             (id, name, content_url, created_at, updated_at, size, show_tabs,
-             project_id, project_name, owner_id, tags, views) = cls._parse_element(workbook_xml, ns)
+             project_id, project_name, owner_id, tags, views,
+             materialized_views_config) = cls._parse_element(workbook_xml, ns)
 
             workbook_item = cls(project_id)
             workbook_item._set_values(id, name, content_url, created_at, updated_at,
-                                      size, show_tabs, None, project_name, owner_id, tags, views)
+                                      size, show_tabs, None, project_name, owner_id, tags, views,
+                                      materialized_views_config)
             all_workbook_items.append(workbook_item)
         return all_workbook_items
 
@@ -199,8 +228,29 @@ class WorkbookItem(object):
         if views_elem is not None:
             views = ViewItem.from_xml_element(views_elem, ns)
 
+        materialized_views_config = {'materialized_views_enabled': None, 'run_materialization_now': None}
+        materialized_views_elem = workbook_xml.find('.//t:materializedViewsEnablementConfig', namespaces=ns)
+        if materialized_views_elem is not None:
+            materialized_views_config = parse_materialized_views_config(materialized_views_elem)
+
         return id, name, content_url, created_at, updated_at, size, show_tabs,\
-            project_id, project_name, owner_id, tags, views
+            project_id, project_name, owner_id, tags, views, materialized_views_config
+
+
+def parse_materialized_views_config(materialized_views_elem):
+    materialized_views_config = dict()
+
+    materialized_views_enabled = materialized_views_elem.get('materializedViewsEnabled', None)
+    if materialized_views_enabled is not None:
+        materialized_views_enabled = string_to_bool(materialized_views_enabled)
+
+    run_materialization_now = materialized_views_elem.get('runMaterializationNow', None)
+    if run_materialization_now is not None:
+        run_materialization_now = string_to_bool(run_materialization_now)
+
+    materialized_views_config['materialized_views_enabled'] = materialized_views_enabled
+    materialized_views_config['run_materialization_now'] = run_materialization_now
+    return materialized_views_config
 
 
 # Used to convert string represented boolean to a boolean type
