@@ -5,6 +5,10 @@ import logging
 
 logger = logging.getLogger('tableau.endpoint.jobs')
 
+try:
+  basestring
+except NameError:
+  basestring = str
 
 class Jobs(Endpoint):
     @property
