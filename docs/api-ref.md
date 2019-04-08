@@ -1929,10 +1929,10 @@ Resource   |  Description
 *server*.jobs  | Access the jobs resources and methods. See [Jobs](#jobs)  
 *server*.workbooks  |  Access the resources and methods for workbooks. See [Workbooks](#workbooks)
 *server*.datasources  |  Access the resources and methods for data sources. See [Data Sources](#data-sources)
-*server*.projects  |   Access the resources and methods for projects. See [Projects](#projets)
-*server*.schedules  |  Access the resources and methods for schedules. See [Schedules](#Schedules)
+*server*.projects  |   Access the resources and methods for projects. See [Projects](#projects)
+*server*.schedules  |  Access the resources and methods for schedules. See [Schedules](#schedules)
 *server*.subscriptions | Access the resources and methods for subscriptions. See [Subscriptions](#subscriptions)
-*server*.server_info  |  Access the resources and methods for server information. See [ServerInfo class](#serverinfo-class) 
+*server*.server_info  |  Access the resources and methods for server information. See [ServerInfo class](#serverinfoitem-class) 
 
 <br>
 <br>
