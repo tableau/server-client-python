@@ -244,7 +244,7 @@ Name | Description
 `name`  |  The name of the data source. If not specified, the name of the published data source file is used. 
 `project_id` |  The identifier of the project associated with the data source. When you must provide this identifier when create an instance of a `DatasourceItem`
 `project_name` |  The name of the project associated with the data source. 
-`tags` |  The tags that have been added to the data source. 
+`tags` |  The tags that have been added to the data source. This is a list of strings, e.g ["tag"].
 `updated_at` |  The date and time when the data source was last updated. 
 
 
@@ -2546,7 +2546,7 @@ Name  |  Description
 `project_name` | The name of the project.
 `size` | The size of the workbook (in megabytes). 
 `show_tabs`  |  (Boolean) Determines whether the workbook shows tabs for the view.
-`tags` |  The tags that have been added to the workbook. 
+`tags` |  The tags that have been added to the workbook. This is a list of strings, e.g ["tag"].
 `updated_at` |  The date and time when the workbook was last updated.
 `views`   | The list of views (`ViewItem`) for the workbook. You must first call the [workbooks.populate_views](#workbooks.populate_views) method to access this data. See the [ViewItem class](#viewitem-class).
 
