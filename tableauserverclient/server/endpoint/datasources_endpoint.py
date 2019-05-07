@@ -200,7 +200,6 @@ class Datasources(Endpoint):
                                                                               file_contents,
                                                                               connection_credentials,
                                                                               connections)
-<<<<<<< HEAD
 
         # Send the publishing request to server
         try:
@@ -218,7 +217,6 @@ class Datasources(Endpoint):
             new_datasource = DatasourceItem.from_response(server_response.content, self.parent_srv.namespace)[0]
             logger.info('Published {0} (ID: {1})'.format(filename, new_datasource.id))
             return new_datasource
-=======
         server_response = self.post_request(url, xml_request, content_type)
         new_datasource = DatasourceItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         logger.info('Published {0} (ID: {1})'.format(filename, new_datasource.id))
@@ -235,4 +233,3 @@ class Datasources(Endpoint):
     @api(version='2.0')
     def delete_permission(self, item, capability_item):
         self._permissions.delete(item, capability_item)
->>>>>>> adding permissions support for workbook, datasource, project
