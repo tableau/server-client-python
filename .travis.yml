@@ -1,11 +1,9 @@
 language: python
 python:
   - "2.7"
-  - "3.3"
-  - "3.4"
   - "3.5"
   - "3.6"
-  - "pypy"
+  - "3.7"
 # command to install dependencies
 install:
   - "pip install -e ."
@@ -14,5 +12,4 @@ install:
 script:
   # Tests
   - python setup.py test
-  # pep8 - disabled for now until we can scrub the files to make sure we pass before turning it on
   - pycodestyle tableauserverclient test samples
