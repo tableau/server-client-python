@@ -44,3 +44,12 @@ class EndpointUnavailableError(Exception):
 
 class ItemTypeNotAllowed(Exception):
     pass
+
+
+class GraphQLError(Exception):
+    def __init__(self, error_payload):
+        self.error = error_payload
+
+    def __str__(self):
+        from pprint import pformat
+        return pformat(self.error)
