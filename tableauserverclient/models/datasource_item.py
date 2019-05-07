@@ -26,7 +26,7 @@ class DatasourceItem(object):
     @property
     def connections(self):
         if self._connections is None:
-            error = 'Datasource item must be populated with connections first.'
+            error = "Datasource item must be populated with connections first."
             raise UnpopulatedPropertyError(error)
         return self._connections()
 
@@ -86,16 +86,55 @@ class DatasourceItem(object):
 
     def _parse_common_elements(self, datasource_xml, ns):
         if not isinstance(datasource_xml, ET.Element):
-            datasource_xml = ET.fromstring(datasource_xml).find('.//t:datasource', namespaces=ns)
+            datasource_xml = ET.fromstring(datasource_xml).find(
+                ".//t:datasource", namespaces=ns
+            )
         if datasource_xml is not None:
-            (_, _, _, _, _, updated_at, _, project_id, project_name, owner_id,
-             certified, certification_note) = self._parse_element(datasource_xml, ns)
-            self._set_values(None, None, None, None, None, updated_at, None, project_id,
-                             project_name, owner_id, certified, certification_note)
+            (
+                _,
+                _,
+                _,
+                _,
+                _,
+                updated_at,
+                _,
+                project_id,
+                project_name,
+                owner_id,
+                certified,
+                certification_note,
+            ) = self._parse_element(datasource_xml, ns)
+            self._set_values(
+                None,
+                None,
+                None,
+                None,
+                None,
+                updated_at,
+                None,
+                project_id,
+                project_name,
+                owner_id,
+                certified,
+                certification_note,
+            )
         return self
 
-    def _set_values(self, id, name, datasource_type, content_url, created_at,
-                    updated_at, tags, project_id, project_name, owner_id, certified, certification_note):
+    def _set_values(
+        self,
+        id,
+        name,
+        datasource_type,
+        content_url,
+        created_at,
+        updated_at,
+        tags,
+        project_id,
+        project_name,
+        owner_id,
+        certified,
+        certification_note,
+    ):
         if id is not None:
             self._id = id
         if name:
@@ -125,45 +164,80 @@ class DatasourceItem(object):
     def from_response(cls, resp, ns):
         all_datasource_items = list()
         parsed_response = ET.fromstring(resp)
-        all_datasource_xml = parsed_response.findall('.//t:datasource', namespaces=ns)
+        all_datasource_xml = parsed_response.findall(".//t:datasource", namespaces=ns)
 
         for datasource_xml in all_datasource_xml:
-            (id_, name, datasource_type, content_url, created_at, updated_at,
-             tags, project_id, project_name, owner_id,
-             certified, certification_note) = cls._parse_element(datasource_xml, ns)
+            (
+                id_,
+                name,
+                datasource_type,
+                content_url,
+                created_at,
+                updated_at,
+                tags,
+                project_id,
+                project_name,
+                owner_id,
+                certified,
+                certification_note,
+            ) = cls._parse_element(datasource_xml, ns)
             datasource_item = cls(project_id)
-            datasource_item._set_values(id_, name, datasource_type, content_url, created_at, updated_at,
-                                        tags, None, project_name, owner_id, certified, certification_note)
+            datasource_item._set_values(
+                id_,
+                name,
+                datasource_type,
+                content_url,
+                created_at,
+                updated_at,
+                tags,
+                None,
+                project_name,
+                owner_id,
+                certified,
+                certification_note,
+            )
             all_datasource_items.append(datasource_item)
         return all_datasource_items
 
     @staticmethod
     def _parse_element(datasource_xml, ns):
-        id_ = datasource_xml.get('id', None)
-        name = datasource_xml.get('name', None)
-        datasource_type = datasource_xml.get('type', None)
-        content_url = datasource_xml.get('contentUrl', None)
-        created_at = parse_datetime(datasource_xml.get('createdAt', None))
-        updated_at = parse_datetime(datasource_xml.get('updatedAt', None))
-        certification_note = datasource_xml.get('certificationNote', None)
-        certified = str(datasource_xml.get('isCertified', None)).lower() == 'true'
+        id_ = datasource_xml.get("id", None)
+        name = datasource_xml.get("name", None)
+        datasource_type = datasource_xml.get("type", None)
+        content_url = datasource_xml.get("contentUrl", None)
+        created_at = parse_datetime(datasource_xml.get("createdAt", None))
+        updated_at = parse_datetime(datasource_xml.get("updatedAt", None))
+        certification_note = datasource_xml.get("certificationNote", None)
+        certified = str(datasource_xml.get("isCertified", None)).lower() == "true"
 
         tags = None
-        tags_elem = datasource_xml.find('.//t:tags', namespaces=ns)
+        tags_elem = datasource_xml.find(".//t:tags", namespaces=ns)
         if tags_elem is not None:
             tags = TagItem.from_xml_element(tags_elem, ns)
 
         project_id = None
         project_name = None
-        project_elem = datasource_xml.find('.//t:project', namespaces=ns)
+        project_elem = datasource_xml.find(".//t:project", namespaces=ns)
         if project_elem is not None:
-            project_id = project_elem.get('id', None)
-            project_name = project_elem.get('name', None)
+            project_id = project_elem.get("id", None)
+            project_name = project_elem.get("name", None)
 
         owner_id = None
-        owner_elem = datasource_xml.find('.//t:owner', namespaces=ns)
+        owner_elem = datasource_xml.find(".//t:owner", namespaces=ns)
         if owner_elem is not None:
-            owner_id = owner_elem.get('id', None)
+            owner_id = owner_elem.get("id", None)
 
-        return (id_, name, datasource_type, content_url, created_at, updated_at, tags, project_id,
-                project_name, owner_id, certified, certification_note)
+        return (
+            id_,
+            name,
+            datasource_type,
+            content_url,
+            created_at,
+            updated_at,
+            tags,
+            project_id,
+            project_name,
+            owner_id,
+            certified,
+            certification_note,
+        )

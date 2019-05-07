@@ -35,12 +35,14 @@ class ConnectionCredentials(object):
 
     @classmethod
     def from_xml_element(cls, parsed_response, ns):
-        connection_creds_xml = parsed_response.find('.//t:connectionCredentials', namespaces=ns)
+        connection_creds_xml = parsed_response.find(
+            ".//t:connectionCredentials", namespaces=ns
+        )
 
-        name = connection_creds_xml.get('name', None)
-        password = connection_creds_xml.get('password', None)
-        embed = connection_creds_xml.get('embed', None)
-        oAuth = connection_creds_xml.get('oAuth', None)
+        name = connection_creds_xml.get("name", None)
+        password = connection_creds_xml.get("password", None)
+        embed = connection_creds_xml.get("embed", None)
+        oAuth = connection_creds_xml.get("oAuth", None)
 
         connection_creds = cls(name, password, embed, oAuth)
         return connection_creds

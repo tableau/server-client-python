@@ -4,10 +4,12 @@ from .property_decorators import property_is_enum, property_not_empty
 
 class ProjectItem(object):
     class ContentPermissions:
-        LockedToProject = 'LockedToProject'
-        ManagedByOwner = 'ManagedByOwner'
+        LockedToProject = "LockedToProject"
+        ManagedByOwner = "ManagedByOwner"
 
-    def __init__(self, name, description=None, content_permissions=None, parent_id=None):
+    def __init__(
+        self, name, description=None, content_permissions=None, parent_id=None
+    ):
         self._content_permissions = None
         self._id = None
         self.description = description
@@ -38,18 +40,28 @@ class ProjectItem(object):
         self._name = value
 
     def is_default(self):
-        return self.name.lower() == 'default'
+        return self.name.lower() == "default"
 
     def _parse_common_tags(self, project_xml):
         if not isinstance(project_xml, ET.Element):
-            project_xml = ET.fromstring(project_xml).find('.//t:project', namespaces=NAMESPACE)
+            project_xml = ET.fromstring(project_xml).find(
+                ".//t:project", namespaces=NAMESPACE
+            )
 
         if project_xml is not None:
-            (_, name, description, content_permissions, parent_id) = self._parse_element(project_xml)
+            (
+                _,
+                name,
+                description,
+                content_permissions,
+                parent_id,
+            ) = self._parse_element(project_xml)
             self._set_values(None, name, description, content_permissions, parent_id)
         return self
 
-    def _set_values(self, project_id, name, description, content_permissions, parent_id):
+    def _set_values(
+        self, project_id, name, description, content_permissions, parent_id
+    ):
         if project_id is not None:
             self._id = project_id
         if name:
@@ -65,21 +77,29 @@ class ProjectItem(object):
     def from_response(cls, resp, ns):
         all_project_items = list()
         parsed_response = ET.fromstring(resp)
-        all_project_xml = parsed_response.findall('.//t:project', namespaces=ns)
+        all_project_xml = parsed_response.findall(".//t:project", namespaces=ns)
 
         for project_xml in all_project_xml:
-            (id, name, description, content_permissions, parent_id) = cls._parse_element(project_xml)
+            (
+                id,
+                name,
+                description,
+                content_permissions,
+                parent_id,
+            ) = cls._parse_element(project_xml)
             project_item = cls(name)
-            project_item._set_values(id, name, description, content_permissions, parent_id)
+            project_item._set_values(
+                id, name, description, content_permissions, parent_id
+            )
             all_project_items.append(project_item)
         return all_project_items
 
     @staticmethod
     def _parse_element(project_xml):
-        id = project_xml.get('id', None)
-        name = project_xml.get('name', None)
-        description = project_xml.get('description', None)
-        content_permissions = project_xml.get('contentPermissions', None)
-        parent_id = project_xml.get('parentProjectId', None)
+        id = project_xml.get("id", None)
+        name = project_xml.get("name", None)
+        description = project_xml.get("description", None)
+        content_permissions = project_xml.get("contentPermissions", None)
+        parent_id = project_xml.get("parentProjectId", None)
 
         return id, name, description, content_permissions, parent_id

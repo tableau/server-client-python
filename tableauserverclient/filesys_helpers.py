@@ -1,4 +1,4 @@
-ALLOWED_SPECIAL = (' ', '.', '_', '-')
+ALLOWED_SPECIAL = (" ", ".", "_", "-")
 
 
 def to_filename(string_to_sanitize):

@@ -62,9 +62,11 @@ class HourlyInterval(object):
 
     @interval.setter
     def interval(self, interval):
-        VALID_INTERVALS = {.25, .5, 1, 2, 4, 6, 8, 12}
+        VALID_INTERVALS = {0.25, 0.5, 1, 2, 4, 6, 8, 12}
         if float(interval) not in VALID_INTERVALS:
-            error = "Invalid interval {} not in {}".format(interval, str(VALID_INTERVALS))
+            error = "Invalid interval {} not in {}".format(
+                interval, str(VALID_INTERVALS)
+            )
             raise ValueError(error)
 
         self._interval = interval
@@ -73,7 +75,7 @@ class HourlyInterval(object):
 
         # We use fractional hours for the two minute-based intervals.
         # Need to convert to minutes from hours here
-        if self.interval in {.25, .5}:
+        if self.interval in {0.25, 0.5}:
             calculated_interval = int(self.interval * 60)
             interval_type = IntervalItem.Occurrence.Minutes
         else:
@@ -161,7 +163,9 @@ class MonthlyInterval(object):
 
     @interval.setter
     def interval(self, interval_value):
-        error = "Invalid interval value for a monthly frequency: {}.".format(interval_value)
+        error = "Invalid interval value for a monthly frequency: {}.".format(
+            interval_value
+        )
 
         # This is weird because the value could be a str or an int
         # The only valid str is 'LastDay' so we check that first. If that's not it

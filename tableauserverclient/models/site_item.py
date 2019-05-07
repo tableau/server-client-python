@@ -1,6 +1,12 @@
 import xml.etree.ElementTree as ET
-from .property_decorators import (property_is_enum, property_is_boolean, property_matches,
-                                  property_not_empty, property_not_nullable, property_is_int)
+from .property_decorators import (
+    property_is_enum,
+    property_is_boolean,
+    property_matches,
+    property_not_empty,
+    property_not_nullable,
+    property_is_int,
+)
 
 
 VALID_CONTENT_URL_RE = r"^[a-zA-Z0-9_\-]*$"
@@ -8,16 +14,26 @@ VALID_CONTENT_URL_RE = r"^[a-zA-Z0-9_\-]*$"
 
 class SiteItem(object):
     class AdminMode:
-        ContentAndUsers = 'ContentAndUsers'
-        ContentOnly = 'ContentOnly'
+        ContentAndUsers = "ContentAndUsers"
+        ContentOnly = "ContentOnly"
 
     class State:
-        Active = 'Active'
-        Suspended = 'Suspended'
+        Active = "Active"
+        Suspended = "Suspended"
 
-    def __init__(self, name, content_url, admin_mode=None, user_quota=None, storage_quota=None,
-                 disable_subscriptions=False, subscribe_others_enabled=True, revision_history_enabled=False,
-                 revision_limit=None, materialized_views_mode=None):
+    def __init__(
+        self,
+        name,
+        content_url,
+        admin_mode=None,
+        user_quota=None,
+        storage_quota=None,
+        disable_subscriptions=False,
+        subscribe_others_enabled=True,
+        revision_history_enabled=False,
+        revision_limit=None,
+        materialized_views_mode=None,
+    ):
         self._admin_mode = None
         self._id = None
         self._num_users = None
@@ -50,7 +66,10 @@ class SiteItem(object):
 
     @content_url.setter
     @property_not_nullable
-    @property_matches(VALID_CONTENT_URL_RE, "content_url can contain only letters, numbers, dashes, and underscores")
+    @property_matches(
+        VALID_CONTENT_URL_RE,
+        "content_url can contain only letters, numbers, dashes, and underscores",
+    )
     def content_url(self, value):
         self._content_url = value
 
@@ -133,25 +152,67 @@ class SiteItem(object):
         self._materialized_views_mode = value
 
     def is_default(self):
-        return self.name.lower() == 'default'
+        return self.name.lower() == "default"
 
     def _parse_common_tags(self, site_xml, ns):
         if not isinstance(site_xml, ET.Element):
-            site_xml = ET.fromstring(site_xml).find('.//t:site', namespaces=ns)
+            site_xml = ET.fromstring(site_xml).find(".//t:site", namespaces=ns)
         if site_xml is not None:
-            (_, name, content_url, _, admin_mode, state,
-             subscribe_others_enabled, disable_subscriptions, revision_history_enabled,
-             user_quota, storage_quota, revision_limit, num_users, storage,
-             materialized_views_mode) = self._parse_element(site_xml, ns)
+            (
+                _,
+                name,
+                content_url,
+                _,
+                admin_mode,
+                state,
+                subscribe_others_enabled,
+                disable_subscriptions,
+                revision_history_enabled,
+                user_quota,
+                storage_quota,
+                revision_limit,
+                num_users,
+                storage,
+                materialized_views_mode,
+            ) = self._parse_element(site_xml, ns)
 
-            self._set_values(None, name, content_url, None, admin_mode, state, subscribe_others_enabled,
-                             disable_subscriptions, revision_history_enabled, user_quota, storage_quota,
-                             revision_limit, num_users, storage, materialized_views_mode)
+            self._set_values(
+                None,
+                name,
+                content_url,
+                None,
+                admin_mode,
+                state,
+                subscribe_others_enabled,
+                disable_subscriptions,
+                revision_history_enabled,
+                user_quota,
+                storage_quota,
+                revision_limit,
+                num_users,
+                storage,
+                materialized_views_mode,
+            )
         return self
 
-    def _set_values(self, id, name, content_url, status_reason, admin_mode, state,
-                    subscribe_others_enabled, disable_subscriptions, revision_history_enabled,
-                    user_quota, storage_quota, revision_limit, num_users, storage, materialized_views_mode):
+    def _set_values(
+        self,
+        id,
+        name,
+        content_url,
+        status_reason,
+        admin_mode,
+        state,
+        subscribe_others_enabled,
+        disable_subscriptions,
+        revision_history_enabled,
+        user_quota,
+        storage_quota,
+        revision_limit,
+        num_users,
+        storage,
+        materialized_views_mode,
+    ):
         if id is not None:
             self._id = id
         if name:
@@ -187,58 +248,103 @@ class SiteItem(object):
     def from_response(cls, resp, ns):
         all_site_items = list()
         parsed_response = ET.fromstring(resp)
-        all_site_xml = parsed_response.findall('.//t:site', namespaces=ns)
+        all_site_xml = parsed_response.findall(".//t:site", namespaces=ns)
         for site_xml in all_site_xml:
-            (id, name, content_url, status_reason, admin_mode, state, subscribe_others_enabled,
-                disable_subscriptions, revision_history_enabled, user_quota, storage_quota,
-                revision_limit, num_users, storage, materialized_views_mode) = cls._parse_element(site_xml, ns)
+            (
+                id,
+                name,
+                content_url,
+                status_reason,
+                admin_mode,
+                state,
+                subscribe_others_enabled,
+                disable_subscriptions,
+                revision_history_enabled,
+                user_quota,
+                storage_quota,
+                revision_limit,
+                num_users,
+                storage,
+                materialized_views_mode,
+            ) = cls._parse_element(site_xml, ns)
 
             site_item = cls(name, content_url)
-            site_item._set_values(id, name, content_url, status_reason, admin_mode, state,
-                                  subscribe_others_enabled, disable_subscriptions, revision_history_enabled,
-                                  user_quota, storage_quota, revision_limit, num_users, storage,
-                                  materialized_views_mode)
+            site_item._set_values(
+                id,
+                name,
+                content_url,
+                status_reason,
+                admin_mode,
+                state,
+                subscribe_others_enabled,
+                disable_subscriptions,
+                revision_history_enabled,
+                user_quota,
+                storage_quota,
+                revision_limit,
+                num_users,
+                storage,
+                materialized_views_mode,
+            )
             all_site_items.append(site_item)
         return all_site_items
 
     @staticmethod
     def _parse_element(site_xml, ns):
-        id = site_xml.get('id', None)
-        name = site_xml.get('name', None)
-        content_url = site_xml.get('contentUrl', None)
-        status_reason = site_xml.get('statusReason', None)
-        admin_mode = site_xml.get('adminMode', None)
-        state = site_xml.get('state', None)
-        subscribe_others_enabled = string_to_bool(site_xml.get('subscribeOthersEnabled', ''))
-        disable_subscriptions = string_to_bool(site_xml.get('disableSubscriptions', ''))
-        revision_history_enabled = string_to_bool(site_xml.get('revisionHistoryEnabled', ''))
+        id = site_xml.get("id", None)
+        name = site_xml.get("name", None)
+        content_url = site_xml.get("contentUrl", None)
+        status_reason = site_xml.get("statusReason", None)
+        admin_mode = site_xml.get("adminMode", None)
+        state = site_xml.get("state", None)
+        subscribe_others_enabled = string_to_bool(
+            site_xml.get("subscribeOthersEnabled", "")
+        )
+        disable_subscriptions = string_to_bool(site_xml.get("disableSubscriptions", ""))
+        revision_history_enabled = string_to_bool(
+            site_xml.get("revisionHistoryEnabled", "")
+        )
 
-        user_quota = site_xml.get('userQuota', None)
+        user_quota = site_xml.get("userQuota", None)
         if user_quota:
             user_quota = int(user_quota)
 
-        storage_quota = site_xml.get('storageQuota', None)
+        storage_quota = site_xml.get("storageQuota", None)
         if storage_quota:
             storage_quota = int(storage_quota)
 
-        revision_limit = site_xml.get('revisionLimit', None)
+        revision_limit = site_xml.get("revisionLimit", None)
         if revision_limit:
             revision_limit = int(revision_limit)
 
         num_users = None
         storage = None
-        usage_elem = site_xml.find('.//t:usage', namespaces=ns)
+        usage_elem = site_xml.find(".//t:usage", namespaces=ns)
         if usage_elem is not None:
-            num_users = usage_elem.get('numUsers', None)
-            storage = usage_elem.get('storage', None)
+            num_users = usage_elem.get("numUsers", None)
+            storage = usage_elem.get("storage", None)
 
-        materialized_views_mode = site_xml.get('materializedViewsMode', '')
+        materialized_views_mode = site_xml.get("materializedViewsMode", "")
 
-        return id, name, content_url, status_reason, admin_mode, state, subscribe_others_enabled,\
-            disable_subscriptions, revision_history_enabled, user_quota, storage_quota,\
-            revision_limit, num_users, storage, materialized_views_mode
+        return (
+            id,
+            name,
+            content_url,
+            status_reason,
+            admin_mode,
+            state,
+            subscribe_others_enabled,
+            disable_subscriptions,
+            revision_history_enabled,
+            user_quota,
+            storage_quota,
+            revision_limit,
+            num_users,
+            storage,
+            materialized_views_mode,
+        )
 
 
 # Used to convert string represented boolean to a boolean type
 def string_to_bool(s):
-    return s.lower() == 'true'
+    return s.lower() == "true"

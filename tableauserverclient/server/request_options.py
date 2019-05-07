@@ -5,42 +5,42 @@ class RequestOptionsBase(object):
 
 class RequestOptions(RequestOptionsBase):
     class Operator:
-        Equals = 'eq'
-        GreaterThan = 'gt'
-        GreaterThanOrEqual = 'gte'
-        LessThan = 'lt'
-        LessThanOrEqual = 'lte'
-        In = 'in'
+        Equals = "eq"
+        GreaterThan = "gt"
+        GreaterThanOrEqual = "gte"
+        LessThan = "lt"
+        LessThanOrEqual = "lte"
+        In = "in"
 
     class Field:
-        Args = 'args'
-        CompletedAt = 'completedAt'
-        CreatedAt = 'createdAt'
-        DomainName = 'domainName'
-        DomainNickname = 'domainNickname'
-        HitsTotal = 'hitsTotal'
-        IsLocal = 'isLocal'
-        JobType = 'jobType'
-        LastLogin = 'lastLogin'
-        MinimumSiteRole = 'minimumSiteRole'
-        Name = 'name'
-        Notes = 'notes'
-        OwnerDomain = 'ownerDomain'
-        OwnerEmail = 'ownerEmail'
-        OwnerName = 'ownerName'
-        Progress = 'progress'
-        ProjectName = 'projectName'
-        SiteRole = 'siteRole'
-        Subtitle = 'subtitle'
-        Tags = 'tags'
-        Title = 'title'
-        Type = 'type'
-        UpdatedAt = 'updatedAt'
-        UserCount = 'userCount'
+        Args = "args"
+        CompletedAt = "completedAt"
+        CreatedAt = "createdAt"
+        DomainName = "domainName"
+        DomainNickname = "domainNickname"
+        HitsTotal = "hitsTotal"
+        IsLocal = "isLocal"
+        JobType = "jobType"
+        LastLogin = "lastLogin"
+        MinimumSiteRole = "minimumSiteRole"
+        Name = "name"
+        Notes = "notes"
+        OwnerDomain = "ownerDomain"
+        OwnerEmail = "ownerEmail"
+        OwnerName = "ownerName"
+        Progress = "progress"
+        ProjectName = "projectName"
+        SiteRole = "siteRole"
+        Subtitle = "subtitle"
+        Tags = "tags"
+        Title = "title"
+        Type = "type"
+        UpdatedAt = "updatedAt"
+        UserCount = "userCount"
 
     class Direction:
-        Desc = 'desc'
-        Asc = 'asc'
+        Desc = "desc"
+        Asc = "asc"
 
     def __init__(self, pagenumber=1, pagesize=100):
         self.pagenumber = pagenumber
@@ -59,28 +59,29 @@ class RequestOptions(RequestOptionsBase):
     def apply_query_params(self, url):
         params = []
 
-        if '?' in url:
-            url, existing_params = url.split('?')
+        if "?" in url:
+            url, existing_params = url.split("?")
             params.append(existing_params)
 
         if self.page_number:
-            params.append('pageNumber={0}'.format(self.pagenumber))
+            params.append("pageNumber={0}".format(self.pagenumber))
         if self.page_size:
-            params.append('pageSize={0}'.format(self.pagesize))
+            params.append("pageSize={0}".format(self.pagesize))
         if len(self.sort) > 0:
             sort_options = (str(sort_item) for sort_item in self.sort)
             ordered_sort_options = sorted(sort_options)
-            params.append('sort={}'.format(','.join(ordered_sort_options)))
+            params.append("sort={}".format(",".join(ordered_sort_options)))
         if len(self.filter) > 0:
             filter_options = (str(filter_item) for filter_item in self.filter)
             ordered_filter_options = sorted(filter_options)
-            params.append('filter={}'.format(','.join(ordered_filter_options)))
+            params.append("filter={}".format(",".join(ordered_filter_options)))
 
-        return "{0}?{1}".format(url, '&'.join(params))
+        return "{0}?{1}".format(url, "&".join(params))
 
 
 class _FilterOptionsBase(RequestOptionsBase):
     """ Provide a basic implementation of adding view filters to the url """
+
     def __init__(self):
         self.view_filters = []
 
@@ -93,20 +94,20 @@ class _FilterOptionsBase(RequestOptionsBase):
 
     def _append_view_filters(self, params):
         for name, value in self.view_filters:
-            params.append('vf_{}={}'.format(name, value))
+            params.append("vf_{}={}".format(name, value))
 
 
 class CSVRequestOptions(_FilterOptionsBase):
     def apply_query_params(self, url):
         params = []
         self._append_view_filters(params)
-        return "{0}?{1}".format(url, '&'.join(params))
+        return "{0}?{1}".format(url, "&".join(params))
 
 
 class ImageRequestOptions(_FilterOptionsBase):
     # if 'high' isn't specified, the REST API endpoint returns an image with standard resolution
     class Resolution:
-        High = 'high'
+        High = "high"
 
     def __init__(self, imageresolution=None, maxage=None):
         super(ImageRequestOptions, self).__init__()
@@ -116,13 +117,13 @@ class ImageRequestOptions(_FilterOptionsBase):
     def apply_query_params(self, url):
         params = []
         if self.image_resolution:
-            params.append('resolution={0}'.format(self.image_resolution))
+            params.append("resolution={0}".format(self.image_resolution))
         if self.max_age:
-            params.append('maxAge={0}'.format(self.max_age))
+            params.append("maxAge={0}".format(self.max_age))
 
         self._append_view_filters(params)
 
-        return "{0}?{1}".format(url, '&'.join(params))
+        return "{0}?{1}".format(url, "&".join(params))
 
 
 class PDFRequestOptions(_FilterOptionsBase):
@@ -153,11 +154,11 @@ class PDFRequestOptions(_FilterOptionsBase):
     def apply_query_params(self, url):
         params = []
         if self.page_type:
-            params.append('type={0}'.format(self.page_type))
+            params.append("type={0}".format(self.page_type))
 
         if self.orientation:
-            params.append('orientation={0}'.format(self.orientation))
+            params.append("orientation={0}".format(self.orientation))
 
         self._append_view_filters(params)
 
-        return "{0}?{1}".format(url, '&'.join(params))
+        return "{0}?{1}".format(url, "&".join(params))

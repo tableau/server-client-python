@@ -5,7 +5,16 @@ from ..datetime_helpers import parse_datetime
 
 
 class JobItem(object):
-    def __init__(self, id_, job_type, progress, created_at, started_at=None, completed_at=None, finish_code=0):
+    def __init__(
+        self,
+        id_,
+        job_type,
+        progress,
+        created_at,
+        started_at=None,
+        completed_at=None,
+        finish_code=0,
+    ):
         self._id = id_
         self._type = job_type
         self._progress = progress
@@ -43,14 +52,17 @@ class JobItem(object):
         return self._finish_code
 
     def __repr__(self):
-        return "<Job#{_id} {_type} created_at({_created_at}) started_at({_started_at}) completed_at({_completed_at})" \
-               " progress ({_progress}) finish_code({_finish_code})>".format(**self.__dict__)
+        return (
+            "<Job#{_id} {_type} created_at({_created_at}) started_at({_started_at}) completed_at({_completed_at})"
+            " progress ({_progress}) finish_code({_finish_code})>".format(
+                **self.__dict__
+            )
+        )
 
     @classmethod
     def from_response(cls, xml, ns):
         parsed_response = ET.fromstring(xml)
-        all_tasks_xml = parsed_response.findall(
-            './/t:job', namespaces=ns)
+        all_tasks_xml = parsed_response.findall(".//t:job", namespaces=ns)
 
         all_tasks = [JobItem._parse_element(x, ns) for x in all_tasks_xml]
 
@@ -58,14 +70,16 @@ class JobItem(object):
 
     @classmethod
     def _parse_element(cls, element, ns):
-        id_ = element.get('id', None)
-        type_ = element.get('type', None)
-        progress = element.get('progress', None)
-        created_at = parse_datetime(element.get('createdAt', None))
-        started_at = parse_datetime(element.get('startedAt', None))
-        completed_at = parse_datetime(element.get('completedAt', None))
-        finish_code = element.get('finishCode', -1)
-        return cls(id_, type_, progress, created_at, started_at, completed_at, finish_code)
+        id_ = element.get("id", None)
+        type_ = element.get("type", None)
+        progress = element.get("progress", None)
+        created_at = parse_datetime(element.get("createdAt", None))
+        started_at = parse_datetime(element.get("startedAt", None))
+        completed_at = parse_datetime(element.get("completedAt", None))
+        finish_code = element.get("finishCode", -1)
+        return cls(
+            id_, type_, progress, created_at, started_at, completed_at, finish_code
+        )
 
 
 class BackgroundJobItem(object):
@@ -76,8 +90,18 @@ class BackgroundJobItem(object):
         Failed = "Failed"
         Cancelled = "Cancelled"
 
-    def __init__(self, id_, created_at, priority, job_type, status, title=None, subtitle=None, started_at=None,
-                 ended_at=None):
+    def __init__(
+        self,
+        id_,
+        created_at,
+        priority,
+        job_type,
+        status,
+        title=None,
+        subtitle=None,
+        started_at=None,
+        ended_at=None,
+    ):
         self._id = id_
         self._type = job_type
         self._status = status
@@ -133,20 +157,29 @@ class BackgroundJobItem(object):
     @classmethod
     def from_response(cls, xml, ns):
         parsed_response = ET.fromstring(xml)
-        all_tasks_xml = parsed_response.findall(
-            './/t:backgroundJob', namespaces=ns)
+        all_tasks_xml = parsed_response.findall(".//t:backgroundJob", namespaces=ns)
         return [cls._parse_element(x, ns) for x in all_tasks_xml]
 
     @classmethod
     def _parse_element(cls, element, ns):
-        id_ = element.get('id', None)
-        type_ = element.get('jobType', None)
-        status = element.get('status', None)
-        created_at = parse_datetime(element.get('createdAt', None))
-        started_at = parse_datetime(element.get('startedAt', None))
-        ended_at = parse_datetime(element.get('endedAt', None))
-        priority = element.get('priority', None)
-        title = element.get('title', None)
-        subtitle = element.get('subtitle', None)
+        id_ = element.get("id", None)
+        type_ = element.get("jobType", None)
+        status = element.get("status", None)
+        created_at = parse_datetime(element.get("createdAt", None))
+        started_at = parse_datetime(element.get("startedAt", None))
+        ended_at = parse_datetime(element.get("endedAt", None))
+        priority = element.get("priority", None)
+        title = element.get("title", None)
+        subtitle = element.get("subtitle", None)
 
-        return cls(id_, created_at, priority, type_, status, title, subtitle, started_at, ended_at)
+        return cls(
+            id_,
+            created_at,
+            priority,
+            type_,
+            status,
+            title,
+            subtitle,
+            started_at,
+            ended_at,
+        )

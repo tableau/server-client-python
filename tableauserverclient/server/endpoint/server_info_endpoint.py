@@ -3,7 +3,7 @@ from .exceptions import ServerResponseError, ServerInfoEndpointNotFoundError
 from ...models import ServerInfoItem
 import logging
 
-logger = logging.getLogger('tableau.endpoint.server_info')
+logger = logging.getLogger("tableau.endpoint.server_info")
 
 
 class ServerInfo(Endpoint):
@@ -20,5 +20,7 @@ class ServerInfo(Endpoint):
             if e.code == "404003":
                 raise ServerInfoEndpointNotFoundError
 
-        server_info = ServerInfoItem.from_response(server_response.content, self.parent_srv.namespace)
+        server_info = ServerInfoItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )
         return server_info

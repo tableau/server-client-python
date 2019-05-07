@@ -42,14 +42,14 @@ class GroupItem(object):
     def from_response(cls, resp, ns):
         all_group_items = list()
         parsed_response = ET.fromstring(resp)
-        all_group_xml = parsed_response.findall('.//t:group', namespaces=ns)
+        all_group_xml = parsed_response.findall(".//t:group", namespaces=ns)
         for group_xml in all_group_xml:
-            name = group_xml.get('name', None)
+            name = group_xml.get("name", None)
             group_item = cls(name)
-            group_item._id = group_xml.get('id', None)
+            group_item._id = group_xml.get("id", None)
 
-            domain_elem = group_xml.find('.//t:domain', namespaces=ns)
+            domain_elem = group_xml.find(".//t:domain", namespaces=ns)
             if domain_elem is not None:
-                group_item._domain_name = domain_elem.get('name', None)
+                group_item._domain_name = domain_elem.get("name", None)
             all_group_items.append(group_item)
         return all_group_items

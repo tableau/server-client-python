@@ -14,11 +14,11 @@ import cgi
 from contextlib import closing
 
 # The maximum size of a file that can be published in a single request is 64MB
-FILESIZE_LIMIT = 1024 * 1024 * 64   # 64MB
+FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
 
-ALLOWED_FILE_EXTENSIONS = ['twb', 'twbx']
+ALLOWED_FILE_EXTENSIONS = ["twb", "twbx"]
 
-logger = logging.getLogger('tableau.endpoint.workbooks')
+logger = logging.getLogger("tableau.endpoint.workbooks")
 
 
 class Workbooks(Endpoint):
@@ -28,16 +28,22 @@ class Workbooks(Endpoint):
 
     @property
     def baseurl(self):
-        return "{0}/sites/{1}/workbooks".format(self.parent_srv.baseurl, self.parent_srv.site_id)
+        return "{0}/sites/{1}/workbooks".format(
+            self.parent_srv.baseurl, self.parent_srv.site_id
+        )
 
     # Get all workbooks on site
     @api(version="2.0")
     def get(self, req_options=None):
-        logger.info('Querying all workbooks on site')
+        logger.info("Querying all workbooks on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
-        all_workbook_items = WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)
+        pagination_item = PaginationItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )
+        all_workbook_items = WorkbookItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )
         return all_workbook_items, pagination_item
 
     # Get 1 workbook
@@ -46,17 +52,21 @@ class Workbooks(Endpoint):
         if not workbook_id:
             error = "Workbook ID undefined."
             raise ValueError(error)
-        logger.info('Querying single workbook (ID: {0})'.format(workbook_id))
+        logger.info("Querying single workbook (ID: {0})".format(workbook_id))
         url = "{0}/{1}".format(self.baseurl, workbook_id)
         server_response = self.get_request(url)
-        return WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        return WorkbookItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )[0]
 
     @api(version="2.8")
     def refresh(self, workbook_id):
         url = "{0}/{1}/refresh".format(self.baseurl, workbook_id)
         empty_req = RequestFactory.Empty.empty_req()
         server_response = self.post_request(url, empty_req)
-        new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        new_job = JobItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )[0]
         return new_job
 
     # Delete 1 workbook by id
@@ -67,7 +77,7 @@ class Workbooks(Endpoint):
             raise ValueError(error)
         url = "{0}/{1}".format(self.baseurl, workbook_id)
         self.delete_request(url)
-        logger.info('Deleted single workbook (ID: {0})'.format(workbook_id))
+        logger.info("Deleted single workbook (ID: {0})".format(workbook_id))
 
     # Update workbook
     @api(version="2.0")
@@ -82,33 +92,45 @@ class Workbooks(Endpoint):
         url = "{0}/{1}".format(self.baseurl, workbook_item.id)
         update_req = RequestFactory.Workbook.update_req(workbook_item)
         server_response = self.put_request(url, update_req)
-        logger.info('Updated workbook item (ID: {0}'.format(workbook_item.id))
+        logger.info("Updated workbook item (ID: {0}".format(workbook_item.id))
         updated_workbook = copy.copy(workbook_item)
-        return updated_workbook._parse_common_tags(server_response.content, self.parent_srv.namespace)
+        return updated_workbook._parse_common_tags(
+            server_response.content, self.parent_srv.namespace
+        )
 
     @api(version="2.3")
     def update_conn(self, *args, **kwargs):
         import warnings
-        warnings.warn('update_conn is deprecated, please use update_connection instead')
+
+        warnings.warn("update_conn is deprecated, please use update_connection instead")
         return self.update_connection(*args, **kwargs)
 
     # Update workbook_connection
     @api(version="2.3")
     def update_connection(self, workbook_item, connection_item):
-        url = "{0}/{1}/connections/{2}".format(self.baseurl, workbook_item.id, connection_item.id)
+        url = "{0}/{1}/connections/{2}".format(
+            self.baseurl, workbook_item.id, connection_item.id
+        )
         update_req = RequestFactory.Connection.update_req(connection_item)
         server_response = self.put_request(url, update_req)
-        connection = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        connection = ConnectionItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )[0]
 
-        logger.info('Updated workbook item (ID: {0} & connection item {1}'.format(workbook_item.id,
-                                                                                  connection_item.id))
+        logger.info(
+            "Updated workbook item (ID: {0} & connection item {1}".format(
+                workbook_item.id, connection_item.id
+            )
+        )
         return connection
 
     # Download workbook contents with option of passing in filepath
     @api(version="2.0")
-    @parameter_added_in(no_extract='2.5')
-    @parameter_added_in(include_extract='2.5')
-    def download(self, workbook_id, filepath=None, include_extract=True, no_extract=None):
+    @parameter_added_in(no_extract="2.5")
+    @parameter_added_in(include_extract="2.5")
+    def download(
+        self, workbook_id, filepath=None, include_extract=True, no_extract=None
+    ):
         if not workbook_id:
             error = "Workbook ID undefined."
             raise ValueError(error)
@@ -116,24 +138,32 @@ class Workbooks(Endpoint):
 
         if no_extract is False or no_extract is True:
             import warnings
-            warnings.warn('no_extract is deprecated, use include_extract instead.', DeprecationWarning)
+
+            warnings.warn(
+                "no_extract is deprecated, use include_extract instead.",
+                DeprecationWarning,
+            )
             include_extract = not no_extract
 
         if not include_extract:
             url += "?includeExtract=False"
 
-        with closing(self.get_request(url, parameters={"stream": True})) as server_response:
-            _, params = cgi.parse_header(server_response.headers['Content-Disposition'])
-            filename = to_filename(os.path.basename(params['filename']))
+        with closing(
+            self.get_request(url, parameters={"stream": True})
+        ) as server_response:
+            _, params = cgi.parse_header(server_response.headers["Content-Disposition"])
+            filename = to_filename(os.path.basename(params["filename"]))
             if filepath is None:
                 filepath = filename
             elif os.path.isdir(filepath):
                 filepath = os.path.join(filepath, filename)
 
-            with open(filepath, 'wb') as f:
+            with open(filepath, "wb") as f:
                 for chunk in server_response.iter_content(1024):  # 1KB
                     f.write(chunk)
-        logger.info('Downloaded workbook to {0} (ID: {1})'.format(filepath, workbook_id))
+        logger.info(
+            "Downloaded workbook to {0} (ID: {1})".format(filepath, workbook_id)
+        )
         return os.path.abspath(filepath)
 
     # Get all views of workbook
@@ -147,16 +177,18 @@ class Workbooks(Endpoint):
             return self._get_views_for_workbook(workbook_item, usage)
 
         workbook_item._set_views(view_fetcher)
-        logger.info('Populated views for workbook (ID: {0}'.format(workbook_item.id))
+        logger.info("Populated views for workbook (ID: {0}".format(workbook_item.id))
 
     def _get_views_for_workbook(self, workbook_item, usage):
         url = "{0}/{1}/views".format(self.baseurl, workbook_item.id)
         if usage:
             url += "?includeUsageStatistics=true"
         server_response = self.get_request(url)
-        views = ViewItem.from_response(server_response.content,
-                                       self.parent_srv.namespace,
-                                       workbook_id=workbook_item.id)
+        views = ViewItem.from_response(
+            server_response.content,
+            self.parent_srv.namespace,
+            workbook_id=workbook_item.id,
+        )
         return views
 
     # Get all connections of workbook
@@ -170,12 +202,16 @@ class Workbooks(Endpoint):
             return self._get_workbook_connections(workbook_item)
 
         workbook_item._set_connections(connection_fetcher)
-        logger.info('Populated connections for workbook (ID: {0})'.format(workbook_item.id))
+        logger.info(
+            "Populated connections for workbook (ID: {0})".format(workbook_item.id)
+        )
 
     def _get_workbook_connections(self, workbook_item, req_options=None):
         url = "{0}/{1}/connections".format(self.baseurl, workbook_item.id)
         server_response = self.get_request(url, req_options)
-        connections = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
+        connections = ConnectionItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )
         return connections
 
     # Get the pdf of the entire workbook if its tabs are enabled, pdf of the default view if its tabs are disabled
@@ -208,7 +244,9 @@ class Workbooks(Endpoint):
             return self._get_wb_preview_image(workbook_item)
 
         workbook_item._set_preview_image(image_fetcher)
-        logger.info('Populated preview image for workbook (ID: {0})'.format(workbook_item.id))
+        logger.info(
+            "Populated preview image for workbook (ID: {0})".format(workbook_item.id)
+        )
 
     def _get_wb_preview_image(self, workbook_item):
         url = "{0}/{1}/previewImage".format(self.baseurl, workbook_item.id)
@@ -218,20 +256,31 @@ class Workbooks(Endpoint):
 
     # Publishes workbook. Chunking method if file over 64MB
     @api(version="2.0")
-    @parameter_added_in(as_job='3.0')
-    @parameter_added_in(connections='2.8')
-    def publish(self, workbook_item, file_path, mode, connection_credentials=None, connections=None, as_job=False):
+    @parameter_added_in(as_job="3.0")
+    @parameter_added_in(connections="2.8")
+    def publish(
+        self,
+        workbook_item,
+        file_path,
+        mode,
+        connection_credentials=None,
+        connections=None,
+        as_job=False,
+    ):
 
         if connection_credentials is not None:
             import warnings
-            warnings.warn("connection_credentials is being deprecated. Use connections instead",
-                          DeprecationWarning)
+
+            warnings.warn(
+                "connection_credentials is being deprecated. Use connections instead",
+                DeprecationWarning,
+            )
 
         if not os.path.isfile(file_path):
             error = "File path does not lead to an existing file."
             raise IOError(error)
         if not hasattr(self.parent_srv.PublishMode, mode):
-            error = 'Invalid mode defined.'
+            error = "Invalid mode defined."
             raise ValueError(error)
 
         filename = os.path.basename(file_path)
@@ -241,40 +290,50 @@ class Workbooks(Endpoint):
         if not workbook_item.name:
             workbook_item.name = os.path.splitext(filename)[0]
         if file_extension not in ALLOWED_FILE_EXTENSIONS:
-            error = "Only {} files can be published as workbooks.".format(', '.join(ALLOWED_FILE_EXTENSIONS))
+            error = "Only {} files can be published as workbooks.".format(
+                ", ".join(ALLOWED_FILE_EXTENSIONS)
+            )
             raise ValueError(error)
 
         # Construct the url with the defined mode
         url = "{0}?workbookType={1}".format(self.baseurl, file_extension)
         if mode == self.parent_srv.PublishMode.Overwrite:
-            url += '&{0}=true'.format(mode.lower())
+            url += "&{0}=true".format(mode.lower())
         elif mode == self.parent_srv.PublishMode.Append:
-            error = 'Workbooks cannot be appended.'
+            error = "Workbooks cannot be appended."
             raise ValueError(error)
 
         if as_job:
-            url += '&{0}=true'.format('asJob')
+            url += "&{0}=true".format("asJob")
 
         # Determine if chunking is required (64MB is the limit for single upload method)
         if os.path.getsize(file_path) >= FILESIZE_LIMIT:
-            logger.info('Publishing {0} to server with chunking method (workbook over 64MB)'.format(filename))
+            logger.info(
+                "Publishing {0} to server with chunking method (workbook over 64MB)".format(
+                    filename
+                )
+            )
             upload_session_id = Fileuploads.upload_chunks(self.parent_srv, file_path)
             url = "{0}&uploadSessionId={1}".format(url, upload_session_id)
             conn_creds = connection_credentials
-            xml_request, content_type = RequestFactory.Workbook.publish_req_chunked(workbook_item,
-                                                                                    connection_credentials=conn_creds,
-                                                                                    connections=connections)
+            xml_request, content_type = RequestFactory.Workbook.publish_req_chunked(
+                workbook_item,
+                connection_credentials=conn_creds,
+                connections=connections,
+            )
         else:
-            logger.info('Publishing {0} to server'.format(filename))
-            with open(file_path, 'rb') as f:
+            logger.info("Publishing {0} to server".format(filename))
+            with open(file_path, "rb") as f:
                 file_contents = f.read()
             conn_creds = connection_credentials
-            xml_request, content_type = RequestFactory.Workbook.publish_req(workbook_item,
-                                                                            filename,
-                                                                            file_contents,
-                                                                            connection_credentials=conn_creds,
-                                                                            connections=connections)
-        logger.debug('Request xml: {0} '.format(xml_request[:1000]))
+            xml_request, content_type = RequestFactory.Workbook.publish_req(
+                workbook_item,
+                filename,
+                file_contents,
+                connection_credentials=conn_creds,
+                connections=connections,
+            )
+        logger.debug("Request xml: {0} ".format(xml_request[:1000]))
 
         # Send the publishing request to server
         try:
@@ -285,10 +344,14 @@ class Workbooks(Endpoint):
             raise err
 
         if as_job:
-            new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
-            logger.info('Published {0} (JOB_ID: {1}'.format(filename, new_job.id))
+            new_job = JobItem.from_response(
+                server_response.content, self.parent_srv.namespace
+            )[0]
+            logger.info("Published {0} (JOB_ID: {1}".format(filename, new_job.id))
             return new_job
         else:
-            new_workbook = WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
-            logger.info('Published {0} (ID: {1})'.format(filename, new_workbook.id))
+            new_workbook = WorkbookItem.from_response(
+                server_response.content, self.parent_srv.namespace
+            )[0]
+            logger.info("Published {0} (ID: {1})".format(filename, new_workbook.id))
             return new_workbook

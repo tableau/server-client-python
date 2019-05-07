@@ -15,8 +15,8 @@ CREATE_WEEKLY_XML = os.path.join(TEST_ASSET_DIR, "schedule_create_weekly.xml")
 CREATE_MONTHLY_XML = os.path.join(TEST_ASSET_DIR, "schedule_create_monthly.xml")
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, "schedule_update.xml")
 
-WORKBOOK_GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, 'workbook_get_by_id.xml')
-DATASOURCE_GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, 'datasource_get_by_id.xml')
+WORKBOOK_GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, "workbook_get_by_id.xml")
+DATASOURCE_GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, "datasource_get_by_id.xml")
 
 
 class ScheduleTests(unittest.TestCase):
@@ -54,10 +54,16 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual("Saturday night", subscription.name)
         self.assertEqual("Active", subscription.state)
         self.assertEqual(80, subscription.priority)
-        self.assertEqual("2016-07-07T20:19:00Z", format_datetime(subscription.created_at))
-        self.assertEqual("2016-09-12T16:39:38Z", format_datetime(subscription.updated_at))
+        self.assertEqual(
+            "2016-07-07T20:19:00Z", format_datetime(subscription.created_at)
+        )
+        self.assertEqual(
+            "2016-09-12T16:39:38Z", format_datetime(subscription.updated_at)
+        )
         self.assertEqual("Subscription", subscription.schedule_type)
-        self.assertEqual("2016-09-18T06:00:00Z", format_datetime(subscription.next_run_at))
+        self.assertEqual(
+            "2016-09-18T06:00:00Z", format_datetime(subscription.next_run_at)
+        )
 
         self.assertEqual("f456e8f2-aeb2-4a8e-b823-00b6f08640f0", flow.id)
         self.assertEqual("First of the month 1:00AM", flow.name)
@@ -80,7 +86,9 @@ class ScheduleTests(unittest.TestCase):
 
     def test_delete(self):
         with requests_mock.mock() as m:
-            m.delete(self.baseurl + "/c9cff7f9-309c-4361-99ff-d4ba8c9f5467", status_code=204)
+            m.delete(
+                self.baseurl + "/c9cff7f9-309c-4361-99ff-d4ba8c9f5467", status_code=204
+            )
             self.server.schedules.delete("c9cff7f9-309c-4361-99ff-d4ba8c9f5467")
 
     def test_create_hourly(self):
@@ -88,22 +96,35 @@ class ScheduleTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
-            hourly_interval = TSC.HourlyInterval(start_time=time(2, 30),
-                                                 end_time=time(23, 0),
-                                                 interval_value=2)
-            new_schedule = TSC.ScheduleItem("hourly-schedule-1", 50, TSC.ScheduleItem.Type.Extract,
-                                            TSC.ScheduleItem.ExecutionOrder.Parallel, hourly_interval)
+            hourly_interval = TSC.HourlyInterval(
+                start_time=time(2, 30), end_time=time(23, 0), interval_value=2
+            )
+            new_schedule = TSC.ScheduleItem(
+                "hourly-schedule-1",
+                50,
+                TSC.ScheduleItem.Type.Extract,
+                TSC.ScheduleItem.ExecutionOrder.Parallel,
+                hourly_interval,
+            )
             new_schedule = self.server.schedules.create(new_schedule)
 
         self.assertEqual("5f42be25-8a43-47ba-971a-63f2d4e7029c", new_schedule.id)
         self.assertEqual("hourly-schedule-1", new_schedule.name)
         self.assertEqual("Active", new_schedule.state)
         self.assertEqual(50, new_schedule.priority)
-        self.assertEqual("2016-09-15T20:47:33Z", format_datetime(new_schedule.created_at))
-        self.assertEqual("2016-09-15T20:47:33Z", format_datetime(new_schedule.updated_at))
+        self.assertEqual(
+            "2016-09-15T20:47:33Z", format_datetime(new_schedule.created_at)
+        )
+        self.assertEqual(
+            "2016-09-15T20:47:33Z", format_datetime(new_schedule.updated_at)
+        )
         self.assertEqual(TSC.ScheduleItem.Type.Extract, new_schedule.schedule_type)
-        self.assertEqual("2016-09-16T01:30:00Z", format_datetime(new_schedule.next_run_at))
-        self.assertEqual(TSC.ScheduleItem.ExecutionOrder.Parallel, new_schedule.execution_order)
+        self.assertEqual(
+            "2016-09-16T01:30:00Z", format_datetime(new_schedule.next_run_at)
+        )
+        self.assertEqual(
+            TSC.ScheduleItem.ExecutionOrder.Parallel, new_schedule.execution_order
+        )
         self.assertEqual(time(2, 30), new_schedule.interval_item.start_time)
         self.assertEqual(time(23), new_schedule.interval_item.end_time)
         self.assertEqual("8", new_schedule.interval_item.interval)
@@ -114,19 +135,32 @@ class ScheduleTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
             daily_interval = TSC.DailyInterval(time(4, 50))
-            new_schedule = TSC.ScheduleItem("daily-schedule-1", 90, TSC.ScheduleItem.Type.Subscription,
-                                            TSC.ScheduleItem.ExecutionOrder.Serial, daily_interval)
+            new_schedule = TSC.ScheduleItem(
+                "daily-schedule-1",
+                90,
+                TSC.ScheduleItem.Type.Subscription,
+                TSC.ScheduleItem.ExecutionOrder.Serial,
+                daily_interval,
+            )
             new_schedule = self.server.schedules.create(new_schedule)
 
         self.assertEqual("907cae38-72fd-417c-892a-95540c4664cd", new_schedule.id)
         self.assertEqual("daily-schedule-1", new_schedule.name)
         self.assertEqual("Active", new_schedule.state)
         self.assertEqual(90, new_schedule.priority)
-        self.assertEqual("2016-09-15T21:01:09Z", format_datetime(new_schedule.created_at))
-        self.assertEqual("2016-09-15T21:01:09Z", format_datetime(new_schedule.updated_at))
+        self.assertEqual(
+            "2016-09-15T21:01:09Z", format_datetime(new_schedule.created_at)
+        )
+        self.assertEqual(
+            "2016-09-15T21:01:09Z", format_datetime(new_schedule.updated_at)
+        )
         self.assertEqual(TSC.ScheduleItem.Type.Subscription, new_schedule.schedule_type)
-        self.assertEqual("2016-09-16T11:45:00Z", format_datetime(new_schedule.next_run_at))
-        self.assertEqual(TSC.ScheduleItem.ExecutionOrder.Serial, new_schedule.execution_order)
+        self.assertEqual(
+            "2016-09-16T11:45:00Z", format_datetime(new_schedule.next_run_at)
+        )
+        self.assertEqual(
+            TSC.ScheduleItem.ExecutionOrder.Serial, new_schedule.execution_order
+        )
         self.assertEqual(time(4, 45), new_schedule.interval_item.start_time)
 
     def test_create_weekly(self):
@@ -134,25 +168,42 @@ class ScheduleTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
-            weekly_interval = TSC.WeeklyInterval(time(9, 15), TSC.IntervalItem.Day.Monday,
-                                                 TSC.IntervalItem.Day.Wednesday,
-                                                 TSC.IntervalItem.Day.Friday)
-            new_schedule = TSC.ScheduleItem("weekly-schedule-1", 80, TSC.ScheduleItem.Type.Extract,
-                                            TSC.ScheduleItem.ExecutionOrder.Parallel, weekly_interval)
+            weekly_interval = TSC.WeeklyInterval(
+                time(9, 15),
+                TSC.IntervalItem.Day.Monday,
+                TSC.IntervalItem.Day.Wednesday,
+                TSC.IntervalItem.Day.Friday,
+            )
+            new_schedule = TSC.ScheduleItem(
+                "weekly-schedule-1",
+                80,
+                TSC.ScheduleItem.Type.Extract,
+                TSC.ScheduleItem.ExecutionOrder.Parallel,
+                weekly_interval,
+            )
             new_schedule = self.server.schedules.create(new_schedule)
 
         self.assertEqual("1adff386-6be0-4958-9f81-a35e676932bf", new_schedule.id)
         self.assertEqual("weekly-schedule-1", new_schedule.name)
         self.assertEqual("Active", new_schedule.state)
         self.assertEqual(80, new_schedule.priority)
-        self.assertEqual("2016-09-15T21:12:50Z", format_datetime(new_schedule.created_at))
-        self.assertEqual("2016-09-15T21:12:50Z", format_datetime(new_schedule.updated_at))
+        self.assertEqual(
+            "2016-09-15T21:12:50Z", format_datetime(new_schedule.created_at)
+        )
+        self.assertEqual(
+            "2016-09-15T21:12:50Z", format_datetime(new_schedule.updated_at)
+        )
         self.assertEqual(TSC.ScheduleItem.Type.Extract, new_schedule.schedule_type)
-        self.assertEqual("2016-09-16T16:15:00Z", format_datetime(new_schedule.next_run_at))
-        self.assertEqual(TSC.ScheduleItem.ExecutionOrder.Parallel, new_schedule.execution_order)
+        self.assertEqual(
+            "2016-09-16T16:15:00Z", format_datetime(new_schedule.next_run_at)
+        )
+        self.assertEqual(
+            TSC.ScheduleItem.ExecutionOrder.Parallel, new_schedule.execution_order
+        )
         self.assertEqual(time(9, 15), new_schedule.interval_item.start_time)
-        self.assertEqual(("Monday", "Wednesday", "Friday"),
-                         new_schedule.interval_item.interval)
+        self.assertEqual(
+            ("Monday", "Wednesday", "Friday"), new_schedule.interval_item.interval
+        )
 
     def test_create_monthly(self):
         with open(CREATE_MONTHLY_XML, "rb") as f:
@@ -160,19 +211,32 @@ class ScheduleTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
             monthly_interval = TSC.MonthlyInterval(time(7), 12)
-            new_schedule = TSC.ScheduleItem("monthly-schedule-1", 20, TSC.ScheduleItem.Type.Extract,
-                                            TSC.ScheduleItem.ExecutionOrder.Serial, monthly_interval)
+            new_schedule = TSC.ScheduleItem(
+                "monthly-schedule-1",
+                20,
+                TSC.ScheduleItem.Type.Extract,
+                TSC.ScheduleItem.ExecutionOrder.Serial,
+                monthly_interval,
+            )
             new_schedule = self.server.schedules.create(new_schedule)
 
         self.assertEqual("e06a7c75-5576-4f68-882d-8909d0219326", new_schedule.id)
         self.assertEqual("monthly-schedule-1", new_schedule.name)
         self.assertEqual("Active", new_schedule.state)
         self.assertEqual(20, new_schedule.priority)
-        self.assertEqual("2016-09-15T21:16:56Z", format_datetime(new_schedule.created_at))
-        self.assertEqual("2016-09-15T21:16:56Z", format_datetime(new_schedule.updated_at))
+        self.assertEqual(
+            "2016-09-15T21:16:56Z", format_datetime(new_schedule.created_at)
+        )
+        self.assertEqual(
+            "2016-09-15T21:16:56Z", format_datetime(new_schedule.updated_at)
+        )
         self.assertEqual(TSC.ScheduleItem.Type.Extract, new_schedule.schedule_type)
-        self.assertEqual("2016-10-12T14:00:00Z", format_datetime(new_schedule.next_run_at))
-        self.assertEqual(TSC.ScheduleItem.ExecutionOrder.Serial, new_schedule.execution_order)
+        self.assertEqual(
+            "2016-10-12T14:00:00Z", format_datetime(new_schedule.next_run_at)
+        )
+        self.assertEqual(
+            TSC.ScheduleItem.ExecutionOrder.Serial, new_schedule.execution_order
+        )
         self.assertEqual(time(7), new_schedule.interval_item.start_time)
         self.assertEqual("12", new_schedule.interval_item.interval)
 
@@ -180,49 +244,67 @@ class ScheduleTests(unittest.TestCase):
         with open(UPDATE_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
-            m.put(self.baseurl + '/7bea1766-1543-4052-9753-9d224bc069b5', text=response_xml)
-            new_interval = TSC.WeeklyInterval(time(7), TSC.IntervalItem.Day.Monday,
-                                              TSC.IntervalItem.Day.Friday)
-            single_schedule = TSC.ScheduleItem("weekly-schedule-1", 90, TSC.ScheduleItem.Type.Extract,
-                                               TSC.ScheduleItem.ExecutionOrder.Parallel, new_interval)
+            m.put(
+                self.baseurl + "/7bea1766-1543-4052-9753-9d224bc069b5",
+                text=response_xml,
+            )
+            new_interval = TSC.WeeklyInterval(
+                time(7), TSC.IntervalItem.Day.Monday, TSC.IntervalItem.Day.Friday
+            )
+            single_schedule = TSC.ScheduleItem(
+                "weekly-schedule-1",
+                90,
+                TSC.ScheduleItem.Type.Extract,
+                TSC.ScheduleItem.ExecutionOrder.Parallel,
+                new_interval,
+            )
             single_schedule._id = "7bea1766-1543-4052-9753-9d224bc069b5"
             single_schedule = self.server.schedules.update(single_schedule)
 
         self.assertEqual("7bea1766-1543-4052-9753-9d224bc069b5", single_schedule.id)
         self.assertEqual("weekly-schedule-1", single_schedule.name)
         self.assertEqual(90, single_schedule.priority)
-        self.assertEqual("2016-09-15T23:50:02Z", format_datetime(single_schedule.updated_at))
+        self.assertEqual(
+            "2016-09-15T23:50:02Z", format_datetime(single_schedule.updated_at)
+        )
         self.assertEqual(TSC.ScheduleItem.Type.Extract, single_schedule.schedule_type)
-        self.assertEqual("2016-09-16T14:00:00Z", format_datetime(single_schedule.next_run_at))
-        self.assertEqual(TSC.ScheduleItem.ExecutionOrder.Parallel, single_schedule.execution_order)
+        self.assertEqual(
+            "2016-09-16T14:00:00Z", format_datetime(single_schedule.next_run_at)
+        )
+        self.assertEqual(
+            TSC.ScheduleItem.ExecutionOrder.Parallel, single_schedule.execution_order
+        )
         self.assertEqual(time(7), single_schedule.interval_item.start_time)
-        self.assertEqual(("Monday", "Friday"),
-                         single_schedule.interval_item.interval)
+        self.assertEqual(("Monday", "Friday"), single_schedule.interval_item.interval)
 
     def test_add_workbook(self):
         self.server.version = "2.8"
-        baseurl = "{}/sites/{}/schedules".format(self.server.baseurl, self.server.site_id)
+        baseurl = "{}/sites/{}/schedules".format(
+            self.server.baseurl, self.server.site_id
+        )
 
         with open(WORKBOOK_GET_BY_ID_XML, "rb") as f:
             workbook_response = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             #  TODO: Replace with real response
-            m.get(self.server.workbooks.baseurl + '/bar', text=workbook_response)
-            m.put(baseurl + '/foo/workbooks', text="OK")
+            m.get(self.server.workbooks.baseurl + "/bar", text=workbook_response)
+            m.put(baseurl + "/foo/workbooks", text="OK")
             workbook = self.server.workbooks.get_by_id("bar")
-            result = self.server.schedules.add_to_schedule('foo', workbook=workbook)
+            result = self.server.schedules.add_to_schedule("foo", workbook=workbook)
         self.assertEqual(0, len(result), "Added properly")
 
     def test_add_datasource(self):
         self.server.version = "2.8"
-        baseurl = "{}/sites/{}/schedules".format(self.server.baseurl, self.server.site_id)
+        baseurl = "{}/sites/{}/schedules".format(
+            self.server.baseurl, self.server.site_id
+        )
 
         with open(DATASOURCE_GET_BY_ID_XML, "rb") as f:
             datasource_response = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             #  TODO: Replace with real response
-            m.get(self.server.datasources.baseurl + '/bar', text=datasource_response)
-            m.put(baseurl + '/foo/datasources', text="OK")
+            m.get(self.server.datasources.baseurl + "/bar", text=datasource_response)
+            m.put(baseurl + "/foo/datasources", text="OK")
             datasource = self.server.datasources.get_by_id("bar")
-            result = self.server.schedules.add_to_schedule('foo', datasource=datasource)
+            result = self.server.schedules.add_to_schedule("foo", datasource=datasource)
         self.assertEqual(0, len(result), "Added properly")
