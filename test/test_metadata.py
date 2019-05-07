@@ -37,9 +37,9 @@ class MetadataTests(unittest.TestCase):
 
     def test_metadata_query(self):
         with open(METADATA_QUERY_SUCCESS, 'rb') as f:
-            response_json = f.read()
+            response_json = json.load(f)
         with requests_mock.mock() as m:
-            m.post(self.baseurl, content=response_json)
+            m.post(self.baseurl, json=response_json)
             actual = self.server.metadata.query('fake query')
 
             datasources = actual['data']
@@ -48,9 +48,9 @@ class MetadataTests(unittest.TestCase):
 
     def test_metadata_query_ignore_error(self):
         with open(METADATA_QUERY_ERROR, 'rb') as f:
-            response_json = f.read()
+            response_json = json.load(f)
         with requests_mock.mock() as m:
-            m.post(self.baseurl, content=response_json)
+            m.post(self.baseurl, json=response_json)
             actual = self.server.metadata.query('fake query')
             datasources = actual['data']
 
@@ -60,9 +60,9 @@ class MetadataTests(unittest.TestCase):
 
     def test_metadata_query_abort_on_error(self):
         with open(METADATA_QUERY_ERROR, 'rb') as f:
-            response_json = f.read()
+            response_json = json.load(f)
         with requests_mock.mock() as m:
-            m.post(self.baseurl, content=response_json)
+            m.post(self.baseurl, json=response_json)
 
             with self.assertRaises(GraphQLError) as e:
                 self.server.metadata.query('fake query', abort_on_error=True)
