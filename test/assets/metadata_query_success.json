@@ -1,0 +1,22 @@
+{
+    "data": {
+      "publishedDatasources": [
+        {
+          "id": "01cf92b2-2d17-b656-fc48-5c25ef6d5352",
+          "name": "Batters (TestV1)"
+        },
+        {
+          "id": "020ae1cd-c356-f1ad-a846-b0094850d22a",
+          "name": "SharePoint_List_sharepoint2010.test.tsi.lan"
+        },
+        {
+          "id": "061493a0-c3b2-6f39-d08c-bc3f842b44af",
+          "name": "Batters_mongodb"
+        },
+        {
+          "id": "089fe515-ad2f-89bc-94bd-69f55f69a9c2",
+          "name": "Sample - Superstore"
+        }
+      ]
+    }
+  }
