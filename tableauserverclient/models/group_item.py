@@ -3,8 +3,13 @@ from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_not_empty
 
 
+    
+
 class GroupItem(object):
-    def __init__(self, name):
+
+    permissions_grantee_type = 'group'
+
+    def __init__(self, name=None):
         self._domain_name = None
         self._id = None
         self._users = None
@@ -17,6 +22,10 @@ class GroupItem(object):
     @property
     def id(self):
         return self._id
+
+    # @id.setter
+    # def id(self, value):
+    #     self._id = value
 
     @property
     def name(self):
@@ -53,3 +62,24 @@ class GroupItem(object):
                 group_item._domain_name = domain_elem.get('name', None)
             all_group_items.append(group_item)
         return all_group_items
+
+class GranteeGroup(GroupItem):
+
+    def __init__(self, id_):
+        self.id = id_
+
+    @property
+    def id(self):
+        return self._id
+
+    @id.setter
+    def id(self, value):
+        self._id = value
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = value

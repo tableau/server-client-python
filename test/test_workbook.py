@@ -282,28 +282,23 @@ class WorkbookTests(unittest.TestCase):
             self.server.workbooks.populate_permissions(single_workbook)
             permissions = single_workbook.permissions
 
-            grantee_type = TSC.Permission.GranteeType.Group
-            object_id = '5e5e1978-71fa-11e4-87dd-7382f5c437af'
-            key = (grantee_type, object_id)
-            self.assertEqual(permissions.rules[key].type, TSC.Permission.GranteeType.Group)
-            self.assertEqual(permissions.rules[key].object_id, '5e5e1978-71fa-11e4-87dd-7382f5c437af')
-            self.assertDictEqual(permissions.rules[key].map, {
-                TSC.Permission.CapabilityType.WebAuthoring: TSC.Permission.CapabilityMode.Allow,
-                TSC.Permission.CapabilityType.Read: TSC.Permission.CapabilityMode.Allow,
-                TSC.Permission.CapabilityType.Filter: TSC.Permission.CapabilityMode.Allow,
-                TSC.Permission.CapabilityType.AddComment: TSC.Permission.CapabilityMode.Allow
+            breakpoint()
+            self.assertEqual(permissions.rules[0].grantee.permissions_grantee_type, 'group')
+            self.assertEqual(permissions.rules[0].grantee.id, '5e5e1978-71fa-11e4-87dd-7382f5c437af')
+            self.assertDictEqual(permissions.rules[0].capabilities, {
+                TSC.Permission.Capability.WebAuthoring: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.Filter: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.AddComment: TSC.Permission.Mode.Allow
             })
 
-            grantee_type = TSC.Permission.GranteeType.User
-            object_id = '7c37ee24-c4b1-42b6-a154-eaeab7ee330a'
-            key = (grantee_type, object_id)
-            self.assertEqual(permissions.rules[key].type, TSC.Permission.GranteeType.User)
-            self.assertEqual(permissions.rules[key].object_id, '7c37ee24-c4b1-42b6-a154-eaeab7ee330a')
-            self.assertDictEqual(permissions.rules[key].map, {
-                TSC.Permission.CapabilityType.ExportImage: TSC.Permission.CapabilityMode.Allow,
-                TSC.Permission.CapabilityType.ShareView: TSC.Permission.CapabilityMode.Allow,
-                TSC.Permission.CapabilityType.ExportData: TSC.Permission.CapabilityMode.Deny,
-                TSC.Permission.CapabilityType.ViewComments: TSC.Permission.CapabilityMode.Deny
+            self.assertEqual(permissions.rules[1].grantee.permissions_grantee_type, 'user')
+            self.assertEqual(permissions.rules[1].grantee.id, '7c37ee24-c4b1-42b6-a154-eaeab7ee330a')
+            self.assertDictEqual(permissions.rules[1].capabilities, {
+                TSC.Permission.Capability.ExportImage: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.ShareView: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.ExportData: TSC.Permission.Mode.Deny,
+                TSC.Permission.Capability.ViewComments: TSC.Permission.Mode.Deny
             })
 
     def test_populate_connections_missing_id(self):

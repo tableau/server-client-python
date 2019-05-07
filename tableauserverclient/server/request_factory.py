@@ -140,9 +140,11 @@ class GroupRequest(object):
             project_element.attrib['siteRole'] = default_site_role
         return ET.tostring(xml_request)
 
+from typing import Union
+from ..models import UserItem, GroupItem
 
 class PermissionRequest(object):
-    def add_req(self, item, permission_item):
+    def add_req(self, item: Union[UserItem, GroupItem], permission_item):
         xml_request = ET.Element('tsRequest')
         permissions_element = ET.SubElement(xml_request, 'permissions')
         item_element = ET.SubElement(permissions_element, type(item).__name__.split('Item')[0].lower())

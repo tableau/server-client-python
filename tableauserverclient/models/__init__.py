@@ -2,7 +2,7 @@ from .connection_credentials import ConnectionCredentials
 from .connection_item import ConnectionItem
 from .datasource_item import DatasourceItem
 from .exceptions import UnpopulatedPropertyError
-from .group_item import GroupItem
+from .group_item import GroupItem, GranteeGroup
 from .interval_item import IntervalItem, DailyInterval, WeeklyInterval, MonthlyInterval, HourlyInterval
 from .job_item import JobItem, BackgroundJobItem
 from .pagination_item import PaginationItem
@@ -13,8 +13,8 @@ from .site_item import SiteItem
 from .tableau_auth import TableauAuth
 from .target import Target
 from .task_item import TaskItem
-from .user_item import UserItem
+from .user_item import UserItem, GranteeUser
 from .view_item import ViewItem
 from .workbook_item import WorkbookItem
 from .subscription_item import SubscriptionItem
-from .permissions_item import Permission, PermissionsItem, CapabilityItem
+from .permissions_item import ExplicitPermissions, PermissionsRule, Permission

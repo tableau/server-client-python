@@ -5,6 +5,9 @@ from ..datetime_helpers import parse_datetime
 
 
 class UserItem(object):
+
+    permissions_grantee_type = 'user'
+
     class Roles:
         Interactor = 'Interactor'
         Publisher = 'Publisher'
@@ -30,7 +33,7 @@ class UserItem(object):
         SAML = 'SAML'
         ServerDefault = 'ServerDefault'
 
-    def __init__(self, name, site_role, auth_setting=None):
+    def __init__(self, name=None, site_role=None, auth_setting=None):
         self._auth_setting = None
         self._domain_name = None
         self._external_auth_user_id = None
@@ -160,3 +163,32 @@ class UserItem(object):
 
     def __repr__(self):
         return "<User {} name={} role={}>".format(self.id, self.name, self.site_role)
+
+class GranteeUser(UserItem):
+
+    def __init__(self, id_):
+        self.id = id_
+
+    @property
+    def id(self):
+        return self._id
+
+    @id.setter
+    def id(self, value):
+        self._id = value
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = value
+
+    @property
+    def site_role(self):
+        return self._site_role
+
+    @site_role.setter
+    def site_role(self, value):
+        self._site_role = value

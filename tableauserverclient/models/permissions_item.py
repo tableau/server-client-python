@@ -9,11 +9,11 @@ logger = logging.getLogger('tableau.models.permissions_item')
 
 class Permission:
 
-    class CapabilityMode:
+    class Mode:
         Allow = 'Allow'
         Deny = 'Deny'
 
-    class CapabilityType:
+    class Capability:
         AddComment = 'AddComment'
         ChangeHierarchy = 'ChangeHierarchy'
         ChangePermissions = 'ChangePermissions'
@@ -32,32 +32,29 @@ class Permission:
         Write = 'Write'
 
 
+from typing import Union, List, Dict
+from . import UserItem, GroupItem, GranteeGroup, GranteeUser
 
 
 class PermissionsRule(object):
-    def __init__(self, type=None, object_id=None, caps_map={}):  # Dict[Capability: Mode]
-        self._type = type
-        self._object_id = object_id
-        self.caps_map = caps_map  # Dict[Capability: Mode]
-        self.map = self.caps_map
 
-    @property
-    def type(self):
-        return self._type
+    def __init__(self,
+                 grantee: Union[GroupItem, UserItem], 
+                 capabilities: Dict[Permission.Capability, Permission.Mode], 
+                 *, 
+                 grantee_id: str = None,
+                 grantee_type: str = None
+        ):
+        
+        if grantee_id is not None and grantee_type is not None:
+            raise Exception("Come back to me later")
 
-    @property
-    def object_id(self):
-        return self._object_id
+        self.grantee = grantee
+        self.capabilities = capabilities
 
-class PermissionsGrantee():
-    def __init__(self, grantee_xml):
-        self.type = None
-        grantee_id = grantee_element.get('id', None)
-        self.typegrantee_type = grantee_element.tag.split('}')[1]
-
-class PermissionsCollection(object):
+class ExplicitPermissions(object):
     def __init__(self):
-        self._rules = None
+        self._rules: List[PermissionsRule] = None
 
     def _set_values(self, rules):
         self._rules = rules
@@ -68,42 +65,39 @@ class PermissionsCollection(object):
 
     @classmethod
     def from_response(cls, resp, ns=None):
-        permissions = PermissionsCollection()
+        permissions = ExplicitPermissions()
         parsed_response = ET.fromstring(resp)
 
-        breakpoint()
-
-        capabilities = {}
-        all_xml = parsed_response.findall('.//t:granteeCapabilities',
+        rules = []
+        permissions_rules_list_xml = parsed_response.findall('.//t:granteeCapabilities',
                                           namespaces=ns)
 
-        for grantee_capability_xml in all_xml:
-            capability_map = {}
+        for grantee_capability_xml in permissions_rules_list_xml:
+            capability_dict = {}
 
             grantee_element = grantee_capability_xml.findall('.//*[@id]', namespaces=ns).pop()
             grantee_id = grantee_element.get('id', None)
-            grantee_type = grantee_element.tag.split('}')[1]
-    
+            grantee_type = grantee_element.tag.split('}').pop()
+
             if grantee_id is None:
                 logger.error('Cannot find grantee type in response')
                 raise UnknownGranteeTypeError()
+
+            if grantee_type == 'user':
+                grantee = GranteeUser(grantee_id)
+            else:
+                grantee = GranteeGroup(grantee_id)
 
             for capability_xml in grantee_capability_xml.findall(
                     './/t:capabilities/t:capability', namespaces=ns):
                 name = capability_xml.get('name')
                 mode = capability_xml.get('mode')
 
-                capability_map[name] = mode
+                capability_dict[name] = mode
 
-            capability_item = CapabilityItem(grantee_type, grantee_id,
-                                             capability_map)
-            capabilities[(grantee_type, grantee_id)] = capability_item
+            rule = PermissionsRule(grantee,
+                                   capability_dict)
+            rules.append(rule)
 
-        permissions._set_values(capabilities)
+        permissions._set_values(rules)
         return permissions
-
-
-## Compat Tests
-
-PermissionsItem = PermissionsCollection
-CapabilityItem = PermissionsRule
