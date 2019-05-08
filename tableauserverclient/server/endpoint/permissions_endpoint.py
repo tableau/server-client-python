@@ -40,10 +40,10 @@ class _PermissionsEndpoint(Endpoint):
         for capability, mode in rule.capabilities.items():
             "              /permissions/groups/group-id/capability-name/capability-mode"
             url = '{0}/{1}/permissions/{2}/{3}/{4}/{5}'.format(
-                self.owner_baseurl(), 
+                self.owner_baseurl(),
                 resource.id,
                 rule.grantee.permissions_grantee_type + 's',
-                rule.grantee.id, 
+                rule.grantee.id,
                 capability,
                 mode)
 
@@ -73,5 +73,5 @@ class _PermissionsEndpoint(Endpoint):
         server_response = self.get_request(url, req_options)
         permissions = ExplicitPermissions.from_response(server_response.content,
                                                         self.parent_srv.namespace)
-    
+
         return permissions

@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 import logging
 
 from .exceptions import UnknownGranteeTypeError
-
+from . import UserItem, GroupItem, GranteeGroup, GranteeUser
 
 logger = logging.getLogger('tableau.models.permissions_item')
 
@@ -32,17 +32,15 @@ class Permission:
         Write = 'Write'
 
 
-from . import UserItem, GroupItem, GranteeGroup, GranteeUser
-
-
 class PermissionsRule(object):
 
     def __init__(self, grantee, capabilities):
         self.grantee = grantee
         self.capabilities = capabilities
 
+
 class ExplicitPermissions(object):
-    def __init__(self, rules = None):
+    def __init__(self, rules=None):
         self._rules = rules
 
     def _set_values(self, rules):
@@ -59,7 +57,7 @@ class ExplicitPermissions(object):
 
         rules = []
         permissions_rules_list_xml = parsed_response.findall('.//t:granteeCapabilities',
-                                          namespaces=ns)
+                                                             namespaces=ns)
 
         for grantee_capability_xml in permissions_rules_list_xml:
             capability_dict = {}

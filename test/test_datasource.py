@@ -192,7 +192,7 @@ class DatasourceTests(unittest.TestCase):
 
             self.server.datasources.populate_permissions(single_datasource)
             permissions = single_datasource.permissions
-            
+
             grantee_type = 'group'
             object_id = '5e5e1978-71fa-11e4-87dd-7382f5c437af'
             self.assertEqual(permissions.rules[0].grantee.permissions_grantee_type, 'group')

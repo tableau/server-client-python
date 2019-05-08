@@ -164,6 +164,7 @@ class UserItem(object):
     def __repr__(self):
         return "<User {} name={} role={}>".format(self.id, self.name, self.site_role)
 
+
 class GranteeUser(UserItem):
 
     def __init__(self, id_):

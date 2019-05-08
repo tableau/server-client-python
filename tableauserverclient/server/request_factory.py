@@ -5,6 +5,8 @@ from functools import wraps
 from requests.packages.urllib3.fields import RequestField
 from requests.packages.urllib3.filepost import encode_multipart_formdata
 
+from ..models import UserItem, GroupItem, PermissionsRule
+
 
 def _add_multipart(parts):
     mime_multipart_parts = list()
@@ -140,7 +142,6 @@ class GroupRequest(object):
             project_element.attrib['siteRole'] = default_site_role
         return ET.tostring(xml_request)
 
-from ..models import UserItem, GroupItem, PermissionsRule
 
 class PermissionRequest(object):
     def add_req(self, rules):
@@ -151,9 +152,10 @@ class PermissionRequest(object):
             grantee_capabilities_element = ET.SubElement(permissions_element, 'granteeCapabilities')
             grantee_element = ET.SubElement(grantee_capabilities_element, rule.grantee.permissions_grantee_type)
             grantee_element.attrib['id'] = rule.grantee.id
+
             capabilities_element = ET.SubElement(grantee_capabilities_element, 'capabilities')
-            
             self._add_all_capabilities(capabilities_element, rule.capabilities)
+
         return ET.tostring(xml_request)
 
     def _add_all_capabilities(self, capabilities_element, capabilities_map):

@@ -3,8 +3,6 @@ from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_not_empty
 
 
-    
-
 class GroupItem(object):
 
     permissions_grantee_type = 'group'
@@ -62,6 +60,7 @@ class GroupItem(object):
                 group_item._domain_name = domain_elem.get('name', None)
             all_group_items.append(group_item)
         return all_group_items
+
 
 class GranteeGroup(GroupItem):
 

@@ -317,7 +317,7 @@ class WorkbookTests(unittest.TestCase):
             PermissionsRule(bob, {'Write': 'Allow'}),
             PermissionsRule(group_of_people, {'Read': 'Deny'})
         ]
-        
+
         with requests_mock.mock() as m:
             m.put(self.baseurl + "/21778de4-b7b9-44bc-a599-1506a2639ace/permissions", text=response_xml)
             permissions = self.server.workbooks.update_permissions(single_workbook, new_permissions)
@@ -333,7 +333,6 @@ class WorkbookTests(unittest.TestCase):
         self.assertDictEqual(permissions.rules[1].capabilities, {
             TSC.Permission.Capability.Write: TSC.Permission.Mode.Allow
         })
-
 
     def test_populate_connections_missing_id(self):
         single_workbook = TSC.WorkbookItem('test')
