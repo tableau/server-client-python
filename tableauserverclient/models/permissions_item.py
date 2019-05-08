@@ -32,29 +32,18 @@ class Permission:
         Write = 'Write'
 
 
-from typing import Union, List, Dict
 from . import UserItem, GroupItem, GranteeGroup, GranteeUser
 
 
 class PermissionsRule(object):
 
-    def __init__(self,
-                 grantee: Union[GroupItem, UserItem], 
-                 capabilities: Dict[Permission.Capability, Permission.Mode], 
-                 *, 
-                 grantee_id: str = None,
-                 grantee_type: str = None
-        ):
-        
-        if grantee_id is not None and grantee_type is not None:
-            raise Exception("Come back to me later")
-
+    def __init__(self, grantee, capabilities):
         self.grantee = grantee
         self.capabilities = capabilities
 
 class ExplicitPermissions(object):
-    def __init__(self):
-        self._rules: List[PermissionsRule] = None
+    def __init__(self, rules = None):
+        self._rules = rules
 
     def _set_values(self, rules):
         self._rules = rules

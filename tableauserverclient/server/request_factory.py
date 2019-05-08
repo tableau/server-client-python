@@ -140,30 +140,24 @@ class GroupRequest(object):
             project_element.attrib['siteRole'] = default_site_role
         return ET.tostring(xml_request)
 
-from typing import Union
-from ..models import UserItem, GroupItem
+from ..models import UserItem, GroupItem, PermissionsRule
 
 class PermissionRequest(object):
-    def add_req(self, item: Union[UserItem, GroupItem], permission_item):
+    def add_req(self, rules):
         xml_request = ET.Element('tsRequest')
         permissions_element = ET.SubElement(xml_request, 'permissions')
-        item_element = ET.SubElement(permissions_element, type(item).__name__.split('Item')[0].lower())
-        item_element.attrib['id'] = item.id
 
-        self._add_all_capabilities(permissions_element, permission_item.capabilities)
-        print(ET.tostring(xml_request))
+        for rule in rules:
+            grantee_capabilities_element = ET.SubElement(permissions_element, 'granteeCapabilities')
+            grantee_element = ET.SubElement(grantee_capabilities_element, rule.grantee.permissions_grantee_type)
+            grantee_element.attrib['id'] = rule.grantee.id
+            capabilities_element = ET.SubElement(grantee_capabilities_element, 'capabilities')
+            
+            self._add_all_capabilities(capabilities_element, rule.capabilities)
         return ET.tostring(xml_request)
 
-    def _add_all_capabilities(self, permissions_element, capabilities_map):
-        for capability in capabilities_map.values():
-            grantee_capabilities_element = ET.SubElement(permissions_element, 'granteeCapabilities')
-            grantee_element = ET.SubElement(grantee_capabilities_element, capability.type)
-            grantee_element.attrib['id'] = capability.object_id
-            capabilities_element = ET.SubElement(grantee_capabilities_element, 'capabilities')
-            self._add_capabilities(capabilities_element, capability.map)
-
-    def _add_capabilities(self, capabilities_element, capabilities):
-        for name, mode in capabilities.items():
+    def _add_all_capabilities(self, capabilities_element, capabilities_map):
+        for name, mode in capabilities_map.items():
             capability_element = ET.SubElement(capabilities_element, 'capability')
             capability_element.attrib['name'] = name
             capability_element.attrib['mode'] = mode

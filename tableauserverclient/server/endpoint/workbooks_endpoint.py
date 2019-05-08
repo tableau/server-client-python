@@ -225,12 +225,12 @@ class Workbooks(Endpoint):
         self._permissions.populate(item)
 
     @api(version='2.0')
-    def update_permission(self, item, permission_item):
-        self._permissions.update(item, permission_item)
+    def update_permissions(self, resource, rules):
+        return self._permissions.update(resource, rules)
 
     @api(version='2.0')
     def delete_permission(self, item, capability_item):
-        self._permissions.delete(item, capability_item)
+        return self._permissions.delete(item, capability_item)
 
     # Publishes workbook. Chunking method if file over 64MB
     @api(version="2.0")

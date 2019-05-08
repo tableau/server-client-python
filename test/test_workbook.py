@@ -7,6 +7,8 @@ import xml.etree.ElementTree as ET
 from tableauserverclient.datetime_helpers import format_datetime
 from tableauserverclient.server.endpoint.exceptions import InternalServerError
 from tableauserverclient.server.request_factory import RequestFactory
+from tableauserverclient.models.permissions_item import PermissionsRule, ExplicitPermissions, GranteeGroup, GranteeUser
+
 from ._utils import asset
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
@@ -24,6 +26,7 @@ POPULATE_VIEWS_USAGE_XML = os.path.join(TEST_ASSET_DIR, 'workbook_populate_views
 PUBLISH_XML = os.path.join(TEST_ASSET_DIR, 'workbook_publish.xml')
 PUBLISH_ASYNC_XML = os.path.join(TEST_ASSET_DIR, 'workbook_publish_async.xml')
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'workbook_update.xml')
+UPDATE_PERMISSIONS = os.path.join(TEST_ASSET_DIR, 'workbook_update_permissions.xml')
 
 
 class WorkbookTests(unittest.TestCase):
@@ -282,7 +285,6 @@ class WorkbookTests(unittest.TestCase):
             self.server.workbooks.populate_permissions(single_workbook)
             permissions = single_workbook.permissions
 
-            breakpoint()
             self.assertEqual(permissions.rules[0].grantee.permissions_grantee_type, 'group')
             self.assertEqual(permissions.rules[0].grantee.id, '5e5e1978-71fa-11e4-87dd-7382f5c437af')
             self.assertDictEqual(permissions.rules[0].capabilities, {
@@ -300,6 +302,38 @@ class WorkbookTests(unittest.TestCase):
                 TSC.Permission.Capability.ExportData: TSC.Permission.Mode.Deny,
                 TSC.Permission.Capability.ViewComments: TSC.Permission.Mode.Deny
             })
+
+    def test_add_permissions(self):
+        with open(UPDATE_PERMISSIONS, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+
+        single_workbook = TSC.WorkbookItem('test')
+        single_workbook._id = '21778de4-b7b9-44bc-a599-1506a2639ace'
+
+        bob = GranteeUser("7c37ee24-c4b1-42b6-a154-eaeab7ee330a")
+        group_of_people = GranteeGroup("5e5e1978-71fa-11e4-87dd-7382f5c437af")
+
+        new_permissions = [
+            PermissionsRule(bob, {'Write': 'Allow'}),
+            PermissionsRule(group_of_people, {'Read': 'Deny'})
+        ]
+        
+        with requests_mock.mock() as m:
+            m.put(self.baseurl + "/21778de4-b7b9-44bc-a599-1506a2639ace/permissions", text=response_xml)
+            permissions = self.server.workbooks.update_permissions(single_workbook, new_permissions)
+
+        self.assertEqual(permissions.rules[0].grantee.permissions_grantee_type, 'group')
+        self.assertEqual(permissions.rules[0].grantee.id, '5e5e1978-71fa-11e4-87dd-7382f5c437af')
+        self.assertDictEqual(permissions.rules[0].capabilities, {
+            TSC.Permission.Capability.Read: TSC.Permission.Mode.Deny
+        })
+
+        self.assertEqual(permissions.rules[1].grantee.permissions_grantee_type, 'user')
+        self.assertEqual(permissions.rules[1].grantee.id, '7c37ee24-c4b1-42b6-a154-eaeab7ee330a')
+        self.assertDictEqual(permissions.rules[1].capabilities, {
+            TSC.Permission.Capability.Write: TSC.Permission.Mode.Allow
+        })
+
 
     def test_populate_connections_missing_id(self):
         single_workbook = TSC.WorkbookItem('test')
