@@ -170,26 +170,14 @@ class GranteeUser(UserItem):
     def __init__(self, id_):
         self.id = id_
 
-    @property
-    def id(self):
-        return self._id
-
-    @id.setter
+    @UserItem.id.setter
     def id(self, value):
         self._id = value
 
-    @property
-    def name(self):
-        return self._name
-
-    @name.setter
+    @UserItem.name.setter
     def name(self, value):
         self._name = value
 
-    @property
-    def site_role(self):
-        return self._site_role
-
-    @site_role.setter
+    @UserItem.site_role.setter
     def site_role(self, value):
         self._site_role = value

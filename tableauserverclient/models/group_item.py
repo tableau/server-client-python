@@ -67,18 +67,10 @@ class GranteeGroup(GroupItem):
     def __init__(self, id_):
         self.id = id_
 
-    @property
-    def id(self):
-        return self._id
-
-    @id.setter
+    @GroupItem.id.setter
     def id(self, value):
         self._id = value
 
-    @property
-    def name(self):
-        return self._name
-
-    @name.setter
+    @GroupItem.name.setter
     def name(self, value):
         self._name = value
