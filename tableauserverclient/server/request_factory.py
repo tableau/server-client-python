@@ -292,6 +292,11 @@ class SiteRequest(object):
             site_element.attrib['revisionHistoryEnabled'] = str(site_item.revision_history_enabled).lower()
         if site_item.materialized_views_mode is not None:
             site_element.attrib['materializedViewsMode'] = str(site_item.materialized_views_mode).lower()
+        if site_item.flows_enabled is not None:
+            site_element.attrib['flowsEnabled'] - str(site_item.flows_enabled).lower()
+        if site_item.cataloging_enabled is not None:
+            site_element.attrib['catalogingEnabled'] - str(site_item.cataloging_enabled).lower()
+
         return ET.tostring(xml_request)
 
     def create_req(self, site_item):

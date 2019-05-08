@@ -106,6 +106,8 @@ class SiteTests(unittest.TestCase):
         self.assertEqual(True, single_site.disable_subscriptions)
         self.assertEqual(15, single_site.user_quota)
         self.assertEqual('disable', single_site.materialized_views_mode)
+        self.assertEqual(True, single_site.flows_enabled)
+        self.assertEqual(True, single_site.cataloging_enabled)
 
     def test_update_missing_id(self):
         single_site = TSC.SiteItem('test', 'test')
