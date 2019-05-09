@@ -202,9 +202,9 @@ class SiteItem(object):
             self._storage = storage
         if materialized_views_mode:
             self._materialized_views_mode = materialized_views_mode
-        if flows_enabled:
+        if flows_enabled is not None:
             self.flows_enabled = flows_enabled
-        if cataloging_enabled:
+        if cataloging_enabled is not None:
             self.cataloging_enabled = cataloging_enabled
 
     @classmethod
