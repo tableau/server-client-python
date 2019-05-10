@@ -17,7 +17,7 @@ class SiteItem(object):
 
     def __init__(self, name, content_url, admin_mode=None, user_quota=None, storage_quota=None,
                  disable_subscriptions=False, subscribe_others_enabled=True, revision_history_enabled=False,
-                 revision_limit=None, materialized_views_mode=None):
+                 revision_limit=None, materialized_views_mode=None, flows_enabled=None, cataloging_enabled=None):
         self._admin_mode = None
         self._id = None
         self._num_users = None
@@ -34,6 +34,8 @@ class SiteItem(object):
         self.subscribe_others_enabled = subscribe_others_enabled
         self.admin_mode = admin_mode
         self.materialized_views_mode = materialized_views_mode
+        self.cataloging_enabled = cataloging_enabled
+        self.flows_enabled = flows_enabled
 
     @property
     def admin_mode(self):
@@ -132,6 +134,22 @@ class SiteItem(object):
     def materialized_views_mode(self, value):
         self._materialized_views_mode = value
 
+    @property
+    def cataloging_enabled(self):
+        return self._cataloging_enabled
+
+    @cataloging_enabled.setter
+    def cataloging_enabled(self, value):
+        self._cataloging_enabled = value
+
+    @property
+    def flows_enabled(self):
+        return self._flows_enabled
+
+    @flows_enabled.setter
+    def flows_enabled(self, value):
+        self._flows_enabled = value
+
     def is_default(self):
         return self.name.lower() == 'default'
 
@@ -142,16 +160,18 @@ class SiteItem(object):
             (_, name, content_url, _, admin_mode, state,
              subscribe_others_enabled, disable_subscriptions, revision_history_enabled,
              user_quota, storage_quota, revision_limit, num_users, storage,
-             materialized_views_mode) = self._parse_element(site_xml, ns)
+             materialized_views_mode, cataloging_enabled, flows_enabled) = self._parse_element(site_xml, ns)
 
             self._set_values(None, name, content_url, None, admin_mode, state, subscribe_others_enabled,
                              disable_subscriptions, revision_history_enabled, user_quota, storage_quota,
-                             revision_limit, num_users, storage, materialized_views_mode)
+                             revision_limit, num_users, storage, materialized_views_mode, cataloging_enabled,
+                             flows_enabled)
         return self
 
     def _set_values(self, id, name, content_url, status_reason, admin_mode, state,
                     subscribe_others_enabled, disable_subscriptions, revision_history_enabled,
-                    user_quota, storage_quota, revision_limit, num_users, storage, materialized_views_mode):
+                    user_quota, storage_quota, revision_limit, num_users, storage, materialized_views_mode,
+                    flows_enabled, cataloging_enabled):
         if id is not None:
             self._id = id
         if name:
@@ -182,6 +202,10 @@ class SiteItem(object):
             self._storage = storage
         if materialized_views_mode:
             self._materialized_views_mode = materialized_views_mode
+        if flows_enabled is not None:
+            self.flows_enabled = flows_enabled
+        if cataloging_enabled is not None:
+            self.cataloging_enabled = cataloging_enabled
 
     @classmethod
     def from_response(cls, resp, ns):
@@ -191,13 +215,14 @@ class SiteItem(object):
         for site_xml in all_site_xml:
             (id, name, content_url, status_reason, admin_mode, state, subscribe_others_enabled,
                 disable_subscriptions, revision_history_enabled, user_quota, storage_quota,
-                revision_limit, num_users, storage, materialized_views_mode) = cls._parse_element(site_xml, ns)
+                revision_limit, num_users, storage, materialized_views_mode, flows_enabled,
+                cataloging_enabled) = cls._parse_element(site_xml, ns)
 
             site_item = cls(name, content_url)
             site_item._set_values(id, name, content_url, status_reason, admin_mode, state,
                                   subscribe_others_enabled, disable_subscriptions, revision_history_enabled,
                                   user_quota, storage_quota, revision_limit, num_users, storage,
-                                  materialized_views_mode)
+                                  materialized_views_mode, flows_enabled, cataloging_enabled)
             all_site_items.append(site_item)
         return all_site_items
 
@@ -234,9 +259,12 @@ class SiteItem(object):
 
         materialized_views_mode = site_xml.get('materializedViewsMode', '')
 
+        flows_enabled = string_to_bool(site_xml.get('flowsEnabled', ''))
+        cataloging_enabled = string_to_bool(site_xml.get('catalogingEnabled', ''))
+
         return id, name, content_url, status_reason, admin_mode, state, subscribe_others_enabled,\
             disable_subscriptions, revision_history_enabled, user_quota, storage_quota,\
-            revision_limit, num_users, storage, materialized_views_mode
+            revision_limit, num_users, storage, materialized_views_mode, flows_enabled, cataloging_enabled
 
 
 # Used to convert string represented boolean to a boolean type
