@@ -19,6 +19,8 @@ class ServerInfo(Endpoint):
         except ServerResponseError as e:
             if e.code == "404003":
                 raise ServerInfoEndpointNotFoundError
+            if e.code == "404001":
+                raise EndpointUnavailableError
 
         server_info = ServerInfoItem.from_response(server_response.content, self.parent_srv.namespace)
         return server_info
