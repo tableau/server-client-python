@@ -144,6 +144,10 @@ class UserItem(object):
         return all_user_items
 
     @staticmethod
+    def for_permissions(id_):
+        return GranteeUser(id_)
+
+    @staticmethod
     def _parse_element(user_xml, ns):
         id = user_xml.get('id', None)
         name = user_xml.get('name', None)
@@ -166,6 +170,10 @@ class UserItem(object):
 
 
 class GranteeUser(UserItem):
+    """Reduced version of the UserItem class that lets you
+    build User objects with only an ID. Necessary for Users returned
+    from Permissions requests, and a shortcut for creating permissions.
+    """
 
     def __init__(self, id_):
         self.id = id_

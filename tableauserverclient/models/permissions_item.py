@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 import logging
 
 from .exceptions import UnknownGranteeTypeError
-from . import UserItem, GroupItem, GranteeGroup, GranteeUser
+from . import UserItem, GroupItem
 
 logger = logging.getLogger('tableau.models.permissions_item')
 
@@ -71,9 +71,9 @@ class ExplicitPermissions(object):
                 raise UnknownGranteeTypeError()
 
             if grantee_type == 'user':
-                grantee = GranteeUser(grantee_id)
+                grantee = UserItem.for_permissions(grantee_id)
             else:
-                grantee = GranteeGroup(grantee_id)
+                grantee = GroupItem.for_permissions(grantee_id)
 
             for capability_xml in grantee_capability_xml.findall(
                     './/t:capabilities/t:capability', namespaces=ns):

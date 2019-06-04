@@ -61,8 +61,16 @@ class GroupItem(object):
             all_group_items.append(group_item)
         return all_group_items
 
+    @staticmethod
+    def for_permissions(id_):
+        return GranteeGroup(id_)
+
 
 class GranteeGroup(GroupItem):
+    """Reduced version of the GroupItem class that lets you
+    build Group objects with only an ID. Necessary for Groups returned
+    from Permissions requests, and a shortcut for creating permissions.
+    """
 
     def __init__(self, id_):
         self.id = id_

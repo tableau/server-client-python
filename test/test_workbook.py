@@ -7,7 +7,9 @@ import xml.etree.ElementTree as ET
 from tableauserverclient.datetime_helpers import format_datetime
 from tableauserverclient.server.endpoint.exceptions import InternalServerError
 from tableauserverclient.server.request_factory import RequestFactory
-from tableauserverclient.models.permissions_item import PermissionsRule, ExplicitPermissions, GranteeGroup, GranteeUser
+from tableauserverclient.models.permissions_item import PermissionsRule
+from tableauserverclient.models.user_item import UserItem
+from tableauserverclient.models.group_item import GroupItem
 
 from ._utils import asset
 
@@ -310,8 +312,8 @@ class WorkbookTests(unittest.TestCase):
         single_workbook = TSC.WorkbookItem('test')
         single_workbook._id = '21778de4-b7b9-44bc-a599-1506a2639ace'
 
-        bob = GranteeUser("7c37ee24-c4b1-42b6-a154-eaeab7ee330a")
-        group_of_people = GranteeGroup("5e5e1978-71fa-11e4-87dd-7382f5c437af")
+        bob = UserItem.for_permissions("7c37ee24-c4b1-42b6-a154-eaeab7ee330a")
+        group_of_people = GroupItem.for_permissions("5e5e1978-71fa-11e4-87dd-7382f5c437af")
 
         new_permissions = [
             PermissionsRule(bob, {'Write': 'Allow'}),
