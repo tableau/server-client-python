@@ -62,18 +62,7 @@ class ExplicitPermissions(object):
         for grantee_capability_xml in permissions_rules_list_xml:
             capability_dict = {}
 
-            grantee_element = grantee_capability_xml.findall('.//*[@id]', namespaces=ns).pop()
-            grantee_id = grantee_element.get('id', None)
-            grantee_type = grantee_element.tag.split('}').pop()
-
-            if grantee_id is None:
-                logger.error('Cannot find grantee type in response')
-                raise UnknownGranteeTypeError()
-
-            if grantee_type == 'user':
-                grantee = UserItem.for_permissions(grantee_id)
-            else:
-                grantee = GroupItem.for_permissions(grantee_id)
+            grantee = ExplicitPermissions._make_grantee_element(grantee_capability_xml, ns)
 
             for capability_xml in grantee_capability_xml.findall(
                     './/t:capabilities/t:capability', namespaces=ns):
@@ -88,3 +77,25 @@ class ExplicitPermissions(object):
 
         permissions._set_values(rules)
         return permissions
+
+    @staticmethod
+    def _make_grantee_element(grantee_capability_xml, ns):
+        """Use Xpath magic and some string splitting to get the right object type from the xml"""
+
+        # Get the first element in the tree with an 'id' attribute
+        grantee_element = grantee_capability_xml.findall('.//*[@id]', namespaces=ns).pop()
+        grantee_id = grantee_element.get('id', None)
+        grantee_type = grantee_element.tag.split('}').pop()
+
+        if grantee_id is None:
+            logger.error('Cannot find grantee type in response')
+            raise UnknownGranteeTypeError()
+
+        if grantee_type == 'user':
+            grantee = UserItem.for_permissions(grantee_id)
+        elif grantee_type == 'group':
+            grantee = GroupItem.for_permissions(grantee_id)
+        else:
+            raise UnknownGranteeTypeError("No support for grantee type of {}".format(grantee_type))
+
+        return grantee

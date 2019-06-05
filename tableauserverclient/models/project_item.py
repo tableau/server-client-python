@@ -17,9 +17,9 @@ class ProjectItem(object):
         self.parent_id = parent_id
 
         self._permissions = None
-        self._default_permissions_workbooks = None
-        self._default_permissions_datasources = None
-        self._default_permissions_flows = None
+        self._default_workbook_permissions = None
+        self._default_datasource_permissions = None
+        self._default_flow_permissions = None
 
     @property
     def content_permissions(self):
@@ -31,6 +31,27 @@ class ProjectItem(object):
             error = "Project item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
         return self._permissions()
+
+    @property
+    def default_datasource_permissions(self):
+        if self._default_datasource_permissions is None:
+            error = "Project item must be populated with permissions first."
+            raise UnpopulatedPropertyError(error)
+        return self._default_datasource_permissions()
+
+    @property
+    def default_workbook_permissions(self):
+        if self._default_workbook_permissions is None:
+            error = "Project item must be populated with permissions first."
+            raise UnpopulatedPropertyError(error)
+        return self._default_workbook_permissions()
+
+    @property
+    def default_flow_permissions(self):
+        if self._default_flow_permissions is None:
+            error = "Project item must be populated with permissions first."
+            raise UnpopulatedPropertyError(error)
+        return self._default_flow_permissions()
 
     @content_permissions.setter
     @property_is_enum(ContentPermissions)
@@ -79,11 +100,11 @@ class ProjectItem(object):
 
     def _set_default_permissions(self, permissions, content_type):
         if content_type == "workbooks" or "workbook":
-            self._default_permissions_workbooks = permissions
+            self._default_workbook_permissions = permissions
         if content_type == "datasources" or "datasource":
-            self._default_permissions_datasources = permissions
+            self._default_datasource_permissions = permissions
         if content_type == "flows" or "flow":
-            self._default_permissions_flows = permissions
+            self._default_flow_permissions = permissions
 
     @classmethod
     def from_response(cls, resp, ns):
