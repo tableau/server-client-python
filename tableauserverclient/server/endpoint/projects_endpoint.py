@@ -64,29 +64,29 @@ class Projects(Endpoint):
         self._permissions.populate(item)
 
     @api(version='2.0')
-    def update_permission(self, item, permission_item):
-        return self._permissions.update(item, permission_item)
+    def update_permission(self, item, rules):
+        return self._permissions.update(item, rules)
 
     @api(version='2.0')
-    def delete_permission(self, item, capability_item):
-        return self._permissions.delete(item, capability_item)
+    def delete_permission(self, item, rule):
+        return self._permissions.delete(item, rule)
 
-    @api(version='2.0')
-    def populate_workbook_defaults(self, item):
-        self._default_permissions.populate_workbook_defaults(item)
+    @api(version='2.1')
+    def populate_workbook_default_permissions(self, item):
+        self._default_permissions.populate_default_permissions(item, 'workbooks')
 
-    @api(version='2.0')
-    def populate_datasource_defaults(self, item):
-        self._default_permissions.populate_datasource_defaults(item)
+    @api(version='2.1')
+    def populate_datasource_default_permissions(self, item):
+        self._default_permissions.populate_default_permissions(item, 'datasources')
 
-    @api(version='2.0')
-    def populate_flow_defaults(self, item):
-        self._default_permissions.populate_flow_defaults(item)
+    @api(version='3.4')
+    def populate_flow_default_permissions(self, item):
+        self._default_permissions.populate_default_permissions(item, 'flows')
 
-    @api(version='2.0')
+    @api(version='2.1')
     def update_default_permissions(self, item, permissions, content_type):
         self._default_permissions.update_default_permissions(item, permissions, content_type)
 
-    @api(version='2.0')
-    def delete_permission(self, item, capability_item):
-        self._permissions.delete(item, capability_item)
+    @api(version='2.1')
+    def delete_default_permission(self, item, rule, content_type):
+        self._default_permissions.delete_default_permission(item, rule, content_type)
