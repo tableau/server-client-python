@@ -49,7 +49,7 @@ class PermissionsRule(object):
         for grantee_capability_xml in permissions_rules_list_xml:
             capability_dict = {}
 
-            grantee = PermissionsRule._make_grantee_element(grantee_capability_xml, ns)
+            grantee = PermissionsRule._parse_grantee_element(grantee_capability_xml, ns)
 
             for capability_xml in grantee_capability_xml.findall(
                     './/t:capabilities/t:capability', namespaces=ns):
@@ -65,7 +65,7 @@ class PermissionsRule(object):
         return rules
 
     @staticmethod
-    def _make_grantee_element(grantee_capability_xml, ns):
+    def _parse_grantee_element(grantee_capability_xml, ns):
         """Use Xpath magic and some string splitting to get the right object type from the xml"""
 
         # Get the first element in the tree with an 'id' attribute

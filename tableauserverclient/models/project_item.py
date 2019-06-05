@@ -99,11 +99,11 @@ class ProjectItem(object):
         self._permissions = permissions
 
     def _set_default_permissions(self, permissions, content_type):
-        if content_type == "workbooks" or "workbook":
+        if content_type in ("workbooks", "workbook"):
             self._default_workbook_permissions = permissions
-        if content_type == "datasources" or "datasource":
+        if content_type in ("datasources", "datasource"):
             self._default_datasource_permissions = permissions
-        if content_type == "flows" or "flow":
+        if content_type in ("flows", "flow"):
             self._default_flow_permissions = permissions
 
     @classmethod

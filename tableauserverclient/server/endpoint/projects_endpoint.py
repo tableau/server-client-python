@@ -84,7 +84,7 @@ class Projects(Endpoint):
         self._default_permissions.populate_default_permissions(item, 'flows')
 
     @api(version='2.1')
-    def update_default_permissions(self, item, permissions, content_type):
+    def update_default_permission(self, item, permissions, content_type):
         self._default_permissions.update_default_permissions(item, permissions, content_type)
 
     @api(version='2.1')

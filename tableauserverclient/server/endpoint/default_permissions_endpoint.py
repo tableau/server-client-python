@@ -30,22 +30,22 @@ class _DefaultPermissionsEndpoint(Endpoint):
         url = '{0}/{1}/default-permissions/{2}'.format(self.owner_baseurl(), resource.id, content_type)
         update_req = RequestFactory.Permission.add_req(permissions)
         response = self.put_request(url, update_req)
-        permissions = ExplicitPermissions.from_response(response.content,
-                                                        self.parent_srv.namespace)
+        permissions = PermissionsRule.from_response(response.content,
+                                                    self.parent_srv.namespace)
         logger.info('Updated permissions for resource {0}'.format(resource.id))
 
         return permissions
 
     def delete_default_permission(self, resource, rule, content_type):
         for capability, mode in rule.capabilities.items():
-            url = '{0}/{1}/default-permissions/{2}/{3}/{4}/{5}/{6}'.format(
-                self.owner_baseurl(),
-                resource.id,
-                content_type,
-                rule.grantee.permissions_grantee_type + 's',
-                rule.grantee.id,
-                capability,
-                mode)
+            url = '{baseurl}/{content_id}/default-permissions/{content_type}/{grantee_type}/{grantee_id}/{cap}/{mode}'.format(
+                baseurl=self.owner_baseurl(),
+                content_id=resource.id,
+                content_type=content_type,
+                grantee_type=rule.grantee.permissions_grantee_type + 's',
+                grantee_id=rule.grantee.id,
+                cap=capability,
+                mode=mode)
 
             logger.debug('Removing {0} permission for capabilty {1}'.format(
                 mode, capability))
@@ -61,7 +61,6 @@ class _DefaultPermissionsEndpoint(Endpoint):
         if not item.id:
             error = "Server item is missing ID. Item must be retrieved from server first."
             raise MissingRequiredFieldError(error)
-
         def permission_fetcher():
             return self._get_default_permissions(item, content_type)
 
@@ -71,7 +70,7 @@ class _DefaultPermissionsEndpoint(Endpoint):
     def _get_default_permissions(self, item, content_type, req_options=None):
         url = "{0}/{1}/default-permissions/{2}".format(self.owner_baseurl(), item.id, content_type)
         server_response = self.get_request(url, req_options)
-        permissions = ExplicitPermissions.from_response(server_response.content,
+        permissions = PermissionsRule.from_response(server_response.content,
                                                         self.parent_srv.namespace)
 
         return permissions
