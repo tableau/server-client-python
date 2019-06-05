@@ -1,7 +1,7 @@
 import logging
 
 from .. import RequestFactory
-from ...models import ExplicitPermissions, PermissionsRule
+from ...models import PermissionsRule
 
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError

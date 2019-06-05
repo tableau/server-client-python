@@ -195,9 +195,9 @@ class DatasourceTests(unittest.TestCase):
 
             grantee_type = 'group'
             object_id = '5e5e1978-71fa-11e4-87dd-7382f5c437af'
-            self.assertEqual(permissions.rules[0].grantee.permissions_grantee_type, 'group')
-            self.assertEqual(permissions.rules[0].grantee.id, '5e5e1978-71fa-11e4-87dd-7382f5c437af')
-            self.assertDictEqual(permissions.rules[0].capabilities, {
+            self.assertEqual(permissions[0].grantee.permissions_grantee_type, 'group')
+            self.assertEqual(permissions[0].grantee.id, '5e5e1978-71fa-11e4-87dd-7382f5c437af')
+            self.assertDictEqual(permissions[0].capabilities, {
                 TSC.Permission.Capability.Delete: TSC.Permission.Mode.Deny,
                 TSC.Permission.Capability.ChangePermissions: TSC.Permission.Mode.Deny,
                 TSC.Permission.Capability.Connect: TSC.Permission.Mode.Allow,
@@ -206,9 +206,9 @@ class DatasourceTests(unittest.TestCase):
 
             grantee_type = 'user'
             object_id = '7c37ee24-c4b1-42b6-a154-eaeab7ee330a'
-            self.assertEqual(permissions.rules[1].grantee.permissions_grantee_type, 'user')
-            self.assertEqual(permissions.rules[1].grantee.id, '7c37ee24-c4b1-42b6-a154-eaeab7ee330a')
-            self.assertDictEqual(permissions.rules[1].capabilities, {
+            self.assertEqual(permissions[1].grantee.permissions_grantee_type, 'user')
+            self.assertEqual(permissions[1].grantee.id, '7c37ee24-c4b1-42b6-a154-eaeab7ee330a')
+            self.assertDictEqual(permissions[1].capabilities, {
                 TSC.Permission.Capability.Write: TSC.Permission.Mode.Allow,
             })
 

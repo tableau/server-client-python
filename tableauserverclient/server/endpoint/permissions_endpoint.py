@@ -1,7 +1,7 @@
 import logging
 
 from .. import RequestFactory
-from ...models import ExplicitPermissions, PermissionsRule
+from ...models import PermissionsRule
 
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
@@ -30,8 +30,8 @@ class _PermissionsEndpoint(Endpoint):
         url = '{0}/{1}/permissions'.format(self.owner_baseurl(), resource.id)
         update_req = RequestFactory.Permission.add_req(permissions)
         response = self.put_request(url, update_req)
-        permissions = ExplicitPermissions.from_response(response.content,
-                                                        self.parent_srv.namespace)
+        permissions = PermissionsRule.from_response(response.content,
+                                                    self.parent_srv.namespace)
         logger.info('Updated permissions for resource {0}'.format(resource.id))
 
         return permissions
@@ -71,7 +71,7 @@ class _PermissionsEndpoint(Endpoint):
     def _get_permissions(self, item, req_options=None):
         url = "{0}/{1}/permissions".format(self.owner_baseurl(), item.id)
         server_response = self.get_request(url, req_options)
-        permissions = ExplicitPermissions.from_response(server_response.content,
-                                                        self.parent_srv.namespace)
+        permissions = PermissionsRule.from_response(server_response.content,
+                                                    self.parent_srv.namespace)
 
         return permissions

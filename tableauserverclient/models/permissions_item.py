@@ -38,21 +38,8 @@ class PermissionsRule(object):
         self.grantee = grantee
         self.capabilities = capabilities
 
-
-class ExplicitPermissions(object):
-    def __init__(self, rules=None):
-        self._rules = rules
-
-    def _set_values(self, rules):
-        self._rules = rules
-
-    @property
-    def rules(self):
-        return self._rules
-
     @classmethod
     def from_response(cls, resp, ns=None):
-        permissions = ExplicitPermissions()
         parsed_response = ET.fromstring(resp)
 
         rules = []
@@ -62,7 +49,7 @@ class ExplicitPermissions(object):
         for grantee_capability_xml in permissions_rules_list_xml:
             capability_dict = {}
 
-            grantee = ExplicitPermissions._make_grantee_element(grantee_capability_xml, ns)
+            grantee = PermissionsRule._make_grantee_element(grantee_capability_xml, ns)
 
             for capability_xml in grantee_capability_xml.findall(
                     './/t:capabilities/t:capability', namespaces=ns):
@@ -75,8 +62,7 @@ class ExplicitPermissions(object):
                                    capability_dict)
             rules.append(rule)
 
-        permissions._set_values(rules)
-        return permissions
+        return rules
 
     @staticmethod
     def _make_grantee_element(grantee_capability_xml, ns):
