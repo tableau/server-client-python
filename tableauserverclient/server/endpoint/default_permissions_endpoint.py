@@ -26,8 +26,8 @@ class _DefaultPermissionsEndpoint(Endpoint):
         # populated without, we will get a sign-in error
         self.owner_baseurl = owner_baseurl
 
-    def update_default_permissions(self, resource, template_type, permissions):
-        url = '{0}/{1}/default-permissions/{2}'.format(self.owner_baseurl(), resource.id, template_type)
+    def update_default_permissions(self, resource, permissions, content_type):
+        url = '{0}/{1}/default-permissions/{2}'.format(self.owner_baseurl(), resource.id, content_type)
         update_req = RequestFactory.Permission.add_req(permissions)
         response = self.put_request(url, update_req)
         permissions = ExplicitPermissions.from_response(response.content,
@@ -36,12 +36,12 @@ class _DefaultPermissionsEndpoint(Endpoint):
 
         return permissions
 
-    def delete_default_permission(self, resource, template_type, rule):
+    def delete_default_permission(self, resource, rule, content_type):
         for capability, mode in rule.capabilities.items():
             url = '{0}/{1}/default-permissions/{2}/{3}/{4}/{5}/{6}'.format(
                 self.owner_baseurl(),
                 resource.id,
-                template_type,
+                content_type,
                 rule.grantee.permissions_grantee_type + 's',
                 rule.grantee.id,
                 capability,
@@ -57,19 +57,19 @@ class _DefaultPermissionsEndpoint(Endpoint):
             rule.grantee.id,
             resource.id))
 
-    def populate(self, item):
+    def populate_default_permissions(self, item, content_type):
         if not item.id:
             error = "Server item is missing ID. Item must be retrieved from server first."
             raise MissingRequiredFieldError(error)
 
         def permission_fetcher():
-            return self._get_default_permissions(item)
+            return self._get_default_permissions(item, content_type)
 
-        item._set_permissions(permission_fetcher)
-        logger.info('Populated permissions for item (ID: {0})'.format(item.id))
+        item._set_default_permissions(permission_fetcher, content_type)
+        logger.info('Populated {0} permissions for item (ID: {1})'.format(item.id, content_type))
 
-    def _get_default_permissions(self, item, template_type, req_options=None):
-        url = "{0}/{1}/default-permissions/{2}".format(self.owner_baseurl(), item.id, template_type)
+    def _get_default_permissions(self, item, content_type, req_options=None):
+        url = "{0}/{1}/default-permissions/{2}".format(self.owner_baseurl(), item.id, content_type)
         server_response = self.get_request(url, req_options)
         permissions = ExplicitPermissions.from_response(server_response.content,
                                                         self.parent_srv.namespace)

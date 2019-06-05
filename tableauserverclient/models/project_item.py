@@ -17,6 +17,9 @@ class ProjectItem(object):
         self.parent_id = parent_id
 
         self._permissions = None
+        self._default_permissions_workbooks = None
+        self._default_permissions_datasources = None
+        self._default_permissions_flows = None
 
     @property
     def content_permissions(self):
@@ -73,6 +76,14 @@ class ProjectItem(object):
 
     def _set_permissions(self, permissions):
         self._permissions = permissions
+
+    def _set_default_permissions(self, permissions, content_type):
+        if content_type == "workbooks" or "workbook":
+            self._default_permissions_workbooks = permissions
+        if content_type == "datasources" or "datasource":
+            self._default_permissions_datasources = permissions
+        if content_type == "flows" or "flow":
+            self._default_permissions_flows = permissions
 
     @classmethod
     def from_response(cls, resp, ns):

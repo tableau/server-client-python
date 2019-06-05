@@ -1,6 +1,7 @@
 from .endpoint import api, Endpoint
 from .exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
+from .default_permissions_endpoint import _DefaultPermissionsEndpoint
 from .. import RequestFactory, ProjectItem, PaginationItem
 import logging
 
@@ -12,6 +13,7 @@ class Projects(Endpoint):
         super(Projects, self).__init__(parent_srv)
 
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
+        self._default_permissions = _DefaultPermissionsEndpoint(parent_srv, lambda: self.baseurl)
 
     @property
     def baseurl(self):
@@ -63,7 +65,27 @@ class Projects(Endpoint):
 
     @api(version='2.0')
     def update_permission(self, item, permission_item):
-        self._permissions.update(item, permission_item)
+        return self._permissions.update(item, permission_item)
+
+    @api(version='2.0')
+    def delete_permission(self, item, capability_item):
+        return self._permissions.delete(item, capability_item)
+
+    @api(version='2.0')
+    def populate_workbook_defaults(self, item):
+        self._default_permissions.populate_workbook_defaults(item)
+
+    @api(version='2.0')
+    def populate_datasource_defaults(self, item):
+        self._default_permissions.populate_datasource_defaults(item)
+
+    @api(version='2.0')
+    def populate_flow_defaults(self, item):
+        self._default_permissions.populate_flow_defaults(item)
+
+    @api(version='2.0')
+    def update_default_permissions(self, item, permissions, content_type):
+        self._default_permissions.update_default_permissions(item, permissions, content_type)
 
     @api(version='2.0')
     def delete_permission(self, item, capability_item):
