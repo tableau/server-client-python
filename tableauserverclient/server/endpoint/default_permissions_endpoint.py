@@ -38,7 +38,9 @@ class _DefaultPermissionsEndpoint(Endpoint):
 
     def delete_default_permission(self, resource, rule, content_type):
         for capability, mode in rule.capabilities.items():
-            url = '{baseurl}/{content_id}/default-permissions/{content_type}/{grantee_type}/{grantee_id}/{cap}/{mode}'.format(
+            # Made readibility better but line is too long, will make this look better
+            url = '{baseurl}/{content_id}/default-permissions/\
+                {content_type}/{grantee_type}/{grantee_id}/{cap}/{mode}'.format(
                 baseurl=self.owner_baseurl(),
                 content_id=resource.id,
                 content_type=content_type,
@@ -61,6 +63,7 @@ class _DefaultPermissionsEndpoint(Endpoint):
         if not item.id:
             error = "Server item is missing ID. Item must be retrieved from server first."
             raise MissingRequiredFieldError(error)
+
         def permission_fetcher():
             return self._get_default_permissions(item, content_type)
 
@@ -71,6 +74,6 @@ class _DefaultPermissionsEndpoint(Endpoint):
         url = "{0}/{1}/default-permissions/{2}".format(self.owner_baseurl(), item.id, content_type)
         server_response = self.get_request(url, req_options)
         permissions = PermissionsRule.from_response(server_response.content,
-                                                        self.parent_srv.namespace)
+                                                    self.parent_srv.namespace)
 
         return permissions
