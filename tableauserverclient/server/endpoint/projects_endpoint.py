@@ -75,36 +75,36 @@ class Projects(Endpoint):
 
     @api(version='2.1')
     def populate_workbook_default_permissions(self, item):
-        self._default_permissions.populate_default_permissions(item, Permission.Resource.Workbooks)
+        self._default_permissions.populate_default_permissions(item, Permission.Resource.Workbook)
 
     @api(version='2.1')
     def populate_datasource_default_permissions(self, item):
-        self._default_permissions.populate_default_permissions(item, Permission.Resource.Datasources)
+        self._default_permissions.populate_default_permissions(item, Permission.Resource.Datasource)
 
     @api(version='3.4')
     def populate_flow_default_permissions(self, item):
-        self._default_permissions.populate_default_permissions(item, Permission.Resource.Flows)
+        self._default_permissions.populate_default_permissions(item, Permission.Resource.Flow)
 
     @api(version='2.1')
     def update_workbook_default_permissions(self, item):
-        self._default_permissions.update_default_permissions(item, Permission.Resource.Workbooks)
+        self._default_permissions.update_default_permissions(item, Permission.Resource.Workbook)
 
     @api(version='2.1')
     def update_datasource_default_permissions(self, item):
-        self._default_permissions.update_default_permissions(item, Permission.Resource.Datasources)
+        self._default_permissions.update_default_permissions(item, Permission.Resource.Datasource)
 
     @api(version='3.4')
     def update_flow_default_permissions(self, item):
-        self._default_permissions.update_default_permissions(item, Permission.Resource.Flows)
+        self._default_permissions.update_default_permissions(item, Permission.Resource.Flow)
 
     @api(version='2.1')
     def delete_workbook_default_permissions(self, item):
-        self._default_permissions.delete_default_permissions(item, Permission.Resource.Workbooks)
+        self._default_permissions.delete_default_permissions(item, Permission.Resource.Workbook)
 
     @api(version='2.1')
     def delete_datasource_default_permissions(self, item):
-        self._default_permissions.delete_default_permissions(item, Permission.Resource.Datasources)
+        self._default_permissions.delete_default_permissions(item, Permission.Resource.Datasource)
 
     @api(version='3.4')
     def delete_flow_default_permissions(self, item):
-        self._default_permissions.delete_default_permissions(item, Permission.Resource.Flows)
+        self._default_permissions.delete_default_permissions(item, Permission.Resource.Flow)

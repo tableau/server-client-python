@@ -33,9 +33,9 @@ class Permission:
         Write = 'Write'
 
     class Resource:
-        Workbooks = 'workbooks'
-        Datasources = 'datasources'
-        Flows = 'flows'
+        Workbook = 'workbook'
+        Datasource = 'datasource'
+        Flow = 'flow'
 
 
 class PermissionsRule(object):

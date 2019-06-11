@@ -102,13 +102,7 @@ class ProjectItem(object):
         self._permissions = permissions
 
     def _set_default_permissions(self, permissions, content_type):
-        {}
-        if content_type in ("workbooks", "workbook"):
-            self._default_workbook_permissions = permissions
-        if content_type in ("datasources", "datasource"):
-            self._default_datasource_permissions = permissions
-        if content_type in ("flows", "flow"):
-            self._default_flow_permissions = permissions
+        setattr(self, "_default_{content}_permissions".format(content=content_type), permissions)
 
     @classmethod
     def from_response(cls, resp, ns):

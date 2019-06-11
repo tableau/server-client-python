@@ -44,7 +44,7 @@ class _DefaultPermissionsEndpoint(Endpoint):
                 baseurl=self.owner_baseurl(),
                 content_id=resource.id,
                 content_type=content_type,
-                grantee_type=rule.grantee.permissions_grantee_type + 's',
+                grantee_type=rule.grantee.tag_name + 's',
                 grantee_id=rule.grantee.id,
                 cap=capability,
                 mode=mode)
@@ -55,7 +55,7 @@ class _DefaultPermissionsEndpoint(Endpoint):
             self.delete_request(url)
 
         logger.info('Deleted permission for {0} {1} item {2}'.format(
-            rule.grantee.permissions_grantee_type,
+            rule.grantee.tag_name,
             rule.grantee.id,
             resource.id))
 
@@ -71,7 +71,7 @@ class _DefaultPermissionsEndpoint(Endpoint):
         logger.info('Populated {0} permissions for item (ID: {1})'.format(item.id, content_type))
 
     def _get_default_permissions(self, item, content_type, req_options=None):
-        url = "{0}/{1}/default-permissions/{2}".format(self.owner_baseurl(), item.id, content_type)
+        url = "{0}/{1}/default-permissions/{2}".format(self.owner_baseurl(), item.id, content_type + "s")
         server_response = self.get_request(url, req_options)
         permissions = PermissionsRule.from_response(server_response.content,
                                                     self.parent_srv.namespace)
