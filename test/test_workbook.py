@@ -287,7 +287,7 @@ class WorkbookTests(unittest.TestCase):
             self.server.workbooks.populate_permissions(single_workbook)
             permissions = single_workbook.permissions
 
-            self.assertEqual(permissions[0].grantee.permissions_grantee_type, 'group')
+            self.assertEqual(permissions[0].grantee.tag_name, 'group')
             self.assertEqual(permissions[0].grantee.id, '5e5e1978-71fa-11e4-87dd-7382f5c437af')
             self.assertDictEqual(permissions[0].capabilities, {
                 TSC.Permission.Capability.WebAuthoring: TSC.Permission.Mode.Allow,
@@ -296,7 +296,7 @@ class WorkbookTests(unittest.TestCase):
                 TSC.Permission.Capability.AddComment: TSC.Permission.Mode.Allow
             })
 
-            self.assertEqual(permissions[1].grantee.permissions_grantee_type, 'user')
+            self.assertEqual(permissions[1].grantee.tag_name, 'user')
             self.assertEqual(permissions[1].grantee.id, '7c37ee24-c4b1-42b6-a154-eaeab7ee330a')
             self.assertDictEqual(permissions[1].capabilities, {
                 TSC.Permission.Capability.ExportImage: TSC.Permission.Mode.Allow,
@@ -312,8 +312,8 @@ class WorkbookTests(unittest.TestCase):
         single_workbook = TSC.WorkbookItem('test')
         single_workbook._id = '21778de4-b7b9-44bc-a599-1506a2639ace'
 
-        bob = UserItem.for_permissions("7c37ee24-c4b1-42b6-a154-eaeab7ee330a")
-        group_of_people = GroupItem.for_permissions("5e5e1978-71fa-11e4-87dd-7382f5c437af")
+        bob = UserItem.as_reference("7c37ee24-c4b1-42b6-a154-eaeab7ee330a")
+        group_of_people = GroupItem.as_reference("5e5e1978-71fa-11e4-87dd-7382f5c437af")
 
         new_permissions = [
             PermissionsRule(bob, {'Write': 'Allow'}),
@@ -324,13 +324,13 @@ class WorkbookTests(unittest.TestCase):
             m.put(self.baseurl + "/21778de4-b7b9-44bc-a599-1506a2639ace/permissions", text=response_xml)
             permissions = self.server.workbooks.update_permissions(single_workbook, new_permissions)
 
-        self.assertEqual(permissions[0].grantee.permissions_grantee_type, 'group')
+        self.assertEqual(permissions[0].grantee.tag_name, 'group')
         self.assertEqual(permissions[0].grantee.id, '5e5e1978-71fa-11e4-87dd-7382f5c437af')
         self.assertDictEqual(permissions[0].capabilities, {
             TSC.Permission.Capability.Read: TSC.Permission.Mode.Deny
         })
 
-        self.assertEqual(permissions[1].grantee.permissions_grantee_type, 'user')
+        self.assertEqual(permissions[1].grantee.tag_name, 'user')
         self.assertEqual(permissions[1].grantee.id, '7c37ee24-c4b1-42b6-a154-eaeab7ee330a')
         self.assertDictEqual(permissions[1].capabilities, {
             TSC.Permission.Capability.Write: TSC.Permission.Mode.Allow

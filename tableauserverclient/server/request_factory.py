@@ -150,7 +150,7 @@ class PermissionRequest(object):
 
         for rule in rules:
             grantee_capabilities_element = ET.SubElement(permissions_element, 'granteeCapabilities')
-            grantee_element = ET.SubElement(grantee_capabilities_element, rule.grantee.permissions_grantee_type)
+            grantee_element = ET.SubElement(grantee_capabilities_element, rule.grantee.tag_name)
             grantee_element.attrib['id'] = rule.grantee.id
 
             capabilities_element = ET.SubElement(grantee_capabilities_element, 'capabilities')

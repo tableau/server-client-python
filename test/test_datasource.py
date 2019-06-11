@@ -193,9 +193,7 @@ class DatasourceTests(unittest.TestCase):
             self.server.datasources.populate_permissions(single_datasource)
             permissions = single_datasource.permissions
 
-            grantee_type = 'group'
-            object_id = '5e5e1978-71fa-11e4-87dd-7382f5c437af'
-            self.assertEqual(permissions[0].grantee.permissions_grantee_type, 'group')
+            self.assertEqual(permissions[0].grantee.tag_name, 'group')
             self.assertEqual(permissions[0].grantee.id, '5e5e1978-71fa-11e4-87dd-7382f5c437af')
             self.assertDictEqual(permissions[0].capabilities, {
                 TSC.Permission.Capability.Delete: TSC.Permission.Mode.Deny,
@@ -204,9 +202,7 @@ class DatasourceTests(unittest.TestCase):
                 TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow,
             })
 
-            grantee_type = 'user'
-            object_id = '7c37ee24-c4b1-42b6-a154-eaeab7ee330a'
-            self.assertEqual(permissions[1].grantee.permissions_grantee_type, 'user')
+            self.assertEqual(permissions[1].grantee.tag_name, 'user')
             self.assertEqual(permissions[1].grantee.id, '7c37ee24-c4b1-42b6-a154-eaeab7ee330a')
             self.assertDictEqual(permissions[1].capabilities, {
                 TSC.Permission.Capability.Write: TSC.Permission.Mode.Allow,

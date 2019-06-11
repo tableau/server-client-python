@@ -2,11 +2,12 @@ import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_is_enum, property_not_empty, property_not_nullable
 from ..datetime_helpers import parse_datetime
+from .reference_item import ResourceReference
 
 
 class UserItem(object):
 
-    permissions_grantee_type = 'user'
+    tag_name = 'user'
 
     class Roles:
         Interactor = 'Interactor'
@@ -97,6 +98,9 @@ class UserItem(object):
             raise UnpopulatedPropertyError(error)
         return self._workbooks()
 
+    def to_reference(self):
+        return ResourceReference(id_=self.id, tag_name=self.tag_name)
+
     def _set_workbooks(self, workbooks):
         self._workbooks = workbooks
 
@@ -144,8 +148,8 @@ class UserItem(object):
         return all_user_items
 
     @staticmethod
-    def for_permissions(id_):
-        return GranteeUser(id_)
+    def as_reference(id_):
+        return ResourceReference(id_, UserItem.tag_name)
 
     @staticmethod
     def _parse_element(user_xml, ns):
@@ -167,25 +171,3 @@ class UserItem(object):
 
     def __repr__(self):
         return "<User {} name={} role={}>".format(self.id, self.name, self.site_role)
-
-
-class GranteeUser(UserItem):
-    """Reduced version of the UserItem class that lets you
-    build User objects with only an ID. Necessary for Users returned
-    from Permissions requests, and a shortcut for creating permissions.
-    """
-
-    def __init__(self, id_):
-        self.id = id_
-
-    @UserItem.id.setter
-    def id(self, value):
-        self._id = value
-
-    @UserItem.name.setter
-    def name(self, value):
-        self._name = value
-
-    @UserItem.site_role.setter
-    def site_role(self, value):
-        self._site_role = value

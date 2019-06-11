@@ -2,7 +2,8 @@ import xml.etree.ElementTree as ET
 import logging
 
 from .exceptions import UnknownGranteeTypeError
-from . import UserItem, GroupItem
+from .user_item import UserItem
+from .group_item import GroupItem
 
 logger = logging.getLogger('tableau.models.permissions_item')
 
@@ -30,6 +31,11 @@ class Permission:
         ViewUnderlyingData = 'ViewUnderlyingData'
         WebAuthoring = 'WebAuthoring'
         Write = 'Write'
+
+    class Resource:
+        Workbooks = 'workbooks'
+        Datasources = 'datasources'
+        Flows = 'flows'
 
 
 class PermissionsRule(object):
@@ -78,9 +84,9 @@ class PermissionsRule(object):
             raise UnknownGranteeTypeError()
 
         if grantee_type == 'user':
-            grantee = UserItem.for_permissions(grantee_id)
+            grantee = UserItem.as_reference(grantee_id)
         elif grantee_type == 'group':
-            grantee = GroupItem.for_permissions(grantee_id)
+            grantee = GroupItem.as_reference(grantee_id)
         else:
             raise UnknownGranteeTypeError("No support for grantee type of {}".format(grantee_type))
 

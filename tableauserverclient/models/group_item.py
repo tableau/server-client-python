@@ -1,11 +1,12 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_not_empty
+from .reference_item import ResourceReference
 
 
 class GroupItem(object):
 
-    permissions_grantee_type = 'group'
+    tag_name = 'group'
 
     def __init__(self, name=None):
         self._domain_name = None
@@ -38,6 +39,9 @@ class GroupItem(object):
         #  Each call to `.users` should create a new pager, this just runs the callable
         return self._users()
 
+    def to_reference(self):
+        return ResourceReference(id_=self.id, tag_name=self.tag_name)
+
     def _set_users(self, users):
         self._users = users
 
@@ -58,23 +62,5 @@ class GroupItem(object):
         return all_group_items
 
     @staticmethod
-    def for_permissions(id_):
-        return GranteeGroup(id_)
-
-
-class GranteeGroup(GroupItem):
-    """Reduced version of the GroupItem class that lets you
-    build Group objects with only an ID. Necessary for Groups returned
-    from Permissions requests, and a shortcut for creating permissions.
-    """
-
-    def __init__(self, id_):
-        self.id = id_
-
-    @GroupItem.id.setter
-    def id(self, value):
-        self._id = value
-
-    @GroupItem.name.setter
-    def name(self, value):
-        self._name = value
+    def as_reference(id_):
+        return ResourceReference(id_, GroupItem.tag_name)

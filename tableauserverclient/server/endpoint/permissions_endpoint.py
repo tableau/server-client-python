@@ -1,7 +1,6 @@
 import logging
 
-from .. import RequestFactory
-from ...models import PermissionsRule
+from .. import RequestFactory, PermissionsRule
 
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
@@ -36,26 +35,33 @@ class _PermissionsEndpoint(Endpoint):
 
         return permissions
 
-    def delete(self, resource, rule):
-        for capability, mode in rule.capabilities.items():
-            "              /permissions/groups/group-id/capability-name/capability-mode"
-            url = '{0}/{1}/permissions/{2}/{3}/{4}/{5}'.format(
-                self.owner_baseurl(),
-                resource.id,
-                rule.grantee.permissions_grantee_type + 's',
+    def delete(self, resource, rules):
+        # Delete is the only endpoint that doesn't take a list of rules
+        # so let's fake it to keep it consistent
+        # TODO that means we need error handling around the call
+        if isinstance(rules, PermissionsRule):
+            rules = [rules]
+
+        for rule in rules:
+            for capability, mode in rule.capabilities.items():
+                "              /permissions/groups/group-id/capability-name/capability-mode"
+                url = '{0}/{1}/permissions/{2}/{3}/{4}/{5}'.format(
+                    self.owner_baseurl(),
+                    resource.id,
+                    rule.grantee.permissions_grantee_type + 's',
+                    rule.grantee.id,
+                    capability,
+                    mode)
+
+                logger.debug('Removing {0} permission for capabilty {1}'.format(
+                    mode, capability))
+
+                self.delete_request(url)
+
+            logger.info('Deleted permission for {0} {1} item {2}'.format(
+                rule.grantee.permissions_grantee_type,
                 rule.grantee.id,
-                capability,
-                mode)
-
-            logger.debug('Removing {0} permission for capabilty {1}'.format(
-                mode, capability))
-
-            self.delete_request(url)
-
-        logger.info('Deleted permission for {0} {1} item {2}'.format(
-            rule.grantee.permissions_grantee_type,
-            rule.grantee.id,
-            resource.id))
+                resource.id))
 
     def populate(self, item):
         if not item.id:
