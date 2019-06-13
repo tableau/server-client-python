@@ -59,6 +59,23 @@ class AuthRequest(object):
             user_element.attrib['id'] = auth_item.user_id_to_impersonate
         return ET.tostring(xml_request)
 
+class DatabaseRequest(object):
+    def update_req(self, database_item):
+        xml_request = ET.Element('tsRequest')
+        database_element = ET.SubElement(xml_request, 'database')
+        if database_item.contact_id:
+            contact_element = ET.SubElement(database_element, 'contact')
+            contact_element.attrib['id'] = database_item.contact_id
+
+        database_element.attrib['isCertified'] = str(database_item.certified).lower()
+
+        if database_item.certification_note:
+            database_element.attrib['certificationNote'] = str(database_item.certification_note)
+
+        if database_item.description:
+            database_element.attrib['description'] = str(database_item.description)
+
+        return ET.tostring(xml_request)
 
 class DatasourceRequest(object):
     def _generate_xml(self, datasource_item, connection_credentials=None, connections=None):
@@ -313,6 +330,24 @@ class SiteRequest(object):
             site_element.attrib['catalogingEnabled'] = str(site_item.cataloging_enabled).lower()
         return ET.tostring(xml_request)
 
+class TableRequest(object):
+    def update_req(self, table_item):
+        xml_request = ET.Element('tsRequest')
+        table_element = ET.SubElement(xml_request, 'table')
+
+        if table_item.contact_id:
+            contact_element = ET.SubElement(table_element, 'contact')
+            contact_element.attrib['id'] = table_item.contact_id
+
+        table_element.attrib['certified'] = str(table_item.certified).lower()
+
+        if table_item.certification_note:
+            table_element.attrib['certificationNote'] = str(table_item.certification_note)
+
+        if table_item.description:
+            table_element.attrib['description'] = str(table_item.description)
+
+        return ET.tostring(xml_request)
 
 class TagRequest(object):
     def add_req(self, tag_set):
@@ -465,6 +500,7 @@ class RequestFactory(object):
     Auth = AuthRequest()
     Connection = Connection()
     Datasource = DatasourceRequest()
+    Database = DatabaseRequest()
     Empty = EmptyRequest()
     Fileupload = FileuploadRequest()
     Group = GroupRequest()
@@ -472,6 +508,7 @@ class RequestFactory(object):
     Project = ProjectRequest()
     Schedule = ScheduleRequest()
     Site = SiteRequest()
+    Table = TableRequest()
     Tag = TagRequest()
     Task = TaskRequest()
     User = UserRequest()

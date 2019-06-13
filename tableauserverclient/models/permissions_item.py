@@ -36,6 +36,8 @@ class Permission:
         Workbook = 'workbook'
         Datasource = 'datasource'
         Flow = 'flow'
+        Table = 'table'
+        Database = 'database'
 
 
 class PermissionsRule(object):
