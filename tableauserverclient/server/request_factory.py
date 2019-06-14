@@ -339,7 +339,7 @@ class TableRequest(object):
             contact_element = ET.SubElement(table_element, 'contact')
             contact_element.attrib['id'] = table_item.contact_id
 
-        table_element.attrib['certified'] = str(table_item.certified).lower()
+        table_element.attrib['isCertified'] = str(table_item.certified).lower()
 
         if table_item.certification_note:
             table_element.attrib['certificationNote'] = str(table_item.certification_note)

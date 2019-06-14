@@ -161,8 +161,8 @@ class DatabaseItem(object):
         if 'embedded' in database_values:
             self._embedded = string_to_bool(database_values['embedded'])
 
-        if 'certified' in database_values:
-            self._certified = string_to_bool(database_values['certified'])
+        if 'isCertified' in database_values:
+            self._certified = string_to_bool(database_values['isCertified'])
 
         if 'certification_note' in database_values:
             self._certification_note = database_values['certificationNote']
