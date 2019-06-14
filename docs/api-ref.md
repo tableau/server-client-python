@@ -15,7 +15,7 @@ The Tableau Server Client (TSC) is a Python library for the Tableau Server REST 
 The TSC API reference is organized by resource. The TSC library is modeled after the REST API. The methods, for example, `workbooks.get()`, correspond to the endpoints for resources, such as [workbooks](#workbooks), [users](#users), [views](#views), and [data sources](#data-sources). The model classes (for example, the [WorkbookItem class](#workbookitem-class) have attributes that represent the fields (`name`, `id`, `owner_id`) that are in the REST API request and response packages, or payloads. 
 
 |:---  |  
-| **Note:**  Some methods and features provided in the REST API might not be currently available in the TSC library (and in some cases, the opposite is true).  In addition, the same limitations apply to the TSC library that apply to the REST API with respect to resources on Tableau Server and Tableau Online. For more information, see the [Tableau Server REST API Reference](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#API_Reference%3FTocPath%3DAPI%2520Reference%7C_____0){:target="_blank"}.|
+| **Note:**  Some methods and features provided in the REST API might not be currently available in the TSC library (and in some cases, the opposite is true).  In addition, the same limitations apply to the TSC library that apply to the REST API with respect to resources on Tableau Server and Tableau Online. For more information, see the [Tableau Server REST API Reference](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#API_Reference0){:target="_blank"}.|
 
  
 
@@ -90,7 +90,7 @@ Signs you in to Tableau Server.
 
 The method signs into Tableau Server or Tableau Online and manages the authentication token. You call this method from the server object you create. For information about the server object, see [Server](#server). The authentication token keeps you signed in for 240 minutes, or until you call the `auth.sign_out` method. Before you use this method, you first need to create the sign-in request (`auth_req`) object by creating an instance of the `TableauAuth`. To call this method, create a server object for your server. For more information, see [Sign in and Out](sign-in-out).
 
-REST API: [Sign In](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Sign_In%3FTocPath%3DAPI%2520Reference%7C_____77){:target="_blank"}
+REST API: [Sign In](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#sign_in){:target="_blank"}
 
 **Parameters**
 
@@ -106,7 +106,7 @@ import tableauserverclient as TSC
 tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
 
 # create an instance for your server
-server = TSC.Server('http://SERVER_URL')
+server = TSC.Server('https://SERVER_URL')
 
 # call the sign-in method with the auth object
 server.auth.sign_in(tableau_auth)
@@ -131,7 +131,7 @@ Signs you out of the current session.
 
 The `sign_out()` method takes care of invalidating the authentication token. For more information, see [Sign in and Out](sign-in-out).
 
-REST API: [Sign Out](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Sign_Out%3FTocPath%3DAPI%2520Reference%7C_____78){:target="_blank"}
+REST API: [Sign Out](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#ign_out){:target="_blank"}
 
 **Example**
 
@@ -301,7 +301,7 @@ Error   |  Description
 `Datasource ID undefined`   | Raises an exception if a valid `datasource_id` is not provided.
 
 
-REST API: [Delete Datasource](http://onlinehelp.tableau.com/v0.0/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Delete_Datasource%3FTocPath%3DAPI%2520Reference%7C_____19){:target="_blank"}
+REST API: [Delete Datasource](https://onlinehelp.tableau.com/v0.0/api/rest_api/en-us/REST/rest_api_ref.htm#delete_data_source){:target="_blank"}
 
 <br> 
 <br>
@@ -315,7 +315,7 @@ datasources.download(datasource_id, filepath=None, include_extract=True, no_extr
 ```
 Downloads the specified data source in `.tdsx` or `.hyper` format.
 
-REST API: [Download Datasource](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Download_Datasource%3FTocPath%3DAPI%2520Reference%7C_____34){:target="_blank"}  
+REST API: [Download Datasource](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#download_data_source){:target="_blank"}  
 
 **Parameters**
 
@@ -360,7 +360,7 @@ Returns all the data sources for the site.
 
 To get the connection information for each data source, you must first populate the `DatasourceItem` with connection information using the [populate_connections(*datasource_item*)](#populate-connections-datasource) method. For more information, see [Populate Connections and Views](populate-connections-views#populate-connections-for-data-sources)
 
-REST API: [Query Datasources](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Datasources%3FTocPath%3DAPI%2520Reference%7C_____49){:target="_blank"}
+REST API: [Query Datasources](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_data_sources){:target="_blank"}
 
 **Parameters**
 
@@ -381,7 +381,7 @@ Returns a list of `DatasourceItem` objects and a `PaginationItem`  object.  Use 
 ```py
 import tableauserverclient as TSC
 tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
-server = TSC.Server('http://SERVERURL')
+server = TSC.Server('https://SERVERURL')
 
 with server.auth.sign_in(tableau_auth):
     all_datasources, pagination_item = server.datasources.get()
@@ -403,7 +403,7 @@ datasources.get_by_id(datasource_id)
 
 Returns the specified data source item. 
 
-REST API: [Query Datasource](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Datasource%3FTocPath%3DAPI%2520Reference%7C_____46){:target="_blank"}
+REST API: [Query Datasource](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_data_source){:target="_blank"}
 
 
 **Parameters**
@@ -450,7 +450,7 @@ Populates the connections for the specified data source.
 
 This method retrieves the connection information for the specified data source. The REST API is designed to return only the information you ask for explicitly. When you query for all the data sources, the connection information is not included. Use this method to retrieve the connections. The method adds the list of data connections to the data source item (`datasource_item.connections`). This is a list of `ConnectionItem` objects.  
 
-REST API:  [Query Datasource Connections](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Datasource_Connections%3FTocPath%3DAPI%2520Reference%7C_____47){:target="_blank"}
+REST API:  [Query Datasource Connections](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_data_source_connections){:target="_blank"}
 
 **Parameters**
 
@@ -478,7 +478,7 @@ None. A list of `ConnectionItem` objects are added to the data source (`datasour
 ```py
 # import tableauserverclient as TSC
 
-# server = TSC.Server('http://SERVERURL')
+# server = TSC.Server('https://SERVERURL')
 # 
    ... 
 
@@ -511,7 +511,7 @@ Publishes a data source to a server, or appends data to an existing data source.
 
 This method checks the size of the data source and automatically determines whether the publish the data source in multiple parts or in one opeation.  
 
-REST API: [Publish Datasource](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Publish_Datasource%3FTocPath%3DAPI%2520Reference%7C_____44){:target="_blank"}
+REST API: [Publish Datasource](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#publish_data_source){:target="_blank"}
 
 **Parameters**
 
@@ -543,7 +543,7 @@ The `DatasourceItem` for the data source that was added or appended to.
 ```py
 
   import tableauserverclient as TSC
-  server = TSC.Server('http://SERVERURL')
+  server = TSC.Server('https://SERVERURL')
     
   ...
 
@@ -572,7 +572,7 @@ datasource.update(datasource_item)
 
 Updates the owner, or project of the specified data source. 
 
-REST API: [Update Datasource](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Update_Datasource%3FTocPath%3DAPI%2520Reference%7C_____79){:target="_blank"}
+REST API: [Update Datasource](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_data_source){:target="_blank"}
 
 **Parameters**
 
@@ -598,7 +598,7 @@ An updated `DatasourceItem`.
 
 ```py   
 # import tableauserverclient as TSC
-# server = TSC.Server('http://SERVERURL')
+# server = TSC.Server('https://SERVERURL')
 # sign in ...   
   
 # get the data source item to update
@@ -624,7 +624,7 @@ datasource.update_connection(datasource_item, connection_item)
 
 Updates the server address, port, username, or password for the specified data source connection.
 
-REST API: [Update Datasource Connection](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Update_Datasource_Connection){:target="_blank"}
+REST API: [Update Datasource Connection](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_data_source_connection){:target="_blank"}
 
 
 **Parameters**
@@ -752,7 +752,7 @@ groups.add_user(group_item, user_id):
 Adds a user to the specified group. 
 
 
-REST API [Add User to Group](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Add_User_to_Group%3FTocPath%3DAPI%2520Reference%7C_____8){:target="_blank"}
+REST API [Add User to Group](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#add_user_to_group){:target="_blank"}
 
 **Parameters**
 
@@ -799,7 +799,7 @@ create(group_item)
 Creates a new group in Tableau Server. 
 
 
-REST API: [Create Group](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Create_Group%3FTocPath%3DAPI%2520Reference%7C_____14){:target="_blank"}
+REST API: [Create Group](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#create_group){:target="_blank"}
 
 
 **Parameters**
@@ -823,7 +823,7 @@ Adds new `GroupItem`.
 
 #  import tableauserverclient as TSC
 #  tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
-#  server = TSC.Server('http://SERVERURL')
+#  server = TSC.Server('https://SERVERURL')
 
 
 # create a new instance with the group name
@@ -849,7 +849,7 @@ groups.delete(group_id)
 
 Deletes the group on the site. 
 
-REST API: [Delete Group](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Remove_User_from_Site%3FTocPath%3DAPI%2520Reference%7C_____74){:target="_blank"}
+REST API: [Delete Group](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#remove_user_from_site){:target="_blank"}
 
 
 **Parameters**  
@@ -873,7 +873,7 @@ Error | Description
 
 # import tableauserverclient as TSC
 # tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
-# server = TSC.Server('http://SERVERURL')
+# server = TSC.Server('https://SERVERURL')
 
   with server.auth.sign_in(tableau_auth):
      server.groups.delete('1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d')
@@ -894,7 +894,7 @@ Returns information about the groups on the site.
 To get information about the users in a group, you must first populate the `GroupItem` with user information using the [groups.populate_users](api-ref#groupspopulate_users) method. 
 
 
-REST API: [Get Uers on Site](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Get_Users_on_Site%3FTocPath%3DAPI%2520Reference%7C_____41){:target="_blank"}
+REST API: [Get Uers on Site](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#get_users_on_site){:target="_blank"}
 
 **Parameters**
 
@@ -914,7 +914,7 @@ Returns a list of `GroupItem` objects and a `PaginationItem`  object.  Use these
 ```py
 # import tableauserverclient as TSC
 # tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
-# server = TSC.Server('http://SERVERURL')
+# server = TSC.Server('https://SERVERURL')
 
   with server.auth.sign_in(tableau_auth):
 
@@ -939,7 +939,7 @@ groups.populate_users(group_item, req_options=None)
 Populates the `group_item` with the list of users. 
 
 
-REST API:  [Get Users in Group](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Get_Users_in_Group){:target="_blank"}
+REST API:  [Get Users in Group](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#get_users_in_group){:target="_blank"}
 
 **Parameters**
 
@@ -965,7 +965,7 @@ None. A list of `UserItem` objects are added to the group (`group_item.users`).
 ```py
 # import tableauserverclient as TSC
 
-# server = TSC.Server('http://SERVERURL')
+# server = TSC.Server('https://SERVERURL')
 # 
    ... 
 
@@ -1000,7 +1000,7 @@ Removes a user from a group.
 
 
 
-REST API: [Remove User from Group](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Remove_User_from_Group%3FTocPath%3DAPI%2520Reference%7C_____73){:target="_blank"}
+REST API: [Remove User from Group](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#remove_user_to_group){:target="_blank"}
 
 
 **Parameters**
@@ -1031,7 +1031,7 @@ None. The user is removed from the group.
 
 # import tableauserverclient as TSC
 # tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
-# server = TSC.Server('http://SERVERURL')
+# server = TSC.Server('https://SERVERURL')
 
   with server.auth.sign_in(tableau_auth):
 
@@ -1073,7 +1073,7 @@ Source file: models/job_item.py
 Name  |  Description
 :--- | :---  
 `id`  |  The `id` of the job. 
-`type` | The type of task. The types correspond to the job type categories listed for the [Query Job](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Job){:target="_blank"} REST API. 
+`type` | The type of task. The types correspond to the job type categories listed for the [Query Job](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_job){:target="_blank"} REST API. 
 `created_at` | The time the job was created.
 `started_at` | The time the job started. 
 `completed_at` | The time the job finished. 
@@ -1102,7 +1102,7 @@ jobs.get(job_id)
 
 Gets information about the specified job. 
 
-REST API: [Query Job](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Job){:target="_blank"}
+REST API: [Query Job](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_job){:target="_blank"}
 
 
 **Parameters**
@@ -1133,7 +1133,7 @@ Returns the `JobItem` requested.
 
 # import tableauserverclient as TSC
 # tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
-# server = TSC.Server('http://SERVERURL')
+# server = TSC.Server('https://SERVERURL')
 
   with server.auth.sign_in(tableau_auth):
 
@@ -1189,7 +1189,7 @@ Name  |  Description
 `name` | Name of the project.
 `description` | The description of the project. 
 `id`  | The project id.
-`parent_id` | The id of the parent project. Use this option to create project hierarchies. For information about managing projects, project hierarchies, and permissions, see [Use Projects to Manage Content Access](http://onlinehelp.tableau.com/current/server/en-us/projects.htm){:target="_blank"}.
+`parent_id` | The id of the parent project. Use this option to create project hierarchies. For information about managing projects, project hierarchies, and permissions, see [Use Projects to Manage Content Access](https://onlinehelp.tableau.com/current/server/en-us/projects.htm){:target="_blank"}.
 
 
 
@@ -1198,7 +1198,7 @@ Source file: models/project_item.py
 
 #### ProjectItem.ContentPermissions
 
-The `ProjectItem` class has a sub-class that defines the permissions for the project (`ProjectItem.ContentPermissions`).  The options are `LockedToProject` and `ManagedByOwner`.  For information on these content permissions, see [Lock Content Permissions to the Project](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Create_Project%3FTocPath%3DAPI%2520Reference%7C_____15){:target="_blank"}.   
+The `ProjectItem` class has a sub-class that defines the permissions for the project (`ProjectItem.ContentPermissions`).  The options are `LockedToProject` and `ManagedByOwner`.  For information on these content permissions, see [Lock Content Permissions to the Project](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#create_project){:target="_blank"}.   
 
 Name | Description   
 :--- | :---   
@@ -1210,7 +1210,7 @@ Name | Description
 ```py  
 
 # import tableauserverclient as TSC
-# server = TSC.Server('http://MY-SERVER')
+# server = TSC.Server('https://MY-SERVER')
 # sign in, etc
 
 
@@ -1254,7 +1254,7 @@ Creates a project on the specified site.
 To create a project, you first create a new instance of a `ProjectItem` and pass it to the create method. To specify the site to create the new project, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site.  See the [TableauAuth class](#tableauauth-class).  
 
 
-REST API: [Create Project](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Create_Project%3FTocPath%3DAPI%2520Reference%7C_____15){:target="_blank"}  
+REST API: [Create Project](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#create_project){:target="_blank"}  
 
 **Parameters**
 
@@ -1273,7 +1273,7 @@ Returns the new project item.
 ```py
 import tableauserverclient as TSC
 tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD', site_id='CONTENTURL')
-server = TSC.Server('http://SERVER')
+server = TSC.Server('https://SERVER')
 
 with server.auth.sign_in(tableau_auth): 
     # create project item
@@ -1299,7 +1299,7 @@ Return a list of project items for a site.
 
 To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site.  See the [TableauAuth class](#tableauauth-class).  
 
-REST API: [Query Projects](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Projects%3FTocPath%3DAPI%2520Reference%7C_____55){:target="_blank"}  
+REST API: [Query Projects](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_projects){:target="_blank"}  
 
 
 **Parameters**  
@@ -1317,7 +1317,7 @@ Returns a list of all `ProjectItem` objects and a `PaginationItem`. Use these va
 ```py    
 import tableauserverclient as TSC  
 tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD', site_id='CONTENTURL')  
-server = TSC.Server('http://SERVER')  
+server = TSC.Server('https://SERVER')  
 
 with server.auth.sign_in(tableau_auth): 
         # get all projects on site
@@ -1340,7 +1340,7 @@ Modify the project settings.
 
 You can use this method to update the project name, the project description, or the project permissions. To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site.  See the [TableauAuth class](#tableauauth-class).   
 
-REST API: [Update Project](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Update_Project%3FTocPath%3DAPI%2520Reference%7C_____82){:target="_blank"}  
+REST API: [Update Project](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_project){:target="_blank"}  
 
 **Parameters**
 
@@ -1366,7 +1366,7 @@ See [ProjectItem class](#projectitem-class)
 
 ```py
 # import tableauserverclient as TSC
-# server = TSC.Server('http://MY-SERVER')
+# server = TSC.Server('https://MY-SERVER')
 # sign in, etc
 
   ...
@@ -1402,7 +1402,7 @@ Deletes a project by ID.
 To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site.  See the [TableauAuth class](#tableauauth-class).  
 
 
-REST API: [Delete Project](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Delete_Project%3FTocPath%3DAPI%2520Reference%7C_____24){:target="_blank"}  
+REST API: [Delete Project](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#delete_project){:target="_blank"}  
 
 
 **Parameters**
@@ -1425,7 +1425,7 @@ Error  |  Description
  
 ```py
 # import tableauserverclient as TSC  
-# server = TSC.Server('http://MY-SERVER')  
+# server = TSC.Server('https://MY-SERVER')  
 # sign in, etc.  
 
  server.projects.delete('1f2f3e4e-5d6d-7c8c-9b0b-1a2a3f4f5e6e')
@@ -1485,7 +1485,7 @@ Name  |  Description
 
 #### RequestOptions.Field class
 
-The `RequestOptions.Field` class corresponds to the fields used in filter expressions in the Tableau REST API. For more information, see [Filtering and Sorting](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_concepts_filtering_and_sorting.htm%3FTocPath%3DConcepts%7C_____7){:target="_blank"} in the Tableau REST API.  
+The `RequestOptions.Field` class corresponds to the fields used in filter expressions in the Tableau REST API. For more information, see [Filtering and Sorting](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_filtering_and_sorting.htm){:target="_blank"} in the Tableau REST API.  
 
 **Attributes**  
 
@@ -1554,7 +1554,7 @@ Use this class to specify view filters to be applied when the CSV data is genera
 
 ```py
 # import tableauserverclient as TSC
-# server = TSC.Server('http://MY-SERVER')
+# server = TSC.Server('https://MY-SERVER')
 # sign in, get a specific view, etc.
 
 # set view filters
@@ -1587,7 +1587,7 @@ You can use the `vf('filter_name', 'filter_value')` method to add view filters. 
 
 ```py
 # import tableauserverclient as TSC  
-# server = TSC.Server('http://MY-SERVER')  
+# server = TSC.Server('https://MY-SERVER')  
 # sign in, get a specific view, etc.  
 
 # set the image request option 
@@ -1622,7 +1622,7 @@ You can use the `vf('filter_name', 'filter_value')` method to add view filters. 
 
 ```py
 # import tableauserverclient as TSC  
-# server = TSC.Server('http://MY-SERVER')  
+# server = TSC.Server('https://MY-SERVER')  
 # sign in, get a specific view, etc.  
 
 # set the PDF request options
@@ -1703,7 +1703,7 @@ schedule.create(schedule_item)
 Creates a new schedule for an extract refresh or a subscription.  
 
 
-REST API: [Create Schedule](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Create_Schedule%3FTocPath%3DAPI%2520Reference%7C_____21){:target="_blank"}  
+REST API: [Create Schedule](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#create_schedule){:target="_blank"}  
 
 
 
@@ -1752,7 +1752,7 @@ schedule.delete(schedule_id)
 Deletes an existing schedule for an extract refresh or a subscription.  
 
 
-REST API: [Delete Schedule](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Delete_Schedule%3FTocPath%3DAPI%2520Reference%7C_____31){:target="_blank"}  
+REST API: [Delete Schedule](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#delete_schedule){:target="_blank"}  
 
 
 
@@ -1783,7 +1783,7 @@ schedule.get([req_options=None])
 Returns all schedule items from the server.  
 
 
-REST API: [Query Schedules](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Schedules%3FTocPath%3DAPI%2520Reference%7C_____65){:target="_blank"}  
+REST API: [Query Schedules](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_schedules){:target="_blank"}  
 
 
 
@@ -1869,7 +1869,7 @@ import tableauserverclient as TSC
 
 ## Server
 
-In the Tableau REST API, the server (`http://MY-SERVER/`) is the base or core of the URI that makes up the various endpoints or methods for accessing resources on the server (views, workbooks, sites, users, data sources, etc.) 
+In the Tableau REST API, the server (`https://MY-SERVER/`) is the base or core of the URI that makes up the various endpoints or methods for accessing resources on the server (views, workbooks, sites, users, data sources, etc.) 
 The TSC library provides a `Server` class that represents the server. You create a server instance to sign in to the server and to call the various methods for accessing resources.  
 
 
@@ -1888,8 +1888,8 @@ The `Server` class contains the attributes that represent the server on Tableau 
 
 Attribute | Description
 :--- | :---
-`server_address`  |  Specifies the address of the Tableau Server or Tableau Online (for example, `http://MY-SERVER/`).  
-`version`   |  Specifies the version of the REST API to use (for example, `'2.5'`). When you use the TSC library to call methods that access Tableau Server, the `version` is passed to the endpoint as part of the URI (`https://MY-SERVER/api/2.5/`). Each release of Tableau Server supports specific versions of the REST API. New versions of the REST API are released with Tableau Server. By default, the value of `version` is set to `'2.3'`, which corresponds to Tableau Server 10.0.  You can view or set this value. You might need to set this to a different value, for example, if you want to access features that are supported by the server and a later version of the REST API.  For more information, see [REST API Versions](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_concepts_versions.htm){:target="_blank"}  
+`server_address`  |  Specifies the address of the Tableau Server or Tableau Online (for example, `https://MY-SERVER/`).  
+`version`   |  Specifies the version of the REST API to use (for example, `'2.5'`). When you use the TSC library to call methods that access Tableau Server, the `version` is passed to the endpoint as part of the URI (`https://MY-SERVER/api/2.5/`). Each release of Tableau Server supports specific versions of the REST API. New versions of the REST API are released with Tableau Server. By default, the value of `version` is set to `'2.3'`, which corresponds to Tableau Server 10.0.  You can view or set this value. You might need to set this to a different value, for example, if you want to access features that are supported by the server and a later version of the REST API.  For more information, see [REST API Versions](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm){:target="_blank"}  
 
 
 
@@ -1900,7 +1900,7 @@ import tableauserverclient as TSC
 
 
 # create a instance of server 
-server = TSC.Server('http://MY-SERVER')
+server = TSC.Server('https://MY-SERVER')
 
 # sign in, etc.
 
@@ -2011,7 +2011,7 @@ Retrieve the build and version information for the server.
 
 This method makes an unauthenticated call, so no sign in or authentication token is required.  
 
-REST API: [Server Info](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Server_Info%3FTocPath%3DAPI%2520Reference%7C_____76){:target="_blank"}   
+REST API: [Server Info](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#server_info){:target="_blank"}   
   
 **Parameters**  
  None 
@@ -2028,7 +2028,7 @@ Error  |  Description
 import tableauserverclient as TSC
 
 # create a instance of server 
-server = TSC.Server('http://MY-SERVER')
+server = TSC.Server('https://MY-SERVER')
 
 # set the version number > 2.3 
 # the server_info.get() method works in 2.4 and later
@@ -2119,7 +2119,7 @@ Creates a new site on the server for the specified site item object.
 Tableau Server only. 
 
 
-REST API: [Create Site](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Create_Site%3FTocPath%3DAPI%2520Reference%7C_____17){:target="_blank"}  
+REST API: [Create Site](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#create_site){:target="_blank"}  
 
 
 
@@ -2141,7 +2141,7 @@ Returns a new instance of `SiteItem`.
 import tableauserverclient as TSC
 
 # create an instance of server 
-server = TSC.Server('http://MY-SERVER')
+server = TSC.Server('https://MY-SERVER')
 
 # create shortcut for admin mode
 content_users=TSC.SiteItem.AdminMode.ContentAndUsers
@@ -2164,7 +2164,7 @@ sites.get()
 Queries all the sites on the server. 
 
 
-REST API: [Query Sites](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Sites%3FTocPath%3DAPI%2520Reference%7C_____58){:target="_blank"}  
+REST API: [Query Sites](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_sites){:target="_blank"}  
 
 
 **Parameters**
@@ -2180,7 +2180,7 @@ Returns a list of all `SiteItem` objects and a `PaginationItem`. Use these value
 
 ```py
 # import tableauserverclient as TSC
-# server = TSC.Server('http://MY-SERVER')
+# server = TSC.Server('https://MY-SERVER')
 # sign in, etc.
 
   # query the sites
@@ -2207,7 +2207,7 @@ sites.get_by_id(site_id)
 Queries the site with the given ID.
 
 
-REST API: [Query  Site](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Site){:target="_blank"}    
+REST API: [Query  Site](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_site){:target="_blank"}    
 
 **Parameters**  
 
@@ -2233,7 +2233,7 @@ Returns the `SiteItem`.
 ```py
 
 # import tableauserverclient as TSC
-# server = TSC.Server('http://MY-SERVER')
+# server = TSC.Server('https://MY-SERVER')
 # sign in, etc.
 
  a_site = server.sites.get_by_id('9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d')
@@ -2253,7 +2253,7 @@ sites.get_by_name(site_name)
 Queries the site with the specified name.
 
 
-REST API: [Query  Site](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Site){:target="_blank"}    
+REST API: [Query  Site](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_site){:target="_blank"}    
 
 **Parameters**  
 
@@ -2279,7 +2279,7 @@ Returns the `SiteItem`.
 ```py
 
 # import tableauserverclient as TSC
-# server = TSC.Server('http://MY-SERVER')
+# server = TSC.Server('https://MY-SERVER')
 # sign in, etc.
 
  a_site = server.sites.get_by_name('MY_SITE')
@@ -2304,7 +2304,7 @@ Modifies the settings for site.
 The site item object must include the site ID and overrides all other settings.
 
 
-REST API: [Update Site](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Update_Site%3FTocPath%3DAPI%2520Reference%7C_____84){:target="_blank"}  
+REST API: [Update Site](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_site){:target="_blank"}  
 
 
 **Parameters**  
@@ -2357,7 +2357,7 @@ Sites.delete(site_id)
 Deletes the specified site.
 
 
-REST API: [Delete Site](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Delete_Site%3FTocPath%3DAPI%2520Reference%7C_____27){:target="_name"}  
+REST API: [Delete Site](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#Delete_Site27){:target="_name"}  
 
 
 **Parameters**
@@ -2381,7 +2381,7 @@ Error  |  Description
 ```py
 
 # import tableauserverclient as TSC
-# server = TSC.Server('http://MY-SERVER')
+# server = TSC.Server('https://MY-SERVER')
 # sign in, etc.
 
 server.sites.delete('9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d')
@@ -2494,7 +2494,7 @@ When a user is subscribed to the content, Tableau Server sends the content to th
 To create a new subscription you need to first create a new `subscription_item` (from `SubscriptionItem` class).
 
 
-REST API: [Create Subscription](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Create_Subscription%3FTocPath%3DAPI%2520Reference%7C_____23){:target="_blank"}
+REST API: [Create Subscription](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#create_subscription){:target="_blank"}
 
 **Parameters**
 
@@ -2553,7 +2553,7 @@ subscriptions.delete(subscription_id)
 
 Deletes the specified subscription from the site. 
 
-REST API: [Delete Subscription](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Delete_Subscription%3FTocPath%3DAPI%2520Reference%7C_____33){:target="_blank"}
+REST API: [Delete Subscription](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#delete_subscription){:target="_blank"}
 
 
 **Parameters**
@@ -2577,7 +2577,7 @@ Error   |  Description
 
 #  import tableauserverclient as TSC
 #  tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD', site_id='SITE')
-#  server = TSC.Server('http://SERVERURL')
+#  server = TSC.Server('https://SERVERURL')
 
 
    with server.auth.sign_in(tableau_auth):
@@ -2598,7 +2598,7 @@ subscription.get(req_options=None)
 Returns information about the subscriptions on the specified site.
 
 
-REST API: [Query Subscriptions](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Subscriptions%3FTocPath%3DAPI%2520Reference%7C_____69){:target="_blank"}
+REST API: [Query Subscriptions](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_subscriptions){:target="_blank"}
 
 **Parameters**
 
@@ -2623,7 +2623,7 @@ subscription.get_by_id(subscription_id)
 
 Returns information about the specified subscription.   
 
-REST API: [Query Subscription](https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Subscription%3FTocPath%3DAPI%2520Reference%7C_____68){:target="_blank"}
+REST API: [Query Subscription](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_subscription){:target="_blank"}
 
 
 **Parameters**
@@ -2731,7 +2731,7 @@ Adds the user to the site.
 
 To add a new user to the site you need to first create a new `user_item` (from `UserItem` class). When you create a new user, you specify the name of the user and their site role. For Tableau Online, you also specify the `auth_setting` attribute in your request.  When you add user to Tableau Online, the name of the user must be the email address that is used to sign in to Tableau Online. After you add a user, Tableau Online sends the user an email invitation. The user can click the link in the invitation to sign in and update their full name and password.
 
-REST API: [Add User to Site](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Add_User_to_Site%3FTocPath%3DAPI%2520Reference%7C_____9){:target="_blank"}
+REST API: [Add User to Site](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#add_user_to_site){:target="_blank"}
 
 **Parameters**
 
@@ -2774,7 +2774,7 @@ Returns information about the users on the specified site.
 To get information about the workbooks a user owns or has view permission for, you must first populate the `UserItem` with workbook information using the [populate_workbooks(*user_item*)](#populate-workbooks-user) method. 
 
 
-REST API: [Get Users on Site](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Get_Users_on_Site%3FTocPath%3DAPI%2520Reference%7C_____41){:target="_blank"}
+REST API: [Get Users on Site](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#get_users_on_site){:target="_blank"}
 
 **Parameters**
 
@@ -2794,7 +2794,7 @@ Returns a list of `UserItem` objects and a `PaginationItem` object.  Use these v
 ```py
 import tableauserverclient as TSC
 tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
-server = TSC.Server('http://SERVERURL')
+server = TSC.Server('https://SERVERURL')
 
 with server.auth.sign_in(tableau_auth):
     all_users, pagination_item = server.users.get()
@@ -2814,7 +2814,7 @@ users.get_by_id(user_id)
 
 Returns information about the specified user.   
 
-REST API: [Query User On Site](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_User_On_Site%3FTocPath%3DAPI%2520Reference%7C_____61){:target="_blank"}
+REST API: [Query User On Site](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_user_on_site){:target="_blank"}
 
 
 **Parameters**
@@ -2873,7 +2873,7 @@ Returns information about the workbooks that the specified user owns and has Rea
 
 This method retrieves the workbook information for the specified user. The REST API is designed to return only the information you ask for explicitly. When you query for all the users, the workbook information for each user is not included. Use this method to retrieve information about the workbooks that the user owns or has Read (view) permissions. The method adds the list of workbooks to the user item object (`user_item.workbooks`).  
 
-REST API:  [Query Datasource Connections](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Datasource_Connections%3FTocPath%3DAPI%2520Reference%7C_____47){:target="_blank"}
+REST API:  [Query Datasource Connections](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_data_source_connections){:target="_blank"}
 
 **Parameters**
 
@@ -2930,7 +2930,7 @@ users.remove(user_id)
 
 Removes the specified user from the site. 
 
-REST API: [Remove User from Site](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Remove_User_from_Site%3FTocPath%3DAPI%2520Reference%7C_____74){:target="_blank"}
+REST API: [Remove User from Site](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#remove_user_from_site){:target="_blank"}
 
 
 **Parameters**
@@ -2954,7 +2954,7 @@ Error   |  Description
 
 #  import tableauserverclient as TSC
 #  tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
-#  server = TSC.Server('http://SERVERURL')
+#  server = TSC.Server('https://SERVERURL')
 
    with server.auth.sign_in(tableau_auth):
      server.users.remove('9f9e9d9c-8b8a-8f8e-7d7c-7b7a6f6d6e6d')
@@ -2974,11 +2974,11 @@ users.update(user_item, password=None)
 
 Updates information about the specified user. 
 
-The information you can modify depends upon whether you are using Tableau Server or Tableau Online, and whether you have configured Tableau Server to use local authentication or Active Directory. For more information, see [Update User](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Update_User%3FTocPath%3DAPI%2520Reference%7C_____86){:target="_blank"}.
+The information you can modify depends upon whether you are using Tableau Server or Tableau Online, and whether you have configured Tableau Server to use local authentication or Active Directory. For more information, see [Update User](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_user){:target="_blank"}.
 
 
 
-REST API: [Update User](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Update_User%3FTocPath%3DAPI%2520Reference%7C_____86){:target="_blank"}
+REST API: [Update User](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_user){:target="_blank"}
 
 **Parameters**
 
@@ -3007,7 +3007,7 @@ An updated `UserItem`.    See [UserItem class](#useritem-class)
 
 #  import tableauserverclient as TSC
 #  tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
-#  server = TSC.Server('http://SERVERURL')
+#  server = TSC.Server('https://SERVERURL')
 
  with server.auth.sign_in(tableau_auth):
     
@@ -3119,7 +3119,7 @@ Returns a list of all `ViewItem` objects and a `PaginationItem`. Use these value
 ```py
 import tableauserverclient as TSC
 tableau_auth = TSC.TableauAuth('username', 'password')
-server = TSC.Server('http://servername')
+server = TSC.Server('https://servername')
 
 with server.auth.sign_in(tableau_auth):
     all_views, pagination_item = server.views.get()
@@ -3425,7 +3425,7 @@ Queries the server and returns information about the workbooks the site.
 
 
 
-REST API: [Query Workbooks for Site](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Workbooks_for_Site%3FTocPath%3DAPI%2520Reference%7C_____70){:target="_blank"}  
+REST API: [Query Workbooks for Site](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_workbooks_for_site){:target="_blank"}  
 
 
 **Parameters**
@@ -3446,7 +3446,7 @@ Returns a list of all `WorkbookItem` objects and a `PaginationItem`. Use these v
 
 import tableauserverclient as TSC
 tableau_auth = TSC.TableauAuth('username', 'password', site_id='site')
-server = TSC.Server('http://servername')
+server = TSC.Server('https://servername')
 
 with server.auth.sign_in(tableau_auth):
   all_workbooks, pagination_item = server.workbooks.get()
@@ -3470,7 +3470,7 @@ workbooks.get_by_id(workbook_id)
 
 Returns information about the specified workbook on the site.
 
-REST API: [Query Workbook](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Workbook%3FTocPath%3DAPI%2520Reference%7C_____66){:target="_blank"}  
+REST API: [Query Workbook](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_workbook){:target="_blank"}  
 
 
 **Parameters**
@@ -3521,7 +3521,7 @@ unless you package the data and workbook in a .twbx file, or publish the data so
 
 For workbooks that are larger than 64 MB, the publish method automatically takes care of chunking the file in parts for uploading. Using this method is considerably more convenient than calling the publish REST APIs directly.  
 
-REST API: [Publish Workbook](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Publish_Workbook%3FTocPath%3DAPI%2520Reference%7C_____45){:target="_blank"}, [Initiate File Upload](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Initiate_File_Upload%3FTocPath%3DAPI%2520Reference%7C_____43){:target="_blank"}, [Append to File Upload](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Append_to_File_Upload%3FTocPath%3DAPI%2520Reference%7C_____13){:target="_blank"}    
+REST API: [Publish Workbook](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#publish_workbook){:target="_blank"}, [Initiate File Upload](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#initiate_file_upload){:target="_blank"}, [Append to File Upload](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#append_to_file_upload){:target="_blank"}    
 
 
 
@@ -3545,7 +3545,7 @@ Error | Description
 `Workbooks cannot be appended.` | The `mode` must be set to `Overwrite` or `CreateNew`.  
 `Only .twb or twbx files can be published as workbooks.`  |  Raises an error if the type of file specified is not supported. 
 
-See the REST API [Publish Workbook](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Publish_Workbook%3FTocPath%3DAPI%2520Reference%7C_____45){:target="_blank"} for additional error codes. 
+See the REST API [Publish Workbook](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#publish_workbook){:target="_blank"} for additional error codes. 
 
 **Returns**
 
@@ -3558,7 +3558,7 @@ The `WorkbookItem` for the workbook that was published.
 
 import tableauserverclient as TSC
 tableau_auth = TSC.TableauAuth('username', 'password', site_id='site')
-server = TSC.Server('http://servername')
+server = TSC.Server('https://servername')
 
 with server.auth.sign_in(tableau_auth):
    # create a workbook item
@@ -3580,7 +3580,7 @@ workbooks.update(workbook_item)
 
 Modifies an existing workbook. Use this method to change the owner or the project that the workbook belongs to, or to change whether the workbook shows views in tabs. The workbook item must include the workbook ID and overrides the existing settings.
 
-REST API: [Update Workbooks](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Update_Workbook%3FTocPath%3DAPI%2520Reference%7C_____87){:target="_blank"}
+REST API: [Update Workbooks](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_workbook){:target="_blank"}
 
 **Parameters**
 
@@ -3600,7 +3600,7 @@ Error | Description
 
 import tableauserverclient as TSC
 tableau_auth = TSC.TableauAuth('username', 'password', site_id='site')
-server = TSC.Server('http://servername')
+server = TSC.Server('https://servername')
 
 with server.auth.sign_in(tableau_auth):
 
@@ -3638,7 +3638,7 @@ Deletes a workbook with the specified ID.
 To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site.  See the [TableauAuth class](#tableauauth-class).  
 
 
-REST API: [Delete Workbook](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Delete_Workbook%3FTocPath%3DAPI%2520Reference%7C_____31){:target="_blank"}  
+REST API: [Delete Workbook](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#Delete_Workbook31){:target="_blank"}  
 
 
 **Parameters**
@@ -3661,7 +3661,7 @@ Error  |  Description
  
 ```py
 # import tableauserverclient as TSC  
-# server = TSC.Server('http://MY-SERVER')  
+# server = TSC.Server('https://MY-SERVER')  
 # tableau_auth sign in, etc.  
 
  server.workbooks.delete('1a1b1c1d-2e2f-2a2b-3c3d-3e3f4a4b4c4d')
@@ -3682,7 +3682,7 @@ workbooks.download(workbook_id, filepath=None, no_extract=False)
 Downloads a workbook to the specified directory (optional).
 
 
-REST API: [Download Workbook](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Download_Workbook%3FTocPath%3DAPI%2520Reference%7C_____36){:target="_blank"}  
+REST API: [Download Workbook](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#download_workbook){:target="_blank"}  
 
 
 **Parameters**
@@ -3733,7 +3733,7 @@ You must first call this method to populate views before you can iterate through
 
 This method retrieves the view information for the specified workbook. The REST API is designed to return only the information you ask for explicitly. When you query for all the data sources, the view information is not included. Use this method to retrieve the views. The method adds the list of views to the workbook item (`workbook_item.views`). This is a list of `ViewItem`.  
 
-REST API:  [Query Views for Workbook](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Views_for_Workbook%3FTocPath%3DAPI%2520Reference%7C_____65){:target="_blank"}
+REST API:  [Query Views for Workbook](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_views_for_workbook){:target="_blank"}
 
 **Parameters**
 
@@ -3761,7 +3761,7 @@ None. A list of `ViewItem` objects are added to the workbook (`workbook_item.vie
 ```py
 # import tableauserverclient as TSC
 
-# server = TSC.Server('http://SERVERURL')
+# server = TSC.Server('https://SERVERURL')
 # 
    ... 
 
@@ -3796,7 +3796,7 @@ connections.
 
 This method retrieves the data source connection information for the specified workbook. The REST API is designed to return only the information you ask for explicitly. When you query all the workbooks, the data source connection information is not included. Use this method to retrieve the connection information for any data sources used by the workbook. The method adds the list of data connections to the workbook item (`workbook_item.connections`). This is a list of `ConnectionItem`.  
 
-REST API:  [Query Workbook Connections](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Workbook_Connections%3FTocPath%3DAPI%2520Reference%7C_____67){:target="_blank"}  
+REST API:  [Query Workbook Connections](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_workbook_connections){:target="_blank"}  
 
 **Parameters**
 
@@ -3824,7 +3824,7 @@ None. A list of `ConnectionItem` objects are added to the data source (`workbook
 ```py
 # import tableauserverclient as TSC
 
-# server = TSC.Server('http://SERVERURL')
+# server = TSC.Server('https://SERVERURL')
 # 
    ... 
 
@@ -3858,7 +3858,7 @@ This method gets the preview image (thumbnail) for the specified workbook item.
 
 The method uses the `view.id` and `workbook.id` to identify the preview image. The method populates the `workbook_item.preview_image`. 
 
-REST API: [Query View Preview Image](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Query_Workbook_Preview_Image%3FTocPath%3DAPI%2520Reference%7C_____69){:target="_blank"}
+REST API: [Query View Preview Image](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_workbook_preview_image){:target="_blank"}
 
 **Parameters** 
 
@@ -3888,7 +3888,7 @@ None. The preview image is added to the view.
 
 # import tableauserverclient as TSC
 
-# server = TSC.Server('http://SERVERURL')
+# server = TSC.Server('https://SERVERURL')
 
    ... 
 
@@ -3911,7 +3911,7 @@ Updates a workbook connection information (server address, server port, user nam
 
 The workbook connections must be populated before the strings can be updated. See [workbooks.populate_connections](#workbooks.populate_connections)
 
-REST API:  [Update Workbook Connection](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_ref.htm#Update_Workbook_Connection%3FTocPath%3DAPI%2520Reference%7C_____88){:target="_blank"}  
+REST API:  [Update Workbook Connection](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_workbook_connection){:target="_blank"}  
 
 **Parameters**
 
