@@ -148,7 +148,7 @@ class DatabaseItem(object):
 
         if 'id' in database_values:
             self._id = database_values['id']
-        
+
         if 'name' in database_values:
             self._name = database_values['name']
 
@@ -230,6 +230,7 @@ class DatabaseItem(object):
             datbase_values['contact'] = contact_values.attrib.copy()
 
         return database_values
+
 
 # Used to convert string represented boolean to a boolean type
 def string_to_bool(s):

@@ -68,8 +68,20 @@ class Tables(Endpoint):
         url = "{0}/{1}/columns".format(self.baseurl, table_item.id)
         server_response = self.get_request(url)
         columns = ColumnItem.from_response(server_response.content,
-                                       self.parent_srv.namespace)
+                                           self.parent_srv.namespace)
         return columns
+
+    # Update workbook_connection
+    @api(version="3.5")
+    def update_column(self, table_item, column_item):
+        url = "{0}/{1}/columns/{2}".format(self.baseurl, table_item.id, column_item.id)
+        update_req = RequestFactory.Column.update_req(column_item)
+        server_response = self.put_request(url, update_req)
+        column = ColumnItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+
+        logger.info('Updated table item (ID: {0} & column item {1}'.format(table_item.id,
+                                                                           column_item.id))
+        return column
 
     @api(version='3.5')
     def populate_permissions(self, item):

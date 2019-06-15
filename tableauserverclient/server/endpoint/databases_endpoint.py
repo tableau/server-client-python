@@ -69,7 +69,7 @@ class Databases(Endpoint):
         url = "{0}/{1}/tables".format(self.baseurl, database_item.id)
         server_response = self.get_request(url)
         tables = TableItem.from_response(server_response.content,
-                                       self.parent_srv.namespace)
+                                         self.parent_srv.namespace)
         return tables
 
     @api(version='3.5')

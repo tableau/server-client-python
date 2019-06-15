@@ -128,6 +128,7 @@ class TableItem(object):
 
         return table_values
 
+
 # Used to convert string represented boolean to a boolean type
 def string_to_bool(s):
     return s.lower() == 'true'

@@ -59,6 +59,18 @@ class AuthRequest(object):
             user_element.attrib['id'] = auth_item.user_id_to_impersonate
         return ET.tostring(xml_request)
 
+
+class ColumnRequest(object):
+    def update_req(self, column_item):
+        xml_request = ET.Element('tsRequest')
+        column_element = ET.SubElement(xml_request, 'column')
+
+        if column_item.description:
+            column_element.attrib['description'] = str(column_item.description)
+
+        return ET.tostring(xml_request)
+
+
 class DatabaseRequest(object):
     def update_req(self, database_item):
         xml_request = ET.Element('tsRequest')
@@ -76,6 +88,7 @@ class DatabaseRequest(object):
             database_element.attrib['description'] = str(database_item.description)
 
         return ET.tostring(xml_request)
+
 
 class DatasourceRequest(object):
     def _generate_xml(self, datasource_item, connection_credentials=None, connections=None):
@@ -330,6 +343,7 @@ class SiteRequest(object):
             site_element.attrib['catalogingEnabled'] = str(site_item.cataloging_enabled).lower()
         return ET.tostring(xml_request)
 
+
 class TableRequest(object):
     def update_req(self, table_item):
         xml_request = ET.Element('tsRequest')
@@ -348,6 +362,7 @@ class TableRequest(object):
             table_element.attrib['description'] = str(table_item.description)
 
         return ET.tostring(xml_request)
+
 
 class TagRequest(object):
     def add_req(self, tag_set):
@@ -499,6 +514,7 @@ class EmptyRequest(object):
 class RequestFactory(object):
     Auth = AuthRequest()
     Connection = Connection()
+    Column = ColumnRequest()
     Datasource = DatasourceRequest()
     Database = DatabaseRequest()
     Empty = EmptyRequest()

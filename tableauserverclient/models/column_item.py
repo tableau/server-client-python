@@ -24,6 +24,14 @@ class ColumnItem(object):
     def name(self, value):
         self._name = value
 
+    @property
+    def description(self):
+        return self._description
+
+    @description.setter
+    def description(self, value):
+        self._description = value
+
     def _set_values(self, id, name, description, remote_type, embedded, schema):
         if id is not None:
             self._id = id
@@ -31,7 +39,7 @@ class ColumnItem(object):
             self._name = name
         if description:
             self.description = description
-        if embedded:
+        if embedded is not None:
             self.embedded = embedded
         if schema:
             self.schema = schema
@@ -49,6 +57,7 @@ class ColumnItem(object):
             column_item = cls(name)
             column_item._set_values(id, name, description, remote_type, embedded, schema)
             all_column_items.append(column_item)
+
         return all_column_items
 
     @staticmethod
@@ -58,9 +67,12 @@ class ColumnItem(object):
         description = column_xml.get('description', None)
         remote_type = column_xml.get('remoteType', None)
         embedded = column_xml.get('embedded', None)
+        if embedded is not None:
+            embedded = string_to_bool(embedded)
         schema = column_xml.get('schema', None)
 
         return id, name, description, remote_type, embedded, schema
+
 
 # Used to convert string represented boolean to a boolean type
 def string_to_bool(s):
