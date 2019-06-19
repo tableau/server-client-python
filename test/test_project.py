@@ -3,11 +3,15 @@ import os
 import requests_mock
 import tableauserverclient as TSC
 
+from ._utils import read_xml_asset, read_xml_assets, asset
+
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
 GET_XML = os.path.join(TEST_ASSET_DIR, 'project_get.xml')
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'project_update.xml')
 CREATE_XML = os.path.join(TEST_ASSET_DIR, 'project_create.xml')
+POPULATE_PERMISSIONS_XML = 'project_populate_permissions.xml'
+POPULATE_WORKBOOK_DEFAULT_PERMISSIONS_XML = 'project_populate_workbook_default_permissions.xml'
 
 
 class ProjectTests(unittest.TestCase):
@@ -97,3 +101,54 @@ class ProjectTests(unittest.TestCase):
 
     def test_create_missing_name(self):
         self.assertRaises(ValueError, TSC.ProjectItem, '')
+
+    def test_populate_permissions(self):
+        with open(asset(POPULATE_PERMISSIONS_XML), 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + '/0448d2ed-590d-4fa0-b272-a2a8a24555b5/permissions', text=response_xml)
+            single_project = TSC.ProjectItem('Project3')
+            single_project._id = '0448d2ed-590d-4fa0-b272-a2a8a24555b5'
+
+            self.server.projects.populate_permissions(single_project)
+            permissions = single_project.permissions
+
+            self.assertEqual(permissions[0].grantee.tag_name, 'group')
+            self.assertEqual(permissions[0].grantee.id, 'c8f2773a-c83a-11e8-8c8f-33e6d787b506')
+            self.assertDictEqual(permissions[0].capabilities, {
+                TSC.Permission.Capability.Write: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow,
+            })
+
+    def test_populate_workbooks(self):
+        response_xml = read_xml_asset(POPULATE_WORKBOOK_DEFAULT_PERMISSIONS_XML)
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/default-permissions/workbooks',
+                  text=response_xml)
+            single_project = TSC.ProjectItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
+            single_project.owner_id = 'dd2239f6-ddf1-4107-981a-4cf94e415794'
+            single_project._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
+
+            self.server.projects.populate_workbook_default_permissions(single_project)
+            permissions = single_project.default_workbook_permissions
+
+        rule1 = permissions.pop()
+
+        self.assertEqual('c8f2773a-c83a-11e8-8c8f-33e6d787b506', rule1.grantee.id)
+        self.assertEqual('group', rule1.grantee.tag_name)
+        self.assertDictEqual(rule1.capabilities, {
+            TSC.Permission.Capability.Write: TSC.Permission.Mode.Allow,
+            TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow,
+            TSC.Permission.Capability.Filter: TSC.Permission.Mode.Allow,
+            TSC.Permission.Capability.ChangePermissions: TSC.Permission.Mode.Allow,
+            TSC.Permission.Capability.WebAuthoring: TSC.Permission.Mode.Allow,
+            TSC.Permission.Capability.ExportData: TSC.Permission.Mode.Allow,
+            TSC.Permission.Capability.ExportXml: TSC.Permission.Mode.Allow,
+            TSC.Permission.Capability.ExportImage: TSC.Permission.Mode.Allow,
+            TSC.Permission.Capability.Delete: TSC.Permission.Mode.Deny,
+            TSC.Permission.Capability.ShareView: TSC.Permission.Mode.Allow,
+            TSC.Permission.Capability.ViewUnderlyingData: TSC.Permission.Mode.Deny,
+            TSC.Permission.Capability.ViewComments: TSC.Permission.Mode.Allow,
+            TSC.Permission.Capability.AddComment: TSC.Permission.Mode.Allow,
+            TSC.Permission.Capability.ChangeHierarchy: TSC.Permission.Mode.Allow,
+        })
