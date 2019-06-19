@@ -7,9 +7,9 @@ from ._utils import read_xml_asset, read_xml_assets, asset
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
-GET_XML = os.path.join(TEST_ASSET_DIR, 'project_get.xml')
-UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'project_update.xml')
-CREATE_XML = os.path.join(TEST_ASSET_DIR, 'project_create.xml')
+GET_XML = asset('project_get.xml')
+UPDATE_XML = asset('project_update.xml')
+CREATE_XML = asset('project_create.xml')
 POPULATE_PERMISSIONS_XML = 'project_populate_permissions.xml'
 POPULATE_WORKBOOK_DEFAULT_PERMISSIONS_XML = 'project_populate_workbook_default_permissions.xml'
 
