@@ -363,7 +363,7 @@ class WorkbookRequest(object):
         if workbook_item.show_tabs:
             workbook_element.attrib['showTabs'] = str(workbook_item.show_tabs).lower()
         project_element = ET.SubElement(workbook_element, 'project')
-        project_element.attrib['id'] = workbook_item.project_id
+        project_element.attrib['id'] = str(workbook_item.project_id)
 
         if connection_credentials is not None and connections is not None:
             raise RuntimeError('You cannot set both `connections` and `connection_credentials`')
