@@ -7,7 +7,7 @@ from .. import RequestFactory, TableItem, ColumnItem, PaginationItem, Permission
 
 import logging
 
-logger = logging.getLogger('tableau.endpoint.projects')
+logger = logging.getLogger('tableau.endpoint.tables')
 
 
 class Tables(Endpoint):
