@@ -29,6 +29,17 @@ class Tables(Endpoint):
         all_table_items = TableItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_table_items, pagination_item
 
+    # Get 1 table
+    @api(version="3.5")
+    def get_by_id(self, table_id):
+        if not table_id:
+            error = "table ID undefined."
+            raise ValueError(error)
+        logger.info('Querying single table (ID: {0})'.format(table_id))
+        url = "{0}/{1}".format(self.baseurl, table_id)
+        server_response = self.get_request(url)
+        return TableItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+
     @api(version="3.5")
     def delete(self, table_id):
         if not table_id:

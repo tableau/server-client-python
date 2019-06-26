@@ -68,6 +68,10 @@ class TableItem(object):
     def contact_id(self):
         return self._contact_id
 
+    @contact_id.setter
+    def contact_id(self, value):
+        self._contact_id = value
+
     @property
     def columns(self):
         if self._columns is None:

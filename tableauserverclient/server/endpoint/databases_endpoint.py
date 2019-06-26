@@ -30,6 +30,17 @@ class Databases(Endpoint):
         all_database_items = DatabaseItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_database_items, pagination_item
 
+    # Get 1 database
+    @api(version="3.5")
+    def get_by_id(self, database_id):
+        if not database_id:
+            error = "database ID undefined."
+            raise ValueError(error)
+        logger.info('Querying single database (ID: {0})'.format(database_id))
+        url = "{0}/{1}".format(self.baseurl, database_id)
+        server_response = self.get_request(url)
+        return DatabaseItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+
     @api(version="3.5")
     def delete(self, database_id):
         if not database_id:
@@ -52,8 +63,8 @@ class Databases(Endpoint):
         updated_database = DatabaseItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return updated_database
 
-    # Get all tables of the database
-    @api(version="3.5")
+    # Not Implemented Yet
+    @api(version="99")
     def populate_tables(self, database_item):
         if not database_item.id:
             error = "database item missing ID. database must be retrieved from server first."
