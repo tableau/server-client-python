@@ -142,31 +142,28 @@ class GroupRequest(object):
 
 
 class PermissionRequest(object):
-    def _add_capability(self, parent_element, capability_set, mode):
-        for capability_item in capability_set:
-            capability_element = ET.SubElement(parent_element, 'capability')
-            capability_element.attrib['name'] = capability_item
-            capability_element.attrib['mode'] = mode
-
-    def add_req(self, permission_item):
+    def add_req(self, item, permission_item):
         xml_request = ET.Element('tsRequest')
         permissions_element = ET.SubElement(xml_request, 'permissions')
+        item_element = ET.SubElement(permissions_element, type(item).__name__.split('Item')[0].lower())
+        item_element.attrib['id'] = item.id
 
-        for user_capability in permission_item.user_capabilities:
-            grantee_element = ET.SubElement(permissions_element, 'granteeCapabilities')
-            grantee_capabilities_element = ET.SubElement(grantee_element, user_capability.User)
-            grantee_capabilities_element.attrib['id'] = user_capability.grantee_id
-            capabilities_element = ET.SubElement(grantee_element, 'capabilities')
-            self._add_capability(capabilities_element, user_capability.allowed, user_capability.Allow)
-            self._add_capability(capabilities_element, user_capability.denied, user_capability.Deny)
-
-        for group_capability in permission_item.group_capabilities:
-            grantee_element = ET.SubElement(permissions_element, 'granteeCapabilities')
-            ET.SubElement(grantee_element, group_capability, id=group_capability.grantee_id)
-            capabilities_element = ET.SubElement(grantee_element, 'capabilities')
-            self._add_capability(capabilities_element, group_capability.allowed, group_capability.Allow)
-            self._add_capability(capabilities_element, group_capability.denied, group_capability.Deny)
+        self._add_all_capabilities(permissions_element, permission_item.capabilities)
         return ET.tostring(xml_request)
+
+    def _add_all_capabilities(self, permissions_element, capabilities_map):
+        for capability in capabilities_map.values():
+            grantee_capabilities_element = ET.SubElement(permissions_element, 'granteeCapabilities')
+            grantee_element = ET.SubElement(grantee_capabilities_element, capability.type)
+            grantee_element.attrib['id'] = capability.object_id
+            capabilities_element = ET.SubElement(grantee_capabilities_element, 'capabilities')
+            self._add_capabilities(capabilities_element, capability.map)
+
+    def _add_capabilities(self, capabilities_element, capabilities):
+        for name, mode in capabilities.items():
+            capability_element = ET.SubElement(capabilities_element, 'capability')
+            capability_element.attrib['name'] = name
+            capability_element.attrib['mode'] = mode
 
 
 class ProjectRequest(object):
