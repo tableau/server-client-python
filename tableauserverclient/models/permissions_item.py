@@ -46,7 +46,7 @@ class Permission:
         Write = 'Write'
 
 
-class CapabilityItem(object):
+class PermissionsRule(object):
     def __init__(self, type=None, object_id=None, map={}):
         self._type = type
         self._object_id = object_id
@@ -112,8 +112,8 @@ class PermissionsCollection(object):
 
                 capability_map[name] = mode
 
-            capability_item = CapabilityItem(grantee_type, grantee_id,
-                                             capability_map)
+            capability_item = PermissionsRule(grantee_type, grantee_id,
+                                              capability_map)
             capabilities[(grantee_type, grantee_id)] = capability_item
 
         permissions._set_values(capabilities)

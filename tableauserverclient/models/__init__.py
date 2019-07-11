@@ -17,4 +17,4 @@ from .user_item import UserItem
 from .view_item import ViewItem
 from .workbook_item import WorkbookItem
 from .subscription_item import SubscriptionItem
-from .permissions_item import Permission, PermissionsCollection, CapabilityItem
+from .permissions_item import Permission, PermissionsCollection, PermissionsRule
