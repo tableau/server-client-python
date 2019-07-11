@@ -3,7 +3,7 @@ from .models import ConnectionCredentials, ConnectionItem, DatasourceItem,\
     GroupItem, JobItem, BackgroundJobItem, PaginationItem, ProjectItem, ScheduleItem, \
     SiteItem, TableauAuth, UserItem, ViewItem, WorkbookItem, UnpopulatedPropertyError, \
     HourlyInterval, DailyInterval, WeeklyInterval, MonthlyInterval, IntervalItem, TaskItem, \
-    SubscriptionItem, Target, PermissionsItem, Permission, CapabilityItem
+    SubscriptionItem, Target, PermissionsCollection, Permission, CapabilityItem
 
 from .server import RequestOptions, CSVRequestOptions, ImageRequestOptions, PDFRequestOptions, Filter, Sort, \
     Server, ServerResponseError, MissingRequiredFieldError, NotSignedInError, Pager

@@ -61,7 +61,7 @@ class CapabilityItem(object):
         return self._object_id
 
 
-class PermissionsItem(object):
+class PermissionsCollection(object):
     def __init__(self):
         self._capabilities = None
 
@@ -74,7 +74,7 @@ class PermissionsItem(object):
 
     @classmethod
     def from_response(cls, resp, ns=None):
-        permissions = PermissionsItem()
+        permissions = PermissionsCollection()
         parsed_response = ET.fromstring(resp)
 
         capabilities = {}

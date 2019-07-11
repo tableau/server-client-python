@@ -1,6 +1,6 @@
 import logging
 
-from .. import RequestFactory, PermissionsItem
+from .. import RequestFactory, PermissionsCollection
 
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
@@ -29,8 +29,8 @@ class _PermissionsEndpoint(Endpoint):
         url = '{0}/{1}/permissions'.format(self.owner_baseurl(), item.id)
         update_req = RequestFactory.Permission.add_req(item, permission_item)
         response = self.put_request(url, update_req)
-        permissions = PermissionsItem.from_response(response.content,
-                                                    self.parent_srv.namespace)
+        permissions = PermissionsCollection.from_response(response.content,
+                                                          self.parent_srv.namespace)
 
         logger.info('Updated permissions for item {0}'.format(item.id))
 
@@ -68,6 +68,6 @@ class _PermissionsEndpoint(Endpoint):
     def _get_permissions(self, item, req_options=None):
         url = "{0}/{1}/permissions".format(self.owner_baseurl(), item.id)
         server_response = self.get_request(url, req_options)
-        permissions = PermissionsItem.from_response(server_response.content,
-                                                    self.parent_srv.namespace)
+        permissions = PermissionsCollection.from_response(server_response.content,
+                                                          self.parent_srv.namespace)
         return permissions
