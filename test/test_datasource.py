@@ -13,7 +13,6 @@ GET_XML = 'datasource_get.xml'
 GET_EMPTY_XML = 'datasource_get_empty.xml'
 GET_BY_ID_XML = 'datasource_get_by_id.xml'
 POPULATE_CONNECTIONS_XML = 'datasource_populate_connections.xml'
-POPULATE_PERMISSIONS_XML = 'datasource_populate_permissions.xml'
 PUBLISH_XML = 'datasource_publish.xml'
 PUBLISH_XML_ASYNC = 'datasource_publish_async.xml'
 UPDATE_XML = 'datasource_update.xml'
@@ -181,38 +180,6 @@ class DatasourceTests(unittest.TestCase):
             self.assertEquals('bar', new_connection.server_address)
             self.assertEquals('9876', new_connection.server_port)
             self.assertEqual('foo', new_connection.username)
-
-    def test_populate_permissions(self):
-        with open(asset(POPULATE_PERMISSIONS_XML), 'rb') as f:
-            response_xml = f.read().decode('utf-8')
-        with requests_mock.mock() as m:
-            m.get(self.baseurl + '/0448d2ed-590d-4fa0-b272-a2a8a24555b5/permissions', text=response_xml)
-            single_datasource = TSC.DatasourceItem('test')
-            single_datasource._id = '0448d2ed-590d-4fa0-b272-a2a8a24555b5'
-
-            self.server.datasources.populate_permissions(single_datasource)
-            permissions = single_datasource.permissions
-            
-            grantee_type = TSC.Permission.GranteeType.Group
-            object_id = '5e5e1978-71fa-11e4-87dd-7382f5c437af'
-            key = (grantee_type, object_id)
-            self.assertEqual(permissions.capabilities[key].type, TSC.Permission.GranteeType.Group)
-            self.assertEqual(permissions.capabilities[key].object_id, '5e5e1978-71fa-11e4-87dd-7382f5c437af')
-            self.assertDictEqual(permissions.capabilities[key].map, {
-                TSC.Permission.DatasourceCapabilityType.Delete: TSC.Permission.CapabilityMode.Deny,
-                TSC.Permission.DatasourceCapabilityType.ChangePermissions: TSC.Permission.CapabilityMode.Deny,
-                TSC.Permission.DatasourceCapabilityType.Connect: TSC.Permission.CapabilityMode.Allow,
-                TSC.Permission.DatasourceCapabilityType.Read: TSC.Permission.CapabilityMode.Allow,
-            })
-
-            grantee_type = TSC.Permission.GranteeType.User
-            object_id = '7c37ee24-c4b1-42b6-a154-eaeab7ee330a'
-            key = (grantee_type, object_id)
-            self.assertEqual(permissions.capabilities[key].type, TSC.Permission.GranteeType.User)
-            self.assertEqual(permissions.capabilities[key].object_id, '7c37ee24-c4b1-42b6-a154-eaeab7ee330a')
-            self.assertDictEqual(permissions.capabilities[key].map, {
-                TSC.Permission.DatasourceCapabilityType.Write: TSC.Permission.CapabilityMode.Allow,
-            })
 
     def test_publish(self):
         response_xml = read_xml_asset(PUBLISH_XML)
