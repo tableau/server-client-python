@@ -1,6 +1,5 @@
 from .endpoint import api, Endpoint
 from .exceptions import MissingRequiredFieldError
-from .permissions_endpoint import _PermissionsEndpoint
 from .. import RequestFactory, ProjectItem, PaginationItem
 import logging
 
@@ -10,8 +9,6 @@ logger = logging.getLogger('tableau.endpoint.projects')
 class Projects(Endpoint):
     def __init__(self, parent_srv):
         super(Projects, self).__init__(parent_srv)
-
-        self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
 
     @property
     def baseurl(self):
@@ -56,15 +53,3 @@ class Projects(Endpoint):
         new_project = ProjectItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         logger.info('Created new project (ID: {0})'.format(new_project.id))
         return new_project
-
-    @api(version='2.0')
-    def populate_permissions(self, item):
-        self._permissions.populate(item)
-
-    @api(version='2.0')
-    def update_permission(self, item, permission_item):
-        self._permissions.update(item, permission_item)
-
-    @api(version='2.0')
-    def delete_permission(self, item, capability_item):
-        self._permissions.delete(item, capability_item)
