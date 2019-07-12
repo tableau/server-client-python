@@ -282,24 +282,18 @@ class WorkbookTests(unittest.TestCase):
             self.server.workbooks.populate_permissions(single_workbook)
             permissions = single_workbook.permissions
 
-            grantee_type = TSC.Permission.GranteeType.Group
-            object_id = '5e5e1978-71fa-11e4-87dd-7382f5c437af'
-            key = (grantee_type, object_id)
-            self.assertEqual(permissions.capabilities[key].type, TSC.Permission.GranteeType.Group)
-            self.assertEqual(permissions.capabilities[key].object_id, '5e5e1978-71fa-11e4-87dd-7382f5c437af')
-            self.assertDictEqual(permissions.capabilities[key].map, {
+            self.assertEqual(permissions.rules[0].grantee.grantee_type, TSC.Permission.GranteeType.Group)
+            self.assertEqual(permissions.rules[0].grantee.grantee_id, '5e5e1978-71fa-11e4-87dd-7382f5c437af')
+            self.assertDictEqual(permissions.rules[0].permissions_map, {
                 TSC.Permission.WorkbookCapabilityType.WebAuthoring: TSC.Permission.CapabilityMode.Allow,
                 TSC.Permission.WorkbookCapabilityType.Read: TSC.Permission.CapabilityMode.Allow,
                 TSC.Permission.WorkbookCapabilityType.Filter: TSC.Permission.CapabilityMode.Allow,
                 TSC.Permission.WorkbookCapabilityType.AddComment: TSC.Permission.CapabilityMode.Allow
             })
 
-            grantee_type = TSC.Permission.GranteeType.User
-            object_id = '7c37ee24-c4b1-42b6-a154-eaeab7ee330a'
-            key = (grantee_type, object_id)
-            self.assertEqual(permissions.capabilities[key].type, TSC.Permission.GranteeType.User)
-            self.assertEqual(permissions.capabilities[key].object_id, '7c37ee24-c4b1-42b6-a154-eaeab7ee330a')
-            self.assertDictEqual(permissions.capabilities[key].map, {
+            self.assertEqual(permissions.rules[1].grantee.grantee_type, TSC.Permission.GranteeType.User)
+            self.assertEqual(permissions.rules[1].grantee.grantee_id, '7c37ee24-c4b1-42b6-a154-eaeab7ee330a')
+            self.assertDictEqual(permissions.rules[1].permissions_map, {
                 TSC.Permission.WorkbookCapabilityType.ExportImage: TSC.Permission.CapabilityMode.Allow,
                 TSC.Permission.WorkbookCapabilityType.ShareView: TSC.Permission.CapabilityMode.Allow,
                 TSC.Permission.WorkbookCapabilityType.ExportData: TSC.Permission.CapabilityMode.Deny,
