@@ -49,15 +49,19 @@ class Permission:
 class PermissionsGrantee(object):
     def __init__(self, grantee_type, grantee_id):
 
-        if grantee_type not in [Permission.GranteeType.User, Permission.GranteeType.Group]:
-            raise UnknownGranteeTypeError()
+        if grantee_type not in [
+            Permission.GranteeType.User,
+            Permission.GranteeType.Group,
+        ]:
+            raise UnknownGranteeTypeError(grantee_type)
 
         self._grantee_type = grantee_type
         self._grantee_id = grantee_id
 
     @classmethod
     def from_xml_element(cls, xml_element):
-        return cls(xml_element.tag, xml_element.get("id"))
+        tag_without_namespace = xml_element.tag.split("}")[-1]
+        return cls(tag_without_namespace, xml_element.get("id"))
 
     def to_xml_element(self):
         xml_element = ET.Element(self.grantee_type)
