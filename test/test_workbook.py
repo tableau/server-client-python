@@ -4,7 +4,6 @@ import requests_mock
 import tableauserverclient as TSC
 import xml.etree.ElementTree as ET
 
-from tableauserverclient import PermissionsGrantee, Permission, PermissionsRule, PermissionsCollection
 from tableauserverclient.datetime_helpers import format_datetime
 from tableauserverclient.server.endpoint.exceptions import InternalServerError
 from tableauserverclient.server.request_factory import RequestFactory
@@ -311,23 +310,23 @@ class WorkbookTests(unittest.TestCase):
             single_workbook = TSC.WorkbookItem('test')
             single_workbook._id = '21778de4-b7b9-44bc-a599-1506a2639ace'
 
-            permisssion_collection = PermissionsCollection([
-                PermissionsRule(
-                    PermissionsGrantee(Permission.GranteeType.Group, '5e5e1978-71fa-11e4-87dd-7382f5c437af'),
+            permisssion_collection = TSC.PermissionsCollection([
+                TSC.PermissionsRule(
+                    TSC.PermissionsGrantee(TSC.Permission.GranteeType.Group, '5e5e1978-71fa-11e4-87dd-7382f5c437af'),
                     {
-                        Permission.WorkbookCapabilityType.WebAuthoring: Permission.CapabilityMode.Allow,
-                        Permission.WorkbookCapabilityType.Read: Permission.CapabilityMode.Allow,
-                        Permission.WorkbookCapabilityType.Filter: Permission.CapabilityMode.Allow,
-                        Permission.WorkbookCapabilityType.AddComment: Permission.CapabilityMode.Allow,
+                        TSC.Permission.WorkbookCapabilityType.WebAuthoring: TSC.Permission.CapabilityMode.Allow,
+                        TSC.Permission.WorkbookCapabilityType.Read: TSC.Permission.CapabilityMode.Allow,
+                        TSC.Permission.WorkbookCapabilityType.Filter: TSC.Permission.CapabilityMode.Allow,
+                        TSC.Permission.WorkbookCapabilityType.AddComment: TSC.Permission.CapabilityMode.Allow,
                     }
                 ),
-                PermissionsRule(
-                    PermissionsGrantee(Permission.GranteeType.User, '7c37ee24-c4b1-42b6-a154-eaeab7ee330a'),
+                TSC.PermissionsRule(
+                    TSC.PermissionsGrantee(TSC.Permission.GranteeType.User, '7c37ee24-c4b1-42b6-a154-eaeab7ee330a'),
                     {
-                        Permission.WorkbookCapabilityType.ExportImage: Permission.CapabilityMode.Allow,
-                        Permission.WorkbookCapabilityType.ShareView: Permission.CapabilityMode.Allow,
-                        Permission.WorkbookCapabilityType.ExportData: Permission.CapabilityMode.Deny,
-                        Permission.WorkbookCapabilityType.ViewComments: Permission.CapabilityMode.Deny,
+                        TSC.Permission.WorkbookCapabilityType.ExportImage: TSC.Permission.CapabilityMode.Allow,
+                        TSC.Permission.WorkbookCapabilityType.ShareView: TSC.Permission.CapabilityMode.Allow,
+                        TSC.Permission.WorkbookCapabilityType.ExportData: TSC.Permission.CapabilityMode.Deny,
+                        TSC.Permission.WorkbookCapabilityType.ViewComments: TSC.Permission.CapabilityMode.Deny,
                     }
                 ),
             ])
@@ -386,23 +385,23 @@ class WorkbookTests(unittest.TestCase):
             single_workbook = TSC.WorkbookItem('test')
             single_workbook._id = '21778de4-b7b9-44bc-a599-1506a2639ace'
 
-            permisssion_collection = PermissionsCollection([
-                PermissionsRule(
-                    PermissionsGrantee(Permission.GranteeType.Group, '5e5e1978-71fa-11e4-87dd-7382f5c437af'),
+            permisssion_collection = TSC.PermissionsCollection([
+                TSC.PermissionsRule(
+                    TSC.PermissionsGrantee(TSC.Permission.GranteeType.Group, '5e5e1978-71fa-11e4-87dd-7382f5c437af'),
                     {
-                        Permission.WorkbookCapabilityType.WebAuthoring: Permission.CapabilityMode.Allow,
-                        Permission.WorkbookCapabilityType.Read: Permission.CapabilityMode.Allow,
-                        Permission.WorkbookCapabilityType.Filter: Permission.CapabilityMode.Allow,
-                        Permission.WorkbookCapabilityType.AddComment: Permission.CapabilityMode.Allow,
+                        TSC.Permission.WorkbookCapabilityType.WebAuthoring: TSC.Permission.CapabilityMode.Allow,
+                        TSC.Permission.WorkbookCapabilityType.Read: TSC.Permission.CapabilityMode.Allow,
+                        TSC.Permission.WorkbookCapabilityType.Filter: TSC.Permission.CapabilityMode.Allow,
+                        TSC.Permission.WorkbookCapabilityType.AddComment: TSC.Permission.CapabilityMode.Allow,
                     }
                 ),
-                PermissionsRule(
-                    PermissionsGrantee(Permission.GranteeType.User, '7c37ee24-c4b1-42b6-a154-eaeab7ee330a'),
+                TSC.PermissionsRule(
+                    TSC.PermissionsGrantee(TSC.Permission.GranteeType.User, '7c37ee24-c4b1-42b6-a154-eaeab7ee330a'),
                     {
-                        Permission.WorkbookCapabilityType.ExportImage: Permission.CapabilityMode.Allow,
-                        Permission.WorkbookCapabilityType.ShareView: Permission.CapabilityMode.Allow,
-                        Permission.WorkbookCapabilityType.ExportData: Permission.CapabilityMode.Deny,
-                        Permission.WorkbookCapabilityType.ViewComments: Permission.CapabilityMode.Deny,
+                        TSC.Permission.WorkbookCapabilityType.ExportImage: TSC.Permission.CapabilityMode.Allow,
+                        TSC.Permission.WorkbookCapabilityType.ShareView: TSC.Permission.CapabilityMode.Allow,
+                        TSC.Permission.WorkbookCapabilityType.ExportData: TSC.Permission.CapabilityMode.Deny,
+                        TSC.Permission.WorkbookCapabilityType.ViewComments: TSC.Permission.CapabilityMode.Deny,
                     }
                 ),
             ])
