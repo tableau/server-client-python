@@ -23,21 +23,12 @@ class DatasourceItem(object):
         self.project_id = project_id
         self.tags = set()
 
-        self._permissions = None
-
     @property
     def connections(self):
         if self._connections is None:
             error = 'Datasource item must be populated with connections first.'
             raise UnpopulatedPropertyError(error)
         return self._connections()
-
-    @property
-    def permissions(self):
-        if self._permissions is None:
-            error = "Project item must be populated with permissions first."
-            raise UnpopulatedPropertyError(error)
-        return self._permissions()
 
     @property
     def content_url(self):
@@ -92,9 +83,6 @@ class DatasourceItem(object):
 
     def _set_connections(self, connections):
         self._connections = connections
-
-    def _set_permissions(self, permissions):
-        self._permissions = permissions
 
     def _parse_common_elements(self, datasource_xml, ns):
         if not isinstance(datasource_xml, ET.Element):
