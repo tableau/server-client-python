@@ -1,4 +1,4 @@
-from .endpoint import api, Endpoint
+from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, ProjectItem, PaginationItem
 import logging
