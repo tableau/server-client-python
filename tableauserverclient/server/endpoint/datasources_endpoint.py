@@ -1,4 +1,4 @@
-from .endpoint import api, parameter_added_in, Endpoint
+from .endpoint import Endpoint, api, parameter_added_in
 from .exceptions import InternalServerError, MissingRequiredFieldError
 from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
