@@ -142,28 +142,10 @@ class GroupRequest(object):
 
 
 class PermissionRequest(object):
-    def add_req(self, item, permission_item):
+    def add_req(self, permission_collection):
         xml_request = ET.Element('tsRequest')
-        permissions_element = ET.SubElement(xml_request, 'permissions')
-        item_element = ET.SubElement(permissions_element, type(item).__name__.split('Item')[0].lower())
-        item_element.attrib['id'] = item.id
-
-        self._add_all_capabilities(permissions_element, permission_item.capabilities)
+        xml_request.append(permission_collection.to_xml_element())
         return ET.tostring(xml_request)
-
-    def _add_all_capabilities(self, permissions_element, capabilities_map):
-        for capability in capabilities_map.values():
-            grantee_capabilities_element = ET.SubElement(permissions_element, 'granteeCapabilities')
-            grantee_element = ET.SubElement(grantee_capabilities_element, capability.type)
-            grantee_element.attrib['id'] = capability.object_id
-            capabilities_element = ET.SubElement(grantee_capabilities_element, 'capabilities')
-            self._add_capabilities(capabilities_element, capability.map)
-
-    def _add_capabilities(self, capabilities_element, capabilities):
-        for name, mode in capabilities.items():
-            capability_element = ET.SubElement(capabilities_element, 'capability')
-            capability_element.attrib['name'] = name
-            capability_element.attrib['mode'] = mode
 
 
 class ProjectRequest(object):

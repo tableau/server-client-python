@@ -27,7 +27,7 @@ class _PermissionsEndpoint(Endpoint):
 
     def update(self, item, permission_item):
         url = '{0}/{1}/permissions'.format(self.owner_baseurl(), item.id)
-        update_req = RequestFactory.Permission.add_req(item, permission_item)
+        update_req = RequestFactory.Permission.add_req(permission_item)
         response = self.put_request(url, update_req)
         permissions = PermissionsCollection.from_response(response.content,
                                                           self.parent_srv.namespace)
@@ -59,10 +59,8 @@ class _PermissionsEndpoint(Endpoint):
             error = "Server item is missing ID. Item must be retrieved from server first."
             raise MissingRequiredFieldError(error)
 
-        def permission_fetcher():
-            return self._get_permissions(item)
-
-        item._set_permissions(permission_fetcher)
+        permissions = self._get_permissions(item)
+        item._set_permissions(permissions)
         logger.info('Populated permissions for item (ID: {0})'.format(item.id))
 
     def _get_permissions(self, item, req_options=None):

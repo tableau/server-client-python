@@ -4,6 +4,7 @@ import requests_mock
 import tableauserverclient as TSC
 import xml.etree.ElementTree as ET
 
+from tableauserverclient import PermissionsGrantee, Permission, PermissionsRule, PermissionsCollection
 from tableauserverclient.datetime_helpers import format_datetime
 from tableauserverclient.server.endpoint.exceptions import InternalServerError
 from tableauserverclient.server.request_factory import RequestFactory
@@ -24,6 +25,7 @@ POPULATE_VIEWS_USAGE_XML = os.path.join(TEST_ASSET_DIR, 'workbook_populate_views
 PUBLISH_XML = os.path.join(TEST_ASSET_DIR, 'workbook_publish.xml')
 PUBLISH_ASYNC_XML = os.path.join(TEST_ASSET_DIR, 'workbook_publish_async.xml')
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'workbook_update.xml')
+UPDATE_PERMISSIONS_XML = os.path.join(TEST_ASSET_DIR, 'workbook_update_permissions.xml')
 
 
 class WorkbookTests(unittest.TestCase):
@@ -299,6 +301,84 @@ class WorkbookTests(unittest.TestCase):
                 TSC.Permission.WorkbookCapabilityType.ExportData: TSC.Permission.CapabilityMode.Deny,
                 TSC.Permission.WorkbookCapabilityType.ViewComments: TSC.Permission.CapabilityMode.Deny
             })
+
+    def test_update_permissions(self):
+        with open(UPDATE_PERMISSIONS_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+
+        with requests_mock.mock() as m:
+            adapter = m.put(self.baseurl + '/21778de4-b7b9-44bc-a599-1506a2639ace/permissions', text=response_xml)
+            single_workbook = TSC.WorkbookItem('test')
+            single_workbook._id = '21778de4-b7b9-44bc-a599-1506a2639ace'
+
+            permisssion_collection = PermissionsCollection([
+                PermissionsRule(
+                    PermissionsGrantee(Permission.GranteeType.Group, '5e5e1978-71fa-11e4-87dd-7382f5c437af'),
+                    {
+                        Permission.WorkbookCapabilityType.WebAuthoring: Permission.CapabilityMode.Allow,
+                        Permission.WorkbookCapabilityType.Read: Permission.CapabilityMode.Allow,
+                        Permission.WorkbookCapabilityType.Filter: Permission.CapabilityMode.Allow,
+                        Permission.WorkbookCapabilityType.AddComment: Permission.CapabilityMode.Allow,
+                    }
+                ),
+                PermissionsRule(
+                    PermissionsGrantee(Permission.GranteeType.User, '7c37ee24-c4b1-42b6-a154-eaeab7ee330a'),
+                    {
+                        Permission.WorkbookCapabilityType.ExportImage: Permission.CapabilityMode.Allow,
+                        Permission.WorkbookCapabilityType.ShareView: Permission.CapabilityMode.Allow,
+                        Permission.WorkbookCapabilityType.ExportData: Permission.CapabilityMode.Deny,
+                        Permission.WorkbookCapabilityType.ViewComments: Permission.CapabilityMode.Deny,
+                    }
+                ),
+            ])
+
+            self.server.workbooks.update_permission(single_workbook, permisssion_collection)
+
+            # Check request
+            request_el = ET.fromstring(adapter.last_request.text)
+            permissions_el = request_el.find('./permissions')
+            grantee_capabilities = permissions_el.findall('./granteeCapabilities')
+
+            permission_map = []
+
+            for grantee_capability in grantee_capabilities:
+                user = grantee_capability.find('./user')
+                group = grantee_capability.find('./group')
+                grantee = user if user is not None else group
+                permission_map.append({
+                    'grantee_id': grantee.get('id'),
+                    'grantee_type': grantee.tag,
+                    'capabilities': {},
+                })
+                for capability in grantee_capability.find('./capabilities'):
+                    permission_map[-1]['capabilities'][capability.get('name')] = capability.get('mode')
+
+            self.assertEqual(
+                permission_map,
+                [
+                    {
+                        'grantee_id': '5e5e1978-71fa-11e4-87dd-7382f5c437af',
+                        'grantee_type': 'group',
+                        'capabilities': {
+                            'WebAuthoring': 'Allow',
+                            'Read': 'Allow',
+                            'Filter': 'Allow',
+                            'AddComment': 'Allow'
+                        }
+                    },
+                    {
+                        'grantee_id': '7c37ee24-c4b1-42b6-a154-eaeab7ee330a',
+                        'grantee_type': 'user',
+                        'capabilities': {
+                            'ExportImage': 'Allow',
+                            'ShareView': 'Allow',
+                            'ExportData': 'Deny',
+                            'ViewComments': 'Deny'
+                        }
+                    }
+                ]
+
+            )
 
     def test_populate_connections_missing_id(self):
         single_workbook = TSC.WorkbookItem('test')

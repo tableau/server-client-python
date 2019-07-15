@@ -86,6 +86,16 @@ class PermissionsRule(object):
     def grantee(self):
         return self._grantee
 
+    def to_xml_element(self):
+        xml_element = ET.Element("granteeCapabilities")
+        xml_element.append(self.grantee.to_xml_element())
+        capabilities_element = ET.SubElement(xml_element, "capabilities")
+        for permission, mode in self.permissions_map.items():
+            ET.SubElement(
+                capabilities_element, "capability", {"name": permission, "mode": mode}
+            )
+        return xml_element
+
 
 class PermissionsCollection(object):
     def __init__(self, rules):
@@ -103,8 +113,18 @@ class PermissionsCollection(object):
         all_xml = parsed_response.findall(".//t:granteeCapabilities", namespaces=ns)
 
         for grantee_capability_xml in all_xml:
+            user_grantee_element = grantee_capability_xml.find(
+                "./t:user", namespaces=ns
+            )
+            group_grantee_element = grantee_capability_xml.find(
+                "./t:group", namespaces=ns
+            )
+            grantee_element = (
+                user_grantee_element
+                if user_grantee_element is not None
+                else group_grantee_element
+            )
 
-            grantee_element = grantee_capability_xml[0]
             grantee = PermissionsGrantee.from_xml_element(grantee_element)
 
             capability_elements = grantee_capability_xml.findall(
@@ -119,3 +139,9 @@ class PermissionsCollection(object):
             capabilities.append(capability_item)
 
         return cls(capabilities)
+
+    def to_xml_element(self):
+        xml_element = ET.Element("permissions")
+        for permission_rule in self.rules:
+            xml_element.append(permission_rule.to_xml_element())
+        return xml_element

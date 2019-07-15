@@ -224,7 +224,8 @@ class Workbooks(Endpoint):
 
     @api(version='2.0')
     def update_permission(self, item, permission_item):
-        self._permissions.update(item, permission_item)
+        permissions = self._permissions.update(item, permission_item)
+        item._set_permissions(permissions)
 
     @api(version='2.0')
     def delete_permission(self, item, capability_item):

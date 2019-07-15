@@ -29,6 +29,7 @@ class WorkbookItem(object):
         self.materialized_views_config = {'materialized_views_enabled': None,
                                           'run_materialization_now': None}
         self._permissions = None
+        self._xml_type = 'workbook'
 
     @property
     def connections(self):
@@ -42,7 +43,7 @@ class WorkbookItem(object):
         if self._permissions is None:
             error = "Workbook item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
-        return self._permissions()
+        return self._permissions
 
     @property
     def content_url(self):
