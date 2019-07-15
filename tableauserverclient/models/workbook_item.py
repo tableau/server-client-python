@@ -28,7 +28,6 @@ class WorkbookItem(object):
         self.materialized_views_config = {'materialized_views_enabled': None,
                                           'run_materialization_now': None}
         self._permissions = None
-        self._xml_type = 'workbook'
 
     @property
     def connections(self):
