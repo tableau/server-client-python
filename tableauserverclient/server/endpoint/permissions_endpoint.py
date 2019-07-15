@@ -14,7 +14,7 @@ class _PermissionsEndpoint(Endpoint):
 
     Tableau permissions model is identical between objects but they are nested under
     the parent object endpoint (i.e. permissions for workbooks are under
-    /workbooks/:id/permission).  This class is meant to be instantated inside a
+    /workbooks/:id/permission).  This class is meant to be instantiated inside a
     parent endpoint which has these supported endpoints
     '''
     def __init__(self, parent_srv, owner_baseurl):
