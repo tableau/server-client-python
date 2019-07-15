@@ -12,4 +12,3 @@ from .endpoint import Auth, Datasources, Endpoint, Groups, Projects, Schedules, 
 from .server import Server
 from .pager import Pager
 from .exceptions import NotSignedInError
-
