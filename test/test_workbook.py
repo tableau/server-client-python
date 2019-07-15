@@ -410,17 +410,23 @@ class WorkbookTests(unittest.TestCase):
             self.server.workbooks.delete_permission(single_workbook, permisssion_collection)
 
             # Check request
-            urls = [r.url for r in adapter.request_history]
-            self.assertEqual(urls, [
-                'http://test/api/2.3/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks/21778de4-b7b9-44bc-a599-1506a2639ace/permissions/groups/5e5e1978-71fa-11e4-87dd-7382f5c437af/WebAuthoring/Allow',
-                'http://test/api/2.3/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks/21778de4-b7b9-44bc-a599-1506a2639ace/permissions/groups/5e5e1978-71fa-11e4-87dd-7382f5c437af/Read/Allow',
-                'http://test/api/2.3/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks/21778de4-b7b9-44bc-a599-1506a2639ace/permissions/groups/5e5e1978-71fa-11e4-87dd-7382f5c437af/Filter/Allow',
-                'http://test/api/2.3/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks/21778de4-b7b9-44bc-a599-1506a2639ace/permissions/groups/5e5e1978-71fa-11e4-87dd-7382f5c437af/AddComment/Allow',
-                'http://test/api/2.3/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks/21778de4-b7b9-44bc-a599-1506a2639ace/permissions/users/7c37ee24-c4b1-42b6-a154-eaeab7ee330a/ExportImage/Allow',
-                'http://test/api/2.3/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks/21778de4-b7b9-44bc-a599-1506a2639ace/permissions/users/7c37ee24-c4b1-42b6-a154-eaeab7ee330a/ShareView/Allow',
-                'http://test/api/2.3/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks/21778de4-b7b9-44bc-a599-1506a2639ace/permissions/users/7c37ee24-c4b1-42b6-a154-eaeab7ee330a/ExportData/Deny',
-                'http://test/api/2.3/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks/21778de4-b7b9-44bc-a599-1506a2639ace/permissions/users/7c37ee24-c4b1-42b6-a154-eaeab7ee330a/ViewComments/Deny',
-            ])
+            url_requests_made = [r.url for r in adapter.request_history]
+
+            base_url = '{}/{}'.format(self.server.workbooks.baseurl, single_workbook._id)
+            group_base_url = '{}/permissions/groups/{}'.format(base_url, '5e5e1978-71fa-11e4-87dd-7382f5c437af')
+            user_base_url = '{}/permissions/users/{}'.format(base_url, '7c37ee24-c4b1-42b6-a154-eaeab7ee330a')
+
+            for url in [
+                '{}/WebAuthoring/Allow'.format(group_base_url),
+                '{}/Read/Allow'.format(group_base_url),
+                '{}/Filter/Allow'.format(group_base_url),
+                '{}/AddComment/Allow'.format(group_base_url),
+                '{}/ExportImage/Allow'.format(user_base_url),
+                '{}/ShareView/Allow'.format(user_base_url),
+                '{}/ExportData/Deny'.format(user_base_url),
+                '{}/ViewComments/Deny'.format(user_base_url),
+            ]:
+                self.assertIn(url, url_requests_made)
 
     def test_populate_connections_missing_id(self):
         single_workbook = TSC.WorkbookItem('test')
