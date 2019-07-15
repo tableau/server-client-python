@@ -16,18 +16,9 @@ class ProjectItem(object):
         self.content_permissions = content_permissions
         self.parent_id = parent_id
 
-        self._permissions = None
-
     @property
     def content_permissions(self):
         return self._content_permissions
-
-    @property
-    def permissions(self):
-        if self._permissions is None:
-            error = "Project item must be populated with permissions first."
-            raise UnpopulatedPropertyError(error)
-        return self._permissions()
 
     @content_permissions.setter
     @property_is_enum(ContentPermissions)
@@ -70,9 +61,6 @@ class ProjectItem(object):
             self._content_permissions = content_permissions
         if parent_id:
             self.parent_id = parent_id
-
-    def _set_permissions(self, permissions):
-        self._permissions = permissions
 
     @classmethod
     def from_response(cls, resp, ns):
