@@ -1,3 +1,7 @@
+## 0.8.1 (17 July 2019)
+
+* Fixed update_workbook endpoint (#454)
+
 ## 0.8 (8 Apr 2019)
 
 * Added Max Age to download view image request (#360)
