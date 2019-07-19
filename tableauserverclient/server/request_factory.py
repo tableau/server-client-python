@@ -50,6 +50,8 @@ class AuthRequest(object):
         credentials_element = ET.SubElement(xml_request, 'credentials')
         credentials_element.attrib['name'] = auth_item.username
         credentials_element.attrib['password'] = auth_item.password
+        credentials_element.attrib['clientId'] = auth_item.token_name
+        credentials_element.attrib['personalAccessToken'] = auth_item.personal_access_token
         site_element = ET.SubElement(credentials_element, 'site')
         site_element.attrib['contentUrl'] = auth_item.site_id
         if auth_item.user_id_to_impersonate:
