@@ -1,6 +1,6 @@
 class TableauAuth(object):
     def __init__(self, username='', password='', site=None, site_id='', user_id_to_impersonate=None, token_name='',
-                    personal_access_token=''):
+                 personal_access_token=''):
         if site is not None:
             import warnings
             warnings.warn('TableauAuth(...site=""...) is deprecated, '

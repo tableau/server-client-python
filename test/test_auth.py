@@ -60,7 +60,7 @@ class AuthTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.post(self.baseurl + '/signin', text=response_xml, status_code=401)
             tableau_auth = TSC.TableauAuth(token_name='mytoken', personal_access_token='mvFsqyansa4',
-                                            user_id_to_impersonate='dd2239f6-ddf1-4107-981a-4cf94e415794')
+                                           user_id_to_impersonate='dd2239f6-ddf1-4107-981a-4cf94e415794')
             self.assertRaises(TSC.ServerResponseError, self.server.auth.sign_in, tableau_auth)
 
     def test_sign_in_error(self):
@@ -85,7 +85,7 @@ class AuthTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.post(self.baseurl + '/signin', text=response_xml, status_code=401)
             tableau_auth = TSC.TableauAuth('testuser', 'somepassword', token_name='mytoken',
-                                            personal_access_token='sometokenstring')
+                                           personal_access_token='sometokenstring')
             self.assertRaises(TSC.ServerResponseError, self.server.auth.sign_in, tableau_auth)
 
     def test_sign_out(self):

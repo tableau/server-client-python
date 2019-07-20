@@ -30,7 +30,7 @@ class SetupHelper(object):
 
     def _addLoggerArgs(self):
         self._parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
-                                    help='desired logging level (set to error by default)')
+                                  help='desired logging level (set to error by default)')
 
     def getParser(self):
         return self._parser
