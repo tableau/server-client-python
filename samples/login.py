@@ -9,6 +9,7 @@ import tableauserverclient as TSC
 
 import setup_helper as Helper
 
+
 def main():
 
     setup_helper = Helper.SetupHelper('Create a user group.')
