@@ -60,6 +60,7 @@ class AuthRequest(object):
             user_element.attrib['id'] = auth_item.user_id_to_impersonate
         return ET.tostring(xml_request)
 
+
 class DatasourceRequest(object):
     def _generate_xml(self, datasource_item, connection_credentials=None, connections=None):
         xml_request = ET.Element('tsRequest')

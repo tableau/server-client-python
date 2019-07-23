@@ -39,7 +39,7 @@ class AuthTests(unittest.TestCase):
         self.assertEqual('eIX6mvFsqyansa4KqEI1UwOpS8ggRs2l', self.server.auth_token)
         self.assertEqual('6b7179ba-b82b-4f0f-91ed-812074ac5da6', self.server.site_id)
         self.assertEqual('1a96d216-e9b8-497b-a82a-0b899a965e01', self.server.user_id)
-        
+
     def test_sign_in_impersonate(self):
         with open(SIGN_IN_IMPERSONATE_XML, 'rb') as f:
             response_xml = f.read().decode('utf-8')
@@ -68,7 +68,7 @@ class AuthTests(unittest.TestCase):
             m.post(self.baseurl + '/signin', text=response_xml, status_code=401)
             tableau_auth = TSC.PersonalAccessTokenAuth(token_name='mytoken', personal_access_token='invalid')
             self.assertRaises(TSC.ServerResponseError, self.server.auth.sign_in, tableau_auth)
-            
+
     def test_sign_in_without_auth(self):
         with open(SIGN_IN_ERROR_XML, 'rb') as f:
             response_xml = f.read().decode('utf-8')

@@ -7,4 +7,4 @@ class PersonalAccessTokenAuth(object):
         self.user_id_to_impersonate = None
 
     def credentials(self):
-        return { 'clientId': self.token_name, 'personalAccessToken': self.personal_access_token }
+        return {'clientId': self.token_name, 'personalAccessToken': self.personal_access_token}

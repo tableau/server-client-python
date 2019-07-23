@@ -27,4 +27,4 @@ class TableauAuth(object):
         self.site_id = value
 
     def credentials(self):
-        return { 'name': self.username, 'password': self.password }
+        return {'name': self.username, 'password': self.password}

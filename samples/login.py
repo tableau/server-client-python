@@ -12,36 +12,37 @@ import tableauserverclient as TSC
 
 
 def main():
-        parser = argparse.ArgumentParser(description='Logs in to the server.')
+    parser = argparse.ArgumentParser(description='Logs in to the server.')
 
-        parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
-                                  help='desired logging level (set to error by default)')
+    parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
+                        help='desired logging level (set to error by default)')
 
-        parser.add_argument('--server', '-s', required=True, help='server address')
+    parser.add_argument('--server', '-s', required=True, help='server address')
 
-        group = parser.add_mutually_exclusive_group(required=True)
-        group.add_argument('--username', '-u', help='username to sign into the server')
-        group.add_argument('--token-name', '-n', help='name of the personal access token used to sign into the server')
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--username', '-u', help='username to sign into the server')
+    group.add_argument('--token-name', '-n', help='name of the personal access token used to sign into the server')
 
-        args = parser.parse_args()
+    args = parser.parse_args()
 
-        # Set logging level based on user input, or error by default
-        logging_level = getattr(logging, args.logging_level.upper())
-        logging.basicConfig(level=logging_level)
+    # Set logging level based on user input, or error by default
+    logging_level = getattr(logging, args.logging_level.upper())
+    logging.basicConfig(level=logging_level)
 
-        server = TSC.Server(args.server)
+    server = TSC.Server(args.server)
 
-        if args.username:
-            # Trying to authenticate using username and password.
-            password = getpass.getpass("Password: ")
-            tableau_auth = TSC.TableauAuth(args.username, password)
-        else:
-            # Trying to authenticate using personal access tokens.
-            personal_access_token = getpass.getpass("Personal Access Token: ")
-            tableau_auth = TSC.PersonalAccessTokenAuth(token_name=args.token_name, personal_access_token=personal_access_token)
+    if args.username:
+        # Trying to authenticate using username and password.
+        password = getpass.getpass("Password: ")
+        tableau_auth = TSC.TableauAuth(args.username, password)
+    else:
+        # Trying to authenticate using personal access tokens.
+        personal_access_token = getpass.getpass("Personal Access Token: ")
+        tableau_auth = TSC.PersonalAccessTokenAuth(token_name=args.token_name,
+                                                   personal_access_token=personal_access_token)
 
-        with server.auth.sign_in(tableau_auth):
-            print('Logged in successfully')
+    with server.auth.sign_in(tableau_auth):
+        print('Logged in successfully')
 
 
 if __name__ == '__main__':
