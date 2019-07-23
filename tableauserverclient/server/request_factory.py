@@ -47,16 +47,18 @@ def _add_credentials_element(parent_element, connection_credentials):
 class AuthRequest(object):
     def signin_req(self, auth_item):
         xml_request = ET.Element('tsRequest')
+
         credentials_element = ET.SubElement(xml_request, 'credentials')
-        credentials_element.attrib['name'] = auth_item.username
-        credentials_element.attrib['password'] = auth_item.password
+        for attribute_name, attribute_value in auth_item.credentials().items():
+            credentials_element.attrib[attribute_name] = attribute_value
+
         site_element = ET.SubElement(credentials_element, 'site')
         site_element.attrib['contentUrl'] = auth_item.site_id
+
         if auth_item.user_id_to_impersonate:
             user_element = ET.SubElement(credentials_element, 'user')
             user_element.attrib['id'] = auth_item.user_id_to_impersonate
         return ET.tostring(xml_request)
-
 
 class DatasourceRequest(object):
     def _generate_xml(self, datasource_item, connection_credentials=None, connections=None):
