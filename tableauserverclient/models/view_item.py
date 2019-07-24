@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
+from .tag_item import TagItem
 
 
 class ViewItem(object):
@@ -103,6 +104,7 @@ class ViewItem(object):
             workbook_elem = view_xml.find('.//t:workbook', namespaces=ns)
             owner_elem = view_xml.find('.//t:owner', namespaces=ns)
             project_elem = view_xml.find('.//t:project', namespaces=ns)
+            tags_elem = view_xml.find('.//t:tags', namespaces=ns)
             view_item._id = view_xml.get('id', None)
             view_item._name = view_xml.get('name', None)
             view_item._content_url = view_xml.get('contentUrl', None)
@@ -121,6 +123,11 @@ class ViewItem(object):
                 view_item._workbook_id = workbook_id
             elif workbook_elem is not None:
                 view_item._workbook_id = workbook_elem.get('id', None)
+
+            if tags_elem is not None:
+                tags = TagItem.from_xml_element(tags_elem, ns)
+                view_item.tags = tags
+                view_item._initial_tags = tags
 
             all_view_items.append(view_item)
         return all_view_items

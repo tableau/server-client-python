@@ -40,6 +40,7 @@ class ViewTests(unittest.TestCase):
         self.assertEqual('3cc6cd06-89ce-4fdc-b935-5294135d6d42', all_views[0].workbook_id)
         self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', all_views[0].owner_id)
         self.assertEqual('5241e88d-d384-4fd7-9c2f-648b5247efc5', all_views[0].project_id)
+        self.assertEqual(set(['tag1', 'tag2']), all_views[0].tags)
 
         self.assertEqual('fd252f73-593c-4c4e-8584-c032b8022adc', all_views[1].id)
         self.assertEqual('Overview', all_views[1].name)
