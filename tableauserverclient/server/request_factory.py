@@ -49,7 +49,7 @@ class AuthRequest(object):
         xml_request = ET.Element('tsRequest')
 
         credentials_element = ET.SubElement(xml_request, 'credentials')
-        for attribute_name, attribute_value in auth_item.credentials().items():
+        for attribute_name, attribute_value in auth_item.credentials.items():
             credentials_element.attrib[attribute_name] = attribute_value
 
         site_element = ET.SubElement(credentials_element, 'site')

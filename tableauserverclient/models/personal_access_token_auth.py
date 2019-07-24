@@ -6,5 +6,6 @@ class PersonalAccessTokenAuth(object):
         # Personal Access Tokens doesn't support impersonation.
         self.user_id_to_impersonate = None
 
+    @property
     def credentials(self):
         return {'clientId': self.token_name, 'personalAccessToken': self.personal_access_token}

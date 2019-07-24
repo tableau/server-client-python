@@ -26,5 +26,6 @@ class TableauAuth(object):
                       DeprecationWarning)
         self.site_id = value
 
+    @property
     def credentials(self):
         return {'name': self.username, 'password': self.password}
