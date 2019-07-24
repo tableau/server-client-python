@@ -128,6 +128,6 @@ class ViewItem(object):
                 tags = TagItem.from_xml_element(tags_elem, ns)
                 view_item.tags = tags
                 view_item._initial_tags = tags
-                
+
             all_view_items.append(view_item)
         return all_view_items
