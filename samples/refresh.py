@@ -1,5 +1,5 @@
 ####
-# This script demonstrates how to use trigger a refresh on a datasource or workbook
+# This script demonstrates how to trigger a refresh on a datasource or workbook
 #
 # To run the script, you must have installed Python 2.7.X or 3.3 and later.
 ####
