@@ -601,7 +601,7 @@ An updated `DatasourceItem`.
   datasource = server.datasources.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
   
 # do some updating 
-  datasource.name = 'New Name'
+  datasource.project_id = 'New Project ID'
 
 # call the update method with the data source item
   updated_datasource = server.datasources.update(datasource)
