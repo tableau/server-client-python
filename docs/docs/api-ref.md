@@ -170,9 +170,9 @@ In the Tableau Server REST API, there are separate endpoints to query and update
 
 **Attributes**  
 
-Name   |  Description     
- :--- | : ---    
-`datasource_id` |  The identifier of the data source. 
+Name | Description     
+:--- | :---    
+`datasource_id`| The identifier of the data source. 
 `datasource_name` |  The name of the data source.
 `id`  |  The identifier of the connection.
 `connection_type`  |  The type of connection. 
