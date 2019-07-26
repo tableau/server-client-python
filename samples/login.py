@@ -25,24 +25,27 @@ def main():
 
     args = parser.parse_args()
 
-    # Set logging level based on user input, or error by default
+    # Set logging level based on user input, or error by default.
     logging_level = getattr(logging, args.logging_level.upper())
     logging.basicConfig(level=logging_level)
 
-    server = TSC.Server(args.server)
+    # Make sure we use an updated version of the rest apis.
+    server = TSC.Server(args.server, use_server_version=True)
 
     if args.username:
         # Trying to authenticate using username and password.
         password = getpass.getpass("Password: ")
         tableau_auth = TSC.TableauAuth(args.username, password)
+        with server.auth.sign_in(tableau_auth):
+            print('Logged in successfully')
+
     else:
         # Trying to authenticate using personal access tokens.
         personal_access_token = getpass.getpass("Personal Access Token: ")
         tableau_auth = TSC.PersonalAccessTokenAuth(token_name=args.token_name,
                                                    personal_access_token=personal_access_token)
-
-    with server.auth.sign_in(tableau_auth):
-        print('Logged in successfully')
+        with server.auth.sign_in_with_personal_access_token(tableau_auth):
+            print('Logged in successfully')
 
 
 if __name__ == '__main__':
