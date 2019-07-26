@@ -25,3 +25,7 @@ class TableauAuth(object):
         warnings.warn('TableauAuth.site is deprecated, use TableauAuth.site_id instead.',
                       DeprecationWarning)
         self.site_id = value
+
+    @property
+    def credentials(self):
+        return {'name': self.username, 'password': self.password}
