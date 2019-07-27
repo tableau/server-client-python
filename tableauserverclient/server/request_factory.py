@@ -49,11 +49,14 @@ def _add_credentials_element(parent_element, connection_credentials):
 class AuthRequest(object):
     def signin_req(self, auth_item):
         xml_request = ET.Element('tsRequest')
+
         credentials_element = ET.SubElement(xml_request, 'credentials')
-        credentials_element.attrib['name'] = auth_item.username
-        credentials_element.attrib['password'] = auth_item.password
+        for attribute_name, attribute_value in auth_item.credentials.items():
+            credentials_element.attrib[attribute_name] = attribute_value
+
         site_element = ET.SubElement(credentials_element, 'site')
         site_element.attrib['contentUrl'] = auth_item.site_id
+
         if auth_item.user_id_to_impersonate:
             user_element = ET.SubElement(credentials_element, 'user')
             user_element.attrib['id'] = auth_item.user_id_to_impersonate
@@ -359,7 +362,7 @@ class WorkbookRequest(object):
         if workbook_item.show_tabs:
             workbook_element.attrib['showTabs'] = str(workbook_item.show_tabs).lower()
         project_element = ET.SubElement(workbook_element, 'project')
-        project_element.attrib['id'] = workbook_item.project_id
+        project_element.attrib['id'] = str(workbook_item.project_id)
 
         if connection_credentials is not None and connections is not None:
             raise RuntimeError('You cannot set both `connections` and `connection_credentials`')
@@ -378,7 +381,7 @@ class WorkbookRequest(object):
         workbook_element = ET.SubElement(xml_request, 'workbook')
         if workbook_item.name:
             workbook_element.attrib['name'] = workbook_item.name
-        if workbook_item.show_tabs:
+        if workbook_item.show_tabs is not None:
             workbook_element.attrib['showTabs'] = str(workbook_item.show_tabs).lower()
         if workbook_item.project_id:
             project_element = ET.SubElement(workbook_element, 'project')
@@ -386,7 +389,8 @@ class WorkbookRequest(object):
         if workbook_item.owner_id:
             owner_element = ET.SubElement(workbook_element, 'owner')
             owner_element.attrib['id'] = workbook_item.owner_id
-        if workbook_item.materialized_views_config is not None:
+        if workbook_item.materialized_views_config['materialized_views_enabled']\
+                and workbook_item.materialized_views_config['run_materialization_now']:
             materialized_views_config = workbook_item.materialized_views_config
             materialized_views_element = ET.SubElement(workbook_element, 'materializedViewsEnablementConfig')
             materialized_views_element.attrib['materializedViewsEnabled'] = str(materialized_views_config

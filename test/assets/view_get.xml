@@ -7,7 +7,7 @@
             <owner id="5de011f8-5aa9-4d5b-b991-f462c8dd6bb7" />
             <project id="5241e88d-d384-4fd7-9c2f-648b5247efc5" />
         </view>
-        <view id="fd252f73-593c-4c4e-8584-c032b8022adc" name="Overview" contentUrl="Superstore/sheets/Overview">
+        <view id="fd252f73-593c-4c4e-8584-c032b8022adc" name="Overview" contentUrl="Superstore/sheets/Overview" createdAt="2002-05-30T09:00:00Z" updatedAt="2002-06-05T08:00:59Z" sheetType="story">
             <workbook id="6d13b0ca-043d-4d42-8c9d-3f3313ea3a00" />
             <owner id="5de011f8-5aa9-4d5b-b991-f462c8dd6bb7" />
             <project id="5b534f74-3226-11e8-b47a-cb2e00f738a3" />
