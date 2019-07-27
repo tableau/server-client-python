@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+    <tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+    <permissions>
+        <datasource id="0448d2ed-590d-4fa0-b272-a2a8a24555b5" name="Some datasource">
+            <owner id="7c37ee24-c4b1-42b6-a154-eaeab7ee330a" />
+        </datasource>
+        <granteeCapabilities>
+            <group id="5e5e1978-71fa-11e4-87dd-7382f5c437af" />
+            <capabilities>
+                <capability name="Delete" mode="Deny" />
+                <capability name="ChangePermissions" mode="Deny" />
+                <capability name="Connect" mode="Allow" />
+                <capability name="Read" mode="Allow" />
+            </capabilities>
+        </granteeCapabilities>
+        <granteeCapabilities>
+            <user id="7c37ee24-c4b1-42b6-a154-eaeab7ee330a" />
+            <capabilities>
+                <capability name="Write" mode="Allow" />
+            </capabilities>
+        </granteeCapabilities>
+    </permissions>
+</tsResponse>

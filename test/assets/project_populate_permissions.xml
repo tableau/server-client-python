@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.5.xsd">
+    <permissions>
+        <project id="90f09c23-440a-44ee-857c-5744a51d5b08" name="Project3">
+            <owner id="26183d16-82f7-4fcf-b163-0e607bf292bc"/>
+        </project>
+        <granteeCapabilities>
+            <group id="c8f2773a-c83a-11e8-8c8f-33e6d787b506"/>
+            <capabilities>
+                <capability name="Read" mode="Allow"/>
+                <capability name="Write" mode="Allow"/>
+            </capabilities>
+        </granteeCapabilities>
+    </permissions>
+</tsResponse>

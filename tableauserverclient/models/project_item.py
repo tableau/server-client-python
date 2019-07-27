@@ -1,5 +1,9 @@
 import xml.etree.ElementTree as ET
+
+from .permissions_item import Permission
+
 from .property_decorators import property_is_enum, property_not_empty
+from .exceptions import UnpopulatedPropertyError
 
 
 class ProjectItem(object):
@@ -15,9 +19,42 @@ class ProjectItem(object):
         self.content_permissions = content_permissions
         self.parent_id = parent_id
 
+        self._permissions = None
+        self._default_workbook_permissions = None
+        self._default_datasource_permissions = None
+        self._default_flow_permissions = None
+
     @property
     def content_permissions(self):
         return self._content_permissions
+
+    @property
+    def permissions(self):
+        if self._permissions is None:
+            error = "Project item must be populated with permissions first."
+            raise UnpopulatedPropertyError(error)
+        return self._permissions()
+
+    @property
+    def default_datasource_permissions(self):
+        if self._default_datasource_permissions is None:
+            error = "Project item must be populated with permissions first."
+            raise UnpopulatedPropertyError(error)
+        return self._default_datasource_permissions()
+
+    @property
+    def default_workbook_permissions(self):
+        if self._default_workbook_permissions is None:
+            error = "Project item must be populated with permissions first."
+            raise UnpopulatedPropertyError(error)
+        return self._default_workbook_permissions()
+
+    @property
+    def default_flow_permissions(self):
+        if self._default_flow_permissions is None:
+            error = "Project item must be populated with permissions first."
+            raise UnpopulatedPropertyError(error)
+        return self._default_flow_permissions()
 
     @content_permissions.setter
     @property_is_enum(ContentPermissions)
@@ -60,6 +97,12 @@ class ProjectItem(object):
             self._content_permissions = content_permissions
         if parent_id:
             self.parent_id = parent_id
+
+    def _set_permissions(self, permissions):
+        self._permissions = permissions
+
+    def _set_default_permissions(self, permissions, content_type):
+        setattr(self, "_default_{content}_permissions".format(content=content_type), permissions)
 
     @classmethod
     def from_response(cls, resp, ns):
