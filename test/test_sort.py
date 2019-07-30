@@ -57,8 +57,8 @@ class SortTests(unittest.TestCase):
                                                        request_object=opts,
                                                        auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
                                                        content_type='text/xml')
-
-            self.assertEqual(resp.request.query, 'pagenumber=13&pagesize=13&filter=tags:in:%5bstocks,market%5d')
+            self.assertDictEqual(resp.request.qs, {'pagenumber': ['13'], 'pagesize': [
+                                 '13'], 'filter': ['tags:in:[stocks,market]']})
 
     def test_sort_asc(self):
         with requests_mock.mock() as m:

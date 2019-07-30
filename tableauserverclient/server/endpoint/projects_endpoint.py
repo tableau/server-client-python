@@ -1,12 +1,22 @@
-from .endpoint import Endpoint, api
+from .endpoint import api, Endpoint
 from .exceptions import MissingRequiredFieldError
-from .. import RequestFactory, ProjectItem, PaginationItem
+from .permissions_endpoint import _PermissionsEndpoint
+from .default_permissions_endpoint import _DefaultPermissionsEndpoint
+
+from .. import RequestFactory, ProjectItem, PaginationItem, PermissionsRule, Permission
+
 import logging
 
 logger = logging.getLogger('tableau.endpoint.projects')
 
 
 class Projects(Endpoint):
+    def __init__(self, parent_srv):
+        super(Projects, self).__init__(parent_srv)
+
+        self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
+        self._default_permissions = _DefaultPermissionsEndpoint(parent_srv, lambda: self.baseurl)
+
     @property
     def baseurl(self):
         return "{0}/sites/{1}/projects".format(self.parent_srv.baseurl, self.parent_srv.site_id)
@@ -50,3 +60,51 @@ class Projects(Endpoint):
         new_project = ProjectItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         logger.info('Created new project (ID: {0})'.format(new_project.id))
         return new_project
+
+    @api(version='2.0')
+    def populate_permissions(self, item):
+        self._permissions.populate(item)
+
+    @api(version='2.0')
+    def update_permission(self, item, rules):
+        return self._permissions.update(item, rules)
+
+    @api(version='2.0')
+    def delete_permission(self, item, rules):
+        return self._permissions.delete(item, rules)
+
+    @api(version='2.1')
+    def populate_workbook_default_permissions(self, item):
+        self._default_permissions.populate_default_permissions(item, Permission.Resource.Workbook)
+
+    @api(version='2.1')
+    def populate_datasource_default_permissions(self, item):
+        self._default_permissions.populate_default_permissions(item, Permission.Resource.Datasource)
+
+    @api(version='3.4')
+    def populate_flow_default_permissions(self, item):
+        self._default_permissions.populate_default_permissions(item, Permission.Resource.Flow)
+
+    @api(version='2.1')
+    def update_workbook_default_permissions(self, item):
+        self._default_permissions.update_default_permissions(item, Permission.Resource.Workbook)
+
+    @api(version='2.1')
+    def update_datasource_default_permissions(self, item):
+        self._default_permissions.update_default_permissions(item, Permission.Resource.Datasource)
+
+    @api(version='3.4')
+    def update_flow_default_permissions(self, item):
+        self._default_permissions.update_default_permissions(item, Permission.Resource.Flow)
+
+    @api(version='2.1')
+    def delete_workbook_default_permissions(self, item):
+        self._default_permissions.delete_default_permissions(item, Permission.Resource.Workbook)
+
+    @api(version='2.1')
+    def delete_datasource_default_permissions(self, item):
+        self._default_permissions.delete_default_permissions(item, Permission.Resource.Datasource)
+
+    @api(version='3.4')
+    def delete_flow_default_permissions(self, item):
+        self._default_permissions.delete_default_permissions(item, Permission.Resource.Flow)

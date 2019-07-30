@@ -1,10 +1,14 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_not_empty
+from .reference_item import ResourceReference
 
 
 class GroupItem(object):
-    def __init__(self, name):
+
+    tag_name = 'group'
+
+    def __init__(self, name=None):
         self._domain_name = None
         self._id = None
         self._users = None
@@ -35,6 +39,9 @@ class GroupItem(object):
         #  Each call to `.users` should create a new pager, this just runs the callable
         return self._users()
 
+    def to_reference(self):
+        return ResourceReference(id_=self.id, tag_name=self.tag_name)
+
     def _set_users(self, users):
         self._users = users
 
@@ -53,3 +60,7 @@ class GroupItem(object):
                 group_item._domain_name = domain_elem.get('name', None)
             all_group_items.append(group_item)
         return all_group_items
+
+    @staticmethod
+    def as_reference(id_):
+        return ResourceReference(id_, GroupItem.tag_name)

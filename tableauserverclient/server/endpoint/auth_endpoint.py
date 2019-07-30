@@ -35,8 +35,13 @@ class Auth(Endpoint):
         user_id = parsed_response.find('.//t:user', namespaces=self.parent_srv.namespace).get('id', None)
         auth_token = parsed_response.find('t:credentials', namespaces=self.parent_srv.namespace).get('token', None)
         self.parent_srv._set_auth(site_id, user_id, auth_token)
-        logger.info('Signed into {0} as {1}'.format(self.parent_srv.server_address, auth_req.username))
+        logger.info('Signed into {0} as user with id {1}'.format(self.parent_srv.server_address, user_id))
         return Auth.contextmgr(self.sign_out)
+
+    @api(version="3.6")
+    def sign_in_with_personal_access_token(self, auth_req):
+        # We use the same request that username/password login uses.
+        return self.sign_in(auth_req)
 
     @api(version="2.0")
     def sign_out(self):

@@ -11,9 +11,11 @@ from .schedule_item import ScheduleItem
 from .server_info_item import ServerInfoItem
 from .site_item import SiteItem
 from .tableau_auth import TableauAuth
+from .personal_access_token_auth import PersonalAccessTokenAuth
 from .target import Target
 from .task_item import TaskItem
 from .user_item import UserItem
 from .view_item import ViewItem
 from .workbook_item import WorkbookItem
 from .subscription_item import SubscriptionItem
+from .permissions_item import PermissionsRule, Permission
