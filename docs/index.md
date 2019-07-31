@@ -66,7 +66,7 @@ Run the following code to get a list of all the data sources on your installatio
 ```py
 import tableauserverclient as TSC
 
-tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
+tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD','SITEID')
 server = TSC.Server('http://SERVER_URL')
 
 with server.auth.sign_in(tableau_auth):
