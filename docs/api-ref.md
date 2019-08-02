@@ -570,7 +570,7 @@ The `DatasourceItem` for the data source that was added or appended to.
 datasource.update(datasource_item)
 ```
 
-Updates the owner, or project of the specified data source. 
+Updates the owner or project of the specified data source. Data source name cannot be updated.
 
 REST API: [Update Datasource](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_data_source){:target="_blank"}
 
@@ -605,7 +605,7 @@ An updated `DatasourceItem`.
   datasource = server.datasources.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
   
 # do some updating 
-  datasource.name = 'New Name'
+  datasource.owner_id = 'New Owner ID'
 
 # call the update method with the data source item
   updated_datasource = server.datasources.update(datasource)
