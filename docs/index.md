@@ -74,7 +74,7 @@ with server.auth.sign_in(tableau_auth):
     print("\nThere are {} datasources on site: ".format(pagination_item.total_available))
     print([datasource.name for datasource in all_datasources])
 ```
-For Tableau online TSC.TableauAuth is used with site_id
+For Tableau online TSC.TableauAuth should be used with site_id
 ```py
 tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD','SITEID')
 ```
