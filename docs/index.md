@@ -66,11 +66,15 @@ Run the following code to get a list of all the data sources on your installatio
 ```py
 import tableauserverclient as TSC
 
-tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD','SITEID')
+tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
 server = TSC.Server('http://SERVER_URL')
 
 with server.auth.sign_in(tableau_auth):
     all_datasources, pagination_item = server.datasources.get()
     print("\nThere are {} datasources on site: ".format(pagination_item.total_available))
     print([datasource.name for datasource in all_datasources])
+```
+For Tableau online TSC.TableauAuth is used with site_id
+```py
+tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD','SITEID')
 ```
