@@ -2187,7 +2187,7 @@ Returns a list of all `SiteItem` objects and a `PaginationItem`. Use these value
   all_sites, pagination_item = server.sites.get()
 
   # print all the site names and ids
-  for site in all_sites):
+  for site in all_sites:
        print(site.id, site.name, site.content_url, site.state)
 
 
