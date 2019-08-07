@@ -15,11 +15,11 @@ with server.auth.sign_in(tableau_auth):
     # Do awesome things here!
 ```
 
-The `SERVER_URL` is the URL of the Tableau server without subpaths. For local Tableau servers, in the form of: `https://www.MY_SERVER.com`. For Tableau Online, `https://10ax.online..tableau.com/`.
+`SERVER_URL` is the URL of your Tableau server without subpaths. For local Tableau servers, an example would be: `https://www.MY_SERVER.com`. For Tableau Online, an example would be: `https://10ax.online.tableau.com/`.
 
-`SITENAME` is same as the `contentURL`, or site subpath, of your full site URL. This parameter can be omitted when signing in to the Default site of a locally installed Tableau server.
+`SITENAME` is the subpath of your site of your full site URL (also called `contentURL` in the REST API). `MYSITE` would be the site name of `https://10ax.online.tableau.com/MYSITE`. This parameter can be omitted when signing in to the Default site of a locally installed Tableau server.
 
-Optionally, you can override the Tableau API version by adding `server.version = '<VERSION_NUMBER>'` before the `auth.signin` call. 
+Optionally, you can override the version of Tableau API you are authorizing against by adding `server.version = '<VERSION_NUMBER>'` before the `auth.signin` call. 
 
 The TSC library signs you out of Tableau Server when you exit out of the `with` block.
 
@@ -28,7 +28,7 @@ The TSC library signs you out of Tableau Server when you exit out of the `with` 
     credentials token is limited by the maximum session length set on your Tableau Server (2 hours by default).
 </div>
 
-An option to using a `with` block is to call the `Auth.sign_in` and `Auth.sign_out` functions explicitly.
+An alternative to using a `with` block is to call the `Auth.sign_in` and `Auth.sign_out` functions explicitly.
 
 ```py
 import tableauserverclient as TSC
