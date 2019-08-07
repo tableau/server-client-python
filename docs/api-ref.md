@@ -249,7 +249,7 @@ Name | Description
 `name`  |  The name of the data source. If not specified, the name of the published data source file is used. 
 `project_id` |  The identifier of the project associated with the data source. When you must provide this identifier when create an instance of a `DatasourceItem`
 `project_name` |  The name of the project associated with the data source. 
-`tags` |  The tags that have been added to the data source. 
+`tags` |  The tags (list of strings) that have been added to the data source. 
 `updated_at` |  The date and time when the data source was last updated. 
 
 
@@ -3449,9 +3449,9 @@ tableau_auth = TSC.TableauAuth('username', 'password', site_id='site')
 server = TSC.Server('https://servername')
 
 with server.auth.sign_in(tableau_auth):
-  all_workbooks, pagination_item = server.workbooks.get()
+  all_workbooks_items, pagination_item = server.workbooks.get()
   # print names of first 100 workbooks
-  print([workbook.name for workbook in all_workbooks])
+  print([workbook.name for workbook in all_workbooks_items])
 
 
 
