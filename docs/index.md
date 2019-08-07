@@ -48,6 +48,20 @@ pip install git+https://github.com/tableau/server-client-python.git@development
 Note that the version from the development branch should not be used for production code. The methods and endpoints in the
 development version are subject to change at any time before the next stable release.
 
+### Install on an offline machine
+
+To install TSC onto a machine without internet connection, use the following steps:
+
+1) Download the [setup package](https://pypi.org/project/tableauserverclient/#files){:target="_blank"}.
+2) Manually install the dependent Python libraries.
+
+   > **Note:**  The way python dependencies are configured in the TSC set up package requires either for them to be preinstalled when installing TSC, or for network to be available to retrieve them. Offline installation currently requires manual installation of the following python libraries (and their dependencies) before intalling TSC:
+     * pytest-runner
+     * pytest
+     * requests
+     
+3) Run `pip install  ./downloads/tableauserverclient-x.x.tar.gz`
+
 ## Get the samples
 
 The TSC samples are included in the `samples` directory of the TSC repository on Github. You can run the following command to clone the
@@ -66,7 +80,7 @@ Run the following code to get a list of all the data sources on your installatio
 ```py
 import tableauserverclient as TSC
 
-tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
+tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD', 'SITENAME')
 server = TSC.Server('http://SERVER_URL')
 
 with server.auth.sign_in(tableau_auth):
@@ -74,3 +88,7 @@ with server.auth.sign_in(tableau_auth):
     print("\nThere are {} datasources on site: ".format(pagination_item.total_available))
     print([datasource.name for datasource in all_datasources])
 ```
+
+> `SERVER_URL` is the URL of your Tableau server without subpaths. For local Tableau servers, an example would be: `https://www.MY_SERVER.com`. For Tableau Online, an example would be: `https://10ax.online.tableau.com/`.
+
+>`SITENAME` is the subpath of your full site URL (also called `contentURL` in the REST API). `MYSITE` would be the site name of `https://10ax.online.tableau.com/MYSITE`. This parameter can be omitted when signing in to the Default site of a on premise Tableau server.
