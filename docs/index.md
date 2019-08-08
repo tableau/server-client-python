@@ -52,14 +52,8 @@ development version are subject to change at any time before the next stable rel
 
 To install TSC onto a machine without internet connection, use the following steps:
 
-1) Download the [setup package](https://pypi.org/project/tableauserverclient/#files){:target="_blank"}.
-2) Manually install the dependent Python libraries.
-
-   > **Note:**  The way python dependencies are configured in the TSC set up package requires either for them to be preinstalled when installing TSC, or for network to be available to retrieve them. Offline installation currently requires manual installation of the following python libraries (and their dependencies) before intalling TSC:
-     * pytest-runner
-     * pytest
-     * requests
-     
+1) Download and manually install the **requests** python library (and its dependencies).     
+2) Download the [setup package](https://pypi.org/project/tableauserverclient/#files){:target="_blank"}.
 3) Run `pip install  ./downloads/tableauserverclient-x.x.tar.gz`
 
 ## Get the samples
