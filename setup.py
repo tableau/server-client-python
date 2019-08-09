@@ -1,8 +1,15 @@
+import sys
 import versioneer
+
 try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
+
+# Only install pytest and runner when test command is run
+# This makes work easier for offline installs or low bandwidth machines
+needs_pytest = {'pytest', 'test', 'ptr'}.intersection(sys.argv)
+pytest_runner = ['pytest-runner'] if needs_pytest else []
 
 setup(
     name='tableauserverclient',
@@ -16,9 +23,7 @@ setup(
     license='MIT',
     description='A Python module for working with the Tableau Server REST API.',
     test_suite='test',
-    setup_requires=[
-        'pytest-runner'
-    ],
+    setup_requires=pytest_runner,
     install_requires=[
         'requests>=2.11,<3.0'
     ],
