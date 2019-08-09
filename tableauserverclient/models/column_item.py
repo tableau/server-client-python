@@ -19,6 +19,7 @@ class ColumnItem(object):
         return self._name
 
     @name.setter
+    @property_not_empty
     def name(self, value):
         self._name = value
 
@@ -29,7 +30,7 @@ class ColumnItem(object):
     @description.setter
     def description(self, value):
         self._description = value
-    
+
     @property
     def remote_type(self):
         return self._remote_type
@@ -66,4 +67,3 @@ class ColumnItem(object):
         remote_type = column_xml.get('remoteType', None)
 
         return id, name, description, remote_type
-

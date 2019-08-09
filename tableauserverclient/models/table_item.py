@@ -36,6 +36,7 @@ class TableItem(object):
         return self._name
 
     @name.setter
+    @property_not_empty
     def name(self, value):
         self._name = value
 
