@@ -64,20 +64,20 @@ class Tables(Endpoint):
 
     # Get all columns of the table
     @api(version="3.5")
-    def populate_columns(self, table_item):
+    def populate_columns(self, table_item, req_options=None):
         if not table_item.id:
             error = "Table item missing ID. table must be retrieved from server first."
             raise MissingRequiredFieldError(error)
 
         def column_fetcher():
-            return self._get_columns_for_table(table_item)
+            return Pager(lambda options: self._get_columns_for_table(table_item, options), req_options)
 
         table_item._set_columns(column_fetcher)
         logger.info('Populated columns for table (ID: {0}'.format(table_item.id))
 
-    def _get_columns_for_table(self, table_item):
+    def _get_columns_for_table(self, table_item, req_options=None):
         url = "{0}/{1}/columns".format(self.baseurl, table_item.id)
-        server_response = self.get_request(url)
+        server_response = self.get_request(url, req_options)
         columns = ColumnItem.from_response(server_response.content,
                                            self.parent_srv.namespace)
         return columns

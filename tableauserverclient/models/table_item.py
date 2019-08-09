@@ -36,7 +36,6 @@ class TableItem(object):
         return self._name
 
     @name.setter
-    @property_not_empty
     def name(self, value):
         self._name = value
 
@@ -94,7 +93,7 @@ class TableItem(object):
             self._description = table_values['description']
 
         if 'certified' in table_values:
-            self._certified = string_to_bool(table_values['certified'])
+            self._certified = string_to_bool(table_values['isCertified'])
 
         if 'certification_note' in table_values:
             self._certification_note = table_values['certificationNote']
@@ -104,6 +103,9 @@ class TableItem(object):
 
         if 'schema' in table_values:
             self._schema = table_values['schema']
+
+        if 'contact' in table_values:
+            self._contact_id = table_values['contact']['id']
 
     def _set_permissions(self, permissions):
         self._permissions = permissions
