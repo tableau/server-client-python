@@ -126,7 +126,7 @@ class DatabaseItem(object):
 
     @property
     def file_extension(self):
-        return self._file_path
+        return self._file_extension
 
     @property
     def file_id(self):

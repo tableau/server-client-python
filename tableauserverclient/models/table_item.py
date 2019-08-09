@@ -9,7 +9,6 @@ from .exceptions import UnpopulatedPropertyError
 
 class TableItem(object):
     def __init__(self, name, description=None):
-        self._content_permissions = None
         self._id = None
         self.description = description
         self.name = name
