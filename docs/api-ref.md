@@ -249,7 +249,7 @@ Name | Description
 `name`  |  The name of the data source. If not specified, the name of the published data source file is used. 
 `project_id` |  The identifier of the project associated with the data source. When you must provide this identifier when create an instance of a `DatasourceItem`
 `project_name` |  The name of the project associated with the data source. 
-`tags` |  The tags that have been added to the data source. 
+`tags` |  The tags (list of strings) that have been added to the data source. 
 `updated_at` |  The date and time when the data source was last updated. 
 
 
@@ -570,7 +570,7 @@ The `DatasourceItem` for the data source that was added or appended to.
 datasource.update(datasource_item)
 ```
 
-Updates the owner, or project of the specified data source. 
+Updates the owner or project of the specified data source. Data source name cannot be updated.
 
 REST API: [Update Datasource](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_data_source){:target="_blank"}
 
@@ -605,7 +605,7 @@ An updated `DatasourceItem`.
   datasource = server.datasources.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
   
 # do some updating 
-  datasource.name = 'New Name'
+  datasource.owner_id = 'New Owner ID'
 
 # call the update method with the data source item
   updated_datasource = server.datasources.update(datasource)
@@ -2187,7 +2187,7 @@ Returns a list of all `SiteItem` objects and a `PaginationItem`. Use these value
   all_sites, pagination_item = server.sites.get()
 
   # print all the site names and ids
-  for site in all_sites):
+  for site in all_sites:
        print(site.id, site.name, site.content_url, site.state)
 
 
@@ -3449,9 +3449,9 @@ tableau_auth = TSC.TableauAuth('username', 'password', site_id='site')
 server = TSC.Server('https://servername')
 
 with server.auth.sign_in(tableau_auth):
-  all_workbooks, pagination_item = server.workbooks.get()
+  all_workbooks_items, pagination_item = server.workbooks.get()
   # print names of first 100 workbooks
-  print([workbook.name for workbook in all_workbooks])
+  print([workbook.name for workbook in all_workbooks_items])
 
 
 

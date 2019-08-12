@@ -48,6 +48,16 @@ pip install git+https://github.com/tableau/server-client-python.git@development
 Note that the version from the development branch should not be used for production code. The methods and endpoints in the
 development version are subject to change at any time before the next stable release.
 
+### Install on an offline machine
+
+To install TSC onto a machine without internet connection, use the following steps:
+
+1) Download and manually install the **requests** python library (and its dependencies).     
+
+2) Download the [setup package](https://pypi.org/project/tableauserverclient/#files){:target="_blank"}.
+
+3) Run `pip install  ./downloads/tableauserverclient-x.x.tar.gz`
+
 ## Get the samples
 
 The TSC samples are included in the `samples` directory of the TSC repository on Github. You can run the following command to clone the
@@ -66,7 +76,7 @@ Run the following code to get a list of all the data sources on your installatio
 ```py
 import tableauserverclient as TSC
 
-tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
+tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD', 'SITENAME')
 server = TSC.Server('http://SERVER_URL')
 
 with server.auth.sign_in(tableau_auth):
@@ -74,7 +84,6 @@ with server.auth.sign_in(tableau_auth):
     print("\nThere are {} datasources on site: ".format(pagination_item.total_available))
     print([datasource.name for datasource in all_datasources])
 ```
-To authenticate to Tableau Online, or a site other than the default site within a local Tableau Server installation, the site_id(SITE_NAME) parameter must be used to specify the site.
-```py
-tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD','SITENAME')
-```
+> `SERVER_URL` is the URL of your Tableau server without subpaths. For local Tableau servers, an example would be: `https://www.MY_SERVER.com`. For Tableau Online, an example would be: `https://10ax.online.tableau.com/`.
+
+>`SITENAME` is the subpath of your full site URL (also called `contentURL` in the REST API). `MYSITE` would be the site name of `https://10ax.online.tableau.com/MYSITE`. This parameter can be omitted when signing in to the Default site of a on premise Tableau server.
