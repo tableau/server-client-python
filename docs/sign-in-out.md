@@ -15,9 +15,11 @@ with server.auth.sign_in(tableau_auth):
     # Do awesome things here!
 ```
 
-`SERVER_URL` is the URL of your Tableau server without subpaths. For local Tableau servers, an example would be: `https://www.MY_SERVER.com`. For Tableau Online, an example would be: `https://10ax.online.tableau.com/`.
+> `SERVER_URL` is the URL of your Tableau server without subpaths. For local Tableau servers, an example would be:      
+  `https://www.MY_SERVER.com`. For Tableau Online, an example would be: `https://10ax.online.tableau.com/`.
 
-`SITENAME` is the subpath of your full site URL (also called `contentURL` in the REST API). `MYSITE` would be the site name of `https://10ax.online.tableau.com/MYSITE`. This parameter can be omitted when signing in to the Default site of an in premise Tableau server.
+> `SITENAME` is the subpath of your full site URL (also called `contentURL` in the REST API). `MYSITE` would be the site name of 
+  `https://10ax.online.tableau.com/MYSITE`. This parameter can be omitted when signing in to the Default site of an in premise Tableau server.
 
 Optionally, you can override the version of Tableau API you are authorizing against by adding `server.version = '<VERSION_NUMBER>'` before the `auth.signin` call. 
 
