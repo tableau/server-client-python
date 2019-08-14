@@ -25,7 +25,8 @@ setup(
     test_suite='test',
     setup_requires=pytest_runner,
     install_requires=[
-        'requests>=2.11,<3.0'
+        'requests>=2.11,<3.0',
+        'urllib3==1.24.3'
     ],
     tests_require=[
         'requests-mock>=1.0,<2.0',
