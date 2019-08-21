@@ -52,7 +52,6 @@ class DatabaseTests(unittest.TestCase):
             single_database.certification_note = "Test"
             single_database = self.server.databases.update(single_database)
 
-
         self.assertEqual('23591f2c-4802-4d6a-9e28-574a8ea9bc4c', single_database.id)
         self.assertEqual('9324cf6b-ba72-4b8e-b895-ac3f28d2f0e0', single_database.contact_id)
         self.assertEqual(True, single_database.certified)

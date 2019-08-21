@@ -39,14 +39,13 @@ class TableTests(unittest.TestCase):
         self.assertEqual('9324cf6b-ba72-4b8e-b895-ac3f28d2f0e0', all_tables[1].contact_id)
         self.assertEqual(False, all_tables[1].certified)
 
-
     def test_update(self):
         response_xml = read_xml_asset(UPDATE_XML)
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/10224773-ecee-42ac-b822-d786b0b8e4d9', text=response_xml)
             single_table = TSC.TableItem('test')
             single_table._id = '10224773-ecee-42ac-b822-d786b0b8e4d9'
-            
+
             single_table.contact_id = '8e1a8235-c9ee-4d61-ae82-2ffacceed8e0'
             single_table.certified = True
             single_table.certification_note = "Test"
