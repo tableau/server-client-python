@@ -17,6 +17,8 @@ class TableItem(object):
         self._certified = None
         self._certification_note = None
         self._permissions = None
+        self._schema = None
+
         self._columns = None
 
     @property
@@ -72,6 +74,10 @@ class TableItem(object):
         self._contact_id = value
 
     @property
+    def schema(self):
+        return self._schema
+
+    @property
     def columns(self):
         if self._columns is None:
             error = "Table must be populated with columns first."
@@ -92,10 +98,10 @@ class TableItem(object):
         if 'description' in table_values:
             self._description = table_values['description']
 
-        if 'certified' in table_values:
+        if 'isCertified' in table_values:
             self._certified = string_to_bool(table_values['isCertified'])
 
-        if 'certification_note' in table_values:
+        if 'certificationNote' in table_values:
             self._certification_note = table_values['certificationNote']
 
         if 'embedded' in table_values:
@@ -129,8 +135,8 @@ class TableItem(object):
         table_values = table_xml.attrib.copy()
 
         contact = table_xml.find('.//t:contact', namespaces=ns)
-        if contact:
-            table_values['contact'] = contact_values.attrib.copy()
+        if contact is not None:
+            table_values['contact'] = contact.attrib.copy()
 
         return table_values
 

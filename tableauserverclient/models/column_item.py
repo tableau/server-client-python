@@ -43,7 +43,7 @@ class ColumnItem(object):
         if description:
             self.description = description
         if remote_type:
-            self.remote_type = remote_type
+            self._remote_type = remote_type
 
     @classmethod
     def from_response(cls, resp, ns):

@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.5.xsd">
+    <pagination pageNumber="1" pageSize="100" totalAvailable="5"/>
+    <databases>
+        <database id="5ea59b45-e497-4827-8809-bfe213236f75" name="hyper_0.hyper" connectionType="hyper" isEmbedded="true" isCertified="false" type="File" filePath="hyper_0.hyper" contentPermissions="LockedToDatabase">
+            <site id="5286d663-8668-4ac2-8c8d-91af7d585f6b"/>
+        </database>
+        <database id="23591f2c-4802-4d6a-9e28-574a8ea9bc4c" name="testv1" connectionType="sqlserver" isEmbedded="false" description="Party" isCertified="true" certificationNote="Test" type="DatabaseServer" hostName="mssql.test.tsi.lan" contentPermissions="LockedToDatabase">
+            <site id="5286d663-8668-4ac2-8c8d-91af7d585f6b"/>
+            <contact id="9324cf6b-ba72-4b8e-b895-ac3f28d2f0e0" name="bob"/>
+            <certifier id="2c5ea058-6408-46a6-9aa2-09f795a31237" name="sally"/>
+        </database>
+        <database id="e8d4aa9f-3d1a-4b49-8d6d-27f113cbd25e" name="oracle.test.tsi.lan:1521" connectionType="oracle" isEmbedded="false" isCertified="false" type="DatabaseServer" hostName="oracle.test.tsi.lan" port="1521" contentPermissions="ManagedByOwner">
+            <site id="5286d663-8668-4ac2-8c8d-91af7d585f6b"/>
+        </database>
+        <database id="760524af-426d-4d6d-a6a2-6b177f821167" name="testv1" connectionType="redshift" isEmbedded="false" isCertified="false" type="DatabaseServer" hostName="tableau-dev.cztbcyhhhp88.us-east-1.redshift.amazonaws.com" port="8912" contentPermissions="LockedToDatabase">
+            <site id="5286d663-8668-4ac2-8c8d-91af7d585f6b"/>
+        </database>
+        <database id="73affd65-cd13-4416-b652-13e879b091c0" name="ec2-54-160-75-126.compute-1.amazonaws.com:10000" connectionType="awshadoophive" isEmbedded="false" isCertified="false" type="DatabaseServer" hostName="ec2-54-160-75-126.compute-1.amazonaws.com" port="10000" contentPermissions="ManagedByOwner">
+            <site id="5286d663-8668-4ac2-8c8d-91af7d585f6b"/>
+        </database>
+    </databases>
+</tsResponse>

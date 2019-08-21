@@ -2,6 +2,7 @@ from .endpoint import api, Endpoint
 from .exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .default_permissions_endpoint import _DefaultPermissionsEndpoint
+from ..pager import Pager
 
 from .. import RequestFactory, TableItem, ColumnItem, PaginationItem, PermissionsRule, Permission
 
@@ -80,7 +81,8 @@ class Tables(Endpoint):
         server_response = self.get_request(url, req_options)
         columns = ColumnItem.from_response(server_response.content,
                                            self.parent_srv.namespace)
-        return columns
+        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
+        return columns, pagination_item
 
     # Update workbook_connection
     @api(version="3.5")

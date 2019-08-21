@@ -12,20 +12,31 @@ class DatabaseItem(object):
         ManagedByOwner = 'ManagedByOwner'
 
     def __init__(self, name, description=None, content_permissions=None):
-        self._content_permissions = None
         self._id = None
-        self.description = description
         self.name = name
+        self.description = description
         self.content_permissions = content_permissions
-
-        self._contact_id = None
         self._certified = None
-        self._connector_url = None
-        self._permissions = None
         self._certification_note = None
+        self._contact_id = None
 
-        self._tables = None
+        self._connector_url = None
+        self._connection_type = None
+        self._embedded = None
+        self._file_extension = None
+        self._file_id = None
+        self._file_path = None
+        self._host_name = None
+        self._metadata_type = None
+        self._mime_type = None
+        self._port = None
+        self._provider = None
+        self._request_url = None
+
+        self._permissions = None
         self._default_table_permissions = None
+
+        self._tables = None  # Not implemented yet
 
     @property
     def content_permissions(self):
@@ -121,6 +132,10 @@ class DatabaseItem(object):
         return self._connector_url
 
     @property
+    def connection_type(self):
+        return self._connection_type
+
+    @property
     def request_url(self):
         return self._request_url
 
@@ -149,9 +164,12 @@ class DatabaseItem(object):
         return self._tables()
 
     def _set_values(self, database_values):
-
+        # ID & Settable
         if 'id' in database_values:
             self._id = database_values['id']
+
+        if 'contact' in database_values:
+            self._contact_id = database_values['contact']['id']
 
         if 'name' in database_values:
             self._name = database_values['name']
@@ -159,50 +177,52 @@ class DatabaseItem(object):
         if 'description' in database_values:
             self._description = database_values['description']
 
-        if 'content_permissions' in database_values:
+        if 'isCertified' in database_values:
+            self._certified = string_to_bool(database_values['isCertified'])
+
+        if 'certificationNote' in database_values:
+            self._certification_note = database_values['certificationNote']
+
+        # Not settable, alphabetical
+
+        if 'connectionType' in database_values:
+            self._connection_type = database_values['connectionType']
+
+        if 'connectorUrl' in database_values:
+            self._connector_url = database_values['connectorUrl']
+
+        if 'contentPermissions' in database_values:
             self._content_permissions = database_values['contentPermissions']
 
         if 'embedded' in database_values:
             self._embedded = string_to_bool(database_values['embedded'])
 
-        if 'isCertified' in database_values:
-            self._certified = string_to_bool(database_values['isCertified'])
+        if 'fileExtension' in database_values:
+            self._file_extension = database_values['fileExtension']
 
-        if 'certification_note' in database_values:
-            self._certification_note = database_values['certificationNote']
+        if 'fileId' in database_values:
+            self._file_id = database_values['fileId']
 
-        if 'type' in database_values:
-            self._metadata_type = database_values['type']
+        if 'filePath' in database_values:
+            self._file_path = database_values['filePath']
 
-        if 'host_name' in database_values:
+        if 'hostName' in database_values:
             self._host_name = database_values['hostName']
+
+        if 'mimeType' in database_values:
+            self._mime_type = database_values['mimeType']
 
         if 'port' in database_values:
             self._port = int(database_values['port'])
 
-        if 'file_path' in database_values:
-            self._file_path = database_values['filePath']
-
         if 'provider' in database_values:
             self._provider = database_values['provider']
 
-        if 'mime_type' in database_values:
-            self._mime_type = database_values['mimeType']
-
-        if 'connector_url' in database_values:
-            self._connector_url = database_values['connectorUrl']
-
-        if 'request_url' in database_values:
+        if 'requestUrl' in database_values:
             self._request_url = database_values['requestUrl']
 
-        if 'file_extension' in database_values:
-            self._file_extension = database_values['fileExtension']
-
-        if 'file_id' in database_values:
-            self._file_id = database_values['fileId']
-
-        if 'contact' in database_values:
-            self._contact_id = database_values['contact']['id']
+        if 'type' in database_values:
+            self._metadata_type = database_values['type']
 
     def _set_permissions(self, permissions):
         self._permissions = permissions
@@ -230,9 +250,8 @@ class DatabaseItem(object):
     def _parse_element(database_xml, ns):
         database_values = database_xml.attrib.copy()
         contact = database_xml.find('.//t:contact', namespaces=ns)
-        if contact:
-            datbase_values['contact'] = contact_values.attrib.copy()
-
+        if contact is not None:
+            database_values['contact'] = contact.attrib.copy()
         return database_values
 
 
