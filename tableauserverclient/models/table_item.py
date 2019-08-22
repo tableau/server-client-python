@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 from .permissions_item import Permission
 from .column_item import ColumnItem
 
-from .property_decorators import property_is_enum, property_not_empty
+from .property_decorators import property_is_enum, property_not_empty, property_is_boolean
 from .exceptions import UnpopulatedPropertyError
 
 
@@ -54,6 +54,7 @@ class TableItem(object):
         return self._certified
 
     @certified.setter
+    @property_is_boolean
     def certified(self, value):
         self._certified = value
 

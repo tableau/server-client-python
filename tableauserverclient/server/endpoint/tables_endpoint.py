@@ -84,7 +84,6 @@ class Tables(Endpoint):
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         return columns, pagination_item
 
-    # Update workbook_connection
     @api(version="3.5")
     def update_column(self, table_item, column_item):
         url = "{0}/{1}/columns/{2}".format(self.baseurl, table_item.id, column_item.id)
