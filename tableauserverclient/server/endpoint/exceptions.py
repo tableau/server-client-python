@@ -46,6 +46,10 @@ class ItemTypeNotAllowed(Exception):
     pass
 
 
+class NonXMLResponseError(Exception):
+    pass
+
+
 class GraphQLError(Exception):
     def __init__(self, error_payload):
         self.error = error_payload

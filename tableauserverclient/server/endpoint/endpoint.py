@@ -1,5 +1,6 @@
 from .exceptions import ServerResponseError, InternalServerError
 from functools import wraps
+from xml.etree.ElementTree import ParseError
 
 import logging
 
@@ -65,7 +66,11 @@ class Endpoint(object):
         if server_response.status_code >= 500:
             raise InternalServerError(server_response)
         elif server_response.status_code not in Success_codes:
-            raise ServerResponseError.from_response(server_response.content, self.parent_srv.namespace)
+            try:
+                raise ServerResponseError.from_response(server_response.content, self.parent_srv.namespace)
+            except ParseError:
+                # not an xml error
+                raise NonXMLResponseError(server_response.content)
 
     def get_unauthenticated_request(self, url, request_object=None):
         return self._make_request(self.parent_srv.session.get, url, request_object=request_object)

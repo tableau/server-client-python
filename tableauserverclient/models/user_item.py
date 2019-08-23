@@ -2,9 +2,13 @@ import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_is_enum, property_not_empty, property_not_nullable
 from ..datetime_helpers import parse_datetime
+from .reference_item import ResourceReference
 
 
 class UserItem(object):
+
+    tag_name = 'user'
+
     class Roles:
         Interactor = 'Interactor'
         Publisher = 'Publisher'
@@ -30,7 +34,7 @@ class UserItem(object):
         SAML = 'SAML'
         ServerDefault = 'ServerDefault'
 
-    def __init__(self, name, site_role, auth_setting=None):
+    def __init__(self, name=None, site_role=None, auth_setting=None):
         self._auth_setting = None
         self._domain_name = None
         self._external_auth_user_id = None
@@ -94,6 +98,9 @@ class UserItem(object):
             raise UnpopulatedPropertyError(error)
         return self._workbooks()
 
+    def to_reference(self):
+        return ResourceReference(id_=self.id, tag_name=self.tag_name)
+
     def _set_workbooks(self, workbooks):
         self._workbooks = workbooks
 
@@ -139,6 +146,10 @@ class UserItem(object):
                                   fullname, email, auth_setting, domain_name)
             all_user_items.append(user_item)
         return all_user_items
+
+    @staticmethod
+    def as_reference(id_):
+        return ResourceReference(id_, UserItem.tag_name)
 
     @staticmethod
     def _parse_element(user_xml, ns):
