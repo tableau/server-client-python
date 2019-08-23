@@ -8,4 +8,4 @@ class PersonalAccessTokenAuth(object):
 
     @property
     def credentials(self):
-        return {'clientId': self.token_name, 'personalAccessToken': self.personal_access_token}
+        return {'personalAccessTokenName': self.token_name, 'personalAccessTokenSecret': self.personal_access_token}
