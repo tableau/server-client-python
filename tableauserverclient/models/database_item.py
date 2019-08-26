@@ -194,8 +194,8 @@ class DatabaseItem(object):
         if 'contentPermissions' in database_values:
             self._content_permissions = database_values['contentPermissions']
 
-        if 'embedded' in database_values:
-            self._embedded = string_to_bool(database_values['embedded'])
+        if 'isEmbedded' in database_values:
+            self._embedded = string_to_bool(database_values['isEmbedded'])
 
         if 'fileExtension' in database_values:
             self._file_extension = database_values['fileExtension']

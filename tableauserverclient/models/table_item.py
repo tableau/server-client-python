@@ -105,8 +105,8 @@ class TableItem(object):
         if 'certificationNote' in table_values:
             self._certification_note = table_values['certificationNote']
 
-        if 'embedded' in table_values:
-            self._embedded = string_to_bool(table_values['embedded'])
+        if 'isEmbedded' in table_values:
+            self._embedded = string_to_bool(table_values['isEmbedded'])
 
         if 'schema' in table_values:
             self._schema = table_values['schema']
