@@ -1,6 +1,8 @@
 from .connection_credentials import ConnectionCredentials
 from .connection_item import ConnectionItem
+from .column_item import ColumnItem
 from .datasource_item import DatasourceItem
+from .database_item import DatabaseItem
 from .exceptions import UnpopulatedPropertyError
 from .group_item import GroupItem
 from .interval_item import IntervalItem, DailyInterval, WeeklyInterval, MonthlyInterval, HourlyInterval
@@ -13,6 +15,7 @@ from .site_item import SiteItem
 from .tableau_auth import TableauAuth
 from .personal_access_token_auth import PersonalAccessTokenAuth
 from .target import Target
+from .table_item import TableItem
 from .task_item import TaskItem
 from .user_item import UserItem
 from .view_item import ViewItem
