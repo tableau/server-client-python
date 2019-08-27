@@ -8,7 +8,6 @@ import copy
 
 class FlowItem(object):
     def __init__(self, project_id, name=None):
-        self._connections = None
         self._webpage_url = None
         self._created_at = None
         self._id = None
@@ -20,6 +19,7 @@ class FlowItem(object):
         self.project_id = project_id
         self.tags = set()
 
+        self._connections = None
         self._permissions = None
 
     @property

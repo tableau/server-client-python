@@ -18,7 +18,7 @@ from contextlib import closing
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64   # 64MB
 
-ALLOWED_FILE_EXTENSIONS = ['tfs', 'tflx']
+ALLOWED_FILE_EXTENSIONS = ['tfl', 'tflx']
 
 logger = logging.getLogger('tableau.endpoint.flows')
 
@@ -47,7 +47,7 @@ class Flows(Endpoint):
     @api(version="3.3")
     def get_by_id(self, flow_id):
         if not flow_id:
-            error = "Datasource ID undefined."
+            error = "Flow ID undefined."
             raise ValueError(error)
         logger.info('Querying single flow (ID: {0})'.format(flow_id))
         url = "{0}/{1}".format(self.baseurl, flow_id)
@@ -58,7 +58,7 @@ class Flows(Endpoint):
     @api(version="3.3")
     def populate_connections(self, flow_item):
         if not flow_item.id:
-            error = 'Datasource item missing ID. Datasource must be retrieved from server first.'
+            error = 'Flow item missing ID. Flow must be retrieved from server first.'
             raise MissingRequiredFieldError(error)
 
         def connections_fetcher():
@@ -77,7 +77,7 @@ class Flows(Endpoint):
     @api(version="3.3")
     def delete(self, flow_id):
         if not flow_id:
-            error = "Datasource ID undefined."
+            error = "Flow ID undefined."
             raise ValueError(error)
         url = "{0}/{1}".format(self.baseurl, flow_id)
         self.delete_request(url)
@@ -85,21 +85,11 @@ class Flows(Endpoint):
 
     # Download 1 flow by id
     @api(version="3.3")
-    @parameter_added_in(no_extract='2.5')
-    @parameter_added_in(include_extract='2.5')
-    def download(self, flow_id, filepath=None, include_extract=True, no_extract=None):
+    def download(self, flow_id, filepath=None):
         if not flow_id:
-            error = "Datasource ID undefined."
+            error = "Flow ID undefined."
             raise ValueError(error)
         url = "{0}/{1}/content".format(self.baseurl, flow_id)
-
-        if no_extract is False or no_extract is True:
-            import warnings
-            warnings.warn('no_extract is deprecated, use include_extract instead.', DeprecationWarning)
-            include_extract = not no_extract
-
-        if not include_extract:
-            url += "?includeExtract=False"
 
         with closing(self.get_request(url, parameters={'stream': True})) as server_response:
             _, params = cgi.parse_header(server_response.headers['Content-Disposition'])
@@ -120,14 +110,14 @@ class Flows(Endpoint):
     @api(version="3.3")
     def update(self, flow_item):
         if not flow_item.id:
-            error = 'Datasource item missing ID. Datasource must be retrieved from server first.'
+            error = 'Flow item missing ID. Flow must be retrieved from server first.'
             raise MissingRequiredFieldError(error)
 
         self._resource_tagger.update_tags(self.baseurl, flow_item)
 
         # Update the flow itself
         url = "{0}/{1}".format(self.baseurl, flow_item.id)
-        update_req = RequestFactory.Datasource.update_req(flow_item)
+        update_req = RequestFactory.Flow.update_req(flow_item)
         server_response = self.put_request(url, update_req)
         logger.info('Updated flow item (ID: {0})'.format(flow_item.id))
         updated_flow = copy.copy(flow_item)
@@ -156,8 +146,7 @@ class Flows(Endpoint):
     # Publish flow
     @api(version="3.3")
     @parameter_added_in(connections="2.8")
-    @parameter_added_in(as_job='3.0')
-    def publish(self, flow_item, file_path, mode, connection_credentials=None, connections=None, as_job=False):
+    def publish(self, flow_item, file_path, mode, connections=None):
         if not os.path.isfile(file_path):
             error = "File path does not lead to an existing file."
             raise IOError(error)
@@ -180,43 +169,34 @@ class Flows(Endpoint):
         if mode == self.parent_srv.PublishMode.Overwrite or mode == self.parent_srv.PublishMode.Append:
             url += '&{0}=true'.format(mode.lower())
 
-        if as_job:
-            url += '&{0}=true'.format('asJob')
-
         # Determine if chunking is required (64MB is the limit for single upload method)
         if os.path.getsize(file_path) >= FILESIZE_LIMIT:
             logger.info('Publishing {0} to server with chunking method (flow over 64MB)'.format(filename))
             upload_session_id = Fileuploads.upload_chunks(self.parent_srv, file_path)
             url = "{0}&uploadSessionId={1}".format(url, upload_session_id)
-            xml_request, content_type = RequestFactory.Datasource.publish_req_chunked(flow_item,
-                                                                                      connection_credentials,
-                                                                                      connections)
+            xml_request, content_type = RequestFactory.Flow.publish_req_chunked(flow_item,
+                                                                                connections)
         else:
             logger.info('Publishing {0} to server'.format(filename))
             with open(file_path, 'rb') as f:
                 file_contents = f.read()
-            xml_request, content_type = RequestFactory.Datasource.publish_req(flow_item,
-                                                                              filename,
-                                                                              file_contents,
-                                                                              connection_credentials,
-                                                                              connections)
+            xml_request, content_type = RequestFactory.Flow.publish_req(flow_item,
+                                                                        filename,
+                                                                        file_contents,
+                                                                        connections)
 
         # Send the publishing request to server
         try:
             server_response = self.post_request(url, xml_request, content_type)
         except InternalServerError as err:
-            if err.code == 504 and not as_job:
+            if err.code == 504:
                 err.content = "Timeout error while publishing. Please use asynchronous publishing to avoid timeouts."
             raise err
-
-        if as_job:
-            new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
-            logger.info('Published {0} (JOB_ID: {1}'.format(filename, new_job.id))
-            return new_job
         else:
             new_flow = FlowItem.from_response(server_response.content, self.parent_srv.namespace)[0]
             logger.info('Published {0} (ID: {1})'.format(filename, new_flow.id))
             return new_flow
+
         server_response = self.post_request(url, xml_request, content_type)
         new_flow = FlowItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         logger.info('Published {0} (ID: {1})'.format(filename, new_flow.id))
