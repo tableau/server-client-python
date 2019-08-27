@@ -124,7 +124,7 @@ class Flows(Endpoint):
         return updated_flow._parse_common_elements(server_response.content, self.parent_srv.namespace)
 
     # Update flow connections
-    @api(version="2.3")
+    @api(version="3.3")
     def update_connection(self, flow_item, connection_item):
         url = "{0}/{1}/connections/{2}".format(self.baseurl, flow_item.id, connection_item.id)
 
@@ -136,8 +136,9 @@ class Flows(Endpoint):
                                                                               connection_item.id))
         return connection
 
+    @api(version="3.3")
     def refresh(self, flow_item):
-        url = "{0}/{1}/refresh".format(self.baseurl, flow_item.id)
+        url = "{0}/{1}/run".format(self.baseurl, flow_item.id)
         empty_req = RequestFactory.Empty.empty_req()
         server_response = self.post_request(url, empty_req)
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
@@ -145,7 +146,6 @@ class Flows(Endpoint):
 
     # Publish flow
     @api(version="3.3")
-    @parameter_added_in(connections="2.8")
     def publish(self, flow_item, file_path, mode, connections=None):
         if not os.path.isfile(file_path):
             error = "File path does not lead to an existing file."
