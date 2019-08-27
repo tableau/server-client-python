@@ -894,7 +894,7 @@ Returns information about the groups on the site.
 To get information about the users in a group, you must first populate the `GroupItem` with user information using the [groups.populate_users](api-ref#groupspopulate_users) method. 
 
 
-REST API: [Get Uers on Site](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#get_users_on_site){:target="_blank"}
+REST API: [Get Users on Site](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#get_users_on_site){:target="_blank"}
 
 **Parameters**
 
