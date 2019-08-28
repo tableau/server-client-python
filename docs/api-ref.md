@@ -572,7 +572,7 @@ datasource.refresh(datasource_item)
 
 Refreshes the data of the specified extract. 
 
-REST API: [Refresh Datasource](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_datasources.htm#update_data_source_now){:target="_blank"}
+REST API: [Update Data Source Now](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_datasources.htm#update_data_source_now){:target="_blank"}
 
 **Parameters**
 
