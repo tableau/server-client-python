@@ -564,6 +564,53 @@ The `DatasourceItem` for the data source that was added or appended to.
 <br>   
 <br>  
 
+#### datasources.refresh
+
+```py
+datasource.refresh(datasource_item)
+```
+
+Refreshes the data of the specified extract. 
+
+REST API: [Refresh Datasource](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_datasources.htm#update_data_source_now){:target="_blank"}
+
+**Parameters**
+
+Name   |  Description     
+ :--- | : ---    
+`datasource_item`  |  The `datasource_item` specifies the data source to update.
+
+
+
+**Exceptions**
+
+Error   |  Description     
+ :--- | : ---    
+`Datasource item missing ID. Datasource must be retrieved from server first.` |  Raises an error if the datasource_item is unspecified. Use the `Datasources.get()` method to retrieve that identifies for the data sources on the server.
+
+
+**Returns**
+
+An refreshed `DatasourceItem`.
+
+
+**Example**
+
+```py   
+# import tableauserverclient as TSC
+# server = TSC.Server('https://SERVERURL')
+# sign in ...   
+  
+# get the data source item to update
+  datasource = server.datasources.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+  
+# call the refresh method with the data source item
+  refreshed_datasource = server.datasources.refresh(datasource)
+
+```
+<br>
+<br>
+
 #### datasources.update
 
 ```py
@@ -3570,6 +3617,52 @@ with server.auth.sign_in(tableau_auth):
 <br>
 <br>  
 
+#### workbooks.refresh
+
+```py
+workbooks.refresh(workbook_item)
+```
+
+
+Refreshes the extract of an existing workbook. The workbook item must include the workbook ID and overrides the existing settings.
+
+REST API: [Update Workbook Now](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooksviews.htm#update_workbook_now){:target="_blank"}
+
+**Parameters**
+
+Name | Description  
+:--- | :--- 
+`workbook_item`  |  The `workbook_item` specifies the settings for the workbook you are updating. You can change the `owner_id`, `project_id`, and the `show_tabs` values. See [WorkbookItem](#workbookitem-class).
+
+
+**Exceptions**
+
+Error | Description  
+:--- | :--- 
+`Workbook item missing ID. Workbook must be retrieved from server first.` | Raises an error if the `workbook_item` is unspecified. Use the `workbooks.get()` or `workbooks.get_by_id()` methods to retrieve the workbook item from the server. 
+
+
+```py  
+
+import tableauserverclient as TSC
+tableau_auth = TSC.TableauAuth('username', 'password', site_id='site')
+server = TSC.Server('https://servername')
+
+with server.auth.sign_in(tableau_auth):
+
+    # get the workbook item from the site
+    workbook = server.workbooks.get_by_id('1a1b1c1d-2e2f-2a2b-3c3d-3e3f4a4b4c4d')
+
+    # call the update method
+    workbook = server.workbooks.refresh(workbook)
+    print("\nThe data of workbook {0} is refreshed.".format(workbook.name))
+
+
+```
+
+
+<br>
+<br> 
 
 #### workbooks.update
 
