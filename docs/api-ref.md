@@ -572,7 +572,7 @@ datasource.refresh(datasource_item)
 
 Refreshes the data of the specified extract. 
 
-REST API: [Refresh Datasource](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_datasources.htm#update_data_source_now){:target="_blank"}
+REST API: [Update Data Source Now](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_datasources.htm#update_data_source_now){:target="_blank"}
 
 **Parameters**
 
@@ -591,7 +591,7 @@ Error   |  Description
 
 **Returns**
 
-An refreshed `DatasourceItem`.
+A refreshed `DatasourceItem`.
 
 
 **Example**
@@ -3624,7 +3624,7 @@ workbooks.refresh(workbook_item)
 ```
 
 
-Refreshes the extract of an existing workbook. The workbook item must include the workbook ID and overrides the existing settings.
+Refreshes the extract of an existing workbook. 
 
 REST API: [Update Workbook Now](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooksviews.htm#update_workbook_now){:target="_blank"}
 
@@ -3632,8 +3632,7 @@ REST API: [Update Workbook Now](https://help.tableau.com/current/api/rest_api/en
 
 Name | Description  
 :--- | :--- 
-`workbook_item`  |  The `workbook_item` specifies the settings for the workbook you are updating. You can change the `owner_id`, `project_id`, and the `show_tabs` values. See [WorkbookItem](#workbookitem-class).
-
+`workbook_item`  |  The `workbook_item` specifies the settings for the workbook you are refreshing.
 
 **Exceptions**
 
