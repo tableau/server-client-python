@@ -3,7 +3,7 @@ title: Samples
 layout: docs
 ---
 
-The TSC samples are included in the `samples` directory of the TSC repository [on Github](https://github.com/tableau/server-client-python).
+The TSC samples are included in the `samples` directory of the TSC repository [on Github](https://github.com/tableau/server-client-python/tree/master/samples).
 
 * TOC
 {:toc}
@@ -32,24 +32,47 @@ publish.
 
 The following list describes the samples available in the repository:
 
-* `create_group.py`. Create a user group.
+* `create_group.py` Create a user group.
 
-* `create_schedules.py`. Create schedules for extract refreshes and subscriptions.
+* `create_project.py` Creates a project in a site.
 
-* `explore_datasource.py`. Queries datasources, selects a datasource, populates connections for the datasource, then updates the datasource.
+* `create_schedules.py` Create schedules for extract refreshes and subscriptions.
 
-* `explore_workbook.py`. Queries workbooks, selects a workbook, populates the connections and views for a workbook, then updates the workbook.
+* `download_view_image.py`	Downloads an image of a specified view.
 
-* `move_workbook_projects.py`. Updates the properties of a workbook to move the workbook from one project to another.
+* `explore_datasource.py` Queries datasources, selects a datasource, populates connections for the datasource, then updates the datasource.
 
-* `move_workbook_sites.py`. Downloads a workbook, stores it in-memory, and uploads it to another site.
+* `explore_workbook.py` Queries workbooks, selects a workbook, populates the connections and views for a workbook, then updates the workbook.
 
-* `pagination_sample.py`. Use the Pager generator to iterate over all the items on the server.
+* `export.py`	Exports a view as an image, pdf, or csv.
 
-* `publish_workbook.py`. Publishes a Tableau workbook.
+* `export_wb.py`	Exports a pdf containing all views in a workbook.
 
-* `set_http_options.py`. Sets HTTP options for the server and specifically for downloading workbooks.
+* `filter_sort_groups.py`	Demonstrates selecting user groups as filters.
 
-**Note**: For all of the samples, ensure that your Tableau Server user account has permission to access the resources
-requested by the samples.
+* `initialize_server.py`	Sets up an existing server instance with site, workbooks and datasources.
+
+* `kill_all_jobs.py`	Kills all running jobs.
+
+* `list.py`	Lists all datasources or workbooks of a site.
+
+* `move_workbook_projects.py` Updates the properties of a workbook to move the workbook from one project to another.
+
+* `move_workbook_sites.py` Downloads a workbook, stores it in-memory, and uploads it to another site.
+
+* `pagination_sample.py` Use the Pager generator to iterate over all the items on the server.
+
+* `publish_workbook.py` Publishes a Tableau workbook.
+
+* `refresh.py` Refreshes a datasource or workbook.
+
+* `refresh_tasks.py` Lists and runs configured tasks on a server.
+
+* `set_http_options.py` Sets HTTP options for the server and specifically for downloading workbooks.
+
+* `set_refresh_schedule.py` Sets the schedule to refresh a datasource or workbook.
+
+* `update_connection.py` Updates and embeds connection credentials of a datasource. 
+
+**Note**: For all of the samples, ensure that your Tableau Server user account has permission to access the resources.
 
