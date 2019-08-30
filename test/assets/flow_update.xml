@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.5.xsd">
+    <flow id="587daa37-b84d-4400-a9a2-aa90e0be7837" name="FlowOne" description="So fun to see" webpageUrl="http://tableauserver/#/flows/1" fileType="tflx" createdAt="2019-06-16T21:43:28Z" updatedAt="2019-06-16T21:43:28Z">
+        <project id="aa23f4ac-906f-11e9-86fb-3f0f71412e77" name="Default"/>
+        <owner id="7ebb3f20-0fd2-4f27-a2f6-c539470999e2"/>
+        <tags>
+            <tag label="i_hate_tags"/>
+        </tags>
+    </flow>
+</tsResponse>

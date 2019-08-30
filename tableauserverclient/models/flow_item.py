@@ -18,6 +18,7 @@ class FlowItem(object):
         self.owner_id = None
         self.project_id = project_id
         self.tags = set()
+        self.description = None
 
         self._connections = None
         self._permissions = None
@@ -58,6 +59,14 @@ class FlowItem(object):
         self._project_id = value
 
     @property
+    def description(self):
+        return self._description
+
+    @description.setter
+    def description(self, value):
+        self._description = value
+
+    @property
     def project_name(self):
         return self._project_name
 
@@ -84,12 +93,14 @@ class FlowItem(object):
                              project_name, owner_id)
         return self
 
-    def _set_values(self, id, name, webpage_url, created_at,
+    def _set_values(self, id, name, description, webpage_url, created_at,
                     updated_at, tags, project_id, project_name, owner_id):
         if id is not None:
             self._id = id
         if name:
             self.name = name
+        if description:
+            self.description = description
         if webpage_url:
             self._webpage_url = webpage_url
         if created_at:
@@ -113,10 +124,10 @@ class FlowItem(object):
         all_flow_xml = parsed_response.findall('.//t:flow', namespaces=ns)
 
         for flow_xml in all_flow_xml:
-            (id_, name, webpage_url, created_at, updated_at,
+            (id_, name, description, webpage_url, created_at, updated_at,
              tags, project_id, project_name, owner_id) = cls._parse_element(flow_xml, ns)
             flow_item = cls(project_id)
-            flow_item._set_values(id_, name, webpage_url, created_at, updated_at,
+            flow_item._set_values(id_, name, description, webpage_url, created_at, updated_at,
                                   tags, None, project_name, owner_id)
             all_flow_items.append(flow_item)
         return all_flow_items
@@ -147,5 +158,5 @@ class FlowItem(object):
         if owner_elem is not None:
             owner_id = owner_elem.get('id', None)
 
-        return (id_, name, webpage_url, created_at, updated_at, tags, project_id,
+        return (id_, name, description, webpage_url, created_at, updated_at, tags, project_id,
                 project_name, owner_id)

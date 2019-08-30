@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.5.xsd">
+    <pagination pageNumber="1" pageSize="100" totalAvailable="5"/>
+    <flows>
+        <flow id="587daa37-b84d-4400-a9a2-aa90e0be7837" name="FlowOne" description="Descriptive" webpageUrl="http://tableauserver/#/flows/1" fileType="tflx" createdAt="2019-06-16T21:43:28Z" updatedAt="2019-06-16T21:43:28Z">
+            <project id="aa23f4ac-906f-11e9-86fb-3f0f71412e77" name="Default"/>
+            <owner id="7ebb3f20-0fd2-4f27-a2f6-c539470999e2"/>
+            <tags>
+                <tag label="i_love_tags"/>
+            </tags>
+        </flow>
+        <flow id="5c36be69-eb30-461b-b66e-3e2a8e27cc35" name="FlowTwo" description="" webpageUrl="http://tableauserver/#/flows/4" fileType="tflx" createdAt="2019-06-18T03:08:19Z" updatedAt="2019-06-18T03:08:19Z">
+            <project id="aa23f4ac-906f-11e9-86fb-3f0f71412e77" name="Default"/>
+            <owner id="9127d03f-d996-405f-b392-631b25183a0f"/>
+        </flow>
+        <flow id="44da0abe-bd49-406a-8200-914cbae71324" name="FlowThree" description="" webpageUrl="http://tableauserver/#/flows/5" fileType="tfl" createdAt="2019-06-18T14:17:11Z" updatedAt="2019-06-18T14:17:11Z">
+            <project id="aa23f4ac-906f-11e9-86fb-3f0f71412e77" name="Default"/>
+            <owner id="9127d03f-d996-405f-b392-631b25183a0f"/>
+        </flow>
+        <flow id="5e732643-804d-4363-998a-3ff232b269fe" name="FlowFour" description="" webpageUrl="http://tableauserver/#/flows/8" fileType="tflx" createdAt="2019-06-20T17:56:48Z" updatedAt="2019-06-20T17:56:48Z">
+            <project id="aa23f4ac-906f-11e9-86fb-3f0f71412e77" name="Default"/>
+            <owner id="87840a63-768d-44a7-a3b2-919370492248"/>
+        </flow>
+        <flow id="7d5eb059-300d-4e42-988a-dd6f280ad944" name="FlowFive" description="" webpageUrl="http://tableauserver/#/flows/9" fileType="tflx" createdAt="2019-06-20T17:59:08Z" updatedAt="2019-06-20T17:59:08Z">
+            <project id="aa23f4ac-906f-11e9-86fb-3f0f71412e77" name="Default"/>
+            <owner id="87840a63-768d-44a7-a3b2-919370492248"/>
+        </flow>
+    </flows>
+</tsResponse>

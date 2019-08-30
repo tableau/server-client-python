@@ -563,6 +563,7 @@ class RequestFactory(object):
     Database = DatabaseRequest()
     Empty = EmptyRequest()
     Fileupload = FileuploadRequest()
+    Flow = FlowRequest()
     Group = GroupRequest()
     Permission = PermissionRequest()
     Project = ProjectRequest()
