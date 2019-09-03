@@ -2,6 +2,7 @@ from .auth_endpoint import Auth
 from .datasources_endpoint import Datasources
 from .databases_endpoint import Databases
 from .endpoint import Endpoint
+from .flows_endpoint import Flows
 from .exceptions import ServerResponseError, MissingRequiredFieldError, ServerInfoEndpointNotFoundError
 from .groups_endpoint import Groups
 from .jobs_endpoint import Jobs

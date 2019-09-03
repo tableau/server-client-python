@@ -151,6 +151,46 @@ class FileuploadRequest(object):
         return _add_multipart(parts)
 
 
+class FlowRequest(object):
+    def _generate_xml(self, flow_item, connections=None):
+        xml_request = ET.Element('tsRequest')
+        flow_element = ET.SubElement(xml_request, 'flow')
+        flow_element.attrib['name'] = flow_item.name
+        project_element = ET.SubElement(flow_element, 'project')
+        project_element.attrib['id'] = flow_item.project_id
+
+        if connections is not None:
+            connections_element = ET.SubElement(flow_element, 'connections')
+            for connection in connections:
+                _add_connections_element(connections_element, connection)
+        return ET.tostring(xml_request)
+
+    def update_req(self, flow_item):
+        xml_request = ET.Element('tsRequest')
+        flow_element = ET.SubElement(xml_request, 'flow')
+        if flow_item.project_id:
+            project_element = ET.SubElement(flow_element, 'project')
+            project_element.attrib['id'] = flow_item.project_id
+        if flow_item.owner_id:
+            owner_element = ET.SubElement(flow_element, 'owner')
+            owner_element.attrib['id'] = flow_item.owner_id
+
+        return ET.tostring(xml_request)
+
+    def publish_req(self, flow_item, filename, file_contents, connections=None):
+        xml_request = self._generate_xml(flow_item, connections)
+
+        parts = {'request_payload': ('', xml_request, 'text/xml'),
+                 'tableau_flow': (filename, file_contents, 'application/octet-stream')}
+        return _add_multipart(parts)
+
+    def publish_req_chunked(self, flow_item, connections=None):
+        xml_request = self._generate_xml(flow_item, connections)
+
+        parts = {'request_payload': ('', xml_request, 'text/xml')}
+        return _add_multipart(parts)
+
+
 class GroupRequest(object):
     def add_user_req(self, user_id):
         xml_request = ET.Element('tsRequest')
@@ -523,6 +563,7 @@ class RequestFactory(object):
     Database = DatabaseRequest()
     Empty = EmptyRequest()
     Fileupload = FileuploadRequest()
+    Flow = FlowRequest()
     Group = GroupRequest()
     Permission = PermissionRequest()
     Project = ProjectRequest()

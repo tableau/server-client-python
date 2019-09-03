@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.5.xsd">
+    <permissions>
+        <flow id="587daa37-b84d-4400-a9a2-aa90e0be7837" name="Agriculture Week">
+            <owner id="7ebb3f20-0fd2-4f27-a2f6-c539470999e2"/>
+        </flow>
+        <granteeCapabilities>
+            <group id="aa42f384-906f-11e9-86fc-bb24278874b9"/>
+            <capabilities>
+                <capability name="Write" mode="Allow"/>
+                <capability name="Read" mode="Allow"/>
+            </capabilities>
+        </granteeCapabilities>
+    </permissions>
+</tsResponse>

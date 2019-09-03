@@ -5,6 +5,7 @@ from .datasource_item import DatasourceItem
 from .database_item import DatabaseItem
 from .exceptions import UnpopulatedPropertyError
 from .group_item import GroupItem
+from .flow_item import FlowItem
 from .interval_item import IntervalItem, DailyInterval, WeeklyInterval, MonthlyInterval, HourlyInterval
 from .job_item import JobItem, BackgroundJobItem
 from .pagination_item import PaginationItem
