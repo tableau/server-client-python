@@ -79,7 +79,7 @@ class FlowTests(unittest.TestCase):
             connections = single_datasource.connections
 
         self.assertTrue(connections)
-        conn1, conn2, conn3  = connections
+        conn1, conn2, conn3 = connections
         self.assertEqual('405c1e4b-60c9-499f-9c47-a4ef1af69359', conn1.id)
         self.assertEqual('excel-direct', conn1.connection_type)
         self.assertEqual('', conn1.server_address)
