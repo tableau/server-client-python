@@ -247,7 +247,8 @@ Name | Description
 `datasource_type` | The type of data source, for example, `sqlserver` or `excel-direct`. 
 `id` |  The identifier for the data source. You need this value to query a specific data source or to delete a data source with the `get_by_id` and `delete` methods. 
 `name`  |  The name of the data source. If not specified, the name of the published data source file is used. 
-`project_id` |  The identifier of the project associated with the data source. When you must provide this identifier when create an instance of a `DatasourceItem`
+`owner_id` |  The identifier of the owner of the data source.
+`project_id` |  The identifier of the project associated with the data source. You must provide this identifier when you create an instance of a `DatasourceItem`.
 `project_name` |  The name of the project associated with the data source. 
 `tags` |  The tags (list of strings) that have been added to the data source. 
 `updated_at` |  The date and time when the data source was last updated. 
