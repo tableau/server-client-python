@@ -9,15 +9,15 @@ logger = logging.getLogger('tableau.endpoint.metadata')
 class Metadata(Endpoint):
     @property
     def baseurl(self):
-        return "{0}/api/exp/metadata/graphql".format(self.parent_srv._server_address)
+        return "{0}/api/metadata/graphql".format(self.parent_srv._server_address)
 
     @api("3.2")
-    def query(self, query, abort_on_error=False):
+    def query(self, query, variables=None, abort_on_error=False):
         logger.info('Querying Metadata API')
         url = self.baseurl
 
         try:
-            graphql_query = json.dumps({'query': query})
+            graphql_query = json.dumps({'query': query, 'variables': variables})
         except Exception:
             # Place holder for now
             raise Exception('Must provide a string')
