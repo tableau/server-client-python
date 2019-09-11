@@ -9,7 +9,7 @@ logger = logging.getLogger('tableau.endpoint.metadata')
 class Metadata(Endpoint):
     @property
     def baseurl(self):
-        return "{0}/api/metadata/graphql".format(self.parent_srv._server_address)
+        return "{0}/api/metadata/graphql".format(self.parent_srv.server_address)
 
     @api("3.2")
     def query(self, query, variables=None, abort_on_error=False):
