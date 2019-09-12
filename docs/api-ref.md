@@ -50,7 +50,7 @@ Name | Description
 :--- | :---   
 `username` | The name of the user whose credentials will be used to sign in.   
 `password` | The password of the user.     
-`site_id` | This corresponds to the `contentUrl` attribute in the Tableau REST API. The `site_id` is the portion of the URL that follows the `/site/` in the URL. For example, "MarketingTeam" is the `site_id` in the following URL *MyServer*/#/site/**MarketingTeam**/projects. To specify the default site on Tableau Server, you can use an empty string `''`  (single quotes, no space).  For Tableau Online, you must provide a value for the `site_id`.  
+`site_id` | This corresponds to the `contentUrl` attribute in the Tableau REST API. It is the portion of the URL that follows the `/site/` in the URL. For example, "MarketingTeam" is the `site_id` in the following URL: `https://MyServer/#/site/MarketingTeam/projects`. To specify the default site on Tableau Server, you can either omit the site_id or use an empty string `''`  (single quotes, no space).  For Tableau Online, you must provide a value for the `site_id`.  
 `user_id_to_impersonate` |  Specifies the id (not the name) of the user to sign in as.   
 
 Source file: models/tableau_auth.py
@@ -61,7 +61,7 @@ Source file: models/tableau_auth.py
 import tableauserverclient as TSC
 # create a new instance of a TableauAuth object for authentication
 
-tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD', site_id='CONTENTURL')
+tableau_auth = TSC.TableauAuth('username', 'password', 'site-id')
 
 # create a server instance
 # pass the "tableau_auth" object to the server.auth.sign_in() method
@@ -103,10 +103,10 @@ REST API: [Sign In](https://onlinehelp.tableau.com/current/api/rest_api/en-us/RE
 import tableauserverclient as TSC
 
 # create an auth object
-tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
+tableau_auth = TSC.TableauAuth('username', 'password')
 
 # create an instance for your server
-server = TSC.Server('https://SERVER_URL')
+server = TSC.Server('https://serverurl')
 
 # call the sign-in method with the auth object
 server.auth.sign_in(tableau_auth)
@@ -2118,8 +2118,8 @@ The `SiteItem` class contains the members or attributes for the site resources o
 
 Attribute | Description
 :--- | :---
-`name` | The name of the site. The name of the default site is "".  
-`content_url` | The path to the site.  
+`name` | The display name of the site, as shown in the Site dropdown of the left hand menu of the Tableau server. For the name of the default site use an empty string: `""`.  
+`content_url` | The name of the subpath of your site URL, as it shows in a browser address bar.   
 `admin_mode` | (Optional) For Tableau Server only. Specify `ContentAndUsers` to allow site administrators to use the server interface and **tabcmd** commands to add and remove users. (Specifying this option does not give site administrators permissions to manage users using the REST API.) Specify `ContentOnly` to prevent site administrators from adding or removing users. (Server administrators can always add or remove users.)
 `user_quota`| (Optional) Specifies the maximum number of users for the site. If you do not specify this value, the limit depends on the type of licensing configured for the server. For user-based license, the maximum number of users is set by the license. For core-based licensing, there is no limit to the number of users. If you specify a maximum value, only licensed users are counted and server administrators are excluded.
 `storage_quota` | (Optional) 	Specifies the maximum amount of space for the new site, in megabytes. If you set a quota and the site exceeds it, publishers will be prevented from uploading new content until the site is under the limit again.
@@ -2249,7 +2249,7 @@ Returns a list of all `SiteItem` objects and a `PaginationItem`. Use these value
 #### sites.get_by_id
 
 ```py
-sites.get_by_id(site_id)
+sites.get_by_id(site_luid)
 ```
 
 Queries the site with the given ID.
@@ -2261,7 +2261,7 @@ REST API: [Query  Site](https://onlinehelp.tableau.com/current/api/rest_api/en-u
 
 Name  |  Description  
 :--- | :---  
-`site_id`  | The id for the site you want to query. 
+`site_luid`  | The unique identifier for the site that you want to remove from the server. You can find a sites's LUID by making a [sites.get](#sitesget) request. 
 
 
 **Exceptions**  
@@ -2307,7 +2307,7 @@ REST API: [Query  Site](https://onlinehelp.tableau.com/current/api/rest_api/en-u
 
 Name  |  Description  
 :--- | :---  
-`site_name`  | The name of the site you want to query. 
+`site_name`  | The display name of the site you want to query, as shown in the Site dropdown in the left hand menu of the server. 
 
 
 **Exceptions**  
@@ -2330,7 +2330,7 @@ Returns the `SiteItem`.
 # server = TSC.Server('https://MY-SERVER')
 # sign in, etc.
 
- a_site = server.sites.get_by_name('MY_SITE')
+ a_site = server.sites.get_by_name('MY SITE NAME')
 
 
 ```
@@ -2399,7 +2399,7 @@ site_item = server.sites.update(site_item)
 
 
 ```py
-Sites.delete(site_id)
+Sites.delete(site_luid)
 ```
 
 Deletes the specified site.
@@ -2412,7 +2412,8 @@ REST API: [Delete Site](https://onlinehelp.tableau.com/current/api/rest_api/en-u
   
 Name   |  Description     
  :--- | : ---    
-`site_id`    |       The id of the site that you want to delete.   
+`site_luid`    |       The unique identifier for the site that you want to remove from the server. You can find a sites's LUID by making a [sites.get](#sitesget) request.
+   
 
  
 
@@ -2420,7 +2421,7 @@ Name   |  Description
 
 Error  |  Description  
 :---  | :---   
-`Site ID Undefined.`   |    The site id must be present and must match the id of the site you are deleting.   
+`Site ID Undefined.`   |    The site id must be present and must match the LUID of the site you are deleting.   
 
 
   
@@ -2508,7 +2509,7 @@ SubscriptionItem(subject, schedule_id, user_id, target)
 
 Name | Description  
 :--- | :--- 
-`id` |   The id of the subscription on the site. 
+`id` |   The unique ID of the subscription on the site. 
 `subject`|  The subject of the subscription. This is the description that you provide to identify the subscription. 
 `schedule_id` | The identifier associated with the specific subscription.  
 `user_id` | The identifier of the user (person) who receives the subscription.
@@ -2608,7 +2609,7 @@ REST API: [Delete Subscription](https://onlinehelp.tableau.com/current/api/rest_
 
 Name   |  Description     
  :--- | : ---    
-`subscription_id`  |  The identifier (`id`) for the subscription that you want to remove from the site. 
+`subscription_id`  | The unique identifier for the subscription that you want to remove from the site. You can find a subscription's LUID by making a [subscription.get](#subscriptionget) request. 
 
 
 **Exceptions**
@@ -3493,7 +3494,7 @@ Returns a list of all `WorkbookItem` objects and a `PaginationItem`. Use these v
 ```py  
 
 import tableauserverclient as TSC
-tableau_auth = TSC.TableauAuth('username', 'password', site_id='site')
+tableau_auth = TSC.TableauAuth('username', 'password', 'site-id')
 server = TSC.Server('https://servername')
 
 with server.auth.sign_in(tableau_auth):
@@ -3605,7 +3606,7 @@ The `WorkbookItem` for the workbook that was published.
 ```py
 
 import tableauserverclient as TSC
-tableau_auth = TSC.TableauAuth('username', 'password', site_id='site')
+tableau_auth = TSC.TableauAuth('username', 'password', 'site-id')
 server = TSC.Server('https://servername')
 
 with server.auth.sign_in(tableau_auth):
@@ -3728,7 +3729,7 @@ Deletes a workbook with the specified ID.
 
 
 
-To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site.  See the [TableauAuth class](#tableauauth-class).  
+To specify the site, create a `TableauAuth` instance `site-id` (the subpath of your full site URL, also called `contentURL` in the REST API), and sign in to that site.  See the [TableauAuth class](#tableauauth-class).  
 
 
 REST API: [Delete Workbook](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#Delete_Workbook31){:target="_blank"}  

@@ -76,7 +76,7 @@ Run the following code to get a list of all the data sources on your installatio
 ```py
 import tableauserverclient as TSC
 
-tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD', 'SITENAME')
+tableau_auth = TSC.TableauAuth('username', 'password', 'site-id')
 server = TSC.Server('http://SERVER_URL')
 
 with server.auth.sign_in(tableau_auth):
@@ -84,6 +84,6 @@ with server.auth.sign_in(tableau_auth):
     print("\nThere are {} datasources on site: ".format(pagination_item.total_available))
     print([datasource.name for datasource in all_datasources])
 ```
-> `SERVER_URL` is the URL of your Tableau server without subpaths. For local Tableau servers, an example would be: `https://www.MY_SERVER.com`. For Tableau Online, an example would be: `https://10ax.online.tableau.com/`.
+> `serverurl` is the URL of your Tableau server without subpaths. For local Tableau servers, an example would be: `https://www.MY_SERVER.com`. For Tableau Online, an example would be: `https://10ax.online.tableau.com/`.
 
->`SITENAME` is the subpath of your full site URL (also called `contentURL` in the REST API). `MYSITE` would be the site name of `https://10ax.online.tableau.com/MYSITE`. This parameter can be omitted when signing in to the Default site of a on premise Tableau server.
+>`site-id` is the subpath of your full site URL (also called `contentURL` in the REST API). `MYSITE` would be the site name of `https://10ax.online.tableau.com/MYSITE`. This parameter can be omitted when signing in to the Default site of a on premise Tableau server.
