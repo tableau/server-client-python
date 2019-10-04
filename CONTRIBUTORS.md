@@ -24,6 +24,10 @@ The following people have contributed to this project to make it possible, and w
 * [Tomasz Machalski](https://github.com/toomyem)
 * [Jared Dominguez](https://github.com/jdomingu)
 * [Brendan Lee](https://github.com/lbrendanl)
+* [Martin Dertz](https://github.com/martydertz)
+* [Christian Oliff](https://github.com/coliff)
+* [Albin Antony](https://github.com/user9747)
+* [prae04](https://github.com/prae04)
 
 ## Core Team
 
