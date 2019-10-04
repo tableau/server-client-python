@@ -19,6 +19,9 @@ The following people have contributed to this project to make it possible, and w
 * [Bruce Zhang](https://github.com/baixin137)
 * [Bumsoo Kim](https://github.com/bskim45)
 * [daniel1608](https://github.com/daniel1608)
+* [Joshua Jacob](https://github.com/jacobj10)
+* [Francisco Pagliaricci](https://github.com/fpagliar)
+* [Tomasz Machalski](https://github.com/toomyem)
 
 ## Core Team
 
@@ -31,4 +34,7 @@ The following people have contributed to this project to make it possible, and w
 * [Jackson Huang](https://github.com/jz-huang)
 * [Brendan Lee](https://github.com/lbrendanl)
 * [Ang Gao](https://github.com/gaoang2148)
-* [Priya R](https://github.com/preguraman)
+* [Priya Reguraman](https://github.com/preguraman)
+* [Jac Fitzgerald](https://github.com/jacalata)
+* [Dan Zucker](https://github.com/dzucker-tab)
+* [Irwin Dolobowsky](https://github.com/irwando)
