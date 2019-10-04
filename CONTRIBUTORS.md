@@ -22,17 +22,17 @@ The following people have contributed to this project to make it possible, and w
 * [Joshua Jacob](https://github.com/jacobj10)
 * [Francisco Pagliaricci](https://github.com/fpagliar)
 * [Tomasz Machalski](https://github.com/toomyem)
+* [Jared Dominguez](https://github.com/jdomingu)
+* [Brendan Lee](https://github.com/lbrendanl)
 
 ## Core Team
 
-* [Shin Chris](https://github.com/shinchris)
+* [Chris Shin](https://github.com/shinchris)
 * [Lee Graber](https://github.com/lgraber)
 * [Tyler Doyle](https://github.com/t8y8)
 * [Russell Hay](https://github.com/RussTheAerialist)
 * [Ben Lower](https://github.com/benlower)
-* [Jared Dominguez](https://github.com/jdomingu)
 * [Jackson Huang](https://github.com/jz-huang)
-* [Brendan Lee](https://github.com/lbrendanl)
 * [Ang Gao](https://github.com/gaoang2148)
 * [Priya Reguraman](https://github.com/preguraman)
 * [Jac Fitzgerald](https://github.com/jacalata)
