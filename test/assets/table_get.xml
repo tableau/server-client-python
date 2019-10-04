@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.5.xsd">
+    <pagination pageNumber="1" pageSize="100" totalAvailable="4"/>
+    <tables>
+        <table id="10224773-ecee-42ac-b822-d786b0b8e4d9" name="dim_Product" isEmbedded="false" isCertified="true" certificationNote="" schema="dbo">
+            <site id="ae2624bd-c20b-4e82-86fa-605ebba881f9"/>
+            <certifier id="8e1a8235-c9ee-4d61-ae82-2ffacceed8e0" name="sally"/>
+        </table>
+        <table id="53c77bc1-fb41-4342-a75a-f68ac0656d0d" name="customer" isEmbedded="false" isCertified="false" schema="dbo">
+            <site id="ae2624bd-c20b-4e82-86fa-605ebba881f9"/>
+            <contact id="9324cf6b-ba72-4b8e-b895-ac3f28d2f0e0" name="bob"/>
+        </table>
+        <table id="d830dced-e412-4f86-9ad8-07302d04df8a" name="promotion" isEmbedded="false" isCertified="false" schema="dbo">
+            <site id="ae2624bd-c20b-4e82-86fa-605ebba881f9"/>
+        </table>
+        <table id="584e8f3a-997b-4e5f-a6ff-739d7667f2ce" name="store" isEmbedded="false" isCertified="false" schema="dbo">
+            <site id="ae2624bd-c20b-4e82-86fa-605ebba881f9"/>
+        </table>
+    </tables>
+</tsResponse>

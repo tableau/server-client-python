@@ -3,8 +3,9 @@ import xml.etree.ElementTree as ET
 from .exceptions import NotSignedInError
 from ..namespace import Namespace
 from .endpoint import Sites, Views, Users, Groups, Workbooks, Datasources, Projects, Auth, \
-    Schedules, ServerInfo, Tasks, ServerInfoEndpointNotFoundError, Subscriptions, Jobs
-from .endpoint.exceptions import EndpointUnavailableError
+    Schedules, ServerInfo, Tasks, ServerInfoEndpointNotFoundError, Subscriptions, Jobs, Metadata,\
+    Databases, Tables, Flows
+from .endpoint.exceptions import EndpointUnavailableError, ServerInfoEndpointNotFoundError
 
 import requests
 
@@ -45,11 +46,15 @@ class Server(object):
         self.jobs = Jobs(self)
         self.workbooks = Workbooks(self)
         self.datasources = Datasources(self)
+        self.flows = Flows(self)
         self.projects = Projects(self)
         self.schedules = Schedules(self)
         self.server_info = ServerInfo(self)
         self.tasks = Tasks(self)
         self.subscriptions = Subscriptions(self)
+        self.metadata = Metadata(self)
+        self.databases = Databases(self)
+        self.tables = Tables(self)
         self._namespace = Namespace()
 
         if use_server_version:

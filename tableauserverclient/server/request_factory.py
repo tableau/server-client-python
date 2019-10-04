@@ -5,6 +5,8 @@ from functools import wraps
 from requests.packages.urllib3.fields import RequestField
 from requests.packages.urllib3.filepost import encode_multipart_formdata
 
+from ..models import UserItem, GroupItem, PermissionsRule
+
 
 def _add_multipart(parts):
     mime_multipart_parts = list()
@@ -47,14 +49,47 @@ def _add_credentials_element(parent_element, connection_credentials):
 class AuthRequest(object):
     def signin_req(self, auth_item):
         xml_request = ET.Element('tsRequest')
+
         credentials_element = ET.SubElement(xml_request, 'credentials')
-        credentials_element.attrib['name'] = auth_item.username
-        credentials_element.attrib['password'] = auth_item.password
+        for attribute_name, attribute_value in auth_item.credentials.items():
+            credentials_element.attrib[attribute_name] = attribute_value
+
         site_element = ET.SubElement(credentials_element, 'site')
         site_element.attrib['contentUrl'] = auth_item.site_id
+
         if auth_item.user_id_to_impersonate:
             user_element = ET.SubElement(credentials_element, 'user')
             user_element.attrib['id'] = auth_item.user_id_to_impersonate
+        return ET.tostring(xml_request)
+
+
+class ColumnRequest(object):
+    def update_req(self, column_item):
+        xml_request = ET.Element('tsRequest')
+        column_element = ET.SubElement(xml_request, 'column')
+
+        if column_item.description:
+            column_element.attrib['description'] = str(column_item.description)
+
+        return ET.tostring(xml_request)
+
+
+class DatabaseRequest(object):
+    def update_req(self, database_item):
+        xml_request = ET.Element('tsRequest')
+        database_element = ET.SubElement(xml_request, 'database')
+        if database_item.contact_id:
+            contact_element = ET.SubElement(database_element, 'contact')
+            contact_element.attrib['id'] = database_item.contact_id
+
+        database_element.attrib['isCertified'] = str(database_item.certified).lower()
+
+        if database_item.certification_note:
+            database_element.attrib['certificationNote'] = str(database_item.certification_note)
+
+        if database_item.description:
+            database_element.attrib['description'] = str(database_item.description)
+
         return ET.tostring(xml_request)
 
 
@@ -116,6 +151,46 @@ class FileuploadRequest(object):
         return _add_multipart(parts)
 
 
+class FlowRequest(object):
+    def _generate_xml(self, flow_item, connections=None):
+        xml_request = ET.Element('tsRequest')
+        flow_element = ET.SubElement(xml_request, 'flow')
+        flow_element.attrib['name'] = flow_item.name
+        project_element = ET.SubElement(flow_element, 'project')
+        project_element.attrib['id'] = flow_item.project_id
+
+        if connections is not None:
+            connections_element = ET.SubElement(flow_element, 'connections')
+            for connection in connections:
+                _add_connections_element(connections_element, connection)
+        return ET.tostring(xml_request)
+
+    def update_req(self, flow_item):
+        xml_request = ET.Element('tsRequest')
+        flow_element = ET.SubElement(xml_request, 'flow')
+        if flow_item.project_id:
+            project_element = ET.SubElement(flow_element, 'project')
+            project_element.attrib['id'] = flow_item.project_id
+        if flow_item.owner_id:
+            owner_element = ET.SubElement(flow_element, 'owner')
+            owner_element.attrib['id'] = flow_item.owner_id
+
+        return ET.tostring(xml_request)
+
+    def publish_req(self, flow_item, filename, file_contents, connections=None):
+        xml_request = self._generate_xml(flow_item, connections)
+
+        parts = {'request_payload': ('', xml_request, 'text/xml'),
+                 'tableau_flow': (filename, file_contents, 'application/octet-stream')}
+        return _add_multipart(parts)
+
+    def publish_req_chunked(self, flow_item, connections=None):
+        xml_request = self._generate_xml(flow_item, connections)
+
+        parts = {'request_payload': ('', xml_request, 'text/xml')}
+        return _add_multipart(parts)
+
+
 class GroupRequest(object):
     def add_user_req(self, user_id):
         xml_request = ET.Element('tsRequest')
@@ -142,31 +217,25 @@ class GroupRequest(object):
 
 
 class PermissionRequest(object):
-    def _add_capability(self, parent_element, capability_set, mode):
-        for capability_item in capability_set:
-            capability_element = ET.SubElement(parent_element, 'capability')
-            capability_element.attrib['name'] = capability_item
-            capability_element.attrib['mode'] = mode
-
-    def add_req(self, permission_item):
+    def add_req(self, rules):
         xml_request = ET.Element('tsRequest')
         permissions_element = ET.SubElement(xml_request, 'permissions')
 
-        for user_capability in permission_item.user_capabilities:
-            grantee_element = ET.SubElement(permissions_element, 'granteeCapabilities')
-            grantee_capabilities_element = ET.SubElement(grantee_element, user_capability.User)
-            grantee_capabilities_element.attrib['id'] = user_capability.grantee_id
-            capabilities_element = ET.SubElement(grantee_element, 'capabilities')
-            self._add_capability(capabilities_element, user_capability.allowed, user_capability.Allow)
-            self._add_capability(capabilities_element, user_capability.denied, user_capability.Deny)
+        for rule in rules:
+            grantee_capabilities_element = ET.SubElement(permissions_element, 'granteeCapabilities')
+            grantee_element = ET.SubElement(grantee_capabilities_element, rule.grantee.tag_name)
+            grantee_element.attrib['id'] = rule.grantee.id
 
-        for group_capability in permission_item.group_capabilities:
-            grantee_element = ET.SubElement(permissions_element, 'granteeCapabilities')
-            ET.SubElement(grantee_element, group_capability, id=group_capability.grantee_id)
-            capabilities_element = ET.SubElement(grantee_element, 'capabilities')
-            self._add_capability(capabilities_element, group_capability.allowed, group_capability.Allow)
-            self._add_capability(capabilities_element, group_capability.denied, group_capability.Deny)
+            capabilities_element = ET.SubElement(grantee_capabilities_element, 'capabilities')
+            self._add_all_capabilities(capabilities_element, rule.capabilities)
+
         return ET.tostring(xml_request)
+
+    def _add_all_capabilities(self, capabilities_element, capabilities_map):
+        for name, mode in capabilities_map.items():
+            capability_element = ET.SubElement(capabilities_element, 'capability')
+            capability_element.attrib['name'] = name
+            capability_element.attrib['mode'] = mode
 
 
 class ProjectRequest(object):
@@ -292,6 +361,10 @@ class SiteRequest(object):
             site_element.attrib['revisionHistoryEnabled'] = str(site_item.revision_history_enabled).lower()
         if site_item.materialized_views_mode is not None:
             site_element.attrib['materializedViewsMode'] = str(site_item.materialized_views_mode).lower()
+        if site_item.flows_enabled is not None:
+            site_element.attrib['flowsEnabled'] = str(site_item.flows_enabled).lower()
+        if site_item.cataloging_enabled is not None:
+            site_element.attrib['catalogingEnabled'] = str(site_item.cataloging_enabled).lower()
         return ET.tostring(xml_request)
 
     def create_req(self, site_item):
@@ -307,6 +380,30 @@ class SiteRequest(object):
             site_element.attrib['storageQuota'] = str(site_item.storage_quota)
         if site_item.disable_subscriptions:
             site_element.attrib['disableSubscriptions'] = str(site_item.disable_subscriptions).lower()
+        if site_item.flows_enabled is not None:
+            site_element.attrib['flowsEnabled'] = str(site_item.flows_enabled).lower()
+        if site_item.cataloging_enabled is not None:
+            site_element.attrib['catalogingEnabled'] = str(site_item.cataloging_enabled).lower()
+        return ET.tostring(xml_request)
+
+
+class TableRequest(object):
+    def update_req(self, table_item):
+        xml_request = ET.Element('tsRequest')
+        table_element = ET.SubElement(xml_request, 'table')
+
+        if table_item.contact_id:
+            contact_element = ET.SubElement(table_element, 'contact')
+            contact_element.attrib['id'] = table_item.contact_id
+
+        table_element.attrib['isCertified'] = str(table_item.certified).lower()
+
+        if table_item.certification_note:
+            table_element.attrib['certificationNote'] = str(table_item.certification_note)
+
+        if table_item.description:
+            table_element.attrib['description'] = str(table_item.description)
+
         return ET.tostring(xml_request)
 
 
@@ -355,7 +452,7 @@ class WorkbookRequest(object):
         if workbook_item.show_tabs:
             workbook_element.attrib['showTabs'] = str(workbook_item.show_tabs).lower()
         project_element = ET.SubElement(workbook_element, 'project')
-        project_element.attrib['id'] = workbook_item.project_id
+        project_element.attrib['id'] = str(workbook_item.project_id)
 
         if connection_credentials is not None and connections is not None:
             raise RuntimeError('You cannot set both `connections` and `connection_credentials`')
@@ -461,14 +558,18 @@ class EmptyRequest(object):
 class RequestFactory(object):
     Auth = AuthRequest()
     Connection = Connection()
+    Column = ColumnRequest()
     Datasource = DatasourceRequest()
+    Database = DatabaseRequest()
     Empty = EmptyRequest()
     Fileupload = FileuploadRequest()
+    Flow = FlowRequest()
     Group = GroupRequest()
     Permission = PermissionRequest()
     Project = ProjectRequest()
     Schedule = ScheduleRequest()
     Site = SiteRequest()
+    Table = TableRequest()
     Tag = TagRequest()
     Task = TaskRequest()
     User = UserRequest()

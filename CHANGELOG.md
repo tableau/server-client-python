@@ -1,3 +1,19 @@
+## 0.9 (4 Oct 2019)
+
+* Added Metadata API endpoints (#431)
+* Added site settings for Data Catalog and Prep Conductor (#434)
+* Added new fields to ViewItem (#331)
+* Added support and samples for Tableau Server Personal Access Tokens (#465)
+* Added Permissions endpoints (#429)
+* Added tags to ViewItem (#470)
+* Added Databases and Tables endpoints (#445)
+* Added Flow endpoints (#494)
+* Added ability to filter projects by topLevelProject attribute (#497)
+* Improved server_info endpoint error handling (#439)
+* Improved Pager to take in keyword arguments (#451)
+* Fixed UUID serialization error while publishing workbook (#449)
+* Fixed materalized views in request body for update_workbook (#461)
+
 ## 0.8.1 (17 July 2019)
 
 * Fixed update_workbook endpoint (#454)
@@ -12,7 +28,6 @@
 * Updated Pager to handle un-paged results (#322)
 * Fixed checked upload (#309, #319, #326, #329)
 * Fixed embed_password field on publish (#416)
-
 
 ## 0.7 (2 Jul 2018)
 

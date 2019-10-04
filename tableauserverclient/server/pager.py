@@ -1,3 +1,5 @@
+from functools import partial
+
 from . import RequestOptions
 from . import Sort
 
@@ -11,13 +13,15 @@ class Pager(object):
     Will loop over anything that returns (List[ModelItem], PaginationItem).
     """
 
-    def __init__(self, endpoint, request_opts=None):
+    def __init__(self, endpoint, request_opts=None, **kwargs):
 
         if hasattr(endpoint, 'get'):
             # The simpliest case is to take an Endpoint and call its get
-            self._endpoint = endpoint.get
+            endpoint = partial(endpoint.get, **kwargs)
+            self._endpoint = endpoint
         elif callable(endpoint):
             # but if they pass a callable then use that instead (used internally)
+            endpoint = partial(endpoint, **kwargs)
             self._endpoint = endpoint
         else:
             # Didn't get something we can page over
