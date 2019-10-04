@@ -14,6 +14,9 @@
 * Fixed UUID serialization error while publishing workbook (#449)
 * Fixed materalized views in request body for update_workbook (#461)
 
+## 0.8.1 (17 July 2019)
+
+* Fixed update_workbook endpoint (#454)
 
 ## 0.8 (8 Apr 2019)
 
@@ -25,7 +28,6 @@
 * Updated Pager to handle un-paged results (#322)
 * Fixed checked upload (#309, #319, #326, #329)
 * Fixed embed_password field on publish (#416)
-
 
 ## 0.7 (2 Jul 2018)
 
