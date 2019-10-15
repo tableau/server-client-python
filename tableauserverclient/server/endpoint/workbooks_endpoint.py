@@ -105,7 +105,7 @@ class Workbooks(Endpoint):
         connection = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
         logger.info('Updated workbook item (ID: {0} & connection item {1})'.format(workbook_item.id,
-                                                                                  connection_item.id))
+                                                                                   connection_item.id))
         return connection
 
     # Download workbook contents with option of passing in filepath
