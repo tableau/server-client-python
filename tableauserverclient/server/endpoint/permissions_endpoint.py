@@ -48,7 +48,7 @@ class _PermissionsEndpoint(Endpoint):
                 url = '{0}/{1}/permissions/{2}/{3}/{4}/{5}'.format(
                     self.owner_baseurl(),
                     resource.id,
-                    rule.grantee.permissions_grantee_type + 's',
+                    rule.grantee.tag_name + 's',
                     rule.grantee.id,
                     capability,
                     mode)
@@ -59,7 +59,7 @@ class _PermissionsEndpoint(Endpoint):
                 self.delete_request(url)
 
             logger.info('Deleted permission for {0} {1} item {2}'.format(
-                rule.grantee.permissions_grantee_type,
+                rule.grantee.tag_name,
                 rule.grantee.id,
                 resource.id))
 
