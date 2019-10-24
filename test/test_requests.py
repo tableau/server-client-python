@@ -5,7 +5,7 @@ import requests_mock
 
 import tableauserverclient as TSC
 
-from tableauserverclient.server.endpoint.exceptions import InternalServerError
+from tableauserverclient.server.endpoint.exceptions import InternalServerError, NonXMLResponseError
 
 
 class RequestTests(unittest.TestCase):
@@ -55,3 +55,11 @@ class RequestTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.register_uri('GET', self.server.server_info.baseurl, status_code=500, text=server_response)
             self.assertRaisesRegexp(InternalServerError, server_response, self.server.server_info.get)
+
+    # Test that 500 server errors are handled properly
+    def test_non_xml_error(self):
+        self.server.version = "3.2"
+        server_response = "this is not xml"
+        with requests_mock.mock() as m:
+            m.register_uri('GET', self.server.server_info.baseurl, status_code=499, text=server_response)
+            self.assertRaisesRegexp(NonXMLResponseError, server_response, self.server.server_info.get)
