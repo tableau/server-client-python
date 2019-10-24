@@ -56,7 +56,7 @@ class RequestTests(unittest.TestCase):
             m.register_uri('GET', self.server.server_info.baseurl, status_code=500, text=server_response)
             self.assertRaisesRegexp(InternalServerError, server_response, self.server.server_info.get)
 
-    # Test that 500 server errors are handled properly
+    # Test that non-xml server errors are handled properly
     def test_non_xml_error(self):
         self.server.version = "3.2"
         server_response = "this is not xml"
