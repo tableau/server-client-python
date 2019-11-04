@@ -38,16 +38,17 @@ class _DefaultPermissionsEndpoint(Endpoint):
 
     def delete_default_permission(self, resource, rule, content_type):
         for capability, mode in rule.capabilities.items():
-            # Made readibility better but line is too long, will make this look better
-            url = '{baseurl}/{content_id}/default-permissions/\
-                {content_type}/{grantee_type}/{grantee_id}/{cap}/{mode}'.format(
-                baseurl=self.owner_baseurl(),
-                content_id=resource.id,
-                content_type=content_type,
-                grantee_type=rule.grantee.tag_name + 's',
-                grantee_id=rule.grantee.id,
-                cap=capability,
-                mode=mode)
+            # Made readability better but line is too long, will make this look better
+            url = '{baseurl}/{content_id}/default-permissions/' \
+                '{content_type}/{grantee_type}/{grantee_id}/{cap}/{mode}' \
+                .format(
+                    baseurl=self.owner_baseurl(),
+                    content_id=resource.id,
+                    content_type=content_type,
+                    grantee_type=rule.grantee.tag_name + 's',
+                    grantee_id=rule.grantee.id,
+                    cap=capability,
+                    mode=mode)
 
             logger.debug('Removing {0} permission for capabilty {1}'.format(
                 mode, capability))
