@@ -497,5 +497,5 @@ class WorkbookTests(unittest.TestCase):
             new_workbook = TSC.WorkbookItem(project_id='')
             publish_mode = self.server.PublishMode.CreateNew
 
-            self.assertRaisesRegexp(InternalServerError, 'Please use asynchronous publishing to avoid timeouts',
+            self.assertRaisesRegex(InternalServerError, 'Please use asynchronous publishing to avoid timeouts',
                                     self.server.workbooks.publish, new_workbook, asset('SampleWB.twbx'), publish_mode)
