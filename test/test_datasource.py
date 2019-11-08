@@ -178,8 +178,8 @@ class DatasourceTests(unittest.TestCase):
             new_connection = self.server.datasources.update_connection(single_datasource, connection)
             self.assertEqual(connection.id, new_connection.id)
             self.assertEqual(connection.connection_type, new_connection.connection_type)
-            self.assertEquals('bar', new_connection.server_address)
-            self.assertEquals('9876', new_connection.server_port)
+            self.assertEqual('bar', new_connection.server_address)
+            self.assertEqual('9876', new_connection.server_port)
             self.assertEqual('foo', new_connection.username)
 
     def test_populate_permissions(self):
@@ -355,6 +355,6 @@ class DatasourceTests(unittest.TestCase):
             new_datasource = TSC.DatasourceItem(project_id='')
             publish_mode = self.server.PublishMode.CreateNew
 
-            self.assertRaisesRegexp(InternalServerError, 'Please use asynchronous publishing to avoid timeouts.',
+            self.assertRaisesRegex(InternalServerError, 'Please use asynchronous publishing to avoid timeouts.',
                                     self.server.datasources.publish, new_datasource,
                                     asset('SampleDS.tds'), publish_mode)
