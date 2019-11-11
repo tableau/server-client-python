@@ -562,7 +562,7 @@ class WebhookRequest(object):
         webhook.attrib['name'] = webhook_item.name
 
         source = ET.SubElement(webhook, 'webhook-source')
-        # TODO: Add Event Type
+        event = ET.SubElement(source, webhook._event)
 
         destination = ET.SubElement(webhook, 'webhook-destination')
         post = ET.SubElement(destination, 'webhook-destination-http')
