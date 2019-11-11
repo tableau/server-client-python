@@ -29,8 +29,6 @@ class WebhookTests(unittest.TestCase):
             m.get(self.baseurl, text=response_xml)
             webhooks, _ = self.server.webhooks.get()
 
-
-
     def test_get_before_signin(self):
         self.server._auth_token = None
         self.assertRaises(TSC.NotSignedInError, self.server.webhooks.get)

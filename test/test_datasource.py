@@ -230,7 +230,7 @@ class DatasourceTests(unittest.TestCase):
         self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', new_datasource.owner_id)
 
     def test_publish_async(self):
-        self.server.version="3.0"
+        self.server.version = "3.0"
         baseurl = self.server.datasources.baseurl
         response_xml = read_xml_asset(PUBLISH_XML_ASYNC)
         with requests_mock.mock() as m:
@@ -358,5 +358,5 @@ class DatasourceTests(unittest.TestCase):
             publish_mode = self.server.PublishMode.CreateNew
 
             self.assertRaisesRegex(InternalServerError, 'Please use asynchronous publishing to avoid timeouts.',
-                                    self.server.datasources.publish, new_datasource,
-                                    asset('SampleDS.tds'), publish_mode)
+                                   self.server.datasources.publish, new_datasource,
+                                   asset('SampleDS.tds'), publish_mode)

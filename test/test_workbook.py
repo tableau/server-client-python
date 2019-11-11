@@ -500,4 +500,4 @@ class WorkbookTests(unittest.TestCase):
             publish_mode = self.server.PublishMode.CreateNew
 
             self.assertRaisesRegex(InternalServerError, 'Please use asynchronous publishing to avoid timeouts',
-                                    self.server.workbooks.publish, new_workbook, asset('SampleWB.twbx'), publish_mode)
+                                   self.server.workbooks.publish, new_workbook, asset('SampleWB.twbx'), publish_mode)
