@@ -14,7 +14,7 @@ GET_XML_WITH_WORKBOOK_AND_DATASOURCE = os.path.join(TEST_ASSET_DIR, "tasks_with_
 class TaskTests(unittest.TestCase):
     def setUp(self):
         self.server = TSC.Server("http://test")
-        self.server.version = '2.6'
+        self.server.version = '3.6'
 
         # Fake Signin
         self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"
@@ -76,3 +76,11 @@ class TaskTests(unittest.TestCase):
         self.assertEqual('c7a9327e-1cda-4504-b026-ddb43b976d1d', task.target.id)
         self.assertEqual('workbook', task.target.type)
         self.assertEqual('b60b4efd-a6f7-4599-beb3-cb677e7abac1', task.schedule_id)
+
+    def test_delete(self):
+        with requests_mock.mock() as m:
+            m.delete(self.baseurl + '/c7a9327e-1cda-4504-b026-ddb43b976d1d', status_code=204)
+            self.server.tasks.delete('c7a9327e-1cda-4504-b026-ddb43b976d1d')
+
+    def test_delete_missing_id(self):
+        self.assertRaises(ValueError, self.server.tasks.delete, '')
