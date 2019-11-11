@@ -594,4 +594,3 @@ class RequestFactory(object):
     User = UserRequest()
     Workbook = WorkbookRequest()
     Webhook = WebhookRequest()
-

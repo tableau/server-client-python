@@ -5,6 +5,7 @@ from .. import RequestFactory
 import logging
 logger = logging.getLogger('tableau.endpoint.webhooks')
 
+
 class Webhooks(Endpoint):
     def __init__(self, parent_srv):
         super(Webhooks, self).__init__(parent_srv)
