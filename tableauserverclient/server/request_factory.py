@@ -53,13 +53,16 @@ class AuthRequest(object):
         credentials_element = ET.SubElement(xml_request, 'credentials')
         for attribute_name, attribute_value in auth_item.credentials.items():
             credentials_element.attrib[attribute_name] = attribute_value
+        print("CE: {}".format(ET.tostring(credentials_element)))
 
         site_element = ET.SubElement(credentials_element, 'site')
         site_element.attrib['contentUrl'] = auth_item.site_id
+        print("SE: {}".format(ET.tostring(site_element)))
 
         if auth_item.user_id_to_impersonate:
             user_element = ET.SubElement(credentials_element, 'user')
             user_element.attrib['id'] = auth_item.user_id_to_impersonate
+            print("UE: {}".format(ET.tostring(user_element)))
         return ET.tostring(xml_request)
 
 
@@ -555,6 +558,24 @@ class EmptyRequest(object):
         pass
 
 
+class WebhookRequest(object):
+    @_tsrequest_wrapped
+    def create_req(self, xml_request, webhook_item):
+        print(webhook_item)
+        webhook = ET.SubElement(xml_request, 'webhook')
+        webhook.attrib['name'] = webhook_item.name
+
+        source = ET.SubElement(webhook, 'webhook-source')
+        # TODO: Add Event Type
+
+        destination = ET.SubElement(webhook, 'webhook-destination')
+        post = ET.SubElement(destination, 'webhook-destination-http')
+        post.attrib['method'] = 'POST'
+        post.attrib['url'] = webhook_item.url
+
+        return ET.tostring(xml_request)
+
+
 class RequestFactory(object):
     Auth = AuthRequest()
     Connection = Connection()
@@ -569,9 +590,11 @@ class RequestFactory(object):
     Project = ProjectRequest()
     Schedule = ScheduleRequest()
     Site = SiteRequest()
+    Subscription = SubscriptionRequest()
     Table = TableRequest()
     Tag = TagRequest()
     Task = TaskRequest()
     User = UserRequest()
     Workbook = WorkbookRequest()
-    Subscription = SubscriptionRequest()
+    Webhook = WebhookRequest()
+
