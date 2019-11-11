@@ -558,7 +558,6 @@ class EmptyRequest(object):
 class WebhookRequest(object):
     @_tsrequest_wrapped
     def create_req(self, xml_request, webhook_item):
-        print(webhook_item)
         webhook = ET.SubElement(xml_request, 'webhook')
         webhook.attrib['name'] = webhook_item.name
 

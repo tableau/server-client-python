@@ -28,6 +28,14 @@ class WebhookTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
             webhooks, _ = self.server.webhooks.get()
+            self.assertEqual(len(webhooks), 1)
+            webhook = webhooks[0]
+
+            self.assertEqual(webhook.url, "url")
+            self.assertEqual(webhook.event, "datasource-created")
+            self.assertEqual(webhook.owner_id, "webhook_owner_luid")
+            self.assertEqual(webhook.name, "webhook-name")
+            self.assertEqual(webhook.id, "webhook-id")
 
     def test_get_before_signin(self):
         self.server._auth_token = None
@@ -49,5 +57,8 @@ class WebhookTests(unittest.TestCase):
             new_webhook = TSC.WebhookItem()
             new_webhook.name = "Test Webhook"
             new_webhook.url = "http://ifttt.com/maker-url"
+            new_webhook.event = "webhook-source-event-datasource-created"
 
             new_webhook = self.server.webhooks.create(new_webhook)
+
+            self.assertNotEqual(new_webhook.id, None)

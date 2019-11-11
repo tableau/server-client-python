@@ -3,7 +3,7 @@
   <webhooks>
     <webhook id="webhook-id" name="webhook-name">
       <webhook-source>
-        <webhook-source-api-event-name/>
+        <webhook-source-event-datasource-created />
       </webhook-source>
       <webhook-destination>
         <webhook-destination-http method="POST" url="url"/>
