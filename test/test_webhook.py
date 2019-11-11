@@ -2,6 +2,7 @@ import unittest
 import os
 import requests_mock
 import tableauserverclient as TSC
+from tableauserverclient.server import RequestFactory, WebhookItem
 
 from ._utils import read_xml_asset, read_xml_assets, asset
 
@@ -9,6 +10,7 @@ TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
 GET_XML = asset('webhook_get.xml')
 CREATE_XML = asset('webhook_create.xml')
+CREATE_REQUEST_XML = asset('webhook_create_request.xml')
 
 
 class WebhookTests(unittest.TestCase):
@@ -62,3 +64,14 @@ class WebhookTests(unittest.TestCase):
             new_webhook = self.server.webhooks.create(new_webhook)
 
             self.assertNotEqual(new_webhook.id, None)
+
+    def test_request_factory(self):
+        with open(CREATE_REQUEST_XML, 'rb') as f:
+            webhook_request_expected = f.read().decode('utf-8')
+
+        webhook_item = WebhookItem()
+        webhook_item._set_values("webhook-id", "webhook-name", "url", "api-event-name",
+                None)
+        webhook_request_actual = '{}\n'.format(RequestFactory.Webhook.create_req(webhook_item).decode('utf-8'))
+        self.maxDiff = None
+        self.assertEqual(webhook_request_expected, webhook_request_actual)

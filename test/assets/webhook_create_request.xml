@@ -1,0 +1,1 @@
+<tsRequest><webhook name="webhook-name"><webhook-source><webhook-source-event-api-event-name /></webhook-source><webhook-destination><webhook-destination-http method="POST" url="url" /></webhook-destination></webhook></tsRequest>

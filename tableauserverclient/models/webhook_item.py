@@ -33,7 +33,7 @@ class WebhookItem(object):
         if url:
             self.url = url
         if event:
-            self._event = event
+            self.event = event
         if owner_id:
             self.owner_id = owner_id
 
