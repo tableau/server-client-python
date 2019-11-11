@@ -58,7 +58,7 @@ def main():
                 workbook_path = source_server.workbooks.download(all_workbooks[0].id, tmpdir)
 
                 # Step 4: Check if destination site exists, then sign in to the site
-                pagination_info, all_sites = source_server.sites.get()
+                all_sites, pagination_info = source_server.sites.get()
                 found_destination_site = any((True for site in all_sites if
                                               args.destination_site.lower() == site.content_url.lower()))
                 if not found_destination_site:
@@ -71,21 +71,14 @@ def main():
                 # because of the different auth token and site ID.
                 with dest_server.auth.sign_in(tableau_auth):
 
-                    # Step 5: Find destination site's default project
-                    pagination_info, dest_projects = dest_server.projects.get()
-                    target_project = next((project for project in dest_projects if project.is_default()), None)
+                    # Step 5: Create a new workbook item and publish workbook. Note that
+                    # an empty project_id will publish to the 'Default' project.
+                    new_workbook = TSC.WorkbookItem(name=args.workbook_name, project_id="")
+                    new_workbook = dest_server.workbooks.publish(new_workbook, workbook_path,
+                                                                 mode=TSC.Server.PublishMode.Overwrite)
+                    print("Successfully moved {0} ({1})".format(new_workbook.name, new_workbook.id))
 
-                    # Step 6: If default project is found, form a new workbook item and publish.
-                    if target_project is not None:
-                        new_workbook = TSC.WorkbookItem(name=args.workbook_name, project_id=target_project.id)
-                        new_workbook = dest_server.workbooks.publish(new_workbook, workbook_path,
-                                                                     mode=TSC.Server.PublishMode.Overwrite)
-                        print("Successfully moved {0} ({1})".format(new_workbook.name, new_workbook.id))
-                    else:
-                        error = "The default project could not be found."
-                        raise LookupError(error)
-
-                # Step 7: Delete workbook from source site and delete temp directory
+                # Step 6: Delete workbook from source site and delete temp directory
                 source_server.workbooks.delete(all_workbooks[0].id)
 
             finally:
