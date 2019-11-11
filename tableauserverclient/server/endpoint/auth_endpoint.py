@@ -25,13 +25,11 @@ class Auth(Endpoint):
     @api(version="2.0")
     def sign_in(self, auth_req):
         url = "{0}/{1}".format(self.baseurl, 'signin')
-        print(auth_req)
         signin_req = RequestFactory.Auth.signin_req(auth_req)
         server_response = self.parent_srv.session.post(url, data=signin_req,
                                                        **self.parent_srv.http_options)
         self.parent_srv._namespace.detect(server_response.content)
         self._check_status(server_response)
-        print(server_response.content)
         parsed_response = ET.fromstring(server_response.content)
         site_id = parsed_response.find('.//t:site', namespaces=self.parent_srv.namespace).get('id', None)
         user_id = parsed_response.find('.//t:user', namespaces=self.parent_srv.namespace).get('id', None)

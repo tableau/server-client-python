@@ -15,7 +15,7 @@ def main():
     parser = argparse.ArgumentParser(description='List out the names and LUIDs for different resource types')
     parser.add_argument('--server', '-s', required=True, help='server address')
     parser.add_argument('--site', '-S', default="", help='site to log into, do not specify for default site')
-    parser.add_argument('--username', '-u', required=True, help='username to signin under')
+    parser.add_argument('--token-name', '-n', required=True, help='username to signin under')
     parser.add_argument('--token', '-t', required=True, help='personal access token for logging in')
 
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
@@ -30,7 +30,7 @@ def main():
     logging.basicConfig(level=logging_level)
 
     # SIGN IN
-    tableau_auth = TSC.PersonalAccessTokenAuth(args.username, args.token, site_id=args.site)
+    tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token, site_id=args.site)
     server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
         endpoint = {

@@ -53,16 +53,13 @@ class AuthRequest(object):
         credentials_element = ET.SubElement(xml_request, 'credentials')
         for attribute_name, attribute_value in auth_item.credentials.items():
             credentials_element.attrib[attribute_name] = attribute_value
-        print("CE: {}".format(ET.tostring(credentials_element)))
 
         site_element = ET.SubElement(credentials_element, 'site')
         site_element.attrib['contentUrl'] = auth_item.site_id
-        print("SE: {}".format(ET.tostring(site_element)))
 
         if auth_item.user_id_to_impersonate:
             user_element = ET.SubElement(credentials_element, 'user')
             user_element.attrib['id'] = auth_item.user_id_to_impersonate
-            print("UE: {}".format(ET.tostring(user_element)))
         return ET.tostring(xml_request)
 
 
