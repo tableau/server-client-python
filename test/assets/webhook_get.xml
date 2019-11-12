@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+  <webhooks>
+    <webhook id="webhook-id" name="webhook-name">
+      <webhook-source>
+        <webhook-source-event-datasource-created />
+      </webhook-source>
+      <webhook-destination>
+        <webhook-destination-http method="POST" url="url"/>
+      </webhook-destination>
+      <owner id="webhook_owner_luid" name="webhook_owner_name"/>
+    </webhook>
+  </webhooks>
+</tsResponse>

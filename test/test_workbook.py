@@ -409,10 +409,12 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual('RESTAPISample_0/sheets/GDPpercapita', new_workbook.views[0].content_url)
 
     def test_publish_async(self):
+        self.server.version = '3.0'
+        baseurl = self.server.workbooks.baseurl
         with open(PUBLISH_ASYNC_XML, 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
-            m.post(self.baseurl, text=response_xml)
+            m.post(baseurl, text=response_xml)
 
             new_workbook = TSC.WorkbookItem(name='Sample',
                                             show_tabs=False,
@@ -497,5 +499,5 @@ class WorkbookTests(unittest.TestCase):
             new_workbook = TSC.WorkbookItem(project_id='')
             publish_mode = self.server.PublishMode.CreateNew
 
-            self.assertRaisesRegexp(InternalServerError, 'Please use asynchronous publishing to avoid timeouts',
-                                    self.server.workbooks.publish, new_workbook, asset('SampleWB.twbx'), publish_mode)
+            self.assertRaisesRegex(InternalServerError, 'Please use asynchronous publishing to avoid timeouts',
+                                   self.server.workbooks.publish, new_workbook, asset('SampleWB.twbx'), publish_mode)

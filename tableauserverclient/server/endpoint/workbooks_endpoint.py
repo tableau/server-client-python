@@ -1,6 +1,5 @@
 from .endpoint import Endpoint, api, parameter_added_in
 from .exceptions import InternalServerError, MissingRequiredFieldError
-from .endpoint import api, parameter_added_in, Endpoint
 from .permissions_endpoint import _PermissionsEndpoint
 from .exceptions import MissingRequiredFieldError
 from .fileuploads_endpoint import Fileuploads

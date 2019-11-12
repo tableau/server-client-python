@@ -54,7 +54,7 @@ class RequestTests(unittest.TestCase):
         server_response = "500: Internal Server Error"
         with requests_mock.mock() as m:
             m.register_uri('GET', self.server.server_info.baseurl, status_code=500, text=server_response)
-            self.assertRaisesRegexp(InternalServerError, server_response, self.server.server_info.get)
+            self.assertRaisesRegex(InternalServerError, server_response, self.server.server_info.get)
 
     # Test that non-xml server errors are handled properly
     def test_non_xml_error(self):
@@ -62,4 +62,4 @@ class RequestTests(unittest.TestCase):
         server_response = "this is not xml"
         with requests_mock.mock() as m:
             m.register_uri('GET', self.server.server_info.baseurl, status_code=499, text=server_response)
-            self.assertRaisesRegexp(NonXMLResponseError, server_response, self.server.server_info.get)
+            self.assertRaisesRegex(NonXMLResponseError, server_response, self.server.server_info.get)
