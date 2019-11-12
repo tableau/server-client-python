@@ -38,6 +38,7 @@ class Permission:
         Flow = 'flow'
         Table = 'table'
         Database = 'database'
+        View = 'view'
 
 
 class PermissionsRule(object):

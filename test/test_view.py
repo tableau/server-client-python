@@ -4,6 +4,7 @@ import requests_mock
 import tableauserverclient as TSC
 
 from tableauserverclient.datetime_helpers import format_datetime
+from tableauserverclient import UserItem, GroupItem, PermissionsRule
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
@@ -13,13 +14,15 @@ GET_XML_USAGE = os.path.join(TEST_ASSET_DIR, 'view_get_usage.xml')
 POPULATE_PREVIEW_IMAGE = os.path.join(TEST_ASSET_DIR, 'Sample View Image.png')
 POPULATE_PDF = os.path.join(TEST_ASSET_DIR, 'populate_pdf.pdf')
 POPULATE_CSV = os.path.join(TEST_ASSET_DIR, 'populate_csv.csv')
+POPULATE_PERMISSIONS_XML = os.path.join(TEST_ASSET_DIR, 'view_populate_permissions.xml')
+UPDATE_PERMISSIONS = os.path.join(TEST_ASSET_DIR, 'view_update_permissions.xml')
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'workbook_update.xml')
 
 
 class ViewTests(unittest.TestCase):
     def setUp(self):
         self.server = TSC.Server('http://test')
-        self.server.version = '2.7'
+        self.server.version = '3.2'
 
         # Fake sign in
         self.server._site_id = 'dad65087-b08b-4603-af4e-2887b8aafc67'
@@ -169,6 +172,59 @@ class ViewTests(unittest.TestCase):
         single_view = TSC.ViewItem()
         single_view._id = None
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.views.populate_image, single_view)
+
+    def test_populate_permissions(self):
+        with open(POPULATE_PERMISSIONS_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + "/e490bec4-2652-4fda-8c4e-f087db6fa328/permissions", text=response_xml)
+            single_view = TSC.ViewItem()
+            single_view._id = "e490bec4-2652-4fda-8c4e-f087db6fa328"
+
+            self.server.views.populate_permissions(single_view)
+            permissions = single_view.permissions
+
+            self.assertEqual(permissions[0].grantee.tag_name, 'group')
+            self.assertEqual(permissions[0].grantee.id, 'c8f2773a-c83a-11e8-8c8f-33e6d787b506')
+            self.assertDictEqual(permissions[0].capabilities, {
+                TSC.Permission.Capability.ViewComments: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.AddComment: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.ExportData: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.ExportImage: TSC.Permission.Mode.Allow,
+
+            })
+
+    def test_add_permissions(self):
+        with open(UPDATE_PERMISSIONS, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+
+        single_view = TSC.ViewItem()
+        single_view._id = '21778de4-b7b9-44bc-a599-1506a2639ace'
+
+        bob = UserItem.as_reference("7c37ee24-c4b1-42b6-a154-eaeab7ee330a")
+        group_of_people = GroupItem.as_reference("5e5e1978-71fa-11e4-87dd-7382f5c437af")
+
+        new_permissions = [
+            PermissionsRule(bob, {'Write': 'Allow'}),
+            PermissionsRule(group_of_people, {'Read': 'Deny'})
+        ]
+
+        with requests_mock.mock() as m:
+            m.put(self.baseurl + "/21778de4-b7b9-44bc-a599-1506a2639ace/permissions", text=response_xml)
+            permissions = self.server.views.update_permissions(single_view, new_permissions)
+
+        self.assertEqual(permissions[0].grantee.tag_name, 'group')
+        self.assertEqual(permissions[0].grantee.id, '5e5e1978-71fa-11e4-87dd-7382f5c437af')
+        self.assertDictEqual(permissions[0].capabilities, {
+            TSC.Permission.Capability.Read: TSC.Permission.Mode.Deny
+        })
+
+        self.assertEqual(permissions[1].grantee.tag_name, 'user')
+        self.assertEqual(permissions[1].grantee.id, '7c37ee24-c4b1-42b6-a154-eaeab7ee330a')
+        self.assertDictEqual(permissions[1].capabilities, {
+            TSC.Permission.Capability.Write: TSC.Permission.Mode.Allow
+        })
 
     def test_update_tags(self):
         with open(ADD_TAGS_XML, 'rb') as f:
