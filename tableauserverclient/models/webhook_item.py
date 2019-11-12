@@ -38,7 +38,8 @@ class WebhookItem(object):
             self.owner_id = owner_id
 
     @property
-    def id(self): return self._id
+    def id(self):
+        return self._id
 
     @property
     def event(self):

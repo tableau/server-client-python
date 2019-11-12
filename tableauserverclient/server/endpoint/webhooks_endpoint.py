@@ -19,9 +19,9 @@ class Webhooks(Endpoint):
         logger.info('Querying all Webhooks on site')
         url = self.baseurl
         server_response = self.get_request(url, req_options)
-        all_workbook_items = WebhookItem.from_response(server_response.content, self.parent_srv.namespace)
-        pagination_item = PaginationItem.from_single_page_list(all_workbook_items)
-        return all_workbook_items, pagination_item
+        all_webhook_items = WebhookItem.from_response(server_response.content, self.parent_srv.namespace)
+        pagination_item = PaginationItem.from_single_page_list(all_webhook_items)
+        return all_webhook_items, pagination_item
 
     @api(version="3.6")
     def get_by_id(self, webhook_id):
