@@ -1,4 +1,4 @@
-from .exceptions import ServerResponseError, InternalServerError
+from .exceptions import ServerResponseError, InternalServerError, NonXMLResponseError
 from functools import wraps
 from xml.etree.ElementTree import ParseError
 
@@ -69,8 +69,14 @@ class Endpoint(object):
             try:
                 raise ServerResponseError.from_response(server_response.content, self.parent_srv.namespace)
             except ParseError:
-                # not an xml error
+                # This will happen if we get a non-success HTTP code that
+                # doesn't return an xml error object (like metadata endpoints)
+                # we convert this to a better exception and pass through the raw
+                # response body
                 raise NonXMLResponseError(server_response.content)
+            except Exception as e:
+                # anything else re-raise here
+                raise
 
     def get_unauthenticated_request(self, url, request_object=None):
         return self._make_request(self.parent_srv.session.get, url, request_object=request_object)

@@ -1,6 +1,5 @@
 from .endpoint import Endpoint, api, parameter_added_in
 from .exceptions import InternalServerError, MissingRequiredFieldError
-from .endpoint import api, parameter_added_in, Endpoint
 from .permissions_endpoint import _PermissionsEndpoint
 from .exceptions import MissingRequiredFieldError
 from .fileuploads_endpoint import Fileuploads
@@ -8,7 +7,7 @@ from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, WorkbookItem, ConnectionItem, ViewItem, PaginationItem
 from ...models.tag_item import TagItem
 from ...models.job_item import JobItem
-from ...filesys_helpers import to_filename
+from ...filesys_helpers import to_filename, make_download_path
 
 import os
 import logging
@@ -86,7 +85,7 @@ class Workbooks(Endpoint):
         url = "{0}/{1}".format(self.baseurl, workbook_item.id)
         update_req = RequestFactory.Workbook.update_req(workbook_item)
         server_response = self.put_request(url, update_req)
-        logger.info('Updated workbook item (ID: {0}'.format(workbook_item.id))
+        logger.info('Updated workbook item (ID: {0})'.format(workbook_item.id))
         updated_workbook = copy.copy(workbook_item)
         return updated_workbook._parse_common_tags(server_response.content, self.parent_srv.namespace)
 
@@ -104,8 +103,8 @@ class Workbooks(Endpoint):
         server_response = self.put_request(url, update_req)
         connection = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
-        logger.info('Updated workbook item (ID: {0} & connection item {1}'.format(workbook_item.id,
-                                                                                  connection_item.id))
+        logger.info('Updated workbook item (ID: {0} & connection item {1})'.format(workbook_item.id,
+                                                                                   connection_item.id))
         return connection
 
     # Download workbook contents with option of passing in filepath
@@ -129,16 +128,14 @@ class Workbooks(Endpoint):
         with closing(self.get_request(url, parameters={"stream": True})) as server_response:
             _, params = cgi.parse_header(server_response.headers['Content-Disposition'])
             filename = to_filename(os.path.basename(params['filename']))
-            if filepath is None:
-                filepath = filename
-            elif os.path.isdir(filepath):
-                filepath = os.path.join(filepath, filename)
 
-            with open(filepath, 'wb') as f:
+            download_path = make_download_path(filepath, filename)
+
+            with open(download_path, 'wb') as f:
                 for chunk in server_response.iter_content(1024):  # 1KB
                     f.write(chunk)
-        logger.info('Downloaded workbook to {0} (ID: {1})'.format(filepath, workbook_id))
-        return os.path.abspath(filepath)
+        logger.info('Downloaded workbook to {0} (ID: {1})'.format(download_path, workbook_id))
+        return os.path.abspath(download_path)
 
     # Get all views of workbook
     @api(version="2.0")
@@ -151,7 +148,7 @@ class Workbooks(Endpoint):
             return self._get_views_for_workbook(workbook_item, usage)
 
         workbook_item._set_views(view_fetcher)
-        logger.info('Populated views for workbook (ID: {0}'.format(workbook_item.id))
+        logger.info('Populated views for workbook (ID: {0})'.format(workbook_item.id))
 
     def _get_views_for_workbook(self, workbook_item, usage):
         url = "{0}/{1}/views".format(self.baseurl, workbook_item.id)

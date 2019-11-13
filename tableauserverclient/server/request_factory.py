@@ -555,6 +555,23 @@ class EmptyRequest(object):
         pass
 
 
+class WebhookRequest(object):
+    @_tsrequest_wrapped
+    def create_req(self, xml_request, webhook_item):
+        webhook = ET.SubElement(xml_request, 'webhook')
+        webhook.attrib['name'] = webhook_item.name
+
+        source = ET.SubElement(webhook, 'webhook-source')
+        event = ET.SubElement(source, webhook_item._event)
+
+        destination = ET.SubElement(webhook, 'webhook-destination')
+        post = ET.SubElement(destination, 'webhook-destination-http')
+        post.attrib['method'] = 'POST'
+        post.attrib['url'] = webhook_item.url
+
+        return ET.tostring(xml_request)
+
+
 class RequestFactory(object):
     Auth = AuthRequest()
     Connection = Connection()
@@ -569,9 +586,10 @@ class RequestFactory(object):
     Project = ProjectRequest()
     Schedule = ScheduleRequest()
     Site = SiteRequest()
+    Subscription = SubscriptionRequest()
     Table = TableRequest()
     Tag = TagRequest()
     Task = TaskRequest()
     User = UserRequest()
     Workbook = WorkbookRequest()
-    Subscription = SubscriptionRequest()
+    Webhook = WebhookRequest()
