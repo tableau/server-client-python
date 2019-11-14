@@ -180,14 +180,14 @@ class ProjectTests(unittest.TestCase):
                 capabilities=capabilities
             )
 
-            m.delete(self.baseurl + '/0448d2ed-590d-4fa0-b272-a2a8a24555b5/permissions/groups/c8f2773a-c83a-11e8-8c8f-33e6d787b506/Read/Allow', status_code=204)
-            m.delete(self.baseurl + '/0448d2ed-590d-4fa0-b272-a2a8a24555b5/permissions/groups/c8f2773a-c83a-11e8-8c8f-33e6d787b506/Write/Allow', status_code=204)
+            endpoint = '{}/permissions/groups/{}'.format(single_project._id, single_group._id)
+            m.delete('{}/{}/Read/Allow'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/Write/Allow'.format(self.baseurl, endpoint), status_code=204)
             self.server.projects.delete_permission(item=single_project, rules=rules)
 
     def test_delete_workbook_default_permission(self):
         with open(asset(POPULATE_WORKBOOK_DEFAULT_PERMISSIONS_XML), 'rb') as f:
             response_xml = f.read().decode('utf-8')
-
 
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/default-permissions/workbooks',
@@ -230,18 +230,19 @@ class ProjectTests(unittest.TestCase):
                 capabilities=capabilities
             )
 
-            m.delete(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/default-permissions/workbook/groups/c8f2773a-c83a-11e8-8c8f-33e6d787b506/Read/Allow', status_code=204)
-            m.delete(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/default-permissions/workbook/groups/c8f2773a-c83a-11e8-8c8f-33e6d787b506/ExportImage/Allow', status_code=204)
-            m.delete(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/default-permissions/workbook/groups/c8f2773a-c83a-11e8-8c8f-33e6d787b506/ExportData/Allow', status_code=204)
-            m.delete(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/default-permissions/workbook/groups/c8f2773a-c83a-11e8-8c8f-33e6d787b506/ViewComments/Allow', status_code=204)
-            m.delete(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/default-permissions/workbook/groups/c8f2773a-c83a-11e8-8c8f-33e6d787b506/AddComment/Allow', status_code=204)
-            m.delete(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/default-permissions/workbook/groups/c8f2773a-c83a-11e8-8c8f-33e6d787b506/Filter/Allow', status_code=204)
-            m.delete(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/default-permissions/workbook/groups/c8f2773a-c83a-11e8-8c8f-33e6d787b506/ViewUnderlyingData/Deny', status_code=204)
-            m.delete(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/default-permissions/workbook/groups/c8f2773a-c83a-11e8-8c8f-33e6d787b506/ShareView/Allow', status_code=204)
-            m.delete(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/default-permissions/workbook/groups/c8f2773a-c83a-11e8-8c8f-33e6d787b506/WebAuthoring/Allow', status_code=204)
-            m.delete(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/default-permissions/workbook/groups/c8f2773a-c83a-11e8-8c8f-33e6d787b506/Write/Allow', status_code=204)
-            m.delete(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/default-permissions/workbook/groups/c8f2773a-c83a-11e8-8c8f-33e6d787b506/ExportXml/Allow', status_code=204)
-            m.delete(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/default-permissions/workbook/groups/c8f2773a-c83a-11e8-8c8f-33e6d787b506/ChangeHierarchy/Allow', status_code=204)
-            m.delete(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/default-permissions/workbook/groups/c8f2773a-c83a-11e8-8c8f-33e6d787b506/Delete/Deny', status_code=204)
-            m.delete(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/default-permissions/workbook/groups/c8f2773a-c83a-11e8-8c8f-33e6d787b506/ChangePermissions/Allow', status_code=204)
+            endpoint = '{}/default-permissions/workbook/groups/{}'.format(single_project._id, single_group._id)
+            m.delete('{}/{}/Read/Allow'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/ExportImage/Allow'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/ExportData/Allow'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/ViewComments/Allow'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/AddComment/Allow'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/Filter/Allow'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/ViewUnderlyingData/Deny'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/ShareView/Allow'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/WebAuthoring/Allow'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/Write/Allow'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/ExportXml/Allow'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/ChangeHierarchy/Allow'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/Delete/Deny'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/ChangePermissions/Allow'.format(self.baseurl, endpoint), status_code=204)
             self.server.projects.delete_workbook_default_permissions(item=single_project, rule=rules)
