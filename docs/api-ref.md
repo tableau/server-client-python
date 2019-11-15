@@ -1429,9 +1429,6 @@ See [ProjectItem class](#projectitem-class)
   
   # call method to update project      
   updated_project = server.projects.update(my_project)
- 
-
-  
 
 ```
 <br>
@@ -1459,8 +1456,6 @@ Name  |  Description
 :--- | :---  
 `project_id`   | The ID of the project to delete. 
 
-  
-
 
 **Exceptions**    
 
@@ -1480,6 +1475,425 @@ Error  |  Description
 
 ```  
 
+
+#### projects.populate_permissions
+```py
+projects.populate_permissions(item)
+```
+
+Queries the project permissions, parses and stores the returned the permissions.
+
+REST API: [Query Project Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_project_permissions){:target="_blank"}  
+
+**Parameters**
+
+Name  |  Description  
+:--- | :---  
+`item`   | A project object.
+
+
+**Example**  
+ 
+```py
+# import tableauserverclient as TSC  
+# server = TSC.Server('https://MY-SERVER')  
+# sign in, etc.  
+
+ all_project_items, pagination_item = server.projects.get()
+ project_item = all_project_items[0]
+ server.projects.populate_permissions(project_item)
+``` 
+
+
+#### projects.update_permission
+```py
+projects.update_permission(item, rules)
+```
+
+Add or update project permissions.
+
+REST API: [Add Project Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#add_project_permissions){:target="_blank"}
+
+**Parameters**
+
+Name  |  Description  
+:--- | :---  
+`item`   | A project object.
+`rules`   | A list of PermissionsRule objects.
+
+**Example**  
+ 
+```py
+# import tableauserverclient as TSC  
+# server = TSC.Server('https://MY-SERVER')  
+# sign in, etc.  
+
+ all_project_items, pagination_item = server.projects.get()
+ project_item = all_project_items[0]
+ 
+ project_capabilities = {
+   TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow
+ }
+
+ project_rules = TSC.PermissionsRule(
+  grantee=project_item,
+  capabilities=project_capabilities
+ )
+ 
+ server.projects.update_permission(project_item, [project_rules])
+``` 
+
+
+#### projects.delete_permission
+```py
+projects.delete_permission(item, rules)
+```
+
+Delete project permissions.
+
+REST API: [Delete Project Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_project_permission){:target="_blank"}
+
+**Parameters**
+
+Name  |  Description  
+:--- | :---  
+`item`   | A project object.
+`rules`   | A list of PermissionsRule objects or a single PermissionsRule object.
+
+**Example**  
+ 
+```py
+# import tableauserverclient as TSC  
+# server = TSC.Server('https://MY-SERVER')  
+# sign in, etc.  
+
+ all_project_items, pagination_item = server.projects.get()
+ project_item = all_project_items[0]
+ 
+ project_capabilities = {
+   TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow
+ }
+
+ project_rules = TSC.PermissionsRule(
+  grantee=project_item,
+  capabilities=project_capabilities
+ )
+ 
+ server.projects.delete_permission(project_item)
+``` 
+
+
+#### projects.populate_workbook_default_permissions
+```py
+projects.populate_workbook_default_permissions(item)
+```
+
+Queries the default workbook permissions, parses and stores the returned the permissions.
+
+REST API: [Query Default Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_default_permissions){:target="_blank"}  
+
+**Parameters**
+
+Name  |  Description  
+:--- | :---  
+`item`   | A project object.
+
+**Example**  
+ 
+```py
+# import tableauserverclient as TSC  
+# server = TSC.Server('https://MY-SERVER')  
+# sign in, etc.  
+
+ all_project_items, pagination_item = server.projects.get()
+ project_item = all_project_items[0]
+ server.projects.populate_workbook_default_permissions(project_item)
+``` 
+
+#### projects.populate_datasource_default_permissions
+```py
+projects.populate_datasource_default_permissions(item)
+```
+
+Queries the default datasource permissions, parses and stores the returned the permissions.
+
+REST API: [Query Default Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_default_permissions){:target="_blank"}  
+
+**Parameters**
+
+Name  |  Description  
+:--- | :---  
+`item`   | A project object.
+
+**Example**  
+ 
+```py
+# import tableauserverclient as TSC  
+# server = TSC.Server('https://MY-SERVER')  
+# sign in, etc.  
+
+ all_project_items, pagination_item = server.projects.get()
+ project_item = all_project_items[0]
+ server.projects.populate_datasource_default_permissions(project_item)
+``` 
+
+
+#### projects.populate_flow_default_permissions
+```py
+projects.populate_flow_default_permissions(item)
+```
+
+Queries the default flow permissions, parses and stores the returned the permissions.
+
+REST API: [Query Default Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_default_permissions){:target="_blank"}  
+
+
+**Parameters**
+
+Name  |  Description  
+:--- | :---  
+`item`   | A project object.
+
+**Example**  
+ 
+```py
+# import tableauserverclient as TSC  
+# server = TSC.Server('https://MY-SERVER')  
+# sign in, etc.  
+
+ all_project_items, pagination_item = server.projects.get()
+ project_item = all_project_items[0]
+ server.projects.populate_flow_default_permissions(project_item)
+``` 
+
+#### projects.update_workbook_default_permissions
+```py
+projects.update_workbook_default_permissions(item, rules)
+```
+
+Add or update default workbook permissions.
+
+REST API: [Add Default Workbook Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#add_default_permissions){:target="_blank"}  
+
+**Parameters**
+
+Name  |  Description  
+:--- | :---  
+`item`   | A project object.
+`rules`   | A list of PermissionsRule objects.
+
+**Example**  
+ 
+```py
+# import tableauserverclient as TSC  
+# server = TSC.Server('https://MY-SERVER')  
+# sign in, etc.  
+
+ all_project_items, pagination_item = server.projects.get()
+ project_item = all_project_items[0]
+ 
+ capabilities = {
+   TSC.Permission.Capability.ViewComments: TSC.Permission.Mode.Allow
+ }
+
+ rules = TSC.PermissionsRule(
+  grantee=project_item,
+  capabilities=capabilities
+ )
+ 
+ server.projects.update_workbook_default_permissions(project_item, [rules])
+``` 
+
+#### projects.update_datasource_default_permissions
+```py
+projects.update_datasource_default_permissions(item, rules)
+```
+
+Add or update default datasource permissions.
+
+REST API: [Add Default Datasource Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#add_default_permissions){:target="_blank"}  
+
+**Parameters**
+
+Name  |  Description  
+:--- | :---  
+`item`   | A project object.
+`rules`   | A list of PermissionsRule objects.
+
+**Example**  
+ 
+```py
+# import tableauserverclient as TSC  
+# server = TSC.Server('https://MY-SERVER')  
+# sign in, etc.  
+
+ all_project_items, pagination_item = server.projects.get()
+ project_item = all_project_items[0]
+ 
+ capabilities = {
+   TSC.Permission.Capability.ExportXml: TSC.Permission.Mode.Allow
+ }
+
+ rules = TSC.PermissionsRule(
+  grantee=project_item,
+  capabilities=capabilities
+ )
+ 
+ server.projects.update_datasource_default_permissions(project_item, [rules])
+``` 
+
+
+#### projects.update_flow_default_permissions
+```py
+projects.update_flow_default_permissions(item, rules)
+```
+
+Add or update default flow permissions.
+
+REST API: [Add Default Flow Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#add_default_permissions){:target="_blank"}  
+
+**Parameters**
+
+Name  |  Description  
+:--- | :---  
+`item`   | A project object.
+`rules`   | A list of PermissionsRule objects.
+
+**Example**  
+ 
+```py
+# import tableauserverclient as TSC  
+# server = TSC.Server('https://MY-SERVER')  
+# sign in, etc.  
+
+ all_project_items, pagination_item = server.projects.get()
+ project_item = all_project_items[0]
+ 
+ capabilities = {
+   TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow
+ }
+
+ rules = TSC.PermissionsRule(
+  grantee=project_item,
+  capabilities=capabilities
+ )
+ 
+ server.projects.update_flow_default_permissions(project_item, [rules])
+``` 
+
+#### projects.delete_workbook_default_permissions
+```py
+projects.delete_workbook_default_permissions(item, rules)
+```
+
+Delete default workbook permissions.
+
+REST API: [Delete Default Workbook Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission){:target="_blank"}  
+
+**Parameters**
+
+Name  |  Description  
+:--- | :---  
+`item`   | A project object.
+`rules`   | A list of PermissionsRule objects.
+
+**Example**  
+ 
+```py
+# import tableauserverclient as TSC  
+# server = TSC.Server('https://MY-SERVER')  
+# sign in, etc.  
+
+ all_project_items, pagination_item = server.projects.get()
+ project_item = all_project_items[0]
+ 
+ capabilities = {
+   TSC.Permission.Capability.ViewComments: TSC.Permission.Mode.Allow
+ }
+
+ rules = TSC.PermissionsRule(
+  grantee=project_item,
+  capabilities=capabilities
+ )
+ 
+ server.projects.delete_workbook_default_permissions(project_item, [rules])
+``` 
+
+#### projects.delete_datasource_default_permissions
+```py
+projects.delete_datasource_default_permissions(item, rules)
+```
+
+Delete default datasource permissions.
+
+REST API: [Delete Default Datasource Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission){:target="_blank"}  
+
+**Parameters**
+
+Name  |  Description  
+:--- | :---  
+`item`   | A project object.
+`rules`   | A list of PermissionsRule objects.
+
+**Example**  
+ 
+```py
+# import tableauserverclient as TSC  
+# server = TSC.Server('https://MY-SERVER')  
+# sign in, etc.  
+
+ all_project_items, pagination_item = server.projects.get()
+ project_item = all_project_items[0]
+ 
+ capabilities = {
+   TSC.Permission.Capability.ExportXml: TSC.Permission.Mode.Allow
+ }
+
+ rules = TSC.PermissionsRule(
+  grantee=project_item,
+  capabilities=capabilities
+ )
+ 
+ server.projects.delete_datasource_default_permissions(project_item, [rules])
+``` 
+
+#### projects.delete_flow_default_permissions
+```py
+projects.delete_flow_default_permissions(item, rules)
+```
+
+Delete default flow permissions.
+
+REST API: [Delete Default Flow Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission){:target="_blank"}  
+
+**Parameters**
+
+Name  |  Description  
+:--- | :---  
+`item`   | A project object.
+`rules`   | A list of PermissionsRule objects.
+
+**Example**  
+ 
+```py
+# import tableauserverclient as TSC  
+# server = TSC.Server('https://MY-SERVER')  
+# sign in, etc.  
+
+ all_project_items, pagination_item = server.projects.get()
+ project_item = all_project_items[0]
+ 
+ capabilities = {
+   TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow
+ }
+
+ rules = TSC.PermissionsRule(
+  grantee=project_item,
+  capabilities=capabilities
+ )
+ 
+ server.projects.delete_flow_default_permissions(project_item, [rules])
+``` 
 
 <br>
 <br>  
