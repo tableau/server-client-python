@@ -152,3 +152,97 @@ class ProjectTests(unittest.TestCase):
             TSC.Permission.Capability.AddComment: TSC.Permission.Mode.Allow,
             TSC.Permission.Capability.ChangeHierarchy: TSC.Permission.Mode.Allow,
         })
+
+    def test_delete_permission(self):
+        with open(asset(POPULATE_PERMISSIONS_XML), 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + '/0448d2ed-590d-4fa0-b272-a2a8a24555b5/permissions', text=response_xml)
+
+            single_group = TSC.GroupItem('Group1')
+            single_group._id = 'c8f2773a-c83a-11e8-8c8f-33e6d787b506'
+
+            single_project = TSC.ProjectItem('Project3')
+            single_project._id = '0448d2ed-590d-4fa0-b272-a2a8a24555b5'
+
+            self.server.projects.populate_permissions(single_project)
+            permissions = single_project.permissions
+
+            capabilities = {}
+
+            for permission in permissions:
+                if permission.grantee.tag_name == "group":
+                    if permission.grantee.id == single_group._id:
+                        capabilities = permission.capabilities
+
+            rules = TSC.PermissionsRule(
+                grantee=single_group,
+                capabilities=capabilities
+            )
+
+            endpoint = '{}/permissions/groups/{}'.format(single_project._id, single_group._id)
+            m.delete('{}/{}/Read/Allow'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/Write/Allow'.format(self.baseurl, endpoint), status_code=204)
+            self.server.projects.delete_permission(item=single_project, rules=rules)
+
+    def test_delete_workbook_default_permission(self):
+        with open(asset(POPULATE_WORKBOOK_DEFAULT_PERMISSIONS_XML), 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/default-permissions/workbooks',
+                  text=response_xml)
+
+            single_group = TSC.GroupItem('Group1')
+            single_group._id = 'c8f2773a-c83a-11e8-8c8f-33e6d787b506'
+
+            single_project = TSC.ProjectItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
+            single_project.owner_id = 'dd2239f6-ddf1-4107-981a-4cf94e415794'
+            single_project._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
+
+            self.server.projects.populate_workbook_default_permissions(single_project)
+            permissions = single_project.default_workbook_permissions
+
+            capabilities = {
+                # View
+                TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.ExportImage: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.ExportData: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.ViewComments: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.AddComment: TSC.Permission.Mode.Allow,
+
+                # Interact/Edit
+                TSC.Permission.Capability.Filter: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.ViewUnderlyingData: TSC.Permission.Mode.Deny,
+                TSC.Permission.Capability.ShareView: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.WebAuthoring: TSC.Permission.Mode.Allow,
+
+                # Edit
+                TSC.Permission.Capability.Write: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.ExportXml: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.ChangeHierarchy: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.Delete: TSC.Permission.Mode.Deny,
+                TSC.Permission.Capability.ChangePermissions: TSC.Permission.Mode.Allow
+            }
+
+            rules = TSC.PermissionsRule(
+                grantee=single_group,
+                capabilities=capabilities
+            )
+
+            endpoint = '{}/default-permissions/workbook/groups/{}'.format(single_project._id, single_group._id)
+            m.delete('{}/{}/Read/Allow'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/ExportImage/Allow'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/ExportData/Allow'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/ViewComments/Allow'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/AddComment/Allow'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/Filter/Allow'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/ViewUnderlyingData/Deny'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/ShareView/Allow'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/WebAuthoring/Allow'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/Write/Allow'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/ExportXml/Allow'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/ChangeHierarchy/Allow'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/Delete/Deny'.format(self.baseurl, endpoint), status_code=204)
+            m.delete('{}/{}/ChangePermissions/Allow'.format(self.baseurl, endpoint), status_code=204)
+            self.server.projects.delete_workbook_default_permissions(item=single_project, rule=rules)

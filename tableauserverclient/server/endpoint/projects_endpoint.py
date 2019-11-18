@@ -86,25 +86,25 @@ class Projects(Endpoint):
         self._default_permissions.populate_default_permissions(item, Permission.Resource.Flow)
 
     @api(version='2.1')
-    def update_workbook_default_permissions(self, item):
-        self._default_permissions.update_default_permissions(item, Permission.Resource.Workbook)
+    def update_workbook_default_permissions(self, item, rules):
+        self._default_permissions.update_default_permissions(item, rules, Permission.Resource.Workbook)
 
     @api(version='2.1')
-    def update_datasource_default_permissions(self, item):
-        self._default_permissions.update_default_permissions(item, Permission.Resource.Datasource)
+    def update_datasource_default_permissions(self, item, rules):
+        self._default_permissions.update_default_permissions(item, rules, Permission.Resource.Datasource)
 
     @api(version='3.4')
-    def update_flow_default_permissions(self, item):
-        self._default_permissions.update_default_permissions(item, Permission.Resource.Flow)
+    def update_flow_default_permissions(self, item, rules):
+        self._default_permissions.update_default_permissions(item, rules, Permission.Resource.Flow)
 
     @api(version='2.1')
-    def delete_workbook_default_permissions(self, item):
-        self._default_permissions.delete_default_permissions(item, Permission.Resource.Workbook)
+    def delete_workbook_default_permissions(self, item, rule):
+        self._default_permissions.delete_default_permission(item, rule, Permission.Resource.Workbook)
 
     @api(version='2.1')
-    def delete_datasource_default_permissions(self, item):
-        self._default_permissions.delete_default_permissions(item, Permission.Resource.Datasource)
+    def delete_datasource_default_permissions(self, item, rule):
+        self._default_permissions.delete_default_permission(item, rule, Permission.Resource.Datasource)
 
     @api(version='3.4')
-    def delete_flow_default_permissions(self, item):
-        self._default_permissions.delete_default_permissions(item, Permission.Resource.Flow)
+    def delete_flow_default_permissions(self, item, rule):
+        self._default_permissions.delete_default_permission(item, rule, Permission.Resource.Flow)
