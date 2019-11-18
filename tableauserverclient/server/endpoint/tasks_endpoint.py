@@ -42,3 +42,13 @@ class Tasks(Endpoint):
         run_req = RequestFactory.Task.run_req(task_item)
         server_response = self.post_request(url, run_req)
         return server_response.content
+
+    # Delete 1 task by id
+    @api(version="3.6")
+    def delete(self, task_id):
+        if not task_id:
+            error = "No Task ID provided"
+            raise ValueError(error)
+        url = "{0}/{1}".format(self.baseurl, task_id)
+        self.delete_request(url)
+        logger.info('Deleted single task (ID: {0})'.format(task_id))
