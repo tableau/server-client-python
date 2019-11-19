@@ -79,6 +79,15 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', all_workbooks[1].owner_id)
         self.assertEqual(set(['Safari', 'Sample']), all_workbooks[1].tags)
 
+    def test_get_ignore_invalid_date(self):
+        with open(GET_INVALID_DATE_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.get(self.baseurl, text=response_xml)
+            all_workbooks, pagination_item = self.server.workbooks.get()
+        self.assertEqual(None, format_datetime(all_workbooks[0].created_at))
+        self.assertEqual('2016-08-04T17:56:41Z', format_datetime(all_workbooks[0].updated_at))
+        
     def test_get_before_signin(self):
         self.server._auth_token = None
         self.assertRaises(TSC.NotSignedInError, self.server.workbooks.get)
