@@ -88,7 +88,7 @@ class WorkbookTests(unittest.TestCase):
             all_workbooks, pagination_item = self.server.workbooks.get()
         self.assertEqual(None, format_datetime(all_workbooks[0].created_at))
         self.assertEqual('2016-08-04T17:56:41Z', format_datetime(all_workbooks[0].updated_at))
-        
+
     def test_get_before_signin(self):
         self.server._auth_token = None
         self.assertRaises(TSC.NotSignedInError, self.server.workbooks.get)
