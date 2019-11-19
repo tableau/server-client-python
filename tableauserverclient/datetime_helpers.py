@@ -35,4 +35,7 @@ def parse_datetime(date):
 
 
 def format_datetime(date):
+    if date is None:
+        return None
+
     return date.astimezone(tz=utc).strftime(TABLEAU_DATE_FORMAT)
