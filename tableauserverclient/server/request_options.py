@@ -98,8 +98,14 @@ class _FilterOptionsBase(RequestOptionsBase):
 
 
 class CSVRequestOptions(_FilterOptionsBase):
+    def __init__(self, maxage=None):
+        self.max_age = maxage
+
     def apply_query_params(self, url):
         params = []
+        if self.max_age:
+            params.append('maxAge={0}'.format(self.max_age))
+
         self._append_view_filters(params)
         return "{0}?{1}".format(url, '&'.join(params))
 
@@ -146,10 +152,11 @@ class PDFRequestOptions(_FilterOptionsBase):
         Portrait = "portrait"
         Landscape = "landscape"
 
-    def __init__(self, page_type=None, orientation=None):
+    def __init__(self, page_type=None, orientation=None, maxage=None):
         super(PDFRequestOptions, self).__init__()
         self.page_type = page_type
         self.orientation = orientation
+        self.max_age = maxage
 
     def apply_query_params(self, url):
         params = []
@@ -158,6 +165,9 @@ class PDFRequestOptions(_FilterOptionsBase):
 
         if self.orientation:
             params.append('orientation={0}'.format(self.orientation))
+
+        if self.max_age:
+            params.append('maxAge={0}'.format(self.max_age))
 
         self._append_view_filters(params)
 
