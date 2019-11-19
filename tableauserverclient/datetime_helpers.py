@@ -28,7 +28,10 @@ def parse_datetime(date):
     if date is None:
         return None
 
-    return datetime.datetime.strptime(date, TABLEAU_DATE_FORMAT).replace(tzinfo=utc)
+    try:
+        return datetime.datetime.strptime(date, TABLEAU_DATE_FORMAT).replace(tzinfo=utc)
+    except ValueError:
+        return None
 
 
 def format_datetime(date):
