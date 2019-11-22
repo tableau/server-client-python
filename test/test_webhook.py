@@ -51,6 +51,11 @@ class WebhookTests(unittest.TestCase):
     def test_delete_missing_id(self):
         self.assertRaises(ValueError, self.server.webhooks.delete, '')
 
+    def test_test(self):
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + '/ee8c6e70-43b6-11e6-af4f-f7b0d8e20760/test', status_code=200)
+            self.server.webhooks.test('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+
     def test_create(self):
         with open(CREATE_XML, 'rb') as f:
             response_xml = f.read().decode('utf-8')
@@ -58,8 +63,9 @@ class WebhookTests(unittest.TestCase):
             m.post(self.baseurl, text=response_xml)
             new_webhook = TSC.WebhookItem()
             new_webhook.name = "Test Webhook"
-            new_webhook.url = "http://ifttt.com/maker-url"
-            new_webhook.event = "webhook-source-event-datasource-created"
+            new_webhook.url = "https://ifttt.com/maker-url"
+            new_webhook.event = "datasource-created"
+            new_webhook.owner_id =
 
             new_webhook = self.server.webhooks.create(new_webhook)
 
@@ -72,6 +78,6 @@ class WebhookTests(unittest.TestCase):
         webhook_item = WebhookItem()
         webhook_item._set_values("webhook-id", "webhook-name", "url", "api-event-name",
                                  None)
-        webhook_request_actual = '{}\n'.format(RequestFactory.Webhook.create_req(webhook_item).decode('utf-8'))
+        webhook_request_actual = '{}\r\n'.format(RequestFactory.Webhook.create_req(webhook_item).decode('utf-8'))
         self.maxDiff = None
         self.assertEqual(webhook_request_expected, webhook_request_actual)

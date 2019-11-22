@@ -51,3 +51,12 @@ class Webhooks(Endpoint):
 
         logger.info('Created new webhook (ID: {0})'.format(new_webhook.id))
         return new_webhook
+
+    @api(version="3.6")
+    def test(self, webhook_id):
+        if not webhook_id:
+            error = "Webhook ID undefined."
+            raise ValueError(error)
+        url = "{0}/{1}/test".format(self.baseurl, webhook_id)
+        testOutcome = self.get_request(url)
+        logger.info('Testing webhook (ID: {0} returned {1})'.format(webhook_id, testOutcome))
