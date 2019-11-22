@@ -44,17 +44,17 @@ class RequestOptions(RequestOptionsBase):
         Asc = 'asc'
 
     def __init__(self, pagenumber=1, pagesize=100):
-        self.pagenumber = pagenumber
-        self.pagesize = pagesize
+        self.pagenumber = to_int("pagenumber", pagenumber)
+        self.pagesize = to_int("pagesize", pagesize)
         self.sort = set()
         self.filter = set()
 
     def page_size(self, page_size):
-        self.pagesize = page_size
+        self.pagesize = to_int("pagesize", page_size)
         return self
 
     def page_number(self, page_number):
-        self.pagenumber = page_number
+        self.pagenumber = to_int("pagenumber", page_number)
         return self
 
     def apply_query_params(self, url):
@@ -100,7 +100,7 @@ class _FilterOptionsBase(RequestOptionsBase):
 class CSVRequestOptions(_FilterOptionsBase):
     def __init__(self, maxage=None):
         super(CSVRequestOptions, self).__init__()
-        self.max_age = maxage
+        self.max_age = to_int("maxage", maxage)
 
     def apply_query_params(self, url):
         params = []
@@ -119,7 +119,7 @@ class ImageRequestOptions(_FilterOptionsBase):
     def __init__(self, imageresolution=None, maxage=None):
         super(ImageRequestOptions, self).__init__()
         self.image_resolution = imageresolution
-        self.max_age = maxage
+        self.max_age = to_int("maxage", maxage)
 
     def apply_query_params(self, url):
         params = []
@@ -157,7 +157,7 @@ class PDFRequestOptions(_FilterOptionsBase):
         super(PDFRequestOptions, self).__init__()
         self.page_type = page_type
         self.orientation = orientation
-        self.max_age = maxage
+        self.max_age = to_int("maxage", maxage)
 
     def apply_query_params(self, url):
         params = []
@@ -173,3 +173,11 @@ class PDFRequestOptions(_FilterOptionsBase):
         self._append_view_filters(params)
 
         return "{0}?{1}".format(url, '&'.join(params))
+
+
+def to_int(name, value):
+    try:
+        return int(value)
+    except ValueError:
+        print("Integer value expected for the '{}' parameter, but got {}".format(name, value))
+        raise
