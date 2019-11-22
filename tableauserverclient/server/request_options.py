@@ -99,6 +99,7 @@ class _FilterOptionsBase(RequestOptionsBase):
 
 class CSVRequestOptions(_FilterOptionsBase):
     def __init__(self, maxage=None):
+        super(CSVRequestOptions, self).__init__()
         self.max_age = maxage
 
     def apply_query_params(self, url):
