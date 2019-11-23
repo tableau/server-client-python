@@ -25,6 +25,7 @@ def main():
     parser.add_argument('--site', '-S', default=None)
     parser.add_argument('-p', default=None, help='password')
     parser.add_argument('--create', '-c', help='create a webhook')
+    parser.add_argument('--delete', '-d', help='delete a webhook', action='store_true')
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
                         help='desired logging level (set to error by default)')
 
@@ -52,7 +53,7 @@ def main():
 
     with server.auth.sign_in(tableau_auth):
 
-        # Publish webhook if publish flag is set (-publish, -p)
+        # Create webhook if create flag is set (-create, -c)
         if args.create:
 
             new_webhook = TSC.WebhookItem()
@@ -74,6 +75,9 @@ def main():
             # sample_webhook.delete()
             print("+++"+sample_webhook.name)
 
+            if (args.delete):
+                print("Deleting webhook " + sample_webhook.name)
+                server.webhooks.delete(sample_webhook.id)
 
 
 

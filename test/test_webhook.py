@@ -61,13 +61,12 @@ class WebhookTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
-            new_webhook = TSC.WebhookItem()
-            new_webhook.name = "Test Webhook"
-            new_webhook.url = "https://ifttt.com/maker-url"
-            new_webhook.event = "datasource-created"
-            new_webhook.owner_id =
+            webhook_model = TSC.WebhookItem()
+            webhook_model.name = "Test Webhook"
+            webhook_model.url = "https://ifttt.com/maker-url"
+            webhook_model.event = "datasource-created"
 
-            new_webhook = self.server.webhooks.create(new_webhook)
+            new_webhook = self.server.webhooks.create(webhook_model)
 
             self.assertNotEqual(new_webhook.id, None)
 
