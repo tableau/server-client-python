@@ -30,8 +30,6 @@ def main():
                         help='desired logging level (set to error by default)')
 
     args = parser.parse_args()
-
-
     if args.p is None:
         password = getpass.getpass("Password: ")
     else:
@@ -78,7 +76,6 @@ def main():
             if (args.delete):
                 print("Deleting webhook " + sample_webhook.name)
                 server.webhooks.delete(sample_webhook.id)
-
 
 
 if __name__ == '__main__':

@@ -77,6 +77,7 @@ class WebhookTests(unittest.TestCase):
         webhook_item = WebhookItem()
         webhook_item._set_values("webhook-id", "webhook-name", "url", "api-event-name",
                                  None)
-        webhook_request_actual = '{}\r\n'.format(RequestFactory.Webhook.create_req(webhook_item).decode('utf-8'))
+        webhook_request_actual = '{}\n'.format(RequestFactory.Webhook.create_req(webhook_item).decode('utf-8'))
         self.maxDiff = None
-        self.assertEqual(webhook_request_expected, webhook_request_actual)
+        # windows does /r/n for linebreaks, remove the extra char if it is there
+        self.assertEqual(webhook_request_expected.replace('\r', ''), webhook_request_actual)
