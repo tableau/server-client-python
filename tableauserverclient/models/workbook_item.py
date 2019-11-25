@@ -22,6 +22,7 @@ class WorkbookItem(object):
         self._updated_at = None
         self._views = None
         self.name = name
+        self._description = None
         self.owner_id = None
         self.project_id = project_id
         self.show_tabs = show_tabs
@@ -51,6 +52,10 @@ class WorkbookItem(object):
     @property
     def created_at(self):
         return self._created_at
+
+    @property
+    def description(self):
+        return self._description
 
     @property
     def id(self):
@@ -145,17 +150,17 @@ class WorkbookItem(object):
         if not isinstance(workbook_xml, ET.Element):
             workbook_xml = ET.fromstring(workbook_xml).find('.//t:workbook', namespaces=ns)
         if workbook_xml is not None:
-            (_, _, _, _, updated_at, _, show_tabs,
+            (_, _, _, _, description, updated_at, _, show_tabs,
              project_id, project_name, owner_id, _, _,
              materialized_views_config) = self._parse_element(workbook_xml, ns)
 
-            self._set_values(None, None, None, None, updated_at,
+            self._set_values(None, None, None, None, description, updated_at,
                              None, show_tabs, project_id, project_name, owner_id, None, None,
                              materialized_views_config)
 
         return self
 
-    def _set_values(self, id, name, content_url, created_at, updated_at,
+    def _set_values(self, id, name, content_url, created_at, description, updated_at,
                     size, show_tabs, project_id, project_name, owner_id, tags, views,
                     materialized_views_config):
         if id is not None:
@@ -166,6 +171,8 @@ class WorkbookItem(object):
             self._content_url = content_url
         if created_at:
             self._created_at = created_at
+        if description:
+            self._description = description
         if updated_at:
             self._updated_at = updated_at
         if size:
@@ -192,12 +199,12 @@ class WorkbookItem(object):
         parsed_response = ET.fromstring(resp)
         all_workbook_xml = parsed_response.findall('.//t:workbook', namespaces=ns)
         for workbook_xml in all_workbook_xml:
-            (id, name, content_url, created_at, updated_at, size, show_tabs,
+            (id, name, content_url, created_at, description, updated_at, size, show_tabs,
              project_id, project_name, owner_id, tags, views,
              materialized_views_config) = cls._parse_element(workbook_xml, ns)
 
             workbook_item = cls(project_id)
-            workbook_item._set_values(id, name, content_url, created_at, updated_at,
+            workbook_item._set_values(id, name, content_url, created_at, description, updated_at,
                                       size, show_tabs, None, project_name, owner_id, tags, views,
                                       materialized_views_config)
             all_workbook_items.append(workbook_item)
@@ -209,6 +216,7 @@ class WorkbookItem(object):
         name = workbook_xml.get('name', None)
         content_url = workbook_xml.get('contentUrl', None)
         created_at = parse_datetime(workbook_xml.get('createdAt', None))
+        description = workbook_xml.get('description', None)
         updated_at = parse_datetime(workbook_xml.get('updatedAt', None))
 
         size = workbook_xml.get('size', None)
@@ -245,7 +253,7 @@ class WorkbookItem(object):
         if materialized_views_elem is not None:
             materialized_views_config = parse_materialized_views_config(materialized_views_elem)
 
-        return id, name, content_url, created_at, updated_at, size, show_tabs,\
+        return id, name, content_url, created_at, description, updated_at, size, show_tabs,\
             project_id, project_name, owner_id, tags, views, materialized_views_config
 
 
