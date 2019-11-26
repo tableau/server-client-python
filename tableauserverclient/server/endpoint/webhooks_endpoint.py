@@ -60,3 +60,4 @@ class Webhooks(Endpoint):
         url = "{0}/{1}/test".format(self.baseurl, webhook_id)
         testOutcome = self.get_request(url)
         logger.info('Testing webhook (ID: {0} returned {1})'.format(webhook_id, testOutcome))
+        return testOutcome

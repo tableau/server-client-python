@@ -59,4 +59,8 @@ somewhere.
 > pip install versioneer
 > python setup.py build
 > python setup.py test
-> 
+>
+
+### before committing
+Our CI runs include a python lint run, so you should run this locally and fix complaints before committing as this will fail your checkin
+> pycodestyle tableauserverclient test samples
