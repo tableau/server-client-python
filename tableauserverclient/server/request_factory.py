@@ -322,8 +322,8 @@ class ScheduleRequest(object):
         """
         xml_request = ET.Element('tsRequest')
         task_element = ET.SubElement(xml_request, 'task')
-        refresh = ET.SubElement(task_element, task_type)
-        workbook = ET.SubElement(refresh, target_type)
+        task = ET.SubElement(task_element, task_type)
+        workbook = ET.SubElement(task, target_type)
         workbook.attrib['id'] = id_
 
         return ET.tostring(xml_request)
