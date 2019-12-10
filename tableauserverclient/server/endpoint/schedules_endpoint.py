@@ -68,12 +68,12 @@ class Schedules(Endpoint):
         return new_schedule
 
     @api(version="2.8")
-    def add_to_schedule(self, schedule_id, workbook=None, datasource=None):
+    def add_to_schedule(self, schedule_id, workbook=None, datasource=None, schedule_type='extractRefresh'):
 
         def add_to(resource, type_, req_factory):
             id_ = resource.id
             url = "{0}/{1}/{2}s".format(self.siteurl, schedule_id, type_)
-            add_req = req_factory(id_)
+            add_req = req_factory(id_, schedule_type=schedule_type)
             response = self.put_request(url, add_req)
             if response.status_code < 200 or response.status_code >= 300:
                 return AddResponse(result=False,
