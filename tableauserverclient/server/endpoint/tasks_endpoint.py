@@ -22,8 +22,11 @@ class Tasks(Endpoint):
         else:
             return task_type
 
-    @api(version='3.8')
+    @api(version='2.6')
     def get(self, req_options=None, task_type=TaskItem.Type.ExtractRefresh):
+        if task_type == TaskItem.Type.MaterializeViews:
+            self.parent_srv.assert_at_least_version("3.8")
+
         logger.info('Querying all {} tasks for the site'.format(task_type))
 
         url = "{0}/{1}".format(self.baseurl, self.__normalize_task_type(task_type))
@@ -60,8 +63,11 @@ class Tasks(Endpoint):
         return server_response.content
 
     # Delete 1 task by id
-    @api(version="3.8")
+    @api(version="3.6")
     def delete(self, task_id, task_type=TaskItem.Type.ExtractRefresh):
+        if task_type == TaskItem.Type.MaterializeViews:
+            self.parent_srv.assert_at_least_version("3.8")
+
         if not task_id:
             error = "No Task ID provided"
             raise ValueError(error)
