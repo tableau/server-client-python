@@ -3,6 +3,7 @@ from .target import Target
 from .schedule_item import ScheduleItem
 from ..datetime_helpers import parse_datetime
 
+
 class TaskItem(object):
     class Type:
         ExtractRefresh = "extractRefresh"

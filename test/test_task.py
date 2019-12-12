@@ -12,6 +12,7 @@ GET_XML_WITH_WORKBOOK = os.path.join(TEST_ASSET_DIR, "tasks_with_workbook.xml")
 GET_XML_WITH_DATASOURCE = os.path.join(TEST_ASSET_DIR, "tasks_with_datasource.xml")
 GET_XML_WITH_WORKBOOK_AND_DATASOURCE = os.path.join(TEST_ASSET_DIR, "tasks_with_workbook_and_datasource.xml")
 GET_XML_MATERIALIZEVIEWS_TASK = os.path.join(TEST_ASSET_DIR, "tasks_with_materializeviews_task.xml")
+GET_XML_RUN_NOW_RESPONSE = os.path.join(TEST_ASSET_DIR, "tasks_run_now_response.xml")
 
 
 class TaskTests(unittest.TestCase):
@@ -111,3 +112,27 @@ class TaskTests(unittest.TestCase):
                 'c9cff7f9-309c-4361-99ff-d4ba8c9f5467'), status_code=204)
             self.server.tasks.delete('c9cff7f9-309c-4361-99ff-d4ba8c9f5467',
                                      TaskItem.Type.MaterializeViews)
+
+    def test_get_by_id(self):
+        with open(GET_XML_WITH_WORKBOOK, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        task_id = 'f84901ac-72ad-4f9b-a87e-7a3500402ad6'
+        with requests_mock.mock() as m:
+            m.get('{}/{}'.format(self.baseurl, task_id), text=response_xml)
+            task = self.server.tasks.get_by_id(task_id)
+
+        self.assertEqual('c7a9327e-1cda-4504-b026-ddb43b976d1d', task.target.id)
+        self.assertEqual('workbook', task.target.type)
+        self.assertEqual('b60b4efd-a6f7-4599-beb3-cb677e7abac1', task.schedule_id)
+
+    def test_run_now(self):
+        task_id = 'f84901ac-72ad-4f9b-a87e-7a3500402ad6'
+        task = TaskItem(task_id, TaskItem.Type.ExtractRefresh, 100)
+        with open(GET_XML_RUN_NOW_RESPONSE, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            m.post('{}/{}/runNow'.format(self.baseurl, task_id), text=response_xml)
+            job_response_content = self.server.tasks.run(task).decode("utf-8")
+
+        self.assertTrue('7b6b59a8-ac3c-4d1d-2e9e-0b5b4ba8a7b6' in job_response_content)
+        self.assertTrue('RefreshExtract' in job_response_content)

@@ -42,7 +42,8 @@ class Tasks(Endpoint):
             error = "No Task ID provided"
             raise ValueError(error)
         logger.info("Querying a single task by id ({})".format(task_id))
-        url = "{}/{}".format(self.baseurl, task_id)
+        url = "{}/{}/{}".format(self.baseurl,
+                                self.__normalize_task_type(TaskItem.Type.ExtractRefresh), task_id)
         server_response = self.get_request(url)
         return TaskItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
@@ -52,7 +53,8 @@ class Tasks(Endpoint):
             error = "User item missing ID."
             raise MissingRequiredFieldError(error)
 
-        url = "{0}/{1}/runNow".format(self.baseurl, task_item.id)
+        url = "{0}/{1}/{2}/runNow".format(self.baseurl,
+                                          self.__normalize_task_type(TaskItem.Type.ExtractRefresh), task_item.id)
         run_req = RequestFactory.Task.run_req(task_item)
         server_response = self.post_request(url, run_req)
         return server_response.content
