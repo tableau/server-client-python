@@ -22,7 +22,7 @@ class TaskTests(unittest.TestCase):
         self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"
         self.server._auth_token = "j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM"
 
-        # default task type is extractRefresh
+        # default task type is extractRefreshes
         self.baseurl = "{}/{}".format(self.server.tasks.baseurl, "extractRefreshes")
 
     def test_get_tasks_with_no_workbook(self):
