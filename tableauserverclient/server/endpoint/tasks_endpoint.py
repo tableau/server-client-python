@@ -31,10 +31,10 @@ class Tasks(Endpoint):
 
         pagination_item = PaginationItem.from_response(server_response.content,
                                                        self.parent_srv.namespace)
-        all_extract_tasks = TaskItem.from_response(server_response.content,
+        all_tasks = TaskItem.from_response(server_response.content,
                                                    self.parent_srv.namespace,
                                                    task_type)
-        return all_extract_tasks, pagination_item
+        return all_tasks, pagination_item
 
     @api(version='2.6')
     def get_by_id(self, task_id):
@@ -65,6 +65,7 @@ class Tasks(Endpoint):
         if not task_id:
             error = "No Task ID provided"
             raise ValueError(error)
-        url = "{0}/{1}/{2}".format(self.baseurl, task_type, task_id)
+        url = "{0}/{1}/{2}".format(self.baseurl,
+                                   self.__normalize_task_type(task_type), task_id)
         self.delete_request(url)
         logger.info('Deleted single task (ID: {0})'.format(task_id))
