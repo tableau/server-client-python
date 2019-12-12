@@ -5,7 +5,7 @@ from functools import wraps
 from requests.packages.urllib3.fields import RequestField
 from requests.packages.urllib3.filepost import encode_multipart_formdata
 
-from ..models import UserItem, GroupItem, PermissionsRule
+from ..models import TaskItem, UserItem, GroupItem, PermissionsRule
 
 
 def _add_multipart(parts):
@@ -311,14 +311,14 @@ class ScheduleRequest(object):
                 single_interval_element.attrib[expression] = value
         return ET.tostring(xml_request)
 
-    def _add_to_req(self, id_, target_type, task_type='extractRefresh'):
+
+    def _add_to_req(self, id_, target_type, task_type=TaskItem.Type.ExtractRefresh):
         """
         <task>
           <task_type>
             <workbook/datasource id="..."/>
           </task_type>
         </task>
-
         """
         xml_request = ET.Element('tsRequest')
         task_element = ET.SubElement(xml_request, 'task')
@@ -328,11 +328,11 @@ class ScheduleRequest(object):
 
         return ET.tostring(xml_request)
 
-    def add_workbook_req(self, id_, schedule_type='extractRefresh'):
-        return self._add_to_req(id_, "workbook", schedule_type)
+    def add_workbook_req(self, id_, task_type=TaskItem.Type.ExtractRefresh):
+        return self._add_to_req(id_, "workbook", task_type)
 
-    def add_datasource_req(self, id_, schedule_type='extractRefresh'):
-        return self._add_to_req(id_, "datasource", schedule_type)
+    def add_datasource_req(self, id_, task_type=TaskItem.Type.ExtractRefresh):
+        return self._add_to_req(id_, "datasource", task_type)
 
 
 class SiteRequest(object):

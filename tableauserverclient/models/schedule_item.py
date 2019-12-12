@@ -200,7 +200,7 @@ class ScheduleItem(object):
             # We use fractional hours for the two minute-based intervals.
             # Need to convert to hours from minutes here
             if interval_occurrence == IntervalItem.Occurrence.Minutes:
-                interval_value = float(interval_value / 60)
+                interval_value = float(interval_value) / 60
 
             return HourlyInterval(start_time, end_time, interval_value)
 

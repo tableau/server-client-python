@@ -10,19 +10,30 @@ class Tasks(Endpoint):
     @property
     def baseurl(self):
         return "{0}/sites/{1}/tasks".format(self.parent_srv.baseurl,
-                                                             self.parent_srv.site_id)
+                                            self.parent_srv.site_id)
+
+    def __normalize_task_type(self, task_type):
+        """
+            The word for extract refresh used in API URL is "extractRefreshes".
+            It is different than the tag "extractRefresh" used in the request body.
+        """
+        if task_type == TaskItem.Type.ExtractRefresh:
+            return '{}es'.format(task_type)
+        else:
+            return task_type
 
     @api(version='3.8')
-    def get(self, req_options=None, task_type='extractRefreshes'):
+    def get(self, req_options=None, task_type=TaskItem.Type.ExtractRefresh):
         logger.info('Querying all {} tasks for the site'.format(task_type))
 
-        url = "{0}/{1}".format(self.baseurl, task_type)
+        url = "{0}/{1}".format(self.baseurl, self.__normalize_task_type(task_type))
         server_response = self.get_request(url, req_options)
 
         pagination_item = PaginationItem.from_response(server_response.content,
                                                        self.parent_srv.namespace)
         all_extract_tasks = TaskItem.from_response(server_response.content,
-                                                   self.parent_srv.namespace)
+                                                   self.parent_srv.namespace,
+                                                   task_type)
         return all_extract_tasks, pagination_item
 
     @api(version='2.6')
