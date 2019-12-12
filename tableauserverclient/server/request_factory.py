@@ -24,6 +24,7 @@ def _tsrequest_wrapped(func):
         xml_request = ET.Element('tsRequest')
         func(self, xml_request, *args, **kwargs)
         return ET.tostring(xml_request)
+
     return wrapper
 
 
@@ -334,6 +335,7 @@ class ScheduleRequest(object):
     def add_datasource_req(self, id_, task_type=TaskItem.Type.ExtractRefresh):
         return self._add_to_req(id_, "datasource", task_type)
 
+
 class SiteRequest(object):
     def update_req(self, site_item):
         xml_request = ET.Element('tsRequest')
@@ -478,7 +480,7 @@ class WorkbookRequest(object):
         if workbook_item.owner_id:
             owner_element = ET.SubElement(workbook_element, 'owner')
             owner_element.attrib['id'] = workbook_item.owner_id
-        if workbook_item.materialized_views_config['materialized_views_enabled']\
+        if workbook_item.materialized_views_config['materialized_views_enabled'] \
                 and workbook_item.materialized_views_config['run_materialization_now']:
             materialized_views_config = workbook_item.materialized_views_config
             materialized_views_element = ET.SubElement(workbook_element, 'materializedViewsEnablementConfig')

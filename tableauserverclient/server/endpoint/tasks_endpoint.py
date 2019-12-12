@@ -32,8 +32,8 @@ class Tasks(Endpoint):
         pagination_item = PaginationItem.from_response(server_response.content,
                                                        self.parent_srv.namespace)
         all_tasks = TaskItem.from_response(server_response.content,
-                                                   self.parent_srv.namespace,
-                                                   task_type)
+                                           self.parent_srv.namespace,
+                                           task_type)
         return all_tasks, pagination_item
 
     @api(version='2.6')
