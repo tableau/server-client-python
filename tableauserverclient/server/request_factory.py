@@ -5,7 +5,7 @@ from functools import wraps
 from requests.packages.urllib3.fields import RequestField
 from requests.packages.urllib3.filepost import encode_multipart_formdata
 
-from ..models import UserItem, GroupItem, PermissionsRule
+from ..models import TaskItem, UserItem, GroupItem, PermissionsRule
 
 
 def _add_multipart(parts):
@@ -24,6 +24,7 @@ def _tsrequest_wrapped(func):
         xml_request = ET.Element('tsRequest')
         func(self, xml_request, *args, **kwargs)
         return ET.tostring(xml_request)
+
     return wrapper
 
 
@@ -311,28 +312,28 @@ class ScheduleRequest(object):
                 single_interval_element.attrib[expression] = value
         return ET.tostring(xml_request)
 
-    def _add_to_req(self, id_, type_):
+    def _add_to_req(self, id_, target_type, task_type=TaskItem.Type.ExtractRefresh):
         """
         <task>
-          <extractRefresh>
+          <target_type>
             <workbook/datasource id="..."/>
-          </extractRefresh>
+          </target_type>
         </task>
 
         """
         xml_request = ET.Element('tsRequest')
         task_element = ET.SubElement(xml_request, 'task')
-        refresh = ET.SubElement(task_element, 'extractRefresh')
-        workbook = ET.SubElement(refresh, type_)
+        task = ET.SubElement(task_element, task_type)
+        workbook = ET.SubElement(task, target_type)
         workbook.attrib['id'] = id_
 
         return ET.tostring(xml_request)
 
-    def add_workbook_req(self, id_):
-        return self._add_to_req(id_, "workbook")
+    def add_workbook_req(self, id_, task_type=TaskItem.Type.ExtractRefresh):
+        return self._add_to_req(id_, "workbook", task_type)
 
-    def add_datasource_req(self, id_):
-        return self._add_to_req(id_, "datasource")
+    def add_datasource_req(self, id_, task_type=TaskItem.Type.ExtractRefresh):
+        return self._add_to_req(id_, "datasource", task_type)
 
 
 class SiteRequest(object):
@@ -479,7 +480,7 @@ class WorkbookRequest(object):
         if workbook_item.owner_id:
             owner_element = ET.SubElement(workbook_element, 'owner')
             owner_element.attrib['id'] = workbook_item.owner_id
-        if workbook_item.materialized_views_config['materialized_views_enabled']\
+        if workbook_item.materialized_views_config['materialized_views_enabled'] \
                 and workbook_item.materialized_views_config['run_materialization_now']:
             materialized_views_config = workbook_item.materialized_views_config
             materialized_views_element = ET.SubElement(workbook_element, 'materializedViewsEnablementConfig')
