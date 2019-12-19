@@ -481,8 +481,7 @@ class WorkbookRequest(object):
             owner_element = ET.SubElement(workbook_element, 'owner')
             owner_element.attrib['id'] = workbook_item.owner_id
         if workbook_item.materialized_views_config is not None and \
-                'materialized_views_enabled' in workbook_item.materialized_views_config and \
-                'run_materialization_now' in workbook_item.materialized_views_config:
+                'materialized_views_enabled' in workbook_item.materialized_views_config:
             materialized_views_config = workbook_item.materialized_views_config
             materialized_views_element = ET.SubElement(workbook_element, 'materializedViewsEnablementConfig')
             materialized_views_element.attrib['materializedViewsEnabled'] = str(materialized_views_config
