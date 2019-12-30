@@ -302,7 +302,7 @@ class ScheduleRequest(object):
             schedule_element.attrib['frequency'] = interval_item._frequency
         frequency_element = ET.SubElement(schedule_element, 'frequencyDetails')
         frequency_element.attrib['start'] = str(interval_item.start_time)
-        if hasattr(interval_item, 'end_time') and interval_item.end_time:
+        if hasattr(interval_item, 'end_time') and interval_item.end_time is not None:
             frequency_element.attrib['end'] = str(interval_item.end_time)
         intervals_element = ET.SubElement(frequency_element, 'intervals')
         if hasattr(interval_item, 'interval'):
