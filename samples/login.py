@@ -46,7 +46,7 @@ def main():
                                                    personal_access_token=personal_access_token)
         with server.auth.sign_in_with_personal_access_token(tableau_auth):
             print('Logged in successfully')
-
+            
 
 if __name__ == '__main__':
     main()
