@@ -40,14 +40,15 @@ def main():
         with server.auth.sign_in(tableau_auth):
             print('Logged in successfully')
 
-    else:  
+    else:
         # Trying to authenticate using personal access tokens.
         personal_access_token = input("Personal Access Token: ")
         tableau_auth = TSC.PersonalAccessTokenAuth(token_name=args.token_name,
-                                                    personal_access_token=personal_access_token, site_id=args.sitename)
+                                                personal_access_token=personal_access_token, site_id=args.sitename)
         with server.auth.sign_in_with_personal_access_token(tableau_auth):
             print('Logged in successfully')
 
 
 if __name__ == '__main__':
     main()
+    
