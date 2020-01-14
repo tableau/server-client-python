@@ -22,6 +22,7 @@ def main():
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--username', '-u', help='username to sign into the server')
     group.add_argument('--token-name', '-n', help='name of the personal access token used to sign into the server')
+    parser.add_argument('--sitename', '-S', default=None)
 
     args = parser.parse_args()
 
@@ -41,9 +42,9 @@ def main():
 
     else:
         # Trying to authenticate using personal access tokens.
-        personal_access_token = getpass.getpass("Personal Access Token: ")
+        personal_access_token = input("Personal Access Token: ")
         tableau_auth = TSC.PersonalAccessTokenAuth(token_name=args.token_name,
-                                                   personal_access_token=personal_access_token)
+                                                   personal_access_token=personal_access_token, site_id=args.sitename)
         with server.auth.sign_in_with_personal_access_token(tableau_auth):
             print('Logged in successfully')
 

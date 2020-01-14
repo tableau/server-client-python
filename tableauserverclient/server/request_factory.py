@@ -302,7 +302,7 @@ class ScheduleRequest(object):
             schedule_element.attrib['frequency'] = interval_item._frequency
         frequency_element = ET.SubElement(schedule_element, 'frequencyDetails')
         frequency_element.attrib['start'] = str(interval_item.start_time)
-        if hasattr(interval_item, 'end_time') and interval_item.end_time:
+        if hasattr(interval_item, 'end_time') and interval_item.end_time is not None:
             frequency_element.attrib['end'] = str(interval_item.end_time)
         intervals_element = ET.SubElement(frequency_element, 'intervals')
         if hasattr(interval_item, 'interval'):
@@ -480,14 +480,15 @@ class WorkbookRequest(object):
         if workbook_item.owner_id:
             owner_element = ET.SubElement(workbook_element, 'owner')
             owner_element.attrib['id'] = workbook_item.owner_id
-        if workbook_item.materialized_views_config['materialized_views_enabled'] \
-                and workbook_item.materialized_views_config['run_materialization_now']:
+        if workbook_item.materialized_views_config is not None and \
+                'materialized_views_enabled' in workbook_item.materialized_views_config:
             materialized_views_config = workbook_item.materialized_views_config
             materialized_views_element = ET.SubElement(workbook_element, 'materializedViewsEnablementConfig')
             materialized_views_element.attrib['materializedViewsEnabled'] = str(materialized_views_config
                                                                                 ["materialized_views_enabled"]).lower()
-            materialized_views_element.attrib['materializeNow'] = str(materialized_views_config
-                                                                      ["run_materialization_now"]).lower()
+            if "run_materialization_now" in materialized_views_config:
+                materialized_views_element.attrib['materializeNow'] = str(materialized_views_config
+                                                                          ["run_materialization_now"]).lower()
 
         return ET.tostring(xml_request)
 
