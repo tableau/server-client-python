@@ -153,6 +153,9 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual(time(9, 15), new_schedule.interval_item.start_time)
         self.assertEqual(("Monday", "Wednesday", "Friday"),
                          new_schedule.interval_item.interval)
+        self.assertEqual(2, len(new_schedule.warnings))
+        self.assertEqual("warning 1", new_schedule.warnings[0])
+        self.assertEqual("warning 2", new_schedule.warnings[1])
 
     def test_create_monthly(self):
         with open(CREATE_MONTHLY_XML, "rb") as f:

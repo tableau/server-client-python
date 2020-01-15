@@ -103,6 +103,10 @@ class ScheduleItem(object):
     def updated_at(self):
         return self._updated_at
 
+    @property
+    def warnings(self):
+        return self._warnings
+
     def _parse_common_tags(self, schedule_xml, ns):
         if not isinstance(schedule_xml, ET.Element):
             schedule_xml = ET.fromstring(schedule_xml).find('.//t:schedule', namespaces=ns)
@@ -125,7 +129,7 @@ class ScheduleItem(object):
         return self
 
     def _set_values(self, id_, name, state, created_at, updated_at, schedule_type,
-                    next_run_at, end_schedule_at, execution_order, priority, interval_item):
+                    next_run_at, end_schedule_at, execution_order, priority, interval_item, warnings=None):
         if id_ is not None:
             self._id = id_
         if name:
@@ -148,6 +152,8 @@ class ScheduleItem(object):
             self._priority = priority
         if interval_item:
             self._interval_item = interval_item
+        if warnings:
+            self._warnings = warnings
 
     @classmethod
     def from_response(cls, resp, ns):
@@ -156,6 +162,11 @@ class ScheduleItem(object):
 
     @classmethod
     def from_element(cls, parsed_response, ns):
+        all_warning_xml = parsed_response.findall('.//t:warning', namespaces=ns)
+        warnings = list() if len(all_warning_xml) > 0 else None
+        for warning_xml in all_warning_xml:
+            warnings.append(warning_xml.get('message', None))
+
         all_schedule_items = []
         all_schedule_xml = parsed_response.findall('.//t:schedule', namespaces=ns)
         for schedule_xml in all_schedule_xml:
@@ -174,7 +185,8 @@ class ScheduleItem(object):
                                       end_schedule_at=end_schedule_at,
                                       execution_order=None,
                                       priority=None,
-                                      interval_item=None)
+                                      interval_item=None,
+                                      warnings=warnings)
 
             all_schedule_items.append(schedule_item)
         return all_schedule_items
