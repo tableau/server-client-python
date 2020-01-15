@@ -214,7 +214,6 @@ class ScheduleTests(unittest.TestCase):
         with open(ADD_WORKBOOK_TO_SCHEDULE, "rb") as f:
             add_workbook_response = f.read().decode("utf-8")
         with requests_mock.mock() as m:
-            #  TODO: Replace with real response
             m.get(self.server.workbooks.baseurl + '/bar', text=workbook_response)
             m.put(baseurl + '/foo/workbooks', text=add_workbook_response)
             workbook = self.server.workbooks.get_by_id("bar")
