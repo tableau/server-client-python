@@ -1,3 +1,4 @@
+import xml.etree.ElementTree as ET
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, PaginationItem, ScheduleItem, WorkbookItem, DatasourceItem, TaskItem
@@ -7,8 +8,8 @@ from collections import namedtuple
 
 logger = logging.getLogger('tableau.endpoint.schedules')
 # Oh to have a first class Result concept in Python...
-AddResponse = namedtuple('AddResponse', ('result', 'error'))
-OK = AddResponse(result=True, error=None)
+AddResponse = namedtuple('AddResponse', ('result', 'error', 'warnings'))
+OK = AddResponse(result=True, error=None, warnings=None)
 
 
 class Schedules(Endpoint):
@@ -70,15 +71,24 @@ class Schedules(Endpoint):
     @api(version="2.8")
     def add_to_schedule(self, schedule_id, workbook=None, datasource=None,
                         task_type=TaskItem.Type.ExtractRefresh):
+        def read_warnings(response):
+            parsed_response = ET.fromstring(response)
+            all_warning_xml = parsed_response.findall('.//t:warning', namespaces=self.parent_srv.namespace)
+            warnings = list() if len(all_warning_xml) > 0 else None
+            for warning_xml in all_warning_xml:
+                warnings.append(warning_xml.get('message', None))
+            return warnings
 
         def add_to(resource, type_, req_factory):
             id_ = resource.id
             url = "{0}/{1}/{2}s".format(self.siteurl, schedule_id, type_)
             add_req = req_factory(id_, task_type=task_type)
             response = self.put_request(url, add_req)
-            if response.status_code < 200 or response.status_code >= 300:
+            warnings = read_warnings(response.content)
+            if response.status_code < 200 or response.status_code >= 300 or warnings:
                 return AddResponse(result=False,
-                                   error="Status {}: {}".format(response.status_code, response.reason))
+                                   error="Status {}: {}".format(response.status_code, response.reason),
+                                   warnings=warnings)
             logger.info("Added {} to {} to schedule {}".format(type_, id_, schedule_id))
             return OK
 
