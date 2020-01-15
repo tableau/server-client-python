@@ -3,7 +3,7 @@
   <task>
     <extractRefresh>
       <schedule id="schedule-id" />
-      <datasource id="workbook-id" />
+      <datasource id="datasource-id" />
     </extractRefresh>
   </task>
 </tsResponse>
