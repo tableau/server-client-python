@@ -8,8 +8,8 @@ from collections import namedtuple
 
 logger = logging.getLogger('tableau.endpoint.schedules')
 # Oh to have a first class Result concept in Python...
-AddResponse = namedtuple('AddResponse', ('result', 'error', 'warnings'))
-OK = AddResponse(result=True, error=None, warnings=None)
+AddResponse = namedtuple('AddResponse', ('result', 'error', 'warnings', 'task_created'))
+OK = AddResponse(result=True, error=None, warnings=None, task_created=None)
 
 
 class Schedules(Endpoint):
@@ -71,26 +71,21 @@ class Schedules(Endpoint):
     @api(version="2.8")
     def add_to_schedule(self, schedule_id, workbook=None, datasource=None,
                         task_type=TaskItem.Type.ExtractRefresh):
-        def read_warnings(response):
-            parsed_response = ET.fromstring(response)
-            all_warning_xml = parsed_response.findall('.//t:warning', namespaces=self.parent_srv.namespace)
-            warnings = list() if len(all_warning_xml) > 0 else None
-            for warning_xml in all_warning_xml:
-                warnings.append(warning_xml.get('message', None))
-            return warnings
-
         def add_to(resource, type_, req_factory):
             id_ = resource.id
             url = "{0}/{1}/{2}s".format(self.siteurl, schedule_id, type_)
             add_req = req_factory(id_, task_type=task_type)
             response = self.put_request(url, add_req)
-            warnings = read_warnings(response.content)
-            if response.status_code < 200 or response.status_code >= 300 or warnings:
-                return AddResponse(result=False,
-                                   error="Status {}: {}".format(response.status_code, response.reason),
-                                   warnings=warnings)
-            logger.info("Added {} to {} to schedule {}".format(type_, id_, schedule_id))
-            return OK
+
+            error, warnings, task_created = ScheduleItem.parse_add_to_schedule_response(
+                response, self.parent_srv.namespace)
+            if task_created:
+                logger.info("Added {} to {} to schedule {}".format(type_, id_, schedule_id))
+
+            if error is not None or warnings is not None:
+                return AddResponse(result=False, error=error, warnings=warnings, task_created=task_created)
+            else:
+                return OK
 
         items = []
 
