@@ -1,4 +1,3 @@
-import xml.etree.ElementTree as ET
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, PaginationItem, ScheduleItem, WorkbookItem, DatasourceItem, TaskItem
