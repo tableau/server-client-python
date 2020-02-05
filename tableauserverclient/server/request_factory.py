@@ -249,6 +249,8 @@ class ProjectRequest(object):
             project_element.attrib['description'] = project_item.description
         if project_item.content_permissions:
             project_element.attrib['contentPermissions'] = project_item.content_permissions
+        if project_item.parent_id:
+            project_element.attrib['parentProjectId'] = project_item.parent_id
         return ET.tostring(xml_request)
 
     def create_req(self, project_item):
