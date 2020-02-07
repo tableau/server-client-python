@@ -70,7 +70,8 @@ class JobItem(object):
         started_at = parse_datetime(element.get('startedAt', None))
         completed_at = parse_datetime(element.get('completedAt', None))
         finish_code = element.get('finishCode', -1)
-        notes = [note.text for note in element.findall('.//t:notes')] or None
+        notes = [note.text for note in 
+                    element.findall('.//t:notes', namespaces=ns)] or None
         return cls(id_, type_, progress, created_at, started_at, completed_at, finish_code, notes)
 
 
