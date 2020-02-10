@@ -2739,7 +2739,7 @@ Name | Description
 `email` |  The email address of the user.    
 `fullname` | The full name of the user.    
 `name` |   The name of the user. This attribute is required when you are creating a `UserItem` instance.  
-`site_role` |  The role the user has on the site. This attribute is required with you are creating a `UserItem` instance. The specific roles vary depending upon the version of the REST API.  For example, for version 2.8 and earlier, the `site_role` can be one of the following: `Interactor`, `Publisher`, `ServerAdministrator`, `SiteAdministrator`, `Unlicensed`, `UnlicensedWithPublish`, `ReadOnly`, `Viewer`, `ViewerWithPublish`, `Guest`.  For REST API 3.0 and later, the `site_role` can be one of the following `Creator`, `Explorer`, `ExplorerCanPublish`, `Viewer`, `SiteAdministratorCreator`, `SiteAdministratorExplorer`, `UnlicensedWithPublish`. 
+`site_role` |  The role the user has on the site. This attribute is required with you are creating a `UserItem` instance. The specific roles vary depending upon the version of the REST API.  For example, for version 2.8 and earlier, the `site_role` can be one of the following: `Interactor`, `Publisher`, `ServerAdministrator`, `SiteAdministrator`, `Unlicensed`, `UnlicensedWithPublish`,  `Viewer`, `ViewerWithPublish`, `Guest`.  For REST API 3.0 and later, the `site_role` can be one of the following `Creator`, `Explorer`, `ExplorerCanPublish`, `ReadOnly` *(viewers from previous API versions who do not have v3.0+ viewer permissions)*, `Viewer`, `SiteAdministratorCreator`, `SiteAdministratorExplorer`, `UnlicensedWithPublish`. 
 
 
 **Example**
