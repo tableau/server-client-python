@@ -5,7 +5,8 @@ from ..datetime_helpers import parse_datetime
 
 
 class JobItem(object):
-    def __init__(self, id_, job_type, progress, created_at, started_at=None, completed_at=None, finish_code=0, notes=[]):
+    def __init__(self, id_, job_type, progress, created_at, started_at=None, 
+                    completed_at=None, finish_code=0, notes=[]):
         self._id = id_
         self._type = job_type
         self._progress = progress
@@ -70,8 +71,8 @@ class JobItem(object):
         started_at = parse_datetime(element.get('startedAt', None))
         completed_at = parse_datetime(element.get('completedAt', None))
         finish_code = element.get('finishCode', -1)
-        notes = [note.text for note in 
-                    element.findall('.//t:notes', namespaces=ns)] or None
+        notes = [note.text for note in
+                 element.findall('.//t:notes', namespaces=ns)] or None
         return cls(id_, type_, progress, created_at, started_at, completed_at, finish_code, notes)
 
 
