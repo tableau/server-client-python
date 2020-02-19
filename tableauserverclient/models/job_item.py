@@ -5,8 +5,8 @@ from ..datetime_helpers import parse_datetime
 
 
 class JobItem(object):
-    def __init__(self, id_, job_type, progress, created_at, started_at=None, 
-                    completed_at=None, finish_code=0, notes=[]):
+    def __init__(self, id_, job_type, progress, created_at, started_at=None,
+                 completed_at=None, finish_code=0, notes=[]):
         self._id = id_
         self._type = job_type
         self._progress = progress
