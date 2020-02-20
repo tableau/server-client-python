@@ -144,6 +144,7 @@ class Datasources(Endpoint):
                                                                                     connection_item.id))
         return connection
 
+    @api(version="2.8")
     def refresh(self, datasource_item):
         id_ = getattr(datasource_item, 'id', datasource_item)
         url = "{0}/{1}/refresh".format(self.baseurl, id_)
