@@ -32,14 +32,14 @@ class JobTests(unittest.TestCase):
             started_at = datetime(2018, 5, 22, 13, 0, 37, tzinfo=utc)
             ended_at = datetime(2018, 5, 22, 13, 0, 45, tzinfo=utc)
 
-            self.assertEquals(1, pagination_item.total_available)
-            self.assertEquals('2eef4225-aa0c-41c4-8662-a76d89ed7336', job.id)
-            self.assertEquals('Success', job.status)
-            self.assertEquals('50', job.priority)
-            self.assertEquals('single_subscription_notify', job.type)
-            self.assertEquals(created_at, job.created_at)
-            self.assertEquals(started_at, job.started_at)
-            self.assertEquals(ended_at, job.ended_at)
+            self.assertEqual(1, pagination_item.total_available)
+            self.assertEqual('2eef4225-aa0c-41c4-8662-a76d89ed7336', job.id)
+            self.assertEqual('Success', job.status)
+            self.assertEqual('50', job.priority)
+            self.assertEqual('single_subscription_notify', job.type)
+            self.assertEqual(created_at, job.created_at)
+            self.assertEqual(started_at, job.started_at)
+            self.assertEqual(ended_at, job.ended_at)
 
     def test_get_before_signin(self):
         self.server._auth_token = None

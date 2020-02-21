@@ -11,9 +11,10 @@ from .projects_endpoint import Projects
 from .schedules_endpoint import Schedules
 from .server_info_endpoint import ServerInfo
 from .sites_endpoint import Sites
+from .subscriptions_endpoint import Subscriptions
 from .tables_endpoint import Tables
 from .tasks_endpoint import Tasks
 from .users_endpoint import Users
 from .views_endpoint import Views
+from .webhooks_endpoint import Webhooks
 from .workbooks_endpoint import Workbooks
-from .subscriptions_endpoint import Subscriptions

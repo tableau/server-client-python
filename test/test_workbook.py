@@ -55,6 +55,7 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual(False, all_workbooks[0].show_tabs)
         self.assertEqual(1, all_workbooks[0].size)
         self.assertEqual('2016-08-03T20:34:04Z', format_datetime(all_workbooks[0].created_at))
+        self.assertEqual('description for Superstore', all_workbooks[0].description)
         self.assertEqual('2016-08-04T17:56:41Z', format_datetime(all_workbooks[0].updated_at))
         self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', all_workbooks[0].project_id)
         self.assertEqual('default', all_workbooks[0].project_name)
@@ -66,6 +67,7 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual(False, all_workbooks[1].show_tabs)
         self.assertEqual(26, all_workbooks[1].size)
         self.assertEqual('2016-07-26T20:34:56Z', format_datetime(all_workbooks[1].created_at))
+        self.assertEqual('description for SafariSample', all_workbooks[1].description)
         self.assertEqual('2016-07-26T20:35:05Z', format_datetime(all_workbooks[1].updated_at))
         self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', all_workbooks[1].project_id)
         self.assertEqual('default', all_workbooks[1].project_name)
@@ -99,6 +101,7 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual(False, single_workbook.show_tabs)
         self.assertEqual(26, single_workbook.size)
         self.assertEqual('2016-07-26T20:34:56Z', format_datetime(single_workbook.created_at))
+        self.assertEqual('description for SafariSample', single_workbook.description)
         self.assertEqual('2016-07-26T20:35:05Z', format_datetime(single_workbook.updated_at))
         self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', single_workbook.project_id)
         self.assertEqual('default', single_workbook.project_name)
@@ -409,10 +412,12 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual('RESTAPISample_0/sheets/GDPpercapita', new_workbook.views[0].content_url)
 
     def test_publish_async(self):
+        self.server.version = '3.0'
+        baseurl = self.server.workbooks.baseurl
         with open(PUBLISH_ASYNC_XML, 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
-            m.post(self.baseurl, text=response_xml)
+            m.post(baseurl, text=response_xml)
 
             new_workbook = TSC.WorkbookItem(name='Sample',
                                             show_tabs=False,
@@ -497,5 +502,5 @@ class WorkbookTests(unittest.TestCase):
             new_workbook = TSC.WorkbookItem(project_id='')
             publish_mode = self.server.PublishMode.CreateNew
 
-            self.assertRaisesRegexp(InternalServerError, 'Please use asynchronous publishing to avoid timeouts',
-                                    self.server.workbooks.publish, new_workbook, asset('SampleWB.twbx'), publish_mode)
+            self.assertRaisesRegex(InternalServerError, 'Please use asynchronous publishing to avoid timeouts',
+                                   self.server.workbooks.publish, new_workbook, asset('SampleWB.twbx'), publish_mode)

@@ -53,3 +53,14 @@ creating a PR can be found in the [Development Guide](https://tableau.github.io/
 If the feature is complex or has multiple solutions that could be equally appropriate approaches, it would be helpful to file an issue to discuss the
 design trade-offs of each solution before implementing, to allow us to collectively arrive at the best solution, which most likely exists in the middle
 somewhere.
+
+
+## Getting Started
+> pip install versioneer
+> python setup.py build
+> python setup.py test
+>
+
+### before committing
+Our CI runs include a python lint run, so you should run this locally and fix complaints before committing as this will fail your checkin
+> pycodestyle tableauserverclient test samples

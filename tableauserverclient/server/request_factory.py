@@ -5,7 +5,7 @@ from functools import wraps
 from requests.packages.urllib3.fields import RequestField
 from requests.packages.urllib3.filepost import encode_multipart_formdata
 
-from ..models import UserItem, GroupItem, PermissionsRule
+from ..models import TaskItem, UserItem, GroupItem, PermissionsRule
 
 
 def _add_multipart(parts):
@@ -24,6 +24,7 @@ def _tsrequest_wrapped(func):
         xml_request = ET.Element('tsRequest')
         func(self, xml_request, *args, **kwargs)
         return ET.tostring(xml_request)
+
     return wrapper
 
 
@@ -248,6 +249,8 @@ class ProjectRequest(object):
             project_element.attrib['description'] = project_item.description
         if project_item.content_permissions:
             project_element.attrib['contentPermissions'] = project_item.content_permissions
+        if project_item.parent_id is not None:
+            project_element.attrib['parentProjectId'] = project_item.parent_id
         return ET.tostring(xml_request)
 
     def create_req(self, project_item):
@@ -275,7 +278,7 @@ class ScheduleRequest(object):
         schedule_element.attrib['frequency'] = interval_item._frequency
         frequency_element = ET.SubElement(schedule_element, 'frequencyDetails')
         frequency_element.attrib['start'] = str(interval_item.start_time)
-        if hasattr(interval_item, 'end_time') and interval_item.end_time:
+        if hasattr(interval_item, 'end_time') and interval_item.end_time is not None:
             frequency_element.attrib['end'] = str(interval_item.end_time)
         if hasattr(interval_item, 'interval') and interval_item.interval:
             intervals_element = ET.SubElement(frequency_element, 'intervals')
@@ -301,7 +304,7 @@ class ScheduleRequest(object):
             schedule_element.attrib['frequency'] = interval_item._frequency
         frequency_element = ET.SubElement(schedule_element, 'frequencyDetails')
         frequency_element.attrib['start'] = str(interval_item.start_time)
-        if hasattr(interval_item, 'end_time') and interval_item.end_time:
+        if hasattr(interval_item, 'end_time') and interval_item.end_time is not None:
             frequency_element.attrib['end'] = str(interval_item.end_time)
         intervals_element = ET.SubElement(frequency_element, 'intervals')
         if hasattr(interval_item, 'interval'):
@@ -311,28 +314,28 @@ class ScheduleRequest(object):
                 single_interval_element.attrib[expression] = value
         return ET.tostring(xml_request)
 
-    def _add_to_req(self, id_, type_):
+    def _add_to_req(self, id_, target_type, task_type=TaskItem.Type.ExtractRefresh):
         """
         <task>
-          <extractRefresh>
+          <target_type>
             <workbook/datasource id="..."/>
-          </extractRefresh>
+          </target_type>
         </task>
 
         """
         xml_request = ET.Element('tsRequest')
         task_element = ET.SubElement(xml_request, 'task')
-        refresh = ET.SubElement(task_element, 'extractRefresh')
-        workbook = ET.SubElement(refresh, type_)
+        task = ET.SubElement(task_element, task_type)
+        workbook = ET.SubElement(task, target_type)
         workbook.attrib['id'] = id_
 
         return ET.tostring(xml_request)
 
-    def add_workbook_req(self, id_):
-        return self._add_to_req(id_, "workbook")
+    def add_workbook_req(self, id_, task_type=TaskItem.Type.ExtractRefresh):
+        return self._add_to_req(id_, "workbook", task_type)
 
-    def add_datasource_req(self, id_):
-        return self._add_to_req(id_, "datasource")
+    def add_datasource_req(self, id_, task_type=TaskItem.Type.ExtractRefresh):
+        return self._add_to_req(id_, "datasource", task_type)
 
 
 class SiteRequest(object):
@@ -479,14 +482,15 @@ class WorkbookRequest(object):
         if workbook_item.owner_id:
             owner_element = ET.SubElement(workbook_element, 'owner')
             owner_element.attrib['id'] = workbook_item.owner_id
-        if workbook_item.materialized_views_config['materialized_views_enabled']\
-                and workbook_item.materialized_views_config['run_materialization_now']:
+        if workbook_item.materialized_views_config is not None and \
+                'materialized_views_enabled' in workbook_item.materialized_views_config:
             materialized_views_config = workbook_item.materialized_views_config
             materialized_views_element = ET.SubElement(workbook_element, 'materializedViewsEnablementConfig')
             materialized_views_element.attrib['materializedViewsEnabled'] = str(materialized_views_config
                                                                                 ["materialized_views_enabled"]).lower()
-            materialized_views_element.attrib['materializeNow'] = str(materialized_views_config
-                                                                      ["run_materialization_now"]).lower()
+            if "run_materialization_now" in materialized_views_config:
+                materialized_views_element.attrib['materializeNow'] = str(materialized_views_config
+                                                                          ["run_materialization_now"]).lower()
 
         return ET.tostring(xml_request)
 
@@ -555,6 +559,23 @@ class EmptyRequest(object):
         pass
 
 
+class WebhookRequest(object):
+    @_tsrequest_wrapped
+    def create_req(self, xml_request, webhook_item):
+        webhook = ET.SubElement(xml_request, 'webhook')
+        webhook.attrib['name'] = webhook_item.name
+
+        source = ET.SubElement(webhook, 'webhook-source')
+        event = ET.SubElement(source, webhook_item._event)
+
+        destination = ET.SubElement(webhook, 'webhook-destination')
+        post = ET.SubElement(destination, 'webhook-destination-http')
+        post.attrib['method'] = 'POST'
+        post.attrib['url'] = webhook_item.url
+
+        return ET.tostring(xml_request)
+
+
 class RequestFactory(object):
     Auth = AuthRequest()
     Connection = Connection()
@@ -569,9 +590,10 @@ class RequestFactory(object):
     Project = ProjectRequest()
     Schedule = ScheduleRequest()
     Site = SiteRequest()
+    Subscription = SubscriptionRequest()
     Table = TableRequest()
     Tag = TagRequest()
     Task = TaskRequest()
     User = UserRequest()
     Workbook = WorkbookRequest()
-    Subscription = SubscriptionRequest()
+    Webhook = WebhookRequest()

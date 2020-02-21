@@ -14,6 +14,9 @@ CREATE_DAILY_XML = os.path.join(TEST_ASSET_DIR, "schedule_create_daily.xml")
 CREATE_WEEKLY_XML = os.path.join(TEST_ASSET_DIR, "schedule_create_weekly.xml")
 CREATE_MONTHLY_XML = os.path.join(TEST_ASSET_DIR, "schedule_create_monthly.xml")
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, "schedule_update.xml")
+ADD_WORKBOOK_TO_SCHEDULE = os.path.join(TEST_ASSET_DIR, "schedule_add_workbook.xml")
+ADD_WORKBOOK_TO_SCHEDULE_WITH_WARNINGS = os.path.join(TEST_ASSET_DIR, "schedule_add_workbook_with_warnings.xml")
+ADD_DATASOURCE_TO_SCHEDULE = os.path.join(TEST_ASSET_DIR, "schedule_add_datasource.xml")
 
 WORKBOOK_GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, 'workbook_get_by_id.xml')
 DATASOURCE_GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, 'datasource_get_by_id.xml')
@@ -153,6 +156,9 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual(time(9, 15), new_schedule.interval_item.start_time)
         self.assertEqual(("Monday", "Wednesday", "Friday"),
                          new_schedule.interval_item.interval)
+        self.assertEqual(2, len(new_schedule.warnings))
+        self.assertEqual("warning 1", new_schedule.warnings[0])
+        self.assertEqual("warning 2", new_schedule.warnings[1])
 
     def test_create_monthly(self):
         with open(CREATE_MONTHLY_XML, "rb") as f:
@@ -205,13 +211,30 @@ class ScheduleTests(unittest.TestCase):
 
         with open(WORKBOOK_GET_BY_ID_XML, "rb") as f:
             workbook_response = f.read().decode("utf-8")
+        with open(ADD_WORKBOOK_TO_SCHEDULE, "rb") as f:
+            add_workbook_response = f.read().decode("utf-8")
         with requests_mock.mock() as m:
-            #  TODO: Replace with real response
             m.get(self.server.workbooks.baseurl + '/bar', text=workbook_response)
-            m.put(baseurl + '/foo/workbooks', text="OK")
+            m.put(baseurl + '/foo/workbooks', text=add_workbook_response)
             workbook = self.server.workbooks.get_by_id("bar")
             result = self.server.schedules.add_to_schedule('foo', workbook=workbook)
         self.assertEqual(0, len(result), "Added properly")
+
+    def test_add_workbook_with_warnings(self):
+        self.server.version = "2.8"
+        baseurl = "{}/sites/{}/schedules".format(self.server.baseurl, self.server.site_id)
+
+        with open(WORKBOOK_GET_BY_ID_XML, "rb") as f:
+            workbook_response = f.read().decode("utf-8")
+        with open(ADD_WORKBOOK_TO_SCHEDULE_WITH_WARNINGS, "rb") as f:
+            add_workbook_response = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            m.get(self.server.workbooks.baseurl + '/bar', text=workbook_response)
+            m.put(baseurl + '/foo/workbooks', text=add_workbook_response)
+            workbook = self.server.workbooks.get_by_id("bar")
+            result = self.server.schedules.add_to_schedule('foo', workbook=workbook)
+        self.assertEqual(1, len(result), "Not added properly")
+        self.assertEqual(2, len(result[0].warnings))
 
     def test_add_datasource(self):
         self.server.version = "2.8"
@@ -219,10 +242,11 @@ class ScheduleTests(unittest.TestCase):
 
         with open(DATASOURCE_GET_BY_ID_XML, "rb") as f:
             datasource_response = f.read().decode("utf-8")
+        with open(ADD_DATASOURCE_TO_SCHEDULE, "rb") as f:
+            add_datasource_response = f.read().decode("utf-8")
         with requests_mock.mock() as m:
-            #  TODO: Replace with real response
             m.get(self.server.datasources.baseurl + '/bar', text=datasource_response)
-            m.put(baseurl + '/foo/datasources', text="OK")
+            m.put(baseurl + '/foo/datasources', text=add_datasource_response)
             datasource = self.server.datasources.get_by_id("bar")
             result = self.server.schedules.add_to_schedule('foo', datasource=datasource)
         self.assertEqual(0, len(result), "Added properly")

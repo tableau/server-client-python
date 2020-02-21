@@ -28,6 +28,12 @@ The following people have contributed to this project to make it possible, and w
 * [Christian Oliff](https://github.com/coliff)
 * [Albin Antony](https://github.com/user9747)
 * [prae04](https://github.com/prae04)
+* [Martin Peters](https://github.com/martinbpeters)
+* [Sherman K](https://github.com/shrmnk)
+* [Jorge Fonseca](https://github.com/JorgeFonseca)
+* [Kacper Wolkiewicz](https://github.com/wolkiewiczk)
+* [Dahai Guo](https://github.com/guodah)
+* [Geraldine Zanolli](https://github.com/illonage)
 
 ## Core Team
 
@@ -41,4 +47,3 @@ The following people have contributed to this project to make it possible, and w
 * [Priya Reguraman](https://github.com/preguraman)
 * [Jac Fitzgerald](https://github.com/jacalata)
 * [Dan Zucker](https://github.com/dzucker-tab)
-* [Irwin Dolobowsky](https://github.com/irwando)

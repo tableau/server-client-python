@@ -26,10 +26,11 @@ setup(
     setup_requires=pytest_runner,
     install_requires=[
         'requests>=2.11,<3.0',
-        'urllib3==1.24.3'
+        'urllib3>=1.24.3,<2.0'
     ],
     tests_require=[
         'requests-mock>=1.0,<2.0',
-        'pytest'
+        'pytest',
+        'mock'
     ]
 )

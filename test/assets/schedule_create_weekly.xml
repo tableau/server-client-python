@@ -9,4 +9,8 @@
             </intervals>
         </frequencyDetails>
     </schedule>
+    <warnings>
+        <warning message="warning 1"/>
+        <warning message="warning 2"/>
+    </warnings>
 </tsResponse>

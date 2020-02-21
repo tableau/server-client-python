@@ -29,3 +29,12 @@ class PaginationItem(object):
             pagination_item._page_size = int(pagination_xml.get('pageSize', '-1'))
             pagination_item._total_available = int(pagination_xml.get('totalAvailable', '-1'))
         return pagination_item
+
+    @classmethod
+    def from_single_page_list(cls, l):
+        item = cls()
+        item._page_number = 1
+        item._page_size = len(l)
+        item._total_available = len(l)
+
+        return item
