@@ -1,3 +1,19 @@
+## 0.10 (21 Feb 2020)
+
+* Added a way to handle non-xml errors (#515)
+* Added Webhooks endpoints for create, delete, get, list, and test (#523, #532)
+* Added delete method in the tasks endpoint (#524)
+* Added description attribute to WorkbookItem (#533)
+* Added support for materializeViews as schedule and task types (#542)
+* Added warnings to schedules (#550, #551)
+* Added ability to update parent_id attribute of projects (#560, #567)
+* Improved filename behavior for download endpoints (#517)
+* Improved logging (#508)
+* Fixed runtime error in permissions endpoint (#513)
+* Fixed move_workbook_sites sample (#503)
+* Fixed project permissions endpoints (#527)
+* Fixed login.py sample to accept site name (#549)
+
 ## 0.9 (4 Oct 2019)
 
 * Added Metadata API endpoints (#431)
