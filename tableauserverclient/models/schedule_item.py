@@ -162,10 +162,7 @@ class ScheduleItem(object):
 
     @classmethod
     def from_element(cls, parsed_response, ns):
-        all_warning_xml = parsed_response.findall('.//t:warning', namespaces=ns)
-        warnings = list() if len(all_warning_xml) > 0 else None
-        for warning_xml in all_warning_xml:
-            warnings.append(warning_xml.get('message', None))
+        warnings = cls._read_warnings(parsed_response, ns)
 
         all_schedule_items = []
         all_schedule_xml = parsed_response.findall('.//t:schedule', namespaces=ns)
@@ -248,3 +245,22 @@ class ScheduleItem(object):
 
         return id, name, state, created_at, updated_at, schedule_type, \
             next_run_at, end_schedule_at, execution_order, priority, interval_item
+
+    @staticmethod
+    def parse_add_to_schedule_response(response, ns):
+        parsed_response = ET.fromstring(response.content)
+        warnings = ScheduleItem._read_warnings(parsed_response, ns)
+        all_task_xml = parsed_response.findall('.//t:task', namespaces=ns)
+
+        error = "Status {}: {}".format(response.status_code, response.reason) \
+            if response.status_code < 200 or response.status_code >= 300 else None
+        task_created = len(all_task_xml) > 0
+        return error, warnings, task_created
+
+    @staticmethod
+    def _read_warnings(parsed_response, ns):
+        all_warning_xml = parsed_response.findall('.//t:warning', namespaces=ns)
+        warnings = list() if len(all_warning_xml) > 0 else None
+        for warning_xml in all_warning_xml:
+            warnings.append(warning_xml.get('message', None))
+        return warnings
