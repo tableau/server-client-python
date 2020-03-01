@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
-from .property_decorators import property_not_nullable, property_is_boolean, property_is_materialized_views_config
+from .property_decorators import property_not_nullable, property_is_boolean, property_is_data_acceleration_config
 from .tag_item import TagItem
 from .view_item import ViewItem
 from .permissions_item import PermissionsRule
@@ -27,8 +27,8 @@ class WorkbookItem(object):
         self.project_id = project_id
         self.show_tabs = show_tabs
         self.tags = set()
-        self.materialized_views_config = {'materialized_views_enabled': None,
-                                          'run_materialization_now': None}
+        self.data_acceleration_config = {'acceleration_enabled': None,
+                                          'accelerate_now': None}
         self._permissions = None
 
     @property
@@ -123,13 +123,13 @@ class WorkbookItem(object):
             return self._views
 
     @property
-    def materialized_views_config(self):
-        return self._materialized_views_config
+    def data_acceleration_config(self):
+        return self._data_acceleration_config
 
-    @materialized_views_config.setter
-    @property_is_materialized_views_config
-    def materialized_views_config(self, value):
-        self._materialized_views_config = value
+    @data_acceleration_config.setter
+    @property_is_data_acceleration_config
+    def data_acceleration_config(self, value):
+        self._data_acceleration_config = value
 
     def _set_connections(self, connections):
         self._connections = connections
@@ -152,17 +152,17 @@ class WorkbookItem(object):
         if workbook_xml is not None:
             (_, _, _, _, description, updated_at, _, show_tabs,
              project_id, project_name, owner_id, _, _,
-             materialized_views_config) = self._parse_element(workbook_xml, ns)
+             data_acceleration_config) = self._parse_element(workbook_xml, ns)
 
             self._set_values(None, None, None, None, description, updated_at,
                              None, show_tabs, project_id, project_name, owner_id, None, None,
-                             materialized_views_config)
+                             data_acceleration_config)
 
         return self
 
     def _set_values(self, id, name, content_url, created_at, description, updated_at,
                     size, show_tabs, project_id, project_name, owner_id, tags, views,
-                    materialized_views_config):
+                    data_acceleration_config):
         if id is not None:
             self._id = id
         if name:
@@ -190,8 +190,8 @@ class WorkbookItem(object):
             self._initial_tags = copy.copy(tags)
         if views:
             self._views = views
-        if materialized_views_config is not None:
-            self.materialized_views_config = materialized_views_config
+        if data_acceleration_config is not None:
+            self.data_acceleration_config = data_acceleration_config
 
     @classmethod
     def from_response(cls, resp, ns):
@@ -201,12 +201,12 @@ class WorkbookItem(object):
         for workbook_xml in all_workbook_xml:
             (id, name, content_url, created_at, description, updated_at, size, show_tabs,
              project_id, project_name, owner_id, tags, views,
-             materialized_views_config) = cls._parse_element(workbook_xml, ns)
+             data_acceleration_config) = cls._parse_element(workbook_xml, ns)
 
             workbook_item = cls(project_id)
             workbook_item._set_values(id, name, content_url, created_at, description, updated_at,
                                       size, show_tabs, None, project_name, owner_id, tags, views,
-                                      materialized_views_config)
+                                      data_acceleration_config)
             all_workbook_items.append(workbook_item)
         return all_workbook_items
 
@@ -248,29 +248,29 @@ class WorkbookItem(object):
         if views_elem is not None:
             views = ViewItem.from_xml_element(views_elem, ns)
 
-        materialized_views_config = {'materialized_views_enabled': None, 'run_materialization_now': None}
-        materialized_views_elem = workbook_xml.find('.//t:materializedViewsEnablementConfig', namespaces=ns)
-        if materialized_views_elem is not None:
-            materialized_views_config = parse_materialized_views_config(materialized_views_elem)
+        data_acceleration_config = {'accelerationEnabled': None, 'accelerateNow': None}
+        data_acceleration_elem = workbook_xml.find('.//t:dataAccelerationConfig', namespaces=ns)
+        if data_acceleration_elem is not None:
+            data_acceleration_config = parse_data_acceleration_config(data_acceleration_elem)
 
         return id, name, content_url, created_at, description, updated_at, size, show_tabs,\
-            project_id, project_name, owner_id, tags, views, materialized_views_config
+            project_id, project_name, owner_id, tags, views, data_acceleration_config
 
 
-def parse_materialized_views_config(materialized_views_elem):
-    materialized_views_config = dict()
+def parse_data_acceleration_config(data_acceleration_elem):
+    data_acceleration_config = dict()
 
-    materialized_views_enabled = materialized_views_elem.get('materializedViewsEnabled', None)
-    if materialized_views_enabled is not None:
-        materialized_views_enabled = string_to_bool(materialized_views_enabled)
+    acceleration_enabled = data_acceleration_elem.get('accelerationEnabled', None)
+    if acceleration_enabled is not None:
+        acceleration_enabled = string_to_bool(acceleration_enabled)
 
-    run_materialization_now = materialized_views_elem.get('runMaterializationNow', None)
-    if run_materialization_now is not None:
-        run_materialization_now = string_to_bool(run_materialization_now)
+    accelerate_now = data_acceleration_elem.get('accelerateNow', None)
+    if accelerate_now is not None:
+        accelerate_now = string_to_bool(accelerate_now)
 
-    materialized_views_config['materialized_views_enabled'] = materialized_views_enabled
-    materialized_views_config['run_materialization_now'] = run_materialization_now
-    return materialized_views_config
+    data_acceleration_config['acceleration_enabled'] = acceleration_enabled
+    data_acceleration_config['accelerate_now'] = accelerate_now
+    return data_acceleration_config
 
 
 # Used to convert string represented boolean to a boolean type
