@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
-from .property_decorators import property_not_nullable, property_is_boolean, property_is_materialized_views_config
+from .property_decorators import property_not_nullable, property_is_boolean
 from .tag_item import TagItem
 from .view_item import ViewItem
 from .permissions_item import PermissionsRule
