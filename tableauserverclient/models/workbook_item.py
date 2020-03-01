@@ -248,7 +248,7 @@ class WorkbookItem(object):
         if views_elem is not None:
             views = ViewItem.from_xml_element(views_elem, ns)
 
-        data_acceleration_config = {'accelerationEnabled': None, 'accelerateNow': None}
+        data_acceleration_config = {'acceleration_enabled': None, 'accelerate_now': None}
         data_acceleration_elem = workbook_xml.find('.//t:dataAccelerationConfig', namespaces=ns)
         if data_acceleration_elem is not None:
             data_acceleration_config = parse_data_acceleration_config(data_acceleration_elem)

@@ -11,7 +11,7 @@ GET_XML_NO_WORKBOOK = os.path.join(TEST_ASSET_DIR, "tasks_no_workbook_or_datasou
 GET_XML_WITH_WORKBOOK = os.path.join(TEST_ASSET_DIR, "tasks_with_workbook.xml")
 GET_XML_WITH_DATASOURCE = os.path.join(TEST_ASSET_DIR, "tasks_with_datasource.xml")
 GET_XML_WITH_WORKBOOK_AND_DATASOURCE = os.path.join(TEST_ASSET_DIR, "tasks_with_workbook_and_datasource.xml")
-GET_XML_MATERIALIZEVIEWS_TASK = os.path.join(TEST_ASSET_DIR, "tasks_with_materializeviews_task.xml")
+GET_XML_DATAACCELERATION_TASK = os.path.join(TEST_ASSET_DIR, "tasks_with_dataacceleration_task.xml")
 GET_XML_RUN_NOW_RESPONSE = os.path.join(TEST_ASSET_DIR, "tasks_run_now_response.xml")
 
 
@@ -91,12 +91,12 @@ class TaskTests(unittest.TestCase):
         self.assertRaises(ValueError, self.server.tasks.delete, '')
 
     def test_get_materializeviews_tasks(self):
-        with open(GET_XML_MATERIALIZEVIEWS_TASK, "rb") as f:
+        with open(GET_XML_DATAACCELERATION_TASK, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             m.get('{}/{}'.format(
-                self.server.tasks.baseurl, TaskItem.Type.MaterializeViews), text=response_xml)
-            all_tasks, pagination_item = self.server.tasks.get(task_type=TaskItem.Type.MaterializeViews)
+                self.server.tasks.baseurl, TaskItem.Type.DataAcceleration), text=response_xml)
+            all_tasks, pagination_item = self.server.tasks.get(task_type=TaskItem.Type.DataAcceleration)
 
         task = all_tasks[0]
         self.assertEqual('a462c148-fc40-4670-a8e4-39b7f0c58c7f', task.target.id)
@@ -108,10 +108,10 @@ class TaskTests(unittest.TestCase):
     def test_delete(self):
         with requests_mock.mock() as m:
             m.delete('{}/{}/{}'.format(
-                self.server.tasks.baseurl, TaskItem.Type.MaterializeViews,
+                self.server.tasks.baseurl, TaskItem.Type.DataAcceleration,
                 'c9cff7f9-309c-4361-99ff-d4ba8c9f5467'), status_code=204)
             self.server.tasks.delete('c9cff7f9-309c-4361-99ff-d4ba8c9f5467',
-                                     TaskItem.Type.MaterializeViews)
+                                     TaskItem.Type.DataAcceleration)
 
     def test_get_by_id(self):
         with open(GET_XML_WITH_WORKBOOK, "rb") as f:
