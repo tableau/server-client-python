@@ -28,7 +28,7 @@ class WorkbookItem(object):
         self.show_tabs = show_tabs
         self.tags = set()
         self.data_acceleration_config = {'acceleration_enabled': None,
-                                          'accelerate_now': None}
+                                         'accelerate_now': None}
         self._permissions = None
 
     @property
@@ -253,8 +253,8 @@ class WorkbookItem(object):
         if data_acceleration_elem is not None:
             data_acceleration_config = parse_data_acceleration_config(data_acceleration_elem)
 
-        return id, name, content_url, created_at, description, updated_at, size, show_tabs,\
-            project_id, project_name, owner_id, tags, views, data_acceleration_config
+        return id, name, content_url, created_at, description, updated_at, size, show_tabs, \
+               project_id, project_name, owner_id, tags, views, data_acceleration_config
 
 
 def parse_data_acceleration_config(data_acceleration_elem):
