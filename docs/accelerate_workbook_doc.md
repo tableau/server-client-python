@@ -424,7 +424,7 @@ Scheduled Tasks for Data Acceleration
 
 Project/Workbook                Schedule        Next Run
 Default/extractworkbook	        *	
-Default/liveworkbook	          My Schedule	    2020-01-22 16:00:00-08:00
+Default/liveworkbook           My Schedule	    2020-01-22 16:00:00-08:00
 Default/liveandextractworkbook	My Schedule	    2020-01-22 16:00:00-08:00
 ```
 
@@ -446,10 +446,10 @@ Default	Default/liveworkbook
 Default	Default/liveandextractworkbook
 
 Scheduled Tasks for Data Acceleration
-Project/Workbook	Schedule	Next Run
-Default/extractworkbook	*	
-Default/liveworkbook	My Schedule	2020-01-22 16:00:00-08:00
-Default/liveandextractworkbook	My Schedule	2020-01-22 16:00:00-08:00
+Project/Workbook	                Schedule	        Next Run
+Default/extractworkbook	          *	
+Default/liveworkbook	            My Schedule	      2020-01-22 16:00:00-08:00
+Default/liveandextractworkbook	  My Schedule	      2020-01-22 16:00:00-08:00
 
 *The Data Acceleration views for these workbooks will be updated when they are published, or when their extract is refreshed.
 ```
