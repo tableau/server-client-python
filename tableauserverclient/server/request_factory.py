@@ -487,10 +487,10 @@ class WorkbookRequest(object):
             data_acceleration_config = workbook_item.data_acceleration_config
             data_acceleration_element = ET.SubElement(workbook_element, 'dataAccelerationConfig')
             data_acceleration_element.attrib['accelerationEnabled'] = str(data_acceleration_config
-                                                                                ["acceleration_enabled"]).lower()
+                                                                          ["acceleration_enabled"]).lower()
             if "accelerate_now" in data_acceleration_config:
                 data_acceleration_element.attrib['accelerateNow'] = str(data_acceleration_config
-                                                                          ["accelerate_now"]).lower()
+                                                                        ["accelerate_now"]).lower()
 
         return ET.tostring(xml_request)
 

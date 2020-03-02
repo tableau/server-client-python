@@ -38,7 +38,8 @@ FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
 CHUNK_SIZE = 1024 * 1024 * 5  # 5MB
 
 # If using python version 3.x, 'raw_input()' is changed to 'input()'
-if sys.version[0] == '3': raw_input = input
+if sys.version[0] == '3':
+    raw_input = input
 
 
 class ApiCallError(Exception):
@@ -222,7 +223,7 @@ def sign_in(args, current_server_address=None):
     except ApiCallError as error:
         print("\n{}, please verify your username, password, and site.".format(error))
         return None
-    except:
+    except Exception:
         print("Unable to connect to {}".format(serverurl))
         return None
 
@@ -245,7 +246,7 @@ def connection_alive(server):
     try:
         server.sites.get()
         return True
-    except:
+    except Exception:
         return False
 
 
@@ -263,7 +264,7 @@ def get_session_connection_to_server():
                     auth_token, site_id, user_id, serverurl, ssl_cert_pem = cleanStrings(auth_token, site_id,
                                                                                          user_id, serverurl,
                                                                                          ssl_cert_pem)
-                except:
+                except Exception:
                     pass
 
         if auth_token is not None:
@@ -272,7 +273,7 @@ def get_session_connection_to_server():
 
             return set_up_tsc_server(serverurl, site_id,
                                      user_id, auth_token, ssl_cert_pem)
-    except:
+    except Exception:
         pass
     return None
 
@@ -293,17 +294,17 @@ def need_to_relogin(args, server):
     current_site = None
     try:
         current_site = server.sites.get_by_id(server.site_id)
-    except:
+    except Exception:
         pass
 
     current_site = current_site.content_url if current_site is not None else None
     current_server_address = server.server_address
-    if not "http://" in current_server_address:
+    if "http://" not in current_server_address:
         current_server_address = "http://" + current_server_address
 
     new_site = args.site if args.site is not None else current_site
     new_server_address = args.server if args.server is not None else current_server_address
-    if new_server_address is not None and not "http://" in new_server_address:
+    if new_server_address is not None and "http://" not in new_server_address:
         new_server_address = "http://" + new_server_address
 
     return current_site != new_site or current_server_address != new_server_address
