@@ -8,7 +8,7 @@ layout: docs
 
 ## Introduction
 
-Starting in Tableau Server version 2020.2 and later, administrators can enable data acceleration for specific workbooks. An accelerated workbook loads faster because Tableau Server pre-computes the workbook's data in a background process.
+Starting in Tableau Server version 2020.2, administrators can enable data acceleration for specific workbooks. An accelerated workbook loads faster because Tableau Server pre-computes the workbook's data in a background process.
 
 The easiest way to configure data acceleration is to use the `accelerate_workbook.py` sample in the Tableau Server Client library. It is also possible to configure data acceleration using the [Tableau Server REST API](https://help.tableau.com/v2020.2/api/rest_api/en-us/REST/rest_api.htm).
 
@@ -27,7 +27,7 @@ Workbooks with published and live data sources (both with embedded credentials),
 
 ## Prerequisites
 
-When using this feature, it is recommended to increase the size of the Tableau Server external cache to 2 GB or larger.
+When using this feature, it is recommended to increase the size of the Tableau Server external query cache to 2 GB or larger because it is used to store the results from acceleration. Query results that exceed this limit will not be cached. The result of not having enough storage for query results is that precomputed results are not cached and those queries will be executed as normal against the data source. 
 
 View your current Tableau Server external cache size setting:
 `tsm configuration get -k redis.max_memory_in_mb`
