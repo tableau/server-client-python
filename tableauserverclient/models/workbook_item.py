@@ -254,7 +254,7 @@ class WorkbookItem(object):
             data_acceleration_config = parse_data_acceleration_config(data_acceleration_elem)
 
         return id, name, content_url, created_at, description, updated_at, size, show_tabs, \
-               project_id, project_name, owner_id, tags, views, data_acceleration_config
+            project_id, project_name, owner_id, tags, views, data_acceleration_config
 
 
 def parse_data_acceleration_config(data_acceleration_elem):
