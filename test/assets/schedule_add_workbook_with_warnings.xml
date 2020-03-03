@@ -1,9 +1,9 @@
 <tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
   <task>
-    <materializeView>
+    <dataAcceleration>
       <schedule id="schedule-id" />
       <workbook id="workbook-id" />
-    </materializeView>
+    </dataAcceleration>
   </task>
   <warnings>
      <warning message="warning 1"/>

@@ -24,7 +24,7 @@ class Tasks(Endpoint):
 
     @api(version='2.6')
     def get(self, req_options=None, task_type=TaskItem.Type.ExtractRefresh):
-        if task_type == TaskItem.Type.MaterializeViews:
+        if task_type == TaskItem.Type.DataAcceleration:
             self.parent_srv.assert_at_least_version("3.8")
 
         logger.info('Querying all {} tasks for the site'.format(task_type))
@@ -65,7 +65,7 @@ class Tasks(Endpoint):
     # Delete 1 task by id
     @api(version="3.6")
     def delete(self, task_id, task_type=TaskItem.Type.ExtractRefresh):
-        if task_type == TaskItem.Type.MaterializeViews:
+        if task_type == TaskItem.Type.DataAcceleration:
             self.parent_srv.assert_at_least_version("3.8")
 
         if not task_id:

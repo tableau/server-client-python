@@ -11,7 +11,7 @@ class ScheduleItem(object):
         Extract = "Extract"
         Flow = "Flow"
         Subscription = "Subscription"
-        MaterializeViews = "MaterializeViews"
+        DataAcceleration = "DataAcceleration"
 
     class ExecutionOrder:
         Parallel = "Parallel"
