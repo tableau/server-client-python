@@ -8,13 +8,11 @@ layout: docs
 
 ## Introduction
 
-Tableau Server administrators can enable data acceleration for specific workbooks. An accelerated workbook loads faster because Tableau Server pre-computes the workbook's data in a background process.
+Starting in Tableau Server version 2020.2, administrators can enable data acceleration for specific workbooks. An accelerated workbook loads faster because Tableau Server pre-computes the workbook's data in a background process.
 
-The easiest way to configure data acceleration is to use the `accelerate_workbooks.py` sample in the Tableau Server Client library. It is also possible to configure data acceleration using the Tableau Server REST API.
+The easiest way to configure data acceleration is to use the `accelerate_workbooks.py` sample in the Tableau Server Client library. It is also possible to configure data acceleration using the [Tableau Server REST API](https://help.tableau.com/v2020.2/api/rest_api/en-us/REST/rest_api.htm).
 
 Workbooks with published and live data sources (both with embedded credentials), and workbooks with embedded extracts are supported. Workbooks with embedded extracts do not need to be scheduled. Workbooks with published and live data sources need to have a data acceleration task added to a schedule.
-
-Not supported, are workbooks with encrypted extracts or workbooks that include user-based, now(), today() functions. Federated data sources are not supported. Data Blending is partially supported for acceleration; Data queried against the secondary data sources is not accelerated.
 
 ## Limitations
 
@@ -22,14 +20,14 @@ Not supported, are workbooks with encrypted extracts or workbooks that include u
 * Only those workbooks with embedded credentials can be accelerated.
 * The pre-computed data is saved into the Tableau Cache.  The cache is subject to the cache size limit and the cache expiration limit. We recommend that you review your configuration and recommend 2GB or larger.
 * When you attach an acceleration schedule to a workbook, if that acceleration schedule interval exceeds the Tableau Server cache expiration time, the workbook will not be accelerated during the period between the cache expiration time and the next run of the acceleration schedule.  The workbook will revert to using the databases. By default, the Tableau Server cache expiration time is 12 hours (720 minutes).
-* Workbooks using encrypted extracts or that include user-based, now(), today() functions are not supported currently and will not be accelerated.
-* Federated Data Source is not supported for acceleration. When there is a workbook containing both federated data sources and other data sources, the data queried against federated data sources will not be accelerated.
-* Data Blending is partially supported for acceleration. Data queried against the secondary data sources are not accelerated.
+* Workbooks using encrypted extracts or that include user-based, now(), today() functions are not supported.
+* Federated data sources are not supported. When there is a workbook containing both federated data sources and other data sources, the data queried against federated data sources will not be accelerated.
+* Data Blending is partially supported for acceleration. Data queried against the secondary data sources is not accelerated.
 * Data acceleration schedules are not currently supported to be created in the Tableau Server schedules view.  
 
 ## Prerequisites
 
-When using this feature, it is recommended to increase the size of the Tableau Server external cache to 2 GB or larger.
+When using this feature, it is recommended to increase the size of the Tableau Server external query cache to 2 GB or larger because it is used to store the results from acceleration. Query results that exceed this limit will not be cached. The result of not having enough storage for query results is that precomputed results are not cached and those queries will be executed as normal against the data source. 
 
 View your current Tableau Server external cache size setting:
 `tsm configuration get -k redis.max_memory_in_mb`
@@ -48,7 +46,7 @@ Note: You must be signed in as a server administrator to create schedules or
 
 `python accelerate_workbooks.py --server <server-url> --username <username> --password <password> --site <site>`
 
-For information about how to identify the site value, see [Sign In and Out](https://tableau.github.io/server-client-python/docs/sign-in-out). If you don’t specify a site, you will be signed into the Default site.  
+For information about how to identify the site value, see [Sign In and Out](https://tableau.github.io/server-client-python/docs/sign-in-out). If you don't specify a site, you will be signed into the Default site.  
 
 ### Enable Workbooks That Only Use Embedded Extracts
 
@@ -227,9 +225,9 @@ Example 2:  Associate an acceleration schedule using a text file with a path lis
 
 ```iecst
 Workbooks added to schedule
-Project/Workbook	Schedules
-Default/my workbook1	My Schedule
-Default/my workbook2	My Schedule
+Project/Workbook    Schedules
+Default/my workbook1    My Schedule
+Default/my workbook2    My Schedule
 ```
 
 Example 3:  Associate acceleration schedules with a workbook that is only extract data source based.
@@ -249,9 +247,9 @@ Warning: Unable to add workbook "Default/WorkbookwithOnlyExtracts" to schedule d
 
 ```iecst
 Workbooks added to schedule
-Project/Workbook	Schedules
-Default/my workbook1	My Schedule
-Default/my workbook2	My Schedule
+Project/Workbook    Schedules
+Default/my workbook1    My Schedule
+Default/my workbook2    My Schedule
 ```
 
 For workbooks that are not supported you will see the following warnings:
@@ -322,9 +320,9 @@ In the example below "workbook1" and "workbook2" was detached from the accelerat
 
 ```iecst
 Workbooks removed from schedule
-Project/Workbook	Schedules
-Default/workbook1	My Schedule
-Default/workbook2	My Schedule
+Project/Workbook    Schedules
+Default/workbook1    My Schedule
+Default/workbook2    My Schedule
 
 Workbooks not on schedule "My Schedule"
 Project/Workbook
@@ -337,8 +335,8 @@ Example 2:  Remove a workbook from a schedule
 
 ```iecst
 Workbooks removed to schedule
-Project/Workbook	Removed From Schedule
-Default/my workbook1	My Schedule
+Project/Workbook    Removed From Schedule
+Default/my workbook1    My Schedule
 ```
 
 Example 3:
@@ -347,8 +345,8 @@ Example 3:
 
 ```iecst
 Workbooks removed from schedule
-Project/Workbook	Schedules
-Default/workbook1	My Schedule
+Project/Workbook    Schedules
+Default/workbook1    My Schedule
 ```
 
 ### Accelerate On-Demand
@@ -424,10 +422,10 @@ Example 2:  When there are enabled workbooks with data acceleration schedules
 ```iecst
 Scheduled Tasks for Data Acceleration
 
-Project/Workbook	Schedule	Next Run
-Default/extractworkbook	*	
-Default/liveworkbook	My Schedule	2020-01-22 16:00:00-08:00
-Default/liveandextractworkbook	My Schedule	2020-01-22 16:00:00-08:00
+Project/Workbook                 Schedule       Next Run
+Default/extractworkbook          *    
+Default/liveworkbook             My Schedule    2020-01-22 16:00:00-08:00
+Default/liveandextractworkbook   My Schedule    2020-01-22 16:00:00-08:00
 ```
 
 ### Show Acceleration Status
@@ -442,16 +440,16 @@ Example 1: Display the status of all enabled and scheduled accelerated workbooks
 
 ```iecst
 Data Acceleration is enabled for the following workbooks
-Site	Project/Workbook
-Default	Default/extractworkbook
-Default	Default/liveworkbook
-Default	Default/liveandextractworkbook
+Site    Project/Workbook
+Default    Default/extractworkbook
+Default    Default/liveworkbook
+Default    Default/liveandextractworkbook
 
 Scheduled Tasks for Data Acceleration
-Project/Workbook	Schedule	Next Run
-Default/extractworkbook	*	
-Default/liveworkbook	My Schedule	2020-01-22 16:00:00-08:00
-Default/liveandextractworkbook	My Schedule	2020-01-22 16:00:00-08:00
+Project/Workbook                 Schedule      Next Run
+Default/extractworkbook          *    
+Default/liveworkbook             My Schedule   2020-01-22 16:00:00-08:00
+Default/liveandextractworkbook   My Schedule   2020-01-22 16:00:00-08:00
 
 *The Data Acceleration views for these workbooks will be updated when they are published, or when their extract is refreshed.
 ```
