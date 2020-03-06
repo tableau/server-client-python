@@ -16,6 +16,7 @@ POPULATE_CONNECTIONS_XML = 'datasource_populate_connections.xml'
 POPULATE_PERMISSIONS_XML = 'datasource_populate_permissions.xml'
 PUBLISH_XML = 'datasource_publish.xml'
 PUBLISH_XML_ASYNC = 'datasource_publish_async.xml'
+REFRESH_XML = 'datasource_refresh.xml'
 UPDATE_XML = 'datasource_update.xml'
 UPDATE_CONNECTION_XML = 'datasource_connection_update.xml'
 
@@ -248,6 +249,26 @@ class DatasourceTests(unittest.TestCase):
         self.assertEqual('0', new_job.progress)
         self.assertEqual('2018-06-30T00:54:54Z', format_datetime(new_job.created_at))
         self.assertEqual('1', new_job.finish_code)
+
+    def test_refresh_id(self):
+        self.server.version = '2.8'
+        self.baseurl = self.server.datasources.baseurl
+        response_xml = read_xml_asset(REFRESH_XML)
+        with requests_mock.mock() as m:
+            m.post(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/refresh',
+                   status_code=202, text=response_xml)
+            self.server.datasources.refresh('9dbd2263-16b5-46e1-9c43-a76bb8ab65fb')
+
+    def test_refresh_object(self):
+        self.server.version = '2.8'
+        self.baseurl = self.server.datasources.baseurl
+        datasource = TSC.DatasourceItem('')
+        datasource._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
+        response_xml = read_xml_asset(REFRESH_XML)
+        with requests_mock.mock() as m:
+            m.post(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/refresh',
+                   status_code=202, text=response_xml)
+            self.server.datasources.refresh(datasource)
 
     def test_delete(self):
         with requests_mock.mock() as m:
