@@ -8,9 +8,9 @@ layout: docs
 
 ## Introduction
 
-Administrators can enable data acceleration for specific workbooks. An accelerated workbook loads faster because Tableau Server pre-computes the workbook's data in a background process.
+Tableau Server administrators can enable data acceleration for specific workbooks. An accelerated workbook loads faster because Tableau Server pre-computes the workbook's data in a background process.
 
-The easiest way to configure data acceleration is to use the `accelerate_workbook.py` sample in the Tableau Server Client library. It is also possible to configure data acceleration using the Tableau Server REST API.
+The easiest way to configure data acceleration is to use the `accelerate_workbooks.py` sample in the Tableau Server Client library. It is also possible to configure data acceleration using the Tableau Server REST API.
 
 Workbooks with published and live data sources (both with embedded credentials), and workbooks with embedded extracts are supported. Workbooks with embedded extracts do not need to be scheduled. Workbooks with published and live data sources need to have a data acceleration task added to a schedule.
 
@@ -40,13 +40,13 @@ Set the Tableau Server external cache size to 2 GB:
 
 ## Quick Start Tutorial
 
-This tutorial shows you how to enable and schedule workbooks for data acceleration using the `accelerate_workbook.py` command line tool.
+This tutorial shows you how to enable and schedule workbooks for data acceleration using the `accelerate_workbooks.py` command line tool.
 
 Note: You must be signed in as a server administrator to create schedules or use site-level commands. For other commands, you can use the server administrator role or the site administrator role.
 
 ### Sign Into Tableau Server
 
-`python accelerate_workbook.py --server <server-url> --username <username> --password <password> --site <site>`
+`python accelerate_workbooks.py --server <server-url> --username <username> --password <password> --site <site>`
 
 For information about how to identify the site value, see [Sign In and Out](https://tableau.github.io/server-client-python/docs/sign-in-out). If you don’t specify a site, you will be signed into the Default site.  
 
@@ -54,7 +54,7 @@ For information about how to identify the site value, see [Sign In and Out](ht
 
 When data acceleration is enabled, a workbook that only has data sources that are embedded extracts does not require an acceleration schedule. Tableau Server automatically identifies the changes to its content and data whenever the workbook is republished or its extracts are refreshed (manually or on a schedule) and it submits a background task for the data pre-computation.  Thus, this type of workbook can be accelerated by just enabling it with the command:
 
-`python accelerate_workbook.py --enable "My Project/Embedded Extract Workbook"`
+`python accelerate_workbooks.py --enable "My Project/Embedded Extract Workbook"`
 
 Note: If a workbook is in a nested project, its path may be like "Project 1/Project 2/Workbook Name". Workbook paths are case sensitive.
 
@@ -72,11 +72,11 @@ Workbooks with published or live data sources need to be scheduled for accel
 
 This command will create an acceleration schedule called "My Schedule" that runs every 4 hours throughout the day.
 
-`python accelerate_workbook.py --create-schedule "My Schedule" --hourly-interval 4 --start-hour 0 --end-hour 23 --end-minute 45`
+`python accelerate_workbooks.py --create-schedule "My Schedule" --hourly-interval 4 --start-hour 0 --end-hour 23 --end-minute 45`
 
 Next, we'll associate this acceleration schedule with your workbooks:
 
-`python accelerate_workbook.py --add-to-schedule "My Schedule" "My Project/My Workbook"`
+`python accelerate_workbooks.py --add-to-schedule "My Schedule" "My Project/My Workbook"`
 
 You will see the following output:
 
@@ -86,7 +86,7 @@ My Project/My Workbook       |  My Schedule
 
 Users can also attach multiple workbooks to "My Schedule" by using a path list.
 
-`python accelerate_workbook.py --add-to-schedule "My Schedule" --path-list pathfile.txt`
+`python accelerate_workbooks.py --add-to-schedule "My Schedule" --path-list pathfile.txt`
 
 In the 'pathfile.txt' file, each line defines a workbook path.
 
@@ -101,10 +101,10 @@ Note: If a workbook uses only embedded extracts then an acceleration
 To see which workbooks have been enabled, use the `--status`, and `--show-schedules` commands.
 
 Display all the workbooks that are enabled, and which acceleration schedules are associated.
-`python accelerate_workbook.py --status`
+`python accelerate_workbooks.py --status`
 
 Display the accelerated schedules associated with workbooks.
-`python accelerate_workbook.py --show-schedules`
+`python accelerate_workbooks.py --show-schedules`
 
 ### Load Your Accelerated Workbooks and Check the Performance
 
@@ -115,7 +115,7 @@ Tableau Server provides an administrator view to review the load times for workb
 ### Sign Out of Tableau Server
 
 Log out of Tableau Server and end your session.
-`python accelerate_workbook.py --logout`
+`python accelerate_workbooks.py --logout`
 
 ## Command Reference
 
@@ -125,39 +125,39 @@ Note: Optional arguments are indicated with [].
 
 Get a list of the available commands.
 
-`python accelerate_workbook.py --help`
+`python accelerate_workbooks.py --help`
 
 ### Sign Into Tableau Server
 
 In Tableau Server, creating schedules and site level commands require the user to be signed in with an account with the Server Administrator role.  For other commands the Server Administrator role or the Site Administrator role is required.
 
-`python accelerate_workbook.py [--server] [SERVER_URL] [--site] [SITE_NAME] [--username] [Username] [--password] [password]`
+`python accelerate_workbooks.py [--server] [SERVER_URL] [--site] [SITE_NAME] [--username] [Username] [--password] [password]`
 
 SITE_NAME is the sub-path of your full site URL (also called contentURL in the REST API).  Given the site URL 'https://my.tableauserver.com/MYSITE', 'MYSITE' is the site name.  See [Sign In and Out](https://tableau.github.io/server-client-python/docs/sign-in-out) for identifying the [SITE_NAME]. When `--site` is not specified or is specified with "" the Default site will be used.
 
-After a successful sign in, a session token file (".token_profile") will be created and saved in the same directory as `accelerate_workbook.py`. The token file will be deleted when you log out.  
+After a successful sign in, a session token file (".token_profile") will be created and saved in the same directory as `accelerate_workbooks.py`. The token file will be deleted when you log out.  
 
 Example: Sign into Tableau Server and the Default site
 
-`python accelerate_workbook.py --server https://server --site "" --username user1 --password password1`
+`python accelerate_workbooks.py --server https://server --site "" --username user1 --password password1`
 
 You can ignore the SSL Certificate by pressing the ENTER key when prompted.
 
 Example: Sign into Tableau Server with an SSL certificate
 
-`python accelerate_workbook.py --server https://server --site "" --username user1 --password password1 --ssl-cert-pem cert.pem`
+`python accelerate_workbooks.py --server https://server --site "" --username user1 --password password1 --ssl-cert-pem cert.pem`
 
 Example: Switch the site that you are logged into
 
-`python accelerate_workbook.py --server https://server --username user1 --password password1 --site different_site`
+`python accelerate_workbooks.py --server https://server --username user1 --password password1 --site different_site`
 
 Example: For some usernames and passwords it may be necessary to use double quotes.
 
-`python accelerate_workbook.py --server https://server --site "" --username "user space name" --password "password with spaces"`
+`python accelerate_workbooks.py --server https://server --site "" --username "user space name" --password "password with spaces"`
 
 Example:  Double quotes "" should not be used when prompted for input:
 
-`python accelerate_workbook.py --server https://server`
+`python accelerate_workbooks.py --server https://server`
 
 site (hit enter for the Default site):
 username: user space name
@@ -170,7 +170,7 @@ The session token file (".token_profile") created on login will be deleted when 
 
 Example:  Sign out of Tableau Server
 
-`python accelerate_workbook.py --logout`
+`python accelerate_workbooks.py --logout`
 
 When successfully signed out of Tableau Server, you will see the following message, "Signed out from current connection to https://server successfully". If you are not connected to an existing server, you will see the following message, "No existing connection to any server."
 
@@ -178,7 +178,7 @@ When successfully signed out of Tableau Server, you will see the following messa
 
 The following command is used to create a data acceleration schedule.
 
-`python accelerate_workbook.py --create-schedule SCHEDULE_NAME INTERVAL_TYPE [INTERVAL] [START_TIME] [END_TIME]`
+`python accelerate_workbooks.py --create-schedule SCHEDULE_NAME INTERVAL_TYPE [INTERVAL] [START_TIME] [END_TIME]`
 
 In Tableau Server, creating schedules requires the Server Administrator role. For other commands the Server Administrator role or the Site Administrator role is sufficient.
 
@@ -199,7 +199,7 @@ Example 1: Create a scheduled pre-computation every 4 hours.
   
 In this example, a pre-computation background task will be submitted every 4 hours throughout the day.
 
-`python  accelerate_workbook.py --create-schedule "My Schedule"  --hourly-interval 4 --start-hour 0 --end-hour 23 --end-minute 45`
+`python  accelerate_workbooks.py --create-schedule "My Schedule"  --hourly-interval 4 --start-hour 0 --end-hour 23 --end-minute 45`
 
 After the acceleration schedule is created using the command line client, it can be viewed in the Tableau Server Schedules view. The scheduled task type will not currently be displayed.  
 
@@ -207,13 +207,13 @@ After the acceleration schedule is created using the command line client, it can
 
 You can associate a workbook to single or multiple data acceleration schedules. If your workbook has not been enabled for acceleration, the --add-schedule command will automatically enable the workbook.  
 
-`python accelerate_workbook.py --add-to-schedule [SCHEDULE_NAME] --workbook-path WORKBOOK_PATH`
+`python accelerate_workbooks.py --add-to-schedule [SCHEDULE_NAME] --workbook-path WORKBOOK_PATH`
 
-`python accelerate_workbook.py --add-to-schedule [SCHEDULE_NAME] --path-list PATH_LIST`
+`python accelerate_workbooks.py --add-to-schedule [SCHEDULE_NAME] --path-list PATH_LIST`
 
 Example 1: Associate a workbook to a schedule
 
-`python accelerate_workbook.py --add-to-schedule "My Schedule" --workbook-path project/workbook1`
+`python accelerate_workbooks.py --add-to-schedule "My Schedule" --workbook-path project/workbook1`
 
 ```iecst
 Workbooks added to schedule
@@ -223,7 +223,7 @@ Default/my workbook1 | My Schedule
 
 Example 2:  Associate an acceleration schedule using a text file with a path list containing one or more workbooks.
 
-`python accelerate_workbook.py --add-to-schedule "My Schedule" --path-list path.txt`
+`python accelerate_workbooks.py --add-to-schedule "My Schedule" --path-list path.txt`
 
 ```iecst
 Workbooks added to schedule
@@ -238,14 +238,14 @@ Any workbook that uses only embedded extracts as its data source does not requir
 
 In the example below, an attempt was made to add "My Schedule" to a workbook with only embedded extracts. The workbook is enabled for acceleration and it is not added to the "My Schedule" acceleration schedule.
 
-`python accelerate_workbook.py --add-to-schedule "My schedule" Default/WorkbookwithOnlyExtracts`
+`python accelerate_workbooks.py --add-to-schedule "My schedule" Default/WorkbookwithOnlyExtracts`
 
 ```iecst
 Workbooks added to schedule: None
 Warning: Unable to add workbook "Default/WorkbookwithOnlyExtracts" to schedule due to Workbook with id 10000 uses only embedded extract(s) and does not need explicit scheduling for acceleration. It was enabled for acceleration but not attached to the given schedule.
 ```
 
-`python accelerate_workbook.py --show-schedule`
+`python accelerate_workbooks.py --show-schedule`
 
 ```iecst
 Workbooks added to schedule
@@ -271,15 +271,15 @@ Enabling a workbook will opt in the workbook for acceleration. data acceleration
 
 To enable one workbook:
 
-`python accelerate_workbook.py --enable [--workbook-path] WORKBOOK_PATH`
+`python accelerate_workbooks.py --enable [--workbook-path] WORKBOOK_PATH`
 
 To enable one or more workbooks in batches, you can provide a file specifying a list of workbooks.
 
-`python accelerate_workbook.py --enable [--path-list] PATH_LIST`
+`python accelerate_workbooks.py --enable [--path-list] PATH_LIST`
 
 Example 1:  Enable a single workbook
 
-`python accelerate_workbook.py --enable Default/Workbook1`
+`python accelerate_workbooks.py --enable Default/Workbook1`
 
 Example 2:  Enable multiple workbooks
 
@@ -288,7 +288,7 @@ Default/Workbook1
 Default/Workbook2
 The following command will enable the workbooks defined in the paths.txt file.
 
-`python accelerate_workbook.py --enable --path-list paths.txt`
+`python accelerate_workbooks.py --enable --path-list paths.txt`
 
 ```iecst
 Workbooks enabled
@@ -309,16 +309,16 @@ Workbooks where credentials are not embedded:
 
 Use the --remove-from-schedule command to detach a workbook from a schedule.
 
-`python accelerate_workbook.py --remove-from-schedule SCHEDULE_NAME [--workbook-path] WORKBOOK_PATH`
+`python accelerate_workbooks.py --remove-from-schedule SCHEDULE_NAME [--workbook-path] WORKBOOK_PATH`
 
-`python accelerate_workbook.py --remove-from-schedule SCHEDULE_NAME [---path-list] PATH_LIST`
+`python accelerate_workbooks.py --remove-from-schedule SCHEDULE_NAME [---path-list] PATH_LIST`
 
-`python accelerate_workbook.py --remove-from-schedule SCHEDULE_NAME project/workbook`
+`python accelerate_workbooks.py --remove-from-schedule SCHEDULE_NAME project/workbook`
 
 Example 1:  Removing multiple workbooks from a schedule using --path-list.  
 In the example below "workbook1" and "workbook2" was detached from the acceleration schedule "My Schedule".  Any workbooks included in the path list are not associated with "My Schedule".
 
-`python accelerate_workbook.py --remove-from-schedule "My Schedule" --path-list "paths.txt"`
+`python accelerate_workbooks.py --remove-from-schedule "My Schedule" --path-list "paths.txt"`
 
 ```iecst
 Workbooks removed from schedule
@@ -333,7 +333,7 @@ Default/extractworkbook
 
 Example 2:  Remove a workbook from a schedule
 
-`python accelerate_workbook.py --remove-from-schedule "My Schedule" Default/workbook1`
+`python accelerate_workbooks.py --remove-from-schedule "My Schedule" Default/workbook1`
 
 ```iecst
 Workbooks removed to schedule
@@ -343,7 +343,7 @@ Default/my workbook1	My Schedule
 
 Example 3:
 
-`python accelerate_workbook.py --remove-from-schedule "My Schedule" --workbook-path Default/workbook1`
+`python accelerate_workbooks.py --remove-from-schedule "My Schedule" --workbook-path Default/workbook1`
 
 ```iecst
 Workbooks removed from schedule
@@ -355,23 +355,23 @@ Default/workbook1	My Schedule
 
 You can use --enable combined with --acceleration-now to submit a backgrounder pre-computation job on demand.  This can be useful to trigger a pre-computation ahead of the next scheduled run.
 
-`python accelerate_workbook.py --enable --accelerate-now --path-list PATH_LIST`
+`python accelerate_workbooks.py --enable --accelerate-now --path-list PATH_LIST`
 
-`python accelerate_workbook.py --enable WORKBOOK_PATH --accelerate-now`
+`python accelerate_workbooks.py --enable WORKBOOK_PATH --accelerate-now`
 
 Example 1:
 
-`python accelerate_workbook.py --enable Default/workbook1 --accelerate-now`
+`python accelerate_workbooks.py --enable Default/workbook1 --accelerate-now`
 
 ### Disable Workbooks
 
 Disabling a workbook stops accelerating the workbook. It detaches the workbook from the workbook's associated schedules and cleans up all of the acceleration artifacts related to the workbook. It will not remove entries from the Tableau query cache.
 
-`python accelerate_workbook.py --disable [--workbook-path] WORKBOOK_PATH`
+`python accelerate_workbooks.py --disable [--workbook-path] WORKBOOK_PATH`
 
-`python accelerate_workbook.py --disable --path-list PATH_LIST`
+`python accelerate_workbooks.py --disable --path-list PATH_LIST`
 
-`python accelerate_workbook.py --disable --workbook-path Default/workbook1`
+`python accelerate_workbooks.py --disable --workbook-path Default/workbook1`
 
 ```iecst
 Workbooks Disabled
@@ -383,9 +383,9 @@ Default/workbook1
 
 The following commands are used to enable or disable a site for acceleration.
 
-`python accelerate_workbook.py --enable --site SITE_NAME --type site`
+`python accelerate_workbooks.py --enable --site SITE_NAME --type site`
 
-`python accelerate_workbook.py --disable --site SITE_NAME --type site`
+`python accelerate_workbooks.py --disable --site SITE_NAME --type site`
 
 Workbooks can only be enabled for acceleration if their site is enabled. Enabling a site will not enable any workbooks automatically. All sites are enabled for acceleration by default. Enabling a site is only needed when a site is explicitly disabled, or a site is imported from another Tableau Server.
 
@@ -395,27 +395,27 @@ In Tableau Server, to enable or disable acceleration requires the user to be sig
 
 Example 1:  Disable the Default site for acceleration
 
-`python accelerate_workbook.py --disable --site SITE_NAME --type site`
+`python accelerate_workbooks.py --disable --site SITE_NAME --type site`
 
 Example 2:  Enable the Default site for acceleration
 
-`python accelerate_workbook.py --enable --site SITE_NAME --type site`
+`python accelerate_workbooks.py --enable --site SITE_NAME --type site`
 
 ### Display Acceleration Schedules
 
 The --show-schedules command displays the schedule information for enabled workbooks associated with their accelerated schedules. The schedule information includes the schedule name associated with the workbooks and their next run time.
 
-`python accelerate_workbook.py --show-schedules`
+`python accelerate_workbooks.py --show-schedules`
 
-`python accelerate_workbook.py --show-schedules SCHEDULE_NAME [--workbook-path] [WORKBOOK_PATH]`
+`python accelerate_workbooks.py --show-schedules SCHEDULE_NAME [--workbook-path] [WORKBOOK_PATH]`
 
-`python accelerate_workbook.py --show-schedules SCHEDULE_NAME [---path-list] [PATH_LIST]`
+`python accelerate_workbooks.py --show-schedules SCHEDULE_NAME [---path-list] [PATH_LIST]`
 
 Note: If --workbook-path or –path-list are omitted, the command will show all the enabled workbooks with their schedule information.
 
 Example 1:  When there are no data acceleration schedules associated with enabled workbooks
 
-`python accelerate_workbook.py --show-schedules`
+`python accelerate_workbooks.py --show-schedules`
 
 Scheduled Tasks for Data Acceleration: None
 
@@ -434,11 +434,11 @@ Default/liveandextractworkbook	My Schedule	2020-01-22 16:00:00-08:00
 
 The --status command shows the list of workbooks enabled for acceleration and their associated schedules.  When a workbook is enabled but not associated with any schedule, an asterisk '*' will be shown in the Schedule column. In that case, the pre-computed data for workbooks will be updated when the workbooks are re-published, or their extracts (if they have any) get refreshed.  Workbooks that only contain embedded extracts will not be associated with schedules.
 
-`python accelerate_workbook.py --status`
+`python accelerate_workbooks.py --status`
 
 Example 1: Display the status of all enabled and scheduled accelerated workbooks.
 
-`python accelerate_workbook.py --status`
+`python accelerate_workbooks.py --status`
 
 ```iecst
 Data Acceleration is enabled for the following workbooks
@@ -465,19 +465,19 @@ This section describes how to specify the workbook path argument and the path li
 
 Double quotes are required for specifying the workbook path if it contains whitespace.
 
-`python accelerate_workbook.py --enable [--workbook-path] PATH_LIST`
+`python accelerate_workbooks.py --enable [--workbook-path] PATH_LIST`
 
 Example 1: Specifying --workbook-path
 
-`python accelerate_workbook.py --enable --workbook-path "project/workbook with spaces"`
+`python accelerate_workbooks.py --enable --workbook-path "project/workbook with spaces"`
 
 Example 2:  --workbook-path is optional
 
-`python accelerate_workbook.py --enable project/workbook`
+`python accelerate_workbooks.py --enable project/workbook`
 
 Example 3:  --workbook-path is optional
 
-`python accelerate_workbook.py --add-to-schedule "My Schedule" project/workbook`
+`python accelerate_workbooks.py --add-to-schedule "My Schedule" project/workbook`
 
 --path-list
 PATH_LIST is a text file where each line is a workbook path. In the PATH_LIST, there is no need to use double quotes for workbook paths that contain whitespace.
@@ -488,12 +488,12 @@ project1/workbook2
 
 Example 1:  Enable multiple workbooks
 
-`python accelerate_workbook.py --enable --path-list paths.txt`
+`python accelerate_workbooks.py --enable --path-list paths.txt`
 
 Example 2:  Add multiple workbooks to a schedule.
 
-`python accelerate_workbook.py --add-to-schedule "My Schedule" --path-list paths.txt`
+`python accelerate_workbooks.py --add-to-schedule "My Schedule" --path-list paths.txt`
 
 Example 3:  Remove multiple workbooks from a schedule.
 
-`python accelerate_workbook.py –-remove-from-schedule "My Schedule" --path-list paths.txt`
+`python accelerate_workbooks.py –-remove-from-schedule "My Schedule" --path-list paths.txt`
