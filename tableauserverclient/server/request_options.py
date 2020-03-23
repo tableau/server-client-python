@@ -11,6 +11,7 @@ class RequestOptions(RequestOptionsBase):
         LessThan = 'lt'
         LessThanOrEqual = 'lte'
         In = 'in'
+        Has = 'has'
 
     class Field:
         Args = 'args'
