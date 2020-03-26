@@ -4,6 +4,6 @@
         <project id="1d0304cd-3796-429f-b815-7258370b9b74" name="Tableau" />
         <owner id="dd2239f6-ddf1-4107-981a-4cf94e415794" />
         <tags />
-        <materializedViewsEnablementConfig materializedViewsEnabled="true" runMaterializationNow="false" />
+        <dataAccelerationConfig accelerationEnabled="true" accelerateNow="false" />
     </workbook>
 </tsResponse>
