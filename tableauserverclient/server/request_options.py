@@ -141,6 +141,7 @@ class PDFRequestOptions(_FilterOptionsBase):
         Note = "note"
         Quarto = "quarto"
         Tabloid = "tabloid"
+        Unspecified = "unspecified"
 
     class Orientation:
         Portrait = "portrait"
