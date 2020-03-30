@@ -1,7 +1,8 @@
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
-from .. import RequestFactory, WorkbookItem, ViewItem, ProjectItem, DatasourceItem
+from .. import RequestFactory, projectItem, ViewItem, ProjectItem, DatasourceItem
 from ..pager import Pager
+import xml.etree.ElementTree as ET
 import logging
 import copy
 
@@ -45,3 +46,31 @@ class Favorites(Endpoint):
                 favorites.append(i)
 
         return favorites
+
+    @api(version="1.0")
+    def add_favorite_workbook(self, user_item, workbook_item):
+        url = '{0}/{1}'.format(self.baseurl, user_item.id)
+        add_req = RequestFactory.Favorite.add_workbook_req(workbook_item.id, workbook_item.name)
+        server_response = self.put_request(url, add_req)
+        logger.info('Favorited {0} for user (ID: {1})'.format(workbook_item.name, user_item.id))
+
+    @api(version="1.0")
+    def add_favorite_view(self, user_item, view_item):
+        url = '{0}/{1}'.format(self.baseurl, user_item.id)
+        add_req = RequestFactory.Favorite.add_view_req(view_item.id, view_item.name)
+        server_response = self.put_request(url, add_req)
+        logger.info('Favorited {0} for user (ID: {1})'.format(view_item.name, user_item.id))
+
+    @api(version="2.3")
+    def add_favorite_datasource(self, user_item, datasource_item):
+        url = '{0}/{1}'.format(self.baseurl, user_item.id)
+        add_req = RequestFactory.Favorite.add_datasource_req(datasource_item.id, datasource_item.name)
+        server_response = self.put_request(url, add_req)
+        logger.info('Favorited {0} for user (ID: {1})'.format(datasource_item.name, user_item.id))
+
+    @api(version="3.1")
+    def add_favorite_project(self, user_item, project_item):
+        url = '{0}/{1}'.format(self.baseurl, user_item.id)
+        add_req = RequestFactory.Favorite.add_project_req(project_item.id, project_item.name)
+        server_response = self.put_request(url, add_req)
+        logger.info('Favorited {0} for user (ID: {1})'.format(project_item.name, user_item.id))
