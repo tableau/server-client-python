@@ -42,6 +42,7 @@ class UserItem(object):
         self._id = None
         self._last_login = None
         self._workbooks = None
+        self._favorites = None
         self.email = None
         self.fullname = None
         self.name = name
@@ -98,6 +99,13 @@ class UserItem(object):
             error = "User item must be populated with workbooks first."
             raise UnpopulatedPropertyError(error)
         return self._workbooks()
+
+    @property
+    def favorites(self):
+        if self._favorites is None:
+            error = "User item must be populated with workbooks first."
+            raise UnpopulatedPropertyError(error)
+        return self._favorites()
 
     def to_reference(self):
         return ResourceReference(id_=self.id, tag_name=self.tag_name)

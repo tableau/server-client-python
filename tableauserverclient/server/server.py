@@ -46,6 +46,7 @@ class Server(object):
         self.jobs = Jobs(self)
         self.workbooks = Workbooks(self)
         self.datasources = Datasources(self)
+        self.favorites = Favorites(self)
         self.flows = Flows(self)
         self.projects = Projects(self)
         self.schedules = Schedules(self)
