@@ -74,3 +74,27 @@ class Favorites(Endpoint):
         add_req = RequestFactory.Favorite.add_project_req(project_item.id, project_item.name)
         server_response = self.put_request(url, add_req)
         logger.info('Favorited {0} for user (ID: {1})'.format(project_item.name, user_item.id))
+
+    @api(version="2.0")
+    def delete_favorite_workbook(self, user_item, workbook_item):
+        url = '{0}/{1}/workbooks/{2}'.format(self.baseurl, user_item.id, workbook_item.id)
+        logger.info('Removing favorite {0} for user (ID: {1})'.format(workbook_item.id, user_item.id))
+        self.delete_request(url)
+
+    @api(version="2.0")
+    def delete_favorite_view(self, user_item, view_item):
+        url = '{0}/{1}/views/{2}'.format(self.baseurl, user_item.id, view_item.id)
+        logger.info('Removing favorite {0} for user (ID: {1})'.format(view_item.id, user_item.id))
+        self.delete_request(url)
+
+    @api(version="2.3")
+    def delete_favorite_datasource(self, user_item, datasource_item):
+        url = '{0}/{1}/datasources/{2}'.format(self.baseurl, user_item.id, datasource_item.id)
+        logger.info('Removing favorite {0} for user (ID: {1})'.format(datasource_item.id, user_item.id))
+        self.delete_request(url)
+
+    @api(version="3.1")
+    def delete_favorite_project(self, user_item, project_item):
+        url = '{0}/{1}/projects/{2}'.format(self.baseurl, user_item.id, project_item.id)
+        logger.info('Removing favorite {0} for user (ID: {1})'.format(project_item.id, user_item.id))
+        self.delete_request(url)
