@@ -149,6 +149,34 @@ class DatasourceRequest(object):
         return _add_multipart(parts)
 
 
+class FavoriteRequest(object):
+    def _add_to_req(self, id_, target_type, label):
+        '''
+        <favorite label="...">
+        <target_type id="..." />
+        </favorite>
+        '''
+        xml_request = ET.Element('tsRequest')
+        favorite_element = ET.SubElement(xml_request, 'favorite')
+        target = ET.SubElement(favorite_element, target_type)
+        favorite_element.attrib['label'] = label
+        target.attrib['id'] = id_
+
+        return ET.tostring(xml_request)
+
+    def add_datasource_req(self, id_, name):
+        return self._add_to_req(id_, 'datasource', name)
+
+    def add_project_req(self, id_, name):
+        return self._add_to_req(id_, 'project', name)
+
+    def add_view_req(self, id_, name):
+        return self._add_to_req(id_, 'view', name)
+
+    def add_workbook_req(self, id_, name):
+        return self._add_to_req(id_, 'workbook', name)
+
+
 class FileuploadRequest(object):
     def chunk_req(self, chunk):
         parts = {'request_payload': ('', '', 'text/xml'),
@@ -605,6 +633,7 @@ class RequestFactory(object):
     Datasource = DatasourceRequest()
     Database = DatabaseRequest()
     Empty = EmptyRequest()
+    Favorite = FavoriteRequest()
     Fileupload = FileuploadRequest()
     Flow = FlowRequest()
     Group = GroupRequest()
