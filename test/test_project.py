@@ -230,7 +230,7 @@ class ProjectTests(unittest.TestCase):
                 capabilities=capabilities
             )
 
-            endpoint = '{}/default-permissions/workbook/groups/{}'.format(single_project._id, single_group._id)
+            endpoint = '{}/default-permissions/workbooks/groups/{}'.format(single_project._id, single_group._id)
             m.delete('{}/{}/Read/Allow'.format(self.baseurl, endpoint), status_code=204)
             m.delete('{}/{}/ExportImage/Allow'.format(self.baseurl, endpoint), status_code=204)
             m.delete('{}/{}/ExportData/Allow'.format(self.baseurl, endpoint), status_code=204)
