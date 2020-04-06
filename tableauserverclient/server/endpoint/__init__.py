@@ -1,4 +1,5 @@
 from .auth_endpoint import Auth
+from .data_acceleration_report_endpoint import DataAccelerationReport
 from .datasources_endpoint import Datasources
 from .databases_endpoint import Databases
 from .endpoint import Endpoint

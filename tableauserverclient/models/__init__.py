@@ -1,6 +1,7 @@
 from .connection_credentials import ConnectionCredentials
 from .connection_item import ConnectionItem
 from .column_item import ColumnItem
+from .data_acceleration_report_item import DataAccelerationReportItem
 from .datasource_item import DatasourceItem
 from .database_item import DatabaseItem
 from .exceptions import UnpopulatedPropertyError
