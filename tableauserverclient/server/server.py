@@ -4,7 +4,7 @@ from .exceptions import NotSignedInError
 from ..namespace import Namespace
 from .endpoint import Sites, Views, Users, Groups, Workbooks, Datasources, Projects, Auth, \
     Schedules, ServerInfo, Tasks, ServerInfoEndpointNotFoundError, Subscriptions, Jobs, Metadata,\
-    Databases, Tables, Flows, Webhooks
+    Databases, Tables, Flows, Webhooks, DataAccelerationReport
 from .endpoint.exceptions import EndpointUnavailableError, ServerInfoEndpointNotFoundError
 
 import requests
@@ -56,6 +56,7 @@ class Server(object):
         self.databases = Databases(self)
         self.tables = Tables(self)
         self.webhooks = Webhooks(self)
+        self.data_acceleration_report = DataAccelerationReport(self)
         self._namespace = Namespace()
 
         if use_server_version:
