@@ -57,7 +57,7 @@ class DataAccelerationReportItem(object):
         accelerated_session_count = comparison_record_xml.get('acceleratedSessionCount', None)
         avg_accelerated_plt = comparison_record_xml.get('averageAcceleratedPLT', None)
         return site, sheet_uri, unaccelerated_session_count, avg_non_accelerated_plt, \
-               accelerated_session_count, avg_accelerated_plt
+            accelerated_session_count, avg_accelerated_plt
 
     @classmethod
     def from_response(cls, resp, ns):
