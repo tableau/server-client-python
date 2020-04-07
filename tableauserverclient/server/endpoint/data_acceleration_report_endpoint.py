@@ -1,9 +1,7 @@
 from .endpoint import api, Endpoint
-from .exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .default_permissions_endpoint import _DefaultPermissionsEndpoint
 
-from .. import RequestFactory, PermissionsRule, Permission
 from ...models.data_acceleration_report_item import DataAccelerationReportItem
 
 import logging
@@ -24,7 +22,7 @@ class DataAccelerationReport(Endpoint):
 
     @api(version="3.8")
     def get(self, req_options=None):
-        logger.info('Querying all acceleration report on site')
+        logger.info("Querying data acceleration report")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
         data_acceleration_report = DataAccelerationReportItem.from_response(
