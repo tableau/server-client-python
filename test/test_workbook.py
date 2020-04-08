@@ -27,6 +27,7 @@ POPULATE_VIEWS_XML = os.path.join(TEST_ASSET_DIR, 'workbook_populate_views.xml')
 POPULATE_VIEWS_USAGE_XML = os.path.join(TEST_ASSET_DIR, 'workbook_populate_views_usage.xml')
 PUBLISH_XML = os.path.join(TEST_ASSET_DIR, 'workbook_publish.xml')
 PUBLISH_ASYNC_XML = os.path.join(TEST_ASSET_DIR, 'workbook_publish_async.xml')
+REFRESH_XML = os.path.join(TEST_ASSET_DIR, 'workbook_refresh.xml')
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'workbook_update.xml')
 UPDATE_PERMISSIONS = os.path.join(TEST_ASSET_DIR, 'workbook_update_permissions.xml')
 
@@ -113,6 +114,28 @@ class WorkbookTests(unittest.TestCase):
 
     def test_get_by_id_missing_id(self):
         self.assertRaises(ValueError, self.server.workbooks.get_by_id, '')
+
+    def test_refresh_id(self):
+        self.server.version = '2.8'
+        self.baseurl = self.server.workbooks.baseurl
+        with open(REFRESH_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/refresh',
+                   status_code=202, text=response_xml)
+            self.server.workbooks.refresh('3cc6cd06-89ce-4fdc-b935-5294135d6d42')
+
+    def test_refresh_object(self):
+        self.server.version = '2.8'
+        self.baseurl = self.server.workbooks.baseurl
+        workbook = TSC.WorkbookItem('')
+        workbook._id = '3cc6cd06-89ce-4fdc-b935-5294135d6d42'
+        with open(REFRESH_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/refresh',
+                   status_code=202, text=response_xml)
+            self.server.workbooks.refresh(workbook)
 
     def test_delete(self):
         with requests_mock.mock() as m:
