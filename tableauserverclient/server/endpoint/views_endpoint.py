@@ -1,6 +1,7 @@
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from .resource_tagger import _ResourceTagger
+from .permissions_endpoint import _PermissionsEndpoint
 from .. import RequestFactory, ViewItem, PaginationItem
 from ...models.tag_item import TagItem
 import logging
@@ -13,6 +14,7 @@ class Views(Endpoint):
     def __init__(self, parent_srv):
         super(Views, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)
+        self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
 
     # Used because populate_preview_image functionaliy requires workbook endpoint
     @property
@@ -108,6 +110,18 @@ class Views(Endpoint):
         with closing(self.get_request(url, request_object=req_options, parameters={"stream": True})) as server_response:
             csv = server_response.iter_content(1024)
         return csv
+
+    @api(version='3.2')
+    def populate_permissions(self, item):
+        self._permissions.populate(item)
+
+    @api(version='3.2')
+    def update_permissions(self, resource, rules):
+        return self._permissions.update(resource, rules)
+
+    @api(version='3.2')
+    def delete_permission(self, item, capability_item):
+        return self._permissions.delete(item, capability_item)
 
     # Update view. Currently only tags can be updated
     def update(self, view_item):
