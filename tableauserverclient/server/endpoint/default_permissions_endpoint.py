@@ -27,7 +27,7 @@ class _DefaultPermissionsEndpoint(Endpoint):
         self.owner_baseurl = owner_baseurl
 
     def update_default_permissions(self, resource, permissions, content_type):
-        url = '{0}/{1}/default-permissions/{2}'.format(self.owner_baseurl(), resource.id, content_type)
+        url = '{0}/{1}/default-permissions/{2}'.format(self.owner_baseurl(), resource.id, content_type + 's')
         update_req = RequestFactory.Permission.add_req(permissions)
         response = self.put_request(url, update_req)
         permissions = PermissionsRule.from_response(response.content,
@@ -44,7 +44,7 @@ class _DefaultPermissionsEndpoint(Endpoint):
                 .format(
                     baseurl=self.owner_baseurl(),
                     content_id=resource.id,
-                    content_type=content_type,
+                    content_type=content_type + 's',
                     grantee_type=rule.grantee.tag_name + 's',
                     grantee_id=rule.grantee.id,
                     cap=capability,
