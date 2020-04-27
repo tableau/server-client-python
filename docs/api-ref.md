@@ -491,9 +491,10 @@ None. A list of `ConnectionItem` objects are added to the data source (`datasour
   server.datasources.populate_connections(datasource)
 
 # print the information about the first connection item
-  print(datasource.connections[0].connection_type)
-  print(datasource.connections[0].id)
-  print(datasource.connections[0].server_address)
+  connection = datasource.connections[0]
+  print(connection.connection_type)
+  print(connection.id)
+  print(connection.server_address)
 
   ...
 
@@ -4026,12 +4027,16 @@ None. The connection information is updated with the information in the `Connect
 
 ```py  
 
+# query for workbook connections
+server.workbooks.populate_connections(workbook)
+
 # update connection item user name and password
-workbook.connections[0].username = 'USERNAME'
-workbook.connections[0].password = 'PASSWORD'
+connection = workbook.connections[0]
+connection.username = 'USERNAME'
+connection.password = 'PASSWORD'
 
 # call the update method
-server.workbooks.update_conn(workbook, workbook.connections[0])
+server.workbooks.update_conn(workbook, connection)
 ```
 
 <br>
