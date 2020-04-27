@@ -109,7 +109,6 @@ class ProjectTests(unittest.TestCase):
         self.assertEquals('Allow', updated_capabilities['Write'])
         self.assertEquals('Allow', updated_capabilities['Connect'])
 
-
     def test_update_missing_id(self):
         single_project = TSC.ProjectItem('test')
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.projects.update, single_project)
