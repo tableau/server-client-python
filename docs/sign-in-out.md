@@ -10,7 +10,7 @@ import tableauserverclient as TSC
 
 tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD', `SITENAME`)
 # or for a personal access token
-# tableau_auth = TSC.TableauAuth('TOKEN_NAME', 'TOKEN_VALUE', 'SITENAME')
+# tableau_auth = TSC.PersonalAccessTokenAuth('TOKEN_NAME', 'TOKEN_VALUE', 'SITENAME')
 server = TSC.Server('https://SERVER_URL')
 
 with server.auth.sign_in(tableau_auth):
