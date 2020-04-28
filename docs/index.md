@@ -19,7 +19,7 @@ This section describes how to:
 
 Before you install TSC, confirm that you have the following dependencies installed:
 
-* Python. You can use TSC with Python 3.3 or later. 
+* Python. You can use TSC with Python 3.5 or later. 
 * Git. Optional, but recommended to download the samples or install from the source code.
 
 
