@@ -93,7 +93,7 @@ class Databases(Endpoint):
 
     @api(version='3.5')
     def delete_permission(self, item, rules):
-        return self._permissions.delete(item, rules)
+        self._permissions.delete(item, rules)
 
     @api(version='3.5')
     def populate_table_default_permissions(self, item):
@@ -101,7 +101,7 @@ class Databases(Endpoint):
 
     @api(version='3.5')
     def update_table_default_permissions(self, item):
-        self._default_permissions.update_default_permissions(item, Permission.Resource.Table)
+        return self._default_permissions.update_default_permissions(item, Permission.Resource.Table)
 
     @api(version='3.5')
     def delete_table_default_permissions(self, item):
