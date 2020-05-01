@@ -43,6 +43,7 @@ def _add_hiddenview_element(views_element, view_name):
     view_element.attrib['name'] = view_name
     view_element.attrib['hidden'] = "true"
 
+
 def _add_credentials_element(parent_element, connection_credentials):
     credentials_element = ET.SubElement(parent_element, 'connectionCredentials')
     credentials_element.attrib['name'] = connection_credentials.name
@@ -457,7 +458,7 @@ class WorkbookRequest(object):
             self, workbook_item,
             connection_credentials=None, connections=None,
             hidden_views=None
-        ):
+    ):
         xml_request = ET.Element('tsRequest')
         workbook_element = ET.SubElement(xml_request, 'workbook')
         workbook_element.attrib['name'] = workbook_item.name
@@ -530,7 +531,6 @@ class WorkbookRequest(object):
                                          connection_credentials=connection_credentials,
                                          connections=connections,
                                          hidden_views=hidden_views)
-
 
         parts = {'request_payload': ('', xml_request, 'text/xml')}
         return _add_multipart(parts)

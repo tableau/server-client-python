@@ -437,7 +437,6 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual('GDP per capita', new_workbook.views[0].name)
         self.assertEqual('RESTAPISample_0/sheets/GDPpercapita', new_workbook.views[0].content_url)
 
-
     def test_publish_with_hidden_view(self):
         with open(PUBLISH_XML, 'rb') as f:
             response_xml = f.read().decode('utf-8')
