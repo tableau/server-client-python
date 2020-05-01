@@ -7,7 +7,7 @@ from ..datetime_helpers import parse_datetime
 class TaskItem(object):
     class Type:
         ExtractRefresh = "extractRefresh"
-        MaterializeViews = "materializeViews"
+        DataAcceleration = "dataAcceleration"
 
     def __init__(self, id_, task_type, priority, consecutive_failed_count=0, schedule_id=None,
                  schedule_item=None, last_run_at=None, target=None):

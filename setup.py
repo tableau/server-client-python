@@ -6,6 +6,11 @@ try:
 except ImportError:
     from distutils.core import setup
 
+from os import path
+this_directory = path.abspath(path.dirname(__file__))
+with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
+
 # Only install pytest and runner when test command is run
 # This makes work easier for offline installs or low bandwidth machines
 needs_pytest = {'pytest', 'test', 'ptr'}.intersection(sys.argv)
@@ -22,6 +27,8 @@ setup(
               'tableauserverclient.server.endpoint'],
     license='MIT',
     description='A Python module for working with the Tableau Server REST API.',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     test_suite='test',
     setup_requires=pytest_runner,
     install_requires=[

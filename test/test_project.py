@@ -12,6 +12,7 @@ UPDATE_XML = asset('project_update.xml')
 CREATE_XML = asset('project_create.xml')
 POPULATE_PERMISSIONS_XML = 'project_populate_permissions.xml'
 POPULATE_WORKBOOK_DEFAULT_PERMISSIONS_XML = 'project_populate_workbook_default_permissions.xml'
+UPDATE_DATASOURCE_DEFAULT_PERMISSIONS_XML = 'project_update_datasource_default_permissions.xml'
 
 
 class ProjectTests(unittest.TestCase):
@@ -78,6 +79,35 @@ class ProjectTests(unittest.TestCase):
         self.assertEqual('Project created for testing', single_project.description)
         self.assertEqual('LockedToProject', single_project.content_permissions)
         self.assertEqual('9a8f2265-70f3-4494-96c5-e5949d7a1120', single_project.parent_id)
+
+    def test_update_datasource_default_permission(self):
+        response_xml = read_xml_asset(UPDATE_DATASOURCE_DEFAULT_PERMISSIONS_XML)
+        with requests_mock.mock() as m:
+            m.put(self.baseurl + '/b4065286-80f0-11ea-af1b-cb7191f48e45/default-permissions/datasources',
+                  text=response_xml)
+            project = TSC.ProjectItem('test-project')
+            project._id = 'b4065286-80f0-11ea-af1b-cb7191f48e45'
+
+            group = TSC.GroupItem('test-group')
+            group._id = 'b4488bce-80f0-11ea-af1c-976d0c1dab39'
+
+            capabilities = {TSC.Permission.Capability.ExportXml: TSC.Permission.Mode.Deny}
+
+            rules = [TSC.PermissionsRule(
+                grantee=group,
+                capabilities=capabilities
+            )]
+
+            new_rules = self.server.projects.update_datasource_default_permissions(project, rules)
+
+        self.assertEquals('b4488bce-80f0-11ea-af1c-976d0c1dab39', new_rules[0].grantee.id)
+
+        updated_capabilities = new_rules[0].capabilities
+        self.assertEquals(4, len(updated_capabilities))
+        self.assertEquals('Deny', updated_capabilities['ExportXml'])
+        self.assertEquals('Allow', updated_capabilities['Read'])
+        self.assertEquals('Allow', updated_capabilities['Write'])
+        self.assertEquals('Allow', updated_capabilities['Connect'])
 
     def test_update_missing_id(self):
         single_project = TSC.ProjectItem('test')
@@ -230,7 +260,7 @@ class ProjectTests(unittest.TestCase):
                 capabilities=capabilities
             )
 
-            endpoint = '{}/default-permissions/workbook/groups/{}'.format(single_project._id, single_group._id)
+            endpoint = '{}/default-permissions/workbooks/groups/{}'.format(single_project._id, single_group._id)
             m.delete('{}/{}/Read/Allow'.format(self.baseurl, endpoint), status_code=204)
             m.delete('{}/{}/ExportImage/Allow'.format(self.baseurl, endpoint), status_code=204)
             m.delete('{}/{}/ExportData/Allow'.format(self.baseurl, endpoint), status_code=204)

@@ -45,7 +45,16 @@ class JobTests(unittest.TestCase):
         self.server._auth_token = None
         self.assertRaises(TSC.NotSignedInError, self.server.jobs.get)
 
-    def test_cancel(self):
+    def test_cancel_id(self):
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', status_code=204)
             self.server.jobs.cancel('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+
+    def test_cancel_item(self):
+        created_at = datetime(2018, 5, 22, 13, 0, 29, tzinfo=utc)
+        started_at = datetime(2018, 5, 22, 13, 0, 37, tzinfo=utc)
+        job = TSC.JobItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'backgroundJob',
+                          0, created_at, started_at, None, 0)
+        with requests_mock.mock() as m:
+            m.put(self.baseurl + '/ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', status_code=204)
+            self.server.jobs.cancel(job)

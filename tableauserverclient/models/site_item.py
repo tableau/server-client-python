@@ -17,7 +17,7 @@ class SiteItem(object):
 
     def __init__(self, name, content_url, admin_mode=None, user_quota=None, storage_quota=None,
                  disable_subscriptions=False, subscribe_others_enabled=True, revision_history_enabled=False,
-                 revision_limit=None, materialized_views_mode=None, flows_enabled=None, cataloging_enabled=None):
+                 revision_limit=None, data_acceleration_mode=None, flows_enabled=None, cataloging_enabled=None):
         self._admin_mode = None
         self._id = None
         self._num_users = None
@@ -33,7 +33,7 @@ class SiteItem(object):
         self.revision_history_enabled = revision_history_enabled
         self.subscribe_others_enabled = subscribe_others_enabled
         self.admin_mode = admin_mode
-        self.materialized_views_mode = materialized_views_mode
+        self.data_acceleration_mode = data_acceleration_mode
         self.cataloging_enabled = cataloging_enabled
         self.flows_enabled = flows_enabled
 
@@ -127,12 +127,12 @@ class SiteItem(object):
         self._subscribe_others_enabled = value
 
     @property
-    def materialized_views_mode(self):
-        return self._materialized_views_mode
+    def data_acceleration_mode(self):
+        return self._data_acceleration_mode
 
-    @materialized_views_mode.setter
-    def materialized_views_mode(self, value):
-        self._materialized_views_mode = value
+    @data_acceleration_mode.setter
+    def data_acceleration_mode(self, value):
+        self._data_acceleration_mode = value
 
     @property
     def cataloging_enabled(self):
@@ -160,17 +160,17 @@ class SiteItem(object):
             (_, name, content_url, _, admin_mode, state,
              subscribe_others_enabled, disable_subscriptions, revision_history_enabled,
              user_quota, storage_quota, revision_limit, num_users, storage,
-             materialized_views_mode, cataloging_enabled, flows_enabled) = self._parse_element(site_xml, ns)
+             data_acceleration_mode, cataloging_enabled, flows_enabled) = self._parse_element(site_xml, ns)
 
             self._set_values(None, name, content_url, None, admin_mode, state, subscribe_others_enabled,
                              disable_subscriptions, revision_history_enabled, user_quota, storage_quota,
-                             revision_limit, num_users, storage, materialized_views_mode, cataloging_enabled,
+                             revision_limit, num_users, storage, data_acceleration_mode, cataloging_enabled,
                              flows_enabled)
         return self
 
     def _set_values(self, id, name, content_url, status_reason, admin_mode, state,
                     subscribe_others_enabled, disable_subscriptions, revision_history_enabled,
-                    user_quota, storage_quota, revision_limit, num_users, storage, materialized_views_mode,
+                    user_quota, storage_quota, revision_limit, num_users, storage, data_acceleration_mode,
                     flows_enabled, cataloging_enabled):
         if id is not None:
             self._id = id
@@ -200,8 +200,8 @@ class SiteItem(object):
             self._num_users = num_users
         if storage:
             self._storage = storage
-        if materialized_views_mode:
-            self._materialized_views_mode = materialized_views_mode
+        if data_acceleration_mode:
+            self._data_acceleration_mode = data_acceleration_mode
         if flows_enabled is not None:
             self.flows_enabled = flows_enabled
         if cataloging_enabled is not None:
@@ -215,14 +215,14 @@ class SiteItem(object):
         for site_xml in all_site_xml:
             (id, name, content_url, status_reason, admin_mode, state, subscribe_others_enabled,
                 disable_subscriptions, revision_history_enabled, user_quota, storage_quota,
-                revision_limit, num_users, storage, materialized_views_mode, flows_enabled,
+                revision_limit, num_users, storage, data_acceleration_mode, flows_enabled,
                 cataloging_enabled) = cls._parse_element(site_xml, ns)
 
             site_item = cls(name, content_url)
             site_item._set_values(id, name, content_url, status_reason, admin_mode, state,
                                   subscribe_others_enabled, disable_subscriptions, revision_history_enabled,
                                   user_quota, storage_quota, revision_limit, num_users, storage,
-                                  materialized_views_mode, flows_enabled, cataloging_enabled)
+                                  data_acceleration_mode, flows_enabled, cataloging_enabled)
             all_site_items.append(site_item)
         return all_site_items
 
@@ -257,14 +257,14 @@ class SiteItem(object):
             num_users = usage_elem.get('numUsers', None)
             storage = usage_elem.get('storage', None)
 
-        materialized_views_mode = site_xml.get('materializedViewsMode', '')
+        data_acceleration_mode = site_xml.get('dataAccelerationMode', '')
 
         flows_enabled = string_to_bool(site_xml.get('flowsEnabled', ''))
         cataloging_enabled = string_to_bool(site_xml.get('catalogingEnabled', ''))
 
         return id, name, content_url, status_reason, admin_mode, state, subscribe_others_enabled,\
             disable_subscriptions, revision_history_enabled, user_quota, storage_quota,\
-            revision_limit, num_users, storage, materialized_views_mode, flows_enabled, cataloging_enabled
+            revision_limit, num_users, storage, data_acceleration_mode, flows_enabled, cataloging_enabled
 
 
 # Used to convert string represented boolean to a boolean type

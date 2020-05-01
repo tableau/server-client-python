@@ -56,7 +56,7 @@ def main():
         connection.username = args.datasource_username
         connection.password = args.datasource_password
         connection.embed_password = True
-        print(update_function(resource, connection).content)
+        print(update_function(resource, connection).__dict__)
 
 
 if __name__ == '__main__':

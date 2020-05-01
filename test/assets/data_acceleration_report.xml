@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse
+    xmlns="http://tableau.com/api"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.8.xsd">
+    <dataAccelerationReport>
+        <comparisonRecord site="site-1"
+            sheetURI="sheet-1"
+            unacceleratedSessionCount="0" 
+            averageNonAcceleratedPLT="0.0" 
+            acceleratedSessionCount="1" 
+            averageAcceleratedPLT="0.166"/>
+        <comparisonRecord site="site-2"
+            sheetURI="sheet-2"
+            unacceleratedSessionCount="2"
+            averageNonAcceleratedPLT="1.29"
+            acceleratedSessionCount="3"
+            averageAcceleratedPLT="0.372"/>
+    </dataAccelerationReport>
+</tsResponse>

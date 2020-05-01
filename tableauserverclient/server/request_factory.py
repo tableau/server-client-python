@@ -362,8 +362,8 @@ class SiteRequest(object):
             site_element.attrib['revisionLimit'] = str(site_item.revision_limit)
         if site_item.subscribe_others_enabled:
             site_element.attrib['revisionHistoryEnabled'] = str(site_item.revision_history_enabled).lower()
-        if site_item.materialized_views_mode is not None:
-            site_element.attrib['materializedViewsMode'] = str(site_item.materialized_views_mode).lower()
+        if site_item.data_acceleration_mode is not None:
+            site_element.attrib['dataAccelerationMode'] = str(site_item.data_acceleration_mode).lower()
         if site_item.flows_enabled is not None:
             site_element.attrib['flowsEnabled'] = str(site_item.flows_enabled).lower()
         if site_item.cataloging_enabled is not None:
@@ -482,15 +482,15 @@ class WorkbookRequest(object):
         if workbook_item.owner_id:
             owner_element = ET.SubElement(workbook_element, 'owner')
             owner_element.attrib['id'] = workbook_item.owner_id
-        if workbook_item.materialized_views_config is not None and \
-                'materialized_views_enabled' in workbook_item.materialized_views_config:
-            materialized_views_config = workbook_item.materialized_views_config
-            materialized_views_element = ET.SubElement(workbook_element, 'materializedViewsEnablementConfig')
-            materialized_views_element.attrib['materializedViewsEnabled'] = str(materialized_views_config
-                                                                                ["materialized_views_enabled"]).lower()
-            if "run_materialization_now" in materialized_views_config:
-                materialized_views_element.attrib['materializeNow'] = str(materialized_views_config
-                                                                          ["run_materialization_now"]).lower()
+        if workbook_item.data_acceleration_config is not None and \
+                'acceleration_enabled' in workbook_item.data_acceleration_config:
+            data_acceleration_config = workbook_item.data_acceleration_config
+            data_acceleration_element = ET.SubElement(workbook_element, 'dataAccelerationConfig')
+            data_acceleration_element.attrib['accelerationEnabled'] = str(data_acceleration_config
+                                                                          ["acceleration_enabled"]).lower()
+            if "accelerate_now" in data_acceleration_config:
+                data_acceleration_element.attrib['accelerateNow'] = str(data_acceleration_config
+                                                                        ["accelerate_now"]).lower()
 
         return ET.tostring(xml_request)
 

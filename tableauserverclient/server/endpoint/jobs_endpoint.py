@@ -35,7 +35,8 @@ class Jobs(Endpoint):
 
     @api(version='3.1')
     def cancel(self, job_id):
-        url = '{0}/{1}'.format(self.baseurl, job_id)
+        id_ = getattr(job_id, 'id', job_id)
+        url = '{0}/{1}'.format(self.baseurl, id_)
         return self.put_request(url)
 
     @api(version='2.6')
