@@ -234,7 +234,11 @@ class Workbooks(Endpoint):
     @api(version="2.0")
     @parameter_added_in(as_job='3.0')
     @parameter_added_in(connections='2.8')
-    def publish(self, workbook_item, file_path, mode, connection_credentials=None, connections=None, as_job=False):
+    def publish(
+        self, workbook_item, file_path, mode,
+        connection_credentials=None, connections=None, as_job=False,
+        hidden_views=None
+    ):
 
         if connection_credentials is not None:
             import warnings
@@ -277,7 +281,8 @@ class Workbooks(Endpoint):
             conn_creds = connection_credentials
             xml_request, content_type = RequestFactory.Workbook.publish_req_chunked(workbook_item,
                                                                                     connection_credentials=conn_creds,
-                                                                                    connections=connections)
+                                                                                    connections=connections,
+                                                                                    hidden_views=hidden_views)
         else:
             logger.info('Publishing {0} to server'.format(filename))
             with open(file_path, 'rb') as f:
@@ -287,7 +292,8 @@ class Workbooks(Endpoint):
                                                                             filename,
                                                                             file_contents,
                                                                             connection_credentials=conn_creds,
-                                                                            connections=connections)
+                                                                            connections=connections,
+                                                                            hidden_views=hidden_views)
         logger.debug('Request xml: {0} '.format(xml_request[:1000]))
 
         # Send the publishing request to server
