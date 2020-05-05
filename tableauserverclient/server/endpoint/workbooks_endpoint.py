@@ -1,10 +1,9 @@
-from .endpoint import Endpoint, api, parameter_added_in
+from .endpoint import QuerysetEndpoint, api, parameter_added_in
 from .exceptions import InternalServerError, MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, WorkbookItem, ConnectionItem, ViewItem, PaginationItem
-from ..query import QuerySet
 from ...models.tag_item import TagItem
 from ...models.job_item import JobItem
 from ...filesys_helpers import to_filename, make_download_path
@@ -23,7 +22,7 @@ ALLOWED_FILE_EXTENSIONS = ['twb', 'twbx']
 logger = logging.getLogger('tableau.endpoint.workbooks')
 
 
-class Workbooks(Endpoint):
+class Workbooks(QuerysetEndpoint):
     def __init__(self, parent_srv):
         super(Workbooks, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)
@@ -55,21 +54,6 @@ class Workbooks(Endpoint):
         url = "{0}/{1}".format(self.baseurl, workbook_id)
         server_response = self.get_request(url)
         return WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
-
-    @api(version="2.0")
-    def filter(self, *args, **kwargs):
-        queryset = QuerySet(self).filter(**kwargs)
-        return queryset
-
-    @api(version="2.0")
-    def order_by(self, *args, **kwargs):
-        queryset = QuerySet(self).order_by(*args)
-        return queryset
-
-    @api(version="2.0")
-    def paginate(self, **kwargs):
-        queryset = QuerySet(self).paginate(**kwargs)
-        return queryset
 
     @api(version="2.8")
     def refresh(self, workbook_id):

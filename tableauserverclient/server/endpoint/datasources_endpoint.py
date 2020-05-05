@@ -1,4 +1,4 @@
-from .endpoint import Endpoint, api, parameter_added_in
+from .endpoint import QuerysetEndpoint, api, parameter_added_in
 from .exceptions import InternalServerError, MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .fileuploads_endpoint import Fileuploads
@@ -21,7 +21,7 @@ ALLOWED_FILE_EXTENSIONS = ['tds', 'tdsx', 'tde', 'hyper']
 logger = logging.getLogger('tableau.endpoint.datasources')
 
 
-class Datasources(Endpoint):
+class Datasources(QuerysetEndpoint):
     def __init__(self, parent_srv):
         super(Datasources, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)
@@ -51,21 +51,6 @@ class Datasources(Endpoint):
         url = "{0}/{1}".format(self.baseurl, datasource_id)
         server_response = self.get_request(url)
         return DatasourceItem.from_response(server_response.content, self.parent_srv.namespace)[0]
-
-    @api(version="2.0")
-    def filter(self, *args, **kwargs):
-        queryset = QuerySet(self).filter(**kwargs)
-        return queryset
-
-    @api(version="2.0")
-    def order_by(self, *args, **kwargs):
-        queryset = QuerySet(self).order_by(*args)
-        return queryset
-
-    @api(version="2.0")
-    def paginate(self, **kwargs):
-        queryset = QuerySet(self).paginate(**kwargs)
-        return queryset
 
     # Populate datasource item's connections
     @api(version="2.0")

@@ -1,16 +1,15 @@
-from .endpoint import Endpoint, api
+from .endpoint import QuerysetEndpoint, api
 from .exceptions import MissingRequiredFieldError
 from .resource_tagger import _ResourceTagger
 from .permissions_endpoint import _PermissionsEndpoint
 from .. import ViewItem, PaginationItem
-from ..query import QuerySet
 import logging
 from contextlib import closing
 
 logger = logging.getLogger('tableau.endpoint.views')
 
 
-class Views(Endpoint):
+class Views(QuerysetEndpoint):
     def __init__(self, parent_srv):
         super(Views, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)
@@ -35,21 +34,6 @@ class Views(Endpoint):
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         all_view_items = ViewItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_view_items, pagination_item
-
-    @api(version="2.0")
-    def filter(self, *args, **kwargs):
-        queryset = QuerySet(self).filter(**kwargs)
-        return queryset
-
-    @api(version="2.0")
-    def order_by(self, *args, **kwargs):
-        queryset = QuerySet(self).order_by(*args)
-        return queryset
-
-    @api(version="2.0")
-    def paginate(self, **kwargs):
-        queryset = QuerySet(self).paginate(**kwargs)
-        return queryset
 
     @api(version="2.0")
     def populate_preview_image(self, view_item):

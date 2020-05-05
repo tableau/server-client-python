@@ -1,15 +1,14 @@
-from .endpoint import Endpoint, api
+from .endpoint import QuerysetEndpoint, api
 from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, UserItem, WorkbookItem, PaginationItem
 from ..pager import Pager
-from ..query import QuerySet
 import logging
 import copy
 
 logger = logging.getLogger('tableau.endpoint.users')
 
 
-class Users(Endpoint):
+class Users(QuerysetEndpoint):
     @property
     def baseurl(self):
         return "{0}/sites/{1}/users".format(self.parent_srv.baseurl, self.parent_srv.site_id)
@@ -34,21 +33,6 @@ class Users(Endpoint):
         url = "{0}/{1}".format(self.baseurl, user_id)
         server_response = self.get_request(url)
         return UserItem.from_response(server_response.content, self.parent_srv.namespace).pop()
-
-    @api(version="2.0")
-    def filter(self, *args, **kwargs):
-        queryset = QuerySet(self).filter(**kwargs)
-        return queryset
-
-    @api(version="2.0")
-    def order_by(self, *args, **kwargs):
-        queryset = QuerySet(self).order_by(*args)
-        return queryset
-
-    @api(version="2.0")
-    def paginate(self, **kwargs):
-        queryset = QuerySet(self).paginate(**kwargs)
-        return queryset
 
     # Update user
     @api(version="2.0")
