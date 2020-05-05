@@ -1,13 +1,11 @@
 from .endpoint import Endpoint, api, parameter_added_in
 from .exceptions import InternalServerError, MissingRequiredFieldError
-from .endpoint import api, parameter_added_in, Endpoint
 from .permissions_endpoint import _PermissionsEndpoint
-from .exceptions import MissingRequiredFieldError
 from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, DatasourceItem, PaginationItem, ConnectionItem
+from ..query import QuerySet
 from ...filesys_helpers import to_filename, make_download_path
-from ...models.tag_item import TagItem
 from ...models.job_item import JobItem
 import os
 import logging
@@ -53,6 +51,21 @@ class Datasources(Endpoint):
         url = "{0}/{1}".format(self.baseurl, datasource_id)
         server_response = self.get_request(url)
         return DatasourceItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+
+    @api(version="2.0")
+    def filter(self, *args, **kwargs):
+        queryset = QuerySet(self).filter(**kwargs)
+        return queryset
+
+    @api(version="2.0")
+    def order_by(self, *args, **kwargs):
+        queryset = QuerySet(self).order_by(*args)
+        return queryset
+
+    @api(version="2.0")
+    def paginate(self, **kwargs):
+        queryset = QuerySet(self).paginate(**kwargs)
+        return queryset
 
     # Populate datasource item's connections
     @api(version="2.0")

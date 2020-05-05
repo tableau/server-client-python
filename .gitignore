@@ -76,6 +76,10 @@ target/
 # pyenv
 .python-version
 
+# poetry
+poetry.lock
+pyproject.toml
+
 # celery beat schedule file
 celerybeat-schedule
 
