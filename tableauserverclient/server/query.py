@@ -6,6 +6,7 @@ from .sort import Sort
 def to_camel_case(word):
     return word.split('_')[0] + ''.join(x.capitalize() or '_' for x in word.split('_')[1:])
 
+
 class QuerySet:
 
     def __init__(self, model):
