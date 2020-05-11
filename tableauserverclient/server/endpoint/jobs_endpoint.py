@@ -1,6 +1,7 @@
 from .endpoint import Endpoint, api
 from .. import JobItem, BackgroundJobItem, PaginationItem
 from ..request_options import RequestOptionsBase
+
 import logging
 
 try:

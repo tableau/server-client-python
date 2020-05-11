@@ -1,11 +1,9 @@
-from ..datetime_helpers import format_datetime
 import xml.etree.ElementTree as ET
-from functools import wraps
 
 from requests.packages.urllib3.fields import RequestField
 from requests.packages.urllib3.filepost import encode_multipart_formdata
 
-from ..models import TaskItem, UserItem, GroupItem, PermissionsRule
+from ..models import TaskItem
 
 
 def _add_multipart(parts):

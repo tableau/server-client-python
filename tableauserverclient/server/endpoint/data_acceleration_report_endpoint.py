@@ -18,7 +18,8 @@ class DataAccelerationReport(Endpoint):
 
     @property
     def baseurl(self):
-        return "{0}/sites/{1}/dataAccelerationReport".format(self.parent_srv.baseurl, self.parent_srv.site_id)
+        return "{0}/sites/{1}/dataAccelerationReport".format(
+            self.parent_srv.baseurl, self.parent_srv.site_id)
 
     @api(version="3.8")
     def get(self, req_options=None):

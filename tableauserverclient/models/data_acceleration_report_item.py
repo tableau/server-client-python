@@ -22,10 +22,6 @@ class DataAccelerationReportItem(object):
             return self._sheet_uri
 
         @property
-        def site(self):
-            return self._site
-
-        @property
         def unaccelerated_session_count(self):
             return self._unaccelerated_session_count
 

@@ -1,14 +1,12 @@
-from .endpoint import Endpoint, api, parameter_added_in
+from .endpoint import Endpoint, api
 from .exceptions import InternalServerError, MissingRequiredFieldError
-from .endpoint import api, parameter_added_in, Endpoint
 from .permissions_endpoint import _PermissionsEndpoint
-from .exceptions import MissingRequiredFieldError
 from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, FlowItem, PaginationItem, ConnectionItem
 from ...filesys_helpers import to_filename, make_download_path
-from ...models.tag_item import TagItem
 from ...models.job_item import JobItem
+
 import os
 import logging
 import copy
