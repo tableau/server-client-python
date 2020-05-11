@@ -450,11 +450,10 @@ class WorkbookTests(unittest.TestCase):
             sample_workbook = os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx')
             publish_mode = self.server.PublishMode.CreateNew
 
-            new_workbook = self.server.workbooks.publish(new_workbook,
-                                                         sample_workbook,
-                                                         publish_mode,
-                                                         hidden_views=['GDP per capita'])
-
+            new_workbook.hidden_views = ['GDP per capita']
+            new_workbook = self.server.workbooks.publish(
+                new_workbook, sample_workbook, publish_mode
+            )
             request_body = m._adapter.request_history[0]._request.body
             self.assertIn(
                 b'<views><view hidden="true" name="GDP per capita" /></views>', request_body)

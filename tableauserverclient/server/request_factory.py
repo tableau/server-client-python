@@ -455,9 +455,7 @@ class UserRequest(object):
 
 class WorkbookRequest(object):
     def _generate_xml(
-            self, workbook_item,
-            connection_credentials=None, connections=None,
-            hidden_views=None
+            self, workbook_item, connection_credentials=None, connections=None
     ):
         xml_request = ET.Element('tsRequest')
         workbook_element = ET.SubElement(xml_request, 'workbook')
@@ -478,9 +476,9 @@ class WorkbookRequest(object):
             for connection in connections:
                 _add_connections_element(connections_element, connection)
 
-        if hidden_views is not None:
+        if workbook_item.hidden_views is not None:
             views_element = ET.SubElement(workbook_element, 'views')
-            for view_name in hidden_views:
+            for view_name in workbook_item.hidden_views:
                 _add_hiddenview_element(views_element, view_name)
 
         return ET.tostring(xml_request)
@@ -512,25 +510,22 @@ class WorkbookRequest(object):
 
     def publish_req(
         self, workbook_item, filename, file_contents,
-        connection_credentials=None, connections=None, hidden_views=None
+        connection_credentials=None, connections=None
     ):
         xml_request = self._generate_xml(workbook_item,
                                          connection_credentials=connection_credentials,
-                                         connections=connections,
-                                         hidden_views=hidden_views)
+                                         connections=connections)
 
         parts = {'request_payload': ('', xml_request, 'text/xml'),
                  'tableau_workbook': (filename, file_contents, 'application/octet-stream')}
         return _add_multipart(parts)
 
     def publish_req_chunked(
-        self, workbook_item, connection_credentials=None, connections=None,
-        hidden_views=None
+        self, workbook_item, connection_credentials=None, connections=None
     ):
         xml_request = self._generate_xml(workbook_item,
                                          connection_credentials=connection_credentials,
-                                         connections=connections,
-                                         hidden_views=hidden_views)
+                                         connections=connections)
 
         parts = {'request_payload': ('', xml_request, 'text/xml')}
         return _add_multipart(parts)

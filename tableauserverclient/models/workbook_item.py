@@ -26,6 +26,7 @@ class WorkbookItem(object):
         self.owner_id = None
         self.project_id = project_id
         self.show_tabs = show_tabs
+        self.hidden_views = None
         self.tags = set()
         self.data_acceleration_config = {'acceleration_enabled': None,
                                          'accelerate_now': None,
