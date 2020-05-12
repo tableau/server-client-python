@@ -20,8 +20,6 @@ class Favorites(Endpoint):
         logger.info('Querying all favorites for user {0}'.format(user_item.name))
         url = '{0}/{1}'.format(self.baseurl, user_item.id)
         server_response = self.get_request(url, req_options)
-        # pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
-        # all_favorite_items = UserItem.from_response(server_response.content, self.parent_srv.namespace)
         parsed_response = ET.fromstring(server_response.content)
         favorites = []
         for workbook in parsed_response.findall('.//t:favorite/t:workbook', self.parent_srv.namespace):
