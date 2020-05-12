@@ -23,25 +23,25 @@ class Favorites(Endpoint):
         parsed_response = ET.fromstring(server_response.content)
         favorites = []
         for workbook in parsed_response.findall('.//t:favorite/t:workbook', self.parent_srv.namespace):
-            i = WorkbookItem('')
-            i._set_values(*i._parse_element(workbook, self.parent_srv.namespace))
-            if i:
-                favorites.append(i)
+            fav_workbook = WorkbookItem('')
+            fav_workbook._set_values(*fav_workbook._parse_element(workbook, self.parent_srv.namespace))
+            if fav_workbook:
+                favorites.append(fav_workbook)
         for view in parsed_response.findall('.//t:favorite[t:view]', self.parent_srv.namespace):
-            i = ViewItem()
-            i.from_xml_element(view, self.parent_srv.namespace)
-            if i:
-                favorites.append(i)
+            fav_view = ViewItem()
+            fav_view.from_xml_element(view, self.parent_srv.namespace)
+            if fav_view:
+                favorites.append(fav_view)
         for datasource in parsed_response.findall('.//t:favorite/t:datasource', self.parent_srv.namespace):
-            i = DatasourceItem('')
-            i._set_values(*i._parse_element(datasource, self.parent_srv.namespace))
-            if i:
-                favorites.append(i)
+            fav_datasource = DatasourceItem('')
+            fav_datasource._set_values(*fav_datasource._parse_element(datasource, self.parent_srv.namespace))
+            if fav_datasource:
+                favorites.append(fav_datasource)
         for project in parsed_response.findall('.//t:favorite/t:project', self.parent_srv.namespace):
-            i = ProjectItem('p')
-            i._set_values(*i._parse_element(project))
-            if i:
-                favorites.append(i)
+            fav_project = ProjectItem('p')
+            fav_project._set_values(*fav_project._parse_element(project))
+            if fav_project:
+                favorites.append(fav_project)
 
         return favorites
 
