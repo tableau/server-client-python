@@ -103,7 +103,7 @@ class UserItem(object):
     @property
     def favorites(self):
         if self._favorites is None:
-            error = "User item must be populated with workbooks first."
+            error = "User item must be populated with favorites first."
             raise UnpopulatedPropertyError(error)
         return self._favorites()
 
