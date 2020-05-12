@@ -45,14 +45,14 @@ class Favorites(Endpoint):
 
         return favorites
 
-    @api(version="1.0")
+    @api(version="2.0")
     def add_favorite_workbook(self, user_item, workbook_item):
         url = '{0}/{1}'.format(self.baseurl, user_item.id)
         add_req = RequestFactory.Favorite.add_workbook_req(workbook_item.id, workbook_item.name)
         server_response = self.put_request(url, add_req)
         logger.info('Favorited {0} for user (ID: {1})'.format(workbook_item.name, user_item.id))
 
-    @api(version="1.0")
+    @api(version="2.0")
     def add_favorite_view(self, user_item, view_item):
         url = '{0}/{1}'.format(self.baseurl, user_item.id)
         add_req = RequestFactory.Favorite.add_view_req(view_item.id, view_item.name)
