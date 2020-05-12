@@ -14,7 +14,7 @@ class Favorites(Endpoint):
     def baseurl(self):
         return "{0}/sites/{1}/favorites".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
-    # Gets all users
+    # Gets all favorites
     @api(version="2.5")
     def get(self, user_item, req_options=None):
         logger.info('Querying all favorites for user {0}'.format(user_item.name))
