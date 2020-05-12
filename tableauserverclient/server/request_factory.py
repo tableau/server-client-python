@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 from requests.packages.urllib3.fields import RequestField
 from requests.packages.urllib3.filepost import encode_multipart_formdata
 
-from ..models import TaskItem
+from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, Favorite
 
 
 def _add_multipart(parts):
@@ -165,16 +165,16 @@ class FavoriteRequest(object):
         return ET.tostring(xml_request)
 
     def add_datasource_req(self, id_, name):
-        return self._add_to_req(id_, 'datasource', name)
+        return self._add_to_req(id_, Favorite.Datasource, name)
 
     def add_project_req(self, id_, name):
-        return self._add_to_req(id_, 'project', name)
+        return self._add_to_req(id_, Favorite.Project, name)
 
     def add_view_req(self, id_, name):
-        return self._add_to_req(id_, 'view', name)
+        return self._add_to_req(id_, Favorite.View, name)
 
     def add_workbook_req(self, id_, name):
-        return self._add_to_req(id_, 'workbook', name)
+        return self._add_to_req(id_, Favorite.Workbook, name)
 
 
 class FileuploadRequest(object):
