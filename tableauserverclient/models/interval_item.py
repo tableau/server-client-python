@@ -173,7 +173,7 @@ class MonthlyInterval(object):
             try:
                 if not (1 <= int(interval_value) <= 31):
                     raise ValueError(error)
-            except ValueError as e:
+            except ValueError:
                 if interval_value != "LastDay":
                     raise ValueError(error)
 

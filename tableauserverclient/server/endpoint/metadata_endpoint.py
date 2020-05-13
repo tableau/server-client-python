@@ -1,5 +1,6 @@
 from .endpoint import Endpoint, api
 from .exceptions import GraphQLError
+
 import logging
 import json
 

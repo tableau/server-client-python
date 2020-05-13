@@ -3,7 +3,7 @@ from .exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .default_permissions_endpoint import _DefaultPermissionsEndpoint
 
-from .. import RequestFactory, DatabaseItem, PaginationItem, PermissionsRule, Permission
+from .. import RequestFactory, DatabaseItem, TableItem, PaginationItem, Permission
 
 import logging
 
