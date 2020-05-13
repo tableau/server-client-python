@@ -105,7 +105,7 @@ class UserItem(object):
         if self._favorites is None:
             error = "User item must be populated with favorites first."
             raise UnpopulatedPropertyError(error)
-        return self._favorites()
+        return self._favorites
 
     def to_reference(self):
         return ResourceReference(id_=self.id, tag_name=self.tag_name)

@@ -5,7 +5,7 @@ from .data_acceleration_report_item import DataAccelerationReportItem
 from .datasource_item import DatasourceItem
 from .database_item import DatabaseItem
 from .exceptions import UnpopulatedPropertyError
-from .favorites_item import Favorite
+from .favorites_item import Favorite, get_favorites
 from .group_item import GroupItem
 from .flow_item import FlowItem
 from .interval_item import IntervalItem, DailyInterval, WeeklyInterval, MonthlyInterval, HourlyInterval

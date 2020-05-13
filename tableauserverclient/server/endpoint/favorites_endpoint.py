@@ -1,6 +1,7 @@
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
-from .. import RequestFactory, WorkbookItem, ViewItem, ProjectItem, DatasourceItem
+from .. import RequestFactory
+from ...models import get_favorites
 from ..pager import Pager
 import xml.etree.ElementTree as ET
 import logging
@@ -20,30 +21,8 @@ class Favorites(Endpoint):
         logger.info('Querying all favorites for user {0}'.format(user_item.name))
         url = '{0}/{1}'.format(self.baseurl, user_item.id)
         server_response = self.get_request(url, req_options)
-        parsed_response = ET.fromstring(server_response.content)
-        favorites = []
-        for workbook in parsed_response.findall('.//t:favorite/t:workbook', self.parent_srv.namespace):
-            fav_workbook = WorkbookItem('')
-            fav_workbook._set_values(*fav_workbook._parse_element(workbook, self.parent_srv.namespace))
-            if fav_workbook:
-                favorites.append(fav_workbook)
-        for view in parsed_response.findall('.//t:favorite[t:view]', self.parent_srv.namespace):
-            fav_view = ViewItem()
-            fav_view.from_xml_element(view, self.parent_srv.namespace)
-            if fav_view:
-                favorites.append(fav_view)
-        for datasource in parsed_response.findall('.//t:favorite/t:datasource', self.parent_srv.namespace):
-            fav_datasource = DatasourceItem('')
-            fav_datasource._set_values(*fav_datasource._parse_element(datasource, self.parent_srv.namespace))
-            if fav_datasource:
-                favorites.append(fav_datasource)
-        for project in parsed_response.findall('.//t:favorite/t:project', self.parent_srv.namespace):
-            fav_project = ProjectItem('p')
-            fav_project._set_values(*fav_project._parse_element(project))
-            if fav_project:
-                favorites.append(fav_project)
 
-        return favorites
+        user_item._favorites = get_favorites(server_response, self.parent_srv.namespace)
 
     @api(version="2.0")
     def add_favorite_workbook(self, user_item, workbook_item):
