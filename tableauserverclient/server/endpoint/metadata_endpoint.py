@@ -33,16 +33,16 @@ def extract_values(obj, key):
     return results
 
 
+    def get_page_info(result):
+        next_page = extract_values(result, 'hasNextPage').pop()
+        cursor = extract_values(result, 'endCursor').pop()
+        return next_page, cursor
+
 class Metadata(Endpoint):
     @property
     def baseurl(self):
         return "{0}/api/metadata/graphql".format(self.parent_srv.server_address)
 
-    @staticmethod
-    def get_page_info(result):
-        next_page = Metadata.extract_values(result, 'hasNextPage').pop()
-        cursor = Metadata.extract_values(result, 'endCursor').pop()
-        return next_page, cursor
 
     @api("3.2")
     def query(self, query, variables=None, abort_on_error=False):
@@ -85,12 +85,12 @@ class Metadata(Endpoint):
 
         paginated_results.append(results)
         # repeat
-        has_another_page, cursor = self.get_page_info(results)
+        has_another_page, cursor = get_page_info(results)
         while has_another_page:
             variables.update({'afterToken': cursor})
             logger.debug("Calling Token: " + cursor)
             graphql_query = json.dumps({'query': query, 'variables': variables})
-            has_another_page, cursor = self.get_page_info(results)
+            has_another_page, cursor = get_page_info(results)
             server_response = self.post_request(url, graphql_query, content_type='text/json')
             results = server_response.json()
             paginated_results.append(results)
