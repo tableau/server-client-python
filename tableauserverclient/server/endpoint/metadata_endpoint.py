@@ -32,7 +32,6 @@ def extract_values(obj, key):
     results = extract(obj, arr, key)
     return results
 
-
     def get_page_info(result):
         next_page = extract_values(result, 'hasNextPage').pop()
         cursor = extract_values(result, 'endCursor').pop()
