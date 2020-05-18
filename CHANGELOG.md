@@ -1,3 +1,14 @@
+## 0.11 (1 May 2020)
+
+* Added more fields to Data Acceleration config (#588)
+* Added OpenID as an auth setting enum (#610)
+* Added support for Data Acceleration Reports (#596)
+* Added support for view permissions (#526)
+* Materialized views changed to Data Acceleration (#576)
+* Improved consistency across workbook/datasource endpoints (#570)
+* Fixed print error in update_connection.py (#602)
+* Fixed log error in add user endpoint (#608)
+
 ## 0.10 (21 Feb 2020)
 
 * Added a way to handle non-xml errors (#515)

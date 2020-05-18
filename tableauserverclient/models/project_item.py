@@ -77,9 +77,9 @@ class ProjectItem(object):
     def is_default(self):
         return self.name.lower() == 'default'
 
-    def _parse_common_tags(self, project_xml):
+    def _parse_common_tags(self, project_xml, ns):
         if not isinstance(project_xml, ET.Element):
-            project_xml = ET.fromstring(project_xml).find('.//t:project', namespaces=NAMESPACE)
+            project_xml = ET.fromstring(project_xml).find('.//t:project', namespaces=ns)
 
         if project_xml is not None:
             (_, name, description, content_permissions, parent_id) = self._parse_element(project_xml)

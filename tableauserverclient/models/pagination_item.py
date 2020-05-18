@@ -31,10 +31,10 @@ class PaginationItem(object):
         return pagination_item
 
     @classmethod
-    def from_single_page_list(cls, l):
+    def from_single_page_list(cls, single_page_list):
         item = cls()
         item._page_number = 1
-        item._page_size = len(l)
-        item._total_available = len(l)
+        item._page_size = len(single_page_list)
+        item._total_available = len(single_page_list)
 
         return item

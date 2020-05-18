@@ -4,6 +4,7 @@ import requests_mock
 import tableauserverclient as TSC
 import xml.etree.ElementTree as ET
 
+
 from tableauserverclient.datetime_helpers import format_datetime
 from tableauserverclient.server.endpoint.exceptions import InternalServerError
 from tableauserverclient.server.request_factory import RequestFactory
@@ -27,6 +28,7 @@ POPULATE_VIEWS_XML = os.path.join(TEST_ASSET_DIR, 'workbook_populate_views.xml')
 POPULATE_VIEWS_USAGE_XML = os.path.join(TEST_ASSET_DIR, 'workbook_populate_views_usage.xml')
 PUBLISH_XML = os.path.join(TEST_ASSET_DIR, 'workbook_publish.xml')
 PUBLISH_ASYNC_XML = os.path.join(TEST_ASSET_DIR, 'workbook_publish_async.xml')
+REFRESH_XML = os.path.join(TEST_ASSET_DIR, 'workbook_refresh.xml')
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'workbook_update.xml')
 UPDATE_PERMISSIONS = os.path.join(TEST_ASSET_DIR, 'workbook_update_permissions.xml')
 
@@ -114,6 +116,28 @@ class WorkbookTests(unittest.TestCase):
     def test_get_by_id_missing_id(self):
         self.assertRaises(ValueError, self.server.workbooks.get_by_id, '')
 
+    def test_refresh_id(self):
+        self.server.version = '2.8'
+        self.baseurl = self.server.workbooks.baseurl
+        with open(REFRESH_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/refresh',
+                   status_code=202, text=response_xml)
+            self.server.workbooks.refresh('3cc6cd06-89ce-4fdc-b935-5294135d6d42')
+
+    def test_refresh_object(self):
+        self.server.version = '2.8'
+        self.baseurl = self.server.workbooks.baseurl
+        workbook = TSC.WorkbookItem('')
+        workbook._id = '3cc6cd06-89ce-4fdc-b935-5294135d6d42'
+        with open(REFRESH_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/refresh',
+                   status_code=202, text=response_xml)
+            self.server.workbooks.refresh(workbook)
+
     def test_delete(self):
         with requests_mock.mock() as m:
             m.delete(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42', status_code=204)
@@ -131,8 +155,10 @@ class WorkbookTests(unittest.TestCase):
             single_workbook._id = '1f951daf-4061-451a-9df1-69a8062664f2'
             single_workbook.owner_id = 'dd2239f6-ddf1-4107-981a-4cf94e415794'
             single_workbook.name = 'renamedWorkbook'
-            single_workbook.materialized_views_config = {'materialized_views_enabled': True,
-                                                         'run_materialization_now': False}
+            single_workbook.data_acceleration_config = {'acceleration_enabled': True,
+                                                        'accelerate_now': False,
+                                                        'last_updated_at': None,
+                                                        'acceleration_status': None}
             single_workbook = self.server.workbooks.update(single_workbook)
 
         self.assertEqual('1f951daf-4061-451a-9df1-69a8062664f2', single_workbook.id)
@@ -140,8 +166,8 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual('1d0304cd-3796-429f-b815-7258370b9b74', single_workbook.project_id)
         self.assertEqual('dd2239f6-ddf1-4107-981a-4cf94e415794', single_workbook.owner_id)
         self.assertEqual('renamedWorkbook', single_workbook.name)
-        self.assertEqual(True, single_workbook.materialized_views_config['materialized_views_enabled'])
-        self.assertEqual(False, single_workbook.materialized_views_config['run_materialization_now'])
+        self.assertEqual(True, single_workbook.data_acceleration_config['acceleration_enabled'])
+        self.assertEqual(False, single_workbook.data_acceleration_config['accelerate_now'])
 
     def test_update_missing_id(self):
         single_workbook = TSC.WorkbookItem('test')
@@ -410,6 +436,28 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual('fe0b4e89-73f4-435e-952d-3a263fbfa56c', new_workbook.views[0].id)
         self.assertEqual('GDP per capita', new_workbook.views[0].name)
         self.assertEqual('RESTAPISample_0/sheets/GDPpercapita', new_workbook.views[0].content_url)
+
+    def test_publish_with_hidden_view(self):
+        with open(PUBLISH_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.post(self.baseurl, text=response_xml)
+
+            new_workbook = TSC.WorkbookItem(name='Sample',
+                                            show_tabs=False,
+                                            project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+
+            sample_workbook = os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx')
+            publish_mode = self.server.PublishMode.CreateNew
+
+            new_workbook = self.server.workbooks.publish(new_workbook,
+                                                         sample_workbook,
+                                                         publish_mode,
+                                                         hidden_views=['GDP per capita'])
+
+            request_body = m._adapter.request_history[0]._request.body
+            self.assertIn(
+                b'<views><view hidden="true" name="GDP per capita" /></views>', request_body)
 
     def test_publish_async(self):
         self.server.version = '3.0'

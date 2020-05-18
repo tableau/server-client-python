@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+    <permissions>
+        <view id="21778de4-b7b9-44bc-a599-1506a2639ace" name="ComplianceDashboard">
+            <owner id="91d5931a-2cd6-4dbc-8b7c-211e85cf5fa3" />
+        </view>
+    <granteeCapabilities>
+        <group id="5e5e1978-71fa-11e4-87dd-7382f5c437af" />
+        <capabilities>
+            <capability name="Read" mode="Deny" />
+        </capabilities>
+    </granteeCapabilities>
+    <granteeCapabilities>
+        <user id="7c37ee24-c4b1-42b6-a154-eaeab7ee330a" />
+        <capabilities>
+            <capability name="Write" mode="Allow" />
+        </capabilities>
+    </granteeCapabilities>
+    </permissions>
+</tsResponse>
+

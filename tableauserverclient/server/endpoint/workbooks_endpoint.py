@@ -1,11 +1,9 @@
 from .endpoint import Endpoint, api, parameter_added_in
 from .exceptions import InternalServerError, MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
-from .exceptions import MissingRequiredFieldError
 from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, WorkbookItem, ConnectionItem, ViewItem, PaginationItem
-from ...models.tag_item import TagItem
 from ...models.job_item import JobItem
 from ...filesys_helpers import to_filename, make_download_path
 
@@ -56,7 +54,8 @@ class Workbooks(Endpoint):
 
     @api(version="2.8")
     def refresh(self, workbook_id):
-        url = "{0}/{1}/refresh".format(self.baseurl, workbook_id)
+        id_ = getattr(workbook_id, 'id', workbook_id)
+        url = "{0}/{1}/refresh".format(self.baseurl, id_)
         empty_req = RequestFactory.Empty.empty_req()
         server_response = self.post_request(url, empty_req)
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
@@ -233,7 +232,11 @@ class Workbooks(Endpoint):
     @api(version="2.0")
     @parameter_added_in(as_job='3.0')
     @parameter_added_in(connections='2.8')
-    def publish(self, workbook_item, file_path, mode, connection_credentials=None, connections=None, as_job=False):
+    def publish(
+        self, workbook_item, file_path, mode,
+        connection_credentials=None, connections=None, as_job=False,
+        hidden_views=None
+    ):
 
         if connection_credentials is not None:
             import warnings
@@ -276,7 +279,8 @@ class Workbooks(Endpoint):
             conn_creds = connection_credentials
             xml_request, content_type = RequestFactory.Workbook.publish_req_chunked(workbook_item,
                                                                                     connection_credentials=conn_creds,
-                                                                                    connections=connections)
+                                                                                    connections=connections,
+                                                                                    hidden_views=hidden_views)
         else:
             logger.info('Publishing {0} to server'.format(filename))
             with open(file_path, 'rb') as f:
@@ -286,7 +290,8 @@ class Workbooks(Endpoint):
                                                                             filename,
                                                                             file_contents,
                                                                             connection_credentials=conn_creds,
-                                                                            connections=connections)
+                                                                            connections=connections,
+                                                                            hidden_views=hidden_views)
         logger.debug('Request xml: {0} '.format(xml_request[:1000]))
 
         # Send the publishing request to server

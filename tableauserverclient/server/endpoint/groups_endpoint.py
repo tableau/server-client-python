@@ -1,8 +1,8 @@
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
-from ...models.exceptions import UnpopulatedPropertyError
 from .. import RequestFactory, GroupItem, UserItem, PaginationItem
 from ..pager import Pager
+
 import logging
 
 logger = logging.getLogger('tableau.endpoint.groups')

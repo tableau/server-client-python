@@ -1,6 +1,6 @@
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
-from .. import RequestFactory, PaginationItem, ScheduleItem, WorkbookItem, DatasourceItem, TaskItem
+from .. import RequestFactory, PaginationItem, ScheduleItem, TaskItem
 import logging
 import copy
 from collections import namedtuple

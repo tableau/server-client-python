@@ -3,7 +3,7 @@ from .exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .default_permissions_endpoint import _DefaultPermissionsEndpoint
 
-from .. import RequestFactory, ProjectItem, PaginationItem, PermissionsRule, Permission
+from .. import RequestFactory, ProjectItem, PaginationItem, Permission
 
 import logging
 
@@ -71,7 +71,7 @@ class Projects(Endpoint):
 
     @api(version='2.0')
     def delete_permission(self, item, rules):
-        return self._permissions.delete(item, rules)
+        self._permissions.delete(item, rules)
 
     @api(version='2.1')
     def populate_workbook_default_permissions(self, item):
@@ -87,15 +87,15 @@ class Projects(Endpoint):
 
     @api(version='2.1')
     def update_workbook_default_permissions(self, item, rules):
-        self._default_permissions.update_default_permissions(item, rules, Permission.Resource.Workbook)
+        return self._default_permissions.update_default_permissions(item, rules, Permission.Resource.Workbook)
 
     @api(version='2.1')
     def update_datasource_default_permissions(self, item, rules):
-        self._default_permissions.update_default_permissions(item, rules, Permission.Resource.Datasource)
+        return self._default_permissions.update_default_permissions(item, rules, Permission.Resource.Datasource)
 
     @api(version='3.4')
     def update_flow_default_permissions(self, item, rules):
-        self._default_permissions.update_default_permissions(item, rules, Permission.Resource.Flow)
+        return self._default_permissions.update_default_permissions(item, rules, Permission.Resource.Flow)
 
     @api(version='2.1')
     def delete_workbook_default_permissions(self, item, rule):

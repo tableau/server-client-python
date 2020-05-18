@@ -28,7 +28,9 @@ class WorkbookItem(object):
         self.show_tabs = show_tabs
         self.tags = set()
         self.data_acceleration_config = {'acceleration_enabled': None,
-                                         'accelerate_now': None}
+                                         'accelerate_now': None,
+                                         'last_updated_at': None,
+                                         'acceleration_status': None}
         self._permissions = None
 
     @property
@@ -248,7 +250,8 @@ class WorkbookItem(object):
         if views_elem is not None:
             views = ViewItem.from_xml_element(views_elem, ns)
 
-        data_acceleration_config = {'acceleration_enabled': None, 'accelerate_now': None}
+        data_acceleration_config = {'acceleration_enabled': None, 'accelerate_now': None,
+                                    'last_updated_at': None, 'acceleration_status': None}
         data_acceleration_elem = workbook_xml.find('.//t:dataAccelerationConfig', namespaces=ns)
         if data_acceleration_elem is not None:
             data_acceleration_config = parse_data_acceleration_config(data_acceleration_elem)
@@ -268,8 +271,16 @@ def parse_data_acceleration_config(data_acceleration_elem):
     if accelerate_now is not None:
         accelerate_now = string_to_bool(accelerate_now)
 
+    last_updated_at = data_acceleration_elem.get('lastUpdatedAt', None)
+    if last_updated_at is not None:
+        last_updated_at = parse_datetime(last_updated_at)
+
+    acceleration_status = data_acceleration_elem.get('accelerationStatus', None)
+
     data_acceleration_config['acceleration_enabled'] = acceleration_enabled
     data_acceleration_config['accelerate_now'] = accelerate_now
+    data_acceleration_config['last_updated_at'] = last_updated_at
+    data_acceleration_config['acceleration_status'] = acceleration_status
     return data_acceleration_config
 
 

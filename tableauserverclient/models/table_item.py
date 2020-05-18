@@ -1,9 +1,6 @@
 import xml.etree.ElementTree as ET
 
-from .permissions_item import Permission
-from .column_item import ColumnItem
-
-from .property_decorators import property_is_enum, property_not_empty, property_is_boolean
+from .property_decorators import property_not_empty, property_is_boolean
 from .exceptions import UnpopulatedPropertyError
 
 

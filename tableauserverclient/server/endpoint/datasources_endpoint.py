@@ -1,14 +1,12 @@
 from .endpoint import Endpoint, api, parameter_added_in
 from .exceptions import InternalServerError, MissingRequiredFieldError
-from .endpoint import api, parameter_added_in, Endpoint
 from .permissions_endpoint import _PermissionsEndpoint
-from .exceptions import MissingRequiredFieldError
 from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, DatasourceItem, PaginationItem, ConnectionItem
 from ...filesys_helpers import to_filename, make_download_path
-from ...models.tag_item import TagItem
 from ...models.job_item import JobItem
+
 import os
 import logging
 import copy
@@ -129,7 +127,8 @@ class Datasources(Endpoint):
         server_response = self.put_request(url, update_req)
         logger.info('Updated datasource item (ID: {0})'.format(datasource_item.id))
         updated_datasource = copy.copy(datasource_item)
-        return updated_datasource._parse_common_elements(server_response.content, self.parent_srv.namespace)
+        return updated_datasource._parse_common_elements(
+            server_response.content, self.parent_srv.namespace)
 
     # Update datasource connections
     @api(version="2.3")
@@ -144,8 +143,10 @@ class Datasources(Endpoint):
                                                                                     connection_item.id))
         return connection
 
+    @api(version="2.8")
     def refresh(self, datasource_item):
-        url = "{0}/{1}/refresh".format(self.baseurl, datasource_item.id)
+        id_ = getattr(datasource_item, 'id', datasource_item)
+        url = "{0}/{1}/refresh".format(self.baseurl, id_)
         empty_req = RequestFactory.Empty.empty_req()
         server_response = self.post_request(url, empty_req)
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]

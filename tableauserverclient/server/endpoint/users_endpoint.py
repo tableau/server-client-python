@@ -2,8 +2,9 @@ from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, UserItem, WorkbookItem, PaginationItem
 from ..pager import Pager
-import logging
+
 import copy
+import logging
 
 logger = logging.getLogger('tableau.endpoint.users')
 
@@ -65,7 +66,7 @@ class Users(Endpoint):
         add_req = RequestFactory.User.add_req(user_item)
         server_response = self.post_request(url, add_req)
         new_user = UserItem.from_response(server_response.content, self.parent_srv.namespace).pop()
-        logger.info('Added new user (ID: {0})'.format(user_item.id))
+        logger.info('Added new user (ID: {0})'.format(new_user.id))
         return new_user
 
     # Get workbooks for user
