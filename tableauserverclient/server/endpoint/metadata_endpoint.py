@@ -2,7 +2,7 @@ from .endpoint import Endpoint, api
 from .exceptions import GraphQLError
 import logging
 import json
-from urllib.parse import urlparse
+
 
 logger = logging.getLogger('tableau.endpoint.metadata')
 
