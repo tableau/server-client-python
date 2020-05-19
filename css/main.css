@@ -273,4 +273,8 @@ html {
 .size-1of2 { width: 50%; }
 .size-1of3 { width: 33.333%; }
 
-
+/* Legal and Privacy Links */
+.aLegal  {
+    word-spacing:  8px;
+    padding-right: 8px;
+}
