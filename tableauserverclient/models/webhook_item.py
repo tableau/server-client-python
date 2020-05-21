@@ -1,10 +1,5 @@
 import xml.etree.ElementTree as ET
-from .exceptions import UnpopulatedPropertyError
-from .property_decorators import property_not_nullable, property_is_boolean, property_is_data_acceleration_config
-from .tag_item import TagItem
-from .view_item import ViewItem
-from .permissions_item import PermissionsRule
-from ..datetime_helpers import parse_datetime
+
 import re
 
 
@@ -86,4 +81,5 @@ class WebhookItem(object):
         return id, name, url, event, owner_id
 
     def __repr__(self):
-        return "<Webhook id={} name={} url={} event={}>".format(self.id, self.name, self.url, self.event)
+        return "<Webhook id={} name={} url={} event={}>".format(
+            self.id, self.name, self.url, self.event)

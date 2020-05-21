@@ -5,7 +5,7 @@
 # For more information, refer to the documentations on 'Query View Image'
 # (https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm)
 #
-# To run the script, you must have installed Python 2.7.X or 3.3 and later.
+# To run the script, you must have installed Python 3.5 or later.
 ####
 
 import argparse

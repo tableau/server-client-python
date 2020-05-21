@@ -1,0 +1,15 @@
+{
+    "data": {
+        "publishedDatasourcesConnection": {
+            "pageInfo": {
+                "hasNextPage": true,
+                "endCursor": "eyJ0eXBlIjoiUHVibGlzaGVkRGF0YXNvdXJjZSIsInNjb3BlIjoic2l0ZXMvMSIsInNvcnRPcmRlclZhbHVlIjp7Imxhc3RJZCI6IjAwMzllNWQ1LTI1ZmEtMTk2Yi1jNjZlLWMwNjc1ODM5ZTBiMCJ9fQ=="
+            },
+            "nodes": [
+                {
+                    "id": "0039e5d5-25fa-196b-c66e-c0675839e0b0"
+                }
+            ]
+        }
+    }
+}

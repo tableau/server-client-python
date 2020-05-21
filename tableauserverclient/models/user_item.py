@@ -31,6 +31,7 @@ class UserItem(object):
         SupportUser = 'SupportUser'
 
     class Auth:
+        OpenID = 'OpenID'
         SAML = 'SAML'
         ServerDefault = 'ServerDefault'
 

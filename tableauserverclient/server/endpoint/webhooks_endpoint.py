@@ -1,8 +1,9 @@
-from .endpoint import Endpoint, api, parameter_added_in
+from .endpoint import Endpoint, api
 from ...models import WebhookItem, PaginationItem
 from .. import RequestFactory
 
 import logging
+
 logger = logging.getLogger('tableau.endpoint.webhooks')
 
 

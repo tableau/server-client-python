@@ -21,6 +21,7 @@ class ViewItem(object):
         self._sheet_type = None
         self._updated_at = None
         self._workbook_id = None
+        self._permissions = None
         self.tags = set()
 
     def _set_preview_image(self, preview_image):
@@ -105,6 +106,16 @@ class ViewItem(object):
     @property
     def workbook_id(self):
         return self._workbook_id
+
+    @property
+    def permissions(self):
+        if self._permissions is None:
+            error = "View item must be populated with permissions first."
+            raise UnpopulatedPropertyError(error)
+        return self._permissions()
+
+    def _set_permissions(self, permissions):
+        self._permissions = permissions
 
     @classmethod
     def from_response(cls, resp, ns, workbook_id=''):
