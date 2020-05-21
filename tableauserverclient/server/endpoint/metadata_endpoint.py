@@ -49,7 +49,7 @@ class Metadata(Endpoint):
     def baseurl(self):
         return "{0}/api/metadata/graphql".format(self.parent_srv.server_address)
 
-    @api("3.2")
+    @api("3.5")
     def query(self, query, variables=None, abort_on_error=False):
         logger.info('Querying Metadata API')
         url = self.baseurl
@@ -68,7 +68,7 @@ class Metadata(Endpoint):
 
         return results
 
-    @api("3.2")
+    @api("3.5")
     def paginated_query(self, query, variables=None, abort_on_error=False):
         logger.info('Querying Metadata API using a Paged Query')
         url = self.baseurl
@@ -103,13 +103,19 @@ class Metadata(Endpoint):
         has_another_page, cursor = get_page_info(results)
 
         while has_another_page:
+            # Update the page
             variables.update({'afterToken': cursor})
+            # make the call
             logger.debug("Calling Token: " + cursor)
             graphql_query = json.dumps({'query': query, 'variables': variables})
             server_response = self.post_request(url, graphql_query, content_type='text/json')
             results = server_response.json()
+            # verify response
+            if abort_on_error and results.get('errors', None):
+                raise GraphQLError(results['errors'])
+            # save results and repeat
             paginated_results.append(results)
             has_another_page, cursor = get_page_info(results)
 
-        logger.info('Sucessfully got results for paged query')
+        logger.info('Sucessfully got all results for paged query')
         return results_dict

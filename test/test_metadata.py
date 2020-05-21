@@ -35,7 +35,7 @@ class MetadataTests(unittest.TestCase):
     def setUp(self):
         self.server = TSC.Server('http://test')
         self.baseurl = self.server.metadata.baseurl
-        self.server.version = "3.2"
+        self.server.version = "3.5"
 
         self.server._site_id = 'dad65087-b08b-4603-af4e-2887b8aafc67'
         self.server._auth_token = 'j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM'
