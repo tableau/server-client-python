@@ -28,10 +28,10 @@ def get_favorites(server_response, namespace):
         if fav_workbook:
             favorites['workbooks'].append(fav_workbook)
     for view in parsed_response.findall('.//t:favorite[t:view]', namespace):
-        fav_view = ViewItem()
-        fav_view.from_xml_element(view, namespace)
-        if fav_view:
-            favorites['views'].append(fav_view)
+        fav_views = ViewItem.from_xml_element(view, namespace)
+        if fav_views:
+            for fav_view in fav_views:
+                favorites['views'].append(fav_view)
     for datasource in parsed_response.findall('.//t:favorite/t:datasource', namespace):
         fav_datasource = DatasourceItem('')
         fav_datasource._set_values(*fav_datasource._parse_element(datasource, namespace))
