@@ -38,6 +38,16 @@ class FavoritesTests(unittest.TestCase):
         self.assertEqual(len(self.user.favorites['views']), 1)
         self.assertEqual(len(self.user.favorites['projects']), 1)
         self.assertEqual(len(self.user.favorites['datasources']), 1)
+        
+        workbook = self.user.favorites['workbooks'][0]
+        view = self.user.favorites['views'][0]
+        datasource = self.user.favorites['datasources'][0]
+        project = self.user.favorites['projects'][0]
+
+        self.assertEqual(workbook.id, '6d13b0ca-043d-4d42-8c9d-3f3313ea3a00')
+        self.assertEqual(view.id, 'd79634e1-6063-4ec9-95ff-50acbf609ff5')
+        self.assertEqual(datasource.id, 'e76a1461-3b1d-4588-bf1b-17551a879ad9')
+        self.assertEqual(project.id, '1d0304cd-3796-429f-b815-7258370b9b74')
 
     def test_add_favorite_workbook(self):
         response_xml = read_xml_asset(ADD_FAVORITE_WORKBOOK_XML)
