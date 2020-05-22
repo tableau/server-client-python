@@ -12,6 +12,7 @@ GET_FAVORITES_XML = 'favorites_get.xml'
 ADD_FAVORITE_WORKBOOK_XML = 'favorites_add_workbook.xml'
 ADD_FAVORITE_VIEW_XML = 'favorites_add_view.xml'
 ADD_FAVORITE_DATASOURCE_XML = 'favorites_add_datasource.xml'
+ADD_FAVORITE_PROJECT_XML = 'favorites_add_project.xml'
 
 class FavoritesTests(unittest.TestCase):
     def setUp(self):
@@ -67,3 +68,14 @@ class FavoritesTests(unittest.TestCase):
             m.put('{0}/{1}'.format(self.baseurl, self.user.id), 
                   text=response_xml)
             self.server.favorites.add_favorite_datasource(self.user, datasource)
+
+    def test_add_favorite_project(self):
+        self.server.version='3.1'
+        baseurl = self.server.favorites.baseurl
+        response_xml = read_xml_asset(ADD_FAVORITE_PROJECT_XML)
+        project = TSC.ProjectItem('Tableau')
+        project._id = '1d0304cd-3796-429f-b815-7258370b9b74'
+        with requests_mock.mock() as m:
+            m.put('{0}/{1}'.format(baseurl, self.user.id), 
+                  text=response_xml)
+            self.server.favorites.add_favorite_project(self.user, project)
