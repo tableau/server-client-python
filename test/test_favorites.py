@@ -10,6 +10,7 @@ from ._utils import read_xml_asset, read_xml_assets, asset
 
 GET_FAVORITES_XML = 'favorites_get.xml'
 ADD_FAVORITE_WORKBOOK_XML = 'favorites_add_workbook.xml'
+ADD_FAVORITE_VIEW_XML = 'favorites_add_view.xml'
 
 class FavoritesTests(unittest.TestCase):
     def setUp(self):
@@ -45,4 +46,14 @@ class FavoritesTests(unittest.TestCase):
             m.put('{0}/{1}'.format(self.baseurl, self.user.id), 
                   text=response_xml)
             self.server.favorites.add_favorite_workbook(self.user, workbook)
+
+    def test_add_favorite_view(self):
+        response_xml = read_xml_asset(ADD_FAVORITE_VIEW_XML)
+        view = TSC.ViewItem()
+        view._id = 'd79634e1-6063-4ec9-95ff-50acbf609ff5'
+        view._name = 'ENDANGERED SAFARI'
+        with requests_mock.mock() as m:
+            m.put('{0}/{1}'.format(self.baseurl, self.user.id), 
+                  text=response_xml)
+            self.server.favorites.add_favorite_view(self.user, view)
 
