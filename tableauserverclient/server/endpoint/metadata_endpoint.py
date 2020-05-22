@@ -3,6 +3,7 @@ from .exceptions import GraphQLError, InvalidGraphQLQuery
 import logging
 import json
 
+
 logger = logging.getLogger('tableau.endpoint.metadata')
 
 
@@ -49,6 +50,10 @@ class Metadata(Endpoint):
     def baseurl(self):
         return "{0}/api/metadata/graphql".format(self.parent_srv.server_address)
 
+    @property
+    def control_baseurl(self):
+        return "{0}/api/metadata/v1/control".format(self.parent_srv.server_address)
+
     @api("3.5")
     def query(self, query, variables=None, abort_on_error=False):
         logger.info('Querying Metadata API')
@@ -67,6 +72,18 @@ class Metadata(Endpoint):
             raise GraphQLError(results['errors'])
 
         return results
+
+    @api("3.9")
+    def backfill_status(self):
+        url = self.control_baseurl + "/backfill/status"
+        response = self.get_request(url)
+        return response.json()
+
+    @api("3.9")
+    def eventing_status(self):
+        url = self.control_baseurl + "/eventing/status"
+        response = self.get_request(url)
+        return response.json()
 
     @api("3.5")
     def paginated_query(self, query, variables=None, abort_on_error=False):
