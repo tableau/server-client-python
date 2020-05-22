@@ -11,6 +11,7 @@ from ._utils import read_xml_asset, read_xml_assets, asset
 GET_FAVORITES_XML = 'favorites_get.xml'
 ADD_FAVORITE_WORKBOOK_XML = 'favorites_add_workbook.xml'
 ADD_FAVORITE_VIEW_XML = 'favorites_add_view.xml'
+ADD_FAVORITE_DATASOURCE_XML = 'favorites_add_datasource.xml'
 
 class FavoritesTests(unittest.TestCase):
     def setUp(self):
@@ -57,3 +58,12 @@ class FavoritesTests(unittest.TestCase):
                   text=response_xml)
             self.server.favorites.add_favorite_view(self.user, view)
 
+    def test_add_favorite_datasource(self):
+        response_xml = read_xml_asset(ADD_FAVORITE_DATASOURCE_XML)
+        datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+        datasource._id = 'e76a1461-3b1d-4588-bf1b-17551a879ad9'
+        datasource.name = 'SampleDS'
+        with requests_mock.mock() as m:
+            m.put('{0}/{1}'.format(self.baseurl, self.user.id), 
+                  text=response_xml)
+            self.server.favorites.add_favorite_datasource(self.user, datasource)
