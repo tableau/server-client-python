@@ -9,6 +9,7 @@ from tableauserverclient.server.request_factory import RequestFactory
 from ._utils import read_xml_asset, read_xml_assets, asset
 
 GET_FAVORITES_XML = 'favorites_get.xml'
+ADD_FAVORITE_WORKBOOK_XML = 'favorites_add_workbook.xml'
 
 class FavoritesTests(unittest.TestCase):
     def setUp(self):
@@ -34,3 +35,14 @@ class FavoritesTests(unittest.TestCase):
         self.assertEqual(len(self.user.favorites['views']), 1)
         self.assertEqual(len(self.user.favorites['projects']), 1)
         self.assertEqual(len(self.user.favorites['datasources']), 1)
+
+    def test_add_favorite_workbook(self):
+        response_xml = read_xml_asset(ADD_FAVORITE_WORKBOOK_XML)
+        workbook = TSC.WorkbookItem('')
+        workbook._id = '6d13b0ca-043d-4d42-8c9d-3f3313ea3a00'
+        workbook.name = 'Superstore'
+        with requests_mock.mock() as m:
+            m.put('{0}/{1}'.format(self.baseurl, self.user.id), 
+                  text=response_xml)
+            self.server.favorites.add_favorite_workbook(self.user, workbook)
+
