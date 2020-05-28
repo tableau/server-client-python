@@ -100,14 +100,14 @@ class ProjectTests(unittest.TestCase):
 
             new_rules = self.server.projects.update_datasource_default_permissions(project, rules)
 
-        self.assertEquals('b4488bce-80f0-11ea-af1c-976d0c1dab39', new_rules[0].grantee.id)
+        self.assertEqual('b4488bce-80f0-11ea-af1c-976d0c1dab39', new_rules[0].grantee.id)
 
         updated_capabilities = new_rules[0].capabilities
-        self.assertEquals(4, len(updated_capabilities))
-        self.assertEquals('Deny', updated_capabilities['ExportXml'])
-        self.assertEquals('Allow', updated_capabilities['Read'])
-        self.assertEquals('Allow', updated_capabilities['Write'])
-        self.assertEquals('Allow', updated_capabilities['Connect'])
+        self.assertEqual(4, len(updated_capabilities))
+        self.assertEqual('Deny', updated_capabilities['ExportXml'])
+        self.assertEqual('Allow', updated_capabilities['Read'])
+        self.assertEqual('Allow', updated_capabilities['Write'])
+        self.assertEqual('Allow', updated_capabilities['Connect'])
 
     def test_update_missing_id(self):
         single_project = TSC.ProjectItem('test')
