@@ -4,7 +4,7 @@ from .exceptions import NotSignedInError
 from ..namespace import Namespace
 from .endpoint import Sites, Views, Users, Groups, Workbooks, Datasources, Projects, Auth, \
     Schedules, ServerInfo, Tasks, Subscriptions, Jobs, Metadata,\
-    Databases, Tables, Flows, Webhooks, DataAccelerationReport
+    Databases, Tables, Flows, Webhooks, DataAccelerationReport, Favorites
 from .endpoint.exceptions import EndpointUnavailableError, ServerInfoEndpointNotFoundError
 
 import requests
