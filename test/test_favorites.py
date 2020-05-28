@@ -14,6 +14,7 @@ ADD_FAVORITE_VIEW_XML = 'favorites_add_view.xml'
 ADD_FAVORITE_DATASOURCE_XML = 'favorites_add_datasource.xml'
 ADD_FAVORITE_PROJECT_XML = 'favorites_add_project.xml'
 
+
 class FavoritesTests(unittest.TestCase):
     def setUp(self):
         self.server = TSC.Server('http://test')
@@ -38,7 +39,7 @@ class FavoritesTests(unittest.TestCase):
         self.assertEqual(len(self.user.favorites['views']), 1)
         self.assertEqual(len(self.user.favorites['projects']), 1)
         self.assertEqual(len(self.user.favorites['datasources']), 1)
-        
+
         workbook = self.user.favorites['workbooks'][0]
         view = self.user.favorites['views'][0]
         datasource = self.user.favorites['datasources'][0]
@@ -80,7 +81,7 @@ class FavoritesTests(unittest.TestCase):
             self.server.favorites.add_favorite_datasource(self.user, datasource)
 
     def test_add_favorite_project(self):
-        self.server.version='3.1'
+        self.server.version = '3.1'
         baseurl = self.server.favorites.baseurl
         response_xml = read_xml_asset(ADD_FAVORITE_PROJECT_XML)
         project = TSC.ProjectItem('Tableau')
@@ -118,7 +119,7 @@ class FavoritesTests(unittest.TestCase):
             self.server.favorites.delete_favorite_datasource(self.user, datasource)
 
     def test_delete_favorite_project(self):
-        self.server.version='3.1'
+        self.server.version = '3.1'
         baseurl = self.server.favorites.baseurl
         project = TSC.ProjectItem('Tableau')
         project._id = '1d0304cd-3796-429f-b815-7258370b9b74'
