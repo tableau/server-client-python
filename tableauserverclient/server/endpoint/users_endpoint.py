@@ -2,8 +2,9 @@ from .endpoint import QuerysetEndpoint, api
 from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, UserItem, WorkbookItem, PaginationItem
 from ..pager import Pager
-import logging
+
 import copy
+import logging
 
 logger = logging.getLogger('tableau.endpoint.users')
 

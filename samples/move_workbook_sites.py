@@ -4,7 +4,7 @@
 # a workbook that matches a given name, download the workbook,
 # and then publish it to the destination site.
 #
-# To run the script, you must have installed Python 2.7.X or 3.3 and later.
+# To run the script, you must have installed Python 3.5 or later.
 ####
 
 import argparse

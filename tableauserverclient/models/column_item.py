@@ -1,7 +1,6 @@
 import xml.etree.ElementTree as ET
 
-from .property_decorators import property_is_enum, property_not_empty
-from .exceptions import UnpopulatedPropertyError
+from .property_decorators import property_not_empty
 
 
 class ColumnItem(object):

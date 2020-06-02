@@ -83,6 +83,7 @@ class RequestOptions(RequestOptionsBase):
 
 class _FilterOptionsBase(RequestOptionsBase):
     """ Provide a basic implementation of adding view filters to the url """
+
     def __init__(self):
         self.view_filters = []
 

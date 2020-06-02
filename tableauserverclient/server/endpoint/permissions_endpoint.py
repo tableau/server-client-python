@@ -2,7 +2,7 @@ import logging
 
 from .. import RequestFactory, PermissionsRule
 
-from .endpoint import Endpoint, api
+from .endpoint import Endpoint
 from .exceptions import MissingRequiredFieldError
 
 
@@ -10,13 +10,14 @@ logger = logging.getLogger(__name__)
 
 
 class _PermissionsEndpoint(Endpoint):
-    ''' Adds permission model to another endpoint
+    """ Adds permission model to another endpoint
 
     Tableau permissions model is identical between objects but they are nested under
     the parent object endpoint (i.e. permissions for workbooks are under
     /workbooks/:id/permission).  This class is meant to be instantated inside a
     parent endpoint which has these supported endpoints
-    '''
+    """
+
     def __init__(self, parent_srv, owner_baseurl):
         super(_PermissionsEndpoint, self).__init__(parent_srv)
 

@@ -2,7 +2,7 @@
 # This script demonstrates how to set http options. It will set the option
 # to not verify SSL certificate, and query all workbooks on site.
 #
-# To run the script, you must have installed Python 2.7.X or 3.3 and later.
+# To run the script, you must have installed Python 3.5 or later.
 ####
 
 import argparse

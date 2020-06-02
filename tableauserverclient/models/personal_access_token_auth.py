@@ -8,7 +8,12 @@ class PersonalAccessTokenAuth(object):
 
     @property
     def credentials(self):
-        return {'personalAccessTokenName': self.token_name, 'personalAccessTokenSecret': self.personal_access_token}
+        return {
+            'personalAccessTokenName': self.token_name,
+            'personalAccessTokenSecret': self.personal_access_token
+        }
 
     def __repr__(self):
-        return "<PersonalAccessToken name={} token={}>".format(self.token_name, self.personal_access_token)
+        return "<PersonalAccessToken name={} token={}>".format(
+            self.token_name, self.personal_access_token
+        )

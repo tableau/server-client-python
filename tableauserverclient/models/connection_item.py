@@ -32,8 +32,10 @@ class ConnectionItem(object):
         return self._connection_type
 
     def __repr__(self):
-        return "<ConnectionItem#{_id} embed={embed_password} type={_connection_type} username={username}>"\
-            .format(**self.__dict__)
+        return (
+            "<ConnectionItem#{_id} embed={embed_password} "
+            "type={_connection_type} username={username}>".format(**self.__dict__)
+        )
 
     @classmethod
     def from_response(cls, resp, ns):
@@ -76,11 +78,13 @@ class ConnectionItem(object):
             connection_item.server_address = connection_xml.get('serverAddress', None)
             connection_item.server_port = connection_xml.get('serverPort', None)
 
-            connection_credentials = connection_xml.find('.//t:connectionCredentials', namespaces=ns)
+            connection_credentials = connection_xml.find(
+                './/t:connectionCredentials', namespaces=ns)
 
             if connection_credentials is not None:
 
-                connection_item.connection_credentials = ConnectionCredentials.from_xml_element(connection_credentials)
+                connection_item.connection_credentials = ConnectionCredentials.from_xml_element(
+                    connection_credentials)
 
         return all_connection_items
 

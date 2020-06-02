@@ -4,7 +4,6 @@ from .permissions_endpoint import _PermissionsEndpoint
 from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, WorkbookItem, ConnectionItem, ViewItem, PaginationItem
-from ...models.tag_item import TagItem
 from ...models.job_item import JobItem
 from ...filesys_helpers import to_filename, make_download_path
 

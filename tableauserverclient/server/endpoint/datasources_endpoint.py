@@ -7,6 +7,7 @@ from .. import RequestFactory, DatasourceItem, PaginationItem, ConnectionItem
 from ..query import QuerySet
 from ...filesys_helpers import to_filename, make_download_path
 from ...models.job_item import JobItem
+
 import os
 import logging
 import copy
@@ -127,7 +128,8 @@ class Datasources(QuerysetEndpoint):
         server_response = self.put_request(url, update_req)
         logger.info('Updated datasource item (ID: {0})'.format(datasource_item.id))
         updated_datasource = copy.copy(datasource_item)
-        return updated_datasource._parse_common_elements(server_response.content, self.parent_srv.namespace)
+        return updated_datasource._parse_common_elements(
+            server_response.content, self.parent_srv.namespace)
 
     # Update datasource connections
     @api(version="2.3")

@@ -74,7 +74,7 @@ class Endpoint(object):
                 # we convert this to a better exception and pass through the raw
                 # response body
                 raise NonXMLResponseError(server_response.content)
-            except Exception as e:
+            except Exception:
                 # anything else re-raise here
                 raise
 
