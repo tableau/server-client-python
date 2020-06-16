@@ -1,5 +1,6 @@
 from ..models.property_decorators import property_is_int
 
+
 class RequestOptionsBase(object):
     def apply_query_params(self, url):
         raise NotImplementedError()
