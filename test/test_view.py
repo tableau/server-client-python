@@ -164,7 +164,7 @@ class ViewTests(unittest.TestCase):
             m.get(self.baseurl + '/d79634e1-6063-4ec9-95ff-50acbf609ff5/data?maxAge=1', content=response)
             single_view = TSC.ViewItem()
             single_view._id = 'd79634e1-6063-4ec9-95ff-50acbf609ff5'
-            request_option = TSC.CSVRequestOptions(1)
+            request_option = TSC.CSVRequestOptions(maxage=1)
             self.server.views.populate_csv(single_view, request_option)
 
             csv_file = b"".join(single_view.csv)
