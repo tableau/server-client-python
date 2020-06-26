@@ -1595,9 +1595,15 @@ Name  |  Description
 ### CSVRequestOptions class
 
 ```py
-CSVRequestOptions()
+CSVRequestOptions(maxage=-1)
 ```
-Use this class to specify view filters to be applied when the CSV data is generated. See `views.populate_csv`.
+Use this class to specify view filters to be applied when the CSV data is generated. This class can also be used to specify the maxage of the cached CSV data on server. See `views.populate_csv`.
+
+**Attributes**
+
+Name  |  Description  
+:--- | :---  
+`maxage` | The maximum number of minutes the CSV data will be cached on server before being refreshed. Value must be an integer between `1` and `240` minutes. `0` will be interpreted as 1 minute on server, as that is the shortest interval allowed. By default, maxage is set to `-1`, indicating default server behavior.
 
 **Example**
 
@@ -1607,7 +1613,7 @@ Use this class to specify view filters to be applied when the CSV data is genera
 # sign in, get a specific view, etc.
 
 # set view filters
-csv_req_option = TSC.CSVRequestOptions()
+csv_req_option = TSC.CSVRequestOptions(maxage=5)
 csv_req_option.vf('Region', 'South')
 csv_req_option.vf('Category', 'Furniture')
 
@@ -1618,15 +1624,16 @@ server.views.populate_csv(view_item, csv_req_option)
 ### ImageRequestOptions class
 
 ```py  
-ImageRequestOptions(imageresolution=None)
+ImageRequestOptions(imageresolution=None, maxage=-1)
 ```
-Use this class to specify the resolution of the view returned as an image. You can also use this class to specify view filters to be applied when the image is generated. See `views.populate_image`. 
+Use this class to specify the resolution of the view or the maxage of the cached image on server. You can also use this class to specify view filters to be applied when the image is generated. See `views.populate_image`. 
 
 **Attributes**
 
 Name  |  Description  
 :--- | :---  
 `imageresolution` | The resolution of the view returned as an image. You set this option with the `Resolution` class. If unspecified, the `views.populate_image` method returns an image with standard resolution (the width of the returned image is 784 pixels). If you set this parameter value to high (`Resolution.High`), the width of the returned image is 1568 pixels. For both resolutions, the height varies to preserve the aspect ratio of the view.
+`maxage` | The maximum number of minutes the image will be cached on server before being refreshed. Value must be an integer between `1` and `240` minutes. `0` will be interpreted as 1 minute on server, as that is the shortest interval allowed. By default, maxage is set to `-1`, indicating default server behavior.
 
 **View Filters**
 
@@ -1640,7 +1647,7 @@ You can use the `vf('filter_name', 'filter_value')` method to add view filters. 
 # sign in, get a specific view, etc.  
 
 # set the image request option 
-image_req_option = TSC.ImageRequestOptions(imageresolution=TSC.ImageRequestOptions.Resolution.High)
+image_req_option = TSC.ImageRequestOptions(imageresolution=TSC.ImageRequestOptions.Resolution.High, maxage=1)
 
 # (optional) set a view filter
 image_req_option.vf('Category', 'Furniture')
@@ -1653,9 +1660,9 @@ server.views.populate_image(view_item, image_req_option)
 ### PDFRequestOptions class
 
 ```py  
-PDFRequestOptions(page_type=None, orientation=None)
+PDFRequestOptions(page_type=None, orientation=None, maxage=-1)
 ```
-Use this class to specify the format of the PDF that is returned for the view. See `views.populate_pdf`. 
+Use this class to specify the format of the PDF that is returned for the view. This class can also be used to specify the maxage of the cached PDF render on server. See `views.populate_pdf`. 
 
 **Attributes**
 
@@ -1663,6 +1670,7 @@ Name  |  Description
 :--- | :---  
 `page_type` | The type of page returned in PDF format for the view. The page_type is set using the `PageType` class: <br> `PageType.A3`<br> `PageType.A4`<br> `PageType.A5`<br> `PageType.B5`<br> `PageType.Executive`<br> `PageType.Folio`<br>  `PageType.Ledger`<br> `PageType.Legal`<br> `PageType.Letter`<br> `PageType.Note`<br> `PageType.Quarto`<br> `PageType.Tabloid`
 `orientation` | The orientation of the page. The options are portrait and landscape. The options are set using the `Orientation` class: <br>`Orientation.Portrait`<br> `Orientation.Landscape`
+`maxage` | The maximum number of minutes the PDF render will be cached on server before being refreshed. Value must be an integer between `1` and `240` minutes. `0` will be interpreted as 1 minute on server, as that is the shortest interval allowed. By default, maxage is set to `-1`, indicating default server behavior.
 
 **View Filters**
 You can use the `vf('filter_name', 'filter_value')` method to add view filters. When the PDF is generated, the specified filters will be applied to the view.
@@ -1675,7 +1683,9 @@ You can use the `vf('filter_name', 'filter_value')` method to add view filters. 
 # sign in, get a specific view, etc.  
 
 # set the PDF request options
-pdf_req_option = TSC.PDFRequestOptions(page_type=TSC.PDFRequestOptions.PageType.A4, orientation=TSC.PDFRequestOptions.Orientation.Landscape)
+pdf_req_option = TSC.PDFRequestOptions(page_type=TSC.PDFRequestOptions.PageType.A4,
+				       orientation=TSC.PDFRequestOptions.Orientation.Landscape,
+				       maxage=1)
 
 # (optional) set a view filter
 pdf_req_option.vf('Region', 'West')
@@ -3259,7 +3269,7 @@ This endpoint is available with REST API version 2.5 and up.
 Name | description
 :--- | :---
 `view_item` | Specifies the view to populate.
-`req_options` | (Optional) You can pass in a request object to specify a high resolution image. By default, the image will be in low resolution. You can also specify view filters to be applied when the image is generated. See [ImageRequestOptions class](#imagerequestoptions-class) for more details.
+`req_options` | (Optional) You can pass in request options to specify the image resolution and the maxage of the cached view image on server. By default, the image will be in low resolution and cached for 240 minutes. You can also specify view filters to be applied when the image is generated. See [ImageRequestOptions class](#imagerequestoptions-class) for more details.
 
 **Exceptions**
 
@@ -3306,7 +3316,7 @@ This endpoint is available with REST API version 2.7 and up.
 Name | description
 :--- | :---
 `view_item` | Specifies the view to populate.
-`req_options` | (Optional) You can pass in a request object to specify view filters to be applied when the CSV data is generated. See [CSVRequestOptions class](#csvrequestoptions-class) for more details.
+`req_options` | (Optional) You can pass in a request object to specify view filters to be applied when the CSV data is generated. You can also specify the maxage of the cached view data on server, which is cached for 240 minutes by default. See [CSVRequestOptions class](#csvrequestoptions-class) for more details.
 
 **Exceptions**
 
@@ -3354,7 +3364,7 @@ This endpoint is available with REST API version 2.7 and up.
 Name | description
 :--- | :---
 `view_item` | Specifies the view to populate.
-`req_options` | (Optional) You can pass in a request object to specify the page type and orientation of the PDF content. If not specified, PDF content will have default page type and orientation. You can also specify view filters to be applied when the PDF is generated. See [PDFRequestOptions class](#pdfrequestoptions-class) for more details.
+`req_options` | (Optional) You can pass in a request object to specify the page type and orientation of the PDF content, as well as the maxage of the cached PDF render on server. If not specified, PDF content will have default page type and orientation, and will be cached for 240 minutes. You can also specify view filters to be applied when the PDF is generated. See [PDFRequestOptions class](#pdfrequestoptions-class) for more details.
 
 **Exceptions**
 
@@ -3995,6 +4005,9 @@ None. The preview image is added to the view.
 
 ```  
 
+<br>
+<br> 
+
 #### workbooks.update_connection
 
 ```py
@@ -4041,5 +4054,50 @@ server.workbooks.update_conn(workbook, connection)
 
 <br>
 <br> 
+
+#### workbooks.populate_pdf
+```
+workbooks.populate_pdf(workbook_item, req_options=None)
+```
+
+Populates the PDF content of the specified workbook.
+
+This method uses the `id` field to query the PDF content, and populates the content as the `pdf` field.
+
+REST API: [Download Workbook PDF](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooksviews.htm#download_workbook_pdf){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.4 and up.
+
+**Parameters**
+
+Name | description
+:--- | :---
+`workbook_item` | Specifies the workbook to populate.
+`req_options` | (Optional) You can pass in a request object to specify the page type and orientation of the PDF content, as well as the maxage of the cached PDF render on server. If not specified, PDF content will have default page type and orientation, and will be cached for 240 minutes. See [PDFRequestOptions class](#pdfrequestoptions-class) for more details.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`Workbook item missing ID` | Raises an error if the ID of the workbook is missing.
+
+**Returns**
+
+None. The PDF content is added to the `workbook_item` and can be accessed by its `pdf` field.
+
+**Example**
+```py
+# Sign in, get view, etc.
+
+# Populate and save the workbook pdf as 'workbook_pdf.pdf'
+server.workbooks.populate_pdf(workbook_item)
+with open('./workbook_pdf.pdf', 'wb') as f:
+	f.write(workbook_item.pdf)
+```
+
+<br>
+<br>
 
 
