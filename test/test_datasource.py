@@ -40,6 +40,7 @@ class DatasourceTests(unittest.TestCase):
         self.assertEqual(2, pagination_item.total_available)
         self.assertEqual('e76a1461-3b1d-4588-bf1b-17551a879ad9', all_datasources[0].id)
         self.assertEqual('dataengine', all_datasources[0].datasource_type)
+        self.assertEqual('SampleDsDescription', all_datasources[0].description)
         self.assertEqual('SampleDS', all_datasources[0].content_url)
         self.assertEqual('2016-08-11T21:22:40Z', format_datetime(all_datasources[0].created_at))
         self.assertEqual('2016-08-11T21:34:17Z', format_datetime(all_datasources[0].updated_at))
@@ -50,6 +51,7 @@ class DatasourceTests(unittest.TestCase):
 
         self.assertEqual('9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', all_datasources[1].id)
         self.assertEqual('dataengine', all_datasources[1].datasource_type)
+        self.assertEqual('description Sample', all_datasources[1].description)
         self.assertEqual('Sampledatasource', all_datasources[1].content_url)
         self.assertEqual('2016-08-04T21:31:55Z', format_datetime(all_datasources[1].created_at))
         self.assertEqual('2016-08-04T21:31:55Z', format_datetime(all_datasources[1].updated_at))
@@ -80,6 +82,7 @@ class DatasourceTests(unittest.TestCase):
 
         self.assertEqual('9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', single_datasource.id)
         self.assertEqual('dataengine', single_datasource.datasource_type)
+        self.assertEqual('abc description xyz', single_datasource.description)
         self.assertEqual('Sampledatasource', single_datasource.content_url)
         self.assertEqual('2016-08-04T21:31:55Z', format_datetime(single_datasource.created_at))
         self.assertEqual('2016-08-04T21:31:55Z', format_datetime(single_datasource.updated_at))

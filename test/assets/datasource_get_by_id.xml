@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
-    <datasource id="9dbd2263-16b5-46e1-9c43-a76bb8ab65fb" name="Sample datasource" contentUrl="Sampledatasource" type="dataengine" createdAt="2016-08-04T21:31:55Z" updatedAt="2016-08-04T21:31:55Z">
+    <datasource id="9dbd2263-16b5-46e1-9c43-a76bb8ab65fb" name="Sample datasource" contentUrl="Sampledatasource" description="abc description xyz" type="dataengine" createdAt="2016-08-04T21:31:55Z" updatedAt="2016-08-04T21:31:55Z">
         <project id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760" name="default" />
         <owner id="5de011f8-5aa9-4d5b-b991-f462c8dd6bb7" />
         <tags>
