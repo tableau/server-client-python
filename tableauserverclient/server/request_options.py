@@ -103,7 +103,7 @@ class _FilterOptionsBase(RequestOptionsBase):
 
 
 class CSVRequestOptions(_FilterOptionsBase):
-    def __init__(self, maxage=None):
+    def __init__(self, maxage=-1):
         super(CSVRequestOptions, self).__init__()
         self.max_age = maxage
 
@@ -112,13 +112,13 @@ class CSVRequestOptions(_FilterOptionsBase):
         return self._max_age
 
     @max_age.setter
-    @property_is_int(range=(0, 240))
+    @property_is_int(range=(0, 240), allowed=[-1])
     def max_age(self, value):
         self._max_age = value
 
     def apply_query_params(self, url):
         params = []
-        if self.max_age != 0:
+        if self.max_age != -1:
             params.append('maxAge={0}'.format(self.max_age))
 
         self._append_view_filters(params)
@@ -130,7 +130,7 @@ class ImageRequestOptions(_FilterOptionsBase):
     class Resolution:
         High = 'high'
 
-    def __init__(self, imageresolution=None, maxage=None):
+    def __init__(self, imageresolution=None, maxage=-1):
         super(ImageRequestOptions, self).__init__()
         self.image_resolution = imageresolution
         self.max_age = maxage
@@ -140,7 +140,7 @@ class ImageRequestOptions(_FilterOptionsBase):
         return self._max_age
 
     @max_age.setter
-    @property_is_int(range=(0, 240))
+    @property_is_int(range=(0, 240), allowed=[-1])
     def max_age(self, value):
         self._max_age = value
 
@@ -148,7 +148,7 @@ class ImageRequestOptions(_FilterOptionsBase):
         params = []
         if self.image_resolution:
             params.append('resolution={0}'.format(self.image_resolution))
-        if self.max_age != 0:
+        if self.max_age != -1:
             params.append('maxAge={0}'.format(self.max_age))
 
         self._append_view_filters(params)
@@ -176,7 +176,7 @@ class PDFRequestOptions(_FilterOptionsBase):
         Portrait = "portrait"
         Landscape = "landscape"
 
-    def __init__(self, page_type=None, orientation=None, maxage=0):
+    def __init__(self, page_type=None, orientation=None, maxage=-1):
         super(PDFRequestOptions, self).__init__()
         self.page_type = page_type
         self.orientation = orientation
@@ -187,7 +187,7 @@ class PDFRequestOptions(_FilterOptionsBase):
         return self._max_age
 
     @max_age.setter
-    @property_is_int(range=(0, 240))
+    @property_is_int(range=(0, 240), allowed=[-1])
     def max_age(self, value):
         self._max_age = value
 
@@ -199,7 +199,7 @@ class PDFRequestOptions(_FilterOptionsBase):
         if self.orientation:
             params.append('orientation={0}'.format(self.orientation))
 
-        if self.max_age != 0:
+        if self.max_age != -1:
             params.append('maxAge={0}'.format(self.max_age))
 
         self._append_view_filters(params)
