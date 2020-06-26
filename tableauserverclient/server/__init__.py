@@ -8,7 +8,7 @@ from .. import ConnectionItem, DatasourceItem, DatabaseItem, JobItem, Background
     PermissionsRule, Permission, ColumnItem, FlowItem, WebhookItem
 from .endpoint import Auth, Datasources, Endpoint, Groups, Projects, Schedules, \
     Sites, Tables, Users, Views, Workbooks, Subscriptions, ServerResponseError, \
-    MissingRequiredFieldError, Flows
+    MissingRequiredFieldError, Flows, Favorites
 from .server import Server
 from .pager import Pager
 from .exceptions import NotSignedInError
