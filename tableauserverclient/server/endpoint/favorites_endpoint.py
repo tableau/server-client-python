@@ -1,7 +1,7 @@
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory
-from ...models import get_favorites
+from ...models import FavoriteItem
 from ..pager import Pager
 import xml.etree.ElementTree as ET
 import logging
@@ -22,7 +22,8 @@ class Favorites(Endpoint):
         url = '{0}/{1}'.format(self.baseurl, user_item.id)
         server_response = self.get_request(url, req_options)
 
-        user_item._favorites = get_favorites(server_response, self.parent_srv.namespace)
+        user_item._favorites = FavoriteItem.from_response(server_response.content, 
+                                             self.parent_srv.namespace)
 
     @api(version="2.0")
     def add_favorite_workbook(self, user_item, workbook_item):
