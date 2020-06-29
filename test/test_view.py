@@ -170,6 +170,18 @@ class ViewTests(unittest.TestCase):
             csv_file = b"".join(single_view.csv)
             self.assertEqual(response, csv_file)
 
+    def test_populate_csv_default_maxage(self):
+        with open(POPULATE_CSV, 'rb') as f:
+            response = f.read()
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + '/d79634e1-6063-4ec9-95ff-50acbf609ff5/data', content=response)
+            single_view = TSC.ViewItem()
+            single_view._id = 'd79634e1-6063-4ec9-95ff-50acbf609ff5'
+            self.server.views.populate_csv(single_view)
+
+            csv_file = b"".join(single_view.csv)
+            self.assertEqual(response, csv_file)
+
     def test_populate_image_missing_id(self):
         single_view = TSC.ViewItem()
         single_view._id = None
