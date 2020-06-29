@@ -1597,13 +1597,13 @@ Name  |  Description
 ```py
 CSVRequestOptions(maxage=-1)
 ```
-Use this class to specify view filters to be applied when the CSV data is generated. This class can also be used to specify the maxage of the cached CSV data on server. See `views.populate_csv`.
+Use this class to specify view filters to be applied when the CSV data is generated. Optionally, you can specify the maximum age of the CSV data cached on the server by providing a `maxage` value. See `views.populate_csv`.
 
 **Attributes**
 
 Name  |  Description  
 :--- | :---  
-`maxage` | The maximum number of minutes the CSV data will be cached on server before being refreshed. Value must be an integer between `1` and `240` minutes. `0` will be interpreted as 1 minute on server, as that is the shortest interval allowed. By default, maxage is set to `-1`, indicating default server behavior.
+`maxage` | Optional. The maximum number of minutes the CSV data will be cached on the server before being refreshed. The value must be an integer between `1` and `240` minutes. `0` will be interpreted as 1 minute on server, as that is the shortest interval allowed. By default, `maxage` is set to `-1`, indicating the default behavior configured in server settings.
 
 **Example**
 
@@ -1626,14 +1626,14 @@ server.views.populate_csv(view_item, csv_req_option)
 ```py  
 ImageRequestOptions(imageresolution=None, maxage=-1)
 ```
-Use this class to specify the resolution of the view or the maxage of the cached image on server. You can also use this class to specify view filters to be applied when the image is generated. See `views.populate_image`. 
+Use this class to specify the resolution of the view and, optionally, the maximum age of the image cached on the server. You can also use this class to specify view filters to be applied when the image is generated. See `views.populate_image`.
 
 **Attributes**
 
 Name  |  Description  
 :--- | :---  
 `imageresolution` | The resolution of the view returned as an image. You set this option with the `Resolution` class. If unspecified, the `views.populate_image` method returns an image with standard resolution (the width of the returned image is 784 pixels). If you set this parameter value to high (`Resolution.High`), the width of the returned image is 1568 pixels. For both resolutions, the height varies to preserve the aspect ratio of the view.
-`maxage` | The maximum number of minutes the image will be cached on server before being refreshed. Value must be an integer between `1` and `240` minutes. `0` will be interpreted as 1 minute on server, as that is the shortest interval allowed. By default, maxage is set to `-1`, indicating default server behavior.
+`maxage` | Optional. The maximum number of minutes the image will be cached on the server before being refreshed. The value must be an integer between `1` and `240` minutes. `0` will be interpreted as 1 minute on server, as that is the shortest interval allowed. By default, `maxage` is set to `-1`, indicating the default behavior configured in server settings.
 
 **View Filters**
 
@@ -1662,7 +1662,7 @@ server.views.populate_image(view_item, image_req_option)
 ```py  
 PDFRequestOptions(page_type=None, orientation=None, maxage=-1)
 ```
-Use this class to specify the format of the PDF that is returned for the view. This class can also be used to specify the maxage of the cached PDF render on server. See `views.populate_pdf`. 
+Use this class to specify the format of the PDF that is returned for the view. Optionally, you can specify the maximum age of the rendered PDF that is cached on the server by providing a `maxage` value. See `views.populate_pdf`. 
 
 **Attributes**
 
@@ -1670,7 +1670,7 @@ Name  |  Description
 :--- | :---  
 `page_type` | The type of page returned in PDF format for the view. The page_type is set using the `PageType` class: <br> `PageType.A3`<br> `PageType.A4`<br> `PageType.A5`<br> `PageType.B5`<br> `PageType.Executive`<br> `PageType.Folio`<br>  `PageType.Ledger`<br> `PageType.Legal`<br> `PageType.Letter`<br> `PageType.Note`<br> `PageType.Quarto`<br> `PageType.Tabloid`
 `orientation` | The orientation of the page. The options are portrait and landscape. The options are set using the `Orientation` class: <br>`Orientation.Portrait`<br> `Orientation.Landscape`
-`maxage` | The maximum number of minutes the PDF render will be cached on server before being refreshed. Value must be an integer between `1` and `240` minutes. `0` will be interpreted as 1 minute on server, as that is the shortest interval allowed. By default, maxage is set to `-1`, indicating default server behavior.
+`maxage` | Optional. The maximum number of minutes the rendered PDF will be cached on the server before being refreshed. The value must be an integer between `1` and `240` minutes. `0` will be interpreted as 1 minute on server, as that is the shortest interval allowed. By default, `maxage` is set to `-1`, indicating the default behavior configured in server settings.
 
 **View Filters**
 You can use the `vf('filter_name', 'filter_value')` method to add view filters. When the PDF is generated, the specified filters will be applied to the view.
