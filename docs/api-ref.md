@@ -3269,7 +3269,7 @@ This endpoint is available with REST API version 2.5 and up.
 Name | description
 :--- | :---
 `view_item` | Specifies the view to populate.
-`req_options` | (Optional) You can pass in request options to specify the image resolution and the maxage of the cached view image on server. By default, the image will be in low resolution and cached for 240 minutes. You can also specify view filters to be applied when the image is generated. See [ImageRequestOptions class](#imagerequestoptions-class) for more details.
+`req_options` | (Optional) You can pass in request options to specify the image resolution and the maximum age of the view image cached on the server. By default, the image will be in low resolution. The maximum image cache time is the value of `maxage` in minutes, and must be an integer between 1 and 240. A value of zero will cause the minimum cache time of 1 minute. A value of -1 will cache images for the time configured in server settings. You can also specify view filters to be applied when the image is generated. See [ImageRequestOptions class](#imagerequestoptions-class) for more details.
 
 **Exceptions**
 
@@ -3316,7 +3316,7 @@ This endpoint is available with REST API version 2.7 and up.
 Name | description
 :--- | :---
 `view_item` | Specifies the view to populate.
-`req_options` | (Optional) You can pass in a request object to specify view filters to be applied when the CSV data is generated. You can also specify the maxage of the cached view data on server, which is cached for 240 minutes by default. See [CSVRequestOptions class](#csvrequestoptions-class) for more details.
+`req_options` | (Optional) You can pass in request options to specify the maximum age of the CSV cached on the server. The maximum CSV cache time is the value of `maxage` in minutes, and must be an integer between 1 and 240. A value of zero will cause the minimum cache time of 1 minute. A value of -1 will cache CSV files for the time configured in server settings. You can also specify view filters to be applied when the data is generated. See [CSVRequestOptions class](#csvrequestoptions-class) for more details.
 
 **Exceptions**
 
@@ -3351,7 +3351,7 @@ views.populate_pdf(view_item, req_options=None)
 
 Populates the PDF content of the specified view.
 
-This method uses the `id` field to query the PDF content, and populates the content as the `pdf` field.
+This method populates a PDF with image(s) of the view you specify.
 
 REST API: [Query View PDF](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_view_pdf){:target="_blank"}
 
@@ -3364,7 +3364,7 @@ This endpoint is available with REST API version 2.7 and up.
 Name | description
 :--- | :---
 `view_item` | Specifies the view to populate.
-`req_options` | (Optional) You can pass in a request object to specify the page type and orientation of the PDF content, as well as the maxage of the cached PDF render on server. If not specified, PDF content will have default page type and orientation, and will be cached for 240 minutes. You can also specify view filters to be applied when the PDF is generated. See [PDFRequestOptions class](#pdfrequestoptions-class) for more details.
+`req_options` | (Optional) You can pass in request options to specify the page type and orientation of the PDF content, as well as the maximum age of the PDF rendered on the server. If not specified, PDF content will have default page type and orientation. The maximum PDF cache time is the value of `maxage` in minutes, and must be an integer between 1 and 240. A value of zero will cause the minimum cache time of 1 minute. A value of -1 will cache PDF files for the time configured in server settings. You can also specify view filters to be applied when the PDF is generated. See [PDFRequestOptions class](#pdfrequestoptions-class) for more details.
 
 **Exceptions**
 
@@ -4062,7 +4062,7 @@ workbooks.populate_pdf(workbook_item, req_options=None)
 
 Populates the PDF content of the specified workbook.
 
-This method uses the `id` field to query the PDF content, and populates the content as the `pdf` field.
+This method populates a PDF with image(s) of the workbook view(s) you specify.
 
 REST API: [Download Workbook PDF](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooksviews.htm#download_workbook_pdf){:target="_blank"}
 
@@ -4075,7 +4075,7 @@ This endpoint is available with REST API version 3.4 and up.
 Name | description
 :--- | :---
 `workbook_item` | Specifies the workbook to populate.
-`req_options` | (Optional) You can pass in a request object to specify the page type and orientation of the PDF content, as well as the maxage of the cached PDF render on server. If not specified, PDF content will have default page type and orientation, and will be cached for 240 minutes. See [PDFRequestOptions class](#pdfrequestoptions-class) for more details.
+`req_options` | (Optional) You can pass in request options to specify the page type and orientation of the PDF content, as well as the maximum age of the PDF rendered on the server. If not specified, PDF content will have default page type and orientation. The maximum PDF cache time is the value of `maxage` in minutes, and must be an integer between 1 and 240. A value of zero will cause the minimum cache time of 1 minute. A value of -1 will cache PDF files for the time configured in server settings. See [PDFRequestOptions class](#pdfrequestoptions-class) for more details.
 
 **Exceptions**
 
