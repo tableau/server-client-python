@@ -2,10 +2,10 @@ from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from .resource_tagger import _ResourceTagger
 from .permissions_endpoint import _PermissionsEndpoint
-from .. import RequestFactory, ViewItem, PaginationItem
-from ...models.tag_item import TagItem
-import logging
+from .. import ViewItem, PaginationItem
+
 from contextlib import closing
+import logging
 
 logger = logging.getLogger('tableau.endpoint.views')
 

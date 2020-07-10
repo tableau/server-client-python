@@ -4,6 +4,7 @@ import requests_mock
 import tableauserverclient as TSC
 import xml.etree.ElementTree as ET
 
+
 from tableauserverclient.datetime_helpers import format_datetime
 from tableauserverclient.server.endpoint.exceptions import InternalServerError
 from tableauserverclient.server.request_factory import RequestFactory
@@ -435,6 +436,28 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual('fe0b4e89-73f4-435e-952d-3a263fbfa56c', new_workbook.views[0].id)
         self.assertEqual('GDP per capita', new_workbook.views[0].name)
         self.assertEqual('RESTAPISample_0/sheets/GDPpercapita', new_workbook.views[0].content_url)
+
+    def test_publish_with_hidden_view(self):
+        with open(PUBLISH_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.post(self.baseurl, text=response_xml)
+
+            new_workbook = TSC.WorkbookItem(name='Sample',
+                                            show_tabs=False,
+                                            project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+
+            sample_workbook = os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx')
+            publish_mode = self.server.PublishMode.CreateNew
+
+            new_workbook = self.server.workbooks.publish(new_workbook,
+                                                         sample_workbook,
+                                                         publish_mode,
+                                                         hidden_views=['GDP per capita'])
+
+            request_body = m._adapter.request_history[0]._request.body
+            self.assertIn(
+                b'<views><view hidden="true" name="GDP per capita" /></views>', request_body)
 
     def test_publish_async(self):
         self.server.version = '3.0'

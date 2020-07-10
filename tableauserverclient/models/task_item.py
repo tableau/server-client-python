@@ -36,7 +36,6 @@ class TaskItem(object):
 
     @classmethod
     def _parse_element(cls, element, ns):
-        schedule_id = None
         schedule_item = None
         target = None
         last_run_at = None

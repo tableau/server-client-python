@@ -129,14 +129,15 @@ class ViewTests(unittest.TestCase):
             self.server.views.populate_image(single_view)
             self.assertEqual(response, single_view.image)
 
-    def test_populate_image_high_resolution(self):
+    def test_populate_image_with_options(self):
         with open(POPULATE_PREVIEW_IMAGE, 'rb') as f:
             response = f.read()
         with requests_mock.mock() as m:
-            m.get(self.baseurl + '/d79634e1-6063-4ec9-95ff-50acbf609ff5/image?resolution=high', content=response)
+            m.get(self.baseurl + '/d79634e1-6063-4ec9-95ff-50acbf609ff5/image?resolution=high&maxAge=10',
+                  content=response)
             single_view = TSC.ViewItem()
             single_view._id = 'd79634e1-6063-4ec9-95ff-50acbf609ff5'
-            req_option = TSC.ImageRequestOptions(imageresolution=TSC.ImageRequestOptions.Resolution.High)
+            req_option = TSC.ImageRequestOptions(imageresolution=TSC.ImageRequestOptions.Resolution.High, maxage=10)
             self.server.views.populate_image(single_view, req_option)
             self.assertEqual(response, single_view.image)
 
@@ -144,19 +145,32 @@ class ViewTests(unittest.TestCase):
         with open(POPULATE_PDF, 'rb') as f:
             response = f.read()
         with requests_mock.mock() as m:
-            m.get(self.baseurl + '/d79634e1-6063-4ec9-95ff-50acbf609ff5/pdf?type=letter&orientation=portrait',
+            m.get(self.baseurl + '/d79634e1-6063-4ec9-95ff-50acbf609ff5/pdf?type=letter&orientation=portrait&maxAge=5',
                   content=response)
             single_view = TSC.ViewItem()
             single_view._id = 'd79634e1-6063-4ec9-95ff-50acbf609ff5'
 
             size = TSC.PDFRequestOptions.PageType.Letter
             orientation = TSC.PDFRequestOptions.Orientation.Portrait
-            req_option = TSC.PDFRequestOptions(size, orientation)
+            req_option = TSC.PDFRequestOptions(size, orientation, 5)
 
             self.server.views.populate_pdf(single_view, req_option)
             self.assertEqual(response, single_view.pdf)
 
     def test_populate_csv(self):
+        with open(POPULATE_CSV, 'rb') as f:
+            response = f.read()
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + '/d79634e1-6063-4ec9-95ff-50acbf609ff5/data?maxAge=1', content=response)
+            single_view = TSC.ViewItem()
+            single_view._id = 'd79634e1-6063-4ec9-95ff-50acbf609ff5'
+            request_option = TSC.CSVRequestOptions(maxage=1)
+            self.server.views.populate_csv(single_view, request_option)
+
+            csv_file = b"".join(single_view.csv)
+            self.assertEqual(response, csv_file)
+
+    def test_populate_csv_default_maxage(self):
         with open(POPULATE_CSV, 'rb') as f:
             response = f.read()
         with requests_mock.mock() as m:

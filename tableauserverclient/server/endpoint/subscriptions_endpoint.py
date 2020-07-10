@@ -1,6 +1,6 @@
 from .endpoint import Endpoint, api
-from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, SubscriptionItem, PaginationItem
+
 import logging
 
 logger = logging.getLogger('tableau.endpoint.subscriptions')

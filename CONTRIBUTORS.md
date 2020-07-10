@@ -36,6 +36,7 @@ The following people have contributed to this project to make it possible, and w
 * [Geraldine Zanolli](https://github.com/illonage)
 * [Jordan Woods](https://github.com/jorwoods)
 * [Reba Magier](https://github.com/rmagier1)
+* [Stephen Mitchell](https://github.com/scuml)
 
 ## Core Team
 

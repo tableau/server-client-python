@@ -1,11 +1,9 @@
-from ..datetime_helpers import format_datetime
 import xml.etree.ElementTree as ET
-from functools import wraps
 
 from requests.packages.urllib3.fields import RequestField
 from requests.packages.urllib3.filepost import encode_multipart_formdata
 
-from ..models import TaskItem, UserItem, GroupItem, PermissionsRule
+from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteItem
 
 
 def _add_multipart(parts):
@@ -36,6 +34,12 @@ def _add_connections_element(connections_element, connection):
     if connection.connection_credentials:
         connection_credentials = connection.connection_credentials
         _add_credentials_element(connection_element, connection_credentials)
+
+
+def _add_hiddenview_element(views_element, view_name):
+    view_element = ET.SubElement(views_element, 'view')
+    view_element.attrib['name'] = view_name
+    view_element.attrib['hidden'] = "true"
 
 
 def _add_credentials_element(parent_element, connection_credentials):
@@ -143,6 +147,34 @@ class DatasourceRequest(object):
 
         parts = {'request_payload': ('', xml_request, 'text/xml')}
         return _add_multipart(parts)
+
+
+class FavoriteRequest(object):
+    def _add_to_req(self, id_, target_type, label):
+        '''
+        <favorite label="...">
+        <target_type id="..." />
+        </favorite>
+        '''
+        xml_request = ET.Element('tsRequest')
+        favorite_element = ET.SubElement(xml_request, 'favorite')
+        target = ET.SubElement(favorite_element, target_type)
+        favorite_element.attrib['label'] = label
+        target.attrib['id'] = id_
+
+        return ET.tostring(xml_request)
+
+    def add_datasource_req(self, id_, name):
+        return self._add_to_req(id_, FavoriteItem.Type.Datasource, name)
+
+    def add_project_req(self, id_, name):
+        return self._add_to_req(id_, FavoriteItem.Type.Project, name)
+
+    def add_view_req(self, id_, name):
+        return self._add_to_req(id_, FavoriteItem.Type.View, name)
+
+    def add_workbook_req(self, id_, name):
+        return self._add_to_req(id_, FavoriteItem.Type.Workbook, name)
 
 
 class FileuploadRequest(object):
@@ -448,7 +480,11 @@ class UserRequest(object):
 
 
 class WorkbookRequest(object):
-    def _generate_xml(self, workbook_item, connection_credentials=None, connections=None):
+    def _generate_xml(
+            self, workbook_item,
+            connection_credentials=None, connections=None,
+            hidden_views=None
+    ):
         xml_request = ET.Element('tsRequest')
         workbook_element = ET.SubElement(xml_request, 'workbook')
         workbook_element.attrib['name'] = workbook_item.name
@@ -467,6 +503,12 @@ class WorkbookRequest(object):
             connections_element = ET.SubElement(workbook_element, 'connections')
             for connection in connections:
                 _add_connections_element(connections_element, connection)
+
+        if hidden_views is not None:
+            views_element = ET.SubElement(workbook_element, 'views')
+            for view_name in hidden_views:
+                _add_hiddenview_element(views_element, view_name)
+
         return ET.tostring(xml_request)
 
     def update_req(self, workbook_item):
@@ -494,19 +536,27 @@ class WorkbookRequest(object):
 
         return ET.tostring(xml_request)
 
-    def publish_req(self, workbook_item, filename, file_contents, connection_credentials=None, connections=None):
+    def publish_req(
+        self, workbook_item, filename, file_contents,
+        connection_credentials=None, connections=None, hidden_views=None
+    ):
         xml_request = self._generate_xml(workbook_item,
                                          connection_credentials=connection_credentials,
-                                         connections=connections)
+                                         connections=connections,
+                                         hidden_views=hidden_views)
 
         parts = {'request_payload': ('', xml_request, 'text/xml'),
                  'tableau_workbook': (filename, file_contents, 'application/octet-stream')}
         return _add_multipart(parts)
 
-    def publish_req_chunked(self, workbook_item, connection_credentials=None, connections=None):
+    def publish_req_chunked(
+        self, workbook_item, connection_credentials=None, connections=None,
+        hidden_views=None
+    ):
         xml_request = self._generate_xml(workbook_item,
                                          connection_credentials=connection_credentials,
-                                         connections=connections)
+                                         connections=connections,
+                                         hidden_views=hidden_views)
 
         parts = {'request_payload': ('', xml_request, 'text/xml')}
         return _add_multipart(parts)
@@ -583,6 +633,7 @@ class RequestFactory(object):
     Datasource = DatasourceRequest()
     Database = DatabaseRequest()
     Empty = EmptyRequest()
+    Favorite = FavoriteRequest()
     Fileupload = FileuploadRequest()
     Flow = FlowRequest()
     Group = GroupRequest()

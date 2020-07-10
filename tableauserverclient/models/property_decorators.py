@@ -84,7 +84,7 @@ def property_is_int(range, allowed=None):
     def property_type_decorator(func):
         @wraps(func)
         def wrapper(self, value):
-            error = "Invalid priority defined: {}.".format(value)
+            error = "Invalid property defined: '{}'. Integer value expected.".format(value)
 
             if range is None:
                 if isinstance(value, int):
