@@ -1,3 +1,12 @@
+## 0.12 (10 July 2020)
+
+* Added hidden_views parameter to workbook publish method (#614)
+* Added simple paging endpoint for GraphQL/Metadata API (#623)
+* Added endpoints to Metadata API for retrieving backfill/eventing status (#626)
+* Added maxage parameter to CSV and PDF export options (#635)
+* Added support for querying, adding, and deleting favorites (#638)
+* Added a sample for publishing datasources (#644)
+
 ## 0.11 (1 May 2020)
 
 * Added more fields to Data Acceleration config (#588)
