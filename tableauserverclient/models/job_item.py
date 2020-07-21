@@ -6,7 +6,7 @@ from ..datetime_helpers import parse_datetime
 
 class JobItem(object):
     def __init__(self, id_, job_type, progress, created_at, started_at=None,
-                 completed_at=None, finish_code=0, notes=[]):
+                 completed_at=None, finish_code=0, notes=None):
         self._id = id_
         self._type = job_type
         self._progress = progress
@@ -14,7 +14,7 @@ class JobItem(object):
         self._started_at = started_at
         self._completed_at = completed_at
         self._finish_code = finish_code
-        self._notes = notes
+        self._notes = notes or []
 
     @property
     def id(self):
