@@ -36,7 +36,7 @@ def main():
     if args.username:
         # Trying to authenticate using username and password.
         password = getpass.getpass("Password: ")
-        tableau_auth = TSC.TableauAuth(args.username, password)
+        tableau_auth = TSC.TableauAuth(args.username, password, site_id=args.sitename)
         with server.auth.sign_in(tableau_auth):
             print('Logged in successfully')
 
