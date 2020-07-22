@@ -1,3 +1,7 @@
+## 0.12.1 (22 July 2020)
+
+* Fixed login.py sample to properly handle sitename (#652)
+
 ## 0.12 (10 July 2020)
 
 * Added hidden_views parameter to workbook publish method (#614)
