@@ -8,6 +8,6 @@ indexed_by_search: false
     <p>The Tableau Server Client is a Python library for the Tableau Server REST API.</p>
     <br />
     <a class="btn btn-primary btn-lg" href="{{ site.baseurl }}/docs" role="button">Get Started</a>&nbsp;&nbsp;
-    <a class="btn btn-primary btn-lg" href="https://github.com/tableau/server-client-python/archive/v0.12.zip" role="button">Download</a>
+    <a class="btn btn-primary btn-lg" href="https://github.com/tableau/server-client-python/archive/master.zip" role="button">Download</a>
 </header>
 
