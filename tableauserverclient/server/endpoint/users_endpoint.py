@@ -90,4 +90,4 @@ class Users(Endpoint):
         return workbook_item, pagination_item
 
     def populate_favorites(self, user_item):
-        raise NotImplementedError('REST API currently does not support the ability to query favorites')
+        self.parent_srv.favorites.get(user_item)

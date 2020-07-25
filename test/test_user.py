@@ -12,7 +12,7 @@ GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, 'user_get_by_id.xml')
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'user_update.xml')
 ADD_XML = os.path.join(TEST_ASSET_DIR, 'user_add.xml')
 POPULATE_WORKBOOKS_XML = os.path.join(TEST_ASSET_DIR, 'user_populate_workbooks.xml')
-ADD_FAVORITE_XML = os.path.join(TEST_ASSET_DIR, 'user_add_favorite.xml')
+GET_FAVORITES_XML = os.path.join(TEST_ASSET_DIR, 'favorites_get.xml')
 
 
 class UserTests(unittest.TestCase):
@@ -146,3 +146,28 @@ class UserTests(unittest.TestCase):
     def test_populate_workbooks_missing_id(self):
         single_user = TSC.UserItem('test', 'Interactor')
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.users.populate_workbooks, single_user)
+
+    def test_populate_favorites(self):
+        self.server.version = '2.5'
+        baseurl = self.server.favorites.baseurl
+        single_user = TSC.UserItem('test', 'Interactor')
+        with open(GET_FAVORITES_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.get('{0}/{1}'.format(baseurl, single_user.id), text=response_xml)
+            self.server.users.populate_favorites(single_user)
+        self.assertIsNotNone(single_user._favorites)
+        self.assertEqual(len(single_user.favorites['workbooks']), 1)
+        self.assertEqual(len(single_user.favorites['views']), 1)
+        self.assertEqual(len(single_user.favorites['projects']), 1)
+        self.assertEqual(len(single_user.favorites['datasources']), 1)
+
+        workbook = single_user.favorites['workbooks'][0]
+        view = single_user.favorites['views'][0]
+        datasource = single_user.favorites['datasources'][0]
+        project = single_user.favorites['projects'][0]
+
+        self.assertEqual(workbook.id, '6d13b0ca-043d-4d42-8c9d-3f3313ea3a00')
+        self.assertEqual(view.id, 'd79634e1-6063-4ec9-95ff-50acbf609ff5')
+        self.assertEqual(datasource.id, 'e76a1461-3b1d-4588-bf1b-17551a879ad9')
+        self.assertEqual(project.id, '1d0304cd-3796-429f-b815-7258370b9b74')
