@@ -105,7 +105,7 @@ class TaskTests(unittest.TestCase):
         self.assertEqual(parse_datetime('2019-12-09T22:30:00Z'), task.schedule_item.next_run_at)
         self.assertEqual(parse_datetime('2019-12-09T20:45:04Z'), task.last_run_at)
 
-    def test_delete(self):
+    def test_delete_data_acceleration(self):
         with requests_mock.mock() as m:
             m.delete('{}/{}/{}'.format(
                 self.server.tasks.baseurl, TaskItem.Type.DataAcceleration,
