@@ -14,7 +14,7 @@ import tableauserverclient as TSC
 
 
 def main():
-    parser = argparse.ArgumentParser(description='List out the names and LUIDs for different resource types')
+    parser = argparse.ArgumentParser(description='List out the names and LUIDs for different resource types.')
     parser.add_argument('--server', '-s', required=True, help='server address')
     parser.add_argument('--site', '-S', default="", help='site to log into, do not specify for default site')
     parser.add_argument('--token-name', '-n', required=True, help='username to signin under')

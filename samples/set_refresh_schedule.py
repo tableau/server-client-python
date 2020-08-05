@@ -1,3 +1,11 @@
+####
+# This script demonstrates how to set the refresh schedule for
+# a workbook or datasource.
+#
+# To run the script, you must have installed Python 3.5 or later.
+####
+
+
 import argparse
 import getpass
 import logging
@@ -6,7 +14,7 @@ import tableauserverclient as TSC
 
 
 def usage(args):
-    parser = argparse.ArgumentParser(description='Explore workbook functions supported by the Server API.')
+    parser = argparse.ArgumentParser(description='Set refresh schedule for a workbook or datasource.')
     parser.add_argument('--server', '-s', required=True, help='server address')
     parser.add_argument('--username', '-u', required=True, help='username to sign into server')
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',

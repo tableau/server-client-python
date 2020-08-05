@@ -17,7 +17,7 @@ import tableauserverclient as TSC
 
 def main():
 
-    parser = argparse.ArgumentParser(description='Query View Image From Server')
+    parser = argparse.ArgumentParser(description='Download image of a specified view.')
     parser.add_argument('--server', '-s', required=True, help='server address')
     parser.add_argument('--site-id', '-si', required=False,
                         help='content url for site the view is on')
