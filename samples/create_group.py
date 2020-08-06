@@ -1,5 +1,5 @@
 ####
-# This script demonstrates how to create groups using the Tableau
+# This script demonstrates how to create a group using the Tableau
 # Server Client.
 #
 # To run the script, you must have installed Python 3.5 or later.
@@ -17,7 +17,7 @@ import tableauserverclient as TSC
 
 def main():
 
-    parser = argparse.ArgumentParser(description='Creates sample schedules for each type of frequency.')
+    parser = argparse.ArgumentParser(description='Creates a sample user group.')
     parser.add_argument('--server', '-s', required=True, help='server address')
     parser.add_argument('--username', '-u', required=True, help='username to sign into server')
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',

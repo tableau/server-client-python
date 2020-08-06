@@ -19,7 +19,7 @@ import tableauserverclient as TSC
 
 def main():
 
-    parser = argparse.ArgumentParser(description='Return a list of all of the workbooks on your server')
+    parser = argparse.ArgumentParser(description='Demonstrate pagination on the list of workbooks on the server.')
     parser.add_argument('--server', '-s', required=True, help='server address')
     parser.add_argument('--username', '-u', required=True, help='username to sign into server')
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',

@@ -2,7 +2,6 @@
 # This script demonstrates how to use the Tableau Server Client
 # to filter and sort on the name of the projects present on site.
 #
-#
 # To run the script, you must have installed Python 3.5 or later.
 ####
 
@@ -26,7 +25,7 @@ def create_example_project(name='Example Project', content_permissions='LockedTo
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Get all of the refresh tasks available on a server')
+    parser = argparse.ArgumentParser(description='Filter and sort projects.')
     parser.add_argument('--server', '-s', required=True, help='server address')
     parser.add_argument('--username', '-u', required=True, help='username to sign into server')
     parser.add_argument('--site', '-S', default=None)

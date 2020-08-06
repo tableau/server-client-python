@@ -12,7 +12,7 @@ import tableauserverclient as TSC
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Cancel all of the running background jobs')
+    parser = argparse.ArgumentParser(description='Cancel all of the running background jobs.')
     parser.add_argument('--server', '-s', required=True, help='server address')
     parser.add_argument('--site', '-S', default=None, help='site to log into, do not specify for default site')
     parser.add_argument('--username', '-u', required=True, help='username to sign into server')
