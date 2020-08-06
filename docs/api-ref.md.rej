@@ -1,0 +1,68 @@
+***************
+*** 15,21 ****
+  The TSC API reference is organized by resource. The TSC library is modeled after the REST API. The methods, for example, `workbooks.get()`, correspond to the endpoints for resources, such as [workbooks](#workbooks), [users](#users), [views](#views), and [data sources](#data-sources). The model classes (for example, the [WorkbookItem class](#workbookitem-class) have attributes that represent the fields (`name`, `id`, `owner_id`) that are in the REST API request and response packages, or payloads. 
+  
+  |:---  |
+- | **Note:**  Some methods and features provided in the REST API might not be currently available in the TSC library (and in some cases, the opposite is true).  In addition, the same limitations apply to the TSC library that apply to the REST API with respect to resources on Tableau Server and Tableau Online. For more information, see the [Tableau Server REST API Reference](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#API_Reference0){:target="_blank"}.|
+  
+   
+  
+--- 15,21 ----
+  The TSC API reference is organized by resource. The TSC library is modeled after the REST API. The methods, for example, `workbooks.get()`, correspond to the endpoints for resources, such as [workbooks](#workbooks), [users](#users), [views](#views), and [data sources](#data-sources). The model classes (for example, the [WorkbookItem class](#workbookitem-class) have attributes that represent the fields (`name`, `id`, `owner_id`) that are in the REST API request and response packages, or payloads. 
+  
+  |:---  |
++ | **Note:**  Some methods and features provided in the REST API might not be currently available in the TSC library (and in some cases, the opposite is true).  In addition, the same limitations apply to the TSC library that apply to the REST API with respect to resources on Tableau Server and Tableau Online. For more information, see the [Tableau Server REST API Reference](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm).|
+  
+   
+  
+***************
+*** 1122,1128 ****
+  Name  |  Description
+  :--- | :---
+  `id`  |  The `id` of the job.
+- `type` | The type of task. The types correspond to the job type categories listed for the [Query Job](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_job){:target="_blank"} REST API. 
+  `created_at` | The time the job was created.
+  `started_at` | The time the job started.
+  `completed_at` | The time the job finished.
+--- 1122,1128 ----
+  Name  |  Description
+  :--- | :---
+  `id`  |  The `id` of the job.
++ `type` | The type of task. The types correspond to the job type categories listed for the [Query Job](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_job) REST API.
+  `created_at` | The time the job was created.
+  `started_at` | The time the job started.
+  `completed_at` | The time the job finished.
+***************
+*** 1948,1954 ****
+  Attribute | Description
+  :--- | :---
+  `server_address`  |  Specifies the address of the Tableau Server or Tableau Online (for example, `https://MY-SERVER/`).
+- `version`   |  Specifies the version of the REST API to use (for example, `'2.5'`). When you use the TSC library to call methods that access Tableau Server, the `version` is passed to the endpoint as part of the URI (`https://MY-SERVER/api/2.5/`). Each release of Tableau Server supports specific versions of the REST API. New versions of the REST API are released with Tableau Server. By default, the value of `version` is set to `'2.3'`, which corresponds to Tableau Server 10.0.  You can view or set this value. You might need to set this to a different value, for example, if you want to access features that are supported by the server and a later version of the REST API.  For more information, see [REST API Versions](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm){:target="_blank"}  
+  
+  
+  
+--- 1948,1954 ----
+  Attribute | Description
+  :--- | :---
+  `server_address`  |  Specifies the address of the Tableau Server or Tableau Online (for example, `https://MY-SERVER/`).
++ `version`   |  Specifies the version of the REST API to use (for example, `'2.5'`). When you use the TSC library to call methods that access Tableau Server, the `version` is passed to the endpoint as part of the URI (`https://MY-SERVER/api/2.5/`). Each release of Tableau Server supports specific versions of the REST API. New versions of the REST API are released with Tableau Server. By default, the value of `version` is set to `'2.3'`, which corresponds to Tableau Server 10.0.  You can view or set this value. You might need to set this to a different value, for example, if you want to access features that are supported by the server and a later version of the REST API.  For more information, see [REST API Versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm)
+  
+  
+  
+***************
+*** 2070,2076 ****
+  
+  This method makes an unauthenticated call, so no sign in or authentication token is required.
+  
+- REST API: [Server Info](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#server_info){:target="_blank"}   
+  
+  **Parameters**
+   None
+--- 2070,2076 ----
+  
+  This method makes an unauthenticated call, so no sign in or authentication token is required.
+  
++ REST API: [Server Info](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#server_info)
+  
+  **Parameters**
+   None

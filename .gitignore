@@ -144,6 +144,6 @@ $RECYCLE.BIN/
 *.lnk
 
 # Documentation
-docs/_site/
-docs/.jekyll-metadata
-docs/Gemfile.lock
+_site/
+.jekyll-metadata
+Gemfile.lock
