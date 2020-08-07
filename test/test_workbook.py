@@ -1,3 +1,5 @@
+
+#%%
 import unittest
 import os
 import requests_mock
@@ -32,6 +34,7 @@ REFRESH_XML = os.path.join(TEST_ASSET_DIR, 'workbook_refresh.xml')
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'workbook_update.xml')
 UPDATE_PERMISSIONS = os.path.join(TEST_ASSET_DIR, 'workbook_update_permissions.xml')
 
+#%%
 
 class WorkbookTests(unittest.TestCase):
     def setUp(self):
@@ -54,6 +57,7 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual('6d13b0ca-043d-4d42-8c9d-3f3313ea3a00', all_workbooks[0].id)
         self.assertEqual('Superstore', all_workbooks[0].name)
         self.assertEqual('Superstore', all_workbooks[0].content_url)
+        self.assertEqual('http://tableauserver/#/workbooks/1/views', all_workbooks[0].webpage_url)
         self.assertEqual(False, all_workbooks[0].show_tabs)
         self.assertEqual(1, all_workbooks[0].size)
         self.assertEqual('2016-08-03T20:34:04Z', format_datetime(all_workbooks[0].created_at))
@@ -66,6 +70,7 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual('3cc6cd06-89ce-4fdc-b935-5294135d6d42', all_workbooks[1].id)
         self.assertEqual('SafariSample', all_workbooks[1].name)
         self.assertEqual('SafariSample', all_workbooks[1].content_url)
+        self.assertEqual('http://tableauserver/#/workbooks/2/views', all_workbooks[1].webpage_url)
         self.assertEqual(False, all_workbooks[1].show_tabs)
         self.assertEqual(26, all_workbooks[1].size)
         self.assertEqual('2016-07-26T20:34:56Z', format_datetime(all_workbooks[1].created_at))
