@@ -8,7 +8,7 @@ views or connections that make up the workbook. Similarly, when you get a data s
 information about the connections that make up the data source. This is a result of the design of the Tableau Server
 REST API, which optimizes the size of responses by only returning what you ask for explicitly.
 
-As a result, if you want to get views and connections, you need to run the `populate_views` and `populate_connections`
+As a result, if you want to get views and connections, you need to call the `populate_views` and `populate_connections`
 functions.
 
 * TOC

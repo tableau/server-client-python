@@ -12,12 +12,11 @@ This topic describes how to contribute to the Tableau Server Client (Python) pro
 
 ## Submit your first patch
 
-
 This section will get you started with the basic workflow, describing how to create your own fork of the repository and how to open a pull request (PR) to add your contributions to the **development** branch.
 
 ### Get the source code and set up your branch
 
-1. Make sure you have [signed the CLA](http://tableau.github.io/#contributor-license-agreement-cla)
+1. Make sure you have [signed the CLA](https://tableau.github.io/contributing.html)
 
 1. Fork the repository.
 
@@ -40,8 +39,10 @@ This section will get you started with the basic workflow, describing how to cre
    It is recommended to use the format issue#-type-description (e.g. 13-fix-connection-bug) like so:
 
    ```shell
-   git checkout -b 13-feature-new-stuff
+   git checkout -b 13-feature-new-stuff development
    ```
+
+   For documentation changes, see the documentation section below.
 
 ### Code and commit
 
@@ -65,20 +66,19 @@ This section will get you started with the basic workflow, describing how to cre
 
    Our documentation is written in markdown and built with Jekyll on GitHub Pages. All of the documentation source files can be found in `/docs` folder in the **gh-pages** branch. The docs are hosted on the following URL: [https://tableau.github.io/server-client-python](https://tableau.github.io/server-client-python)
 
-   If you are just making documentation updates (adding new docs, fixing typos, improving wording) the easiest method is to use the built-in `Edit this file` feature right in GitHub (click the pencil icon). If you are viewing one of the pages on [https://tableau.github.io/server-client-python](https://tableau.github.io/server-client-python), clicking the **Edit this page** link at the top of the page will take you to the same place. 
+   If you are just making documentation updates (adding new docs, fixing typos, improving wording) the easiest method is to use the built-in `Edit this file` feature right in GitHub (click the pencil icon). If you are viewing one of the pages on [https://tableau.github.io/server-client-python](https://tableau.github.io/server-client-python), clicking the **Edit this page** link at the top of the page will take you to the same place.
 
 ### Commit changes to your fork and open a PR
 
-1. Make a PR as described [here](https://help.github.com/articles/creating-a-pull-request-from-a-fork/) against the **development** branch for code changes, or against **gh-pages** for documentation updates.
+1. Make a PR as described [here](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request-from-a-fork) against the **development** branch for code changes, or against **gh-pages** for documentation updates.
 
 1. Wait for a review and address any feedback.
    While we try and stay on top of all issues and PRs it might take a few days for someone to respond. Politely pinging
    the PR after a few days with no response is OK, we'll try and respond with a timeline as soon as we are able.
 
-1. That's it! When the PR has received ![](https://assets-cdn.github.com/images/icons/emoji/unicode/1f680.png){:height="5%" width="5%"} (:rocket:'s) from members of the core team they will merge the PR
+1. That's it! When the PR has received ![](https://github.githubassets.com/images/icons/emoji/unicode/1f680.png){:height="5%" width="5%"} (:rocket:'s) from members of the core team they will merge the PR.
 
 ---
-
 
 ## Add new features
 
