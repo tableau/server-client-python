@@ -3742,7 +3742,7 @@ Deletes a workbook with the specified ID.
 To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site.  See the [TableauAuth class](#tableauauth-class).  
 
 
-REST API: [Delete Workbook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#Delete_Workbook31)
+REST API: [Delete Workbook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#delete_workbook1)
 
 
 **Parameters**

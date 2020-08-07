@@ -25,18 +25,28 @@ For example, the code might display version `2.3`.
 
 ## Use the REST API version supported by the server
 
-To always use the latest version of the REST API that is supported by the instance of Tableau Server you are connecting to, specify `use_server_version=True` as one of the arguments.
+There are two options for always using the the latest version of the REST API that is supported by the instance of Tableau Server you are connecting to.
+
+The first method is to specify `use_server_version=True` as one of the arguments, for example:
 
 ```py
 import tableauserverclient as TSC
 
 server = TSC.Server('http://SERVER_URL', use_server_version=True)
+```
 
+The second method is to create the server object first, then call the `use_server_version()` method on it. There are some situations where this method is needed. For instance, if you want to disable certificate checking, you have to do that after you create the server object, but before you make calls to the server (use_server_version makes a call to the server).
+
+```py
+import tableauserverclient as TSC
+
+server = TSC.Server('http://SERVER_URL')
+server.use_server_version()
 ```
 
 ## Use a specific version of the REST API
 
-To use another version of the REST API, set the version like so:
+To use a specific version of the REST API, set the version like so:
 
 ```py
 import tableauserverclient as TSC
@@ -52,6 +62,7 @@ The current version of TSC only supports the following REST API and Tableau Serv
 
 |REST API version|Tableau Server version|
 |---|---|
+|3.8|2020.2|
 |3.7|2020.1|
 |3.6|2019.4|
 |3.5|2019.3|

@@ -76,7 +76,7 @@ This section will get you started with the basic workflow, describing how to cre
    While we try and stay on top of all issues and PRs it might take a few days for someone to respond. Politely pinging
    the PR after a few days with no response is OK, we'll try and respond with a timeline as soon as we are able.
 
-1. That's it! When the PR has received approval from members of the core team they will merge the PR
+1. That's it! When the PR has received ![](https://github.githubassets.com/images/icons/emoji/unicode/1f680.png){:height="5%" width="5%"} (:rocket:'s) from members of the core team they will merge the PR.
 
 ---
 
