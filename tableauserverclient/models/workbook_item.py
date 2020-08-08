@@ -177,7 +177,7 @@ class WorkbookItem(object):
         if content_url:
             self._content_url = content_url
         if webpage_url:
-            self._webpage_url = webpage_url            
+            self._webpage_url = webpage_url
         if created_at:
             self._created_at = created_at
         if description:
