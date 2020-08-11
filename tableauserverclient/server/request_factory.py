@@ -67,6 +67,13 @@ class AuthRequest(object):
             user_element.attrib['id'] = auth_item.user_id_to_impersonate
         return ET.tostring(xml_request)
 
+    def switch_req(self, site_content_url):
+        xml_request = ET.Element('tsRequest')
+
+        site_element = ET.SubElement(xml_request, 'site')
+        site_element.attrib['contentUrl'] = site_content_url
+        return ET.tostring(xml_request)
+
 
 class ColumnRequest(object):
     def update_req(self, column_item):
