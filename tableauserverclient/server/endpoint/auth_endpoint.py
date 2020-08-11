@@ -1,5 +1,5 @@
 from ..request_factory import RequestFactory
-
+from .exceptions import ServerResponseError
 from .endpoint import Endpoint, api
 import xml.etree.ElementTree as ET
 import logging
@@ -57,7 +57,13 @@ class Auth(Endpoint):
     def switch_site(self, site_item):
         url = "{0}/{1}".format(self.baseurl, 'switchSite')
         switch_req = RequestFactory.Auth.switch_req(site_item.content_url)
-        server_response = self.post_request(url, switch_req)
+        try:
+            server_response = self.post_request(url, switch_req)
+        except ServerResponseError as e:
+            if e.code == "403070":
+                return Auth.contextmgr(self.sign_out)
+            else:
+                raise e
         self.parent_srv._namespace.detect(server_response.content)
         self._check_status(server_response)
         parsed_response = ET.fromstring(server_response.content)
