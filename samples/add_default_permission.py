@@ -17,7 +17,7 @@ import tableauserverclient as TSC
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Add workbook default permission for a given project')
+    parser = argparse.ArgumentParser(description='Add workbook default permissions for a given project.')
     parser.add_argument('--server', '-s', required=True, help='Server address')
     parser.add_argument('--username', '-u', required=True, help='Username to sign into server')
     parser.add_argument('--site', '-S', default=None, help='Site to sign into - default site if not provided')

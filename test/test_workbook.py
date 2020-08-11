@@ -1,5 +1,6 @@
 import unittest
 import os
+import re
 import requests_mock
 import tableauserverclient as TSC
 import xml.etree.ElementTree as ET
@@ -459,8 +460,8 @@ class WorkbookTests(unittest.TestCase):
                                                          hidden_views=['GDP per capita'])
 
             request_body = m._adapter.request_history[0]._request.body
-            self.assertIn(
-                b'<views><view hidden="true" name="GDP per capita" /></views>', request_body)
+            self.assertTrue(re.search(rb'<views><view.*?hidden=\"true\".*?\/><\/views>', request_body))
+            self.assertTrue(re.search(rb'<views><view.*?name=\"GDP per capita\".*?\/><\/views>', request_body))
 
     def test_publish_async(self):
         self.server.version = '3.0'

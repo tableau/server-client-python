@@ -1,9 +1,12 @@
-#
+####
 # This sample uses the PyPDF2 library for combining pdfs together to get the full pdf for all the views in a
 # workbook.
 #
 # You will need to do `pip install PyPDF2` to use this sample.
 #
+# To run the script, you must have installed Python 3.5 or later.
+####
+
 
 import argparse
 import getpass
@@ -48,7 +51,7 @@ def cleanup(tempdir):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Export to PDF all of the views in a workbook')
+    parser = argparse.ArgumentParser(description='Export to PDF all of the views in a workbook.')
     parser.add_argument('--server', '-s', required=True, help='server address')
     parser.add_argument('--site', '-S', default=None, help='Site to log into, do not specify for default site')
     parser.add_argument('--username', '-u', required=True, help='username to sign into server')
