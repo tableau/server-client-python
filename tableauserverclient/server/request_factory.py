@@ -86,6 +86,28 @@ class ColumnRequest(object):
         return ET.tostring(xml_request)
 
 
+class DataAlertRequest(object):
+    def add_user_to_alert(self, alert_item, user_item):
+        xml_request = ET.Element('tsRequest')
+        user_element = ET.SubElement(xml_request, 'user')
+        user_element.attrib['id'] = user_item.id
+
+        return ET.tostring(xml_request)
+
+
+    def update_req(self, alert_item):
+        xml_request = ET.Element('tsRequest')
+        dataAlert_element = ET.SubElement(xml_request, 'dataAlert')
+        dataAlert_element.attrib['subject'] = alert_item.subject
+        dataAlert_element.attrib['frequency'] = alert_item.frequency
+        dataAlert_element.attrib['public'] = alert_item.public
+
+        owner = ET.SubElement(dataAlert_element, 'owner')
+        owner.attrib['id'] = alert_item.owner_id
+
+        return ET.tostring(xml_request)
+
+
 class DatabaseRequest(object):
     def update_req(self, database_item):
         xml_request = ET.Element('tsRequest')
@@ -637,6 +659,7 @@ class RequestFactory(object):
     Auth = AuthRequest()
     Connection = Connection()
     Column = ColumnRequest()
+    DataAlert = DataAlertRequest()
     Datasource = DatasourceRequest()
     Database = DatabaseRequest()
     Empty = EmptyRequest()
