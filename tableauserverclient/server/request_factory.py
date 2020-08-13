@@ -94,7 +94,6 @@ class DataAlertRequest(object):
 
         return ET.tostring(xml_request)
 
-
     def update_req(self, alert_item):
         xml_request = ET.Element('tsRequest')
         dataAlert_element = ET.SubElement(xml_request, 'dataAlert')

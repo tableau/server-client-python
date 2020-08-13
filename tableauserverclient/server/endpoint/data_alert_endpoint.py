@@ -3,7 +3,7 @@ from .exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .default_permissions_endpoint import _DefaultPermissionsEndpoint
 
-from .. import RequestFactory, DataAlertItem, TableItem, PaginationItem, Permission
+from .. import RequestFactory, DataAlertItem, PaginationItem, UserItem
 
 import logging
 
@@ -52,11 +52,12 @@ class DataAlerts(Endpoint):
     @api(version="3.2")
     def delete_user_from_alert(self, dataalert, user):
         dataalert_id = getattr(dataalert, 'id', dataalert)
+        user_id = getattr(user, 'id', user)
         if not dataalert_id:
             error = "Dataalert ID undefined."
             raise ValueError(error)
         # DELETE /api/api-version/sites/site-id/dataAlerts/data-alert-id/users/user-id
-        url = "{0}/{1}/users/{2}".format(self.baseurl, dataalert_id, user.id)
+        url = "{0}/{1}/users/{2}".format(self.baseurl, dataalert_id, user_id)
         self.delete_request(url)
         logger.info('Deleted single dataalert (ID: {0})'.format(dataalert_id))
 
@@ -67,11 +68,11 @@ class DataAlerts(Endpoint):
             raise MissingRequiredFieldError(error)
 
         url = "{0}/{1}/users".format(self.baseurl, dataalert_item.id)
-        update_req = RequestFactory.DataAlert.update_req(dataalert_item)
-        server_response = self.put_request(url, update_req)
+        update_req = RequestFactory.DataAlert.add_user_to_alert(dataalert_item, user)
+        server_response = self.post_request(url, update_req)
         logger.info('Updated dataalert item (ID: {0})'.format(dataalert_item.id))
-        updated_dataalert = DataAlertItem.from_response(server_response.content, self.parent_srv.namespace)[0]
-        return updated_dataalert
+        user = UserItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        return user
 
     @api(version="3.2")
     def update(self, dataalert_item):
