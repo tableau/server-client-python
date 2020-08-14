@@ -56,21 +56,27 @@ class DataAlerts(Endpoint):
         if not dataalert_id:
             error = "Dataalert ID undefined."
             raise ValueError(error)
+        if not user_id:
+            error = "User ID undefined."
+            raise ValueError(error)
         # DELETE /api/api-version/sites/site-id/dataAlerts/data-alert-id/users/user-id
         url = "{0}/{1}/users/{2}".format(self.baseurl, dataalert_id, user_id)
         self.delete_request(url)
-        logger.info('Deleted single dataalert (ID: {0})'.format(dataalert_id))
+        logger.info('Deleted User (ID {0}) from dataalert (ID: {1})'.format(user_id, dataalert_id))
 
     @api(version="3.2")
     def add_user_to_alert(self, dataalert_item, user):
         if not dataalert_item.id:
             error = "Dataalert item missing ID."
             raise MissingRequiredFieldError(error)
-
+        user_id = getattr(user, 'id', user)
+        if not user_id:
+            error = "User ID undefined."
+            raise ValueError(error)
         url = "{0}/{1}/users".format(self.baseurl, dataalert_item.id)
-        update_req = RequestFactory.DataAlert.add_user_to_alert(dataalert_item, user)
+        update_req = RequestFactory.DataAlert.add_user_to_alert(dataalert_item, user_id)
         server_response = self.post_request(url, update_req)
-        logger.info('Updated dataalert item (ID: {0})'.format(dataalert_item.id))
+        logger.info('Added user (ID {0}) to dataalert item (ID: {1})'.format(user_id, dataalert_item.id))
         user = UserItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return user
 

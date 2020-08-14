@@ -1,11 +1,18 @@
 import xml.etree.ElementTree as ET
 
-from .property_decorators import property_not_empty
+from .property_decorators import property_not_empty, property_is_enum
 from .user_item import UserItem
 from .view_item import ViewItem
 
 
 class DataAlertItem(object):
+    class Frequency:
+        Once = 'once'
+        Frequently = 'frequently'
+        Hourly = 'hourly'
+        Daily = 'daily'
+        Weekly = 'weekly'
+
     def __init__(self):
         self._id = None
         self._subject = None
@@ -46,7 +53,7 @@ class DataAlertItem(object):
         return self._frequency
 
     @frequency.setter
-    @property_not_empty
+    @property_is_enum(Frequency)
     def frequency(self, value):
         self._frequency = value
 

@@ -87,10 +87,10 @@ class ColumnRequest(object):
 
 
 class DataAlertRequest(object):
-    def add_user_to_alert(self, alert_item, user_item):
+    def add_user_to_alert(self, alert_item, user_id):
         xml_request = ET.Element('tsRequest')
         user_element = ET.SubElement(xml_request, 'user')
-        user_element.attrib['id'] = user_item.id
+        user_element.attrib['id'] = user_id
 
         return ET.tostring(xml_request)
 
