@@ -3436,6 +3436,7 @@ Name  |  Description
 `tags` |  The tags that have been added to the workbook. 
 `updated_at` |  The date and time when the workbook was last updated.
 `views`   | The list of views (`ViewItem`) for the workbook. You must first call the [workbooks.populate_views](#workbooks.populate_views) method to access this data. See the [ViewItem class](#viewitem-class).
+`webpage_url` | The full URL of the workbook.
 
 
 
