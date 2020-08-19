@@ -568,12 +568,11 @@ class WorkbookRequest(object):
         parts = {'request_payload': ('', xml_request, 'text/xml')}
         return _add_multipart(parts)
 
-
     @_tsrequest_wrapped
     def embedded_extract_req(self, xml_request, include_all=True, datasources=None):
         list_element = ET.SubElement(xml_request, 'datasources')
         if include_all:
-            list_element.attrib['includeAll']="true"
+            list_element.attrib['includeAll'] = "true"
         else:
             for datasource_item in datasources:
                 datasource_element = list_element.SubElement(xml_request, 'datasource')

@@ -111,8 +111,7 @@ class Sites(Endpoint):
             raise ValueError(error)
         url = "{0}/{1}/encrypt-extracts".format(self.baseurl, site_id)
         empty_req = RequestFactory.Empty.empty_req()
-        self.post_request(url,empty_req)
-
+        self.post_request(url, empty_req)
 
     @api(version="3.5")
     def decrypt_extracts(self, site_id):
@@ -121,8 +120,7 @@ class Sites(Endpoint):
             raise ValueError(error)
         url = "{0}/{1}/decrypt-extracts".format(self.baseurl, site_id)
         empty_req = RequestFactory.Empty.empty_req()
-        self.post_request(url,empty_req)
-
+        self.post_request(url, empty_req)
 
     @api(version="3.5")
     def re_encrypt_extracts(self, site_id):
@@ -130,6 +128,6 @@ class Sites(Endpoint):
             error = "Site ID undefined."
             raise ValueError(error)
         url = "{0}/{1}/reencrypt-extracts".format(self.baseurl, site_id)
-        
+
         empty_req = RequestFactory.Empty.empty_req()
-        self.post_request(url,empty_req)
+        self.post_request(url, empty_req)

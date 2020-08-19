@@ -580,23 +580,24 @@ class WorkbookTests(unittest.TestCase):
     def test_create_extracts_all(self):
         self.server.version = "3.10"
         self.baseurl = self.server.workbooks.baseurl
-        
+
         with open(PUBLISH_ASYNC_XML, 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
-            m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/createExtract', status_code=200, text=response_xml)
+            m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/createExtract',
+                   status_code=200, text=response_xml)
             self.server.workbooks.create_extract('3cc6cd06-89ce-4fdc-b935-5294135d6d42')
-
 
     def test_create_extracts_one(self):
         self.server.version = "3.10"
         self.baseurl = self.server.workbooks.baseurl
-    
+
         datasource = TSC.DatasourceItem('test')
         datasource._id = '1f951daf-4061-451a-9df1-69a8062664f2'
-        
+
         with open(PUBLISH_ASYNC_XML, 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
-            m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/createExtract', status_code=200, text=response_xml)
+            m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/createExtract',
+                   status_code=200, text=response_xml)
             self.server.workbooks.create_extract('3cc6cd06-89ce-4fdc-b935-5294135d6d42', False, datasource)

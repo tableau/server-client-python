@@ -151,7 +151,7 @@ class Datasources(Endpoint):
         server_response = self.post_request(url, empty_req)
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return new_job
-    
+
     @api(version='3.5')
     def create_extract(self, datasource_item, encrypt=False):
         id_ = getattr(datasource_item, 'id', datasource_item)
@@ -167,7 +167,6 @@ class Datasources(Endpoint):
         url = "{0}/{1}/deleteExtract".format(self.baseurl, id_)
         empty_req = RequestFactory.Empty.empty_req()
         self.post_request(url, empty_req)
-        
 
     # Publish datasource
     @api(version="2.0")

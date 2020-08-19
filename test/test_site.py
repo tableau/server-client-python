@@ -151,7 +151,7 @@ class SiteTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.post(self.baseurl + '/0626857c-1def-4503-a7d8-7907c3ff9d9f/reencrypt-extracts', status_code=200)
             self.server.sites.re_encrypt_extracts('0626857c-1def-4503-a7d8-7907c3ff9d9f')
-            
+
     def test_decrypt(self):
         with requests_mock.mock() as m:
             m.post(self.baseurl + '/0626857c-1def-4503-a7d8-7907c3ff9d9f/decrypt-extracts', status_code=200)

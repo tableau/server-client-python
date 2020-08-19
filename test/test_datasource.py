@@ -392,19 +392,19 @@ class DatasourceTests(unittest.TestCase):
     def test_create_extracts(self):
         self.server.version = "3.10"
         self.baseurl = self.server.datasources.baseurl
-        
+
         response_xml = read_xml_asset(PUBLISH_XML_ASYNC)
         with requests_mock.mock() as m:
-            m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/createExtract', status_code=200, text=response_xml)
+            m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/createExtract',
+                   status_code=200, text=response_xml)
             self.server.datasources.create_extract('3cc6cd06-89ce-4fdc-b935-5294135d6d42')
 
     def test_create_extracts_encrypted(self):
         self.server.version = "3.10"
         self.baseurl = self.server.datasources.baseurl
-        
+
         response_xml = read_xml_asset(PUBLISH_XML_ASYNC)
         with requests_mock.mock() as m:
-            m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/createExtract', status_code=200, text=response_xml)
+            m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/createExtract',
+                   status_code=200, text=response_xml)
             self.server.datasources.create_extract('3cc6cd06-89ce-4fdc-b935-5294135d6d42', True)
-
-
