@@ -244,13 +244,13 @@ class Datasources(Endpoint):
 
     @api(version='2.0')
     def update_permission(self, item, permission_item):
-                import warnings	
-        warnings.warn('Server.datasources.update_permission is deprecated, '	
-                      'please use Server.datasources.update_permissions instead.',	
-                      DeprecationWarning)	
-        self._permissions.update(item, permission_item)	
+        import warnings
+        warnings.warn('Server.datasources.update_permission is deprecated, '
+                      'please use Server.datasources.update_permissions instead.',
+                      DeprecationWarning)
+        self._permissions.update(item, permission_item)
 
-    @api(version='2.0')	
+    @api(version='2.0')
     def update_permissions(self, item, permission_item):
         self._permissions.update(item, permission_item)
 
