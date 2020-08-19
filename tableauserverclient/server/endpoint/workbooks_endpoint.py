@@ -61,6 +61,26 @@ class Workbooks(Endpoint):
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return new_job
 
+    
+    @api(version='3.5')
+    def create_extract(self, workbook_item, encrypt=False, includeAll=True, datasources=None):
+        id_ = getattr(workbook_item, 'id', workbook_item)
+        url = "{0}/{1}/createExtract?encrypt={2}".format(self.baseurl, id_, encrypt)
+
+        datasource_req = RequestFactory.WorkbookR.embedded_extract_req(includeAll, datasources)
+        
+        server_response = self.post_request(url, datasource_req)
+        new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        return new_job
+
+    @api(version='3.5')
+    def delete_extract(self, workbook_item):
+        id_ = getattr(workbook_item, 'id', workbook_item)
+        url = "{0}/{1}/deleteExtract".format(self.baseurl, id_)
+        empty_req = RequestFactory.Empty.empty_req()
+        server_response = self.post_request(url, empty_req)
+        
+
     # Delete 1 workbook by id
     @api(version="2.0")
     def delete(self, workbook_id):

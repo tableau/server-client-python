@@ -470,8 +470,11 @@ class WorkbookTests(unittest.TestCase):
                                                          hidden_views=['GDP per capita'])
 
             request_body = m._adapter.request_history[0]._request.body
-            self.assertTrue(re.search(rb'<views><view.*?hidden=\"true\".*?\/><\/views>', request_body))
-            self.assertTrue(re.search(rb'<views><view.*?name=\"GDP per capita\".*?\/><\/views>', request_body))
+            # order of attributes in xml is unspecified
+            self.assertTrue(
+                (b'<views><view hidden="true" name="GDP per capita" /></views>' in request_body)
+                or
+                (b'<views><view name="GDP per capita" hidden="true" /></views>' in request_body))
 
     def test_publish_async(self):
         self.server.version = '3.0'
@@ -566,3 +569,34 @@ class WorkbookTests(unittest.TestCase):
 
             self.assertRaisesRegex(InternalServerError, 'Please use asynchronous publishing to avoid timeouts',
                                    self.server.workbooks.publish, new_workbook, asset('SampleWB.twbx'), publish_mode)
+
+    def test_delete_extracts_all(self):
+        self.server.version = "3.10"
+        self.baseurl = self.server.workbooks.baseurl
+        with requests_mock.mock() as m:
+            m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/deleteExtract', status_code=200)
+            self.server.workbooks.delete_extract('3cc6cd06-89ce-4fdc-b935-5294135d6d42')
+
+    def test_create_extracts_all(self):
+        self.server.version = "3.10"
+        self.baseurl = self.server.workbooks.baseurl
+        
+        with open(PUBLISH_ASYNC_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/createExtract', status_code=200, text=response_xml)
+            self.server.workbooks.create_extract('3cc6cd06-89ce-4fdc-b935-5294135d6d42')
+
+
+    def test_create_extracts_one(self):
+        self.server.version = "3.10"
+        self.baseurl = self.server.workbooks.baseurl
+    
+        datasource = TSC.DatasourceItem('test')
+        datasource._id = '1f951daf-4061-451a-9df1-69a8062664f2'
+        
+        with open(PUBLISH_ASYNC_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/createExtract', status_code=200, text=response_xml)
+            self.server.workbooks.create_extract('3cc6cd06-89ce-4fdc-b935-5294135d6d42', False, datasource)
