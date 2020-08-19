@@ -67,7 +67,7 @@ class Workbooks(Endpoint):
         id_ = getattr(workbook_item, 'id', workbook_item)
         url = "{0}/{1}/createExtract?encrypt={2}".format(self.baseurl, id_, encrypt)
 
-        datasource_req = RequestFactory.WorkbookR.embedded_extract_req(includeAll, datasources)
+        datasource_req = RequestFactory.Workbook.embedded_extract_req(includeAll, datasources)
         
         server_response = self.post_request(url, datasource_req)
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
