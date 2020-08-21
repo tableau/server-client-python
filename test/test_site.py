@@ -15,6 +15,7 @@ CREATE_XML = os.path.join(TEST_ASSET_DIR, 'site_create.xml')
 class SiteTests(unittest.TestCase):
     def setUp(self):
         self.server = TSC.Server('http://test')
+        self.server.version = "3.10"
 
         # Fake signin
         self.server._auth_token = 'j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM'
@@ -140,3 +141,18 @@ class SiteTests(unittest.TestCase):
 
     def test_delete_missing_id(self):
         self.assertRaises(ValueError, self.server.sites.delete, '')
+
+    def test_encrypt(self):
+        with requests_mock.mock() as m:
+            m.post(self.baseurl + '/0626857c-1def-4503-a7d8-7907c3ff9d9f/encrypt-extracts', status_code=200)
+            self.server.sites.encrypt_extracts('0626857c-1def-4503-a7d8-7907c3ff9d9f')
+
+    def test_recrypt(self):
+        with requests_mock.mock() as m:
+            m.post(self.baseurl + '/0626857c-1def-4503-a7d8-7907c3ff9d9f/reencrypt-extracts', status_code=200)
+            self.server.sites.re_encrypt_extracts('0626857c-1def-4503-a7d8-7907c3ff9d9f')
+
+    def test_decrypt(self):
+        with requests_mock.mock() as m:
+            m.post(self.baseurl + '/0626857c-1def-4503-a7d8-7907c3ff9d9f/decrypt-extracts', status_code=200)
+            self.server.sites.decrypt_extracts('0626857c-1def-4503-a7d8-7907c3ff9d9f')

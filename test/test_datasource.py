@@ -381,3 +381,30 @@ class DatasourceTests(unittest.TestCase):
             self.assertRaisesRegex(InternalServerError, 'Please use asynchronous publishing to avoid timeouts.',
                                    self.server.datasources.publish, new_datasource,
                                    asset('SampleDS.tds'), publish_mode)
+
+    def test_delete_extracts(self):
+        self.server.version = "3.10"
+        self.baseurl = self.server.datasources.baseurl
+        with requests_mock.mock() as m:
+            m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/deleteExtract', status_code=200)
+            self.server.datasources.delete_extract('3cc6cd06-89ce-4fdc-b935-5294135d6d42')
+
+    def test_create_extracts(self):
+        self.server.version = "3.10"
+        self.baseurl = self.server.datasources.baseurl
+
+        response_xml = read_xml_asset(PUBLISH_XML_ASYNC)
+        with requests_mock.mock() as m:
+            m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/createExtract',
+                   status_code=200, text=response_xml)
+            self.server.datasources.create_extract('3cc6cd06-89ce-4fdc-b935-5294135d6d42')
+
+    def test_create_extracts_encrypted(self):
+        self.server.version = "3.10"
+        self.baseurl = self.server.datasources.baseurl
+
+        response_xml = read_xml_asset(PUBLISH_XML_ASYNC)
+        with requests_mock.mock() as m:
+            m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/createExtract',
+                   status_code=200, text=response_xml)
+            self.server.datasources.create_extract('3cc6cd06-89ce-4fdc-b935-5294135d6d42', True)

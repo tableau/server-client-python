@@ -1,3 +1,6 @@
+## 0.13 (19 Aug 2020)
+* Add support for basic Extract operations - Create, Delete, en/re/decrypt for site
+
 ## 0.12.1 (22 July 2020)
 
 * Fixed login.py sample to properly handle sitename (#652)
