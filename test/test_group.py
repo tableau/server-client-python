@@ -222,3 +222,5 @@ class GroupTests(unittest.TestCase):
 
         self.assertEqual('ef8b19c0-43b6-11e6-af50-63f5805dbe3c', group.id)
         self.assertEqual('Group updated name', group.name)
+        self.assertEqual('ExplorerCanPublish', group.minimum_site_role)
+        self.assertEqual('onLogin', group.license_mode)

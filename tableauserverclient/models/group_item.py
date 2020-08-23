@@ -85,13 +85,10 @@ class GroupItem(object):
                 group_item.minimum_site_role = import_elem.get('siteRole')
             else:
                 # local group, we will just have two extra attributes here
-                group_item._license_mode = group_xml.get('grantLicenseMode')
-                group_item._minimum_site_role = group_xml.get('siteRole')
+                group_item.domain_name = 'local'
+                group_item.license_mode = group_xml.get('grantLicenseMode')
+                group_item.minimum_site_role = group_xml.get('siteRole')
 
-            # what is this stuff? when would there be a domain element in a group?
-            domain_elem = group_xml.find('.//t:domain', namespaces=ns)
-            if domain_elem is not None:
-                group_item._domain_name = domain_elem.get('name', None)
             all_group_items.append(group_item)
         return all_group_items
 
