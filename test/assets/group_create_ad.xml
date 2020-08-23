@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+    <group id="3e4a9ea0-a07a-4fe6-b50f-c345c8c81034" name="試供品" >
+        <import domainName='active-directory-domain-name'
+            siteRole='Creator'
+    		grantLicenseMode='onLogin' />
+     </group>
+</tsResponse>

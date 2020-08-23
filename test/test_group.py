@@ -13,6 +13,7 @@ POPULATE_USERS_EMPTY = os.path.join(TEST_ASSET_DIR, 'group_populate_users_empty.
 ADD_USER = os.path.join(TEST_ASSET_DIR, 'group_add_user.xml')
 ADD_USER_POPULATE = os.path.join(TEST_ASSET_DIR, 'group_users_added.xml')
 CREATE_GROUP = os.path.join(TEST_ASSET_DIR, 'group_create.xml')
+CREATE_GROUP_AD = os.path.join(TEST_ASSET_DIR, 'group_create_ad.xml')
 CREATE_GROUP_ASYNC = os.path.join(TEST_ASSET_DIR, 'group_create_async.xml')
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'group_update.xml')
 
@@ -184,6 +185,30 @@ class GroupTests(unittest.TestCase):
             group = self.server.groups.create(group_to_create)
             self.assertEqual(group.name, u'試供品')
             self.assertEqual(group.id, '3e4a9ea0-a07a-4fe6-b50f-c345c8c81034')
+
+    def test_create_ad_group(self):
+        with open(CREATE_GROUP_AD, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.post(self.baseurl, text=response_xml)
+            group_to_create = TSC.GroupItem(u'試供品')
+            group_to_create.domain_name = 'just-has-to-exist'
+            group = self.server.groups.create_AD_group(group_to_create, False)
+            self.assertEqual(group.name, u'試供品')
+            self.assertEqual(group.license_mode, 'onLogin')
+            self.assertEqual(group.minimum_site_role, 'Creator')
+            self.assertEqual(group.domain_name, 'active-directory-domain-name')
+
+    def test_create_group_async(self):
+        with open(CREATE_GROUP_ASYNC, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.post(self.baseurl, text=response_xml)
+            group_to_create = TSC.GroupItem(u'試供品')
+            group_to_create.domain_name = 'woohoo'
+            job = self.server.groups.create_AD_group(group_to_create, True)
+            self.assertEqual(job.mode, 'Asynchronous')
+            self.assertEqual(job.type, 'GroupImport')
 
     def test_update(self):
         with open(UPDATE_XML, 'rb') as f:

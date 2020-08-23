@@ -13,10 +13,16 @@ class GroupItem(object):
         self._id = None
         self._users = None
         self.name = name
+        self._license_mode = None
+        self._minimum_site_role = None
 
     @property
     def domain_name(self):
         return self._domain_name
+
+    @domain_name.setter
+    def domain_name(self, value):
+        self._domain_name = value
 
     @property
     def id(self):
@@ -30,6 +36,23 @@ class GroupItem(object):
     @property_not_empty
     def name(self, value):
         self._name = value
+
+    @property
+    def license_mode(self):
+        return self._license_mode
+
+    @license_mode.setter
+    def license_mode(self, value):
+        # valid values = onSync, onLogin
+        self._license_mode = value
+
+    @property
+    def minimum_site_role(self):
+        return self._minimum_site_role
+
+    @minimum_site_role.setter
+    def minimum_site_role(self, value):
+        self._minimum_site_role = value
 
     @property
     def users(self):
@@ -54,7 +77,18 @@ class GroupItem(object):
             name = group_xml.get('name', None)
             group_item = cls(name)
             group_item._id = group_xml.get('id', None)
+            # AD groups have an extra element under this
+            import_elem = group_xml.find('.//t:import', namespaces=ns)
+            if (import_elem is not None):
+                group_item.domain_name = import_elem.get('domainName')
+                group_item.license_mode = import_elem.get('grantLicenseMode')
+                group_item.minimum_site_role = import_elem.get('siteRole')
+            else:
+                # local group, we will just have two extra attributes here
+                group_item._license_mode = group_xml.get('grantLicenseMode')
+                group_item._minimum_site_role = group_xml.get('siteRole')
 
+            # what is this stuff? when would there be a domain element in a group?
             domain_elem = group_xml.find('.//t:domain', namespaces=ns)
             if domain_elem is not None:
                 group_item._domain_name = domain_elem.get('name', None)
