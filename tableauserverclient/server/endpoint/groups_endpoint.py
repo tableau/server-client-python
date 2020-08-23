@@ -91,7 +91,6 @@ class Groups(Endpoint):
         else:
             return GroupItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
-
     # Removes 1 user from 1 group
     @api(version="2.0")
     def remove_user(self, group_item, user_id):
