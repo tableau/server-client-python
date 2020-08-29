@@ -58,7 +58,7 @@ class Groups(Endpoint):
         logger.info('Deleted single group (ID: {0})'.format(group_id))
 
     @api(version="2.0")
-    def update(self, group_item, default_site_role=UNLICENSED_USER, asJob=False):
+    def update(self, group_item, default_site_role=UNLICENSED_USER, as_job=False):
         if not group_item.id:
             error = "Group item missing ID."
             raise MissingRequiredFieldError(error)
@@ -66,7 +66,7 @@ class Groups(Endpoint):
         update_req = RequestFactory.Group.update_req(group_item, default_site_role)
         server_response = self.put_request(url, update_req)
         logger.info('Updated group item (ID: {0})'.format(group_item.id))
-        if (asJob):
+        if (as_job):
             return JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         else:
             return GroupItem.from_response(server_response.content, self.parent_srv.namespace)[0]

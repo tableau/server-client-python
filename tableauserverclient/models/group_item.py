@@ -1,7 +1,8 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
-from .property_decorators import property_not_empty
+from .property_decorators import property_not_empty, property_is_enum
 from .reference_item import ResourceReference
+from .user_item import UserItem
 
 
 class GroupItem(object):
@@ -51,6 +52,7 @@ class GroupItem(object):
         return self._minimum_site_role
 
     @minimum_site_role.setter
+    @property_is_enum(UserItem.Roles)
     def minimum_site_role(self, value):
         self._minimum_site_role = value
 
