@@ -2579,20 +2579,20 @@ Returns the new `SubscriptionItem` object.
 
 
 # create the target (content) of the subscription 
-# in this case, id of the workbook add the target type "workbook"
+# in this case, id of the workbook and the target type "workbook"
 
-  target = ('c7a9327e-1cda-4504-b026-ddb43b976d1d', 'workbook')
+  target = TSC.Target('c7a9327e-1cda-4504-b026-ddb43b976d1d', 'workbook')
 
 # the ids for  the schedule and user
-  schedule = ('b60b4efd-a6f7-4599-beb3-cb677e7abac1')
-  user = 'b60b4efd-a6f7-4599-beb3-cb677e7abac1'
+  schedule_id = 'b60b4efd-a6f7-4599-beb3-cb677e7abac1'
+  user_id = 'b60b4efd-a6f7-4599-beb3-cb677e7abac1'
 
 # create a new SubscriptionItem object.
-  newSub = TSC.SubscriptionItem('My Subscription', schedule, user, target)
+  newSub = TSC.SubscriptionItem('My Subscription', schedule_id, user_id, target)
 
 # create the new subscription to the site
   newSub = server.subscriptions.create(newSub)
-  print(newUSub.subject)
+  print(newSub.subject)
 
 ``` 
 
