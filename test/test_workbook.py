@@ -457,7 +457,7 @@ class WorkbookTests(unittest.TestCase):
 
             request_body = m._adapter.request_history[0]._request.body
             self.assertIn(
-                b'<views><view hidden="true" name="GDP per capita" /></views>', request_body)
+                b'<views><view name="GDP per capita" hidden="true" /></views>', request_body)
 
     def test_publish_async(self):
         self.server.version = '3.0'
