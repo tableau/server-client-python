@@ -79,7 +79,7 @@ Source file: server/endpoint/auth_endpoint.py
 <br>
 <br> 
 
-#### auth.sign in
+#### auth.sign_in
 
 ```py
 auth.sign_in(auth_req)
@@ -122,7 +122,7 @@ server.auth.sign_in(tableau_auth)
 <br>
 
 
-#### auth.sign out
+#### auth.sign_out
 
 ```py
 auth.sign_out()
@@ -367,7 +367,7 @@ REST API: [Query Datasources](https://help.tableau.com/current/api/rest_api/en-u
 
 Name | Description  
 :--- | :--- 
-`req_option` |  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific data source, you could specify the name of the project or its id. 
+`req_options` |  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific data source, you could specify the name of the project or its id. 
 
 
 **Returns**
@@ -949,7 +949,7 @@ REST API: [Get Users on Site](https://help.tableau.com/current/api/rest_api/en-u
 
 Name | Description  
 :--- | :--- 
-`req_option` |  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific group, you could specify the name of the group or the group id. 
+`req_options` |  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific group, you could specify the name of the group or the group id. 
 
 
 **Returns**
@@ -1850,7 +1850,7 @@ REST API: [Query Schedules](https://help.tableau.com/current/api/rest_api/en-us/
   
 Name  |  Description  
 :--- | :---  
-`req_options` | (Optional) To filter the return items, you can specify request options. See Requests and . 
+`req_options` | (Optional) Additional request options to send to the endpoint.
 
 #### schedule.update
 
@@ -2663,7 +2663,7 @@ REST API: [Query Subscriptions](https://help.tableau.com/current/api/rest_api/en
 
 Name   |  Description     
  :--- | : ---    
-`req_option` |  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific subscription, you could specify the subject of the subscription or the id of the subscription. 
+`req_options` |  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific subscription, you could specify the subject of the subscription or the id of the subscription. 
 
 
 **Returns**
@@ -2839,7 +2839,7 @@ REST API: [Get Users on Site](https://help.tableau.com/current/api/rest_api/en-u
 
 Name   |  Description     
  :--- | : ---    
-`req_option` |  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific user, you could specify the name of the user or the user's id. 
+`req_options` |  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific user, you could specify the name of the user or the user's id. 
 
 
 **Returns**
@@ -3164,7 +3164,7 @@ This endpoint is available with REST API version 2.0 and up.
 
 Name | Description  
 :--- | :---  
-`req_option`  |  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific view, you could specify the name of the view or its ID.
+`req_options`  |  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific view, you could specify the name of the view or its ID.
 `usage` | (Optional) If true (`usage=True`) returns the usage statistics for the views. The default is `usage=False`.  
 
 
@@ -3492,7 +3492,7 @@ REST API: [Query Workbooks for Site](https://help.tableau.com/current/api/rest_a
 
 Name | Description  
 :--- | :---  
-`req_option`  |  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific workbook, you could specify the name of the workbook or the name of the owner. See [Filter and Sort](filter-sort)
+`req_options`  |  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific workbook, you could specify the name of the workbook or the name of the owner. See [Filter and Sort](filter-sort)
 
 
 **Returns**
