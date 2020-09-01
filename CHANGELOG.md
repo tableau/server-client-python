@@ -1,5 +1,16 @@
-## 0.13 (19 Aug 2020)
-* Add support for basic Extract operations - Create, Delete, en/re/decrypt for site
+## 0.13 (1 Sept 2020)
+* Added notes field to JobItem (#571)
+* Added webpage_url field to WorkbookItem (#661)
+* Added support for switching between sites (#655)
+* Added support for querying favorites for a user (#656)
+* Added support for Python 3.8 (#659)
+* Added support for Data Alerts (#667)
+* Added support for basic Extract operations - Create, Delete, en/re/decrypt for site (#672)
+* Added support for creating and querying Active Directory groups (#674)
+* Added support for asynchronously updating a group (#674)
+* Improved handling of invalid dates (#529)
+* Improved consistency of update_permission endpoints (#668)
+* Documentation updates (#658, #669, #670, #673, #683)
 
 ## 0.12.1 (22 July 2020)
 
