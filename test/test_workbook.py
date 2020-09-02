@@ -1,5 +1,6 @@
 import unittest
 import os
+import re
 import requests_mock
 import tableauserverclient as TSC
 import xml.etree.ElementTree as ET
@@ -19,6 +20,7 @@ TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 ADD_TAGS_XML = os.path.join(TEST_ASSET_DIR, 'workbook_add_tags.xml')
 GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, 'workbook_get_by_id.xml')
 GET_EMPTY_XML = os.path.join(TEST_ASSET_DIR, 'workbook_get_empty.xml')
+GET_INVALID_DATE_XML = os.path.join(TEST_ASSET_DIR, 'workbook_get_invalid_date.xml')
 GET_XML = os.path.join(TEST_ASSET_DIR, 'workbook_get.xml')
 POPULATE_CONNECTIONS_XML = os.path.join(TEST_ASSET_DIR, 'workbook_populate_connections.xml')
 POPULATE_PDF = os.path.join(TEST_ASSET_DIR, 'populate_pdf.pdf')
@@ -55,6 +57,7 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual('Superstore', all_workbooks[0].name)
         self.assertEqual('Superstore', all_workbooks[0].content_url)
         self.assertEqual(False, all_workbooks[0].show_tabs)
+        self.assertEqual('http://tableauserver/#/workbooks/1/views', all_workbooks[0].webpage_url)
         self.assertEqual(1, all_workbooks[0].size)
         self.assertEqual('2016-08-03T20:34:04Z', format_datetime(all_workbooks[0].created_at))
         self.assertEqual('description for Superstore', all_workbooks[0].description)
@@ -66,6 +69,7 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual('3cc6cd06-89ce-4fdc-b935-5294135d6d42', all_workbooks[1].id)
         self.assertEqual('SafariSample', all_workbooks[1].name)
         self.assertEqual('SafariSample', all_workbooks[1].content_url)
+        self.assertEqual('http://tableauserver/#/workbooks/2/views', all_workbooks[1].webpage_url)
         self.assertEqual(False, all_workbooks[1].show_tabs)
         self.assertEqual(26, all_workbooks[1].size)
         self.assertEqual('2016-07-26T20:34:56Z', format_datetime(all_workbooks[1].created_at))
@@ -75,6 +79,15 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual('default', all_workbooks[1].project_name)
         self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', all_workbooks[1].owner_id)
         self.assertEqual(set(['Safari', 'Sample']), all_workbooks[1].tags)
+
+    def test_get_ignore_invalid_date(self):
+        with open(GET_INVALID_DATE_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.get(self.baseurl, text=response_xml)
+            all_workbooks, pagination_item = self.server.workbooks.get()
+        self.assertEqual(None, format_datetime(all_workbooks[0].created_at))
+        self.assertEqual('2016-08-04T17:56:41Z', format_datetime(all_workbooks[0].updated_at))
 
     def test_get_before_signin(self):
         self.server._auth_token = None
@@ -100,6 +113,7 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual('3cc6cd06-89ce-4fdc-b935-5294135d6d42', single_workbook.id)
         self.assertEqual('SafariSample', single_workbook.name)
         self.assertEqual('SafariSample', single_workbook.content_url)
+        self.assertEqual('http://tableauserver/#/workbooks/2/views', single_workbook.webpage_url)
         self.assertEqual(False, single_workbook.show_tabs)
         self.assertEqual(26, single_workbook.size)
         self.assertEqual('2016-07-26T20:34:56Z', format_datetime(single_workbook.created_at))
@@ -456,8 +470,9 @@ class WorkbookTests(unittest.TestCase):
                                                          hidden_views=['GDP per capita'])
 
             request_body = m._adapter.request_history[0]._request.body
-            self.assertIn(
-                b'<views><view hidden="true" name="GDP per capita" /></views>', request_body)
+            # order of attributes in xml is unspecified
+            self.assertTrue(re.search(rb'<views><view.*?hidden=\"true\".*?\/><\/views>', request_body))
+            self.assertTrue(re.search(rb'<views><view.*?name=\"GDP per capita\".*?\/><\/views>', request_body))
 
     def test_publish_async(self):
         self.server.version = '3.0'
@@ -552,3 +567,35 @@ class WorkbookTests(unittest.TestCase):
 
             self.assertRaisesRegex(InternalServerError, 'Please use asynchronous publishing to avoid timeouts',
                                    self.server.workbooks.publish, new_workbook, asset('SampleWB.twbx'), publish_mode)
+
+    def test_delete_extracts_all(self):
+        self.server.version = "3.10"
+        self.baseurl = self.server.workbooks.baseurl
+        with requests_mock.mock() as m:
+            m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/deleteExtract', status_code=200)
+            self.server.workbooks.delete_extract('3cc6cd06-89ce-4fdc-b935-5294135d6d42')
+
+    def test_create_extracts_all(self):
+        self.server.version = "3.10"
+        self.baseurl = self.server.workbooks.baseurl
+
+        with open(PUBLISH_ASYNC_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/createExtract',
+                   status_code=200, text=response_xml)
+            self.server.workbooks.create_extract('3cc6cd06-89ce-4fdc-b935-5294135d6d42')
+
+    def test_create_extracts_one(self):
+        self.server.version = "3.10"
+        self.baseurl = self.server.workbooks.baseurl
+
+        datasource = TSC.DatasourceItem('test')
+        datasource._id = '1f951daf-4061-451a-9df1-69a8062664f2'
+
+        with open(PUBLISH_ASYNC_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/createExtract',
+                   status_code=200, text=response_xml)
+            self.server.workbooks.create_extract('3cc6cd06-89ce-4fdc-b935-5294135d6d42', False, datasource)

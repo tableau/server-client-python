@@ -4,10 +4,12 @@ from datetime import datetime
 import requests_mock
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import utc
+from ._utils import read_xml_asset
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
-GET_XML = os.path.join(TEST_ASSET_DIR, 'job_get.xml')
+GET_XML = 'job_get.xml'
+GET_BY_ID_XML = 'job_get_by_id.xml'
 
 
 class JobTests(unittest.TestCase):
@@ -22,8 +24,7 @@ class JobTests(unittest.TestCase):
         self.baseurl = self.server.jobs.baseurl
 
     def test_get(self):
-        with open(GET_XML, 'rb') as f:
-            response_xml = f.read().decode('utf-8')
+        response_xml = read_xml_asset(GET_XML)
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
             all_jobs, pagination_item = self.server.jobs.get()
@@ -40,6 +41,19 @@ class JobTests(unittest.TestCase):
             self.assertEqual(created_at, job.created_at)
             self.assertEqual(started_at, job.started_at)
             self.assertEqual(ended_at, job.ended_at)
+
+    def test_get_by_id(self):
+        response_xml = read_xml_asset(GET_BY_ID_XML)
+        job_id = '2eef4225-aa0c-41c4-8662-a76d89ed7336'
+        with requests_mock.mock() as m:
+            m.get('{0}/{1}'.format(self.baseurl, job_id), text=response_xml)
+            job = self.server.jobs.get_by_id(job_id)
+
+            created_at = datetime(2020, 5, 13, 20, 23, 45, tzinfo=utc)
+            updated_at = datetime(2020, 5, 13, 20, 25, 18, tzinfo=utc)
+            ended_at = datetime(2020, 5, 13, 20, 25, 18, tzinfo=utc)
+            self.assertEqual(job_id, job.id)
+            self.assertListEqual(job.notes, ['Job detail notes'])
 
     def test_get_before_signin(self):
         self.server._auth_token = None

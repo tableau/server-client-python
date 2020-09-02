@@ -67,6 +67,14 @@ class Projects(Endpoint):
 
     @api(version='2.0')
     def update_permission(self, item, rules):
+        import warnings
+        warnings.warn('Server.projects.update_permission is deprecated, '
+                      'please use Server.projects.update_permissions instead.',
+                      DeprecationWarning)
+        return self._permissions.update(item, rules)
+
+    @api(version='2.0')
+    def update_permissions(self, item, rules):
         return self._permissions.update(item, rules)
 
     @api(version='2.0')

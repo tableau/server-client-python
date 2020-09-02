@@ -1,3 +1,10 @@
+####
+# This script demonstrates how to export a view using the Tableau
+# Server Client.
+#
+# To run the script, you must have installed Python 3.5 or later.
+####
+
 import argparse
 import getpass
 import logging
@@ -6,7 +13,7 @@ import tableauserverclient as TSC
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Export a view as an image, pdf, or csv')
+    parser = argparse.ArgumentParser(description='Export a view as an image, PDF, or CSV')
     parser.add_argument('--server', '-s', required=True, help='server address')
     parser.add_argument('--username', '-u', required=True, help='username to sign into server')
     parser.add_argument('--site', '-S', default=None)

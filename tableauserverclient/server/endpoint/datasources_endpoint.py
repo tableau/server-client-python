@@ -152,6 +152,22 @@ class Datasources(Endpoint):
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return new_job
 
+    @api(version='3.5')
+    def create_extract(self, datasource_item, encrypt=False):
+        id_ = getattr(datasource_item, 'id', datasource_item)
+        url = "{0}/{1}/createExtract?encrypt={2}".format(self.baseurl, id_, encrypt)
+        empty_req = RequestFactory.Empty.empty_req()
+        server_response = self.post_request(url, empty_req)
+        new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        return new_job
+
+    @api(version='3.5')
+    def delete_extract(self, datasource_item):
+        id_ = getattr(datasource_item, 'id', datasource_item)
+        url = "{0}/{1}/deleteExtract".format(self.baseurl, id_)
+        empty_req = RequestFactory.Empty.empty_req()
+        self.post_request(url, empty_req)
+
     # Publish datasource
     @api(version="2.0")
     @parameter_added_in(connections="2.8")
@@ -227,6 +243,14 @@ class Datasources(Endpoint):
 
     @api(version='2.0')
     def update_permission(self, item, permission_item):
+        import warnings
+        warnings.warn('Server.datasources.update_permission is deprecated, '
+                      'please use Server.datasources.update_permissions instead.',
+                      DeprecationWarning)
+        self._permissions.update(item, permission_item)
+
+    @api(version='2.0')
+    def update_permissions(self, item, permission_item):
         self._permissions.update(item, permission_item)
 
     @api(version='2.0')

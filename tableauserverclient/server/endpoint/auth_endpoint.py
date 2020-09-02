@@ -1,5 +1,5 @@
 from ..request_factory import RequestFactory
-
+from .exceptions import ServerResponseError
 from .endpoint import Endpoint, api
 import xml.etree.ElementTree as ET
 import logging
@@ -52,3 +52,24 @@ class Auth(Endpoint):
         self.post_request(url, '')
         self.parent_srv._clear_auth()
         logger.info('Signed out')
+
+    @api(version="2.6")
+    def switch_site(self, site_item):
+        url = "{0}/{1}".format(self.baseurl, 'switchSite')
+        switch_req = RequestFactory.Auth.switch_req(site_item.content_url)
+        try:
+            server_response = self.post_request(url, switch_req)
+        except ServerResponseError as e:
+            if e.code == "403070":
+                return Auth.contextmgr(self.sign_out)
+            else:
+                raise e
+        self.parent_srv._namespace.detect(server_response.content)
+        self._check_status(server_response)
+        parsed_response = ET.fromstring(server_response.content)
+        site_id = parsed_response.find('.//t:site', namespaces=self.parent_srv.namespace).get('id', None)
+        user_id = parsed_response.find('.//t:user', namespaces=self.parent_srv.namespace).get('id', None)
+        auth_token = parsed_response.find('t:credentials', namespaces=self.parent_srv.namespace).get('token', None)
+        self.parent_srv._set_auth(site_id, user_id, auth_token)
+        logger.info('Signed into {0} as user with id {1}'.format(self.parent_srv.server_address, user_id))
+        return Auth.contextmgr(self.sign_out)

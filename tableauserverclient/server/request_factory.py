@@ -67,6 +67,13 @@ class AuthRequest(object):
             user_element.attrib['id'] = auth_item.user_id_to_impersonate
         return ET.tostring(xml_request)
 
+    def switch_req(self, site_content_url):
+        xml_request = ET.Element('tsRequest')
+
+        site_element = ET.SubElement(xml_request, 'site')
+        site_element.attrib['contentUrl'] = site_content_url
+        return ET.tostring(xml_request)
+
 
 class ColumnRequest(object):
     def update_req(self, column_item):
@@ -75,6 +82,27 @@ class ColumnRequest(object):
 
         if column_item.description:
             column_element.attrib['description'] = str(column_item.description)
+
+        return ET.tostring(xml_request)
+
+
+class DataAlertRequest(object):
+    def add_user_to_alert(self, alert_item, user_id):
+        xml_request = ET.Element('tsRequest')
+        user_element = ET.SubElement(xml_request, 'user')
+        user_element.attrib['id'] = user_id
+
+        return ET.tostring(xml_request)
+
+    def update_req(self, alert_item):
+        xml_request = ET.Element('tsRequest')
+        dataAlert_element = ET.SubElement(xml_request, 'dataAlert')
+        dataAlert_element.attrib['subject'] = alert_item.subject
+        dataAlert_element.attrib['frequency'] = alert_item.frequency.lower()
+        dataAlert_element.attrib['public'] = alert_item.public
+
+        owner = ET.SubElement(dataAlert_element, 'owner')
+        owner.attrib['id'] = alert_item.owner_id
 
         return ET.tostring(xml_request)
 
@@ -231,13 +259,36 @@ class GroupRequest(object):
         user_element.attrib['id'] = user_id
         return ET.tostring(xml_request)
 
-    def create_req(self, group_item):
+    def create_local_req(self, group_item):
         xml_request = ET.Element('tsRequest')
         group_element = ET.SubElement(xml_request, 'group')
         group_element.attrib['name'] = group_item.name
+        if group_item.license_mode is not None:
+            group_element.attrib['grantLicenseMode'] = group_item.license_mode
+        if group_item.minimum_site_role is not None:
+            group_element.attrib['SiteRole'] = group_item.minimum_site_role
         return ET.tostring(xml_request)
 
-    def update_req(self, group_item, default_site_role):
+    def create_ad_req(self, group_item):
+        xml_request = ET.Element('tsRequest')
+        group_element = ET.SubElement(xml_request, 'group')
+        group_element.attrib['name'] = group_item.name
+        import_element = ET.SubElement(group_element, 'import')
+        import_element.attrib['source'] = "ActiveDirectory"
+        if group_item.domain_name is None:
+            error = "Group Domain undefined."
+            raise ValueError(error)
+
+        import_element.attrib['domainName'] = group_item.domain_name
+        if group_item.license_mode is not None:
+            import_element.attrib['grantLicenseMode'] = group_item.license
+        if group_item.minimum_site_role is not None:
+            import_element.attrib['SiteRole'] = group_item.minimum_site_role
+        return ET.tostring(xml_request)
+
+    def update_req(self, group_item, default_site_role=None):
+        if default_site_role is not None:
+            group_item.minimum_site_role = default_site_role
         xml_request = ET.Element('tsRequest')
         group_element = ET.SubElement(xml_request, 'group')
         group_element.attrib['name'] = group_item.name
@@ -245,7 +296,9 @@ class GroupRequest(object):
             project_element = ET.SubElement(group_element, 'import')
             project_element.attrib['source'] = "ActiveDirectory"
             project_element.attrib['domainName'] = group_item.domain_name
-            project_element.attrib['siteRole'] = default_site_role
+            project_element.attrib['siteRole'] = group_item.minimum_site_role
+            project_element.attrib['grantLicenseMode'] = group_item.license_mode
+
         return ET.tostring(xml_request)
 
 
@@ -561,6 +614,16 @@ class WorkbookRequest(object):
         parts = {'request_payload': ('', xml_request, 'text/xml')}
         return _add_multipart(parts)
 
+    @_tsrequest_wrapped
+    def embedded_extract_req(self, xml_request, include_all=True, datasources=None):
+        list_element = ET.SubElement(xml_request, 'datasources')
+        if include_all:
+            list_element.attrib['includeAll'] = "true"
+        else:
+            for datasource_item in datasources:
+                datasource_element = list_element.SubElement(xml_request, 'datasource')
+                datasource_element.attrib['id'] = datasource_item.id
+
 
 class Connection(object):
     @_tsrequest_wrapped
@@ -616,7 +679,7 @@ class WebhookRequest(object):
         webhook.attrib['name'] = webhook_item.name
 
         source = ET.SubElement(webhook, 'webhook-source')
-        event = ET.SubElement(source, webhook_item._event)
+        ET.SubElement(source, webhook_item._event)
 
         destination = ET.SubElement(webhook, 'webhook-destination')
         post = ET.SubElement(destination, 'webhook-destination-http')
@@ -630,6 +693,7 @@ class RequestFactory(object):
     Auth = AuthRequest()
     Connection = Connection()
     Column = ColumnRequest()
+    DataAlert = DataAlertRequest()
     Datasource = DatasourceRequest()
     Database = DatabaseRequest()
     Empty = EmptyRequest()

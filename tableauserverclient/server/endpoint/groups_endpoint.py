@@ -1,6 +1,6 @@
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
-from .. import RequestFactory, GroupItem, UserItem, PaginationItem
+from .. import RequestFactory, GroupItem, UserItem, PaginationItem, JobItem
 from ..pager import Pager
 
 import logging
@@ -58,7 +58,7 @@ class Groups(Endpoint):
         logger.info('Deleted single group (ID: {0})'.format(group_id))
 
     @api(version="2.0")
-    def update(self, group_item, default_site_role=UNLICENSED_USER):
+    def update(self, group_item, default_site_role=UNLICENSED_USER, as_job=False):
         if not group_item.id:
             error = "Group item missing ID."
             raise MissingRequiredFieldError(error)
@@ -66,16 +66,30 @@ class Groups(Endpoint):
         update_req = RequestFactory.Group.update_req(group_item, default_site_role)
         server_response = self.put_request(url, update_req)
         logger.info('Updated group item (ID: {0})'.format(group_item.id))
-        updated_group = GroupItem.from_response(server_response.content, self.parent_srv.namespace)[0]
-        return updated_group
+        if (as_job):
+            return JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        else:
+            return GroupItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     # Create a 'local' Tableau group
     @api(version="2.0")
     def create(self, group_item):
         url = self.baseurl
-        create_req = RequestFactory.Group.create_req(group_item)
+        create_req = RequestFactory.Group.create_local_req(group_item)
         server_response = self.post_request(url, create_req)
         return GroupItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+
+    # Create a group based on Active Directory
+    @api(version="2.0")
+    def create_AD_group(self, group_item, asJob=False):
+        asJobparameter = "?asJob=true" if asJob else ""
+        url = self.baseurl + asJobparameter
+        create_req = RequestFactory.Group.create_ad_req(group_item)
+        server_response = self.post_request(url, create_req)
+        if (asJob):
+            return JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        else:
+            return GroupItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     # Removes 1 user from 1 group
     @api(version="2.0")
@@ -102,5 +116,6 @@ class Groups(Endpoint):
         url = "{0}/{1}/users".format(self.baseurl, group_item.id)
         add_req = RequestFactory.Group.add_user_req(user_id)
         server_response = self.post_request(url, add_req)
-        return UserItem.from_response(server_response.content, self.parent_srv.namespace).pop()
+        user = UserItem.from_response(server_response.content, self.parent_srv.namespace).pop()
         logger.info('Added user (id: {0}) to group (ID: {1})'.format(user_id, group_item.id))
+        return user

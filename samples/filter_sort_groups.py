@@ -1,5 +1,5 @@
 ####
-# This script demonstrates how to filter groups using the Tableau
+# This script demonstrates how to filter and sort groups using the Tableau
 # Server Client.
 #
 # To run the script, you must have installed Python 3.5 or later.
@@ -24,7 +24,7 @@ def create_example_group(group_name='Example Group', server=None):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Filter on groups')
+    parser = argparse.ArgumentParser(description='Filter and sort groups.')
     parser.add_argument('--server', '-s', required=True, help='server address')
     parser.add_argument('--username', '-u', required=True, help='username to sign into server')
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',

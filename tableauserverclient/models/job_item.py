@@ -3,7 +3,8 @@ from ..datetime_helpers import parse_datetime
 
 
 class JobItem(object):
-    def __init__(self, id_, job_type, progress, created_at, started_at=None, completed_at=None, finish_code=0):
+    def __init__(self, id_, job_type, progress, created_at, started_at=None,
+                 completed_at=None, finish_code=0, notes=None, mode=None):
         self._id = id_
         self._type = job_type
         self._progress = progress
@@ -11,6 +12,8 @@ class JobItem(object):
         self._started_at = started_at
         self._completed_at = completed_at
         self._finish_code = finish_code
+        self._notes = notes or []
+        self._mode = mode
 
     @property
     def id(self):
@@ -40,6 +43,19 @@ class JobItem(object):
     def finish_code(self):
         return self._finish_code
 
+    @property
+    def notes(self):
+        return self._notes
+
+    @property
+    def mode(self):
+        return self._mode
+
+    @mode.setter
+    def mode(self, value):
+        # check for valid data here
+        self._mode = value
+
     def __repr__(self):
         return "<Job#{_id} {_type} created_at({_created_at}) started_at({_started_at}) completed_at({_completed_at})" \
                " progress ({_progress}) finish_code({_finish_code})>".format(**self.__dict__)
@@ -63,7 +79,10 @@ class JobItem(object):
         started_at = parse_datetime(element.get('startedAt', None))
         completed_at = parse_datetime(element.get('completedAt', None))
         finish_code = element.get('finishCode', -1)
-        return cls(id_, type_, progress, created_at, started_at, completed_at, finish_code)
+        notes = [note.text for note in
+                 element.findall('.//t:notes', namespaces=ns)] or None
+        mode = element.get('mode', None)
+        return cls(id_, type_, progress, created_at, started_at, completed_at, finish_code, notes, mode)
 
 
 class BackgroundJobItem(object):

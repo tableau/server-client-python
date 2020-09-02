@@ -12,6 +12,7 @@ class WorkbookItem(object):
     def __init__(self, project_id, name=None, show_tabs=False):
         self._connections = None
         self._content_url = None
+        self._webpage_url = None
         self._created_at = None
         self._id = None
         self._initial_tags = set()
@@ -50,6 +51,10 @@ class WorkbookItem(object):
     @property
     def content_url(self):
         return self._content_url
+
+    @property
+    def webpage_url(self):
+        return self._webpage_url
 
     @property
     def created_at(self):
@@ -152,17 +157,17 @@ class WorkbookItem(object):
         if not isinstance(workbook_xml, ET.Element):
             workbook_xml = ET.fromstring(workbook_xml).find('.//t:workbook', namespaces=ns)
         if workbook_xml is not None:
-            (_, _, _, _, description, updated_at, _, show_tabs,
+            (_, _, _, _, _, description, updated_at, _, show_tabs,
              project_id, project_name, owner_id, _, _,
              data_acceleration_config) = self._parse_element(workbook_xml, ns)
 
-            self._set_values(None, None, None, None, description, updated_at,
+            self._set_values(None, None, None, None, None, description, updated_at,
                              None, show_tabs, project_id, project_name, owner_id, None, None,
                              data_acceleration_config)
 
         return self
 
-    def _set_values(self, id, name, content_url, created_at, description, updated_at,
+    def _set_values(self, id, name, content_url, webpage_url, created_at, description, updated_at,
                     size, show_tabs, project_id, project_name, owner_id, tags, views,
                     data_acceleration_config):
         if id is not None:
@@ -171,6 +176,8 @@ class WorkbookItem(object):
             self.name = name
         if content_url:
             self._content_url = content_url
+        if webpage_url:
+            self._webpage_url = webpage_url
         if created_at:
             self._created_at = created_at
         if description:
@@ -201,12 +208,12 @@ class WorkbookItem(object):
         parsed_response = ET.fromstring(resp)
         all_workbook_xml = parsed_response.findall('.//t:workbook', namespaces=ns)
         for workbook_xml in all_workbook_xml:
-            (id, name, content_url, created_at, description, updated_at, size, show_tabs,
+            (id, name, content_url, webpage_url, created_at, description, updated_at, size, show_tabs,
              project_id, project_name, owner_id, tags, views,
              data_acceleration_config) = cls._parse_element(workbook_xml, ns)
 
             workbook_item = cls(project_id)
-            workbook_item._set_values(id, name, content_url, created_at, description, updated_at,
+            workbook_item._set_values(id, name, content_url, webpage_url, created_at, description, updated_at,
                                       size, show_tabs, None, project_name, owner_id, tags, views,
                                       data_acceleration_config)
             all_workbook_items.append(workbook_item)
@@ -217,6 +224,7 @@ class WorkbookItem(object):
         id = workbook_xml.get('id', None)
         name = workbook_xml.get('name', None)
         content_url = workbook_xml.get('contentUrl', None)
+        webpage_url = workbook_xml.get('webpageUrl', None)
         created_at = parse_datetime(workbook_xml.get('createdAt', None))
         description = workbook_xml.get('description', None)
         updated_at = parse_datetime(workbook_xml.get('updatedAt', None))
@@ -256,7 +264,7 @@ class WorkbookItem(object):
         if data_acceleration_elem is not None:
             data_acceleration_config = parse_data_acceleration_config(data_acceleration_elem)
 
-        return id, name, content_url, created_at, description, updated_at, size, show_tabs, \
+        return id, name, content_url, webpage_url, created_at, description, updated_at, size, show_tabs, \
             project_id, project_name, owner_id, tags, views, data_acceleration_config
 
 
