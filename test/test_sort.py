@@ -31,7 +31,7 @@ class SortTests(unittest.TestCase):
                                                        auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
                                                        content_type='text/xml')
 
-            self.assertEqual(resp.request.query, 'pagenumber=13&pagesize=13&filter=name:eq:superstore')
+            self.assertEqual(resp.request.query, 'pagenumber=13&pagesize=13&filter=name%3aeq%3asuperstore')
 
     def test_filter_equals_list(self):
         with self.assertRaises(ValueError) as cm:
@@ -57,7 +57,7 @@ class SortTests(unittest.TestCase):
                                                        request_object=opts,
                                                        auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
                                                        content_type='text/xml')
-            self.assertEqual(resp.request.query, 'pagenumber=13&pagesize=13&filter=tags:in:%5bstocks,market%5d')
+            self.assertEqual(resp.request.query, 'pagenumber=13&pagesize=13&filter=tags%3ain%3a%5bstocks%2cmarket%5d')
 
     def test_sort_asc(self):
         with requests_mock.mock() as m:
@@ -74,7 +74,7 @@ class SortTests(unittest.TestCase):
                                                        auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
                                                        content_type='text/xml')
 
-            self.assertEqual(resp.request.query, 'pagenumber=13&pagesize=13&sort=name:asc')
+            self.assertEqual(resp.request.query, 'pagenumber=13&pagesize=13&sort=name%3aasc')
 
     def test_filter_combo(self):
         with requests_mock.mock() as m:
@@ -97,7 +97,8 @@ class SortTests(unittest.TestCase):
                                                        auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
                                                        content_type='text/xml')
 
-            expected = 'pagenumber=13&pagesize=13&filter=lastlogin:gte:2017-01-15t00:00:00:00z,siterole:eq:publisher'
+            expected = 'pagenumber=13&pagesize=13&filter=lastlogin%3agte%3a' \
+                       '2017-01-15t00%3a00%3a00%3a00z%2csiterole%3aeq%3apublisher'
 
             self.assertEqual(resp.request.query, expected)
 

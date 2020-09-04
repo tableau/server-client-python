@@ -41,9 +41,9 @@ class Endpoint(object):
 
     def _make_request(self, method, url, content=None, request_object=None,
                       auth_token=None, content_type=None, parameters=None):
-        if request_object is not None:
-            url = request_object.apply_query_params(url)
         parameters = parameters or {}
+        if request_object is not None:
+            parameters["params"] = request_object.get_query_params()
         parameters.update(self.parent_srv.http_options)
         parameters['headers'] = Endpoint._make_common_headers(auth_token, content_type)
 

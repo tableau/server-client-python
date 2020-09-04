@@ -1,5 +1,6 @@
 import unittest
 import os
+import requests
 import requests_mock
 import tableauserverclient as TSC
 
@@ -107,3 +108,40 @@ class RequestOptionTests(unittest.TestCase):
             for _ in range(100):
                 matching_workbooks, pagination_item = self.server.workbooks.get(req_option)
                 self.assertEqual(3, pagination_item.total_available)
+
+    # Test req_options if url already has query params
+    def test_double_query_params(self):
+        with requests_mock.mock() as m:
+            m.get(requests_mock.ANY)
+            url = "http://test/api/2.3/sites/12345/views?queryParamExists=true"
+            opts = TSC.RequestOptions(pagesize=13, pagenumber=13)
+
+            opts.filter.add(TSC.Filter(TSC.RequestOptions.Field.Tags,
+                                       TSC.RequestOptions.Operator.In,
+                                       ['stocks', 'market']))
+
+            resp = self.server.workbooks._make_request(requests.get,
+                                                       url,
+                                                       content=None,
+                                                       request_object=opts,
+                                                       auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
+                                                       content_type='text/xml')
+            self.assertEqual(resp.request.query,
+                             'queryparamexists=true&pagenumber=13&pagesize=13&filter=tags%3ain%3a%5bstocks%2cmarket%5d')
+
+    def test_vf(self):
+        with requests_mock.mock() as m:
+            m.get(requests_mock.ANY)
+            url = "http://test/api/2.3/sites/123/views/456/data"
+            opts = TSC.PDFRequestOptions()
+            opts.vf("name1#", "value1")
+            opts.vf("name2$", "value2")
+            opts.page_type = TSC.PDFRequestOptions.PageType.Tabloid
+
+            resp = self.server.workbooks._make_request(requests.get,
+                                                       url,
+                                                       content=None,
+                                                       request_object=opts,
+                                                       auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
+                                                       content_type='text/xml')
+            self.assertEqual(resp.request.query, 'type=tabloid&vf_name1%23=value1&vf_name2%24=value2')
