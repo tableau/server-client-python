@@ -1,5 +1,6 @@
 from ..request_factory import RequestFactory
 from .exceptions import ServerResponseError
+from ..exceptions import NotSignedInError
 from .endpoint import Endpoint, api
 import xml.etree.ElementTree as ET
 import logging
@@ -78,7 +79,8 @@ class Auth(Endpoint):
     def revoke_all_server_admin_tokens(self):
         url = "{0}/{1}".format(self.baseurl, 'revokeAllServerAdminTokens')
         if not self.parent_srv.is_signed_in():
+            error = 'Please sign in first as the server admin.'
+            raise NotSignedInError(error)
             return
         self.post_request(url, '')
-        self.parent_srv._clear_auth()
         logger.info('Revoked all tokens for all server admins')
