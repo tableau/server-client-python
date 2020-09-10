@@ -106,3 +106,19 @@ class AuthTests(unittest.TestCase):
         self.assertEqual('eIX6mvFsqyansa4KqEI1UwOpS8ggRs2l', self.server.auth_token)
         self.assertEqual('6b7179ba-b82b-4f0f-91ed-812074ac5da6', self.server.site_id)
         self.assertEqual('1a96d216-e9b8-497b-a82a-0b899a965e01', self.server.user_id)
+
+    def test_revoke_all_server_admin_tokens(self):
+        self.server.version = "3.10"
+        baseurl = self.server.auth.baseurl
+        with open(SIGN_IN_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.post(baseurl + '/signin', text=response_xml)
+            m.post(baseurl + '/revokeAllServerAdminTokens', text='')
+            tableau_auth = TSC.TableauAuth('testuser', 'password')
+            self.server.auth.sign_in(tableau_auth)
+            self.server.auth.revoke_all_server_admin_tokens()
+
+        self.assertEqual('eIX6mvFsqyansa4KqEI1UwOpS8ggRs2l', self.server.auth_token)
+        self.assertEqual('6b7179ba-b82b-4f0f-91ed-812074ac5da6', self.server.site_id)
+        self.assertEqual('1a96d216-e9b8-497b-a82a-0b899a965e01', self.server.user_id)
