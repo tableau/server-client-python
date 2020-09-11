@@ -1,5 +1,6 @@
 import unittest
 import os
+import re
 import requests
 import requests_mock
 import tableauserverclient as TSC
@@ -144,4 +145,6 @@ class RequestOptionTests(unittest.TestCase):
                                                        request_object=opts,
                                                        auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
                                                        content_type='text/xml')
-            self.assertEqual(resp.request.query, 'type=tabloid&vf_name1%23=value1&vf_name2%24=value2')
+            self.assertTrue(re.search('vf_name1%23=value1', resp.request.query))
+            self.assertTrue(re.search('vf_name2%24=value2', resp.request.query))
+            self.assertTrue(re.search('type=tabloid', resp.request.query))
