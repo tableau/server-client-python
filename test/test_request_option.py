@@ -115,7 +115,7 @@ class RequestOptionTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.get(requests_mock.ANY)
             url = "http://test/api/2.3/sites/12345/views?queryParamExists=true"
-            opts = TSC.RequestOptions(pagesize=13, pagenumber=13)
+            opts = TSC.RequestOptions()
 
             opts.filter.add(TSC.Filter(TSC.RequestOptions.Field.Tags,
                                        TSC.RequestOptions.Operator.In,
@@ -127,8 +127,8 @@ class RequestOptionTests(unittest.TestCase):
                                                        request_object=opts,
                                                        auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
                                                        content_type='text/xml')
-            self.assertEqual(resp.request.query,
-                             'queryparamexists=true&pagenumber=13&pagesize=13&filter=tags%3ain%3a%5bstocks%2cmarket%5d')
+            self.assertTrue(re.search('queryparamexists=true', resp.request.query))
+            self.assertTrue(re.search('filter=tags%3ain%3a%5bstocks%2cmarket%5d', resp.request.query))
 
     def test_vf(self):
         with requests_mock.mock() as m:
