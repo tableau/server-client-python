@@ -38,11 +38,22 @@ add your contributions to the **development** branch.
    python setup.py test
    ```
 
-1. Set up the feature/fix branch (based off the `development` branch). It is
+1. Configure a remote that points to the source (upstream) repository:
+   ```shell
+   git remote add upstream https://github.com/tableau/server-client-python
+   ```
+   More information about configuring a remote for a fork can be found [here](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/configuring-a-remote-for-a-fork).
+   
+1. Sync your fork:
+   ```shell
+   git fetch upstream
+   ```
+
+1. Set up the feature/fix branch (based off the source `development` branch). It is
    recommended to use the format issue#-type-description, for example:
 
    ```shell
-   git checkout -b 13-fix-connection-bug development
+   git checkout -b 13-fix-connection-bug upstream/development
    ```
 
 For documentation changes, see the documentation section below.
