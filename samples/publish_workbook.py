@@ -31,7 +31,7 @@ def main():
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
                         help='desired logging level (set to error by default)')
     parser.add_argument('--as-job', '-a', help='Publishing asynchronously', action='store_true')
-    parser.add_argument('--sitename', '-S', default='', help='sitename required')
+    parser.add_argument('--site', '-S', default='', help='id (contentUrl) of site to sign into')
 
     args = parser.parse_args()
 
@@ -42,7 +42,7 @@ def main():
     logging.basicConfig(level=logging_level)
 
     # Step 1: Sign in to server.
-    tableau_auth = TSC.TableauAuth(args.username, password,site_id=args.sitename)
+    tableau_auth = TSC.TableauAuth(args.username, password, site_id=args.sitename)
     server = TSC.Server(args.server)
 
     overwrite_true = TSC.Server.PublishMode.Overwrite
