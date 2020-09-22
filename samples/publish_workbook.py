@@ -42,7 +42,7 @@ def main():
     logging.basicConfig(level=logging_level)
 
     # Step 1: Sign in to server.
-    tableau_auth = TSC.TableauAuth(args.username, password, site_id=args.sitename)
+    tableau_auth = TSC.TableauAuth(args.username, password, site_id=args.site)
     server = TSC.Server(args.server)
 
     overwrite_true = TSC.Server.PublishMode.Overwrite
