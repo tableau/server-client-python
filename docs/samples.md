@@ -21,7 +21,7 @@ the arguments required by a particular sample, run the sample with the `-h` flag
 
 For example, if you run the following command:
 
-```
+```shell
 python samples/publish_workbook.py -h
 ```
 

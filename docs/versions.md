@@ -6,6 +6,8 @@ layout: docs
 Because the TSC library is a client for the Tableau Server REST API, you need to confirm that the version of the TSC
 library that you use is compatible with the version of the REST API used by your installation of Tableau Server.
 
+For reference, the [REST API and Resource Versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm) page has more details about versions.
+
 * TOC
 {:toc}
 
@@ -21,11 +23,11 @@ server = TSC.Server('http://SERVER_URL')
 print(server.version)
 ```
 
-For example, the code might display version `2.3`. 
+For example, the code might display version `2.3`.
 
 ## Use the REST API version supported by the server
 
-There are two options for always using the the latest version of the REST API that is supported by the instance of Tableau Server you are connecting to.
+There are two options for always using the the latest version of the REST API that is supported by the instance of Tableau Server you are connecting to. This could be necessary in cases where you're using an API feature that is only supported in a newer REST API version.
 
 The first method is to specify `use_server_version=True` as one of the arguments, for example:
 
@@ -52,7 +54,7 @@ To use a specific version of the REST API, set the version like so:
 import tableauserverclient as TSC
 
 server = TSC.Server('http://SERVER_URL')
-server.version = '2.6'
+server.version = '3.6'
 
 ```
 
@@ -62,6 +64,7 @@ The current version of TSC only supports the following REST API and Tableau Serv
 
 |REST API version|Tableau Server version|
 |---|---|
+|3.9|2020.3|
 |3.8|2020.2|
 |3.7|2020.1|
 |3.6|2019.4|
