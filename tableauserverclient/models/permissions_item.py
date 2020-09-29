@@ -20,6 +20,7 @@ class Permission:
         ChangePermissions = 'ChangePermissions'
         Connect = 'Connect'
         Delete = 'Delete'
+        Execute = 'Execute'
         ExportData = 'ExportData'
         ExportImage = 'ExportImage'
         ExportXml = 'ExportXml'
@@ -31,7 +32,6 @@ class Permission:
         ViewUnderlyingData = 'ViewUnderlyingData'
         WebAuthoring = 'WebAuthoring'
         Write = 'Write'
-        Execute = 'Execute'
 
     class Resource:
         Workbook = 'workbook'
