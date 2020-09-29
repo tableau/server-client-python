@@ -27,10 +27,11 @@ def main():
     parser = argparse.ArgumentParser(description='Publish a workbook to server.')
     parser.add_argument('--server', '-s', required=True, help='server address')
     parser.add_argument('--username', '-u', required=True, help='username to sign into server')
-    parser.add_argument('--filepath', '-f', required=True, help='filepath to the workbook to publish')
+    parser.add_argument('--filepath', '-f', required=True, help='computer filepath of the workbook to publish')
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
                         help='desired logging level (set to error by default)')
     parser.add_argument('--as-job', '-a', help='Publishing asynchronously', action='store_true')
+    parser.add_argument('--site', '-S', default='', help='id (contentUrl) of site to sign into')
 
     args = parser.parse_args()
 
@@ -41,7 +42,7 @@ def main():
     logging.basicConfig(level=logging_level)
 
     # Step 1: Sign in to server.
-    tableau_auth = TSC.TableauAuth(args.username, password)
+    tableau_auth = TSC.TableauAuth(args.username, password, site_id=args.site)
     server = TSC.Server(args.server)
 
     overwrite_true = TSC.Server.PublishMode.Overwrite
