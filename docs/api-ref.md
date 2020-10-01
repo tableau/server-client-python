@@ -1076,7 +1076,7 @@ None. The user is removed from the group.
 **Example**
 
 ```py
-#  Remove a user from the group
+#  Remove a user from a group
 
 # import tableauserverclient as TSC
 # tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
@@ -1084,8 +1084,9 @@ None. The user is removed from the group.
 
   with server.auth.sign_in(tableau_auth):
 
-     # get the group
-     mygroup = server.groups.get_by_id('1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d')
+     # get a group
+     all_groups, pagination_item = server.groups.get()
+     mygroup = all_groups[0]
 
      # remove user '9f9e9d9c-8b8a-8f8e-7d7c-7b7a6f6d6e6d'
      server.groups.remove_user(mygroup, '9f9e9d9c-8b8a-8f8e-7d7c-7b7a6f6d6e6d')
