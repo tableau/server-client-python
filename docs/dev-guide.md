@@ -32,7 +32,7 @@ add your contributions to the **development** branch.
    git clone git@github.com:<user-name>/server-client-python.git
    ```
 
-1. Run the tests to make sure everything is peachy:
+1. Run the tests to make sure everything is passing:
 
    ```shell
    python setup.py test
@@ -95,6 +95,9 @@ Here's a quick checklist to follow when coding to ensure a good pull request
 
 1. Add a sample to show users how to use the new feature.
 
+1. Add documentation (most likely in api-ref.md) in a separate pull request
+   (see more below).
+
 ### Add tests
 
 All of our tests live under the `test/` folder in the repository. We use
@@ -153,15 +156,15 @@ go together.
 
 To preview and run the documentation locally, these are the steps:
 
-1. Install [Ruby](https://www.ruby-lang.org/en/downloads/) (v2.5.0 or higher)
+1. Install [Ruby](https://www.ruby-lang.org/en/documentation/installation/) (v2.5.0 or higher).
 
-1. Install [Bundler](https://bundler.io/)
+1. Install [Bundler](https://bundler.io/).
 
-1. Install [Jekyll](https://jekyllrb.com/docs/installation/)
+1. Install the project dependencies (which includes Jekyll) by running `bundle install`. (In the future you can run `bundle update` to catch any new dependencies.)
 
-1. Run the Jekyll site locally with `bundle exec jekyll serve`
+1. Run the Jekyll site locally with `bundle exec jekyll serve`.
 
-1. In your browser, connect to <http://127.0.0.1:4000/server-client-python/>
+1. In your browser, connect to <http://127.0.0.1:4000/server-client-python/> to preview the changes. As long as the Jekyll serve process is running, it will rebuild any new file changes automatically.
 
-For more details on the steps, see the GitHub Pages topic on
+For more details, see the GitHub Pages topic on
 [testing locally](https://docs.github.com/en/github/working-with-github-pages/testing-your-github-pages-site-locally-with-jekyll).

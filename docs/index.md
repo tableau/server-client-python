@@ -19,9 +19,8 @@ This section describes how to:
 
 Before you install TSC, confirm that you have the following dependencies installed:
 
-* Python. You can use TSC with Python 3.5 or later. 
+* Python. You can use TSC with Python 3.5 or later.
 * Git. Optional, but recommended to download the samples or install from the source code.
-
 
 ## Install TSC
 
@@ -31,7 +30,7 @@ You can install TSC with pip or from the source code.
 
 Run the following command to install the latest stable version of TSC:
 
-```
+```shell
 pip install tableauserverclient
 ```
 
@@ -40,7 +39,7 @@ pip install tableauserverclient
 You can install from the development branch for a preview of upcoming features. Run the following command
 to install from the development branch:
 
-```
+```shell
 pip install git+https://github.com/tableau/server-client-python.git@development
 ```
 
@@ -49,13 +48,15 @@ development version are subject to change at any time before the next stable rel
 
 ### Install on an offline machine
 
-To install TSC onto a machine without internet connection, use the following steps:
+To install TSC onto a machine without an internet connection, use the following steps:
 
-1) Download and manually install the **requests** python library (and its dependencies).     
+1) Ensure that Python 3.5 or higher is installed.
 
-2) Download the [setup package](https://pypi.org/project/tableauserverclient/#files){:target="_blank"}.
+2) Download and manually install the `requests` Python library (and its dependencies).
 
-3) Run `pip install  ./downloads/tableauserverclient-x.x.tar.gz`
+3) Download the [setup package](https://pypi.org/project/tableauserverclient/#files){:target="_blank"}.
+
+4) Run `pip install ./tableauserverclient-x.y.tar.gz`
 
 ## Get the samples
 
