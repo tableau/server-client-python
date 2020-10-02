@@ -2,6 +2,22 @@ from ..models.property_decorators import property_is_int
 
 
 class RequestOptionsBase(object):
+    def apply_query_params(self, url):
+        import warnings
+        warnings.simplefilter('always', DeprecationWarning)
+        warnings.warn('apply_query_params is deprecated, please use get_query_params instead.', DeprecationWarning)
+        try:
+            params = self.get_query_params()
+            params_list = ["{}={}".format(k, v) for (k, v) in params.items()]
+
+            if '?' in url:
+                url, existing_params = url.split('?')
+                params_list.append(existing_params)
+
+            return "{0}?{1}".format(url, '&'.join(params_list))
+        except NotImplementedError:
+            raise
+
     def get_query_params(self):
         raise NotImplementedError()
 
