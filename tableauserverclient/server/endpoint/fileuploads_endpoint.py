@@ -40,7 +40,7 @@ class Fileuploads(Endpoint):
         return FileuploadItem.from_response(server_response.content, self.parent_srv.namespace)
 
     def read_chunks(self, file):
-        is_file_path = isinstance(file, os.PathLike) or isinstance(file, str)
+        is_file_path = isinstance(file, str)
         f = open(file, 'rb') if is_file_path else file
 
         while True:

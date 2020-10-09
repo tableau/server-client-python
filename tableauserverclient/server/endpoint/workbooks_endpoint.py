@@ -262,7 +262,7 @@ class Workbooks(Endpoint):
             warnings.warn("connection_credentials is being deprecated. Use connections instead",
                           DeprecationWarning)
 
-        is_file_path = isinstance(file, os.PathLike) or isinstance(file, str)
+        is_file_path = isinstance(file, str)
 
         if is_file_path and not os.path.isfile(file):
             error = "File path does not lead to an existing file."
