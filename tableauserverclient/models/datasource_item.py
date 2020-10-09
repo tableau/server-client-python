@@ -28,6 +28,7 @@ class DatasourceItem(object):
         self._updated_at = None
         self._use_remote_query_agent = None
         self._webpage_url = None
+        self.description = None
         self.name = name
         self.owner_id = None
         self.project_id = project_id
