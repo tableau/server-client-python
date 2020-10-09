@@ -39,23 +39,28 @@ class Fileuploads(Endpoint):
         logger.info('Uploading a chunk to session (ID: {0})'.format(self.upload_id))
         return FileuploadItem.from_response(server_response.content, self.parent_srv.namespace)
 
-    def read_chunks(self, file_path):
-        with open(file_path, 'rb') as f:
-            while True:
-                chunked_content = f.read(CHUNK_SIZE)
-                if not chunked_content:
-                    break
-                yield chunked_content
+    def read_chunks(self, file):
+        is_file_path = isinstance(file, os.PathLike) or isinstance(file, str)
+        f = open(file, 'rb') if is_file_path else file
+
+        while True:
+            chunked_content = f.read(CHUNK_SIZE)
+            if not chunked_content:
+                break
+            yield chunked_content
+
+        # Close file if opened
+        if is_file_path:
+            f.close()
 
     @classmethod
-    def upload_chunks(cls, parent_srv, file_path):
+    def upload_chunks(cls, parent_srv, file):
         file_uploader = cls(parent_srv)
         upload_id = file_uploader.initiate()
-        chunks = file_uploader.read_chunks(file_path)
+        chunks = file_uploader.read_chunks(file)
         for chunk in chunks:
             xml_request, content_type = RequestFactory.Fileupload.chunk_req(chunk)
             fileupload_item = file_uploader.append(xml_request, content_type)
-            logger.info("\tPublished {0}MB of {1}".format(fileupload_item.file_size,
-                                                          os.path.basename(file_path)))
+            logger.info("\tPublished {0}MB".format(fileupload_item.file_size))
         logger.info("\tCommitting file upload...")
         return upload_id
