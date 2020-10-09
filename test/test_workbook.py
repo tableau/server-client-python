@@ -451,6 +451,75 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual('GDP per capita', new_workbook.views[0].name)
         self.assertEqual('RESTAPISample_0/sheets/GDPpercapita', new_workbook.views[0].content_url)
 
+    def test_publish_a_packaged_file_object(self):
+        with open(PUBLISH_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.post(self.baseurl, text=response_xml)
+
+            new_workbook = TSC.WorkbookItem(name='Sample',
+                                            show_tabs=False,
+                                            project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+
+            sample_workbook = os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx')
+
+            with open(sample_workbook, 'rb') as fp:
+
+                publish_mode = self.server.PublishMode.CreateNew
+
+                new_workbook = self.server.workbooks.publish(new_workbook,
+                                                             fp,
+                                                             publish_mode)
+
+        self.assertEqual('a8076ca1-e9d8-495e-bae6-c684dbb55836', new_workbook.id)
+        self.assertEqual('RESTAPISample', new_workbook.name)
+        self.assertEqual('RESTAPISample_0', new_workbook.content_url)
+        self.assertEqual(False, new_workbook.show_tabs)
+        self.assertEqual(1, new_workbook.size)
+        self.assertEqual('2016-08-18T18:33:24Z', format_datetime(new_workbook.created_at))
+        self.assertEqual('2016-08-18T20:31:34Z', format_datetime(new_workbook.updated_at))
+        self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', new_workbook.project_id)
+        self.assertEqual('default', new_workbook.project_name)
+        self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', new_workbook.owner_id)
+        self.assertEqual('fe0b4e89-73f4-435e-952d-3a263fbfa56c', new_workbook.views[0].id)
+        self.assertEqual('GDP per capita', new_workbook.views[0].name)
+        self.assertEqual('RESTAPISample_0/sheets/GDPpercapita', new_workbook.views[0].content_url)
+
+    def test_publish_non_packeged_file_object(self):
+
+        with open(PUBLISH_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.post(self.baseurl, text=response_xml)
+
+            new_workbook = TSC.WorkbookItem(name='Sample',
+                                            show_tabs=False,
+                                            project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+
+            sample_workbook = os.path.join(TEST_ASSET_DIR, 'RESTAPISample.twb')
+
+            with open(sample_workbook, 'rb') as fp:
+
+                publish_mode = self.server.PublishMode.CreateNew
+
+                new_workbook = self.server.workbooks.publish(new_workbook,
+                                                             fp,
+                                                             publish_mode)
+
+        self.assertEqual('a8076ca1-e9d8-495e-bae6-c684dbb55836', new_workbook.id)
+        self.assertEqual('RESTAPISample', new_workbook.name)
+        self.assertEqual('RESTAPISample_0', new_workbook.content_url)
+        self.assertEqual(False, new_workbook.show_tabs)
+        self.assertEqual(1, new_workbook.size)
+        self.assertEqual('2016-08-18T18:33:24Z', format_datetime(new_workbook.created_at))
+        self.assertEqual('2016-08-18T20:31:34Z', format_datetime(new_workbook.updated_at))
+        self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', new_workbook.project_id)
+        self.assertEqual('default', new_workbook.project_name)
+        self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', new_workbook.owner_id)
+        self.assertEqual('fe0b4e89-73f4-435e-952d-3a263fbfa56c', new_workbook.views[0].id)
+        self.assertEqual('GDP per capita', new_workbook.views[0].name)
+        self.assertEqual('RESTAPISample_0/sheets/GDPpercapita', new_workbook.views[0].content_url)
+
     def test_publish_with_hidden_view(self):
         with open(PUBLISH_XML, 'rb') as f:
             response_xml = f.read().decode('utf-8')
@@ -510,6 +579,15 @@ class WorkbookTests(unittest.TestCase):
         self.assertRaises(ValueError, self.server.workbooks.publish,
                           new_workbook, os.path.join(TEST_ASSET_DIR, 'SampleDS.tds'),
                           self.server.PublishMode.CreateNew)
+
+    def test_publish_unnamed_file_object(self):
+        new_workbook = TSC.WorkbookItem('test')
+
+        with open(os.path.join(TEST_ASSET_DIR, 'SampleDS.tds')) as f:
+
+            self.assertRaises(ValueError, self.server.workbooks.publish,
+                              new_workbook, f, self.server.PublishMode.CreateNew
+                              )
 
     def test_publish_multi_connection(self):
         new_workbook = TSC.WorkbookItem(name='Sample', show_tabs=False,
