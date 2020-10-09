@@ -138,17 +138,17 @@ class DatasourceItem(object):
         if not isinstance(datasource_xml, ET.Element):
             datasource_xml = ET.fromstring(datasource_xml).find('.//t:datasource', namespaces=ns)
         if datasource_xml is not None:
-            (ask_data_enablement, certified, certification_note, _, _, _, encrypt_extracts, has_extracts,
-             _, _,owner_id, project_id, project_name, _, updated_at, use_remote_query_agent,
+            (ask_data_enablement, certified, certification_note, _, _, _, _, encrypt_extracts, has_extracts,
+             _, _, owner_id, project_id, project_name, _, updated_at, use_remote_query_agent,
              webpage_url) = self._parse_element(datasource_xml, ns)
-            self._set_values(ask_data_enablement, certified, certification_note, None, None, None, encrypt_extracts,
-                             has_extracts, None, None, owner_id, project_id, project_name, None, updated_at,
-                             use_remote_query_agent, webpage_url)
+            self._set_values(ask_data_enablement, certified, certification_note, None, None, None, None,
+                             encrypt_extracts, has_extracts, None, None, owner_id, project_id, project_name, None,
+                             updated_at, use_remote_query_agent, webpage_url)
         return self
 
     def _set_values(self, ask_data_enablement, certified, certification_note, content_url, created_at, datasource_type,
-                    encrypt_extracts, has_extracts, id_, name, owner_id, project_id, project_name, tags, updated_at,
-                    use_remote_query_agent, webpage_url):
+                    description, encrypt_extracts, has_extracts, id_, name, owner_id, project_id, project_name, tags,
+                    updated_at, use_remote_query_agent, webpage_url):
         if ask_data_enablement is not None:
             self._ask_data_enablement = ask_data_enablement
         if certification_note:
@@ -160,6 +160,8 @@ class DatasourceItem(object):
             self._created_at = created_at
         if datasource_type:
             self._datasource_type = datasource_type
+        if description:
+            self.description = description
         if encrypt_extracts is not None:
             self.encrypt_extracts = str(encrypt_extracts).lower() == 'true'
         if has_extracts is not None:
@@ -181,9 +183,8 @@ class DatasourceItem(object):
             self._updated_at = updated_at
         if use_remote_query_agent is not None:
             self._use_remote_query_agent = str(use_remote_query_agent).lower() == 'true'
-        if webpage_url is not None:
+        if webpage_url:
             self._webpage_url = webpage_url
-
 
     @classmethod
     def from_response(cls, resp, ns):
@@ -193,12 +194,13 @@ class DatasourceItem(object):
 
         for datasource_xml in all_datasource_xml:
             (ask_data_enablement, certified, certification_note, content_url, created_at, datasource_type,
-             encrypt_extracts, has_extracts, id_, name, owner_id, project_id, project_name, tags, updated_at,
-             use_remote_query_agent, webpage_url) = cls._parse_element(datasource_xml, ns)
+             description, encrypt_extracts, has_extracts, id_, name, owner_id, project_id, project_name, tags,
+             updated_at, use_remote_query_agent, webpage_url) = cls._parse_element(datasource_xml, ns)
             datasource_item = cls(project_id)
-            datasource_item._set_values(ask_data_enablement, certified, certification_note, content_url, created_at,
-                                        datasource_type, encrypt_extracts, has_extracts, id_, name, owner_id,
-                                        None, project_name, tags, updated_at, use_remote_query_agent, webpage_url)
+            datasource_item._set_values(ask_data_enablement, certified, certification_note, content_url,
+                                        created_at, datasource_type, description, encrypt_extracts,
+                                        has_extracts, id_, name, owner_id, None, project_name, tags, updated_at,
+                                        use_remote_query_agent, webpage_url)
             all_datasource_items.append(datasource_item)
         return all_datasource_items
 
@@ -209,6 +211,7 @@ class DatasourceItem(object):
         content_url = datasource_xml.get('contentUrl', None)
         created_at = parse_datetime(datasource_xml.get('createdAt', None))
         datasource_type = datasource_xml.get('type', None)
+        description = datasource_xml.get('description', None)
         encrypt_extracts = datasource_xml.get('encryptExtracts', None)
         has_extracts = datasource_xml.get('hasExtracts', None)
         id_ = datasource_xml.get('id', None)
@@ -240,5 +243,5 @@ class DatasourceItem(object):
             ask_data_enablement = ask_data_elem.get('enablement', None)
 
         return (ask_data_enablement, certified, certification_note, content_url, created_at,
-                datasource_type, encrypt_extracts, has_extracts, id_, name, owner_id,
+                datasource_type, description, encrypt_extracts, has_extracts, id_, name, owner_id,
                 project_id, project_name, tags, updated_at, use_remote_query_agent, webpage_url)
