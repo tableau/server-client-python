@@ -131,6 +131,15 @@ class DatasourceRequest(object):
         xml_request = ET.Element('tsRequest')
         datasource_element = ET.SubElement(xml_request, 'datasource')
         datasource_element.attrib['name'] = datasource_item.name
+        if datasource_item.description:
+            datasource_element.attrib['description'] = str(datasource_item.description)
+        if datasource_item.use_remote_query_agent is not None:
+            datasource_element.attrib['useRemoteQueryAgent'] = str(datasource_item.use_remote_query_agent).lower()
+
+        if datasource_item.ask_data_enablement:
+            ask_data_element = ET.SubElement(datasource_element, 'askData')
+            ask_data_element.attrib['enablement'] = datasource_item.ask_data_enablement
+
         project_element = ET.SubElement(datasource_element, 'project')
         project_element.attrib['id'] = datasource_item.project_id
 
@@ -149,6 +158,9 @@ class DatasourceRequest(object):
     def update_req(self, datasource_item):
         xml_request = ET.Element('tsRequest')
         datasource_element = ET.SubElement(xml_request, 'datasource')
+        if datasource_item.ask_data_enablement:
+            ask_data_element = ET.SubElement(datasource_element, 'askData')
+            ask_data_element.attrib['enablement'] = datasource_item.ask_data_enablement
         if datasource_item.project_id:
             project_element = ET.SubElement(datasource_element, 'project')
             project_element.attrib['id'] = datasource_item.project_id
@@ -160,6 +172,8 @@ class DatasourceRequest(object):
 
         if datasource_item.certification_note:
             datasource_element.attrib['certificationNote'] = str(datasource_item.certification_note)
+        if datasource_item.encrypt_extracts is not None:
+            datasource_element.attrib['encryptExtracts'] = str(datasource_item.encrypt_extracts).lower()
 
         return ET.tostring(xml_request)
 
