@@ -281,12 +281,16 @@ The `DatasourceItem` represents the data source resources on Tableau Server. Thi
 
 Name | Description
 :--- | :---
+`ask_data_enablement` | Determines if a data source allows use of Ask Data. The value can be `TSC.DatasourceItem.AskDataEnablement.Enabled`, `TSC.DatasourceItem.AskDataEnablement.Disabled`, or `TSC.DatasourceItem.AskDataEnablement.SiteDefault`. If no setting is specifed, it will default to SiteDefault. See [REST API Publish Datasource](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_datasources.htm#publish_data_source) for more information about ask_data_enablement.
 `connections` |  The list of data connections (`ConnectionItem`) for the specified data source. You must first call the `populate_connections` method to access this data. See the [ConnectionItem class](#connectionitem-class).
 `content_url` |  The name of the data source as it would appear in a URL.
 `created_at` |  The date and time when the data source was created.
 `certified` | A Boolean value that indicates whether the data source is certified.
 `certification_note` |  The optional note that describes the certified data source.
 `datasource_type` | The type of data source, for example, `sqlserver` or `excel-direct`.
+`description` | The description for the data source.
+`encrypt_extracts` | A Boolean value to determine if a datasource should be encrypted or not. See [Extract and Encryption Methods](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_extract_encryption.htm) for more information.
+`has_extracts` | A Boolean value that indicates whether the datasource has extracts.
 `id` |  The identifier for the data source. You need this value to query a specific data source or to delete a data source with the `get_by_id` and `delete` methods.
 `name`  |  The name of the data source. If not specified, the name of the published data source file is used.
 `owner_id` |  The identifier of the owner of the data source.
@@ -294,6 +298,8 @@ Name | Description
 `project_name` |  The name of the project associated with the data source.
 `tags` |  The tags (list of strings) that have been added to the data source.
 `updated_at` |  The date and time when the data source was last updated.
+`use_remote_query_agent` | A Boolean value that indicates whether to allow or disallow your Tableau Online site to use Tableau Bridge clients. Bridge allows you to maintain data sources with live connections to supported on-premises data sources. See [Configure and Manage the Bridge Client Pool](https://help.tableau.com/current/online/en-us/to_enable_bridge_live_connections.htm) for more information.
+`webpage_url` | The url of the datasource as displayed in browsers.
 
 
 **Example**
