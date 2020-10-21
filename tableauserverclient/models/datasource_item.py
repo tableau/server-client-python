@@ -95,6 +95,10 @@ class DatasourceItem(object):
         self._encrypt_extracts = value
 
     @property
+    def has_extracts(self):
+        return self._has_extracts
+
+    @property
     def id(self):
         return self._id
 
@@ -127,6 +131,10 @@ class DatasourceItem(object):
     @property_is_boolean
     def use_remote_query_agent(self, value):
         self._use_remote_query_agent = value
+
+    @property
+    def webpage_url(self):
+        return self._webpage_url
 
     def _set_connections(self, connections):
         self._connections = connections
