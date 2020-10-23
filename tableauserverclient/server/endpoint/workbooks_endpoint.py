@@ -5,7 +5,7 @@ from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, WorkbookItem, ConnectionItem, ViewItem, PaginationItem
 from ...models.job_item import JobItem
-from ...filesys_helpers import to_filename, make_download_path, file_is_compressed
+from ...filesys_helpers import to_filename, make_download_path, file_is_compressed, get_file_object_size
 
 import os
 import logging
@@ -283,11 +283,8 @@ class Workbooks(Endpoint):
         except TypeError:
             # Expect file to be a file object
 
+            file_size = get_file_object_size(file)
             file_extension = 'twbx' if file_is_compressed(file) else 'twb'
-
-            file.seek(0, os.SEEK_END)
-            file_size = file.tell()
-            file.seek(0)
 
             if not workbook_item.name:
                 error = "Workbook item must have a name when passing a file object"
