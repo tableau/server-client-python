@@ -262,18 +262,16 @@ class Workbooks(Endpoint):
             warnings.warn("connection_credentials is being deprecated. Use connections instead",
                           DeprecationWarning)
 
-        is_file_path = isinstance(file, str)
+        try:
+            # Expect file to be a filepath
+            if not os.path.isfile(file):
+                error = "File path does not lead to an existing file."
+                raise IOError(error)
 
-        if is_file_path and not os.path.isfile(file):
-            error = "File path does not lead to an existing file."
-            raise IOError(error)
-        if not hasattr(self.parent_srv.PublishMode, mode):
-            error = 'Invalid mode defined.'
-            raise ValueError(error)
-
-        if is_file_path:
             filename = os.path.basename(file)
             file_extension = os.path.splitext(filename)[1][1:]
+
+            file_size = os.path.getsize(file)
 
             # If name is not defined, grab the name from the file to publish
             if not workbook_item.name:
@@ -281,12 +279,23 @@ class Workbooks(Endpoint):
             if file_extension not in ALLOWED_FILE_EXTENSIONS:
                 error = "Only {} files can be published as workbooks.".format(', '.join(ALLOWED_FILE_EXTENSIONS))
                 raise ValueError(error)
-        elif not workbook_item.name:
-            error = "Workbook item must have a name when passing a file object"
-            raise ValueError(error)
 
-        if not is_file_path:
+        except TypeError:
+            # Expect file to be a file object
+
             file_extension = 'twbx' if file_is_compressed(file) else 'twb'
+
+            file.seek(0, os.SEEK_END)
+            file_size = file.tell()
+            file.seek(0)
+
+            if not workbook_item.name:
+                error = "Workbook item must have a name when passing a file object"
+                raise ValueError(error)
+
+        if not hasattr(self.parent_srv.PublishMode, mode):
+            error = 'Invalid mode defined.'
+            raise ValueError(error)
 
         # Construct the url with the defined mode
         url = "{0}?workbookType={1}".format(self.baseurl, file_extension)
@@ -300,13 +309,6 @@ class Workbooks(Endpoint):
             url += '&{0}=true'.format('asJob')
 
         # Determine if chunking is required (64MB is the limit for single upload method)
-        if is_file_path:
-            file_size = os.path.getsize(file)
-        else:
-            file.seek(0, os.SEEK_END)
-            file_size = file.tell()
-            file.seek(0)
-
         if file_size >= FILESIZE_LIMIT:
             logger.info('Publishing {0} to server with chunking method (workbook over 64MB)'.format(workbook_item.name))
             upload_session_id = Fileuploads.upload_chunks(self.parent_srv, file)
@@ -318,11 +320,14 @@ class Workbooks(Endpoint):
                                                                                     hidden_views=hidden_views)
         else:
             logger.info('Publishing {0} to server'.format(workbook_item.name))
-            if is_file_path:
+
+            try:
                 with open(file, 'rb') as f:
                     file_contents = f.read()
-            else:
+
+            except TypeError:
                 file_contents = file.read()
+
             conn_creds = connection_credentials
             xml_request, content_type = RequestFactory.Workbook.publish_req(workbook_item,
                                                                             workbook_item.name,
