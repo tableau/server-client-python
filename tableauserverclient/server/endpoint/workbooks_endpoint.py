@@ -270,7 +270,6 @@ class Workbooks(Endpoint):
 
             filename = os.path.basename(file)
             file_extension = os.path.splitext(filename)[1][1:]
-
             file_size = os.path.getsize(file)
 
             # If name is not defined, grab the name from the file to publish
@@ -282,13 +281,16 @@ class Workbooks(Endpoint):
 
         except TypeError:
             # Expect file to be a file object
-
             file_size = get_file_object_size(file)
             file_extension = 'twbx' if file_is_compressed(file) else 'twb'
 
             if not workbook_item.name:
                 error = "Workbook item must have a name when passing a file object"
                 raise ValueError(error)
+
+            # Generate filename for file object.
+            # This is needed when publishing the workbook in a single request
+            filename = "{}.{}".format(workbook_item.name, file_extension)
 
         if not hasattr(self.parent_srv.PublishMode, mode):
             error = 'Invalid mode defined.'
@@ -316,7 +318,7 @@ class Workbooks(Endpoint):
                                                                                     connections=connections,
                                                                                     hidden_views=hidden_views)
         else:
-            logger.info('Publishing {0} to server'.format(workbook_item.name))
+            logger.info('Publishing {0} to server'.format(filename))
 
             try:
                 with open(file, 'rb') as f:
@@ -327,7 +329,7 @@ class Workbooks(Endpoint):
 
             conn_creds = connection_credentials
             xml_request, content_type = RequestFactory.Workbook.publish_req(workbook_item,
-                                                                            workbook_item.name,
+                                                                            filename,
                                                                             file_contents,
                                                                             connection_credentials=conn_creds,
                                                                             connections=connections,
