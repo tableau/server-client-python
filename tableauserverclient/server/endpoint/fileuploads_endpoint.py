@@ -40,24 +40,23 @@ class Fileuploads(Endpoint):
         return FileuploadItem.from_response(server_response.content, self.parent_srv.namespace)
 
     def read_chunks(self, file):
-        is_file_path = isinstance(file, str)
-        f = open(file, 'rb') if is_file_path else file
 
         while True:
-            chunked_content = f.read(CHUNK_SIZE)
+            chunked_content = file.read(CHUNK_SIZE)
             if not chunked_content:
                 break
             yield chunked_content
-
-        # Close file if opened
-        if is_file_path:
-            f.close()
 
     @classmethod
     def upload_chunks(cls, parent_srv, file):
         file_uploader = cls(parent_srv)
         upload_id = file_uploader.initiate()
-        chunks = file_uploader.read_chunks(file)
+
+        try:
+            with open(file, 'rb') as f:
+                chunks = file_uploader.read_chunks(f)
+        except TypeError:
+            chunks = file_uploader.read_chunks(file)
         for chunk in chunks:
             xml_request, content_type = RequestFactory.Fileupload.chunk_req(chunk)
             fileupload_item = file_uploader.append(xml_request, content_type)
