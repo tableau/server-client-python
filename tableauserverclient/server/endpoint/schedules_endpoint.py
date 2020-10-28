@@ -43,9 +43,6 @@ class Schedules(Endpoint):
         if not schedule_item.id:
             error = "Schedule item missing ID."
             raise MissingRequiredFieldError(error)
-        if schedule_item.interval_item is None:
-            error = "Interval item must be defined."
-            raise MissingRequiredFieldError(error)
 
         url = "{0}/{1}".format(self.baseurl, schedule_item.id)
         update_req = RequestFactory.Schedule.update_req(schedule_item)

@@ -398,19 +398,21 @@ class ScheduleRequest(object):
             schedule_element.attrib['executionOrder'] = schedule_item.execution_order
         if schedule_item.state:
             schedule_element.attrib['state'] = schedule_item.state
+
         interval_item = schedule_item.interval_item
-        if interval_item._frequency:
-            schedule_element.attrib['frequency'] = interval_item._frequency
-        frequency_element = ET.SubElement(schedule_element, 'frequencyDetails')
-        frequency_element.attrib['start'] = str(interval_item.start_time)
-        if hasattr(interval_item, 'end_time') and interval_item.end_time is not None:
-            frequency_element.attrib['end'] = str(interval_item.end_time)
-        intervals_element = ET.SubElement(frequency_element, 'intervals')
-        if hasattr(interval_item, 'interval'):
-            for interval in interval_item._interval_type_pairs():
-                (expression, value) = interval
-                single_interval_element = ET.SubElement(intervals_element, 'interval')
-                single_interval_element.attrib[expression] = value
+        if interval_item is not None:
+            if interval_item._frequency:
+                schedule_element.attrib['frequency'] = interval_item._frequency
+            frequency_element = ET.SubElement(schedule_element, 'frequencyDetails')
+            frequency_element.attrib['start'] = str(interval_item.start_time)
+            if hasattr(interval_item, 'end_time') and interval_item.end_time is not None:
+                frequency_element.attrib['end'] = str(interval_item.end_time)
+            intervals_element = ET.SubElement(frequency_element, 'intervals')
+            if hasattr(interval_item, 'interval'):
+                for interval in interval_item._interval_type_pairs():
+                    (expression, value) = interval
+                    single_interval_element = ET.SubElement(intervals_element, 'interval')
+                    single_interval_element.attrib[expression] = value
         return ET.tostring(xml_request)
 
     def _add_to_req(self, id_, target_type, task_type=TaskItem.Type.ExtractRefresh):
