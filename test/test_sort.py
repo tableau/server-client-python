@@ -1,5 +1,5 @@
 import unittest
-import os
+import re
 import requests
 import requests_mock
 import tableauserverclient as TSC
@@ -31,7 +31,9 @@ class SortTests(unittest.TestCase):
                                                        auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
                                                        content_type='text/xml')
 
-            self.assertEqual(resp.request.query, 'pagenumber=13&pagesize=13&filter=name:eq:superstore')
+            self.assertTrue(re.search('pagenumber=13', resp.request.query))
+            self.assertTrue(re.search('pagesize=13', resp.request.query))
+            self.assertTrue(re.search('filter=name%3aeq%3asuperstore', resp.request.query))
 
     def test_filter_equals_list(self):
         with self.assertRaises(ValueError) as cm:
@@ -57,7 +59,9 @@ class SortTests(unittest.TestCase):
                                                        request_object=opts,
                                                        auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
                                                        content_type='text/xml')
-            self.assertEqual(resp.request.query, 'pagenumber=13&pagesize=13&filter=tags:in:%5bstocks,market%5d')
+            self.assertTrue(re.search('pagenumber=13', resp.request.query))
+            self.assertTrue(re.search('pagesize=13', resp.request.query))
+            self.assertTrue(re.search('filter=tags%3ain%3a%5bstocks%2cmarket%5d', resp.request.query))
 
     def test_sort_asc(self):
         with requests_mock.mock() as m:
@@ -74,7 +78,9 @@ class SortTests(unittest.TestCase):
                                                        auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
                                                        content_type='text/xml')
 
-            self.assertEqual(resp.request.query, 'pagenumber=13&pagesize=13&sort=name:asc')
+            self.assertTrue(re.search('pagenumber=13', resp.request.query))
+            self.assertTrue(re.search('pagesize=13', resp.request.query))
+            self.assertTrue(re.search('sort=name%3aasc', resp.request.query))
 
     def test_filter_combo(self):
         with requests_mock.mock() as m:
@@ -97,9 +103,14 @@ class SortTests(unittest.TestCase):
                                                        auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
                                                        content_type='text/xml')
 
-            expected = 'pagenumber=13&pagesize=13&filter=lastlogin:gte:2017-01-15t00:00:00:00z,siterole:eq:publisher'
+            expected = 'pagenumber=13&pagesize=13&filter=lastlogin%3agte%3a' \
+                       '2017-01-15t00%3a00%3a00%3a00z%2csiterole%3aeq%3apublisher'
 
-            self.assertEqual(resp.request.query, expected)
+            self.assertTrue(re.search('pagenumber=13', resp.request.query))
+            self.assertTrue(re.search('pagesize=13', resp.request.query))
+            self.assertTrue(re.search(
+                'filter=lastlogin%3agte%3a2017-01-15t00%3a00%3a00%3a00z%2csiterole%3aeq%3apublisher',
+                resp.request.query))
 
 
 if __name__ == '__main__':
