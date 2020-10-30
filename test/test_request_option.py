@@ -78,6 +78,17 @@ class RequestOptionTests(unittest.TestCase):
         self.assertEqual('RESTAPISample', matching_workbooks[0].name)
         self.assertEqual('RESTAPISample', matching_workbooks[1].name)
 
+    def test_filter_equals_shorthand(self):
+        with open(FILTER_EQUALS, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + '/workbooks?filter=name:eq:RESTAPISample', text=response_xml)
+            matching_workbooks = self.server.workbooks.filter(name='RESTAPISample').order_by("name")
+
+            self.assertEqual(2, matching_workbooks.total_available)
+            self.assertEqual('RESTAPISample', matching_workbooks[0].name)
+            self.assertEqual('RESTAPISample', matching_workbooks[1].name)
+
     def test_filter_tags_in(self):
         with open(FILTER_TAGS_IN, 'rb') as f:
             response_xml = f.read().decode('utf-8')
@@ -92,6 +103,22 @@ class RequestOptionTests(unittest.TestCase):
         self.assertEqual(set(['weather']), matching_workbooks[0].tags)
         self.assertEqual(set(['safari']), matching_workbooks[1].tags)
         self.assertEqual(set(['sample']), matching_workbooks[2].tags)
+
+    def test_filter_tags_in_shorthand(self):
+        with open(FILTER_TAGS_IN, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + '/workbooks?filter=tags:in:[sample,safari,weather]', text=response_xml)
+            matching_workbooks = self.server.workbooks.filter(tags__in=['sample', 'safari', 'weather'])
+
+            self.assertEqual(3, matching_workbooks.total_available)
+            self.assertEqual(set(['weather']), matching_workbooks[0].tags)
+            self.assertEqual(set(['safari']), matching_workbooks[1].tags)
+            self.assertEqual(set(['sample']), matching_workbooks[2].tags)
+
+    def test_invalid_shorthand_option(self):
+        with self.assertRaises(ValueError):
+            self.server.workbooks.filter(nonexistant__in=['sample', 'safari'])
 
     def test_multiple_filter_options(self):
         with open(FILTER_MULTIPLE, 'rb') as f:
@@ -148,3 +175,19 @@ class RequestOptionTests(unittest.TestCase):
             self.assertTrue(re.search('vf_name1%23=value1', resp.request.query))
             self.assertTrue(re.search('vf_name2%24=value2', resp.request.query))
             self.assertTrue(re.search('type=tabloid', resp.request.query))
+
+    def test_multiple_filter_options_shorthand(self):
+        with open(FILTER_MULTIPLE, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        # To ensure that this is deterministic, run this a few times
+        with requests_mock.mock() as m:
+            # Sometimes pep8 requires you to do things you might not otherwise do
+            url = ''.join((self.baseurl, '/workbooks?pageNumber=1&pageSize=100&',
+                          'filter=name:eq:foo,tags:in:[sample,safari,weather]'))
+            m.get(url, text=response_xml)
+
+            for _ in range(100):
+                matching_workbooks = self.server.workbooks.filter(
+                    tags__in=['sample', 'safari', 'weather'], name='foo'
+                )
+                self.assertEqual(3, matching_workbooks.total_available)
