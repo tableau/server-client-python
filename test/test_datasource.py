@@ -47,6 +47,10 @@ class DatasourceTests(unittest.TestCase):
         self.assertEqual('SampleDS', all_datasources[0].name)
         self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', all_datasources[0].project_id)
         self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', all_datasources[0].owner_id)
+        self.assertEqual('https://web.com', all_datasources[0].webpage_url)
+        self.assertFalse(all_datasources[0].encrypt_extracts)
+        self.assertTrue(all_datasources[0].has_extracts)
+        self.assertFalse(all_datasources[0].use_remote_query_agent)
 
         self.assertEqual('9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', all_datasources[1].id)
         self.assertEqual('dataengine', all_datasources[1].datasource_type)
@@ -58,6 +62,10 @@ class DatasourceTests(unittest.TestCase):
         self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', all_datasources[1].project_id)
         self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', all_datasources[1].owner_id)
         self.assertEqual(set(['world', 'indicators', 'sample']), all_datasources[1].tags)
+        self.assertEqual('https://page.com', all_datasources[1].webpage_url)
+        self.assertTrue(all_datasources[1].encrypt_extracts)
+        self.assertFalse(all_datasources[1].has_extracts)
+        self.assertTrue(all_datasources[1].use_remote_query_agent)
 
     def test_get_before_signin(self):
         self.server._auth_token = None
@@ -88,6 +96,8 @@ class DatasourceTests(unittest.TestCase):
         self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', single_datasource.project_id)
         self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', single_datasource.owner_id)
         self.assertEqual(set(['world', 'indicators', 'sample']), single_datasource.tags)
+        self.assertEqual("test-ds", single_datasource.description)
+        self.assertEqual(TSC.DatasourceItem.AskDataEnablement.SiteDefault, single_datasource.ask_data_enablement)
 
     def test_update(self):
         response_xml = read_xml_asset(UPDATE_XML)

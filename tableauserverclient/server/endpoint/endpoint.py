@@ -1,7 +1,7 @@
 from .exceptions import ServerResponseError, InternalServerError, NonXMLResponseError
 from functools import wraps
 from xml.etree.ElementTree import ParseError
-
+from ..query import QuerySet
 import logging
 
 try:
@@ -165,3 +165,25 @@ def parameter_added_in(**params):
             return func(self, *args, **kwargs)
         return wrapper
     return _decorator
+
+
+class QuerysetEndpoint(Endpoint):
+    @api(version="2.0")
+    def all(self, *args, **kwargs):
+        queryset = QuerySet(self)
+        return queryset
+
+    @api(version="2.0")
+    def filter(self, *args, **kwargs):
+        queryset = QuerySet(self).filter(**kwargs)
+        return queryset
+
+    @api(version="2.0")
+    def order_by(self, *args, **kwargs):
+        queryset = QuerySet(self).order_by(*args)
+        return queryset
+
+    @api(version="2.0")
+    def paginate(self, **kwargs):
+        queryset = QuerySet(self).paginate(**kwargs)
+        return queryset

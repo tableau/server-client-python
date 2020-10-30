@@ -20,6 +20,7 @@ class Permission:
         ChangePermissions = 'ChangePermissions'
         Connect = 'Connect'
         Delete = 'Delete'
+        Execute = 'Execute'
         ExportData = 'ExportData'
         ExportImage = 'ExportImage'
         ExportXml = 'ExportXml'

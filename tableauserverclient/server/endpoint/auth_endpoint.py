@@ -73,3 +73,9 @@ class Auth(Endpoint):
         self.parent_srv._set_auth(site_id, user_id, auth_token)
         logger.info('Signed into {0} as user with id {1}'.format(self.parent_srv.server_address, user_id))
         return Auth.contextmgr(self.sign_out)
+
+    @api(version="3.10")
+    def revoke_all_server_admin_tokens(self):
+        url = "{0}/{1}".format(self.baseurl, 'revokeAllServerAdminTokens')
+        self.post_request(url, '')
+        logger.info('Revoked all tokens for all server admins')
