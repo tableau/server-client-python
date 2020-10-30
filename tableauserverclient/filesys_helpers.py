@@ -20,3 +20,23 @@ def make_download_path(filepath, filename):
         download_path = filepath + os.path.splitext(filename)[1]
 
     return download_path
+
+
+def get_file_object_size(file):
+    # Returns the size of a file object
+    file.seek(0, os.SEEK_END)
+    file_size = file.tell()
+    file.seek(0)
+    return file_size
+
+
+def file_is_compressed(file):
+    # Determine if file is a zip file or not
+    # This reference lists magic file signatures: https://www.garykessler.net/library/file_sigs.html
+
+    zip_file_signature = b'PK\x03\x04'
+
+    is_zip_file = file.read(len(zip_file_signature)) == zip_file_signature
+    file.seek(0)
+
+    return is_zip_file
