@@ -176,6 +176,21 @@ class RequestOptionTests(unittest.TestCase):
             self.assertTrue(re.search('vf_name2%24=value2', resp.request.query))
             self.assertTrue(re.search('type=tabloid', resp.request.query))
 
+    def test_all_fields(self):
+        with requests_mock.mock() as m:
+            m.get(requests_mock.ANY)
+            url = "http://test/api/2.3/sites/123/views/456/data"
+            opts = TSC.RequestOptions()
+            opts._all_fields = True
+
+            resp = self.server.users._make_request(requests.get,
+                                                   url,
+                                                   content=None,
+                                                   request_object=opts,
+                                                   auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
+                                                   content_type='text/xml')
+            self.assertTrue(re.search('fields=_all_', resp.request.query))
+
     def test_multiple_filter_options_shorthand(self):
         with open(FILTER_MULTIPLE, 'rb') as f:
             response_xml = f.read().decode('utf-8')

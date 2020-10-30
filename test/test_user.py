@@ -29,7 +29,7 @@ class UserTests(unittest.TestCase):
         with open(GET_XML, 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
-            m.get(self.baseurl, text=response_xml)
+            m.get(self.baseurl + "?fields=_all_", text=response_xml)
             all_users, pagination_item = self.server.users.get()
 
         self.assertEqual(2, pagination_item.total_available)
@@ -40,11 +40,15 @@ class UserTests(unittest.TestCase):
         self.assertEqual('alice', single_user.name)
         self.assertEqual('Publisher', single_user.site_role)
         self.assertEqual('2016-08-16T23:17:06Z', format_datetime(single_user.last_login))
+        self.assertEqual('alice cook', single_user.fullname)
+        self.assertEqual('alicecook@test.com', single_user.email)
 
         self.assertTrue(any(user.id == '2a47bbf8-8900-4ebb-b0a4-2723bd7c46c3' for user in all_users))
         single_user = next(user for user in all_users if user.id == '2a47bbf8-8900-4ebb-b0a4-2723bd7c46c3')
         self.assertEqual('Bob', single_user.name)
         self.assertEqual('Interactor', single_user.site_role)
+        self.assertEqual('Bob Smith', single_user.fullname)
+        self.assertEqual('bob@test.com', single_user.email)
 
     def test_get_empty(self):
         with open(GET_EMPTY_XML, 'rb') as f:

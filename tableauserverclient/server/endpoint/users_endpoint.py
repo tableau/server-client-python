@@ -1,6 +1,6 @@
 from .endpoint import QuerysetEndpoint, api
 from .exceptions import MissingRequiredFieldError
-from .. import RequestFactory, UserItem, WorkbookItem, PaginationItem
+from .. import RequestFactory, RequestOptions, UserItem, WorkbookItem, PaginationItem
 from ..pager import Pager
 
 import copy
@@ -18,6 +18,11 @@ class Users(QuerysetEndpoint):
     @api(version="2.0")
     def get(self, req_options=None):
         logger.info('Querying all users on site')
+
+        if req_options is None:
+            req_options = RequestOptions()
+        req_options._all_fields = True
+
         url = self.baseurl
         server_response = self.get_request(url, req_options)
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
