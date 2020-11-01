@@ -8,7 +8,6 @@ then pass the object to your endpoint as a parameter.
 * TOC
 {:toc}
 
-
 ## Available endpoints and fields
 
 You can use the TSC library to filter and sort the following endpoints:
@@ -30,11 +29,11 @@ fields:
 * UpdatedAt
 
 **Important**: Not all of the fields are available for all endpoints. For more information, see the [REST
-API help](http://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm#REST/rest_api_concepts_filtering_and_sorting.htm).
+API help](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_filtering_and_sorting.htm).
 
 ## Filtering
 
-To filter on a field, you need to specify the following criteria:
+To filter on a field, you need to specify the field name, an operator criteria and a value criteria.
 
 ### Operator criteria
 
@@ -70,7 +69,7 @@ print(matching_workbooks[0].owner_id)
 
 ## Sorting
 
-To sort on a field, you need to specify the direction in which you want to sort.
+To sort on a field, you need to specify the field name and the direction criteria for the sort order.
 
 ### Direction criteria - RequestOptions
 

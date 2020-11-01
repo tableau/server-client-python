@@ -1,11 +1,11 @@
 ---
-title: Page through Results
+title: Page Through Results
 layout: docs
 ---
 
 Many of the calls that you make with the TSC library query for resources (like workbooks or data sources) on Tableau
-Server. Because the number of resources on Tableau Server can be very large, Tableau Server only returns the first 100
-resources by default. To get all of the resources on Tableau Server, you need to page through the results.
+Server. Because the number of resources can be very large, Tableau Server only returns the first 100
+resources by default. To get all of the resources, you need to page through the results.
 
 * TOC
 {:toc}
@@ -30,7 +30,7 @@ Server REST API when it runs out of resources--it does not make a call for each 
 
 ### Set pagination options
 
-You can set pagination options in the request options and then pass the request options to the `Pager` function as a
+You can set pagination options in a `RequestOptions` object and then pass it to the `Pager` function as a
 second optional parameter.
 
 For example, to set the page size to 1000 use the following code:
