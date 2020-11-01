@@ -131,7 +131,7 @@ Signs you out of the current session.
 
 The `sign_out()` method takes care of invalidating the authentication token. For more information, see [Sign in and Out](sign-in-out).
 
-REST API: [Sign Out](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#ign_out){:target="_blank"}
+REST API: [Sign Out](https://onlinehelp.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#sign_out){:target="_blank"}
 
 **Example**
 
@@ -139,6 +139,42 @@ REST API: [Sign Out](https://onlinehelp.tableau.com/current/api/rest_api/en-us/R
 
 server.auth.sign_out()
 
+
+```
+
+
+
+
+**See Also**  
+[Sign in and Out](sign-in-out)  
+[Server](#server)
+
+<br>
+<br>
+
+#### auth.switch site
+
+```py
+auth.switch_site(site_item)
+```
+Switches you to the target site using a TSC Site Object as an argument.
+
+The `switch_site()` method takes care of error handling if you try to switch to the site you are currently signed in to.
+
+REST API: [Switch Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#switch_site){:target="_blank"}
+
+**Parameters**
+
+Name   |  Description     
+ :--- | : ---    
+`site_item`  |  The `site_item` specifies the site to switch to.
+
+
+**Example**
+
+```py
+sites, pagination_item = server.sites.get()
+server.auth.switch_site(sites[1])
 
 ```
 
@@ -576,12 +612,7 @@ Refreshes the data of the specified extract.
 
 REST API: [Update Data Source Now](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_datasources.htm#update_data_source_now){:target="_blank"}
 
-**Parameters**
-
-Name   |  Description     
- :--- | : ---    
-`datasource_item`  |  The `datasource_item` specifies the data source to update.
-
+ 
 
 
 **Exceptions**
