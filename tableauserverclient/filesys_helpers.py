@@ -52,7 +52,7 @@ def get_file_type(file):
     # Return pointer back to start
     file.seek(0)
 
-    if file_type == None:
+    if file_type is None:
         error = "Unknown file type!"
         raise ValueError(error)
 
