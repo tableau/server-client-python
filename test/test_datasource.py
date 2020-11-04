@@ -277,6 +277,8 @@ class DatasourceTests(unittest.TestCase):
                 with ZipFile(zip_archive, 'w') as zf:
                     zf.write(asset('SampleDS.tds'))
 
+                zip_archive.seek(0)
+
                 new_datasource = self.server.datasources.publish(new_datasource,
                                                                  zip_archive,
                                                                  mode=publish_mode)
