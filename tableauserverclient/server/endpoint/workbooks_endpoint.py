@@ -5,7 +5,7 @@ from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, WorkbookItem, ConnectionItem, ViewItem, PaginationItem
 from ...models.job_item import JobItem
-from ...filesys_helpers import to_filename, make_download_path, file_is_compressed, get_file_object_size
+from ...filesys_helpers import to_filename, make_download_path, get_file_type, get_file_object_size
 
 import os
 import logging
@@ -284,7 +284,16 @@ class Workbooks(QuerysetEndpoint):
         except TypeError:
             # Expect file to be a file object
             file_size = get_file_object_size(file)
-            file_extension = 'twbx' if file_is_compressed(file) else 'twb'
+
+            file_type = get_file_type(file)
+
+            if file_type == 'zip':
+                file_extension = 'twbx'
+            elif file_type == 'xml':
+                file_extension = 'twb'
+            else:
+                error = 'Unsupported file type {}!'.format(file_type)
+                raise ValueError(error)
 
             if not workbook_item.name:
                 error = "Workbook item must have a name when passing a file object"

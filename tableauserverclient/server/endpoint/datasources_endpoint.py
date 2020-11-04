@@ -5,7 +5,7 @@ from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, DatasourceItem, PaginationItem, ConnectionItem
 from ..query import QuerySet
-from ...filesys_helpers import to_filename, make_download_path, file_is_compressed, get_file_object_size
+from ...filesys_helpers import to_filename, make_download_path, get_file_type, get_file_object_size
 from ...models.job_item import JobItem
 
 import os
@@ -198,7 +198,15 @@ class Datasources(QuerysetEndpoint):
                 error = "Datasource item must have a name when passing a file object"
                 raise ValueError(error)
 
-            file_extension = 'tdsx' if file_is_compressed(file) else 'tds'
+            file_type = get_file_type(file)
+            if file_type == 'zip':
+                file_extension = 'tdsx'
+            elif file_type == 'xml':
+                file_extension = 'tds'
+            else:
+                error = "Unsupported file type {}".format(file_type)
+                raise ValueError(error)
+
             filename = "{}.{}".format(datasource_item.name, file_extension)
             file_size = get_file_object_size(file)
 
