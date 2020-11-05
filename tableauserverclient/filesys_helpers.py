@@ -31,9 +31,10 @@ def get_file_object_size(file):
 
 
 def get_file_type(file):
+    # Tableau workbooks (twb) and data sources (tds) are both stored as xml files.
+    # Packaged workbooks (twbx) and data sources (tdsx) are zip files containing original files accompanied with supporting local files.
 
     # This reference lists magic file signatures: https://www.garykessler.net/library/file_sigs.html
-
     MAGIC_BYTES = {
         'zip': bytes.fromhex("504b0304"),
         'tde': bytes.fromhex("20020162"),
