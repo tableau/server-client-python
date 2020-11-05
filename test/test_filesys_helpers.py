@@ -28,6 +28,15 @@ class FilesysTests(unittest.TestCase):
 
         self.assertEqual(file_size, 0)
 
+    def test_get_file_size_coincides_with_built_in_method(self):
+
+        asset_path = asset('SampleWB.twbx')
+        target_size = os.path.getsize(asset_path)
+        with open(asset_path, 'rb') as f:
+            file_size = get_file_object_size(f)
+
+        self.assertEqual(file_size, target_size)
+
     def test_get_file_type_identifies_a_zip_file(self):
 
         with BytesIO() as file_object:
