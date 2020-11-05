@@ -49,13 +49,6 @@ class FilesysTests(unittest.TestCase):
 
         self.assertEqual(file_type, 'zip')
 
-    def test_get_file_type_identifies_twbx_file_as_zip_file(self):
-
-        with open(asset('SampleWB.twbx'), 'rb') as file_object:
-            file_type = get_file_type(file_object)
-
-        self.assertEqual(file_type, 'zip')
-
     def test_get_file_type_identifies_tdsx_as_zip_file(self):
         with open(asset('World Indicators.tdsx'), 'rb') as file_object:
             file_type = get_file_type(file_object)
