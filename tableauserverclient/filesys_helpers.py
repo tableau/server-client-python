@@ -31,9 +31,10 @@ def get_file_object_size(file):
 
 
 def get_file_type(file):
+
     # This reference lists magic file signatures: https://www.garykessler.net/library/file_sigs.html
 
-    magic_bytes = {
+    MAGIC_BYTES = {
         'zip': bytes.fromhex("504b0304"),
         'tde': bytes.fromhex("20020162"),
         'xml': bytes.fromhex("3c3f786d6c20"),
@@ -44,7 +45,7 @@ def get_file_type(file):
     first_bytes = file.read(32)
 
     file_type = None
-    for ft, signature in magic_bytes.items():
+    for ft, signature in MAGIC_BYTES.items():
         if first_bytes.startswith(signature):
             file_type = ft
             break
