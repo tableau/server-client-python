@@ -1,7 +1,10 @@
 import unittest
+from io import BytesIO
 import os
 import requests_mock
 import xml.etree.ElementTree as ET
+from zipfile import ZipFile
+
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
 from tableauserverclient.server.endpoint.exceptions import InternalServerError
@@ -240,6 +243,56 @@ class DatasourceTests(unittest.TestCase):
         self.assertEqual('default', new_datasource.project_name)
         self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', new_datasource.owner_id)
 
+    def test_publish_a_non_packaged_file_object(self):
+        response_xml = read_xml_asset(PUBLISH_XML)
+        with requests_mock.mock() as m:
+            m.post(self.baseurl, text=response_xml)
+            new_datasource = TSC.DatasourceItem('SampleDS', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+            publish_mode = self.server.PublishMode.CreateNew
+
+            with open(asset('SampleDS.tds'), 'rb') as file_object:
+                new_datasource = self.server.datasources.publish(new_datasource,
+                                                                 file_object,
+                                                                 mode=publish_mode)
+
+        self.assertEqual('e76a1461-3b1d-4588-bf1b-17551a879ad9', new_datasource.id)
+        self.assertEqual('SampleDS', new_datasource.name)
+        self.assertEqual('SampleDS', new_datasource.content_url)
+        self.assertEqual('dataengine', new_datasource.datasource_type)
+        self.assertEqual('2016-08-11T21:22:40Z', format_datetime(new_datasource.created_at))
+        self.assertEqual('2016-08-17T23:37:08Z', format_datetime(new_datasource.updated_at))
+        self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', new_datasource.project_id)
+        self.assertEqual('default', new_datasource.project_name)
+        self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', new_datasource.owner_id)
+
+    def test_publish_a_packaged_file_object(self):
+        response_xml = read_xml_asset(PUBLISH_XML)
+        with requests_mock.mock() as m:
+            m.post(self.baseurl, text=response_xml)
+            new_datasource = TSC.DatasourceItem('SampleDS', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+            publish_mode = self.server.PublishMode.CreateNew
+
+            # Create a dummy tdsx file in memory
+            with BytesIO() as zip_archive:
+                with ZipFile(zip_archive, 'w') as zf:
+                    zf.write(asset('SampleDS.tds'))
+
+                zip_archive.seek(0)
+
+                new_datasource = self.server.datasources.publish(new_datasource,
+                                                                 zip_archive,
+                                                                 mode=publish_mode)
+
+        self.assertEqual('e76a1461-3b1d-4588-bf1b-17551a879ad9', new_datasource.id)
+        self.assertEqual('SampleDS', new_datasource.name)
+        self.assertEqual('SampleDS', new_datasource.content_url)
+        self.assertEqual('dataengine', new_datasource.datasource_type)
+        self.assertEqual('2016-08-11T21:22:40Z', format_datetime(new_datasource.created_at))
+        self.assertEqual('2016-08-17T23:37:08Z', format_datetime(new_datasource.updated_at))
+        self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', new_datasource.project_id)
+        self.assertEqual('default', new_datasource.project_name)
+        self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', new_datasource.owner_id)
+
     def test_publish_async(self):
         self.server.version = "3.0"
         baseurl = self.server.datasources.baseurl
@@ -259,6 +312,15 @@ class DatasourceTests(unittest.TestCase):
         self.assertEqual('0', new_job.progress)
         self.assertEqual('2018-06-30T00:54:54Z', format_datetime(new_job.created_at))
         self.assertEqual('1', new_job.finish_code)
+
+    def test_publish_unnamed_file_object(self):
+        new_datasource = TSC.DatasourceItem('test')
+        publish_mode = self.server.PublishMode.CreateNew
+
+        with open(asset('SampleDS.tds'), 'rb') as file_object:
+            self.assertRaises(ValueError, self.server.datasources.publish,
+                              new_datasource, file_object, publish_mode
+                              )
 
     def test_refresh_id(self):
         self.server.version = '2.8'
@@ -335,6 +397,29 @@ class DatasourceTests(unittest.TestCase):
         new_datasource = TSC.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
         self.assertRaises(ValueError, self.server.datasources.publish, new_datasource,
                           asset('SampleWB.twbx'), self.server.PublishMode.Append)
+
+    def test_publish_hyper_file_object_raises_exception(self):
+        new_datasource = TSC.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+        with open(asset('World Indicators.hyper')) as file_object:
+            self.assertRaises(ValueError, self.server.datasources.publish, new_datasource,
+                              file_object, self.server.PublishMode.Append)
+
+    def test_publish_tde_file_object_raises_exception(self):
+
+        new_datasource = TSC.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+        tds_asset = asset(os.path.join('Data', 'Tableau Samples', 'World Indicators.tde'))
+        with open(tds_asset) as file_object:
+            self.assertRaises(ValueError, self.server.datasources.publish, new_datasource,
+                              file_object, self.server.PublishMode.Append)
+
+    def test_publish_file_object_of_unknown_type_raises_exception(self):
+        new_datasource = TSC.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+
+        with BytesIO() as file_object:
+            file_object.write(bytes.fromhex('89504E470D0A1A0A'))
+            file_object.seek(0)
+            self.assertRaises(ValueError, self.server.datasources.publish, new_datasource,
+                              file_object, self.server.PublishMode.Append)
 
     def test_publish_multi_connection(self):
         new_datasource = TSC.DatasourceItem(name='Sample', project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')

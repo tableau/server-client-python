@@ -30,13 +30,33 @@ def get_file_object_size(file):
     return file_size
 
 
-def file_is_compressed(file):
-    # Determine if file is a zip file or not
+def get_file_type(file):
+    # Tableau workbooks (twb) and data sources (tds) are both stored as xml files.
+    # Packaged workbooks (twbx) and data sources (tdsx) are zip files
+    # containing original files accompanied with supporting local files.
+
     # This reference lists magic file signatures: https://www.garykessler.net/library/file_sigs.html
+    MAGIC_BYTES = {
+        'zip': bytes.fromhex("504b0304"),
+        'tde': bytes.fromhex("20020162"),
+        'xml': bytes.fromhex("3c3f786d6c20"),
+        'hyper': bytes.fromhex("487970657208000001000000")
+    }
 
-    zip_file_signature = b'PK\x03\x04'
+    # Peek first bytes of a file
+    first_bytes = file.read(32)
 
-    is_zip_file = file.read(len(zip_file_signature)) == zip_file_signature
+    file_type = None
+    for ft, signature in MAGIC_BYTES.items():
+        if first_bytes.startswith(signature):
+            file_type = ft
+            break
+
+    # Return pointer back to start
     file.seek(0)
 
-    return is_zip_file
+    if file_type is None:
+        error = "Unknown file type!"
+        raise ValueError(error)
+
+    return file_type
