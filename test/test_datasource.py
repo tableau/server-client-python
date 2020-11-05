@@ -398,6 +398,29 @@ class DatasourceTests(unittest.TestCase):
         self.assertRaises(ValueError, self.server.datasources.publish, new_datasource,
                           asset('SampleWB.twbx'), self.server.PublishMode.Append)
 
+    def test_publish_hyper_file_object_raises_exception(self):
+        new_datasource = TSC.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+        with open(asset('World Indicators.hyper')) as file_object:
+            self.assertRaises(ValueError, self.server.datasources.publish, new_datasource,
+                              file_object, self.server.PublishMode.Append)
+
+    def test_publish_tde_file_object_raises_exception(self):
+
+        new_datasource = TSC.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+        tds_asset = asset(os.path.join('Data', 'Tableau Samples', 'World Indicators.tde'))
+        with open(tds_asset) as file_object:
+            self.assertRaises(ValueError, self.server.datasources.publish, new_datasource,
+                              file_object, self.server.PublishMode.Append)
+
+    def test_publish_file_object_of_unknown_type_raises_exception(self):
+        new_datasource = TSC.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+
+        with BytesIO() as file_object:
+            file_object.write(bytes.fromhex('89504E470D0A1A0A'))
+            file_object.seek(0)
+            self.assertRaises(ValueError, self.server.datasources.publish, new_datasource,
+                              file_object, self.server.PublishMode.Append)
+
     def test_publish_multi_connection(self):
         new_datasource = TSC.DatasourceItem(name='Sample', project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
         connection1 = TSC.ConnectionItem()

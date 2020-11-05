@@ -1,4 +1,5 @@
 import unittest
+from io import BytesIO
 import os
 import re
 import requests_mock
@@ -588,6 +589,14 @@ class WorkbookTests(unittest.TestCase):
             self.assertRaises(ValueError, self.server.workbooks.publish,
                               new_workbook, f, self.server.PublishMode.CreateNew
                               )
+
+    def test_publish_file_object_of_unknown_type_raises_exception(self):
+        new_workbook = TSC.WorkbookItem('test')
+        with BytesIO() as file_object:
+            file_object.write(bytes.fromhex('89504E470D0A1A0A'))
+            file_object.seek(0)
+            self.assertRaises(ValueError, self.server.workbooks.publish, new_workbook,
+                              file_object, self.server.PublishMode.CreateNew)
 
     def test_publish_multi_connection(self):
         new_workbook = TSC.WorkbookItem(name='Sample', show_tabs=False,
