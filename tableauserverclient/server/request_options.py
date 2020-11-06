@@ -69,6 +69,9 @@ class RequestOptions(RequestOptionsBase):
         self.sort = set()
         self.filter = set()
 
+        # This is private until we expand all of our parsers to handle the extra fields
+        self._all_fields = False
+
     def page_size(self, page_size):
         self.pagesize = page_size
         return self
@@ -91,6 +94,8 @@ class RequestOptions(RequestOptionsBase):
             filter_options = (str(filter_item) for filter_item in self.filter)
             ordered_filter_options = sorted(filter_options)
             params['filter'] = ','.join(ordered_filter_options)
+        if self._all_fields:
+            params['fields'] = '_all_'
         return params
 
 
