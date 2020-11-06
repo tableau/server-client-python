@@ -455,13 +455,13 @@ class SiteRequest(object):
             site_element.attrib['state'] = site_item.state
         if site_item.storage_quota:
             site_element.attrib['storageQuota'] = str(site_item.storage_quota)
-        if site_item.disable_subscriptions:
+        if site_item.disable_subscriptions is not None:
             site_element.attrib['disableSubscriptions'] = str(site_item.disable_subscriptions).lower()
-        if site_item.subscribe_others_enabled:
+        if site_item.subscribe_others_enabled is not None:
             site_element.attrib['subscribeOthersEnabled'] = str(site_item.subscribe_others_enabled).lower()
         if site_item.revision_limit:
             site_element.attrib['revisionLimit'] = str(site_item.revision_limit)
-        if site_item.subscribe_others_enabled:
+        if site_item.subscribe_others_enabled is not None:
             site_element.attrib['revisionHistoryEnabled'] = str(site_item.revision_history_enabled).lower()
         if site_item.data_acceleration_mode is not None:
             site_element.attrib['dataAccelerationMode'] = str(site_item.data_acceleration_mode).lower()
@@ -482,7 +482,7 @@ class SiteRequest(object):
             site_element.attrib['userQuota'] = str(site_item.user_quota)
         if site_item.storage_quota:
             site_element.attrib['storageQuota'] = str(site_item.storage_quota)
-        if site_item.disable_subscriptions:
+        if site_item.disable_subscriptions is not None:
             site_element.attrib['disableSubscriptions'] = str(site_item.disable_subscriptions).lower()
         if site_item.flows_enabled is not None:
             site_element.attrib['flowsEnabled'] = str(site_item.flows_enabled).lower()
