@@ -192,6 +192,7 @@ class ScheduleTests(unittest.TestCase):
             single_schedule = TSC.ScheduleItem("weekly-schedule-1", 90, TSC.ScheduleItem.Type.Extract,
                                                TSC.ScheduleItem.ExecutionOrder.Parallel, new_interval)
             single_schedule._id = "7bea1766-1543-4052-9753-9d224bc069b5"
+            single_schedule.state = TSC.ScheduleItem.State.Suspended
             single_schedule = self.server.schedules.update(single_schedule)
 
         self.assertEqual("7bea1766-1543-4052-9753-9d224bc069b5", single_schedule.id)
@@ -204,6 +205,32 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual(time(7), single_schedule.interval_item.start_time)
         self.assertEqual(("Monday", "Friday"),
                          single_schedule.interval_item.interval)
+        self.assertEqual(TSC.ScheduleItem.State.Suspended, single_schedule.state)
+
+    # Tests calling update with a schedule item returned from the server
+    def test_update_after_get(self):
+        with open(GET_XML, "rb") as f:
+            get_response_xml = f.read().decode("utf-8")
+        with open(UPDATE_XML, "rb") as f:
+            update_response_xml = f.read().decode("utf-8")
+
+        # Get a schedule
+        with requests_mock.mock() as m:
+            m.get(self.baseurl, text=get_response_xml)
+            all_schedules, pagination_item = self.server.schedules.get()
+        schedule_item = all_schedules[0]
+        self.assertEqual(TSC.ScheduleItem.State.Active, schedule_item.state)
+        self.assertEqual('Weekday early mornings', schedule_item.name)
+
+        # Update the schedule
+        with requests_mock.mock() as m:
+            m.put(self.baseurl + '/c9cff7f9-309c-4361-99ff-d4ba8c9f5467', text=update_response_xml)
+            schedule_item.state = TSC.ScheduleItem.State.Suspended
+            schedule_item.name = 'newName'
+            schedule_item = self.server.schedules.update(schedule_item)
+
+        self.assertEqual(TSC.ScheduleItem.State.Suspended, schedule_item.state)
+        self.assertEqual('weekly-schedule-1', schedule_item.name)
 
     def test_add_workbook(self):
         self.server.version = "2.8"

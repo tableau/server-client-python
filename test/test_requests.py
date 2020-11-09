@@ -1,5 +1,5 @@
 import unittest
-
+import re
 import requests
 import requests_mock
 
@@ -22,7 +22,7 @@ class RequestTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.get(requests_mock.ANY)
             url = "http://test/api/2.3/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks"
-            opts = TSC.RequestOptions(pagesize=13, pagenumber=13)
+            opts = TSC.RequestOptions(pagesize=13, pagenumber=15)
             resp = self.server.workbooks._make_request(requests.get,
                                                        url,
                                                        content=None,
@@ -30,9 +30,8 @@ class RequestTests(unittest.TestCase):
                                                        auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
                                                        content_type='text/xml')
 
-            self.assertEqual(resp.request.query, 'pagenumber=13&pagesize=13')
-            self.assertEqual(resp.request.headers['x-tableau-auth'], 'j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM')
-            self.assertEqual(resp.request.headers['content-type'], 'text/xml')
+            self.assertTrue(re.search('pagesize=13', resp.request.query))
+            self.assertTrue(re.search('pagenumber=15', resp.request.query))
 
     def test_make_post_request(self):
         with requests_mock.mock() as m:

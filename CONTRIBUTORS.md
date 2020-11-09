@@ -39,6 +39,8 @@ The following people have contributed to this project to make it possible, and w
 * [Stephen Mitchell](https://github.com/scuml)
 * [absentmoose](https://github.com/absentmoose)
 * [Paul Vickers](https://github.com/paulvic)
+* [Madhura Selvarajan](https://github.com/maddy-at-leisure)
+* [Niklas Nevalainen](https://github.com/nnevalainen)
 
 ## Core Team
 

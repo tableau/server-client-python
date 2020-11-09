@@ -131,6 +131,15 @@ class DatasourceRequest(object):
         xml_request = ET.Element('tsRequest')
         datasource_element = ET.SubElement(xml_request, 'datasource')
         datasource_element.attrib['name'] = datasource_item.name
+        if datasource_item.description:
+            datasource_element.attrib['description'] = str(datasource_item.description)
+        if datasource_item.use_remote_query_agent is not None:
+            datasource_element.attrib['useRemoteQueryAgent'] = str(datasource_item.use_remote_query_agent).lower()
+
+        if datasource_item.ask_data_enablement:
+            ask_data_element = ET.SubElement(datasource_element, 'askData')
+            ask_data_element.attrib['enablement'] = datasource_item.ask_data_enablement
+
         project_element = ET.SubElement(datasource_element, 'project')
         project_element.attrib['id'] = datasource_item.project_id
 
@@ -149,6 +158,9 @@ class DatasourceRequest(object):
     def update_req(self, datasource_item):
         xml_request = ET.Element('tsRequest')
         datasource_element = ET.SubElement(xml_request, 'datasource')
+        if datasource_item.ask_data_enablement:
+            ask_data_element = ET.SubElement(datasource_element, 'askData')
+            ask_data_element.attrib['enablement'] = datasource_item.ask_data_enablement
         if datasource_item.project_id:
             project_element = ET.SubElement(datasource_element, 'project')
             project_element.attrib['id'] = datasource_item.project_id
@@ -160,6 +172,8 @@ class DatasourceRequest(object):
 
         if datasource_item.certification_note:
             datasource_element.attrib['certificationNote'] = str(datasource_item.certification_note)
+        if datasource_item.encrypt_extracts is not None:
+            datasource_element.attrib['encryptExtracts'] = str(datasource_item.encrypt_extracts).lower()
 
         return ET.tostring(xml_request)
 
@@ -384,19 +398,21 @@ class ScheduleRequest(object):
             schedule_element.attrib['executionOrder'] = schedule_item.execution_order
         if schedule_item.state:
             schedule_element.attrib['state'] = schedule_item.state
+
         interval_item = schedule_item.interval_item
-        if interval_item._frequency:
-            schedule_element.attrib['frequency'] = interval_item._frequency
-        frequency_element = ET.SubElement(schedule_element, 'frequencyDetails')
-        frequency_element.attrib['start'] = str(interval_item.start_time)
-        if hasattr(interval_item, 'end_time') and interval_item.end_time is not None:
-            frequency_element.attrib['end'] = str(interval_item.end_time)
-        intervals_element = ET.SubElement(frequency_element, 'intervals')
-        if hasattr(interval_item, 'interval'):
-            for interval in interval_item._interval_type_pairs():
-                (expression, value) = interval
-                single_interval_element = ET.SubElement(intervals_element, 'interval')
-                single_interval_element.attrib[expression] = value
+        if interval_item is not None:
+            if interval_item._frequency:
+                schedule_element.attrib['frequency'] = interval_item._frequency
+            frequency_element = ET.SubElement(schedule_element, 'frequencyDetails')
+            frequency_element.attrib['start'] = str(interval_item.start_time)
+            if hasattr(interval_item, 'end_time') and interval_item.end_time is not None:
+                frequency_element.attrib['end'] = str(interval_item.end_time)
+            intervals_element = ET.SubElement(frequency_element, 'intervals')
+            if hasattr(interval_item, 'interval'):
+                for interval in interval_item._interval_type_pairs():
+                    (expression, value) = interval
+                    single_interval_element = ET.SubElement(intervals_element, 'interval')
+                    single_interval_element.attrib[expression] = value
         return ET.tostring(xml_request)
 
     def _add_to_req(self, id_, target_type, task_type=TaskItem.Type.ExtractRefresh):
@@ -439,13 +455,13 @@ class SiteRequest(object):
             site_element.attrib['state'] = site_item.state
         if site_item.storage_quota:
             site_element.attrib['storageQuota'] = str(site_item.storage_quota)
-        if site_item.disable_subscriptions:
+        if site_item.disable_subscriptions is not None:
             site_element.attrib['disableSubscriptions'] = str(site_item.disable_subscriptions).lower()
-        if site_item.subscribe_others_enabled:
+        if site_item.subscribe_others_enabled is not None:
             site_element.attrib['subscribeOthersEnabled'] = str(site_item.subscribe_others_enabled).lower()
         if site_item.revision_limit:
             site_element.attrib['revisionLimit'] = str(site_item.revision_limit)
-        if site_item.subscribe_others_enabled:
+        if site_item.subscribe_others_enabled is not None:
             site_element.attrib['revisionHistoryEnabled'] = str(site_item.revision_history_enabled).lower()
         if site_item.data_acceleration_mode is not None:
             site_element.attrib['dataAccelerationMode'] = str(site_item.data_acceleration_mode).lower()
@@ -466,7 +482,7 @@ class SiteRequest(object):
             site_element.attrib['userQuota'] = str(site_item.user_quota)
         if site_item.storage_quota:
             site_element.attrib['storageQuota'] = str(site_item.storage_quota)
-        if site_item.disable_subscriptions:
+        if site_item.disable_subscriptions is not None:
             site_element.attrib['disableSubscriptions'] = str(site_item.disable_subscriptions).lower()
         if site_item.flows_enabled is not None:
             site_element.attrib['flowsEnabled'] = str(site_item.flows_enabled).lower()

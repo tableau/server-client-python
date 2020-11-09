@@ -1,7 +1,7 @@
 from .exceptions import ServerResponseError, InternalServerError, NonXMLResponseError
 from functools import wraps
 from xml.etree.ElementTree import ParseError
-
+from ..query import QuerySet
 import logging
 
 try:
@@ -41,9 +41,9 @@ class Endpoint(object):
 
     def _make_request(self, method, url, content=None, request_object=None,
                       auth_token=None, content_type=None, parameters=None):
-        if request_object is not None:
-            url = request_object.apply_query_params(url)
         parameters = parameters or {}
+        if request_object is not None:
+            parameters["params"] = request_object.get_query_params()
         parameters.update(self.parent_srv.http_options)
         parameters['headers'] = Endpoint._make_common_headers(auth_token, content_type)
 
@@ -165,3 +165,25 @@ def parameter_added_in(**params):
             return func(self, *args, **kwargs)
         return wrapper
     return _decorator
+
+
+class QuerysetEndpoint(Endpoint):
+    @api(version="2.0")
+    def all(self, *args, **kwargs):
+        queryset = QuerySet(self)
+        return queryset
+
+    @api(version="2.0")
+    def filter(self, *args, **kwargs):
+        queryset = QuerySet(self).filter(**kwargs)
+        return queryset
+
+    @api(version="2.0")
+    def order_by(self, *args, **kwargs):
+        queryset = QuerySet(self).order_by(*args)
+        return queryset
+
+    @api(version="2.0")
+    def paginate(self, **kwargs):
+        queryset = QuerySet(self).paginate(**kwargs)
+        return queryset
