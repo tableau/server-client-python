@@ -50,6 +50,10 @@ class Endpoint(object):
         if content is not None:
             parameters['data'] = content
 
+        logger.debug(u'request {}, url: {}'.format(method.__name__, url))
+        if content:
+            logger.debug(u'request content: {}'.format(content))
+
         server_response = method(url, **parameters)
         self.parent_srv._namespace.detect(server_response.content)
         self._check_status(server_response)
@@ -62,7 +66,8 @@ class Endpoint(object):
         return server_response
 
     def _check_status(self, server_response):
-        logger.debug(self._safe_to_log(server_response))
+        if len(server_response.content) > 0:
+            logger.debug(self._safe_to_log(server_response))
         if server_response.status_code >= 500:
             raise InternalServerError(server_response)
         elif server_response.status_code not in Success_codes:
