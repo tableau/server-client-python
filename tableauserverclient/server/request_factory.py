@@ -593,13 +593,12 @@ class WorkbookRequest(object):
         if workbook_item.owner_id:
             owner_element = ET.SubElement(workbook_element, 'owner')
             owner_element.attrib['id'] = workbook_item.owner_id
-        if workbook_item.data_acceleration_config is not None and \
-                'acceleration_enabled' in workbook_item.data_acceleration_config:
+        if workbook_item.data_acceleration_config['acceleration_enabled'] is not None:
             data_acceleration_config = workbook_item.data_acceleration_config
             data_acceleration_element = ET.SubElement(workbook_element, 'dataAccelerationConfig')
             data_acceleration_element.attrib['accelerationEnabled'] = str(data_acceleration_config
                                                                           ["acceleration_enabled"]).lower()
-            if "accelerate_now" in data_acceleration_config:
+            if data_acceleration_config['accelerate_now'] is not None:
                 data_acceleration_element.attrib['accelerateNow'] = str(data_acceleration_config
                                                                         ["accelerate_now"]).lower()
 
