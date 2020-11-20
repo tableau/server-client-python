@@ -8,6 +8,7 @@ import tableauserverclient as TSC
 class SortTests(unittest.TestCase):
     def setUp(self):
         self.server = TSC.Server('http://test')
+        self.server.version = "3.7"
         self.server._site_id = 'dad65087-b08b-4603-af4e-2887b8aafc67'
         self.server._auth_token = 'j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM'
         self.baseurl = self.server.workbooks.baseurl
@@ -24,12 +25,7 @@ class SortTests(unittest.TestCase):
                                        TSC.RequestOptions.Operator.Equals,
                                        'Superstore'))
 
-            resp = self.server.workbooks._make_request(requests.get,
-                                                       url,
-                                                       content=None,
-                                                       request_object=opts,
-                                                       auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
-                                                       content_type='text/xml')
+            resp = self.server.workbooks.get_request(url, request_object=opts)
 
             self.assertTrue(re.search('pagenumber=13', resp.request.query))
             self.assertTrue(re.search('pagesize=13', resp.request.query))
@@ -53,12 +49,7 @@ class SortTests(unittest.TestCase):
                                        TSC.RequestOptions.Operator.In,
                                        ['stocks', 'market']))
 
-            resp = self.server.workbooks._make_request(requests.get,
-                                                       url,
-                                                       content=None,
-                                                       request_object=opts,
-                                                       auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
-                                                       content_type='text/xml')
+            resp = self.server.workbooks.get_request(url, request_object=opts)
             self.assertTrue(re.search('pagenumber=13', resp.request.query))
             self.assertTrue(re.search('pagesize=13', resp.request.query))
             self.assertTrue(re.search('filter=tags%3ain%3a%5bstocks%2cmarket%5d', resp.request.query))
@@ -71,12 +62,7 @@ class SortTests(unittest.TestCase):
             opts.sort.add(TSC.Sort(TSC.RequestOptions.Field.Name,
                                    TSC.RequestOptions.Direction.Asc))
 
-            resp = self.server.workbooks._make_request(requests.get,
-                                                       url,
-                                                       content=None,
-                                                       request_object=opts,
-                                                       auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
-                                                       content_type='text/xml')
+            resp = self.server.workbooks.get_request(url, request_object=opts)
 
             self.assertTrue(re.search('pagenumber=13', resp.request.query))
             self.assertTrue(re.search('pagesize=13', resp.request.query))
@@ -96,12 +82,7 @@ class SortTests(unittest.TestCase):
                                        TSC.RequestOptions.Operator.Equals,
                                        'Publisher'))
 
-            resp = self.server.workbooks._make_request(requests.get,
-                                                       url,
-                                                       content=None,
-                                                       request_object=opts,
-                                                       auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
-                                                       content_type='text/xml')
+            resp = self.server.workbooks.get_request(url, request_object=opts)
 
             expected = 'pagenumber=13&pagesize=13&filter=lastlogin%3agte%3a' \
                        '2017-01-15t00%3a00%3a00%3a00z%2csiterole%3aeq%3apublisher'

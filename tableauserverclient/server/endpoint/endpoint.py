@@ -1,4 +1,4 @@
-from .exceptions import ServerResponseError, InternalServerError, NonXMLResponseError
+from .exceptions import ServerResponseError, InternalServerError, NonXMLResponseError, EndpointUnavailableError
 from functools import wraps
 from xml.etree.ElementTree import ParseError
 from ..query import QuerySet
@@ -39,11 +39,9 @@ class Endpoint(object):
         else:
             return server_response.content
 
-    def _make_request(self, method, url, content=None, request_object=None,
-                      auth_token=None, content_type=None, parameters=None):
+    def _make_request(self, method, url, content=None, auth_token=None,
+                      content_type=None, parameters=None):
         parameters = parameters or {}
-        if request_object is not None:
-            parameters["params"] = request_object.get_query_params()
         parameters.update(self.parent_srv.http_options)
         parameters['headers'] = Endpoint._make_common_headers(auth_token, content_type)
 
@@ -78,28 +76,33 @@ class Endpoint(object):
                 # anything else re-raise here
                 raise
 
-    def get_unauthenticated_request(self, url, request_object=None):
-        return self._make_request(self.parent_srv.session.get, url, request_object=request_object)
+    def get_unauthenticated_request(self, url):
+        return self._make_request(self.parent_srv.session.get, url)
 
     def get_request(self, url, request_object=None, parameters=None):
+        if request_object is not None:
+            try:
+                # Query param encoding is not needed for versions before 3.7 (2020.1)
+                self.parent_srv.assert_at_least_version("3.7")
+                parameters = parameters or {}
+                parameters["params"] = request_object.get_query_params()
+            except EndpointUnavailableError:
+                url = request_object.apply_query_params(url)
+
         return self._make_request(self.parent_srv.session.get, url, auth_token=self.parent_srv.auth_token,
-                                  request_object=request_object, parameters=parameters)
+                                  parameters=parameters)
 
     def delete_request(self, url):
         # We don't return anything for a delete
         self._make_request(self.parent_srv.session.delete, url, auth_token=self.parent_srv.auth_token)
 
     def put_request(self, url, xml_request=None, content_type='text/xml'):
-        return self._make_request(self.parent_srv.session.put, url,
-                                  content=xml_request,
-                                  auth_token=self.parent_srv.auth_token,
-                                  content_type=content_type)
+        return self._make_request(self.parent_srv.session.put, url, content=xml_request,
+                                  auth_token=self.parent_srv.auth_token, content_type=content_type)
 
     def post_request(self, url, xml_request, content_type='text/xml'):
-        return self._make_request(self.parent_srv.session.post, url,
-                                  content=xml_request,
-                                  auth_token=self.parent_srv.auth_token,
-                                  content_type=content_type)
+        return self._make_request(self.parent_srv.session.post, url, content=xml_request,
+                                  auth_token=self.parent_srv.auth_token, content_type=content_type)
 
 
 def api(version):
