@@ -82,14 +82,15 @@ class Endpoint(object):
     def get_request(self, url, request_object=None, parameters=None):
         if request_object is not None:
             try:
-                # Query param encoding is not needed for versions before 3.7 (2020.1)
+                # Query param delimiters don't need to be encoded for versions before 3.7 (2020.1)
                 self.parent_srv.assert_at_least_version("3.7")
                 parameters = parameters or {}
                 parameters["params"] = request_object.get_query_params()
             except EndpointUnavailableError:
                 url = request_object.apply_query_params(url)
 
-        return self._make_request(self.parent_srv.session.get, url, auth_token=self.parent_srv.auth_token,
+        return self._make_request(self.parent_srv.session.get, url,
+                                  auth_token=self.parent_srv.auth_token,
                                   parameters=parameters)
 
     def delete_request(self, url):
@@ -97,12 +98,16 @@ class Endpoint(object):
         self._make_request(self.parent_srv.session.delete, url, auth_token=self.parent_srv.auth_token)
 
     def put_request(self, url, xml_request=None, content_type='text/xml'):
-        return self._make_request(self.parent_srv.session.put, url, content=xml_request,
-                                  auth_token=self.parent_srv.auth_token, content_type=content_type)
+        return self._make_request(self.parent_srv.session.put, url,
+                                  content=xml_request,
+                                  auth_token=self.parent_srv.auth_token,
+                                  content_type=content_type)
 
     def post_request(self, url, xml_request, content_type='text/xml'):
-        return self._make_request(self.parent_srv.session.post, url, content=xml_request,
-                                  auth_token=self.parent_srv.auth_token, content_type=content_type)
+        return self._make_request(self.parent_srv.session.post, url,
+                                  content=xml_request,
+                                  auth_token=self.parent_srv.auth_token,
+                                  content_type=content_type)
 
 
 def api(version):
