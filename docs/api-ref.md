@@ -3248,6 +3248,50 @@ See [ViewItem class](#viewitem-class)
 <br>
 <br>
 
+#### views.get_by_id
+```
+views.get_by_id(view_id)
+```
+
+Returns the details of a specific view.
+
+
+REST API: [Get View](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#get_view)
+
+**Version**
+
+This endpoint is available REST API version 3.1 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`view_id`  |  The ID of the view to retrieve.
+
+
+
+**Returns**
+
+Returns a single `ViewItem` object.
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+tableau_auth = TSC.TableauAuth('username', 'password')
+server = TSC.Server('https://servername')
+
+with server.auth.sign_in(tableau_auth):
+    view = server.view.get_by_id('d79634e1-6063-4ec9-95ff-50acbf609ff5')
+    print(view.name)
+```
+
+See [ViewItem class](#viewitem-class)
+
+
+<br>
+<br>
+
 #### views.populate_preview_image
 
 ```py
@@ -3347,7 +3391,7 @@ See [ViewItem class](#viewitem-class)
 
 #### views.populate_csv
 ```
-views.populate_csv(view_item)
+views.populate_csv(view_item, req_options=None)
 ```
 
 Populates the CSV data of the specified view.
