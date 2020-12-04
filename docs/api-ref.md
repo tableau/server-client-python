@@ -3365,7 +3365,7 @@ This endpoint is available with REST API version 2.7 and up.
 Name | description
 :--- | :---
 `view_item` | Specifies the view to populate.
-`req_options` | (Optional) You can pass in request options to specify the maximum age of the CSV cached on the server. The maximum CSV cache time is the value of `maxage` in minutes, and must be an integer between 1 and 240. A value of zero will cause the minimum cache time of 1 minute. A value of -1 will cache CSV files for the time configured in server settings. You can also specify view filters to be applied when the data is generated. See [CSVRequestOptions class](#csvrequestoptions-class) for more details.
+`req_options` | (Optional) You can pass in request options to specify the maximum age of the CSV cached on the server. See [CSVRequestOptions class](#csvrequestoptions-class) for more details.
 
 **Exceptions**
 
@@ -3381,9 +3381,9 @@ None. The CSV data is added to the `view_item` and can be accessed by its `csv` 
 ```py
 # Sign in, get view, etc.
 
-# Populate and save the CSV data as 'view_csv.csv'
+# Populate and save the CSV data in a file
 server.views.populate_csv(view_item)
-with open('./view_csv.csv', 'wb') as f:
+with open('./view_data.csv', 'wb') as f:
 	# Perform byte join on the CSV data
 	f.write(b''.join(view_item.csv))
 ```
@@ -3413,7 +3413,7 @@ This endpoint is available with REST API version 2.7 and up.
 Name | description
 :--- | :---
 `view_item` | Specifies the view to populate.
-`req_options` | (Optional) You can pass in request options to specify the page type and orientation of the PDF content, as well as the maximum age of the PDF rendered on the server. If not specified, PDF content will have default page type and orientation. The maximum PDF cache time is the value of `maxage` in minutes, and must be an integer between 1 and 240. A value of zero will cause the minimum cache time of 1 minute. A value of -1 will cache PDF files for the time configured in server settings. You can also specify view filters to be applied when the PDF is generated. See [PDFRequestOptions class](#pdfrequestoptions-class) for more details.
+`req_options` | (Optional) You can pass in request options to specify the page type and orientation of the PDF content, as well as the maximum age of the PDF rendered on the server. See [PDFRequestOptions class](#pdfrequestoptions-class) for more details.
 
 **Exceptions**
 
@@ -4125,7 +4125,7 @@ This endpoint is available with REST API version 3.4 and up.
 Name | description
 :--- | :---
 `workbook_item` | Specifies the workbook to populate.
-`req_options` | (Optional) You can pass in request options to specify the page type and orientation of the PDF content, as well as the maximum age of the PDF rendered on the server. If not specified, PDF content will have default page type and orientation. The maximum PDF cache time is the value of `maxage` in minutes, and must be an integer between 1 and 240. A value of zero will cause the minimum cache time of 1 minute. A value of -1 will cache PDF files for the time configured in server settings. See [PDFRequestOptions class](#pdfrequestoptions-class) for more details.
+`req_options` | (Optional) You can pass in request options to specify the page type and orientation of the PDF content, as well as the maximum age of the PDF rendered on the server. See [PDFRequestOptions class](#pdfrequestoptions-class) for more details.
 
 **Exceptions**
 
