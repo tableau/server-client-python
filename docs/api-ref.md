@@ -1681,7 +1681,7 @@ Use this class to specify the resolution of the view and, optionally, the maximu
 
 Name  |  Description
 :--- | :---
-`imageresolution` | The resolution of the view returned as an image. You set this option with the `Resolution` class. If unspecified, the `views.populate_image` method returns an image with standard resolution (the width of the returned image is 784 pixels). If you set this parameter value to high (`Resolution.High`), the width of the returned image is 1568 pixels. For both resolutions, the height varies to preserve the aspect ratio of the view.
+`imageresolution` | The resolution of the view returned as an image. If unspecified, the `views.populate_image` method returns an image with standard resolution (the width of the returned image is 784 pixels). If you set this parameter value to high (`Resolution.High`), the width of the returned image is 1568 pixels. For both resolutions, the height varies to preserve the aspect ratio of the view.
 `maxage` | Optional. The maximum number of minutes the image will be cached on the server before being refreshed. The value must be an integer between `1` and `240` minutes. `0` will be interpreted as 1 minute on server, as that is the shortest interval allowed. By default, `maxage` is set to `-1`, indicating the default behavior configured in server settings.
 
 **View Filters**
@@ -3318,7 +3318,7 @@ This endpoint is available with REST API version 2.5 and up.
 Name | description
 :--- | :---
 `view_item` | Specifies the view to populate.
-`req_options` | (Optional) You can pass in request options to specify the image resolution and the maximum age of the view image cached on the server. By default, the image will be in low resolution. The maximum image cache time is the value of `maxage` in minutes, and must be an integer between 1 and 240. A value of zero will cause the minimum cache time of 1 minute. A value of -1 will cache images for the time configured in server settings. You can also specify view filters to be applied when the image is generated. See [ImageRequestOptions class](#imagerequestoptions-class) for more details.
+`req_options` | (Optional) You can pass in request options to specify the image resolution (`imageresolution`) and the maximum age of the view image cached on the server (`maxage`). See [ImageRequestOptions class](#imagerequestoptions-class) for more details.
 
 **Exceptions**
 
@@ -3365,7 +3365,7 @@ This endpoint is available with REST API version 2.7 and up.
 Name | description
 :--- | :---
 `view_item` | Specifies the view to populate.
-`req_options` | (Optional) You can pass in request options to specify the maximum age of the CSV cached on the server. The maximum CSV cache time is the value of `maxage` in minutes, and must be an integer between 1 and 240. A value of zero will cause the minimum cache time of 1 minute. A value of -1 will cache CSV files for the time configured in server settings. You can also specify view filters to be applied when the data is generated. See [CSVRequestOptions class](#csvrequestoptions-class) for more details.
+`req_options` | (Optional) You can pass in request options to specify the maximum age of the CSV cached on the server. See [CSVRequestOptions class](#csvrequestoptions-class) for more details.
 
 **Exceptions**
 
@@ -3381,9 +3381,9 @@ None. The CSV data is added to the `view_item` and can be accessed by its `csv` 
 ```py
 # Sign in, get view, etc.
 
-# Populate and save the CSV data as 'view_csv.csv'
+# Populate and save the CSV data in a file
 server.views.populate_csv(view_item)
-with open('./view_csv.csv', 'wb') as f:
+with open('./view_data.csv', 'wb') as f:
 	# Perform byte join on the CSV data
 	f.write(b''.join(view_item.csv))
 ```
@@ -3413,7 +3413,7 @@ This endpoint is available with REST API version 2.7 and up.
 Name | description
 :--- | :---
 `view_item` | Specifies the view to populate.
-`req_options` | (Optional) You can pass in request options to specify the page type and orientation of the PDF content, as well as the maximum age of the PDF rendered on the server. If not specified, PDF content will have default page type and orientation. The maximum PDF cache time is the value of `maxage` in minutes, and must be an integer between 1 and 240. A value of zero will cause the minimum cache time of 1 minute. A value of -1 will cache PDF files for the time configured in server settings. You can also specify view filters to be applied when the PDF is generated. See [PDFRequestOptions class](#pdfrequestoptions-class) for more details.
+`req_options` | (Optional) You can pass in request options to specify the page type and orientation of the PDF content, as well as the maximum age of the PDF rendered on the server. See [PDFRequestOptions class](#pdfrequestoptions-class) for more details.
 
 **Exceptions**
 
@@ -4125,7 +4125,7 @@ This endpoint is available with REST API version 3.4 and up.
 Name | description
 :--- | :---
 `workbook_item` | Specifies the workbook to populate.
-`req_options` | (Optional) You can pass in request options to specify the page type and orientation of the PDF content, as well as the maximum age of the PDF rendered on the server. If not specified, PDF content will have default page type and orientation. The maximum PDF cache time is the value of `maxage` in minutes, and must be an integer between 1 and 240. A value of zero will cause the minimum cache time of 1 minute. A value of -1 will cache PDF files for the time configured in server settings. See [PDFRequestOptions class](#pdfrequestoptions-class) for more details.
+`req_options` | (Optional) You can pass in request options to specify the page type and orientation of the PDF content, as well as the maximum age of the PDF rendered on the server. See [PDFRequestOptions class](#pdfrequestoptions-class) for more details.
 
 **Exceptions**
 

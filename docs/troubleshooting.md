@@ -39,8 +39,8 @@ These are the steps to send the API traffic through to a local proxy like Fiddle
 2. Launch the Fiddler app and click the settings (gear) icon to enable Capture HTTPS traffic. (Do not click Trust root certificate.)
 3. Before running your script, set the following environment variables (on Windows, use SET commands instead):
 ```shell
-export HTTP_PROXY=127.0.0.1:8866
-export HTTPS_PROXY=127.0.0.1:8866
+export HTTP_PROXY=http://127.0.0.1:8866
+export HTTPS_PROXY=http://127.0.0.1:8866
 export CURL_CA_BUNDLE=""
 export PYTHONWARNINGS="ignore:Unverified HTTPS request"
 ```

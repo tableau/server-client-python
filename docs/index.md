@@ -10,7 +10,9 @@ the TSC library you can do almost everything that you can do with the REST API, 
 * Create users and groups.
 * Query projects, sites, and more.
 
-This section describes how to:
+If you need help or to report issues, refer to the [Getting Help](getting-help) page.
+
+This page describes how to:
 
 * TOC
 {:toc}
@@ -85,6 +87,8 @@ with server.auth.sign_in(tableau_auth):
     print([datasource.name for datasource in all_datasources])
 ```
 
-> `SERVER_URL` is the URL of your Tableau server without subpaths. For local Tableau servers, an example would be: `https://www.MY_SERVER.com`. For Tableau Online, an example would be: `https://10ax.online.tableau.com/`.
+`SERVER_URL` is the URL of your Tableau server without subpaths. For local Tableau servers, an example would be: `https://www.MY_SERVER.com`. For Tableau Online, an example would be: `https://10ax.online.tableau.com/`.
 
-> `SITENAME` is the subpath of your full site URL (also called `contentURL` in the REST API). `MYSITE` would be the site name of `https://10ax.online.tableau.com/MYSITE`. This parameter can be omitted when signing in to the Default site of a on premise Tableau server.
+`SITENAME` is the subpath of your full site URL (also called `contentURL` in the REST API). `MYSITE` would be the site name of `https://10ax.online.tableau.com/MYSITE`. This parameter can be omitted when signing in to the Default site of a on premise Tableau server.
+
+See [Sign In and Out](sign-in-out) for more details about the sign in & out options.
