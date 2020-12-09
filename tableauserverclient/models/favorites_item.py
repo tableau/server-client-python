@@ -42,7 +42,7 @@ class FavoriteItem:
                 favorites['datasources'].append(fav_datasource)
         for project in parsed_response.findall('.//t:favorite/t:project', namespace):
             fav_project = ProjectItem('p')
-            fav_project._set_values(*fav_project._parse_element(project))
+            fav_project._set_values(*fav_project._parse_element(project, namespace))
             if fav_project:
                 favorites['projects'].append(fav_project)
 

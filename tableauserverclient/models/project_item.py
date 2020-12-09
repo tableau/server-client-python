@@ -11,13 +11,14 @@ class ProjectItem(object):
         LockedToProject = 'LockedToProject'
         ManagedByOwner = 'ManagedByOwner'
 
-    def __init__(self, name, description=None, content_permissions=None, parent_id=None):
+    def __init__(self, name, description=None, content_permissions=None, parent_id=None, owner_id=None):
         self._content_permissions = None
         self._id = None
         self.description = description
         self.name = name
         self.content_permissions = content_permissions
         self.parent_id = parent_id
+        self.owner_id = owner_id
 
         self._permissions = None
         self._default_workbook_permissions = None
@@ -82,11 +83,11 @@ class ProjectItem(object):
             project_xml = ET.fromstring(project_xml).find('.//t:project', namespaces=ns)
 
         if project_xml is not None:
-            (_, name, description, content_permissions, parent_id) = self._parse_element(project_xml)
-            self._set_values(None, name, description, content_permissions, parent_id)
+            (_, name, description, content_permissions, parent_id, owner_id) = self._parse_element(project_xml, ns)
+            self._set_values(None, name, description, content_permissions, parent_id, owner_id)
         return self
 
-    def _set_values(self, project_id, name, description, content_permissions, parent_id):
+    def _set_values(self, project_id, name, description, content_permissions, parent_id, owner_id):
         if project_id is not None:
             self._id = project_id
         if name:
@@ -97,6 +98,8 @@ class ProjectItem(object):
             self._content_permissions = content_permissions
         if parent_id:
             self.parent_id = parent_id
+        if owner_id:
+            self.owner_id = owner_id
 
     def _set_permissions(self, permissions):
         self._permissions = permissions
@@ -111,18 +114,23 @@ class ProjectItem(object):
         all_project_xml = parsed_response.findall('.//t:project', namespaces=ns)
 
         for project_xml in all_project_xml:
-            (id, name, description, content_permissions, parent_id) = cls._parse_element(project_xml)
+            (id, name, description, content_permissions, parent_id, owner_id) = cls._parse_element(project_xml, ns)
             project_item = cls(name)
-            project_item._set_values(id, name, description, content_permissions, parent_id)
+            project_item._set_values(id, name, description, content_permissions, parent_id, owner_id)
             all_project_items.append(project_item)
         return all_project_items
 
     @staticmethod
-    def _parse_element(project_xml):
+    def _parse_element(project_xml, ns):
         id = project_xml.get('id', None)
         name = project_xml.get('name', None)
         description = project_xml.get('description', None)
         content_permissions = project_xml.get('contentPermissions', None)
         parent_id = project_xml.get('parentProjectId', None)
 
-        return id, name, description, content_permissions, parent_id
+        owner_id = None
+        owner_tag = project_xml.find('.//t:owner', namespaces=ns)
+        if owner_tag is not None:
+            owner_id = owner_tag.get('id', None)
+
+        return id, name, description, content_permissions, parent_id, owner_id
