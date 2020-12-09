@@ -73,6 +73,26 @@ server.auth.sign_in(tableau_auth)
 server.auth.sign_out()
 ```
 
+### 405000 Method Not Allowed Response
+
+In some cases, you may find that sign in fails with a 405 message:
+```
+405000: Method Not Allowed
+    The HTTP method 'GET' is not supported for the given resource
+```
+
+The most likely cause of this is signing in to a Tableau Server using the HTTP address which the server redirects to a secure HTTPS address. However, during the redirect the POST request turns into a GET request which is then considered an invalid method for the login entrypoint. (For security reasons, the server is following the standards correctly in this case).
+
+The solution is to avoid the redirect by using the HTTPS URL for the site. For example, instead of:
+```py
+server = TSC.Server('http://SERVER_URL')
+```
+
+Switch to the HTTPS (SSL) URL instead:
+```py
+server = TSC.Server('https://SERVER_URL')
+```
+
 ## Sign Out
 
 Signing out cleans up the current session and invalidates the authentication token being held by the TSC library.
