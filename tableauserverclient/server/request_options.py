@@ -2,10 +2,8 @@ from ..models.property_decorators import property_is_int
 
 
 class RequestOptionsBase(object):
+    # This method is used if server api version is below 3.7 (2020.1)
     def apply_query_params(self, url):
-        import warnings
-        warnings.simplefilter('always', DeprecationWarning)
-        warnings.warn('apply_query_params is deprecated, please use get_query_params instead.', DeprecationWarning)
         try:
             params = self.get_query_params()
             params_list = ["{}={}".format(k, v) for (k, v) in params.items()]

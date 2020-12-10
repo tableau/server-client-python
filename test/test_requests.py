@@ -23,12 +23,7 @@ class RequestTests(unittest.TestCase):
             m.get(requests_mock.ANY)
             url = "http://test/api/2.3/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks"
             opts = TSC.RequestOptions(pagesize=13, pagenumber=15)
-            resp = self.server.workbooks._make_request(requests.get,
-                                                       url,
-                                                       content=None,
-                                                       request_object=opts,
-                                                       auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
-                                                       content_type='text/xml')
+            resp = self.server.workbooks.get_request(url, request_object=opts)
 
             self.assertTrue(re.search('pagesize=13', resp.request.query))
             self.assertTrue(re.search('pagenumber=15', resp.request.query))
@@ -37,10 +32,7 @@ class RequestTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.post(requests_mock.ANY)
             url = "http://test/api/2.3/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks"
-            resp = self.server.workbooks._make_request(requests.post,
-                                                       url,
-                                                       content=b'1337',
-                                                       request_object=None,
+            resp = self.server.workbooks._make_request(requests.post, url, content=b'1337',
                                                        auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
                                                        content_type='multipart/mixed')
             self.assertEqual(resp.request.headers['x-tableau-auth'], 'j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM')

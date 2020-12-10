@@ -20,6 +20,7 @@ class RequestOptionTests(unittest.TestCase):
         self.server = TSC.Server('http://test')
 
         # Fake signin
+        self.server.version = "3.10"
         self.server._site_id = 'dad65087-b08b-4603-af4e-2887b8aafc67'
         self.server._auth_token = 'j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM'
 
@@ -141,54 +142,77 @@ class RequestOptionTests(unittest.TestCase):
     def test_double_query_params(self):
         with requests_mock.mock() as m:
             m.get(requests_mock.ANY)
-            url = "http://test/api/2.3/sites/12345/views?queryParamExists=true"
+            url = self.baseurl + "/views?queryParamExists=true"
             opts = TSC.RequestOptions()
 
             opts.filter.add(TSC.Filter(TSC.RequestOptions.Field.Tags,
                                        TSC.RequestOptions.Operator.In,
                                        ['stocks', 'market']))
+            opts.sort.add(TSC.Sort(TSC.RequestOptions.Field.Name,
+                                   TSC.RequestOptions.Direction.Asc))
 
-            resp = self.server.workbooks._make_request(requests.get,
-                                                       url,
-                                                       content=None,
-                                                       request_object=opts,
-                                                       auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
-                                                       content_type='text/xml')
+            resp = self.server.workbooks.get_request(url, request_object=opts)
             self.assertTrue(re.search('queryparamexists=true', resp.request.query))
             self.assertTrue(re.search('filter=tags%3ain%3a%5bstocks%2cmarket%5d', resp.request.query))
+            self.assertTrue(re.search('sort=name%3aasc', resp.request.query))
+
+    # Test req_options for versions below 3.7
+    def test_filter_sort_legacy(self):
+        self.server.version = "3.6"
+        with requests_mock.mock() as m:
+            m.get(requests_mock.ANY)
+            url = self.baseurl + "/views?queryParamExists=true"
+            opts = TSC.RequestOptions()
+
+            opts.filter.add(TSC.Filter(TSC.RequestOptions.Field.Tags,
+                                       TSC.RequestOptions.Operator.In,
+                                       ['stocks', 'market']))
+            opts.sort.add(TSC.Sort(TSC.RequestOptions.Field.Name,
+                                   TSC.RequestOptions.Direction.Asc))
+
+            resp = self.server.workbooks.get_request(url, request_object=opts)
+            self.assertTrue(re.search('queryparamexists=true', resp.request.query))
+            self.assertTrue(re.search('filter=tags:in:%5bstocks,market%5d', resp.request.query))
+            self.assertTrue(re.search('sort=name:asc', resp.request.query))
 
     def test_vf(self):
         with requests_mock.mock() as m:
             m.get(requests_mock.ANY)
-            url = "http://test/api/2.3/sites/123/views/456/data"
+            url = self.baseurl + "/views/456/data"
             opts = TSC.PDFRequestOptions()
             opts.vf("name1#", "value1")
             opts.vf("name2$", "value2")
             opts.page_type = TSC.PDFRequestOptions.PageType.Tabloid
 
-            resp = self.server.workbooks._make_request(requests.get,
-                                                       url,
-                                                       content=None,
-                                                       request_object=opts,
-                                                       auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
-                                                       content_type='text/xml')
+            resp = self.server.workbooks.get_request(url, request_object=opts)
             self.assertTrue(re.search('vf_name1%23=value1', resp.request.query))
             self.assertTrue(re.search('vf_name2%24=value2', resp.request.query))
+            self.assertTrue(re.search('type=tabloid', resp.request.query))
+
+    # Test req_options for versions beloe 3.7
+    def test_vf_legacy(self):
+        self.server.version = "3.6"
+        with requests_mock.mock() as m:
+            m.get(requests_mock.ANY)
+            url = self.baseurl + "/views/456/data"
+            opts = TSC.PDFRequestOptions()
+            opts.vf("name1@", "value1")
+            opts.vf("name2$", "value2")
+            opts.page_type = TSC.PDFRequestOptions.PageType.Tabloid
+
+            resp = self.server.workbooks.get_request(url, request_object=opts)
+            self.assertTrue(re.search('vf_name1@=value1', resp.request.query))
+            self.assertTrue(re.search('vf_name2\\$=value2', resp.request.query))
             self.assertTrue(re.search('type=tabloid', resp.request.query))
 
     def test_all_fields(self):
         with requests_mock.mock() as m:
             m.get(requests_mock.ANY)
-            url = "http://test/api/2.3/sites/123/views/456/data"
+            url = self.baseurl + "/views/456/data"
             opts = TSC.RequestOptions()
             opts._all_fields = True
 
-            resp = self.server.users._make_request(requests.get,
-                                                   url,
-                                                   content=None,
-                                                   request_object=opts,
-                                                   auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
-                                                   content_type='text/xml')
+            resp = self.server.users.get_request(url, request_object=opts)
             self.assertTrue(re.search('fields=_all_', resp.request.query))
 
     def test_multiple_filter_options_shorthand(self):
