@@ -90,7 +90,7 @@ Source file: models/personal_access_token_auth.py
 ```py
 import tableauserverclient as TSC
 
-tableau_auth = TSC.PersonalAccessToken('TOKEN-NAME', 'TOKEN-VALUE', site_id='CONTENTURL')
+tableau_auth = TSC.PersonalAccessTokenAuth('TOKEN-NAME', 'TOKEN-VALUE', site_id='CONTENTURL')
 server = TSC.Server('https://SERVER_URL', use_server_version=True)
 server.auth.sign_in(tableau_auth)
 ```
