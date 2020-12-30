@@ -194,34 +194,6 @@ server.auth.switch_site(site)
 <br>
 <br>
 
-#### auth.switch site
-
-```py
-auth.switch_site(site_item)
-```
-Switches you to the target site using a TSC Site Object as an argument.
-
-The `switch_site()` method takes care of error handling if you try to switch to the site you are currently signed in to.
-
-REST API: [Switch Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#switch_site){:target="_blank"}
-
-**Parameters**
-
-Name   |  Description     
- :--- | : ---    
-`site_item`  |  The `site_item` specifies the site to switch to.
-
-
-**Example**
-
-```py
-sites, pagination_item = server.sites.get()
-server.auth.switch_site(sites[1])
-
-```
-
-
-
 
 **See Also**  
 [Sign in and Out](sign-in-out)  
