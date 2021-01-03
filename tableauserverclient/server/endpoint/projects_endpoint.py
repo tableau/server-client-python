@@ -3,7 +3,8 @@ from .exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .default_permissions_endpoint import _DefaultPermissionsEndpoint
 
-from .. import RequestFactory, ProjectItem, PaginationItem, Permission
+from .. import RequestFactory, ProjectItem, PaginationItem, Permission, \
+               Server, RequestOptions, PermissionsRule
 
 import logging
 
@@ -11,7 +12,7 @@ logger = logging.getLogger('tableau.endpoint.projects')
 
 
 class Projects(Endpoint):
-    def __init__(self, parent_srv):
+    def __init__(self, parent_srv: Server):
         super(Projects, self).__init__(parent_srv)
 
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
@@ -22,7 +23,7 @@ class Projects(Endpoint):
         return "{0}/sites/{1}/projects".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     @api(version="2.0")
-    def get(self, req_options=None):
+    def get(self, req_options: RequestOptions = None):
         logger.info('Querying all projects on site')
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -31,7 +32,7 @@ class Projects(Endpoint):
         return all_project_items, pagination_item
 
     @api(version="2.0")
-    def delete(self, project_id):
+    def delete(self, project_id: str):
         if not project_id:
             error = "Project ID undefined."
             raise ValueError(error)
@@ -40,7 +41,7 @@ class Projects(Endpoint):
         logger.info('Deleted single project (ID: {0})'.format(project_id))
 
     @api(version="2.0")
-    def update(self, project_item):
+    def update(self, project_item: ProjectItem):
         if not project_item.id:
             error = "Project item missing ID."
             raise MissingRequiredFieldError(error)
@@ -53,7 +54,7 @@ class Projects(Endpoint):
         return updated_project
 
     @api(version="2.0")
-    def create(self, project_item):
+    def create(self, project_item: ProjectItem):
         url = self.baseurl
         create_req = RequestFactory.Project.create_req(project_item)
         server_response = self.post_request(url, create_req)
@@ -62,11 +63,11 @@ class Projects(Endpoint):
         return new_project
 
     @api(version='2.0')
-    def populate_permissions(self, item):
+    def populate_permissions(self, item: ProjectItem):
         self._permissions.populate(item)
 
     @api(version='2.0')
-    def update_permission(self, item, rules):
+    def update_permission(self, item: ProjectItem, rules: PermissionsRule):
         import warnings
         warnings.warn('Server.projects.update_permission is deprecated, '
                       'please use Server.projects.update_permissions instead.',
@@ -74,11 +75,11 @@ class Projects(Endpoint):
         return self._permissions.update(item, rules)
 
     @api(version='2.0')
-    def update_permissions(self, item, rules):
+    def update_permissions(self, item: ProjectItem, rules: PermissionsRule):
         return self._permissions.update(item, rules)
 
     @api(version='2.0')
-    def delete_permission(self, item, rules):
+    def delete_permission(self, item: ProjectItem, rules: PermissionsRule):
         self._permissions.delete(item, rules)
 
     @api(version='2.1')

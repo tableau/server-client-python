@@ -2,10 +2,11 @@ from .endpoint import QuerysetEndpoint, api
 from .exceptions import MissingRequiredFieldError
 from .resource_tagger import _ResourceTagger
 from .permissions_endpoint import _PermissionsEndpoint
-from .. import ViewItem, PaginationItem
+from .. import ViewItem, PaginationItem, RequestOptions
 
 from contextlib import closing
 import logging
+from typing import Tuple, List
 
 logger = logging.getLogger('tableau.endpoint.views')
 
@@ -26,7 +27,8 @@ class Views(QuerysetEndpoint):
         return "{0}/views".format(self.siteurl)
 
     @api(version="2.2")
-    def get(self, req_options=None, usage=False):
+    def get(self, req_options: RequestOptions = None,
+            usage: bool = False) -> Tuple[List[ViewItem], PaginationItem]:
         logger.info('Querying all views on site')
         url = self.baseurl
         if usage:
@@ -37,7 +39,7 @@ class Views(QuerysetEndpoint):
         return all_view_items, pagination_item
 
     @api(version="3.1")
-    def get_by_id(self, view_id):
+    def get_by_id(self, view_id: str) -> ViewItem:
         if not view_id:
             error = "View item missing ID."
             raise MissingRequiredFieldError(error)
@@ -47,7 +49,7 @@ class Views(QuerysetEndpoint):
         return ViewItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     @api(version="2.0")
-    def populate_preview_image(self, view_item):
+    def populate_preview_image(self, view_item: ViewItem):
         if not view_item.id or not view_item.workbook_id:
             error = "View item missing ID or workbook ID."
             raise MissingRequiredFieldError(error)
@@ -67,7 +69,7 @@ class Views(QuerysetEndpoint):
         return image
 
     @api(version="2.5")
-    def populate_image(self, view_item, req_options=None):
+    def populate_image(self, view_item: ViewItem, req_options: RequestOptions = None):
         if not view_item.id:
             error = "View item missing ID."
             raise MissingRequiredFieldError(error)
@@ -78,14 +80,14 @@ class Views(QuerysetEndpoint):
         view_item._set_image(image_fetcher)
         logger.info("Populated image for view (ID: {0})".format(view_item.id))
 
-    def _get_view_image(self, view_item, req_options):
+    def _get_view_image(self, view_item: ViewItem, req_options: RequestOptions = None):
         url = "{0}/{1}/image".format(self.baseurl, view_item.id)
         server_response = self.get_request(url, req_options)
         image = server_response.content
         return image
 
     @api(version="2.7")
-    def populate_pdf(self, view_item, req_options=None):
+    def populate_pdf(self, view_item: ViewItem, req_options: RequestOptions = None):
         if not view_item.id:
             error = "View item missing ID."
             raise MissingRequiredFieldError(error)
@@ -103,7 +105,7 @@ class Views(QuerysetEndpoint):
         return pdf
 
     @api(version="2.7")
-    def populate_csv(self, view_item, req_options=None):
+    def populate_csv(self, view_item: ViewItem, req_options: RequestOptions = None):
         if not view_item.id:
             error = "View item missing ID."
             raise MissingRequiredFieldError(error)
@@ -122,7 +124,7 @@ class Views(QuerysetEndpoint):
         return csv
 
     @api(version='3.2')
-    def populate_permissions(self, item):
+    def populate_permissions(self, item: ViewItem):
         self._permissions.populate(item)
 
     @api(version='3.2')
@@ -134,7 +136,7 @@ class Views(QuerysetEndpoint):
         return self._permissions.delete(item, capability_item)
 
     # Update view. Currently only tags can be updated
-    def update(self, view_item):
+    def update(self, view_item: ViewItem) -> ViewItem:
         if not view_item.id:
             error = "View item missing ID. View must be retrieved from server first."
             raise MissingRequiredFieldError(error)

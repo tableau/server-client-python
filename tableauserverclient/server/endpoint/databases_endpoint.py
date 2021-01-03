@@ -1,9 +1,14 @@
+from typing import List
+
 from .endpoint import api, Endpoint
 from .exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .default_permissions_endpoint import _DefaultPermissionsEndpoint
 
-from .. import RequestFactory, DatabaseItem, TableItem, PaginationItem, Permission
+
+from .. import RequestFactory, DatabaseItem, TableItem, PaginationItem, \
+               Permission, Server, RequestOptions, DatabaseItem, \
+               PermissionsRule
 
 import logging
 
@@ -11,7 +16,7 @@ logger = logging.getLogger('tableau.endpoint.databases')
 
 
 class Databases(Endpoint):
-    def __init__(self, parent_srv):
+    def __init__(self, parent_srv: Server):
         super(Databases, self).__init__(parent_srv)
 
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
@@ -22,7 +27,7 @@ class Databases(Endpoint):
         return "{0}/sites/{1}/databases".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     @api(version="3.5")
-    def get(self, req_options=None):
+    def get(self, req_options: RequestOptions = None):
         logger.info('Querying all databases on site')
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -32,7 +37,7 @@ class Databases(Endpoint):
 
     # Get 1 database
     @api(version="3.5")
-    def get_by_id(self, database_id):
+    def get_by_id(self, database_id: str):
         if not database_id:
             error = "database ID undefined."
             raise ValueError(error)
@@ -42,7 +47,7 @@ class Databases(Endpoint):
         return DatabaseItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     @api(version="3.5")
-    def delete(self, database_id):
+    def delete(self, database_id: str):
         if not database_id:
             error = "Database ID undefined."
             raise ValueError(error)
@@ -51,7 +56,7 @@ class Databases(Endpoint):
         logger.info('Deleted single database (ID: {0})'.format(database_id))
 
     @api(version="3.5")
-    def update(self, database_item):
+    def update(self, database_item: DatabaseItem):
         if not database_item.id:
             error = "Database item missing ID."
             raise MissingRequiredFieldError(error)
@@ -65,7 +70,7 @@ class Databases(Endpoint):
 
     # Not Implemented Yet
     @api(version="99")
-    def populate_tables(self, database_item):
+    def populate_tables(self, database_item: DatabaseItem):
         if not database_item.id:
             error = "database item missing ID. database must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -76,7 +81,7 @@ class Databases(Endpoint):
         database_item._set_tables(column_fetcher)
         logger.info('Populated tables for database (ID: {0}'.format(database_item.id))
 
-    def _get_tables_for_database(self, database_item):
+    def _get_tables_for_database(self, database_item: DatabaseItem):
         url = "{0}/{1}/tables".format(self.baseurl, database_item.id)
         server_response = self.get_request(url)
         tables = TableItem.from_response(server_response.content,
@@ -84,11 +89,11 @@ class Databases(Endpoint):
         return tables
 
     @api(version='3.5')
-    def populate_permissions(self, item):
+    def populate_permissions(self, item: DatabaseItem):
         self._permissions.populate(item)
 
     @api(version='3.5')
-    def update_permission(self, item, rules):
+    def update_permission(self, item: DatabaseItem, rules):
         import warnings
         warnings.warn('Server.databases.update_permission is deprecated, '
                       'please use Server.databases.update_permissions instead.',
@@ -96,21 +101,21 @@ class Databases(Endpoint):
         return self._permissions.update(item, rules)
 
     @api(version='3.5')
-    def update_permissions(self, item, rules):
+    def update_permissions(self, item: DatabaseItem, rules: List[PermissionsRule]):
         return self._permissions.update(item, rules)
 
     @api(version='3.5')
-    def delete_permission(self, item, rules):
+    def delete_permission(self, item: DatabaseItem, rules: List[PermissionsRule]):
         self._permissions.delete(item, rules)
 
     @api(version='3.5')
-    def populate_table_default_permissions(self, item):
+    def populate_table_default_permissions(self, item: DatabaseItem):
         self._default_permissions.populate_default_permissions(item, Permission.Resource.Table)
 
     @api(version='3.5')
-    def update_table_default_permissions(self, item):
+    def update_table_default_permissions(self, item: DatabaseItem):
         return self._default_permissions.update_default_permissions(item, Permission.Resource.Table)
 
     @api(version='3.5')
-    def delete_table_default_permissions(self, item):
+    def delete_table_default_permissions(self, item: DatabaseItem):
         self._default_permissions.delete_default_permissions(item, Permission.Resource.Table)

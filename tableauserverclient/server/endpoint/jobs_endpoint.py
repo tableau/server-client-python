@@ -1,14 +1,9 @@
 from .endpoint import Endpoint, api
-from .. import JobItem, BackgroundJobItem, PaginationItem
+from .. import JobItem, BackgroundJobItem, PaginationItem, RequestOptions
 from ..request_options import RequestOptionsBase
 
 import logging
-
-try:
-    basestring
-except NameError:
-    # In case we are in python 3 the string check is different
-    basestring = str
+from typing import Union
 
 logger = logging.getLogger('tableau.endpoint.jobs')
 
@@ -19,9 +14,9 @@ class Jobs(Endpoint):
         return "{0}/sites/{1}/jobs".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     @api(version='2.6')
-    def get(self, job_id=None, req_options=None):
+    def get(self, job_id: str = None, req_options: RequestOptions = None):
         # Backwards Compatibility fix until we rev the major version
-        if job_id is not None and isinstance(job_id, basestring):
+        if job_id is not None and isinstance(job_id, str):
             import warnings
             warnings.warn("Jobs.get(job_id) is deprecated, update code to use Jobs.get_by_id(job_id)")
             return self.get_by_id(job_id)
@@ -35,13 +30,13 @@ class Jobs(Endpoint):
         return jobs, pagination_item
 
     @api(version='3.1')
-    def cancel(self, job_id):
+    def cancel(self, job_id: Union[str, JobItem]):
         id_ = getattr(job_id, 'id', job_id)
         url = '{0}/{1}'.format(self.baseurl, id_)
         return self.put_request(url)
 
     @api(version='2.6')
-    def get_by_id(self, job_id):
+    def get_by_id(self, job_id: str):
         logger.info('Query for information about job ' + job_id)
         url = "{0}/{1}".format(self.baseurl, job_id)
         server_response = self.get_request(url)

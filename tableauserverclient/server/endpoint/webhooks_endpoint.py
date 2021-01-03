@@ -1,8 +1,9 @@
 from .endpoint import Endpoint, api
 from ...models import WebhookItem, PaginationItem
-from .. import RequestFactory
+from .. import RequestFactory, RequestOptions
 
 import logging
+from typing import Tuple, List
 
 logger = logging.getLogger('tableau.endpoint.webhooks')
 
@@ -16,7 +17,7 @@ class Webhooks(Endpoint):
         return "{0}/sites/{1}/webhooks".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     @api(version="3.6")
-    def get(self, req_options=None):
+    def get(self, req_options: RequestOptions = None) -> Tuple[List[WebhookItem], PaginationItem]:
         logger.info('Querying all Webhooks on site')
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -25,7 +26,7 @@ class Webhooks(Endpoint):
         return all_webhook_items, pagination_item
 
     @api(version="3.6")
-    def get_by_id(self, webhook_id):
+    def get_by_id(self, webhook_id: str) -> WebhookItem:
         if not webhook_id:
             error = "Webhook ID undefined."
             raise ValueError(error)
@@ -35,7 +36,7 @@ class Webhooks(Endpoint):
         return WebhookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     @api(version="3.6")
-    def delete(self, webhook_id):
+    def delete(self, webhook_id: str):
         if not webhook_id:
             error = "Webhook ID undefined."
             raise ValueError(error)
@@ -44,7 +45,7 @@ class Webhooks(Endpoint):
         logger.info('Deleted single webhook (ID: {0})'.format(webhook_id))
 
     @api(version="3.6")
-    def create(self, webhook_item):
+    def create(self, webhook_item: WebhookItem) -> WebhookItem:
         url = self.baseurl
         create_req = RequestFactory.Webhook.create_req(webhook_item)
         server_response = self.post_request(url, create_req)
@@ -54,7 +55,7 @@ class Webhooks(Endpoint):
         return new_webhook
 
     @api(version="3.6")
-    def test(self, webhook_id):
+    def test(self, webhook_id: str):
         if not webhook_id:
             error = "Webhook ID undefined."
             raise ValueError(error)

@@ -1,8 +1,11 @@
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
-from .. import TaskItem, PaginationItem, RequestFactory
+from .. import TaskItem, PaginationItem, RequestFactory, RequestOptions
 
 import logging
+from typing import Tuple, List
+
+GET = Tuple[List[TaskItem], PaginationItem]
 
 logger = logging.getLogger('tableau.endpoint.tasks')
 
@@ -24,7 +27,8 @@ class Tasks(Endpoint):
             return task_type
 
     @api(version='2.6')
-    def get(self, req_options=None, task_type=TaskItem.Type.ExtractRefresh):
+    def get(self, req_options: RequestOptions = None,
+            task_type: TaskItem.Type = TaskItem.Type.ExtractRefresh) -> GET:
         if task_type == TaskItem.Type.DataAcceleration:
             self.parent_srv.assert_at_least_version("3.8")
 
@@ -41,7 +45,7 @@ class Tasks(Endpoint):
         return all_tasks, pagination_item
 
     @api(version='2.6')
-    def get_by_id(self, task_id):
+    def get_by_id(self, task_id: str) -> TaskItem:
         if not task_id:
             error = "No Task ID provided"
             raise ValueError(error)
@@ -52,7 +56,7 @@ class Tasks(Endpoint):
         return TaskItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     @api(version='2.6')
-    def run(self, task_item):
+    def run(self, task_item: TaskItem):
         if not task_item.id:
             error = "User item missing ID."
             raise MissingRequiredFieldError(error)
@@ -65,7 +69,7 @@ class Tasks(Endpoint):
 
     # Delete 1 task by id
     @api(version="3.6")
-    def delete(self, task_id, task_type=TaskItem.Type.ExtractRefresh):
+    def delete(self, task_id: str, task_type=TaskItem.Type.ExtractRefresh):
         if task_type == TaskItem.Type.DataAcceleration:
             self.parent_srv.assert_at_least_version("3.8")
 

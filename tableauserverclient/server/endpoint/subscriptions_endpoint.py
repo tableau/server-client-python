@@ -1,7 +1,8 @@
 from .endpoint import Endpoint, api
-from .. import RequestFactory, SubscriptionItem, PaginationItem
+from .. import RequestFactory, SubscriptionItem, PaginationItem, RequestOptions
 
 import logging
+from typing import Tuple, List
 
 logger = logging.getLogger('tableau.endpoint.subscriptions')
 
@@ -13,7 +14,7 @@ class Subscriptions(Endpoint):
                                                     self.parent_srv.site_id)
 
     @api(version='2.3')
-    def get(self, req_options=None):
+    def get(self, req_options: RequestOptions = None) -> Tuple[List[SubscriptionItem], PaginationItem]:
         logger.info('Querying all subscriptions for the site')
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -23,7 +24,7 @@ class Subscriptions(Endpoint):
         return all_subscriptions, pagination_item
 
     @api(version='2.3')
-    def get_by_id(self, subscription_id):
+    def get_by_id(self, subscription_id: str):
         if not subscription_id:
             error = "No Subscription ID provided"
             raise ValueError(error)
@@ -33,7 +34,7 @@ class Subscriptions(Endpoint):
         return SubscriptionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     @api(version='2.3')
-    def create(self, subscription_item):
+    def create(self, subscription_item: SubscriptionItem):
         if not subscription_item:
             error = "No Susbcription provided"
             raise ValueError(error)
@@ -44,7 +45,7 @@ class Subscriptions(Endpoint):
         return SubscriptionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     @api(version='2.3')
-    def delete(self, subscription_id):
+    def delete(self, subscription_id: str):
         if not subscription_id:
             error = "Subscription ID undefined."
             raise ValueError(error)

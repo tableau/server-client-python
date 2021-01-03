@@ -3,7 +3,7 @@ from .exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .default_permissions_endpoint import _DefaultPermissionsEndpoint
 
-from .. import RequestFactory, DataAlertItem, PaginationItem, UserItem
+from .. import RequestFactory, DataAlertItem, PaginationItem, UserItem, Server, RequestOptions
 
 import logging
 
@@ -19,7 +19,7 @@ class DataAlerts(Endpoint):
         return "{0}/sites/{1}/dataAlerts".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     @api(version="3.2")
-    def get(self, req_options=None):
+    def get(self, req_options: RequestOptions = None):
         logger.info('Querying all dataAlerts on site')
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -29,7 +29,7 @@ class DataAlerts(Endpoint):
 
     # Get 1 dataAlert
     @api(version="3.2")
-    def get_by_id(self, dataAlert_id):
+    def get_by_id(self, dataAlert_id: str):
         if not dataAlert_id:
             error = "dataAlert ID undefined."
             raise ValueError(error)
@@ -39,7 +39,7 @@ class DataAlerts(Endpoint):
         return DataAlertItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     @api(version="3.2")
-    def delete(self, dataAlert):
+    def delete(self, dataAlert: DataAlertItem):
         dataAlert_id = getattr(dataAlert, 'id', dataAlert)
         if not dataAlert_id:
             error = "Dataalert ID undefined."
@@ -50,7 +50,7 @@ class DataAlerts(Endpoint):
         logger.info('Deleted single dataAlert (ID: {0})'.format(dataAlert_id))
 
     @api(version="3.2")
-    def delete_user_from_alert(self, dataAlert, user):
+    def delete_user_from_alert(self, dataAlert: DataAlertItem, user: UserItem):
         dataAlert_id = getattr(dataAlert, 'id', dataAlert)
         user_id = getattr(user, 'id', user)
         if not dataAlert_id:
@@ -65,7 +65,7 @@ class DataAlerts(Endpoint):
         logger.info('Deleted User (ID {0}) from dataAlert (ID: {1})'.format(user_id, dataAlert_id))
 
     @api(version="3.2")
-    def add_user_to_alert(self, dataAlert_item, user):
+    def add_user_to_alert(self, dataAlert_item: DataAlertItem, user: UserItem):
         if not dataAlert_item.id:
             error = "Dataalert item missing ID."
             raise MissingRequiredFieldError(error)
@@ -81,7 +81,7 @@ class DataAlerts(Endpoint):
         return user
 
     @api(version="3.2")
-    def update(self, dataAlert_item):
+    def update(self, dataAlert_item: DataAlertItem):
         if not dataAlert_item.id:
             error = "Dataalert item missing ID."
             raise MissingRequiredFieldError(error)

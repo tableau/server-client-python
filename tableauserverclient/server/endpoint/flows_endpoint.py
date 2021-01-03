@@ -3,7 +3,8 @@ from .exceptions import InternalServerError, MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
-from .. import RequestFactory, FlowItem, PaginationItem, ConnectionItem
+from .. import RequestFactory, FlowItem, PaginationItem, ConnectionItem, \
+               RequestOptions, Server, PermissionsRule
 from ...filesys_helpers import to_filename, make_download_path
 from ...models.job_item import JobItem
 
@@ -12,6 +13,7 @@ import logging
 import copy
 import cgi
 from contextlib import closing
+from typing import Union, Iterable, Tuple, List
 
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64   # 64MB
@@ -33,7 +35,7 @@ class Flows(Endpoint):
 
     # Get all flows
     @api(version="3.3")
-    def get(self, req_options=None):
+    def get(self, req_options: RequestOptions = None) -> Tuple[List[FlowItem], PaginationItem]:
         logger.info('Querying all flows on site')
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -43,7 +45,7 @@ class Flows(Endpoint):
 
     # Get 1 flow by id
     @api(version="3.3")
-    def get_by_id(self, flow_id):
+    def get_by_id(self, flow_id: str) -> FlowItem:
         if not flow_id:
             error = "Flow ID undefined."
             raise ValueError(error)
@@ -54,7 +56,7 @@ class Flows(Endpoint):
 
     # Populate flow item's connections
     @api(version="3.3")
-    def populate_connections(self, flow_item):
+    def populate_connections(self, flow_item: FlowItem):
         if not flow_item.id:
             error = 'Flow item missing ID. Flow must be retrieved from server first.'
             raise MissingRequiredFieldError(error)
@@ -65,7 +67,7 @@ class Flows(Endpoint):
         flow_item._set_connections(connections_fetcher)
         logger.info('Populated connections for flow (ID: {0})'.format(flow_item.id))
 
-    def _get_flow_connections(self, flow_item, req_options=None):
+    def _get_flow_connections(self, flow_item: FlowItem, req_options: RequestOptions = None) -> ConnectionItem:
         url = '{0}/{1}/connections'.format(self.baseurl, flow_item.id)
         server_response = self.get_request(url, req_options)
         connections = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
@@ -73,7 +75,7 @@ class Flows(Endpoint):
 
     # Delete 1 flow by id
     @api(version="3.3")
-    def delete(self, flow_id):
+    def delete(self, flow_id: str):
         if not flow_id:
             error = "Flow ID undefined."
             raise ValueError(error)
@@ -83,7 +85,7 @@ class Flows(Endpoint):
 
     # Download 1 flow by id
     @api(version="3.3")
-    def download(self, flow_id, filepath=None):
+    def download(self, flow_id: str, filepath: str = None) -> str:
         if not flow_id:
             error = "Flow ID undefined."
             raise ValueError(error)
@@ -104,7 +106,7 @@ class Flows(Endpoint):
 
     # Update flow
     @api(version="3.3")
-    def update(self, flow_item):
+    def update(self, flow_item: FlowItem) -> FlowItem:
         if not flow_item.id:
             error = 'Flow item missing ID. Flow must be retrieved from server first.'
             raise MissingRequiredFieldError(error)
@@ -121,7 +123,7 @@ class Flows(Endpoint):
 
     # Update flow connections
     @api(version="3.3")
-    def update_connection(self, flow_item, connection_item):
+    def update_connection(self, flow_item: FlowItem, connection_item: ConnectionItem):
         url = "{0}/{1}/connections/{2}".format(self.baseurl, flow_item.id, connection_item.id)
 
         update_req = RequestFactory.Connection.update_req(connection_item)
@@ -133,7 +135,7 @@ class Flows(Endpoint):
         return connection
 
     @api(version="3.3")
-    def refresh(self, flow_item):
+    def refresh(self, flow_item: FlowItem) -> JobItem:
         url = "{0}/{1}/run".format(self.baseurl, flow_item.id)
         empty_req = RequestFactory.Empty.empty_req()
         server_response = self.post_request(url, empty_req)
@@ -142,7 +144,9 @@ class Flows(Endpoint):
 
     # Publish flow
     @api(version="3.3")
-    def publish(self, flow_item, file_path, mode, connections=None):
+    def publish(self, flow_item: FlowItem, file_path: str,
+                mode: Server.PublishMode,
+                connections: Iterable[ConnectionItem] = None) -> FlowItem:
         if not os.path.isfile(file_path):
             error = "File path does not lead to an existing file."
             raise IOError(error)
@@ -199,11 +203,11 @@ class Flows(Endpoint):
         return new_flow
 
     @api(version='3.3')
-    def populate_permissions(self, item):
+    def populate_permissions(self, item: FlowItem):
         self._permissions.populate(item)
 
     @api(version='3.3')
-    def update_permission(self, item, permission_item):
+    def update_permission(self, item: FlowItem, permission_item: PermissionsRule):
         import warnings
         warnings.warn('Server.flows.update_permission is deprecated, '
                       'please use Server.flows.update_permissions instead.',
@@ -211,9 +215,9 @@ class Flows(Endpoint):
         self._permissions.update(item, permission_item)
 
     @api(version='3.3')
-    def update_permissions(self, item, permission_item):
+    def update_permissions(self, item: FlowItem, permission_item: PermissionsRule):
         self._permissions.update(item, permission_item)
 
     @api(version='3.3')
-    def delete_permission(self, item, capability_item):
+    def delete_permission(self, item: FlowItem, capability_item):
         self._permissions.delete(item, capability_item)

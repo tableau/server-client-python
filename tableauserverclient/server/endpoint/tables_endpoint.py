@@ -3,9 +3,11 @@ from .exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from ..pager import Pager
 
-from .. import RequestFactory, TableItem, ColumnItem, PaginationItem
+from .. import RequestFactory, TableItem, ColumnItem, PaginationItem, \
+               RequestOptions, PermissionsRule
 
 import logging
+from typing import Tuple, List
 
 logger = logging.getLogger('tableau.endpoint.tables')
 
@@ -21,7 +23,7 @@ class Tables(Endpoint):
         return "{0}/sites/{1}/tables".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     @api(version="3.5")
-    def get(self, req_options=None):
+    def get(self, req_options: RequestOptions = None) -> Tuple[List[TableItem], PaginationItem]:
         logger.info('Querying all tables on site')
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -31,7 +33,7 @@ class Tables(Endpoint):
 
     # Get 1 table
     @api(version="3.5")
-    def get_by_id(self, table_id):
+    def get_by_id(self, table_id: str) -> TableItem:
         if not table_id:
             error = "table ID undefined."
             raise ValueError(error)
@@ -41,7 +43,7 @@ class Tables(Endpoint):
         return TableItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     @api(version="3.5")
-    def delete(self, table_id):
+    def delete(self, table_id: str):
         if not table_id:
             error = "Database ID undefined."
             raise ValueError(error)
@@ -50,7 +52,7 @@ class Tables(Endpoint):
         logger.info('Deleted single table (ID: {0})'.format(table_id))
 
     @api(version="3.5")
-    def update(self, table_item):
+    def update(self, table_item: TableItem) -> TableItem:
         if not table_item.id:
             error = "table item missing ID."
             raise MissingRequiredFieldError(error)
@@ -64,7 +66,8 @@ class Tables(Endpoint):
 
     # Get all columns of the table
     @api(version="3.5")
-    def populate_columns(self, table_item, req_options=None):
+    def populate_columns(self, table_item: TableItem,
+                         req_options: RequestOptions = None):
         if not table_item.id:
             error = "Table item missing ID. table must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -84,7 +87,8 @@ class Tables(Endpoint):
         return columns, pagination_item
 
     @api(version="3.5")
-    def update_column(self, table_item, column_item):
+    def update_column(self, table_item: TableItem,
+                      column_item: ColumnItem) -> ColumnItem:
         url = "{0}/{1}/columns/{2}".format(self.baseurl, table_item.id, column_item.id)
         update_req = RequestFactory.Column.update_req(column_item)
         server_response = self.put_request(url, update_req)
@@ -95,11 +99,11 @@ class Tables(Endpoint):
         return column
 
     @api(version='3.5')
-    def populate_permissions(self, item):
+    def populate_permissions(self, item: TableItem):
         self._permissions.populate(item)
 
     @api(version='3.5')
-    def update_permission(self, item, rules):
+    def update_permission(self, item: TableItem, rules: PermissionsRule):
         import warnings
         warnings.warn('Server.tables.update_permission is deprecated, '
                       'please use Server.tables.update_permissions instead.',
@@ -107,9 +111,9 @@ class Tables(Endpoint):
         return self._permissions.update(item, rules)
 
     @api(version='3.5')
-    def update_permissions(self, item, rules):
+    def update_permissions(self, item: TableItem, rules: PermissionsRule):
         return self._permissions.update(item, rules)
 
     @api(version='3.5')
-    def delete_permission(self, item, rules):
+    def delete_permission(self, item: TableItem, rules: PermissionsRule):
         return self._permissions.delete(item, rules)

@@ -1,6 +1,7 @@
 from ..request_factory import RequestFactory
 from .exceptions import ServerResponseError
 from .endpoint import Endpoint, api
+from .. import TableauAuth, SiteItem
 import xml.etree.ElementTree as ET
 import logging
 
@@ -23,7 +24,7 @@ class Auth(Endpoint):
         return "{0}/auth".format(self.parent_srv.baseurl)
 
     @api(version="2.0")
-    def sign_in(self, auth_req):
+    def sign_in(self, auth_req: TableauAuth):
         url = "{0}/{1}".format(self.baseurl, 'signin')
         signin_req = RequestFactory.Auth.signin_req(auth_req)
         server_response = self.parent_srv.session.post(url, data=signin_req,
@@ -39,7 +40,7 @@ class Auth(Endpoint):
         return Auth.contextmgr(self.sign_out)
 
     @api(version="3.6")
-    def sign_in_with_personal_access_token(self, auth_req):
+    def sign_in_with_personal_access_token(self, auth_req: TableauAuth):
         # We use the same request that username/password login uses.
         return self.sign_in(auth_req)
 
@@ -54,7 +55,7 @@ class Auth(Endpoint):
         logger.info('Signed out')
 
     @api(version="2.6")
-    def switch_site(self, site_item):
+    def switch_site(self, site_item: SiteItem):
         url = "{0}/{1}".format(self.baseurl, 'switchSite')
         switch_req = RequestFactory.Auth.switch_req(site_item.content_url)
         try:

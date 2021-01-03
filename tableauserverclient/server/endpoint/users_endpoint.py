@@ -5,6 +5,7 @@ from ..pager import Pager
 
 import copy
 import logging
+from typing import Tuple, List
 
 logger = logging.getLogger('tableau.endpoint.users')
 
@@ -16,7 +17,7 @@ class Users(QuerysetEndpoint):
 
     # Gets all users
     @api(version="2.0")
-    def get(self, req_options=None):
+    def get(self, req_options: RequestOptions = None) -> Tuple[List[UserItem], PaginationItem]:
         logger.info('Querying all users on site')
 
         if req_options is None:
@@ -31,7 +32,7 @@ class Users(QuerysetEndpoint):
 
     # Gets 1 user by id
     @api(version="2.0")
-    def get_by_id(self, user_id):
+    def get_by_id(self, user_id: str) -> UserItem:
         if not user_id:
             error = "User ID undefined."
             raise ValueError(error)
@@ -42,7 +43,7 @@ class Users(QuerysetEndpoint):
 
     # Update user
     @api(version="2.0")
-    def update(self, user_item, password=None):
+    def update(self, user_item: UserItem, password: str = None) -> UserItem:
         if not user_item.id:
             error = "User item missing ID."
             raise MissingRequiredFieldError(error)
@@ -56,7 +57,7 @@ class Users(QuerysetEndpoint):
 
     # Delete 1 user by id
     @api(version="2.0")
-    def remove(self, user_id):
+    def remove(self, user_id: str):
         if not user_id:
             error = "User ID undefined."
             raise ValueError(error)
@@ -66,7 +67,7 @@ class Users(QuerysetEndpoint):
 
     # Add new user to site
     @api(version="2.0")
-    def add(self, user_item):
+    def add(self, user_item: UserItem) -> UserItem:
         url = self.baseurl
         add_req = RequestFactory.User.add_req(user_item)
         server_response = self.post_request(url, add_req)
@@ -76,7 +77,7 @@ class Users(QuerysetEndpoint):
 
     # Get workbooks for user
     @api(version="2.0")
-    def populate_workbooks(self, user_item, req_options=None):
+    def populate_workbooks(self, user_item: UserItem, req_options: RequestOptions = None):
         if not user_item.id:
             error = "User item missing ID."
             raise MissingRequiredFieldError(error)
@@ -94,5 +95,5 @@ class Users(QuerysetEndpoint):
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         return workbook_item, pagination_item
 
-    def populate_favorites(self, user_item):
+    def populate_favorites(self, user_item: UserItem):
         self.parent_srv.favorites.get(user_item)

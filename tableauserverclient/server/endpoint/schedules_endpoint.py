@@ -1,9 +1,12 @@
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
-from .. import RequestFactory, PaginationItem, ScheduleItem, TaskItem
+from .. import RequestFactory, PaginationItem, ScheduleItem, TaskItem, \
+               RequestOptions, WorkbookItem, DatasourceItem
 import logging
 import copy
 from collections import namedtuple
+
+from typing import Tuple, List
 
 logger = logging.getLogger('tableau.endpoint.schedules')
 # Oh to have a first class Result concept in Python...
@@ -21,7 +24,7 @@ class Schedules(Endpoint):
         return "{0}/sites/{1}/schedules".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     @api(version="2.3")
-    def get(self, req_options=None):
+    def get(self, req_options: RequestOptions = None) -> Tuple[List[ScheduleItem], PaginationItem]:
         logger.info("Querying all schedules")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -30,7 +33,7 @@ class Schedules(Endpoint):
         return all_schedule_items, pagination_item
 
     @api(version="2.3")
-    def delete(self, schedule_id):
+    def delete(self, schedule_id: str):
         if not schedule_id:
             error = "Schedule ID undefined"
             raise ValueError(error)
@@ -39,7 +42,7 @@ class Schedules(Endpoint):
         logger.info("Deleted single schedule (ID: {0})".format(schedule_id))
 
     @api(version="2.3")
-    def update(self, schedule_item):
+    def update(self, schedule_item: ScheduleItem) -> ScheduleItem:
         if not schedule_item.id:
             error = "Schedule item missing ID."
             raise MissingRequiredFieldError(error)
@@ -52,7 +55,7 @@ class Schedules(Endpoint):
         return updated_schedule._parse_common_tags(server_response.content, self.parent_srv.namespace)
 
     @api(version="2.3")
-    def create(self, schedule_item):
+    def create(self, schedule_item: ScheduleItem) -> ScheduleItem:
         if schedule_item.interval_item is None:
             error = "Interval item must be defined."
             raise MissingRequiredFieldError(error)
@@ -65,8 +68,10 @@ class Schedules(Endpoint):
         return new_schedule
 
     @api(version="2.8")
-    def add_to_schedule(self, schedule_id, workbook=None, datasource=None,
-                        task_type=TaskItem.Type.ExtractRefresh):
+    def add_to_schedule(self, schedule_id: ScheduleItem,
+                        workbook: WorkbookItem = None,
+                        datasource: DatasourceItem = None,
+                        task_type: TaskItem.Type = TaskItem.Type.ExtractRefresh) -> List:
         def add_to(resource, type_, req_factory):
             id_ = resource.id
             url = "{0}/{1}/{2}s".format(self.siteurl, schedule_id, type_)
