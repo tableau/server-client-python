@@ -277,10 +277,8 @@ class GroupRequest(object):
         xml_request = ET.Element('tsRequest')
         group_element = ET.SubElement(xml_request, 'group')
         group_element.attrib['name'] = group_item.name
-        if group_item.license_mode is not None:
-            group_element.attrib['grantLicenseMode'] = group_item.license_mode
         if group_item.minimum_site_role is not None:
-            group_element.attrib['SiteRole'] = group_item.minimum_site_role
+            group_element.attrib['minimumSiteRole'] = group_item.minimum_site_role
         return ET.tostring(xml_request)
 
     def create_ad_req(self, group_item):
@@ -295,9 +293,9 @@ class GroupRequest(object):
 
         import_element.attrib['domainName'] = group_item.domain_name
         if group_item.license_mode is not None:
-            import_element.attrib['grantLicenseMode'] = group_item.license
+            import_element.attrib['grantLicenseMode'] = group_item.license_mode
         if group_item.minimum_site_role is not None:
-            import_element.attrib['SiteRole'] = group_item.minimum_site_role
+            import_element.attrib['siteRole'] = group_item.minimum_site_role
         return ET.tostring(xml_request)
 
     def update_req(self, group_item, default_site_role=None):
