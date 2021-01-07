@@ -9,13 +9,17 @@ class GroupItem(object):
 
     tag_name = 'group'
 
-    def __init__(self, name=None):
-        self._domain_name = None
+    class LicenseMode:
+        onLogin = 'onLogin'
+        onSync = 'onSync'
+
+    def __init__(self, name=None, domain_name=None):
         self._id = None
-        self._users = None
-        self.name = name
         self._license_mode = None
         self._minimum_site_role = None
+        self._users = None
+        self.name = name
+        self.domain_name = domain_name
 
     @property
     def domain_name(self):
@@ -43,8 +47,8 @@ class GroupItem(object):
         return self._license_mode
 
     @license_mode.setter
+    @property_is_enum(LicenseMode)
     def license_mode(self, value):
-        # valid values = onSync, onLogin
         self._license_mode = value
 
     @property
