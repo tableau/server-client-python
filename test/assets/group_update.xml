@@ -2,7 +2,7 @@
 <tsResponse xmlns="http://tableau.com/api"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
-    <group id="ef8b19c0-43b6-11e6-af50-63f5805dbe3c" name="Group updated name"
-        siteRole="ExplorerCanPublish"
-        grantLicenseMode='onLogin'/>/>
+    <group id="ef8b19c0-43b6-11e6-af50-63f5805dbe3c" name="Group updated name">
+        <import domainName="local" siteRole="ExplorerCanPublish" grantLicenseMode="onLogin" />
+    </group>
 </tsResponse>

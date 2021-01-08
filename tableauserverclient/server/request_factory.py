@@ -299,17 +299,30 @@ class GroupRequest(object):
         return ET.tostring(xml_request)
 
     def update_req(self, group_item, default_site_role=None):
+        # (1/8/2021): Deprecated starting v0.15
         if default_site_role is not None:
+            import warnings
+            warnings.simplefilter('always', DeprecationWarning)
+            warnings.warn('RequestFactory.Group.update_req(...default_site_role="") is deprecated, '
+                          'please set the minimum_site_role field of GroupItem',
+                          DeprecationWarning)
             group_item.minimum_site_role = default_site_role
+
         xml_request = ET.Element('tsRequest')
         group_element = ET.SubElement(xml_request, 'group')
         group_element.attrib['name'] = group_item.name
-        if group_item.domain_name != 'local':
-            project_element = ET.SubElement(group_element, 'import')
-            project_element.attrib['source'] = "ActiveDirectory"
-            project_element.attrib['domainName'] = group_item.domain_name
-            project_element.attrib['siteRole'] = group_item.minimum_site_role
-            project_element.attrib['grantLicenseMode'] = group_item.license_mode
+        if group_item.domain_name is not None and group_item.domain_name != 'local':
+            # Import element is only accepted in the request for AD groups
+            import_element = ET.SubElement(group_element, 'import')
+            import_element.attrib['source'] = "ActiveDirectory"
+            import_element.attrib['domainName'] = group_item.domain_name
+            import_element.attrib['siteRole'] = group_item.minimum_site_role
+            if group_item.license_mode is not None:
+                import_element.attrib['grantLicenseMode'] = group_item.license_mode
+        else:
+            # Local group request does not accept an 'import' element
+            if group_item.minimum_site_role is not None:
+                group_element.attrib['minimumSiteRole'] = group_item.minimum_site_role
 
         return ET.tostring(xml_request)
 

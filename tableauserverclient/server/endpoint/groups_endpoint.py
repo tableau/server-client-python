@@ -7,8 +7,6 @@ import logging
 
 logger = logging.getLogger('tableau.endpoint.groups')
 
-UNLICENSED_USER = UserItem.Roles.Unlicensed
-
 
 class Groups(Endpoint):
     @property
@@ -58,15 +56,28 @@ class Groups(Endpoint):
         logger.info('Deleted single group (ID: {0})'.format(group_id))
 
     @api(version="2.0")
-    def update(self, group_item, default_site_role=UNLICENSED_USER, as_job=False):
+    def update(self, group_item, default_site_role=None, as_job=False):
+        # (1/8/2021): Deprecated starting v0.15
+        if default_site_role is not None:
+            import warnings
+            warnings.simplefilter('always', DeprecationWarning)
+            warnings.warn('Groups.update(...default_site_role=""...) is deprecated, '
+                          'please set the minimum_site_role field of GroupItem',
+                          DeprecationWarning)
+            group_item.minimum_site_role = default_site_role
+
         if not group_item.id:
             error = "Group item missing ID."
             raise MissingRequiredFieldError(error)
+        if as_job and (group_item.domain_name is None or group_item.domain_name == 'local'):
+            error = "Local groups cannot be updated asynchronously."
+            raise ValueError(error)
+
         url = "{0}/{1}".format(self.baseurl, group_item.id)
-        update_req = RequestFactory.Group.update_req(group_item, default_site_role)
+        update_req = RequestFactory.Group.update_req(group_item, None)
         server_response = self.put_request(url, update_req)
         logger.info('Updated group item (ID: {0})'.format(group_item.id))
-        if (as_job):
+        if as_job:
             return JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         else:
             return GroupItem.from_response(server_response.content, self.parent_srv.namespace)[0]
