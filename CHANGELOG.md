@@ -1,3 +1,7 @@
+## 0.14.1 (9 Dec 2020)
+* Fixed filter query issue for server version below 2020.1 (#745)
+* Fixed large workbook/datasource publish issue (#757)
+
 ## 0.14.0 (6 Nov 2020)
 * Added django-style filtering and sorting (#615)
 * Added encoding tag-name before deleting (#687)
