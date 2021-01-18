@@ -520,11 +520,13 @@ class SiteRequest(object):
         if site_item.authoring_enabled is not None:
             site_element.attrib['authoringEnabled'] = str(site_item.authoring_enabled).lower()
         if site_item.custom_subscription_email_enabled is not None:
-            site_element.attrib['customSubscriptionEmailEnabled'] = str(site_item.custom_subscription_email_enabled).lower()
+            site_element.attrib['customSubscriptionEmailEnabled'] = \
+                str(site_item.custom_subscription_email_enabled).lower()
         if site_item.custom_subscription_email is not None:
             site_element.attrib['customSubscriptionEmail'] = str(site_item.custom_subscription_email).lower()
         if site_item.custom_subscription_footer_enabled is not None:
-            site_element.attrib['customSubscriptionFooterEnabled'] = str(site_item.custom_subscription_footer_enabled).lower()
+            site_element.attrib['customSubscriptionFooterEnabled'] =\
+                str(site_item.custom_subscription_footer_enabled).lower()
         if site_item.custom_subscription_footer is not None:
             site_element.attrib['customSubscriptionFooter'] = str(site_item.custom_subscription_footer).lower()
         if site_item.ask_data_mode is not None:
@@ -548,7 +550,8 @@ class SiteRequest(object):
         if site_item.auto_suspend_refresh_enabled is not None:
             site_element.attrib['autoSuspendRefreshEnabled'] = str(site_item.auto_suspend_refresh_enabled).lower()
         if site_item.auto_suspend_refresh_inactivity_window is not None:
-            site_element.attrib['autoSuspendRefreshInactivityWindow'] = str(site_item.auto_suspend_refresh_inactivity_window).lower()
+            site_element.attrib['autoSuspendRefreshInactivityWindow'] =\
+                str(site_item.auto_suspend_refresh_inactivity_window).lower()
 
         return ET.tostring(xml_request)
 
@@ -628,11 +631,13 @@ class SiteRequest(object):
         if site_item.authoring_enabled is not None:
             site_element.attrib['authoringEnabled'] = str(site_item.authoring_enabled).lower()
         if site_item.custom_subscription_email_enabled is not None:
-            site_element.attrib['customSubscriptionEmailEnabled'] = str(site_item.custom_subscription_email_enabled).lower()
+            site_element.attrib['customSubscriptionEmailEnabled'] =\
+                str(site_item.custom_subscription_email_enabled).lower()
         if site_item.custom_subscription_email is not None:
             site_element.attrib['customSubscriptionEmail'] = str(site_item.custom_subscription_email).lower()
         if site_item.custom_subscription_footer_enabled is not None:
-            site_element.attrib['customSubscriptionFooterEnabled'] = str(site_item.custom_subscription_footer_enabled).lower()
+            site_element.attrib['customSubscriptionFooterEnabled'] =\
+                str(site_item.custom_subscription_footer_enabled).lower()
         if site_item.custom_subscription_footer is not None:
             site_element.attrib['customSubscriptionFooter'] = str(site_item.custom_subscription_footer).lower()
         if site_item.ask_data_mode is not None:
@@ -656,9 +661,11 @@ class SiteRequest(object):
         if site_item.auto_suspend_refresh_enabled is not None:
             site_element.attrib['autoSuspendRefreshEnabled'] = str(site_item.auto_suspend_refresh_enabled).lower()
         if site_item.auto_suspend_refresh_inactivity_window is not None:
-            site_element.attrib['autoSuspendRefreshInactivityWindow'] = str(site_item.auto_suspend_refresh_inactivity_window).lower()
+            site_element.attrib['autoSuspendRefreshInactivityWindow'] =\
+                str(site_item.auto_suspend_refresh_inactivity_window).lower()
 
         return ET.tostring(xml_request)
+
 
 class TableRequest(object):
     def update_req(self, table_item):
