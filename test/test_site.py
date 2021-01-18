@@ -5,11 +5,11 @@ import tableauserverclient as TSC
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
-GET_XML = os.path.join(TEST_ASSET_DIR, 'site_get_new_model.xml')
-GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, 'site_get_by_id_new_model.xml')
-GET_BY_NAME_XML = os.path.join(TEST_ASSET_DIR, 'site_get_by_name_new_model.xml')
-UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'site_update_new_model.xml')
-CREATE_XML = os.path.join(TEST_ASSET_DIR, 'site_create_new_model.xml')
+GET_XML = os.path.join(TEST_ASSET_DIR, 'site_get.xml')
+GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, 'site_get_by_id.xml')
+GET_BY_NAME_XML = os.path.join(TEST_ASSET_DIR, 'site_get_by_name.xml')
+UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'site_update.xml')
+CREATE_XML = os.path.join(TEST_ASSET_DIR, 'site_create.xml')
 
 
 class SiteTests(unittest.TestCase):
