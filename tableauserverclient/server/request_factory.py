@@ -467,6 +467,12 @@ class SiteRequest(object):
             site_element.attrib['flowsEnabled'] = str(site_item.flows_enabled).lower()
         if site_item.cataloging_enabled is not None:
             site_element.attrib['catalogingEnabled'] = str(site_item.cataloging_enabled).lower()
+        if site_item.tier_creator_capacity is not None:
+            site_element.attrib['tierCreatorCapacity'] = str(site_item.tier_creator_capacity)
+        if site_item.tier_explorer_capacity is not None:
+            site_element.attrib['tierExplorerCapacity'] = str(site_item.tier_explorer_capacity)
+        if site_item.tier_viewer_capacity is not None:
+            site_element.attrib['tierViewerCapacity'] = str(site_item.tier_viewer_capacity)
         return ET.tostring(xml_request)
 
     def create_req(self, site_item):
@@ -486,6 +492,12 @@ class SiteRequest(object):
             site_element.attrib['flowsEnabled'] = str(site_item.flows_enabled).lower()
         if site_item.cataloging_enabled is not None:
             site_element.attrib['catalogingEnabled'] = str(site_item.cataloging_enabled).lower()
+        if site_item.tier_creator_capacity is not None:
+            site_element.attrib['tierCreatorCapacity'] = str(site_item.tier_creator_capacity)
+        if site_item.tier_explorer_capacity is not None:
+            site_element.attrib['tierExplorerCapacity'] = str(site_item.tier_explorer_capacity)
+        if site_item.tier_viewer_capacity is not None:
+            site_element.attrib['tierViewerCapacity'] = str(site_item.tier_viewer_capacity)
         return ET.tostring(xml_request)
 
 

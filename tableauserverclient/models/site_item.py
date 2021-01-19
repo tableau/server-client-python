@@ -17,7 +17,8 @@ class SiteItem(object):
 
     def __init__(self, name, content_url, admin_mode=None, user_quota=None, storage_quota=None,
                  disable_subscriptions=False, subscribe_others_enabled=True, revision_history_enabled=False,
-                 revision_limit=None, data_acceleration_mode=None, flows_enabled=None, cataloging_enabled=None):
+                 revision_limit=None, data_acceleration_mode=None, flows_enabled=None, cataloging_enabled=None,
+                 tier_creator_capacity=None, tier_explorer_capacity=None, tier_viewer_capacity=None):
         self._admin_mode = None
         self._id = None
         self._num_users = None
@@ -36,6 +37,9 @@ class SiteItem(object):
         self.data_acceleration_mode = data_acceleration_mode
         self.cataloging_enabled = cataloging_enabled
         self.flows_enabled = flows_enabled
+        self.tier_creator_capacity = tier_creator_capacity
+        self.tier_explorer_capacity = tier_explorer_capacity
+        self.tier_viewer_capacity = tier_viewer_capacity
 
     @property
     def admin_mode(self):
@@ -150,6 +154,33 @@ class SiteItem(object):
     def flows_enabled(self, value):
         self._flows_enabled = value
 
+    @property
+    def tier_creator_capacity(self):
+        return self._tier_creator_capacity
+
+    @tier_creator_capacity.setter
+    @property_is_int((0, 100000), allowed=(None,))
+    def tier_creator_capacity(self, value):
+        self._tier_creator_capacity = value
+
+    @property
+    def tier_explorer_capacity(self):
+        return self._tier_explorer_capacity
+
+    @tier_explorer_capacity.setter
+    @property_is_int((0, 100000), allowed=(None,))
+    def tier_explorer_capacity(self, value):
+        self._tier_explorer_capacity = value
+
+    @property
+    def tier_viewer_capacity(self):
+        return self._tier_viewer_capacity
+
+    @tier_viewer_capacity.setter
+    @property_is_int((0, 100000), allowed=(None,))
+    def tier_viewer_capacity(self, value):
+        self._tier_viewer_capacity = value
+
     def is_default(self):
         return self.name.lower() == 'default'
 
@@ -160,18 +191,22 @@ class SiteItem(object):
             (_, name, content_url, _, admin_mode, state,
              subscribe_others_enabled, disable_subscriptions, revision_history_enabled,
              user_quota, storage_quota, revision_limit, num_users, storage,
-             data_acceleration_mode, cataloging_enabled, flows_enabled) = self._parse_element(site_xml, ns)
+             data_acceleration_mode, cataloging_enabled, flows_enabled,
+             tier_creator_capacity, tier_explorer_capacity,
+             tier_viewer_capacity) = self._parse_element(site_xml, ns)
 
             self._set_values(None, name, content_url, None, admin_mode, state, subscribe_others_enabled,
                              disable_subscriptions, revision_history_enabled, user_quota, storage_quota,
                              revision_limit, num_users, storage, data_acceleration_mode, cataloging_enabled,
-                             flows_enabled)
+                             flows_enabled, tier_creator_capacity, tier_explorer_capacity,
+                             tier_viewer_capacity)
         return self
 
     def _set_values(self, id, name, content_url, status_reason, admin_mode, state,
                     subscribe_others_enabled, disable_subscriptions, revision_history_enabled,
                     user_quota, storage_quota, revision_limit, num_users, storage, data_acceleration_mode,
-                    flows_enabled, cataloging_enabled):
+                    flows_enabled, cataloging_enabled, tier_creator_capacity, tier_explorer_capacity,
+                    tier_viewer_capacity):
         if id is not None:
             self._id = id
         if name:
@@ -206,6 +241,12 @@ class SiteItem(object):
             self.flows_enabled = flows_enabled
         if cataloging_enabled is not None:
             self.cataloging_enabled = cataloging_enabled
+        if tier_creator_capacity:
+            self.tier_creator_capacity = tier_creator_capacity
+        if tier_explorer_capacity:
+            self.tier_explorer_capacity = tier_explorer_capacity
+        if tier_viewer_capacity:
+            self.tier_viewer_capacity = tier_viewer_capacity
 
     @classmethod
     def from_response(cls, resp, ns):
@@ -216,13 +257,16 @@ class SiteItem(object):
             (id, name, content_url, status_reason, admin_mode, state, subscribe_others_enabled,
                 disable_subscriptions, revision_history_enabled, user_quota, storage_quota,
                 revision_limit, num_users, storage, data_acceleration_mode, flows_enabled,
-                cataloging_enabled) = cls._parse_element(site_xml, ns)
+                cataloging_enabled, tier_creator_capacity, tier_explorer_capacity,
+                tier_viewer_capacity) = cls._parse_element(site_xml, ns)
 
             site_item = cls(name, content_url)
             site_item._set_values(id, name, content_url, status_reason, admin_mode, state,
                                   subscribe_others_enabled, disable_subscriptions, revision_history_enabled,
                                   user_quota, storage_quota, revision_limit, num_users, storage,
-                                  data_acceleration_mode, flows_enabled, cataloging_enabled)
+                                  data_acceleration_mode, flows_enabled, cataloging_enabled,
+                                  tier_creator_capacity, tier_explorer_capacity,
+                                  tier_viewer_capacity)
             all_site_items.append(site_item)
         return all_site_items
 
@@ -262,9 +306,20 @@ class SiteItem(object):
         flows_enabled = string_to_bool(site_xml.get('flowsEnabled', ''))
         cataloging_enabled = string_to_bool(site_xml.get('catalogingEnabled', ''))
 
+        tier_creator_capacity = site_xml.get('tierCreatorCapacity', None)
+        tier_explorer_capacity = site_xml.get('tierExplorerCapacity', None)
+        tier_viewer_capacity = site_xml.get('tierViewerCapacity', None)
+        if tier_creator_capacity:
+            tier_creator_capacity = int(tier_creator_capacity)
+        if tier_explorer_capacity:
+            tier_explorer_capacity = int(tier_explorer_capacity)
+        if tier_viewer_capacity:
+            tier_viewer_capacity = int(tier_viewer_capacity)
+
         return id, name, content_url, status_reason, admin_mode, state, subscribe_others_enabled,\
             disable_subscriptions, revision_history_enabled, user_quota, storage_quota,\
-            revision_limit, num_users, storage, data_acceleration_mode, flows_enabled, cataloging_enabled
+            revision_limit, num_users, storage, data_acceleration_mode, flows_enabled, cataloging_enabled,\
+            tier_creator_capacity, tier_explorer_capacity, tier_viewer_capacity
 
 
 # Used to convert string represented boolean to a boolean type

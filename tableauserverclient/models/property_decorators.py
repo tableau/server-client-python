@@ -8,6 +8,8 @@ except NameError:
     # In case we are in python 3 the string check is different
     basestring = str
 
+literal_range = range
+
 
 def property_is_enum(enum_type):
     def property_type_decorator(func):
@@ -92,9 +94,9 @@ def property_is_int(range, allowed=None):
                 else:
                     raise ValueError(error)
 
-            min, max = range
+            range_ = literal_range(*range)
 
-            if (value < min or value > max) and (value not in allowed):
+            if (value not in range_) and (value not in allowed):
                 raise ValueError(error)
 
             return func(self, value)
