@@ -224,3 +224,13 @@ class GroupTests(unittest.TestCase):
         self.assertEqual('Group updated name', group.name)
         self.assertEqual('ExplorerCanPublish', group.minimum_site_role)
         self.assertEqual('onLogin', group.license_mode)
+
+    # async update is not supported for local groups
+    def test_update_local_async(self):
+        group = TSC.GroupItem("myGroup")
+        group._id = 'ef8b19c0-43b6-11e6-af50-63f5805dbe3c'
+        self.assertRaises(ValueError, self.server.groups.update, group, as_job=True)
+
+        # mimic group returned from server where domain name is set to 'local'
+        group.domain_name = "local"
+        self.assertRaises(ValueError, self.server.groups.update, group, as_job=True)
