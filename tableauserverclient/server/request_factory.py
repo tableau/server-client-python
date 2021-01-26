@@ -348,6 +348,10 @@ class ProjectRequest(object):
             project_element.attrib['contentPermissions'] = project_item.content_permissions
         if project_item.parent_id is not None:
             project_element.attrib['parentProjectId'] = project_item.parent_id
+        # Pending issue #269
+        # if project_item.owner_id is not None:
+        #     owner_element = ET.SubElement(project_element, 'owner')
+        #     owner_element.attrib['id'] = project_item.owner_id
         return ET.tostring(xml_request)
 
     def create_req(self, project_item):
@@ -360,6 +364,10 @@ class ProjectRequest(object):
             project_element.attrib['contentPermissions'] = project_item.content_permissions
         if project_item.parent_id:
             project_element.attrib['parentProjectId'] = project_item.parent_id
+        # Pending issue #269
+        # if project_item.owner_id:
+        #     owner_element = ET.SubElement(project_element, 'owner')
+        #     owner_element.attrib['id'] = project_item.owner_id
         return ET.tostring(xml_request)
 
 

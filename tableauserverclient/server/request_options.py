@@ -36,6 +36,7 @@ class RequestOptions(RequestOptionsBase):
         CreatedAt = 'createdAt'
         DomainName = 'domainName'
         DomainNickname = 'domainNickname'
+        Email = 'email'
         HitsTotal = 'hitsTotal'
         IsLocal = 'isLocal'
         JobType = 'jobType'

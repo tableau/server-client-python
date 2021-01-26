@@ -39,16 +39,19 @@ class ProjectTests(unittest.TestCase):
                          all_projects[0].description)
         self.assertEqual('ManagedByOwner', all_projects[0].content_permissions)
         self.assertEqual(None, all_projects[0].parent_id)
+        self.assertEqual('dd2239f6-ddf1-4107-981a-4cf94e415794', all_projects[0].owner_id)
 
         self.assertEqual('1d0304cd-3796-429f-b815-7258370b9b74', all_projects[1].id)
         self.assertEqual('Tableau', all_projects[1].name)
         self.assertEqual('ManagedByOwner', all_projects[1].content_permissions)
         self.assertEqual(None, all_projects[1].parent_id)
+        self.assertEqual('2a47bbf8-8900-4ebb-b0a4-2723bd7c46c3', all_projects[1].owner_id)
 
         self.assertEqual('4cc52973-5e3a-4d1f-a4fb-5b5f73796edf', all_projects[2].id)
         self.assertEqual('Tableau > Child 1', all_projects[2].name)
         self.assertEqual('ManagedByOwner', all_projects[2].content_permissions)
         self.assertEqual('1d0304cd-3796-429f-b815-7258370b9b74', all_projects[2].parent_id)
+        self.assertEqual('dd2239f6-ddf1-4107-981a-4cf94e415794', all_projects[2].owner_id)
 
     def test_get_before_signin(self):
         self.server._auth_token = None
