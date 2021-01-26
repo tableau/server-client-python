@@ -156,3 +156,18 @@ class SiteTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.post(self.baseurl + '/0626857c-1def-4503-a7d8-7907c3ff9d9f/decrypt-extracts', status_code=200)
             self.server.sites.decrypt_extracts('0626857c-1def-4503-a7d8-7907c3ff9d9f')
+
+    def test_quota_and_tiers_error(self):
+        with open(UPDATE_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.put(self.baseurl + '/6b7179ba-b82b-4f0f-91ed-812074ac5da6', text=response_xml)
+            single_site = TSC.SiteItem(name='Tableau', content_url='tableau',
+                                       admin_mode=TSC.SiteItem.AdminMode.ContentAndUsers,
+                                       user_quota=15, storage_quota=1000,
+                                       disable_subscriptions=True, revision_history_enabled=False,
+                                       data_acceleration_mode='disable')
+            single_site.tier_creator_capacity = 11
+            single_site._id = '6b7179ba-b82b-4f0f-91ed-812074ac5da6'
+            with self.assertRaises(ValueError):
+                single_site = self.server.sites.update(single_site)

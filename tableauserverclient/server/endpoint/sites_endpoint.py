@@ -67,6 +67,13 @@ class Sites(Endpoint):
                 error = 'You cannot set admin_mode to ContentOnly and also set a user quota'
                 raise ValueError(error)
 
+        if site_item.user_quota:
+            if any([site_item.tier_creator_capacity,
+                    site_item.tier_explorer_capacity,
+                    site_item.tier_viewer_capacity, ]):
+                error = 'You cannot set tiered capacity and a user quota.'
+                raise ValueError(error)
+
         url = "{0}/{1}".format(self.baseurl, site_item.id)
         update_req = RequestFactory.Site.update_req(site_item)
         server_response = self.put_request(url, update_req)
