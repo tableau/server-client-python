@@ -11,14 +11,14 @@ class ProjectItem(object):
         LockedToProject = 'LockedToProject'
         ManagedByOwner = 'ManagedByOwner'
 
-    def __init__(self, name, description=None, content_permissions=None, parent_id=None, owner_id=None):
+    def __init__(self, name, description=None, content_permissions=None, parent_id=None):
         self._content_permissions = None
         self._id = None
         self.description = description
         self.name = name
         self.content_permissions = content_permissions
         self.parent_id = parent_id
-        self.owner_id = owner_id
+        # self.owner_id = owner_id
 
         self._permissions = None
         self._default_workbook_permissions = None
@@ -75,6 +75,14 @@ class ProjectItem(object):
     def name(self, value):
         self._name = value
 
+    @property
+    def owner_id(self):
+        return self._owner_id
+
+    @owner_id.setter
+    def owner_id(self, value):
+        raise NotImplementedError('REST API does not currently support updating project owner.')
+
     def is_default(self):
         return self.name.lower() == 'default'
 
@@ -99,7 +107,7 @@ class ProjectItem(object):
         if parent_id:
             self.parent_id = parent_id
         if owner_id:
-            self.owner_id = owner_id
+            self._owner_id = owner_id
 
     def _set_permissions(self, permissions):
         self._permissions = permissions

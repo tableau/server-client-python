@@ -159,7 +159,7 @@ class ProjectTests(unittest.TestCase):
             m.get(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/default-permissions/workbooks',
                   text=response_xml)
             single_project = TSC.ProjectItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
-            single_project.owner_id = 'dd2239f6-ddf1-4107-981a-4cf94e415794'
+            single_project._owner_id = 'dd2239f6-ddf1-4107-981a-4cf94e415794'
             single_project._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
 
             self.server.projects.populate_workbook_default_permissions(single_project)
@@ -230,7 +230,7 @@ class ProjectTests(unittest.TestCase):
             single_group._id = 'c8f2773a-c83a-11e8-8c8f-33e6d787b506'
 
             single_project = TSC.ProjectItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
-            single_project.owner_id = 'dd2239f6-ddf1-4107-981a-4cf94e415794'
+            single_project._owner_id = 'dd2239f6-ddf1-4107-981a-4cf94e415794'
             single_project._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
 
             self.server.projects.populate_workbook_default_permissions(single_project)
