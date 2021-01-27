@@ -8,8 +8,6 @@ except NameError:
     # In case we are in python 3 the string check is different
     basestring = str
 
-literal_range = range
-
 
 def property_is_enum(enum_type):
     def property_type_decorator(func):
@@ -71,7 +69,7 @@ def property_is_valid_time(func):
     return wrapper
 
 
-def property_is_int(range, allowed=None):
+def property_is_int(valid_int_range, allowed=None):
     '''Takes a range of ints and a list of exemptions to check against
     when setting a property on a model. The range is a tuple of (min, max) and the
     allowed list (empty by default) allows values outside that range.
@@ -88,15 +86,13 @@ def property_is_int(range, allowed=None):
         def wrapper(self, value):
             error = "Invalid property defined: '{}'. Integer value expected.".format(value)
 
-            if range is None:
+            if valid_int_range is None:
                 if isinstance(value, int):
                     return func(self, value)
                 else:
                     raise ValueError(error)
 
-            range_ = literal_range(*range)
-
-            if (value not in range_) and (value not in allowed):
+            if (value not in range(*valid_int_range)) and (value not in allowed):
                 raise ValueError(error)
 
             return func(self, value)
