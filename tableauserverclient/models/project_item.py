@@ -18,7 +18,6 @@ class ProjectItem(object):
         self.name = name
         self.content_permissions = content_permissions
         self.parent_id = parent_id
-        # self.owner_id = owner_id
 
         self._permissions = None
         self._default_workbook_permissions = None
