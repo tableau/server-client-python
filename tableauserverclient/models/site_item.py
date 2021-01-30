@@ -80,8 +80,8 @@ class SiteItem(object):
         self.user_visibility_mode = user_visibility_mode
         self.use_default_time_zone = use_default_time_zone
         self.time_zone = time_zone
-        self.auto_suspend_refresh_inactivity_window = auto_suspend_refresh_inactivity_window
         self.auto_suspend_refresh_enabled = auto_suspend_refresh_enabled
+        self.auto_suspend_refresh_inactivity_window = auto_suspend_refresh_inactivity_window
 
     @property
     def admin_mode(self):
@@ -480,7 +480,7 @@ class SiteItem(object):
 
     @property
     def auto_suspend_refresh_inactivity_window(self):
-        return self._auto_suspend_refresh_enabled
+        return self._auto_suspend_refresh_inactivity_window
 
     @auto_suspend_refresh_inactivity_window.setter
     def auto_suspend_refresh_inactivity_window(self, value):
@@ -694,15 +694,15 @@ class SiteItem(object):
         subscribe_others_enabled = string_to_bool(site_xml.get('subscribeOthersEnabled', ''))
         disable_subscriptions = string_to_bool(site_xml.get('disableSubscriptions', ''))
         revision_history_enabled = string_to_bool(site_xml.get('revisionHistoryEnabled', ''))
-        editing_flows_enabled = string_to_bool(site_xml.get('editingFlowsEnabled', ''))
-        scheduling_flows_enabled = string_to_bool(site_xml.get('schedulingFlowsEnabled', ''))
-        allow_subscription_attachments = string_to_bool(site_xml.get('allowSubscriptionAttachments', ''))
+        editing_flows_enabled = string_to_bool(site_xml.get('editingFlowsEnabled', 'true'))
+        scheduling_flows_enabled = string_to_bool(site_xml.get('schedulingFlowsEnabled', 'true'))
+        allow_subscription_attachments = string_to_bool(site_xml.get('allowSubscriptionAttachments', 'true'))
         guest_access_enabled = string_to_bool(site_xml.get('guestAccessEnabled', ''))
-        cache_warmup_enabled = string_to_bool(site_xml.get('cacheWarmupEnabled', ''))
-        commenting_enabled = string_to_bool(site_xml.get('commentingEnabled', ''))
+        cache_warmup_enabled = string_to_bool(site_xml.get('cacheWarmupEnabled', 'true'))
+        commenting_enabled = string_to_bool(site_xml.get('commentingEnabled', 'true'))
         extract_encryption_mode = site_xml.get('extractEncryptionMode', None)
         request_access_enabled = string_to_bool(site_xml.get('requestAccessEnabled', ''))
-        run_now_enabled = string_to_bool(site_xml.get('runNowEnabled', ''))
+        run_now_enabled = string_to_bool(site_xml.get('runNowEnabled', 'true'))
         tier_explorer_capacity = site_xml.get('tierExplorerCapacity', None)
         if tier_explorer_capacity:
             tier_explorer_capacity = int(tier_explorer_capacity)
@@ -712,28 +712,30 @@ class SiteItem(object):
         tier_viewer_capacity = site_xml.get('tierViewerCapacity', None)
         if tier_viewer_capacity:
             tier_viewer_capacity = int(tier_viewer_capacity)
-        data_alerts_enabled = string_to_bool(site_xml.get('dataAlertsEnabled', ''))
-        commenting_mentions_enabled = string_to_bool(site_xml.get('commentingMentionsEnabled', ''))
+        data_alerts_enabled = string_to_bool(site_xml.get('dataAlertsEnabled', 'true'))
+        commenting_mentions_enabled = string_to_bool(site_xml.get('commentingMentionsEnabled', 'true'))
         catalog_obfuscation_enabled = string_to_bool(site_xml.get('catalogObfuscationEnabled', ''))
-        flow_auto_save_enabled = string_to_bool(site_xml.get('flowAutoSaveEnabled', ''))
-        web_extraction_enabled = string_to_bool(site_xml.get('webExtractionEnabled', ''))
-        metrics_content_type_enabled = string_to_bool(site_xml.get('metricsContentTypeEnabled', ''))
+        flow_auto_save_enabled = string_to_bool(site_xml.get('flowAutoSaveEnabled', 'true'))
+        web_extraction_enabled = string_to_bool(site_xml.get('webExtractionEnabled', 'true'))
+        metrics_content_type_enabled = string_to_bool(site_xml.get('metricsContentTypeEnabled', 'true'))
         notify_site_admins_on_throttle = string_to_bool(site_xml.get('notifySiteAdminsOnThrottle', ''))
-        authoring_enabled = string_to_bool(site_xml.get('authoringEnabled', ''))
+        authoring_enabled = string_to_bool(site_xml.get('authoringEnabled', 'true'))
         custom_subscription_email_enabled = string_to_bool(site_xml.get('customSubscriptionEmailEnabled', ''))
-        custom_subscription_email = site_xml.get('customSubscriptionEmailEnabled', None)
+        custom_subscription_email = site_xml.get('customSubscriptionEmail', None)
         custom_subscription_footer_enabled = string_to_bool(site_xml.get('customSubscriptionFooterEnabled', ''))
-        custom_subscription_footer = site_xml.get('customSubscriptionEmailEnabled', None)
+        custom_subscription_footer = site_xml.get('customSubscriptionFooter', None)
         ask_data_mode = site_xml.get('askDataMode', None)
-        named_sharing_enabled = string_to_bool(site_xml.get('namedSharingEnabled', ''))
+        named_sharing_enabled = string_to_bool(site_xml.get('namedSharingEnabled', 'true'))
         mobile_biometrics_enabled = string_to_bool(site_xml.get('mobileBiometricsEnabled', ''))
-        sheet_image_enabled = string_to_bool(site_xml.get('sheetImageEnabled', ''))
+        sheet_image_enabled = string_to_bool(site_xml.get('sheetImageEnabled', 'true'))
         derived_permissions_enabled = string_to_bool(site_xml.get('derivedPermissionsEnabled', ''))
-        user_visibility_mode = string_to_bool(site_xml.get('userVisibilityMode', ''))
-        use_default_time_zone = string_to_bool(site_xml.get('useDefaultTimeZone', ''))
+        user_visibility_mode = site_xml.get('userVisibilityMode', '')
+        use_default_time_zone = string_to_bool(site_xml.get('useDefaultTimeZone', 'true'))
         time_zone = site_xml.get('timeZone', None)
-        auto_suspend_refresh_enabled = string_to_bool(site_xml.get('autoSuspendRefreshEnabled', ''))
+        auto_suspend_refresh_enabled = string_to_bool(site_xml.get('autoSuspendRefreshEnabled', 'true'))
         auto_suspend_refresh_inactivity_window = site_xml.get('autoSuspendRefreshInactivityWindow', None)
+        if auto_suspend_refresh_inactivity_window:
+            auto_suspend_refresh_inactivity_window = int(auto_suspend_refresh_inactivity_window)
 
         user_quota = site_xml.get('userQuota', None)
         if user_quota:
@@ -756,8 +758,8 @@ class SiteItem(object):
 
         data_acceleration_mode = site_xml.get('dataAccelerationMode', '')
 
-        flows_enabled = string_to_bool(site_xml.get('flowsEnabled', ''))
-        cataloging_enabled = string_to_bool(site_xml.get('catalogingEnabled', ''))
+        flows_enabled = string_to_bool(site_xml.get('flowsEnabled', 'true'))
+        cataloging_enabled = string_to_bool(site_xml.get('catalogingEnabled', 'true'))
 
         return id, name, content_url, status_reason, admin_mode, state, subscribe_others_enabled,\
             disable_subscriptions, revision_history_enabled, user_quota, storage_quota,\
