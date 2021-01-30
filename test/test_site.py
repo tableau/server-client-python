@@ -36,13 +36,30 @@ class SiteTests(unittest.TestCase):
         self.assertEqual('ContentOnly', all_sites[0].admin_mode)
         self.assertEqual(False, all_sites[0].revision_history_enabled)
         self.assertEqual(True, all_sites[0].subscribe_others_enabled)
-
+        self.assertEqual(25, all_sites[0].revision_limit)
+        self.assertEqual(None, all_sites[0].num_users)
+        self.assertEqual(None, all_sites[0].storage)
+        self.assertEqual(True, all_sites[0].cataloging_enabled)
+        self.assertEqual(False, all_sites[0].editing_flows_enabled)
+        self.assertEqual(False, all_sites[0].scheduling_flows_enabled)
+        self.assertEqual(True, all_sites[0].allow_subscription_attachments)
         self.assertEqual('6b7179ba-b82b-4f0f-91ed-812074ac5da6', all_sites[1].id)
         self.assertEqual('Active', all_sites[1].state)
         self.assertEqual('Samples', all_sites[1].name)
         self.assertEqual('ContentOnly', all_sites[1].admin_mode)
         self.assertEqual(False, all_sites[1].revision_history_enabled)
         self.assertEqual(True, all_sites[1].subscribe_others_enabled)
+        self.assertEqual(False, all_sites[1].guest_access_enabled)
+        self.assertEqual(True, all_sites[1].cache_warmup_enabled)
+        self.assertEqual(True, all_sites[1].commenting_enabled)
+        self.assertEqual(True, all_sites[1].cache_warmup_enabled)
+        self.assertEqual(False, all_sites[1].request_access_enabled)
+        self.assertEqual(True, all_sites[1].run_now_enabled)
+        self.assertEqual(1, all_sites[1].tier_explorer_capacity)
+        self.assertEqual(2, all_sites[1].tier_creator_capacity)
+        self.assertEqual(1, all_sites[1].tier_viewer_capacity)
+        self.assertEqual(True, all_sites[1].flows_enabled)
+        self.assertEqual(None, all_sites[1].data_acceleration_mode)
 
     def test_get_before_signin(self):
         self.server._auth_token = None
@@ -62,6 +79,9 @@ class SiteTests(unittest.TestCase):
         self.assertEqual(False, single_site.revision_history_enabled)
         self.assertEqual(True, single_site.subscribe_others_enabled)
         self.assertEqual(False, single_site.disable_subscriptions)
+        self.assertEqual(True, single_site.data_alerts_enabled)
+        self.assertEqual(False, single_site.commenting_mentions_enabled)
+        self.assertEqual(True, single_site.catalog_obfuscation_enabled)
 
     def test_get_by_id_missing_id(self):
         self.assertRaises(ValueError, self.server.sites.get_by_id, '')
@@ -93,7 +113,18 @@ class SiteTests(unittest.TestCase):
                                        admin_mode=TSC.SiteItem.AdminMode.ContentAndUsers,
                                        user_quota=15, storage_quota=1000,
                                        disable_subscriptions=True, revision_history_enabled=False,
-                                       data_acceleration_mode='disable')
+                                       data_acceleration_mode='disable', flow_auto_save_enabled=True,
+                                       web_extraction_enabled=False, metrics_content_type_enabled=True,
+                                       notify_site_admins_on_throttle=False, authoring_enabled=True,
+                                       custom_subscription_email_enabled=True,
+                                       custom_subscription_email='test@test.com',
+                                       custom_subscription_footer_enabled=True,
+                                       custom_subscription_footer='example_footer', ask_data_mode='EnabledByDefault',
+                                       named_sharing_enabled=False, mobile_biometrics_enabled=True,
+                                       sheet_image_enabled=False, derived_permissions_enabled=True,
+                                       user_visibility_mode='FULL', use_default_time_zone=False,
+                                       time_zone='America/Los_Angeles', auto_suspend_refresh_enabled=True,
+                                       auto_suspend_refresh_inactivity_window=55)
             single_site._id = '6b7179ba-b82b-4f0f-91ed-812074ac5da6'
             single_site = self.server.sites.update(single_site)
 
@@ -109,6 +140,25 @@ class SiteTests(unittest.TestCase):
         self.assertEqual('disable', single_site.data_acceleration_mode)
         self.assertEqual(True, single_site.flows_enabled)
         self.assertEqual(True, single_site.cataloging_enabled)
+        self.assertEqual(True, single_site.flow_auto_save_enabled)
+        self.assertEqual(False, single_site.web_extraction_enabled)
+        self.assertEqual(True, single_site.metrics_content_type_enabled)
+        self.assertEqual(False, single_site.notify_site_admins_on_throttle)
+        self.assertEqual(True, single_site.authoring_enabled)
+        self.assertEqual(True, single_site.custom_subscription_email_enabled)
+        self.assertEqual('test@test.com', single_site.custom_subscription_email)
+        self.assertEqual(True, single_site.custom_subscription_footer_enabled)
+        self.assertEqual('example_footer', single_site.custom_subscription_footer)
+        self.assertEqual('EnabledByDefault', single_site.ask_data_mode)
+        self.assertEqual(False, single_site.named_sharing_enabled)
+        self.assertEqual(True, single_site.mobile_biometrics_enabled)
+        self.assertEqual(False, single_site.sheet_image_enabled)
+        self.assertEqual(True, single_site.derived_permissions_enabled)
+        self.assertEqual('FULL', single_site.user_visibility_mode)
+        self.assertEqual(False, single_site.use_default_time_zone)
+        self.assertEqual('America/Los_Angeles', single_site.time_zone)
+        self.assertEqual(True, single_site.auto_suspend_refresh_enabled)
+        self.assertEqual(55, single_site.auto_suspend_refresh_inactivity_window)
 
     def test_update_missing_id(self):
         single_site = TSC.SiteItem('test', 'test')

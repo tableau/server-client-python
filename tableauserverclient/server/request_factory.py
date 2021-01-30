@@ -481,10 +481,6 @@ class SiteRequest(object):
             site_element.attrib['cacheWarmupEnabled'] = str(site_item.cache_warmup_enabled).lower()
         if site_item.commenting_enabled is not None:
             site_element.attrib['commentingEnabled'] = str(site_item.commenting_enabled).lower()
-        if site_item.revision_history_enabled is not None:
-            site_element.attrib['revisionHistoryEnabled'] = str(site_item.revision_history_enabled).lower()
-        if site_item.revision_limit is not None:
-            site_element.attrib['revisionLimit'] = str(site_item.revision_limit).lower()
         if site_item.subscribe_others_enabled is not None:
             site_element.attrib['subscribeOthersEnabled'] = str(site_item.subscribe_others_enabled).lower()
         if site_item.extract_encryption_mode is not None:
@@ -493,8 +489,6 @@ class SiteRequest(object):
             site_element.attrib['requestAccessEnabled'] = str(site_item.request_access_enabled).lower()
         if site_item.run_now_enabled is not None:
             site_element.attrib['runNowEnabled'] = str(site_item.run_now_enabled).lower()
-        if site_item.user_quota is not None:
-            site_element.attrib['userQuota'] = str(site_item.user_quota).lower()
         if site_item.tier_creator_capacity is not None:
             site_element.attrib['tierCreatorCapacity'] = str(site_item.tier_creator_capacity).lower()
         if site_item.tier_explorer_capacity is not None:
@@ -502,7 +496,7 @@ class SiteRequest(object):
         if site_item.tier_viewer_capacity is not None:
             site_element.attrib['tierViewerCapacity'] = str(site_item.tier_viewer_capacity).lower()
         if site_item.data_alerts_enabled is not None:
-            site_element.attrib['dataAlertsEnabled'] = str(site_item.data_alerts_enabled).lower()
+            site_element.attrib['dataAlertsEnabled'] = str(site_item.data_alerts_enabled)
         if site_item.commenting_mentions_enabled is not None:
             site_element.attrib['commentingMentionsEnabled'] = str(site_item.commenting_mentions_enabled).lower()
         if site_item.catalog_obfuscation_enabled is not None:
@@ -530,7 +524,7 @@ class SiteRequest(object):
         if site_item.custom_subscription_footer is not None:
             site_element.attrib['customSubscriptionFooter'] = str(site_item.custom_subscription_footer).lower()
         if site_item.ask_data_mode is not None:
-            site_element.attrib['askDataMode'] = str(site_item.ask_data_mode).lower()
+            site_element.attrib['askDataMode'] = str(site_item.ask_data_mode)
         if site_item.named_sharing_enabled is not None:
             site_element.attrib['namedSharingEnabled'] = str(site_item.named_sharing_enabled).lower()
         if site_item.mobile_biometrics_enabled is not None:
@@ -542,16 +536,16 @@ class SiteRequest(object):
         if site_item.derived_permissions_enabled is not None:
             site_element.attrib['derivedPermissionsEnabled'] = str(site_item.derived_permissions_enabled).lower()
         if site_item.user_visibility_mode is not None:
-            site_element.attrib['userVisibilityMode'] = str(site_item.user_visibility_mode).lower()
+            site_element.attrib['userVisibilityMode'] = str(site_item.user_visibility_mode)
         if site_item.use_default_time_zone is not None:
             site_element.attrib['useDefaultTimeZone'] = str(site_item.use_default_time_zone).lower()
         if site_item.time_zone is not None:
-            site_element.attrib['timeZone'] = str(site_item.time_zone).lower()
+            site_element.attrib['timeZone'] = str(site_item.time_zone)
         if site_item.auto_suspend_refresh_enabled is not None:
             site_element.attrib['autoSuspendRefreshEnabled'] = str(site_item.auto_suspend_refresh_enabled).lower()
         if site_item.auto_suspend_refresh_inactivity_window is not None:
             site_element.attrib['autoSuspendRefreshInactivityWindow'] =\
-                str(site_item.auto_suspend_refresh_inactivity_window).lower()
+                str(site_item.auto_suspend_refresh_inactivity_window)
 
         return ET.tostring(xml_request)
 
@@ -641,7 +635,7 @@ class SiteRequest(object):
         if site_item.custom_subscription_footer is not None:
             site_element.attrib['customSubscriptionFooter'] = str(site_item.custom_subscription_footer).lower()
         if site_item.ask_data_mode is not None:
-            site_element.attrib['askDataMode'] = str(site_item.ask_data_mode).lower()
+            site_element.attrib['askDataMode'] = str(site_item.ask_data_mode)
         if site_item.named_sharing_enabled is not None:
             site_element.attrib['namedSharingEnabled'] = str(site_item.named_sharing_enabled).lower()
         if site_item.mobile_biometrics_enabled is not None:
@@ -653,16 +647,16 @@ class SiteRequest(object):
         if site_item.derived_permissions_enabled is not None:
             site_element.attrib['derivedPermissionsEnabled'] = str(site_item.derived_permissions_enabled).lower()
         if site_item.user_visibility_mode is not None:
-            site_element.attrib['userVisibilityMode'] = str(site_item.user_visibility_mode).lower()
+            site_element.attrib['userVisibilityMode'] = str(site_item.user_visibility_mode)
         if site_item.use_default_time_zone is not None:
             site_element.attrib['useDefaultTimeZone'] = str(site_item.use_default_time_zone).lower()
         if site_item.time_zone is not None:
-            site_element.attrib['timeZone'] = str(site_item.time_zone).lower()
+            site_element.attrib['timeZone'] = str(site_item.time_zone)
         if site_item.auto_suspend_refresh_enabled is not None:
             site_element.attrib['autoSuspendRefreshEnabled'] = str(site_item.auto_suspend_refresh_enabled).lower()
         if site_item.auto_suspend_refresh_inactivity_window is not None:
             site_element.attrib['autoSuspendRefreshInactivityWindow'] =\
-                str(site_item.auto_suspend_refresh_inactivity_window).lower()
+                str(site_item.auto_suspend_refresh_inactivity_window)
 
         return ET.tostring(xml_request)
 
