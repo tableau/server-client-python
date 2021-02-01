@@ -60,7 +60,7 @@ class Groups(Endpoint):
 
     @api(version="2.0")
     def update(self, group_item: GroupItem,
-               default_site_role: UserItem.Roles = UNLICENSED_USER,
+               default_site_role: UserItem.Roles = None,
                as_job: bool = False) -> Union[JobItem, GroupItem]:
         # (1/8/2021): Deprecated starting v0.15
         if default_site_role is not None:
