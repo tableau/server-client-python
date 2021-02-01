@@ -16,11 +16,11 @@ OK = AddResponse(result=True, error=None, warnings=None, task_created=None)
 
 class Schedules(Endpoint):
     @property
-    def baseurl(self):
+    def baseurl(self) -> str:
         return "{0}/schedules".format(self.parent_srv.baseurl)
 
     @property
-    def siteurl(self):
+    def siteurl(self) -> str:
         return "{0}/sites/{1}/schedules".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     @api(version="2.3")
@@ -33,7 +33,7 @@ class Schedules(Endpoint):
         return all_schedule_items, pagination_item
 
     @api(version="2.3")
-    def delete(self, schedule_id: str):
+    def delete(self, schedule_id: str) -> None:
         if not schedule_id:
             error = "Schedule ID undefined"
             raise ValueError(error)

@@ -1,9 +1,12 @@
 import xml.etree.ElementTree as ET
+from typing import Dict, List, Tuple, TypeVar
 
 from .permissions_item import Permission
 
 from .property_decorators import property_is_enum, property_not_empty
 from .exceptions import UnpopulatedPropertyError
+
+T = TypeVar('T', bound='ProjectItem')
 
 
 class ProjectItem(object):
@@ -105,7 +108,7 @@ class ProjectItem(object):
         setattr(self, "_default_{content}_permissions".format(content=content_type), permissions)
 
     @classmethod
-    def from_response(cls, resp, ns):
+    def from_response(cls, resp: str, ns: Dict) -> List[T]:
         all_project_items = list()
         parsed_response = ET.fromstring(resp)
         all_project_xml = parsed_response.findall('.//t:project', namespaces=ns)
@@ -118,7 +121,7 @@ class ProjectItem(object):
         return all_project_items
 
     @staticmethod
-    def _parse_element(project_xml):
+    def _parse_element(project_xml: ET.ElementTree) -> Tuple:
         id = project_xml.get('id', None)
         name = project_xml.get('name', None)
         description = project_xml.get('description', None)

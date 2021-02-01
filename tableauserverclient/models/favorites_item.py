@@ -1,9 +1,11 @@
 import xml.etree.ElementTree as ET
 import logging
+from typing import Dict, List
 from .workbook_item import WorkbookItem
 from .view_item import ViewItem
 from .project_item import ProjectItem
 from .datasource_item import DatasourceItem
+
 
 logger = logging.getLogger('tableau.models.favorites_item')
 
@@ -16,7 +18,7 @@ class FavoriteItem:
         Project = 'project'
 
     @classmethod
-    def from_response(cls, xml, namespace):
+    def from_response(cls, xml: str, namespace: Dict) -> Dict[str, List]:
         favorites = {
             'datasources': [],
             'projects':    [],

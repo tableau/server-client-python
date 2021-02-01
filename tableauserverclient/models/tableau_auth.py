@@ -1,5 +1,8 @@
+from typing import Dict
+
+
 class TableauAuth(object):
-    def __init__(self, username, password, site=None, site_id='', user_id_to_impersonate=None):
+    def __init__(self, username: str, password: str, site=None, site_id: str = '', user_id_to_impersonate: str = None):
         if site is not None:
             import warnings
             warnings.warn('TableauAuth(...site=""...) is deprecated, '
@@ -13,19 +16,19 @@ class TableauAuth(object):
         self.username = username
 
     @property
-    def site(self):
+    def site(self) -> str:
         import warnings
         warnings.warn('TableauAuth.site is deprecated, use TableauAuth.site_id instead.',
                       DeprecationWarning)
         return self.site_id
 
     @site.setter
-    def site(self, value):
+    def site(self, value: str):
         import warnings
         warnings.warn('TableauAuth.site is deprecated, use TableauAuth.site_id instead.',
                       DeprecationWarning)
         self.site_id = value
 
     @property
-    def credentials(self):
+    def credentials(self) -> Dict[str, str]:
         return {'name': self.username, 'password': self.password}

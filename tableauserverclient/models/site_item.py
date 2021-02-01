@@ -2,6 +2,9 @@ import xml.etree.ElementTree as ET
 from .property_decorators import (property_is_enum, property_is_boolean, property_matches,
                                   property_not_empty, property_not_nullable, property_is_int)
 
+from typing import List, Mapping, TypeVar
+
+T = TypeVar('T', bound='SiteItem')
 
 VALID_CONTENT_URL_RE = r"^[a-zA-Z0-9_\-]*$"
 
@@ -15,9 +18,12 @@ class SiteItem(object):
         Active = 'Active'
         Suspended = 'Suspended'
 
-    def __init__(self, name, content_url, admin_mode=None, user_quota=None, storage_quota=None,
-                 disable_subscriptions=False, subscribe_others_enabled=True, revision_history_enabled=False,
-                 revision_limit=None, data_acceleration_mode=None, flows_enabled=None, cataloging_enabled=None):
+    def __init__(self, name: str, content_url: str, admin_mode: 'SiteItem.AdminMode' = None,
+                 user_quota: int = None, storage_quota=None,
+                 disable_subscriptions: bool = False, subscribe_others_enabled: bool = True,
+                 revision_history_enabled: bool = False, revision_limit: int = None,
+                 data_acceleration_mode=None, flows_enabled: bool = None,
+                 cataloging_enabled: bool = None):
         self._admin_mode = None
         self._id = None
         self._num_users = None
@@ -38,75 +44,75 @@ class SiteItem(object):
         self.flows_enabled = flows_enabled
 
     @property
-    def admin_mode(self):
+    def admin_mode(self) -> 'SiteItem.AdminMode':
         return self._admin_mode
 
     @admin_mode.setter
     @property_is_enum(AdminMode)
-    def admin_mode(self, value):
+    def admin_mode(self, value: 'SiteItem.AdminMode'):
         self._admin_mode = value
 
     @property
-    def content_url(self):
+    def content_url(self) -> str:
         return self._content_url
 
     @content_url.setter
     @property_not_nullable
     @property_matches(VALID_CONTENT_URL_RE, "content_url can contain only letters, numbers, dashes, and underscores")
-    def content_url(self, value):
+    def content_url(self, value: str):
         self._content_url = value
 
     @property
-    def disable_subscriptions(self):
+    def disable_subscriptions(self) -> bool:
         return self._disable_subscriptions
 
     @disable_subscriptions.setter
     @property_is_boolean
-    def disable_subscriptions(self, value):
+    def disable_subscriptions(self, value: bool):
         self._disable_subscriptions = value
 
     @property
-    def id(self):
+    def id(self) -> str:
         return self._id
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @name.setter
     @property_not_empty
-    def name(self, value):
+    def name(self, value: str):
         self._name = value
 
     @property
-    def num_users(self):
+    def num_users(self) -> bool:
         return self._num_users
 
     @property
-    def revision_history_enabled(self):
+    def revision_history_enabled(self) -> bool:
         return self._revision_history_enabled
 
     @revision_history_enabled.setter
     @property_is_boolean
-    def revision_history_enabled(self, value):
+    def revision_history_enabled(self, value: bool):
         self._revision_history_enabled = value
 
     @property
-    def revision_limit(self):
+    def revision_limit(self) -> int:
         return self._revision_limit
 
     @revision_limit.setter
     @property_is_int((2, 10000), allowed=[-1])
-    def revision_limit(self, value):
+    def revision_limit(self, value: int):
         self._revision_limit = value
 
     @property
-    def state(self):
+    def state(self) -> 'SiteItem.State':
         return self._state
 
     @state.setter
     @property_is_enum(State)
-    def state(self, value):
+    def state(self, value: 'SiteItem.State'):
         self._state = value
 
     @property
@@ -118,42 +124,42 @@ class SiteItem(object):
         return self._storage
 
     @property
-    def subscribe_others_enabled(self):
+    def subscribe_others_enabled(self) -> bool:
         return self._subscribe_others_enabled
 
     @subscribe_others_enabled.setter
     @property_is_boolean
-    def subscribe_others_enabled(self, value):
+    def subscribe_others_enabled(self, value: bool):
         self._subscribe_others_enabled = value
 
     @property
-    def data_acceleration_mode(self):
+    def data_acceleration_mode(self) -> bool:
         return self._data_acceleration_mode
 
     @data_acceleration_mode.setter
-    def data_acceleration_mode(self, value):
+    def data_acceleration_mode(self, value: str):
         self._data_acceleration_mode = value
 
     @property
-    def cataloging_enabled(self):
+    def cataloging_enabled(self) -> bool:
         return self._cataloging_enabled
 
     @cataloging_enabled.setter
-    def cataloging_enabled(self, value):
+    def cataloging_enabled(self, value: bool):
         self._cataloging_enabled = value
 
     @property
-    def flows_enabled(self):
+    def flows_enabled(self) -> bool:
         return self._flows_enabled
 
     @flows_enabled.setter
-    def flows_enabled(self, value):
+    def flows_enabled(self, value: bool):
         self._flows_enabled = value
 
-    def is_default(self):
+    def is_default(self) -> bool:
         return self.name.lower() == 'default'
 
-    def _parse_common_tags(self, site_xml, ns):
+    def _parse_common_tags(self, site_xml: ET.ElementTree, ns: Mapping):
         if not isinstance(site_xml, ET.Element):
             site_xml = ET.fromstring(site_xml).find('.//t:site', namespaces=ns)
         if site_xml is not None:
@@ -208,7 +214,7 @@ class SiteItem(object):
             self.cataloging_enabled = cataloging_enabled
 
     @classmethod
-    def from_response(cls, resp, ns):
+    def from_response(cls, resp: str, ns: Mapping) -> List[T]:
         all_site_items = list()
         parsed_response = ET.fromstring(resp)
         all_site_xml = parsed_response.findall('.//t:site', namespaces=ns)
@@ -227,7 +233,7 @@ class SiteItem(object):
         return all_site_items
 
     @staticmethod
-    def _parse_element(site_xml, ns):
+    def _parse_element(site_xml: ET.ElementTree, ns: Mapping):
         id = site_xml.get('id', None)
         name = site_xml.get('name', None)
         content_url = site_xml.get('contentUrl', None)
@@ -268,5 +274,5 @@ class SiteItem(object):
 
 
 # Used to convert string represented boolean to a boolean type
-def string_to_bool(s):
+def string_to_bool(s: str) -> bool:
     return s.lower() == 'true'

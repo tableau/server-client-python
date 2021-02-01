@@ -1,5 +1,8 @@
 import xml.etree.ElementTree as ET
 from ..datetime_helpers import parse_datetime
+from typing import Dict, List, Tuple, TypeVar
+
+T = TypeVar('T', bound='JobItem')
 
 
 class JobItem(object):
@@ -52,7 +55,7 @@ class JobItem(object):
         return self._mode
 
     @mode.setter
-    def mode(self, value):
+    def mode(self, value: str):
         # check for valid data here
         self._mode = value
 
@@ -61,7 +64,7 @@ class JobItem(object):
                " progress ({_progress}) finish_code({_finish_code})>".format(**self.__dict__)
 
     @classmethod
-    def from_response(cls, xml, ns):
+    def from_response(cls, xml: str, ns: Dict) -> List[T]:
         parsed_response = ET.fromstring(xml)
         all_tasks_xml = parsed_response.findall(
             './/t:job', namespaces=ns)
@@ -71,7 +74,7 @@ class JobItem(object):
         return all_tasks
 
     @classmethod
-    def _parse_element(cls, element, ns):
+    def _parse_element(cls, element: ET.ElementTree, ns: Dict) -> Tuple:
         id_ = element.get('id', None)
         type_ = element.get('type', None)
         progress = element.get('progress', None)
@@ -85,6 +88,9 @@ class JobItem(object):
         return cls(id_, type_, progress, created_at, started_at, completed_at, finish_code, notes, mode)
 
 
+B = TypeVar('B', bound='BackgroundJobItem')
+
+
 class BackgroundJobItem(object):
     class Status:
         Pending = "Pending"
@@ -94,7 +100,7 @@ class BackgroundJobItem(object):
         Cancelled = "Cancelled"
 
     def __init__(self, id_, created_at, priority, job_type, status, title=None, subtitle=None, started_at=None,
-                 ended_at=None):
+                 ended_at=None) -> B:
         self._id = id_
         self._type = job_type
         self._status = status
@@ -148,14 +154,14 @@ class BackgroundJobItem(object):
         return self._priority
 
     @classmethod
-    def from_response(cls, xml, ns):
+    def from_response(cls, xml: str, ns: Dict) -> List[B]:
         parsed_response = ET.fromstring(xml)
         all_tasks_xml = parsed_response.findall(
             './/t:backgroundJob', namespaces=ns)
         return [cls._parse_element(x, ns) for x in all_tasks_xml]
 
     @classmethod
-    def _parse_element(cls, element, ns):
+    def _parse_element(cls, element: ET.ElementTree, ns: Dict) -> Tuple:
         id_ = element.get('id', None)
         type_ = element.get('jobType', None)
         status = element.get('status', None)

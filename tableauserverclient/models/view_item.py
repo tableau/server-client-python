@@ -1,12 +1,15 @@
 import xml.etree.ElementTree as ET
-from ..datetime_helpers import parse_datetime
+from ..datetime_helpers import parse_datetime, datetime
 from .exceptions import UnpopulatedPropertyError
 from .tag_item import TagItem
 import copy
+from typing import List, Mapping, TypeVar
+
+T = TypeVar('T', bound='ViewItem')
 
 
 class ViewItem(object):
-    def __init__(self):
+    def __init__(self) -> T:
         self._content_url = None
         self._created_at = None
         self._id = None
@@ -46,7 +49,7 @@ class ViewItem(object):
         return self._created_at
 
     @property
-    def id(self):
+    def id(self) -> str:
         return self._id
 
     @property
@@ -72,7 +75,7 @@ class ViewItem(object):
         return self._preview_image()
 
     @property
-    def project_id(self):
+    def project_id(self) -> str:
         return self._project_id
 
     @property
@@ -94,22 +97,22 @@ class ViewItem(object):
         return self._sheet_type
 
     @property
-    def total_views(self):
+    def total_views(self) -> int:
         if self._total_views is None:
             error = "Usage statistics must be requested when querying for view."
             raise UnpopulatedPropertyError(error)
         return self._total_views
 
     @property
-    def updated_at(self):
+    def updated_at(self) -> datetime.datetime:
         return self._updated_at
 
     @property
-    def workbook_id(self):
+    def workbook_id(self) -> str:
         return self._workbook_id
 
     @property
-    def permissions(self):
+    def permissions(self) -> List['PermissionRule']:
         if self._permissions is None:
             error = "View item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
@@ -119,11 +122,11 @@ class ViewItem(object):
         self._permissions = permissions
 
     @classmethod
-    def from_response(cls, resp, ns, workbook_id=''):
+    def from_response(cls, resp: str, ns: Mapping, workbook_id: str = '') -> List[T]:
         return cls.from_xml_element(ET.fromstring(resp), ns, workbook_id)
 
     @classmethod
-    def from_xml_element(cls, parsed_response, ns, workbook_id=''):
+    def from_xml_element(cls, parsed_response: ET.ElementTree, ns: Mapping, workbook_id: str = '') -> List[T]:
         all_view_items = list()
         all_view_xml = parsed_response.findall('.//t:view', namespaces=ns)
         for view_xml in all_view_xml:

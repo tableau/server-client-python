@@ -1,9 +1,12 @@
 import xml.etree.ElementTree as ET
 from .connection_credentials import ConnectionCredentials
+from typing import List, Dict, Type, TypeVar
+
+T = TypeVar('T', bound='ConnectionItem')
 
 
 class ConnectionItem(object):
-    def __init__(self):
+    def __init__(self) -> T:
         self._datasource_id = None
         self._datasource_name = None
         self._id = None
@@ -38,7 +41,7 @@ class ConnectionItem(object):
         )
 
     @classmethod
-    def from_response(cls, resp, ns):
+    def from_response(cls: Type, resp: str, ns: Dict) -> List[T]:
         all_connection_items = list()
         parsed_response = ET.fromstring(resp)
         all_connection_xml = parsed_response.findall('.//t:connection', namespaces=ns)
@@ -58,7 +61,8 @@ class ConnectionItem(object):
         return all_connection_items
 
     @classmethod
-    def from_xml_element(cls, parsed_response, ns):
+    def from_xml_element(cls, parsed_response: ET.ElementTree,
+                         ns: Dict) -> List[T]:
         '''
         <connections>
             <connection serverAddress="mysql.test.com">
@@ -90,5 +94,5 @@ class ConnectionItem(object):
 
 
 # Used to convert string represented boolean to a boolean type
-def string_to_bool(s):
+def string_to_bool(s: str) -> bool:
     return s.lower() == 'true'

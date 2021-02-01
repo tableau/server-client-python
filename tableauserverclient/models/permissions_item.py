@@ -1,11 +1,15 @@
 import xml.etree.ElementTree as ET
 import logging
 
+from typing import Dict, Iterable, List, TypeVar, Union
+
 from .exceptions import UnknownGranteeTypeError
 from .user_item import UserItem
 from .group_item import GroupItem
+from .reference_item import ResourceReference
 
 logger = logging.getLogger('tableau.models.permissions_item')
+T = TypeVar('T', bound='PermissionRule')
 
 
 class Permission:
@@ -44,12 +48,13 @@ class Permission:
 
 class PermissionsRule(object):
 
-    def __init__(self, grantee, capabilities):
+    def __init__(self, grantee: ResourceReference,
+                 capabilities: Dict[Permission.Capability, Permission.Mode]) -> T:
         self.grantee = grantee
         self.capabilities = capabilities
 
     @classmethod
-    def from_response(cls, resp, ns=None):
+    def from_response(cls, resp: str, ns: Dict = None) -> List[T]:
         parsed_response = ET.fromstring(resp)
 
         rules = []

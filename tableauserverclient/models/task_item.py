@@ -2,6 +2,11 @@ import xml.etree.ElementTree as ET
 from .target import Target
 from .schedule_item import ScheduleItem
 from ..datetime_helpers import parse_datetime
+import datetime
+
+from typing import List, Mapping, TypeVar
+
+T = TypeVar('T', bound='TaskItem')
 
 
 class TaskItem(object):
@@ -9,8 +14,9 @@ class TaskItem(object):
         ExtractRefresh = "extractRefresh"
         DataAcceleration = "dataAcceleration"
 
-    def __init__(self, id_, task_type, priority, consecutive_failed_count=0, schedule_id=None,
-                 schedule_item=None, last_run_at=None, target=None):
+    def __init__(self, id_: str, task_type: 'TaskItem.Type', priority: int, consecutive_failed_count: int = 0,
+                 schedule_id: str = None, schedule_item: ScheduleItem = None,
+                 last_run_at: datetime.datetime = None, target: Target = None) -> T:
         self.id = id_
         self.task_type = task_type
         self.priority = priority
@@ -20,12 +26,12 @@ class TaskItem(object):
         self.last_run_at = last_run_at
         self.target = target
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<Task#{id} {task_type} pri({priority}) failed({consecutive_failed_count}) schedule_id({" \
                "schedule_id}) target({target})>".format(**self.__dict__)
 
     @classmethod
-    def from_response(cls, xml, ns, task_type=Type.ExtractRefresh):
+    def from_response(cls, xml: str, ns: Mapping, task_type: 'TaskItem.Type' = Type.ExtractRefresh) -> List[T]:
         parsed_response = ET.fromstring(xml)
         all_tasks_xml = parsed_response.findall(
             './/t:task/t:{}'.format(task_type), namespaces=ns)
@@ -35,7 +41,7 @@ class TaskItem(object):
         return list(all_tasks)
 
     @classmethod
-    def _parse_element(cls, element, ns):
+    def _parse_element(cls, element: ET.ElementTree, ns: Mapping) -> tuple:
         schedule_item = None
         target = None
         last_run_at = None

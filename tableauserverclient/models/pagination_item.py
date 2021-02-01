@@ -1,4 +1,7 @@
 import xml.etree.ElementTree as ET
+from typing import Dict, List, TypeVar
+
+T = TypeVar('T', bound='PaginationItem')
 
 
 class PaginationItem(object):
@@ -20,7 +23,7 @@ class PaginationItem(object):
         return self._total_available
 
     @classmethod
-    def from_response(cls, resp, ns):
+    def from_response(cls, resp: str, ns: Dict) -> T:
         parsed_response = ET.fromstring(resp)
         pagination_xml = parsed_response.find('t:pagination', namespaces=ns)
         pagination_item = cls()

@@ -4,12 +4,15 @@ from .property_decorators import property_not_nullable, property_is_boolean, pro
 from .tag_item import TagItem
 from .view_item import ViewItem
 from .permissions_item import PermissionsRule
-from ..datetime_helpers import parse_datetime
+from ..datetime_helpers import parse_datetime, datetime
 import copy
+from typing import Dict, List, Mapping, TypeVar, Union
+
+T = TypeVar('T', bound='WorkbookItem')
 
 
 class WorkbookItem(object):
-    def __init__(self, project_id, name=None, show_tabs=False):
+    def __init__(self, project_id: str, name: str = None, show_tabs: bool = False):
         self._connections = None
         self._content_url = None
         self._webpage_url = None
@@ -35,37 +38,37 @@ class WorkbookItem(object):
         self._permissions = None
 
     @property
-    def connections(self):
+    def connections(self) -> List['ConnectionItem']:
         if self._connections is None:
             error = "Workbook item must be populated with connections first."
             raise UnpopulatedPropertyError(error)
         return self._connections()
 
     @property
-    def permissions(self):
+    def permissions(self) -> List['PermissionRule']:
         if self._permissions is None:
             error = "Workbook item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
         return self._permissions()
 
     @property
-    def content_url(self):
+    def content_url(self) -> str:
         return self._content_url
 
     @property
-    def webpage_url(self):
+    def webpage_url(self) -> str:
         return self._webpage_url
 
     @property
-    def created_at(self):
+    def created_at(self) -> datetime.datetime:
         return self._created_at
 
     @property
-    def description(self):
+    def description(self) -> str:
         return self._description
 
     @property
-    def id(self):
+    def id(self) -> str:
         return self._id
 
     @property
@@ -83,37 +86,37 @@ class WorkbookItem(object):
         return self._preview_image()
 
     @property
-    def project_id(self):
+    def project_id(self) -> str:
         return self._project_id
 
     @project_id.setter
     @property_not_nullable
-    def project_id(self, value):
+    def project_id(self, value: str):
         self._project_id = value
 
     @property
-    def project_name(self):
+    def project_name(self) -> str:
         return self._project_name
 
     @property
-    def show_tabs(self):
+    def show_tabs(self) -> bool:
         return self._show_tabs
 
     @show_tabs.setter
     @property_is_boolean
-    def show_tabs(self, value):
+    def show_tabs(self, value: bool):
         self._show_tabs = value
 
     @property
-    def size(self):
+    def size(self) -> int:
         return self._size
 
     @property
-    def updated_at(self):
+    def updated_at(self) -> datetime.datetime:
         return self._updated_at
 
     @property
-    def views(self):
+    def views(self) -> List['ViewItem']:
         # Views can be set in an initial workbook response OR by a call
         # to Server. Without getting too fancy, I think we can rely on
         # returning a list from the response, until they call
@@ -138,13 +141,13 @@ class WorkbookItem(object):
     def data_acceleration_config(self, value):
         self._data_acceleration_config = value
 
-    def _set_connections(self, connections):
+    def _set_connections(self, connections: List['ConnectionItem']):
         self._connections = connections
 
-    def _set_permissions(self, permissions):
+    def _set_permissions(self, permissions: List['PermissionRule']):
         self._permissions = permissions
 
-    def _set_views(self, views):
+    def _set_views(self, views: List['ViewItem']):
         self._views = views
 
     def _set_pdf(self, pdf):
@@ -153,7 +156,7 @@ class WorkbookItem(object):
     def _set_preview_image(self, preview_image):
         self._preview_image = preview_image
 
-    def _parse_common_tags(self, workbook_xml, ns):
+    def _parse_common_tags(self, workbook_xml: Union[str, ET.ElementTree], ns: Mapping) -> T:
         if not isinstance(workbook_xml, ET.Element):
             workbook_xml = ET.fromstring(workbook_xml).find('.//t:workbook', namespaces=ns)
         if workbook_xml is not None:
@@ -203,7 +206,7 @@ class WorkbookItem(object):
             self.data_acceleration_config = data_acceleration_config
 
     @classmethod
-    def from_response(cls, resp, ns):
+    def from_response(cls, resp: str, ns: Mapping) -> List[T]:
         all_workbook_items = list()
         parsed_response = ET.fromstring(resp)
         all_workbook_xml = parsed_response.findall('.//t:workbook', namespaces=ns)
@@ -220,7 +223,7 @@ class WorkbookItem(object):
         return all_workbook_items
 
     @staticmethod
-    def _parse_element(workbook_xml, ns):
+    def _parse_element(workbook_xml: ET.ElementTree, ns: Mapping) -> tuple:
         id = workbook_xml.get('id', None)
         name = workbook_xml.get('name', None)
         content_url = workbook_xml.get('contentUrl', None)
@@ -268,7 +271,7 @@ class WorkbookItem(object):
             project_id, project_name, owner_id, tags, views, data_acceleration_config
 
 
-def parse_data_acceleration_config(data_acceleration_elem):
+def parse_data_acceleration_config(data_acceleration_elem: ET.ElementTree) -> Dict:
     data_acceleration_config = dict()
 
     acceleration_enabled = data_acceleration_elem.get('accelerationEnabled', None)

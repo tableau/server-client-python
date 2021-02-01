@@ -3,13 +3,18 @@ import xml.etree.ElementTree as ET
 from .property_decorators import property_is_enum, property_not_empty, property_is_boolean
 from .exceptions import UnpopulatedPropertyError
 
+from typing import List, Dict, Tuple, TypeVar
+
+T = TypeVar('T', bound='DatabaseItem')
+
 
 class DatabaseItem(object):
     class ContentPermissions:
         LockedToProject = 'LockedToDatabase'
         ManagedByOwner = 'ManagedByOwner'
 
-    def __init__(self, name, description=None, content_permissions=None):
+    def __init__(self, name: str, description: str = None,
+                 content_permissions: 'DatabaseItem.ContentPermissions' = None) -> T:
         self._id = None
         self.name = name
         self.description = description
@@ -56,7 +61,7 @@ class DatabaseItem(object):
 
     @content_permissions.setter
     @property_is_enum(ContentPermissions)
-    def content_permissions(self, value):
+    def content_permissions(self, value: 'DatabaseItem.ContentPermissions'):
         self._content_permissions = value
 
     @property
@@ -69,7 +74,7 @@ class DatabaseItem(object):
 
     @name.setter
     @property_not_empty
-    def name(self, value):
+    def name(self, value: str):
         self._name = value
 
     @property
@@ -77,7 +82,7 @@ class DatabaseItem(object):
         return self._description
 
     @description.setter
-    def description(self, value):
+    def description(self, value: str):
         self._description = value
 
     @property
@@ -90,7 +95,7 @@ class DatabaseItem(object):
 
     @certified.setter
     @property_is_boolean
-    def certified(self, value):
+    def certified(self, value: bool):
         self._certified = value
 
     @property
@@ -150,7 +155,7 @@ class DatabaseItem(object):
         return self._contact_id
 
     @contact_id.setter
-    def contact_id(self, value):
+    def contact_id(self, value: str):
         self._contact_id = value
 
     @property
@@ -232,7 +237,7 @@ class DatabaseItem(object):
         setattr(self, "_default_{content}_permissions".format(content=content_type), permissions)
 
     @classmethod
-    def from_response(cls, resp, ns):
+    def from_response(cls, resp: str, ns: Dict) -> List[T]:
         all_database_items = list()
         parsed_response = ET.fromstring(resp)
         all_database_xml = parsed_response.findall('.//t:database', namespaces=ns)
@@ -245,7 +250,7 @@ class DatabaseItem(object):
         return all_database_items
 
     @staticmethod
-    def _parse_element(database_xml, ns):
+    def _parse_element(database_xml: ET.ElementTree, ns: Dict) -> Dict:
         database_values = database_xml.attrib.copy()
         contact = database_xml.find('.//t:contact', namespaces=ns)
         if contact is not None:
@@ -254,5 +259,5 @@ class DatabaseItem(object):
 
 
 # Used to convert string represented boolean to a boolean type
-def string_to_bool(s):
+def string_to_bool(s: str) -> bool:
     return s.lower() == 'true'

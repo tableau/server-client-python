@@ -4,7 +4,7 @@ from .permissions_endpoint import _PermissionsEndpoint
 from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, FlowItem, PaginationItem, ConnectionItem, \
-               RequestOptions, Server, PermissionsRule
+               RequestOptions, PermissionsRule
 from ...filesys_helpers import to_filename, make_download_path
 from ...models.job_item import JobItem
 
@@ -145,7 +145,7 @@ class Flows(Endpoint):
     # Publish flow
     @api(version="3.3")
     def publish(self, flow_item: FlowItem, file_path: str,
-                mode: Server.PublishMode,
+                mode: 'Server.PublishMode',
                 connections: Iterable[ConnectionItem] = None) -> FlowItem:
         if not os.path.isfile(file_path):
             error = "File path does not lead to an existing file."

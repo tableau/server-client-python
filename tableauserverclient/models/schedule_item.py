@@ -4,6 +4,9 @@ from datetime import datetime
 from .interval_item import IntervalItem, HourlyInterval, DailyInterval, WeeklyInterval, MonthlyInterval
 from .property_decorators import property_is_enum, property_not_nullable, property_is_int
 from ..datetime_helpers import parse_datetime
+from typing import TypeVar
+
+T = TypeVar('T', bound='ScheduleItem')
 
 
 class ScheduleItem(object):
@@ -21,7 +24,9 @@ class ScheduleItem(object):
         Active = "Active"
         Suspended = "Suspended"
 
-    def __init__(self, name, priority, schedule_type, execution_order, interval_item):
+    def __init__(self, name: str, priority: int, schedule_type: 'ScheduleItem.Type',
+                 execution_order: 'ScheduleItem.ExecutionOrder',
+                 interval_item: 'ScheduleItem.IntervalItem') -> T:
         self._created_at = None
         self._end_schedule_at = None
         self._id = None

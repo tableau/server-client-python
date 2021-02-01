@@ -1,4 +1,8 @@
 from .property_decorators import property_is_boolean
+import xml.etree.ElementTree as ET
+from typing import Dict, TypeVar
+
+T = TypeVar('T', bound='ConnectionCredentials')
 
 
 class ConnectionCredentials(object):
@@ -9,7 +13,8 @@ class ConnectionCredentials(object):
 
     """
 
-    def __init__(self, name, password, embed=True, oauth=False):
+    def __init__(self, name: str, password: str, embed: bool = True,
+                 oauth: bool = False) -> T:
         self.name = name
         self.password = password
         self.embed = embed
@@ -21,7 +26,7 @@ class ConnectionCredentials(object):
 
     @embed.setter
     @property_is_boolean
-    def embed(self, value):
+    def embed(self, value: bool):
         self._embed = value
 
     @property
@@ -30,11 +35,11 @@ class ConnectionCredentials(object):
 
     @oauth.setter
     @property_is_boolean
-    def oauth(self, value):
+    def oauth(self, value: bool):
         self._oauth = value
 
     @classmethod
-    def from_xml_element(cls, parsed_response, ns):
+    def from_xml_element(cls, parsed_response: ET.ElementTree, ns: Dict) -> T:
         connection_creds_xml = parsed_response.find('.//t:connectionCredentials', namespaces=ns)
 
         name = connection_creds_xml.get('name', None)

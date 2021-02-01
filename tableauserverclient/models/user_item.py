@@ -1,8 +1,12 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_is_enum, property_not_empty, property_not_nullable
-from ..datetime_helpers import parse_datetime
+from ..datetime_helpers import parse_datetime, datetime
 from .reference_item import ResourceReference
+
+from typing import Dict, List, Mapping, TypeVar, Union
+
+T = TypeVar('T', bound='UserItem')
 
 
 class UserItem(object):
@@ -35,7 +39,8 @@ class UserItem(object):
         SAML = 'SAML'
         ServerDefault = 'ServerDefault'
 
-    def __init__(self, name=None, site_role=None, auth_setting=None):
+    def __init__(self, name: str = None, site_role: 'UserItem.Roles' = None,
+                 auth_setting: 'UserItem.Auth' = None) -> T:
         self._auth_setting = None
         self._domain_name = None
         self._external_auth_user_id = None
@@ -50,70 +55,70 @@ class UserItem(object):
         self.auth_setting = auth_setting
 
     @property
-    def auth_setting(self):
+    def auth_setting(self) -> 'UserItem.Auth':
         return self._auth_setting
 
     @auth_setting.setter
     @property_is_enum(Auth)
-    def auth_setting(self, value):
+    def auth_setting(self, value: 'UserItem.Auth'):
         self._auth_setting = value
 
     @property
-    def domain_name(self):
+    def domain_name(self) -> str:
         return self._domain_name
 
     @property
-    def external_auth_user_id(self):
+    def external_auth_user_id(self) -> str:
         return self._external_auth_user_id
 
     @property
-    def id(self):
+    def id(self) -> str:
         return self._id
 
     @property
-    def last_login(self):
+    def last_login(self) -> datetime.datetime:
         return self._last_login
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @name.setter
     @property_not_empty
-    def name(self, value):
+    def name(self, value: str):
         self._name = value
 
     @property
-    def site_role(self):
+    def site_role(self) -> 'UserItem.Roles':
         return self._site_role
 
     @site_role.setter
     @property_not_nullable
     @property_is_enum(Roles)
-    def site_role(self, value):
+    def site_role(self, value: 'UserItem.Roles'):
         self._site_role = value
 
     @property
-    def workbooks(self):
+    def workbooks(self) -> List['WorkbookItem']:
         if self._workbooks is None:
             error = "User item must be populated with workbooks first."
             raise UnpopulatedPropertyError(error)
         return self._workbooks()
 
     @property
-    def favorites(self):
+    def favorites(self) -> Dict[str, List]:
         if self._favorites is None:
             error = "User item must be populated with favorites first."
             raise UnpopulatedPropertyError(error)
         return self._favorites
 
-    def to_reference(self):
+    def to_reference(self) -> 'ResourceReference':
         return ResourceReference(id_=self.id, tag_name=self.tag_name)
 
     def _set_workbooks(self, workbooks):
         self._workbooks = workbooks
 
-    def _parse_common_tags(self, user_xml, ns):
+    def _parse_common_tags(self, user_xml: Union[str, ET.ElementTree], ns: Mapping) -> T:
         if not isinstance(user_xml, ET.Element):
             user_xml = ET.fromstring(user_xml).find('.//t:user', namespaces=ns)
         if user_xml is not None:
@@ -143,7 +148,7 @@ class UserItem(object):
             self._domain_name = domain_name
 
     @classmethod
-    def from_response(cls, resp, ns):
+    def from_response(cls, resp: str, ns: Mapping) -> List[T]:
         all_user_items = []
         parsed_response = ET.fromstring(resp)
         all_user_xml = parsed_response.findall('.//t:user', namespaces=ns)
@@ -157,11 +162,11 @@ class UserItem(object):
         return all_user_items
 
     @staticmethod
-    def as_reference(id_):
+    def as_reference(id_: str) -> ResourceReference:
         return ResourceReference(id_, UserItem.tag_name)
 
     @staticmethod
-    def _parse_element(user_xml, ns):
+    def _parse_element(user_xml: ET.ElementTree, ns: Mapping) -> tuple:
         id = user_xml.get('id', None)
         name = user_xml.get('name', None)
         site_role = user_xml.get('siteRole', None)
@@ -178,5 +183,5 @@ class UserItem(object):
 
         return id, name, site_role, last_login, external_auth_user_id, fullname, email, auth_setting, domain_name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<User {} name={} role={}>".format(self.id, self.name, self.site_role)

@@ -2,10 +2,16 @@ import xml.etree.ElementTree as ET
 
 from .property_decorators import property_not_empty, property_is_boolean
 from .exceptions import UnpopulatedPropertyError
+from .permissions_item import PermissionsRule
+from .column_item import ColumnItem
+
+from typing import List, Mapping, TypeVar
+
+T = TypeVar('T', bound='TableItem')
 
 
 class TableItem(object):
-    def __init__(self, name, description=None):
+    def __init__(self, name: str, description: str = None) -> T:
         self._id = None
         self.description = description
         self.name = name
@@ -19,56 +25,56 @@ class TableItem(object):
         self._columns = None
 
     @property
-    def permissions(self):
+    def permissions(self) -> List[PermissionsRule]:
         if self._permissions is None:
             error = "Project item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
         return self._permissions()
 
     @property
-    def id(self):
+    def id(self) -> str:
         return self._id
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @name.setter
     @property_not_empty
-    def name(self, value):
+    def name(self, value: str):
         self._name = value
 
     @property
-    def description(self):
+    def description(self) -> str:
         return self._description
 
     @description.setter
-    def description(self, value):
+    def description(self, value: str):
         self._description = value
 
     @property
-    def certified(self):
+    def certified(self) -> bool:
         return self._certified
 
     @certified.setter
     @property_is_boolean
-    def certified(self, value):
+    def certified(self, value: bool):
         self._certified = value
 
     @property
-    def certification_note(self):
+    def certification_note(self) -> str:
         return self._certification_note
 
     @certification_note.setter
-    def certification_note(self, value):
+    def certification_note(self, value: str):
         self._certification_note = value
 
     @property
-    def contact_id(self):
+    def contact_id(self) -> str:
         return self._contact_id
 
     @contact_id.setter
-    def contact_id(self, value):
+    def contact_id(self, value: str):
         self._contact_id = value
 
     @property
@@ -76,14 +82,14 @@ class TableItem(object):
         return self._schema
 
     @property
-    def columns(self):
+    def columns(self) -> List[ColumnItem]:
         if self._columns is None:
             error = "Table must be populated with columns first."
             raise UnpopulatedPropertyError(error)
         #  Each call to `.columns` should create a new pager, this just runs the callable
         return self._columns()
 
-    def _set_columns(self, columns):
+    def _set_columns(self, columns: List[ColumnItem]):
         self._columns = columns
 
     def _set_values(self, table_values):
@@ -115,7 +121,7 @@ class TableItem(object):
         self._permissions = permissions
 
     @classmethod
-    def from_response(cls, resp, ns):
+    def from_response(cls, resp: str, ns: Mapping) -> List[T]:
         all_table_items = list()
         parsed_response = ET.fromstring(resp)
         all_table_xml = parsed_response.findall('.//t:table', namespaces=ns)
@@ -140,5 +146,5 @@ class TableItem(object):
 
 
 # Used to convert string represented boolean to a boolean type
-def string_to_bool(s):
+def string_to_bool(s: str) -> bool:
     return s.lower() == 'true'

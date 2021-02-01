@@ -1,10 +1,12 @@
 import xml.etree.ElementTree as ET
-
+from typing import Dict, List, Tuple, TypeVar
 from .property_decorators import property_not_empty
+
+T = TypeVar('T', bound='ColumnItem')
 
 
 class ColumnItem(object):
-    def __init__(self, name, description=None):
+    def __init__(self, name: str, description: str = None) -> T:
         self._id = None
         self.description = description
         self.name = name
@@ -19,7 +21,7 @@ class ColumnItem(object):
 
     @name.setter
     @property_not_empty
-    def name(self, value):
+    def name(self, value: str):
         self._name = value
 
     @property
@@ -27,7 +29,7 @@ class ColumnItem(object):
         return self._description
 
     @description.setter
-    def description(self, value):
+    def description(self, value: str):
         self._description = value
 
     @property
@@ -45,7 +47,7 @@ class ColumnItem(object):
             self._remote_type = remote_type
 
     @classmethod
-    def from_response(cls, resp, ns):
+    def from_response(cls, resp: str, ns: Dict) -> List[T]:
         all_column_items = list()
         parsed_response = ET.fromstring(resp)
         all_column_xml = parsed_response.findall('.//t:column', namespaces=ns)
@@ -59,7 +61,7 @@ class ColumnItem(object):
         return all_column_items
 
     @staticmethod
-    def _parse_element(column_xml, ns):
+    def _parse_element(column_xml: ET.ElementTree, ns: Dict) -> Tuple:
         id = column_xml.get('id', None)
         name = column_xml.get('name', None)
         description = column_xml.get('description', None)

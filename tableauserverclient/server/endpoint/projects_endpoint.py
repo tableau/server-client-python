@@ -4,7 +4,7 @@ from .permissions_endpoint import _PermissionsEndpoint
 from .default_permissions_endpoint import _DefaultPermissionsEndpoint
 
 from .. import RequestFactory, ProjectItem, PaginationItem, Permission, \
-               Server, RequestOptions, PermissionsRule
+               RequestOptions, PermissionsRule
 
 import logging
 
@@ -12,7 +12,7 @@ logger = logging.getLogger('tableau.endpoint.projects')
 
 
 class Projects(Endpoint):
-    def __init__(self, parent_srv: Server):
+    def __init__(self, parent_srv: 'Server'):
         super(Projects, self).__init__(parent_srv)
 
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)

@@ -4,6 +4,11 @@ from .property_decorators import property_not_nullable, property_is_boolean, pro
 from .tag_item import TagItem
 from ..datetime_helpers import parse_datetime
 import copy
+from typing import Dict, Iterable, List, Optional, Tuple, TypeVar, Union
+from .connection_item import ConnectionItem
+import datetime
+
+T = TypeVar('T', bound='DatasourceItem')
 
 
 class DatasourceItem(object):
@@ -12,7 +17,7 @@ class DatasourceItem(object):
         Disabled = 'Disabled'
         SiteDefault = 'SiteDefault'
 
-    def __init__(self, project_id, name=None):
+    def __init__(self, project_id: str, name: str = None) -> T:
         self._ask_data_enablement = None
         self._certified = None
         self._certification_note = None
@@ -42,7 +47,7 @@ class DatasourceItem(object):
 
     @ask_data_enablement.setter
     @property_is_enum(AskDataEnablement)
-    def ask_data_enablement(self, value):
+    def ask_data_enablement(self, value: 'DatasourceItem.AskDataEnablement'):
         self._ask_data_enablement = value
 
     @property
@@ -74,7 +79,7 @@ class DatasourceItem(object):
     @certified.setter
     @property_not_nullable
     @property_is_boolean
-    def certified(self, value):
+    def certified(self, value: bool):
         self._certified = value
 
     @property
@@ -82,7 +87,7 @@ class DatasourceItem(object):
         return self._certification_note
 
     @certification_note.setter
-    def certification_note(self, value):
+    def certification_note(self, value: str):
         self._certification_note = value
 
     @property
@@ -91,7 +96,7 @@ class DatasourceItem(object):
 
     @encrypt_extracts.setter
     @property_is_boolean
-    def encrypt_extracts(self, value):
+    def encrypt_extracts(self, value: bool):
         self._encrypt_extracts = value
 
     @property
@@ -108,7 +113,7 @@ class DatasourceItem(object):
 
     @project_id.setter
     @property_not_nullable
-    def project_id(self, value):
+    def project_id(self, value: str):
         self._project_id = value
 
     @property
@@ -129,20 +134,21 @@ class DatasourceItem(object):
 
     @use_remote_query_agent.setter
     @property_is_boolean
-    def use_remote_query_agent(self, value):
+    def use_remote_query_agent(self, value: bool):
         self._use_remote_query_agent = value
 
     @property
     def webpage_url(self):
         return self._webpage_url
 
-    def _set_connections(self, connections):
+    def _set_connections(self, connections: Iterable[ConnectionItem]) -> None:
         self._connections = connections
 
-    def _set_permissions(self, permissions):
+    def _set_permissions(self, permissions) -> None:
         self._permissions = permissions
 
-    def _parse_common_elements(self, datasource_xml, ns):
+    def _parse_common_elements(self, datasource_xml: Union[ET.ElementTree, str],
+                               ns: Dict) -> T:
         if not isinstance(datasource_xml, ET.Element):
             datasource_xml = ET.fromstring(datasource_xml).find('.//t:datasource', namespaces=ns)
         if datasource_xml is not None:
@@ -154,9 +160,24 @@ class DatasourceItem(object):
                              updated_at, use_remote_query_agent, webpage_url)
         return self
 
-    def _set_values(self, ask_data_enablement, certified, certification_note, content_url, created_at, datasource_type,
-                    description, encrypt_extracts, has_extracts, id_, name, owner_id, project_id, project_name, tags,
-                    updated_at, use_remote_query_agent, webpage_url):
+    def _set_values(self, ask_data_enablement: Optional[str],
+                    certified: bool,
+                    certification_note: Optional[str],
+                    content_url: str,
+                    created_at: datetime.datetime,
+                    datasource_type: Optional[str],
+                    description: Optional[str],
+                    encrypt_extracts: Optional[str],
+                    has_extracts: Optional[str],
+                    id_: Optional[str],
+                    name: Optional[str],
+                    owner_id: Optional[str],
+                    project_id: Optional[str],
+                    project_name: Optional[str],
+                    tags: Optional[Iterable],
+                    updated_at: Optional[datetime.datetime],
+                    use_remote_query_agent: Optional[str],
+                    webpage_url: Optional[str]):
         if ask_data_enablement is not None:
             self._ask_data_enablement = ask_data_enablement
         if certification_note:
@@ -195,7 +216,7 @@ class DatasourceItem(object):
             self._webpage_url = webpage_url
 
     @classmethod
-    def from_response(cls, resp, ns):
+    def from_response(cls, resp: str, ns: Dict) -> List[T]:
         all_datasource_items = list()
         parsed_response = ET.fromstring(resp)
         all_datasource_xml = parsed_response.findall('.//t:datasource', namespaces=ns)
@@ -213,7 +234,7 @@ class DatasourceItem(object):
         return all_datasource_items
 
     @staticmethod
-    def _parse_element(datasource_xml, ns):
+    def _parse_element(datasource_xml: ET.ElementTree, ns: Dict) -> Tuple:
         certification_note = datasource_xml.get('certificationNote', None)
         certified = str(datasource_xml.get('isCertified', None)).lower() == 'true'
         content_url = datasource_xml.get('contentUrl', None)

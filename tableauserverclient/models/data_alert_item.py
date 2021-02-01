@@ -4,6 +4,10 @@ from .property_decorators import property_not_empty, property_is_enum, property_
 from .user_item import UserItem
 from .view_item import ViewItem
 
+from typing import List, Dict, Tuple, TypeVar
+
+T = TypeVar('T', bound='DataAlertItem')
+
 
 class DataAlertItem(object):
     class Frequency:
@@ -13,7 +17,7 @@ class DataAlertItem(object):
         Daily = 'Daily'
         Weekly = 'Weekly'
 
-    def __init__(self):
+    def __init__(self) -> T:
         self._id = None
         self._subject = None
         self._creatorId = None
@@ -45,7 +49,7 @@ class DataAlertItem(object):
 
     @subject.setter
     @property_not_empty
-    def subject(self, value):
+    def subject(self, value: str):
         self._subject = value
 
     @property
@@ -54,7 +58,7 @@ class DataAlertItem(object):
 
     @frequency.setter
     @property_is_enum(Frequency)
-    def frequency(self, value):
+    def frequency(self, value: Frequency):
         self._frequency = value
 
     @property
@@ -63,7 +67,7 @@ class DataAlertItem(object):
 
     @public.setter
     @property_is_boolean
-    def public(self, value):
+    def public(self, value: bool):
         self._public = value
 
     @property
@@ -152,7 +156,7 @@ class DataAlertItem(object):
             self._recipients = recipients
 
     @classmethod
-    def from_response(cls, resp, ns):
+    def from_response(cls, resp: str, ns: Dict) -> List[T]:
         all_alert_items = list()
         parsed_response = ET.fromstring(resp)
         all_alert_xml = parsed_response.findall('.//t:dataAlert', namespaces=ns)
@@ -166,7 +170,7 @@ class DataAlertItem(object):
         return all_alert_items
 
     @staticmethod
-    def _parse_element(alert_xml, ns):
+    def _parse_element(alert_xml: ET.ElementTree, ns: Dict) -> Dict:
         kwargs = dict()
         kwargs['id'] = alert_xml.get('id', None)
         kwargs['subject'] = alert_xml.get('subject', None)

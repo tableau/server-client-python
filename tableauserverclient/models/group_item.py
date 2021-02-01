@@ -1,8 +1,11 @@
 import xml.etree.ElementTree as ET
+from typing import Dict, List, TypeVar
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_not_empty, property_is_enum
 from .reference_item import ResourceReference
 from .user_item import UserItem
+
+T = TypeVar('T', bound='GroupItem')
 
 
 class GroupItem(object):
@@ -13,7 +16,7 @@ class GroupItem(object):
         onLogin = 'onLogin'
         onSync = 'onSync'
 
-    def __init__(self, name=None, domain_name=None):
+    def __init__(self, name: str = None, domain_name: str = None) -> T:
         self._id = None
         self._license_mode = None
         self._minimum_site_role = None
@@ -26,7 +29,7 @@ class GroupItem(object):
         return self._domain_name
 
     @domain_name.setter
-    def domain_name(self, value):
+    def domain_name(self, value: str):
         self._domain_name = value
 
     @property
@@ -39,7 +42,7 @@ class GroupItem(object):
 
     @name.setter
     @property_not_empty
-    def name(self, value):
+    def name(self, value: str):
         self._name = value
 
     @property
@@ -48,7 +51,7 @@ class GroupItem(object):
 
     @license_mode.setter
     @property_is_enum(LicenseMode)
-    def license_mode(self, value):
+    def license_mode(self, value: str):
         self._license_mode = value
 
     @property
@@ -57,25 +60,25 @@ class GroupItem(object):
 
     @minimum_site_role.setter
     @property_is_enum(UserItem.Roles)
-    def minimum_site_role(self, value):
+    def minimum_site_role(self, value: UserItem.Roles):
         self._minimum_site_role = value
 
     @property
-    def users(self):
+    def users(self) -> List[UserItem]:
         if self._users is None:
             error = "Group must be populated with users first."
             raise UnpopulatedPropertyError(error)
         #  Each call to `.users` should create a new pager, this just runs the callable
         return self._users()
 
-    def to_reference(self):
+    def to_reference(self) -> ResourceReference:
         return ResourceReference(id_=self.id, tag_name=self.tag_name)
 
     def _set_users(self, users):
         self._users = users
 
     @classmethod
-    def from_response(cls, resp, ns):
+    def from_response(cls, resp: str, ns: Dict) -> List[T]:
         all_group_items = list()
         parsed_response = ET.fromstring(resp)
         all_group_xml = parsed_response.findall('.//t:group', namespaces=ns)
@@ -100,5 +103,5 @@ class GroupItem(object):
         return all_group_items
 
     @staticmethod
-    def as_reference(id_):
+    def as_reference(id_: str) -> ResourceReference:
         return ResourceReference(id_, GroupItem.tag_name)

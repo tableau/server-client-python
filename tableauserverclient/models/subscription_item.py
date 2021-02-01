@@ -1,10 +1,14 @@
 import xml.etree.ElementTree as ET
 from .target import Target
 
+from typing import List, Mapping, TypeVar
+
+T = TypeVar('T', bound='SubscriptionItem')
+
 
 class SubscriptionItem(object):
 
-    def __init__(self, subject, schedule_id, user_id, target):
+    def __init__(self, subject: str, schedule_id: str, user_id: str, target: Target) -> T:
         self.id = None
         self.subject = subject
         self.schedule_id = schedule_id
@@ -23,7 +27,7 @@ class SubscriptionItem(object):
         self.id = id_
 
     @classmethod
-    def from_response(cls, xml, ns):
+    def from_response(cls, xml: str, ns: Mapping) -> List[T]:
         parsed_response = ET.fromstring(xml)
         all_subscriptions_xml = parsed_response.findall(
             './/t:subscription', namespaces=ns)

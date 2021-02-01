@@ -1,6 +1,8 @@
 import xml.etree.ElementTree as ET
-
 import re
+from typing import List, Mapping, TypeVar
+
+T = TypeVar('T', bound='WebhookItem')
 
 
 NAMESPACE_RE = re.compile(r'^{.*}')
@@ -13,7 +15,7 @@ def _parse_event(events):
 
 
 class WebhookItem(object):
-    def __init__(self):
+    def __init__(self) -> T:
         self._id = None
         self.name = None
         self.url = None
@@ -33,21 +35,21 @@ class WebhookItem(object):
             self.owner_id = owner_id
 
     @property
-    def id(self):
+    def id(self) -> str:
         return self._id
 
     @property
-    def event(self):
+    def event(self) -> str:
         if self._event:
             return self._event.replace("webhook-source-event-", "")
         return None
 
     @event.setter
-    def event(self, value):
+    def event(self, value: str):
         self._event = "webhook-source-event-{}".format(value)
 
     @classmethod
-    def from_response(cls, resp, ns):
+    def from_response(cls, resp: str, ns: Mapping) -> List[T]:
         all_webhooks_items = list()
         parsed_response = ET.fromstring(resp)
         all_webhooks_xml = parsed_response.findall('.//t:webhook', namespaces=ns)
@@ -60,7 +62,7 @@ class WebhookItem(object):
         return all_webhooks_items
 
     @staticmethod
-    def _parse_element(webhook_xml, ns):
+    def _parse_element(webhook_xml: ET.ElementTree, ns: Mapping) -> tuple:
         id = webhook_xml.get('id', None)
         name = webhook_xml.get('name', None)
 
@@ -80,6 +82,6 @@ class WebhookItem(object):
 
         return id, name, url, event, owner_id
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<Webhook id={} name={} url={} event={}>".format(
             self.id, self.name, self.url, self.event)

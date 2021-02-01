@@ -1,13 +1,16 @@
 import xml.etree.ElementTree as ET
+from typing import Dict, List, Tuple, TypeVar
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_not_nullable
 from .tag_item import TagItem
 from ..datetime_helpers import parse_datetime
 import copy
 
+T = TypeVar('T', bound='FlowItem')
+
 
 class FlowItem(object):
-    def __init__(self, project_id, name=None):
+    def __init__(self, project_id: str, name: str = None) -> T:
         self._webpage_url = None
         self._created_at = None
         self._id = None
@@ -63,7 +66,7 @@ class FlowItem(object):
         return self._description
 
     @description.setter
-    def description(self, value):
+    def description(self, value: str):
         self._description = value
 
     @property
@@ -118,7 +121,7 @@ class FlowItem(object):
             self.owner_id = owner_id
 
     @classmethod
-    def from_response(cls, resp, ns):
+    def from_response(cls, resp: str, ns: Dict) -> List[T]:
         all_flow_items = list()
         parsed_response = ET.fromstring(resp)
         all_flow_xml = parsed_response.findall('.//t:flow', namespaces=ns)
@@ -133,7 +136,7 @@ class FlowItem(object):
         return all_flow_items
 
     @staticmethod
-    def _parse_element(flow_xml, ns):
+    def _parse_element(flow_xml: ET.ElementTree, ns: Dict) -> Tuple:
         id_ = flow_xml.get('id', None)
         name = flow_xml.get('name', None)
         description = flow_xml.get('description', None)

@@ -4,7 +4,7 @@ from .permissions_endpoint import _PermissionsEndpoint
 from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, DatasourceItem, PaginationItem, \
-               ConnectionItem, JobItem, Server, RequestOptions, PermissionsRule
+               ConnectionItem, JobItem, RequestOptions, PermissionsRule
 from ..query import QuerySet
 from ...filesys_helpers import to_filename, make_download_path, get_file_type, get_file_object_size
 from ...models import ConnectionCredentials
@@ -14,7 +14,7 @@ import logging
 import copy
 import cgi
 from contextlib import closing
-from typing import Union, Iterable, Tuple
+from typing import Union, Iterable, List, Tuple
 
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64   # 64MB
@@ -25,7 +25,7 @@ logger = logging.getLogger('tableau.endpoint.datasources')
 
 
 class Datasources(QuerysetEndpoint):
-    def __init__(self, parent_srv: Server):
+    def __init__(self, parent_srv):
         super(Datasources, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
@@ -178,7 +178,7 @@ class Datasources(QuerysetEndpoint):
     @parameter_added_in(connections="2.8")
     @parameter_added_in(as_job='3.0')
     def publish(self, datasource_item: DatasourceItem, file: str,
-                mode: Server.PublishMode,
+                mode: 'Server.PublishMode',
                 connection_credentials: ConnectionCredentials = None,
                 connections: Iterable[ConnectionItem] = None,
                 as_job: bool = False):
