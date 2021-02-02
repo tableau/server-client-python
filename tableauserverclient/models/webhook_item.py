@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 import re
-from typing import List, Mapping, TypeVar
+from typing import Dict, List, Mapping, Optional, TypeVar, Union
 
 T = TypeVar('T', bound='WebhookItem')
 
@@ -15,12 +15,13 @@ def _parse_event(events):
 
 
 class WebhookItem(object):
-    def __init__(self) -> T:
+    def __init__(self) -> None:
         self._id = None
         self.name = None
         self.url = None
         self._event = None
         self.owner_id = None
+        return
 
     def _set_values(self, id, name, url, event, owner_id):
         if id is not None:
@@ -35,11 +36,11 @@ class WebhookItem(object):
             self.owner_id = owner_id
 
     @property
-    def id(self) -> str:
+    def id(self) -> Union[str, None]:
         return self._id
 
     @property
-    def event(self) -> str:
+    def event(self) -> Union[str, None]:
         if self._event:
             return self._event.replace("webhook-source-event-", "")
         return None
@@ -62,7 +63,7 @@ class WebhookItem(object):
         return all_webhooks_items
 
     @staticmethod
-    def _parse_element(webhook_xml: ET.ElementTree, ns: Mapping) -> tuple:
+    def _parse_element(webhook_xml: ET.ElementTree, ns: Optional[Dict[Union[str, str], Union[str, str]]]) -> tuple:
         id = webhook_xml.get('id', None)
         name = webhook_xml.get('name', None)
 
