@@ -1,3 +1,4 @@
+import sys
 import xml.etree.ElementTree as ET
 from .property_decorators import (property_is_enum, property_is_boolean, property_matches,
                                   property_not_empty, property_not_nullable, property_is_int)
@@ -159,7 +160,7 @@ class SiteItem(object):
         return self._tier_creator_capacity
 
     @tier_creator_capacity.setter
-    @property_is_int((0, 100000), allowed=(None,))
+    @property_is_int((0, sys.maxsize), allowed=(-1, None,))
     def tier_creator_capacity(self, value):
         self._tier_creator_capacity = value
 
@@ -168,7 +169,7 @@ class SiteItem(object):
         return self._tier_explorer_capacity
 
     @tier_explorer_capacity.setter
-    @property_is_int((0, 100000), allowed=(None,))
+    @property_is_int((0, sys.maxsize), allowed=(-1, None,))
     def tier_explorer_capacity(self, value):
         self._tier_explorer_capacity = value
 
@@ -177,7 +178,7 @@ class SiteItem(object):
         return self._tier_viewer_capacity
 
     @tier_viewer_capacity.setter
-    @property_is_int((0, 100000), allowed=(None,))
+    @property_is_int((0, sys.maxsize), allowed=(-1, None,))
     def tier_viewer_capacity(self, value):
         self._tier_viewer_capacity = value
 
