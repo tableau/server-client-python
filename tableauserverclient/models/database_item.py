@@ -40,6 +40,11 @@ class DatabaseItem(object):
     def content_permissions(self):
         return self._content_permissions
 
+    @content_permissions.setter # type: ignore
+    @property_is_enum(ContentPermissions)
+    def content_permissions(self, value):
+        self._content_permissions = value
+    
     @property
     def permissions(self):
         if self._permissions is None:
@@ -54,10 +59,6 @@ class DatabaseItem(object):
             raise UnpopulatedPropertyError(error)
         return self._default_table_permissions()
 
-    @content_permissions.setter
-    @property_is_enum(ContentPermissions)
-    def content_permissions(self, value):
-        self._content_permissions = value
 
     @property
     def id(self):
@@ -67,7 +68,7 @@ class DatabaseItem(object):
     def name(self):
         return self._name
 
-    @name.setter
+    @name.setter # type: ignore
     @property_not_empty
     def name(self, value):
         self._name = value
@@ -76,7 +77,7 @@ class DatabaseItem(object):
     def description(self):
         return self._description
 
-    @description.setter
+    @description.setter # type: ignore
     def description(self, value):
         self._description = value
 
@@ -88,7 +89,7 @@ class DatabaseItem(object):
     def certified(self):
         return self._certified
 
-    @certified.setter
+    @certified.setter # type: ignore
     @property_is_boolean
     def certified(self, value):
         self._certified = value

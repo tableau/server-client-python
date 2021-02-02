@@ -19,7 +19,7 @@ class ConnectionCredentials(object):
     def embed(self):
         return self._embed
 
-    @embed.setter
+    @embed.setter # type: ignore
     @property_is_boolean
     def embed(self, value):
         self._embed = value
@@ -28,7 +28,7 @@ class ConnectionCredentials(object):
     def oauth(self):
         return self._oauth
 
-    @oauth.setter
+    @oauth.setter # type: ignore
     @property_is_boolean
     def oauth(self, value):
         self._oauth = value

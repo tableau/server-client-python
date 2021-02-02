@@ -41,7 +41,7 @@ class SiteItem(object):
     def admin_mode(self):
         return self._admin_mode
 
-    @admin_mode.setter
+    @admin_mode.setter # type: ignore
     @property_is_enum(AdminMode)
     def admin_mode(self, value):
         self._admin_mode = value
@@ -50,7 +50,7 @@ class SiteItem(object):
     def content_url(self):
         return self._content_url
 
-    @content_url.setter
+    @content_url.setter # type: ignore
     @property_not_nullable
     @property_matches(VALID_CONTENT_URL_RE, "content_url can contain only letters, numbers, dashes, and underscores")
     def content_url(self, value):
@@ -60,7 +60,7 @@ class SiteItem(object):
     def disable_subscriptions(self):
         return self._disable_subscriptions
 
-    @disable_subscriptions.setter
+    @disable_subscriptions.setter # type: ignore
     @property_is_boolean
     def disable_subscriptions(self, value):
         self._disable_subscriptions = value
@@ -73,7 +73,7 @@ class SiteItem(object):
     def name(self):
         return self._name
 
-    @name.setter
+    @name.setter # type: ignore
     @property_not_empty
     def name(self, value):
         self._name = value
@@ -86,7 +86,7 @@ class SiteItem(object):
     def revision_history_enabled(self):
         return self._revision_history_enabled
 
-    @revision_history_enabled.setter
+    @revision_history_enabled.setter # type: ignore
     @property_is_boolean
     def revision_history_enabled(self, value):
         self._revision_history_enabled = value
@@ -95,7 +95,7 @@ class SiteItem(object):
     def revision_limit(self):
         return self._revision_limit
 
-    @revision_limit.setter
+    @revision_limit.setter # type: ignore
     @property_is_int((2, 10000), allowed=[-1])
     def revision_limit(self, value):
         self._revision_limit = value
@@ -104,7 +104,7 @@ class SiteItem(object):
     def state(self):
         return self._state
 
-    @state.setter
+    @state.setter # type: ignore
     @property_is_enum(State)
     def state(self, value):
         self._state = value
@@ -121,7 +121,7 @@ class SiteItem(object):
     def subscribe_others_enabled(self):
         return self._subscribe_others_enabled
 
-    @subscribe_others_enabled.setter
+    @subscribe_others_enabled.setter # type: ignore
     @property_is_boolean
     def subscribe_others_enabled(self, value):
         self._subscribe_others_enabled = value
