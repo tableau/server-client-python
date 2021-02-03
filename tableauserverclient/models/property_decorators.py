@@ -86,13 +86,16 @@ def property_is_int(valid_int_range, allowed=None):
         def wrapper(self, value):
             error = "Invalid property defined: '{}'. Integer value expected.".format(value)
 
+            if value in allowed:
+                return func(self, value)
+
             if valid_int_range is None:
                 if isinstance(value, int):
                     return func(self, value)
                 else:
                     raise ValueError(error)
 
-            if (value not in range(*valid_int_range)) and (value not in allowed):
+            if not (valid_int_range[0] < value < valid_int_range[1]):
                 raise ValueError(error)
 
             return func(self, value)
