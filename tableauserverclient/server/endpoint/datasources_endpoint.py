@@ -29,6 +29,7 @@ if TYPE_CHECKING:
     from ..server import Server
     from ...models import PermissionsRule
 
+
 class Datasources(QuerysetEndpoint):
     def __init__(self, parent_srv: 'Server') -> None:
         super(Datasources, self).__init__(parent_srv)
@@ -291,7 +292,7 @@ class Datasources(QuerysetEndpoint):
         self._permissions.update(item, permission_item)
 
     @api(version='2.0')
-    def update_permissions(self, item: DatasourceItem, permission_item: 'PermissionsRule') -> None:
+    def update_permissions(self, item: DatasourceItem, permission_item: List['PermissionsRule']) -> None:
         self._permissions.update(item, permission_item)
 
     @api(version='2.0')
