@@ -3,7 +3,7 @@ import unittest
 try:
     from unittest import mock
 except ImportError:
-    import mock
+    import mock  # type: ignore
 
 import tableauserverclient.server.request_factory as factory
 from tableauserverclient.server.endpoint import Endpoint
