@@ -10,6 +10,7 @@ python:
 install:
   - "pip install -e ."
   - "pip install pycodestyle"
+  - "pip install mypy"
 # command to run tests
 script:
   # Tests
