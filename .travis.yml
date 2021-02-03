@@ -16,4 +16,4 @@ script:
   # Tests
   - python setup.py test
   - pycodestyle tableauserverclient test samples
-  - mypy tableauserverclient
+  - mypy tableauserverclient test samples
