@@ -2,8 +2,12 @@ import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_not_nullable, property_is_boolean, property_is_enum
 from .tag_item import TagItem
-from ..datetime_helpers import parse_datetime
+from ..datetime_helpers import parse_datetime, datetime
 import copy
+from .permissions_item import PermissionsRule
+from .connection_item import ConnectionItem
+
+from typing import Dict, List, Mapping, Optional, Sequence, Set, Tuple, TypeVar
 
 
 class DatasourceItem(object):
@@ -12,7 +16,7 @@ class DatasourceItem(object):
         Disabled = 'Disabled'
         SiteDefault = 'SiteDefault'
 
-    def __init__(self, project_id, name=None):
+    def __init__(self, project_id: str, name: str = None) -> None:
         self._ask_data_enablement = None
         self._certified = None
         self._certification_note = None
@@ -23,7 +27,7 @@ class DatasourceItem(object):
         self._encrypt_extracts = None
         self._has_extracts = None
         self._id = None
-        self._initial_tags = set()
+        self._initial_tags: Set = set()
         self._project_name = None
         self._updated_at = None
         self._use_remote_query_agent = None
@@ -31,58 +35,60 @@ class DatasourceItem(object):
         self.description = None
         self.name = name
         self.owner_id = None
-        self.project_id = project_id
-        self.tags = set()
+        self.project_id = project_id  # type: ignore
+        self.tags: Set = set()
 
         self._permissions = None
 
+        return
+
     @property
-    def ask_data_enablement(self):
+    def ask_data_enablement(self) -> Optional['DatasourceItem.AskDataEnablement']:
         return self._ask_data_enablement
 
     @ask_data_enablement.setter  # type: ignore
     @property_is_enum(AskDataEnablement)
-    def ask_data_enablement(self, value):
+    def ask_data_enablement(self, value: Optional['DatasourceItem.AskDataEnablement']):
         self._ask_data_enablement = value
 
     @property
-    def connections(self):
+    def connections(self) -> Optional[List['ConnectionItem']]:
         if self._connections is None:
             error = 'Datasource item must be populated with connections first.'
             raise UnpopulatedPropertyError(error)
         return self._connections()
 
     @property
-    def permissions(self):
+    def permissions(self) -> Optional[List['PermissionsRule']]:
         if self._permissions is None:
             error = "Project item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
         return self._permissions()
 
     @property
-    def content_url(self):
+    def content_url(self) -> Optional[str]:
         return self._content_url
 
     @property
-    def created_at(self):
+    def created_at(self) -> Optional['datetime.datetime']:
         return self._created_at
 
     @property
-    def certified(self):
+    def certified(self) -> Optional[bool]:
         return self._certified
 
     @certified.setter  # type: ignore
     @property_not_nullable
     @property_is_boolean
-    def certified(self, value):
+    def certified(self, value: Optional[bool]):
         self._certified = value
 
     @property
-    def certification_note(self):
+    def certification_note(self) -> Optional[str]:
         return self._certification_note
 
     @certification_note.setter  # type: ignore
-    def certification_note(self, value):
+    def certification_note(self, value: Optional[str]):
         self._certification_note = value
 
     @property
@@ -91,49 +97,49 @@ class DatasourceItem(object):
 
     @encrypt_extracts.setter  # type: ignore
     @property_is_boolean
-    def encrypt_extracts(self, value):
+    def encrypt_extracts(self, value: Optional[bool]):
         self._encrypt_extracts = value
 
     @property
-    def has_extracts(self):
+    def has_extracts(self) -> Optional[bool]:
         return self._has_extracts
 
     @property
-    def id(self):
+    def id(self) -> Optional[str]:
         return self._id
 
     @property
-    def project_id(self):
+    def project_id(self) -> str:
         return self._project_id
 
     @project_id.setter  # type: ignore
     @property_not_nullable
-    def project_id(self, value):
+    def project_id(self, value: str):
         self._project_id = value
 
     @property
-    def project_name(self):
+    def project_name(self) -> Optional[str]:
         return self._project_name
 
     @property
-    def datasource_type(self):
+    def datasource_type(self) -> Optional[str]:
         return self._datasource_type
 
     @property
-    def updated_at(self):
+    def updated_at(self) -> Optional['datetime.datetime']:
         return self._updated_at
 
     @property
-    def use_remote_query_agent(self):
+    def use_remote_query_agent(self) -> Optional[bool]:
         return self._use_remote_query_agent
 
     @use_remote_query_agent.setter  # type: ignore
     @property_is_boolean
-    def use_remote_query_agent(self, value):
+    def use_remote_query_agent(self, value: bool):
         self._use_remote_query_agent = value
 
     @property
-    def webpage_url(self):
+    def webpage_url(self) -> Optional[str]:
         return self._webpage_url
 
     def _set_connections(self, connections):
@@ -195,7 +201,7 @@ class DatasourceItem(object):
             self._webpage_url = webpage_url
 
     @classmethod
-    def from_response(cls, resp, ns):
+    def from_response(cls, resp: str, ns: Dict) -> List['DatasourceItem']:
         all_datasource_items = list()
         parsed_response = ET.fromstring(resp)
         all_datasource_xml = parsed_response.findall('.//t:datasource', namespaces=ns)
@@ -213,7 +219,7 @@ class DatasourceItem(object):
         return all_datasource_items
 
     @staticmethod
-    def _parse_element(datasource_xml, ns):
+    def _parse_element(datasource_xml: ET.Element, ns: Dict) -> Tuple:
         certification_note = datasource_xml.get('certificationNote', None)
         certified = str(datasource_xml.get('isCertified', None)).lower() == 'true'
         content_url = datasource_xml.get('contentUrl', None)
