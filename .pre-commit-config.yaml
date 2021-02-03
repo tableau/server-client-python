@@ -1,0 +1,31 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+    -   id: check-yaml
+    -   id: end-of-file-fixer
+    -   id: trailing-whitespace
+    
+-   repo: local
+    hooks:
+    -   id: unittest
+      name: unittest
+      entry: python -m unittest discover 
+      language: python
+      'types': [python]
+      pass_filenames: false
+      stages: [commit]
+    -   id: pycodestyle
+      name: pycodestyle
+      entry: pycodestyle tableauserverclient samples test 
+      language: python
+      'types': [python]
+      pass_filenames: false
+      stages: [commit]
+    -   id: mypy
+      name: mypy
+      entry: mypy tableauserverclient samples 
+      language: python
+      'types': [python]
+      pass_filenames: false
+      stages: [commit]
