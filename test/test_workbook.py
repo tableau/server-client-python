@@ -557,7 +557,7 @@ class WorkbookTests(unittest.TestCase):
             sample_workbook = os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx')
             publish_mode = self.server.PublishMode.CreateNew
 
-            new_workbook = self.server.workbooks.publish(new_workbook,
+            self.server.workbooks.publish(new_workbook,
                                                          sample_workbook,
                                                          publish_mode,
                                                          as_job=True,
@@ -711,7 +711,3 @@ class WorkbookTests(unittest.TestCase):
             m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/createExtract',
                    status_code=200, text=response_xml)
             self.server.workbooks.create_extract('3cc6cd06-89ce-4fdc-b935-5294135d6d42', False, datasource)
-
-    def test_publish_params(self):
-        self.server.version = "3.10"
-        self.baseurl = self.server.workbooks.baseurl
