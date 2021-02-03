@@ -4,28 +4,35 @@ repos:
     hooks:
     -   id: check-yaml
     -   id: end-of-file-fixer
+        files: '.*\.py'
     -   id: trailing-whitespace
-    
+        files: '.*\.py'
+
 -   repo: local
     hooks:
     -   id: unittest
-      name: unittest
-      entry: python -m unittest discover 
-      language: python
-      'types': [python]
-      pass_filenames: false
-      stages: [commit]
+        name: unittest
+        entry: python -m unittest discover
+        language: python
+        'types': [python]
+        pass_filenames: false
+        additional_dependencies:
+          - requests
+          - mock
+          - requests-mock
+          - pytest
+        stages: [commit]
     -   id: pycodestyle
-      name: pycodestyle
-      entry: pycodestyle tableauserverclient samples test 
-      language: python
-      'types': [python]
-      pass_filenames: false
-      stages: [commit]
+        name: pycodestyle
+        entry: pycodestyle tableauserverclient samples test
+        language: python
+        'types': [python]
+        pass_filenames: false
+        stages: [commit]
     -   id: mypy
-      name: mypy
-      entry: mypy tableauserverclient samples 
-      language: python
-      'types': [python]
-      pass_filenames: false
-      stages: [commit]
+        name: mypy
+        entry: mypy tableauserverclient samples
+        language: python
+        'types': [python]
+        pass_filenames: false
+        stages: [commit]
