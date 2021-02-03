@@ -43,7 +43,7 @@ class DataAlertItem(object):
     def subject(self):
         return self._subject
 
-    @subject.setter # type: ignore
+    @subject.setter  # type: ignore
     @property_not_empty
     def subject(self, value):
         self._subject = value
@@ -52,7 +52,7 @@ class DataAlertItem(object):
     def frequency(self):
         return self._frequency
 
-    @frequency.setter # type: ignore
+    @frequency.setter  # type: ignore
     @property_is_enum(Frequency)
     def frequency(self, value):
         self._frequency = value
@@ -61,7 +61,7 @@ class DataAlertItem(object):
     def public(self):
         return self._public
 
-    @public.setter # type: ignore
+    @public.setter  # type: ignore
     @property_is_boolean
     def public(self, value):
         self._public = value

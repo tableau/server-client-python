@@ -33,7 +33,7 @@ class TableItem(object):
     def name(self):
         return self._name
 
-    @name.setter # type: ignore
+    @name.setter  # type: ignore
     @property_not_empty
     def name(self, value):
         self._name = value
@@ -50,7 +50,7 @@ class TableItem(object):
     def certified(self):
         return self._certified
 
-    @certified.setter # type: ignore
+    @certified.setter  # type: ignore
     @property_is_boolean
     def certified(self, value):
         self._certified = value

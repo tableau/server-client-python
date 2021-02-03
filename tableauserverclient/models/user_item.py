@@ -53,7 +53,7 @@ class UserItem(object):
     def auth_setting(self):
         return self._auth_setting
 
-    @auth_setting.setter # type: ignore
+    @auth_setting.setter  # type: ignore
     @property_is_enum(Auth)
     def auth_setting(self, value):
         self._auth_setting = value
@@ -78,7 +78,7 @@ class UserItem(object):
     def name(self):
         return self._name
 
-    @name.setter # type: ignore
+    @name.setter  # type: ignore
     @property_not_empty
     def name(self, value):
         self._name = value
@@ -87,7 +87,7 @@ class UserItem(object):
     def site_role(self):
         return self._site_role
 
-    @site_role.setter # type: ignore
+    @site_role.setter  # type: ignore
     @property_not_nullable
     @property_is_enum(Roles)
     def site_role(self, value):

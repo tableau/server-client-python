@@ -86,7 +86,7 @@ class WorkbookItem(object):
     def project_id(self):
         return self._project_id
 
-    @project_id.setter # type: ignore
+    @project_id.setter  # type: ignore
     @property_not_nullable
     def project_id(self, value):
         self._project_id = value
@@ -99,7 +99,7 @@ class WorkbookItem(object):
     def show_tabs(self):
         return self._show_tabs
 
-    @show_tabs.setter # type: ignore
+    @show_tabs.setter  # type: ignore
     @property_is_boolean
     def show_tabs(self, value):
         self._show_tabs = value
@@ -133,7 +133,7 @@ class WorkbookItem(object):
     def data_acceleration_config(self):
         return self._data_acceleration_config
 
-    @data_acceleration_config.setter # type: ignore
+    @data_acceleration_config.setter  # type: ignore
     @property_is_data_acceleration_config
     def data_acceleration_config(self, value):
         self._data_acceleration_config = value

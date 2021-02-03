@@ -40,7 +40,7 @@ class DatasourceItem(object):
     def ask_data_enablement(self):
         return self._ask_data_enablement
 
-    @ask_data_enablement.setter # type: ignore
+    @ask_data_enablement.setter  # type: ignore
     @property_is_enum(AskDataEnablement)
     def ask_data_enablement(self, value):
         self._ask_data_enablement = value
@@ -71,7 +71,7 @@ class DatasourceItem(object):
     def certified(self):
         return self._certified
 
-    @certified.setter # type: ignore
+    @certified.setter  # type: ignore
     @property_not_nullable
     @property_is_boolean
     def certified(self, value):
@@ -81,7 +81,7 @@ class DatasourceItem(object):
     def certification_note(self):
         return self._certification_note
 
-    @certification_note.setter # type: ignore
+    @certification_note.setter  # type: ignore
     def certification_note(self, value):
         self._certification_note = value
 
@@ -89,7 +89,7 @@ class DatasourceItem(object):
     def encrypt_extracts(self):
         return self._encrypt_extracts
 
-    @encrypt_extracts.setter # type: ignore
+    @encrypt_extracts.setter  # type: ignore
     @property_is_boolean
     def encrypt_extracts(self, value):
         self._encrypt_extracts = value
@@ -106,7 +106,7 @@ class DatasourceItem(object):
     def project_id(self):
         return self._project_id
 
-    @project_id.setter # type: ignore
+    @project_id.setter  # type: ignore
     @property_not_nullable
     def project_id(self, value):
         self._project_id = value
@@ -127,7 +127,7 @@ class DatasourceItem(object):
     def use_remote_query_agent(self):
         return self._use_remote_query_agent
 
-    @use_remote_query_agent.setter # type: ignore
+    @use_remote_query_agent.setter  # type: ignore
     @property_is_boolean
     def use_remote_query_agent(self, value):
         self._use_remote_query_agent = value

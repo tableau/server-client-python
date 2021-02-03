@@ -37,7 +37,7 @@ class GroupItem(object):
     def name(self):
         return self._name
 
-    @name.setter # type: ignore
+    @name.setter  # type: ignore
     @property_not_empty
     def name(self, value):
         self._name = value
@@ -46,7 +46,7 @@ class GroupItem(object):
     def license_mode(self):
         return self._license_mode
 
-    @license_mode.setter # type: ignore
+    @license_mode.setter  # type: ignore
     @property_is_enum(LicenseMode)
     def license_mode(self, value):
         self._license_mode = value
@@ -55,7 +55,7 @@ class GroupItem(object):
     def minimum_site_role(self):
         return self._minimum_site_role
 
-    @minimum_site_role.setter # type: ignore
+    @minimum_site_role.setter  # type: ignore
     @property_is_enum(UserItem.Roles)
     def minimum_site_role(self, value):
         self._minimum_site_role = value
