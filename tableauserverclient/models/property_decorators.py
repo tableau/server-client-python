@@ -88,7 +88,6 @@ def property_is_int(valid_int_range, allowed=None):
 
             if value in allowed:
                 return func(self, value)
-                
             if valid_int_range is None:
                 if isinstance(value, int):
                     return func(self, value)
