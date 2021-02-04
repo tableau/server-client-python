@@ -13,6 +13,12 @@ import copy
 import cgi
 from contextlib import closing
 
+from typing import Dict, List, Mapping, Optional, Tuple, TYPE_CHECKING, Union
+
+if TYPE_CHECKING:
+    from ..server import Server
+    from ..request_options import RequestOptions
+
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64   # 64MB
 
@@ -22,18 +28,20 @@ logger = logging.getLogger('tableau.endpoint.workbooks')
 
 
 class Workbooks(QuerysetEndpoint):
-    def __init__(self, parent_srv):
+    def __init__(self, parent_srv: 'Server') -> None:
         super(Workbooks, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
 
+        return
+
     @property
-    def baseurl(self):
+    def baseurl(self) -> str:
         return "{0}/sites/{1}/workbooks".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     # Get all workbooks on site
     @api(version="2.0")
-    def get(self, req_options=None):
+    def get(self, req_options: Optional['RequestOptions'] = None) -> Tuple[List[WorkbookItem], PaginationItem]:
         logger.info('Querying all workbooks on site')
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -45,7 +53,7 @@ class Workbooks(QuerysetEndpoint):
 
     # Get 1 workbook
     @api(version="2.0")
-    def get_by_id(self, workbook_id):
+    def get_by_id(self, workbook_id: str) -> WorkbookItem:
         if not workbook_id:
             error = "Workbook ID undefined."
             raise ValueError(error)
@@ -55,7 +63,7 @@ class Workbooks(QuerysetEndpoint):
         return WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     @api(version="2.8")
-    def refresh(self, workbook_id):
+    def refresh(self, workbook_id: str) -> JobItem:
         id_ = getattr(workbook_id, 'id', workbook_id)
         url = "{0}/{1}/refresh".format(self.baseurl, id_)
         empty_req = RequestFactory.Empty.empty_req()
