@@ -58,7 +58,7 @@ class SiteTests(unittest.TestCase):
         self.assertEqual(1, all_sites[1].tier_explorer_capacity)
         self.assertEqual(2, all_sites[1].tier_creator_capacity)
         self.assertEqual(1, all_sites[1].tier_viewer_capacity)
-        self.assertEqual(True, all_sites[1].flows_enabled)
+        self.assertEqual(False, all_sites[1].flows_enabled)
         self.assertEqual(None, all_sites[1].data_acceleration_mode)
 
     def test_get_before_signin(self):
@@ -79,7 +79,7 @@ class SiteTests(unittest.TestCase):
         self.assertEqual(False, single_site.revision_history_enabled)
         self.assertEqual(True, single_site.subscribe_others_enabled)
         self.assertEqual(False, single_site.disable_subscriptions)
-        self.assertEqual(True, single_site.data_alerts_enabled)
+        self.assertEqual(False, single_site.data_alerts_enabled)
         self.assertEqual(False, single_site.commenting_mentions_enabled)
         self.assertEqual(True, single_site.catalog_obfuscation_enabled)
 
