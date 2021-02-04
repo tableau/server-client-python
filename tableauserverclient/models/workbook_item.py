@@ -7,10 +7,12 @@ from .permissions_item import PermissionsRule
 from ..datetime_helpers import parse_datetime
 import copy
 
-from typing import Dict, List, Mapping, Optional, TYPE_CHECKING
+from typing import Dict, List, Mapping, Optional, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
-    ...
+    from .connection_item import ConnectionItem
+    from .permissions_item import PermissionsRule
+    import datetime
 
 
 class WorkbookItem(object):
@@ -42,37 +44,37 @@ class WorkbookItem(object):
         return
 
     @property
-    def connections(self):
+    def connections(self) -> List['ConnectionItem']:
         if self._connections is None:
             error = "Workbook item must be populated with connections first."
             raise UnpopulatedPropertyError(error)
         return self._connections()
 
     @property
-    def permissions(self):
+    def permissions(self) -> List['PermissionsRule']:
         if self._permissions is None:
             error = "Workbook item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
         return self._permissions()
 
     @property
-    def content_url(self):
+    def content_url(self) -> Optional[str]:
         return self._content_url
 
     @property
-    def webpage_url(self):
+    def webpage_url(self) -> Optional[str]:
         return self._webpage_url
 
     @property
-    def created_at(self):
+    def created_at(self) -> Optional['datetime.datetime']:
         return self._created_at
 
     @property
-    def description(self):
+    def description(self) -> Optional[str]:
         return self._description
 
     @property
-    def id(self):
+    def id(self) -> Optional[str]:
         return self._id
 
     @property
@@ -90,25 +92,25 @@ class WorkbookItem(object):
         return self._preview_image()
 
     @property
-    def project_id(self):
+    def project_id(self) -> Optional[str]:
         return self._project_id
 
     @project_id.setter  # type: ignore
     @property_not_nullable
-    def project_id(self, value):
+    def project_id(self, value: str):
         self._project_id = value
 
     @property
-    def project_name(self):
+    def project_name(self) -> Optional[str]:
         return self._project_name
 
     @property
-    def show_tabs(self):
+    def show_tabs(self) -> bool:
         return self._show_tabs
 
     @show_tabs.setter  # type: ignore
     @property_is_boolean
-    def show_tabs(self, value):
+    def show_tabs(self, value: bool):
         self._show_tabs = value
 
     @property
@@ -116,11 +118,11 @@ class WorkbookItem(object):
         return self._size
 
     @property
-    def updated_at(self):
+    def updated_at(self) -> Optional['datetime.datetime']:
         return self._updated_at
 
     @property
-    def views(self):
+    def views(self) -> List[ViewItem]:
         # Views can be set in an initial workbook response OR by a call
         # to Server. Without getting too fancy, I think we can rely on
         # returning a list from the response, until they call
@@ -210,7 +212,7 @@ class WorkbookItem(object):
             self.data_acceleration_config = data_acceleration_config
 
     @classmethod
-    def from_response(cls, resp, ns):
+    def from_response(cls, resp: str, ns: Optional[Dict[Union[str, str], Union[str, str]]]) -> List['WorkbookItem']:
         all_workbook_items = list()
         parsed_response = ET.fromstring(resp)
         all_workbook_xml = parsed_response.findall('.//t:workbook', namespaces=ns)
@@ -300,5 +302,5 @@ def parse_data_acceleration_config(data_acceleration_elem):
 
 
 # Used to convert string represented boolean to a boolean type
-def string_to_bool(s):
+def string_to_bool(s: str) -> bool:
     return s.lower() == 'true'
