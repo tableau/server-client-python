@@ -7,15 +7,20 @@ from .permissions_item import PermissionsRule
 from ..datetime_helpers import parse_datetime
 import copy
 
+from typing import Dict, List, Mapping, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    ...
+
 
 class WorkbookItem(object):
-    def __init__(self, project_id, name=None, show_tabs=False):
+    def __init__(self, project_id: str, name: str = None, show_tabs: bool = False) -> None:
         self._connections = None
         self._content_url = None
         self._webpage_url = None
         self._created_at = None
         self._id = None
-        self._initial_tags = set()
+        self._initial_tags: set = set()
         self._pdf = None
         self._preview_image = None
         self._project_name = None
@@ -25,14 +30,16 @@ class WorkbookItem(object):
         self.name = name
         self._description = None
         self.owner_id = None
-        self.project_id = project_id
-        self.show_tabs = show_tabs
-        self.tags = set()
-        self.data_acceleration_config = {'acceleration_enabled': None,
+        self.project_id = project_id  # type: ignore
+        self.show_tabs = show_tabs  # type: ignore
+        self.tags: set = set()
+        self.data_acceleration_config = {'acceleration_enabled': None,  # type: ignore
                                          'accelerate_now': None,
                                          'last_updated_at': None,
                                          'acceleration_status': None}
         self._permissions = None
+
+        return
 
     @property
     def connections(self):
