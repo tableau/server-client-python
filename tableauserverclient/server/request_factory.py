@@ -481,8 +481,6 @@ class SiteRequest(object):
             site_element.attrib['cacheWarmupEnabled'] = str(site_item.cache_warmup_enabled).lower()
         if site_item.commenting_enabled is not None:
             site_element.attrib['commentingEnabled'] = str(site_item.commenting_enabled).lower()
-        if site_item.subscribe_others_enabled is not None:
-            site_element.attrib['subscribeOthersEnabled'] = str(site_item.subscribe_others_enabled).lower()
         if site_item.extract_encryption_mode is not None:
             site_element.attrib['extractEncryptionMode'] = str(site_item.extract_encryption_mode).lower()
         if site_item.request_access_enabled is not None:
@@ -505,8 +503,6 @@ class SiteRequest(object):
             site_element.attrib['flowAutoSaveEnabled'] = str(site_item.flow_auto_save_enabled).lower()
         if site_item.web_extraction_enabled is not None:
             site_element.attrib['webExtractionEnabled'] = str(site_item.web_extraction_enabled).lower()
-        if site_item.run_now_enabled is not None:
-            site_element.attrib['runNowEnabled'] = str(site_item.run_now_enabled).lower()
         if site_item.metrics_content_type_enabled is not None:
             site_element.attrib['metricsContentTypeEnabled'] = str(site_item.metrics_content_type_enabled).lower()
         if site_item.notify_site_admins_on_throttle is not None:
@@ -531,8 +527,6 @@ class SiteRequest(object):
             site_element.attrib['mobileBiometricsEnabled'] = str(site_item.mobile_biometrics_enabled).lower()
         if site_item.sheet_image_enabled is not None:
             site_element.attrib['sheetImageEnabled'] = str(site_item.sheet_image_enabled).lower()
-        if site_item.cataloging_enabled is not None:
-            site_element.attrib['catalogingEnabled'] = str(site_item.cataloging_enabled).lower()
         if site_item.derived_permissions_enabled is not None:
             site_element.attrib['derivedPermissionsEnabled'] = str(site_item.derived_permissions_enabled).lower()
         if site_item.user_visibility_mode is not None:
@@ -570,8 +564,6 @@ class SiteRequest(object):
             site_element.attrib['dataAccelerationMode'] = str(site_item.data_acceleration_mode).lower()
         if site_item.flows_enabled is not None:
             site_element.attrib['flowsEnabled'] = str(site_item.flows_enabled).lower()
-        if site_item.cataloging_enabled is not None:
-            site_element.attrib['catalogingEnabled'] = str(site_item.cataloging_enabled).lower()
         if site_item.editing_flows_enabled is not None:
             site_element.attrib['editingFlowsEnabled'] = str(site_item.editing_flows_enabled).lower()
         if site_item.scheduling_flows_enabled is not None:
@@ -586,8 +578,6 @@ class SiteRequest(object):
             site_element.attrib['commentingEnabled'] = str(site_item.commenting_enabled).lower()
         if site_item.revision_history_enabled is not None:
             site_element.attrib['revisionHistoryEnabled'] = str(site_item.revision_history_enabled).lower()
-        if site_item.subscribe_others_enabled is not None:
-            site_element.attrib['subscribeOthersEnabled'] = str(site_item.subscribe_others_enabled).lower()
         if site_item.extract_encryption_mode is not None:
             site_element.attrib['extractEncryptionMode'] = str(site_item.extract_encryption_mode).lower()
         if site_item.request_access_enabled is not None:
@@ -610,8 +600,6 @@ class SiteRequest(object):
             site_element.attrib['flowAutoSaveEnabled'] = str(site_item.flow_auto_save_enabled).lower()
         if site_item.web_extraction_enabled is not None:
             site_element.attrib['webExtractionEnabled'] = str(site_item.web_extraction_enabled).lower()
-        if site_item.run_now_enabled is not None:
-            site_element.attrib['runNowEnabled'] = str(site_item.run_now_enabled).lower()
         if site_item.metrics_content_type_enabled is not None:
             site_element.attrib['metricsContentTypeEnabled'] = str(site_item.metrics_content_type_enabled).lower()
         if site_item.notify_site_admins_on_throttle is not None:
