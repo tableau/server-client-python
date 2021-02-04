@@ -461,7 +461,7 @@ class SiteRequest(object):
             site_element.attrib['subscribeOthersEnabled'] = str(site_item.subscribe_others_enabled).lower()
         if site_item.revision_limit:
             site_element.attrib['revisionLimit'] = str(site_item.revision_limit)
-        if site_item.subscribe_others_enabled is not None:
+        if site_item.revision_history_enabled is not None:
             site_element.attrib['revisionHistoryEnabled'] = str(site_item.revision_history_enabled).lower()
         if site_item.data_acceleration_mode is not None:
             site_element.attrib['dataAccelerationMode'] = str(site_item.data_acceleration_mode).lower()
@@ -566,8 +566,6 @@ class SiteRequest(object):
             site_element.attrib['subscribeOthersEnabled'] = str(site_item.subscribe_others_enabled).lower()
         if site_item.revision_limit:
             site_element.attrib['revisionLimit'] = str(site_item.revision_limit)
-        if site_item.subscribe_others_enabled is not None:
-            site_element.attrib['revisionHistoryEnabled'] = str(site_item.revision_history_enabled).lower()
         if site_item.data_acceleration_mode is not None:
             site_element.attrib['dataAccelerationMode'] = str(site_item.data_acceleration_mode).lower()
         if site_item.flows_enabled is not None:
@@ -588,8 +586,6 @@ class SiteRequest(object):
             site_element.attrib['commentingEnabled'] = str(site_item.commenting_enabled).lower()
         if site_item.revision_history_enabled is not None:
             site_element.attrib['revisionHistoryEnabled'] = str(site_item.revision_history_enabled).lower()
-        if site_item.revision_limit is not None:
-            site_element.attrib['revisionLimit'] = str(site_item.revision_limit).lower()
         if site_item.subscribe_others_enabled is not None:
             site_element.attrib['subscribeOthersEnabled'] = str(site_item.subscribe_others_enabled).lower()
         if site_item.extract_encryption_mode is not None:
@@ -598,8 +594,6 @@ class SiteRequest(object):
             site_element.attrib['requestAccessEnabled'] = str(site_item.request_access_enabled).lower()
         if site_item.run_now_enabled is not None:
             site_element.attrib['runNowEnabled'] = str(site_item.run_now_enabled).lower()
-        if site_item.user_quota is not None:
-            site_element.attrib['userQuota'] = str(site_item.user_quota).lower()
         if site_item.tier_creator_capacity is not None:
             site_element.attrib['tierCreatorCapacity'] = str(site_item.tier_creator_capacity).lower()
         if site_item.tier_explorer_capacity is not None:
