@@ -2,12 +2,15 @@ import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_not_nullable, property_is_boolean, property_is_enum
 from .tag_item import TagItem
-from ..datetime_helpers import parse_datetime, datetime
+from ..datetime_helpers import parse_datetime
 import copy
-from .permissions_item import PermissionsRule
-from .connection_item import ConnectionItem
 
-from typing import Dict, List, Mapping, Optional, Sequence, Set, Tuple, TypeVar
+from typing import Dict, List, Mapping, Optional, Sequence, Set, Tuple, TypeVar, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .permissions_item import PermissionsRule
+    from .connection_item import ConnectionItem
+    import datetime
 
 
 class DatasourceItem(object):
