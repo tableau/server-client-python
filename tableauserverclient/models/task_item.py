@@ -9,6 +9,10 @@ class TaskItem(object):
         ExtractRefresh = "extractRefresh"
         DataAcceleration = "dataAcceleration"
 
+    # This mapping is used to convert task type returned from server
+    _TASK_TYPE_MAPPING = {'RefreshExtractTask': Type.ExtractRefresh,
+                          'MaterializeViewsTask': Type.DataAcceleration}
+
     def __init__(self, id_, task_type, priority, consecutive_failed_count=0, schedule_id=None,
                  schedule_item=None, last_run_at=None, target=None):
         self.id = id_
@@ -58,9 +62,19 @@ class TaskItem(object):
         if last_run_at_element is not None:
             last_run_at = parse_datetime(last_run_at_element.text)
 
-        task_type = element.get('type', None)
+        # Server response has different names for task types
+        task_type = cls._translate_task_type(element.get('type', None))
+
         priority = int(element.get('priority', -1))
         consecutive_failed_count = int(element.get('consecutiveFailedCount', 0))
         id_ = element.get('id', None)
         return cls(id_, task_type, priority, consecutive_failed_count, schedule_item.id,
                    schedule_item, last_run_at, target)
+
+    @staticmethod
+    def _translate_task_type(task_type):
+        if task_type in TaskItem._TASK_TYPE_MAPPING:
+            return TaskItem._TASK_TYPE_MAPPING[task_type]
+        else:
+            return task_type
+
