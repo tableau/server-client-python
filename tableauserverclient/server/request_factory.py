@@ -827,11 +827,11 @@ class TaskRequest(object):
 
 
 class SubscriptionRequest(object):
-    def create_req(self, subscription_item):
-        xml_request = ET.Element('tsRequest')
+    @_tsrequest_wrapped
+    def create_req(self, xml_request, subscription_item):
+        subscription_element = ET.SubElement(xml_request, 'subscription')
 
         # Main attributes
-        subscription_element = ET.SubElement(xml_request, 'subscription')
         subscription_element.attrib['subject'] = subscription_item.subject
         if subscription_item.attach_image is not None:
             subscription_element.attrib['attachImage'] = str(subscription_item.attach_image).lower()
