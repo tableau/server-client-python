@@ -829,16 +829,33 @@ class TaskRequest(object):
 class SubscriptionRequest(object):
     def create_req(self, subscription_item):
         xml_request = ET.Element('tsRequest')
+
+        # Main attributes
         subscription_element = ET.SubElement(xml_request, 'subscription')
         subscription_element.attrib['subject'] = subscription_item.subject
+        if subscription_item.attach_image is not None:
+            subscription_element.attrib['attachImage'] = str(subscription_item.attach_image).lower()
+        if subscription_item.attach_pdf is not None:
+            subscription_element.attrib['attachPdf'] = str(subscription_item.attach_pdf).lower()
+        if subscription_item.message is not None:
+            subscription_element.attrib['message'] = subscription_item.message
+        if subscription_item.page_orientation is not None:
+            subscription_element.attrib['pageOrientation'] = subscription_item.page_orientation
+        if subscription_item.page_size_option is not None:
+            subscription_element.attrib['pageSizeOption'] = subscription_item.page_size_option
 
+        # Content element
         content_element = ET.SubElement(subscription_element, 'content')
         content_element.attrib['id'] = subscription_item.target.id
         content_element.attrib['type'] = subscription_item.target.type
+        if subscription_item.send_if_view_empty is not None:
+            content_element.attrib['sendIfViewEmpty'] = str(subscription_item.send_if_view_empty).lower()
 
+        # Schedule element
         schedule_element = ET.SubElement(subscription_element, 'schedule')
         schedule_element.attrib['id'] = subscription_item.schedule_id
 
+        # User element
         user_element = ET.SubElement(subscription_element, 'user')
         user_element.attrib['id'] = subscription_item.user_id
         return ET.tostring(xml_request)
