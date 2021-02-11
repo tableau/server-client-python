@@ -860,6 +860,35 @@ class SubscriptionRequest(object):
         user_element.attrib['id'] = subscription_item.user_id
         return ET.tostring(xml_request)
 
+    @_tsrequest_wrapped
+    def update_req(self, xml_request, subscription_item):
+        subscription = ET.SubElement(xml_request, 'subscription')
+
+        # Main attributes
+        if subscription_item.subject is not None:
+            subscription.attrib['subject'] = subscription_item.subject
+        if subscription_item.attach_image is not None:
+            subscription.attrib['attachImage'] = str(subscription_item.attach_image).lower()
+        if subscription_item.attach_pdf is not None:
+            subscription.attrib['attachPdf'] = str(subscription_item.attach_pdf).lower()
+        if subscription_item.page_orientation is not None:
+            subscription.attrib['pageOrientation'] = subscription_item.page_orientation
+        if subscription_item.page_size_option is not None:
+            subscription.attrib['pageSizeOption'] = subscription_item.page_size_option
+        if subscription_item.suspended is not None:
+            subscription.attrib['suspended'] = str(subscription_item.suspended).lower()
+
+        # Schedule element
+        schedule = ET.SubElement(subscription, 'schedule')
+        if subscription_item.schedule_id is not None:
+            schedule.attrib['id'] = subscription_item.schedule_id
+
+        # Content element
+        content = ET.SubElement(subscription, 'content')
+        if subscription_item.send_if_view_empty is not None:
+            content.attrib['sendIfViewEmpty'] = str(subscription_item.send_if_view_empty).lower()
+        return ET.tostring(xml_request)
+
 
 class EmptyRequest(object):
     @_tsrequest_wrapped
