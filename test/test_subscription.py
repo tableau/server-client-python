@@ -28,13 +28,41 @@ class SubscriptionTests(unittest.TestCase):
             m.get(self.baseurl, text=response_xml)
             all_subscriptions, pagination_item = self.server.subscriptions.get()
 
+        self.assertEqual(2, pagination_item.total_available)
         subscription = all_subscriptions[0]
         self.assertEqual('382e9a6e-0c08-4a95-b6c1-c14df7bac3e4', subscription.id)
-        self.assertEqual('View', subscription.target.type)
-        self.assertEqual('cdd716ca-5818-470e-8bec-086885dbadee', subscription.target.id)
-        self.assertEqual('c0d5fc44-ad8c-4957-bec0-b70ed0f8df1e', subscription.user_id)
+        self.assertEqual('NOT FOUND!', subscription.message)
+        self.assertTrue(subscription.attach_image)
+        self.assertFalse(subscription.attach_pdf)
+        self.assertFalse(subscription.suspended)
+        self.assertFalse(subscription.send_if_view_empty)
+        self.assertIsNone(subscription.page_orientation)
+        self.assertIsNone(subscription.page_size_option)
         self.assertEqual('Not Found Alert', subscription.subject)
+        self.assertEqual('cdd716ca-5818-470e-8bec-086885dbadee', subscription.target.id)
+        self.assertEqual('View', subscription.target.type)
+        self.assertEqual('c0d5fc44-ad8c-4957-bec0-b70ed0f8df1e', subscription.user_id)
+        self.assertEqual('jonsnow@winterfell.com', subscription.user_name)
         self.assertEqual('7617c389-cdca-4940-a66e-69956fcebf3e', subscription.schedule_id)
+        self.assertEqual('Subscribe daily [00:00 - 04:00, Pacific US] [migrated at 1490824351877]', subscription.schedule_name)
+
+        subscription = all_subscriptions[1]
+        self.assertEqual('23cb7630-afc8-4c8e-b6cd-83ae0322ec66', subscription.id)
+        self.assertEqual('overview', subscription.message)
+        self.assertFalse(subscription.attach_image)
+        self.assertTrue(subscription.attach_pdf)
+        self.assertTrue(subscription.suspended)
+        self.assertTrue(subscription.send_if_view_empty)
+        self.assertEqual('PORTRAIT', subscription.page_orientation)
+        self.assertEqual('A5', subscription.page_size_option)
+        self.assertEqual('Last 7 Days', subscription.subject)
+        self.assertEqual('2e6b4e8f-22dd-4061-8f75-bf33703da7e5', subscription.target.id)
+        self.assertEqual('Workbook', subscription.target.type)
+        self.assertEqual('c0d5fc44-ad8c-4957-bec0-b70ed0f8df1e', subscription.user_id)
+        self.assertEqual('jonsnow@winterfell.com', subscription.user_name)
+        self.assertEqual('3407cd38-7b39-4983-86a6-67a1506a5e3f', subscription.schedule_id)
+        self.assertEqual('SSS_27212a85-6b28-41f6-8c69-29b02043d7a5', subscription.schedule_name)
+
 
     def test_get_subscription_by_id(self):
         with open(GET_XML_BY_ID, "rb") as f:
