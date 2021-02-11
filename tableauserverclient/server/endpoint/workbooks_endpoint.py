@@ -256,7 +256,7 @@ class Workbooks(QuerysetEndpoint):
     def publish(
         self, workbook_item, file, mode,
         connection_credentials=None, connections=None, as_job=False,
-        hidden_views=None
+        hidden_views=None, skip_connection_check=False
     ):
 
         if connection_credentials is not None:
@@ -317,6 +317,9 @@ class Workbooks(QuerysetEndpoint):
 
         if as_job:
             url += '&{0}=true'.format('asJob')
+
+        if skip_connection_check:
+            url += '&{0}=true'.format('skipConnectionCheck')
 
         # Determine if chunking is required (64MB is the limit for single upload method)
         if file_size >= FILESIZE_LIMIT:
