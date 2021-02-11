@@ -72,6 +72,40 @@ Here's a quick checklist to follow when coding to ensure a good pull request
   issues before submitting your pull request.
 - Keep commit messages clean and descriptive.
 
+### Use git pre-commit hook
+
+Setting up a git pre-commit hook can be helpful to ensure your code changes follow
+the project style conventions before pushing and creating a pull request.
+
+To configure the pre-commit hook, navigate to your local clone/fork of the
+`server-client-python` project and change into the `.git/hooks` directory.
+Create a file `pre-commit` with the contents below and mark it as executable
+(`chmod +x pre-commit`).
+
+To test that the hook is working correctly, make a style-inconsistent change (for
+example, changing some indentation to not be a multiple of 4), then try to commit
+locally. You should get a failure with an explanation from pycodestyle with the
+issue.
+
+```shell
+#!/bin/sh
+
+# only check if on a code branch (i.e. skip if on a docs branch)
+if [ -e tableauserverclient/__init__.py ];
+then
+   # check for style conventions in all code dirs
+   echo Running pycodestyle
+   pycodestyle tableauserverclient test samples
+fi
+```
+
+Windows users: The first line of the sample script above will need to be adjusted
+depending on how and where git is installed on your system, for example:
+
+```shell
+#!C:/Program\ Files/Git/usr/bin/sh.exe
+```
+
 ### Adding features
 
 1. Create an endpoint class for the new feature, following the structure of the
