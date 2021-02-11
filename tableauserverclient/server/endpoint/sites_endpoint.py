@@ -67,10 +67,11 @@ class Sites(Endpoint):
                 error = 'You cannot set admin_mode to ContentOnly and also set a user quota'
                 raise ValueError(error)
 
-        if site_item.user_quota:
-            if any([site_item.tier_creator_capacity,
-                    site_item.tier_explorer_capacity,
-                    site_item.tier_viewer_capacity, ]):
+        reset = (None, -1,)
+        if site_item.user_quota not in reset:
+            if any([site_item.tier_creator_capacity not in reset,
+                    site_item.tier_explorer_capacity not in reset,
+                    site_item.tier_viewer_capacity not in reset, ]):
                 error = 'You cannot set tiered capacity and a user quota.'
                 raise ValueError(error)
 
