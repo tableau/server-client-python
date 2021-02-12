@@ -77,4 +77,3 @@ class TaskItem(object):
             return TaskItem._TASK_TYPE_MAPPING[task_type]
         else:
             return task_type
-
