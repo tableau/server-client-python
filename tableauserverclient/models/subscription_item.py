@@ -7,8 +7,6 @@ class SubscriptionItem(object):
 
     def __init__(self, subject, schedule_id, user_id, target):
         self._id = None
-        self._schedule_name = None
-        self._user_name = None
         self.attach_image = True
         self.attach_pdf = False
         self.message = None
@@ -32,14 +30,6 @@ class SubscriptionItem(object):
     @property
     def id(self):
         return self._id
-
-    @property
-    def schedule_name(self):
-        return self._schedule_name
-
-    @property
-    def user_name(self):
-        return self._user_name
 
     @property
     def attach_image(self):
@@ -94,10 +84,8 @@ class SubscriptionItem(object):
 
         # Schedule element
         schedule_id = None
-        schedule_name = None
         if schedule_element is not None:
             schedule_id = schedule_element.get('id', None)
-            schedule_name = schedule_element.get('name', None)
 
         # Content element
         target = None
@@ -108,10 +96,8 @@ class SubscriptionItem(object):
 
         # User element
         user_id = None
-        user_name = None
         if user_element is not None:
             user_id = user_element.get('id', None)
-            user_name = user_element.get('name', None)
 
         # Main attributes
         id_ = element.get('id', None)
@@ -126,8 +112,6 @@ class SubscriptionItem(object):
         # Create SubscriptionItem and set fields
         sub = cls(subject, schedule_id, user_id, target)
         sub._id = id_
-        sub._schedule_name = schedule_name
-        sub._user_name = user_name
         sub.attach_image = attach_image
         sub.attach_pdf = attach_pdf
         sub.message = message
