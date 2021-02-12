@@ -34,9 +34,12 @@ setup(
     install_requires=[
         'requests>=2.11,<3.0',
     ],
-    tests_require=[
-        'requests-mock>=1.0,<2.0',
-        'pytest',
-        'mock'
-    ]
+    extras_require={
+        'test': [
+            'mock',
+            'pycodestyle',
+            'pytest',
+            'requests-mock>=1.0,<2.0'
+        ]
+    }
 )
