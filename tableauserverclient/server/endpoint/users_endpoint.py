@@ -104,10 +104,10 @@ class Users(QuerysetEndpoint):
             error = "User item missing ID."
             raise MissingRequiredFieldError(error)
 
-        def wb_pager():
+        def groups_for_user_pager():
             return Pager(lambda options: self._get_groups_for_user(user_item, options), req_options)
 
-        user_item._set_groups(wb_pager)
+        user_item._set_groups(groups_for_user_pager)
 
     def _get_groups_for_user(self, user_item, req_options=None):
         url = "{0}/{1}/groups".format(self.baseurl, user_item.id)
