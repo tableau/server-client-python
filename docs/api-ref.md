@@ -2800,6 +2800,7 @@ Name | Description
 `fullname` | The full name of the user.
 `name` |   The name of the user. This attribute is required when you are creating a `UserItem` instance.
 `site_role` |  The role the user has on the site. This attribute is required with you are creating a `UserItem` instance. The specific roles vary depending upon the version of the REST API.  For example, for version 2.8 and earlier, the `site_role` can be one of the following: `Interactor`, `Publisher`, `ServerAdministrator`, `SiteAdministrator`, `Unlicensed`, `UnlicensedWithPublish`,  `Viewer`, `ViewerWithPublish`, `Guest`.  For REST API 3.0 and later, the `site_role` can be one of the following `Creator`, `Explorer`, `ExplorerCanPublish`, `ReadOnly` *(viewers from previous API versions who do not have v3.0+ viewer permissions)*, `Viewer`, `SiteAdministratorCreator`, `SiteAdministratorExplorer`, `UnlicensedWithPublish`.
+`groups` | The groups that the user belongs to. You must run the populate_groups method to add the groups to the `UserItem`.
 
 
 **Example**
@@ -2969,6 +2970,58 @@ Returns the list of favorites (views, workbooks, and data sources) for a user.
 <br>
 <br>
 
+#### users.populate_groups
+
+```py
+users.populate_groups(user_item, req_options=None):
+```
+
+Returns the groups that the user belongs to.
+
+**Parameters**
+
+Name   |  Description
+ :--- | : ---
+`user_item`  |  The `user_item` specifies the user to populate with group membership.
+
+
+
+
+**Exceptions**
+
+Error   |  Description
+ :--- | : ---
+`User item missing ID.` |  Raises an error if the `user_item` is unspecified.
+
+
+**Returns**
+
+A list of `GroupItem`
+
+A `PaginationItem` that points (`user_item.groups`). See [UserItem class](#useritem-class)
+
+
+**Example**
+
+```py
+# first get all users, call server.users.get()
+# get groups for user[0]
+    ...
+
+  page_n = server.users.populate_groups(all_users[0])
+  print("\nUser {0} is a member of {1} groups".format(all_users[0].name, page_n.total_available))
+  print("\nThe groups are:")
+  for group in all_users[0].groups :
+      print(group.name)
+
+    ...
+```
+
+
+
+
+<br>
+<br>
 
 #### users.populate_workbooks
 
