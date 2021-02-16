@@ -1,4 +1,5 @@
 from .endpoint import Endpoint, api
+from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, SubscriptionItem, PaginationItem
 
 import logging
@@ -51,3 +52,14 @@ class Subscriptions(Endpoint):
         url = "{0}/{1}".format(self.baseurl, subscription_id)
         self.delete_request(url)
         logger.info('Deleted subscription (ID: {0})'.format(subscription_id))
+
+    @api(version='2.3')
+    def update(self, subscription_item):
+        if not subscription_item.id:
+            error = "Subscription item missing ID. Subscription must be retrieved from server first."
+            raise MissingRequiredFieldError(error)
+        url = "{0}/{1}".format(self.baseurl, subscription_item.id)
+        update_req = RequestFactory.Subscription.update_req(subscription_item)
+        server_response = self.put_request(url, update_req)
+        logger.info('Updated subscription item (ID: {0})'.format(subscription_item.id))
+        return SubscriptionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
