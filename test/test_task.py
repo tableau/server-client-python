@@ -104,6 +104,7 @@ class TaskTests(unittest.TestCase):
         self.assertEqual('b22190b4-6ac2-4eed-9563-4afc03444413', task.schedule_id)
         self.assertEqual(parse_datetime('2019-12-09T22:30:00Z'), task.schedule_item.next_run_at)
         self.assertEqual(parse_datetime('2019-12-09T20:45:04Z'), task.last_run_at)
+        self.assertEqual(TSC.TaskItem.Type.DataAcceleration, task.task_type)
 
     def test_delete_data_acceleration(self):
         with requests_mock.mock() as m:
@@ -124,6 +125,7 @@ class TaskTests(unittest.TestCase):
         self.assertEqual('c7a9327e-1cda-4504-b026-ddb43b976d1d', task.target.id)
         self.assertEqual('workbook', task.target.type)
         self.assertEqual('b60b4efd-a6f7-4599-beb3-cb677e7abac1', task.schedule_id)
+        self.assertEqual(TSC.TaskItem.Type.ExtractRefresh, task.task_type)
 
     def test_run_now(self):
         task_id = 'f84901ac-72ad-4f9b-a87e-7a3500402ad6'
