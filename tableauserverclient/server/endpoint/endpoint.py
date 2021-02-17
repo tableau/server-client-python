@@ -48,19 +48,22 @@ class Endpoint(object):
         if content is not None:
             parameters['data'] = content
 
+        logger.debug(u'request {}, url: {}'.format(method.__name__, url))
+        if content:
+            logger.debug(u'request content: {}'.format(content[:1000]))
+
         server_response = method(url, **parameters)
         self.parent_srv._namespace.detect(server_response.content)
         self._check_status(server_response)
 
         # This check is to determine if the response is a text response (xml or otherwise)
         # so that we do not attempt to log bytes and other binary data.
-        if server_response.encoding:
+        if len(server_response.content) > 0 and server_response.encoding:
             logger.debug(u'Server response from {0}:\n\t{1}'.format(
                 url, server_response.content.decode(server_response.encoding)))
         return server_response
 
     def _check_status(self, server_response):
-        logger.debug(self._safe_to_log(server_response))
         if server_response.status_code >= 500:
             raise InternalServerError(server_response)
         elif server_response.status_code not in Success_codes:

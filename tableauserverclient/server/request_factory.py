@@ -277,10 +277,8 @@ class GroupRequest(object):
         xml_request = ET.Element('tsRequest')
         group_element = ET.SubElement(xml_request, 'group')
         group_element.attrib['name'] = group_item.name
-        if group_item.license_mode is not None:
-            group_element.attrib['grantLicenseMode'] = group_item.license_mode
         if group_item.minimum_site_role is not None:
-            group_element.attrib['SiteRole'] = group_item.minimum_site_role
+            group_element.attrib['minimumSiteRole'] = group_item.minimum_site_role
         return ET.tostring(xml_request)
 
     def create_ad_req(self, group_item):
@@ -295,23 +293,36 @@ class GroupRequest(object):
 
         import_element.attrib['domainName'] = group_item.domain_name
         if group_item.license_mode is not None:
-            import_element.attrib['grantLicenseMode'] = group_item.license
+            import_element.attrib['grantLicenseMode'] = group_item.license_mode
         if group_item.minimum_site_role is not None:
-            import_element.attrib['SiteRole'] = group_item.minimum_site_role
+            import_element.attrib['siteRole'] = group_item.minimum_site_role
         return ET.tostring(xml_request)
 
     def update_req(self, group_item, default_site_role=None):
+        # (1/8/2021): Deprecated starting v0.15
         if default_site_role is not None:
+            import warnings
+            warnings.simplefilter('always', DeprecationWarning)
+            warnings.warn('RequestFactory.Group.update_req(...default_site_role="") is deprecated, '
+                          'please set the minimum_site_role field of GroupItem',
+                          DeprecationWarning)
             group_item.minimum_site_role = default_site_role
+
         xml_request = ET.Element('tsRequest')
         group_element = ET.SubElement(xml_request, 'group')
         group_element.attrib['name'] = group_item.name
-        if group_item.domain_name != 'local':
-            project_element = ET.SubElement(group_element, 'import')
-            project_element.attrib['source'] = "ActiveDirectory"
-            project_element.attrib['domainName'] = group_item.domain_name
-            project_element.attrib['siteRole'] = group_item.minimum_site_role
-            project_element.attrib['grantLicenseMode'] = group_item.license_mode
+        if group_item.domain_name is not None and group_item.domain_name != 'local':
+            # Import element is only accepted in the request for AD groups
+            import_element = ET.SubElement(group_element, 'import')
+            import_element.attrib['source'] = "ActiveDirectory"
+            import_element.attrib['domainName'] = group_item.domain_name
+            import_element.attrib['siteRole'] = group_item.minimum_site_role
+            if group_item.license_mode is not None:
+                import_element.attrib['grantLicenseMode'] = group_item.license_mode
+        else:
+            # Local group request does not accept an 'import' element
+            if group_item.minimum_site_role is not None:
+                group_element.attrib['minimumSiteRole'] = group_item.minimum_site_role
 
         return ET.tostring(xml_request)
 
@@ -461,7 +472,7 @@ class SiteRequest(object):
             site_element.attrib['subscribeOthersEnabled'] = str(site_item.subscribe_others_enabled).lower()
         if site_item.revision_limit:
             site_element.attrib['revisionLimit'] = str(site_item.revision_limit)
-        if site_item.subscribe_others_enabled is not None:
+        if site_item.revision_history_enabled is not None:
             site_element.attrib['revisionHistoryEnabled'] = str(site_item.revision_history_enabled).lower()
         if site_item.data_acceleration_mode is not None:
             site_element.attrib['dataAccelerationMode'] = str(site_item.data_acceleration_mode).lower()
@@ -469,6 +480,78 @@ class SiteRequest(object):
             site_element.attrib['flowsEnabled'] = str(site_item.flows_enabled).lower()
         if site_item.cataloging_enabled is not None:
             site_element.attrib['catalogingEnabled'] = str(site_item.cataloging_enabled).lower()
+        if site_item.editing_flows_enabled is not None:
+            site_element.attrib['editingFlowsEnabled'] = str(site_item.editing_flows_enabled).lower()
+        if site_item.scheduling_flows_enabled is not None:
+            site_element.attrib['schedulingFlowsEnabled'] = str(site_item.scheduling_flows_enabled).lower()
+        if site_item.allow_subscription_attachments is not None:
+            site_element.attrib['allowSubscriptionAttachments'] = str(site_item.allow_subscription_attachments).lower()
+        if site_item.guest_access_enabled is not None:
+            site_element.attrib['guestAccessEnabled'] = str(site_item.guest_access_enabled).lower()
+        if site_item.cache_warmup_enabled is not None:
+            site_element.attrib['cacheWarmupEnabled'] = str(site_item.cache_warmup_enabled).lower()
+        if site_item.commenting_enabled is not None:
+            site_element.attrib['commentingEnabled'] = str(site_item.commenting_enabled).lower()
+        if site_item.extract_encryption_mode is not None:
+            site_element.attrib['extractEncryptionMode'] = str(site_item.extract_encryption_mode).lower()
+        if site_item.request_access_enabled is not None:
+            site_element.attrib['requestAccessEnabled'] = str(site_item.request_access_enabled).lower()
+        if site_item.run_now_enabled is not None:
+            site_element.attrib['runNowEnabled'] = str(site_item.run_now_enabled).lower()
+        if site_item.tier_creator_capacity is not None:
+            site_element.attrib['tierCreatorCapacity'] = str(site_item.tier_creator_capacity).lower()
+        if site_item.tier_explorer_capacity is not None:
+            site_element.attrib['tierExplorerCapacity'] = str(site_item.tier_explorer_capacity).lower()
+        if site_item.tier_viewer_capacity is not None:
+            site_element.attrib['tierViewerCapacity'] = str(site_item.tier_viewer_capacity).lower()
+        if site_item.data_alerts_enabled is not None:
+            site_element.attrib['dataAlertsEnabled'] = str(site_item.data_alerts_enabled)
+        if site_item.commenting_mentions_enabled is not None:
+            site_element.attrib['commentingMentionsEnabled'] = str(site_item.commenting_mentions_enabled).lower()
+        if site_item.catalog_obfuscation_enabled is not None:
+            site_element.attrib['catalogObfuscationEnabled'] = str(site_item.catalog_obfuscation_enabled).lower()
+        if site_item.flow_auto_save_enabled is not None:
+            site_element.attrib['flowAutoSaveEnabled'] = str(site_item.flow_auto_save_enabled).lower()
+        if site_item.web_extraction_enabled is not None:
+            site_element.attrib['webExtractionEnabled'] = str(site_item.web_extraction_enabled).lower()
+        if site_item.metrics_content_type_enabled is not None:
+            site_element.attrib['metricsContentTypeEnabled'] = str(site_item.metrics_content_type_enabled).lower()
+        if site_item.notify_site_admins_on_throttle is not None:
+            site_element.attrib['notifySiteAdminsOnThrottle'] = str(site_item.notify_site_admins_on_throttle).lower()
+        if site_item.authoring_enabled is not None:
+            site_element.attrib['authoringEnabled'] = str(site_item.authoring_enabled).lower()
+        if site_item.custom_subscription_email_enabled is not None:
+            site_element.attrib['customSubscriptionEmailEnabled'] = \
+                str(site_item.custom_subscription_email_enabled).lower()
+        if site_item.custom_subscription_email is not None:
+            site_element.attrib['customSubscriptionEmail'] = str(site_item.custom_subscription_email).lower()
+        if site_item.custom_subscription_footer_enabled is not None:
+            site_element.attrib['customSubscriptionFooterEnabled'] =\
+                str(site_item.custom_subscription_footer_enabled).lower()
+        if site_item.custom_subscription_footer is not None:
+            site_element.attrib['customSubscriptionFooter'] = str(site_item.custom_subscription_footer).lower()
+        if site_item.ask_data_mode is not None:
+            site_element.attrib['askDataMode'] = str(site_item.ask_data_mode)
+        if site_item.named_sharing_enabled is not None:
+            site_element.attrib['namedSharingEnabled'] = str(site_item.named_sharing_enabled).lower()
+        if site_item.mobile_biometrics_enabled is not None:
+            site_element.attrib['mobileBiometricsEnabled'] = str(site_item.mobile_biometrics_enabled).lower()
+        if site_item.sheet_image_enabled is not None:
+            site_element.attrib['sheetImageEnabled'] = str(site_item.sheet_image_enabled).lower()
+        if site_item.derived_permissions_enabled is not None:
+            site_element.attrib['derivedPermissionsEnabled'] = str(site_item.derived_permissions_enabled).lower()
+        if site_item.user_visibility_mode is not None:
+            site_element.attrib['userVisibilityMode'] = str(site_item.user_visibility_mode)
+        if site_item.use_default_time_zone is not None:
+            site_element.attrib['useDefaultTimeZone'] = str(site_item.use_default_time_zone).lower()
+        if site_item.time_zone is not None:
+            site_element.attrib['timeZone'] = str(site_item.time_zone)
+        if site_item.auto_suspend_refresh_enabled is not None:
+            site_element.attrib['autoSuspendRefreshEnabled'] = str(site_item.auto_suspend_refresh_enabled).lower()
+        if site_item.auto_suspend_refresh_inactivity_window is not None:
+            site_element.attrib['autoSuspendRefreshInactivityWindow'] =\
+                str(site_item.auto_suspend_refresh_inactivity_window)
+
         return ET.tostring(xml_request)
 
     def create_req(self, site_item):
@@ -484,10 +567,90 @@ class SiteRequest(object):
             site_element.attrib['storageQuota'] = str(site_item.storage_quota)
         if site_item.disable_subscriptions is not None:
             site_element.attrib['disableSubscriptions'] = str(site_item.disable_subscriptions).lower()
+        if site_item.subscribe_others_enabled is not None:
+            site_element.attrib['subscribeOthersEnabled'] = str(site_item.subscribe_others_enabled).lower()
+        if site_item.revision_limit:
+            site_element.attrib['revisionLimit'] = str(site_item.revision_limit)
+        if site_item.data_acceleration_mode is not None:
+            site_element.attrib['dataAccelerationMode'] = str(site_item.data_acceleration_mode).lower()
         if site_item.flows_enabled is not None:
             site_element.attrib['flowsEnabled'] = str(site_item.flows_enabled).lower()
+        if site_item.editing_flows_enabled is not None:
+            site_element.attrib['editingFlowsEnabled'] = str(site_item.editing_flows_enabled).lower()
+        if site_item.scheduling_flows_enabled is not None:
+            site_element.attrib['schedulingFlowsEnabled'] = str(site_item.scheduling_flows_enabled).lower()
+        if site_item.allow_subscription_attachments is not None:
+            site_element.attrib['allowSubscriptionAttachments'] = str(site_item.allow_subscription_attachments).lower()
+        if site_item.guest_access_enabled is not None:
+            site_element.attrib['guestAccessEnabled'] = str(site_item.guest_access_enabled).lower()
+        if site_item.cache_warmup_enabled is not None:
+            site_element.attrib['cacheWarmupEnabled'] = str(site_item.cache_warmup_enabled).lower()
+        if site_item.commenting_enabled is not None:
+            site_element.attrib['commentingEnabled'] = str(site_item.commenting_enabled).lower()
+        if site_item.revision_history_enabled is not None:
+            site_element.attrib['revisionHistoryEnabled'] = str(site_item.revision_history_enabled).lower()
+        if site_item.extract_encryption_mode is not None:
+            site_element.attrib['extractEncryptionMode'] = str(site_item.extract_encryption_mode).lower()
+        if site_item.request_access_enabled is not None:
+            site_element.attrib['requestAccessEnabled'] = str(site_item.request_access_enabled).lower()
+        if site_item.run_now_enabled is not None:
+            site_element.attrib['runNowEnabled'] = str(site_item.run_now_enabled).lower()
+        if site_item.tier_creator_capacity is not None:
+            site_element.attrib['tierCreatorCapacity'] = str(site_item.tier_creator_capacity).lower()
+        if site_item.tier_explorer_capacity is not None:
+            site_element.attrib['tierExplorerCapacity'] = str(site_item.tier_explorer_capacity).lower()
+        if site_item.tier_viewer_capacity is not None:
+            site_element.attrib['tierViewerCapacity'] = str(site_item.tier_viewer_capacity).lower()
+        if site_item.data_alerts_enabled is not None:
+            site_element.attrib['dataAlertsEnabled'] = str(site_item.data_alerts_enabled).lower()
+        if site_item.commenting_mentions_enabled is not None:
+            site_element.attrib['commentingMentionsEnabled'] = str(site_item.commenting_mentions_enabled).lower()
+        if site_item.catalog_obfuscation_enabled is not None:
+            site_element.attrib['catalogObfuscationEnabled'] = str(site_item.catalog_obfuscation_enabled).lower()
+        if site_item.flow_auto_save_enabled is not None:
+            site_element.attrib['flowAutoSaveEnabled'] = str(site_item.flow_auto_save_enabled).lower()
+        if site_item.web_extraction_enabled is not None:
+            site_element.attrib['webExtractionEnabled'] = str(site_item.web_extraction_enabled).lower()
+        if site_item.metrics_content_type_enabled is not None:
+            site_element.attrib['metricsContentTypeEnabled'] = str(site_item.metrics_content_type_enabled).lower()
+        if site_item.notify_site_admins_on_throttle is not None:
+            site_element.attrib['notifySiteAdminsOnThrottle'] = str(site_item.notify_site_admins_on_throttle).lower()
+        if site_item.authoring_enabled is not None:
+            site_element.attrib['authoringEnabled'] = str(site_item.authoring_enabled).lower()
+        if site_item.custom_subscription_email_enabled is not None:
+            site_element.attrib['customSubscriptionEmailEnabled'] =\
+                str(site_item.custom_subscription_email_enabled).lower()
+        if site_item.custom_subscription_email is not None:
+            site_element.attrib['customSubscriptionEmail'] = str(site_item.custom_subscription_email).lower()
+        if site_item.custom_subscription_footer_enabled is not None:
+            site_element.attrib['customSubscriptionFooterEnabled'] =\
+                str(site_item.custom_subscription_footer_enabled).lower()
+        if site_item.custom_subscription_footer is not None:
+            site_element.attrib['customSubscriptionFooter'] = str(site_item.custom_subscription_footer).lower()
+        if site_item.ask_data_mode is not None:
+            site_element.attrib['askDataMode'] = str(site_item.ask_data_mode)
+        if site_item.named_sharing_enabled is not None:
+            site_element.attrib['namedSharingEnabled'] = str(site_item.named_sharing_enabled).lower()
+        if site_item.mobile_biometrics_enabled is not None:
+            site_element.attrib['mobileBiometricsEnabled'] = str(site_item.mobile_biometrics_enabled).lower()
+        if site_item.sheet_image_enabled is not None:
+            site_element.attrib['sheetImageEnabled'] = str(site_item.sheet_image_enabled).lower()
         if site_item.cataloging_enabled is not None:
             site_element.attrib['catalogingEnabled'] = str(site_item.cataloging_enabled).lower()
+        if site_item.derived_permissions_enabled is not None:
+            site_element.attrib['derivedPermissionsEnabled'] = str(site_item.derived_permissions_enabled).lower()
+        if site_item.user_visibility_mode is not None:
+            site_element.attrib['userVisibilityMode'] = str(site_item.user_visibility_mode)
+        if site_item.use_default_time_zone is not None:
+            site_element.attrib['useDefaultTimeZone'] = str(site_item.use_default_time_zone).lower()
+        if site_item.time_zone is not None:
+            site_element.attrib['timeZone'] = str(site_item.time_zone)
+        if site_item.auto_suspend_refresh_enabled is not None:
+            site_element.attrib['autoSuspendRefreshEnabled'] = str(site_item.auto_suspend_refresh_enabled).lower()
+        if site_item.auto_suspend_refresh_inactivity_window is not None:
+            site_element.attrib['autoSuspendRefreshInactivityWindow'] =\
+                str(site_item.auto_suspend_refresh_inactivity_window)
+
         return ET.tostring(xml_request)
 
 
@@ -593,13 +756,12 @@ class WorkbookRequest(object):
         if workbook_item.owner_id:
             owner_element = ET.SubElement(workbook_element, 'owner')
             owner_element.attrib['id'] = workbook_item.owner_id
-        if workbook_item.data_acceleration_config is not None and \
-                'acceleration_enabled' in workbook_item.data_acceleration_config:
+        if workbook_item.data_acceleration_config['acceleration_enabled'] is not None:
             data_acceleration_config = workbook_item.data_acceleration_config
             data_acceleration_element = ET.SubElement(workbook_element, 'dataAccelerationConfig')
             data_acceleration_element.attrib['accelerationEnabled'] = str(data_acceleration_config
                                                                           ["acceleration_enabled"]).lower()
-            if "accelerate_now" in data_acceleration_config:
+            if data_acceleration_config['accelerate_now'] is not None:
                 data_acceleration_element.attrib['accelerateNow'] = str(data_acceleration_config
                                                                         ["accelerate_now"]).lower()
 
@@ -665,20 +827,66 @@ class TaskRequest(object):
 
 
 class SubscriptionRequest(object):
-    def create_req(self, subscription_item):
-        xml_request = ET.Element('tsRequest')
+    @_tsrequest_wrapped
+    def create_req(self, xml_request, subscription_item):
         subscription_element = ET.SubElement(xml_request, 'subscription')
-        subscription_element.attrib['subject'] = subscription_item.subject
 
+        # Main attributes
+        subscription_element.attrib['subject'] = subscription_item.subject
+        if subscription_item.attach_image is not None:
+            subscription_element.attrib['attachImage'] = str(subscription_item.attach_image).lower()
+        if subscription_item.attach_pdf is not None:
+            subscription_element.attrib['attachPdf'] = str(subscription_item.attach_pdf).lower()
+        if subscription_item.message is not None:
+            subscription_element.attrib['message'] = subscription_item.message
+        if subscription_item.page_orientation is not None:
+            subscription_element.attrib['pageOrientation'] = subscription_item.page_orientation
+        if subscription_item.page_size_option is not None:
+            subscription_element.attrib['pageSizeOption'] = subscription_item.page_size_option
+
+        # Content element
         content_element = ET.SubElement(subscription_element, 'content')
         content_element.attrib['id'] = subscription_item.target.id
         content_element.attrib['type'] = subscription_item.target.type
+        if subscription_item.send_if_view_empty is not None:
+            content_element.attrib['sendIfViewEmpty'] = str(subscription_item.send_if_view_empty).lower()
 
+        # Schedule element
         schedule_element = ET.SubElement(subscription_element, 'schedule')
         schedule_element.attrib['id'] = subscription_item.schedule_id
 
+        # User element
         user_element = ET.SubElement(subscription_element, 'user')
         user_element.attrib['id'] = subscription_item.user_id
+        return ET.tostring(xml_request)
+
+    @_tsrequest_wrapped
+    def update_req(self, xml_request, subscription_item):
+        subscription = ET.SubElement(xml_request, 'subscription')
+
+        # Main attributes
+        if subscription_item.subject is not None:
+            subscription.attrib['subject'] = subscription_item.subject
+        if subscription_item.attach_image is not None:
+            subscription.attrib['attachImage'] = str(subscription_item.attach_image).lower()
+        if subscription_item.attach_pdf is not None:
+            subscription.attrib['attachPdf'] = str(subscription_item.attach_pdf).lower()
+        if subscription_item.page_orientation is not None:
+            subscription.attrib['pageOrientation'] = subscription_item.page_orientation
+        if subscription_item.page_size_option is not None:
+            subscription.attrib['pageSizeOption'] = subscription_item.page_size_option
+        if subscription_item.suspended is not None:
+            subscription.attrib['suspended'] = str(subscription_item.suspended).lower()
+
+        # Schedule element
+        schedule = ET.SubElement(subscription, 'schedule')
+        if subscription_item.schedule_id is not None:
+            schedule.attrib['id'] = subscription_item.schedule_id
+
+        # Content element
+        content = ET.SubElement(subscription, 'content')
+        if subscription_item.send_if_view_empty is not None:
+            content.attrib['sendIfViewEmpty'] = str(subscription_item.send_if_view_empty).lower()
         return ET.tostring(xml_request)
 
 

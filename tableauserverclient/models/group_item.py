@@ -9,13 +9,17 @@ class GroupItem(object):
 
     tag_name = 'group'
 
-    def __init__(self, name=None):
-        self._domain_name = None
+    class LicenseMode:
+        onLogin = 'onLogin'
+        onSync = 'onSync'
+
+    def __init__(self, name=None, domain_name=None):
         self._id = None
-        self._users = None
-        self.name = name
         self._license_mode = None
         self._minimum_site_role = None
+        self._users = None
+        self.name = name
+        self.domain_name = domain_name
 
     @property
     def domain_name(self):
@@ -43,8 +47,8 @@ class GroupItem(object):
         return self._license_mode
 
     @license_mode.setter
+    @property_is_enum(LicenseMode)
     def license_mode(self, value):
-        # valid values = onSync, onLogin
         self._license_mode = value
 
     @property
@@ -79,17 +83,18 @@ class GroupItem(object):
             name = group_xml.get('name', None)
             group_item = cls(name)
             group_item._id = group_xml.get('id', None)
-            # AD groups have an extra element under this
+
+            # Domain name is returned in a domain element for some calls
+            domain_elem = group_xml.find('.//t:domain', namespaces=ns)
+            if domain_elem is not None:
+                group_item.domain_name = domain_elem.get('name', None)
+
+            # Import element is returned for both local and AD groups (2020.3+)
             import_elem = group_xml.find('.//t:import', namespaces=ns)
-            if (import_elem is not None):
-                group_item.domain_name = import_elem.get('domainName')
-                group_item.license_mode = import_elem.get('grantLicenseMode')
-                group_item.minimum_site_role = import_elem.get('siteRole')
-            else:
-                # local group, we will just have two extra attributes here
-                group_item.domain_name = 'local'
-                group_item.license_mode = group_xml.get('grantLicenseMode')
-                group_item.minimum_site_role = group_xml.get('siteRole')
+            if import_elem is not None:
+                group_item.domain_name = import_elem.get('domainName', None)
+                group_item.license_mode = import_elem.get('grantLicenseMode', None)
+                group_item.minimum_site_role = import_elem.get('siteRole', None)
 
             all_group_items.append(group_item)
         return all_group_items
