@@ -18,6 +18,7 @@ from typing import Dict, List, Mapping, Optional, Tuple, TYPE_CHECKING, Union
 if TYPE_CHECKING:
     from ..server import Server
     from ..request_options import RequestOptions
+    from .. import DatasourceItem
 
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64   # 64MB
@@ -73,7 +74,8 @@ class Workbooks(QuerysetEndpoint):
 
     # create one or more extracts on 1 workbook, optionally encrypted
     @api(version='3.5')
-    def create_extract(self, workbook_item, encrypt=False, includeAll=True, datasources=None):
+    def create_extract(self, workbook_item: WorkbookItem, encrypt: bool = False, includeAll: bool = True,
+                       datasources: Optional[List['DatasourceItem']] = None) -> JobItem:
         id_ = getattr(workbook_item, 'id', workbook_item)
         url = "{0}/{1}/createExtract?encrypt={2}".format(self.baseurl, id_, encrypt)
 
@@ -84,7 +86,7 @@ class Workbooks(QuerysetEndpoint):
 
     # delete all the extracts on 1 workbook
     @api(version='3.5')
-    def delete_extract(self, workbook_item):
+    def delete_extract(self, workbook_item: WorkbookItem) -> None:
         id_ = getattr(workbook_item, 'id', workbook_item)
         url = "{0}/{1}/deleteExtract".format(self.baseurl, id_)
         empty_req = RequestFactory.Empty.empty_req()
@@ -92,7 +94,7 @@ class Workbooks(QuerysetEndpoint):
 
     # Delete 1 workbook by id
     @api(version="2.0")
-    def delete(self, workbook_id):
+    def delete(self, workbook_id: str) -> None:
         if not workbook_id:
             error = "Workbook ID undefined."
             raise ValueError(error)
@@ -102,7 +104,7 @@ class Workbooks(QuerysetEndpoint):
 
     # Update workbook
     @api(version="2.0")
-    def update(self, workbook_item):
+    def update(self, workbook_item: WorkbookItem) -> WorkbookItem:
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -125,7 +127,7 @@ class Workbooks(QuerysetEndpoint):
 
     # Update workbook_connection
     @api(version="2.3")
-    def update_connection(self, workbook_item, connection_item):
+    def update_connection(self, workbook_item: WorkbookItem, connection_item: ConnectionItem) -> ConnectionItem:
         url = "{0}/{1}/connections/{2}".format(self.baseurl, workbook_item.id, connection_item.id)
         update_req = RequestFactory.Connection.update_req(connection_item)
         server_response = self.put_request(url, update_req)
