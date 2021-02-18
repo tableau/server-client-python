@@ -192,7 +192,7 @@ class SiteItem(object):
     def flows_enabled(self):
         return self._flows_enabled
 
-    @flows_enabled.setter
+    @flows_enabled.setter  # type: ignore
     @property_is_boolean
     def flows_enabled(self, value):
         self._flows_enabled = value
@@ -204,7 +204,7 @@ class SiteItem(object):
     def editing_flows_enabled(self):
         return self._editing_flows_enabled
 
-    @editing_flows_enabled.setter
+    @editing_flows_enabled.setter  # type: ignore
     @property_is_boolean
     def editing_flows_enabled(self, value):
         self._editing_flows_enabled = value
@@ -213,7 +213,7 @@ class SiteItem(object):
     def scheduling_flows_enabled(self):
         return self._scheduling_flows_enabled
 
-    @scheduling_flows_enabled.setter
+    @scheduling_flows_enabled.setter  # type: ignore
     @property_is_boolean
     def scheduling_flows_enabled(self, value):
         self._scheduling_flows_enabled = value
@@ -222,7 +222,7 @@ class SiteItem(object):
     def allow_subscription_attachments(self):
         return self._allow_subscription_attachments
 
-    @allow_subscription_attachments.setter
+    @allow_subscription_attachments.setter  # type: ignore
     @property_is_boolean
     def allow_subscription_attachments(self, value):
         self._allow_subscription_attachments = value
@@ -231,7 +231,7 @@ class SiteItem(object):
     def guest_access_enabled(self):
         return self._guest_access_enabled
 
-    @guest_access_enabled.setter
+    @guest_access_enabled.setter  # type: ignore
     @property_is_boolean
     def guest_access_enabled(self, value):
         self._guest_access_enabled = value
@@ -240,7 +240,7 @@ class SiteItem(object):
     def cache_warmup_enabled(self):
         return self._cache_warmup_enabled
 
-    @cache_warmup_enabled.setter
+    @cache_warmup_enabled.setter  # type: ignore
     @property_is_boolean
     def cache_warmup_enabled(self, value):
         self._cache_warmup_enabled = value
@@ -249,7 +249,7 @@ class SiteItem(object):
     def commenting_enabled(self):
         return self._commenting_enabled
 
-    @commenting_enabled.setter
+    @commenting_enabled.setter  # type: ignore
     @property_is_boolean
     def commenting_enabled(self, value):
         self._commenting_enabled = value
@@ -266,7 +266,7 @@ class SiteItem(object):
     def request_access_enabled(self):
         return self._request_access_enabled
 
-    @request_access_enabled.setter
+    @request_access_enabled.setter  # type: ignore
     @property_is_boolean
     def request_access_enabled(self, value):
         self._request_access_enabled = value
@@ -275,7 +275,7 @@ class SiteItem(object):
     def run_now_enabled(self):
         return self._run_now_enabled
 
-    @run_now_enabled.setter
+    @run_now_enabled.setter  # type: ignore
     @property_is_boolean
     def run_now_enabled(self, value):
         self._run_now_enabled = value
@@ -308,7 +308,7 @@ class SiteItem(object):
     def data_alerts_enabled(self):
         return self._data_alerts_enabled
 
-    @data_alerts_enabled.setter
+    @data_alerts_enabled.setter  # type: ignore
     @property_is_boolean
     def data_alerts_enabled(self, value):
         self._data_alerts_enabled = value
@@ -317,7 +317,7 @@ class SiteItem(object):
     def commenting_mentions_enabled(self):
         return self._commenting_mentions_enabled
 
-    @commenting_mentions_enabled.setter
+    @commenting_mentions_enabled.setter  # type: ignore
     @property_is_boolean
     def commenting_mentions_enabled(self, value):
         self._commenting_mentions_enabled = value
@@ -326,7 +326,7 @@ class SiteItem(object):
     def catalog_obfuscation_enabled(self):
         return self._catalog_obfuscation_enabled
 
-    @catalog_obfuscation_enabled.setter
+    @catalog_obfuscation_enabled.setter  # type: ignore
     @property_is_boolean
     def catalog_obfuscation_enabled(self, value):
         self._catalog_obfuscation_enabled = value
@@ -335,7 +335,7 @@ class SiteItem(object):
     def flow_auto_save_enabled(self):
         return self._flow_auto_save_enabled
 
-    @flow_auto_save_enabled.setter
+    @flow_auto_save_enabled.setter  # type: ignore
     @property_is_boolean
     def flow_auto_save_enabled(self, value):
         self._flow_auto_save_enabled = value
@@ -344,7 +344,7 @@ class SiteItem(object):
     def web_extraction_enabled(self):
         return self._web_extraction_enabled
 
-    @web_extraction_enabled.setter
+    @web_extraction_enabled.setter  # type: ignore
     @property_is_boolean
     def web_extraction_enabled(self, value):
         self._web_extraction_enabled = value
@@ -353,7 +353,7 @@ class SiteItem(object):
     def metrics_content_type_enabled(self):
         return self._metrics_content_type_enabled
 
-    @metrics_content_type_enabled.setter
+    @metrics_content_type_enabled.setter  # type: ignore
     @property_is_boolean
     def metrics_content_type_enabled(self, value):
         self._metrics_content_type_enabled = value
@@ -362,7 +362,7 @@ class SiteItem(object):
     def notify_site_admins_on_throttle(self):
         return self._notify_site_admins_on_throttle
 
-    @notify_site_admins_on_throttle.setter
+    @notify_site_admins_on_throttle.setter  # type: ignore
     @property_is_boolean
     def notify_site_admins_on_throttle(self, value):
         self._notify_site_admins_on_throttle = value
@@ -371,7 +371,7 @@ class SiteItem(object):
     def authoring_enabled(self):
         return self._authoring_enabled
 
-    @authoring_enabled.setter
+    @authoring_enabled.setter  # type: ignore
     @property_is_boolean
     def authoring_enabled(self, value):
         self._authoring_enabled = value
@@ -380,7 +380,7 @@ class SiteItem(object):
     def custom_subscription_email_enabled(self):
         return self._custom_subscription_email_enabled
 
-    @custom_subscription_email_enabled.setter
+    @custom_subscription_email_enabled.setter  # type: ignore
     @property_is_boolean
     def custom_subscription_email_enabled(self, value):
         self._custom_subscription_email_enabled = value
@@ -397,7 +397,7 @@ class SiteItem(object):
     def custom_subscription_footer_enabled(self):
         return self._custom_subscription_footer_enabled
 
-    @custom_subscription_footer_enabled.setter
+    @custom_subscription_footer_enabled.setter  # type: ignore
     @property_is_boolean
     def custom_subscription_footer_enabled(self, value):
         self._custom_subscription_footer_enabled = value
@@ -422,7 +422,7 @@ class SiteItem(object):
     def named_sharing_enabled(self):
         return self._named_sharing_enabled
 
-    @named_sharing_enabled.setter
+    @named_sharing_enabled.setter  # type: ignore
     @property_is_boolean
     def named_sharing_enabled(self, value):
         self._named_sharing_enabled = value
@@ -431,7 +431,7 @@ class SiteItem(object):
     def mobile_biometrics_enabled(self):
         return self._mobile_biometrics_enabled
 
-    @mobile_biometrics_enabled.setter
+    @mobile_biometrics_enabled.setter  # type: ignore
     @property_is_boolean
     def mobile_biometrics_enabled(self, value):
         self._mobile_biometrics_enabled = value
@@ -440,7 +440,7 @@ class SiteItem(object):
     def sheet_image_enabled(self):
         return self._sheet_image_enabled
 
-    @sheet_image_enabled.setter
+    @sheet_image_enabled.setter  # type: ignore
     @property_is_boolean
     def sheet_image_enabled(self, value):
         self._sheet_image_enabled = value
@@ -449,7 +449,7 @@ class SiteItem(object):
     def derived_permissions_enabled(self):
         return self._derived_permissions_enabled
 
-    @derived_permissions_enabled.setter
+    @derived_permissions_enabled.setter  # type: ignore
     @property_is_boolean
     def derived_permissions_enabled(self, value):
         self._derived_permissions_enabled = value
