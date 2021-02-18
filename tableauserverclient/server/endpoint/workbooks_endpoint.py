@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from ..server import Server
     from ..request_options import RequestOptions
     from .. import DatasourceItem
+    from pathlib import Path
 
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64   # 64MB
@@ -141,7 +142,8 @@ class Workbooks(QuerysetEndpoint):
     @api(version="2.0")
     @parameter_added_in(no_extract='2.5')
     @parameter_added_in(include_extract='2.5')
-    def download(self, workbook_id, filepath=None, include_extract=True, no_extract=None):
+    def download(self, workbook_id: str, filepath: Optional[Union[str, 'Path']] = None,
+                 include_extract: bool = True, no_extract: Optional[bool] = None) -> str:
         if not workbook_id:
             error = "Workbook ID undefined."
             raise ValueError(error)
@@ -169,7 +171,7 @@ class Workbooks(QuerysetEndpoint):
 
     # Get all views of workbook
     @api(version="2.0")
-    def populate_views(self, workbook_item, usage=False):
+    def populate_views(self, workbook_item: WorkbookItem, usage: bool = False) -> None:
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -180,7 +182,7 @@ class Workbooks(QuerysetEndpoint):
         workbook_item._set_views(view_fetcher)
         logger.info('Populated views for workbook (ID: {0})'.format(workbook_item.id))
 
-    def _get_views_for_workbook(self, workbook_item, usage):
+    def _get_views_for_workbook(self, workbook_item: WorkbookItem, usage: bool) -> List[ViewItem]:
         url = "{0}/{1}/views".format(self.baseurl, workbook_item.id)
         if usage:
             url += "?includeUsageStatistics=true"
@@ -192,7 +194,7 @@ class Workbooks(QuerysetEndpoint):
 
     # Get all connections of workbook
     @api(version="2.0")
-    def populate_connections(self, workbook_item):
+    def populate_connections(self, workbook_item: WorkbookItem) -> None:
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -203,7 +205,8 @@ class Workbooks(QuerysetEndpoint):
         workbook_item._set_connections(connection_fetcher)
         logger.info('Populated connections for workbook (ID: {0})'.format(workbook_item.id))
 
-    def _get_workbook_connections(self, workbook_item, req_options=None):
+    def _get_workbook_connections(self, workbook_item: WorkbookItem,
+                                  req_options: 'RequestOptions' = None) -> List[ConnectionItem]:
         url = "{0}/{1}/connections".format(self.baseurl, workbook_item.id)
         server_response = self.get_request(url, req_options)
         connections = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
@@ -211,7 +214,7 @@ class Workbooks(QuerysetEndpoint):
 
     # Get the pdf of the entire workbook if its tabs are enabled, pdf of the default view if its tabs are disabled
     @api(version="3.4")
-    def populate_pdf(self, workbook_item, req_options=None):
+    def populate_pdf(self, workbook_item: WorkbookItem, req_options: 'RequestOptions' = None) -> None:
         if not workbook_item.id:
             error = "Workbook item missing ID."
             raise MissingRequiredFieldError(error)
@@ -230,7 +233,7 @@ class Workbooks(QuerysetEndpoint):
 
     # Get preview image of workbook
     @api(version="2.0")
-    def populate_preview_image(self, workbook_item):
+    def populate_preview_image(self, workbook_item: WorkbookItem) -> None:
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -248,7 +251,7 @@ class Workbooks(QuerysetEndpoint):
         return preview_image
 
     @api(version='2.0')
-    def populate_permissions(self, item):
+    def populate_permissions(self, item: WorkbookItem) -> None:
         self._permissions.populate(item)
 
     @api(version='2.0')
