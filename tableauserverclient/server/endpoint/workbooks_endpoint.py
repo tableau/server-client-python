@@ -13,13 +13,13 @@ import copy
 import cgi
 from contextlib import closing
 
-from typing import Dict, List, Mapping, Optional, Tuple, TYPE_CHECKING, Union
+from typing import Any, Dict, List, IO, Mapping, Optional, Sequence, Tuple, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from ..server import Server
     from ..request_options import RequestOptions
     from .. import DatasourceItem
-    from pathlib import Path
+    from ...models.connection_credentials import ConnectionCredentials
 
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64   # 64MB
@@ -142,7 +142,7 @@ class Workbooks(QuerysetEndpoint):
     @api(version="2.0")
     @parameter_added_in(no_extract='2.5')
     @parameter_added_in(include_extract='2.5')
-    def download(self, workbook_id: str, filepath: Optional[Union[str, 'Path']] = None,
+    def download(self, workbook_id: str, filepath: Optional[Union['os.PathLike[Any]', IO[Any]]] = None,
                  include_extract: bool = True, no_extract: Optional[bool] = None) -> str:
         if not workbook_id:
             error = "Workbook ID undefined."
@@ -262,15 +262,17 @@ class Workbooks(QuerysetEndpoint):
     def delete_permission(self, item, capability_item):
         return self._permissions.delete(item, capability_item)
 
+    #TODO: Fix file type hint
     # Publishes workbook. Chunking method if file over 64MB
     @api(version="2.0")
     @parameter_added_in(as_job='3.0')
     @parameter_added_in(connections='2.8')
     def publish(
-        self, workbook_item, file, mode,
-        connection_credentials=None, connections=None, as_job=False,
-        hidden_views=None, skip_connection_check=False
-    ):
+        self, workbook_item: WorkbookItem, file: Union['os.PathLike[Any]', IO[Any], str], mode: str,
+        connection_credentials: Optional['ConnectionCredentials'] = None,
+        connections: Optional[Sequence[ConnectionItem]] = None, as_job: bool = False,
+        hidden_views: Optional[Sequence[str]] = None, skip_connection_check: bool = False
+    ) -> Union[JobItem, WorkbookItem]:
 
         if connection_credentials is not None:
             import warnings
