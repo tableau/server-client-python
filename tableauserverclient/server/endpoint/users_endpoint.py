@@ -1,6 +1,6 @@
 from .endpoint import QuerysetEndpoint, api
 from .exceptions import MissingRequiredFieldError
-from .. import RequestFactory, RequestOptions, UserItem, WorkbookItem, PaginationItem
+from .. import RequestFactory, RequestOptions, UserItem, WorkbookItem, PaginationItem, GroupItem
 from ..pager import Pager
 
 import copy
@@ -96,3 +96,23 @@ class Users(QuerysetEndpoint):
 
     def populate_favorites(self, user_item):
         self.parent_srv.favorites.get(user_item)
+
+    # Get groups for user
+    @api(version="3.7")
+    def populate_groups(self, user_item, req_options=None):
+        if not user_item.id:
+            error = "User item missing ID."
+            raise MissingRequiredFieldError(error)
+
+        def groups_for_user_pager():
+            return Pager(lambda options: self._get_groups_for_user(user_item, options), req_options)
+
+        user_item._set_groups(groups_for_user_pager)
+
+    def _get_groups_for_user(self, user_item, req_options=None):
+        url = "{0}/{1}/groups".format(self.baseurl, user_item.id)
+        server_response = self.get_request(url, req_options)
+        logger.info('Populated groups for user (ID: {0})'.format(user_item.id))
+        group_item = GroupItem.from_response(server_response.content, self.parent_srv.namespace)
+        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
+        return group_item, pagination_item

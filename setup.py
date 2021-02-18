@@ -15,6 +15,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 # This makes work easier for offline installs or low bandwidth machines
 needs_pytest = {'pytest', 'test', 'ptr'}.intersection(sys.argv)
 pytest_runner = ['pytest-runner'] if needs_pytest else []
+test_requirements = ['mock', 'pycodestyle', 'pytest', 'requests-mock>=1.0,<2.0']
 
 setup(
     name='tableauserverclient',
@@ -34,9 +35,8 @@ setup(
     install_requires=[
         'requests>=2.11,<3.0',
     ],
-    tests_require=[
-        'requests-mock>=1.0,<2.0',
-        'pytest',
-        'mock'
-    ]
+    tests_require=test_requirements,
+    extras_require={
+        'test': test_requirements
+    }
 )

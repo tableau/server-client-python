@@ -43,6 +43,7 @@ class UserItem(object):
         self._last_login = None
         self._workbooks = None
         self._favorites = None
+        self._groups = None
         self.email = None
         self.fullname = None
         self.name = name
@@ -107,11 +108,21 @@ class UserItem(object):
             raise UnpopulatedPropertyError(error)
         return self._favorites
 
+    @property
+    def groups(self):
+        if self._groups is None:
+            error = "User item must be populated with groups first."
+            raise UnpopulatedPropertyError(error)
+        return self._groups()
+
     def to_reference(self):
         return ResourceReference(id_=self.id, tag_name=self.tag_name)
 
     def _set_workbooks(self, workbooks):
         self._workbooks = workbooks
+
+    def _set_groups(self, groups):
+        self._groups = groups
 
     def _parse_common_tags(self, user_xml, ns):
         if not isinstance(user_xml, ET.Element):
