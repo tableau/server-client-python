@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.7.xsd">
+    <pagination pageNumber="1" pageSize="100" totalAvailable="3" />
+    <groups>
+        <group id="ef8b19c0-43b6-11e6-af50-63f5805dbe3c" name="All Users">
+            <domain name="local" />
+        </group>
+        <group id="e7833b48-c6f7-47b5-a2a7-36e7dd232758" name="Another group">
+            <domain name="local" />
+        </group>
+        <group id="86a66d40-f289-472a-83d0-927b0f954dc8" name="TableauExample">
+            <domain name="local" />
+        </group>
+    </groups>
+</tsResponse>
