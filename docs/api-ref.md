@@ -812,7 +812,8 @@ Name | Description
 `id` |  The id of the group.
 `users`  |   The list of users (`UserItem`).
 `name` |  The name of the group.  The `name` is required when you create an instance of a group.
-
+`minimum_site_role` | The role to grant users that are added to the group.
+`license_mode` | The mode defining when to apply licenses for group members. When the mode is `onLogin`, a license is granted for each group member when they login to a site. When the mode is `onSync`, a license is granted for group members each time the domain is synced.
 
 
 **Example**
@@ -893,7 +894,7 @@ None.
 create(group_item)
 ```
 
-Creates a new group in Tableau Server.
+Creates a new local group in Tableau Server.
 
 
 REST API: [Create Group](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#create_group)
@@ -925,6 +926,7 @@ Adds new `GroupItem`.
 
 # create a new instance with the group name
   newgroup = TSC.GroupItem('My Group')
+  newgroup.minimum_site_role = TSC.UserItem.Roles.ExplorerCanPublish
 
 # call the create method
   newgroup = server.groups.create(newgroup)
@@ -933,6 +935,59 @@ Adds new `GroupItem`.
   all_groups, pagination_item = server.groups.get()
   for group in all_groups :
       print(group.name, group.id)
+```
+
+<br>
+<br>
+
+#### groups.create_AD_group
+
+```py
+create_AD_group(group_item, asJob=False)
+```
+
+Creates an active directory group in Tableau Server.
+
+
+REST API: [Create Group](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#create_group)
+
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`group_item`  |  The `group_item` specifies the group to add. You first create a new instance of a `GroupItem` and pass that to this method.
+`asJob` | Boolean flag used to specify an asynchronous operation. If set to `True`, the return value will be a JobItem containing the status of the queued job. See [JobItem class](#jobitem-class).
+
+
+
+
+**Returns**
+Returns the created `GroupItem` or a `JobItem` if asJob flag was set to True.
+
+
+**Example**
+
+```py
+
+# Create a new group
+
+#  import tableauserverclient as TSC
+#  tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
+#  server = TSC.Server('https://SERVERURL')
+
+
+# create a new instance with the group name
+  newgroup = TSC.GroupItem('AD_Group_Name', 'AD_Domain_Name')
+  newgroup.minimum_site_role = TSC.UserItem.Roles.SiteAdministratorExplorer
+  newgroup.license_mode = TSC.GroupItem.LicenseMode.onSync
+
+# call the create method
+  newgroup = server.groups.create_AD_group(newgroup)
+  
+# call the create method asynchronously
+  newgroup_job = server.groups.create_AD_group(newgroup, asJob=True)
+
 ```
 
 <br>
