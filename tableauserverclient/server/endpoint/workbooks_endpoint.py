@@ -268,7 +268,7 @@ class Workbooks(QuerysetEndpoint):
     @parameter_added_in(as_job='3.0')
     @parameter_added_in(connections='2.8')
     def publish(
-        self, workbook_item: WorkbookItem, file: Union['os.PathLike[Any]', IO[Any], str], mode: str,
+        self, workbook_item: WorkbookItem, file, mode: str,
         connection_credentials: Optional['ConnectionCredentials'] = None,
         connections: Optional[Sequence[ConnectionItem]] = None, as_job: bool = False,
         hidden_views: Optional[Sequence[str]] = None, skip_connection_check: bool = False
