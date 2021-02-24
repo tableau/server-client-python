@@ -1199,6 +1199,65 @@ None. The user is removed from the group.
 <br>
 <br>
 
+
+#### groups.update
+
+```py
+groups.update(group_item, as_job=False)
+```
+
+Updates a group in Tableau Server.
+
+REST API: [Update Group](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_usersgroups.htm#update_group)
+
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`group_item`  |  The `group_item` specifies the group to update.
+`as_job` |  (Optional) If this value is set to `True`, the update operation will be asynchronous and return a JobItem. This is only supported for Active Directory groups. By default, this value is set to `False`. 
+
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`Group item missing ID.` |  Raises an error if the `group_item` is missing the `id` attribute.
+`Local groups cannot be updated asynchronously.` | The `as_job` attribute was set to `True` for a local group.
+
+
+**Returns**
+
+The updated `GroupItem` object. If `as_job` was set to `True`, a `JobItem` will be returned instead.
+
+
+**Example**
+
+```py
+# Fetch an existing group from server.
+groups, pagination = server.groups.get()
+group = groups[0]
+
+# Set update-able fields. Any of these can be added or removed.
+## Local group
+group.name = "new group name"
+group.minimum_site_role = TSC.UserItem.Roles.SiteAdministratorExplorer
+
+## Active Directory group
+group.minimum_site_role = TSC.UserItem.Roles.SiteAdministratorExplorer
+group.license_mode = TSC.GroupItem.LicenseMode.onLogin
+
+# Update group - synchronous
+group = server.groups.update(group)
+
+# Update group - asynchronous (only for Active Directory groups)
+job = server.groups.update(group, as_job=True)
+```
+
+<br>
+<br>
+
 ---
 
 ## Jobs
