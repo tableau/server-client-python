@@ -248,7 +248,7 @@ The `ConnectionCredentials` class is used for workbook and data source publish r
 Attribute | Description
 :--- | :---
 `name`     | The username for the connection.
-`embed_password`  |  (Boolean) Determines whether to embed the passowrd (`True`) for the workbook or data source connection or not (`False`).
+`embed_password`  |  (Boolean) Determines whether to embed the password (`True`) for the workbook or data source connection or not (`False`).
 `password`  |  The password used for the connection.
 `server_address`   |  The server address for the connection.
 `server_port`   |  The port used by the server.
@@ -281,7 +281,7 @@ The `DatasourceItem` represents the data source resources on Tableau Server. Thi
 
 Name | Description
 :--- | :---
-`ask_data_enablement` | Determines if a data source allows use of Ask Data. The value can be `TSC.DatasourceItem.AskDataEnablement.Enabled`, `TSC.DatasourceItem.AskDataEnablement.Disabled`, or `TSC.DatasourceItem.AskDataEnablement.SiteDefault`. If no setting is specifed, it will default to SiteDefault. See [REST API Publish Datasource](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_datasources.htm#publish_data_source) for more information about ask_data_enablement.
+`ask_data_enablement` | Determines if a data source allows use of Ask Data. The value can be `TSC.DatasourceItem.AskDataEnablement.Enabled`, `TSC.DatasourceItem.AskDataEnablement.Disabled`, or `TSC.DatasourceItem.AskDataEnablement.SiteDefault`. If no setting is specified, it will default to SiteDefault. See [REST API Publish Datasource](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_datasources.htm#publish_data_source) for more information about ask_data_enablement.
 `connections` |  The list of data connections (`ConnectionItem`) for the specified data source. You must first call the `populate_connections` method to access this data. See the [ConnectionItem class](#connectionitem-class).
 `content_url` |  The name of the data source as it would appear in a URL.
 `created_at` |  The date and time when the data source was created.
@@ -559,7 +559,7 @@ datasources.publish(datasource_item, file_path, mode, connection_credentials=Non
 
 Publishes a data source to a server, or appends data to an existing data source.
 
-This method checks the size of the data source and automatically determines whether the publish the data source in multiple parts or in one opeation.
+This method checks the size of the data source and automatically determines whether the publish the data source in multiple parts or in one operation.
 
 REST API: [Publish Datasource](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#publish_data_source)
 
@@ -1205,7 +1205,7 @@ None. The user is removed from the group.
 
 Using the TSC library, you can get information about an asynchronous process (or *job*) on the server. These jobs can be created when Tableau runs certain tasks that could be long running, such as importing or synchronizing users from Active Directory, or running an extract refresh. For example, the REST API methods to create or update groups, to run an extract refresh task, or to publish workbooks can take an `asJob` parameter (`asJob-true`) that creates a background process (the *job*) to complete the call. Information about the asynchronous job is returned from the method.
 
-If you have the identifer of the job, you can use the TSC library to find out the status of the asynchronous job.
+If you have the identifier of the job, you can use the TSC library to find out the status of the asynchronous job.
 
 The job properties are defined in the `JobItem` class. The class corresponds to the properties for jobs you can access using the Tableau Server REST API. The job methods are based upon the endpoints for jobs in the REST API and operate on the `JobItem` class.
 
@@ -1809,7 +1809,7 @@ server.views.populate_pdf(view_item, pdf_req_option)
 
 Using the TSC library, you can schedule extract refresh or subscription tasks on Tableau Server. You can also get and update information about the scheduled tasks, or delete scheduled tasks.
 
-If you have the identifer of the job, you can use the TSC library to find out the status of the asynchronous job.
+If you have the identifier of the job, you can use the TSC library to find out the status of the asynchronous job.
 
 The schedule properties are defined in the `ScheduleItem` class. The class corresponds to the properties for schedules you can access in Tableau Server or by using the Tableau Server REST API. The Schedule methods are based upon the endpoints for jobs in the REST API and operate on the `JobItem` class.
 
@@ -3655,7 +3655,7 @@ import tableauserverclient as TSC
  new_workbook = TSC.WorkbookItem('3a8b6148-493c-11e6-a621-6f3499394a39')
 
 
-````
+```
 
 Source file: models/workbook_item.py
 
@@ -3793,7 +3793,7 @@ Name | Description
 `workbook_item`  |  The `workbook_item` specifies the workbook you are publishing. When you are adding a workbook, you need to first create a new instance of a `workbook_item` that includes a `project_id` of an existing project. The name of the workbook will be the name of the file, unless you also specify a name for the new workbook when you create the instance. See [WorkbookItem](#workbookitem-class).
 `file_path`  |  The path and name of the workbook to publish.
 `mode`     |  Specifies whether you are publishing a new workbook (`CreateNew`) or overwriting an existing workbook (`Overwrite`).  You cannot appending workbooks.  You can also use the publish mode attributes, for example: `TSC.Server.PublishMode.Overwrite`.
-`connection_credentials` | (Optional)  The credentials (if required) to connect to the workbook's data source. The `ConnectionCredentials` object contains the authentication information for the data source (user name and password, and whether the credentials are embeded or OAuth is used).
+`connection_credentials` | (Optional)  The credentials (if required) to connect to the workbook's data source. The `ConnectionCredentials` object contains the authentication information for the data source (user name and password, and whether the credentials are embedded or OAuth is used).
 
 
 
@@ -4020,7 +4020,7 @@ The file path to the downloaded workbook.
   file_path = server.workbooks.download('1a1b1c1d-2e2f-2a2b-3c3d-3e3f4a4b4c4d')
   print("\nDownloaded the file to {0}.".format(file_path))
 
-````
+```
 
 
 <br>
