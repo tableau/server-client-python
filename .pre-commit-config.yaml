@@ -30,7 +30,7 @@ repos:
         stages: [commit]
     -   id: mypy
         name: mypy
-        entry: mypy tableauserverclient samples test
+        entry: mypy --show-error-codes --disable-error-code misc tableauserverclient
         language: python
         'types': [python]
         pass_filenames: false
