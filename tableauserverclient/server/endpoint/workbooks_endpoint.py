@@ -75,8 +75,13 @@ class Workbooks(QuerysetEndpoint):
 
     # create one or more extracts on 1 workbook, optionally encrypted
     @api(version='3.5')
-    def create_extract(self, workbook_item: WorkbookItem, encrypt: bool = False, includeAll: bool = True,
-                       datasources: Optional[List['DatasourceItem']] = None) -> JobItem:
+    def create_extract(
+        self,
+        workbook_item: WorkbookItem,
+        encrypt: bool = False,
+        includeAll: bool = True,
+        datasources: Optional[List['DatasourceItem']] = None
+    ) -> JobItem:
         id_ = getattr(workbook_item, 'id', workbook_item)
         url = "{0}/{1}/createExtract?encrypt={2}".format(self.baseurl, id_, encrypt)
 
@@ -142,8 +147,13 @@ class Workbooks(QuerysetEndpoint):
     @api(version="2.0")
     @parameter_added_in(no_extract='2.5')
     @parameter_added_in(include_extract='2.5')
-    def download(self, workbook_id: str, filepath: Optional[Union['os.PathLike[Any]', IO[Any]]] = None,
-                 include_extract: bool = True, no_extract: Optional[bool] = None) -> str:
+    def download(
+        self,
+        workbook_id: str,
+        filepath: Optional[Union['os.PathLike[Any]', IO[Any]]] = None,
+        include_extract: bool = True,
+        no_extract: Optional[bool] = None
+    ) -> str:
         if not workbook_id:
             error = "Workbook ID undefined."
             raise ValueError(error)
@@ -268,10 +278,14 @@ class Workbooks(QuerysetEndpoint):
     @parameter_added_in(as_job='3.0')
     @parameter_added_in(connections='2.8')
     def publish(
-        self, workbook_item: WorkbookItem, file, mode: str,
+        self,
+        workbook_item: WorkbookItem,
+        file, mode: str,
         connection_credentials: Optional['ConnectionCredentials'] = None,
-        connections: Optional[Sequence[ConnectionItem]] = None, as_job: bool = False,
-        hidden_views: Optional[Sequence[str]] = None, skip_connection_check: bool = False
+        connections: Optional[Sequence[ConnectionItem]] = None,
+        as_job: bool = False,
+        hidden_views: Optional[Sequence[str]] = None,
+        skip_connection_check: bool = False
     ) -> Union[JobItem, WorkbookItem]:
 
         if connection_credentials is not None:

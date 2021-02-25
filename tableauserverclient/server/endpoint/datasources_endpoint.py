@@ -16,7 +16,9 @@ import cgi
 from contextlib import closing
 
 from pathlib import Path
-from typing import List, Dict, Sequence, Mapping, Optional, Tuple, Union, TYPE_CHECKING, Any, BinaryIO
+from typing import List, Dict, Sequence, Mapping, Optional, Tuple, Union, TYPE_CHECKING, Any, TextIO, TypeVar
+
+PathOrFile = TypeVar('PathOrFile', os.PathLike[Any], str, TextIO)
 
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64   # 64MB
@@ -36,7 +38,7 @@ class Datasources(QuerysetEndpoint):
         self._resource_tagger = _ResourceTagger(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
 
-        return
+        return None
 
     @property
     def baseurl(self) -> str:
@@ -96,8 +98,13 @@ class Datasources(QuerysetEndpoint):
     @api(version="2.0")
     @parameter_added_in(no_extract='2.5')
     @parameter_added_in(include_extract='2.5')
-    def download(self, datasource_id: str, filepath: str = None, include_extract: bool = True,
-                 no_extract: Optional[bool] = None) -> str:
+    def download(
+        self,
+        datasource_id: str,
+        filepath: str = None,
+        include_extract: bool = True,
+        no_extract: Optional[bool] = None
+    ) -> str:
         if not datasource_id:
             error = "Datasource ID undefined."
             raise ValueError(error)
@@ -184,19 +191,25 @@ class Datasources(QuerysetEndpoint):
     @api(version="2.0")
     @parameter_added_in(connections="2.8")
     @parameter_added_in(as_job='3.0')
-    def publish(self, datasource_item: DatasourceItem, file: Union[str, Path, BinaryIO], mode: str,
-                connection_credentials: ConnectionCredentials = None, connections: Sequence[ConnectionItem] = None,
-                as_job: bool = False) -> Union[DatasourceItem, JobItem]:
+    def publish(
+        self,
+        datasource_item: DatasourceItem,
+        file: PathOrFile,
+        mode: str,
+        connection_credentials: ConnectionCredentials = None,
+        connections: Sequence[ConnectionItem] = None,
+        as_job: bool = False
+    ) -> Union[DatasourceItem, JobItem]:
 
         try:
 
-            if not os.path.isfile(file):  # type: ignore
+            if not os.path.isfile(file):
                 error = "File path does not lead to an existing file."
                 raise IOError(error)
 
-            filename = os.path.basename(file)  # type: ignore
+            filename = os.path.basename(file)
             file_extension = os.path.splitext(filename)[1][1:]
-            file_size = os.path.getsize(file)  # type: ignore
+            file_size = os.path.getsize(file)
 
             # If name is not defined, grab the name from the file to publish
             if not datasource_item.name:
@@ -247,10 +260,10 @@ class Datasources(QuerysetEndpoint):
             logger.info('Publishing {0} to server'.format(filename))
 
             try:
-                with open(file, 'rb') as f:  # type: ignore
+                with open(file, 'rb') as f:
                     file_contents = f.read()
             except TypeError:
-                file_contents = file.read()  # type: ignore
+                file_contents = file.read()
 
             xml_request, content_type = RequestFactory.Datasource.publish_req(datasource_item,
                                                                               filename,

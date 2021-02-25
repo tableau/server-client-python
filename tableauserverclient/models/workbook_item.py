@@ -212,7 +212,7 @@ class WorkbookItem(object):
             self.data_acceleration_config = data_acceleration_config
 
     @classmethod
-    def from_response(cls, resp: str, ns: Optional[Dict[Union[str, str], Union[str, str]]]) -> List['WorkbookItem']:
+    def from_response(cls, resp: str, ns: Dict[str, str]) -> List['WorkbookItem']:
         all_workbook_items = list()
         parsed_response = ET.fromstring(resp)
         all_workbook_xml = parsed_response.findall('.//t:workbook', namespaces=ns)
