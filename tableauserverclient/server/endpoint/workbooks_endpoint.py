@@ -35,7 +35,7 @@ class Workbooks(QuerysetEndpoint):
         self._resource_tagger = _ResourceTagger(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
 
-        return
+        return None
 
     @property
     def baseurl(self) -> str:

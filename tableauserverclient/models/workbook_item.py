@@ -41,7 +41,7 @@ class WorkbookItem(object):
                                          'acceleration_status': None}
         self._permissions = None
 
-        return
+        return None
 
     @property
     def connections(self) -> List['ConnectionItem']:

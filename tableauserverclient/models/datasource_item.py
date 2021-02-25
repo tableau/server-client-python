@@ -43,7 +43,7 @@ class DatasourceItem(object):
 
         self._permissions = None
 
-        return
+        return None
 
     @property
     def ask_data_enablement(self) -> Optional['DatasourceItem.AskDataEnablement']:
