@@ -18,7 +18,7 @@ from contextlib import closing
 from pathlib import Path
 from typing import List, Dict, Sequence, Mapping, Optional, Tuple, Union, TYPE_CHECKING, Any, TextIO, TypeVar
 
-PathOrFile = TypeVar('PathOrFile', os.PathLike[Any], str, TextIO)
+PathOrFile = TypeVar('PathOrFile', os.PathLike, str, TextIO)
 
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64   # 64MB
