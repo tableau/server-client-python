@@ -280,7 +280,8 @@ class Workbooks(QuerysetEndpoint):
     def publish(
         self,
         workbook_item: WorkbookItem,
-        file, mode: str,
+        file,
+        mode: str,
         connection_credentials: Optional['ConnectionCredentials'] = None,
         connections: Optional[Sequence[ConnectionItem]] = None,
         as_job: bool = False,
