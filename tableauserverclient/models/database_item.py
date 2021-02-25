@@ -40,7 +40,7 @@ class DatabaseItem(object):
     def content_permissions(self):
         return self._content_permissions
 
-    @content_permissions.setter  # type: ignore
+    @content_permissions.setter
     @property_is_enum(ContentPermissions)
     def content_permissions(self, value):
         self._content_permissions = value
@@ -67,7 +67,7 @@ class DatabaseItem(object):
     def name(self):
         return self._name
 
-    @name.setter  # type: ignore
+    @name.setter
     @property_not_empty
     def name(self, value):
         self._name = value
@@ -76,7 +76,7 @@ class DatabaseItem(object):
     def description(self):
         return self._description
 
-    @description.setter  # type: ignore
+    @description.setter
     def description(self, value):
         self._description = value
 
@@ -88,7 +88,7 @@ class DatabaseItem(object):
     def certified(self):
         return self._certified
 
-    @certified.setter  # type: ignore
+    @certified.setter
     @property_is_boolean
     def certified(self, value):
         self._certified = value

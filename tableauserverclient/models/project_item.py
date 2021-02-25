@@ -28,7 +28,7 @@ class ProjectItem(object):
     def content_permissions(self):
         return self._content_permissions
 
-    @content_permissions.setter  # type: ignore
+    @content_permissions.setter
     @property_is_enum(ContentPermissions)
     def content_permissions(self, value):
         self._content_permissions = value
@@ -69,7 +69,7 @@ class ProjectItem(object):
     def name(self):
         return self._name
 
-    @name.setter  # type: ignore
+    @name.setter
     @property_not_empty
     def name(self, value):
         self._name = value

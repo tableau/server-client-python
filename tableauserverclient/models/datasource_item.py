@@ -38,7 +38,7 @@ class DatasourceItem(object):
         self.description = None
         self.name = name
         self.owner_id = None
-        self.project_id = project_id  # type: ignore
+        self.project_id = project_id
         self.tags: Set = set()
 
         self._permissions = None
@@ -49,7 +49,7 @@ class DatasourceItem(object):
     def ask_data_enablement(self) -> Optional['DatasourceItem.AskDataEnablement']:
         return self._ask_data_enablement
 
-    @ask_data_enablement.setter  # type: ignore
+    @ask_data_enablement.setter
     @property_is_enum(AskDataEnablement)
     def ask_data_enablement(self, value: Optional['DatasourceItem.AskDataEnablement']):
         self._ask_data_enablement = value
@@ -80,7 +80,7 @@ class DatasourceItem(object):
     def certified(self) -> Optional[bool]:
         return self._certified
 
-    @certified.setter  # type: ignore
+    @certified.setter
     @property_not_nullable
     @property_is_boolean
     def certified(self, value: Optional[bool]):
@@ -90,7 +90,7 @@ class DatasourceItem(object):
     def certification_note(self) -> Optional[str]:
         return self._certification_note
 
-    @certification_note.setter  # type: ignore
+    @certification_note.setter
     def certification_note(self, value: Optional[str]):
         self._certification_note = value
 
@@ -98,7 +98,7 @@ class DatasourceItem(object):
     def encrypt_extracts(self):
         return self._encrypt_extracts
 
-    @encrypt_extracts.setter  # type: ignore
+    @encrypt_extracts.setter
     @property_is_boolean
     def encrypt_extracts(self, value: Optional[bool]):
         self._encrypt_extracts = value
@@ -115,7 +115,7 @@ class DatasourceItem(object):
     def project_id(self) -> str:
         return self._project_id
 
-    @project_id.setter  # type: ignore
+    @project_id.setter
     @property_not_nullable
     def project_id(self, value: str):
         self._project_id = value
@@ -136,7 +136,7 @@ class DatasourceItem(object):
     def use_remote_query_agent(self) -> Optional[bool]:
         return self._use_remote_query_agent
 
-    @use_remote_query_agent.setter  # type: ignore
+    @use_remote_query_agent.setter
     @property_is_boolean
     def use_remote_query_agent(self, value: bool):
         self._use_remote_query_agent = value
