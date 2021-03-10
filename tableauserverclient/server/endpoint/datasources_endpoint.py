@@ -18,7 +18,6 @@ from contextlib import closing
 from pathlib import Path
 from typing import List, Dict, Sequence, Mapping, Optional, Tuple, Union, TYPE_CHECKING, Any, TextIO, TypeVar
 
-PathOrFile = TypeVar('PathOrFile', os.PathLike, str, TextIO)
 
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64   # 64MB
@@ -194,7 +193,7 @@ class Datasources(QuerysetEndpoint):
     def publish(
         self,
         datasource_item: DatasourceItem,
-        file: PathOrFile,
+        file,
         mode: str,
         connection_credentials: ConnectionCredentials = None,
         connections: Sequence[ConnectionItem] = None,
