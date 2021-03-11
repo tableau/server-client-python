@@ -13,6 +13,7 @@ UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'user_update.xml')
 ADD_XML = os.path.join(TEST_ASSET_DIR, 'user_add.xml')
 POPULATE_WORKBOOKS_XML = os.path.join(TEST_ASSET_DIR, 'user_populate_workbooks.xml')
 GET_FAVORITES_XML = os.path.join(TEST_ASSET_DIR, 'favorites_get.xml')
+POPULATE_GROUPS_XML = os.path.join(TEST_ASSET_DIR, 'user_populate_groups.xml')
 
 
 class UserTests(unittest.TestCase):
@@ -175,3 +176,29 @@ class UserTests(unittest.TestCase):
         self.assertEqual(view.id, 'd79634e1-6063-4ec9-95ff-50acbf609ff5')
         self.assertEqual(datasource.id, 'e76a1461-3b1d-4588-bf1b-17551a879ad9')
         self.assertEqual(project.id, '1d0304cd-3796-429f-b815-7258370b9b74')
+
+    def test_populate_groups(self):
+        self.server.version = '3.7'
+        with open(POPULATE_GROUPS_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.get(self.server.users.baseurl + '/dd2239f6-ddf1-4107-981a-4cf94e415794/groups',
+                  text=response_xml)
+            single_user = TSC.UserItem('test', 'Interactor')
+            single_user._id = 'dd2239f6-ddf1-4107-981a-4cf94e415794'
+            self.server.users.populate_groups(single_user)
+
+            group_list = list(single_user.groups)
+
+            self.assertEqual(3, len(group_list))
+            self.assertEqual('ef8b19c0-43b6-11e6-af50-63f5805dbe3c', group_list[0].id)
+            self.assertEqual('All Users', group_list[0].name)
+            self.assertEqual('local', group_list[0].domain_name)
+
+            self.assertEqual('e7833b48-c6f7-47b5-a2a7-36e7dd232758', group_list[1].id)
+            self.assertEqual('Another group', group_list[1].name)
+            self.assertEqual('local', group_list[1].domain_name)
+
+            self.assertEqual('86a66d40-f289-472a-83d0-927b0f954dc8', group_list[2].id)
+            self.assertEqual('TableauExample', group_list[2].name)
+            self.assertEqual('local', group_list[2].domain_name)

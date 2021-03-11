@@ -74,6 +74,14 @@ class ProjectItem(object):
     def name(self, value):
         self._name = value
 
+    @property
+    def owner_id(self):
+        return self._owner_id
+
+    @owner_id.setter
+    def owner_id(self, value):
+        raise NotImplementedError('REST API does not currently support updating project owner.')
+
     def is_default(self):
         return self.name.lower() == 'default'
 
@@ -86,7 +94,7 @@ class ProjectItem(object):
             self._set_values(None, name, description, content_permissions, parent_id)
         return self
 
-    def _set_values(self, project_id, name, description, content_permissions, parent_id):
+    def _set_values(self, project_id, name, description, content_permissions, parent_id, owner_id):
         if project_id is not None:
             self._id = project_id
         if name:
@@ -97,6 +105,8 @@ class ProjectItem(object):
             self._content_permissions = content_permissions
         if parent_id:
             self.parent_id = parent_id
+        if owner_id:
+            self._owner_id = owner_id
 
     def _set_permissions(self, permissions):
         self._permissions = permissions
@@ -111,9 +121,9 @@ class ProjectItem(object):
         all_project_xml = parsed_response.findall('.//t:project', namespaces=ns)
 
         for project_xml in all_project_xml:
-            (id, name, description, content_permissions, parent_id) = cls._parse_element(project_xml)
+            (id, name, description, content_permissions, parent_id, owner_id) = cls._parse_element(project_xml)
             project_item = cls(name)
-            project_item._set_values(id, name, description, content_permissions, parent_id)
+            project_item._set_values(id, name, description, content_permissions, parent_id, owner_id)
             all_project_items.append(project_item)
         return all_project_items
 
@@ -124,5 +134,8 @@ class ProjectItem(object):
         description = project_xml.get('description', None)
         content_permissions = project_xml.get('contentPermissions', None)
         parent_id = project_xml.get('parentProjectId', None)
+        owner_id = None
+        for owner in project_xml:
+            owner_id = owner.get('id', None)
 
-        return id, name, description, content_permissions, parent_id
+        return id, name, description, content_permissions, parent_id, owner_id

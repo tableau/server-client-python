@@ -2,3 +2,22 @@ include versioneer.py
 include tableauserverclient/_version.py
 include LICENSE
 include LICENSE.versioneer
+include README.md
+include CHANGELOG.md
+recursive-include docs *.md
+recursive-include samples *.py
+recursive-include samples *.txt
+recursive-include smoke *.py
+recursive-include test *.csv
+recursive-include test *.dict
+recursive-include test *.hyper
+recursive-include test *.json
+recursive-include test *.pdf
+recursive-include test *.png
+recursive-include test *.py
+recursive-include test *.tde
+recursive-include test *.tds
+recursive-include test *.tdsx
+recursive-include test *.twb
+recursive-include test *.twbx
+recursive-include test *.xml
