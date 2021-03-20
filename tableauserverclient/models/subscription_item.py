@@ -21,11 +21,11 @@ class SubscriptionItem(object):
 
     def __repr__(self):
         if self.id is not None:
-            return "<Subscription#{id} subject({subject}) schedule_id({schedule_id}) user_id({user_id}) \
-                target({target})".format(**self.__dict__)
+            return ("<Subscription#{_id} subject({subject}) schedule_id({schedule_id}) user_id({user_id}) "
+                    "target({target})").format(**self.__dict__)
         else:
-            return "<Subscription subject({subject}) schedule_id({schedule_id}) user_id({user_id}) \
-                target({target})".format(**self.__dict__)
+            return ("<Subscription subject({subject}) schedule_id({schedule_id}) user_id({user_id}) "
+                    "target({target})").format(**self.__dict__)
 
     @property
     def id(self):
