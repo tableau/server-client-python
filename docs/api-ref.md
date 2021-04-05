@@ -2901,12 +2901,12 @@ TaskItem(id, task_type, priority, consecutive_failed_count=0, schedule_id=None, 
 
 Name | Description  
 :--- | :---  
-`consecutive_failed_count` | The number of failed consecutive executions.  
-`id` |   The id of the task on the site.  
+`id` |   The id of the task on the site.
+`task_type` | Type of extract task - full or incremental refresh.
 `priority` | The priority of the task on the server.
-`schedule_id` | The id of the schedule on the site.    
-`target` | An object, `datasource` or `workbook` which is associated to the task. Source file: models/target.py
-`task_type` | Type of extract task - full or incremental refresh.  
+`consecutive_failed_count` | The number of failed consecutive executions.
+`schedule_id` | The id of the schedule on the site.
+`target` | An object, `datasource` or `workbook`, which is associated to the task. Source file: models/target.py
 
 
 **Example**
@@ -2942,14 +2942,14 @@ tasks.get(req_options=None)
 
 Returns information about the tasks on the specified site.
 
-REST API: [Get Extract Refresh Tasks on Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#get_extract_refresh_tasks){:target="_blank"}
+REST API: [Get Extract Refresh Tasks on Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#get_extract_refresh_tasks)
 
 
 **Parameters**
 
 Name   |  Description     
  :--- | : ---    
-`req_option` |  (Optional) You can pass the method a request object that contains additional parameters to filter the request.
+`req_options` |  (Optional) You can pass the method a request object that contains additional parameters to filter the request.
 
 
 **Returns**
@@ -3008,9 +3008,8 @@ The `TaskItem`.  See [TaskItem class](#taskitem-class)
 **Example**
 
 ```py
-  task1 = server.tasks.get_by_id('9f9e9d9c-8b8a-8f8e-7d7c-7b7a6f6d6e6d')
-  print(task1.task_type)
-
+task1 = server.tasks.get_by_id('9f9e9d9c-8b8a-8f8e-7d7c-7b7a6f6d6e6d')
+print(task1.task_type)
 ```
 
 <br>   
@@ -3048,9 +3047,8 @@ Returns the REST API response.
 # server = TSC.Server('server')
 # login, etc.
 
-  task = server.tasks.get_by_id('9f9e9d9c-8b8a-8f8e-7d7c-7b7a6f6d6e6d')
-  server.tasks.run(task)
-
+task = server.tasks.get_by_id('9f9e9d9c-8b8a-8f8e-7d7c-7b7a6f6d6e6d')
+server.tasks.run(task)
 ```
 
 <br>   
