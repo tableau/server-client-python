@@ -17,6 +17,7 @@ class TableItem(object):
         self._schema = None
 
         self._columns = None
+        self._dqws = None
 
     @property
     def permissions(self):
@@ -24,6 +25,13 @@ class TableItem(object):
             error = "Project item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
         return self._permissions()
+
+    @property
+    def dqws(self):
+        if self._dqws is None:
+            error = "Project item must be populated with dqws first."
+            raise UnpopulatedPropertyError(error)
+        return self._dqws()
 
     @property
     def id(self):
@@ -85,6 +93,9 @@ class TableItem(object):
 
     def _set_columns(self, columns):
         self._columns = columns
+
+    def _set_dqws(self, dqws):
+        self._dqws = dqws
 
     def _set_values(self, table_values):
         if 'id' in table_values:

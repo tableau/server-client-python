@@ -1,6 +1,7 @@
 from .endpoint import QuerysetEndpoint, api, parameter_added_in
 from .exceptions import InternalServerError, MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
+from .dqw_endpoint import _DQWEndpoint
 from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, DatasourceItem, PaginationItem, ConnectionItem
@@ -27,6 +28,7 @@ class Datasources(QuerysetEndpoint):
         super(Datasources, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
+        self._dqw = _DQWEndpoint(self.parent_srv, 'datasource')
 
     @property
     def baseurl(self):
@@ -285,3 +287,19 @@ class Datasources(QuerysetEndpoint):
     @api(version='2.0')
     def delete_permission(self, item, capability_item):
         self._permissions.delete(item, capability_item)
+
+    @api(version='3.5')
+    def populate_dqw(self, item):
+        self._dqw.populate(item)
+
+    @api(version='3.5')
+    def update_dqw(self, item, warning):
+        return self._dqw.update(item, warning)
+
+    @api(version='3.5')
+    def add_dqw(self, item, warning):
+        return self._dqw.add(item, warning)
+
+    @api(version='3.5')
+    def delete_dqw(self, item):
+        self._dqw.clear(item)

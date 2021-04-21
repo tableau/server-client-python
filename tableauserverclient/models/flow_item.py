@@ -22,6 +22,7 @@ class FlowItem(object):
 
         self._connections = None
         self._permissions = None
+        self._dqws = None
 
     @property
     def connections(self):
@@ -44,6 +45,14 @@ class FlowItem(object):
     @property
     def created_at(self):
         return self._created_at
+
+    @property
+    def dqws(self):
+        if self._dqws is None:
+            error = "Project item must be populated with dqws first."
+            raise UnpopulatedPropertyError(error)
+        return self._dqws()
+
 
     @property
     def id(self):
@@ -83,6 +92,9 @@ class FlowItem(object):
 
     def _set_permissions(self, permissions):
         self._permissions = permissions
+
+    def _set_dqws(self, dqws):
+        self._dqws = dqws
 
     def _parse_common_elements(self, flow_xml, ns):
         if not isinstance(flow_xml, ET.Element):

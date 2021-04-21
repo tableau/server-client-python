@@ -35,6 +35,7 @@ class DatasourceItem(object):
         self.tags = set()
 
         self._permissions = None
+        self._dqws = None
 
     @property
     def ask_data_enablement(self):
@@ -95,6 +96,13 @@ class DatasourceItem(object):
         self._encrypt_extracts = value
 
     @property
+    def dqws(self):
+        if self._dqws is None:
+            error = "Project item must be populated with dqws first."
+            raise UnpopulatedPropertyError(error)
+        return self._dqws()
+
+    @property
     def has_extracts(self):
         return self._has_extracts
 
@@ -141,6 +149,9 @@ class DatasourceItem(object):
 
     def _set_permissions(self, permissions):
         self._permissions = permissions
+
+    def _set_dqws(self, dqws):
+        self._dqws = dqws
 
     def _parse_common_elements(self, datasource_xml, ns):
         if not isinstance(datasource_xml, ET.Element):
