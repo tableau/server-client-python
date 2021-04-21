@@ -87,29 +87,29 @@ class TableItem(object):
         self._columns = columns
 
     def _set_values(self, table_values):
-        if 'id' in table_values:
-            self._id = table_values['id']
+        if "id" in table_values:
+            self._id = table_values["id"]
 
-        if 'name' in table_values:
-            self._name = table_values['name']
+        if "name" in table_values:
+            self._name = table_values["name"]
 
-        if 'description' in table_values:
-            self._description = table_values['description']
+        if "description" in table_values:
+            self._description = table_values["description"]
 
-        if 'isCertified' in table_values:
-            self._certified = string_to_bool(table_values['isCertified'])
+        if "isCertified" in table_values:
+            self._certified = string_to_bool(table_values["isCertified"])
 
-        if 'certificationNote' in table_values:
-            self._certification_note = table_values['certificationNote']
+        if "certificationNote" in table_values:
+            self._certification_note = table_values["certificationNote"]
 
-        if 'isEmbedded' in table_values:
-            self._embedded = string_to_bool(table_values['isEmbedded'])
+        if "isEmbedded" in table_values:
+            self._embedded = string_to_bool(table_values["isEmbedded"])
 
-        if 'schema' in table_values:
-            self._schema = table_values['schema']
+        if "schema" in table_values:
+            self._schema = table_values["schema"]
 
-        if 'contact' in table_values:
-            self._contact_id = table_values['contact']['id']
+        if "contact" in table_values:
+            self._contact_id = table_values["contact"]["id"]
 
     def _set_permissions(self, permissions):
         self._permissions = permissions
@@ -118,7 +118,7 @@ class TableItem(object):
     def from_response(cls, resp, ns):
         all_table_items = list()
         parsed_response = ET.fromstring(resp)
-        all_table_xml = parsed_response.findall('.//t:table', namespaces=ns)
+        all_table_xml = parsed_response.findall(".//t:table", namespaces=ns)
 
         for table_xml in all_table_xml:
             parsed_table = cls._parse_element(table_xml, ns)
@@ -132,13 +132,13 @@ class TableItem(object):
 
         table_values = table_xml.attrib.copy()
 
-        contact = table_xml.find('.//t:contact', namespaces=ns)
+        contact = table_xml.find(".//t:contact", namespaces=ns)
         if contact is not None:
-            table_values['contact'] = contact.attrib.copy()
+            table_values["contact"] = contact.attrib.copy()
 
         return table_values
 
 
 # Used to convert string represented boolean to a boolean type
 def string_to_bool(s):
-    return s.lower() == 'true'
+    return s.lower() == "true"

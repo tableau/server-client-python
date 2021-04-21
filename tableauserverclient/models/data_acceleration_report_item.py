@@ -3,9 +3,15 @@ import xml.etree.ElementTree as ET
 
 class DataAccelerationReportItem(object):
     class ComparisonRecord(object):
-        def __init__(self, site, sheet_uri, unaccelerated_session_count,
-                     avg_non_accelerated_plt, accelerated_session_count,
-                     avg_accelerated_plt):
+        def __init__(
+            self,
+            site,
+            sheet_uri,
+            unaccelerated_session_count,
+            avg_non_accelerated_plt,
+            accelerated_session_count,
+            avg_accelerated_plt,
+        ):
             self._site = site
             self._sheet_uri = sheet_uri
             self._unaccelerated_session_count = unaccelerated_session_count
@@ -46,26 +52,43 @@ class DataAccelerationReportItem(object):
 
     @staticmethod
     def _parse_element(comparison_record_xml, ns):
-        site = comparison_record_xml.get('site', None)
-        sheet_uri = comparison_record_xml.get('sheetURI', None)
-        unaccelerated_session_count = comparison_record_xml.get('unacceleratedSessionCount', None)
-        avg_non_accelerated_plt = comparison_record_xml.get('averageNonAcceleratedPLT', None)
-        accelerated_session_count = comparison_record_xml.get('acceleratedSessionCount', None)
-        avg_accelerated_plt = comparison_record_xml.get('averageAcceleratedPLT', None)
-        return site, sheet_uri, unaccelerated_session_count, avg_non_accelerated_plt, \
-            accelerated_session_count, avg_accelerated_plt
+        site = comparison_record_xml.get("site", None)
+        sheet_uri = comparison_record_xml.get("sheetURI", None)
+        unaccelerated_session_count = comparison_record_xml.get("unacceleratedSessionCount", None)
+        avg_non_accelerated_plt = comparison_record_xml.get("averageNonAcceleratedPLT", None)
+        accelerated_session_count = comparison_record_xml.get("acceleratedSessionCount", None)
+        avg_accelerated_plt = comparison_record_xml.get("averageAcceleratedPLT", None)
+        return (
+            site,
+            sheet_uri,
+            unaccelerated_session_count,
+            avg_non_accelerated_plt,
+            accelerated_session_count,
+            avg_accelerated_plt,
+        )
 
     @classmethod
     def from_response(cls, resp, ns):
         comparison_records = list()
         parsed_response = ET.fromstring(resp)
-        all_comparison_records_xml = parsed_response.findall('.//t:comparisonRecord', namespaces=ns)
+        all_comparison_records_xml = parsed_response.findall(".//t:comparisonRecord", namespaces=ns)
         for comparison_record_xml in all_comparison_records_xml:
-            (site, sheet_uri, unaccelerated_session_count, avg_non_accelerated_plt,
-             accelerated_session_count, avg_accelerated_plt) = cls._parse_element(comparison_record_xml, ns)
+            (
+                site,
+                sheet_uri,
+                unaccelerated_session_count,
+                avg_non_accelerated_plt,
+                accelerated_session_count,
+                avg_accelerated_plt,
+            ) = cls._parse_element(comparison_record_xml, ns)
 
             comparison_record = DataAccelerationReportItem.ComparisonRecord(
-                site, sheet_uri, unaccelerated_session_count, avg_non_accelerated_plt,
-                accelerated_session_count, avg_accelerated_plt)
+                site,
+                sheet_uri,
+                unaccelerated_session_count,
+                avg_non_accelerated_plt,
+                accelerated_session_count,
+                avg_accelerated_plt,
+            )
             comparison_records.append(comparison_record)
         return cls(comparison_records)

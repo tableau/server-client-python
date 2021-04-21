@@ -119,42 +119,42 @@ class ViewItem(object):
         self._permissions = permissions
 
     @classmethod
-    def from_response(cls, resp, ns, workbook_id=''):
+    def from_response(cls, resp, ns, workbook_id=""):
         return cls.from_xml_element(ET.fromstring(resp), ns, workbook_id)
 
     @classmethod
-    def from_xml_element(cls, parsed_response, ns, workbook_id=''):
+    def from_xml_element(cls, parsed_response, ns, workbook_id=""):
         all_view_items = list()
-        all_view_xml = parsed_response.findall('.//t:view', namespaces=ns)
+        all_view_xml = parsed_response.findall(".//t:view", namespaces=ns)
         for view_xml in all_view_xml:
             view_item = cls()
-            usage_elem = view_xml.find('.//t:usage', namespaces=ns)
-            workbook_elem = view_xml.find('.//t:workbook', namespaces=ns)
-            owner_elem = view_xml.find('.//t:owner', namespaces=ns)
-            project_elem = view_xml.find('.//t:project', namespaces=ns)
-            tags_elem = view_xml.find('.//t:tags', namespaces=ns)
-            view_item._created_at = parse_datetime(view_xml.get('createdAt', None))
-            view_item._updated_at = parse_datetime(view_xml.get('updatedAt', None))
-            view_item._id = view_xml.get('id', None)
-            view_item._name = view_xml.get('name', None)
-            view_item._content_url = view_xml.get('contentUrl', None)
-            view_item._sheet_type = view_xml.get('sheetType', None)
+            usage_elem = view_xml.find(".//t:usage", namespaces=ns)
+            workbook_elem = view_xml.find(".//t:workbook", namespaces=ns)
+            owner_elem = view_xml.find(".//t:owner", namespaces=ns)
+            project_elem = view_xml.find(".//t:project", namespaces=ns)
+            tags_elem = view_xml.find(".//t:tags", namespaces=ns)
+            view_item._created_at = parse_datetime(view_xml.get("createdAt", None))
+            view_item._updated_at = parse_datetime(view_xml.get("updatedAt", None))
+            view_item._id = view_xml.get("id", None)
+            view_item._name = view_xml.get("name", None)
+            view_item._content_url = view_xml.get("contentUrl", None)
+            view_item._sheet_type = view_xml.get("sheetType", None)
 
             if usage_elem is not None:
-                total_view = usage_elem.get('totalViewCount', None)
+                total_view = usage_elem.get("totalViewCount", None)
                 if total_view:
                     view_item._total_views = int(total_view)
 
             if owner_elem is not None:
-                view_item._owner_id = owner_elem.get('id', None)
+                view_item._owner_id = owner_elem.get("id", None)
 
             if project_elem is not None:
-                view_item._project_id = project_elem.get('id', None)
+                view_item._project_id = project_elem.get("id", None)
 
             if workbook_id:
                 view_item._workbook_id = workbook_id
             elif workbook_elem is not None:
-                view_item._workbook_id = workbook_elem.get('id', None)
+                view_item._workbook_id = workbook_elem.get("id", None)
 
             if tags_elem is not None:
                 tags = TagItem.from_xml_element(tags_elem, ns)

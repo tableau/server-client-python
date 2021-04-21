@@ -1,5 +1,6 @@
 import os
-ALLOWED_SPECIAL = (' ', '.', '_', '-')
+
+ALLOWED_SPECIAL = (" ", ".", "_", "-")
 
 
 def to_filename(string_to_sanitize):
@@ -37,10 +38,10 @@ def get_file_type(file):
 
     # This reference lists magic file signatures: https://www.garykessler.net/library/file_sigs.html
     MAGIC_BYTES = {
-        'zip': bytes.fromhex("504b0304"),
-        'tde': bytes.fromhex("20020162"),
-        'xml': bytes.fromhex("3c3f786d6c20"),
-        'hyper': bytes.fromhex("487970657208000001000000")
+        "zip": bytes.fromhex("504b0304"),
+        "tde": bytes.fromhex("20020162"),
+        "xml": bytes.fromhex("3c3f786d6c20"),
+        "hyper": bytes.fromhex("487970657208000001000000"),
     }
 
     # Peek first bytes of a file
