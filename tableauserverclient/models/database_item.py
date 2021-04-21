@@ -251,8 +251,8 @@ class DatabaseItem(object):
     def _set_data_quality_warnings(self, dqw):
         self._data_quality_warnings = dqw
 
-    def _set_dqws(self, dqw):
-        self._dqws = dqw
+    def _set_data_quality_warnings(self, dqw):
+        self._data_quality_warningss = dqw
 
     @classmethod
     def from_response(cls, resp, ns):
