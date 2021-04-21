@@ -9,12 +9,11 @@ from .exceptions import MissingRequiredFieldError
 logger = logging.getLogger(__name__)
 
 
-class _DQWEndpoint(Endpoint):
-    """ adds data quality warnings
-    """
+class _DataQualityWarningEndpoint(Endpoint):
+
 
     def __init__(self, parent_srv, resource_type):
-        super(_DQWEndpoint, self).__init__(parent_srv)
+        super(_DataQualityWarningEndpoint, self).__init__(parent_srv)
 
         # owner_baseurl is the baseurl of the parent.  The MUST be a lambda
         # since we don't know the full site URL until we sign in.  If
@@ -56,12 +55,12 @@ class _DQWEndpoint(Endpoint):
             raise MissingRequiredFieldError(error)
 
         def dqw_fetcher():
-            return self._get_dqws(item)
+            return self._get_data_quality_warningss(item)
 
-        item._set_dqws(dqw_fetcher)
+        item._set_data_quality_warnings(dqw_fetcher)
         logger.info('Populated permissions for item (ID: {0})'.format(item.id))
 
-    def _get_dqws(self, item, req_options=None):
+    def _get_data_quality_warningss(self, item, req_options=None):
         url = "{baseurl}/{content_luid}".format(baseurl=self.baseurl, content_luid=item.id)
         server_response = self.get_request(url, req_options)
         dqws = DQWItem.from_response(server_response.content,

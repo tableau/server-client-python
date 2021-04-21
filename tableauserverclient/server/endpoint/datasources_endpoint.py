@@ -1,12 +1,17 @@
 from .endpoint import QuerysetEndpoint, api, parameter_added_in
 from .exceptions import InternalServerError, MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
-from .dqw_endpoint import _DQWEndpoint
+from .dqw_endpoint import _DataQualityWarningEndpoint
 from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, DatasourceItem, PaginationItem, ConnectionItem
 from ..query import QuerySet
-from ...filesys_helpers import to_filename, make_download_path, get_file_type, get_file_object_size
+from ...filesys_helpers import (
+    to_filename,
+    make_download_path,
+    get_file_type,
+    get_file_object_size,
+)
 from ...models.job_item import JobItem
 
 import os
@@ -28,11 +33,13 @@ class Datasources(QuerysetEndpoint):
         super(Datasources, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
-        self._dqw = _DQWEndpoint(self.parent_srv, 'datasource')
+        self._data_quality_warnings = _DataQualityWarningEndpoint(self.parent_srv, "datasource")
 
     @property
     def baseurl(self):
-        return "{0}/sites/{1}/datasources".format(self.parent_srv.baseurl, self.parent_srv.site_id)
+        return "{0}/sites/{1}/datasources".format(
+            self.parent_srv.baseurl, self.parent_srv.site_id
+        )
 
     # Get all datasources
     @api(version="2.0")
@@ -40,8 +47,12 @@ class Datasources(QuerysetEndpoint):
         logger.info("Querying all datasources on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
-        all_datasource_items = DatasourceItem.from_response(server_response.content, self.parent_srv.namespace)
+        pagination_item = PaginationItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )
+        all_datasource_items = DatasourceItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )
         return all_datasource_items, pagination_item
 
     # Get 1 datasource by id
@@ -53,7 +64,9 @@ class Datasources(QuerysetEndpoint):
         logger.info("Querying single datasource (ID: {0})".format(datasource_id))
         url = "{0}/{1}".format(self.baseurl, datasource_id)
         server_response = self.get_request(url)
-        return DatasourceItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        return DatasourceItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )[0]
 
     # Populate datasource item's connections
     @api(version="2.0")
@@ -66,12 +79,16 @@ class Datasources(QuerysetEndpoint):
             return self._get_datasource_connections(datasource_item)
 
         datasource_item._set_connections(connections_fetcher)
-        logger.info("Populated connections for datasource (ID: {0})".format(datasource_item.id))
+        logger.info(
+            "Populated connections for datasource (ID: {0})".format(datasource_item.id)
+        )
 
     def _get_datasource_connections(self, datasource_item, req_options=None):
         url = "{0}/{1}/connections".format(self.baseurl, datasource_item.id)
         server_response = self.get_request(url, req_options)
-        connections = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
+        connections = ConnectionItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )
         return connections
 
     # Delete 1 datasource by id
@@ -88,7 +105,9 @@ class Datasources(QuerysetEndpoint):
     @api(version="2.0")
     @parameter_added_in(no_extract="2.5")
     @parameter_added_in(include_extract="2.5")
-    def download(self, datasource_id, filepath=None, include_extract=True, no_extract=None):
+    def download(
+        self, datasource_id, filepath=None, include_extract=True, no_extract=None
+    ):
         if not datasource_id:
             error = "Datasource ID undefined."
             raise ValueError(error)
@@ -97,13 +116,18 @@ class Datasources(QuerysetEndpoint):
         if no_extract is False or no_extract is True:
             import warnings
 
-            warnings.warn("no_extract is deprecated, use include_extract instead.", DeprecationWarning)
+            warnings.warn(
+                "no_extract is deprecated, use include_extract instead.",
+                DeprecationWarning,
+            )
             include_extract = not no_extract
 
         if not include_extract:
             url += "?includeExtract=False"
 
-        with closing(self.get_request(url, parameters={"stream": True})) as server_response:
+        with closing(
+            self.get_request(url, parameters={"stream": True})
+        ) as server_response:
             _, params = cgi.parse_header(server_response.headers["Content-Disposition"])
             filename = to_filename(os.path.basename(params["filename"]))
 
@@ -113,7 +137,11 @@ class Datasources(QuerysetEndpoint):
                 for chunk in server_response.iter_content(1024):  # 1KB
                     f.write(chunk)
 
-        logger.info("Downloaded datasource to {0} (ID: {1})".format(download_path, datasource_id))
+        logger.info(
+            "Downloaded datasource to {0} (ID: {1})".format(
+                download_path, datasource_id
+            )
+        )
         return os.path.abspath(download_path)
 
     # Update datasource
@@ -131,19 +159,27 @@ class Datasources(QuerysetEndpoint):
         server_response = self.put_request(url, update_req)
         logger.info("Updated datasource item (ID: {0})".format(datasource_item.id))
         updated_datasource = copy.copy(datasource_item)
-        return updated_datasource._parse_common_elements(server_response.content, self.parent_srv.namespace)
+        return updated_datasource._parse_common_elements(
+            server_response.content, self.parent_srv.namespace
+        )
 
     # Update datasource connections
     @api(version="2.3")
     def update_connection(self, datasource_item, connection_item):
-        url = "{0}/{1}/connections/{2}".format(self.baseurl, datasource_item.id, connection_item.id)
+        url = "{0}/{1}/connections/{2}".format(
+            self.baseurl, datasource_item.id, connection_item.id
+        )
 
         update_req = RequestFactory.Connection.update_req(connection_item)
         server_response = self.put_request(url, update_req)
-        connection = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        connection = ConnectionItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )[0]
 
         logger.info(
-            "Updated datasource item (ID: {0} & connection item {1}".format(datasource_item.id, connection_item.id)
+            "Updated datasource item (ID: {0} & connection item {1}".format(
+                datasource_item.id, connection_item.id
+            )
         )
         return connection
 
@@ -153,7 +189,9 @@ class Datasources(QuerysetEndpoint):
         url = "{0}/{1}/refresh".format(self.baseurl, id_)
         empty_req = RequestFactory.Empty.empty_req()
         server_response = self.post_request(url, empty_req)
-        new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        new_job = JobItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )[0]
         return new_job
 
     @api(version="3.5")
@@ -162,7 +200,9 @@ class Datasources(QuerysetEndpoint):
         url = "{0}/{1}/createExtract?encrypt={2}".format(self.baseurl, id_, encrypt)
         empty_req = RequestFactory.Empty.empty_req()
         server_response = self.post_request(url, empty_req)
-        new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        new_job = JobItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )[0]
         return new_job
 
     @api(version="3.5")
@@ -176,7 +216,15 @@ class Datasources(QuerysetEndpoint):
     @api(version="2.0")
     @parameter_added_in(connections="2.8")
     @parameter_added_in(as_job="3.0")
-    def publish(self, datasource_item, file, mode, connection_credentials=None, connections=None, as_job=False):
+    def publish(
+        self,
+        datasource_item,
+        file,
+        mode,
+        connection_credentials=None,
+        connections=None,
+        as_job=False,
+    ):
 
         try:
 
@@ -192,7 +240,9 @@ class Datasources(QuerysetEndpoint):
             if not datasource_item.name:
                 datasource_item.name = os.path.splitext(filename)[0]
             if file_extension not in ALLOWED_FILE_EXTENSIONS:
-                error = "Only {} files can be published as datasources.".format(", ".join(ALLOWED_FILE_EXTENSIONS))
+                error = "Only {} files can be published as datasources.".format(
+                    ", ".join(ALLOWED_FILE_EXTENSIONS)
+                )
                 raise ValueError(error)
 
         except TypeError:
@@ -219,7 +269,10 @@ class Datasources(QuerysetEndpoint):
 
         # Construct the url with the defined mode
         url = "{0}?datasourceType={1}".format(self.baseurl, file_extension)
-        if mode == self.parent_srv.PublishMode.Overwrite or mode == self.parent_srv.PublishMode.Append:
+        if (
+            mode == self.parent_srv.PublishMode.Overwrite
+            or mode == self.parent_srv.PublishMode.Append
+        ):
             url += "&{0}=true".format(mode.lower())
 
         if as_job:
@@ -227,7 +280,11 @@ class Datasources(QuerysetEndpoint):
 
         # Determine if chunking is required (64MB is the limit for single upload method)
         if file_size >= FILESIZE_LIMIT:
-            logger.info("Publishing {0} to server with chunking method (datasource over 64MB)".format(filename))
+            logger.info(
+                "Publishing {0} to server with chunking method (datasource over 64MB)".format(
+                    filename
+                )
+            )
             upload_session_id = Fileuploads.upload_chunks(self.parent_srv, file)
             url = "{0}&uploadSessionId={1}".format(url, upload_session_id)
             xml_request, content_type = RequestFactory.Datasource.publish_req_chunked(
@@ -243,7 +300,11 @@ class Datasources(QuerysetEndpoint):
                 file_contents = file.read()
 
             xml_request, content_type = RequestFactory.Datasource.publish_req(
-                datasource_item, filename, file_contents, connection_credentials, connections
+                datasource_item,
+                filename,
+                file_contents,
+                connection_credentials,
+                connections,
             )
 
         # Send the publishing request to server
@@ -255,15 +316,21 @@ class Datasources(QuerysetEndpoint):
             raise err
 
         if as_job:
-            new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+            new_job = JobItem.from_response(
+                server_response.content, self.parent_srv.namespace
+            )[0]
             logger.info("Published {0} (JOB_ID: {1}".format(filename, new_job.id))
             return new_job
         else:
-            new_datasource = DatasourceItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+            new_datasource = DatasourceItem.from_response(
+                server_response.content, self.parent_srv.namespace
+            )[0]
             logger.info("Published {0} (ID: {1})".format(filename, new_datasource.id))
             return new_datasource
         server_response = self.post_request(url, xml_request, content_type)
-        new_datasource = DatasourceItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        new_datasource = DatasourceItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )[0]
         logger.info("Published {0} (ID: {1})".format(filename, new_datasource.id))
         return new_datasource
 
@@ -290,18 +357,18 @@ class Datasources(QuerysetEndpoint):
     def delete_permission(self, item, capability_item):
         self._permissions.delete(item, capability_item)
 
-    @api(version='3.5')
+    @api(version="3.5")
     def populate_dqw(self, item):
-        self._dqw.populate(item)
+        self._data_quality_warnings.populate(item)
 
-    @api(version='3.5')
+    @api(version="3.5")
     def update_dqw(self, item, warning):
-        return self._dqw.update(item, warning)
+        return self._data_quality_warnings.update(item, warning)
 
-    @api(version='3.5')
+    @api(version="3.5")
     def add_dqw(self, item, warning):
-        return self._dqw.add(item, warning)
+        return self._data_quality_warnings.add(item, warning)
 
-    @api(version='3.5')
+    @api(version="3.5")
     def delete_dqw(self, item):
-        self._dqw.clear(item)
+        self._data_quality_warnings.clear(item)

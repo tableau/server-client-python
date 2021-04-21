@@ -22,7 +22,7 @@ class FlowItem(object):
 
         self._connections = None
         self._permissions = None
-        self._dqws = None
+        self._data_quality_warningss = None
 
     @property
     def connections(self):
@@ -48,11 +48,10 @@ class FlowItem(object):
 
     @property
     def dqws(self):
-        if self._dqws is None:
+        if self._data_quality_warningss is None:
             error = "Project item must be populated with dqws first."
             raise UnpopulatedPropertyError(error)
-        return self._dqws()
-
+        return self._data_quality_warningss()
 
     @property
     def id(self):
@@ -93,19 +92,51 @@ class FlowItem(object):
     def _set_permissions(self, permissions):
         self._permissions = permissions
 
-    def _set_dqws(self, dqws):
-        self._dqws = dqws
+    def _set_data_quality_warnings(self, dqws):
+        self._data_quality_warningss = dqws
 
     def _parse_common_elements(self, flow_xml, ns):
         if not isinstance(flow_xml, ET.Element):
             flow_xml = ET.fromstring(flow_xml).find(".//t:flow", namespaces=ns)
         if flow_xml is not None:
-            (_, _, _, _, _, updated_at, _, project_id, project_name, owner_id) = self._parse_element(flow_xml, ns)
-            self._set_values(None, None, None, None, None, updated_at, None, project_id, project_name, owner_id)
+            (
+                _,
+                _,
+                _,
+                _,
+                _,
+                updated_at,
+                _,
+                project_id,
+                project_name,
+                owner_id,
+            ) = self._parse_element(flow_xml, ns)
+            self._set_values(
+                None,
+                None,
+                None,
+                None,
+                None,
+                updated_at,
+                None,
+                project_id,
+                project_name,
+                owner_id,
+            )
         return self
 
     def _set_values(
-        self, id, name, description, webpage_url, created_at, updated_at, tags, project_id, project_name, owner_id
+        self,
+        id,
+        name,
+        description,
+        webpage_url,
+        created_at,
+        updated_at,
+        tags,
+        project_id,
+        project_name,
+        owner_id,
     ):
         if id is not None:
             self._id = id
@@ -150,7 +181,16 @@ class FlowItem(object):
             ) = cls._parse_element(flow_xml, ns)
             flow_item = cls(project_id)
             flow_item._set_values(
-                id_, name, description, webpage_url, created_at, updated_at, tags, None, project_name, owner_id
+                id_,
+                name,
+                description,
+                webpage_url,
+                created_at,
+                updated_at,
+                tags,
+                None,
+                project_name,
+                owner_id,
             )
             all_flow_items.append(flow_item)
         return all_flow_items
@@ -181,4 +221,15 @@ class FlowItem(object):
         if owner_elem is not None:
             owner_id = owner_elem.get("id", None)
 
-        return (id_, name, description, webpage_url, created_at, updated_at, tags, project_id, project_name, owner_id)
+        return (
+            id_,
+            name,
+            description,
+            webpage_url,
+            created_at,
+            updated_at,
+            tags,
+            project_id,
+            project_name,
+            owner_id,
+        )

@@ -1,6 +1,10 @@
 import xml.etree.ElementTree as ET
 
-from .property_decorators import property_is_enum, property_not_empty, property_is_boolean
+from .property_decorators import (
+    property_is_enum,
+    property_not_empty,
+    property_is_boolean,
+)
 from .exceptions import UnpopulatedPropertyError
 
 
@@ -34,16 +38,16 @@ class DatabaseItem(object):
         self._permissions = None
         self._default_table_permissions = None
 
-        self._dqws = None
+        self._data_quality_warningss = None
 
         self._tables = None  # Not implemented yet
 
     @property
     def dqws(self):
-        if self._dqws is None:
+        if self._data_quality_warningss is None:
             error = "Project item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
-        return self._dqws()
+        return self._data_quality_warningss()
 
     @property
     def content_permissions(self):
@@ -238,10 +242,14 @@ class DatabaseItem(object):
         self._tables = tables
 
     def _set_default_permissions(self, permissions, content_type):
-        setattr(self, "_default_{content}_permissions".format(content=content_type), permissions)
+        setattr(
+            self,
+            "_default_{content}_permissions".format(content=content_type),
+            permissions,
+        )
 
-    def _set_dqws(self, dqw):
-        self._dqws = dqw
+    def _set_data_quality_warnings(self, dqw):
+        self._data_quality_warningss = dqw
 
     @classmethod
     def from_response(cls, resp, ns):
