@@ -20,15 +20,21 @@ class Tables(Endpoint):
 
     @property
     def baseurl(self):
-        return "{0}/sites/{1}/tables".format(self.parent_srv.baseurl, self.parent_srv.site_id)
+        return "{0}/sites/{1}/tables".format(
+            self.parent_srv.baseurl, self.parent_srv.site_id
+        )
 
     @api(version="3.5")
     def get(self, req_options=None):
         logger.info("Querying all tables on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
-        all_table_items = TableItem.from_response(server_response.content, self.parent_srv.namespace)
+        pagination_item = PaginationItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )
+        all_table_items = TableItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )
         return all_table_items, pagination_item
 
     # Get 1 table
@@ -40,7 +46,9 @@ class Tables(Endpoint):
         logger.info("Querying single table (ID: {0})".format(table_id))
         url = "{0}/{1}".format(self.baseurl, table_id)
         server_response = self.get_request(url)
-        return TableItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        return TableItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )[0]
 
     @api(version="3.5")
     def delete(self, table_id):

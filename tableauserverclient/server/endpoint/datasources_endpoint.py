@@ -37,7 +37,9 @@ class Datasources(QuerysetEndpoint):
 
     @property
     def baseurl(self):
-        return "{0}/sites/{1}/datasources".format(self.parent_srv.baseurl, self.parent_srv.site_id)
+        return "{0}/sites/{1}/datasources".format(
+            self.parent_srv.baseurl, self.parent_srv.site_id
+        )
 
     # Get all datasources
     @api(version="2.0")
@@ -45,8 +47,12 @@ class Datasources(QuerysetEndpoint):
         logger.info("Querying all datasources on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
-        all_datasource_items = DatasourceItem.from_response(server_response.content, self.parent_srv.namespace)
+        pagination_item = PaginationItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )
+        all_datasource_items = DatasourceItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )
         return all_datasource_items, pagination_item
 
     # Get 1 datasource by id
@@ -58,7 +64,9 @@ class Datasources(QuerysetEndpoint):
         logger.info("Querying single datasource (ID: {0})".format(datasource_id))
         url = "{0}/{1}".format(self.baseurl, datasource_id)
         server_response = self.get_request(url)
-        return DatasourceItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        return DatasourceItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )[0]
 
     # Populate datasource item's connections
     @api(version="2.0")
@@ -76,7 +84,9 @@ class Datasources(QuerysetEndpoint):
     def _get_datasource_connections(self, datasource_item, req_options=None):
         url = "{0}/{1}/connections".format(self.baseurl, datasource_item.id)
         server_response = self.get_request(url, req_options)
-        connections = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
+        connections = ConnectionItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )
         return connections
 
     # Delete 1 datasource by id
@@ -144,7 +154,9 @@ class Datasources(QuerysetEndpoint):
     # Update datasource connections
     @api(version="2.3")
     def update_connection(self, datasource_item, connection_item):
-        url = "{0}/{1}/connections/{2}".format(self.baseurl, datasource_item.id, connection_item.id)
+        url = "{0}/{1}/connections/{2}".format(
+            self.baseurl, datasource_item.id, connection_item.id
+        )
 
         update_req = RequestFactory.Connection.update_req(connection_item)
         server_response = self.put_request(url, update_req)
@@ -161,7 +173,9 @@ class Datasources(QuerysetEndpoint):
         url = "{0}/{1}/refresh".format(self.baseurl, id_)
         empty_req = RequestFactory.Empty.empty_req()
         server_response = self.post_request(url, empty_req)
-        new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        new_job = JobItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )[0]
         return new_job
 
     @api(version="3.5")
@@ -170,7 +184,9 @@ class Datasources(QuerysetEndpoint):
         url = "{0}/{1}/createExtract?encrypt={2}".format(self.baseurl, id_, encrypt)
         empty_req = RequestFactory.Empty.empty_req()
         server_response = self.post_request(url, empty_req)
-        new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        new_job = JobItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )[0]
         return new_job
 
     @api(version="3.5")

@@ -193,8 +193,12 @@ class DatasourceRequest(object):
         }
         return _add_multipart(parts)
 
-    def publish_req_chunked(self, datasource_item, connection_credentials=None, connections=None):
-        xml_request = self._generate_xml(datasource_item, connection_credentials, connections)
+    def publish_req_chunked(
+        self, datasource_item, connection_credentials=None, connections=None
+    ):
+        xml_request = self._generate_xml(
+            datasource_item, connection_credentials, connections
+        )
 
         parts = {"request_payload": ("", xml_request, "text/xml")}
         return _add_multipart(parts)

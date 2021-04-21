@@ -31,7 +31,9 @@ class Flows(Endpoint):
 
     @property
     def baseurl(self):
-        return "{0}/sites/{1}/flows".format(self.parent_srv.baseurl, self.parent_srv.site_id)
+        return "{0}/sites/{1}/flows".format(
+            self.parent_srv.baseurl, self.parent_srv.site_id
+        )
 
     # Get all flows
     @api(version="3.3")
@@ -39,8 +41,12 @@ class Flows(Endpoint):
         logger.info("Querying all flows on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
-        all_flow_items = FlowItem.from_response(server_response.content, self.parent_srv.namespace)
+        pagination_item = PaginationItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )
+        all_flow_items = FlowItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )
         return all_flow_items, pagination_item
 
     # Get 1 flow by id
@@ -52,7 +58,9 @@ class Flows(Endpoint):
         logger.info("Querying single flow (ID: {0})".format(flow_id))
         url = "{0}/{1}".format(self.baseurl, flow_id)
         server_response = self.get_request(url)
-        return FlowItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        return FlowItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )[0]
 
     # Populate flow item's connections
     @api(version="3.3")
@@ -70,7 +78,9 @@ class Flows(Endpoint):
     def _get_flow_connections(self, flow_item, req_options=None):
         url = "{0}/{1}/connections".format(self.baseurl, flow_item.id)
         server_response = self.get_request(url, req_options)
-        connections = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
+        connections = ConnectionItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )
         return connections
 
     # Delete 1 flow by id
@@ -119,12 +129,16 @@ class Flows(Endpoint):
         server_response = self.put_request(url, update_req)
         logger.info("Updated flow item (ID: {0})".format(flow_item.id))
         updated_flow = copy.copy(flow_item)
-        return updated_flow._parse_common_elements(server_response.content, self.parent_srv.namespace)
+        return updated_flow._parse_common_elements(
+            server_response.content, self.parent_srv.namespace
+        )
 
     # Update flow connections
     @api(version="3.3")
     def update_connection(self, flow_item, connection_item):
-        url = "{0}/{1}/connections/{2}".format(self.baseurl, flow_item.id, connection_item.id)
+        url = "{0}/{1}/connections/{2}".format(
+            self.baseurl, flow_item.id, connection_item.id
+        )
 
         update_req = RequestFactory.Connection.update_req(connection_item)
         server_response = self.put_request(url, update_req)
@@ -138,7 +152,9 @@ class Flows(Endpoint):
         url = "{0}/{1}/run".format(self.baseurl, flow_item.id)
         empty_req = RequestFactory.Empty.empty_req()
         server_response = self.post_request(url, empty_req)
-        new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        new_job = JobItem.from_response(
+            server_response.content, self.parent_srv.namespace
+        )[0]
         return new_job
 
     # Publish flow
