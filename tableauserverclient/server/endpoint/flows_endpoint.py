@@ -1,6 +1,7 @@
 from .endpoint import Endpoint, api
 from .exceptions import InternalServerError, MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
+from .dqw_endpoint import _DataQualityWarningEndpoint
 from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, FlowItem, PaginationItem, ConnectionItem
@@ -26,6 +27,7 @@ class Flows(Endpoint):
         super(Flows, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
+        self._data_quality_warnings = _DataQualityWarningEndpoint(self.parent_srv, "flow")
 
     @property
     def baseurl(self):
@@ -214,3 +216,19 @@ class Flows(Endpoint):
     @api(version="3.3")
     def delete_permission(self, item, capability_item):
         self._permissions.delete(item, capability_item)
+
+    @api(version="3.5")
+    def populate_dqw(self, item):
+        self._data_quality_warnings.populate(item)
+
+    @api(version="3.5")
+    def update_dqw(self, item, warning):
+        return self._data_quality_warnings.update(item, warning)
+
+    @api(version="3.5")
+    def add_dqw(self, item, warning):
+        return self._data_quality_warnings.add(item, warning)
+
+    @api(version="3.5")
+    def delete_dqw(self, item):
+        self._data_quality_warnings.clear(item)

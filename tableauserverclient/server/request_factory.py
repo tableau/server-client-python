@@ -177,7 +177,14 @@ class DatasourceRequest(object):
 
         return ET.tostring(xml_request)
 
-    def publish_req(self, datasource_item, filename, file_contents, connection_credentials=None, connections=None):
+    def publish_req(
+        self,
+        datasource_item,
+        filename,
+        file_contents,
+        connection_credentials=None,
+        connections=None,
+    ):
         xml_request = self._generate_xml(datasource_item, connection_credentials, connections)
 
         parts = {
@@ -191,6 +198,66 @@ class DatasourceRequest(object):
 
         parts = {"request_payload": ("", xml_request, "text/xml")}
         return _add_multipart(parts)
+
+
+class DQWRequest(object):
+    def add_req(self, dqw_item):
+        xml_request = ET.Element("tsRequest")
+        dqw_element = ET.SubElement(xml_request, "dataQualityWarning")
+
+        dqw_element.attrib["isActive"] = str(dqw_item.active).lower()
+        dqw_element.attrib["isSevere"] = str(dqw_item.severe).lower()
+
+        dqw_element.attrib["type"] = dqw_item.warning_type
+
+        if dqw_item.message:
+            dqw_element.attrib["message"] = str(dqw_item.message)
+
+        return ET.tostring(xml_request)
+
+    def update_req(self, database_item):
+        xml_request = ET.Element("tsRequest")
+        dqw_element = ET.SubElement(xml_request, "dataQualityWarning")
+
+        dqw_element.attrib["isActive"] = str(dqw_item.active).lower()
+        dqw_element.attrib["isSevere"] = str(dqw_item.severe).lower()
+
+        dqw_element.attrib["type"] = dqw_item.warning_type
+
+        if dqw_item.message:
+            dqw_element.attrib["message"] = str(dqw_item.message)
+
+        return ET.tostring(xml_request)
+
+
+class DQWRequest(object):
+    def add_req(self, dqw_item):
+        xml_request = ET.Element("tsRequest")
+        dqw_element = ET.SubElement(xml_request, "dataQualityWarning")
+
+        dqw_element.attrib["isActive"] = str(dqw_item.active).lower()
+        dqw_element.attrib["isSevere"] = str(dqw_item.severe).lower()
+
+        dqw_element.attrib["type"] = dqw_item.warning_type
+
+        if dqw_item.message:
+            dqw_element.attrib["message"] = str(dqw_item.message)
+
+        return ET.tostring(xml_request)
+
+    def update_req(self, database_item):
+        xml_request = ET.Element("tsRequest")
+        dqw_element = ET.SubElement(xml_request, "dataQualityWarning")
+
+        dqw_element.attrib["isActive"] = str(dqw_item.active).lower()
+        dqw_element.attrib["isSevere"] = str(dqw_item.severe).lower()
+
+        dqw_element.attrib["type"] = dqw_item.warning_type
+
+        if dqw_item.message:
+            dqw_element.attrib["message"] = str(dqw_item.message)
+
+        return ET.tostring(xml_request)
 
 
 class FavoriteRequest(object):
@@ -223,7 +290,10 @@ class FavoriteRequest(object):
 
 class FileuploadRequest(object):
     def chunk_req(self, chunk):
-        parts = {"request_payload": ("", "", "text/xml"), "tableau_file": ("file", chunk, "application/octet-stream")}
+        parts = {
+            "request_payload": ("", "", "text/xml"),
+            "tableau_file": ("file", chunk, "application/octet-stream"),
+        }
         return _add_multipart(parts)
 
 
@@ -724,7 +794,13 @@ class UserRequest(object):
 
 
 class WorkbookRequest(object):
-    def _generate_xml(self, workbook_item, connection_credentials=None, connections=None, hidden_views=None):
+    def _generate_xml(
+        self,
+        workbook_item,
+        connection_credentials=None,
+        connections=None,
+        hidden_views=None,
+    ):
         xml_request = ET.Element("tsRequest")
         workbook_element = ET.SubElement(xml_request, "workbook")
         workbook_element.attrib["name"] = workbook_item.name
@@ -778,7 +854,13 @@ class WorkbookRequest(object):
         return ET.tostring(xml_request)
 
     def publish_req(
-        self, workbook_item, filename, file_contents, connection_credentials=None, connections=None, hidden_views=None
+        self,
+        workbook_item,
+        filename,
+        file_contents,
+        connection_credentials=None,
+        connections=None,
+        hidden_views=None,
     ):
         xml_request = self._generate_xml(
             workbook_item,
@@ -793,7 +875,13 @@ class WorkbookRequest(object):
         }
         return _add_multipart(parts)
 
-    def publish_req_chunked(self, workbook_item, connection_credentials=None, connections=None, hidden_views=None):
+    def publish_req_chunked(
+        self,
+        workbook_item,
+        connection_credentials=None,
+        connections=None,
+        hidden_views=None,
+    ):
         xml_request = self._generate_xml(
             workbook_item,
             connection_credentials=connection_credentials,
@@ -932,6 +1020,7 @@ class RequestFactory(object):
     DataAlert = DataAlertRequest()
     Datasource = DatasourceRequest()
     Database = DatabaseRequest()
+    DQW = DQWRequest()
     Empty = EmptyRequest()
     Favorite = FavoriteRequest()
     Fileupload = FileuploadRequest()

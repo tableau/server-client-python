@@ -2,6 +2,7 @@ from .endpoint import api, Endpoint
 from .exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .default_permissions_endpoint import _DefaultPermissionsEndpoint
+from .dqw_endpoint import _DataQualityWarningEndpoint
 
 from .. import RequestFactory, DatabaseItem, TableItem, PaginationItem, Permission
 
@@ -16,6 +17,7 @@ class Databases(Endpoint):
 
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
         self._default_permissions = _DefaultPermissionsEndpoint(parent_srv, lambda: self.baseurl)
+        self._data_quality_warnings = _DataQualityWarningEndpoint(parent_srv, "database")
 
     @property
     def baseurl(self):
@@ -116,3 +118,19 @@ class Databases(Endpoint):
     @api(version="3.5")
     def delete_table_default_permissions(self, item):
         self._default_permissions.delete_default_permissions(item, Permission.Resource.Table)
+
+    @api(version="3.5")
+    def populate_dqw(self, item):
+        self._data_quality_warnings.populate(item)
+
+    @api(version="3.5")
+    def update_dqw(self, item, warning):
+        return self._data_quality_warnings.update(item, warning)
+
+    @api(version="3.5")
+    def add_dqw(self, item, warning):
+        return self._data_quality_warnings.add(item, warning)
+
+    @api(version="3.5")
+    def delete_dqw(self, item):
+        self._data_quality_warnings.clear(item)

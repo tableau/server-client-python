@@ -5,6 +5,7 @@ from .data_acceleration_report_item import DataAccelerationReportItem
 from .data_alert_item import DataAlertItem
 from .datasource_item import DatasourceItem
 from .database_item import DatabaseItem
+from .dqw_item import DQWItem
 from .exceptions import UnpopulatedPropertyError
 from .favorites_item import FavoriteItem
 from .group_item import GroupItem

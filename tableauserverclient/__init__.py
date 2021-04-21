@@ -4,6 +4,7 @@ from .models import (
     ConnectionItem,
     DataAlertItem,
     DatasourceItem,
+    DQWItem,
     GroupItem,
     JobItem,
     BackgroundJobItem,

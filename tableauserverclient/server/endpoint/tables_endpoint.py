@@ -1,6 +1,7 @@
 from .endpoint import api, Endpoint
 from .exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
+from .dqw_endpoint import _DataQualityWarningEndpoint
 from ..pager import Pager
 
 from .. import RequestFactory, TableItem, ColumnItem, PaginationItem
@@ -15,6 +16,7 @@ class Tables(Endpoint):
         super(Tables, self).__init__(parent_srv)
 
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
+        self._data_quality_warnings = _DataQualityWarningEndpoint(self.parent_srv, "table")
 
     @property
     def baseurl(self):
@@ -70,7 +72,10 @@ class Tables(Endpoint):
             raise MissingRequiredFieldError(error)
 
         def column_fetcher():
-            return Pager(lambda options: self._get_columns_for_table(table_item, options), req_options)
+            return Pager(
+                lambda options: self._get_columns_for_table(table_item, options),
+                req_options,
+            )
 
         table_item._set_columns(column_fetcher)
         logger.info("Populated columns for table (ID: {0}".format(table_item.id))
@@ -113,3 +118,19 @@ class Tables(Endpoint):
     @api(version="3.5")
     def delete_permission(self, item, rules):
         return self._permissions.delete(item, rules)
+
+    @api(version="3.5")
+    def populate_dqw(self, item):
+        self._data_quality_warnings.populate(item)
+
+    @api(version="3.5")
+    def update_dqw(self, item, warning):
+        return self._data_quality_warnings.update(item, warning)
+
+    @api(version="3.5")
+    def add_dqw(self, item, warning):
+        return self._data_quality_warnings.add(item, warning)
+
+    @api(version="3.5")
+    def delete_dqw(self, item):
+        self._data_quality_warnings.clear(item)
