@@ -34,7 +34,16 @@ class DatabaseItem(object):
         self._permissions = None
         self._default_table_permissions = None
 
+        self._dqws = None
+
         self._tables = None  # Not implemented yet
+
+    @property
+    def dqws(self):
+        if self._dqws is None:
+            error = "Project item must be populated with permissions first."
+            raise UnpopulatedPropertyError(error)
+        return self._dqws()
 
     @property
     def content_permissions(self):
@@ -230,6 +239,9 @@ class DatabaseItem(object):
 
     def _set_default_permissions(self, permissions, content_type):
         setattr(self, "_default_{content}_permissions".format(content=content_type), permissions)
+
+    def _set_dqws(self, dqw):
+        self._dqws = dqw
 
     @classmethod
     def from_response(cls, resp, ns):

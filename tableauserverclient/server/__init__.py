@@ -7,6 +7,7 @@ from .. import (
     DataAlertItem,
     DatasourceItem,
     DatabaseItem,
+    DQWItem,
     JobItem,
     BackgroundJobItem,
     GroupItem,
