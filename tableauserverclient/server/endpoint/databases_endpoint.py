@@ -129,8 +129,8 @@ class Databases(Endpoint):
 
     @api(version='3.5')
     def add_dqw(self, item, warning):
-        return self._dqw.update(item, warning)
+        return self._dqw.add(item, warning)
 
     @api(version='3.5')
-    def delete_permission(self, item, warning):
-        self._dqw.delete(item, warning)
+    def delete_dqw(self, item):
+        self._dqw.clear(item)
