@@ -4,4 +4,4 @@ class Sort(object):
         self.direction = direction
 
     def __str__(self):
-        return '{0}:{1}'.format(self.field, self.direction)
+        return "{0}:{1}".format(self.field, self.direction)

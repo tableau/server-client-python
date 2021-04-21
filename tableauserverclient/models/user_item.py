@@ -7,33 +7,33 @@ from .reference_item import ResourceReference
 
 class UserItem(object):
 
-    tag_name = 'user'
+    tag_name = "user"
 
     class Roles:
-        Interactor = 'Interactor'
-        Publisher = 'Publisher'
-        ServerAdministrator = 'ServerAdministrator'
-        SiteAdministrator = 'SiteAdministrator'
-        Unlicensed = 'Unlicensed'
-        UnlicensedWithPublish = 'UnlicensedWithPublish'
-        Viewer = 'Viewer'
-        ViewerWithPublish = 'ViewerWithPublish'
-        Guest = 'Guest'
+        Interactor = "Interactor"
+        Publisher = "Publisher"
+        ServerAdministrator = "ServerAdministrator"
+        SiteAdministrator = "SiteAdministrator"
+        Unlicensed = "Unlicensed"
+        UnlicensedWithPublish = "UnlicensedWithPublish"
+        Viewer = "Viewer"
+        ViewerWithPublish = "ViewerWithPublish"
+        Guest = "Guest"
 
-        Creator = 'Creator'
-        Explorer = 'Explorer'
-        ExplorerCanPublish = 'ExplorerCanPublish'
-        ReadOnly = 'ReadOnly'
-        SiteAdministratorCreator = 'SiteAdministratorCreator'
-        SiteAdministratorExplorer = 'SiteAdministratorExplorer'
+        Creator = "Creator"
+        Explorer = "Explorer"
+        ExplorerCanPublish = "ExplorerCanPublish"
+        ReadOnly = "ReadOnly"
+        SiteAdministratorCreator = "SiteAdministratorCreator"
+        SiteAdministratorExplorer = "SiteAdministratorExplorer"
 
         # Online only
-        SupportUser = 'SupportUser'
+        SupportUser = "SupportUser"
 
     class Auth:
-        OpenID = 'OpenID'
-        SAML = 'SAML'
-        ServerDefault = 'ServerDefault'
+        OpenID = "OpenID"
+        SAML = "SAML"
+        ServerDefault = "ServerDefault"
 
     def __init__(self, name=None, site_role=None, auth_setting=None):
         self._auth_setting = None
@@ -126,14 +126,15 @@ class UserItem(object):
 
     def _parse_common_tags(self, user_xml, ns):
         if not isinstance(user_xml, ET.Element):
-            user_xml = ET.fromstring(user_xml).find('.//t:user', namespaces=ns)
+            user_xml = ET.fromstring(user_xml).find(".//t:user", namespaces=ns)
         if user_xml is not None:
             (_, _, site_role, _, _, fullname, email, auth_setting, _) = self._parse_element(user_xml, ns)
             self._set_values(None, None, site_role, None, None, fullname, email, auth_setting, None)
         return self
 
-    def _set_values(self, id, name, site_role, last_login,
-                    external_auth_user_id, fullname, email, auth_setting, domain_name):
+    def _set_values(
+        self, id, name, site_role, last_login, external_auth_user_id, fullname, email, auth_setting, domain_name
+    ):
         if id is not None:
             self._id = id
         if name:
@@ -157,13 +158,23 @@ class UserItem(object):
     def from_response(cls, resp, ns):
         all_user_items = []
         parsed_response = ET.fromstring(resp)
-        all_user_xml = parsed_response.findall('.//t:user', namespaces=ns)
+        all_user_xml = parsed_response.findall(".//t:user", namespaces=ns)
         for user_xml in all_user_xml:
-            (id, name, site_role, last_login, external_auth_user_id,
-             fullname, email, auth_setting, domain_name) = cls._parse_element(user_xml, ns)
+            (
+                id,
+                name,
+                site_role,
+                last_login,
+                external_auth_user_id,
+                fullname,
+                email,
+                auth_setting,
+                domain_name,
+            ) = cls._parse_element(user_xml, ns)
             user_item = cls(name, site_role)
-            user_item._set_values(id, name, site_role, last_login, external_auth_user_id,
-                                  fullname, email, auth_setting, domain_name)
+            user_item._set_values(
+                id, name, site_role, last_login, external_auth_user_id, fullname, email, auth_setting, domain_name
+            )
             all_user_items.append(user_item)
         return all_user_items
 
@@ -173,19 +184,19 @@ class UserItem(object):
 
     @staticmethod
     def _parse_element(user_xml, ns):
-        id = user_xml.get('id', None)
-        name = user_xml.get('name', None)
-        site_role = user_xml.get('siteRole', None)
-        last_login = parse_datetime(user_xml.get('lastLogin', None))
-        external_auth_user_id = user_xml.get('externalAuthUserId', None)
-        fullname = user_xml.get('fullName', None)
-        email = user_xml.get('email', None)
-        auth_setting = user_xml.get('authSetting', None)
+        id = user_xml.get("id", None)
+        name = user_xml.get("name", None)
+        site_role = user_xml.get("siteRole", None)
+        last_login = parse_datetime(user_xml.get("lastLogin", None))
+        external_auth_user_id = user_xml.get("externalAuthUserId", None)
+        fullname = user_xml.get("fullName", None)
+        email = user_xml.get("email", None)
+        auth_setting = user_xml.get("authSetting", None)
 
         domain_name = None
-        domain_elem = user_xml.find('.//t:domain', namespaces=ns)
+        domain_elem = user_xml.find(".//t:domain", namespaces=ns)
         if domain_elem is not None:
-            domain_name = domain_elem.get('name', None)
+            domain_name = domain_elem.get("name", None)
 
         return id, name, site_role, last_login, external_auth_user_id, fullname, email, auth_setting, domain_name
 

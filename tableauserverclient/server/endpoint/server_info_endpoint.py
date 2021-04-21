@@ -3,7 +3,7 @@ from .exceptions import ServerResponseError, ServerInfoEndpointNotFoundError, En
 from ...models import ServerInfoItem
 import logging
 
-logger = logging.getLogger('tableau.endpoint.server_info')
+logger = logging.getLogger("tableau.endpoint.server_info")
 
 
 class ServerInfo(Endpoint):
