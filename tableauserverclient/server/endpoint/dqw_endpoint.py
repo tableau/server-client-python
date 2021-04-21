@@ -26,7 +26,7 @@ class _DQWEndpoint(Endpoint):
     def baseurl(self):
         return "{0}/sites/{1}/dataQualityWarnings/{2}".format(self.parent_srv.baseurl, self.parent_srv.site_id, self.resource_type)
 
-    def add_dqw(self, resource, warning):
+    def update(self, resource, warning):
         url = '{baseurl}/{content_luid}'.format(baseurl=self.baseurl, content_luid=resource.id)
         add_req = RequestFactory.DQW.add_req(warning)
         response = self.post_request(url, add_req)
