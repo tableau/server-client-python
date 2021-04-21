@@ -22,12 +22,12 @@ class FlowItem(object):
 
         self._connections = None
         self._permissions = None
-        self._dqws = None
+        self._data_quality_warningss = None
 
     @property
     def connections(self):
         if self._connections is None:
-            error = 'Flow item must be populated with connections first.'
+            error = "Flow item must be populated with connections first."
             raise UnpopulatedPropertyError(error)
         return self._connections()
 
@@ -48,11 +48,10 @@ class FlowItem(object):
 
     @property
     def dqws(self):
-        if self._dqws is None:
+        if self._data_quality_warningss is None:
             error = "Project item must be populated with dqws first."
             raise UnpopulatedPropertyError(error)
-        return self._dqws()
-
+        return self._data_quality_warningss()
 
     @property
     def id(self):
@@ -93,20 +92,52 @@ class FlowItem(object):
     def _set_permissions(self, permissions):
         self._permissions = permissions
 
-    def _set_dqws(self, dqws):
-        self._dqws = dqws
+    def _set_data_quality_warnings(self, dqws):
+        self._data_quality_warningss = dqws
 
     def _parse_common_elements(self, flow_xml, ns):
         if not isinstance(flow_xml, ET.Element):
-            flow_xml = ET.fromstring(flow_xml).find('.//t:flow', namespaces=ns)
+            flow_xml = ET.fromstring(flow_xml).find(".//t:flow", namespaces=ns)
         if flow_xml is not None:
-            (_, _, _, _, _, updated_at, _, project_id, project_name, owner_id) = self._parse_element(flow_xml, ns)
-            self._set_values(None, None, None, None, None, updated_at, None, project_id,
-                             project_name, owner_id)
+            (
+                _,
+                _,
+                _,
+                _,
+                _,
+                updated_at,
+                _,
+                project_id,
+                project_name,
+                owner_id,
+            ) = self._parse_element(flow_xml, ns)
+            self._set_values(
+                None,
+                None,
+                None,
+                None,
+                None,
+                updated_at,
+                None,
+                project_id,
+                project_name,
+                owner_id,
+            )
         return self
 
-    def _set_values(self, id, name, description, webpage_url, created_at,
-                    updated_at, tags, project_id, project_name, owner_id):
+    def _set_values(
+        self,
+        id,
+        name,
+        description,
+        webpage_url,
+        created_at,
+        updated_at,
+        tags,
+        project_id,
+        project_name,
+        owner_id,
+    ):
         if id is not None:
             self._id = id
         if name:
@@ -133,42 +164,72 @@ class FlowItem(object):
     def from_response(cls, resp, ns):
         all_flow_items = list()
         parsed_response = ET.fromstring(resp)
-        all_flow_xml = parsed_response.findall('.//t:flow', namespaces=ns)
+        all_flow_xml = parsed_response.findall(".//t:flow", namespaces=ns)
 
         for flow_xml in all_flow_xml:
-            (id_, name, description, webpage_url, created_at, updated_at,
-             tags, project_id, project_name, owner_id) = cls._parse_element(flow_xml, ns)
+            (
+                id_,
+                name,
+                description,
+                webpage_url,
+                created_at,
+                updated_at,
+                tags,
+                project_id,
+                project_name,
+                owner_id,
+            ) = cls._parse_element(flow_xml, ns)
             flow_item = cls(project_id)
-            flow_item._set_values(id_, name, description, webpage_url, created_at, updated_at,
-                                  tags, None, project_name, owner_id)
+            flow_item._set_values(
+                id_,
+                name,
+                description,
+                webpage_url,
+                created_at,
+                updated_at,
+                tags,
+                None,
+                project_name,
+                owner_id,
+            )
             all_flow_items.append(flow_item)
         return all_flow_items
 
     @staticmethod
     def _parse_element(flow_xml, ns):
-        id_ = flow_xml.get('id', None)
-        name = flow_xml.get('name', None)
-        description = flow_xml.get('description', None)
-        webpage_url = flow_xml.get('webpageUrl', None)
-        created_at = parse_datetime(flow_xml.get('createdAt', None))
-        updated_at = parse_datetime(flow_xml.get('updatedAt', None))
+        id_ = flow_xml.get("id", None)
+        name = flow_xml.get("name", None)
+        description = flow_xml.get("description", None)
+        webpage_url = flow_xml.get("webpageUrl", None)
+        created_at = parse_datetime(flow_xml.get("createdAt", None))
+        updated_at = parse_datetime(flow_xml.get("updatedAt", None))
 
         tags = None
-        tags_elem = flow_xml.find('.//t:tags', namespaces=ns)
+        tags_elem = flow_xml.find(".//t:tags", namespaces=ns)
         if tags_elem is not None:
             tags = TagItem.from_xml_element(tags_elem, ns)
 
         project_id = None
         project_name = None
-        project_elem = flow_xml.find('.//t:project', namespaces=ns)
+        project_elem = flow_xml.find(".//t:project", namespaces=ns)
         if project_elem is not None:
-            project_id = project_elem.get('id', None)
-            project_name = project_elem.get('name', None)
+            project_id = project_elem.get("id", None)
+            project_name = project_elem.get("name", None)
 
         owner_id = None
-        owner_elem = flow_xml.find('.//t:owner', namespaces=ns)
+        owner_elem = flow_xml.find(".//t:owner", namespaces=ns)
         if owner_elem is not None:
-            owner_id = owner_elem.get('id', None)
+            owner_id = owner_elem.get("id", None)
 
-        return (id_, name, description, webpage_url, created_at, updated_at, tags, project_id,
-                project_name, owner_id)
+        return (
+            id_,
+            name,
+            description,
+            webpage_url,
+            created_at,
+            updated_at,
+            tags,
+            project_id,
+            project_name,
+            owner_id,
+        )
