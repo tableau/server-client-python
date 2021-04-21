@@ -17,7 +17,7 @@ class TableItem(object):
         self._schema = None
 
         self._columns = None
-        self._data_quality_warningss = None
+        self._data_quality_warnings = None
 
     @property
     def permissions(self):
@@ -28,10 +28,10 @@ class TableItem(object):
 
     @property
     def dqws(self):
-        if self._data_quality_warningss is None:
+        if self._data_quality_warnings is None:
             error = "Project item must be populated with dqws first."
             raise UnpopulatedPropertyError(error)
-        return self._data_quality_warningss()
+        return self._data_quality_warnings()
 
     @property
     def id(self):
@@ -95,7 +95,7 @@ class TableItem(object):
         self._columns = columns
 
     def _set_data_quality_warnings(self, dqws):
-        self._data_quality_warningss = dqws
+        self._data_quality_warnings = dqws
 
     def _set_values(self, table_values):
         if "id" in table_values:
