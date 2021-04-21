@@ -7,7 +7,7 @@ from .. import RequestFactory, TableItem, ColumnItem, PaginationItem
 
 import logging
 
-logger = logging.getLogger('tableau.endpoint.tables')
+logger = logging.getLogger("tableau.endpoint.tables")
 
 
 class Tables(Endpoint):
@@ -22,7 +22,7 @@ class Tables(Endpoint):
 
     @api(version="3.5")
     def get(self, req_options=None):
-        logger.info('Querying all tables on site')
+        logger.info("Querying all tables on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
@@ -35,7 +35,7 @@ class Tables(Endpoint):
         if not table_id:
             error = "table ID undefined."
             raise ValueError(error)
-        logger.info('Querying single table (ID: {0})'.format(table_id))
+        logger.info("Querying single table (ID: {0})".format(table_id))
         url = "{0}/{1}".format(self.baseurl, table_id)
         server_response = self.get_request(url)
         return TableItem.from_response(server_response.content, self.parent_srv.namespace)[0]
@@ -47,7 +47,7 @@ class Tables(Endpoint):
             raise ValueError(error)
         url = "{0}/{1}".format(self.baseurl, table_id)
         self.delete_request(url)
-        logger.info('Deleted single table (ID: {0})'.format(table_id))
+        logger.info("Deleted single table (ID: {0})".format(table_id))
 
     @api(version="3.5")
     def update(self, table_item):
@@ -58,7 +58,7 @@ class Tables(Endpoint):
         url = "{0}/{1}".format(self.baseurl, table_item.id)
         update_req = RequestFactory.Table.update_req(table_item)
         server_response = self.put_request(url, update_req)
-        logger.info('Updated table item (ID: {0})'.format(table_item.id))
+        logger.info("Updated table item (ID: {0})".format(table_item.id))
         updated_table = TableItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return updated_table
 
@@ -73,13 +73,12 @@ class Tables(Endpoint):
             return Pager(lambda options: self._get_columns_for_table(table_item, options), req_options)
 
         table_item._set_columns(column_fetcher)
-        logger.info('Populated columns for table (ID: {0}'.format(table_item.id))
+        logger.info("Populated columns for table (ID: {0}".format(table_item.id))
 
     def _get_columns_for_table(self, table_item, req_options=None):
         url = "{0}/{1}/columns".format(self.baseurl, table_item.id)
         server_response = self.get_request(url, req_options)
-        columns = ColumnItem.from_response(server_response.content,
-                                           self.parent_srv.namespace)
+        columns = ColumnItem.from_response(server_response.content, self.parent_srv.namespace)
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         return columns, pagination_item
 
@@ -90,26 +89,27 @@ class Tables(Endpoint):
         server_response = self.put_request(url, update_req)
         column = ColumnItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
-        logger.info('Updated table item (ID: {0} & column item {1}'.format(table_item.id,
-                                                                           column_item.id))
+        logger.info("Updated table item (ID: {0} & column item {1}".format(table_item.id, column_item.id))
         return column
 
-    @api(version='3.5')
+    @api(version="3.5")
     def populate_permissions(self, item):
         self._permissions.populate(item)
 
-    @api(version='3.5')
+    @api(version="3.5")
     def update_permission(self, item, rules):
         import warnings
-        warnings.warn('Server.tables.update_permission is deprecated, '
-                      'please use Server.tables.update_permissions instead.',
-                      DeprecationWarning)
+
+        warnings.warn(
+            "Server.tables.update_permission is deprecated, " "please use Server.tables.update_permissions instead.",
+            DeprecationWarning,
+        )
         return self._permissions.update(item, rules)
 
-    @api(version='3.5')
+    @api(version="3.5")
     def update_permissions(self, item, rules):
         return self._permissions.update(item, rules)
 
-    @api(version='3.5')
+    @api(version="3.5")
     def delete_permission(self, item, rules):
         return self._permissions.delete(item, rules)

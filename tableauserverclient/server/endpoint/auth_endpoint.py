@@ -4,7 +4,7 @@ from .endpoint import Endpoint, api
 import xml.etree.ElementTree as ET
 import logging
 
-logger = logging.getLogger('tableau.endpoint.auth')
+logger = logging.getLogger("tableau.endpoint.auth")
 
 
 class Auth(Endpoint):
@@ -24,18 +24,17 @@ class Auth(Endpoint):
 
     @api(version="2.0")
     def sign_in(self, auth_req):
-        url = "{0}/{1}".format(self.baseurl, 'signin')
+        url = "{0}/{1}".format(self.baseurl, "signin")
         signin_req = RequestFactory.Auth.signin_req(auth_req)
-        server_response = self.parent_srv.session.post(url, data=signin_req,
-                                                       **self.parent_srv.http_options)
+        server_response = self.parent_srv.session.post(url, data=signin_req, **self.parent_srv.http_options)
         self.parent_srv._namespace.detect(server_response.content)
         self._check_status(server_response)
         parsed_response = ET.fromstring(server_response.content)
-        site_id = parsed_response.find('.//t:site', namespaces=self.parent_srv.namespace).get('id', None)
-        user_id = parsed_response.find('.//t:user', namespaces=self.parent_srv.namespace).get('id', None)
-        auth_token = parsed_response.find('t:credentials', namespaces=self.parent_srv.namespace).get('token', None)
+        site_id = parsed_response.find(".//t:site", namespaces=self.parent_srv.namespace).get("id", None)
+        user_id = parsed_response.find(".//t:user", namespaces=self.parent_srv.namespace).get("id", None)
+        auth_token = parsed_response.find("t:credentials", namespaces=self.parent_srv.namespace).get("token", None)
         self.parent_srv._set_auth(site_id, user_id, auth_token)
-        logger.info('Signed into {0} as user with id {1}'.format(self.parent_srv.server_address, user_id))
+        logger.info("Signed into {0} as user with id {1}".format(self.parent_srv.server_address, user_id))
         return Auth.contextmgr(self.sign_out)
 
     @api(version="3.6")
@@ -45,17 +44,17 @@ class Auth(Endpoint):
 
     @api(version="2.0")
     def sign_out(self):
-        url = "{0}/{1}".format(self.baseurl, 'signout')
+        url = "{0}/{1}".format(self.baseurl, "signout")
         # If there are no auth tokens you're already signed out. No-op
         if not self.parent_srv.is_signed_in():
             return
-        self.post_request(url, '')
+        self.post_request(url, "")
         self.parent_srv._clear_auth()
-        logger.info('Signed out')
+        logger.info("Signed out")
 
     @api(version="2.6")
     def switch_site(self, site_item):
-        url = "{0}/{1}".format(self.baseurl, 'switchSite')
+        url = "{0}/{1}".format(self.baseurl, "switchSite")
         switch_req = RequestFactory.Auth.switch_req(site_item.content_url)
         try:
             server_response = self.post_request(url, switch_req)
@@ -67,15 +66,15 @@ class Auth(Endpoint):
         self.parent_srv._namespace.detect(server_response.content)
         self._check_status(server_response)
         parsed_response = ET.fromstring(server_response.content)
-        site_id = parsed_response.find('.//t:site', namespaces=self.parent_srv.namespace).get('id', None)
-        user_id = parsed_response.find('.//t:user', namespaces=self.parent_srv.namespace).get('id', None)
-        auth_token = parsed_response.find('t:credentials', namespaces=self.parent_srv.namespace).get('token', None)
+        site_id = parsed_response.find(".//t:site", namespaces=self.parent_srv.namespace).get("id", None)
+        user_id = parsed_response.find(".//t:user", namespaces=self.parent_srv.namespace).get("id", None)
+        auth_token = parsed_response.find("t:credentials", namespaces=self.parent_srv.namespace).get("token", None)
         self.parent_srv._set_auth(site_id, user_id, auth_token)
-        logger.info('Signed into {0} as user with id {1}'.format(self.parent_srv.server_address, user_id))
+        logger.info("Signed into {0} as user with id {1}".format(self.parent_srv.server_address, user_id))
         return Auth.contextmgr(self.sign_out)
 
     @api(version="3.10")
     def revoke_all_server_admin_tokens(self):
-        url = "{0}/{1}".format(self.baseurl, 'revokeAllServerAdminTokens')
-        self.post_request(url, '')
-        logger.info('Revoked all tokens for all server admins')
+        url = "{0}/{1}".format(self.baseurl, "revokeAllServerAdminTokens")
+        self.post_request(url, "")
+        logger.info("Revoked all tokens for all server admins")

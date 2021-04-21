@@ -1,6 +1,12 @@
 import xml.etree.ElementTree as ET
-from .property_decorators import (property_is_enum, property_is_boolean, property_matches,
-                                  property_not_empty, property_not_nullable, property_is_int)
+from .property_decorators import (
+    property_is_enum,
+    property_is_boolean,
+    property_matches,
+    property_not_empty,
+    property_not_nullable,
+    property_is_int,
+)
 
 
 VALID_CONTENT_URL_RE = r"^[a-zA-Z0-9_\-]*$"
@@ -8,28 +14,62 @@ VALID_CONTENT_URL_RE = r"^[a-zA-Z0-9_\-]*$"
 
 class SiteItem(object):
     class AdminMode:
-        ContentAndUsers = 'ContentAndUsers'
-        ContentOnly = 'ContentOnly'
+        ContentAndUsers = "ContentAndUsers"
+        ContentOnly = "ContentOnly"
 
     class State:
-        Active = 'Active'
-        Suspended = 'Suspended'
+        Active = "Active"
+        Suspended = "Suspended"
 
-    def __init__(self, name, content_url, admin_mode=None, user_quota=None, storage_quota=None,
-                 disable_subscriptions=False, subscribe_others_enabled=True, revision_history_enabled=False,
-                 revision_limit=None, data_acceleration_mode=None, flows_enabled=True, cataloging_enabled=True,
-                 editing_flows_enabled=True, scheduling_flows_enabled=True, allow_subscription_attachments=True,
-                 guest_access_enabled=False, cache_warmup_enabled=True, commenting_enabled=True,
-                 extract_encryption_mode=None, request_access_enabled=False, run_now_enabled=True,
-                 tier_explorer_capacity=None, tier_creator_capacity=None, tier_viewer_capacity=None,
-                 data_alerts_enabled=True, commenting_mentions_enabled=True, catalog_obfuscation_enabled=False,
-                 flow_auto_save_enabled=True, web_extraction_enabled=True, metrics_content_type_enabled=True,
-                 notify_site_admins_on_throttle=False, authoring_enabled=True, custom_subscription_email_enabled=False,
-                 custom_subscription_email=False, custom_subscription_footer_enabled=False,
-                 custom_subscription_footer=False, ask_data_mode='EnabledByDefault', named_sharing_enabled=True,
-                 mobile_biometrics_enabled=False, sheet_image_enabled=True, derived_permissions_enabled=False,
-                 user_visibility_mode='FULL', use_default_time_zone=True, time_zone=None,
-                 auto_suspend_refresh_enabled=True, auto_suspend_refresh_inactivity_window=30):
+    def __init__(
+        self,
+        name,
+        content_url,
+        admin_mode=None,
+        user_quota=None,
+        storage_quota=None,
+        disable_subscriptions=False,
+        subscribe_others_enabled=True,
+        revision_history_enabled=False,
+        revision_limit=None,
+        data_acceleration_mode=None,
+        flows_enabled=True,
+        cataloging_enabled=True,
+        editing_flows_enabled=True,
+        scheduling_flows_enabled=True,
+        allow_subscription_attachments=True,
+        guest_access_enabled=False,
+        cache_warmup_enabled=True,
+        commenting_enabled=True,
+        extract_encryption_mode=None,
+        request_access_enabled=False,
+        run_now_enabled=True,
+        tier_explorer_capacity=None,
+        tier_creator_capacity=None,
+        tier_viewer_capacity=None,
+        data_alerts_enabled=True,
+        commenting_mentions_enabled=True,
+        catalog_obfuscation_enabled=False,
+        flow_auto_save_enabled=True,
+        web_extraction_enabled=True,
+        metrics_content_type_enabled=True,
+        notify_site_admins_on_throttle=False,
+        authoring_enabled=True,
+        custom_subscription_email_enabled=False,
+        custom_subscription_email=False,
+        custom_subscription_footer_enabled=False,
+        custom_subscription_footer=False,
+        ask_data_mode="EnabledByDefault",
+        named_sharing_enabled=True,
+        mobile_biometrics_enabled=False,
+        sheet_image_enabled=True,
+        derived_permissions_enabled=False,
+        user_visibility_mode="FULL",
+        use_default_time_zone=True,
+        time_zone=None,
+        auto_suspend_refresh_enabled=True,
+        auto_suspend_refresh_inactivity_window=30,
+    ):
         self._admin_mode = None
         self._id = None
         self._num_users = None
@@ -198,7 +238,7 @@ class SiteItem(object):
         self._flows_enabled = value
 
     def is_default(self):
-        return self.name.lower() == 'default'
+        return self.name.lower() == "default"
 
     @property
     def editing_flows_enabled(self):
@@ -496,51 +536,171 @@ class SiteItem(object):
 
     def _parse_common_tags(self, site_xml, ns):
         if not isinstance(site_xml, ET.Element):
-            site_xml = ET.fromstring(site_xml).find('.//t:site', namespaces=ns)
+            site_xml = ET.fromstring(site_xml).find(".//t:site", namespaces=ns)
         if site_xml is not None:
-            (_, name, content_url, _, admin_mode, state,
-             subscribe_others_enabled, disable_subscriptions, revision_history_enabled,
-             user_quota, storage_quota, revision_limit, num_users, storage,
-             data_acceleration_mode, flows_enabled, cataloging_enabled, editing_flows_enabled,
-             scheduling_flows_enabled, allow_subscription_attachments, guest_access_enabled,
-             cache_warmup_enabled, commenting_enabled, extract_encryption_mode, request_access_enabled,
-             run_now_enabled, tier_explorer_capacity, tier_creator_capacity, tier_viewer_capacity, data_alerts_enabled,
-             commenting_mentions_enabled, catalog_obfuscation_enabled, flow_auto_save_enabled, web_extraction_enabled,
-             metrics_content_type_enabled, notify_site_admins_on_throttle, authoring_enabled,
-             custom_subscription_email_enabled, custom_subscription_email, custom_subscription_footer_enabled,
-             custom_subscription_footer, ask_data_mode, named_sharing_enabled, mobile_biometrics_enabled,
-             sheet_image_enabled, derived_permissions_enabled, user_visibility_mode, use_default_time_zone, time_zone,
-             auto_suspend_refresh_enabled, auto_suspend_refresh_inactivity_window) = self._parse_element(site_xml, ns)
+            (
+                _,
+                name,
+                content_url,
+                _,
+                admin_mode,
+                state,
+                subscribe_others_enabled,
+                disable_subscriptions,
+                revision_history_enabled,
+                user_quota,
+                storage_quota,
+                revision_limit,
+                num_users,
+                storage,
+                data_acceleration_mode,
+                flows_enabled,
+                cataloging_enabled,
+                editing_flows_enabled,
+                scheduling_flows_enabled,
+                allow_subscription_attachments,
+                guest_access_enabled,
+                cache_warmup_enabled,
+                commenting_enabled,
+                extract_encryption_mode,
+                request_access_enabled,
+                run_now_enabled,
+                tier_explorer_capacity,
+                tier_creator_capacity,
+                tier_viewer_capacity,
+                data_alerts_enabled,
+                commenting_mentions_enabled,
+                catalog_obfuscation_enabled,
+                flow_auto_save_enabled,
+                web_extraction_enabled,
+                metrics_content_type_enabled,
+                notify_site_admins_on_throttle,
+                authoring_enabled,
+                custom_subscription_email_enabled,
+                custom_subscription_email,
+                custom_subscription_footer_enabled,
+                custom_subscription_footer,
+                ask_data_mode,
+                named_sharing_enabled,
+                mobile_biometrics_enabled,
+                sheet_image_enabled,
+                derived_permissions_enabled,
+                user_visibility_mode,
+                use_default_time_zone,
+                time_zone,
+                auto_suspend_refresh_enabled,
+                auto_suspend_refresh_inactivity_window,
+            ) = self._parse_element(site_xml, ns)
 
-            self._set_values(None, name, content_url, None, admin_mode, state, subscribe_others_enabled,
-                             disable_subscriptions, revision_history_enabled, user_quota, storage_quota,
-                             revision_limit, num_users, storage, data_acceleration_mode, flows_enabled,
-                             cataloging_enabled, editing_flows_enabled, scheduling_flows_enabled,
-                             allow_subscription_attachments, guest_access_enabled, cache_warmup_enabled,
-                             commenting_enabled, extract_encryption_mode, request_access_enabled, run_now_enabled,
-                             tier_explorer_capacity, tier_creator_capacity, tier_viewer_capacity, data_alerts_enabled,
-                             commenting_mentions_enabled, catalog_obfuscation_enabled, flow_auto_save_enabled,
-                             web_extraction_enabled, metrics_content_type_enabled, notify_site_admins_on_throttle,
-                             authoring_enabled, custom_subscription_email_enabled, custom_subscription_email,
-                             custom_subscription_footer_enabled, custom_subscription_footer, ask_data_mode,
-                             named_sharing_enabled, mobile_biometrics_enabled, sheet_image_enabled,
-                             derived_permissions_enabled, user_visibility_mode, use_default_time_zone, time_zone,
-                             auto_suspend_refresh_enabled, auto_suspend_refresh_inactivity_window)
+            self._set_values(
+                None,
+                name,
+                content_url,
+                None,
+                admin_mode,
+                state,
+                subscribe_others_enabled,
+                disable_subscriptions,
+                revision_history_enabled,
+                user_quota,
+                storage_quota,
+                revision_limit,
+                num_users,
+                storage,
+                data_acceleration_mode,
+                flows_enabled,
+                cataloging_enabled,
+                editing_flows_enabled,
+                scheduling_flows_enabled,
+                allow_subscription_attachments,
+                guest_access_enabled,
+                cache_warmup_enabled,
+                commenting_enabled,
+                extract_encryption_mode,
+                request_access_enabled,
+                run_now_enabled,
+                tier_explorer_capacity,
+                tier_creator_capacity,
+                tier_viewer_capacity,
+                data_alerts_enabled,
+                commenting_mentions_enabled,
+                catalog_obfuscation_enabled,
+                flow_auto_save_enabled,
+                web_extraction_enabled,
+                metrics_content_type_enabled,
+                notify_site_admins_on_throttle,
+                authoring_enabled,
+                custom_subscription_email_enabled,
+                custom_subscription_email,
+                custom_subscription_footer_enabled,
+                custom_subscription_footer,
+                ask_data_mode,
+                named_sharing_enabled,
+                mobile_biometrics_enabled,
+                sheet_image_enabled,
+                derived_permissions_enabled,
+                user_visibility_mode,
+                use_default_time_zone,
+                time_zone,
+                auto_suspend_refresh_enabled,
+                auto_suspend_refresh_inactivity_window,
+            )
         return self
 
-    def _set_values(self, id, name, content_url, status_reason, admin_mode, state,
-                    subscribe_others_enabled, disable_subscriptions, revision_history_enabled,
-                    user_quota, storage_quota, revision_limit, num_users, storage, data_acceleration_mode,
-                    flows_enabled, cataloging_enabled, editing_flows_enabled, scheduling_flows_enabled,
-                    allow_subscription_attachments, guest_access_enabled, cache_warmup_enabled, commenting_enabled,
-                    extract_encryption_mode, request_access_enabled, run_now_enabled, tier_explorer_capacity,
-                    tier_creator_capacity, tier_viewer_capacity, data_alerts_enabled, commenting_mentions_enabled,
-                    catalog_obfuscation_enabled, flow_auto_save_enabled, web_extraction_enabled,
-                    metrics_content_type_enabled, notify_site_admins_on_throttle, authoring_enabled,
-                    custom_subscription_email_enabled, custom_subscription_email, custom_subscription_footer_enabled,
-                    custom_subscription_footer, ask_data_mode, named_sharing_enabled, mobile_biometrics_enabled,
-                    sheet_image_enabled, derived_permissions_enabled, user_visibility_mode, use_default_time_zone,
-                    time_zone, auto_suspend_refresh_enabled, auto_suspend_refresh_inactivity_window):
+    def _set_values(
+        self,
+        id,
+        name,
+        content_url,
+        status_reason,
+        admin_mode,
+        state,
+        subscribe_others_enabled,
+        disable_subscriptions,
+        revision_history_enabled,
+        user_quota,
+        storage_quota,
+        revision_limit,
+        num_users,
+        storage,
+        data_acceleration_mode,
+        flows_enabled,
+        cataloging_enabled,
+        editing_flows_enabled,
+        scheduling_flows_enabled,
+        allow_subscription_attachments,
+        guest_access_enabled,
+        cache_warmup_enabled,
+        commenting_enabled,
+        extract_encryption_mode,
+        request_access_enabled,
+        run_now_enabled,
+        tier_explorer_capacity,
+        tier_creator_capacity,
+        tier_viewer_capacity,
+        data_alerts_enabled,
+        commenting_mentions_enabled,
+        catalog_obfuscation_enabled,
+        flow_auto_save_enabled,
+        web_extraction_enabled,
+        metrics_content_type_enabled,
+        notify_site_admins_on_throttle,
+        authoring_enabled,
+        custom_subscription_email_enabled,
+        custom_subscription_email,
+        custom_subscription_footer_enabled,
+        custom_subscription_footer,
+        ask_data_mode,
+        named_sharing_enabled,
+        mobile_biometrics_enabled,
+        sheet_image_enabled,
+        derived_permissions_enabled,
+        user_visibility_mode,
+        use_default_time_zone,
+        time_zone,
+        auto_suspend_refresh_enabled,
+        auto_suspend_refresh_inactivity_window,
+    ):
         if id is not None:
             self._id = id
         if name:
@@ -648,133 +808,252 @@ class SiteItem(object):
     def from_response(cls, resp, ns):
         all_site_items = list()
         parsed_response = ET.fromstring(resp)
-        all_site_xml = parsed_response.findall('.//t:site', namespaces=ns)
+        all_site_xml = parsed_response.findall(".//t:site", namespaces=ns)
         for site_xml in all_site_xml:
-            (id, name, content_url, status_reason, admin_mode, state, subscribe_others_enabled,
-                disable_subscriptions, revision_history_enabled, user_quota, storage_quota,
-                revision_limit, num_users, storage, data_acceleration_mode, flows_enabled, cataloging_enabled,
-                editing_flows_enabled, scheduling_flows_enabled, allow_subscription_attachments, guest_access_enabled,
-                cache_warmup_enabled, commenting_enabled, extract_encryption_mode, request_access_enabled,
-                run_now_enabled, tier_explorer_capacity, tier_creator_capacity, tier_viewer_capacity,
-                data_alerts_enabled, commenting_mentions_enabled, catalog_obfuscation_enabled, flow_auto_save_enabled,
-                web_extraction_enabled, metrics_content_type_enabled, notify_site_admins_on_throttle,
-                authoring_enabled, custom_subscription_email_enabled, custom_subscription_email,
-                custom_subscription_footer_enabled, custom_subscription_footer, ask_data_mode, named_sharing_enabled,
-                mobile_biometrics_enabled, sheet_image_enabled, derived_permissions_enabled, user_visibility_mode,
-                use_default_time_zone, time_zone, auto_suspend_refresh_enabled,
-                auto_suspend_refresh_inactivity_window) = cls._parse_element(site_xml, ns)
+            (
+                id,
+                name,
+                content_url,
+                status_reason,
+                admin_mode,
+                state,
+                subscribe_others_enabled,
+                disable_subscriptions,
+                revision_history_enabled,
+                user_quota,
+                storage_quota,
+                revision_limit,
+                num_users,
+                storage,
+                data_acceleration_mode,
+                flows_enabled,
+                cataloging_enabled,
+                editing_flows_enabled,
+                scheduling_flows_enabled,
+                allow_subscription_attachments,
+                guest_access_enabled,
+                cache_warmup_enabled,
+                commenting_enabled,
+                extract_encryption_mode,
+                request_access_enabled,
+                run_now_enabled,
+                tier_explorer_capacity,
+                tier_creator_capacity,
+                tier_viewer_capacity,
+                data_alerts_enabled,
+                commenting_mentions_enabled,
+                catalog_obfuscation_enabled,
+                flow_auto_save_enabled,
+                web_extraction_enabled,
+                metrics_content_type_enabled,
+                notify_site_admins_on_throttle,
+                authoring_enabled,
+                custom_subscription_email_enabled,
+                custom_subscription_email,
+                custom_subscription_footer_enabled,
+                custom_subscription_footer,
+                ask_data_mode,
+                named_sharing_enabled,
+                mobile_biometrics_enabled,
+                sheet_image_enabled,
+                derived_permissions_enabled,
+                user_visibility_mode,
+                use_default_time_zone,
+                time_zone,
+                auto_suspend_refresh_enabled,
+                auto_suspend_refresh_inactivity_window,
+            ) = cls._parse_element(site_xml, ns)
 
             site_item = cls(name, content_url)
-            site_item._set_values(id, name, content_url, status_reason, admin_mode, state, subscribe_others_enabled,
-                                  disable_subscriptions, revision_history_enabled, user_quota, storage_quota,
-                                  revision_limit, num_users, storage, data_acceleration_mode, flows_enabled,
-                                  cataloging_enabled, editing_flows_enabled, scheduling_flows_enabled,
-                                  allow_subscription_attachments, guest_access_enabled, cache_warmup_enabled,
-                                  commenting_enabled, extract_encryption_mode, request_access_enabled, run_now_enabled,
-                                  tier_explorer_capacity, tier_creator_capacity, tier_viewer_capacity,
-                                  data_alerts_enabled, commenting_mentions_enabled, catalog_obfuscation_enabled,
-                                  flow_auto_save_enabled, web_extraction_enabled, metrics_content_type_enabled,
-                                  notify_site_admins_on_throttle, authoring_enabled, custom_subscription_email_enabled,
-                                  custom_subscription_email, custom_subscription_footer_enabled,
-                                  custom_subscription_footer, ask_data_mode, named_sharing_enabled,
-                                  mobile_biometrics_enabled, sheet_image_enabled, derived_permissions_enabled,
-                                  user_visibility_mode, use_default_time_zone, time_zone, auto_suspend_refresh_enabled,
-                                  auto_suspend_refresh_inactivity_window)
+            site_item._set_values(
+                id,
+                name,
+                content_url,
+                status_reason,
+                admin_mode,
+                state,
+                subscribe_others_enabled,
+                disable_subscriptions,
+                revision_history_enabled,
+                user_quota,
+                storage_quota,
+                revision_limit,
+                num_users,
+                storage,
+                data_acceleration_mode,
+                flows_enabled,
+                cataloging_enabled,
+                editing_flows_enabled,
+                scheduling_flows_enabled,
+                allow_subscription_attachments,
+                guest_access_enabled,
+                cache_warmup_enabled,
+                commenting_enabled,
+                extract_encryption_mode,
+                request_access_enabled,
+                run_now_enabled,
+                tier_explorer_capacity,
+                tier_creator_capacity,
+                tier_viewer_capacity,
+                data_alerts_enabled,
+                commenting_mentions_enabled,
+                catalog_obfuscation_enabled,
+                flow_auto_save_enabled,
+                web_extraction_enabled,
+                metrics_content_type_enabled,
+                notify_site_admins_on_throttle,
+                authoring_enabled,
+                custom_subscription_email_enabled,
+                custom_subscription_email,
+                custom_subscription_footer_enabled,
+                custom_subscription_footer,
+                ask_data_mode,
+                named_sharing_enabled,
+                mobile_biometrics_enabled,
+                sheet_image_enabled,
+                derived_permissions_enabled,
+                user_visibility_mode,
+                use_default_time_zone,
+                time_zone,
+                auto_suspend_refresh_enabled,
+                auto_suspend_refresh_inactivity_window,
+            )
             all_site_items.append(site_item)
         return all_site_items
 
     @staticmethod
     def _parse_element(site_xml, ns):
-        id = site_xml.get('id', None)
-        name = site_xml.get('name', None)
-        content_url = site_xml.get('contentUrl', None)
-        status_reason = site_xml.get('statusReason', None)
-        admin_mode = site_xml.get('adminMode', None)
-        state = site_xml.get('state', None)
-        subscribe_others_enabled = string_to_bool(site_xml.get('subscribeOthersEnabled', ''))
-        disable_subscriptions = string_to_bool(site_xml.get('disableSubscriptions', ''))
-        revision_history_enabled = string_to_bool(site_xml.get('revisionHistoryEnabled', ''))
-        editing_flows_enabled = string_to_bool(site_xml.get('editingFlowsEnabled', ''))
-        scheduling_flows_enabled = string_to_bool(site_xml.get('schedulingFlowsEnabled', ''))
-        allow_subscription_attachments = string_to_bool(site_xml.get('allowSubscriptionAttachments', ''))
-        guest_access_enabled = string_to_bool(site_xml.get('guestAccessEnabled', ''))
-        cache_warmup_enabled = string_to_bool(site_xml.get('cacheWarmupEnabled', ''))
-        commenting_enabled = string_to_bool(site_xml.get('commentingEnabled', ''))
-        extract_encryption_mode = site_xml.get('extractEncryptionMode', None)
-        request_access_enabled = string_to_bool(site_xml.get('requestAccessEnabled', ''))
-        run_now_enabled = string_to_bool(site_xml.get('runNowEnabled', ''))
-        tier_explorer_capacity = site_xml.get('tierExplorerCapacity', None)
+        id = site_xml.get("id", None)
+        name = site_xml.get("name", None)
+        content_url = site_xml.get("contentUrl", None)
+        status_reason = site_xml.get("statusReason", None)
+        admin_mode = site_xml.get("adminMode", None)
+        state = site_xml.get("state", None)
+        subscribe_others_enabled = string_to_bool(site_xml.get("subscribeOthersEnabled", ""))
+        disable_subscriptions = string_to_bool(site_xml.get("disableSubscriptions", ""))
+        revision_history_enabled = string_to_bool(site_xml.get("revisionHistoryEnabled", ""))
+        editing_flows_enabled = string_to_bool(site_xml.get("editingFlowsEnabled", ""))
+        scheduling_flows_enabled = string_to_bool(site_xml.get("schedulingFlowsEnabled", ""))
+        allow_subscription_attachments = string_to_bool(site_xml.get("allowSubscriptionAttachments", ""))
+        guest_access_enabled = string_to_bool(site_xml.get("guestAccessEnabled", ""))
+        cache_warmup_enabled = string_to_bool(site_xml.get("cacheWarmupEnabled", ""))
+        commenting_enabled = string_to_bool(site_xml.get("commentingEnabled", ""))
+        extract_encryption_mode = site_xml.get("extractEncryptionMode", None)
+        request_access_enabled = string_to_bool(site_xml.get("requestAccessEnabled", ""))
+        run_now_enabled = string_to_bool(site_xml.get("runNowEnabled", ""))
+        tier_explorer_capacity = site_xml.get("tierExplorerCapacity", None)
         if tier_explorer_capacity:
             tier_explorer_capacity = int(tier_explorer_capacity)
-        tier_creator_capacity = site_xml.get('tierCreatorCapacity', None)
+        tier_creator_capacity = site_xml.get("tierCreatorCapacity", None)
         if tier_creator_capacity:
             tier_creator_capacity = int(tier_creator_capacity)
-        tier_viewer_capacity = site_xml.get('tierViewerCapacity', None)
+        tier_viewer_capacity = site_xml.get("tierViewerCapacity", None)
         if tier_viewer_capacity:
             tier_viewer_capacity = int(tier_viewer_capacity)
-        data_alerts_enabled = string_to_bool(site_xml.get('dataAlertsEnabled', ''))
-        commenting_mentions_enabled = string_to_bool(site_xml.get('commentingMentionsEnabled', ''))
-        catalog_obfuscation_enabled = string_to_bool(site_xml.get('catalogObfuscationEnabled', ''))
-        flow_auto_save_enabled = string_to_bool(site_xml.get('flowAutoSaveEnabled', ''))
-        web_extraction_enabled = string_to_bool(site_xml.get('webExtractionEnabled', ''))
-        metrics_content_type_enabled = string_to_bool(site_xml.get('metricsContentTypeEnabled', ''))
-        notify_site_admins_on_throttle = string_to_bool(site_xml.get('notifySiteAdminsOnThrottle', ''))
-        authoring_enabled = string_to_bool(site_xml.get('authoringEnabled', ''))
-        custom_subscription_email_enabled = string_to_bool(site_xml.get('customSubscriptionEmailEnabled', ''))
-        custom_subscription_email = site_xml.get('customSubscriptionEmail', None)
-        custom_subscription_footer_enabled = string_to_bool(site_xml.get('customSubscriptionFooterEnabled', ''))
-        custom_subscription_footer = site_xml.get('customSubscriptionFooter', None)
-        ask_data_mode = site_xml.get('askDataMode', None)
-        named_sharing_enabled = string_to_bool(site_xml.get('namedSharingEnabled', ''))
-        mobile_biometrics_enabled = string_to_bool(site_xml.get('mobileBiometricsEnabled', ''))
-        sheet_image_enabled = string_to_bool(site_xml.get('sheetImageEnabled', ''))
-        derived_permissions_enabled = string_to_bool(site_xml.get('derivedPermissionsEnabled', ''))
-        user_visibility_mode = site_xml.get('userVisibilityMode', '')
-        use_default_time_zone = string_to_bool(site_xml.get('useDefaultTimeZone', ''))
-        time_zone = site_xml.get('timeZone', None)
-        auto_suspend_refresh_enabled = string_to_bool(site_xml.get('autoSuspendRefreshEnabled', ''))
-        auto_suspend_refresh_inactivity_window = site_xml.get('autoSuspendRefreshInactivityWindow', None)
+        data_alerts_enabled = string_to_bool(site_xml.get("dataAlertsEnabled", ""))
+        commenting_mentions_enabled = string_to_bool(site_xml.get("commentingMentionsEnabled", ""))
+        catalog_obfuscation_enabled = string_to_bool(site_xml.get("catalogObfuscationEnabled", ""))
+        flow_auto_save_enabled = string_to_bool(site_xml.get("flowAutoSaveEnabled", ""))
+        web_extraction_enabled = string_to_bool(site_xml.get("webExtractionEnabled", ""))
+        metrics_content_type_enabled = string_to_bool(site_xml.get("metricsContentTypeEnabled", ""))
+        notify_site_admins_on_throttle = string_to_bool(site_xml.get("notifySiteAdminsOnThrottle", ""))
+        authoring_enabled = string_to_bool(site_xml.get("authoringEnabled", ""))
+        custom_subscription_email_enabled = string_to_bool(site_xml.get("customSubscriptionEmailEnabled", ""))
+        custom_subscription_email = site_xml.get("customSubscriptionEmail", None)
+        custom_subscription_footer_enabled = string_to_bool(site_xml.get("customSubscriptionFooterEnabled", ""))
+        custom_subscription_footer = site_xml.get("customSubscriptionFooter", None)
+        ask_data_mode = site_xml.get("askDataMode", None)
+        named_sharing_enabled = string_to_bool(site_xml.get("namedSharingEnabled", ""))
+        mobile_biometrics_enabled = string_to_bool(site_xml.get("mobileBiometricsEnabled", ""))
+        sheet_image_enabled = string_to_bool(site_xml.get("sheetImageEnabled", ""))
+        derived_permissions_enabled = string_to_bool(site_xml.get("derivedPermissionsEnabled", ""))
+        user_visibility_mode = site_xml.get("userVisibilityMode", "")
+        use_default_time_zone = string_to_bool(site_xml.get("useDefaultTimeZone", ""))
+        time_zone = site_xml.get("timeZone", None)
+        auto_suspend_refresh_enabled = string_to_bool(site_xml.get("autoSuspendRefreshEnabled", ""))
+        auto_suspend_refresh_inactivity_window = site_xml.get("autoSuspendRefreshInactivityWindow", None)
         if auto_suspend_refresh_inactivity_window:
             auto_suspend_refresh_inactivity_window = int(auto_suspend_refresh_inactivity_window)
 
-        user_quota = site_xml.get('userQuota', None)
+        user_quota = site_xml.get("userQuota", None)
         if user_quota:
             user_quota = int(user_quota)
 
-        storage_quota = site_xml.get('storageQuota', None)
+        storage_quota = site_xml.get("storageQuota", None)
         if storage_quota:
             storage_quota = int(storage_quota)
 
-        revision_limit = site_xml.get('revisionLimit', None)
+        revision_limit = site_xml.get("revisionLimit", None)
         if revision_limit:
             revision_limit = int(revision_limit)
 
         num_users = None
         storage = None
-        usage_elem = site_xml.find('.//t:usage', namespaces=ns)
+        usage_elem = site_xml.find(".//t:usage", namespaces=ns)
         if usage_elem is not None:
-            num_users = usage_elem.get('numUsers', None)
-            storage = usage_elem.get('storage', None)
+            num_users = usage_elem.get("numUsers", None)
+            storage = usage_elem.get("storage", None)
 
-        data_acceleration_mode = site_xml.get('dataAccelerationMode', '')
+        data_acceleration_mode = site_xml.get("dataAccelerationMode", "")
 
-        flows_enabled = string_to_bool(site_xml.get('flowsEnabled', ''))
-        cataloging_enabled = string_to_bool(site_xml.get('catalogingEnabled', ''))
+        flows_enabled = string_to_bool(site_xml.get("flowsEnabled", ""))
+        cataloging_enabled = string_to_bool(site_xml.get("catalogingEnabled", ""))
 
-        return id, name, content_url, status_reason, admin_mode, state, subscribe_others_enabled,\
-            disable_subscriptions, revision_history_enabled, user_quota, storage_quota,\
-            revision_limit, num_users, storage, data_acceleration_mode, flows_enabled, cataloging_enabled,\
-            editing_flows_enabled, scheduling_flows_enabled, allow_subscription_attachments, guest_access_enabled,\
-            cache_warmup_enabled, commenting_enabled, extract_encryption_mode, request_access_enabled, run_now_enabled,\
-            tier_explorer_capacity, tier_creator_capacity, tier_viewer_capacity, data_alerts_enabled,\
-            commenting_mentions_enabled, catalog_obfuscation_enabled, flow_auto_save_enabled, web_extraction_enabled,\
-            metrics_content_type_enabled, notify_site_admins_on_throttle, authoring_enabled,\
-            custom_subscription_email_enabled, custom_subscription_email, custom_subscription_footer_enabled,\
-            custom_subscription_footer, ask_data_mode, named_sharing_enabled, mobile_biometrics_enabled,\
-            sheet_image_enabled, derived_permissions_enabled, user_visibility_mode, use_default_time_zone, time_zone,\
-            auto_suspend_refresh_enabled, auto_suspend_refresh_inactivity_window
+        return (
+            id,
+            name,
+            content_url,
+            status_reason,
+            admin_mode,
+            state,
+            subscribe_others_enabled,
+            disable_subscriptions,
+            revision_history_enabled,
+            user_quota,
+            storage_quota,
+            revision_limit,
+            num_users,
+            storage,
+            data_acceleration_mode,
+            flows_enabled,
+            cataloging_enabled,
+            editing_flows_enabled,
+            scheduling_flows_enabled,
+            allow_subscription_attachments,
+            guest_access_enabled,
+            cache_warmup_enabled,
+            commenting_enabled,
+            extract_encryption_mode,
+            request_access_enabled,
+            run_now_enabled,
+            tier_explorer_capacity,
+            tier_creator_capacity,
+            tier_viewer_capacity,
+            data_alerts_enabled,
+            commenting_mentions_enabled,
+            catalog_obfuscation_enabled,
+            flow_auto_save_enabled,
+            web_extraction_enabled,
+            metrics_content_type_enabled,
+            notify_site_admins_on_throttle,
+            authoring_enabled,
+            custom_subscription_email_enabled,
+            custom_subscription_email,
+            custom_subscription_footer_enabled,
+            custom_subscription_footer,
+            ask_data_mode,
+            named_sharing_enabled,
+            mobile_biometrics_enabled,
+            sheet_image_enabled,
+            derived_permissions_enabled,
+            user_visibility_mode,
+            use_default_time_zone,
+            time_zone,
+            auto_suspend_refresh_enabled,
+            auto_suspend_refresh_inactivity_window,
+        )
 
 
 # Used to convert string represented boolean to a boolean type
 def string_to_bool(s):
-    return s.lower() == 'true'
+    return s.lower() == "true"
