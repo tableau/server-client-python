@@ -25,13 +25,10 @@ jobs:
         pip install -e .[test]
         pip install mypy
 
-    - name: Lint with pycodestyle
-      run: |
-        pycodestyle tableauserverclient test samples
-
     - name: Test with pytest
       run: |
         pytest test
+
     - name: Run Mypy but allow failures
       run: |
         mypy --show-error-codes --disable-error-code misc tableauserverclient
