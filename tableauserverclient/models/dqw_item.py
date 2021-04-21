@@ -7,7 +7,7 @@ class DQWItem(object):
     def __init__(self, warning_type="WARNING", message=None, active=True, severe=False):
         self.id = None
         # content related
-        self.content_ID = None
+        self.content_id = None
         self.content_type = None
 
         # DQW related
@@ -20,7 +20,7 @@ class DQWItem(object):
 
         # owner
         self.owner_display_name = None
-        self.owner = None
+        self.owner_id = None
 
     @classmethod
     def from_response(cls, resp, ns):
@@ -34,7 +34,7 @@ class DQWItem(object):
             dqw = DQWItem()
             dqw.id = dqw_elem.get('id', None)
             dqw.owner_display_name = dqw_elem.get('userDisplayName', None)
-            dqw.content_ID = dqw_elem.get('contentId', None)
+            dqw.content_id = dqw_elem.get('contentId', None)
             dqw.content_type = dqw_elem.get('contentType', None)
             dqw.message = dqw_elem.get('message', None)
             dqw.warning_type = dqw_elem.get('type', None)
@@ -49,7 +49,13 @@ class DQWItem(object):
 
             dqw.created_at = parse_datetime(dqw_elem.get('createdAt', None))
             dqw.updated_at = parse_datetime(dqw_elem.get('updatedAt', None))
-            
+
+            owner_id = None
+            owner_tag = dqw_elem.find('.//t:owner', namespaces=ns)
+            if owner_tag is not None:
+                owner_id = owner_tag.get('id', None)
+            dqw.owner_id = owner_id
+
             all_dqws.append(dqw)
 
         return all_dqws

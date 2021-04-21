@@ -26,7 +26,7 @@ class _DQWEndpoint(Endpoint):
     def baseurl(self):
         return "{0}/sites/{1}/dataQualityWarnings/{2}".format(self.parent_srv.baseurl, self.parent_srv.site_id, self.resource_type)
 
-    def update(self, resource, warning):
+    def add(self, resource, warning):
         url = '{baseurl}/{content_luid}'.format(baseurl=self.baseurl, content_luid=resource.id)
         add_req = RequestFactory.DQW.add_req(warning)
         response = self.post_request(url, add_req)
@@ -36,8 +36,18 @@ class _DQWEndpoint(Endpoint):
 
         return warnings
 
-    def delete(self, resource, warning):
-        url = '/{content_luid}'.format(content_luid=resource.id)
+    def update(self, resource, warning):
+        url = '{baseurl}/{content_luid}'.format(baseurl=self.baseurl, content_luid=resource.id)
+        add_req = RequestFactory.DQW.add_req(warning)
+        response = self.put_request(url, add_req)
+        warnings = DQWItem.from_response(response.content,
+                                                    self.parent_srv.namespace)
+        logger.info('Added dqw for resource {0}'.format(resource.id))
+
+        return warnings
+
+    def clear(self, resource):
+        url = '{baseurl}/{content_luid}'.format(baseurl=self.baseurl, content_luid=resource.id)
         return self.delete_request(url)
 
     def populate(self, item):
