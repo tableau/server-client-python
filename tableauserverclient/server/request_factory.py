@@ -46,9 +46,7 @@ def _add_credentials_element(parent_element, connection_credentials):
     credentials_element = ET.SubElement(parent_element, "connectionCredentials")
     credentials_element.attrib["name"] = connection_credentials.name
     credentials_element.attrib["password"] = connection_credentials.password
-    credentials_element.attrib["embed"] = (
-        "true" if connection_credentials.embed else "false"
-    )
+    credentials_element.attrib["embed"] = "true" if connection_credentials.embed else "false"
     if connection_credentials.oauth:
         credentials_element.attrib["oAuth"] = "true"
 
@@ -120,9 +118,7 @@ class DatabaseRequest(object):
         database_element.attrib["isCertified"] = str(database_item.certified).lower()
 
         if database_item.certification_note:
-            database_element.attrib["certificationNote"] = str(
-                database_item.certification_note
-            )
+            database_element.attrib["certificationNote"] = str(database_item.certification_note)
 
         if database_item.description:
             database_element.attrib["description"] = str(database_item.description)
@@ -131,18 +127,14 @@ class DatabaseRequest(object):
 
 
 class DatasourceRequest(object):
-    def _generate_xml(
-        self, datasource_item, connection_credentials=None, connections=None
-    ):
+    def _generate_xml(self, datasource_item, connection_credentials=None, connections=None):
         xml_request = ET.Element("tsRequest")
         datasource_element = ET.SubElement(xml_request, "datasource")
         datasource_element.attrib["name"] = datasource_item.name
         if datasource_item.description:
             datasource_element.attrib["description"] = str(datasource_item.description)
         if datasource_item.use_remote_query_agent is not None:
-            datasource_element.attrib["useRemoteQueryAgent"] = str(
-                datasource_item.use_remote_query_agent
-            ).lower()
+            datasource_element.attrib["useRemoteQueryAgent"] = str(datasource_item.use_remote_query_agent).lower()
 
         if datasource_item.ask_data_enablement:
             ask_data_element = ET.SubElement(datasource_element, "askData")
@@ -152,9 +144,7 @@ class DatasourceRequest(object):
         project_element.attrib["id"] = datasource_item.project_id
 
         if connection_credentials is not None and connections is not None:
-            raise RuntimeError(
-                "You cannot set both `connections` and `connection_credentials`"
-            )
+            raise RuntimeError("You cannot set both `connections` and `connection_credentials`")
 
         if connection_credentials is not None:
             _add_credentials_element(datasource_element, connection_credentials)
@@ -178,18 +168,12 @@ class DatasourceRequest(object):
             owner_element = ET.SubElement(datasource_element, "owner")
             owner_element.attrib["id"] = datasource_item.owner_id
 
-        datasource_element.attrib["isCertified"] = str(
-            datasource_item.certified
-        ).lower()
+        datasource_element.attrib["isCertified"] = str(datasource_item.certified).lower()
 
         if datasource_item.certification_note:
-            datasource_element.attrib["certificationNote"] = str(
-                datasource_item.certification_note
-            )
+            datasource_element.attrib["certificationNote"] = str(datasource_item.certification_note)
         if datasource_item.encrypt_extracts is not None:
-            datasource_element.attrib["encryptExtracts"] = str(
-                datasource_item.encrypt_extracts
-            ).lower()
+            datasource_element.attrib["encryptExtracts"] = str(datasource_item.encrypt_extracts).lower()
 
         return ET.tostring(xml_request)
 
@@ -201,9 +185,7 @@ class DatasourceRequest(object):
         connection_credentials=None,
         connections=None,
     ):
-        xml_request = self._generate_xml(
-            datasource_item, connection_credentials, connections
-        )
+        xml_request = self._generate_xml(datasource_item, connection_credentials, connections)
 
         parts = {
             "request_payload": ("", xml_request, "text/xml"),
@@ -211,12 +193,8 @@ class DatasourceRequest(object):
         }
         return _add_multipart(parts)
 
-    def publish_req_chunked(
-        self, datasource_item, connection_credentials=None, connections=None
-    ):
-        xml_request = self._generate_xml(
-            datasource_item, connection_credentials, connections
-        )
+    def publish_req_chunked(self, datasource_item, connection_credentials=None, connections=None):
+        xml_request = self._generate_xml(datasource_item, connection_credentials, connections)
 
         parts = {"request_payload": ("", xml_request, "text/xml")}
         return _add_multipart(parts)
@@ -431,17 +409,11 @@ class PermissionRequest(object):
         permissions_element = ET.SubElement(xml_request, "permissions")
 
         for rule in rules:
-            grantee_capabilities_element = ET.SubElement(
-                permissions_element, "granteeCapabilities"
-            )
-            grantee_element = ET.SubElement(
-                grantee_capabilities_element, rule.grantee.tag_name
-            )
+            grantee_capabilities_element = ET.SubElement(permissions_element, "granteeCapabilities")
+            grantee_element = ET.SubElement(grantee_capabilities_element, rule.grantee.tag_name)
             grantee_element.attrib["id"] = rule.grantee.id
 
-            capabilities_element = ET.SubElement(
-                grantee_capabilities_element, "capabilities"
-            )
+            capabilities_element = ET.SubElement(grantee_capabilities_element, "capabilities")
             self._add_all_capabilities(capabilities_element, rule.capabilities)
 
         return ET.tostring(xml_request)
@@ -462,9 +434,7 @@ class ProjectRequest(object):
         if project_item.description:
             project_element.attrib["description"] = project_item.description
         if project_item.content_permissions:
-            project_element.attrib[
-                "contentPermissions"
-            ] = project_item.content_permissions
+            project_element.attrib["contentPermissions"] = project_item.content_permissions
         if project_item.parent_id is not None:
             project_element.attrib["parentProjectId"] = project_item.parent_id
         return ET.tostring(xml_request)
@@ -476,9 +446,7 @@ class ProjectRequest(object):
         if project_item.description:
             project_element.attrib["description"] = project_item.description
         if project_item.content_permissions:
-            project_element.attrib[
-                "contentPermissions"
-            ] = project_item.content_permissions
+            project_element.attrib["contentPermissions"] = project_item.content_permissions
         if project_item.parent_id:
             project_element.attrib["parentProjectId"] = project_item.parent_id
         return ET.tostring(xml_request)
@@ -524,18 +492,13 @@ class ScheduleRequest(object):
                 schedule_element.attrib["frequency"] = interval_item._frequency
             frequency_element = ET.SubElement(schedule_element, "frequencyDetails")
             frequency_element.attrib["start"] = str(interval_item.start_time)
-            if (
-                hasattr(interval_item, "end_time")
-                and interval_item.end_time is not None
-            ):
+            if hasattr(interval_item, "end_time") and interval_item.end_time is not None:
                 frequency_element.attrib["end"] = str(interval_item.end_time)
             intervals_element = ET.SubElement(frequency_element, "intervals")
             if hasattr(interval_item, "interval"):
                 for interval in interval_item._interval_type_pairs():
                     (expression, value) = interval
-                    single_interval_element = ET.SubElement(
-                        intervals_element, "interval"
-                    )
+                    single_interval_element = ET.SubElement(intervals_element, "interval")
                     single_interval_element.attrib[expression] = value
         return ET.tostring(xml_request)
 
@@ -580,157 +543,89 @@ class SiteRequest(object):
         if site_item.storage_quota:
             site_element.attrib["storageQuota"] = str(site_item.storage_quota)
         if site_item.disable_subscriptions is not None:
-            site_element.attrib["disableSubscriptions"] = str(
-                site_item.disable_subscriptions
-            ).lower()
+            site_element.attrib["disableSubscriptions"] = str(site_item.disable_subscriptions).lower()
         if site_item.subscribe_others_enabled is not None:
-            site_element.attrib["subscribeOthersEnabled"] = str(
-                site_item.subscribe_others_enabled
-            ).lower()
+            site_element.attrib["subscribeOthersEnabled"] = str(site_item.subscribe_others_enabled).lower()
         if site_item.revision_limit:
             site_element.attrib["revisionLimit"] = str(site_item.revision_limit)
         if site_item.revision_history_enabled is not None:
-            site_element.attrib["revisionHistoryEnabled"] = str(
-                site_item.revision_history_enabled
-            ).lower()
+            site_element.attrib["revisionHistoryEnabled"] = str(site_item.revision_history_enabled).lower()
         if site_item.data_acceleration_mode is not None:
-            site_element.attrib["dataAccelerationMode"] = str(
-                site_item.data_acceleration_mode
-            ).lower()
+            site_element.attrib["dataAccelerationMode"] = str(site_item.data_acceleration_mode).lower()
         if site_item.flows_enabled is not None:
             site_element.attrib["flowsEnabled"] = str(site_item.flows_enabled).lower()
         if site_item.cataloging_enabled is not None:
-            site_element.attrib["catalogingEnabled"] = str(
-                site_item.cataloging_enabled
-            ).lower()
+            site_element.attrib["catalogingEnabled"] = str(site_item.cataloging_enabled).lower()
         if site_item.editing_flows_enabled is not None:
-            site_element.attrib["editingFlowsEnabled"] = str(
-                site_item.editing_flows_enabled
-            ).lower()
+            site_element.attrib["editingFlowsEnabled"] = str(site_item.editing_flows_enabled).lower()
         if site_item.scheduling_flows_enabled is not None:
-            site_element.attrib["schedulingFlowsEnabled"] = str(
-                site_item.scheduling_flows_enabled
-            ).lower()
+            site_element.attrib["schedulingFlowsEnabled"] = str(site_item.scheduling_flows_enabled).lower()
         if site_item.allow_subscription_attachments is not None:
-            site_element.attrib["allowSubscriptionAttachments"] = str(
-                site_item.allow_subscription_attachments
-            ).lower()
+            site_element.attrib["allowSubscriptionAttachments"] = str(site_item.allow_subscription_attachments).lower()
         if site_item.guest_access_enabled is not None:
-            site_element.attrib["guestAccessEnabled"] = str(
-                site_item.guest_access_enabled
-            ).lower()
+            site_element.attrib["guestAccessEnabled"] = str(site_item.guest_access_enabled).lower()
         if site_item.cache_warmup_enabled is not None:
-            site_element.attrib["cacheWarmupEnabled"] = str(
-                site_item.cache_warmup_enabled
-            ).lower()
+            site_element.attrib["cacheWarmupEnabled"] = str(site_item.cache_warmup_enabled).lower()
         if site_item.commenting_enabled is not None:
-            site_element.attrib["commentingEnabled"] = str(
-                site_item.commenting_enabled
-            ).lower()
+            site_element.attrib["commentingEnabled"] = str(site_item.commenting_enabled).lower()
         if site_item.extract_encryption_mode is not None:
-            site_element.attrib["extractEncryptionMode"] = str(
-                site_item.extract_encryption_mode
-            ).lower()
+            site_element.attrib["extractEncryptionMode"] = str(site_item.extract_encryption_mode).lower()
         if site_item.request_access_enabled is not None:
-            site_element.attrib["requestAccessEnabled"] = str(
-                site_item.request_access_enabled
-            ).lower()
+            site_element.attrib["requestAccessEnabled"] = str(site_item.request_access_enabled).lower()
         if site_item.run_now_enabled is not None:
-            site_element.attrib["runNowEnabled"] = str(
-                site_item.run_now_enabled
-            ).lower()
+            site_element.attrib["runNowEnabled"] = str(site_item.run_now_enabled).lower()
         if site_item.tier_creator_capacity is not None:
-            site_element.attrib["tierCreatorCapacity"] = str(
-                site_item.tier_creator_capacity
-            ).lower()
+            site_element.attrib["tierCreatorCapacity"] = str(site_item.tier_creator_capacity).lower()
         if site_item.tier_explorer_capacity is not None:
-            site_element.attrib["tierExplorerCapacity"] = str(
-                site_item.tier_explorer_capacity
-            ).lower()
+            site_element.attrib["tierExplorerCapacity"] = str(site_item.tier_explorer_capacity).lower()
         if site_item.tier_viewer_capacity is not None:
-            site_element.attrib["tierViewerCapacity"] = str(
-                site_item.tier_viewer_capacity
-            ).lower()
+            site_element.attrib["tierViewerCapacity"] = str(site_item.tier_viewer_capacity).lower()
         if site_item.data_alerts_enabled is not None:
-            site_element.attrib["dataAlertsEnabled"] = str(
-                site_item.data_alerts_enabled
-            )
+            site_element.attrib["dataAlertsEnabled"] = str(site_item.data_alerts_enabled)
         if site_item.commenting_mentions_enabled is not None:
-            site_element.attrib["commentingMentionsEnabled"] = str(
-                site_item.commenting_mentions_enabled
-            ).lower()
+            site_element.attrib["commentingMentionsEnabled"] = str(site_item.commenting_mentions_enabled).lower()
         if site_item.catalog_obfuscation_enabled is not None:
-            site_element.attrib["catalogObfuscationEnabled"] = str(
-                site_item.catalog_obfuscation_enabled
-            ).lower()
+            site_element.attrib["catalogObfuscationEnabled"] = str(site_item.catalog_obfuscation_enabled).lower()
         if site_item.flow_auto_save_enabled is not None:
-            site_element.attrib["flowAutoSaveEnabled"] = str(
-                site_item.flow_auto_save_enabled
-            ).lower()
+            site_element.attrib["flowAutoSaveEnabled"] = str(site_item.flow_auto_save_enabled).lower()
         if site_item.web_extraction_enabled is not None:
-            site_element.attrib["webExtractionEnabled"] = str(
-                site_item.web_extraction_enabled
-            ).lower()
+            site_element.attrib["webExtractionEnabled"] = str(site_item.web_extraction_enabled).lower()
         if site_item.metrics_content_type_enabled is not None:
-            site_element.attrib["metricsContentTypeEnabled"] = str(
-                site_item.metrics_content_type_enabled
-            ).lower()
+            site_element.attrib["metricsContentTypeEnabled"] = str(site_item.metrics_content_type_enabled).lower()
         if site_item.notify_site_admins_on_throttle is not None:
-            site_element.attrib["notifySiteAdminsOnThrottle"] = str(
-                site_item.notify_site_admins_on_throttle
-            ).lower()
+            site_element.attrib["notifySiteAdminsOnThrottle"] = str(site_item.notify_site_admins_on_throttle).lower()
         if site_item.authoring_enabled is not None:
-            site_element.attrib["authoringEnabled"] = str(
-                site_item.authoring_enabled
-            ).lower()
+            site_element.attrib["authoringEnabled"] = str(site_item.authoring_enabled).lower()
         if site_item.custom_subscription_email_enabled is not None:
             site_element.attrib["customSubscriptionEmailEnabled"] = str(
                 site_item.custom_subscription_email_enabled
             ).lower()
         if site_item.custom_subscription_email is not None:
-            site_element.attrib["customSubscriptionEmail"] = str(
-                site_item.custom_subscription_email
-            ).lower()
+            site_element.attrib["customSubscriptionEmail"] = str(site_item.custom_subscription_email).lower()
         if site_item.custom_subscription_footer_enabled is not None:
             site_element.attrib["customSubscriptionFooterEnabled"] = str(
                 site_item.custom_subscription_footer_enabled
             ).lower()
         if site_item.custom_subscription_footer is not None:
-            site_element.attrib["customSubscriptionFooter"] = str(
-                site_item.custom_subscription_footer
-            ).lower()
+            site_element.attrib["customSubscriptionFooter"] = str(site_item.custom_subscription_footer).lower()
         if site_item.ask_data_mode is not None:
             site_element.attrib["askDataMode"] = str(site_item.ask_data_mode)
         if site_item.named_sharing_enabled is not None:
-            site_element.attrib["namedSharingEnabled"] = str(
-                site_item.named_sharing_enabled
-            ).lower()
+            site_element.attrib["namedSharingEnabled"] = str(site_item.named_sharing_enabled).lower()
         if site_item.mobile_biometrics_enabled is not None:
-            site_element.attrib["mobileBiometricsEnabled"] = str(
-                site_item.mobile_biometrics_enabled
-            ).lower()
+            site_element.attrib["mobileBiometricsEnabled"] = str(site_item.mobile_biometrics_enabled).lower()
         if site_item.sheet_image_enabled is not None:
-            site_element.attrib["sheetImageEnabled"] = str(
-                site_item.sheet_image_enabled
-            ).lower()
+            site_element.attrib["sheetImageEnabled"] = str(site_item.sheet_image_enabled).lower()
         if site_item.derived_permissions_enabled is not None:
-            site_element.attrib["derivedPermissionsEnabled"] = str(
-                site_item.derived_permissions_enabled
-            ).lower()
+            site_element.attrib["derivedPermissionsEnabled"] = str(site_item.derived_permissions_enabled).lower()
         if site_item.user_visibility_mode is not None:
-            site_element.attrib["userVisibilityMode"] = str(
-                site_item.user_visibility_mode
-            )
+            site_element.attrib["userVisibilityMode"] = str(site_item.user_visibility_mode)
         if site_item.use_default_time_zone is not None:
-            site_element.attrib["useDefaultTimeZone"] = str(
-                site_item.use_default_time_zone
-            ).lower()
+            site_element.attrib["useDefaultTimeZone"] = str(site_item.use_default_time_zone).lower()
         if site_item.time_zone is not None:
             site_element.attrib["timeZone"] = str(site_item.time_zone)
         if site_item.auto_suspend_refresh_enabled is not None:
-            site_element.attrib["autoSuspendRefreshEnabled"] = str(
-                site_item.auto_suspend_refresh_enabled
-            ).lower()
+            site_element.attrib["autoSuspendRefreshEnabled"] = str(site_item.auto_suspend_refresh_enabled).lower()
         if site_item.auto_suspend_refresh_inactivity_window is not None:
             site_element.attrib["autoSuspendRefreshInactivityWindow"] = str(
                 site_item.auto_suspend_refresh_inactivity_window
@@ -750,157 +645,89 @@ class SiteRequest(object):
         if site_item.storage_quota:
             site_element.attrib["storageQuota"] = str(site_item.storage_quota)
         if site_item.disable_subscriptions is not None:
-            site_element.attrib["disableSubscriptions"] = str(
-                site_item.disable_subscriptions
-            ).lower()
+            site_element.attrib["disableSubscriptions"] = str(site_item.disable_subscriptions).lower()
         if site_item.subscribe_others_enabled is not None:
-            site_element.attrib["subscribeOthersEnabled"] = str(
-                site_item.subscribe_others_enabled
-            ).lower()
+            site_element.attrib["subscribeOthersEnabled"] = str(site_item.subscribe_others_enabled).lower()
         if site_item.revision_limit:
             site_element.attrib["revisionLimit"] = str(site_item.revision_limit)
         if site_item.data_acceleration_mode is not None:
-            site_element.attrib["dataAccelerationMode"] = str(
-                site_item.data_acceleration_mode
-            ).lower()
+            site_element.attrib["dataAccelerationMode"] = str(site_item.data_acceleration_mode).lower()
         if site_item.flows_enabled is not None:
             site_element.attrib["flowsEnabled"] = str(site_item.flows_enabled).lower()
         if site_item.editing_flows_enabled is not None:
-            site_element.attrib["editingFlowsEnabled"] = str(
-                site_item.editing_flows_enabled
-            ).lower()
+            site_element.attrib["editingFlowsEnabled"] = str(site_item.editing_flows_enabled).lower()
         if site_item.scheduling_flows_enabled is not None:
-            site_element.attrib["schedulingFlowsEnabled"] = str(
-                site_item.scheduling_flows_enabled
-            ).lower()
+            site_element.attrib["schedulingFlowsEnabled"] = str(site_item.scheduling_flows_enabled).lower()
         if site_item.allow_subscription_attachments is not None:
-            site_element.attrib["allowSubscriptionAttachments"] = str(
-                site_item.allow_subscription_attachments
-            ).lower()
+            site_element.attrib["allowSubscriptionAttachments"] = str(site_item.allow_subscription_attachments).lower()
         if site_item.guest_access_enabled is not None:
-            site_element.attrib["guestAccessEnabled"] = str(
-                site_item.guest_access_enabled
-            ).lower()
+            site_element.attrib["guestAccessEnabled"] = str(site_item.guest_access_enabled).lower()
         if site_item.cache_warmup_enabled is not None:
-            site_element.attrib["cacheWarmupEnabled"] = str(
-                site_item.cache_warmup_enabled
-            ).lower()
+            site_element.attrib["cacheWarmupEnabled"] = str(site_item.cache_warmup_enabled).lower()
         if site_item.commenting_enabled is not None:
-            site_element.attrib["commentingEnabled"] = str(
-                site_item.commenting_enabled
-            ).lower()
+            site_element.attrib["commentingEnabled"] = str(site_item.commenting_enabled).lower()
         if site_item.revision_history_enabled is not None:
-            site_element.attrib["revisionHistoryEnabled"] = str(
-                site_item.revision_history_enabled
-            ).lower()
+            site_element.attrib["revisionHistoryEnabled"] = str(site_item.revision_history_enabled).lower()
         if site_item.extract_encryption_mode is not None:
-            site_element.attrib["extractEncryptionMode"] = str(
-                site_item.extract_encryption_mode
-            ).lower()
+            site_element.attrib["extractEncryptionMode"] = str(site_item.extract_encryption_mode).lower()
         if site_item.request_access_enabled is not None:
-            site_element.attrib["requestAccessEnabled"] = str(
-                site_item.request_access_enabled
-            ).lower()
+            site_element.attrib["requestAccessEnabled"] = str(site_item.request_access_enabled).lower()
         if site_item.run_now_enabled is not None:
-            site_element.attrib["runNowEnabled"] = str(
-                site_item.run_now_enabled
-            ).lower()
+            site_element.attrib["runNowEnabled"] = str(site_item.run_now_enabled).lower()
         if site_item.tier_creator_capacity is not None:
-            site_element.attrib["tierCreatorCapacity"] = str(
-                site_item.tier_creator_capacity
-            ).lower()
+            site_element.attrib["tierCreatorCapacity"] = str(site_item.tier_creator_capacity).lower()
         if site_item.tier_explorer_capacity is not None:
-            site_element.attrib["tierExplorerCapacity"] = str(
-                site_item.tier_explorer_capacity
-            ).lower()
+            site_element.attrib["tierExplorerCapacity"] = str(site_item.tier_explorer_capacity).lower()
         if site_item.tier_viewer_capacity is not None:
-            site_element.attrib["tierViewerCapacity"] = str(
-                site_item.tier_viewer_capacity
-            ).lower()
+            site_element.attrib["tierViewerCapacity"] = str(site_item.tier_viewer_capacity).lower()
         if site_item.data_alerts_enabled is not None:
-            site_element.attrib["dataAlertsEnabled"] = str(
-                site_item.data_alerts_enabled
-            ).lower()
+            site_element.attrib["dataAlertsEnabled"] = str(site_item.data_alerts_enabled).lower()
         if site_item.commenting_mentions_enabled is not None:
-            site_element.attrib["commentingMentionsEnabled"] = str(
-                site_item.commenting_mentions_enabled
-            ).lower()
+            site_element.attrib["commentingMentionsEnabled"] = str(site_item.commenting_mentions_enabled).lower()
         if site_item.catalog_obfuscation_enabled is not None:
-            site_element.attrib["catalogObfuscationEnabled"] = str(
-                site_item.catalog_obfuscation_enabled
-            ).lower()
+            site_element.attrib["catalogObfuscationEnabled"] = str(site_item.catalog_obfuscation_enabled).lower()
         if site_item.flow_auto_save_enabled is not None:
-            site_element.attrib["flowAutoSaveEnabled"] = str(
-                site_item.flow_auto_save_enabled
-            ).lower()
+            site_element.attrib["flowAutoSaveEnabled"] = str(site_item.flow_auto_save_enabled).lower()
         if site_item.web_extraction_enabled is not None:
-            site_element.attrib["webExtractionEnabled"] = str(
-                site_item.web_extraction_enabled
-            ).lower()
+            site_element.attrib["webExtractionEnabled"] = str(site_item.web_extraction_enabled).lower()
         if site_item.metrics_content_type_enabled is not None:
-            site_element.attrib["metricsContentTypeEnabled"] = str(
-                site_item.metrics_content_type_enabled
-            ).lower()
+            site_element.attrib["metricsContentTypeEnabled"] = str(site_item.metrics_content_type_enabled).lower()
         if site_item.notify_site_admins_on_throttle is not None:
-            site_element.attrib["notifySiteAdminsOnThrottle"] = str(
-                site_item.notify_site_admins_on_throttle
-            ).lower()
+            site_element.attrib["notifySiteAdminsOnThrottle"] = str(site_item.notify_site_admins_on_throttle).lower()
         if site_item.authoring_enabled is not None:
-            site_element.attrib["authoringEnabled"] = str(
-                site_item.authoring_enabled
-            ).lower()
+            site_element.attrib["authoringEnabled"] = str(site_item.authoring_enabled).lower()
         if site_item.custom_subscription_email_enabled is not None:
             site_element.attrib["customSubscriptionEmailEnabled"] = str(
                 site_item.custom_subscription_email_enabled
             ).lower()
         if site_item.custom_subscription_email is not None:
-            site_element.attrib["customSubscriptionEmail"] = str(
-                site_item.custom_subscription_email
-            ).lower()
+            site_element.attrib["customSubscriptionEmail"] = str(site_item.custom_subscription_email).lower()
         if site_item.custom_subscription_footer_enabled is not None:
             site_element.attrib["customSubscriptionFooterEnabled"] = str(
                 site_item.custom_subscription_footer_enabled
             ).lower()
         if site_item.custom_subscription_footer is not None:
-            site_element.attrib["customSubscriptionFooter"] = str(
-                site_item.custom_subscription_footer
-            ).lower()
+            site_element.attrib["customSubscriptionFooter"] = str(site_item.custom_subscription_footer).lower()
         if site_item.ask_data_mode is not None:
             site_element.attrib["askDataMode"] = str(site_item.ask_data_mode)
         if site_item.named_sharing_enabled is not None:
-            site_element.attrib["namedSharingEnabled"] = str(
-                site_item.named_sharing_enabled
-            ).lower()
+            site_element.attrib["namedSharingEnabled"] = str(site_item.named_sharing_enabled).lower()
         if site_item.mobile_biometrics_enabled is not None:
-            site_element.attrib["mobileBiometricsEnabled"] = str(
-                site_item.mobile_biometrics_enabled
-            ).lower()
+            site_element.attrib["mobileBiometricsEnabled"] = str(site_item.mobile_biometrics_enabled).lower()
         if site_item.sheet_image_enabled is not None:
-            site_element.attrib["sheetImageEnabled"] = str(
-                site_item.sheet_image_enabled
-            ).lower()
+            site_element.attrib["sheetImageEnabled"] = str(site_item.sheet_image_enabled).lower()
         if site_item.cataloging_enabled is not None:
-            site_element.attrib["catalogingEnabled"] = str(
-                site_item.cataloging_enabled
-            ).lower()
+            site_element.attrib["catalogingEnabled"] = str(site_item.cataloging_enabled).lower()
         if site_item.derived_permissions_enabled is not None:
-            site_element.attrib["derivedPermissionsEnabled"] = str(
-                site_item.derived_permissions_enabled
-            ).lower()
+            site_element.attrib["derivedPermissionsEnabled"] = str(site_item.derived_permissions_enabled).lower()
         if site_item.user_visibility_mode is not None:
-            site_element.attrib["userVisibilityMode"] = str(
-                site_item.user_visibility_mode
-            )
+            site_element.attrib["userVisibilityMode"] = str(site_item.user_visibility_mode)
         if site_item.use_default_time_zone is not None:
-            site_element.attrib["useDefaultTimeZone"] = str(
-                site_item.use_default_time_zone
-            ).lower()
+            site_element.attrib["useDefaultTimeZone"] = str(site_item.use_default_time_zone).lower()
         if site_item.time_zone is not None:
             site_element.attrib["timeZone"] = str(site_item.time_zone)
         if site_item.auto_suspend_refresh_enabled is not None:
-            site_element.attrib["autoSuspendRefreshEnabled"] = str(
-                site_item.auto_suspend_refresh_enabled
-            ).lower()
+            site_element.attrib["autoSuspendRefreshEnabled"] = str(site_item.auto_suspend_refresh_enabled).lower()
         if site_item.auto_suspend_refresh_inactivity_window is not None:
             site_element.attrib["autoSuspendRefreshInactivityWindow"] = str(
                 site_item.auto_suspend_refresh_inactivity_window
@@ -921,9 +748,7 @@ class TableRequest(object):
         table_element.attrib["isCertified"] = str(table_item.certified).lower()
 
         if table_item.certification_note:
-            table_element.attrib["certificationNote"] = str(
-                table_item.certification_note
-            )
+            table_element.attrib["certificationNote"] = str(table_item.certification_note)
 
         if table_item.description:
             table_element.attrib["description"] = str(table_item.description)
@@ -985,9 +810,7 @@ class WorkbookRequest(object):
         project_element.attrib["id"] = str(workbook_item.project_id)
 
         if connection_credentials is not None and connections is not None:
-            raise RuntimeError(
-                "You cannot set both `connections` and `connection_credentials`"
-            )
+            raise RuntimeError("You cannot set both `connections` and `connection_credentials`")
 
         if connection_credentials is not None:
             _add_credentials_element(workbook_element, connection_credentials)
@@ -1019,9 +842,7 @@ class WorkbookRequest(object):
             owner_element.attrib["id"] = workbook_item.owner_id
         if workbook_item.data_acceleration_config["acceleration_enabled"] is not None:
             data_acceleration_config = workbook_item.data_acceleration_config
-            data_acceleration_element = ET.SubElement(
-                workbook_element, "dataAccelerationConfig"
-            )
+            data_acceleration_element = ET.SubElement(workbook_element, "dataAccelerationConfig")
             data_acceleration_element.attrib["accelerationEnabled"] = str(
                 data_acceleration_config["acceleration_enabled"]
             ).lower()
@@ -1087,9 +908,7 @@ class Connection(object):
     def update_req(self, xml_request, connection_item):
         connection_element = ET.SubElement(xml_request, "connection")
         if connection_item.server_address:
-            connection_element.attrib[
-                "serverAddress"
-            ] = connection_item.server_address.lower()
+            connection_element.attrib["serverAddress"] = connection_item.server_address.lower()
         if connection_item.server_port:
             connection_element.attrib["serverPort"] = str(connection_item.server_port)
         if connection_item.username:
@@ -1097,9 +916,7 @@ class Connection(object):
         if connection_item.password:
             connection_element.attrib["password"] = connection_item.password
         if connection_item.embed_password is not None:
-            connection_element.attrib["embedPassword"] = str(
-                connection_item.embed_password
-            ).lower()
+            connection_element.attrib["embedPassword"] = str(connection_item.embed_password).lower()
 
 
 class TaskRequest(object):
@@ -1117,32 +934,22 @@ class SubscriptionRequest(object):
         # Main attributes
         subscription_element.attrib["subject"] = subscription_item.subject
         if subscription_item.attach_image is not None:
-            subscription_element.attrib["attachImage"] = str(
-                subscription_item.attach_image
-            ).lower()
+            subscription_element.attrib["attachImage"] = str(subscription_item.attach_image).lower()
         if subscription_item.attach_pdf is not None:
-            subscription_element.attrib["attachPdf"] = str(
-                subscription_item.attach_pdf
-            ).lower()
+            subscription_element.attrib["attachPdf"] = str(subscription_item.attach_pdf).lower()
         if subscription_item.message is not None:
             subscription_element.attrib["message"] = subscription_item.message
         if subscription_item.page_orientation is not None:
-            subscription_element.attrib[
-                "pageOrientation"
-            ] = subscription_item.page_orientation
+            subscription_element.attrib["pageOrientation"] = subscription_item.page_orientation
         if subscription_item.page_size_option is not None:
-            subscription_element.attrib[
-                "pageSizeOption"
-            ] = subscription_item.page_size_option
+            subscription_element.attrib["pageSizeOption"] = subscription_item.page_size_option
 
         # Content element
         content_element = ET.SubElement(subscription_element, "content")
         content_element.attrib["id"] = subscription_item.target.id
         content_element.attrib["type"] = subscription_item.target.type
         if subscription_item.send_if_view_empty is not None:
-            content_element.attrib["sendIfViewEmpty"] = str(
-                subscription_item.send_if_view_empty
-            ).lower()
+            content_element.attrib["sendIfViewEmpty"] = str(subscription_item.send_if_view_empty).lower()
 
         # Schedule element
         schedule_element = ET.SubElement(subscription_element, "schedule")
@@ -1161,9 +968,7 @@ class SubscriptionRequest(object):
         if subscription_item.subject is not None:
             subscription.attrib["subject"] = subscription_item.subject
         if subscription_item.attach_image is not None:
-            subscription.attrib["attachImage"] = str(
-                subscription_item.attach_image
-            ).lower()
+            subscription.attrib["attachImage"] = str(subscription_item.attach_image).lower()
         if subscription_item.attach_pdf is not None:
             subscription.attrib["attachPdf"] = str(subscription_item.attach_pdf).lower()
         if subscription_item.page_orientation is not None:
@@ -1181,9 +986,7 @@ class SubscriptionRequest(object):
         # Content element
         content = ET.SubElement(subscription, "content")
         if subscription_item.send_if_view_empty is not None:
-            content.attrib["sendIfViewEmpty"] = str(
-                subscription_item.send_if_view_empty
-            ).lower()
+            content.attrib["sendIfViewEmpty"] = str(subscription_item.send_if_view_empty).lower()
         return ET.tostring(xml_request)
 
 

@@ -16,28 +16,20 @@ class Databases(Endpoint):
         super(Databases, self).__init__(parent_srv)
 
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
-        self._default_permissions = _DefaultPermissionsEndpoint(
-            parent_srv, lambda: self.baseurl
-        )
+        self._default_permissions = _DefaultPermissionsEndpoint(parent_srv, lambda: self.baseurl)
         self._data_quality_warnings = _DataQualityWarningEndpoint(parent_srv, "database")
 
     @property
     def baseurl(self):
-        return "{0}/sites/{1}/databases".format(
-            self.parent_srv.baseurl, self.parent_srv.site_id
-        )
+        return "{0}/sites/{1}/databases".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     @api(version="3.5")
     def get(self, req_options=None):
         logger.info("Querying all databases on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(
-            server_response.content, self.parent_srv.namespace
-        )
-        all_database_items = DatabaseItem.from_response(
-            server_response.content, self.parent_srv.namespace
-        )
+        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
+        all_database_items = DatabaseItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_database_items, pagination_item
 
     # Get 1 database
@@ -49,9 +41,7 @@ class Databases(Endpoint):
         logger.info("Querying single database (ID: {0})".format(database_id))
         url = "{0}/{1}".format(self.baseurl, database_id)
         server_response = self.get_request(url)
-        return DatabaseItem.from_response(
-            server_response.content, self.parent_srv.namespace
-        )[0]
+        return DatabaseItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     @api(version="3.5")
     def delete(self, database_id):
@@ -72,9 +62,7 @@ class Databases(Endpoint):
         update_req = RequestFactory.Database.update_req(database_item)
         server_response = self.put_request(url, update_req)
         logger.info("Updated database item (ID: {0})".format(database_item.id))
-        updated_database = DatabaseItem.from_response(
-            server_response.content, self.parent_srv.namespace
-        )[0]
+        updated_database = DatabaseItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return updated_database
 
     # Not Implemented Yet
@@ -93,9 +81,7 @@ class Databases(Endpoint):
     def _get_tables_for_database(self, database_item):
         url = "{0}/{1}/tables".format(self.baseurl, database_item.id)
         server_response = self.get_request(url)
-        tables = TableItem.from_response(
-            server_response.content, self.parent_srv.namespace
-        )
+        tables = TableItem.from_response(server_response.content, self.parent_srv.namespace)
         return tables
 
     @api(version="3.5")
@@ -123,21 +109,15 @@ class Databases(Endpoint):
 
     @api(version="3.5")
     def populate_table_default_permissions(self, item):
-        self._default_permissions.populate_default_permissions(
-            item, Permission.Resource.Table
-        )
+        self._default_permissions.populate_default_permissions(item, Permission.Resource.Table)
 
     @api(version="3.5")
     def update_table_default_permissions(self, item):
-        return self._default_permissions.update_default_permissions(
-            item, Permission.Resource.Table
-        )
+        return self._default_permissions.update_default_permissions(item, Permission.Resource.Table)
 
     @api(version="3.5")
     def delete_table_default_permissions(self, item):
-        self._default_permissions.delete_default_permissions(
-            item, Permission.Resource.Table
-        )
+        self._default_permissions.delete_default_permissions(item, Permission.Resource.Table)
 
     @api(version="3.5")
     def populate_dqw(self, item):

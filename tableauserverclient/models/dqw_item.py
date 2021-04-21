@@ -36,9 +36,7 @@ class DQWItem(object):
     @classmethod
     def from_xml_element(cls, parsed_response, ns):
         all_dqws = []
-        dqw_elem_list = parsed_response.findall(
-            ".//t:dataQualityWarning", namespaces=ns
-        )
+        dqw_elem_list = parsed_response.findall(".//t:dataQualityWarning", namespaces=ns)
         for dqw_elem in dqw_elem_list:
             dqw = DQWItem()
             dqw.id = dqw_elem.get("id", None)
