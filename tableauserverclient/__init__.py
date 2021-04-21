@@ -4,7 +4,7 @@ from .models import ConnectionCredentials, ConnectionItem, DataAlertItem, Dataso
     SiteItem, TableauAuth, PersonalAccessTokenAuth, UserItem, ViewItem, WorkbookItem, UnpopulatedPropertyError,\
     HourlyInterval, DailyInterval, WeeklyInterval, MonthlyInterval, IntervalItem, TaskItem,\
     SubscriptionItem, Target, PermissionsRule, Permission, DatabaseItem, TableItem, ColumnItem, FlowItem, \
-    WebhookItem, PersonalAccessTokenAuth
+    WebhookItem, PersonalAccessTokenAuth, DQWItem
 from .server import RequestOptions, CSVRequestOptions, ImageRequestOptions, PDFRequestOptions, Filter, Sort, \
     Server, ServerResponseError, MissingRequiredFieldError, NotSignedInError, Pager
 from ._version import get_versions

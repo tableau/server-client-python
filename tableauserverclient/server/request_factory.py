@@ -190,6 +190,41 @@ class DatasourceRequest(object):
         parts = {'request_payload': ('', xml_request, 'text/xml')}
         return _add_multipart(parts)
 
+class DQWRequest(object):
+    """DEPRECATED
+       WARNING
+       STALE
+       SENSITIVE_DATA
+       MAINTENANCE"""
+
+    def add_req(self, dqw_item):
+        xml_request = ET.Element('tsRequest')
+        dqw_element = ET.SubElement(xml_request, 'dataQualityWarning')
+
+        dqw_element.attrib['isActive'] = str(dqw_item.active).lower()
+        dqw_element.attrib['isSevere'] = str(dqw_item.severe).lower()
+
+        dqw_element.attrib['type'] = dqw_item.warning_type
+
+        if dqw_item.message:
+            dqw_element.attrib['message'] = str(dqw_item.message)
+
+        return ET.tostring(xml_request)
+
+    def update_req(self, database_item):
+        xml_request = ET.Element('tsRequest')
+        dqw_element = ET.SubElement(xml_request, 'dataQualityWarning')
+
+        dqw_element.attrib['isActive'] = str(dqw_item.active).lower()
+        dqw_element.attrib['isSevere'] = str(dqw_item.severe).lower()
+
+        dqw_element.attrib['type'] = dqw_item.warning_type
+
+        if dqw_item.message:
+            dqw_element.attrib['message'] = str(dqw_item.message)
+
+        return ET.tostring(xml_request)
+
 
 class FavoriteRequest(object):
     def _add_to_req(self, id_, target_type, label):
@@ -920,6 +955,7 @@ class RequestFactory(object):
     DataAlert = DataAlertRequest()
     Datasource = DatasourceRequest()
     Database = DatabaseRequest()
+    DQW = DQWRequest()
     Empty = EmptyRequest()
     Favorite = FavoriteRequest()
     Fileupload = FileuploadRequest()
