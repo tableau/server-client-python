@@ -22,7 +22,7 @@ class FlowItem(object):
 
         self._connections = None
         self._permissions = None
-        self._data_quality_warningss = None
+        self._data_quality_warnings = None
 
     @property
     def connections(self):
@@ -48,10 +48,10 @@ class FlowItem(object):
 
     @property
     def dqws(self):
-        if self._data_quality_warningss is None:
+        if self._data_quality_warnings is None:
             error = "Project item must be populated with dqws first."
             raise UnpopulatedPropertyError(error)
-        return self._data_quality_warningss()
+        return self._data_quality_warnings()
 
     @property
     def id(self):
@@ -93,7 +93,7 @@ class FlowItem(object):
         self._permissions = permissions
 
     def _set_data_quality_warnings(self, dqws):
-        self._data_quality_warningss = dqws
+        self._data_quality_warnings = dqws
 
     def _parse_common_elements(self, flow_xml, ns):
         if not isinstance(flow_xml, ET.Element):
