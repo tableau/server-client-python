@@ -38,7 +38,7 @@ class _DQWEndpoint(Endpoint):
 
     def update(self, resource, warning):
         url = '{baseurl}/{content_luid}'.format(baseurl=self.baseurl, content_luid=resource.id)
-        add_req = RequestFactory.DQW.add_req(warning)
+        add_req = RequestFactory.DQW.update_req(warning)
         response = self.put_request(url, add_req)
         warnings = DQWItem.from_response(response.content,
                                                     self.parent_srv.namespace)
