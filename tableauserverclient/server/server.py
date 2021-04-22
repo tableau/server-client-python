@@ -25,7 +25,10 @@ from .endpoint import (
     Favorites,
     DataAlerts,
 )
-from .endpoint.exceptions import EndpointUnavailableError, ServerInfoEndpointNotFoundError
+from .endpoint.exceptions import (
+    EndpointUnavailableError,
+    ServerInfoEndpointNotFoundError,
+)
 
 import requests
 
@@ -34,7 +37,13 @@ try:
 except ImportError:
     from distutils.version import LooseVersion as Version
 
-_PRODUCT_TO_REST_VERSION = {"10.0": "2.3", "9.3": "2.2", "9.2": "2.1", "9.1": "2.0", "9.0": "2.0"}
+_PRODUCT_TO_REST_VERSION = {
+    "10.0": "2.3",
+    "9.3": "2.2",
+    "9.2": "2.1",
+    "9.1": "2.0",
+    "9.0": "2.0",
+}
 
 
 class Server(object):

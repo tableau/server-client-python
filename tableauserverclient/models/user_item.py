@@ -1,6 +1,10 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
-from .property_decorators import property_is_enum, property_not_empty, property_not_nullable
+from .property_decorators import (
+    property_is_enum,
+    property_not_empty,
+    property_not_nullable,
+)
 from ..datetime_helpers import parse_datetime
 from .reference_item import ResourceReference
 
@@ -128,12 +132,31 @@ class UserItem(object):
         if not isinstance(user_xml, ET.Element):
             user_xml = ET.fromstring(user_xml).find(".//t:user", namespaces=ns)
         if user_xml is not None:
-            (_, _, site_role, _, _, fullname, email, auth_setting, _) = self._parse_element(user_xml, ns)
+            (
+                _,
+                _,
+                site_role,
+                _,
+                _,
+                fullname,
+                email,
+                auth_setting,
+                _,
+            ) = self._parse_element(user_xml, ns)
             self._set_values(None, None, site_role, None, None, fullname, email, auth_setting, None)
         return self
 
     def _set_values(
-        self, id, name, site_role, last_login, external_auth_user_id, fullname, email, auth_setting, domain_name
+        self,
+        id,
+        name,
+        site_role,
+        last_login,
+        external_auth_user_id,
+        fullname,
+        email,
+        auth_setting,
+        domain_name,
     ):
         if id is not None:
             self._id = id
@@ -173,7 +196,15 @@ class UserItem(object):
             ) = cls._parse_element(user_xml, ns)
             user_item = cls(name, site_role)
             user_item._set_values(
-                id, name, site_role, last_login, external_auth_user_id, fullname, email, auth_setting, domain_name
+                id,
+                name,
+                site_role,
+                last_login,
+                external_auth_user_id,
+                fullname,
+                email,
+                auth_setting,
+                domain_name,
             )
             all_user_items.append(user_item)
         return all_user_items
@@ -198,7 +229,17 @@ class UserItem(object):
         if domain_elem is not None:
             domain_name = domain_elem.get("name", None)
 
-        return id, name, site_role, last_login, external_auth_user_id, fullname, email, auth_setting, domain_name
+        return (
+            id,
+            name,
+            site_role,
+            last_login,
+            external_auth_user_id,
+            fullname,
+            email,
+            auth_setting,
+            domain_name,
+        )
 
     def __repr__(self):
         return "<User {} name={} role={}>".format(self.id, self.name, self.site_role)

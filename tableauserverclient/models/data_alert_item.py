@@ -1,6 +1,10 @@
 import xml.etree.ElementTree as ET
 
-from .property_decorators import property_not_empty, property_is_enum, property_is_boolean
+from .property_decorators import (
+    property_not_empty,
+    property_is_enum,
+    property_is_boolean,
+)
 from .user_item import UserItem
 from .view_item import ViewItem
 

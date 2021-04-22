@@ -1,4 +1,9 @@
-from .exceptions import ServerResponseError, InternalServerError, NonXMLResponseError, EndpointUnavailableError
+from .exceptions import (
+    ServerResponseError,
+    InternalServerError,
+    NonXMLResponseError,
+    EndpointUnavailableError,
+)
 from functools import wraps
 from xml.etree.ElementTree import ParseError
 from ..query import QuerySet
@@ -39,7 +44,15 @@ class Endpoint(object):
         else:
             return server_response.content
 
-    def _make_request(self, method, url, content=None, auth_token=None, content_type=None, parameters=None):
+    def _make_request(
+        self,
+        method,
+        url,
+        content=None,
+        auth_token=None,
+        content_type=None,
+        parameters=None,
+    ):
         parameters = parameters or {}
         parameters.update(self.parent_srv.http_options)
         parameters["headers"] = Endpoint._make_common_headers(auth_token, content_type)
@@ -95,7 +108,10 @@ class Endpoint(object):
                 url = request_object.apply_query_params(url)
 
         return self._make_request(
-            self.parent_srv.session.get, url, auth_token=self.parent_srv.auth_token, parameters=parameters
+            self.parent_srv.session.get,
+            url,
+            auth_token=self.parent_srv.auth_token,
+            parameters=parameters,
         )
 
     def delete_request(self, url):

@@ -90,7 +90,13 @@ class ProjectItem(object):
             project_xml = ET.fromstring(project_xml).find(".//t:project", namespaces=ns)
 
         if project_xml is not None:
-            (_, name, description, content_permissions, parent_id) = self._parse_element(project_xml)
+            (
+                _,
+                name,
+                description,
+                content_permissions,
+                parent_id,
+            ) = self._parse_element(project_xml)
             self._set_values(None, name, description, content_permissions, parent_id)
         return self
 
@@ -112,7 +118,11 @@ class ProjectItem(object):
         self._permissions = permissions
 
     def _set_default_permissions(self, permissions, content_type):
-        setattr(self, "_default_{content}_permissions".format(content=content_type), permissions)
+        setattr(
+            self,
+            "_default_{content}_permissions".format(content=content_type),
+            permissions,
+        )
 
     @classmethod
     def from_response(cls, resp, ns):
@@ -121,7 +131,14 @@ class ProjectItem(object):
         all_project_xml = parsed_response.findall(".//t:project", namespaces=ns)
 
         for project_xml in all_project_xml:
-            (id, name, description, content_permissions, parent_id, owner_id) = cls._parse_element(project_xml)
+            (
+                id,
+                name,
+                description,
+                content_permissions,
+                parent_id,
+                owner_id,
+            ) = cls._parse_element(project_xml)
             project_item = cls(name)
             project_item._set_values(id, name, description, content_permissions, parent_id, owner_id)
             all_project_items.append(project_item)

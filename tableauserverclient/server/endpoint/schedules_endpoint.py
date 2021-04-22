@@ -65,7 +65,13 @@ class Schedules(Endpoint):
         return new_schedule
 
     @api(version="2.8")
-    def add_to_schedule(self, schedule_id, workbook=None, datasource=None, task_type=TaskItem.Type.ExtractRefresh):
+    def add_to_schedule(
+        self,
+        schedule_id,
+        workbook=None,
+        datasource=None,
+        task_type=TaskItem.Type.ExtractRefresh,
+    ):
         def add_to(resource, type_, req_factory):
             id_ = resource.id
             url = "{0}/{1}/{2}s".format(self.siteurl, schedule_id, type_)
@@ -79,7 +85,12 @@ class Schedules(Endpoint):
                 logger.info("Added {} to {} to schedule {}".format(type_, id_, schedule_id))
 
             if error is not None or warnings is not None:
-                return AddResponse(result=False, error=error, warnings=warnings, task_created=task_created)
+                return AddResponse(
+                    result=False,
+                    error=error,
+                    warnings=warnings,
+                    task_created=task_created,
+                )
             else:
                 return OK
 

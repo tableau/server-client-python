@@ -10,7 +10,10 @@ class TaskItem(object):
         DataAcceleration = "dataAcceleration"
 
     # This mapping is used to convert task type returned from server
-    _TASK_TYPE_MAPPING = {"RefreshExtractTask": Type.ExtractRefresh, "MaterializeViewsTask": Type.DataAcceleration}
+    _TASK_TYPE_MAPPING = {
+        "RefreshExtractTask": Type.ExtractRefresh,
+        "MaterializeViewsTask": Type.DataAcceleration,
+    }
 
     def __init__(
         self,
@@ -78,7 +81,14 @@ class TaskItem(object):
         consecutive_failed_count = int(element.get("consecutiveFailedCount", 0))
         id_ = element.get("id", None)
         return cls(
-            id_, task_type, priority, consecutive_failed_count, schedule_item.id, schedule_item, last_run_at, target
+            id_,
+            task_type,
+            priority,
+            consecutive_failed_count,
+            schedule_item.id,
+            schedule_item,
+            last_run_at,
+            target,
         )
 
     @staticmethod

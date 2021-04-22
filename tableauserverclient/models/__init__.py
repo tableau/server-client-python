@@ -10,7 +10,13 @@ from .exceptions import UnpopulatedPropertyError
 from .favorites_item import FavoriteItem
 from .group_item import GroupItem
 from .flow_item import FlowItem
-from .interval_item import IntervalItem, DailyInterval, WeeklyInterval, MonthlyInterval, HourlyInterval
+from .interval_item import (
+    IntervalItem,
+    DailyInterval,
+    WeeklyInterval,
+    MonthlyInterval,
+    HourlyInterval,
+)
 from .job_item import JobItem, BackgroundJobItem
 from .pagination_item import PaginationItem
 from .project_item import ProjectItem
