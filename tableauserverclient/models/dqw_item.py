@@ -8,7 +8,7 @@ class DQWItem(object):
         DEPRECATED = "DEPRECATED"
         STALE = "STALE"
         SENSITIVE_DATA = "SENSITIVE_DATA"
-        MAINTENANCE = "MINTENANCE"
+        MAINTENANCE = "MAINTENANCE"
 
     def __init__(self, warning_type="WARNING", message=None, active=True, severe=False):
         self._id = None
