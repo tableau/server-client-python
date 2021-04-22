@@ -88,6 +88,22 @@ class DQWItem(object):
     def active(self, value):
         self._active = value
 
+    @property
+    def created_at(self):
+        return self._created_at
+
+    @created_at.setter
+    def created_at(self, value):
+        self._created_at = value
+
+    @property
+    def updated_at(self):
+        return self._updated_at
+
+    @updated_at.setter
+    def updated_at(self, value):
+        self._updated_at = value
+
     @classmethod
     def from_response(cls, resp, ns):
         return cls.from_xml_element(ET.fromstring(resp), ns)

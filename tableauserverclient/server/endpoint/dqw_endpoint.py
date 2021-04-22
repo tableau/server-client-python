@@ -12,11 +12,6 @@ logger = logging.getLogger(__name__)
 class _DataQualityWarningEndpoint(Endpoint):
     def __init__(self, parent_srv, resource_type):
         super(_DataQualityWarningEndpoint, self).__init__(parent_srv)
-
-        # owner_baseurl is the baseurl of the parent.  The MUST be a lambda
-        # since we don't know the full site URL until we sign in.  If
-        # populated without, we will get a sign-in error
-
         self.resource_type = resource_type
 
     @property
