@@ -1199,6 +1199,65 @@ None. The user is removed from the group.
 <br>
 <br>
 
+
+#### groups.update
+
+```py
+groups.update(group_item, as_job=False)
+```
+
+Updates a group in Tableau Server.
+
+REST API: [Update Group](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_usersgroups.htm#update_group)
+
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`group_item`  |  The `group_item` specifies the group to update.
+`as_job` |  (Optional) If this value is set to `True`, the update operation will be asynchronous and return a JobItem. This is only supported for Active Directory groups. By default, this value is set to `False`. 
+
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`Group item missing ID.` |  Raises an error if the `group_item` is missing the `id` attribute.
+`Local groups cannot be updated asynchronously.` | The `as_job` attribute was set to `True` for a local group.
+
+
+**Returns**
+
+The updated `GroupItem` object. If `as_job` was set to `True`, a `JobItem` will be returned instead.
+
+
+**Example**
+
+```py
+# Fetch an existing group from server.
+groups, pagination = server.groups.get()
+group = groups[0]
+
+# Set update-able fields. Any of these can be added or removed.
+## Local group
+group.name = "new group name"
+group.minimum_site_role = TSC.UserItem.Roles.SiteAdministratorExplorer
+
+## Active Directory group
+group.minimum_site_role = TSC.UserItem.Roles.SiteAdministratorExplorer
+group.license_mode = TSC.GroupItem.LicenseMode.onLogin
+
+# Update group - synchronous
+group = server.groups.update(group)
+
+# Update group - asynchronous (only for Active Directory groups)
+job = server.groups.update(group, as_job=True)
+```
+
+<br>
+<br>
+
 ---
 
 ## Jobs
@@ -2823,6 +2882,213 @@ The `SubscriptionItem`.  See [SubscriptionItem class](#subscriptionitem-class)
 
 <br>
 <br>
+
+---
+
+## Tasks
+
+Using the TSC library, you can get information about all the tasks on a site and you can remove tasks. To create new tasks see [Schedules](#schedules).
+
+The task resources for Tableau Server are defined in the `TaskItem` class. The class corresponds to the task resources you can access using the Tableau Server REST API. The task methods are based upon the endpoints for tasks in the REST API and operate on the `TaskItem` class.  
+
+### TaskItem class
+
+```py
+TaskItem(id, task_type, priority, consecutive_failed_count=0, schedule_id=None, target=None)
+```
+
+**Attributes**
+
+Name | Description  
+:--- | :---  
+`id` |   The id of the task on the site.
+`task_type` | Type of extract task - full or incremental refresh.
+`priority` | The priority of the task on the server.
+`consecutive_failed_count` | The number of failed consecutive executions.
+`schedule_id` | The id of the schedule on the site.
+`target` | An object, `datasource` or `workbook`, which is associated to the task. Source file: models/target.py
+
+
+**Example**
+
+```py
+# import tableauserverclient as TSC
+# server = TSC.Server('server')
+
+  task = server.tasks.get_by_id('9f9e9d9c-8b8a-8f8e-7d7c-7b7a6f6d6e6d')
+  print(task)
+
+```
+
+Source file: models/task_item.py
+
+<br> 
+<br>
+
+
+###  Tasks methods
+
+The Tableau Server Client provides several methods for interacting with task resources, or endpoints. These methods correspond to endpoints in the Tableau Server REST API.
+
+Source file: server/endpoint/tasks_endpoint.py
+<br> 
+<br>
+
+#### tasks.get
+
+```py
+tasks.get(req_options=None)
+```
+
+Returns information about the tasks on the specified site.
+
+REST API: [Get Extract Refresh Tasks on Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#get_extract_refresh_tasks)
+
+
+**Parameters**
+
+Name   |  Description     
+ :--- | : ---    
+`req_options` |  (Optional) You can pass the method a request object that contains additional parameters to filter the request.
+
+
+**Returns**
+
+Returns a list of `TaskItem` objects and a `PaginationItem` object.  Use these values to iterate through the results. 
+
+
+**Example**
+
+
+```py
+import tableauserverclient as TSC
+tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
+server = TSC.Server('https://SERVERURL')
+
+with server.auth.sign_in(tableau_auth):
+    all_tasks, pagination_item = server.tasks.get()
+    print("\nThere are {} tasks on site: ".format(pagination_item.total_available))
+    print([task.id for task in all_tasks])
+```
+
+<br>
+<br>
+
+#### tasks.get_by_id
+
+
+```py
+tasks.get_by_id(task_id)
+```
+
+Returns information about the specified task.   
+
+REST API: [Query Extract Refresh Task On Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#get_extract_refresh_task){:target="_blank"}
+
+
+**Parameters**
+
+Name   |  Description     
+ :--- | : ---    
+`task_id`  |  The `task_id` specifies the task to query. 
+
+
+**Exceptions**
+
+Error   |  Description     
+ :--- | : ---    
+`Task ID undefined.`  |  Raises an exception if a valid `task_id` is not provided.
+
+
+**Returns**
+
+The `TaskItem`.  See [TaskItem class](#taskitem-class)
+
+
+**Example**
+
+```py
+task1 = server.tasks.get_by_id('9f9e9d9c-8b8a-8f8e-7d7c-7b7a6f6d6e6d')
+print(task1.task_type)
+```
+
+<br>   
+<br>  
+
+#### tasks.run
+
+
+```py
+tasks.run(task_item)
+```
+
+Runs the specified extract refresh task. 
+
+To run a extract refresh task you need to first lookup the task `task_item` (`TaskItem` class).
+
+REST API: [Run Extract Refresh Task](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#run_extract_refresh_task){:target="_blank"}
+
+
+**Parameters**
+
+Name   |  Description     
+ :--- | : ---    
+`task_item` |  You can pass the method a task object.
+
+
+**Returns**
+
+Returns the REST API response.
+
+**Example**
+
+```py
+# import tableauserverclient as TSC
+# server = TSC.Server('server')
+# login, etc.
+
+task = server.tasks.get_by_id('9f9e9d9c-8b8a-8f8e-7d7c-7b7a6f6d6e6d')
+server.tasks.run(task)
+```
+
+<br>   
+<br> 
+
+#### tasks.delete
+
+
+```py
+tasks.delete(task_id)
+```
+
+Deletes an extract refresh task.
+
+REST API: [Run Extract Refresh Task](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobstasksschedules.htm#delete_workbook){:target="_blank"}
+
+**Parameters**
+
+Name   |  Description     
+ :--- | : ---    
+`task_id`  |  The `task_id` specifies the task to delete. 
+
+
+**Exceptions**
+
+Error   |  Description     
+ :--- | : ---    
+`Task ID undefined.`  |  Raises an exception if a valid `task_id` is not provided.
+
+
+**Example**
+
+```py
+  server.tasks.delete('9f9e9d9c-8b8a-8f8e-7d7c-7b7a6f6d6e6d')
+
+```
+
+<br>   
+<br>  
+
 
 ---
 
