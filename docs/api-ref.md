@@ -3120,33 +3120,22 @@ Name | Description
 `email` |  The email address of the user.
 `fullname` | The full name of the user.
 `name` |   The name of the user. This attribute is required when you are creating a `UserItem` instance.
-`site_role` |  The role the user has on the site. This attribute is required with you are creating a `UserItem` instance. See *User Roles* below for details.
+`site_role` |  The role the user has on the site. This attribute is required if you are creating a `UserItem` instance. See *User Roles* below for details.
 `groups` | The groups that the user belongs to. You must run the populate_groups method to add the groups to the `UserItem`.
 
 **User Roles**
 
-The possible user roles (for the `site_role` attribute) vary depending upon the version of the REST API.
+The possible user roles for the `site_role` attribute are the following:
 
-For REST API 3.0 and later:
 * `Creator`
 * `Explorer`
 * `ExplorerCanPublish`
-* `ReadOnly` *(viewers from previous API versions who do not have v3.0+ viewer permissions)*
-* `Viewer`
-* `SiteAdministratorCreator`
-* `SiteAdministratorExplorer`
-* `UnlicensedWithPublish`
-
-For REST API 2.8 and earlier:
-* `Interactor`
-* `Publisher`
 * `ServerAdministrator`
-* `SiteAdministrator`
+* `SiteAdministratorExplorer`
+* `SiteAdministratorCreator`
 * `Unlicensed`
-* `UnlicensedWithPublish`
+* `ReadOnly`
 * `Viewer`
-* `ViewerWithPublish`
-* `Guest`
 
 
 **Example**
