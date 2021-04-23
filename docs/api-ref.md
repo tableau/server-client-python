@@ -194,6 +194,14 @@ server.auth.switch_site(site)
 <br>
 <br>
 
+
+**See Also**  
+[Sign in and Out](sign-in-out)  
+[Server](#server)
+
+<br>
+<br>
+
 ---
 
 
@@ -629,7 +637,6 @@ REST API: [Update Data Source Now](https://help.tableau.com/current/api/rest_api
 Name   |  Description
  :--- | : ---
 `datasource_item`  |  The `datasource_item` specifies the data source to update.
-
 
 
 **Exceptions**

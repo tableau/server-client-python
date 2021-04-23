@@ -45,13 +45,15 @@ The operator can be any of the following:
 * GreaterThan
 * GreaterThanOrEqual
 * LessThan
+* LessThanOrEqual
 * In
+* Has
 
 ### Value criteria
 
 The value that you want to filter on. This can be any valid string.
 
-### Filtering example
+### Filtering example - RequestOptions
 
 The following code displays only the workbooks where the name equals Superstore:
 
@@ -69,11 +71,11 @@ print(matching_workbooks[0].owner_id)
 
 To sort on a field, you need to specify the field name and the direction criteria for the sort order.
 
-### Direction criteria
+### Direction criteria - RequestOptions
 
 This can be either `Asc` for ascending or `Desc` for descending.
 
-### Sorting example
+### Sorting example - RequestOptions
 
 The following code sorts the workbooks in ascending order:
 
@@ -86,3 +88,78 @@ matching_workbooks, pagination_item = server.workbooks.get(req_option)
 for wb in matching_workbooks:
     print(wb.name)
 ```
+
+
+## Django style filters and sorts
+
+### Filtering examples - Django style
+
+The following code displays only workbooks where the name equals Superstore:
+
+```py
+all_workbooks = server.workbooks.filter(name='Superstore')
+for workbook in all_workbooks:
+    print(workbook.owner_id)
+```
+
+### Direction criteria - Django style
+
+The field name cane be input as normal for ascending or prefixed with `-` for descending.
+
+### Sorting example - Django style
+
+The following code sorts the workbooks in ascending order:
+
+```py
+matching_workbooks = server.workbooks.sort('name')
+
+for wb in matching_workbooks:
+    print(wb.name)
+```
+
+Sort can take multiple args, with desc direction added as a (-) prefix 
+
+```py
+workbooks = workbooks.sort("project_name", "-created_at")
+```
+
+### More detailed examples
+
+```py
+# Return queryset with no filters
+workbooks = server.workbooks.all() 
+
+# filters can be appended in new lines
+workbooks = workbooks.filter(project_name=project_name)
+
+# sort can take multiple args, with desc direction added as a (-) prefix 
+workbooks = workbooks.sort("project_name", "-created_at")
+
+# pagination take these two keywords
+workbooks = workbooks.paginate(page_size=10, page_number=2) 
+
+# query is executed at time of access
+for workbook in workbooks: 
+    print(workbook)
+
+# pagination item is still accessible  
+print(workbooks.total_available, workbooks.page_size, workbooks.page_number) 
+
+# methods can be chained
+all_workbooks = server.workbooks.filter(project_name=project_name).sort("-project_name")
+
+# operators are implemented using dunderscore
+all_workbooks = server.workbooks.filter(project_name__in=["Project A", "Project B"])
+```
+
+### Operators available
+
+| Operator | Implementation |
+| --- | --- |
+| Equals | eq |
+| GreaterThan | gt |
+| GreaterThanOrEqual | gte |
+| LessThan | lt |
+| LessThanOrEqual | lte |
+| In | in |
+| Has | has |
