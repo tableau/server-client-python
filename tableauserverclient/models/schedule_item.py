@@ -1,8 +1,18 @@
 import xml.etree.ElementTree as ET
 from datetime import datetime
 
-from .interval_item import IntervalItem, HourlyInterval, DailyInterval, WeeklyInterval, MonthlyInterval
-from .property_decorators import property_is_enum, property_not_nullable, property_is_int
+from .interval_item import (
+    IntervalItem,
+    HourlyInterval,
+    DailyInterval,
+    WeeklyInterval,
+    MonthlyInterval,
+)
+from .property_decorators import (
+    property_is_enum,
+    property_not_nullable,
+    property_is_int,
+)
 from ..datetime_helpers import parse_datetime
 
 

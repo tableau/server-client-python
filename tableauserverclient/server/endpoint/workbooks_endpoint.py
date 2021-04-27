@@ -5,7 +5,12 @@ from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, WorkbookItem, ConnectionItem, ViewItem, PaginationItem
 from ...models.job_item import JobItem
-from ...filesys_helpers import to_filename, make_download_path, get_file_type, get_file_object_size
+from ...filesys_helpers import (
+    to_filename,
+    make_download_path,
+    get_file_type,
+    get_file_object_size,
+)
 
 import os
 import logging
@@ -140,7 +145,10 @@ class Workbooks(QuerysetEndpoint):
         if no_extract is False or no_extract is True:
             import warnings
 
-            warnings.warn("no_extract is deprecated, use include_extract instead.", DeprecationWarning)
+            warnings.warn(
+                "no_extract is deprecated, use include_extract instead.",
+                DeprecationWarning,
+            )
             include_extract = not no_extract
 
         if not include_extract:
@@ -176,7 +184,11 @@ class Workbooks(QuerysetEndpoint):
         if usage:
             url += "?includeUsageStatistics=true"
         server_response = self.get_request(url)
-        views = ViewItem.from_response(server_response.content, self.parent_srv.namespace, workbook_id=workbook_item.id)
+        views = ViewItem.from_response(
+            server_response.content,
+            self.parent_srv.namespace,
+            workbook_id=workbook_item.id,
+        )
         return views
 
     # Get all connections of workbook
@@ -267,7 +279,10 @@ class Workbooks(QuerysetEndpoint):
         if connection_credentials is not None:
             import warnings
 
-            warnings.warn("connection_credentials is being deprecated. Use connections instead", DeprecationWarning)
+            warnings.warn(
+                "connection_credentials is being deprecated. Use connections instead",
+                DeprecationWarning,
+            )
 
         try:
             # Expect file to be a filepath
@@ -333,7 +348,10 @@ class Workbooks(QuerysetEndpoint):
             url = "{0}&uploadSessionId={1}".format(url, upload_session_id)
             conn_creds = connection_credentials
             xml_request, content_type = RequestFactory.Workbook.publish_req_chunked(
-                workbook_item, connection_credentials=conn_creds, connections=connections, hidden_views=hidden_views
+                workbook_item,
+                connection_credentials=conn_creds,
+                connections=connections,
+                hidden_views=hidden_views,
             )
         else:
             logger.info("Publishing {0} to server".format(filename))

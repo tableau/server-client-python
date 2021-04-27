@@ -1,6 +1,10 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
-from .property_decorators import property_not_nullable, property_is_boolean, property_is_enum
+from .property_decorators import (
+    property_not_nullable,
+    property_is_boolean,
+    property_is_enum,
+)
 from .tag_item import TagItem
 from ..datetime_helpers import parse_datetime
 import copy
@@ -35,6 +39,7 @@ class DatasourceItem(object):
         self.tags = set()
 
         self._permissions = None
+        self._data_quality_warnings = None
 
     @property
     def ask_data_enablement(self):
@@ -95,6 +100,13 @@ class DatasourceItem(object):
         self._encrypt_extracts = value
 
     @property
+    def dqws(self):
+        if self._data_quality_warnings is None:
+            error = "Project item must be populated with dqws first."
+            raise UnpopulatedPropertyError(error)
+        return self._data_quality_warnings()
+
+    @property
     def has_extracts(self):
         return self._has_extracts
 
@@ -141,6 +153,9 @@ class DatasourceItem(object):
 
     def _set_permissions(self, permissions):
         self._permissions = permissions
+
+    def _set_data_quality_warnings(self, dqws):
+        self._data_quality_warnings = dqws
 
     def _parse_common_elements(self, datasource_xml, ns):
         if not isinstance(datasource_xml, ET.Element):

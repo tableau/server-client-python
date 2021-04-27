@@ -46,7 +46,12 @@ class _PermissionsEndpoint(Endpoint):
             for capability, mode in rule.capabilities.items():
                 "              /permissions/groups/group-id/capability-name/capability-mode"
                 url = "{0}/{1}/permissions/{2}/{3}/{4}/{5}".format(
-                    self.owner_baseurl(), resource.id, rule.grantee.tag_name + "s", rule.grantee.id, capability, mode
+                    self.owner_baseurl(),
+                    resource.id,
+                    rule.grantee.tag_name + "s",
+                    rule.grantee.id,
+                    capability,
+                    mode,
                 )
 
                 logger.debug("Removing {0} permission for capabilty {1}".format(mode, capability))

@@ -1,5 +1,9 @@
 from .endpoint import Endpoint, api
-from .exceptions import ServerResponseError, ServerInfoEndpointNotFoundError, EndpointUnavailableError
+from .exceptions import (
+    ServerResponseError,
+    ServerInfoEndpointNotFoundError,
+    EndpointUnavailableError,
+)
 from ...models import ServerInfoItem
 import logging
 

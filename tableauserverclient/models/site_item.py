@@ -138,7 +138,10 @@ class SiteItem(object):
 
     @content_url.setter
     @property_not_nullable
-    @property_matches(VALID_CONTENT_URL_RE, "content_url can contain only letters, numbers, dashes, and underscores")
+    @property_matches(
+        VALID_CONTENT_URL_RE,
+        "content_url can contain only letters, numbers, dashes, and underscores",
+    )
     def content_url(self, value):
         self._content_url = value
 
