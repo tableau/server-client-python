@@ -152,7 +152,12 @@ def property_is_data_acceleration_config(func):
             raise ValueError("{} is not type 'dict', cannot update {})".format(value.__class__.__name__, func.__name__))
         if len(value) != 4 or not all(
             attr in value.keys()
-            for attr in ("acceleration_enabled", "accelerate_now", "last_updated_at", "acceleration_status",)
+            for attr in (
+                "acceleration_enabled",
+                "accelerate_now",
+                "last_updated_at",
+                "acceleration_status",
+            )
         ):
             error = "{} should have 2 keys ".format(func.__name__)
             error += "'acceleration_enabled' and 'accelerate_now'"

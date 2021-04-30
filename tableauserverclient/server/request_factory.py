@@ -178,7 +178,12 @@ class DatasourceRequest(object):
         return ET.tostring(xml_request)
 
     def publish_req(
-        self, datasource_item, filename, file_contents, connection_credentials=None, connections=None,
+        self,
+        datasource_item,
+        filename,
+        file_contents,
+        connection_credentials=None,
+        connections=None,
     ):
         xml_request = self._generate_xml(datasource_item, connection_credentials, connections)
 
@@ -760,7 +765,11 @@ class UserRequest(object):
 
 class WorkbookRequest(object):
     def _generate_xml(
-        self, workbook_item, connection_credentials=None, connections=None, hidden_views=None,
+        self,
+        workbook_item,
+        connection_credentials=None,
+        connections=None,
+        hidden_views=None,
     ):
         xml_request = ET.Element("tsRequest")
         workbook_element = ET.SubElement(xml_request, "workbook")
@@ -815,7 +824,13 @@ class WorkbookRequest(object):
         return ET.tostring(xml_request)
 
     def publish_req(
-        self, workbook_item, filename, file_contents, connection_credentials=None, connections=None, hidden_views=None,
+        self,
+        workbook_item,
+        filename,
+        file_contents,
+        connection_credentials=None,
+        connections=None,
+        hidden_views=None,
     ):
         xml_request = self._generate_xml(
             workbook_item,
@@ -831,7 +846,11 @@ class WorkbookRequest(object):
         return _add_multipart(parts)
 
     def publish_req_chunked(
-        self, workbook_item, connection_credentials=None, connections=None, hidden_views=None,
+        self,
+        workbook_item,
+        connection_credentials=None,
+        connections=None,
+        hidden_views=None,
     ):
         xml_request = self._generate_xml(
             workbook_item,

@@ -116,7 +116,8 @@ class Datasources(QuerysetEndpoint):
             import warnings
 
             warnings.warn(
-                "no_extract is deprecated, use include_extract instead.", DeprecationWarning,
+                "no_extract is deprecated, use include_extract instead.",
+                DeprecationWarning,
             )
             include_extract = not no_extract
 
@@ -271,7 +272,11 @@ class Datasources(QuerysetEndpoint):
                 file_contents = file.read()
 
             xml_request, content_type = RequestFactory.Datasource.publish_req(
-                datasource_item, filename, file_contents, connection_credentials, connections,
+                datasource_item,
+                filename,
+                file_contents,
+                connection_credentials,
+                connections,
             )
 
         # Send the publishing request to server

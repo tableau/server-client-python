@@ -99,14 +99,44 @@ class FlowItem(object):
         if not isinstance(flow_xml, ET.Element):
             flow_xml = ET.fromstring(flow_xml).find(".//t:flow", namespaces=ns)
         if flow_xml is not None:
-            (_, _, _, _, _, updated_at, _, project_id, project_name, owner_id,) = self._parse_element(flow_xml, ns)
+            (
+                _,
+                _,
+                _,
+                _,
+                _,
+                updated_at,
+                _,
+                project_id,
+                project_name,
+                owner_id,
+            ) = self._parse_element(flow_xml, ns)
             self._set_values(
-                None, None, None, None, None, updated_at, None, project_id, project_name, owner_id,
+                None,
+                None,
+                None,
+                None,
+                None,
+                updated_at,
+                None,
+                project_id,
+                project_name,
+                owner_id,
             )
         return self
 
     def _set_values(
-        self, id, name, description, webpage_url, created_at, updated_at, tags, project_id, project_name, owner_id,
+        self,
+        id,
+        name,
+        description,
+        webpage_url,
+        created_at,
+        updated_at,
+        tags,
+        project_id,
+        project_name,
+        owner_id,
     ):
         if id is not None:
             self._id = id
@@ -151,7 +181,16 @@ class FlowItem(object):
             ) = cls._parse_element(flow_xml, ns)
             flow_item = cls(project_id)
             flow_item._set_values(
-                id_, name, description, webpage_url, created_at, updated_at, tags, None, project_name, owner_id,
+                id_,
+                name,
+                description,
+                webpage_url,
+                created_at,
+                updated_at,
+                tags,
+                None,
+                project_name,
+                owner_id,
             )
             all_flow_items.append(flow_item)
         return all_flow_items

@@ -13,12 +13,29 @@ from ...filesys_helpers import (
 )
 
 import os
+from pathlib import Path
+import io
 import logging
 import copy
 import cgi
 from contextlib import closing
 
-from typing import Any, Dict, List, IO, Mapping, Optional, Sequence, Tuple, TYPE_CHECKING, Union
+from typing import (
+    Any,
+    Dict,
+    List,
+    IO,
+    Mapping,
+    Optional,
+    runtime_checkable,
+    Sequence,
+    Tuple,
+    TYPE_CHECKING,
+    TypeVar,
+    Union,
+    Protocol,
+    Generic,
+)
 
 if TYPE_CHECKING:
     from ..server import Server
@@ -32,6 +49,16 @@ FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
 ALLOWED_FILE_EXTENSIONS = ["twb", "twbx"]
 
 logger = logging.getLogger("tableau.endpoint.workbooks")
+
+PathOrFile = Union[os.PathLike, IO[Any]]
+
+T = TypeVar("T")
+
+
+@runtime_checkable
+class Readable(Protocol, Generic[T]):
+    def read(self) -> T:
+        ...
 
 
 class Workbooks(QuerysetEndpoint):
@@ -168,7 +195,8 @@ class Workbooks(QuerysetEndpoint):
             import warnings
 
             warnings.warn(
-                "no_extract is deprecated, use include_extract instead.", DeprecationWarning,
+                "no_extract is deprecated, use include_extract instead.",
+                DeprecationWarning,
             )
             include_extract = not no_extract
 
@@ -206,7 +234,9 @@ class Workbooks(QuerysetEndpoint):
             url += "?includeUsageStatistics=true"
         server_response = self.get_request(url)
         views = ViewItem.from_response(
-            server_response.content, self.parent_srv.namespace, workbook_id=workbook_item.id,
+            server_response.content,
+            self.parent_srv.namespace,
+            workbook_id=workbook_item.id,
         )
         return views
 
@@ -289,7 +319,7 @@ class Workbooks(QuerysetEndpoint):
     def publish(
         self,
         workbook_item: WorkbookItem,
-        file,
+        file: PathOrFile,
         mode: str,
         connection_credentials: Optional["ConnectionCredentials"] = None,
         connections: Optional[Sequence[ConnectionItem]] = None,
@@ -302,10 +332,11 @@ class Workbooks(QuerysetEndpoint):
             import warnings
 
             warnings.warn(
-                "connection_credentials is being deprecated. Use connections instead", DeprecationWarning,
+                "connection_credentials is being deprecated. Use connections instead",
+                DeprecationWarning,
             )
 
-        try:
+        if isinstance(file, (str, Path)):
             # Expect file to be a filepath
             if not os.path.isfile(file):
                 error = "File path does not lead to an existing file."
@@ -322,7 +353,7 @@ class Workbooks(QuerysetEndpoint):
                 error = "Only {} files can be published as workbooks.".format(", ".join(ALLOWED_FILE_EXTENSIONS))
                 raise ValueError(error)
 
-        except TypeError:
+        else:
             # Expect file to be a file object
             file_size = get_file_object_size(file)
 
@@ -369,17 +400,23 @@ class Workbooks(QuerysetEndpoint):
             url = "{0}&uploadSessionId={1}".format(url, upload_session_id)
             conn_creds = connection_credentials
             xml_request, content_type = RequestFactory.Workbook.publish_req_chunked(
-                workbook_item, connection_credentials=conn_creds, connections=connections, hidden_views=hidden_views,
+                workbook_item,
+                connection_credentials=conn_creds,
+                connections=connections,
+                hidden_views=hidden_views,
             )
         else:
             logger.info("Publishing {0} to server".format(filename))
 
-            try:
+            if isinstance(file, (str, Path)):
                 with open(file, "rb") as f:
                     file_contents = f.read()
 
-            except TypeError:
+            elif isinstance(file, Readable):
                 file_contents = file.read()
+
+            else:
+                raise TypeError()
 
             conn_creds = connection_credentials
             xml_request, content_type = RequestFactory.Workbook.publish_req(

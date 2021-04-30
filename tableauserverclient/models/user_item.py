@@ -132,12 +132,31 @@ class UserItem(object):
         if not isinstance(user_xml, ET.Element):
             user_xml = ET.fromstring(user_xml).find(".//t:user", namespaces=ns)
         if user_xml is not None:
-            (_, _, site_role, _, _, fullname, email, auth_setting, _,) = self._parse_element(user_xml, ns)
+            (
+                _,
+                _,
+                site_role,
+                _,
+                _,
+                fullname,
+                email,
+                auth_setting,
+                _,
+            ) = self._parse_element(user_xml, ns)
             self._set_values(None, None, site_role, None, None, fullname, email, auth_setting, None)
         return self
 
     def _set_values(
-        self, id, name, site_role, last_login, external_auth_user_id, fullname, email, auth_setting, domain_name,
+        self,
+        id,
+        name,
+        site_role,
+        last_login,
+        external_auth_user_id,
+        fullname,
+        email,
+        auth_setting,
+        domain_name,
     ):
         if id is not None:
             self._id = id
@@ -177,7 +196,15 @@ class UserItem(object):
             ) = cls._parse_element(user_xml, ns)
             user_item = cls(name, site_role)
             user_item._set_values(
-                id, name, site_role, last_login, external_auth_user_id, fullname, email, auth_setting, domain_name,
+                id,
+                name,
+                site_role,
+                last_login,
+                external_auth_user_id,
+                fullname,
+                email,
+                auth_setting,
+                domain_name,
             )
             all_user_items.append(user_item)
         return all_user_items

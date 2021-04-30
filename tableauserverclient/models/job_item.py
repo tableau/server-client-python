@@ -92,7 +92,17 @@ class JobItem(object):
         finish_code = element.get("finishCode", -1)
         notes = [note.text for note in element.findall(".//t:notes", namespaces=ns)] or None
         mode = element.get("mode", None)
-        return cls(id_, type_, progress, created_at, started_at, completed_at, finish_code, notes, mode,)
+        return cls(
+            id_,
+            type_,
+            progress,
+            created_at,
+            started_at,
+            completed_at,
+            finish_code,
+            notes,
+            mode,
+        )
 
 
 class BackgroundJobItem(object):
@@ -104,7 +114,16 @@ class BackgroundJobItem(object):
         Cancelled = "Cancelled"
 
     def __init__(
-        self, id_, created_at, priority, job_type, status, title=None, subtitle=None, started_at=None, ended_at=None,
+        self,
+        id_,
+        created_at,
+        priority,
+        job_type,
+        status,
+        title=None,
+        subtitle=None,
+        started_at=None,
+        ended_at=None,
     ):
         self._id = id_
         self._type = job_type
@@ -176,4 +195,14 @@ class BackgroundJobItem(object):
         title = element.get("title", None)
         subtitle = element.get("subtitle", None)
 
-        return cls(id_, created_at, priority, type_, status, title, subtitle, started_at, ended_at,)
+        return cls(
+            id_,
+            created_at,
+            priority,
+            type_,
+            status,
+            title,
+            subtitle,
+            started_at,
+            ended_at,
+        )
