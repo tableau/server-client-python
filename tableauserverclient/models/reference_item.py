@@ -1,5 +1,4 @@
 class ResourceReference(object):
-
     def __init__(self, id_, tag_name):
         self.id = id_
         self.tag_name = tag_name

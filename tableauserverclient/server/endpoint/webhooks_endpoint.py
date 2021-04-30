@@ -4,7 +4,7 @@ from .. import RequestFactory
 
 import logging
 
-logger = logging.getLogger('tableau.endpoint.webhooks')
+logger = logging.getLogger("tableau.endpoint.webhooks")
 
 
 class Webhooks(Endpoint):
@@ -17,7 +17,7 @@ class Webhooks(Endpoint):
 
     @api(version="3.6")
     def get(self, req_options=None):
-        logger.info('Querying all Webhooks on site')
+        logger.info("Querying all Webhooks on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
         all_webhook_items = WebhookItem.from_response(server_response.content, self.parent_srv.namespace)
@@ -29,7 +29,7 @@ class Webhooks(Endpoint):
         if not webhook_id:
             error = "Webhook ID undefined."
             raise ValueError(error)
-        logger.info('Querying single webhook (ID: {0})'.format(webhook_id))
+        logger.info("Querying single webhook (ID: {0})".format(webhook_id))
         url = "{0}/{1}".format(self.baseurl, webhook_id)
         server_response = self.get_request(url)
         return WebhookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
@@ -41,7 +41,7 @@ class Webhooks(Endpoint):
             raise ValueError(error)
         url = "{0}/{1}".format(self.baseurl, webhook_id)
         self.delete_request(url)
-        logger.info('Deleted single webhook (ID: {0})'.format(webhook_id))
+        logger.info("Deleted single webhook (ID: {0})".format(webhook_id))
 
     @api(version="3.6")
     def create(self, webhook_item):
@@ -50,7 +50,7 @@ class Webhooks(Endpoint):
         server_response = self.post_request(url, create_req)
         new_webhook = WebhookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
-        logger.info('Created new webhook (ID: {0})'.format(new_webhook.id))
+        logger.info("Created new webhook (ID: {0})".format(new_webhook.id))
         return new_webhook
 
     @api(version="3.6")
@@ -60,5 +60,5 @@ class Webhooks(Endpoint):
             raise ValueError(error)
         url = "{0}/{1}/test".format(self.baseurl, webhook_id)
         testOutcome = self.get_request(url)
-        logger.info('Testing webhook (ID: {0} returned {1})'.format(webhook_id, testOutcome))
+        logger.info("Testing webhook (ID: {0} returned {1})".format(webhook_id, testOutcome))
         return testOutcome

@@ -15,9 +15,11 @@ class ServerResponseError(Exception):
     def from_response(cls, resp, ns):
         # Check elements exist before .text
         parsed_response = ET.fromstring(resp)
-        error_response = cls(parsed_response.find('t:error', namespaces=ns).get('code', ''),
-                             parsed_response.find('.//t:summary', namespaces=ns).text,
-                             parsed_response.find('.//t:detail', namespaces=ns).text)
+        error_response = cls(
+            parsed_response.find("t:error", namespaces=ns).get("code", ""),
+            parsed_response.find(".//t:summary", namespaces=ns).text,
+            parsed_response.find(".//t:detail", namespaces=ns).text,
+        )
         return error_response
 
 
@@ -60,4 +62,5 @@ class GraphQLError(Exception):
 
     def __str__(self):
         from pprint import pformat
+
         return pformat(self.error)

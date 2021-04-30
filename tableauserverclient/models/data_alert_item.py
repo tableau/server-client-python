@@ -1,17 +1,21 @@
 import xml.etree.ElementTree as ET
 
-from .property_decorators import property_not_empty, property_is_enum, property_is_boolean
+from .property_decorators import (
+    property_not_empty,
+    property_is_enum,
+    property_is_boolean,
+)
 from .user_item import UserItem
 from .view_item import ViewItem
 
 
 class DataAlertItem(object):
     class Frequency:
-        Once = 'Once'
-        Frequently = 'Frequently'
-        Hourly = 'Hourly'
-        Daily = 'Daily'
-        Weekly = 'Weekly'
+        Once = "Once"
+        Frequently = "Frequently"
+        Hourly = "Hourly"
+        Daily = "Daily"
+        Weekly = "Weekly"
 
     def __init__(self):
         self._id = None
@@ -33,7 +37,9 @@ class DataAlertItem(object):
 
     def __repr__(self):
         return "<Data Alert {id} subject={subject} frequency={frequency} \
-                public={public}>".format(**self.__dict__)
+                public={public}>".format(
+            **self.__dict__
+        )
 
     @property
     def id(self):
@@ -114,10 +120,25 @@ class DataAlertItem(object):
     def project_name(self):
         return self._project_name
 
-    def _set_values(self, id, subject, creatorId, createdAt, updatedAt,
-                    frequency, public, recipients, owner_id, owner_name,
-                    view_id, view_name, workbook_id, workbook_name, project_id,
-                    project_name):
+    def _set_values(
+        self,
+        id,
+        subject,
+        creatorId,
+        createdAt,
+        updatedAt,
+        frequency,
+        public,
+        recipients,
+        owner_id,
+        owner_name,
+        view_id,
+        view_name,
+        workbook_id,
+        workbook_name,
+        project_id,
+        project_name,
+    ):
         if id is not None:
             self._id = id
         if subject:
@@ -155,7 +176,7 @@ class DataAlertItem(object):
     def from_response(cls, resp, ns):
         all_alert_items = list()
         parsed_response = ET.fromstring(resp)
-        all_alert_xml = parsed_response.findall('.//t:dataAlert', namespaces=ns)
+        all_alert_xml = parsed_response.findall(".//t:dataAlert", namespaces=ns)
 
         for alert_xml in all_alert_xml:
             kwargs = cls._parse_element(alert_xml, ns)
@@ -168,30 +189,30 @@ class DataAlertItem(object):
     @staticmethod
     def _parse_element(alert_xml, ns):
         kwargs = dict()
-        kwargs['id'] = alert_xml.get('id', None)
-        kwargs['subject'] = alert_xml.get('subject', None)
-        kwargs['creatorId'] = alert_xml.get('creatorId', None)
-        kwargs['createdAt'] = alert_xml.get('createdAt', None)
-        kwargs['updatedAt'] = alert_xml.get('updatedAt', None)
-        kwargs['frequency'] = alert_xml.get('frequency', None)
-        kwargs['public'] = alert_xml.get('public', None)
+        kwargs["id"] = alert_xml.get("id", None)
+        kwargs["subject"] = alert_xml.get("subject", None)
+        kwargs["creatorId"] = alert_xml.get("creatorId", None)
+        kwargs["createdAt"] = alert_xml.get("createdAt", None)
+        kwargs["updatedAt"] = alert_xml.get("updatedAt", None)
+        kwargs["frequency"] = alert_xml.get("frequency", None)
+        kwargs["public"] = alert_xml.get("public", None)
 
-        owner = alert_xml.findall('.//t:owner', namespaces=ns)[0]
-        kwargs['owner_id'] = owner.get('id', None)
-        kwargs['owner_name'] = owner.get('name', None)
+        owner = alert_xml.findall(".//t:owner", namespaces=ns)[0]
+        kwargs["owner_id"] = owner.get("id", None)
+        kwargs["owner_name"] = owner.get("name", None)
 
-        view_response = alert_xml.findall('.//t:view', namespaces=ns)[0]
-        kwargs['view_id'] = view_response.get('id', None)
-        kwargs['view_name'] = view_response.get('name', None)
+        view_response = alert_xml.findall(".//t:view", namespaces=ns)[0]
+        kwargs["view_id"] = view_response.get("id", None)
+        kwargs["view_name"] = view_response.get("name", None)
 
-        workbook_response = view_response.findall('.//t:workbook', namespaces=ns)[0]
-        kwargs['workbook_id'] = workbook_response.get('id', None)
-        kwargs['workbook_name'] = workbook_response.get('name', None)
-        project_response = view_response.findall('.//t:project', namespaces=ns)[0]
-        kwargs['project_id'] = project_response.get('id', None)
-        kwargs['project_name'] = project_response.get('name', None)
+        workbook_response = view_response.findall(".//t:workbook", namespaces=ns)[0]
+        kwargs["workbook_id"] = workbook_response.get("id", None)
+        kwargs["workbook_name"] = workbook_response.get("name", None)
+        project_response = view_response.findall(".//t:project", namespaces=ns)[0]
+        kwargs["project_id"] = project_response.get("id", None)
+        kwargs["project_name"] = project_response.get("name", None)
 
-        recipients = alert_xml.findall('.//t:recipient', namespaces=ns)
-        kwargs['recipients'] = [recipient.get('id', None) for recipient in recipients]
+        recipients = alert_xml.findall(".//t:recipient", namespaces=ns)
+        kwargs["recipients"] = [recipient.get("id", None) for recipient in recipients]
 
         return kwargs

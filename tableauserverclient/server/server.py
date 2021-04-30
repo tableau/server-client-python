@@ -2,29 +2,52 @@ import xml.etree.ElementTree as ET
 
 from .exceptions import NotSignedInError
 from ..namespace import Namespace
-from .endpoint import Sites, Views, Users, Groups, Workbooks, Datasources, Projects, Auth, \
-    Schedules, ServerInfo, Tasks, Subscriptions, Jobs, Metadata,\
-    Databases, Tables, Flows, Webhooks, DataAccelerationReport, Favorites, DataAlerts
-from .endpoint.exceptions import EndpointUnavailableError, ServerInfoEndpointNotFoundError
+from .endpoint import (
+    Sites,
+    Views,
+    Users,
+    Groups,
+    Workbooks,
+    Datasources,
+    Projects,
+    Auth,
+    Schedules,
+    ServerInfo,
+    Tasks,
+    Subscriptions,
+    Jobs,
+    Metadata,
+    Databases,
+    Tables,
+    Flows,
+    Webhooks,
+    DataAccelerationReport,
+    Favorites,
+    DataAlerts,
+)
+from .endpoint.exceptions import (
+    EndpointUnavailableError,
+    ServerInfoEndpointNotFoundError,
+)
 
 import requests
 
 from distutils.version import LooseVersion as Version
 
 _PRODUCT_TO_REST_VERSION = {
-    '10.0': '2.3',
-    '9.3': '2.2',
-    '9.2': '2.1',
-    '9.1': '2.0',
-    '9.0': '2.0'
+    "10.0": "2.3",
+    "9.3": "2.2",
+    "9.2": "2.1",
+    "9.1": "2.0",
+    "9.0": "2.0",
 }
 
 
 class Server(object):
     class PublishMode:
-        Append = 'Append'
-        Overwrite = 'Overwrite'
-        CreateNew = 'CreateNew'
+        Append = "Append"
+        Overwrite = "Overwrite"
+        CreateNew = "CreateNew"
 
     def __init__(self, server_address, use_server_version=False):
         self._server_address = server_address
@@ -81,8 +104,8 @@ class Server(object):
     def _get_legacy_version(self):
         response = self._session.get(self.server_address + "/auth?format=xml")
         info_xml = ET.fromstring(response.content)
-        prod_version = info_xml.find('.//product_version').text
-        version = _PRODUCT_TO_REST_VERSION.get(prod_version, '2.1')  # 2.1
+        prod_version = info_xml.find(".//product_version").text
+        version = _PRODUCT_TO_REST_VERSION.get(prod_version, "2.1")  # 2.1
         return version
 
     def _determine_highest_version(self):
@@ -104,6 +127,7 @@ class Server(object):
     def use_highest_version(self):
         self.use_server_version()
         import warnings
+
         warnings.warn("use use_server_version instead", DeprecationWarning)
 
     def assert_at_least_version(self, version):
@@ -111,7 +135,8 @@ class Server(object):
         minimum_supported = Version(version)
         if server_version < minimum_supported:
             error = "This endpoint is not available in API version {}. Requires {}".format(
-                server_version, minimum_supported)
+                server_version, minimum_supported
+            )
             raise EndpointUnavailableError(error)
 
     @property
@@ -125,21 +150,21 @@ class Server(object):
     @property
     def auth_token(self):
         if self._auth_token is None:
-            error = 'Missing authentication token. You must sign in first.'
+            error = "Missing authentication token. You must sign in first."
             raise NotSignedInError(error)
         return self._auth_token
 
     @property
     def site_id(self):
         if self._site_id is None:
-            error = 'Missing site ID. You must sign in first.'
+            error = "Missing site ID. You must sign in first."
             raise NotSignedInError(error)
         return self._site_id
 
     @property
     def user_id(self):
         if self._user_id is None:
-            error = 'Missing user ID. You must sign in first.'
+            error = "Missing user ID. You must sign in first."
             raise NotSignedInError(error)
         return self._user_id
 

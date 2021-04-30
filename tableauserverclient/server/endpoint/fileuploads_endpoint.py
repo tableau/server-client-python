@@ -8,13 +8,13 @@ import logging
 # For when a datasource is over 64MB, break it into 5MB(standard chunk size) chunks
 CHUNK_SIZE = 1024 * 1024 * 5  # 5MB
 
-logger = logging.getLogger('tableau.endpoint.fileuploads')
+logger = logging.getLogger("tableau.endpoint.fileuploads")
 
 
 class Fileuploads(Endpoint):
     def __init__(self, parent_srv):
         super(Fileuploads, self).__init__(parent_srv)
-        self.upload_id = ''
+        self.upload_id = ""
 
     @property
     def baseurl(self):
@@ -23,10 +23,10 @@ class Fileuploads(Endpoint):
     @api(version="2.0")
     def initiate(self):
         url = self.baseurl
-        server_response = self.post_request(url, '')
+        server_response = self.post_request(url, "")
         fileupload_item = FileuploadItem.from_response(server_response.content, self.parent_srv.namespace)
         self.upload_id = fileupload_item.upload_session_id
-        logger.info('Initiated file upload session (ID: {0})'.format(self.upload_id))
+        logger.info("Initiated file upload session (ID: {0})".format(self.upload_id))
         return self.upload_id
 
     @api(version="2.0")
@@ -36,13 +36,13 @@ class Fileuploads(Endpoint):
             raise MissingRequiredFieldError(error)
         url = "{0}/{1}".format(self.baseurl, self.upload_id)
         server_response = self.put_request(url, xml_request, content_type)
-        logger.info('Uploading a chunk to session (ID: {0})'.format(self.upload_id))
+        logger.info("Uploading a chunk to session (ID: {0})".format(self.upload_id))
         return FileuploadItem.from_response(server_response.content, self.parent_srv.namespace)
 
     def read_chunks(self, file):
         file_opened = False
         try:
-            file_content = open(file, 'rb')
+            file_content = open(file, "rb")
             file_opened = True
         except TypeError:
             file_content = file

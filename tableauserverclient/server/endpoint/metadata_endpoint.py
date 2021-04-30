@@ -4,7 +4,7 @@ import logging
 import json
 
 
-logger = logging.getLogger('tableau.endpoint.metadata')
+logger = logging.getLogger("tableau.endpoint.metadata")
 
 
 def is_valid_paged_query(parsed_query):
@@ -12,9 +12,11 @@ def is_valid_paged_query(parsed_query):
     Also check that we are asking for the pageInfo object, so we get the endCursor. There
     is no way to do this relilably without writing a GraphQL parser, so simply check that
     that the string contains 'hasNextPage' and 'endCursor'"""
-    return all(k in parsed_query['variables'] for k in ('first', 'afterToken')) and \
-        'hasNextPage' in parsed_query['query'] and \
-        'endCursor' in parsed_query['query']
+    return (
+        all(k in parsed_query["variables"] for k in ("first", "afterToken"))
+        and "hasNextPage" in parsed_query["query"]
+        and "endCursor" in parsed_query["query"]
+    )
 
 
 def extract_values(obj, key):
@@ -40,8 +42,8 @@ def extract_values(obj, key):
 
 
 def get_page_info(result):
-    next_page = extract_values(result, 'hasNextPage').pop()
-    cursor = extract_values(result, 'endCursor').pop()
+    next_page = extract_values(result, "hasNextPage").pop()
+    cursor = extract_values(result, "endCursor").pop()
     return next_page, cursor
 
 
@@ -56,20 +58,20 @@ class Metadata(Endpoint):
 
     @api("3.5")
     def query(self, query, variables=None, abort_on_error=False):
-        logger.info('Querying Metadata API')
+        logger.info("Querying Metadata API")
         url = self.baseurl
 
         try:
-            graphql_query = json.dumps({'query': query, 'variables': variables})
+            graphql_query = json.dumps({"query": query, "variables": variables})
         except Exception as e:
-            raise InvalidGraphQLQuery('Must provide a string')
+            raise InvalidGraphQLQuery("Must provide a string")
 
         # Setting content type because post_reuqest defaults to text/xml
-        server_response = self.post_request(url, graphql_query, content_type='text/json')
+        server_response = self.post_request(url, graphql_query, content_type="text/json")
         results = server_response.json()
 
-        if abort_on_error and results.get('errors', None):
-            raise GraphQLError(results['errors'])
+        if abort_on_error and results.get("errors", None):
+            raise GraphQLError(results["errors"])
 
         return results
 
@@ -87,32 +89,34 @@ class Metadata(Endpoint):
 
     @api("3.5")
     def paginated_query(self, query, variables=None, abort_on_error=False):
-        logger.info('Querying Metadata API using a Paged Query')
+        logger.info("Querying Metadata API using a Paged Query")
         url = self.baseurl
 
         if variables is None:
             # default paramaters
-            variables = {'first': 100, 'afterToken': None}
-        elif (('first' in variables) and ('afterToken' not in variables)):
+            variables = {"first": 100, "afterToken": None}
+        elif ("first" in variables) and ("afterToken" not in variables):
             # they passed a page size but not a token, probably because they're starting at `null` token
-            variables.update({'afterToken': None})
+            variables.update({"afterToken": None})
 
-        graphql_query = json.dumps({'query': query, 'variables': variables})
+        graphql_query = json.dumps({"query": query, "variables": variables})
         parsed_query = json.loads(graphql_query)
 
         if not is_valid_paged_query(parsed_query):
-            raise InvalidGraphQLQuery('Paged queries must have a `$first` and `$afterToken` variables as well as '
-                                      'a pageInfo object with `endCursor` and `hasNextPage`')
+            raise InvalidGraphQLQuery(
+                "Paged queries must have a `$first` and `$afterToken` variables as well as "
+                "a pageInfo object with `endCursor` and `hasNextPage`"
+            )
 
-        results_dict = {'pages': []}
-        paginated_results = results_dict['pages']
+        results_dict = {"pages": []}
+        paginated_results = results_dict["pages"]
 
         # get first page
-        server_response = self.post_request(url, graphql_query, content_type='text/json')
+        server_response = self.post_request(url, graphql_query, content_type="text/json")
         results = server_response.json()
 
-        if abort_on_error and results.get('errors', None):
-            raise GraphQLError(results['errors'])
+        if abort_on_error and results.get("errors", None):
+            raise GraphQLError(results["errors"])
 
         paginated_results.append(results)
 
@@ -121,18 +125,18 @@ class Metadata(Endpoint):
 
         while has_another_page:
             # Update the page
-            variables.update({'afterToken': cursor})
+            variables.update({"afterToken": cursor})
             # make the call
             logger.debug("Calling Token: " + cursor)
-            graphql_query = json.dumps({'query': query, 'variables': variables})
-            server_response = self.post_request(url, graphql_query, content_type='text/json')
+            graphql_query = json.dumps({"query": query, "variables": variables})
+            server_response = self.post_request(url, graphql_query, content_type="text/json")
             results = server_response.json()
             # verify response
-            if abort_on_error and results.get('errors', None):
-                raise GraphQLError(results['errors'])
+            if abort_on_error and results.get("errors", None):
+                raise GraphQLError(results["errors"])
             # save results and repeat
             paginated_results.append(results)
             has_another_page, cursor = get_page_info(results)
 
-        logger.info('Sucessfully got all results for paged query')
+        logger.info("Sucessfully got all results for paged query")
         return results_dict

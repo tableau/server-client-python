@@ -8,8 +8,8 @@ from .exceptions import UnpopulatedPropertyError
 
 class ProjectItem(object):
     class ContentPermissions:
-        LockedToProject = 'LockedToProject'
-        ManagedByOwner = 'ManagedByOwner'
+        LockedToProject = "LockedToProject"
+        ManagedByOwner = "ManagedByOwner"
 
     def __init__(self, name, description=None, content_permissions=None, parent_id=None):
         self._content_permissions = None
@@ -80,17 +80,23 @@ class ProjectItem(object):
 
     @owner_id.setter
     def owner_id(self, value):
-        raise NotImplementedError('REST API does not currently support updating project owner.')
+        raise NotImplementedError("REST API does not currently support updating project owner.")
 
     def is_default(self):
-        return self.name.lower() == 'default'
+        return self.name.lower() == "default"
 
     def _parse_common_tags(self, project_xml, ns):
         if not isinstance(project_xml, ET.Element):
-            project_xml = ET.fromstring(project_xml).find('.//t:project', namespaces=ns)
+            project_xml = ET.fromstring(project_xml).find(".//t:project", namespaces=ns)
 
         if project_xml is not None:
-            (_, name, description, content_permissions, parent_id) = self._parse_element(project_xml)
+            (
+                _,
+                name,
+                description,
+                content_permissions,
+                parent_id,
+            ) = self._parse_element(project_xml)
             self._set_values(None, name, description, content_permissions, parent_id)
         return self
 
@@ -112,16 +118,27 @@ class ProjectItem(object):
         self._permissions = permissions
 
     def _set_default_permissions(self, permissions, content_type):
-        setattr(self, "_default_{content}_permissions".format(content=content_type), permissions)
+        setattr(
+            self,
+            "_default_{content}_permissions".format(content=content_type),
+            permissions,
+        )
 
     @classmethod
     def from_response(cls, resp, ns):
         all_project_items = list()
         parsed_response = ET.fromstring(resp)
-        all_project_xml = parsed_response.findall('.//t:project', namespaces=ns)
+        all_project_xml = parsed_response.findall(".//t:project", namespaces=ns)
 
         for project_xml in all_project_xml:
-            (id, name, description, content_permissions, parent_id, owner_id) = cls._parse_element(project_xml)
+            (
+                id,
+                name,
+                description,
+                content_permissions,
+                parent_id,
+                owner_id,
+            ) = cls._parse_element(project_xml)
             project_item = cls(name)
             project_item._set_values(id, name, description, content_permissions, parent_id, owner_id)
             all_project_items.append(project_item)
@@ -129,13 +146,13 @@ class ProjectItem(object):
 
     @staticmethod
     def _parse_element(project_xml):
-        id = project_xml.get('id', None)
-        name = project_xml.get('name', None)
-        description = project_xml.get('description', None)
-        content_permissions = project_xml.get('contentPermissions', None)
-        parent_id = project_xml.get('parentProjectId', None)
+        id = project_xml.get("id", None)
+        name = project_xml.get("name", None)
+        description = project_xml.get("description", None)
+        content_permissions = project_xml.get("contentPermissions", None)
+        parent_id = project_xml.get("parentProjectId", None)
         owner_id = None
         for owner in project_xml:
-            owner_id = owner.get('id', None)
+            owner_id = owner.get("id", None)
 
         return id, name, description, content_permissions, parent_id, owner_id
