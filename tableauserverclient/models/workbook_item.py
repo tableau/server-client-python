@@ -11,7 +11,15 @@ from .permissions_item import PermissionsRule
 from ..datetime_helpers import parse_datetime
 import copy
 
-from typing import Dict, List, Mapping, Optional, TYPE_CHECKING, Union
+from typing import (
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Set,
+    TYPE_CHECKING,
+    Union,
+)
 
 if TYPE_CHECKING:
     from .connection_item import ConnectionItem
@@ -38,7 +46,7 @@ class WorkbookItem(object):
         self.owner_id = None
         self.project_id = project_id
         self.show_tabs = show_tabs
-        self.tags = set()
+        self.tags: Set[str] = set()
         self.data_acceleration_config = {
             "acceleration_enabled": None,
             "accelerate_now": None,

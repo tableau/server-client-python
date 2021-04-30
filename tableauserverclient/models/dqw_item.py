@@ -81,14 +81,6 @@ class DQWItem(object):
         self._severe = value
 
     @property
-    def active(self):
-        return self._active
-
-    @active.setter
-    def active(self, value):
-        self._active = value
-
-    @property
     def created_at(self):
         return self._created_at
 
