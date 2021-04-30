@@ -51,7 +51,6 @@ ALLOWED_FILE_EXTENSIONS = ["twb", "twbx"]
 logger = logging.getLogger("tableau.endpoint.workbooks")
 
 PathOrFile = Union[os.PathLike, IO[Any]]
-
 T = TypeVar("T")
 
 
@@ -182,7 +181,7 @@ class Workbooks(QuerysetEndpoint):
     def download(
         self,
         workbook_id: str,
-        filepath: Optional[Union["os.PathLike[Any]", IO[Any]]] = None,
+        filepath: os.PathLike = None,
         include_extract: bool = True,
         no_extract: Optional[bool] = None,
     ) -> str:

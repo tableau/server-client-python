@@ -22,8 +22,22 @@ import cgi
 from contextlib import closing
 
 from pathlib import Path
-from typing import List, Dict, Sequence, Mapping, Optional, Tuple, Union, TYPE_CHECKING, Any, TextIO, TypeVar
-
+from typing import (
+    Any,
+    Dict,
+    List,
+    IO,
+    Mapping,
+    Optional,
+    runtime_checkable,
+    Sequence,
+    Tuple,
+    TYPE_CHECKING,
+    TypeVar,
+    Union,
+    Protocol,
+    Generic,
+)
 
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
@@ -35,6 +49,15 @@ logger = logging.getLogger("tableau.endpoint.datasources")
 if TYPE_CHECKING:
     from ..server import Server
     from ...models import PermissionsRule
+
+PathOrFile = Union[os.PathLike, IO[Any]]
+T = TypeVar("T")
+
+
+@runtime_checkable
+class Readable(Protocol, Generic[T]):
+    def read(self) -> T:
+        ...
 
 
 class Datasources(QuerysetEndpoint):
@@ -105,7 +128,11 @@ class Datasources(QuerysetEndpoint):
     @parameter_added_in(no_extract="2.5")
     @parameter_added_in(include_extract="2.5")
     def download(
-        self, datasource_id: str, filepath: str = None, include_extract: bool = True, no_extract: Optional[bool] = None
+        self,
+        datasource_id: str,
+        filepath: os.PathLike = None,
+        include_extract: bool = True,
+        no_extract: Optional[bool] = None,
     ) -> str:
         if not datasource_id:
             error = "Datasource ID undefined."
@@ -200,15 +227,14 @@ class Datasources(QuerysetEndpoint):
     def publish(
         self,
         datasource_item: DatasourceItem,
-        file,
+        file: PathOrFile,
         mode: str,
         connection_credentials: ConnectionCredentials = None,
         connections: Sequence[ConnectionItem] = None,
         as_job: bool = False,
     ) -> Union[DatasourceItem, JobItem]:
 
-        try:
-
+        if isinstance(file, (Path, str)):
             if not os.path.isfile(file):
                 error = "File path does not lead to an existing file."
                 raise IOError(error)
@@ -224,7 +250,7 @@ class Datasources(QuerysetEndpoint):
                 error = "Only {} files can be published as datasources.".format(", ".join(ALLOWED_FILE_EXTENSIONS))
                 raise ValueError(error)
 
-        except TypeError:
+        else:
 
             if not datasource_item.name:
                 error = "Datasource item must have a name when passing a file object"
@@ -265,10 +291,10 @@ class Datasources(QuerysetEndpoint):
         else:
             logger.info("Publishing {0} to server".format(filename))
 
-            try:
+            if isinstance(file, (Path, str)):
                 with open(file, "rb") as f:
                     file_contents = f.read()
-            except TypeError:
+            elif isinstance(file, Readable):
                 file_contents = file.read()
 
             xml_request, content_type = RequestFactory.Datasource.publish_req(
