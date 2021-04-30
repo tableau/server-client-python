@@ -111,7 +111,7 @@ The field name cane be input as normal for ascending or prefixed with `-` for de
 The following code sorts the workbooks in ascending order:
 
 ```py
-matching_workbooks = server.workbooks.sort('name')
+matching_workbooks = server.workbooks.order_by('name')
 
 for wb in matching_workbooks:
     print(wb.name)
@@ -120,7 +120,7 @@ for wb in matching_workbooks:
 Sort can take multiple args, with desc direction added as a (-) prefix 
 
 ```py
-workbooks = workbooks.sort("project_name", "-created_at")
+workbooks = workbooks.order_by("project_name", "-created_at")
 ```
 
 ### More detailed examples
@@ -133,7 +133,7 @@ workbooks = server.workbooks.all()
 workbooks = workbooks.filter(project_name=project_name)
 
 # sort can take multiple args, with desc direction added as a (-) prefix 
-workbooks = workbooks.sort("project_name", "-created_at")
+workbooks = workbooks.order_by("project_name", "-created_at")
 
 # pagination take these two keywords
 workbooks = workbooks.paginate(page_size=10, page_number=2) 
@@ -146,7 +146,7 @@ for workbook in workbooks:
 print(workbooks.total_available, workbooks.page_size, workbooks.page_number) 
 
 # methods can be chained
-all_workbooks = server.workbooks.filter(project_name=project_name).sort("-project_name")
+all_workbooks = server.workbooks.filter(project_name=project_name).order_by("-project_name")
 
 # operators are implemented using dunderscore
 all_workbooks = server.workbooks.filter(project_name__in=["Project A", "Project B"])
