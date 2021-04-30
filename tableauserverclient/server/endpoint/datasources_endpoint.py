@@ -105,11 +105,7 @@ class Datasources(QuerysetEndpoint):
     @parameter_added_in(no_extract="2.5")
     @parameter_added_in(include_extract="2.5")
     def download(
-        self,
-        datasource_id: str,
-        filepath: str = None,
-        include_extract: bool = True,
-        no_extract: Optional[bool] = None
+        self, datasource_id: str, filepath: str = None, include_extract: bool = True, no_extract: Optional[bool] = None
     ) -> str:
         if not datasource_id:
             error = "Datasource ID undefined."
@@ -120,8 +116,7 @@ class Datasources(QuerysetEndpoint):
             import warnings
 
             warnings.warn(
-                "no_extract is deprecated, use include_extract instead.",
-                DeprecationWarning,
+                "no_extract is deprecated, use include_extract instead.", DeprecationWarning,
             )
             include_extract = not no_extract
 
@@ -208,7 +203,7 @@ class Datasources(QuerysetEndpoint):
         mode: str,
         connection_credentials: ConnectionCredentials = None,
         connections: Sequence[ConnectionItem] = None,
-        as_job: bool = False
+        as_job: bool = False,
     ) -> Union[DatasourceItem, JobItem]:
 
         try:
@@ -276,11 +271,7 @@ class Datasources(QuerysetEndpoint):
                 file_contents = file.read()
 
             xml_request, content_type = RequestFactory.Datasource.publish_req(
-                datasource_item,
-                filename,
-                file_contents,
-                connection_credentials,
-                connections,
+                datasource_item, filename, file_contents, connection_credentials, connections,
             )
 
         # Send the publishing request to server

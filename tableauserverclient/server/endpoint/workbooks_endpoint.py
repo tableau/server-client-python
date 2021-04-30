@@ -83,7 +83,7 @@ class Workbooks(QuerysetEndpoint):
         workbook_item: WorkbookItem,
         encrypt: bool = False,
         includeAll: bool = True,
-        datasources: Optional[List["DatasourceItem"]] = None
+        datasources: Optional[List["DatasourceItem"]] = None,
     ) -> JobItem:
         id_ = getattr(workbook_item, "id", workbook_item)
         url = "{0}/{1}/createExtract?encrypt={2}".format(self.baseurl, id_, encrypt)
@@ -157,7 +157,7 @@ class Workbooks(QuerysetEndpoint):
         workbook_id: str,
         filepath: Optional[Union["os.PathLike[Any]", IO[Any]]] = None,
         include_extract: bool = True,
-        no_extract: Optional[bool] = None
+        no_extract: Optional[bool] = None,
     ) -> str:
         if not workbook_id:
             error = "Workbook ID undefined."
@@ -168,8 +168,7 @@ class Workbooks(QuerysetEndpoint):
             import warnings
 
             warnings.warn(
-                "no_extract is deprecated, use include_extract instead.",
-                DeprecationWarning,
+                "no_extract is deprecated, use include_extract instead.", DeprecationWarning,
             )
             include_extract = not no_extract
 
@@ -207,9 +206,7 @@ class Workbooks(QuerysetEndpoint):
             url += "?includeUsageStatistics=true"
         server_response = self.get_request(url)
         views = ViewItem.from_response(
-            server_response.content,
-            self.parent_srv.namespace,
-            workbook_id=workbook_item.id,
+            server_response.content, self.parent_srv.namespace, workbook_id=workbook_item.id,
         )
         return views
 
@@ -226,8 +223,9 @@ class Workbooks(QuerysetEndpoint):
         workbook_item._set_connections(connection_fetcher)
         logger.info("Populated connections for workbook (ID: {0})".format(workbook_item.id))
 
-    def _get_workbook_connections(self, workbook_item: WorkbookItem,
-                                  req_options: "RequestOptions" = None) -> List[ConnectionItem]:
+    def _get_workbook_connections(
+        self, workbook_item: WorkbookItem, req_options: "RequestOptions" = None
+    ) -> List[ConnectionItem]:
         url = "{0}/{1}/connections".format(self.baseurl, workbook_item.id)
         server_response = self.get_request(url, req_options)
         connections = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
@@ -297,15 +295,14 @@ class Workbooks(QuerysetEndpoint):
         connections: Optional[Sequence[ConnectionItem]] = None,
         as_job: bool = False,
         hidden_views: Optional[Sequence[str]] = None,
-        skip_connection_check: bool = False
+        skip_connection_check: bool = False,
     ) -> Union[JobItem, WorkbookItem]:
 
         if connection_credentials is not None:
             import warnings
 
             warnings.warn(
-                "connection_credentials is being deprecated. Use connections instead",
-                DeprecationWarning,
+                "connection_credentials is being deprecated. Use connections instead", DeprecationWarning,
             )
 
         try:
@@ -372,10 +369,7 @@ class Workbooks(QuerysetEndpoint):
             url = "{0}&uploadSessionId={1}".format(url, upload_session_id)
             conn_creds = connection_credentials
             xml_request, content_type = RequestFactory.Workbook.publish_req_chunked(
-                workbook_item,
-                connection_credentials=conn_creds,
-                connections=connections,
-                hidden_views=hidden_views,
+                workbook_item, connection_credentials=conn_creds, connections=connections, hidden_views=hidden_views,
             )
         else:
             logger.info("Publishing {0} to server".format(filename))

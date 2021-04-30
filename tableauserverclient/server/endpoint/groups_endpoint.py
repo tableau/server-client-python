@@ -33,10 +33,7 @@ class Groups(Endpoint):
         # Define an inner function that we bind to the model_item's `.user` property.
 
         def user_pager():
-            return Pager(
-                lambda options: self._get_users_for_group(group_item, options),
-                req_options,
-            )
+            return Pager(lambda options: self._get_users_for_group(group_item, options), req_options,)
 
         group_item._set_users(user_pager)
 

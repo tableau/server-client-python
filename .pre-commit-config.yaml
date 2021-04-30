@@ -21,9 +21,9 @@ repos:
           - requests-mock
           - pytest
         stages: [commit]
-    -   id: pycodestyle
-        name: pycodestyle
-        entry: pycodestyle tableauserverclient samples test
+    -   id: black
+        name: black
+        entry: black --line-length 120 tableauserverclient
         language: python
         'types': [python]
         pass_filenames: false

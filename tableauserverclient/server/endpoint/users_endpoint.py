@@ -112,10 +112,7 @@ class Users(QuerysetEndpoint):
             raise MissingRequiredFieldError(error)
 
         def groups_for_user_pager():
-            return Pager(
-                lambda options: self._get_groups_for_user(user_item, options),
-                req_options,
-            )
+            return Pager(lambda options: self._get_groups_for_user(user_item, options), req_options,)
 
         user_item._set_groups(groups_for_user_pager)
 

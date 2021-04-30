@@ -42,13 +42,7 @@ class Endpoint(object):
             return server_response.content
 
     def _make_request(
-        self,
-        method,
-        url,
-        content=None,
-        auth_token=None,
-        content_type=None,
-        parameters=None,
+        self, method, url, content=None, auth_token=None, content_type=None, parameters=None,
     ):
         parameters = parameters or {}
         parameters.update(self.parent_srv.http_options)
@@ -105,10 +99,7 @@ class Endpoint(object):
                 url = request_object.apply_query_params(url)
 
         return self._make_request(
-            self.parent_srv.session.get,
-            url,
-            auth_token=self.parent_srv.auth_token,
-            parameters=parameters,
+            self.parent_srv.session.get, url, auth_token=self.parent_srv.auth_token, parameters=parameters,
         )
 
     def delete_request(self, url):

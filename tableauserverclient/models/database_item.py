@@ -243,9 +243,7 @@ class DatabaseItem(object):
 
     def _set_default_permissions(self, permissions, content_type):
         setattr(
-            self,
-            "_default_{content}_permissions".format(content=content_type),
-            permissions,
+            self, "_default_{content}_permissions".format(content=content_type), permissions,
         )
 
     def _set_data_quality_warnings(self, dqw):

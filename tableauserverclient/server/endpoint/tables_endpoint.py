@@ -72,10 +72,7 @@ class Tables(Endpoint):
             raise MissingRequiredFieldError(error)
 
         def column_fetcher():
-            return Pager(
-                lambda options: self._get_columns_for_table(table_item, options),
-                req_options,
-            )
+            return Pager(lambda options: self._get_columns_for_table(table_item, options), req_options,)
 
         table_item._set_columns(column_fetcher)
         logger.info("Populated columns for table (ID: {0}".format(table_item.id))
