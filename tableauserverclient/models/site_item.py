@@ -49,7 +49,7 @@ class SiteItem(object):
         tier_viewer_capacity=None,
         data_alerts_enabled=True,
         commenting_mentions_enabled=True,
-        catalog_obfuscation_enabled=False,
+        catalog_obfuscation_enabled=True,
         flow_auto_save_enabled=True,
         web_extraction_enabled=True,
         metrics_content_type_enabled=True,
