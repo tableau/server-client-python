@@ -2569,19 +2569,17 @@ SubscriptionItem(subject, schedule_id, user_id, target)
 Name | Description
 :--- | :---
 `id` |   The id of the subscription on the site.
-`attach_image` | Setting this `True` will cause the subscriber to receive mail with .png images of workbooks or views attached to it. By default, this value is set to `True`. If subscriptions to attachments are disabled in Tableau server or site settings, then making a request that sets `attach_image` to `False` will cause an error.
-`attach_pdf` | Setting this `True` will cause the subscriber to receive mail with a .pdf file containing images of workbooks or views attached to it. By default, this value is set to `False`. If subscriptions to attachments are disabled in Tableau server or site settings, then making a request that sets `attach_pdf` to `True` will cause an error.
+`attach_image` | Setting this to `True` will cause the subscriber to receive mail with .png images of workbooks or views attached to it. By default, this value is set to `True`. If `attach_pdf` is set to `False`, then this value cannot be set to `False`.
+`attach_pdf` | Setting this to `True` will cause the subscriber to receive mail with a .pdf file containing images of workbooks or views attached to it. By default, this value is set to `False`.
 `message` | The text body of the subscription email message.
 `page_orientation` | The orientation of the pages produced when `attach_pdf` is `True`. If this parameter is not present the page orientation will default to `Portrait`. See chart below for a full list of values.
 `page_size_option` | The type of page produced, which determines the page dimensions when `attach_pdf` is `True`. If this parameter is not present the page type will default to `Letter`. See chart below for a full list of values.
 `schedule_id` | The id of the schedule associated with the specific subscription.
-`schedule_name` | The name of the schedule associated with the specific subscription.
 `send_if_view_empty` | Applies to views only (see `target` attribute). If `True`, an image is sent even if the view specified in a subscription is empty. If `False`, nothing is sent if the view is empty. The default value is `True`.
 `subject`|  The subject of the subscription. This is the description that you provide to identify the subscription.
 `suspended` | Setting this value to `True` stops email delivery for the specified subscription. Setting it to `False` will resume email delivery for the subscription.
 `target` | The target of the subscription, that is, the content that is subscribed to (view, workbook). The target is an instance of the `target` class. The `target` has two properties, the `id` of the workbook or view (`target.id`), and the `type` (`target.type`), which can either `view` or `workbook`. The `send_if_view_empty` attribute can only be set to `True` if the `target.type` is set to `View`.
 `user_id` | The identifier of the user (person) who receives the subscription.
-`user_name` | The name of the user (person) who receives the subscription.
 
 <br>
 **Valid PDF options (applies only if `attach_pdf` is set to `True`)**
