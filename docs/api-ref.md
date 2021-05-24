@@ -676,7 +676,7 @@ datasource.update(datasource_item)
 
 Updates the specified data source. 
 
-REST API: [Update Datasource](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_data_source)
+REST API: [Update Data Source](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_data_source)
 
 **Parameters**
 
