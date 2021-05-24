@@ -2,7 +2,6 @@ import unittest
 import sys
 from io import BytesIO
 import os
-sys.path.append('d:\\dev\\git\\server-client-python\\.eggs\\requests_mock-1.9.1-py3.7.egg')
 import requests_mock
 import xml.etree.ElementTree as ET
 from zipfile import ZipFile
