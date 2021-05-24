@@ -1,5 +1,4 @@
 import unittest
-import sys
 from io import BytesIO
 import os
 import requests_mock
