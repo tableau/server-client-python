@@ -2690,15 +2690,30 @@ SubscriptionItem(subject, schedule_id, user_id, target)
 Name | Description
 :--- | :---
 `id` |   The id of the subscription on the site.
+`attach_image` | Setting this to `True` will cause the subscriber to receive mail with .png images of workbooks or views attached to it. By default, this value is set to `True`. If `attach_pdf` is set to `False`, then this value cannot be set to `False`.
+`attach_pdf` | Setting this to `True` will cause the subscriber to receive mail with a .pdf file containing images of workbooks or views attached to it. By default, this value is set to `False`.
+`message` | The text body of the subscription email message.
+`page_orientation` | The orientation of the pages produced when `attach_pdf` is `True`. If this parameter is not present the page orientation will default to `Portrait`. See chart below for a full list of values.
+`page_size_option` | The type of page produced, which determines the page dimensions when `attach_pdf` is `True`. If this parameter is not present the page type will default to `Letter`. See chart below for a full list of values.
+`schedule_id` | The id of the schedule associated with the specific subscription.
+`send_if_view_empty` | Applies to views only (see `target` attribute). If `True`, an image is sent even if the view specified in a subscription is empty. If `False`, nothing is sent if the view is empty. The default value is `True`.
 `subject`|  The subject of the subscription. This is the description that you provide to identify the subscription.
-`schedule_id` | The identifier associated with the specific subscription.
+`suspended` | Setting this value to `True` stops email delivery for the specified subscription. Setting it to `False` will resume email delivery for the subscription.
+`target` | The target of the subscription, that is, the content that is subscribed to (view, workbook). The target is an instance of the `target` class. The `target` has two properties, the `id` of the workbook or view (`target.id`), and the `type` (`target.type`), which can either `view` or `workbook`. The `send_if_view_empty` attribute can only be set to `True` if the `target.type` is set to `View`.
 `user_id` | The identifier of the user (person) who receives the subscription.
-`target` | The target of the subscription, that is, the content that is subscribed to (view, workbook). The target is an instance of the `target` class. The `target` has two properties, the `id` of the workbook or view (`target.id`), and the `type` (`target.type`), which can either `view` or `workbook`.
+
+<br>
+**Valid PDF options (applies only if `attach_pdf` is set to `True`)**
+
+Attribute | Valid options
+:--- | :---
+`page_orientation` | `TSC.PDFRequestOptions.Orientation.Landscape` <br> `TSC.PDFRequestOptions.Orientation.Portrait`
+`page_size_option` | `TSC.PDFRequestOptions.PageType.A3`<br> `TSC.PDFRequestOptions.PageType.A4`<br> `TSC.PDFRequestOptions.PageType.A5`<br> `TSC.PDFRequestOptions.PageType.B5`<br> `TSC.PDFRequestOptions.PageType.Executive`<br> `TSC.PDFRequestOptions.PageType.Folio`<br>  `TSC.PDFRequestOptions.PageType.Ledger`<br> `TSC.PDFRequestOptions.PageType.Legal`<br> `TSC.PDFRequestOptions.PageType.Letter`<br> `TSC.PDFRequestOptions.PageType.Note`<br> `TSC.PDFRequestOptions.PageType.Quarto`<br> `TSC.PDFRequestOptions.PageType.Tabloid`
 
 
-
-
-Source files: server/endpoints/subscription_item.py
+Source files:
+server/endpoints/subscription_item.py
+server/request_options.py
 
 
 ###  Subscription methods
@@ -2717,7 +2732,7 @@ Source files: server/endpoints/subscriptions_endpoint.py
 ```py
 subscription.create(subscription_item)
 ```
-Creates a subscription to a view or workbook for a specific user.
+Creates a subscription to a view or workbook for a specific user on a specific schedule.
 When a user is subscribed to the content, Tableau Server sends the content to the user in email on the schedule that's defined on Tableau Server and specified in the `subscription_item`.
 
 To create a new subscription you need to first create a new `subscription_item` (from `SubscriptionItem` class).
@@ -2729,7 +2744,7 @@ REST API: [Create Subscription](https://help.tableau.com/current/api/rest_api/en
 
 Name   |  Description
  :--- | : ---
-`subscription_item` |  Specifies the user to subscribe, the content to subscribe to, the schedule to associate the subscription with, and the subject, or description for the subscription.
+`subscription_item` |  Specifies the user to subscribe, the content to subscribe to, the schedule to associate the subscription with, and other metadata for the subscription.
 
 
 **Returns**
@@ -2742,28 +2757,29 @@ Returns the new `SubscriptionItem` object.
 **Example**
 
 ```py
-# import tableauserverclient as TSC
-# server = TSC.Server('server')
-# create auth, specify site
-# login, etc.
+# Create the target (content) of the subscription with its ID and type.
+# ID can be obtained by calling workbooks.get() or views.get().
+target = TSC.Target('c7a9327e-1cda-4504-b026-ddb43b976d1d', 'workbook')
 
+# Store the schedule ID and user ID.
+# IDs can be obtained by calling schedules.get() and users.get().
+schedule_id = 'b60b4efd-a6f7-4599-beb3-cb677e7abac1'
+user_id = '28ce5884-ed38-49a9-aa10-8f5fbd59bbf6'
 
-# create the target (content) of the subscription
-# in this case, id of the workbook and the target type "workbook"
+# Create the new SubscriptionItem object with variables from above.
+new_sub = TSC.SubscriptionItem('My Subscription', schedule_id, user_id, target)
 
-  target = TSC.Target('c7a9327e-1cda-4504-b026-ddb43b976d1d', 'workbook')
+# (Optional) Set other fields. Any of these can be added or removed.
+new_sub.attach_image = False
+new_sub.attach_pdf = True
+new_sub.message = "You have an alert!"
+new_sub.page_orientation = TSC.PDFRequestOptions.Orientation.Landscape
+new_sub.page_size_option = TSC.PDFRequestOptions.PageType.B4
+new_sub.send_if_view_empty = True
 
-# the ids for  the schedule and user
-  schedule_id = 'b60b4efd-a6f7-4599-beb3-cb677e7abac1'
-  user_id = 'b60b4efd-a6f7-4599-beb3-cb677e7abac1'
-
-# create a new SubscriptionItem object.
-  newSub = TSC.SubscriptionItem('My Subscription', schedule_id, user_id, target)
-
-# create the new subscription to the site
-  newSub = server.subscriptions.create(newSub)
-  print(newSub.subject)
-
+# Create the new subscription on the site you are logged in.
+new_sub = server.subscriptions.create(new_sub)
+print(new_sub.subject)
 ```
 
 
@@ -2883,9 +2899,51 @@ The `SubscriptionItem`.  See [SubscriptionItem class](#subscriptionitem-class)
 
 ```
 
+<br>
+<br>
+
+#### subscription.update
+
+```py
+subscription.update(subscription_item)
+```
+Updates a specific subscription. To update a subscription, you must first query it from server using the `subscriptions.get()` or `subscriptions.get_by_id()` method.
 
 
+REST API: [Update Subscription](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_subscription)
 
+**Parameters**
+
+Name   |  Description
+ :--- | : ---
+`subscription_item` |  Specifies the user to subscribe, the content to subscribe to, the schedule to associate the subscription with, and other metadata for the subscription.
+
+
+**Returns**
+
+Returns the updated `SubscriptionItem` object.
+
+
+**Example**
+
+```py
+# Fetch an existing subscription from server. You can also use the subscriptions.get() method
+sub = server.subscriptions.get_by_id('59cec1ec-15a0-4eb3-bc9d-056b87aa0a18')
+
+# Set update-able fields. Any of these can be added or removed.
+sub.subject = "Updated subject"
+sub.attach_image = True
+sub.attach_pdf = True
+sub.page_orientation = TSC.PDFRequestOptions.Orientation.Landscape
+sub.page_size_option = TSC.PDFRequestOptions.PageType.Folio
+sub.suspended = True
+sub.schedule_id = 'cf2f4465-9c4b-4536-b7cc-59994e9b7dde'
+sub.send_if_view_empty = True
+
+# Create the new subscription on the site you are logged in.
+sub = server.subscriptions.update(sub)
+print(new_sub.subject)
+```
 
 <br>
 <br>
