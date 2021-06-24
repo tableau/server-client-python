@@ -11,6 +11,7 @@ from tableauserverclient.server.endpoint.exceptions import InternalServerError
 from tableauserverclient.server.request_factory import RequestFactory
 from ._utils import read_xml_asset, read_xml_assets, asset
 
+
 ADD_TAGS_XML = 'datasource_add_tags.xml'
 GET_XML = 'datasource_get.xml'
 GET_EMPTY_XML = 'datasource_get_empty.xml'
@@ -106,25 +107,28 @@ class DatasourceTests(unittest.TestCase):
         response_xml = read_xml_asset(UPDATE_XML)
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', text=response_xml)
-            single_datasource = TSC.DatasourceItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
+            single_datasource = TSC.DatasourceItem('1d0304cd-3796-429f-b815-7258370b9b74', 'Sample datasource')
             single_datasource.owner_id = 'dd2239f6-ddf1-4107-981a-4cf94e415794'
+            single_datasource._content_url = 'Sampledatasource'
             single_datasource._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
             single_datasource.certified = True
             single_datasource.certification_note = "Warning, here be dragons."
-            single_datasource = self.server.datasources.update(single_datasource)
+            updated_datasource = self.server.datasources.update(single_datasource)
 
-        self.assertEqual('9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', single_datasource.id)
-        self.assertEqual('1d0304cd-3796-429f-b815-7258370b9b74', single_datasource.project_id)
-        self.assertEqual('dd2239f6-ddf1-4107-981a-4cf94e415794', single_datasource.owner_id)
-        self.assertEqual(True, single_datasource.certified)
-        self.assertEqual("Warning, here be dragons.", single_datasource.certification_note)
+        self.assertEqual(updated_datasource.id, single_datasource.id)
+        self.assertEqual(updated_datasource.name, single_datasource.name)
+        self.assertEqual(updated_datasource.content_url, single_datasource.content_url)
+        self.assertEqual(updated_datasource.project_id, single_datasource.project_id)
+        self.assertEqual(updated_datasource.owner_id, single_datasource.owner_id)
+        self.assertEqual(updated_datasource.certified, single_datasource.certified)
+        self.assertEqual(updated_datasource.certification_note, single_datasource.certification_note)
 
     def test_update_copy_fields(self):
         with open(asset(UPDATE_XML), 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', text=response_xml)
-            single_datasource = TSC.DatasourceItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
+            single_datasource = TSC.DatasourceItem('1d0304cd-3796-429f-b815-7258370b9b74', 'test')
             single_datasource._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
             single_datasource._project_name = 'Tester'
             updated_datasource = self.server.datasources.update(single_datasource)
@@ -152,7 +156,7 @@ class DatasourceTests(unittest.TestCase):
         response_xml = read_xml_asset(POPULATE_CONNECTIONS_XML)
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/connections', text=response_xml)
-            single_datasource = TSC.DatasourceItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
+            single_datasource = TSC.DatasourceItem('1d0304cd-3796-429f-b815-7258370b9b74', 'test')
             single_datasource.owner_id = 'dd2239f6-ddf1-4107-981a-4cf94e415794'
             single_datasource._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
             self.server.datasources.populate_connections(single_datasource)
@@ -180,7 +184,7 @@ class DatasourceTests(unittest.TestCase):
             m.put(self.baseurl +
                   '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/connections/be786ae0-d2bf-4a4b-9b34-e2de8d2d4488',
                   text=response_xml)
-            single_datasource = TSC.DatasourceItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
+            single_datasource = TSC.DatasourceItem('1d0304cd-3796-429f-b815-7258370b9b74')
             single_datasource.owner_id = 'dd2239f6-ddf1-4107-981a-4cf94e415794'
             single_datasource._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
             self.server.datasources.populate_connections(single_datasource)
@@ -201,7 +205,7 @@ class DatasourceTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/0448d2ed-590d-4fa0-b272-a2a8a24555b5/permissions', text=response_xml)
-            single_datasource = TSC.DatasourceItem('test')
+            single_datasource = TSC.DatasourceItem('1d0304cd-3796-429f-b815-7258370b9b74', 'test')
             single_datasource._id = '0448d2ed-590d-4fa0-b272-a2a8a24555b5'
 
             self.server.datasources.populate_permissions(single_datasource)
@@ -226,7 +230,7 @@ class DatasourceTests(unittest.TestCase):
         response_xml = read_xml_asset(PUBLISH_XML)
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
-            new_datasource = TSC.DatasourceItem('SampleDS', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+            new_datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'SampleDS')
             publish_mode = self.server.PublishMode.CreateNew
 
             new_datasource = self.server.datasources.publish(new_datasource,
@@ -247,7 +251,7 @@ class DatasourceTests(unittest.TestCase):
         response_xml = read_xml_asset(PUBLISH_XML)
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
-            new_datasource = TSC.DatasourceItem('SampleDS', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+            new_datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'SampleDS')
             publish_mode = self.server.PublishMode.CreateNew
 
             with open(asset('SampleDS.tds'), 'rb') as file_object:
@@ -269,7 +273,7 @@ class DatasourceTests(unittest.TestCase):
         response_xml = read_xml_asset(PUBLISH_XML)
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
-            new_datasource = TSC.DatasourceItem('SampleDS', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+            new_datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'SampleDS')
             publish_mode = self.server.PublishMode.CreateNew
 
             # Create a dummy tdsx file in memory
@@ -299,7 +303,7 @@ class DatasourceTests(unittest.TestCase):
         response_xml = read_xml_asset(PUBLISH_XML_ASYNC)
         with requests_mock.mock() as m:
             m.post(baseurl, text=response_xml)
-            new_datasource = TSC.DatasourceItem('SampleDS', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+            new_datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'SampleDS')
             publish_mode = self.server.PublishMode.CreateNew
 
             new_job = self.server.datasources.publish(new_datasource,
@@ -380,40 +384,40 @@ class DatasourceTests(unittest.TestCase):
         os.remove(file_path)
 
     def test_update_missing_id(self):
-        single_datasource = TSC.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+        single_datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'test')
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.datasources.update, single_datasource)
 
     def test_publish_missing_path(self):
-        new_datasource = TSC.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+        new_datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'test')
         self.assertRaises(IOError, self.server.datasources.publish, new_datasource,
                           '', self.server.PublishMode.CreateNew)
 
     def test_publish_missing_mode(self):
-        new_datasource = TSC.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+        new_datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'test')
         self.assertRaises(ValueError, self.server.datasources.publish, new_datasource,
                           asset('SampleDS.tds'), None)
 
     def test_publish_invalid_file_type(self):
-        new_datasource = TSC.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+        new_datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'test')
         self.assertRaises(ValueError, self.server.datasources.publish, new_datasource,
                           asset('SampleWB.twbx'), self.server.PublishMode.Append)
 
     def test_publish_hyper_file_object_raises_exception(self):
-        new_datasource = TSC.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+        new_datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'test')
         with open(asset('World Indicators.hyper')) as file_object:
             self.assertRaises(ValueError, self.server.datasources.publish, new_datasource,
                               file_object, self.server.PublishMode.Append)
 
     def test_publish_tde_file_object_raises_exception(self):
 
-        new_datasource = TSC.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+        new_datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'test')
         tds_asset = asset(os.path.join('Data', 'Tableau Samples', 'World Indicators.tde'))
         with open(tds_asset) as file_object:
             self.assertRaises(ValueError, self.server.datasources.publish, new_datasource,
                               file_object, self.server.PublishMode.Append)
 
     def test_publish_file_object_of_unknown_type_raises_exception(self):
-        new_datasource = TSC.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+        new_datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'test')
 
         with BytesIO() as file_object:
             file_object.write(bytes.fromhex('89504E470D0A1A0A'))

@@ -6,7 +6,7 @@ import logging
 import copy
 import urllib.parse
 
-logger = logging.getLogger('tableau.endpoint.resource_tagger')
+logger = logging.getLogger("tableau.endpoint.resource_tagger")
 
 
 class _ResourceTagger(Endpoint):
@@ -47,4 +47,4 @@ class _ResourceTagger(Endpoint):
             if add_set:
                 resource_item.tags = self._add_tags(baseurl, resource_item.id, add_set)
             resource_item._initial_tags = copy.copy(resource_item.tags)
-        logger.info('Updated tags to {0}'.format(resource_item.tags))
+        logger.info("Updated tags to {0}".format(resource_item.tags))
