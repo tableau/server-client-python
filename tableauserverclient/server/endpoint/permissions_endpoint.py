@@ -44,7 +44,7 @@ class _PermissionsEndpoint(Endpoint):
 
         for rule in rules:
             for capability, mode in rule.capabilities.items():
-                "              /permissions/groups/group-id/capability-name/capability-mode"
+                "/permissions/groups/group-id/capability-name/capability-mode"
                 url = "{0}/{1}/permissions/{2}/{3}/{4}/{5}".format(
                     self.owner_baseurl(),
                     resource.id,

@@ -17,7 +17,7 @@ class ServerInfo(Endpoint):
 
     @api(version="2.4")
     def get(self):
-        """ Retrieve the server info for the server.  This is an unauthenticated call """
+        """Retrieve the server info for the server.  This is an unauthenticated call"""
         try:
             server_response = self.get_unauthenticated_request(self.baseurl)
         except ServerResponseError as e:
