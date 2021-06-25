@@ -1,0 +1,4 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+    <project id="cb3759e5-da4a-4ade-b916-7e2b4ea7ec86" name="Test Project Permissions" description="Project created for testing" contentPermissions="LockedToProjectWithoutNested" parentProjectId="7687bc43-a543-42f3-b86f-80caed03a813" />
+</tsResponse>
