@@ -3202,6 +3202,7 @@ The possible user roles for the `site_role` attribute are the following:
 * `ReadOnly`
 * `Viewer`
 
+Note: If any operations related to a user's `site_role` cause a 400 error response (for example: `Invalid site role: 'Explorer' is malformed or is not a supported user role in this version of Tableau`), ensure you are [using the latest REST API version for your server](versions#use-the-rest-api-version-supported-by-the-server).
 
 **Example**
 

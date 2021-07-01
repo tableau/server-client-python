@@ -23,11 +23,13 @@ server = TSC.Server('http://SERVER_URL')
 print(server.version)
 ```
 
-For example, the code might display version `2.3`.
+For example, the code might display version `3.10`.
 
 ## Use the REST API version supported by the server
 
-There are two options for always using the the latest version of the REST API that is supported by the instance of Tableau Server you are connecting to. This could be necessary in cases where you're using an API feature that is only supported in a newer REST API version.
+It's recommended to always use the latest REST API version supported by the server. This helps ensure you'll get the latest behaviors as documented here and in the Tableau REST API documentation.
+
+There are two options for always using the the latest version supported by the instance of Tableau Server you are connecting to:
 
 The first method is to specify `use_server_version=True` as one of the arguments, for example:
 
