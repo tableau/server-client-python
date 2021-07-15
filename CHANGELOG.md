@@ -2,7 +2,7 @@
 * Documentation updates (#800, #818, #839, #842)
 * Fixed data alert repr in subscription item (#821)
 * Added support for Data Quality Warning (#836)
-* Updated request factory to add name attribute (#843)
+* Added support for renaming datasources (#843)
 * Improved Datasource tests (#843)
 * Updated catalog obfuscation field (#844)
 * Fixed revision limit field in site_item.py file (#847)
