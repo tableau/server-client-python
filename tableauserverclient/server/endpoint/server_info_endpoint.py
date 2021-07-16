@@ -1,9 +1,13 @@
 from .endpoint import Endpoint, api
-from .exceptions import ServerResponseError, ServerInfoEndpointNotFoundError, EndpointUnavailableError
+from .exceptions import (
+    ServerResponseError,
+    ServerInfoEndpointNotFoundError,
+    EndpointUnavailableError,
+)
 from ...models import ServerInfoItem
 import logging
 
-logger = logging.getLogger('tableau.endpoint.server_info')
+logger = logging.getLogger("tableau.endpoint.server_info")
 
 
 class ServerInfo(Endpoint):

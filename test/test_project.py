@@ -9,6 +9,7 @@ TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
 GET_XML = asset('project_get.xml')
 UPDATE_XML = asset('project_update.xml')
+SET_CONTENT_PERMISSIONS_XML = asset('project_content_permission.xml')
 CREATE_XML = asset('project_create.xml')
 POPULATE_PERMISSIONS_XML = 'project_populate_permissions.xml'
 POPULATE_WORKBOOK_DEFAULT_PERMISSIONS_XML = 'project_populate_workbook_default_permissions.xml'
@@ -82,6 +83,23 @@ class ProjectTests(unittest.TestCase):
         self.assertEqual('Project created for testing', single_project.description)
         self.assertEqual('LockedToProject', single_project.content_permissions)
         self.assertEqual('9a8f2265-70f3-4494-96c5-e5949d7a1120', single_project.parent_id)
+
+    def test_content_permission_locked_to_project_without_nested(self):
+        with open(SET_CONTENT_PERMISSIONS_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.put(self.baseurl + '/cb3759e5-da4a-4ade-b916-7e2b4ea7ec86', text=response_xml)
+            project_item = TSC.ProjectItem(name='Test Project Permissions',
+                                           content_permissions='LockedToProjectWithoutNested',
+                                           description='Project created for testing',
+                                           parent_id='7687bc43-a543-42f3-b86f-80caed03a813')
+            project_item._id = 'cb3759e5-da4a-4ade-b916-7e2b4ea7ec86'
+            project_item = self.server.projects.update(project_item)
+        self.assertEqual('cb3759e5-da4a-4ade-b916-7e2b4ea7ec86', project_item.id)
+        self.assertEqual('Test Project Permissions', project_item.name)
+        self.assertEqual('Project created for testing', project_item.description)
+        self.assertEqual('LockedToProjectWithoutNested', project_item.content_permissions)
+        self.assertEqual('7687bc43-a543-42f3-b86f-80caed03a813', project_item.parent_id)
 
     def test_update_datasource_default_permission(self):
         response_xml = read_xml_asset(UPDATE_DATASOURCE_DEFAULT_PERMISSIONS_XML)

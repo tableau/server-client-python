@@ -67,5 +67,9 @@ python setup.py test
 Our CI runs include a Python lint run, so you should run this locally and fix complaints before committing as this will fail your checkin.
 
 ```shell
-pycodestyle tableauserverclient test samples
+# this will run the formatter without making changes
+black --line-length 120 tableauserverclient --check
+
+# this will format the directory and code for you
+black --line-length 120 tableauserverclient
 ```

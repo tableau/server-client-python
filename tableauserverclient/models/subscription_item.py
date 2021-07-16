@@ -4,7 +4,6 @@ from .property_decorators import property_is_boolean
 
 
 class SubscriptionItem(object):
-
     def __init__(self, subject, schedule_id, user_id, target):
         self._id = None
         self.attach_image = True
@@ -21,11 +20,15 @@ class SubscriptionItem(object):
 
     def __repr__(self):
         if self.id is not None:
-            return "<Subscription#{id} subject({subject}) schedule_id({schedule_id}) user_id({user_id}) \
-                target({target})".format(**self.__dict__)
+            return "<Subscription#{_id} subject({subject}) schedule_id({schedule_id}) user_id({user_id}) \
+                target({target})".format(
+                **self.__dict__
+            )
         else:
             return "<Subscription subject({subject}) schedule_id({schedule_id}) user_id({user_id}) \
-                target({target})".format(**self.__dict__)
+                target({target})".format(
+                **self.__dict__
+            )
 
     @property
     def id(self):
@@ -70,44 +73,43 @@ class SubscriptionItem(object):
     @classmethod
     def from_response(cls, xml, ns):
         parsed_response = ET.fromstring(xml)
-        all_subscriptions_xml = parsed_response.findall(
-            './/t:subscription', namespaces=ns)
+        all_subscriptions_xml = parsed_response.findall(".//t:subscription", namespaces=ns)
 
         all_subscriptions = [SubscriptionItem._parse_element(x, ns) for x in all_subscriptions_xml]
         return all_subscriptions
 
     @classmethod
     def _parse_element(cls, element, ns):
-        schedule_element = element.find('.//t:schedule', namespaces=ns)
-        content_element = element.find('.//t:content', namespaces=ns)
-        user_element = element.find('.//t:user', namespaces=ns)
+        schedule_element = element.find(".//t:schedule", namespaces=ns)
+        content_element = element.find(".//t:content", namespaces=ns)
+        user_element = element.find(".//t:user", namespaces=ns)
 
         # Schedule element
         schedule_id = None
         if schedule_element is not None:
-            schedule_id = schedule_element.get('id', None)
+            schedule_id = schedule_element.get("id", None)
 
         # Content element
         target = None
         send_if_view_empty = None
         if content_element is not None:
-            target = Target(content_element.get('id', None), content_element.get('type'))
-            send_if_view_empty = string_to_bool(content_element.get('sendIfViewEmpty', ''))
+            target = Target(content_element.get("id", None), content_element.get("type"))
+            send_if_view_empty = string_to_bool(content_element.get("sendIfViewEmpty", ""))
 
         # User element
         user_id = None
         if user_element is not None:
-            user_id = user_element.get('id', None)
+            user_id = user_element.get("id", None)
 
         # Main attributes
-        id_ = element.get('id', None)
-        subject = element.get('subject', None)
-        attach_image = string_to_bool(element.get('attachImage', ''))
-        attach_pdf = string_to_bool(element.get('attachPdf', ''))
-        message = element.get('message', None)
-        page_orientation = element.get('pageOrientation', None)
-        page_size_option = element.get('pageSizeOption', None)
-        suspended = string_to_bool(element.get('suspended', ''))
+        id_ = element.get("id", None)
+        subject = element.get("subject", None)
+        attach_image = string_to_bool(element.get("attachImage", ""))
+        attach_pdf = string_to_bool(element.get("attachPdf", ""))
+        message = element.get("message", None)
+        page_orientation = element.get("pageOrientation", None)
+        page_size_option = element.get("pageSizeOption", None)
+        suspended = string_to_bool(element.get("suspended", ""))
 
         # Create SubscriptionItem and set fields
         sub = cls(subject, schedule_id, user_id, target)
@@ -125,4 +127,4 @@ class SubscriptionItem(object):
 
 # Used to convert string represented boolean to a boolean type
 def string_to_bool(s):
-    return s.lower() == 'true'
+    return s.lower() == "true"
