@@ -1315,7 +1315,7 @@ Source files: server/endpoint/jobs_endpoint.py
 
 
 ```py
-jobs.get(job_id)
+jobs.get_by_id(job_id)
 
 ```
 
@@ -1362,7 +1362,7 @@ Returns the `JobItem` requested.
 
 
     myJobId = '576b616d-341a-4539-b32c-1ed0eb9db548'
-    jobinfo = server.jobs.get(myJobID)
+    jobinfo = server.jobs.get_by_id(myJobId)
 
     print(jobinfo)
 
