@@ -1311,7 +1311,7 @@ Source files: server/endpoint/jobs_endpoint.py
 <br>
 
 
-#### jobs.get
+#### jobs.get_by_id
 
 
 ```py
