@@ -10,6 +10,7 @@ from .view_item import ViewItem
 from .permissions_item import PermissionsRule
 from ..datetime_helpers import parse_datetime
 import copy
+import uuid
 
 
 class WorkbookItem(object):
@@ -274,6 +275,10 @@ class WorkbookItem(object):
                 views,
                 data_acceleration_config,
             ) = cls._parse_element(workbook_xml, ns)
+
+            # workaround for Personal Space workbooks which won't have a project
+            if not project_id:
+                project_id = uuid.uuid4()
 
             workbook_item = cls(project_id)
             workbook_item._set_values(
