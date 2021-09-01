@@ -9,7 +9,7 @@
 # publish the datasource using the chunking method.
 #
 # For more information, refer to the documentations:
-# (https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_datasources.htm#publish_data_source)
+# (https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#publish_data_source)
 #
 # For signing into server, this script uses personal access tokens. For
 # more information on personal access tokens, refer to the documentations:
