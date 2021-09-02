@@ -289,7 +289,7 @@ The `DatasourceItem` represents the data source resources on Tableau Server. Thi
 
 Name | Description
 :--- | :---
-`ask_data_enablement` | Determines if a data source allows use of Ask Data. The value can be `TSC.DatasourceItem.AskDataEnablement.Enabled`, `TSC.DatasourceItem.AskDataEnablement.Disabled`, or `TSC.DatasourceItem.AskDataEnablement.SiteDefault`. If no setting is specified, it will default to SiteDefault. See [REST API Publish Datasource](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_datasources.htm#publish_data_source) for more information about ask_data_enablement.
+`ask_data_enablement` | Determines if a data source allows use of Ask Data. The value can be `TSC.DatasourceItem.AskDataEnablement.Enabled`, `TSC.DatasourceItem.AskDataEnablement.Disabled`, or `TSC.DatasourceItem.AskDataEnablement.SiteDefault`. If no setting is specified, it will default to SiteDefault. See [REST API Publish Datasource](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#publish_data_source) for more information about ask_data_enablement.
 `connections` |  The list of data connections (`ConnectionItem`) for the specified data source. You must first call the `populate_connections` method to access this data. See the [ConnectionItem class](#connectionitem-class).
 `content_url` |  The name of the data source as it would appear in a URL.
 `created_at` |  The date and time when the data source was created.
@@ -630,7 +630,7 @@ datasource.refresh(datasource_item)
 
 Refreshes the data of the specified extract.
 
-REST API: [Update Data Source Now](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_datasources.htm#update_data_source_now)
+REST API: [Update Data Source Now](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#update_data_source_now)
 
 **Parameters**
 
