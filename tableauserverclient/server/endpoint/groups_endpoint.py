@@ -1,4 +1,4 @@
-from .endpoint import Endpoint, api
+from .endpoint import Endpoint, QuerysetEndpoint, api
 from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, GroupItem, UserItem, PaginationItem, JobItem
 from ..pager import Pager
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from ..request_options import RequestOptions
 
 
-class Groups(Endpoint):
+class Groups(QuerysetEndpoint):
     @property
     def baseurl(self) -> str:
         return "{0}/sites/{1}/groups".format(self.parent_srv.baseurl, self.parent_srv.site_id)
