@@ -18,6 +18,7 @@ class QuerySet:
 
     def __iter__(self):
         self.request_options.pagenumber = 1
+        self._result_cache = None
         total = self.total_available
         size = self.page_size
         yield from self._result_cache
