@@ -1,6 +1,7 @@
 from .request_options import RequestOptions
 from .filter import Filter
 from .sort import Sort
+import math
 
 
 def to_camel_case(word):
@@ -13,27 +14,26 @@ class QuerySet:
         self.request_options = RequestOptions()
         self._result_cache = None
         self._pagination_item = None
-        self._count = 0
 
     def __iter__(self):
-        if self._count == getattr(self._pagination_item, 'total_available', None):
-            for result in self._result_cache:
-                yield result
-            return
-        self._fetch_all()
-        cache = self._result_cache.copy()
-        while self._count < self._pagination_item.total_available:
-            if len(cache) == 0:
-                cache = self._load_next_page()
-            try:
-                yield cache.pop(0)
-                self._count += 1
-            except IndexError:
-                return None
+        for page in range(math.ceil(self.total_available / self.page_size)):
+            yield from self._result_cache
+            self._pagination_item.pagenumber = page
+            self._load_next_page()
 
 
     def __getitem__(self, k):
-        return list(self)[k]
+        page = self.page_number
+        size = self.page_size
+        if k in range((page - 1) * size, page*size):
+            idx = k - ( size * (page - 1) )
+            return self._result_cache[idx]
+        else:
+            self._result_cache = None
+            self.request_options.pagenumber = math.ceil(k / size)
+            return self[k]
+            
+
 
     def _fetch_all(self):
         """
@@ -103,6 +103,4 @@ class QuerySet:
 
     def _load_next_page(self):
         self.request_options.pagenumber += 1
-        cache, self._pagination_item = self.model.get(self.request_options)
-        self._result_cache += cache
-        return cache
+        self._result_cache, self._pagination_item = self.model.get(self.request_options)
