@@ -13,10 +13,24 @@ class QuerySet:
         self.request_options = RequestOptions()
         self._result_cache = None
         self._pagination_item = None
+        self._count = 0
 
     def __iter__(self):
+        if self._count == getattr(self._pagination_item, 'total_available'):
+            for result in self._result_cache:
+                yield result
+            return
         self._fetch_all()
-        return iter(self._result_cache)
+        cache = self._result_cache.copy()
+        while self._count < self._pagination_item.total_available:
+            if len(cache) == 0:
+                cache = self._load_next_page()
+            try:
+                yield cache.pop(0)
+                self._count += 1
+            except IndexError:
+                return None
+
 
     def __getitem__(self, k):
         return list(self)[k]
@@ -86,3 +100,9 @@ class QuerySet:
         if key not in RequestOptions.Field.__dict__.values():
             raise ValueError("Sort key name %s is not valid.", key)
         return (key, direction)
+
+    def _load_next_page(self):
+        self.request_options.pagenumber += 1
+        cache, self._pagination_item = self.model.get(self.request_options)
+        self._result_cache += cache
+        return cache
