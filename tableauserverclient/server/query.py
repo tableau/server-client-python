@@ -16,7 +16,7 @@ class QuerySet:
         self._count = 0
 
     def __iter__(self):
-        if self._count == getattr(self._pagination_item, 'total_available'):
+        if self._count == getattr(self._pagination_item, 'total_available', None):
             for result in self._result_cache:
                 yield result
             return
