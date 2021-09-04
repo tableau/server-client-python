@@ -15,6 +15,7 @@ class QuerySet:
         self._result_cache = None
         self._pagination_item = None
 
+
     def __iter__(self):
         for page in range(math.ceil(self.total_available / self.page_size)):
             yield from self._result_cache
@@ -32,7 +33,6 @@ class QuerySet:
             self._result_cache = None
             self.request_options.pagenumber = math.ceil(k / size)
             return self[k]
-            
 
 
     def _fetch_all(self):
