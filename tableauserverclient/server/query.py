@@ -17,10 +17,15 @@ class QuerySet:
 
 
     def __iter__(self):
-        for page in range(math.ceil(self.total_available / self.page_size)):
+        self.request_options.pagenumber = 1
+        total = self.total_available
+        size = self.page_size
+        yield from self._result_cache
+        for page in range(1, math.ceil(total / size)):
+            self.request_options.pagenumber = page + 1
+            self._result_cache = None
+            self._fetch_all()
             yield from self._result_cache
-            self._pagination_item.pagenumber = page
-            self._load_next_page()
 
 
     def __getitem__(self, k):
@@ -100,7 +105,3 @@ class QuerySet:
         if key not in RequestOptions.Field.__dict__.values():
             raise ValueError("Sort key name %s is not valid.", key)
         return (key, direction)
-
-    def _load_next_page(self):
-        self.request_options.pagenumber += 1
-        self._result_cache, self._pagination_item = self.model.get(self.request_options)
