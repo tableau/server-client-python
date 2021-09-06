@@ -33,7 +33,7 @@ class QuerySet:
         page = self.page_number
         size = self.page_size
         if k in range((page - 1) * size, page*size):
-            idx = k - ( size * (page - 1) )
+            idx = k % size
             return self._result_cache[idx]
         else:
             self._result_cache = None
