@@ -25,6 +25,7 @@ from .endpoint import (
     Favorites,
     DataAlerts,
     Fileuploads,
+    FlowRuns
 )
 from .endpoint.exceptions import (
     EndpointUnavailableError,
@@ -85,6 +86,7 @@ class Server(object):
         self.data_alerts = DataAlerts(self)
         self.fileuploads = Fileuploads(self)
         self._namespace = Namespace()
+        self.flowruns = FlowRuns(self)
 
         if use_server_version:
             self.use_server_version()

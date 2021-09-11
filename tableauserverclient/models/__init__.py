@@ -10,6 +10,7 @@ from .exceptions import UnpopulatedPropertyError
 from .favorites_item import FavoriteItem
 from .group_item import GroupItem
 from .flow_item import FlowItem
+from .flowrun_item import FlowRunItem
 from .interval_item import (
     IntervalItem,
     DailyInterval,

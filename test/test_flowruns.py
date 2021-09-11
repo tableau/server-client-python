@@ -12,7 +12,7 @@ GET_XML = 'flowruns_get.xml'
 GET_BY_ID_XML = 'flowruns_get_by_id.xml'
 
 
-class FlowTests(unittest.TestCase):
+class FlowRunTests(unittest.TestCase):
     def setUp(self):
         self.server = TSC.Server('http://test')
 
@@ -47,7 +47,7 @@ class FlowTests(unittest.TestCase):
     def test_get_by_id(self):
         response_xml = read_xml_asset(GET_BY_ID_XML)
         with requests_mock.mock() as m:
-            m.get(self.baseurl + "/cc2e652d-4a9b-4476-8c93-b238c45db968")
+            m.get(self.baseurl + "/cc2e652d-4a9b-4476-8c93-b238c45db968", text=response_xml)
             flowrun = self.server.flowruns.get_by_id("cc2e652d-4a9b-4476-8c93-b238c45db968")
         
         self.assertEqual('cc2e652d-4a9b-4476-8c93-b238c45db968', flowrun.id)
@@ -55,5 +55,5 @@ class FlowTests(unittest.TestCase):
         self.assertEqual('2021-02-11T01:57:38Z', format_datetime(flowrun.completed_at))
         self.assertEqual('Success', flowrun.status)
         self.assertEqual('100', flowrun.progress)
-        self.assertEqual('aa23f4ac-906f-11e9-86fb-3f0f71412e77', flowrun.background_job_id)
+        self.assertEqual('1ad21a9d-2530-4fbf-9064-efd3c736e023', flowrun.background_job_id)
 
