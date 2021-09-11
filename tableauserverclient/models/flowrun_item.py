@@ -1,20 +1,17 @@
-from typing import Any, Dict, Mapping
 import xml.etree.ElementTree as ET
-from .property_decorators import property_not_nullable
 from ..datetime_helpers import parse_datetime
 import itertools
-from datetime import datetime
 
 
 class FlowRunItem(object):
     def __init__(self) -> None:
-        self._id: str = None
-        self._flow_id: str = None
-        self._status: str = None
-        self._started_at: datetime = None
-        self._completed_at: datetime = None
-        self._progress: str = None
-        self._background_job_id: str = None
+        self._id=None
+        self._flow_id=None
+        self._status=None
+        self._started_at=None
+        self._completed_at=None
+        self._progress=None
+        self._background_job_id=None
 
     
     @property
@@ -54,13 +51,13 @@ class FlowRunItem(object):
 
     def _set_values(
         self,
-        id: str,
-        flow_id: str,
-        status: str,
-        started_at: datetime,
-        completed_at: datetime,
-        progress: str,
-        background_job_id: str
+        id,
+        flow_id,
+        status,
+        started_at,
+        completed_at,
+        progress,
+        background_job_id,
     ):
         if id is not None:
             self._id = id
@@ -96,7 +93,7 @@ class FlowRunItem(object):
 
 
     @staticmethod
-    def _parse_element(flowrun_xml: ET.Element, ns: Mapping[str, str]) -> Dict[str, Any]:
+    def _parse_element(flowrun_xml, ns):
         result = {}
         result['id'] = flowrun_xml.get("id", None)
         result['flow_id'] = flowrun_xml.get("flowId", None)

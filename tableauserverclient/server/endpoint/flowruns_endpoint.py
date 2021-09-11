@@ -1,3 +1,4 @@
+from tableauserverclient.models import flowrun_item
 from .endpoint import Endpoint, api
 from .. import FlowRunItem, PaginationItem
 
@@ -42,6 +43,7 @@ class FlowRuns(Endpoint):
         if not flowrun_id:
             error = "Flow ID undefined."
             raise ValueError(error)
-        url = "{0}/{1}".format(self.baseurl, flowrun_id)
+        id_ = getattr(flowrun_id, 'id', flowrun_id)
+        url = "{0}/{1}".format(self.baseurl, id_)
         self.put_request(url)
-        logger.info("Deleted single flow (ID: {0})".format(flowrun_id))
+        logger.info("Deleted single flow (ID: {0})".format(id_))

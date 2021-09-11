@@ -57,3 +57,14 @@ class FlowRunTests(unittest.TestCase):
         self.assertEqual('100', flowrun.progress)
         self.assertEqual('1ad21a9d-2530-4fbf-9064-efd3c736e023', flowrun.background_job_id)
 
+    def test_cancel_id(self):
+        with requests_mock.mock() as m:
+            m.put(self.baseurl + '/ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', status_code=204)
+            self.server.flowruns.cancel('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+
+    def test_cancel_item(self):
+        run = TSC.FlowRunItem()
+        run._id = 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760'
+        with requests_mock.mock() as m:
+            m.put(self.baseurl + '/ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', status_code=204)
+            self.server.flowruns.cancel(run)
