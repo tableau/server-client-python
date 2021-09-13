@@ -1,5 +1,5 @@
 from tableauserverclient.models import flowrun_item
-from .endpoint import Endpoint, api
+from .endpoint import Endpoint, QuerysetEndpoint, api
 from .. import FlowRunItem, PaginationItem
 
 import logging
@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger("tableau.endpoint.flowruns")
 
 
-class FlowRuns(Endpoint):
+class FlowRuns(QuerysetEndpoint):
     def __init__(self, parent_srv):
         super(FlowRuns, self).__init__(parent_srv)
 
