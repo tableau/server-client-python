@@ -12,6 +12,7 @@ GET_XML = 'flow_get.xml'
 POPULATE_CONNECTIONS_XML = 'flow_populate_connections.xml'
 POPULATE_PERMISSIONS_XML = 'flow_populate_permissions.xml'
 UPDATE_XML = 'flow_update.xml'
+REFRESH_XML = 'flow_refresh.xml'
 
 
 class FlowTests(unittest.TestCase):
@@ -113,3 +114,22 @@ class FlowTests(unittest.TestCase):
                 TSC.Permission.Capability.Write: TSC.Permission.Mode.Allow,
                 TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow,
             })
+
+    def test_refresh(self):
+        with open(asset(REFRESH_XML), 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.post(self.baseurl + '/92967d2d-c7e2-46d0-8847-4802df58f484/run', text=response_xml)
+            flow_item = TSC.FlowItem('test')
+            flow_item._id = '92967d2d-c7e2-46d0-8847-4802df58f484'
+            refresh_job = self.server.flows.refresh(flow_item)
+
+            self.assertEqual(refresh_job.id, 'd1b2ccd0-6dfa-444a-aee4-723dbd6b7c9d')
+            self.assertEqual(refresh_job.mode, 'Asynchronous')
+            self.assertEqual(refresh_job.type, 'RunFlow')
+            self.assertEqual(format_datetime(refresh_job.created_at), '2018-05-22T13:00:29Z')
+            self.assertIsInstance(refresh_job.flowrun, TSC.FlowRunItem)
+            self.assertEqual(refresh_job.flowrun.id, 'e0c3067f-2333-4eee-8028-e0a56ca496f6')
+            self.assertEqual(refresh_job.flowrun.flow_id, '92967d2d-c7e2-46d0-8847-4802df58f484')
+            self.assertEqual(format_datetime(refresh_job.flowrun.started_at), '2018-05-22T13:00:29Z')
+
