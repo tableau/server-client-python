@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from .flowrun_item import FlowRunItem
+from .flow_run_item import FlowRunItem
 from ..datetime_helpers import parse_datetime
 
 

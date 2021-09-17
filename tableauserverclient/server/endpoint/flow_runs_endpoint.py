@@ -1,4 +1,3 @@
-from tableauserverclient.models import flowrun_item
 from .endpoint import Endpoint, QuerysetEndpoint, api
 from .. import FlowRunItem, PaginationItem
 
