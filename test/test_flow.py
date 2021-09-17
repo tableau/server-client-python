@@ -128,8 +128,8 @@ class FlowTests(unittest.TestCase):
             self.assertEqual(refresh_job.mode, 'Asynchronous')
             self.assertEqual(refresh_job.type, 'RunFlow')
             self.assertEqual(format_datetime(refresh_job.created_at), '2018-05-22T13:00:29Z')
-            self.assertIsInstance(refresh_job.flowrun, TSC.FlowRunItem)
-            self.assertEqual(refresh_job.flowrun.id, 'e0c3067f-2333-4eee-8028-e0a56ca496f6')
-            self.assertEqual(refresh_job.flowrun.flow_id, '92967d2d-c7e2-46d0-8847-4802df58f484')
-            self.assertEqual(format_datetime(refresh_job.flowrun.started_at), '2018-05-22T13:00:29Z')
+            self.assertIsInstance(refresh_job.flow_run, TSC.FlowRunItem)
+            self.assertEqual(refresh_job.flow_run.id, 'e0c3067f-2333-4eee-8028-e0a56ca496f6')
+            self.assertEqual(refresh_job.flow_run.flow_id, '92967d2d-c7e2-46d0-8847-4802df58f484')
+            self.assertEqual(format_datetime(refresh_job.flow_run.started_at), '2018-05-22T13:00:29Z')
 

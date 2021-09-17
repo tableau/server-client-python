@@ -86,7 +86,7 @@ class Server(object):
         self.data_alerts = DataAlerts(self)
         self.fileuploads = Fileuploads(self)
         self._namespace = Namespace()
-        self.flowruns = FlowRuns(self)
+        self.flow_runs = FlowRuns(self)
 
         if use_server_version:
             self.use_server_version()

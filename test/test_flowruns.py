@@ -21,13 +21,13 @@ class FlowRunTests(unittest.TestCase):
         self.server._auth_token = 'j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM'
         self.server.version = "3.10"
 
-        self.baseurl = self.server.flowruns.baseurl
+        self.baseurl = self.server.flow_runs.baseurl
 
     def test_get(self):
         response_xml = read_xml_asset(GET_XML)
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
-            all_flowruns, pagination_item = self.server.flowruns.get()
+            all_flowruns, pagination_item = self.server.flow_runs.get()
 
         self.assertEqual(2, pagination_item.total_available)
         self.assertEqual('cc2e652d-4a9b-4476-8c93-b238c45db968', all_flowruns[0].id)
@@ -48,7 +48,7 @@ class FlowRunTests(unittest.TestCase):
         response_xml = read_xml_asset(GET_BY_ID_XML)
         with requests_mock.mock() as m:
             m.get(self.baseurl + "/cc2e652d-4a9b-4476-8c93-b238c45db968", text=response_xml)
-            flowrun = self.server.flowruns.get_by_id("cc2e652d-4a9b-4476-8c93-b238c45db968")
+            flowrun = self.server.flow_runs.get_by_id("cc2e652d-4a9b-4476-8c93-b238c45db968")
         
         self.assertEqual('cc2e652d-4a9b-4476-8c93-b238c45db968', flowrun.id)
         self.assertEqual('2021-02-11T01:42:55Z', format_datetime(flowrun.started_at))
@@ -60,11 +60,11 @@ class FlowRunTests(unittest.TestCase):
     def test_cancel_id(self):
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', status_code=204)
-            self.server.flowruns.cancel('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+            self.server.flow_runs.cancel('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
 
     def test_cancel_item(self):
         run = TSC.FlowRunItem()
         run._id = 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760'
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', status_code=204)
-            self.server.flowruns.cancel(run)
+            self.server.flow_runs.cancel(run)
