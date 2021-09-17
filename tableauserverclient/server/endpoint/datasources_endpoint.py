@@ -18,6 +18,7 @@ import logging
 import copy
 import cgi
 from contextlib import closing
+import json
 
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
@@ -281,6 +282,34 @@ class Datasources(QuerysetEndpoint):
             new_datasource = DatasourceItem.from_response(server_response.content, self.parent_srv.namespace)[0]
             logger.info("Published {0} (ID: {1})".format(filename, new_datasource.id))
             return new_datasource
+
+    @api(version="3.13")
+    def update_data(self, datasource_or_connection_item, *, request_id, actions, payload = None):
+        if isinstance(datasource_or_connection_item, DatasourceItem):
+            datasource_id = datasource_or_connection_item.id
+            url = "{0}/{1}/data".format(self.baseurl, datasource_id)
+        elif isinstance(datasource_or_connection_item, ConnectionItem):
+            datasource_id = datasource_or_connection_item.datasource_id
+            connection_id = datasource_or_connection_item.id
+            url = "{0}/{1}/connections/{2}/data".format(self.baseurl, datasource_id, connection_id)
+        else:
+            assert isinstance(datasource_or_connection_item, str)
+            url = "{0}/{1}/data".format(self.baseurl, datasource_or_connection_item)
+
+        if payload is not None:
+            if not os.path.isfile(payload):
+                error = "File path does not lead to an existing file."
+                raise IOError(error)
+
+            logger.info("Uploading {0} to server with chunking method for Update job".format(payload))
+            upload_session_id = self.parent_srv.fileuploads.upload(payload)
+            url = "{0}?uploadSessionId={1}".format(url, upload_session_id)
+
+        json_request = json.dumps({"actions": actions})
+        parameters = {"headers": {"requestid": request_id}}
+        server_response = self.patch_request(url, json_request, "application/json", parameters=parameters)
+        new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        return new_job
 
     @api(version="2.0")
     def populate_permissions(self, item):

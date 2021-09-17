@@ -1,3 +1,4 @@
+from tableauserverclient.server.endpoint.fileuploads_endpoint import Fileuploads
 import unittest
 from io import BytesIO
 import os
@@ -22,6 +23,7 @@ PUBLISH_XML = 'datasource_publish.xml'
 PUBLISH_XML_ASYNC = 'datasource_publish_async.xml'
 REFRESH_XML = 'datasource_refresh.xml'
 UPDATE_XML = 'datasource_update.xml'
+UPDATE_DATA_XML = 'datasource_data_update.xml'
 UPDATE_CONNECTION_XML = 'datasource_connection_update.xml'
 
 
@@ -354,6 +356,86 @@ class DatasourceTests(unittest.TestCase):
 
         # We only check the `id`; remaining fields are already tested in `test_refresh_id`
         self.assertEqual('7c3d599e-949f-44c3-94a1-f30ba85757e4', new_job.id)
+
+    def test_update_data_datasource_object(self):
+        """Calling `update_data` with a `DatasourceItem` should update that datasource"""
+        self.server.version = "3.13"
+        self.baseurl = self.server.datasources.baseurl
+
+        datasource = TSC.DatasourceItem('')
+        datasource._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
+        response_xml = read_xml_asset(UPDATE_DATA_XML)
+        with requests_mock.mock() as m:
+            m.patch(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/data',
+                   status_code=202, headers={"requestid": "test_id"}, text=response_xml)
+            new_job = self.server.datasources.update_data(datasource, request_id="test_id", actions=[])
+
+        self.assertEqual('5c0ba560-c959-424e-b08a-f32ef0bfb737', new_job.id)
+        self.assertEqual('UpdateUploadedFile', new_job.type)
+        self.assertEqual(None, new_job.progress)
+        self.assertEqual('2021-09-18T09:40:12Z', format_datetime(new_job.created_at))
+        self.assertEqual(-1, new_job.finish_code)
+
+    def test_update_data_connection_object(self):
+        """Calling `update_data` with a `ConnectionItem` should update that connection"""
+        self.server.version = "3.13"
+        self.baseurl = self.server.datasources.baseurl
+
+        connection = TSC.ConnectionItem()
+        connection._datasource_id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
+        connection._id = '7ecaccd8-39b0-4875-a77d-094f6e930019'
+        response_xml = read_xml_asset(UPDATE_DATA_XML)
+        with requests_mock.mock() as m:
+            m.patch(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/connections/7ecaccd8-39b0-4875-a77d-094f6e930019/data',
+                   status_code=202, headers={"requestid": "test_id"}, text=response_xml)
+            new_job = self.server.datasources.update_data(connection, request_id="test_id", actions=[])
+
+        # We only check the `id`; remaining fields are already tested in `test_update_data_datasource_object`
+        self.assertEqual('5c0ba560-c959-424e-b08a-f32ef0bfb737', new_job.id)
+
+    def test_update_data_datasource_string(self):
+        """For convenience, calling `update_data` with a `str` should update the datasource with the corresponding UUID"""
+        self.server.version = "3.13"
+        self.baseurl = self.server.datasources.baseurl
+
+        datasource_id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
+        response_xml = read_xml_asset(UPDATE_DATA_XML)
+        with requests_mock.mock() as m:
+            m.patch(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/data',
+                   status_code=202, headers={"requestid": "test_id"}, text=response_xml)
+            new_job = self.server.datasources.update_data(datasource_id, request_id="test_id", actions=[])
+
+        # We only check the `id`; remaining fields are already tested in `test_update_data_datasource_object`
+        self.assertEqual('5c0ba560-c959-424e-b08a-f32ef0bfb737', new_job.id)
+
+    def test_update_data_datasource_payload_file(self):
+        """If `payload` is present, we upload it and associate the job with it"""
+        self.server.version = "3.13"
+        self.baseurl = self.server.datasources.baseurl
+
+        datasource_id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
+        mock_upload_id = '10051:c3e56879876842d4b3600f20c1f79876-0:0'
+        response_xml = read_xml_asset(UPDATE_DATA_XML)
+        with requests_mock.mock() as rm, \
+             unittest.mock.patch.object(Fileuploads, "upload", return_value=mock_upload_id):
+            rm.patch(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/data?uploadSessionId=' + mock_upload_id,
+                   status_code=202, headers={"requestid": "test_id"}, text=response_xml)
+            new_job = self.server.datasources.update_data(datasource_id, request_id="test_id",
+                actions=[], payload=asset('World Indicators.hyper'))
+
+        # We only check the `id`; remaining fields are already tested in `test_update_data_datasource_object`
+        self.assertEqual('5c0ba560-c959-424e-b08a-f32ef0bfb737', new_job.id)
+
+    def test_update_data_datasource_invalid_payload_file(self):
+        """If `payload` points to a non-existing file, we report an error"""
+        self.server.version = "3.13"
+        self.baseurl = self.server.datasources.baseurl
+        datasource_id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
+        with self.assertRaises(IOError) as cm:
+            self.server.datasources.update_data(datasource_id, request_id="test_id",
+                actions=[], payload='no/such/file.missing')
+        exception = cm.exception
+        self.assertEqual(str(exception), "File path does not lead to an existing file.")
 
     def test_delete(self):
         with requests_mock.mock() as m:
