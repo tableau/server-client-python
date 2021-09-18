@@ -32,11 +32,16 @@ class QuerySet:
     def __getitem__(self, k):
         page = self.page_number
         size = self.page_size
+
         if isinstance(k, slice):
-            start = k.start or 0
-            stop = k.stop or self.total_available
-            step = k.step or 1
+            start = k.start if k.start is not None else 0
+            stop = k.stop if k.stop is not None else self.total_available
+            step = k.step if k.step is not None else 1
             return [self[i] for i in range(start, stop, step)]
+
+        if k < 0:
+            k += self.total_available
+
         if k in range((page - 1) * size, page*size):
             return self._result_cache[k % size]
         else:

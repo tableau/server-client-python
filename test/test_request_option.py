@@ -261,3 +261,7 @@ class RequestOptionTests(unittest.TestCase):
         self.assertEqual(8, len(all_views[2:]))
         self.assertEqual(2, len(all_views[:2]))
         self.assertEqual(3, len(all_views[2:5]))
+        self.assertEqual(3, len(all_views[-3:]))
+        self.assertEqual(3, len(all_views[-6:-3]))
+
+        self.assertEqual(all_views[-3].id, "2df55de2-3a2d-4e34-b515-6d4e70b830e9")
