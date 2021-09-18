@@ -751,6 +751,44 @@ See the `update_connection.py` sample in the Samples directory.
 <br>
 <br>
 
+#### datasource.update_hyper_data
+
+```py
+datasource.update_hyper_data(datasource_or_connection_item, *, request_id, actions, payload=None)
+```
+
+Updates the data contained within a published live-to-Hyper datasource.
+
+REST API: [Update Data in Hyper Data Source](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_data_in_hyper_data_source)
+
+**Version**
+
+This endpoint is available with REST API version 3.13 and up.
+
+**Parameters**
+
+Name   |  Description
+ :--- | : ---
+`datasource_or_connection_item` | Either a `DataSourceItem` or a `ConnectionItem`. If the datasource only contains a single connection, the `DataSourceItem` is sufficient to identify which data should be updated. Otherwise, for datasources with multiple connections, a `ConnectionItem` must be provided.
+`request_id` | User supplied arbitrary string to identify the request. A request identified with the same key will only be executed once, even if additional requests using the key are made, for instance, due to retries when facing network issues.
+`actions` | a list of actions (insert, update, delete, ...) specifying how to modify the data within the published datasource
+`payload` | an (optional) Hyper file containing tuples to be inserted/deleted or other payload data used by the `actions`.
+
+For more information on the `actions`, see the [REST API docs on "Action batch description"](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_how_to_update_data_to_hyper.htm#action-batch-descriptions).
+To create a `payload` Hyper file, you can use [Hyper API](https://help.tableau.com/current/api/hyper_api/en-us/index.html) or [pantab](https://github.com/innobi/pantab).
+
+**Returns**
+
+A `JobItem` for the update job on the server. Upon completion of this job, the data was updated.
+
+**Example**
+
+See the `update_datasource_data.py` sample in the Samples directory.
+
+
+<br>
+<br>
+
 ## Filters
 
 The TSC library provides a `Filter` class that you can use to filter results returned from the server.
