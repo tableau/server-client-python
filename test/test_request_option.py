@@ -243,3 +243,21 @@ class RequestOptionTests(unittest.TestCase):
             for _ in range(100):
                 matching_workbooks = self.server.workbooks.filter(tags__in=["sample", "safari", "weather"], name="foo")
                 self.assertEqual(3, matching_workbooks.total_available)
+
+    def test_slicing(self):
+        with open(PAGINATION_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + '/views?pageNumber=1&pageSize=10', text=response_xml)
+            req_option = TSC.RequestOptions().page_size(10)
+            all_views, pagination_item = self.server.views.get(req_option)
+
+        self.assertEqual(1, pagination_item.page_number)
+        self.assertEqual(10, pagination_item.page_size)
+        self.assertEqual(33, pagination_item.total_available)
+        self.assertEqual(10, len(all_views))
+        self.assertEqual(10, len(all_views[::]))
+        self.assertEqual(5, len(all_views[::2]))
+        self.assertEqual(8, len(all_views[2:]))
+        self.assertEqual(2, len(all_views[:2]))
+        self.assertEqual(3, len(all_views[2:5]))
