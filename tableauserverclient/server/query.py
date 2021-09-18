@@ -46,7 +46,7 @@ class QuerySet:
             return self._result_cache[k % size]
         else:
             self._result_cache = None
-            self.request_options.pagenumber = math.ceil(k / size)
+            self.request_options.pagenumber = max(1, math.ceil(k / size))
             return self[k]
 
 
