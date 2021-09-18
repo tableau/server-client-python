@@ -282,10 +282,6 @@ class Datasources(QuerysetEndpoint):
             new_datasource = DatasourceItem.from_response(server_response.content, self.parent_srv.namespace)[0]
             logger.info("Published {0} (ID: {1})".format(filename, new_datasource.id))
             return new_datasource
-        server_response = self.post_request(url, xml_request, content_type)
-        new_datasource = DatasourceItem.from_response(server_response.content, self.parent_srv.namespace)[0]
-        logger.info("Published {0} (ID: {1})".format(filename, new_datasource.id))
-        return new_datasource
 
     @api(version="2.0")
     def populate_permissions(self, item):
