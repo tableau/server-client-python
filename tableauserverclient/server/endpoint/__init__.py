@@ -5,6 +5,7 @@ from .datasources_endpoint import Datasources
 from .databases_endpoint import Databases
 from .endpoint import Endpoint
 from .favorites_endpoint import Favorites
+from .fileuploads_endpoint import Fileuploads
 from .flows_endpoint import Flows
 from .exceptions import (
     ServerResponseError,

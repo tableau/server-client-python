@@ -2,7 +2,6 @@ from .endpoint import Endpoint, api
 from .exceptions import InternalServerError, MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .dqw_endpoint import _DataQualityWarningEndpoint
-from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, FlowItem, PaginationItem, ConnectionItem
 from ...filesys_helpers import to_filename, make_download_path
@@ -169,7 +168,7 @@ class Flows(Endpoint):
         # Determine if chunking is required (64MB is the limit for single upload method)
         if os.path.getsize(file_path) >= FILESIZE_LIMIT:
             logger.info("Publishing {0} to server with chunking method (flow over 64MB)".format(filename))
-            upload_session_id = Fileuploads.upload_chunks(self.parent_srv, file_path)
+            upload_session_id = self.parent_srv.fileuploads.upload(file_path)
             url = "{0}&uploadSessionId={1}".format(url, upload_session_id)
             xml_request, content_type = RequestFactory.Flow.publish_req_chunked(flow_item, connections)
         else:
