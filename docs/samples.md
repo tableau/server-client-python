@@ -48,6 +48,7 @@ The following list describes the samples available in the repository:
 * `kill_all_jobs.py` Kills all running jobs.
 * `list.py` Lists all datasources or workbooks of a site.
 * `login.py` Demonstrates logging in to the server with either username/password or personal access token.
+* `metadata_query.py` Uses the metadata API to query information on a published data source.
 * `move_workbook_projects.py` Moves a workbook from one project to another.
 * `move_workbook_sites.py` Downloads a workbook, stores it in-memory, and uploads it to another site.
 * `pagination_sample.py` Uses the Pager generator to iterate over all the items on the server.
