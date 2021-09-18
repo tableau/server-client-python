@@ -333,7 +333,13 @@ class DatasourceTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.post(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/refresh',
                    status_code=202, text=response_xml)
-            self.server.datasources.refresh('9dbd2263-16b5-46e1-9c43-a76bb8ab65fb')
+            new_job = self.server.datasources.refresh('9dbd2263-16b5-46e1-9c43-a76bb8ab65fb')
+
+        self.assertEqual('7c3d599e-949f-44c3-94a1-f30ba85757e4', new_job.id)
+        self.assertEqual('RefreshExtract', new_job.type)
+        self.assertEqual(None, new_job.progress)
+        self.assertEqual('2020-03-05T22:05:32Z', format_datetime(new_job.created_at))
+        self.assertEqual(-1, new_job.finish_code)
 
     def test_refresh_object(self):
         self.server.version = '2.8'
@@ -344,7 +350,10 @@ class DatasourceTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.post(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/refresh',
                    status_code=202, text=response_xml)
-            self.server.datasources.refresh(datasource)
+            new_job = self.server.datasources.refresh(datasource)
+
+        # We only check the `id`; remaining fields are already tested in `test_refresh_id`
+        self.assertEqual('7c3d599e-949f-44c3-94a1-f30ba85757e4', new_job.id)
 
     def test_delete(self):
         with requests_mock.mock() as m:
