@@ -10,14 +10,19 @@ The TSC samples are included in the `samples` directory of the TSC repository [o
 
 ## Run the samples
 
-Each of the samples requires the following arguments:
+Each of the samples accepts the following arguments:
 
-* `--server`. The URL for the Tableau Server that you want to connect to.
-* `--username`. The user name of the Tableau Server account that you want to use. When you run the samples, you are
-  prompted for a password for the user account that you enter.
+* `--server` (required): The URL for the Tableau Server that you want to connect to.
+* `--site` (optional): The site on the Server that you want to connect to.
+* `--token-name` (required): The name of the personal access token used to sign into the server.
+* `--token-value` (required): The value of the personal access token used to sign into the server.
+* `--logging-level` (optional; `debug`, `info` or `error`): The desired log level.
 
-Additionally, some of the samples require that you enter other arguments when you run them. For more information about
-the arguments required by a particular sample, run the sample with the `-h` flag to see the help output.
+To get a `token-name` and `token-value`, you will have to create personal access token first.
+You can follow [Tableau's documentation](https://help.tableau.com/current/server/en-us/security_personal_access_tokens.htm#create-tokens) to do so.
+
+Some of the samples also require additional arguments. For more information about the arguments
+required by a particular sample, run the sample with the `-h` flag.
 
 For example, if you run the following command:
 
@@ -25,8 +30,7 @@ For example, if you run the following command:
 python samples/publish_workbook.py -h
 ```
 
-You might see that you need to enter a server address, a user name, and a file path for the workbook that you want to
-publish.
+You will see that you need to enter a file path for the workbook that you want to publish.
 
 ## Samples list
 

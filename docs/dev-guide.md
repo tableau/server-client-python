@@ -127,7 +127,9 @@ depending on how and where git is installed on your system, for example:
 1. Add testing by getting real xml responses from the server, and asserting that
    all properties are parsed and set correctly.
 
-1. Add a sample to show users how to use the new feature.
+1. Add a sample to show users how to use the new feature. Try to keep the command
+   line arguments of your sample consistent with the [Samples documentation page](samples)
+   and with other samples.
 
 1. Add documentation (most likely in api-ref.md) in a separate pull request
    (see more below).
