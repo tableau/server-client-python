@@ -33,6 +33,8 @@ class QuerySet:
         page = self.page_number
         size = self.page_size
 
+        page_range = range((page - 1) * size, page*size)
+
         if isinstance(k, slice):
             step = k.step if k.step is not None else 1
             start = k.start if k.start is not None else 0
@@ -41,14 +43,16 @@ class QuerySet:
                 start += self.total_available
             if stop < 0:
                 stop += self.total_available
-            if all(i in range((page - 1) * size, page*size) for i in range(start, stop, step)):
+
+            k_range = range(start, stop, step)
+            if all(i in page_range for i in k_range):
                 return self._result_cache[k]
-            return [self[i] for i in range(start, stop, step)]
+            return [self[i] for i in k_range]
 
         if k < 0:
             k += self.total_available
 
-        if k in range((page - 1) * size, page*size):
+        if k in page_range:
             return self._result_cache[k % size]
         elif k in range(self.total_available):
             self._result_cache = None
