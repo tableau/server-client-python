@@ -67,8 +67,12 @@ def main():
 
         job = server.datasources.update_hyper_data(args.datasource_id, request_id=request_id, actions=actions)
 
-        # TODO: Add a flag that will poll and wait for the returned job to be done
-        print(job)
+        print(f"Update job posted (ID: {job.id})")
+        print("Waiting for job...")
+        # `wait_for_job` will throw if the job isn't executed successfully
+        job = server.jobs.wait_for_job(job)
+        print("Job finished succesfully")
+
 
 if __name__ == '__main__':
     main()

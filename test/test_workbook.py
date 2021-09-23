@@ -616,7 +616,7 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual('PublishWorkbook', new_job.type)
         self.assertEqual('0', new_job.progress)
         self.assertEqual('2018-06-29T23:22:32Z', format_datetime(new_job.created_at))
-        self.assertEqual('1', new_job.finish_code)
+        self.assertEqual(1, new_job.finish_code)
 
     def test_publish_invalid_file(self):
         new_workbook = TSC.WorkbookItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
