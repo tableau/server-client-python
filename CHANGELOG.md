@@ -1,3 +1,13 @@
+## 0.16.0 (15 July 2021)
+* Documentation updates (#800, #818, #839, #842)
+* Fixed data alert repr in subscription item (#821)
+* Added support for Data Quality Warning (#836)
+* Added support for renaming datasources (#843)
+* Improved Datasource tests (#843)
+* Updated catalog obfuscation field (#844)
+* Fixed revision limit field in site_item.py file (#847)
+* Added the Missing content permission field- LockedToProjectWithoutNested (#856)
+
 ## 0.15.0 (16 Feb 2021)
 * Added support for python version 3.9 (#744)
 * Added support for 'Get View by ID' (#750)

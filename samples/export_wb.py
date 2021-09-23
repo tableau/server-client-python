@@ -9,7 +9,6 @@
 
 
 import argparse
-import getpass
 import logging
 import tempfile
 import shutil
@@ -52,22 +51,20 @@ def cleanup(tempdir):
 
 def main():
     parser = argparse.ArgumentParser(description='Export to PDF all of the views in a workbook.')
+    # Common options; please keep those in sync across all samples
     parser.add_argument('--server', '-s', required=True, help='server address')
-    parser.add_argument('--site', '-S', default=None, help='Site to log into, do not specify for default site')
-    parser.add_argument('--username', '-u', required=True, help='username to sign into server')
-    parser.add_argument('--password', '-p', default=None, help='password for the user')
-
+    parser.add_argument('--site', '-S', help='site name')
+    parser.add_argument('--token-name', '-p', required=True,
+                        help='name of the personal access token used to sign into the server')
+    parser.add_argument('--token-value', '-v', required=True,
+                        help='value of the personal access token used to sign into the server')
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
                         help='desired logging level (set to error by default)')
+    # Options specific to this sample
     parser.add_argument('--file', '-f', default='out.pdf', help='filename to store the exported data')
     parser.add_argument('resource_id', help='LUID for the workbook')
 
     args = parser.parse_args()
-
-    if args.password is None:
-        password = getpass.getpass("Password: ")
-    else:
-        password = args.password
 
     # Set logging level based on user input, or error by default
     logging_level = getattr(logging, args.logging_level.upper())
@@ -76,9 +73,9 @@ def main():
     tempdir = tempfile.mkdtemp('tsc')
     logging.debug("Saving to tempdir: %s", tempdir)
 
-    tableau_auth = TSC.TableauAuth(args.username, password, args.site)
-    server = TSC.Server(args.server, use_server_version=True)
     try:
+        tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
+        server = TSC.Server(args.server, use_server_version=True)
         with server.auth.sign_in(tableau_auth):
             get_list = functools.partial(get_views_for_workbook, server)
             download = functools.partial(download_pdf, server, tempdir)
