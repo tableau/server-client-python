@@ -35,6 +35,7 @@ def main():
     parser.add_argument('--filepath', '-f', required=True, help='filepath to the datasource to publish')
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
                         help='desired logging level (set to error by default)')
+    parser.add_argument('--project', help='Project within which to publish the datasource')
     parser.add_argument('--async', '-a', help='Publishing asynchronously', dest='async_', action='store_true')
     parser.add_argument('--conn-username', help='connection username')
     parser.add_argument('--conn-password', help='connection password')
@@ -55,9 +56,22 @@ def main():
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
     server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
-        # Create a new datasource item to publish - empty project_id field
-        # will default the publish to the site's default project
-        new_datasource = TSC.DatasourceItem(project_id="")
+        # Empty project_id field will default the publish to the site's default project
+        project_id = ""
+
+        # Retrieve the project id, if a project name was passed
+        if args.project is not None:
+            req_options = TSC.RequestOptions()
+            req_options.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name,
+                                   TSC.RequestOptions.Operator.Equals,
+                                   args.project))
+            projects = list(TSC.Pager(server.projects, req_options))
+            if len(projects) > 1:
+                raise ValueError("The project name is not unique")
+            project_id = projects[0].id
+
+        # Create a new datasource item to publish
+        new_datasource = TSC.DatasourceItem(project_id=project_id)
 
         # Create a connection_credentials item if connection details are provided
         new_conn_creds = None
