@@ -8,7 +8,6 @@
 ####
 
 import argparse
-import getpass
 import logging
 
 import tableauserverclient as TSC
@@ -17,25 +16,28 @@ import tableauserverclient as TSC
 def main():
 
     parser = argparse.ArgumentParser(description='Move one workbook from the default project to another.')
+    # Common options; please keep those in sync across all samples
     parser.add_argument('--server', '-s', required=True, help='server address')
-    parser.add_argument('--username', '-u', required=True, help='username to sign into server')
-    parser.add_argument('--workbook-name', '-w', required=True, help='name of workbook to move')
-    parser.add_argument('--destination-project', '-d', required=True, help='name of project to move workbook into')
+    parser.add_argument('--site', '-S', help='site name')
+    parser.add_argument('--token-name', '-p', required=True,
+                        help='name of the personal access token used to sign into the server')
+    parser.add_argument('--token-value', '-v', required=True,
+                        help='value of the personal access token used to sign into the server')
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
                         help='desired logging level (set to error by default)')
+    # Options specific to this sample
+    parser.add_argument('--workbook-name', '-w', required=True, help='name of workbook to move')
+    parser.add_argument('--destination-project', '-d', required=True, help='name of project to move workbook into')
 
     args = parser.parse_args()
-
-    password = getpass.getpass("Password: ")
 
     # Set logging level based on user input, or error by default
     logging_level = getattr(logging, args.logging_level.upper())
     logging.basicConfig(level=logging_level)
 
     # Step 1: Sign in to server
-    tableau_auth = TSC.TableauAuth(args.username, password)
-    server = TSC.Server(args.server)
-
+    tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
+    server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
         # Step 2: Query workbook to move
         req_option = TSC.RequestOptions()
