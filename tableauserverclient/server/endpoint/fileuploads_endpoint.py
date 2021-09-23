@@ -43,13 +43,15 @@ class Fileuploads(Endpoint):
         except TypeError:
             file_content = file
 
-        while True:
-            chunked_content = file_content.read(CHUNK_SIZE)
-            if not chunked_content:
-                if file_opened:
-                    file_content.close()
-                break
-            yield chunked_content
+        try:
+            while True:
+                chunked_content = file_content.read(CHUNK_SIZE)
+                if not chunked_content:
+                    break
+                yield chunked_content
+        finally:
+            if file_opened:
+                file_content.close()
 
     def upload(self, file):
         upload_id = self.initiate()
