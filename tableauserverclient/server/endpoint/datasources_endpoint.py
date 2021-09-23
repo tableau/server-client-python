@@ -2,7 +2,6 @@ from .endpoint import QuerysetEndpoint, api, parameter_added_in
 from .exceptions import InternalServerError, MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .dqw_endpoint import _DataQualityWarningEndpoint
-from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, DatasourceItem, PaginationItem, ConnectionItem
 from ..query import QuerySet
@@ -244,7 +243,7 @@ class Datasources(QuerysetEndpoint):
         # Determine if chunking is required (64MB is the limit for single upload method)
         if file_size >= FILESIZE_LIMIT:
             logger.info("Publishing {0} to server with chunking method (datasource over 64MB)".format(filename))
-            upload_session_id = Fileuploads.upload_chunks(self.parent_srv, file)
+            upload_session_id = self.parent_srv.fileuploads.upload(file)
             url = "{0}&uploadSessionId={1}".format(url, upload_session_id)
             xml_request, content_type = RequestFactory.Datasource.publish_req_chunked(
                 datasource_item, connection_credentials, connections
