@@ -1379,6 +1379,55 @@ Returns the `JobItem` requested.
 
 ---
 
+## Metadata
+
+Using the `metadata` endpoint, one can use GraphQL to query metadata on, e.g., workbooks, datasources, the fields contained within them, and the relationships between them.
+
+### Metadata methods
+
+
+The Metadata methods call the [Metadata API](https://help.tableau.com/current/api/metadata_api/en-us/index.html) which is a GraphQL interface allowing to query metadata about objects on the server (workbooks, datasources, ...) and the relationships between them.
+
+
+Source files: server/endpoint/metadata_endpoint.py
+
+<br>
+<br>
+
+
+#### metadata.query
+
+
+```py
+metadata.query(query, variables=None, abort_on_error=False)
+```
+
+Executes a metadata query and returns the result.
+
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`query`          | The GraphQL query
+`variables`      | Variables for the GraphQL query
+`abort_on_error` | Whether to throw an exception on error
+
+
+**Returns**
+
+The method returns the query results as a stucture of `list`s and `dict`s as returned by the `json` package.
+
+
+**Example**
+
+See the `metadata_query.py` sample in the Samples directory.
+
+<br>
+<br>
+
+---
+
 ## Projects
 
 Using the TSC library, you can get information about all the projects on a site, or you can create, update projects, or remove projects.
