@@ -66,6 +66,7 @@ The current version of TSC only supports the following REST API and Tableau Serv
 
 |REST API version|Tableau Server version|
 |---|---|
+|3.13|2021.3|
 |3.12|2021.2|
 |3.11|2021.1|
 |3.10|2020.4|
