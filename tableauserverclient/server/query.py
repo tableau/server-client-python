@@ -43,6 +43,12 @@ class QuerySet:
                 start += self.total_available
             if stop < 0:
                 stop += self.total_available
+            if start < stop and step < 0:
+                # Since slicing is left inclusive and right exclusive, shift
+                # the start and stop values by 1 to keep that behavior
+                start, stop = stop - 1, start - 1
+                slice_stop = stop if stop > 0 else None
+                k = slice(start, slice_stop, step)
 
             k_range = range(start, stop, step)
             if all(i in page_range for i in k_range):
