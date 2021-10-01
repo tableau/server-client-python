@@ -21,28 +21,28 @@ class FlowRuns(QuerysetEndpoint):
         url = self.baseurl
         server_response = self.get_request(url, req_options)
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
-        all_flow_items = FlowRunItem.from_response(server_response.content, self.parent_srv.namespace)
-        return all_flow_items, pagination_item
+        all_flow_run_items = FlowRunItem.from_response(server_response.content, self.parent_srv.namespace)
+        return all_flow_run_items, pagination_item
 
     # Get 1 flow by id
     @api(version="3.10")
-    def get_by_id(self, flowrun_id):
-        if not flowrun_id:
+    def get_by_id(self, flow_run_id):
+        if not flow_run_id:
             error = "Flow ID undefined."
             raise ValueError(error)
-        logger.info("Querying single flow (ID: {0})".format(flowrun_id))
-        url = "{0}/{1}".format(self.baseurl, flowrun_id)
+        logger.info("Querying single flow (ID: {0})".format(flow_run_id))
+        url = "{0}/{1}".format(self.baseurl, flow_run_id)
         server_response = self.get_request(url)
         return FlowRunItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
 
     # Cancel 1 flow run by id
     @api(version="3.10")
-    def cancel(self, flowrun_id):
-        if not flowrun_id:
+    def cancel(self, flow_run_id):
+        if not flow_run_id:
             error = "Flow ID undefined."
             raise ValueError(error)
-        id_ = getattr(flowrun_id, 'id', flowrun_id)
+        id_ = getattr(flow_run_id, 'id', flow_run_id)
         url = "{0}/{1}".format(self.baseurl, id_)
         self.put_request(url)
         logger.info("Deleted single flow (ID: {0})".format(id_))
