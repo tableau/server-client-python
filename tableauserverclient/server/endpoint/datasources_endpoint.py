@@ -284,7 +284,7 @@ class Datasources(QuerysetEndpoint):
             return new_datasource
 
     @api(version="3.13")
-    def update_data(self, datasource_or_connection_item, *, request_id, actions, payload = None):
+    def update_hyper_data(self, datasource_or_connection_item, *, request_id, actions, payload = None):
         if isinstance(datasource_or_connection_item, DatasourceItem):
             datasource_id = datasource_or_connection_item.id
             url = "{0}/{1}/data".format(self.baseurl, datasource_id)
