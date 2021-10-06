@@ -6,12 +6,6 @@ from ...exponential_backoff import ExponentialBackoffTimer
 
 import logging
 
-try:
-    basestring
-except NameError:
-    # In case we are in python 3 the string check is different
-    basestring = str
-
 logger = logging.getLogger("tableau.endpoint.jobs")
 
 class Jobs(Endpoint):
@@ -22,7 +16,7 @@ class Jobs(Endpoint):
     @api(version="2.6")
     def get(self, job_id=None, req_options=None):
         # Backwards Compatibility fix until we rev the major version
-        if job_id is not None and isinstance(job_id, basestring):
+        if job_id is not None and isinstance(job_id, str):
             import warnings
 
             warnings.warn("Jobs.get(job_id) is deprecated, update code to use Jobs.get_by_id(job_id)")
