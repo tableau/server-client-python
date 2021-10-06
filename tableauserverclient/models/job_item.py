@@ -3,6 +3,16 @@ from ..datetime_helpers import parse_datetime
 
 
 class JobItem(object):
+    class FinishCode:
+        """
+        Status codes as documented on
+        https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#query_job
+        """
+        Success = 0
+        Failed = 1
+        Cancelled = 2
+
+
     def __init__(
         self,
         id_,
@@ -89,7 +99,7 @@ class JobItem(object):
         created_at = parse_datetime(element.get("createdAt", None))
         started_at = parse_datetime(element.get("startedAt", None))
         completed_at = parse_datetime(element.get("completedAt", None))
-        finish_code = element.get("finishCode", -1)
+        finish_code = int(element.get("finishCode", -1))
         notes = [note.text for note in element.findall(".//t:notes", namespaces=ns)] or None
         mode = element.get("mode", None)
         return cls(

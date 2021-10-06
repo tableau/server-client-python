@@ -39,16 +39,19 @@ def main():
             resource = server.workbooks.get_by_id(args.resource_id)
 
             # trigger the refresh, you'll get a job id back which can be used to poll for when the refresh is done
-            results = server.workbooks.refresh(args.resource_id)
+            job = server.workbooks.refresh(args.resource_id)
         else:
             # Get the datasource by its Id to make sure it exists
             resource = server.datasources.get_by_id(args.resource_id)
 
             # trigger the refresh, you'll get a job id back which can be used to poll for when the refresh is done
-            results = server.datasources.refresh(resource)
-
-        print(results)
-        # TODO: Add a flag that will poll and wait for the returned job to be done
+            job = server.datasources.refresh(resource)
+ 
+        print(f"Update job posted (ID: {job.id})")
+        print("Waiting for job...")
+        # `wait_for_job` will throw if the job isn't executed successfully
+        job = server.jobs.wait_for_job(job)
+        print("Job finished succesfully")
 
 
 if __name__ == '__main__':

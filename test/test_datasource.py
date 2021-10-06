@@ -317,7 +317,7 @@ class DatasourceTests(unittest.TestCase):
         self.assertEqual('PublishDatasource', new_job.type)
         self.assertEqual('0', new_job.progress)
         self.assertEqual('2018-06-30T00:54:54Z', format_datetime(new_job.created_at))
-        self.assertEqual('1', new_job.finish_code)
+        self.assertEqual(1, new_job.finish_code)
 
     def test_publish_unnamed_file_object(self):
         new_datasource = TSC.DatasourceItem('test')
