@@ -64,13 +64,13 @@ class FlowRuns(QuerysetEndpoint):
             flow_run = self.get_by_id(flow_run_id)
             logger.debug(f"\tFlowRun {flow_run_id} progress={flow_run.progress}")
 
-        logger.info("FlowRun {} Completed: Status: {}".format(id_, flow_run.status))
+        logger.info("FlowRun {} Completed: Status: {}".format(flow_run_id, flow_run.status))
 
         if flow_run.status == "Success":
             return flow_run
         elif flow_run.status == "Failed":
             raise FlowRunFailedException(flow_run)
-        elif flow_run.finish_code in ["Canceled", "Cancelled"]:
+        elif flow_run.status in ["Canceled", "Cancelled"]:
             raise FlowRunCanceledException(flow_run)
         else:
             raise AssertionError("Unexpected status in flow_run", flow_run)

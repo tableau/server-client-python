@@ -29,6 +29,9 @@ def mocked_time():
     def get_time():
         return mock_time
     
-    patch = unittest.mock.patch
+    try:
+        patch = unittest.mock.patch
+    except AttributeError:
+        from unittest.mock import patch
     with patch("time.sleep", sleep_mock), patch("time.time", get_time):
         yield get_time
