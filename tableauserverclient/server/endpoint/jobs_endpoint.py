@@ -50,6 +50,7 @@ class Jobs(Endpoint):
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return new_job
 
+    @api(version="2.6")
     def wait_for_job(self, job_id, *, timeout=None):
         if isinstance(job_id, JobItem):
             job_id = job_id.id
