@@ -1,16 +1,12 @@
 from .endpoint import Endpoint, QuerysetEndpoint, api
-from .. import FlowRunItem, PaginationItem
 from .exceptions import FlowRunFailedException, FlowRunCanceledException
-import time
+from .. import FlowRunItem, PaginationItem
+from ...exponential_backoff import ExponentialBackoffTimer
 
 import logging
 
 logger = logging.getLogger("tableau.endpoint.flowruns")
 
-# Polling for job completion uses exponential backoff for the sleep intervals between polls
-ASYNC_JOB_POLL_MIN_INTERVAL=0.5
-ASYNC_JOB_POLL_MAX_INTERVAL=30
-ASYNC_JOB_POLL_BACKOFF_FACTOR=1.4
 
 class FlowRuns(QuerysetEndpoint):
     def __init__(self, parent_srv):
@@ -56,25 +52,17 @@ class FlowRuns(QuerysetEndpoint):
 
     @api(version="3.10")
     def wait_for_job(self, flow_run_id, *, timeout=None):
-        id_ = getattr(flow_run_id, "id", flow_run_id)
-        wait_start_time = time.time()
-        logger.debug(f"Waiting for job {id_}")
+        if isinstance(flow_run_id, FlowRunItem):
+            flow_run_id = flow_run_id.id
+        assert isinstance(flow_run_id, str)
+        logger.debug(f"Waiting for flow run {flow_run_id}")
 
-        current_sleep_interval = ASYNC_JOB_POLL_MIN_INTERVAL
-        flow_run = self.get_by_id(id_)
+        backoffTimer = ExponentialBackoffTimer(timeout=timeout)
+        flow_run = self.get_by_id(flow_run_id)
         while flow_run.completed_at is None:
-            max_sleep_time = ASYNC_JOB_POLL_MAX_INTERVAL
-
-            if timeout is not None:
-                elapsed = (time.time() - wait_start_time)
-                if elapsed >= timeout:
-                    raise TimeoutError(f"Timeout after {elapsed} seconds waiting for asynchronous flow run: {id_}")
-                max_sleep_time = max(ASYNC_JOB_POLL_MIN_INTERVAL, timeout - elapsed)
-
-            time.sleep(min(current_sleep_interval, max_sleep_time))
-            job = self.get_by_id(id_)
-            current_sleep_interval *= ASYNC_JOB_POLL_BACKOFF_FACTOR
-            logger.debug(f"\tFlowRun {id_} progress={flow_run.progress}")
+            backoffTimer.sleep()
+            flow_run = self.get_by_id(flow_run_id)
+            logger.debug(f"\tFlowRun {flow_run_id} progress={flow_run.progress}")
 
         logger.info("FlowRun {} Completed: Status: {}".format(id_, flow_run.status))
 
