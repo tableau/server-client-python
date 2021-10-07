@@ -1,6 +1,6 @@
 ####
 # This script demonstrates how to query for permissions using TSC
-# To run the script, you must have installed Python 3.5 and later.
+# To run the script, you must have installed Python 3.6 or later.
 #
 # Example usage: 'python query_permissions.py -s https://10ax.online.tableau.com --site
 #       devSite123 -u tabby@tableau.com workbook b4065286-80f0-11ea-af1b-cb7191f48e45'

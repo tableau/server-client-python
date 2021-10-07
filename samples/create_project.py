@@ -4,7 +4,7 @@
 # parent_id.
 #
 #
-# To run the script, you must have installed Python 3.5 or later.
+# To run the script, you must have installed Python 3.6 or later.
 ####
 
 import argparse
