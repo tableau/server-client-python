@@ -3,12 +3,6 @@ import re
 from functools import wraps
 from ..datetime_helpers import parse_datetime
 
-try:
-    basestring
-except NameError:
-    # In case we are in python 3 the string check is different
-    basestring = str
-
 
 def property_is_enum(enum_type):
     def property_type_decorator(func):
@@ -134,7 +128,7 @@ def property_is_datetime(func):
     def wrapper(self, value):
         if isinstance(value, datetime.datetime):
             return func(self, value)
-        if not isinstance(value, basestring):
+        if not isinstance(value, str):
             raise ValueError(
                 "Cannot convert {} into a datetime, cannot update {}".format(value.__class__.__name__, func.__name__)
             )
