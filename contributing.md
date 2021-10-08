@@ -15,7 +15,7 @@ a feature do not require the CLA.
 
 ## Issues and Feature Requests
 
-To submit an issue/bug report, or to request a feature, please submit a [github issue](https://github.com/tableau/server-client-python/issues) to the repo.
+To submit an issue/bug report, or to request a feature, please submit a [GitHub issue](https://github.com/tableau/server-client-python/issues) to the repo.
 
 If you are submitting a bug report, please provide as much information as you can, including clear and concise repro steps, attaching any necessary
 files to assist in the repro.  **Be sure to scrub the files of any potentially sensitive information.  Issues are public.**
@@ -48,19 +48,28 @@ anyone can add to an issue:
 ## Fixes, Implementations, and Documentation
 
 For all other things, please submit a PR that includes the fix, documentation, or new code that you are trying to contribute.  More information on
-creating a PR can be found in the [Development Guide](https://tableau.github.io/server-client-python/docs/dev-guide)
+creating a PR can be found in the [Development Guide](https://tableau.github.io/server-client-python/docs/dev-guide).
 
 If the feature is complex or has multiple solutions that could be equally appropriate approaches, it would be helpful to file an issue to discuss the
 design trade-offs of each solution before implementing, to allow us to collectively arrive at the best solution, which most likely exists in the middle
 somewhere.
 
-
 ## Getting Started
-> pip install versioneer
-> python setup.py build
-> python setup.py test
->
 
-### before committing
-Our CI runs include a python lint run, so you should run this locally and fix complaints before committing as this will fail your checkin
-> pycodestyle tableauserverclient test samples
+```shell
+pip install versioneer
+python setup.py build
+python setup.py test
+```
+
+### Before Committing
+
+Our CI runs include a Python lint run, so you should run this locally and fix complaints before committing as this will fail your checkin.
+
+```shell
+# this will run the formatter without making changes
+black --line-length 120 tableauserverclient --check
+
+# this will format the directory and code for you
+black --line-length 120 tableauserverclient
+```

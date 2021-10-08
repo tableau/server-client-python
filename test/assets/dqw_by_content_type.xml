@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.10.xsd">
+    <dataQualityWarningList>
+        <dataQualityWarning id="c2e0e406-84fb-4f4e-9998-f20dd9306710" userDisplayName="Alice Alison" contentId="94441d26-9a52-4a42-b0fb-3f94792d1aac" contentType="DATABASE" message="Hello, World!" type="WARNING" isActive="true" createdAt="2021-04-09T18:39:54Z" updatedAt="2021-04-09T18:39:54Z" isSevere="true">
+            <site id="b208fa0e-1dd4-4185-921a-6101407fdaca"/>
+            <owner id="eddc8c5f-6af0-40be-b6b0-2c790290a43f"/>
+        </dataQualityWarning>
+    </dataQualityWarningList>
+</tsResponse>

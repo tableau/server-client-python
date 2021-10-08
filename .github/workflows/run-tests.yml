@@ -1,0 +1,36 @@
+name: Python tests
+
+on: [push]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: [3.6, 3.7, 3.8, 3.9, 3.10.0-rc.2]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.python-version }} on ${{ matrix.os }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .[test]
+        pip install mypy
+
+    - name: Test with pytest
+      run: |
+        pytest test
+
+    - name: Run Mypy but allow failures
+      run: |
+        mypy --show-error-codes --disable-error-code misc tableauserverclient
+      continue-on-error: true

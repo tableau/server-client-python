@@ -2,12 +2,13 @@ from .endpoint import api, Endpoint
 from .exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .default_permissions_endpoint import _DefaultPermissionsEndpoint
+from .dqw_endpoint import _DataQualityWarningEndpoint
 
 from .. import RequestFactory, DatabaseItem, TableItem, PaginationItem, Permission
 
 import logging
 
-logger = logging.getLogger('tableau.endpoint.databases')
+logger = logging.getLogger("tableau.endpoint.databases")
 
 
 class Databases(Endpoint):
@@ -16,6 +17,7 @@ class Databases(Endpoint):
 
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
         self._default_permissions = _DefaultPermissionsEndpoint(parent_srv, lambda: self.baseurl)
+        self._data_quality_warnings = _DataQualityWarningEndpoint(parent_srv, "database")
 
     @property
     def baseurl(self):
@@ -23,7 +25,7 @@ class Databases(Endpoint):
 
     @api(version="3.5")
     def get(self, req_options=None):
-        logger.info('Querying all databases on site')
+        logger.info("Querying all databases on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
@@ -36,7 +38,7 @@ class Databases(Endpoint):
         if not database_id:
             error = "database ID undefined."
             raise ValueError(error)
-        logger.info('Querying single database (ID: {0})'.format(database_id))
+        logger.info("Querying single database (ID: {0})".format(database_id))
         url = "{0}/{1}".format(self.baseurl, database_id)
         server_response = self.get_request(url)
         return DatabaseItem.from_response(server_response.content, self.parent_srv.namespace)[0]
@@ -48,7 +50,7 @@ class Databases(Endpoint):
             raise ValueError(error)
         url = "{0}/{1}".format(self.baseurl, database_id)
         self.delete_request(url)
-        logger.info('Deleted single database (ID: {0})'.format(database_id))
+        logger.info("Deleted single database (ID: {0})".format(database_id))
 
     @api(version="3.5")
     def update(self, database_item):
@@ -59,7 +61,7 @@ class Databases(Endpoint):
         url = "{0}/{1}".format(self.baseurl, database_item.id)
         update_req = RequestFactory.Database.update_req(database_item)
         server_response = self.put_request(url, update_req)
-        logger.info('Updated database item (ID: {0})'.format(database_item.id))
+        logger.info("Updated database item (ID: {0})".format(database_item.id))
         updated_database = DatabaseItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return updated_database
 
@@ -74,35 +76,61 @@ class Databases(Endpoint):
             return self._get_tables_for_database(database_item)
 
         database_item._set_tables(column_fetcher)
-        logger.info('Populated tables for database (ID: {0}'.format(database_item.id))
+        logger.info("Populated tables for database (ID: {0}".format(database_item.id))
 
     def _get_tables_for_database(self, database_item):
         url = "{0}/{1}/tables".format(self.baseurl, database_item.id)
         server_response = self.get_request(url)
-        tables = TableItem.from_response(server_response.content,
-                                         self.parent_srv.namespace)
+        tables = TableItem.from_response(server_response.content, self.parent_srv.namespace)
         return tables
 
-    @api(version='3.5')
+    @api(version="3.5")
     def populate_permissions(self, item):
         self._permissions.populate(item)
 
-    @api(version='3.5')
+    @api(version="3.5")
     def update_permission(self, item, rules):
+        import warnings
+
+        warnings.warn(
+            "Server.databases.update_permission is deprecated, "
+            "please use Server.databases.update_permissions instead.",
+            DeprecationWarning,
+        )
         return self._permissions.update(item, rules)
 
-    @api(version='3.5')
+    @api(version="3.5")
+    def update_permissions(self, item, rules):
+        return self._permissions.update(item, rules)
+
+    @api(version="3.5")
     def delete_permission(self, item, rules):
         self._permissions.delete(item, rules)
 
-    @api(version='3.5')
+    @api(version="3.5")
     def populate_table_default_permissions(self, item):
         self._default_permissions.populate_default_permissions(item, Permission.Resource.Table)
 
-    @api(version='3.5')
+    @api(version="3.5")
     def update_table_default_permissions(self, item):
         return self._default_permissions.update_default_permissions(item, Permission.Resource.Table)
 
-    @api(version='3.5')
+    @api(version="3.5")
     def delete_table_default_permissions(self, item):
         self._default_permissions.delete_default_permissions(item, Permission.Resource.Table)
+
+    @api(version="3.5")
+    def populate_dqw(self, item):
+        self._data_quality_warnings.populate(item)
+
+    @api(version="3.5")
+    def update_dqw(self, item, warning):
+        return self._data_quality_warnings.update(item, warning)
+
+    @api(version="3.5")
+    def add_dqw(self, item, warning):
+        return self._data_quality_warnings.add(item, warning)
+
+    @api(version="3.5")
+    def delete_dqw(self, item):
+        self._data_quality_warnings.clear(item)

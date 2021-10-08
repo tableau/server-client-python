@@ -1,7 +1,7 @@
 """Target class meant to abstract mappings to other objects"""
 
 
-class Target():
+class Target:
     def __init__(self, id_, target_type):
         self.id = id_
         self.type = target_type

@@ -11,12 +11,12 @@ from ._utils import read_xml_asset, read_xml_assets, asset
 GET_XML = 'database_get.xml'
 POPULATE_PERMISSIONS_XML = 'database_populate_permissions.xml'
 UPDATE_XML = 'database_update.xml'
+GET_DQW_BY_CONTENT = "dqw_by_content_type.xml"
 
 
 class DatabaseTests(unittest.TestCase):
     def setUp(self):
         self.server = TSC.Server('http://test')
-
         # Fake signin
         self.server._site_id = 'dad65087-b08b-4603-af4e-2887b8aafc67'
         self.server._auth_token = 'j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM'
@@ -80,6 +80,27 @@ class DatabaseTests(unittest.TestCase):
             self.assertDictEqual(permissions[1].capabilities, {
                 TSC.Permission.Capability.Write: TSC.Permission.Mode.Allow,
             })
+
+    def test_populate_data_quality_warning(self):
+        with open(asset(GET_DQW_BY_CONTENT), 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.get(self.server.databases._data_quality_warnings.baseurl + '/94441d26-9a52-4a42-b0fb-3f94792d1aac',
+                  text=response_xml)
+            single_database = TSC.DatabaseItem('test')
+            single_database._id = '94441d26-9a52-4a42-b0fb-3f94792d1aac'
+
+            self.server.databases.populate_dqw(single_database)
+            dqws = single_database.dqws
+            first_dqw = dqws.pop()
+            self.assertEqual(first_dqw.id, "c2e0e406-84fb-4f4e-9998-f20dd9306710")
+            self.assertEqual(first_dqw.warning_type, "WARNING")
+            self.assertEqual(first_dqw.message, "Hello, World!")
+            self.assertEqual(first_dqw.owner_id, "eddc8c5f-6af0-40be-b6b0-2c790290a43f")
+            self.assertEqual(first_dqw.active, True)
+            self.assertEqual(first_dqw.severe, True)
+            self.assertEqual(str(first_dqw.created_at), "2021-04-09 18:39:54+00:00")
+            self.assertEqual(str(first_dqw.updated_at), "2021-04-09 18:39:54+00:00")
 
     def test_delete(self):
         with requests_mock.mock() as m:

@@ -14,7 +14,7 @@ class Pager(object):
 
     def __init__(self, endpoint, request_opts=None, **kwargs):
 
-        if hasattr(endpoint, 'get'):
+        if hasattr(endpoint, "get"):
             # The simpliest case is to take an Endpoint and call its get
             endpoint = partial(endpoint.get, **kwargs)
             self._endpoint = endpoint
@@ -30,7 +30,7 @@ class Pager(object):
 
         # If we have options we could be starting on any page, backfill the count
         if self._options:
-            self._count = ((self._options.pagenumber - 1) * self._options.pagesize)
+            self._count = (self._options.pagenumber - 1) * self._options.pagesize
         else:
             self._count = 0
             self._options = RequestOptions()

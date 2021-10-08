@@ -1,17 +1,23 @@
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
-from .property_decorators import property_not_nullable, property_is_boolean, property_is_data_acceleration_config
+from .property_decorators import (
+    property_not_nullable,
+    property_is_boolean,
+    property_is_data_acceleration_config,
+)
 from .tag_item import TagItem
 from .view_item import ViewItem
 from .permissions_item import PermissionsRule
 from ..datetime_helpers import parse_datetime
 import copy
+import uuid
 
 
 class WorkbookItem(object):
     def __init__(self, project_id, name=None, show_tabs=False):
         self._connections = None
         self._content_url = None
+        self._webpage_url = None
         self._created_at = None
         self._id = None
         self._initial_tags = set()
@@ -27,10 +33,12 @@ class WorkbookItem(object):
         self.project_id = project_id
         self.show_tabs = show_tabs
         self.tags = set()
-        self.data_acceleration_config = {'acceleration_enabled': None,
-                                         'accelerate_now': None,
-                                         'last_updated_at': None,
-                                         'acceleration_status': None}
+        self.data_acceleration_config = {
+            "acceleration_enabled": None,
+            "accelerate_now": None,
+            "last_updated_at": None,
+            "acceleration_status": None,
+        }
         self._permissions = None
 
     @property
@@ -50,6 +58,10 @@ class WorkbookItem(object):
     @property
     def content_url(self):
         return self._content_url
+
+    @property
+    def webpage_url(self):
+        return self._webpage_url
 
     @property
     def created_at(self):
@@ -150,27 +162,72 @@ class WorkbookItem(object):
 
     def _parse_common_tags(self, workbook_xml, ns):
         if not isinstance(workbook_xml, ET.Element):
-            workbook_xml = ET.fromstring(workbook_xml).find('.//t:workbook', namespaces=ns)
+            workbook_xml = ET.fromstring(workbook_xml).find(".//t:workbook", namespaces=ns)
         if workbook_xml is not None:
-            (_, _, _, _, description, updated_at, _, show_tabs,
-             project_id, project_name, owner_id, _, _,
-             data_acceleration_config) = self._parse_element(workbook_xml, ns)
+            (
+                _,
+                _,
+                _,
+                _,
+                _,
+                description,
+                updated_at,
+                _,
+                show_tabs,
+                project_id,
+                project_name,
+                owner_id,
+                _,
+                _,
+                data_acceleration_config,
+            ) = self._parse_element(workbook_xml, ns)
 
-            self._set_values(None, None, None, None, description, updated_at,
-                             None, show_tabs, project_id, project_name, owner_id, None, None,
-                             data_acceleration_config)
+            self._set_values(
+                None,
+                None,
+                None,
+                None,
+                None,
+                description,
+                updated_at,
+                None,
+                show_tabs,
+                project_id,
+                project_name,
+                owner_id,
+                None,
+                None,
+                data_acceleration_config,
+            )
 
         return self
 
-    def _set_values(self, id, name, content_url, created_at, description, updated_at,
-                    size, show_tabs, project_id, project_name, owner_id, tags, views,
-                    data_acceleration_config):
+    def _set_values(
+        self,
+        id,
+        name,
+        content_url,
+        webpage_url,
+        created_at,
+        description,
+        updated_at,
+        size,
+        show_tabs,
+        project_id,
+        project_name,
+        owner_id,
+        tags,
+        views,
+        data_acceleration_config,
+    ):
         if id is not None:
             self._id = id
         if name:
             self.name = name
         if content_url:
             self._content_url = content_url
+        if webpage_url:
+            self._webpage_url = webpage_url
         if created_at:
             self._created_at = created_at
         if description:
@@ -199,91 +256,143 @@ class WorkbookItem(object):
     def from_response(cls, resp, ns):
         all_workbook_items = list()
         parsed_response = ET.fromstring(resp)
-        all_workbook_xml = parsed_response.findall('.//t:workbook', namespaces=ns)
+        all_workbook_xml = parsed_response.findall(".//t:workbook", namespaces=ns)
         for workbook_xml in all_workbook_xml:
-            (id, name, content_url, created_at, description, updated_at, size, show_tabs,
-             project_id, project_name, owner_id, tags, views,
-             data_acceleration_config) = cls._parse_element(workbook_xml, ns)
+            (
+                id,
+                name,
+                content_url,
+                webpage_url,
+                created_at,
+                description,
+                updated_at,
+                size,
+                show_tabs,
+                project_id,
+                project_name,
+                owner_id,
+                tags,
+                views,
+                data_acceleration_config,
+            ) = cls._parse_element(workbook_xml, ns)
+
+            # workaround for Personal Space workbooks which won't have a project
+            if not project_id:
+                project_id = uuid.uuid4()
 
             workbook_item = cls(project_id)
-            workbook_item._set_values(id, name, content_url, created_at, description, updated_at,
-                                      size, show_tabs, None, project_name, owner_id, tags, views,
-                                      data_acceleration_config)
+            workbook_item._set_values(
+                id,
+                name,
+                content_url,
+                webpage_url,
+                created_at,
+                description,
+                updated_at,
+                size,
+                show_tabs,
+                None,
+                project_name,
+                owner_id,
+                tags,
+                views,
+                data_acceleration_config,
+            )
             all_workbook_items.append(workbook_item)
         return all_workbook_items
 
     @staticmethod
     def _parse_element(workbook_xml, ns):
-        id = workbook_xml.get('id', None)
-        name = workbook_xml.get('name', None)
-        content_url = workbook_xml.get('contentUrl', None)
-        created_at = parse_datetime(workbook_xml.get('createdAt', None))
-        description = workbook_xml.get('description', None)
-        updated_at = parse_datetime(workbook_xml.get('updatedAt', None))
+        id = workbook_xml.get("id", None)
+        name = workbook_xml.get("name", None)
+        content_url = workbook_xml.get("contentUrl", None)
+        webpage_url = workbook_xml.get("webpageUrl", None)
+        created_at = parse_datetime(workbook_xml.get("createdAt", None))
+        description = workbook_xml.get("description", None)
+        updated_at = parse_datetime(workbook_xml.get("updatedAt", None))
 
-        size = workbook_xml.get('size', None)
+        size = workbook_xml.get("size", None)
         if size:
             size = int(size)
 
-        show_tabs = string_to_bool(workbook_xml.get('showTabs', ''))
+        show_tabs = string_to_bool(workbook_xml.get("showTabs", ""))
 
         project_id = None
         project_name = None
-        project_tag = workbook_xml.find('.//t:project', namespaces=ns)
+        project_tag = workbook_xml.find(".//t:project", namespaces=ns)
         if project_tag is not None:
-            project_id = project_tag.get('id', None)
-            project_name = project_tag.get('name', None)
+            project_id = project_tag.get("id", None)
+            project_name = project_tag.get("name", None)
 
         owner_id = None
-        owner_tag = workbook_xml.find('.//t:owner', namespaces=ns)
+        owner_tag = workbook_xml.find(".//t:owner", namespaces=ns)
         if owner_tag is not None:
-            owner_id = owner_tag.get('id', None)
+            owner_id = owner_tag.get("id", None)
 
         tags = None
-        tags_elem = workbook_xml.find('.//t:tags', namespaces=ns)
+        tags_elem = workbook_xml.find(".//t:tags", namespaces=ns)
         if tags_elem is not None:
             all_tags = TagItem.from_xml_element(tags_elem, ns)
             tags = all_tags
 
         views = None
-        views_elem = workbook_xml.find('.//t:views', namespaces=ns)
+        views_elem = workbook_xml.find(".//t:views", namespaces=ns)
         if views_elem is not None:
             views = ViewItem.from_xml_element(views_elem, ns)
 
-        data_acceleration_config = {'acceleration_enabled': None, 'accelerate_now': None,
-                                    'last_updated_at': None, 'acceleration_status': None}
-        data_acceleration_elem = workbook_xml.find('.//t:dataAccelerationConfig', namespaces=ns)
+        data_acceleration_config = {
+            "acceleration_enabled": None,
+            "accelerate_now": None,
+            "last_updated_at": None,
+            "acceleration_status": None,
+        }
+        data_acceleration_elem = workbook_xml.find(".//t:dataAccelerationConfig", namespaces=ns)
         if data_acceleration_elem is not None:
             data_acceleration_config = parse_data_acceleration_config(data_acceleration_elem)
 
-        return id, name, content_url, created_at, description, updated_at, size, show_tabs, \
-            project_id, project_name, owner_id, tags, views, data_acceleration_config
+        return (
+            id,
+            name,
+            content_url,
+            webpage_url,
+            created_at,
+            description,
+            updated_at,
+            size,
+            show_tabs,
+            project_id,
+            project_name,
+            owner_id,
+            tags,
+            views,
+            data_acceleration_config,
+        )
 
 
 def parse_data_acceleration_config(data_acceleration_elem):
     data_acceleration_config = dict()
 
-    acceleration_enabled = data_acceleration_elem.get('accelerationEnabled', None)
+    acceleration_enabled = data_acceleration_elem.get("accelerationEnabled", None)
     if acceleration_enabled is not None:
         acceleration_enabled = string_to_bool(acceleration_enabled)
 
-    accelerate_now = data_acceleration_elem.get('accelerateNow', None)
+    accelerate_now = data_acceleration_elem.get("accelerateNow", None)
     if accelerate_now is not None:
         accelerate_now = string_to_bool(accelerate_now)
 
-    last_updated_at = data_acceleration_elem.get('lastUpdatedAt', None)
+    last_updated_at = data_acceleration_elem.get("lastUpdatedAt", None)
     if last_updated_at is not None:
         last_updated_at = parse_datetime(last_updated_at)
 
-    acceleration_status = data_acceleration_elem.get('accelerationStatus', None)
+    acceleration_status = data_acceleration_elem.get("accelerationStatus", None)
 
-    data_acceleration_config['acceleration_enabled'] = acceleration_enabled
-    data_acceleration_config['accelerate_now'] = accelerate_now
-    data_acceleration_config['last_updated_at'] = last_updated_at
-    data_acceleration_config['acceleration_status'] = acceleration_status
+    data_acceleration_config["acceleration_enabled"] = acceleration_enabled
+    data_acceleration_config["accelerate_now"] = accelerate_now
+    data_acceleration_config["last_updated_at"] = last_updated_at
+    data_acceleration_config["acceleration_status"] = acceleration_status
     return data_acceleration_config
 
 
 # Used to convert string represented boolean to a boolean type
 def string_to_bool(s):
-    return s.lower() == 'true'
+    return s.lower() == "true"

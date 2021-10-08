@@ -90,3 +90,35 @@ class AuthTests(unittest.TestCase):
         self.assertIsNone(self.server._auth_token)
         self.assertIsNone(self.server._site_id)
         self.assertIsNone(self.server._user_id)
+
+    def test_switch_site(self):
+        self.server.version = '2.6'
+        baseurl = self.server.auth.baseurl
+        site_id, user_id, auth_token = list('123')
+        self.server._set_auth(site_id, user_id, auth_token)
+        with open(SIGN_IN_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.post(baseurl + '/switchSite', text=response_xml)
+            site = TSC.SiteItem('Samples', 'Samples')
+            self.server.auth.switch_site(site)
+
+        self.assertEqual('eIX6mvFsqyansa4KqEI1UwOpS8ggRs2l', self.server.auth_token)
+        self.assertEqual('6b7179ba-b82b-4f0f-91ed-812074ac5da6', self.server.site_id)
+        self.assertEqual('1a96d216-e9b8-497b-a82a-0b899a965e01', self.server.user_id)
+
+    def test_revoke_all_server_admin_tokens(self):
+        self.server.version = "3.10"
+        baseurl = self.server.auth.baseurl
+        with open(SIGN_IN_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.post(baseurl + '/signin', text=response_xml)
+            m.post(baseurl + '/revokeAllServerAdminTokens', text='')
+            tableau_auth = TSC.TableauAuth('testuser', 'password')
+            self.server.auth.sign_in(tableau_auth)
+            self.server.auth.revoke_all_server_admin_tokens()
+
+        self.assertEqual('eIX6mvFsqyansa4KqEI1UwOpS8ggRs2l', self.server.auth_token)
+        self.assertEqual('6b7179ba-b82b-4f0f-91ed-812074ac5da6', self.server.site_id)
+        self.assertEqual('1a96d216-e9b8-497b-a82a-0b899a965e01', self.server.user_id)

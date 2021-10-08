@@ -12,7 +12,8 @@ GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, 'user_get_by_id.xml')
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'user_update.xml')
 ADD_XML = os.path.join(TEST_ASSET_DIR, 'user_add.xml')
 POPULATE_WORKBOOKS_XML = os.path.join(TEST_ASSET_DIR, 'user_populate_workbooks.xml')
-ADD_FAVORITE_XML = os.path.join(TEST_ASSET_DIR, 'user_add_favorite.xml')
+GET_FAVORITES_XML = os.path.join(TEST_ASSET_DIR, 'favorites_get.xml')
+POPULATE_GROUPS_XML = os.path.join(TEST_ASSET_DIR, 'user_populate_groups.xml')
 
 
 class UserTests(unittest.TestCase):
@@ -29,7 +30,7 @@ class UserTests(unittest.TestCase):
         with open(GET_XML, 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
-            m.get(self.baseurl, text=response_xml)
+            m.get(self.baseurl + "?fields=_all_", text=response_xml)
             all_users, pagination_item = self.server.users.get()
 
         self.assertEqual(2, pagination_item.total_available)
@@ -40,11 +41,15 @@ class UserTests(unittest.TestCase):
         self.assertEqual('alice', single_user.name)
         self.assertEqual('Publisher', single_user.site_role)
         self.assertEqual('2016-08-16T23:17:06Z', format_datetime(single_user.last_login))
+        self.assertEqual('alice cook', single_user.fullname)
+        self.assertEqual('alicecook@test.com', single_user.email)
 
         self.assertTrue(any(user.id == '2a47bbf8-8900-4ebb-b0a4-2723bd7c46c3' for user in all_users))
         single_user = next(user for user in all_users if user.id == '2a47bbf8-8900-4ebb-b0a4-2723bd7c46c3')
         self.assertEqual('Bob', single_user.name)
         self.assertEqual('Interactor', single_user.site_role)
+        self.assertEqual('Bob Smith', single_user.fullname)
+        self.assertEqual('bob@test.com', single_user.email)
 
     def test_get_empty(self):
         with open(GET_EMPTY_XML, 'rb') as f:
@@ -146,3 +151,54 @@ class UserTests(unittest.TestCase):
     def test_populate_workbooks_missing_id(self):
         single_user = TSC.UserItem('test', 'Interactor')
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.users.populate_workbooks, single_user)
+
+    def test_populate_favorites(self):
+        self.server.version = '2.5'
+        baseurl = self.server.favorites.baseurl
+        single_user = TSC.UserItem('test', 'Interactor')
+        with open(GET_FAVORITES_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.get('{0}/{1}'.format(baseurl, single_user.id), text=response_xml)
+            self.server.users.populate_favorites(single_user)
+        self.assertIsNotNone(single_user._favorites)
+        self.assertEqual(len(single_user.favorites['workbooks']), 1)
+        self.assertEqual(len(single_user.favorites['views']), 1)
+        self.assertEqual(len(single_user.favorites['projects']), 1)
+        self.assertEqual(len(single_user.favorites['datasources']), 1)
+
+        workbook = single_user.favorites['workbooks'][0]
+        view = single_user.favorites['views'][0]
+        datasource = single_user.favorites['datasources'][0]
+        project = single_user.favorites['projects'][0]
+
+        self.assertEqual(workbook.id, '6d13b0ca-043d-4d42-8c9d-3f3313ea3a00')
+        self.assertEqual(view.id, 'd79634e1-6063-4ec9-95ff-50acbf609ff5')
+        self.assertEqual(datasource.id, 'e76a1461-3b1d-4588-bf1b-17551a879ad9')
+        self.assertEqual(project.id, '1d0304cd-3796-429f-b815-7258370b9b74')
+
+    def test_populate_groups(self):
+        self.server.version = '3.7'
+        with open(POPULATE_GROUPS_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.get(self.server.users.baseurl + '/dd2239f6-ddf1-4107-981a-4cf94e415794/groups',
+                  text=response_xml)
+            single_user = TSC.UserItem('test', 'Interactor')
+            single_user._id = 'dd2239f6-ddf1-4107-981a-4cf94e415794'
+            self.server.users.populate_groups(single_user)
+
+            group_list = list(single_user.groups)
+
+            self.assertEqual(3, len(group_list))
+            self.assertEqual('ef8b19c0-43b6-11e6-af50-63f5805dbe3c', group_list[0].id)
+            self.assertEqual('All Users', group_list[0].name)
+            self.assertEqual('local', group_list[0].domain_name)
+
+            self.assertEqual('e7833b48-c6f7-47b5-a2a7-36e7dd232758', group_list[1].id)
+            self.assertEqual('Another group', group_list[1].name)
+            self.assertEqual('local', group_list[1].domain_name)
+
+            self.assertEqual('86a66d40-f289-472a-83d0-927b0f954dc8', group_list[2].id)
+            self.assertEqual('TableauExample', group_list[2].name)
+            self.assertEqual('local', group_list[2].domain_name)

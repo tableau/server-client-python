@@ -2,12 +2,10 @@
 # This script demonstrates how to use the Tableau Server Client
 # to filter and sort on the name of the projects present on site.
 #
-#
-# To run the script, you must have installed Python 3.5 or later.
+# To run the script, you must have installed Python 3.6 or later.
 ####
 
 import argparse
-import getpass
 import logging
 
 import tableauserverclient as TSC
@@ -26,29 +24,27 @@ def create_example_project(name='Example Project', content_permissions='LockedTo
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Get all of the refresh tasks available on a server')
+    parser = argparse.ArgumentParser(description='Filter and sort projects.')
+    # Common options; please keep those in sync across all samples
     parser.add_argument('--server', '-s', required=True, help='server address')
-    parser.add_argument('--username', '-u', required=True, help='username to sign into server')
-    parser.add_argument('--site', '-S', default=None)
-    parser.add_argument('-p', default=None)
-
+    parser.add_argument('--site', '-S', help='site name')
+    parser.add_argument('--token-name', '-p', required=True,
+                        help='name of the personal access token used to sign into the server')
+    parser.add_argument('--token-value', '-v', required=True,
+                        help='value of the personal access token used to sign into the server')
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
                         help='desired logging level (set to error by default)')
+    # Options specific to this sample
+    # This sample has no additional options, yet. If you add some, please add them here
 
     args = parser.parse_args()
-
-    if args.p is None:
-        password = getpass.getpass("Password: ")
-    else:
-        password = args.p
 
     # Set logging level based on user input, or error by default
     logging_level = getattr(logging, args.logging_level.upper())
     logging.basicConfig(level=logging_level)
 
-    tableau_auth = TSC.TableauAuth(args.username, password)
-    server = TSC.Server(args.server)
-
+    tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
+    server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
         # Use highest Server REST API version available
         server.use_server_version()

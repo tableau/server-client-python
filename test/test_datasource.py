@@ -1,12 +1,17 @@
+from tableauserverclient.server.endpoint.fileuploads_endpoint import Fileuploads
 import unittest
+from io import BytesIO
 import os
 import requests_mock
 import xml.etree.ElementTree as ET
+from zipfile import ZipFile
+
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
 from tableauserverclient.server.endpoint.exceptions import InternalServerError
 from tableauserverclient.server.request_factory import RequestFactory
 from ._utils import read_xml_asset, read_xml_assets, asset
+
 
 ADD_TAGS_XML = 'datasource_add_tags.xml'
 GET_XML = 'datasource_get.xml'
@@ -18,6 +23,7 @@ PUBLISH_XML = 'datasource_publish.xml'
 PUBLISH_XML_ASYNC = 'datasource_publish_async.xml'
 REFRESH_XML = 'datasource_refresh.xml'
 UPDATE_XML = 'datasource_update.xml'
+UPDATE_HYPER_DATA_XML = 'datasource_data_update.xml'
 UPDATE_CONNECTION_XML = 'datasource_connection_update.xml'
 
 
@@ -48,6 +54,10 @@ class DatasourceTests(unittest.TestCase):
         self.assertEqual('SampleDS', all_datasources[0].name)
         self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', all_datasources[0].project_id)
         self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', all_datasources[0].owner_id)
+        self.assertEqual('https://web.com', all_datasources[0].webpage_url)
+        self.assertFalse(all_datasources[0].encrypt_extracts)
+        self.assertTrue(all_datasources[0].has_extracts)
+        self.assertFalse(all_datasources[0].use_remote_query_agent)
 
         self.assertEqual('9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', all_datasources[1].id)
         self.assertEqual('dataengine', all_datasources[1].datasource_type)
@@ -60,6 +70,10 @@ class DatasourceTests(unittest.TestCase):
         self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', all_datasources[1].project_id)
         self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', all_datasources[1].owner_id)
         self.assertEqual(set(['world', 'indicators', 'sample']), all_datasources[1].tags)
+        self.assertEqual('https://page.com', all_datasources[1].webpage_url)
+        self.assertTrue(all_datasources[1].encrypt_extracts)
+        self.assertFalse(all_datasources[1].has_extracts)
+        self.assertTrue(all_datasources[1].use_remote_query_agent)
 
     def test_get_before_signin(self):
         self.server._auth_token = None
@@ -91,30 +105,35 @@ class DatasourceTests(unittest.TestCase):
         self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', single_datasource.project_id)
         self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', single_datasource.owner_id)
         self.assertEqual(set(['world', 'indicators', 'sample']), single_datasource.tags)
+        self.assertEqual("test-ds", single_datasource.description)
+        self.assertEqual(TSC.DatasourceItem.AskDataEnablement.SiteDefault, single_datasource.ask_data_enablement)
 
     def test_update(self):
         response_xml = read_xml_asset(UPDATE_XML)
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', text=response_xml)
-            single_datasource = TSC.DatasourceItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
+            single_datasource = TSC.DatasourceItem('1d0304cd-3796-429f-b815-7258370b9b74', 'Sample datasource')
             single_datasource.owner_id = 'dd2239f6-ddf1-4107-981a-4cf94e415794'
+            single_datasource._content_url = 'Sampledatasource'
             single_datasource._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
             single_datasource.certified = True
             single_datasource.certification_note = "Warning, here be dragons."
-            single_datasource = self.server.datasources.update(single_datasource)
+            updated_datasource = self.server.datasources.update(single_datasource)
 
-        self.assertEqual('9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', single_datasource.id)
-        self.assertEqual('1d0304cd-3796-429f-b815-7258370b9b74', single_datasource.project_id)
-        self.assertEqual('dd2239f6-ddf1-4107-981a-4cf94e415794', single_datasource.owner_id)
-        self.assertEqual(True, single_datasource.certified)
-        self.assertEqual("Warning, here be dragons.", single_datasource.certification_note)
+        self.assertEqual(updated_datasource.id, single_datasource.id)
+        self.assertEqual(updated_datasource.name, single_datasource.name)
+        self.assertEqual(updated_datasource.content_url, single_datasource.content_url)
+        self.assertEqual(updated_datasource.project_id, single_datasource.project_id)
+        self.assertEqual(updated_datasource.owner_id, single_datasource.owner_id)
+        self.assertEqual(updated_datasource.certified, single_datasource.certified)
+        self.assertEqual(updated_datasource.certification_note, single_datasource.certification_note)
 
     def test_update_copy_fields(self):
         with open(asset(UPDATE_XML), 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', text=response_xml)
-            single_datasource = TSC.DatasourceItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
+            single_datasource = TSC.DatasourceItem('1d0304cd-3796-429f-b815-7258370b9b74', 'test')
             single_datasource._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
             single_datasource._project_name = 'Tester'
             updated_datasource = self.server.datasources.update(single_datasource)
@@ -142,7 +161,7 @@ class DatasourceTests(unittest.TestCase):
         response_xml = read_xml_asset(POPULATE_CONNECTIONS_XML)
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/connections', text=response_xml)
-            single_datasource = TSC.DatasourceItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
+            single_datasource = TSC.DatasourceItem('1d0304cd-3796-429f-b815-7258370b9b74', 'test')
             single_datasource.owner_id = 'dd2239f6-ddf1-4107-981a-4cf94e415794'
             single_datasource._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
             self.server.datasources.populate_connections(single_datasource)
@@ -170,7 +189,7 @@ class DatasourceTests(unittest.TestCase):
             m.put(self.baseurl +
                   '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/connections/be786ae0-d2bf-4a4b-9b34-e2de8d2d4488',
                   text=response_xml)
-            single_datasource = TSC.DatasourceItem('test', '1d0304cd-3796-429f-b815-7258370b9b74')
+            single_datasource = TSC.DatasourceItem('1d0304cd-3796-429f-b815-7258370b9b74')
             single_datasource.owner_id = 'dd2239f6-ddf1-4107-981a-4cf94e415794'
             single_datasource._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
             self.server.datasources.populate_connections(single_datasource)
@@ -191,7 +210,7 @@ class DatasourceTests(unittest.TestCase):
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/0448d2ed-590d-4fa0-b272-a2a8a24555b5/permissions', text=response_xml)
-            single_datasource = TSC.DatasourceItem('test')
+            single_datasource = TSC.DatasourceItem('1d0304cd-3796-429f-b815-7258370b9b74', 'test')
             single_datasource._id = '0448d2ed-590d-4fa0-b272-a2a8a24555b5'
 
             self.server.datasources.populate_permissions(single_datasource)
@@ -216,12 +235,62 @@ class DatasourceTests(unittest.TestCase):
         response_xml = read_xml_asset(PUBLISH_XML)
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
-            new_datasource = TSC.DatasourceItem('SampleDS', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+            new_datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'SampleDS')
             publish_mode = self.server.PublishMode.CreateNew
 
             new_datasource = self.server.datasources.publish(new_datasource,
                                                              asset('SampleDS.tds'),
                                                              mode=publish_mode)
+
+        self.assertEqual('e76a1461-3b1d-4588-bf1b-17551a879ad9', new_datasource.id)
+        self.assertEqual('SampleDS', new_datasource.name)
+        self.assertEqual('SampleDS', new_datasource.content_url)
+        self.assertEqual('dataengine', new_datasource.datasource_type)
+        self.assertEqual('2016-08-11T21:22:40Z', format_datetime(new_datasource.created_at))
+        self.assertEqual('2016-08-17T23:37:08Z', format_datetime(new_datasource.updated_at))
+        self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', new_datasource.project_id)
+        self.assertEqual('default', new_datasource.project_name)
+        self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', new_datasource.owner_id)
+
+    def test_publish_a_non_packaged_file_object(self):
+        response_xml = read_xml_asset(PUBLISH_XML)
+        with requests_mock.mock() as m:
+            m.post(self.baseurl, text=response_xml)
+            new_datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'SampleDS')
+            publish_mode = self.server.PublishMode.CreateNew
+
+            with open(asset('SampleDS.tds'), 'rb') as file_object:
+                new_datasource = self.server.datasources.publish(new_datasource,
+                                                                 file_object,
+                                                                 mode=publish_mode)
+
+        self.assertEqual('e76a1461-3b1d-4588-bf1b-17551a879ad9', new_datasource.id)
+        self.assertEqual('SampleDS', new_datasource.name)
+        self.assertEqual('SampleDS', new_datasource.content_url)
+        self.assertEqual('dataengine', new_datasource.datasource_type)
+        self.assertEqual('2016-08-11T21:22:40Z', format_datetime(new_datasource.created_at))
+        self.assertEqual('2016-08-17T23:37:08Z', format_datetime(new_datasource.updated_at))
+        self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', new_datasource.project_id)
+        self.assertEqual('default', new_datasource.project_name)
+        self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', new_datasource.owner_id)
+
+    def test_publish_a_packaged_file_object(self):
+        response_xml = read_xml_asset(PUBLISH_XML)
+        with requests_mock.mock() as m:
+            m.post(self.baseurl, text=response_xml)
+            new_datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'SampleDS')
+            publish_mode = self.server.PublishMode.CreateNew
+
+            # Create a dummy tdsx file in memory
+            with BytesIO() as zip_archive:
+                with ZipFile(zip_archive, 'w') as zf:
+                    zf.write(asset('SampleDS.tds'))
+
+                zip_archive.seek(0)
+
+                new_datasource = self.server.datasources.publish(new_datasource,
+                                                                 zip_archive,
+                                                                 mode=publish_mode)
 
         self.assertEqual('e76a1461-3b1d-4588-bf1b-17551a879ad9', new_datasource.id)
         self.assertEqual('SampleDS', new_datasource.name)
@@ -239,7 +308,7 @@ class DatasourceTests(unittest.TestCase):
         response_xml = read_xml_asset(PUBLISH_XML_ASYNC)
         with requests_mock.mock() as m:
             m.post(baseurl, text=response_xml)
-            new_datasource = TSC.DatasourceItem('SampleDS', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+            new_datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'SampleDS')
             publish_mode = self.server.PublishMode.CreateNew
 
             new_job = self.server.datasources.publish(new_datasource,
@@ -251,7 +320,16 @@ class DatasourceTests(unittest.TestCase):
         self.assertEqual('PublishDatasource', new_job.type)
         self.assertEqual('0', new_job.progress)
         self.assertEqual('2018-06-30T00:54:54Z', format_datetime(new_job.created_at))
-        self.assertEqual('1', new_job.finish_code)
+        self.assertEqual(1, new_job.finish_code)
+
+    def test_publish_unnamed_file_object(self):
+        new_datasource = TSC.DatasourceItem('test')
+        publish_mode = self.server.PublishMode.CreateNew
+
+        with open(asset('SampleDS.tds'), 'rb') as file_object:
+            self.assertRaises(ValueError, self.server.datasources.publish,
+                              new_datasource, file_object, publish_mode
+                              )
 
     def test_refresh_id(self):
         self.server.version = '2.8'
@@ -260,7 +338,13 @@ class DatasourceTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.post(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/refresh',
                    status_code=202, text=response_xml)
-            self.server.datasources.refresh('9dbd2263-16b5-46e1-9c43-a76bb8ab65fb')
+            new_job = self.server.datasources.refresh('9dbd2263-16b5-46e1-9c43-a76bb8ab65fb')
+
+        self.assertEqual('7c3d599e-949f-44c3-94a1-f30ba85757e4', new_job.id)
+        self.assertEqual('RefreshExtract', new_job.type)
+        self.assertEqual(None, new_job.progress)
+        self.assertEqual('2020-03-05T22:05:32Z', format_datetime(new_job.created_at))
+        self.assertEqual(-1, new_job.finish_code)
 
     def test_refresh_object(self):
         self.server.version = '2.8'
@@ -271,7 +355,90 @@ class DatasourceTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.post(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/refresh',
                    status_code=202, text=response_xml)
-            self.server.datasources.refresh(datasource)
+            new_job = self.server.datasources.refresh(datasource)
+
+        # We only check the `id`; remaining fields are already tested in `test_refresh_id`
+        self.assertEqual('7c3d599e-949f-44c3-94a1-f30ba85757e4', new_job.id)
+
+    def test_update_hyper_data_datasource_object(self):
+        """Calling `update_hyper_data` with a `DatasourceItem` should update that datasource"""
+        self.server.version = "3.13"
+        self.baseurl = self.server.datasources.baseurl
+
+        datasource = TSC.DatasourceItem('')
+        datasource._id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
+        response_xml = read_xml_asset(UPDATE_HYPER_DATA_XML)
+        with requests_mock.mock() as m:
+            m.patch(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/data',
+                   status_code=202, headers={"requestid": "test_id"}, text=response_xml)
+            new_job = self.server.datasources.update_hyper_data(datasource, request_id="test_id", actions=[])
+
+        self.assertEqual('5c0ba560-c959-424e-b08a-f32ef0bfb737', new_job.id)
+        self.assertEqual('UpdateUploadedFile', new_job.type)
+        self.assertEqual(None, new_job.progress)
+        self.assertEqual('2021-09-18T09:40:12Z', format_datetime(new_job.created_at))
+        self.assertEqual(-1, new_job.finish_code)
+
+    def test_update_hyper_data_connection_object(self):
+        """Calling `update_hyper_data` with a `ConnectionItem` should update that connection"""
+        self.server.version = "3.13"
+        self.baseurl = self.server.datasources.baseurl
+
+        connection = TSC.ConnectionItem()
+        connection._datasource_id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
+        connection._id = '7ecaccd8-39b0-4875-a77d-094f6e930019'
+        response_xml = read_xml_asset(UPDATE_HYPER_DATA_XML)
+        with requests_mock.mock() as m:
+            m.patch(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/connections/7ecaccd8-39b0-4875-a77d-094f6e930019/data',
+                   status_code=202, headers={"requestid": "test_id"}, text=response_xml)
+            new_job = self.server.datasources.update_hyper_data(connection, request_id="test_id", actions=[])
+
+        # We only check the `id`; remaining fields are already tested in `test_update_hyper_data_datasource_object`
+        self.assertEqual('5c0ba560-c959-424e-b08a-f32ef0bfb737', new_job.id)
+
+    def test_update_hyper_data_datasource_string(self):
+        """For convenience, calling `update_hyper_data` with a `str` should update the datasource with the corresponding UUID"""
+        self.server.version = "3.13"
+        self.baseurl = self.server.datasources.baseurl
+
+        datasource_id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
+        response_xml = read_xml_asset(UPDATE_HYPER_DATA_XML)
+        with requests_mock.mock() as m:
+            m.patch(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/data',
+                   status_code=202, headers={"requestid": "test_id"}, text=response_xml)
+            new_job = self.server.datasources.update_hyper_data(datasource_id, request_id="test_id", actions=[])
+
+        # We only check the `id`; remaining fields are already tested in `test_update_hyper_data_datasource_object`
+        self.assertEqual('5c0ba560-c959-424e-b08a-f32ef0bfb737', new_job.id)
+
+    def test_update_hyper_data_datasource_payload_file(self):
+        """If `payload` is present, we upload it and associate the job with it"""
+        self.server.version = "3.13"
+        self.baseurl = self.server.datasources.baseurl
+
+        datasource_id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
+        mock_upload_id = '10051:c3e56879876842d4b3600f20c1f79876-0:0'
+        response_xml = read_xml_asset(UPDATE_HYPER_DATA_XML)
+        with requests_mock.mock() as rm, \
+             unittest.mock.patch.object(Fileuploads, "upload", return_value=mock_upload_id):
+            rm.patch(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/data?uploadSessionId=' + mock_upload_id,
+                   status_code=202, headers={"requestid": "test_id"}, text=response_xml)
+            new_job = self.server.datasources.update_hyper_data(datasource_id, request_id="test_id",
+                actions=[], payload=asset('World Indicators.hyper'))
+
+        # We only check the `id`; remaining fields are already tested in `test_update_hyper_data_datasource_object`
+        self.assertEqual('5c0ba560-c959-424e-b08a-f32ef0bfb737', new_job.id)
+
+    def test_update_hyper_data_datasource_invalid_payload_file(self):
+        """If `payload` points to a non-existing file, we report an error"""
+        self.server.version = "3.13"
+        self.baseurl = self.server.datasources.baseurl
+        datasource_id = '9dbd2263-16b5-46e1-9c43-a76bb8ab65fb'
+        with self.assertRaises(IOError) as cm:
+            self.server.datasources.update_hyper_data(datasource_id, request_id="test_id",
+                actions=[], payload='no/such/file.missing')
+        exception = cm.exception
+        self.assertEqual(str(exception), "File path does not lead to an existing file.")
 
     def test_delete(self):
         with requests_mock.mock() as m:
@@ -311,23 +478,46 @@ class DatasourceTests(unittest.TestCase):
         os.remove(file_path)
 
     def test_update_missing_id(self):
-        single_datasource = TSC.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+        single_datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'test')
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.datasources.update, single_datasource)
 
     def test_publish_missing_path(self):
-        new_datasource = TSC.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+        new_datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'test')
         self.assertRaises(IOError, self.server.datasources.publish, new_datasource,
                           '', self.server.PublishMode.CreateNew)
 
     def test_publish_missing_mode(self):
-        new_datasource = TSC.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+        new_datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'test')
         self.assertRaises(ValueError, self.server.datasources.publish, new_datasource,
                           asset('SampleDS.tds'), None)
 
     def test_publish_invalid_file_type(self):
-        new_datasource = TSC.DatasourceItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+        new_datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'test')
         self.assertRaises(ValueError, self.server.datasources.publish, new_datasource,
                           asset('SampleWB.twbx'), self.server.PublishMode.Append)
+
+    def test_publish_hyper_file_object_raises_exception(self):
+        new_datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'test')
+        with open(asset('World Indicators.hyper')) as file_object:
+            self.assertRaises(ValueError, self.server.datasources.publish, new_datasource,
+                              file_object, self.server.PublishMode.Append)
+
+    def test_publish_tde_file_object_raises_exception(self):
+
+        new_datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'test')
+        tds_asset = asset(os.path.join('Data', 'Tableau Samples', 'World Indicators.tde'))
+        with open(tds_asset) as file_object:
+            self.assertRaises(ValueError, self.server.datasources.publish, new_datasource,
+                              file_object, self.server.PublishMode.Append)
+
+    def test_publish_file_object_of_unknown_type_raises_exception(self):
+        new_datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'test')
+
+        with BytesIO() as file_object:
+            file_object.write(bytes.fromhex('89504E470D0A1A0A'))
+            file_object.seek(0)
+            self.assertRaises(ValueError, self.server.datasources.publish, new_datasource,
+                              file_object, self.server.PublishMode.Append)
 
     def test_publish_multi_connection(self):
         new_datasource = TSC.DatasourceItem(name='Sample', project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
@@ -384,3 +574,30 @@ class DatasourceTests(unittest.TestCase):
             self.assertRaisesRegex(InternalServerError, 'Please use asynchronous publishing to avoid timeouts.',
                                    self.server.datasources.publish, new_datasource,
                                    asset('SampleDS.tds'), publish_mode)
+
+    def test_delete_extracts(self):
+        self.server.version = "3.10"
+        self.baseurl = self.server.datasources.baseurl
+        with requests_mock.mock() as m:
+            m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/deleteExtract', status_code=200)
+            self.server.datasources.delete_extract('3cc6cd06-89ce-4fdc-b935-5294135d6d42')
+
+    def test_create_extracts(self):
+        self.server.version = "3.10"
+        self.baseurl = self.server.datasources.baseurl
+
+        response_xml = read_xml_asset(PUBLISH_XML_ASYNC)
+        with requests_mock.mock() as m:
+            m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/createExtract',
+                   status_code=200, text=response_xml)
+            self.server.datasources.create_extract('3cc6cd06-89ce-4fdc-b935-5294135d6d42')
+
+    def test_create_extracts_encrypted(self):
+        self.server.version = "3.10"
+        self.baseurl = self.server.datasources.baseurl
+
+        response_xml = read_xml_asset(PUBLISH_XML_ASYNC)
+        with requests_mock.mock() as m:
+            m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/createExtract',
+                   status_code=200, text=response_xml)
+            self.server.datasources.create_extract('3cc6cd06-89ce-4fdc-b935-5294135d6d42', True)

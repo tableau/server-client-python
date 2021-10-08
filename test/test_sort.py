@@ -1,5 +1,5 @@
 import unittest
-import os
+import re
 import requests
 import requests_mock
 import tableauserverclient as TSC
@@ -8,6 +8,7 @@ import tableauserverclient as TSC
 class SortTests(unittest.TestCase):
     def setUp(self):
         self.server = TSC.Server('http://test')
+        self.server.version = "3.10"
         self.server._site_id = 'dad65087-b08b-4603-af4e-2887b8aafc67'
         self.server._auth_token = 'j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM'
         self.baseurl = self.server.workbooks.baseurl
@@ -24,14 +25,11 @@ class SortTests(unittest.TestCase):
                                        TSC.RequestOptions.Operator.Equals,
                                        'Superstore'))
 
-            resp = self.server.workbooks._make_request(requests.get,
-                                                       url,
-                                                       content=None,
-                                                       request_object=opts,
-                                                       auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
-                                                       content_type='text/xml')
+            resp = self.server.workbooks.get_request(url, request_object=opts)
 
-            self.assertEqual(resp.request.query, 'pagenumber=13&pagesize=13&filter=name:eq:superstore')
+            self.assertTrue(re.search('pagenumber=13', resp.request.query))
+            self.assertTrue(re.search('pagesize=13', resp.request.query))
+            self.assertTrue(re.search('filter=name%3aeq%3asuperstore', resp.request.query))
 
     def test_filter_equals_list(self):
         with self.assertRaises(ValueError) as cm:
@@ -51,13 +49,10 @@ class SortTests(unittest.TestCase):
                                        TSC.RequestOptions.Operator.In,
                                        ['stocks', 'market']))
 
-            resp = self.server.workbooks._make_request(requests.get,
-                                                       url,
-                                                       content=None,
-                                                       request_object=opts,
-                                                       auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
-                                                       content_type='text/xml')
-            self.assertEqual(resp.request.query, 'pagenumber=13&pagesize=13&filter=tags:in:%5bstocks,market%5d')
+            resp = self.server.workbooks.get_request(url, request_object=opts)
+            self.assertTrue(re.search('pagenumber=13', resp.request.query))
+            self.assertTrue(re.search('pagesize=13', resp.request.query))
+            self.assertTrue(re.search('filter=tags%3ain%3a%5bstocks%2cmarket%5d', resp.request.query))
 
     def test_sort_asc(self):
         with requests_mock.mock() as m:
@@ -67,14 +62,11 @@ class SortTests(unittest.TestCase):
             opts.sort.add(TSC.Sort(TSC.RequestOptions.Field.Name,
                                    TSC.RequestOptions.Direction.Asc))
 
-            resp = self.server.workbooks._make_request(requests.get,
-                                                       url,
-                                                       content=None,
-                                                       request_object=opts,
-                                                       auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
-                                                       content_type='text/xml')
+            resp = self.server.workbooks.get_request(url, request_object=opts)
 
-            self.assertEqual(resp.request.query, 'pagenumber=13&pagesize=13&sort=name:asc')
+            self.assertTrue(re.search('pagenumber=13', resp.request.query))
+            self.assertTrue(re.search('pagesize=13', resp.request.query))
+            self.assertTrue(re.search('sort=name%3aasc', resp.request.query))
 
     def test_filter_combo(self):
         with requests_mock.mock() as m:
@@ -90,16 +82,16 @@ class SortTests(unittest.TestCase):
                                        TSC.RequestOptions.Operator.Equals,
                                        'Publisher'))
 
-            resp = self.server.workbooks._make_request(requests.get,
-                                                       url,
-                                                       content=None,
-                                                       request_object=opts,
-                                                       auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
-                                                       content_type='text/xml')
+            resp = self.server.workbooks.get_request(url, request_object=opts)
 
-            expected = 'pagenumber=13&pagesize=13&filter=lastlogin:gte:2017-01-15t00:00:00:00z,siterole:eq:publisher'
+            expected = 'pagenumber=13&pagesize=13&filter=lastlogin%3agte%3a' \
+                       '2017-01-15t00%3a00%3a00%3a00z%2csiterole%3aeq%3apublisher'
 
-            self.assertEqual(resp.request.query, expected)
+            self.assertTrue(re.search('pagenumber=13', resp.request.query))
+            self.assertTrue(re.search('pagesize=13', resp.request.query))
+            self.assertTrue(re.search(
+                'filter=lastlogin%3agte%3a2017-01-15t00%3a00%3a00%3a00z%2csiterole%3aeq%3apublisher',
+                resp.request.query))
 
 
 if __name__ == '__main__':
