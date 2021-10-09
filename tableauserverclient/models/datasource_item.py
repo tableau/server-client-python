@@ -136,6 +136,10 @@ class DatasourceItem(object):
     def description(self):
         return self._description
 
+    @description.setter
+    def description(self, value):
+        self._description = value
+
     @property
     def updated_at(self):
         return self._updated_at
@@ -170,7 +174,6 @@ class DatasourceItem(object):
                 ask_data_enablement,
                 certified,
                 certification_note,
-                _,
                 _,
                 _,
                 _,

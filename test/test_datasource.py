@@ -105,7 +105,6 @@ class DatasourceTests(unittest.TestCase):
         self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', single_datasource.project_id)
         self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', single_datasource.owner_id)
         self.assertEqual(set(['world', 'indicators', 'sample']), single_datasource.tags)
-        self.assertEqual("test-ds", single_datasource.description)
         self.assertEqual(TSC.DatasourceItem.AskDataEnablement.SiteDefault, single_datasource.ask_data_enablement)
 
     def test_update(self):
