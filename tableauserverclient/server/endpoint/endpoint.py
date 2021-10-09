@@ -37,7 +37,7 @@ class Endpoint(object):
             headers["x-tableau-auth"] = auth_token
         if content_type is not None:
             headers["content-type"] = content_type
-
+        headers["User-Agent"] = "Tableau Server Client {}".format(get_versions()['version'])
         return headers
 
     def _make_request(

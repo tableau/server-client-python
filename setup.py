@@ -38,7 +38,7 @@ setup(
     setup_requires=pytest_runner,
     install_requires=[
         'defusedxml>=0.7.1',
-        'requests>=2.11,<3.0',
+        'requests>=2.20,<3.0',
     ],
     python_requires='>3.7.0',
     tests_require=test_requirements,
