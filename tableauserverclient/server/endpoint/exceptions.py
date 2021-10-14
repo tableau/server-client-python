@@ -75,7 +75,7 @@ class JobFailedException(Exception):
         return f"Job {self.job.id} failed with notes {self.notes}"
 
 
-class JobCanceledException(JobFailedException):
+class JobCancelledException(JobFailedException):
     pass
 class FlowRunFailedException(Exception):
     def __init__(self, flow_run):
@@ -86,5 +86,5 @@ class FlowRunFailedException(Exception):
         return f"FlowRun {self.flow_run.id} failed with job id {self.background_job_id}"
 
 
-class FlowRunCanceledException(FlowRunFailedException):
+class FlowRunCancelledException(FlowRunFailedException):
     pass 

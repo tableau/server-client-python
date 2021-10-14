@@ -1,5 +1,5 @@
 from .endpoint import Endpoint, QuerysetEndpoint, api
-from .exceptions import FlowRunFailedException, FlowRunCanceledException
+from .exceptions import FlowRunFailedException, FlowRunCancelledException
 from .. import FlowRunItem, PaginationItem
 from ...exponential_backoff import ExponentialBackoffTimer
 
@@ -70,7 +70,7 @@ class FlowRuns(QuerysetEndpoint):
             return flow_run
         elif flow_run.status == "Failed":
             raise FlowRunFailedException(flow_run)
-        elif flow_run.status in ["Canceled", "Cancelled"]:
-            raise FlowRunCanceledException(flow_run)
+        elif flow_run.status == "Cancelled":
+            raise FlowRunCancelledException(flow_run)
         else:
             raise AssertionError("Unexpected status in flow_run", flow_run)
