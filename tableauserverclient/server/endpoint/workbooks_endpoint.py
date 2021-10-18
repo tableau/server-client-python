@@ -25,8 +25,10 @@ from typing import (
     Dict,
     List,
     IO,
+    Literal,
     Mapping,
     Optional,
+    overload,
     runtime_checkable,
     Sequence,
     Tuple,
@@ -312,6 +314,36 @@ class Workbooks(QuerysetEndpoint):
 
     # TODO: Fix file type hint
     # Publishes workbook. Chunking method if file over 64MB
+    @overload
+    def publish(
+        self,
+        workbook_item: WorkbookItem,
+        file: PathOrFile,
+        mode: str,
+        connection_credentials: Optional["ConnectionCredentials"],
+        connections: Optional[Sequence[ConnectionItem]],
+        as_job: Literal[True],
+        hidden_views: Optional[Sequence[str]],
+        skip_connection_check: bool,
+    ) -> JobItem:
+        ...
+
+
+    @overload
+    def publish(
+        self,
+        workbook_item: WorkbookItem,
+        file: PathOrFile,
+        mode: str,
+        connection_credentials: Optional["ConnectionCredentials"],
+        connections: Optional[Sequence[ConnectionItem]],
+        as_job: Literal[False],
+        hidden_views: Optional[Sequence[str]],
+        skip_connection_check: bool,
+    ) -> WorkbookItem:
+        ...
+
+
     @api(version="2.0")
     @parameter_added_in(as_job="3.0")
     @parameter_added_in(connections="2.8")
@@ -325,7 +357,7 @@ class Workbooks(QuerysetEndpoint):
         as_job: bool = False,
         hidden_views: Optional[Sequence[str]] = None,
         skip_connection_check: bool = False,
-    ) -> Union[JobItem, WorkbookItem]:
+    ):
 
         if connection_credentials is not None:
             import warnings
