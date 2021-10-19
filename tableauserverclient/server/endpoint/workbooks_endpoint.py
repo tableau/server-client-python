@@ -43,7 +43,7 @@ ALLOWED_FILE_EXTENSIONS = ["twb", "twbx"]
 
 logger = logging.getLogger("tableau.endpoint.workbooks")
 
-PathOrFile = Union[os.PathLike, io.BytesIO]
+PathOrFile = Union[os.PathLike, io.BytesIO, io.BufferedReader]
 
 
 class Workbooks(QuerysetEndpoint):
@@ -427,7 +427,7 @@ class Workbooks(QuerysetEndpoint):
                 with open(file, "rb") as f:
                     file_contents = f.read()
 
-            elif isinstance(file, io.BytesIO):
+            elif isinstance(file, (io.BytesIO, io.BufferedReader)):
                 file_contents = file.read()
 
             else:

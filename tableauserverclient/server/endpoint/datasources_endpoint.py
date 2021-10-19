@@ -31,8 +31,12 @@ from typing import (
     Sequence,
     Tuple,
     TYPE_CHECKING,
+    TypeVar,
     Union,
 )
+
+io_types = (io.BytesIO, io.BufferedReader, io.TextIOWrapper)
+T = TypeVar('T', *io_types)
 
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
@@ -45,7 +49,7 @@ if TYPE_CHECKING:
     from ..server import Server
     from ...models import PermissionsRule
 
-PathOrFile = Union[os.PathLike, io.BytesIO]
+PathOrFile = Union[os.PathLike, T]
 
 
 class Datasources(QuerysetEndpoint):
@@ -264,7 +268,7 @@ class Datasources(QuerysetEndpoint):
                 error = "Only {} files can be published as datasources.".format(", ".join(ALLOWED_FILE_EXTENSIONS))
                 raise ValueError(error)
 
-        elif isinstance(file, io.BytesIO):
+        elif isinstance(file, io_types):
 
             if not datasource_item.name:
                 error = "Datasource item must have a name when passing a file object"
@@ -311,8 +315,10 @@ class Datasources(QuerysetEndpoint):
             if isinstance(file, (Path, str)):
                 with open(file, "rb") as f:
                     file_contents = f.read()
-            elif isinstance(file, io.BytesIO):
+            elif isinstance(file, io_types):
                 file_contents = file.read()
+            else:
+                raise TypeError()
 
             xml_request, content_type = RequestFactory.Datasource.publish_req(
                 datasource_item,
