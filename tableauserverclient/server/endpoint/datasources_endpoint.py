@@ -25,9 +25,7 @@ import json
 from pathlib import Path
 from typing import (
     List,
-    Literal,
     Optional,
-    overload,
     Sequence,
     Tuple,
     TYPE_CHECKING,
@@ -212,31 +210,6 @@ class Datasources(QuerysetEndpoint):
         empty_req = RequestFactory.Empty.empty_req()
         self.post_request(url, empty_req)
 
-    
-    @overload
-    def publish(
-        self,
-        datasource_item: DatasourceItem,
-        file: PathOrFile,
-        mode: str,
-        connection_credentials: ConnectionCredentials = None,
-        connections: Sequence[ConnectionItem] = None,
-        as_job: Literal[False] = False,
-    ) -> DatasourceItem:
-        ...
-
-    
-    @overload
-    def publish(
-        self,
-        datasource_item: DatasourceItem,
-        file: PathOrFile,
-        mode: str,
-        connection_credentials: ConnectionCredentials,
-        connections: Sequence[ConnectionItem],
-        as_job: Literal[True],
-    ) -> JobItem:
-        ...
 
     # Publish datasource
     @api(version="2.0")

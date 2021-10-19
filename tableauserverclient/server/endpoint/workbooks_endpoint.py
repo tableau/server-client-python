@@ -21,9 +21,7 @@ from contextlib import closing
 
 from typing import (
     List,
-    Literal,
     Optional,
-    overload,
     Sequence,
     Tuple,
     TYPE_CHECKING,
@@ -295,37 +293,6 @@ class Workbooks(QuerysetEndpoint):
     @api(version="2.0")
     def delete_permission(self, item, capability_item):
         return self._permissions.delete(item, capability_item)
-
-    # TODO: Fix file type hint
-    # Publishes workbook. Chunking method if file over 64MB
-    @overload
-    def publish(
-        self,
-        workbook_item: WorkbookItem,
-        file: PathOrFile,
-        mode: str,
-        connection_credentials: Optional["ConnectionCredentials"],
-        connections: Optional[Sequence[ConnectionItem]],
-        as_job: Literal[True],
-        hidden_views: Optional[Sequence[str]],
-        skip_connection_check: bool,
-    ) -> JobItem:
-        ...
-
-
-    @overload
-    def publish(
-        self,
-        workbook_item: WorkbookItem,
-        file: PathOrFile,
-        mode: str,
-        connection_credentials: Optional["ConnectionCredentials"],
-        connections: Optional[Sequence[ConnectionItem]],
-        as_job: Literal[False],
-        hidden_views: Optional[Sequence[str]],
-        skip_connection_check: bool,
-    ) -> WorkbookItem:
-        ...
 
 
     @api(version="2.0")
