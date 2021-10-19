@@ -46,22 +46,21 @@ def main():
 
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
     server = TSC.Server(args.server)
-    server.add_http_options({'verify': False})
     server.use_server_version()
     with server.auth.sign_in(tableau_auth):
         # Use highest Server REST API version available
         server.use_server_version()
 
         # Without parent_id specified, projects are created at the top level.
-        top_level_project = TSC.ProjectItem(name='TPL2')
+        top_level_project = TSC.ProjectItem(name='Top Level Project')
         top_level_project = create_project(server, top_level_project)
 
         # Specifying parent_id creates a nested projects.
-        child_project = TSC.ProjectItem(name='CPL2', parent_id=top_level_project.id)
+        child_project = TSC.ProjectItem(name='Child Project', parent_id=top_level_project.id)
         child_project = create_project(server, child_project, samples=True)
 
         # Projects can be nested at any level.
-        grand_child_project = TSC.ProjectItem(name='GCPL', parent_id=child_project.id)
+        grand_child_project = TSC.ProjectItem(name='Grand Child Project', parent_id=child_project.id)
         grand_child_project = create_project(server, grand_child_project)
 
         # Projects can be updated
