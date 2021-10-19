@@ -38,7 +38,7 @@ class SubscriptionItem(object):
     def attach_image(self):
         return self._attach_image
 
-    @attach_image.setter
+    @attach_image.setter  # type: ignore[misc]
     @property_is_boolean
     def attach_image(self, value):
         self._attach_image = value
@@ -47,7 +47,7 @@ class SubscriptionItem(object):
     def attach_pdf(self):
         return self._attach_pdf
 
-    @attach_pdf.setter
+    @attach_pdf.setter  # type: ignore[misc]
     @property_is_boolean
     def attach_pdf(self, value):
         self._attach_pdf = value
@@ -56,7 +56,7 @@ class SubscriptionItem(object):
     def send_if_view_empty(self):
         return self._send_if_view_empty
 
-    @send_if_view_empty.setter
+    @send_if_view_empty.setter  # type: ignore[misc]
     @property_is_boolean
     def send_if_view_empty(self, value):
         self._send_if_view_empty = value
@@ -65,7 +65,7 @@ class SubscriptionItem(object):
     def suspended(self):
         return self._suspended
 
-    @suspended.setter
+    @suspended.setter  # type: ignore[misc]
     @property_is_boolean
     def suspended(self, value):
         self._suspended = value

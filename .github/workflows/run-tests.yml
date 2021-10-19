@@ -29,7 +29,6 @@ jobs:
       run: |
         pytest test
 
-    - name: Run Mypy but allow failures
+    - name: Run Mypy tests
       run: |
         mypy --show-error-codes --disable-error-code misc tableauserverclient
-      continue-on-error: true

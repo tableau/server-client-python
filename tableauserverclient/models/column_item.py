@@ -17,7 +17,7 @@ class ColumnItem(object):
     def name(self):
         return self._name
 
-    @name.setter
+    @name.setter  # type: ignore[misc]
     @property_not_empty
     def name(self, value):
         self._name = value
