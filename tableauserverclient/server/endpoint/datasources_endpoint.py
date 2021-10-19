@@ -289,7 +289,7 @@ class Datasources(QuerysetEndpoint):
             elif isinstance(file, io_types):
                 file_contents = file.read()
             else:
-                raise TypeError()
+                raise TypeError("file should be a filepath or file object.")
 
             xml_request, content_type = RequestFactory.Datasource.publish_req(
                 datasource_item,
