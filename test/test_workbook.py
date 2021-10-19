@@ -5,7 +5,7 @@ import re
 import requests_mock
 import tableauserverclient as TSC
 import xml.etree.ElementTree as ET
-
+from pathlib import Path
 
 from tableauserverclient.datetime_helpers import format_datetime
 from tableauserverclient.server.endpoint.exceptions import InternalServerError
@@ -532,6 +532,37 @@ class WorkbookTests(unittest.TestCase):
                 new_workbook = self.server.workbooks.publish(new_workbook,
                                                              fp,
                                                              publish_mode)
+
+        self.assertEqual('a8076ca1-e9d8-495e-bae6-c684dbb55836', new_workbook.id)
+        self.assertEqual('RESTAPISample', new_workbook.name)
+        self.assertEqual('RESTAPISample_0', new_workbook.content_url)
+        self.assertEqual(False, new_workbook.show_tabs)
+        self.assertEqual(1, new_workbook.size)
+        self.assertEqual('2016-08-18T18:33:24Z', format_datetime(new_workbook.created_at))
+        self.assertEqual('2016-08-18T20:31:34Z', format_datetime(new_workbook.updated_at))
+        self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', new_workbook.project_id)
+        self.assertEqual('default', new_workbook.project_name)
+        self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', new_workbook.owner_id)
+        self.assertEqual('fe0b4e89-73f4-435e-952d-3a263fbfa56c', new_workbook.views[0].id)
+        self.assertEqual('GDP per capita', new_workbook.views[0].name)
+        self.assertEqual('RESTAPISample_0/sheets/GDPpercapita', new_workbook.views[0].content_url)
+
+    def test_publish_path_object(self):
+        with open(PUBLISH_XML, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.post(self.baseurl, text=response_xml)
+
+            new_workbook = TSC.WorkbookItem(name='Sample',
+                                            show_tabs=False,
+                                            project_id='ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
+
+            sample_workbook = Path(TEST_ASSET_DIR) / 'SampleWB.twbx'
+            publish_mode = self.server.PublishMode.CreateNew
+
+            new_workbook = self.server.workbooks.publish(new_workbook,
+                                                         sample_workbook,
+                                                         publish_mode)
 
         self.assertEqual('a8076ca1-e9d8-495e-bae6-c684dbb55836', new_workbook.id)
         self.assertEqual('RESTAPISample', new_workbook.name)
