@@ -15,6 +15,7 @@ from ...filesys_helpers import (
 from ...models.job_item import JobItem
 from ...models import ConnectionCredentials
 
+import io
 import os
 import logging
 import copy
@@ -23,20 +24,14 @@ from contextlib import closing
 
 from pathlib import Path
 from typing import (
-    Any,
-    Dict,
     List,
-    IO,
-    Mapping,
+    Literal,
     Optional,
-    runtime_checkable,
+    overload,
     Sequence,
     Tuple,
     TYPE_CHECKING,
-    TypeVar,
     Union,
-    Protocol,
-    Generic,
 )
 
 # The maximum size of a file that can be published in a single request is 64MB
@@ -50,14 +45,7 @@ if TYPE_CHECKING:
     from ..server import Server
     from ...models import PermissionsRule
 
-PathOrFile = Union[os.PathLike, IO[Any]]
-T = TypeVar("T")
-
-
-@runtime_checkable
-class Readable(Protocol, Generic[T]):
-    def read(self) -> T:
-        ...
+PathOrFile = Union[os.PathLike, io.BytesIO]
 
 
 class Datasources(QuerysetEndpoint):
@@ -220,6 +208,32 @@ class Datasources(QuerysetEndpoint):
         empty_req = RequestFactory.Empty.empty_req()
         self.post_request(url, empty_req)
 
+    
+    @overload
+    def publish(
+        self,
+        datasource_item: DatasourceItem,
+        file: PathOrFile,
+        mode: str,
+        connection_credentials: ConnectionCredentials = None,
+        connections: Sequence[ConnectionItem] = None,
+        as_job: Literal[False] = False,
+    ) -> DatasourceItem:
+        ...
+
+    
+    @overload
+    def publish(
+        self,
+        datasource_item: DatasourceItem,
+        file: PathOrFile,
+        mode: str,
+        connection_credentials: ConnectionCredentials,
+        connections: Sequence[ConnectionItem],
+        as_job: Literal[True],
+    ) -> JobItem:
+        ...
+
     # Publish datasource
     @api(version="2.0")
     @parameter_added_in(connections="2.8")
@@ -250,7 +264,7 @@ class Datasources(QuerysetEndpoint):
                 error = "Only {} files can be published as datasources.".format(", ".join(ALLOWED_FILE_EXTENSIONS))
                 raise ValueError(error)
 
-        else:
+        elif isinstance(file, io.BytesIO):
 
             if not datasource_item.name:
                 error = "Datasource item must have a name when passing a file object"
@@ -268,6 +282,9 @@ class Datasources(QuerysetEndpoint):
             filename = "{}.{}".format(datasource_item.name, file_extension)
             file_size = get_file_object_size(file)
 
+        else:
+            raise TypeError()
+        
         if not mode or not hasattr(self.parent_srv.PublishMode, mode):
             error = "Invalid mode defined."
             raise ValueError(error)
@@ -294,7 +311,7 @@ class Datasources(QuerysetEndpoint):
             if isinstance(file, (Path, str)):
                 with open(file, "rb") as f:
                     file_contents = f.read()
-            elif isinstance(file, Readable):
+            elif isinstance(file, io.BytesIO):
                 file_contents = file.read()
 
             xml_request, content_type = RequestFactory.Datasource.publish_req(

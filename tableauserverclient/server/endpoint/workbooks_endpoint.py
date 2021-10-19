@@ -21,22 +21,14 @@ import cgi
 from contextlib import closing
 
 from typing import (
-    Any,
-    Dict,
     List,
-    IO,
     Literal,
-    Mapping,
     Optional,
     overload,
-    runtime_checkable,
     Sequence,
     Tuple,
     TYPE_CHECKING,
-    TypeVar,
     Union,
-    Protocol,
-    Generic,
 )
 
 if TYPE_CHECKING:
@@ -52,14 +44,7 @@ ALLOWED_FILE_EXTENSIONS = ["twb", "twbx"]
 
 logger = logging.getLogger("tableau.endpoint.workbooks")
 
-PathOrFile = Union[os.PathLike, IO[Any]]
-T = TypeVar("T")
-
-
-@runtime_checkable
-class Readable(Protocol, Generic[T]):
-    def read(self) -> T:
-        ...
+PathOrFile = Union[os.PathLike, io.BytesIO]
 
 
 class Workbooks(QuerysetEndpoint):
@@ -443,7 +428,7 @@ class Workbooks(QuerysetEndpoint):
                 with open(file, "rb") as f:
                     file_contents = f.read()
 
-            elif isinstance(file, Readable):
+            elif isinstance(file, io.BytesIO):
                 file_contents = file.read()
 
             else:
