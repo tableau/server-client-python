@@ -334,7 +334,7 @@ class Workbooks(QuerysetEndpoint):
                 error = "Only {} files can be published as workbooks.".format(", ".join(ALLOWED_FILE_EXTENSIONS))
                 raise ValueError(error)
 
-        else:
+        elif isinstance(file, (io.BytesIO, io.BufferedReader)):
             # Expect file to be a file object
             file_size = get_file_object_size(file)
 
@@ -355,6 +355,9 @@ class Workbooks(QuerysetEndpoint):
             # Generate filename for file object.
             # This is needed when publishing the workbook in a single request
             filename = "{}.{}".format(workbook_item.name, file_extension)
+
+        else:
+            raise TypeError('file should be a filepath or file object.')
 
         if not hasattr(self.parent_srv.PublishMode, mode):
             error = "Invalid mode defined."
@@ -397,7 +400,8 @@ class Workbooks(QuerysetEndpoint):
                 file_contents = file.read()
 
             else:
-                raise TypeError()
+                raise TypeError('file should be a filepath or file object.')
+
 
             conn_creds = connection_credentials
             xml_request, content_type = RequestFactory.Workbook.publish_req(

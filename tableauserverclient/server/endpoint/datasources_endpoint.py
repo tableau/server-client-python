@@ -258,7 +258,7 @@ class Datasources(QuerysetEndpoint):
             file_size = get_file_object_size(file)
 
         else:
-            raise TypeError()
+            raise TypeError('file should be a filepath or file object.')
 
         if not mode or not hasattr(self.parent_srv.PublishMode, mode):
             error = "Invalid mode defined."
