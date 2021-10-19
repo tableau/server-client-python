@@ -31,4 +31,4 @@ jobs:
 
     - name: Run Mypy tests
       run: |
-        mypy --show-error-codes --disable-error-code misc --disable-error-code import tableauserverclient
+        mypy --show-error-codes --disable-error-code misc --disable-error-code import tableauserverclient test

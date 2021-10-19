@@ -28,21 +28,21 @@ class DatasourceItem(object):
         self._certified = None
         self._certification_note = None
         self._connections = None
-        self._content_url = None
+        self._content_url: Optional[str] = None
         self._created_at = None
         self._datasource_type = None
         self._description = None
         self._encrypt_extracts = None
         self._has_extracts = None
-        self._id = None
+        self._id: Optional[str] = None
         self._initial_tags: Set = set()
-        self._project_name = None
+        self._project_name: Optional[str] = None
         self._updated_at = None
         self._use_remote_query_agent = None
         self._webpage_url = None
         self.description = None
         self.name = name
-        self.owner_id = None
+        self.owner_id: Optional[str] = None
         self.project_id = project_id
         self.tags: Set = set()
 

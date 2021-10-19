@@ -34,7 +34,7 @@ class WorkbookItem(object):
         self._content_url = None
         self._webpage_url = None
         self._created_at = None
-        self._id = None
+        self._id: Optional[str] = None
         self._initial_tags: set = set()
         self._pdf = None
         self._preview_image = None
@@ -44,7 +44,7 @@ class WorkbookItem(object):
         self._views = None
         self.name = name
         self._description = None
-        self.owner_id = None
+        self.owner_id: Optional[str] = None
         self.project_id = project_id
         self.show_tabs = show_tabs
         self.tags: Set[str] = set()
