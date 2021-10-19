@@ -317,7 +317,7 @@ class Workbooks(QuerysetEndpoint):
                 DeprecationWarning,
             )
 
-        if isinstance(file, (str, Path)):
+        if isinstance(file, (str, os.PathLike)):
             # Expect file to be a filepath
             if not os.path.isfile(file):
                 error = "File path does not lead to an existing file."

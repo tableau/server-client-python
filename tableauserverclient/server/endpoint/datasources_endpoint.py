@@ -223,7 +223,7 @@ class Datasources(QuerysetEndpoint):
         as_job: bool = False,
     ) -> Union[DatasourceItem, JobItem]:
 
-        if isinstance(file, (Path, str)):
+        if isinstance(file, (os.PathLike, str)):
             if not os.path.isfile(file):
                 error = "File path does not lead to an existing file."
                 raise IOError(error)
