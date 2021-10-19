@@ -8,10 +8,10 @@ class JobItem(object):
         Status codes as documented on
         https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#query_job
         """
+
         Success = 0
         Failed = 1
         Cancelled = 2
-
 
     def __init__(
         self,

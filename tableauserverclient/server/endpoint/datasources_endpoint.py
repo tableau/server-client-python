@@ -209,7 +209,6 @@ class Datasources(QuerysetEndpoint):
         empty_req = RequestFactory.Empty.empty_req()
         self.post_request(url, empty_req)
 
-
     # Publish datasource
     @api(version="2.0")
     @parameter_added_in(connections="2.8")
@@ -260,7 +259,7 @@ class Datasources(QuerysetEndpoint):
 
         else:
             raise TypeError()
-        
+
         if not mode or not hasattr(self.parent_srv.PublishMode, mode):
             error = "Invalid mode defined."
             raise ValueError(error)
@@ -318,7 +317,7 @@ class Datasources(QuerysetEndpoint):
             return new_datasource
 
     @api(version="3.13")
-    def update_hyper_data(self, datasource_or_connection_item, *, request_id, actions, payload = None):
+    def update_hyper_data(self, datasource_or_connection_item, *, request_id, actions, payload=None):
         if isinstance(datasource_or_connection_item, DatasourceItem):
             datasource_id = datasource_or_connection_item.id
             url = "{0}/{1}/data".format(self.baseurl, datasource_id)

@@ -70,7 +70,7 @@ class JobFailedException(Exception):
     def __init__(self, job):
         self.notes = job.notes
         self.job = job
-    
+
     def __str__(self):
         return f"Job {self.job.id} failed with notes {self.notes}"
 

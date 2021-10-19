@@ -294,7 +294,6 @@ class Workbooks(QuerysetEndpoint):
     def delete_permission(self, item, capability_item):
         return self._permissions.delete(item, capability_item)
 
-
     @api(version="2.0")
     @parameter_added_in(as_job="3.0")
     @parameter_added_in(connections="2.8")
