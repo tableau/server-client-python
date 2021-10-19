@@ -632,9 +632,18 @@ class WorkbookTests(unittest.TestCase):
     def test_publish_unnamed_file_object(self):
         new_workbook = TSC.WorkbookItem('test')
 
-        with open(os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx')) as f:
+        with open(os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx'), 'rb') as f:
 
             self.assertRaises(ValueError, self.server.workbooks.publish,
+                              new_workbook, f, self.server.PublishMode.CreateNew
+                              )
+
+    def test_publish_non_bytes_file_object(self):
+        new_workbook = TSC.WorkbookItem('test')
+
+        with open(os.path.join(TEST_ASSET_DIR, 'SampleWB.twbx')) as f:
+
+            self.assertRaises(TypeError, self.server.workbooks.publish,
                               new_workbook, f, self.server.PublishMode.CreateNew
                               )
 
