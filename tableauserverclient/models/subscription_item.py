@@ -20,7 +20,7 @@ class SubscriptionItem(object):
 
     def __repr__(self):
         if self.id is not None:
-            return "<Subscription#{id} subject({subject}) schedule_id({schedule_id}) user_id({user_id}) \
+            return "<Subscription#{_id} subject({subject}) schedule_id({schedule_id}) user_id({user_id}) \
                 target({target})".format(
                 **self.__dict__
             )

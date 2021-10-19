@@ -85,7 +85,8 @@ class DatabaseTests(unittest.TestCase):
         with open(asset(GET_DQW_BY_CONTENT), 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
-            m.get(self.server.databases._data_quality_warnings.baseurl + '/94441d26-9a52-4a42-b0fb-3f94792d1aac', text=response_xml)
+            m.get(self.server.databases._data_quality_warnings.baseurl + '/94441d26-9a52-4a42-b0fb-3f94792d1aac',
+                  text=response_xml)
             single_database = TSC.DatabaseItem('test')
             single_database._id = '94441d26-9a52-4a42-b0fb-3f94792d1aac'
 
@@ -100,7 +101,6 @@ class DatabaseTests(unittest.TestCase):
             self.assertEqual(first_dqw.severe, True)
             self.assertEqual(str(first_dqw.created_at), "2021-04-09 18:39:54+00:00")
             self.assertEqual(str(first_dqw.updated_at), "2021-04-09 18:39:54+00:00")
-
 
     def test_delete(self):
         with requests_mock.mock() as m:

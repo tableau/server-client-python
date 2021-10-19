@@ -1,6 +1,8 @@
 from .endpoint import Endpoint, api
+from .exceptions import JobCanceledException, JobFailedException
 from .. import JobItem, BackgroundJobItem, PaginationItem
 from ..request_options import RequestOptionsBase
+from ...exponential_backoff import ExponentialBackoffTimer
 
 import logging
 
@@ -11,7 +13,6 @@ except NameError:
     basestring = str
 
 logger = logging.getLogger("tableau.endpoint.jobs")
-
 
 class Jobs(Endpoint):
     @property
@@ -48,3 +49,27 @@ class Jobs(Endpoint):
         server_response = self.get_request(url)
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return new_job
+
+    def wait_for_job(self, job_id, *, timeout=None):
+        if isinstance(job_id, JobItem):
+            job_id = job_id.id
+        assert isinstance(job_id, str)
+        logger.debug(f"Waiting for job {job_id}")
+
+        backoffTimer = ExponentialBackoffTimer(timeout=timeout)
+        job = self.get_by_id(job_id)
+        while job.completed_at is None:
+            backoffTimer.sleep()
+            job = self.get_by_id(job_id)
+            logger.debug(f"\tJob {job_id} progress={job.progress}")
+
+        logger.info("Job {} Completed: Finish Code: {} - Notes:{}".format(job_id, job.finish_code, job.notes))
+
+        if job.finish_code == JobItem.FinishCode.Success:
+            return job
+        elif job.finish_code == JobItem.FinishCode.Failed:
+            raise JobFailedException(job)
+        elif job.finish_code == JobItem.FinishCode.Cancelled:
+            raise JobCanceledException(job)
+        else:
+            raise AssertionError("Unexpected finish_code in job", job)

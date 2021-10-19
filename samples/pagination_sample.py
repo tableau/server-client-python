@@ -10,7 +10,6 @@
 ####
 
 import argparse
-import getpass
 import logging
 import os.path
 
@@ -20,26 +19,28 @@ import tableauserverclient as TSC
 def main():
 
     parser = argparse.ArgumentParser(description='Demonstrate pagination on the list of workbooks on the server.')
+    # Common options; please keep those in sync across all samples
     parser.add_argument('--server', '-s', required=True, help='server address')
-    parser.add_argument('--username', '-u', required=True, help='username to sign into server')
+    parser.add_argument('--site', '-S', help='site name')
+    parser.add_argument('--token-name', '-n', required=True,
+                        help='name of the personal access token used to sign into the server')
+    parser.add_argument('--token-value', '-v', required=True,
+                        help='value of the personal access token used to sign into the server')
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
                         help='desired logging level (set to error by default)')
+    # Options specific to this sample
+    # This sample has no additional options, yet. If you add some, please add them here
 
     args = parser.parse_args()
-
-    password = getpass.getpass("Password: ")
 
     # Set logging level based on user input, or error by default
     logging_level = getattr(logging, args.logging_level.upper())
     logging.basicConfig(level=logging_level)
 
-    # SIGN IN
-
-    tableau_auth = TSC.TableauAuth(args.username, password)
-    server = TSC.Server(args.server)
-
+    # Sign in to server
+    tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
+    server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
-
         # Pager returns a generator that yields one item at a time fetching
         # from Server only when necessary. Pager takes a server Endpoint as its
         # first parameter. It will call 'get' on that endpoint. To get workbooks

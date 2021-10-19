@@ -10,6 +10,7 @@ class ProjectItem(object):
     class ContentPermissions:
         LockedToProject = "LockedToProject"
         ManagedByOwner = "ManagedByOwner"
+        LockedToProjectWithoutNested = "LockedToProjectWithoutNested"
 
     def __init__(self, name, description=None, content_permissions=None, parent_id=None):
         self._content_permissions = None

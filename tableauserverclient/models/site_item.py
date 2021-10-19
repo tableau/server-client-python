@@ -31,7 +31,7 @@ class SiteItem(object):
         disable_subscriptions=False,
         subscribe_others_enabled=True,
         revision_history_enabled=False,
-        revision_limit=None,
+        revision_limit=25,
         data_acceleration_mode=None,
         flows_enabled=True,
         cataloging_enabled=True,
@@ -49,7 +49,7 @@ class SiteItem(object):
         tier_viewer_capacity=None,
         data_alerts_enabled=True,
         commenting_mentions_enabled=True,
-        catalog_obfuscation_enabled=False,
+        catalog_obfuscation_enabled=True,
         flow_auto_save_enabled=True,
         web_extraction_enabled=True,
         metrics_content_type_enabled=True,
@@ -76,13 +76,13 @@ class SiteItem(object):
         self._state = None
         self._status_reason = None
         self._storage = None
-        self._revision_limit = None
         self.user_quota = user_quota
         self.storage_quota = storage_quota
         self.content_url = content_url
         self.disable_subscriptions = disable_subscriptions
         self.name = name
         self.revision_history_enabled = revision_history_enabled
+        self.revision_limit = revision_limit
         self.subscribe_others_enabled = subscribe_others_enabled
         self.admin_mode = admin_mode
         self.data_acceleration_mode = data_acceleration_mode

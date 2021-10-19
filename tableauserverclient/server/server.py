@@ -24,6 +24,7 @@ from .endpoint import (
     DataAccelerationReport,
     Favorites,
     DataAlerts,
+    Fileuploads,
 )
 from .endpoint.exceptions import (
     EndpointUnavailableError,
@@ -79,6 +80,7 @@ class Server(object):
         self.webhooks = Webhooks(self)
         self.data_acceleration_report = DataAccelerationReport(self)
         self.data_alerts = DataAlerts(self)
+        self.fileuploads = Fileuploads(self)
         self._namespace = Namespace()
 
         if use_server_version:

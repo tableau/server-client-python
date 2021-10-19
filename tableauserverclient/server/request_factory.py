@@ -158,6 +158,8 @@ class DatasourceRequest(object):
     def update_req(self, datasource_item):
         xml_request = ET.Element("tsRequest")
         datasource_element = ET.SubElement(xml_request, "datasource")
+        if datasource_item.name:
+            datasource_element.attrib["name"] = datasource_item.name
         if datasource_item.ask_data_enablement:
             ask_data_element = ET.SubElement(datasource_element, "askData")
             ask_data_element.attrib["enablement"] = datasource_item.ask_data_enablement

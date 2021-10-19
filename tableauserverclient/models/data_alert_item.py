@@ -36,8 +36,8 @@ class DataAlertItem(object):
         self._recipients = None
 
     def __repr__(self):
-        return "<Data Alert {id} subject={subject} frequency={frequency} \
-                public={public}>".format(
+        return "<Data Alert {_id} subject={_subject} frequency={_frequency} \
+                public={_public}>".format(
             **self.__dict__
         )
 

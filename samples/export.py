@@ -6,7 +6,6 @@
 ####
 
 import argparse
-import getpass
 import logging
 
 import tableauserverclient as TSC
@@ -14,13 +13,16 @@ import tableauserverclient as TSC
 
 def main():
     parser = argparse.ArgumentParser(description='Export a view as an image, PDF, or CSV')
+    # Common options; please keep those in sync across all samples
     parser.add_argument('--server', '-s', required=True, help='server address')
-    parser.add_argument('--username', '-u', required=True, help='username to sign into server')
-    parser.add_argument('--site', '-S', default=None)
-    parser.add_argument('-p', default=None)
-
+    parser.add_argument('--site', '-S', help='site name')
+    parser.add_argument('--token-name', '-p', required=True,
+                        help='name of the personal access token used to sign into the server')
+    parser.add_argument('--token-value', '-v', required=True,
+                        help='value of the personal access token used to sign into the server')
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
                         help='desired logging level (set to error by default)')
+    # Options specific to this sample
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--pdf', dest='type', action='store_const', const=('populate_pdf', 'PDFRequestOptions', 'pdf',
                                                                           'pdf'))
@@ -36,16 +38,11 @@ def main():
 
     args = parser.parse_args()
 
-    if args.p is None:
-        password = getpass.getpass("Password: ")
-    else:
-        password = args.p
-
     # Set logging level based on user input, or error by default
     logging_level = getattr(logging, args.logging_level.upper())
     logging.basicConfig(level=logging_level)
 
-    tableau_auth = TSC.TableauAuth(args.username, password, args.site)
+    tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
     server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
         views = filter(lambda x: x.id == args.resource_id,
