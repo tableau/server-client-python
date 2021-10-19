@@ -357,7 +357,7 @@ class Workbooks(QuerysetEndpoint):
             filename = "{}.{}".format(workbook_item.name, file_extension)
 
         else:
-            raise TypeError('file should be a filepath or file object.')
+            raise TypeError("file should be a filepath or file object.")
 
         if not hasattr(self.parent_srv.PublishMode, mode):
             error = "Invalid mode defined."
@@ -400,8 +400,7 @@ class Workbooks(QuerysetEndpoint):
                 file_contents = file.read()
 
             else:
-                raise TypeError('file should be a filepath or file object.')
-
+                raise TypeError("file should be a filepath or file object.")
 
             conn_creds = connection_credentials
             xml_request, content_type = RequestFactory.Workbook.publish_req(

@@ -258,7 +258,7 @@ class Datasources(QuerysetEndpoint):
             file_size = get_file_object_size(file)
 
         else:
-            raise TypeError('file should be a filepath or file object.')
+            raise TypeError("file should be a filepath or file object.")
 
         if not mode or not hasattr(self.parent_srv.PublishMode, mode):
             error = "Invalid mode defined."
@@ -317,13 +317,14 @@ class Datasources(QuerysetEndpoint):
             return new_datasource
 
     @api(version="3.13")
-    def update_hyper_data(self,
-                          datasource_or_connection_item: Union[DatasourceItem, ConnectionItem],
-                          *,
-                          request_id: str,
-                          actions: List[str],
-                          payload: Optional[os.PathLike] = None
-                          ) -> JobItem:
+    def update_hyper_data(
+        self,
+        datasource_or_connection_item: Union[DatasourceItem, ConnectionItem],
+        *,
+        request_id: str,
+        actions: List[str],
+        payload: Optional[os.PathLike] = None
+    ) -> JobItem:
         if isinstance(datasource_or_connection_item, DatasourceItem):
             datasource_id = datasource_or_connection_item.id
             url = "{0}/{1}/data".format(self.baseurl, datasource_id)
