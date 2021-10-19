@@ -40,7 +40,7 @@ class HourlyInterval(object):
     def start_time(self):
         return self._start_time
 
-    @start_time.setter  # type: ignore[misc]
+    @start_time.setter
     @property_is_valid_time
     @property_not_nullable
     def start_time(self, value):
@@ -50,7 +50,7 @@ class HourlyInterval(object):
     def end_time(self):
         return self._end_time
 
-    @end_time.setter  # type: ignore[misc]
+    @end_time.setter
     @property_is_valid_time
     @property_not_nullable
     def end_time(self, value):
@@ -95,7 +95,7 @@ class DailyInterval(object):
     def start_time(self):
         return self._start_time
 
-    @start_time.setter  # type: ignore[misc]
+    @start_time.setter
     @property_is_valid_time
     @property_not_nullable
     def start_time(self, value):
@@ -115,7 +115,7 @@ class WeeklyInterval(object):
     def start_time(self):
         return self._start_time
 
-    @start_time.setter  # type: ignore[misc]
+    @start_time.setter
     @property_is_valid_time
     @property_not_nullable
     def start_time(self, value):
@@ -149,7 +149,7 @@ class MonthlyInterval(object):
     def start_time(self):
         return self._start_time
 
-    @start_time.setter  # type: ignore[misc]
+    @start_time.setter
     @property_is_valid_time
     @property_not_nullable
     def start_time(self, value):

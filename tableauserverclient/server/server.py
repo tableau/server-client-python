@@ -31,7 +31,7 @@ from .endpoint.exceptions import (
     ServerInfoEndpointNotFoundError,
 )
 
-import requests  # type: ignore[import]
+import requests
 
 from distutils.version import LooseVersion as Version
 

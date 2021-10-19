@@ -124,7 +124,7 @@ class CSVRequestOptions(_FilterOptionsBase):
     def max_age(self):
         return self._max_age
 
-    @max_age.setter  # type: ignore[misc]
+    @max_age.setter
     @property_is_int(range=(0, 240), allowed=[-1])
     def max_age(self, value):
         self._max_age = value
@@ -152,7 +152,7 @@ class ImageRequestOptions(_FilterOptionsBase):
     def max_age(self):
         return self._max_age
 
-    @max_age.setter  # type: ignore[misc]
+    @max_age.setter
     @property_is_int(range=(0, 240), allowed=[-1])
     def max_age(self, value):
         self._max_age = value
@@ -198,7 +198,7 @@ class PDFRequestOptions(_FilterOptionsBase):
     def max_age(self):
         return self._max_age
 
-    @max_age.setter  # type: ignore[misc]
+    @max_age.setter
     @property_is_int(range=(0, 240), allowed=[-1])
     def max_age(self, value):
         self._max_age = value

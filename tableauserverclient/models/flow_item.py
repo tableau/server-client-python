@@ -61,7 +61,7 @@ class FlowItem(object):
     def project_id(self):
         return self._project_id
 
-    @project_id.setter  # type: ignore[misc]
+    @project_id.setter
     @property_not_nullable
     def project_id(self, value):
         self._project_id = value

@@ -45,10 +45,10 @@ class WorkbookItem(object):
         self.name = name
         self._description = None
         self.owner_id = None
-        self.project_id = project_id  # type: ignore[misc]
-        self.show_tabs = show_tabs  # type: ignore[misc]
+        self.project_id = project_id
+        self.show_tabs = show_tabs
         self.tags: Set[str] = set()
-        self.data_acceleration_config = {  # type: ignore[misc]
+        self.data_acceleration_config = {
             "acceleration_enabled": None,
             "accelerate_now": None,
             "last_updated_at": None,
@@ -110,7 +110,7 @@ class WorkbookItem(object):
     def project_id(self) -> Optional[str]:
         return self._project_id
 
-    @project_id.setter  # type: ignore[misc]
+    @project_id.setter
     @property_not_nullable
     def project_id(self, value: str):
         self._project_id = value
@@ -123,7 +123,7 @@ class WorkbookItem(object):
     def show_tabs(self) -> bool:
         return self._show_tabs
 
-    @show_tabs.setter  # type: ignore[misc]
+    @show_tabs.setter
     @property_is_boolean
     def show_tabs(self, value: bool):
         self._show_tabs = value
@@ -157,7 +157,7 @@ class WorkbookItem(object):
     def data_acceleration_config(self):
         return self._data_acceleration_config
 
-    @data_acceleration_config.setter  # type: ignore[misc]
+    @data_acceleration_config.setter
     @property_is_data_acceleration_config
     def data_acceleration_config(self, value):
         self._data_acceleration_config = value

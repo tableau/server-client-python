@@ -59,7 +59,7 @@ class ScheduleItem(object):
     def execution_order(self):
         return self._execution_order
 
-    @execution_order.setter  # type: ignore[misc]
+    @execution_order.setter
     @property_is_enum(ExecutionOrder)
     def execution_order(self, value):
         self._execution_order = value
@@ -72,7 +72,7 @@ class ScheduleItem(object):
     def name(self):
         return self._name
 
-    @name.setter  # type: ignore[misc]
+    @name.setter
     @property_not_nullable
     def name(self, value):
         self._name = value
@@ -85,7 +85,7 @@ class ScheduleItem(object):
     def priority(self):
         return self._priority
 
-    @priority.setter  # type: ignore[misc]
+    @priority.setter
     @property_is_int(range=(1, 100))
     def priority(self, value):
         self._priority = value
@@ -94,7 +94,7 @@ class ScheduleItem(object):
     def schedule_type(self):
         return self._schedule_type
 
-    @schedule_type.setter  # type: ignore[misc]
+    @schedule_type.setter
     @property_is_enum(Type)
     @property_not_nullable
     def schedule_type(self, value):
@@ -104,7 +104,7 @@ class ScheduleItem(object):
     def state(self):
         return self._state
 
-    @state.setter  # type: ignore[misc]
+    @state.setter
     @property_is_enum(State)
     def state(self, value):
         self._state = value

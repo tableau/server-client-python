@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 
-from requests.packages.urllib3.fields import RequestField  # type: ignore[import]
-from requests.packages.urllib3.filepost import encode_multipart_formdata  # type: ignore[import]
+from requests.packages.urllib3.fields import RequestField
+from requests.packages.urllib3.filepost import encode_multipart_formdata
 
 from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteItem
 
