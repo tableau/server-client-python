@@ -33,8 +33,7 @@ from typing import (
     Union,
 )
 
-io_types = (io.BytesIO, io.BufferedReader, io.TextIOWrapper)
-T = TypeVar('T', *io_types)
+io_types = (io.BytesIO, io.BufferedReader)
 
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
@@ -47,7 +46,7 @@ if TYPE_CHECKING:
     from ..server import Server
     from ...models import PermissionsRule
 
-PathOrFile = Union[os.PathLike, T]
+PathOrFile = Union[os.PathLike, io.BufferedReader, io.BytesIO]
 
 
 class Datasources(QuerysetEndpoint):

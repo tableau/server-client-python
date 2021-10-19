@@ -497,7 +497,7 @@ class DatasourceTests(unittest.TestCase):
 
     def test_publish_hyper_file_object_raises_exception(self):
         new_datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'test')
-        with open(asset('World Indicators.hyper')) as file_object:
+        with open(asset('World Indicators.hyper'), 'rb') as file_object:
             self.assertRaises(ValueError, self.server.datasources.publish, new_datasource,
                               file_object, self.server.PublishMode.Append)
 
@@ -505,7 +505,7 @@ class DatasourceTests(unittest.TestCase):
 
         new_datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'test')
         tds_asset = asset(os.path.join('Data', 'Tableau Samples', 'World Indicators.tde'))
-        with open(tds_asset) as file_object:
+        with open(tds_asset, 'rb') as file_object:
             self.assertRaises(ValueError, self.server.datasources.publish, new_datasource,
                               file_object, self.server.PublishMode.Append)
 
