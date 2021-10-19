@@ -46,7 +46,9 @@ if TYPE_CHECKING:
     from ..server import Server
     from ...models import PermissionsRule
 
-PathOrFile = Union[os.PathLike, io.BufferedReader, io.BytesIO]
+FilePath = Union[str, os.PathLike]
+FileObject = Union[io.BufferedReader, io.BytesIO]
+PathOrFile = Union[FilePath, FileObject]
 
 
 class Datasources(QuerysetEndpoint):
@@ -119,7 +121,7 @@ class Datasources(QuerysetEndpoint):
     def download(
         self,
         datasource_id: str,
-        filepath: os.PathLike = None,
+        filepath: FilePath = None,
         include_extract: bool = True,
         no_extract: Optional[bool] = None,
     ) -> str:
@@ -323,7 +325,7 @@ class Datasources(QuerysetEndpoint):
         *,
         request_id: str,
         actions: List[str],
-        payload: Optional[os.PathLike] = None
+        payload: Optional[FilePath] = None
     ) -> JobItem:
         if isinstance(datasource_or_connection_item, DatasourceItem):
             datasource_id = datasource_or_connection_item.id

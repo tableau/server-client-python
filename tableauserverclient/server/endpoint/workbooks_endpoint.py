@@ -40,8 +40,9 @@ FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
 ALLOWED_FILE_EXTENSIONS = ["twb", "twbx"]
 
 logger = logging.getLogger("tableau.endpoint.workbooks")
-
-PathOrFile = Union[os.PathLike, io.BytesIO, io.BufferedReader]
+FilePath = Union[str, os.PathLike]
+FileObject = Union[io.BufferedReader, io.BytesIO]
+PathOrFile = Union[FilePath, FileObject]
 
 
 class Workbooks(QuerysetEndpoint):
@@ -165,7 +166,7 @@ class Workbooks(QuerysetEndpoint):
     def download(
         self,
         workbook_id: str,
-        filepath: os.PathLike = None,
+        filepath: FilePath = None,
         include_extract: bool = True,
         no_extract: Optional[bool] = None,
     ) -> str:
