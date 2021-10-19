@@ -31,6 +31,7 @@ class DatasourceItem(object):
         self._content_url = None
         self._created_at = None
         self._datasource_type = None
+        self._description = None
         self._encrypt_extracts = None
         self._has_extracts = None
         self._id = None
@@ -139,6 +140,14 @@ class DatasourceItem(object):
     @property
     def datasource_type(self) -> Optional[str]:
         return self._datasource_type
+
+    @property
+    def description(self) -> Optional[str]:
+        return self._description
+
+    @description.setter
+    def description(self, value: str):
+        self._description = value
 
     @property
     def updated_at(self) -> Optional["datetime.datetime"]:
@@ -323,6 +332,15 @@ class DatasourceItem(object):
 
     @staticmethod
     def _parse_element(datasource_xml: ET.Element, ns: Dict) -> Tuple:
+        id_ = datasource_xml.get('id', None)
+        name = datasource_xml.get('name', None)
+        datasource_type = datasource_xml.get('type', None)
+        description = datasource_xml.get('description', None)
+        content_url = datasource_xml.get('contentUrl', None)
+        created_at = parse_datetime(datasource_xml.get('createdAt', None))
+        updated_at = parse_datetime(datasource_xml.get('updatedAt', None))
+        certification_note = datasource_xml.get('certificationNote', None)
+        certified = str(datasource_xml.get('isCertified', None)).lower() == 'true'
         certification_note = datasource_xml.get("certificationNote", None)
         certified = str(datasource_xml.get("isCertified", None)).lower() == "true"
         content_url = datasource_xml.get("contentUrl", None)
