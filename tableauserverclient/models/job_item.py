@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+from .flow_run_item import FlowRunItem
 from ..datetime_helpers import parse_datetime
 
 
@@ -24,6 +25,7 @@ class JobItem(object):
         finish_code=0,
         notes=None,
         mode=None,
+        flow_run=None,
     ):
         self._id = id_
         self._type = job_type
@@ -34,6 +36,7 @@ class JobItem(object):
         self._finish_code = finish_code
         self._notes = notes or []
         self._mode = mode
+        self._flow_run = flow_run
 
     @property
     def id(self):
@@ -76,6 +79,14 @@ class JobItem(object):
         # check for valid data here
         self._mode = value
 
+    @property
+    def flow_run(self):
+        return self._flow_run
+
+    @flow_run.setter
+    def flow_run(self, value):
+        self._flow_run = value
+
     def __repr__(self):
         return (
             "<Job#{_id} {_type} created_at({_created_at}) started_at({_started_at}) completed_at({_completed_at})"
@@ -102,6 +113,13 @@ class JobItem(object):
         finish_code = int(element.get("finishCode", -1))
         notes = [note.text for note in element.findall(".//t:notes", namespaces=ns)] or None
         mode = element.get("mode", None)
+        flow_run = None
+        for flow_job in element.findall(".//t:runFlowJobType", namespaces=ns):
+            flow_run = FlowRunItem()
+            flow_run._id = flow_job.get("flowRunId", None)
+            for flow in flow_job.findall(".//t:flow", namespaces=ns):
+                flow_run._flow_id = flow.get("id", None)
+                flow_run._started_at = created_at or started_at
         return cls(
             id_,
             type_,
@@ -112,6 +130,7 @@ class JobItem(object):
             finish_code,
             notes,
             mode,
+            flow_run,
         )
 
 

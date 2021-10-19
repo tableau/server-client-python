@@ -7,6 +7,7 @@ from .endpoint import Endpoint
 from .favorites_endpoint import Favorites
 from .fileuploads_endpoint import Fileuploads
 from .flows_endpoint import Flows
+from .flow_runs_endpoint import FlowRuns
 from .exceptions import (
     ServerResponseError,
     MissingRequiredFieldError,

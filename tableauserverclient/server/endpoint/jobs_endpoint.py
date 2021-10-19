@@ -1,5 +1,5 @@
 from .endpoint import Endpoint, api
-from .exceptions import JobCanceledException, JobFailedException
+from .exceptions import JobCancelledException, JobFailedException
 from .. import JobItem, BackgroundJobItem, PaginationItem
 from ..request_options import RequestOptionsBase
 from ...exponential_backoff import ExponentialBackoffTimer
@@ -44,6 +44,7 @@ class Jobs(Endpoint):
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return new_job
 
+    @api(version="2.6")
     def wait_for_job(self, job_id, *, timeout=None):
         if isinstance(job_id, JobItem):
             job_id = job_id.id
@@ -64,6 +65,6 @@ class Jobs(Endpoint):
         elif job.finish_code == JobItem.FinishCode.Failed:
             raise JobFailedException(job)
         elif job.finish_code == JobItem.FinishCode.Cancelled:
-            raise JobCanceledException(job)
+            raise JobCancelledException(job)
         else:
             raise AssertionError("Unexpected finish_code in job", job)
