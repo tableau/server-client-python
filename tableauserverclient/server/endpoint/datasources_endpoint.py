@@ -83,7 +83,7 @@ class Datasources(QuerysetEndpoint):
         server_response = self.get_request(url)
         return DatasourceItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
-    # Populate datasource item"s connections
+    # Populate datasource item's connections
     @api(version="2.0")
     def populate_connections(self, datasource_item: DatasourceItem) -> None:
         if not datasource_item.id:

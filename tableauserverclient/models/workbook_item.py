@@ -147,7 +147,7 @@ class WorkbookItem(object):
             error = "Workbook item must be populated with views first."
             raise UnpopulatedPropertyError(error)
         elif callable(self._views):
-            # We"ve called `populate_views` on this model
+            # We've called `populate_views` on this model
             return self._views()
         else:
             # We had views included in a WorkbookItem response
