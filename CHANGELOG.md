@@ -1,3 +1,11 @@
+## 0.17.0 (20 October 2021)
+Update publish.sh to use python3 (#866)
+Fixed jobs.get_by_id(job_id) example & reference docs (#867, #868) 
+Fixed handling for workbooks in personal spaces which do not have projectID or Name  (#875) 
+Updated links to Data Source Methods page in REST API docs (#879)
+Upgraded to newer Slack action provider (#880)
+Added support to the package for getting flow run status, as well as the ability to cancel flow runs. (#884)
+
 ## 0.16.0 (15 July 2021)
 * Documentation updates (#800, #818, #839, #842)
 * Fixed data alert repr in subscription item (#821)
