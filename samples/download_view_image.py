@@ -5,11 +5,10 @@
 # For more information, refer to the documentations on 'Query View Image'
 # (https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm)
 #
-# To run the script, you must have installed Python 3.5 or later.
+# To run the script, you must have installed Python 3.6 or later.
 ####
 
 import argparse
-import getpass
 import logging
 
 import tableauserverclient as TSC
@@ -18,34 +17,30 @@ import tableauserverclient as TSC
 def main():
 
     parser = argparse.ArgumentParser(description='Download image of a specified view.')
+    # Common options; please keep those in sync across all samples
     parser.add_argument('--server', '-s', required=True, help='server address')
-    parser.add_argument('--site-id', '-si', required=False,
-                        help='content url for site the view is on')
-    parser.add_argument('--username', '-u', required=True, help='username to sign into server')
-    parser.add_argument('--view-name', '-v', required=True,
+    parser.add_argument('--site', '-S', help='site name')
+    parser.add_argument('--token-name', '-p', required=True,
+                        help='name of the personal access token used to sign into the server')
+    parser.add_argument('--token-value', '-v', required=True,
+                        help='value of the personal access token used to sign into the server')
+    parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
+                        help='desired logging level (set to error by default)')
+    # Options specific to this sample
+    parser.add_argument('--view-name', '-vn', required=True,
                         help='name of view to download an image of')
     parser.add_argument('--filepath', '-f', required=True, help='filepath to save the image returned')
     parser.add_argument('--maxage', '-m', required=False, help='max age of the image in the cache in minutes.')
-    parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
-                        help='desired logging level (set to error by default)')
 
     args = parser.parse_args()
-
-    password = getpass.getpass("Password: ")
 
     # Set logging level based on user input, or error by default
     logging_level = getattr(logging, args.logging_level.upper())
     logging.basicConfig(level=logging_level)
 
     # Step 1: Sign in to server.
-    site_id = args.site_id
-    if not site_id:
-        site_id = ""
-    tableau_auth = TSC.TableauAuth(args.username, password, site_id=site_id)
-    server = TSC.Server(args.server)
-    # The new endpoint was introduced in Version 2.5
-    server.version = "2.5"
-
+    tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
+    server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
         # Step 2: Query for the view that we want an image of
         req_option = TSC.RequestOptions()

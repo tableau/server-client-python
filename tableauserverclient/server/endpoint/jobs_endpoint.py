@@ -1,17 +1,12 @@
 from .endpoint import Endpoint, api
+from .exceptions import JobCancelledException, JobFailedException
 from .. import JobItem, BackgroundJobItem, PaginationItem
 from ..request_options import RequestOptionsBase
+from ...exponential_backoff import ExponentialBackoffTimer
 
 import logging
 
-try:
-    basestring
-except NameError:
-    # In case we are in python 3 the string check is different
-    basestring = str
-
 logger = logging.getLogger("tableau.endpoint.jobs")
-
 
 class Jobs(Endpoint):
     @property
@@ -21,7 +16,7 @@ class Jobs(Endpoint):
     @api(version="2.6")
     def get(self, job_id=None, req_options=None):
         # Backwards Compatibility fix until we rev the major version
-        if job_id is not None and isinstance(job_id, basestring):
+        if job_id is not None and isinstance(job_id, str):
             import warnings
 
             warnings.warn("Jobs.get(job_id) is deprecated, update code to use Jobs.get_by_id(job_id)")
@@ -48,3 +43,28 @@ class Jobs(Endpoint):
         server_response = self.get_request(url)
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return new_job
+
+    @api(version="2.6")
+    def wait_for_job(self, job_id, *, timeout=None):
+        if isinstance(job_id, JobItem):
+            job_id = job_id.id
+        assert isinstance(job_id, str)
+        logger.debug(f"Waiting for job {job_id}")
+
+        backoffTimer = ExponentialBackoffTimer(timeout=timeout)
+        job = self.get_by_id(job_id)
+        while job.completed_at is None:
+            backoffTimer.sleep()
+            job = self.get_by_id(job_id)
+            logger.debug(f"\tJob {job_id} progress={job.progress}")
+
+        logger.info("Job {} Completed: Finish Code: {} - Notes:{}".format(job_id, job.finish_code, job.notes))
+
+        if job.finish_code == JobItem.FinishCode.Success:
+            return job
+        elif job.finish_code == JobItem.FinishCode.Failed:
+            raise JobFailedException(job)
+        elif job.finish_code == JobItem.FinishCode.Cancelled:
+            raise JobCancelledException(job)
+        else:
+            raise AssertionError("Unexpected finish_code in job", job)

@@ -1,7 +1,6 @@
 from .endpoint import QuerysetEndpoint, api, parameter_added_in
 from .exceptions import InternalServerError, MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
-from .fileuploads_endpoint import Fileuploads
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, WorkbookItem, ConnectionItem, ViewItem, PaginationItem
 from ...models.job_item import JobItem
@@ -344,7 +343,7 @@ class Workbooks(QuerysetEndpoint):
         # Determine if chunking is required (64MB is the limit for single upload method)
         if file_size >= FILESIZE_LIMIT:
             logger.info("Publishing {0} to server with chunking method (workbook over 64MB)".format(workbook_item.name))
-            upload_session_id = Fileuploads.upload_chunks(self.parent_srv, file)
+            upload_session_id = self.parent_srv.fileuploads.upload(file)
             url = "{0}&uploadSessionId={1}".format(url, upload_session_id)
             conn_creds = connection_credentials
             xml_request, content_type = RequestFactory.Workbook.publish_req_chunked(

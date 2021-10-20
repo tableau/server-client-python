@@ -20,6 +20,7 @@ TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
 
 ADD_TAGS_XML = os.path.join(TEST_ASSET_DIR, 'workbook_add_tags.xml')
 GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, 'workbook_get_by_id.xml')
+GET_BY_ID_XML_PERSONAL = os.path.join(TEST_ASSET_DIR, 'workbook_get_by_id_personal.xml')
 GET_EMPTY_XML = os.path.join(TEST_ASSET_DIR, 'workbook_get_empty.xml')
 GET_INVALID_DATE_XML = os.path.join(TEST_ASSET_DIR, 'workbook_get_invalid_date.xml')
 GET_XML = os.path.join(TEST_ASSET_DIR, 'workbook_get.xml')
@@ -122,6 +123,31 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual('2016-07-26T20:35:05Z', format_datetime(single_workbook.updated_at))
         self.assertEqual('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', single_workbook.project_id)
         self.assertEqual('default', single_workbook.project_name)
+        self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', single_workbook.owner_id)
+        self.assertEqual(set(['Safari', 'Sample']), single_workbook.tags)
+        self.assertEqual('d79634e1-6063-4ec9-95ff-50acbf609ff5', single_workbook.views[0].id)
+        self.assertEqual('ENDANGERED SAFARI', single_workbook.views[0].name)
+        self.assertEqual('SafariSample/sheets/ENDANGEREDSAFARI', single_workbook.views[0].content_url)
+
+    def test_get_by_id_personal(self):
+        # workbooks in personal space don't have project_id or project_name
+        with open(GET_BY_ID_XML_PERSONAL, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d43', text=response_xml)
+            single_workbook = self.server.workbooks.get_by_id('3cc6cd06-89ce-4fdc-b935-5294135d6d43')
+
+        self.assertEqual('3cc6cd06-89ce-4fdc-b935-5294135d6d43', single_workbook.id)
+        self.assertEqual('SafariSample', single_workbook.name)
+        self.assertEqual('SafariSample', single_workbook.content_url)
+        self.assertEqual('http://tableauserver/#/workbooks/2/views', single_workbook.webpage_url)
+        self.assertEqual(False, single_workbook.show_tabs)
+        self.assertEqual(26, single_workbook.size)
+        self.assertEqual('2016-07-26T20:34:56Z', format_datetime(single_workbook.created_at))
+        self.assertEqual('description for SafariSample', single_workbook.description)
+        self.assertEqual('2016-07-26T20:35:05Z', format_datetime(single_workbook.updated_at))
+        self.assertTrue(single_workbook.project_id)
+        self.assertIsNone(single_workbook.project_name)
         self.assertEqual('5de011f8-5aa9-4d5b-b991-f462c8dd6bb7', single_workbook.owner_id)
         self.assertEqual(set(['Safari', 'Sample']), single_workbook.tags)
         self.assertEqual('d79634e1-6063-4ec9-95ff-50acbf609ff5', single_workbook.views[0].id)
@@ -590,7 +616,7 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual('PublishWorkbook', new_job.type)
         self.assertEqual('0', new_job.progress)
         self.assertEqual('2018-06-29T23:22:32Z', format_datetime(new_job.created_at))
-        self.assertEqual('1', new_job.finish_code)
+        self.assertEqual(1, new_job.finish_code)
 
     def test_publish_invalid_file(self):
         new_workbook = TSC.WorkbookItem('test', 'ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')

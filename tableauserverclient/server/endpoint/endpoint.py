@@ -55,7 +55,9 @@ class Endpoint(object):
     ):
         parameters = parameters or {}
         parameters.update(self.parent_srv.http_options)
-        parameters["headers"] = Endpoint._make_common_headers(auth_token, content_type)
+        if not "headers" in parameters:
+            parameters["headers"] = {}
+        parameters["headers"].update(Endpoint._make_common_headers(auth_token, content_type))
 
         if content is not None:
             parameters["data"] = content
@@ -118,22 +120,34 @@ class Endpoint(object):
         # We don't return anything for a delete
         self._make_request(self.parent_srv.session.delete, url, auth_token=self.parent_srv.auth_token)
 
-    def put_request(self, url, xml_request=None, content_type="text/xml"):
+    def put_request(self, url, xml_request=None, content_type="text/xml", parameters=None):
         return self._make_request(
             self.parent_srv.session.put,
             url,
             content=xml_request,
             auth_token=self.parent_srv.auth_token,
             content_type=content_type,
+            parameters=parameters,
         )
 
-    def post_request(self, url, xml_request, content_type="text/xml"):
+    def post_request(self, url, xml_request, content_type="text/xml", parameters=None):
         return self._make_request(
             self.parent_srv.session.post,
             url,
             content=xml_request,
             auth_token=self.parent_srv.auth_token,
             content_type=content_type,
+            parameters=parameters,
+        )
+
+    def patch_request(self, url, xml_request, content_type="text/xml", parameters=None):
+        return self._make_request(
+            self.parent_srv.session.patch,
+            url,
+            content=xml_request,
+            auth_token=self.parent_srv.auth_token,
+            content_type=content_type,
+            parameters=parameters,
         )
 
 
