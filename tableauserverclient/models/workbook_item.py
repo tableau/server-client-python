@@ -15,11 +15,9 @@ import uuid
 from typing import (
     Dict,
     List,
-    Mapping,
     Optional,
     Set,
     TYPE_CHECKING,
-    Union,
 )
 
 if TYPE_CHECKING:

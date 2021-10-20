@@ -9,7 +9,7 @@ from .tag_item import TagItem
 from ..datetime_helpers import parse_datetime
 import copy
 
-from typing import Dict, List, Mapping, Optional, Sequence, Set, Tuple, TypeVar, TYPE_CHECKING
+from typing import Dict, List, Optional, Set, Tuple, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .permissions_item import PermissionsRule
