@@ -59,3 +59,4 @@ The following people have contributed to this project to make it possible, and w
 * [Dan Zucker](https://github.com/dzucker-tab)
 * [Brian Cantoni](https://github.com/bcantoni)
 * [Ovini Nanayakkara](https://github.com/ovinis)
+* [Manish Muttreja](https://github.com/mmuttreja-tableau)
