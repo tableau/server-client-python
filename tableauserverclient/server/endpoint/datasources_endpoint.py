@@ -25,11 +25,11 @@ import json
 from pathlib import Path
 from typing import (
     List,
+    Mapping,
     Optional,
     Sequence,
     Tuple,
     TYPE_CHECKING,
-    TypeVar,
     Union,
 )
 
@@ -324,7 +324,7 @@ class Datasources(QuerysetEndpoint):
         datasource_or_connection_item: Union[DatasourceItem, ConnectionItem, str],
         *,
         request_id: str,
-        actions: List[str],
+        actions: Sequence[Mapping[str, Union[str, Mapping[str, str]]]],
         payload: Optional[FilePath] = None
     ) -> JobItem:
         if isinstance(datasource_or_connection_item, DatasourceItem):
