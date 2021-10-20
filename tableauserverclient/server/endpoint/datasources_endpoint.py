@@ -321,7 +321,7 @@ class Datasources(QuerysetEndpoint):
     @api(version="3.13")
     def update_hyper_data(
         self,
-        datasource_or_connection_item: Union[DatasourceItem, ConnectionItem],
+        datasource_or_connection_item: Union[DatasourceItem, ConnectionItem, str],
         *,
         request_id: str,
         actions: List[str],
