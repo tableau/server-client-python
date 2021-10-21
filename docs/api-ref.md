@@ -1354,7 +1354,6 @@ Source files: server/endpoint/jobs_endpoint.py
 
 ```py
 jobs.get_by_id(job_id)
-
 ```
 
 Gets information about the specified job.
@@ -1411,6 +1410,40 @@ Returns the `JobItem` requested.
 
 ```
 
+
+<br>
+<br>
+
+#### jobs.wait_for_job
+
+
+```py
+jobs.wait_for_job(job_id, *, timeout=None)
+```
+
+Waits until a given job succesfully finishes.
+Repeatedly polls the server using `jobs.get_by_id` until the job completed.
+It uses an exponentially increasing sleep time between polls to guarantee a snappy response time for fast-running jobs while not putting overly large load on the server for long-running jobs. 
+
+In case the job fails or is cancelled, `wait_for_job` will raise an exception.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`job_id`  |  The `job_id` specifies the id of the job that we want to wait for
+`timeout` |  Optional timeout interval in seconds. `wait_for_job` will raise a `TimeoutError` if the job is not finished after waiting for `timeout` seconds.
+
+
+**Returns**
+
+Returns the final `JobItem`.
+
+Usually, you can just discard the return value without checking the job status. In case the job wasn't succesful, `wait_for_job` would have already raised an exception. For advanced scenarios, he returned `JobItem` might still be interesting to access e.g. start and end time or `notes`.
+
+**Example**
+
+See the `update_datasource_data.py` or `refresh.py` sample in the Samples directory.
 
 <br>
 <br>
