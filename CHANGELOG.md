@@ -10,10 +10,8 @@
 * Added a new sample & documentation for metadata API (#895, #896)
 * Added support to the package for getting flow run status, as well as the ability to cancel flow runs. (#884)
 * Added jobs.wait_for_job method (#903)
-* Renamed datasource.update_data to datasource.update_hyper_data (#906)
-* Dropped support for Python 3.5 (#911)
 * Added description support for datasources item (#912) 
-
+* Dropped support for Python 3.5 (#911)
 
 ## 0.16.0 (15 July 2021)
 * Documentation updates (#800, #818, #839, #842)
