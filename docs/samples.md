@@ -64,5 +64,6 @@ The following list describes the samples available in the repository:
 * `set_http_options.py` Demonstrates HTTP options for the server and specifically for downloading workbooks.
 * `set_refresh_schedule.py` Sets the schedule to refresh a workbook or datasource.
 * `update_connection.py` Updates and embeds connection credentials of a datasource.
+* `update_datasource_data.py` Updates the data within a published live-to-Hyper datasource.
 
 **Note**: For all of the samples, ensure that your Tableau Server user account has permission to access the resources. Also keep in mind that some example operations (like create group) are not allowed on Tableau Online.
