@@ -324,7 +324,7 @@ class Datasources(QuerysetEndpoint):
         datasource_or_connection_item: Union[DatasourceItem, ConnectionItem, str],
         *,
         request_id: str,
-        actions: Sequence[Mapping[str, Union[str, Mapping[str, str]]]],
+        actions: Sequence[Mapping],
         payload: Optional[FilePath] = None
     ) -> JobItem:
         if isinstance(datasource_or_connection_item, DatasourceItem):
