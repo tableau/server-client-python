@@ -9,7 +9,7 @@ from .tag_item import TagItem
 from ..datetime_helpers import parse_datetime
 import copy
 
-from typing import Dict, List, Optional, Set, Tuple, TYPE_CHECKING
+from typing import Dict, List, Optional, Set, Tuple, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from .permissions_item import PermissionsRule
@@ -44,7 +44,7 @@ class DatasourceItem(object):
         self.name = name
         self.owner_id: Optional[str] = None
         self.project_id = project_id
-        self.tags: Set = set()
+        self.tags: Set[str] = set()
 
         self._permissions = None
         self._data_quality_warnings = None
