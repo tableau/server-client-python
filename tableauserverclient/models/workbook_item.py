@@ -12,14 +12,7 @@ from ..datetime_helpers import parse_datetime
 import copy
 import uuid
 
-from typing import (
-    Dict,
-    List,
-    Optional,
-    Set,
-    TYPE_CHECKING,
-    Union
-)
+from typing import Dict, List, Optional, Set, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from .connection_item import ConnectionItem

@@ -17,7 +17,7 @@ GET_BY_ID_INPROGRESS_XML = 'job_get_by_id_inprogress.xml'
 
 
 class JobTests(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server = TSC.Server('http://test')
         self.server.version = '3.1'
 
@@ -27,7 +27,7 @@ class JobTests(unittest.TestCase):
 
         self.baseurl = self.server.jobs.baseurl
 
-    def test_get(self):
+    def test_get(self) -> None:
         response_xml = read_xml_asset(GET_XML)
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
@@ -46,7 +46,7 @@ class JobTests(unittest.TestCase):
             self.assertEqual(started_at, job.started_at)
             self.assertEqual(ended_at, job.ended_at)
 
-    def test_get_by_id(self):
+    def test_get_by_id(self) -> None:
         response_xml = read_xml_asset(GET_BY_ID_XML)
         job_id = '2eef4225-aa0c-41c4-8662-a76d89ed7336'
         with requests_mock.mock() as m:
@@ -56,26 +56,26 @@ class JobTests(unittest.TestCase):
             self.assertEqual(job_id, job.id)
             self.assertListEqual(job.notes, ['Job detail notes'])
 
-    def test_get_before_signin(self):
+    def test_get_before_signin(self) -> None:
         self.server._auth_token = None
         self.assertRaises(TSC.NotSignedInError, self.server.jobs.get)
 
-    def test_cancel_id(self):
+    def test_cancel_id(self) -> None:
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', status_code=204)
             self.server.jobs.cancel('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
 
-    def test_cancel_item(self):
+    def test_cancel_item(self) -> None:
         created_at = datetime(2018, 5, 22, 13, 0, 29, tzinfo=utc)
         started_at = datetime(2018, 5, 22, 13, 0, 37, tzinfo=utc)
         job = TSC.JobItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'backgroundJob',
-                          0, created_at, started_at, None, 0)
+                          "0", created_at, started_at, None, 0)
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', status_code=204)
             self.server.jobs.cancel(job)
 
 
-    def test_wait_for_job_finished(self):
+    def test_wait_for_job_finished(self) -> None:
         # Waiting for an already finished job, directly returns that job's info
         response_xml = read_xml_asset(GET_BY_ID_XML)
         job_id = '2eef4225-aa0c-41c4-8662-a76d89ed7336'
@@ -87,7 +87,7 @@ class JobTests(unittest.TestCase):
             self.assertListEqual(job.notes, ['Job detail notes'])
 
 
-    def test_wait_for_job_failed(self):
+    def test_wait_for_job_failed(self) -> None:
         # Waiting for a failed job raises an exception
         response_xml = read_xml_asset(GET_BY_ID_FAILED_XML)
         job_id = '77d5e57a-2517-479f-9a3c-a32025f2b64d'
@@ -97,7 +97,7 @@ class JobTests(unittest.TestCase):
                 self.server.jobs.wait_for_job(job_id)
 
 
-    def test_wait_for_job_timeout(self):
+    def test_wait_for_job_timeout(self) -> None:
         # Waiting for a job which doesn't terminate will throw an exception
         response_xml = read_xml_asset(GET_BY_ID_INPROGRESS_XML)
         job_id = '77d5e57a-2517-479f-9a3c-a32025f2b64d'
