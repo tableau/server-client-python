@@ -16,7 +16,7 @@ REFRESH_XML = 'flow_refresh.xml'
 
 
 class FlowTests(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server = TSC.Server('http://test')
 
         # Fake signin
@@ -26,7 +26,7 @@ class FlowTests(unittest.TestCase):
 
         self.baseurl = self.server.flows.baseurl
 
-    def test_get(self):
+    def test_get(self) -> None:
         response_xml = read_xml_asset(GET_XML)
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
@@ -53,7 +53,7 @@ class FlowTests(unittest.TestCase):
         self.assertEqual('aa23f4ac-906f-11e9-86fb-3f0f71412e77', all_flows[1].project_id)
         self.assertEqual('9127d03f-d996-405f-b392-631b25183a0f', all_flows[1].owner_id)
 
-    def test_update(self):
+    def test_update(self) -> None:
         response_xml = read_xml_asset(UPDATE_XML)
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/587daa37-b84d-4400-a9a2-aa90e0be7837', text=response_xml)
@@ -68,7 +68,7 @@ class FlowTests(unittest.TestCase):
         self.assertEqual('7ebb3f20-0fd2-4f27-a2f6-c539470999e2', single_datasource.owner_id)
         self.assertEqual("So fun to see", single_datasource.description)
 
-    def test_populate_connections(self):
+    def test_populate_connections(self) -> None:
         response_xml = read_xml_asset(POPULATE_CONNECTIONS_XML)
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/connections', text=response_xml)
@@ -97,7 +97,7 @@ class FlowTests(unittest.TestCase):
         self.assertEqual('sally', conn3.username)
         self.assertEqual(True, conn3.embed_password)
 
-    def test_populate_permissions(self):
+    def test_populate_permissions(self) -> None:
         with open(asset(POPULATE_PERMISSIONS_XML), 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
