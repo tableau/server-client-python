@@ -14,9 +14,9 @@ import sys
 import tableauserverclient as TSC
 
 
-def create_project(server, project_item):
+def create_project(server, project_item, samples=False):
     try:
-        project_item = server.projects.create(project_item)
+        project_item = server.projects.create(project_item, samples)
         print('Created a new project called: %s' % project_item.name)
         return project_item
     except TSC.ServerResponseError:
@@ -45,7 +45,8 @@ def main():
     logging.basicConfig(level=logging_level)
 
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
-    server = TSC.Server(args.server, use_server_version=True)
+    server = TSC.Server(args.server)
+    server.use_server_version()
     with server.auth.sign_in(tableau_auth):
         # Use highest Server REST API version available
         server.use_server_version()
@@ -56,11 +57,14 @@ def main():
 
         # Specifying parent_id creates a nested projects.
         child_project = TSC.ProjectItem(name='Child Project', parent_id=top_level_project.id)
-        child_project = create_project(server, child_project)
+        child_project = create_project(server, child_project, samples=True)
 
         # Projects can be nested at any level.
         grand_child_project = TSC.ProjectItem(name='Grand Child Project', parent_id=child_project.id)
         grand_child_project = create_project(server, grand_child_project)
+
+        # Projects can be updated
+        changed_project = server.projects.update(grand_child_project, samples=True)
 
 
 if __name__ == '__main__':
