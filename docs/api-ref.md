@@ -1297,7 +1297,9 @@ Name  |  Description
 `started_at` | The time the job started.
 `completed_at` | The time the job finished.
 `finish_code` | The return code from job.
-
+`progress` | The progress of the job.
+`notes` | The notes of the job.
+`mode` | The mode of the job.
 
 ### Jobs methods
 
