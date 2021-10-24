@@ -5,6 +5,8 @@ from requests.packages.urllib3.filepost import encode_multipart_formdata
 
 from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteItem
 
+from typing import Iterable
+
 
 def _add_multipart(parts):
     mime_multipart_parts = list()
@@ -376,7 +378,7 @@ class GroupRequest(object):
 
 
 class PermissionRequest(object):
-    def add_req(self, rules):
+    def add_req(self, rules: Iterable[PermissionsRule]) -> bytes:
         xml_request = ET.Element("tsRequest")
         permissions_element = ET.SubElement(xml_request, "permissions")
 
