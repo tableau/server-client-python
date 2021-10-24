@@ -5,6 +5,11 @@ from requests.packages.urllib3.filepost import encode_multipart_formdata
 
 from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteItem
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..models import ProjectItem
+
 
 def _add_multipart(parts):
     mime_multipart_parts = list()
@@ -398,7 +403,7 @@ class PermissionRequest(object):
 
 
 class ProjectRequest(object):
-    def update_req(self, project_item):
+    def update_req(self, project_item: "ProjectItem") -> bytes:
         xml_request = ET.Element("tsRequest")
         project_element = ET.SubElement(xml_request, "project")
         if project_item.name:
@@ -411,7 +416,7 @@ class ProjectRequest(object):
             project_element.attrib["parentProjectId"] = project_item.parent_id
         return ET.tostring(xml_request)
 
-    def create_req(self, project_item):
+    def create_req(self, project_item: "ProjectItem") -> bytes:
         xml_request = ET.Element("tsRequest")
         project_element = ET.SubElement(xml_request, "project")
         project_element.attrib["name"] = project_item.name
