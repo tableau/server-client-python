@@ -4260,6 +4260,8 @@ Name | Description
 `file_path`  |  The path and name of the workbook to publish.
 `mode`     |  Specifies whether you are publishing a new workbook (`CreateNew`) or overwriting an existing workbook (`Overwrite`).  You cannot appending workbooks.  You can also use the publish mode attributes, for example: `TSC.Server.PublishMode.Overwrite`.
 `connection_credentials` | (Optional)  The credentials (if required) to connect to the workbook's data source. The `ConnectionCredentials` object contains the authentication information for the data source (user name and password, and whether the credentials are embedded or OAuth is used).
+`skip_connection_check` | (Optional) Set to `True` to skip connection check at time of upload. Publishing will succeed but unchecked connection issues may result in a non-functioning workbook. Defaults to `False`.
+`as_job` | (Optional) Set to `True` to run the upload as a job (asynchronous upload). If set to `True` a job will start to perform the publishing process and a `Job` object is returned.
 
 
 
