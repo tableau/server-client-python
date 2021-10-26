@@ -5,6 +5,11 @@ from requests.packages.urllib3.filepost import encode_multipart_formdata
 
 from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteItem
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..models import WebhookItem
+
 
 def _add_multipart(parts):
     mime_multipart_parts = list()
@@ -970,17 +975,26 @@ class EmptyRequest(object):
 
 class WebhookRequest(object):
     @_tsrequest_wrapped
-    def create_req(self, xml_request, webhook_item):
+    def create_req(self, xml_request: ET.Element, webhook_item: "WebhookItem") -> bytes:
         webhook = ET.SubElement(xml_request, "webhook")
-        webhook.attrib["name"] = webhook_item.name
+        if isinstance(webhook_item.name, str):
+            webhook.attrib["name"] = webhook_item.name
+        else:
+            raise ValueError(f"Name must be provided for {webhook_item}")
 
         source = ET.SubElement(webhook, "webhook-source")
-        ET.SubElement(source, webhook_item._event)
+        if isinstance(webhook_item._event, str):
+            ET.SubElement(source, webhook_item._event)
+        else:
+            raise ValueError(f"_event for Webhook must be provided. {webhook_item}")
 
         destination = ET.SubElement(webhook, "webhook-destination")
         post = ET.SubElement(destination, "webhook-destination-http")
         post.attrib["method"] = "POST"
-        post.attrib["url"] = webhook_item.url
+        if isinstance(webhook_item.url, str):
+            post.attrib["url"] = webhook_item.url
+        else:
+            raise ValueError(f"URL must be provided on {webhook_item}")
 
         return ET.tostring(xml_request)
 

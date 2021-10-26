@@ -14,7 +14,7 @@ CREATE_REQUEST_XML = asset('webhook_create_request.xml')
 
 
 class WebhookTests(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server = TSC.Server('http://test')
         self.server.version = "3.6"
 
@@ -24,7 +24,7 @@ class WebhookTests(unittest.TestCase):
 
         self.baseurl = self.server.webhooks.baseurl
 
-    def test_get(self):
+    def test_get(self) -> None:
         with open(GET_XML, 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
@@ -39,24 +39,24 @@ class WebhookTests(unittest.TestCase):
             self.assertEqual(webhook.name, "webhook-name")
             self.assertEqual(webhook.id, "webhook-id")
 
-    def test_get_before_signin(self):
+    def test_get_before_signin(self) -> None:
         self.server._auth_token = None
         self.assertRaises(TSC.NotSignedInError, self.server.webhooks.get)
 
-    def test_delete(self):
+    def test_delete(self) -> None:
         with requests_mock.mock() as m:
             m.delete(self.baseurl + '/ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', status_code=204)
             self.server.webhooks.delete('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
 
-    def test_delete_missing_id(self):
+    def test_delete_missing_id(self) -> None:
         self.assertRaises(ValueError, self.server.webhooks.delete, '')
 
-    def test_test(self):
+    def test_test(self) -> None:
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/ee8c6e70-43b6-11e6-af4f-f7b0d8e20760/test', status_code=200)
             self.server.webhooks.test('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
 
-    def test_create(self):
+    def test_create(self) -> None:
         with open(CREATE_XML, 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
@@ -70,7 +70,7 @@ class WebhookTests(unittest.TestCase):
 
             self.assertNotEqual(new_webhook.id, None)
 
-    def test_request_factory(self):
+    def test_request_factory(self) -> None:
         with open(CREATE_REQUEST_XML, 'rb') as f:
             webhook_request_expected = f.read().decode('utf-8')
 
