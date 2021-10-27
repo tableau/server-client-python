@@ -4236,7 +4236,7 @@ print(workbook.name)
 #### workbooks.publish
 
 ```py
-workbooks.publish(workbook_item, file_path, publish_mode)
+workbooks.publish(workbook_item, file_path, publish_mode, connections, skip_connection_check, as_job, hidden_views)
 ```
 
 Publish a workbook to the specified site.
@@ -4259,7 +4259,8 @@ Name | Description
 `workbook_item`  |  The `workbook_item` specifies the workbook you are publishing. When you are adding a workbook, you need to first create a new instance of a `workbook_item` that includes a `project_id` of an existing project. The name of the workbook will be the name of the file, unless you also specify a name for the new workbook when you create the instance. See [WorkbookItem](#workbookitem-class).
 `file_path`  |  The path and name of the workbook to publish.
 `mode`     |  Specifies whether you are publishing a new workbook (`CreateNew`) or overwriting an existing workbook (`Overwrite`).  You cannot appending workbooks.  You can also use the publish mode attributes, for example: `TSC.Server.PublishMode.Overwrite`.
-`connection_credentials` | (Optional)  The credentials (if required) to connect to the workbook's data source. The `ConnectionCredentials` object contains the authentication information for the data source (user name and password, and whether the credentials are embedded or OAuth is used).
+`connections` | List of `ConnectionCredentials` objects for the connections created within the workbook.
+`connection_credentials` | (Optional)  The credentials (if required) to connect to the workbook's data source. The `ConnectionCredentials` object contains the authentication information for the data source (user name and password, and whether the credentials are embedded or OAuth is used). **Deprecated since API server version 2.3.**
 `skip_connection_check` | (Optional) Set to `True` to skip connection check at time of upload. Publishing will succeed but unchecked connection issues may result in a non-functioning workbook. Defaults to `False`.
 `as_job` | (Optional) Set to `True` to run the upload as a job (asynchronous upload). If set to `True` a job will start to perform the publishing process and a `Job` object is returned. Defaults to `False`.
 `hidden_views` | (Optional) List of string names of views that need to be hidden when the workbook is published.
