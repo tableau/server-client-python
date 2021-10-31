@@ -389,3 +389,71 @@ class Workbooks(QuerysetEndpoint):
             new_workbook = WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
             logger.info("Published {0} (ID: {1})".format(workbook_item.name, new_workbook.id))
             return new_workbook
+
+    # Populate workbook item's revisions
+    def populate_revisions(self, workbook_item):
+        if not workbook_item.id:
+            error = "Workbook item missing ID. Workbook must be retrieved from server first."
+            raise MissingRequiredFieldError(error)
+
+        def revisions_fetcher():
+            return self._get_workbook_revisions(workbook_item)
+
+        workbook_item._set_revisions(revisions_fetcher)
+        logger.info(
+            "Populated revisions for workbook (ID: {0})".format(workbook_item.id)
+        )
+
+    def _get_workbook_revisions(self, workbook_item, req_options=None):
+        url = "{0}/{1}/revisions".format(self.baseurl, workbook_item.id)
+        server_response = self.get_request(url, req_options)
+        revisions = RevisionItem.from_response(
+            server_response.content, self.parent_srv.namespace, workbook_item
+        )
+        return revisions
+
+    # Download 1 workbook revision by revision number
+    def download_revision(
+        self,
+        workbook_id,
+        revision_number,
+        filepath=None,
+        include_extract=True,
+        no_extract=None,
+    ):
+        if not workbook_id:
+            error = "Workbook ID undefined."
+            raise ValueError(error)
+        url = "{0}/{1}/revisions/{2}/content".format(
+            self.baseurl, workbook_id, revision_number
+        )
+
+        if no_extract is False or no_extract is True:
+            import warnings
+
+            warnings.warn(
+                "no_extract is deprecated, use include_extract instead.",
+                DeprecationWarning,
+            )
+            include_extract = not no_extract
+
+        if not include_extract:
+            url += "?includeExtract=False"
+
+        with closing(
+            self.get_request(url, parameters={"stream": True})
+        ) as server_response:
+            _, params = cgi.parse_header(server_response.headers["Content-Disposition"])
+            filename = to_filename(os.path.basename(params["filename"]))
+
+            download_path = make_download_path(filepath, filename)
+
+            with open(download_path, "wb") as f:
+                for chunk in server_response.iter_content(1024):  # 1KB
+                    f.write(chunk)
+        logger.info(
+            "Downloaded workbook revision {0} to {1} (ID: {2})".format(
+                revision_number, download_path, workbook_id
+            )
+        )
+        return os.path.abspath(download_path)
