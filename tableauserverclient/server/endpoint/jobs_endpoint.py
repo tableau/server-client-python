@@ -8,6 +8,7 @@ import logging
 
 logger = logging.getLogger("tableau.endpoint.jobs")
 
+
 class Jobs(Endpoint):
     @property
     def baseurl(self):
