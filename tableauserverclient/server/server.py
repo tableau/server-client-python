@@ -1,8 +1,7 @@
-from distutils.version import LooseVersion as Version
-import urllib3
-import requests
-from defusedxml.ElementTree import fromstring
+import xml.etree.ElementTree as ET
 
+from .exceptions import NotSignedInError
+from ..namespace import Namespace
 from .endpoint import (
     Sites,
     Views,
@@ -26,16 +25,16 @@ from .endpoint import (
     Favorites,
     DataAlerts,
     Fileuploads,
-    FlowRuns,
-    Metrics,
+    FlowRuns
 )
 from .endpoint.exceptions import (
     EndpointUnavailableError,
     ServerInfoEndpointNotFoundError,
 )
-from .exceptions import NotSignedInError
-from ..namespace import Namespace
 
+import requests
+
+from distutils.version import LooseVersion as Version
 
 _PRODUCT_TO_REST_VERSION = {
     "10.0": "2.3",
@@ -52,7 +51,7 @@ class Server(object):
         Overwrite = "Overwrite"
         CreateNew = "CreateNew"
 
-    def __init__(self, server_address, use_server_version=True, http_options=None):
+    def __init__(self, server_address, use_server_version=False):
         self._server_address = server_address
         self._auth_token = None
         self._site_id = None
@@ -85,18 +84,12 @@ class Server(object):
         self.fileuploads = Fileuploads(self)
         self._namespace = Namespace()
         self.flow_runs = FlowRuns(self)
-        self.metrics = Metrics(self)
-
-        if http_options:
-            self.add_http_options(http_options)
 
         if use_server_version:
             self.use_server_version()
 
     def add_http_options(self, options_dict):
         self._http_options.update(options_dict)
-        if options_dict.get("verify") == False:
-            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     def clear_http_options(self):
         self._http_options = dict()
@@ -114,7 +107,7 @@ class Server(object):
 
     def _get_legacy_version(self):
         response = self._session.get(self.server_address + "/auth?format=xml")
-        info_xml = fromstring(response.content)
+        info_xml = ET.fromstring(response.content)
         prod_version = info_xml.find(".//product_version").text
         version = _PRODUCT_TO_REST_VERSION.get(prod_version, "2.1")  # 2.1
         return version
