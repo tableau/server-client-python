@@ -77,6 +77,8 @@ class JobFailedException(Exception):
 
 class JobCancelledException(JobFailedException):
     pass
+
+
 class FlowRunFailedException(Exception):
     def __init__(self, flow_run):
         self.background_job_id = flow_run.background_job_id
@@ -87,4 +89,4 @@ class FlowRunFailedException(Exception):
 
 
 class FlowRunCancelledException(FlowRunFailedException):
-    pass 
+    pass
