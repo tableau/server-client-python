@@ -12,10 +12,27 @@ from ...filesys_helpers import (
 )
 
 import os
+from pathlib import Path
+import io
 import logging
 import copy
 import cgi
 from contextlib import closing
+
+from typing import (
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    TYPE_CHECKING,
+    Union,
+)
+
+if TYPE_CHECKING:
+    from ..server import Server
+    from ..request_options import RequestOptions
+    from .. import DatasourceItem
+    from ...models.connection_credentials import ConnectionCredentials
 
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
@@ -23,21 +40,26 @@ FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
 ALLOWED_FILE_EXTENSIONS = ["twb", "twbx"]
 
 logger = logging.getLogger("tableau.endpoint.workbooks")
+FilePath = Union[str, os.PathLike]
+FileObject = Union[io.BufferedReader, io.BytesIO]
+PathOrFile = Union[FilePath, FileObject]
 
 
 class Workbooks(QuerysetEndpoint):
-    def __init__(self, parent_srv):
+    def __init__(self, parent_srv: "Server") -> None:
         super(Workbooks, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
 
+        return None
+
     @property
-    def baseurl(self):
+    def baseurl(self) -> str:
         return "{0}/sites/{1}/workbooks".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     # Get all workbooks on site
     @api(version="2.0")
-    def get(self, req_options=None):
+    def get(self, req_options: Optional["RequestOptions"] = None) -> Tuple[List[WorkbookItem], PaginationItem]:
         logger.info("Querying all workbooks on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -47,7 +69,7 @@ class Workbooks(QuerysetEndpoint):
 
     # Get 1 workbook
     @api(version="2.0")
-    def get_by_id(self, workbook_id):
+    def get_by_id(self, workbook_id: str) -> WorkbookItem:
         if not workbook_id:
             error = "Workbook ID undefined."
             raise ValueError(error)
@@ -57,7 +79,7 @@ class Workbooks(QuerysetEndpoint):
         return WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     @api(version="2.8")
-    def refresh(self, workbook_id):
+    def refresh(self, workbook_id: str) -> JobItem:
         id_ = getattr(workbook_id, "id", workbook_id)
         url = "{0}/{1}/refresh".format(self.baseurl, id_)
         empty_req = RequestFactory.Empty.empty_req()
@@ -67,7 +89,13 @@ class Workbooks(QuerysetEndpoint):
 
     # create one or more extracts on 1 workbook, optionally encrypted
     @api(version="3.5")
-    def create_extract(self, workbook_item, encrypt=False, includeAll=True, datasources=None):
+    def create_extract(
+        self,
+        workbook_item: WorkbookItem,
+        encrypt: bool = False,
+        includeAll: bool = True,
+        datasources: Optional[List["DatasourceItem"]] = None,
+    ) -> JobItem:
         id_ = getattr(workbook_item, "id", workbook_item)
         url = "{0}/{1}/createExtract?encrypt={2}".format(self.baseurl, id_, encrypt)
 
@@ -78,7 +106,7 @@ class Workbooks(QuerysetEndpoint):
 
     # delete all the extracts on 1 workbook
     @api(version="3.5")
-    def delete_extract(self, workbook_item):
+    def delete_extract(self, workbook_item: WorkbookItem) -> None:
         id_ = getattr(workbook_item, "id", workbook_item)
         url = "{0}/{1}/deleteExtract".format(self.baseurl, id_)
         empty_req = RequestFactory.Empty.empty_req()
@@ -86,7 +114,7 @@ class Workbooks(QuerysetEndpoint):
 
     # Delete 1 workbook by id
     @api(version="2.0")
-    def delete(self, workbook_id):
+    def delete(self, workbook_id: str) -> None:
         if not workbook_id:
             error = "Workbook ID undefined."
             raise ValueError(error)
@@ -96,7 +124,7 @@ class Workbooks(QuerysetEndpoint):
 
     # Update workbook
     @api(version="2.0")
-    def update(self, workbook_item):
+    def update(self, workbook_item: WorkbookItem) -> WorkbookItem:
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -120,7 +148,7 @@ class Workbooks(QuerysetEndpoint):
 
     # Update workbook_connection
     @api(version="2.3")
-    def update_connection(self, workbook_item, connection_item):
+    def update_connection(self, workbook_item: WorkbookItem, connection_item: ConnectionItem) -> ConnectionItem:
         url = "{0}/{1}/connections/{2}".format(self.baseurl, workbook_item.id, connection_item.id)
         update_req = RequestFactory.Connection.update_req(connection_item)
         server_response = self.put_request(url, update_req)
@@ -135,7 +163,13 @@ class Workbooks(QuerysetEndpoint):
     @api(version="2.0")
     @parameter_added_in(no_extract="2.5")
     @parameter_added_in(include_extract="2.5")
-    def download(self, workbook_id, filepath=None, include_extract=True, no_extract=None):
+    def download(
+        self,
+        workbook_id: str,
+        filepath: FilePath = None,
+        include_extract: bool = True,
+        no_extract: Optional[bool] = None,
+    ) -> str:
         if not workbook_id:
             error = "Workbook ID undefined."
             raise ValueError(error)
@@ -167,7 +201,7 @@ class Workbooks(QuerysetEndpoint):
 
     # Get all views of workbook
     @api(version="2.0")
-    def populate_views(self, workbook_item, usage=False):
+    def populate_views(self, workbook_item: WorkbookItem, usage: bool = False) -> None:
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -178,7 +212,7 @@ class Workbooks(QuerysetEndpoint):
         workbook_item._set_views(view_fetcher)
         logger.info("Populated views for workbook (ID: {0})".format(workbook_item.id))
 
-    def _get_views_for_workbook(self, workbook_item, usage):
+    def _get_views_for_workbook(self, workbook_item: WorkbookItem, usage: bool) -> List[ViewItem]:
         url = "{0}/{1}/views".format(self.baseurl, workbook_item.id)
         if usage:
             url += "?includeUsageStatistics=true"
@@ -192,7 +226,7 @@ class Workbooks(QuerysetEndpoint):
 
     # Get all connections of workbook
     @api(version="2.0")
-    def populate_connections(self, workbook_item):
+    def populate_connections(self, workbook_item: WorkbookItem) -> None:
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -203,7 +237,9 @@ class Workbooks(QuerysetEndpoint):
         workbook_item._set_connections(connection_fetcher)
         logger.info("Populated connections for workbook (ID: {0})".format(workbook_item.id))
 
-    def _get_workbook_connections(self, workbook_item, req_options=None):
+    def _get_workbook_connections(
+        self, workbook_item: WorkbookItem, req_options: "RequestOptions" = None
+    ) -> List[ConnectionItem]:
         url = "{0}/{1}/connections".format(self.baseurl, workbook_item.id)
         server_response = self.get_request(url, req_options)
         connections = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
@@ -211,7 +247,7 @@ class Workbooks(QuerysetEndpoint):
 
     # Get the pdf of the entire workbook if its tabs are enabled, pdf of the default view if its tabs are disabled
     @api(version="3.4")
-    def populate_pdf(self, workbook_item, req_options=None):
+    def populate_pdf(self, workbook_item: WorkbookItem, req_options: "RequestOptions" = None) -> None:
         if not workbook_item.id:
             error = "Workbook item missing ID."
             raise MissingRequiredFieldError(error)
@@ -230,7 +266,7 @@ class Workbooks(QuerysetEndpoint):
 
     # Get preview image of workbook
     @api(version="2.0")
-    def populate_preview_image(self, workbook_item):
+    def populate_preview_image(self, workbook_item: WorkbookItem) -> None:
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -248,7 +284,7 @@ class Workbooks(QuerysetEndpoint):
         return preview_image
 
     @api(version="2.0")
-    def populate_permissions(self, item):
+    def populate_permissions(self, item: WorkbookItem) -> None:
         self._permissions.populate(item)
 
     @api(version="2.0")
@@ -259,20 +295,19 @@ class Workbooks(QuerysetEndpoint):
     def delete_permission(self, item, capability_item):
         return self._permissions.delete(item, capability_item)
 
-    # Publishes workbook. Chunking method if file over 64MB
     @api(version="2.0")
     @parameter_added_in(as_job="3.0")
     @parameter_added_in(connections="2.8")
     def publish(
         self,
-        workbook_item,
-        file,
-        mode,
-        connection_credentials=None,
-        connections=None,
-        as_job=False,
-        hidden_views=None,
-        skip_connection_check=False,
+        workbook_item: WorkbookItem,
+        file: PathOrFile,
+        mode: str,
+        connection_credentials: Optional["ConnectionCredentials"] = None,
+        connections: Optional[Sequence[ConnectionItem]] = None,
+        as_job: bool = False,
+        hidden_views: Optional[Sequence[str]] = None,
+        skip_connection_check: bool = False,
     ):
 
         if connection_credentials is not None:
@@ -283,7 +318,7 @@ class Workbooks(QuerysetEndpoint):
                 DeprecationWarning,
             )
 
-        try:
+        if isinstance(file, (str, os.PathLike)):
             # Expect file to be a filepath
             if not os.path.isfile(file):
                 error = "File path does not lead to an existing file."
@@ -300,7 +335,7 @@ class Workbooks(QuerysetEndpoint):
                 error = "Only {} files can be published as workbooks.".format(", ".join(ALLOWED_FILE_EXTENSIONS))
                 raise ValueError(error)
 
-        except TypeError:
+        elif isinstance(file, (io.BytesIO, io.BufferedReader)):
             # Expect file to be a file object
             file_size = get_file_object_size(file)
 
@@ -321,6 +356,9 @@ class Workbooks(QuerysetEndpoint):
             # Generate filename for file object.
             # This is needed when publishing the workbook in a single request
             filename = "{}.{}".format(workbook_item.name, file_extension)
+
+        else:
+            raise TypeError("file should be a filepath or file object.")
 
         if not hasattr(self.parent_srv.PublishMode, mode):
             error = "Invalid mode defined."
@@ -355,12 +393,15 @@ class Workbooks(QuerysetEndpoint):
         else:
             logger.info("Publishing {0} to server".format(filename))
 
-            try:
+            if isinstance(file, (str, Path)):
                 with open(file, "rb") as f:
                     file_contents = f.read()
 
-            except TypeError:
+            elif isinstance(file, (io.BytesIO, io.BufferedReader)):
                 file_contents = file.read()
+
+            else:
+                raise TypeError("file should be a filepath or file object.")
 
             conn_creds = connection_credentials
             xml_request, content_type = RequestFactory.Workbook.publish_req(

@@ -9,10 +9,7 @@ from xml.etree.ElementTree import ParseError
 from ..query import QuerySet
 import logging
 
-try:
-    from distutils2.version import NormalizedVersion as Version
-except ImportError:
-    from packaging.version import Version
+from distutils.version import LooseVersion as Version
 
 logger = logging.getLogger("tableau.endpoint")
 
