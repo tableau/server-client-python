@@ -36,6 +36,9 @@ from .endpoint.exceptions import (
 from .exceptions import NotSignedInError
 from ..namespace import Namespace
 
+import requests
+
+from distutils.version import LooseVersion as Version
 
 _PRODUCT_TO_REST_VERSION = {
     "10.0": "2.3",

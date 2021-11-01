@@ -1,12 +1,14 @@
 import os
 import re
+import requests_mock
+import tableauserverclient as TSC
 import tempfile
 import unittest
+import xml.etree.ElementTree as ET
+
+from defusedxml.ElementTree import fromstring
 from io import BytesIO
 from pathlib import Path
-
-import requests_mock
-from defusedxml.ElementTree import fromstring
 
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime

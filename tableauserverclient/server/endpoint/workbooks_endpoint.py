@@ -28,6 +28,15 @@ from ...filesys_helpers import (
 from ...models.job_item import JobItem
 from ...models.revision_item import RevisionItem
 
+from typing import (
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    TYPE_CHECKING,
+    Union,
+)
+
 if TYPE_CHECKING:
     from ..server import Server
     from ..request_options import RequestOptions

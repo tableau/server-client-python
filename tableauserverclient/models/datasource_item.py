@@ -19,6 +19,13 @@ if TYPE_CHECKING:
     from .revision_item import RevisionItem
     import datetime
 
+from typing import Dict, List, Optional, Set, Tuple, TYPE_CHECKING, Union
+
+if TYPE_CHECKING:
+    from .permissions_item import PermissionsRule
+    from .connection_item import ConnectionItem
+    import datetime
+
 
 class DatasourceItem(object):
     class AskDataEnablement:

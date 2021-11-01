@@ -23,6 +23,20 @@ if TYPE_CHECKING:
     import datetime
     from .revision_item import RevisionItem
 
+from typing import (
+    Dict,
+    List,
+    Optional,
+    Set,
+    TYPE_CHECKING,
+    Union
+)
+
+if TYPE_CHECKING:
+    from .connection_item import ConnectionItem
+    from .permissions_item import PermissionsRule
+    import datetime
+
 
 class WorkbookItem(object):
     def __init__(self, project_id: str, name: str = None, show_tabs: bool = False) -> None:
