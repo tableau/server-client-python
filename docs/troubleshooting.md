@@ -12,6 +12,20 @@ This page covers some common troubleshooting tips for using the TSC library.
 * TOC
 {:toc}
 
+## 400000 Bad Request
+
+It's not uncommon to receive a response error similar to the following:
+
+    400000: Bad Request
+            Payload is either malformed or incomplete
+
+This type of response can be caused by several different problems communicating with the backend REST API. Try these steps to resolve the issue:
+
+1. Update to the latest release of the TSC library
+2. Adjust your code to always [use the latest REST API version supported by the server](versions#use-the-rest-api-version-supported-by-the-server)
+
+If the problem still persists, you can post an Issue with details to see if others can help. It might also be helpful to capture the REST API requests and responses as described next.
+
 ## Logging REST API communication with Tableau Server
 
 There may be cases where it's helpful to inspect the REST API calls the TSC library is making and the responses coming back from Tableau Server. Some examples might be:
