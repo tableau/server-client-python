@@ -2,50 +2,54 @@ import xml.etree.ElementTree as ET
 from ..datetime_helpers import parse_datetime
 import itertools
 
+from typing import Dict, List, Optional, Type, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from datetime import datetime
 
 class FlowRunItem(object):
     def __init__(self) -> None:
-        self._id=None
-        self._flow_id=None
-        self._status=None
-        self._started_at=None
-        self._completed_at=None
-        self._progress=None
-        self._background_job_id=None
+        self._id: str = ''
+        self._flow_id: Optional[str] = None
+        self._status: Optional[str] = None
+        self._started_at: Optional["datetime"] = None
+        self._completed_at: Optional["datetime"] = None
+        self._progress: Optional[str] = None
+        self._background_job_id: Optional[str] = None
 
     
     @property
-    def id(self):
+    def id(self) -> str:
         return self._id
 
 
     @property
-    def flow_id(self):
+    def flow_id(self) -> Optional[str]:
         return self._flow_id
 
 
     @property
-    def status(self):
+    def status(self) -> Optional[str]:
         return self._status
 
 
     @property
-    def started_at(self):
+    def started_at(self) -> Optional["datetime"]:
         return self._started_at
 
 
     @property
-    def completed_at(self):
+    def completed_at(self) -> Optional["datetime"]:
         return self._completed_at
 
 
     @property
-    def progress(self):
+    def progress(self) -> Optional[str]:
         return self._progress
 
 
     @property
-    def background_job_id(self):
+    def background_job_id(self) -> Optional[str]:
         return self._background_job_id
 
 
@@ -76,7 +80,7 @@ class FlowRunItem(object):
 
 
     @classmethod
-    def from_response(cls, resp, ns):
+    def from_response(cls: Type["FlowRunItem"], resp: bytes, ns: Optional[Dict]) -> List["FlowRunItem"]:
         all_flowrun_items = list()
         parsed_response = ET.fromstring(resp)
         all_flowrun_xml = itertools.chain(
