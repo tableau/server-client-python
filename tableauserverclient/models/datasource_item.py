@@ -14,6 +14,7 @@ from typing import Dict, List, Optional, Set, Tuple, TYPE_CHECKING, Union
 if TYPE_CHECKING:
     from .permissions_item import PermissionsRule
     from .connection_item import ConnectionItem
+    from .revision_item import RevisionItem
     import datetime
 
 
@@ -37,7 +38,7 @@ class DatasourceItem(object):
         self._id: Optional[str] = None
         self._initial_tags: Set = set()
         self._project_name: Optional[str] = None
-        self._revisions: List = None
+        self._revisions: Optional[List["RevisionItem"]] = None
         self._updated_at = None
         self._use_remote_query_agent = None
         self._webpage_url = None
@@ -168,7 +169,7 @@ class DatasourceItem(object):
         return self._webpage_url
 
     @property
-    def revisions(self):
+    def revisions(self) -> Optional[List["RevisionItem"]]:
         if self._revisions is None:
             error = "Datasource item must be populated with revisions first."
             raise UnpopulatedPropertyError(error)
