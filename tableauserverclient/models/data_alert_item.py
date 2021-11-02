@@ -17,11 +17,11 @@ if TYPE_CHECKING:
 
 class DataAlertItem(object):
     class Frequency:
-        Once: str = "Once"
-        Frequently: str = "Frequently"
-        Hourly: str = "Hourly"
-        Daily: str = "Daily"
-        Weekly: str = "Weekly"
+        Once = "Once"
+        Frequently = "Frequently"
+        Hourly = "Hourly"
+        Daily = "Daily"
+        Weekly = "Weekly"
 
     def __init__(self):
         self._id: Optional[str] = None
