@@ -219,8 +219,8 @@ class DatasourceTests(unittest.TestCase):
             self.assertEqual(permissions[0].grantee.tag_name, "group")  # type: ignore[index]
             self.assertEqual(permissions[0].grantee.id, "5e5e1978-71fa-11e4-87dd-7382f5c437af")  # type: ignore[index]
             self.assertDictEqual(
-                permissions[0].capabilities,
-                {  # type: ignore[index]
+                permissions[0].capabilities,  # type: ignore[index]
+                {
                     TSC.Permission.Capability.Delete: TSC.Permission.Mode.Deny,
                     TSC.Permission.Capability.ChangePermissions: TSC.Permission.Mode.Deny,
                     TSC.Permission.Capability.Connect: TSC.Permission.Mode.Allow,
@@ -231,8 +231,8 @@ class DatasourceTests(unittest.TestCase):
             self.assertEqual(permissions[1].grantee.tag_name, "user")  # type: ignore[index]
             self.assertEqual(permissions[1].grantee.id, "7c37ee24-c4b1-42b6-a154-eaeab7ee330a")  # type: ignore[index]
             self.assertDictEqual(
-                permissions[1].capabilities,
-                {  # type: ignore[index]
+                permissions[1].capabilities,  # type: ignore[index]
+                {
                     TSC.Permission.Capability.Write: TSC.Permission.Mode.Allow,
                 },
             )
