@@ -34,10 +34,7 @@ from .endpoint.exceptions import (
 
 import requests
 
-try:
-    from distutils2.version import NormalizedVersion as Version
-except ImportError:
-    from distutils.version import LooseVersion as Version
+from distutils.version import LooseVersion as Version
 
 _PRODUCT_TO_REST_VERSION = {
     "10.0": "2.3",
