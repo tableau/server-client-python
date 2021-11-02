@@ -62,6 +62,7 @@ class Projects(Endpoint):
 
     @api(version="2.0")
     def create(self, project_item: ProjectItem, samples: bool = False) -> ProjectItem:
+        params = {"params": {RequestOptions.Field.PublishSamples: samples }}
         url = self.baseurl
         create_req = RequestFactory.Project.create_req(project_item)
         server_response = self.post_request(url, create_req, XML_CONTENT_TYPE, params)
