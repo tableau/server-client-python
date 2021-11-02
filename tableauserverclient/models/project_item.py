@@ -29,6 +29,11 @@ class ProjectItem(object):
     def content_permissions(self):
         return self._content_permissions
 
+    @content_permissions.setter
+    @property_is_enum(ContentPermissions)
+    def content_permissions(self, value):
+        self._content_permissions = value
+
     @property
     def permissions(self):
         if self._permissions is None:
@@ -56,11 +61,6 @@ class ProjectItem(object):
             error = "Project item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
         return self._default_flow_permissions()
-
-    @content_permissions.setter
-    @property_is_enum(ContentPermissions)
-    def content_permissions(self, value):
-        self._content_permissions = value
 
     @property
     def id(self):

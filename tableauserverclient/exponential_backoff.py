@@ -1,12 +1,12 @@
 import time
 
 # Polling for server-side events (such as job completion) uses exponential backoff for the sleep intervals between polls
-ASYNC_POLL_MIN_INTERVAL=0.5
-ASYNC_POLL_MAX_INTERVAL=30
-ASYNC_POLL_BACKOFF_FACTOR=1.4
+ASYNC_POLL_MIN_INTERVAL = 0.5
+ASYNC_POLL_MAX_INTERVAL = 30
+ASYNC_POLL_BACKOFF_FACTOR = 1.4
 
 
-class ExponentialBackoffTimer():
+class ExponentialBackoffTimer:
     def __init__(self, *, timeout=None):
         self.start_time = time.time()
         self.timeout = timeout
@@ -15,7 +15,7 @@ class ExponentialBackoffTimer():
     def sleep(self):
         max_sleep_time = ASYNC_POLL_MAX_INTERVAL
         if self.timeout is not None:
-            elapsed = (time.time() - self.start_time)
+            elapsed = time.time() - self.start_time
             if elapsed >= self.timeout:
                 raise TimeoutError(f"Timeout after {elapsed} seconds waiting for asynchronous event")
             remaining_time = self.timeout - elapsed
