@@ -8,9 +8,8 @@ import logging
 
 logger = logging.getLogger("tableau.endpoint.jobs")
 
-from typing import List, Optional, Tuple, TYPE_CHECKING, TypeVar
+from typing import List, Optional, Tuple, TYPE_CHECKING, Union
 
-T = TypeVar("T", int, float)
 
 
 class Jobs(Endpoint):
@@ -20,8 +19,8 @@ class Jobs(Endpoint):
 
     @api(version="2.6")
     def get(
-        self, job_id=None, req_options: Optional[RequestOptionsBase] = None
-    ) -> Tuple[List[BackgroundJobItem], PaginationItem]:
+        self, job_id: Optional[str] = None, req_options: Optional[RequestOptionsBase] = None
+        ) -> Tuple[List[BackgroundJobItem], PaginationItem]:
         # Backwards Compatibility fix until we rev the major version
         if job_id is not None and isinstance(job_id, str):
             import warnings
@@ -38,9 +37,11 @@ class Jobs(Endpoint):
         return jobs, pagination_item
 
     @api(version="3.1")
-    def cancel(self, job_id: str):
-        id_ = getattr(job_id, "id", job_id)
-        url = "{0}/{1}".format(self.baseurl, id_)
+    def cancel(self, job_id: Union[str, JobItem]):
+        if isinstance(job_id, JobItem):
+            job_id = job_id.id
+        assert isinstance(job_id, str)
+        url = "{0}/{1}".format(self.baseurl, job_id)
         return self.put_request(url)
 
     @api(version="2.6")
@@ -51,7 +52,7 @@ class Jobs(Endpoint):
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return new_job
 
-    def wait_for_job(self, job_id: str, *, timeout: Optional[T] = None) -> JobItem:
+    def wait_for_job(self, job_id: Union[str, JobItem], *, timeout: Optional[float] = None) -> JobItem:
         if isinstance(job_id, JobItem):
             job_id = job_id.id
         assert isinstance(job_id, str)
