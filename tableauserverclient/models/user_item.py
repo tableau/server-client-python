@@ -20,30 +20,30 @@ class UserItem(object):
     tag_name: str = "user"
 
     class Roles:
-        Interactor: str = "Interactor"
-        Publisher: str = "Publisher"
-        ServerAdministrator: str = "ServerAdministrator"
-        SiteAdministrator: str = "SiteAdministrator"
-        Unlicensed: str = "Unlicensed"
-        UnlicensedWithPublish: str = "UnlicensedWithPublish"
-        Viewer: str = "Viewer"
-        ViewerWithPublish: str = "ViewerWithPublish"
-        Guest: str = "Guest"
+        Interactor="Interactor"
+        Publisher="Publisher"
+        ServerAdministrator="ServerAdministrator"
+        SiteAdministrator="SiteAdministrator"
+        Unlicensed="Unlicensed"
+        UnlicensedWithPublish="UnlicensedWithPublish"
+        Viewer="Viewer"
+        ViewerWithPublish="ViewerWithPublish"
+        Guest="Guest"
 
-        Creator: str = "Creator"
-        Explorer: str = "Explorer"
-        ExplorerCanPublish: str = "ExplorerCanPublish"
-        ReadOnly: str = "ReadOnly"
-        SiteAdministratorCreator: str = "SiteAdministratorCreator"
-        SiteAdministratorExplorer: str = "SiteAdministratorExplorer"
+        Creator="Creator"
+        Explorer="Explorer"
+        ExplorerCanPublish="ExplorerCanPublish"
+        ReadOnly="ReadOnly"
+        SiteAdministratorCreator="SiteAdministratorCreator"
+        SiteAdministratorExplorer="SiteAdministratorExplorer"
 
         # Online only
-        SupportUser: str = "SupportUser"
+        SupportUser="SupportUser"
 
     class Auth:
-        OpenID: str = "OpenID"
-        SAML: str = "SAML"
-        ServerDefault: str = "ServerDefault"
+        OpenID="OpenID"
+        SAML="SAML"
+        ServerDefault="ServerDefault"
 
     def __init__(
         self, name: Optional[str] = None, site_role: Optional[str] = None, auth_setting: Optional[str] = None
