@@ -5,10 +5,11 @@ from requests.packages.urllib3.filepost import encode_multipart_formdata
 
 from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteItem
 
-from typing import Any, Dict, Optional, TYPE_CHECKING, Tuple
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple
 
 if TYPE_CHECKING:
     from ..models import FlowItem
+    from ..models import ConnectionItem
 
 
 def _add_multipart(parts: Dict) -> Tuple[Any, str]:
@@ -275,7 +276,7 @@ class FileuploadRequest(object):
 
 
 class FlowRequest(object):
-    def _generate_xml(self, flow_item: "FlowItem", connections=None) -> bytes:
+    def _generate_xml(self, flow_item: "FlowItem", connections: Optional[List["ConnectionItem"]] = None) -> bytes:
         xml_request = ET.Element("tsRequest")
         flow_element = ET.SubElement(xml_request, "flow")
         if flow_item.name is not None:
@@ -301,7 +302,13 @@ class FlowRequest(object):
 
         return ET.tostring(xml_request)
 
-    def publish_req(self, flow_item: "FlowItem", filename: str, file_contents: bytes, connections=None):
+    def publish_req(
+        self,
+        flow_item: "FlowItem",
+        filename: str,
+        file_contents: bytes,
+        connections: Optional[List["ConnectionItem"]] = None
+    ) -> Tuple[Any, str]:
         xml_request = self._generate_xml(flow_item, connections)
 
         parts = {
