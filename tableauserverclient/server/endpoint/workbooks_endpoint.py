@@ -389,6 +389,7 @@ class Workbooks(QuerysetEndpoint):
                 workbook_item,
                 connection_credentials=conn_creds,
                 connections=connections,
+                hidden_views=hidden_views,
             )
         else:
             logger.info("Publishing {0} to server".format(filename))
@@ -410,6 +411,7 @@ class Workbooks(QuerysetEndpoint):
                 file_contents,
                 connection_credentials=conn_creds,
                 connections=connections,
+                hidden_views=hidden_views,
             )
         logger.debug("Request xml: {0} ".format(xml_request[:1000]))
 
