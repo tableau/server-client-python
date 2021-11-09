@@ -8,13 +8,12 @@ import logging
 # For when a datasource is over 64MB, break it into 5MB(standard chunk size) chunks
 CHUNK_SIZE = 1024 * 1024 * 5  # 5MB
 
-logger = logging.getLogger('tableau.endpoint.fileuploads')
+logger = logging.getLogger("tableau.endpoint.fileuploads")
 
 
 class Fileuploads(Endpoint):
     def __init__(self, parent_srv):
         super(Fileuploads, self).__init__(parent_srv)
-        self.upload_id = ''
 
     @property
     def baseurl(self):
@@ -23,39 +22,42 @@ class Fileuploads(Endpoint):
     @api(version="2.0")
     def initiate(self):
         url = self.baseurl
-        server_response = self.post_request(url, '')
+        server_response = self.post_request(url, "")
         fileupload_item = FileuploadItem.from_response(server_response.content, self.parent_srv.namespace)
-        self.upload_id = fileupload_item.upload_session_id
-        logger.info('Initiated file upload session (ID: {0})'.format(self.upload_id))
-        return self.upload_id
+        upload_id = fileupload_item.upload_session_id
+        logger.info("Initiated file upload session (ID: {0})".format(upload_id))
+        return upload_id
 
     @api(version="2.0")
-    def append(self, xml_request, content_type):
-        if not self.upload_id:
-            error = "File upload session must be initiated first."
-            raise MissingRequiredFieldError(error)
-        url = "{0}/{1}".format(self.baseurl, self.upload_id)
-        server_response = self.put_request(url, xml_request, content_type)
-        logger.info('Uploading a chunk to session (ID: {0})'.format(self.upload_id))
+    def append(self, upload_id, data, content_type):
+        url = "{0}/{1}".format(self.baseurl, upload_id)
+        server_response = self.put_request(url, data, content_type)
+        logger.info("Uploading a chunk to session (ID: {0})".format(upload_id))
         return FileuploadItem.from_response(server_response.content, self.parent_srv.namespace)
 
-    def read_chunks(self, file_path):
-        with open(file_path, 'rb') as f:
+    def _read_chunks(self, file):
+        file_opened = False
+        try:
+            file_content = open(file, "rb")
+            file_opened = True
+        except TypeError:
+            file_content = file
+
+        try:
             while True:
-                chunked_content = f.read(CHUNK_SIZE)
+                chunked_content = file_content.read(CHUNK_SIZE)
                 if not chunked_content:
                     break
                 yield chunked_content
+        finally:
+            if file_opened:
+                file_content.close()
 
-    @classmethod
-    def upload_chunks(cls, parent_srv, file_path):
-        file_uploader = cls(parent_srv)
-        upload_id = file_uploader.initiate()
-        chunks = file_uploader.read_chunks(file_path)
-        for chunk in chunks:
-            xml_request, content_type = RequestFactory.Fileupload.chunk_req(chunk)
-            fileupload_item = file_uploader.append(xml_request, content_type)
-            logger.info("\tPublished {0}MB of {1}".format(fileupload_item.file_size,
-                                                          os.path.basename(file_path)))
-        logger.info("\tCommitting file upload...")
+    def upload(self, file):
+        upload_id = self.initiate()
+        for chunk in self._read_chunks(file):
+            request, content_type = RequestFactory.Fileupload.chunk_req(chunk)
+            fileupload_item = self.append(upload_id, request, content_type)
+            logger.info("\tPublished {0}MB".format(fileupload_item.file_size))
+        logger.info("File upload finished (ID: {0})".format(upload_id))
         return upload_id

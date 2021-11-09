@@ -13,6 +13,7 @@ POPULATE_USERS_EMPTY = os.path.join(TEST_ASSET_DIR, 'group_populate_users_empty.
 ADD_USER = os.path.join(TEST_ASSET_DIR, 'group_add_user.xml')
 ADD_USER_POPULATE = os.path.join(TEST_ASSET_DIR, 'group_users_added.xml')
 CREATE_GROUP = os.path.join(TEST_ASSET_DIR, 'group_create.xml')
+CREATE_GROUP_AD = os.path.join(TEST_ASSET_DIR, 'group_create_ad.xml')
 CREATE_GROUP_ASYNC = os.path.join(TEST_ASSET_DIR, 'group_create_async.xml')
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'group_update.xml')
 
@@ -185,6 +186,30 @@ class GroupTests(unittest.TestCase):
             self.assertEqual(group.name, u'試供品')
             self.assertEqual(group.id, '3e4a9ea0-a07a-4fe6-b50f-c345c8c81034')
 
+    def test_create_ad_group(self):
+        with open(CREATE_GROUP_AD, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.post(self.baseurl, text=response_xml)
+            group_to_create = TSC.GroupItem(u'試供品')
+            group_to_create.domain_name = 'just-has-to-exist'
+            group = self.server.groups.create_AD_group(group_to_create, False)
+            self.assertEqual(group.name, u'試供品')
+            self.assertEqual(group.license_mode, 'onLogin')
+            self.assertEqual(group.minimum_site_role, 'Creator')
+            self.assertEqual(group.domain_name, 'active-directory-domain-name')
+
+    def test_create_group_async(self):
+        with open(CREATE_GROUP_ASYNC, 'rb') as f:
+            response_xml = f.read().decode('utf-8')
+        with requests_mock.mock() as m:
+            m.post(self.baseurl, text=response_xml)
+            group_to_create = TSC.GroupItem(u'試供品')
+            group_to_create.domain_name = 'woohoo'
+            job = self.server.groups.create_AD_group(group_to_create, True)
+            self.assertEqual(job.mode, 'Asynchronous')
+            self.assertEqual(job.type, 'GroupImport')
+
     def test_update(self):
         with open(UPDATE_XML, 'rb') as f:
             response_xml = f.read().decode('utf-8')
@@ -197,3 +222,15 @@ class GroupTests(unittest.TestCase):
 
         self.assertEqual('ef8b19c0-43b6-11e6-af50-63f5805dbe3c', group.id)
         self.assertEqual('Group updated name', group.name)
+        self.assertEqual('ExplorerCanPublish', group.minimum_site_role)
+        self.assertEqual('onLogin', group.license_mode)
+
+    # async update is not supported for local groups
+    def test_update_local_async(self):
+        group = TSC.GroupItem("myGroup")
+        group._id = 'ef8b19c0-43b6-11e6-af50-63f5805dbe3c'
+        self.assertRaises(ValueError, self.server.groups.update, group, as_job=True)
+
+        # mimic group returned from server where domain name is set to 'local'
+        group.domain_name = "local"
+        self.assertRaises(ValueError, self.server.groups.update, group, as_job=True)

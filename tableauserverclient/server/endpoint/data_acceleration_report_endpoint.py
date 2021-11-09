@@ -6,7 +6,7 @@ from ...models.data_acceleration_report_item import DataAccelerationReportItem
 
 import logging
 
-logger = logging.getLogger('tableau.endpoint.data_acceleration_report')
+logger = logging.getLogger("tableau.endpoint.data_acceleration_report")
 
 
 class DataAccelerationReport(Endpoint):
@@ -26,5 +26,6 @@ class DataAccelerationReport(Endpoint):
         url = self.baseurl
         server_response = self.get_request(url, req_options)
         data_acceleration_report = DataAccelerationReportItem.from_response(
-            server_response.content, self.parent_srv.namespace)
+            server_response.content, self.parent_srv.namespace
+        )
         return data_acceleration_report

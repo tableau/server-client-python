@@ -1,57 +1,130 @@
 import xml.etree.ElementTree as ET
-from .exceptions import UnpopulatedPropertyError
 from .target import Target
+from .property_decorators import property_is_boolean
 
 
 class SubscriptionItem(object):
-
     def __init__(self, subject, schedule_id, user_id, target):
-        self.id = None
-        self.subject = subject
+        self._id = None
+        self.attach_image = True
+        self.attach_pdf = False
+        self.message = None
+        self.page_orientation = None
+        self.page_size_option = None
         self.schedule_id = schedule_id
-        self.user_id = user_id
+        self.send_if_view_empty = True
+        self.subject = subject
+        self.suspended = False
         self.target = target
+        self.user_id = user_id
 
     def __repr__(self):
         if self.id is not None:
-            return "<Subscription#{id} subject({subject}) schedule_id({schedule_id}) user_id({user_id}) \
-                target({target})".format(**self.__dict__)
+            return "<Subscription#{_id} subject({subject}) schedule_id({schedule_id}) user_id({user_id}) \
+                target({target})".format(
+                **self.__dict__
+            )
         else:
             return "<Subscription subject({subject}) schedule_id({schedule_id}) user_id({user_id}) \
-                target({target})".format(**self.__dict__)
+                target({target})".format(
+                **self.__dict__
+            )
 
-    def _set_id(self, id_):
-        self.id = id_
+    @property
+    def id(self):
+        return self._id
+
+    @property
+    def attach_image(self):
+        return self._attach_image
+
+    @attach_image.setter
+    @property_is_boolean
+    def attach_image(self, value):
+        self._attach_image = value
+
+    @property
+    def attach_pdf(self):
+        return self._attach_pdf
+
+    @attach_pdf.setter
+    @property_is_boolean
+    def attach_pdf(self, value):
+        self._attach_pdf = value
+
+    @property
+    def send_if_view_empty(self):
+        return self._send_if_view_empty
+
+    @send_if_view_empty.setter
+    @property_is_boolean
+    def send_if_view_empty(self, value):
+        self._send_if_view_empty = value
+
+    @property
+    def suspended(self):
+        return self._suspended
+
+    @suspended.setter
+    @property_is_boolean
+    def suspended(self, value):
+        self._suspended = value
 
     @classmethod
     def from_response(cls, xml, ns):
         parsed_response = ET.fromstring(xml)
-        all_subscriptions_xml = parsed_response.findall(
-            './/t:subscription', namespaces=ns)
+        all_subscriptions_xml = parsed_response.findall(".//t:subscription", namespaces=ns)
 
         all_subscriptions = [SubscriptionItem._parse_element(x, ns) for x in all_subscriptions_xml]
         return all_subscriptions
 
     @classmethod
     def _parse_element(cls, element, ns):
+        schedule_element = element.find(".//t:schedule", namespaces=ns)
+        content_element = element.find(".//t:content", namespaces=ns)
+        user_element = element.find(".//t:user", namespaces=ns)
+
+        # Schedule element
         schedule_id = None
-        target = None
-
-        schedule_element = element.find('.//t:schedule', namespaces=ns)
-        content_element = element.find('.//t:content', namespaces=ns)
-        user_element = element.find('.//t:user', namespaces=ns)
-
         if schedule_element is not None:
-            schedule_id = schedule_element.get('id', None)
+            schedule_id = schedule_element.get("id", None)
 
+        # Content element
+        target = None
+        send_if_view_empty = None
         if content_element is not None:
-            target = Target(content_element.get('id', None), content_element.get('type'))
+            target = Target(content_element.get("id", None), content_element.get("type"))
+            send_if_view_empty = string_to_bool(content_element.get("sendIfViewEmpty", ""))
 
+        # User element
+        user_id = None
         if user_element is not None:
-            user_id = user_element.get('id')
+            user_id = user_element.get("id", None)
 
-        id_ = element.get('id', None)
-        subject = element.get('subject', None)
+        # Main attributes
+        id_ = element.get("id", None)
+        subject = element.get("subject", None)
+        attach_image = string_to_bool(element.get("attachImage", ""))
+        attach_pdf = string_to_bool(element.get("attachPdf", ""))
+        message = element.get("message", None)
+        page_orientation = element.get("pageOrientation", None)
+        page_size_option = element.get("pageSizeOption", None)
+        suspended = string_to_bool(element.get("suspended", ""))
+
+        # Create SubscriptionItem and set fields
         sub = cls(subject, schedule_id, user_id, target)
-        sub._set_id(id_)
+        sub._id = id_
+        sub.attach_image = attach_image
+        sub.attach_pdf = attach_pdf
+        sub.message = message
+        sub.page_orientation = page_orientation
+        sub.page_size_option = page_size_option
+        sub.send_if_view_empty = send_if_view_empty
+        sub.suspended = suspended
+
         return sub
+
+
+# Used to convert string represented boolean to a boolean type
+def string_to_bool(s):
+    return s.lower() == "true"

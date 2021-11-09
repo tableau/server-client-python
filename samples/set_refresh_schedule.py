@@ -1,17 +1,29 @@
+####
+# This script demonstrates how to set the refresh schedule for
+# a workbook or datasource.
+#
+# To run the script, you must have installed Python 3.6 or later.
+####
+
+
 import argparse
-import getpass
 import logging
 
 import tableauserverclient as TSC
 
 
 def usage(args):
-    parser = argparse.ArgumentParser(description='Explore workbook functions supported by the Server API.')
+    parser = argparse.ArgumentParser(description='Set refresh schedule for a workbook or datasource.')
+    # Common options; please keep those in sync across all samples
     parser.add_argument('--server', '-s', required=True, help='server address')
-    parser.add_argument('--username', '-u', required=True, help='username to sign into server')
+    parser.add_argument('--site', '-S', help='site name')
+    parser.add_argument('--token-name', '-p', required=True,
+                        help='name of the personal access token used to sign into the server')
+    parser.add_argument('--token-value', '-v', required=True,
+                        help='value of the personal access token used to sign into the server')
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
                         help='desired logging level (set to error by default)')
-    parser.add_argument('--password', '-p', default=None)
+    # Options specific to this sample
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--workbook', '-w')
     group.add_argument('--datasource', '-d')
@@ -53,18 +65,13 @@ def assign_to_schedule(server, workbook_or_datasource, schedule):
 
 
 def run(args):
-    password = args.password
-    if password is None:
-        password = getpass.getpass("Password: ")
-
     # Set logging level based on user input, or error by default
     logging_level = getattr(logging, args.logging_level.upper())
     logging.basicConfig(level=logging_level)
 
     # Step 1: Sign in to server.
-    tableau_auth = TSC.TableauAuth(args.username, password)
+    tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
     server = TSC.Server(args.server, use_server_version=True)
-
     with server.auth.sign_in(tableau_auth):
         if args.workbook:
             item = get_workbook_by_name(server, args.workbook)

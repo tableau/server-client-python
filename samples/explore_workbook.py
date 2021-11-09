@@ -10,7 +10,6 @@
 ####
 
 import argparse
-import getpass
 import logging
 import os.path
 
@@ -20,33 +19,34 @@ import tableauserverclient as TSC
 def main():
 
     parser = argparse.ArgumentParser(description='Explore workbook functions supported by the Server API.')
+    # Common options; please keep those in sync across all samples
     parser.add_argument('--server', '-s', required=True, help='server address')
-    parser.add_argument('--username', '-u', required=True, help='username to sign into server')
-    parser.add_argument('--publish', '-p', metavar='FILEPATH', help='path to workbook to publish')
-    parser.add_argument('--download', '-d', metavar='FILEPATH', help='path to save downloaded workbook')
-    parser.add_argument('--preview-image', '-i', metavar='FILENAME',
-                        help='filename (a .png file) to save the preview image')
+    parser.add_argument('--site', '-S', help='site name')
+    parser.add_argument('--token-name', '-p', required=True,
+                        help='name of the personal access token used to sign into the server')
+    parser.add_argument('--token-value', '-v', required=True,
+                        help='value of the personal access token used to sign into the server')
     parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
                         help='desired logging level (set to error by default)')
+    # Options specific to this sample
+    parser.add_argument('--publish', metavar='FILEPATH', help='path to workbook to publish')
+    parser.add_argument('--download', metavar='FILEPATH', help='path to save downloaded workbook')
+    parser.add_argument('--preview-image', '-i', metavar='FILENAME',
+                        help='filename (a .png file) to save the preview image')
 
     args = parser.parse_args()
-
-    password = getpass.getpass("Password: ")
 
     # Set logging level based on user input, or error by default
     logging_level = getattr(logging, args.logging_level.upper())
     logging.basicConfig(level=logging_level)
 
     # SIGN IN
-    tableau_auth = TSC.TableauAuth(args.username, password)
-    server = TSC.Server(args.server)
-    server.use_highest_version()
-
-    overwrite_true = TSC.Server.PublishMode.Overwrite
-
+    tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
+    server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
 
         # Publish workbook if publish flag is set (-publish, -p)
+        overwrite_true = TSC.Server.PublishMode.Overwrite
         if args.publish:
             all_projects, pagination_item = server.projects.get()
             default_project = next((project for project in all_projects if project.is_default()), None)

@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api https://help.tableau.com/samples/en-us/rest_api/ts-api_3_14.xsd">
+    <job id="777bf7c4-421d-4b2c-a518-11b90187c545" mode="Asynchronous" type="UpdateUploadedFile" progress="100" createdAt="2021-10-05T18:53:34Z" startedAt="2021-10-05T18:53:34Z" completedAt="2021-10-05T18:53:35Z" finishCode="1">
+        <updateUploadedFileJob>
+            <datasource id="03b9fbec-81f6-4160-ae49-5f9f6d412758" name="World Indicators"/>
+            <connectionLuid>c569ee62-9204-416f-843d-5ccfebc0231b</connectionLuid>
+        </updateUploadedFileJob>
+    </job>
+</tsResponse>

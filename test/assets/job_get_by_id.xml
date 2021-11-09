@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.1.xsd">
+    <job id="2eef4225-aa0c-41c4-8662-a76d89ed7336" mode="job-mode" type="extractRefreshJob"     
+         progress="100"     createdAt="2020-05-13T20:23:45Z"     updatedAt="2020-05-13T20:25:18Z"     
+         completedAt="2020-05-13T20:25:18Z"     finishCode="0">     
+      <extractRefreshJob>       
+        <notes>Job detail notes</notes>     
+      </extractRefreshJob>         
+      <statusNotes>       
+        <statusNote type="CountOfUsersAddedToGroup" value="5" text="Description of how many users were added to the group during the import." />More detail
+      </statusNotes>   
+    </job>
+</tsResponse>

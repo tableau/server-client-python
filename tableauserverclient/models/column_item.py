@@ -1,7 +1,6 @@
 import xml.etree.ElementTree as ET
 
-from .property_decorators import property_is_enum, property_not_empty
-from .exceptions import UnpopulatedPropertyError
+from .property_decorators import property_not_empty
 
 
 class ColumnItem(object):
@@ -49,7 +48,7 @@ class ColumnItem(object):
     def from_response(cls, resp, ns):
         all_column_items = list()
         parsed_response = ET.fromstring(resp)
-        all_column_xml = parsed_response.findall('.//t:column', namespaces=ns)
+        all_column_xml = parsed_response.findall(".//t:column", namespaces=ns)
 
         for column_xml in all_column_xml:
             (id, name, description, remote_type) = cls._parse_element(column_xml, ns)
@@ -61,9 +60,9 @@ class ColumnItem(object):
 
     @staticmethod
     def _parse_element(column_xml, ns):
-        id = column_xml.get('id', None)
-        name = column_xml.get('name', None)
-        description = column_xml.get('description', None)
-        remote_type = column_xml.get('remoteType', None)
+        id = column_xml.get("id", None)
+        name = column_xml.get("name", None)
+        description = column_xml.get("description", None)
+        remote_type = column_xml.get("remoteType", None)
 
         return id, name, description, remote_type
