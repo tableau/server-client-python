@@ -77,4 +77,8 @@ black --line-length 120 tableauserverclient --check
 
 # this will format the directory and code for you
 black --line-length 120 tableauserverclient
+
+# this will run type checking
+pip install mypy
+mypy --show-error-codes --disable-error-code misc --disable-error-code import tableauserverclient test
 ```

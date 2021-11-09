@@ -857,8 +857,9 @@ class WorkbookRequest(object):
             for connection in connections:
                 _add_connections_element(connections_element, connection)
 
-        if hidden_views is not None:       
+        if hidden_views is not None:
             import warnings
+
             warnings.simplefilter("always", DeprecationWarning)
             warnings.warn(
                 "the hidden_views parameter should now be set on the workbook directly",
