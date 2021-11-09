@@ -306,7 +306,6 @@ class Workbooks(QuerysetEndpoint):
         connection_credentials: Optional["ConnectionCredentials"] = None,
         connections: Optional[Sequence[ConnectionItem]] = None,
         as_job: bool = False,
-        hidden_views: Optional[Sequence[str]] = None,
         skip_connection_check: bool = False,
     ):
 
@@ -388,7 +387,6 @@ class Workbooks(QuerysetEndpoint):
                 workbook_item,
                 connection_credentials=conn_creds,
                 connections=connections,
-                hidden_views=hidden_views,
             )
         else:
             logger.info("Publishing {0} to server".format(filename))
@@ -410,7 +408,6 @@ class Workbooks(QuerysetEndpoint):
                 file_contents,
                 connection_credentials=conn_creds,
                 connections=connections,
-                hidden_views=hidden_views,
             )
         logger.debug("Request xml: {0} ".format(xml_request[:1000]))
 
