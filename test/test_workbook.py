@@ -805,3 +805,13 @@ class WorkbookTests(unittest.TestCase):
         self.assertIsNone(revisions[1].user_id)
         self.assertEqual("Cassie", revisions[2].user_name)
         self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", revisions[2].user_id)
+
+    def test_delete_revision(self):
+        self.baseurl = self.server.workbooks.baseurl
+        workbook = TSC.WorkbookItem('project', 'test')
+        workbook._id = '06b944d2-959d-4604-9305-12323c95e70e'
+
+        with requests_mock.mock() as m:
+            m.delete("{0}/{1}/revisions/3".format(self.baseurl, workbook.id))
+            self.server.workbooks.delete_revision(workbook.id, "3")
+
