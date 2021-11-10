@@ -465,3 +465,13 @@ class Datasources(QuerysetEndpoint):
             )
         )
         return os.path.abspath(download_path)
+
+    @api(version="2.3")
+    def delete_revision(self, datasource_id: str, revision_number: str) -> None:
+        if datasource_id is None or revision_number is None:
+            raise ValueError
+        url = "/".join([self.baseurl, datasource_id, "revision", revision_number])
+
+        self.delete_request(url)
+        logger.info("Deleted single workbook revsision (ID: {0}) (Revision: {1})".format(datasource_id, revision_number))
+
