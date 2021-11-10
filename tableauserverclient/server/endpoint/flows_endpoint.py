@@ -13,7 +13,7 @@ import copy
 import cgi
 from contextlib import closing
 
-from typing import List, Optional, TYPE_CHECKING, Tuple, Union
+from typing import Iterable, List, Optional, TYPE_CHECKING, Tuple, Union
 
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
@@ -220,7 +220,7 @@ class Flows(Endpoint):
         self._permissions.update(item, permission_item)
 
     @api(version="3.3")
-    def update_permissions(self, item: FlowItem, permission_item: Union["PermissionsRule", List["PermissionsRule"]]) -> None:
+    def update_permissions(self, item: FlowItem, permission_item: Iterable["PermissionsRule"]) -> None:
         self._permissions.update(item, permission_item)
 
     @api(version="3.3")
