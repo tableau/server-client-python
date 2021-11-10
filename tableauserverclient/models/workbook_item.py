@@ -40,7 +40,7 @@ class WorkbookItem(object):
         self.owner_id: Optional[str] = None
         self.project_id = project_id
         self.show_tabs = show_tabs
-        self.hidden_views = None
+        self.hidden_views: Optional[List[str]] = None
         self.tags: Set[str] = set()
         self.data_acceleration_config = {
             "acceleration_enabled": None,
