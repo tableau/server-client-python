@@ -6,6 +6,7 @@ import requests_mock
 import tableauserverclient as TSC
 import xml.etree.ElementTree as ET
 from pathlib import Path
+import tempfile
 
 from tableauserverclient.datetime_helpers import format_datetime
 from tableauserverclient.server.endpoint.exceptions import InternalServerError
@@ -806,7 +807,7 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual("Cassie", revisions[2].user_name)
         self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", revisions[2].user_id)
 
-    def test_delete_revision(self):
+    def test_delete_revision(self) -> None:
         self.baseurl = self.server.workbooks.baseurl
         workbook = TSC.WorkbookItem('project', 'test')
         workbook._id = '06b944d2-959d-4604-9305-12323c95e70e'
@@ -814,4 +815,11 @@ class WorkbookTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.delete("{0}/{1}/revisions/3".format(self.baseurl, workbook.id))
             self.server.workbooks.delete_revision(workbook.id, "3")
+
+    def test_download_revision(self) -> None:
+        with requests_mock.mock() as m, tempfile.TemporaryDirectory() as td:
+            m.get(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/revisions/3/content',
+                  headers={'Content-Disposition': 'name="tableau_datasource"; filename="Sample datasource.tds"'})
+            file_path = self.server.workbooks.download_revision('9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', "3", td)
+            self.assertTrue(os.path.exists(file_path))
 

@@ -5,6 +5,7 @@ import os
 import requests_mock
 import xml.etree.ElementTree as ET
 from zipfile import ZipFile
+import tempfile
 
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
@@ -603,7 +604,6 @@ class DatasourceTests(unittest.TestCase):
             self.server.datasources.create_extract('3cc6cd06-89ce-4fdc-b935-5294135d6d42', True)
 
     def test_revisions(self) -> None:
-        self.baseurl = self.server.datasources.baseurl
         datasource = TSC.DatasourceItem('project', 'test')
         datasource._id = '06b944d2-959d-4604-9305-12323c95e70e'
 
@@ -632,8 +632,7 @@ class DatasourceTests(unittest.TestCase):
         self.assertEqual("Cassie", revisions[2].user_name)
         self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", revisions[2].user_id)
 
-    def test_delete_revision(self):
-        self.baseurl = self.server.datasources.baseurl
+    def test_delete_revision(self) -> None:
         datasource = TSC.DatasourceItem('project', 'test')
         datasource._id = '06b944d2-959d-4604-9305-12323c95e70e'
 
@@ -641,4 +640,9 @@ class DatasourceTests(unittest.TestCase):
             m.delete("{0}/{1}/revisions/3".format(self.baseurl, datasource.id))
             self.server.datasources.delete_revision(datasource.id, "3")
 
-
+    def test_download_revision(self) -> None:
+        with requests_mock.mock() as m, tempfile.TemporaryDirectory() as td:
+            m.get(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/revisions/3/content',
+                  headers={'Content-Disposition': 'name="tableau_datasource"; filename="Sample datasource.tds"'})
+            file_path = self.server.datasources.download_revision('9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', "3", td)
+            self.assertTrue(os.path.exists(file_path))
