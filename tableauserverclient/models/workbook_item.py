@@ -31,6 +31,7 @@ class WorkbookItem(object):
         self._pdf = None
         self._preview_image = None
         self._project_name = None
+        self._revisions = None
         self._size = None
         self._updated_at = None
         self._views = None
@@ -155,6 +156,13 @@ class WorkbookItem(object):
     def data_acceleration_config(self, value):
         self._data_acceleration_config = value
 
+    @property
+    def revisions(self):
+        if self._revisions is None:
+            error = "Workbook item must be populated with revisions first."
+            raise UnpopulatedPropertyError(error)
+        return self._revisions()
+
     def _set_connections(self, connections):
         self._connections = connections
 
@@ -169,6 +177,9 @@ class WorkbookItem(object):
 
     def _set_preview_image(self, preview_image):
         self._preview_image = preview_image
+
+    def _set_revisions(self, revisions):
+        self._revisions = revisions
 
     def _parse_common_tags(self, workbook_xml, ns):
         if not isinstance(workbook_xml, ET.Element):
