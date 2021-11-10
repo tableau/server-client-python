@@ -220,7 +220,7 @@ class Flows(Endpoint):
         self._permissions.update(item, permission_item)
 
     @api(version="3.3")
-    def update_permissions(self, item: FlowItem, permission_item: "Permission") -> None:
+    def update_permissions(self, item: FlowItem, permission_item: "PermissionsRule") -> None:
         self._permissions.update(item, permission_item)
 
     @api(version="3.3")
