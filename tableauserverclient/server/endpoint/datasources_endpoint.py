@@ -393,6 +393,7 @@ class Datasources(QuerysetEndpoint):
         self._data_quality_warnings.clear(item)
 
     # Populate datasource item's revisions
+    @api(version="2.3")
     def populate_revisions(self, datasource_item: DatasourceItem) -> None:
         if not datasource_item.id:
             error = "Datasource item missing ID. Datasource must be retrieved from server first."
@@ -419,6 +420,7 @@ class Datasources(QuerysetEndpoint):
         return revisions
 
     # Download 1 datasource revision by revision number
+    @api(version="2.3")
     def download_revision(
         self,
         datasource_id: str,

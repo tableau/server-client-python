@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 from ..datetime_helpers import parse_datetime
-from typing import List, Mapping, Optional, TYPE_CHECKING, Type, Union
+from typing import List, Optional, TYPE_CHECKING, Type
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -13,6 +13,8 @@ class RevisionItem(object):
         self._current: Optional[bool] = None
         self._deleted: Optional[bool] = None
         self._created_at: Optional["datetime"] = None
+        self._user_id: Optional[str] = None
+        self._user_name: Optional[str] = None
 
     @property
     def resource_id(self) -> Optional[str]:
@@ -38,10 +40,18 @@ class RevisionItem(object):
     def created_at(self) -> Optional["datetime"]:
         return self._created_at
 
+    @property
+    def user_id(self) -> Optional[str]:
+        return self._user_id
+
+    @property
+    def user_name(self) -> Optional[str]:
+        return self._user_name
+
     def __repr__(self):
         return (
             "<RevisionItem# revisionNumber={_revision_number} "
-            "current={_current} deleted={_deleted}>".format(**self.__dict__)
+            "current={_current} deleted={_deleted} user={_user_id}>".format(**self.__dict__)
         )
 
     @classmethod
@@ -59,9 +69,12 @@ class RevisionItem(object):
             revision_item._resource_id = resource_item.id
             revision_item._resource_name = resource_item.name
             revision_item._revision_number = revision_xml.get("revisionNumber", None)
-            revision_item._current = string_to_bool(revision_xml.get("current", ""))
-            revision_item._deleted = string_to_bool(revision_xml.get("deleted", ""))
+            revision_item._current = string_to_bool(revision_xml.get("isCurrent", ""))
+            revision_item._deleted = string_to_bool(revision_xml.get("isDeleted", ""))
             revision_item._created_at = parse_datetime(revision_xml.get("createdAt", None))
+            for user in revision_xml.findall('.//t:user', namespaces=ns):
+                revision_item._user_id = user.get("id", None)
+                revision_item._user_name = user.get("name", None)
 
             all_revision_items.append(revision_item)
         return all_revision_items

@@ -430,6 +430,7 @@ class Workbooks(QuerysetEndpoint):
             return new_workbook
 
     # Populate workbook item's revisions
+    @api(version="2.3")
     def populate_revisions(self, workbook_item: WorkbookItem) -> None:
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
@@ -456,6 +457,7 @@ class Workbooks(QuerysetEndpoint):
         return revisions
 
     # Download 1 workbook revision by revision number
+    @api(version="2.3")
     def download_revision(
         self,
         workbook_id: str,
