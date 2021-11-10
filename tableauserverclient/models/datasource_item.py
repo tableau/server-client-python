@@ -37,6 +37,7 @@ class DatasourceItem(object):
         self._id: Optional[str] = None
         self._initial_tags: Set = set()
         self._project_name: Optional[str] = None
+        self._revisions = None
         self._updated_at = None
         self._use_remote_query_agent = None
         self._webpage_url = None
@@ -166,6 +167,13 @@ class DatasourceItem(object):
     def webpage_url(self) -> Optional[str]:
         return self._webpage_url
 
+    @property
+    def revisions(self):
+        if self._revisions is None:
+            error = "Datasource item must be populated with revisions first."
+            raise UnpopulatedPropertyError(error)
+        return self._revisions()
+
     def _set_connections(self, connections):
         self._connections = connections
 
@@ -174,6 +182,9 @@ class DatasourceItem(object):
 
     def _set_data_quality_warnings(self, dqws):
         self._data_quality_warnings = dqws
+
+    def _set_revisions(self, revisions):
+        self._revisions = revisions
 
     def _parse_common_elements(self, datasource_xml, ns):
         if not isinstance(datasource_xml, ET.Element):

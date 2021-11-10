@@ -391,3 +391,71 @@ class Datasources(QuerysetEndpoint):
     @api(version="3.5")
     def delete_dqw(self, item):
         self._data_quality_warnings.clear(item)
+
+    # Populate datasource item's revisions
+    def populate_revisions(self, datasource_item):
+        if not datasource_item.id:
+            error = "Datasource item missing ID. Datasource must be retrieved from server first."
+            raise MissingRequiredFieldError(error)
+
+        def revisions_fetcher():
+            return self._get_datasource_revisions(datasource_item)
+
+        datasource_item._set_revisions(revisions_fetcher)
+        logger.info(
+            "Populated revisions for datasource (ID: {0})".format(datasource_item.id)
+        )
+
+    def _get_datasource_revisions(self, datasource_item, req_options=None):
+        url = "{0}/{1}/revisions".format(self.baseurl, datasource_item.id)
+        server_response = self.get_request(url, req_options)
+        revisions = RevisionItem.from_response(
+            server_response.content, self.parent_srv.namespace, datasource_item
+        )
+        return revisions
+
+    # Download 1 datasource revision by revision number
+    def download_revision(
+        self,
+        datasource_id,
+        revision_number,
+        filepath=None,
+        include_extract=True,
+        no_extract=None,
+    ):
+        if not datasource_id:
+            error = "Datasource ID undefined."
+            raise ValueError(error)
+        url = "{0}/{1}/revisions/{2}/content".format(
+            self.baseurl, datasource_id, revision_number
+        )
+        if no_extract is False or no_extract is True:
+            import warnings
+
+            warnings.warn(
+                "no_extract is deprecated, use include_extract instead.",
+                DeprecationWarning,
+            )
+            include_extract = not no_extract
+
+        if not include_extract:
+            url += "?includeExtract=False"
+
+        with closing(
+            self.get_request(url, parameters={"stream": True})
+        ) as server_response:
+            _, params = cgi.parse_header(server_response.headers["Content-Disposition"])
+            filename = to_filename(os.path.basename(params["filename"]))
+
+            download_path = make_download_path(filepath, filename)
+
+            with open(download_path, "wb") as f:
+                for chunk in server_response.iter_content(1024):  # 1KB
+                    f.write(chunk)
+
+        logger.info(
+            "Downloaded datasource revision {0} to {1} (ID: {2})".format(
+                revision_number, download_path, datasource_id
+            )
+        )
+        return os.path.abspath(download_path)
