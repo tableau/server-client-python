@@ -22,6 +22,7 @@ POPULATE_PERMISSIONS_XML = 'datasource_populate_permissions.xml'
 PUBLISH_XML = 'datasource_publish.xml'
 PUBLISH_XML_ASYNC = 'datasource_publish_async.xml'
 REFRESH_XML = 'datasource_refresh.xml'
+REVISION_XML = 'datasource_revision.xml'
 UPDATE_XML = 'datasource_update.xml'
 UPDATE_HYPER_DATA_XML = 'datasource_data_update.xml'
 UPDATE_CONNECTION_XML = 'datasource_connection_update.xml'
@@ -600,3 +601,44 @@ class DatasourceTests(unittest.TestCase):
             m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/createExtract',
                    status_code=200, text=response_xml)
             self.server.datasources.create_extract('3cc6cd06-89ce-4fdc-b935-5294135d6d42', True)
+
+    def test_revisions(self) -> None:
+        self.baseurl = self.server.datasources.baseurl
+        datasource = TSC.DatasourceItem('project', 'test')
+        datasource._id = '06b944d2-959d-4604-9305-12323c95e70e'
+
+        response_xml = read_xml_asset(REVISION_XML)
+        with requests_mock.mock() as m:
+            m.get("{0}/{1}/revisions".format(self.baseurl, datasource.id), text=response_xml)
+            self.server.datasources.populate_revisions(datasource)
+            revisions = datasource.revisions
+
+        self.assertEqual(len(revisions), 3)
+        self.assertEqual("2016-07-26T20:34:56Z", format_datetime(revisions[0].created_at))
+        self.assertEqual("2016-07-27T20:34:56Z", format_datetime(revisions[1].created_at))
+        self.assertEqual("2016-07-28T20:34:56Z", format_datetime(revisions[2].created_at))
+
+        self.assertEqual(False, revisions[0].deleted)
+        self.assertEqual(False, revisions[0].current)
+        self.assertEqual(False, revisions[1].deleted)
+        self.assertEqual(False, revisions[1].current)
+        self.assertEqual(False, revisions[2].deleted)
+        self.assertEqual(True, revisions[2].current)
+
+        self.assertEqual("Cassie", revisions[0].user_name)
+        self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", revisions[0].user_id)
+        self.assertIsNone(revisions[1].user_name)
+        self.assertIsNone(revisions[1].user_id)
+        self.assertEqual("Cassie", revisions[2].user_name)
+        self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", revisions[2].user_id)
+
+    def test_delete_revision(self):
+        self.baseurl = self.server.datasources.baseurl
+        datasource = TSC.DatasourceItem('project', 'test')
+        datasource._id = '06b944d2-959d-4604-9305-12323c95e70e'
+
+        with requests_mock.mock() as m:
+            m.delete("{0}/{1}/revisions/3".format(self.baseurl, datasource.id))
+            self.server.datasources.delete_revision(datasource.id, "3")
+
+
