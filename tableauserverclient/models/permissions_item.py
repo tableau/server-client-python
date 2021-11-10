@@ -7,7 +7,7 @@ from .group_item import GroupItem
 
 logger = logging.getLogger("tableau.models.permissions_item")
 
-from typing import Dict, List, Mapping, Optional, TYPE_CHECKING
+from typing import Dict, List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .reference_item import ResourceReference
