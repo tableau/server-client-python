@@ -12,7 +12,7 @@ from ...filesys_helpers import (
     get_file_object_size,
 )
 from ...models.job_item import JobItem
-from ...models import ConnectionCredentials
+from ...models import ConnectionCredentials, RevisionItem
 
 import io
 import os
@@ -393,7 +393,7 @@ class Datasources(QuerysetEndpoint):
         self._data_quality_warnings.clear(item)
 
     # Populate datasource item's revisions
-    def populate_revisions(self, datasource_item):
+    def populate_revisions(self, datasource_item: DatasourceItem) -> None:
         if not datasource_item.id:
             error = "Datasource item missing ID. Datasource must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -406,7 +406,11 @@ class Datasources(QuerysetEndpoint):
             "Populated revisions for datasource (ID: {0})".format(datasource_item.id)
         )
 
-    def _get_datasource_revisions(self, datasource_item, req_options=None):
+    def _get_datasource_revisions(
+        self,
+        datasource_item: DatasourceItem,
+        req_options: Optional["RequestOptions"] = None
+    ) -> List[RevisionItem]:
         url = "{0}/{1}/revisions".format(self.baseurl, datasource_item.id)
         server_response = self.get_request(url, req_options)
         revisions = RevisionItem.from_response(
@@ -417,12 +421,12 @@ class Datasources(QuerysetEndpoint):
     # Download 1 datasource revision by revision number
     def download_revision(
         self,
-        datasource_id,
-        revision_number,
-        filepath=None,
-        include_extract=True,
-        no_extract=None,
-    ):
+        datasource_id: str,
+        revision_number: str,
+        filepath: Optional[PathOrFile] = None,
+        include_extract: bool = True,
+        no_extract: Optional[bool] = None,
+    ) -> str:
         if not datasource_id:
             error = "Datasource ID undefined."
             raise ValueError(error)

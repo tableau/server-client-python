@@ -12,12 +12,13 @@ from ..datetime_helpers import parse_datetime
 import copy
 import uuid
 
-from typing import Dict, List, Optional, Set, TYPE_CHECKING, Union
+from typing import Dict, List, Optional, Set, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .connection_item import ConnectionItem
     from .permissions_item import PermissionsRule
     import datetime
+    from .revision_item import RevisionItem
 
 
 class WorkbookItem(object):
@@ -40,7 +41,7 @@ class WorkbookItem(object):
         self.owner_id: Optional[str] = None
         self.project_id = project_id
         self.show_tabs = show_tabs
-        self.hidden_views = None
+        self.hidden_views: Optional[List[str]] = None
         self.tags: Set[str] = set()
         self.data_acceleration_config = {
             "acceleration_enabled": None,
@@ -157,7 +158,7 @@ class WorkbookItem(object):
         self._data_acceleration_config = value
 
     @property
-    def revisions(self):
+    def revisions(self) -> List["RevisionItem"]:
         if self._revisions is None:
             error = "Workbook item must be populated with revisions first."
             raise UnpopulatedPropertyError(error)
