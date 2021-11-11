@@ -4,6 +4,7 @@ from .permissions_endpoint import _PermissionsEndpoint
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, WorkbookItem, ConnectionItem, ViewItem, PaginationItem
 from ...models.job_item import JobItem
+from ...models.revision_item import RevisionItem
 from ...filesys_helpers import (
     to_filename,
     make_download_path,
@@ -429,7 +430,8 @@ class Workbooks(QuerysetEndpoint):
             return new_workbook
 
     # Populate workbook item's revisions
-    def populate_revisions(self, workbook_item):
+    @api(version="2.3")
+    def populate_revisions(self, workbook_item: WorkbookItem) -> None:
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -442,7 +444,11 @@ class Workbooks(QuerysetEndpoint):
             "Populated revisions for workbook (ID: {0})".format(workbook_item.id)
         )
 
-    def _get_workbook_revisions(self, workbook_item, req_options=None):
+    def _get_workbook_revisions(
+        self,
+        workbook_item: WorkbookItem,
+        req_options: Optional["RequestOptions"]=None
+    ) -> List[RevisionItem]:
         url = "{0}/{1}/revisions".format(self.baseurl, workbook_item.id)
         server_response = self.get_request(url, req_options)
         revisions = RevisionItem.from_response(
@@ -451,14 +457,15 @@ class Workbooks(QuerysetEndpoint):
         return revisions
 
     # Download 1 workbook revision by revision number
+    @api(version="2.3")
     def download_revision(
         self,
-        workbook_id,
-        revision_number,
-        filepath=None,
-        include_extract=True,
-        no_extract=None,
-    ):
+        workbook_id: str,
+        revision_number: str,
+        filepath: Optional[PathOrFile] = None,
+        include_extract: bool = True,
+        no_extract: Optional[bool] = None,
+    ) -> str:
         if not workbook_id:
             error = "Workbook ID undefined."
             raise ValueError(error)
@@ -495,3 +502,12 @@ class Workbooks(QuerysetEndpoint):
             )
         )
         return os.path.abspath(download_path)
+
+    @api(version="2.3")
+    def delete_revision(self, workbook_id: str, revision_number: str) -> None:
+        if workbook_id is None or revision_number is None:
+            raise ValueError
+        url = "/".join([self.baseurl, workbook_id, "revisions", revision_number])
+
+        self.delete_request(url)
+        logger.info("Deleted single workbook revsision (ID: {0}) (Revision: {1})".format(workbook_id, revision_number))
