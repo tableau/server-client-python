@@ -503,7 +503,7 @@ class Workbooks(QuerysetEndpoint):
         )
         return os.path.abspath(download_path)
 
-    @api(version="2.0")
+    @api(version="2.3")
     def delete_revision(self, workbook_id: str, revision_number: str) -> None:
         if workbook_id is None or revision_number is None:
             raise ValueError
