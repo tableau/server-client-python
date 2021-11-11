@@ -24,6 +24,7 @@ from typing import Dict, List, Optional, Set, Tuple, TYPE_CHECKING, Union
 if TYPE_CHECKING:
     from .permissions_item import PermissionsRule
     from .connection_item import ConnectionItem
+    from .revision_item import RevisionItem
     import datetime
 
 
