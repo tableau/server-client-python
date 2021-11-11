@@ -56,7 +56,7 @@ class RevisionItem(object):
 
     @classmethod
     def from_response(
-        cls: Type["RevisionItem"],
+        cls,
         resp: bytes,
         ns,
         resource_item
