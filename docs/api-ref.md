@@ -3915,6 +3915,8 @@ users.populate_groups(user_item, req_options=None):
 
 Returns the groups that the user belongs to.
 
+REST API: [Get Groups for a User](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_users_and_groups.htm#get_groups_for_a_user)
+
 **Parameters**
 
 Name   |  Description
@@ -3968,10 +3970,9 @@ users.populate_workbooks(user_item, req_options=None):
 
 Returns information about the workbooks that the specified user owns and has Read (view) permissions for.
 
-
 This method retrieves the workbook information for the specified user. The REST API is designed to return only the information you ask for explicitly. When you query for all the users, the workbook information for each user is not included. Use this method to retrieve information about the workbooks that the user owns or has Read (view) permissions. The method adds the list of workbooks to the user item object (`user_item.workbooks`).
 
-REST API:  [Query Datasource Connections](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_data_source_connections)
+REST API: [Query Workbooks for User](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#query_workbooks_for_user)
 
 **Parameters**
 
