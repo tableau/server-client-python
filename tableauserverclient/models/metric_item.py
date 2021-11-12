@@ -162,14 +162,14 @@ class MetricItem(object):
             for view in metric_xml.findall('.//t:underlyingView', namespaces=ns):
                 metric_item._view_id = view.get("id", None)
 
-            tags = None
+            tags = set()
             tags_elem = metric_xml.find(".//t:tags", namespaces=ns)
             if tags_elem is not None:
                 all_tags = TagItem.from_xml_element(tags_elem, ns)
                 tags = all_tags
             
-            metric_item.tags = tags  # type: ignore[assignment]
-            metric_item._initial_tags = tags  # type: ignore[assignment]
+            metric_item.tags = tags
+            metric_item._initial_tags = tags
 
             all_metric_items.append(metric_item)
         return all_metric_items
