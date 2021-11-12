@@ -36,6 +36,7 @@ from .models import (
     PersonalAccessTokenAuth,
     FlowRunItem,
     RevisionItem,
+    MetricItem,
 )
 from .server import (
     RequestOptions,

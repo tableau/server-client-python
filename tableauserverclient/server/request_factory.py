@@ -1,8 +1,11 @@
+from os import name
 import xml.etree.ElementTree as ET
 
 from requests.packages.urllib3.fields import RequestField
 from requests.packages.urllib3.filepost import encode_multipart_formdata
 from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple, Iterable
+
+from tableauserverclient.models.metric_item import MetricItem
 
 from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteItem
 
@@ -1054,6 +1057,26 @@ class WebhookRequest(object):
         return ET.tostring(xml_request)
 
 
+class MetricRequest:
+    @_tsrequest_wrapped
+    def update_req(self, xml_request: ET.Element, metric_item: MetricItem) -> bytes:
+        metric_element = ET.SubElement(xml_request, "metric")
+        if metric_item.id is not None:
+            metric_element.attrib["id"] = metric_item.id
+        if metric_item.name is not None:
+            metric_element.attrib["name"] = metric_item.name
+        if metric_item.description is not None:
+            metric_element.attrib["description"] = metric_item.description
+        if metric_item.suspended is not None:
+            metric_element.attrib["suspended"] = str(metric_item.suspended).lower()
+        if metric_item.project_id is not None:
+            ET.SubElement(metric_element, "project", {"id": metric_item.project_id})
+        if metric_item.owner_id is not None:
+            ET.SubElement(metric_element, "owner", {"id": metric_item.owner_id})
+
+        return ET.tostring(xml_request)
+
+
 class RequestFactory(object):
     Auth = AuthRequest()
     Connection = Connection()
@@ -1067,6 +1090,7 @@ class RequestFactory(object):
     Fileupload = FileuploadRequest()
     Flow = FlowRequest()
     Group = GroupRequest()
+    Metric = MetricRequest()
     Permission = PermissionRequest()
     Project = ProjectRequest()
     Schedule = ScheduleRequest()
