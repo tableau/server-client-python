@@ -132,7 +132,7 @@ class MetricItem(object):
 
 
     def __repr__(self):
-        return "<MetricItem# name={_name} id={_id} owner_id={_owner_id}".format(**self.__dict__)
+        return "<MetricItem# name={_name} id={_id} owner_id={_owner_id}>".format(**self.__dict__)
 
     @classmethod
     def from_response(
