@@ -632,7 +632,7 @@ class DatasourceTests(unittest.TestCase):
 
         response_xml = read_xml_asset(PUBLISH_XML_ASYNC)
         with requests_mock.mock() as m:
-            m.post(
+            m.posta(
                 self.baseurl + "/3cc6cd06-89ce-4fdc-b935-5294135d6d42/createExtract", status_code=200, text=response_xml
             )
             self.server.datasources.create_extract("3cc6cd06-89ce-4fdc-b935-5294135d6d42", True)

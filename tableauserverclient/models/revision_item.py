@@ -5,7 +5,6 @@ from typing import List, Optional, TYPE_CHECKING, Type
 if TYPE_CHECKING:
     from datetime import datetime
 
-
 class RevisionItem(object):
     def __init__(self):
         self._resource_id: Optional[str] = None
