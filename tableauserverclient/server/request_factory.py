@@ -250,6 +250,9 @@ class FavoriteRequest(object):
     def add_datasource_req(self, id_, name):
         return self._add_to_req(id_, FavoriteItem.Type.Datasource, name)
 
+    def add_flow_req(self, id_, name):
+        return self._add_to_req(id_, FavoriteItem.Type.Flow, name)
+
     def add_project_req(self, id_, name):
         return self._add_to_req(id_, FavoriteItem.Type.Project, name)
 

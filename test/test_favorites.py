@@ -16,7 +16,7 @@ ADD_FAVORITE_PROJECT_XML = 'favorites_add_project.xml'
 
 
 class FavoritesTests(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server = TSC.Server('http://test')
         self.server.version = '2.5'
 
@@ -28,7 +28,7 @@ class FavoritesTests(unittest.TestCase):
         self.user = TSC.UserItem('alice', TSC.UserItem.Roles.Viewer)
         self.user._id = 'dd2239f6-ddf1-4107-981a-4cf94e415794'
 
-    def test_get(self):
+    def test_get(self) -> None:
         response_xml = read_xml_asset(GET_FAVORITES_XML)
         with requests_mock.mock() as m:
             m.get('{0}/{1}'.format(self.baseurl, self.user.id),
@@ -50,7 +50,7 @@ class FavoritesTests(unittest.TestCase):
         self.assertEqual(datasource.id, 'e76a1461-3b1d-4588-bf1b-17551a879ad9')
         self.assertEqual(project.id, '1d0304cd-3796-429f-b815-7258370b9b74')
 
-    def test_add_favorite_workbook(self):
+    def test_add_favorite_workbook(self) -> None:
         response_xml = read_xml_asset(ADD_FAVORITE_WORKBOOK_XML)
         workbook = TSC.WorkbookItem('')
         workbook._id = '6d13b0ca-043d-4d42-8c9d-3f3313ea3a00'
@@ -60,7 +60,7 @@ class FavoritesTests(unittest.TestCase):
                   text=response_xml)
             self.server.favorites.add_favorite_workbook(self.user, workbook)
 
-    def test_add_favorite_view(self):
+    def test_add_favorite_view(self) -> None:
         response_xml = read_xml_asset(ADD_FAVORITE_VIEW_XML)
         view = TSC.ViewItem()
         view._id = 'd79634e1-6063-4ec9-95ff-50acbf609ff5'
@@ -70,7 +70,7 @@ class FavoritesTests(unittest.TestCase):
                   text=response_xml)
             self.server.favorites.add_favorite_view(self.user, view)
 
-    def test_add_favorite_datasource(self):
+    def test_add_favorite_datasource(self) -> None:
         response_xml = read_xml_asset(ADD_FAVORITE_DATASOURCE_XML)
         datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
         datasource._id = 'e76a1461-3b1d-4588-bf1b-17551a879ad9'
@@ -80,7 +80,7 @@ class FavoritesTests(unittest.TestCase):
                   text=response_xml)
             self.server.favorites.add_favorite_datasource(self.user, datasource)
 
-    def test_add_favorite_project(self):
+    def test_add_favorite_project(self) -> None:
         self.server.version = '3.1'
         baseurl = self.server.favorites.baseurl
         response_xml = read_xml_asset(ADD_FAVORITE_PROJECT_XML)
@@ -91,7 +91,7 @@ class FavoritesTests(unittest.TestCase):
                   text=response_xml)
             self.server.favorites.add_favorite_project(self.user, project)
 
-    def test_delete_favorite_workbook(self):
+    def test_delete_favorite_workbook(self) -> None:
         workbook = TSC.WorkbookItem('')
         workbook._id = '6d13b0ca-043d-4d42-8c9d-3f3313ea3a00'
         workbook.name = 'Superstore'
@@ -100,7 +100,7 @@ class FavoritesTests(unittest.TestCase):
                      workbook.id))
             self.server.favorites.delete_favorite_workbook(self.user, workbook)
 
-    def test_delete_favorite_view(self):
+    def test_delete_favorite_view(self) -> None:
         view = TSC.ViewItem()
         view._id = 'd79634e1-6063-4ec9-95ff-50acbf609ff5'
         view._name = 'ENDANGERED SAFARI'
@@ -109,7 +109,7 @@ class FavoritesTests(unittest.TestCase):
                      view.id))
             self.server.favorites.delete_favorite_view(self.user, view)
 
-    def test_delete_favorite_datasource(self):
+    def test_delete_favorite_datasource(self) -> None:
         datasource = TSC.DatasourceItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
         datasource._id = 'e76a1461-3b1d-4588-bf1b-17551a879ad9'
         datasource.name = 'SampleDS'
@@ -118,7 +118,7 @@ class FavoritesTests(unittest.TestCase):
                      datasource.id))
             self.server.favorites.delete_favorite_datasource(self.user, datasource)
 
-    def test_delete_favorite_project(self):
+    def test_delete_favorite_project(self) -> None:
         self.server.version = '3.1'
         baseurl = self.server.favorites.baseurl
         project = TSC.ProjectItem('Tableau')
