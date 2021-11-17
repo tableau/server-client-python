@@ -99,7 +99,7 @@ class DataAlertRequest(object):
         dataAlert_element = ET.SubElement(xml_request, "dataAlert")
         dataAlert_element.attrib["subject"] = alert_item.subject
         dataAlert_element.attrib["frequency"] = alert_item.frequency.lower()
-        dataAlert_element.attrib["public"] = alert_item.public
+        dataAlert_element.attrib["public"] = str(alert_item.public).lower()
 
         owner = ET.SubElement(dataAlert_element, "owner")
         owner.attrib["id"] = alert_item.owner_id
