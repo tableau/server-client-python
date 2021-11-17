@@ -5,6 +5,11 @@ from requests.packages.urllib3.filepost import encode_multipart_formdata
 
 from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteItem
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..models import SubscriptionItem
+
 
 def _add_multipart(parts):
     mime_multipart_parts = list()
@@ -895,7 +900,7 @@ class TaskRequest(object):
 
 class SubscriptionRequest(object):
     @_tsrequest_wrapped
-    def create_req(self, xml_request, subscription_item):
+    def create_req(self, xml_request: ET.Element, subscription_item: "SubscriptionItem") -> bytes:
         subscription_element = ET.SubElement(xml_request, "subscription")
 
         # Main attributes
@@ -928,7 +933,7 @@ class SubscriptionRequest(object):
         return ET.tostring(xml_request)
 
     @_tsrequest_wrapped
-    def update_req(self, xml_request, subscription_item):
+    def update_req(self, xml_request: ET.Element, subscription_item: "SubscriptionItem") -> bytes:
         subscription = ET.SubElement(xml_request, "subscription")
 
         # Main attributes

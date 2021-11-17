@@ -11,7 +11,7 @@ GET_XML_BY_ID = os.path.join(TEST_ASSET_DIR, "subscription_get_by_id.xml")
 
 
 class SubscriptionTests(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server = TSC.Server("http://test")
         self.server.version = '2.6'
 
@@ -21,7 +21,7 @@ class SubscriptionTests(unittest.TestCase):
 
         self.baseurl = self.server.subscriptions.baseurl
 
-    def test_get_subscriptions(self):
+    def test_get_subscriptions(self) -> None:
         with open(GET_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -59,7 +59,7 @@ class SubscriptionTests(unittest.TestCase):
         self.assertEqual('c0d5fc44-ad8c-4957-bec0-b70ed0f8df1e', subscription.user_id)
         self.assertEqual('3407cd38-7b39-4983-86a6-67a1506a5e3f', subscription.schedule_id)
 
-    def test_get_subscription_by_id(self):
+    def test_get_subscription_by_id(self) -> None:
         with open(GET_XML_BY_ID, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -73,7 +73,7 @@ class SubscriptionTests(unittest.TestCase):
         self.assertEqual('Not Found Alert', subscription.subject)
         self.assertEqual('7617c389-cdca-4940-a66e-69956fcebf3e', subscription.schedule_id)
 
-    def test_create_subscription(self):
+    def test_create_subscription(self) -> None:
         with open(CREATE_XML, 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
@@ -91,7 +91,7 @@ class SubscriptionTests(unittest.TestCase):
         self.assertEqual("4906c453-d5ec-4972-9ff4-789b629bdfa2", new_subscription.schedule_id)
         self.assertEqual("8d30c8de-0a5f-4bee-b266-c621b4f3eed0", new_subscription.user_id)
 
-    def test_delete_subscription(self):
+    def test_delete_subscription(self) -> None:
         with requests_mock.mock() as m:
             m.delete(self.baseurl + '/78e9318d-2d29-4d67-b60f-3f2f5fd89ecc', status_code=204)
             self.server.subscriptions.delete('78e9318d-2d29-4d67-b60f-3f2f5fd89ecc')
