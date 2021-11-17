@@ -17,7 +17,7 @@ UPDATE_DATASOURCE_DEFAULT_PERMISSIONS_XML = 'project_update_datasource_default_p
 
 
 class ProjectTests(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server = TSC.Server('http://test')
 
         # Fake signin
@@ -26,7 +26,7 @@ class ProjectTests(unittest.TestCase):
 
         self.baseurl = self.server.projects.baseurl
 
-    def test_get(self):
+    def test_get(self) -> None:
         with open(GET_XML, 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
@@ -54,19 +54,19 @@ class ProjectTests(unittest.TestCase):
         self.assertEqual('1d0304cd-3796-429f-b815-7258370b9b74', all_projects[2].parent_id)
         self.assertEqual('dd2239f6-ddf1-4107-981a-4cf94e415794', all_projects[2].owner_id)
 
-    def test_get_before_signin(self):
+    def test_get_before_signin(self) -> None:
         self.server._auth_token = None
         self.assertRaises(TSC.NotSignedInError, self.server.projects.get)
 
-    def test_delete(self):
+    def test_delete(self) -> None:
         with requests_mock.mock() as m:
             m.delete(self.baseurl + '/ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', status_code=204)
             self.server.projects.delete('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760')
 
-    def test_delete_missing_id(self):
+    def test_delete_missing_id(self) -> None:
         self.assertRaises(ValueError, self.server.projects.delete, '')
 
-    def test_update(self):
+    def test_update(self) -> None:
         with open(UPDATE_XML, 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
@@ -84,7 +84,7 @@ class ProjectTests(unittest.TestCase):
         self.assertEqual('LockedToProject', single_project.content_permissions)
         self.assertEqual('9a8f2265-70f3-4494-96c5-e5949d7a1120', single_project.parent_id)
 
-    def test_content_permission_locked_to_project_without_nested(self):
+    def test_content_permission_locked_to_project_without_nested(self) -> None:
         with open(SET_CONTENT_PERMISSIONS_XML, 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
@@ -101,7 +101,7 @@ class ProjectTests(unittest.TestCase):
         self.assertEqual('LockedToProjectWithoutNested', project_item.content_permissions)
         self.assertEqual('7687bc43-a543-42f3-b86f-80caed03a813', project_item.parent_id)
 
-    def test_update_datasource_default_permission(self):
+    def test_update_datasource_default_permission(self) -> None:
         response_xml = read_xml_asset(UPDATE_DATASOURCE_DEFAULT_PERMISSIONS_XML)
         with requests_mock.mock() as m:
             m.put(self.baseurl + '/b4065286-80f0-11ea-af1b-cb7191f48e45/default-permissions/datasources',
@@ -130,11 +130,11 @@ class ProjectTests(unittest.TestCase):
         self.assertEqual('Allow', updated_capabilities['Write'])
         self.assertEqual('Allow', updated_capabilities['Connect'])
 
-    def test_update_missing_id(self):
+    def test_update_missing_id(self) -> None:
         single_project = TSC.ProjectItem('test')
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.projects.update, single_project)
 
-    def test_create(self):
+    def test_create(self) -> None:
         with open(CREATE_XML, 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
@@ -150,10 +150,10 @@ class ProjectTests(unittest.TestCase):
         self.assertEqual('ManagedByOwner', new_project.content_permissions)
         self.assertEqual('9a8f2265-70f3-4494-96c5-e5949d7a1120', new_project.parent_id)
 
-    def test_create_missing_name(self):
+    def test_create_missing_name(self) -> None:
         self.assertRaises(ValueError, TSC.ProjectItem, '')
 
-    def test_populate_permissions(self):
+    def test_populate_permissions(self) -> None:
         with open(asset(POPULATE_PERMISSIONS_XML), 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
@@ -171,7 +171,7 @@ class ProjectTests(unittest.TestCase):
                 TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow,
             })
 
-    def test_populate_workbooks(self):
+    def test_populate_workbooks(self) -> None:
         response_xml = read_xml_asset(POPULATE_WORKBOOK_DEFAULT_PERMISSIONS_XML)
         with requests_mock.mock() as m:
             m.get(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/default-permissions/workbooks',
@@ -204,7 +204,7 @@ class ProjectTests(unittest.TestCase):
             TSC.Permission.Capability.ChangeHierarchy: TSC.Permission.Mode.Allow,
         })
 
-    def test_delete_permission(self):
+    def test_delete_permission(self) -> None:
         with open(asset(POPULATE_PERMISSIONS_XML), 'rb') as f:
             response_xml = f.read().decode('utf-8')
         with requests_mock.mock() as m:
@@ -236,7 +236,7 @@ class ProjectTests(unittest.TestCase):
             m.delete('{}/{}/Write/Allow'.format(self.baseurl, endpoint), status_code=204)
             self.server.projects.delete_permission(item=single_project, rules=rules)
 
-    def test_delete_workbook_default_permission(self):
+    def test_delete_workbook_default_permission(self) -> None:
         with open(asset(POPULATE_WORKBOOK_DEFAULT_PERMISSIONS_XML), 'rb') as f:
             response_xml = f.read().decode('utf-8')
 
