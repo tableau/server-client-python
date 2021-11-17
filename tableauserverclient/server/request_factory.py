@@ -5,6 +5,11 @@ from requests.packages.urllib3.filepost import encode_multipart_formdata
 
 from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteItem
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..models import SiteItem
+
 
 def _add_multipart(parts):
     mime_multipart_parts = list()
@@ -499,7 +504,7 @@ class ScheduleRequest(object):
 
 
 class SiteRequest(object):
-    def update_req(self, site_item):
+    def update_req(self, site_item: "SiteItem"):
         xml_request = ET.Element("tsRequest")
         site_element = ET.SubElement(xml_request, "site")
         if site_item.name:
@@ -605,7 +610,7 @@ class SiteRequest(object):
 
         return ET.tostring(xml_request)
 
-    def create_req(self, site_item):
+    def create_req(self, site_item: "SiteItem"):
         xml_request = ET.Element("tsRequest")
         site_element = ET.SubElement(xml_request, "site")
         site_element.attrib["name"] = site_item.name
