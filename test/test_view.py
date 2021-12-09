@@ -15,6 +15,7 @@ GET_XML_USAGE = os.path.join(TEST_ASSET_DIR, "view_get_usage.xml")
 POPULATE_PREVIEW_IMAGE = os.path.join(TEST_ASSET_DIR, "Sample View Image.png")
 POPULATE_PDF = os.path.join(TEST_ASSET_DIR, "populate_pdf.pdf")
 POPULATE_CSV = os.path.join(TEST_ASSET_DIR, "populate_csv.csv")
+POPULATE_EXCEL = os.path.join(TEST_ASSET_DIR, "populate_excel.xlsx")
 POPULATE_PERMISSIONS_XML = os.path.join(TEST_ASSET_DIR, "view_populate_permissions.xml")
 UPDATE_PERMISSIONS = os.path.join(TEST_ASSET_DIR, "view_update_permissions.xml")
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, "workbook_update.xml")
@@ -282,3 +283,18 @@ class ViewTests(unittest.TestCase):
 
         self.assertEqual(single_view.tags, updated_view.tags)
         self.assertEqual(single_view._initial_tags, updated_view._initial_tags)
+
+    def test_populate_excel(self) -> None:
+        self.server.version = "3.8"
+        self.baseurl = self.server.views.baseurl
+        with open(POPULATE_EXCEL, 'rb') as f:
+            response = f.read()
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + '/d79634e1-6063-4ec9-95ff-50acbf609ff5/crosstab/excel?maxAge=1', content=response)
+            single_view = TSC.ViewItem()
+            single_view._id = 'd79634e1-6063-4ec9-95ff-50acbf609ff5'
+            request_option = TSC.CSVRequestOptions(maxage=1)
+            self.server.views.populate_excel(single_view, request_option)
+
+            excel_file = b"".join(single_view.excel)
+            self.assertEqual(response, excel_file)
