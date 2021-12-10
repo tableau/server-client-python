@@ -5,6 +5,7 @@ from requests.packages.urllib3.filepost import encode_multipart_formdata
 
 from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteItem
 
+from typing import Optional
 
 def _add_multipart(parts):
     mime_multipart_parts = list()
@@ -474,7 +475,7 @@ class ScheduleRequest(object):
                     single_interval_element.attrib[expression] = value
         return ET.tostring(xml_request)
 
-    def _add_to_req(self, id_, target_type, task_type=TaskItem.Type.ExtractRefresh):
+    def _add_to_req(self, id_: Optional[str], target_type: str, task_type: str = TaskItem.Type.ExtractRefresh) -> bytes:
         """
         <task>
           <target_type>
@@ -483,6 +484,8 @@ class ScheduleRequest(object):
         </task>
 
         """
+        if not isinstance(id_, str):
+            raise ValueError(f"id_ should be a string, reeceived: {type(id_)}")
         xml_request = ET.Element("tsRequest")
         task_element = ET.SubElement(xml_request, "task")
         task = ET.SubElement(task_element, task_type)
@@ -491,10 +494,10 @@ class ScheduleRequest(object):
 
         return ET.tostring(xml_request)
 
-    def add_workbook_req(self, id_, task_type=TaskItem.Type.ExtractRefresh):
+    def add_workbook_req(self, id_: Optional[str], task_type: str = TaskItem.Type.ExtractRefresh) -> bytes:
         return self._add_to_req(id_, "workbook", task_type)
 
-    def add_datasource_req(self, id_, task_type=TaskItem.Type.ExtractRefresh):
+    def add_datasource_req(self, id_: Optional[str], task_type: str = TaskItem.Type.ExtractRefresh) -> bytes:
         return self._add_to_req(id_, "datasource", task_type)
 
 

@@ -23,7 +23,7 @@ DATASOURCE_GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, 'datasource_get_by_id.xm
 
 
 class ScheduleTests(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server = TSC.Server("http://test")
 
         # Fake Signin
@@ -32,7 +32,7 @@ class ScheduleTests(unittest.TestCase):
 
         self.baseurl = self.server.schedules.baseurl
 
-    def test_get(self):
+    def test_get(self) -> None:
         with open(GET_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -71,7 +71,7 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual("Flow", flow.schedule_type)
         self.assertEqual("2019-03-01T09:00:00Z", format_datetime(flow.next_run_at))
 
-    def test_get_empty(self):
+    def test_get_empty(self) -> None:
         with open(GET_EMPTY_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -81,12 +81,12 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual(0, pagination_item.total_available)
         self.assertEqual([], all_schedules)
 
-    def test_delete(self):
+    def test_delete(self) -> None:
         with requests_mock.mock() as m:
             m.delete(self.baseurl + "/c9cff7f9-309c-4361-99ff-d4ba8c9f5467", status_code=204)
             self.server.schedules.delete("c9cff7f9-309c-4361-99ff-d4ba8c9f5467")
 
-    def test_create_hourly(self):
+    def test_create_hourly(self) -> None:
         with open(CREATE_HOURLY_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -108,10 +108,10 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual("2016-09-16T01:30:00Z", format_datetime(new_schedule.next_run_at))
         self.assertEqual(TSC.ScheduleItem.ExecutionOrder.Parallel, new_schedule.execution_order)
         self.assertEqual(time(2, 30), new_schedule.interval_item.start_time)
-        self.assertEqual(time(23), new_schedule.interval_item.end_time)
-        self.assertEqual("8", new_schedule.interval_item.interval)
+        self.assertEqual(time(23), new_schedule.interval_item.end_time)  # type: ignore[union-attr]
+        self.assertEqual("8", new_schedule.interval_item.interval)  # type: ignore[union-attr]
 
-    def test_create_daily(self):
+    def test_create_daily(self) -> None:
         with open(CREATE_DAILY_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -132,7 +132,7 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual(TSC.ScheduleItem.ExecutionOrder.Serial, new_schedule.execution_order)
         self.assertEqual(time(4, 45), new_schedule.interval_item.start_time)
 
-    def test_create_weekly(self):
+    def test_create_weekly(self) -> None:
         with open(CREATE_WEEKLY_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -155,12 +155,12 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual(TSC.ScheduleItem.ExecutionOrder.Parallel, new_schedule.execution_order)
         self.assertEqual(time(9, 15), new_schedule.interval_item.start_time)
         self.assertEqual(("Monday", "Wednesday", "Friday"),
-                         new_schedule.interval_item.interval)
+                         new_schedule.interval_item.interval)  # type: ignore[union-attr]
         self.assertEqual(2, len(new_schedule.warnings))
         self.assertEqual("warning 1", new_schedule.warnings[0])
         self.assertEqual("warning 2", new_schedule.warnings[1])
 
-    def test_create_monthly(self):
+    def test_create_monthly(self) -> None:
         with open(CREATE_MONTHLY_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -180,9 +180,9 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual("2016-10-12T14:00:00Z", format_datetime(new_schedule.next_run_at))
         self.assertEqual(TSC.ScheduleItem.ExecutionOrder.Serial, new_schedule.execution_order)
         self.assertEqual(time(7), new_schedule.interval_item.start_time)
-        self.assertEqual("12", new_schedule.interval_item.interval)
+        self.assertEqual("12", new_schedule.interval_item.interval)  # type: ignore[union-attr]
 
-    def test_update(self):
+    def test_update(self) -> None:
         with open(UPDATE_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -204,11 +204,11 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual(TSC.ScheduleItem.ExecutionOrder.Parallel, single_schedule.execution_order)
         self.assertEqual(time(7), single_schedule.interval_item.start_time)
         self.assertEqual(("Monday", "Friday"),
-                         single_schedule.interval_item.interval)
+                         single_schedule.interval_item.interval)  # type: ignore[union-attr]
         self.assertEqual(TSC.ScheduleItem.State.Suspended, single_schedule.state)
 
     # Tests calling update with a schedule item returned from the server
-    def test_update_after_get(self):
+    def test_update_after_get(self) -> None:
         with open(GET_XML, "rb") as f:
             get_response_xml = f.read().decode("utf-8")
         with open(UPDATE_XML, "rb") as f:
@@ -232,7 +232,7 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual(TSC.ScheduleItem.State.Suspended, schedule_item.state)
         self.assertEqual('weekly-schedule-1', schedule_item.name)
 
-    def test_add_workbook(self):
+    def test_add_workbook(self) -> None:
         self.server.version = "2.8"
         baseurl = "{}/sites/{}/schedules".format(self.server.baseurl, self.server.site_id)
 
@@ -247,7 +247,7 @@ class ScheduleTests(unittest.TestCase):
             result = self.server.schedules.add_to_schedule('foo', workbook=workbook)
         self.assertEqual(0, len(result), "Added properly")
 
-    def test_add_workbook_with_warnings(self):
+    def test_add_workbook_with_warnings(self) -> None:
         self.server.version = "2.8"
         baseurl = "{}/sites/{}/schedules".format(self.server.baseurl, self.server.site_id)
 
@@ -263,7 +263,7 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual(1, len(result), "Not added properly")
         self.assertEqual(2, len(result[0].warnings))
 
-    def test_add_datasource(self):
+    def test_add_datasource(self) -> None:
         self.server.version = "2.8"
         baseurl = "{}/sites/{}/schedules".format(self.server.baseurl, self.server.site_id)
 
