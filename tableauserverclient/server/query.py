@@ -90,7 +90,9 @@ class QuerySet:
         self._fetch_all()
         return self._pagination_item.page_size
 
-    def filter(self, **kwargs):
+    def filter(self, *invalid, **kwargs):
+        if invalid:
+            raise ValueError(f"Only accepts keyword arguments.")
         for kwarg_key, value in kwargs.items():
             field_name, operator = self._parse_shorthand_filter(kwarg_key)
             self.request_options.filter.add(Filter(field_name, operator, value))
