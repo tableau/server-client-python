@@ -271,3 +271,7 @@ class RequestOptionTests(unittest.TestCase):
 
         with self.assertRaises(IndexError):
             all_views[100]
+
+    def test_queryset_filter_args_error(self):
+        with self.assertRaises(RuntimeError):
+            workbooks = self.server.workbooks.filter("argument")
