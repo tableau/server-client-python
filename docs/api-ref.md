@@ -625,7 +625,7 @@ The `DatasourceItem` for the data source that was added or appended to.
 #### datasources.refresh
 
 ```py
-datasource.refresh(datasource_item)
+datasources.refresh(datasource_item)
 ```
 
 Refreshes the data of the specified extract.
