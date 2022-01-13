@@ -104,7 +104,7 @@ for workbook in all_workbooks:
 
 ### Direction criteria - Django style
 
-The field name cane be input as normal for ascending or prefixed with `-` for descending.
+The field name can be input as normal for ascending or prefixed with `-` for descending.
 
 ### Sorting example - Django style
 
