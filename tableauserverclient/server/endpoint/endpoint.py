@@ -12,7 +12,7 @@ import logging
 try:
     from distutils2.version import NormalizedVersion as Version
 except ImportError:
-    from distutils.version import LooseVersion as Version
+    from packaging.version import Version
 
 logger = logging.getLogger("tableau.endpoint")
 
