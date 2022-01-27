@@ -28,11 +28,11 @@ Name | Description
 TOKEN_NAME | The personal access token name (from the My Account settings page)
 TOKEN_VALUE | The personal access token value (from the My Account settings page)
 **Tableau Server** |
-SITENAME | The Tableau Server site you are authenticating with; for example in the site URL http://MyServer/#/site/MarketingTeam/projects, the site name is MarketingTeam; in the REST API documentation this field is also referred to as contentUrl; this value can be omitted to connect with the Default site on the server
-SERVER_URL | The Tableau Server you are authenticating with; if your server has SSL enabled, this should be an HTTPS link
+SITENAME | The Tableau Server site you are authenticating with. For example in the site URL http://MyServer/#/site/MarketingTeam/projects, the site name is MarketingTeam. In the REST API documentation, this field is also referred to as contentUrl. This value can be omitted to connect with the Default site on the server.
+SERVER_URL | The Tableau Server you are authenticating with. If your server has SSL enabled, this should be an HTTPS link.
 **Tableau Online** |
-SITENAME | The Tableau Online site you are authenticating with; for example in the site URL https://10ay.online.tableau.com/#/site/umbrellacorp816664/workbooks, the site name is umbrellacorp816664; in the REST API documentation this field is also referred to as contentUrl; this value is always required when connecting to Tableau Online
-SERVER_URL | The Tableau Online instance you are authenticating with; in the example above the server URL would be https://10ay.online.tableau.com; this will always be an an HTTPS link
+SITENAME | The Tableau Online site you are authenticating with. For example in the site URL https://10ay.online.tableau.com/#/site/umbrellacorp816664/workbooks, the site name is umbrellacorp816664. In the REST API documentation, this field is also referred to as contentUrl. This value is always required when connecting to Tableau Online.
+SERVER_URL | The Tableau Online instance you are authenticating with. In the example above the server URL would be https://10ay.online.tableau.com. This will always be an an HTTPS link.
 
 This example illustrates using the above values to sign in with a personal access token, do some operations, and then sign out:
 
@@ -72,6 +72,29 @@ server.auth.sign_in(tableau_auth)
 
 server.auth.sign_out()
 ```
+
+### Handling SSL certificates for Tableau Server
+
+If you're connecting to a Tableau Server instance that uses self-signed or non-public SSL certificates, you may need to provide those as part of the sign in process. An example of this could be an on-premise Tableau Server that is using internally-generated SSL certificates. You may see an error like `SSL: CERTIFICATE_VERIFY_FAILED` if you connect with a Tableau Server but don't have the SSL certificates configured correctly.
+
+The solution here is to call `server.add_http_options()` and include the local path containing the SSL certificate file:
+
+```py
+import tableauserverclient as TSC
+
+tableau_auth = TSC.PersonalAccessTokenAuth('TOKEN_NAME', 'TOKEN_VALUE', 'SITENAME')
+server = TSC.Server('https://SERVER_URL', use_server_version=True)
+server.add_http_options({'verify': '/path/to/certfile.pem'})
+server.auth.sign_in(tableau_auth)
+
+# Do awesome things here!
+
+server.auth.sign_out()
+```
+
+The TSC library uses the Python Requests library under the hood, so you can learn more about the `verify` option on the [Python Requests advanced usage](https://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification) documentation.
+
+You can also set `verify` to `False` to disable the SSL certificate verification step, but this is only useful for development and _should not be used for real production work_.
 
 ### 405000 Method Not Allowed Response
 
