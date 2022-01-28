@@ -31,7 +31,7 @@ class JobItem(object):
         finish_code: int = 0,
         notes: Optional[List[str]] = None,
         mode: Optional[str] = None,
-        flow_run: Optional[FlowRunItem] = None
+        flow_run: Optional[FlowRunItem] = None,
     ):
         self._id = id_
         self._type = job_type

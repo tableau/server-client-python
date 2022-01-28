@@ -13,19 +13,26 @@ import tableauserverclient as TSC
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Query permissions of a given resource.')
+    parser = argparse.ArgumentParser(description="Query permissions of a given resource.")
     # Common options; please keep those in sync across all samples
-    parser.add_argument('--server', '-s', required=True, help='server address')
-    parser.add_argument('--site', '-S', help='site name')
-    parser.add_argument('--token-name', '-p', required=True,
-                        help='name of the personal access token used to sign into the server')
-    parser.add_argument('--token-value', '-v', required=True,
-                        help='value of the personal access token used to sign into the server')
-    parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
-                        help='desired logging level (set to error by default)')
+    parser.add_argument("--server", "-s", required=True, help="server address")
+    parser.add_argument("--site", "-S", help="site name")
+    parser.add_argument(
+        "--token-name", "-p", required=True, help="name of the personal access token used to sign into the server"
+    )
+    parser.add_argument(
+        "--token-value", "-v", required=True, help="value of the personal access token used to sign into the server"
+    )
+    parser.add_argument(
+        "--logging-level",
+        "-l",
+        choices=["debug", "info", "error"],
+        default="error",
+        help="desired logging level (set to error by default)",
+    )
     # Options specific to this sample
-    parser.add_argument('resource_type', choices=['workbook', 'datasource', 'flow', 'table', 'database'])
-    parser.add_argument('resource_id')
+    parser.add_argument("resource_type", choices=["workbook", "datasource", "flow", "table", "database"])
+    parser.add_argument("resource_id")
 
     args = parser.parse_args()
 
@@ -40,11 +47,11 @@ def main():
 
         # Mapping to grab the handler for the user-inputted resource type
         endpoint = {
-            'workbook': server.workbooks,
-            'datasource': server.datasources,
-            'flow': server.flows,
-            'table': server.tables,
-            'database': server.databases
+            "workbook": server.workbooks,
+            "datasource": server.datasources,
+            "flow": server.flows,
+            "table": server.tables,
+            "database": server.databases,
         }.get(args.resource_type)
 
         # Get the resource by its ID
@@ -55,8 +62,9 @@ def main():
         permissions = resource.permissions
 
         # Print result
-        print("\n{0} permission rule(s) found for {1} {2}."
-              .format(len(permissions), args.resource_type, args.resource_id))
+        print(
+            "\n{0} permission rule(s) found for {1} {2}.".format(len(permissions), args.resource_type, args.resource_id)
+        )
 
         for permission in permissions:
             grantee = permission.grantee
@@ -67,5 +75,5 @@ def main():
                 print("\t{0} - {1}".format(capability, capabilities[capability]))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
