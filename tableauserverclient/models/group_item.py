@@ -4,78 +4,83 @@ from .property_decorators import property_not_empty, property_is_enum
 from .reference_item import ResourceReference
 from .user_item import UserItem
 
+from typing import Callable, List, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..server import Pager
+
 
 class GroupItem(object):
 
-    tag_name = "group"
+    tag_name: str = "group"
 
     class LicenseMode:
-        onLogin = "onLogin"
-        onSync = "onSync"
+        onLogin: str = "onLogin"
+        onSync: str = "onSync"
 
-    def __init__(self, name=None, domain_name=None):
-        self._id = None
-        self._license_mode = None
-        self._minimum_site_role = None
-        self._users = None
-        self.name = name
-        self.domain_name = domain_name
+    def __init__(self, name=None, domain_name=None) -> None:
+        self._id: Optional[str] = None
+        self._license_mode: Optional[str] = None
+        self._minimum_site_role: Optional[str] = None
+        self._users: Optional[Callable[..., "Pager"]] = None
+        self.name: Optional[str] = name
+        self.domain_name: Optional[str] = domain_name
 
     @property
-    def domain_name(self):
+    def domain_name(self) -> Optional[str]:
         return self._domain_name
 
     @domain_name.setter
-    def domain_name(self, value):
+    def domain_name(self, value: str) -> None:
         self._domain_name = value
 
     @property
-    def id(self):
+    def id(self) -> Optional[str]:
         return self._id
 
     @property
-    def name(self):
+    def name(self) -> Optional[str]:
         return self._name
 
     @name.setter
     @property_not_empty
-    def name(self, value):
+    def name(self, value: str) -> None:
         self._name = value
 
     @property
-    def license_mode(self):
+    def license_mode(self) -> Optional[str]:
         return self._license_mode
 
     @license_mode.setter
     @property_is_enum(LicenseMode)
-    def license_mode(self, value):
+    def license_mode(self, value: str) -> None:
         self._license_mode = value
 
     @property
-    def minimum_site_role(self):
+    def minimum_site_role(self) -> Optional[str]:
         return self._minimum_site_role
 
     @minimum_site_role.setter
     @property_is_enum(UserItem.Roles)
-    def minimum_site_role(self, value):
+    def minimum_site_role(self, value: str) -> None:
         self._minimum_site_role = value
 
     @property
-    def users(self):
+    def users(self) -> "Pager":
         if self._users is None:
             error = "Group must be populated with users first."
             raise UnpopulatedPropertyError(error)
         #  Each call to `.users` should create a new pager, this just runs the callable
         return self._users()
 
-    def to_reference(self):
+    def to_reference(self) -> ResourceReference:
         return ResourceReference(id_=self.id, tag_name=self.tag_name)
 
-    def _set_users(self, users):
+    def _set_users(self, users: Callable[..., "Pager"]) -> None:
         self._users = users
 
     @classmethod
-    def from_response(cls, resp, ns):
+    def from_response(cls, resp, ns) -> List["GroupItem"]:
         all_group_items = list()
         parsed_response = ET.fromstring(resp)
         all_group_xml = parsed_response.findall(".//t:group", namespaces=ns)
@@ -100,5 +105,5 @@ class GroupItem(object):
         return all_group_items
 
     @staticmethod
-    def as_reference(id_):
+    def as_reference(id_: str) -> ResourceReference:
         return ResourceReference(id_, GroupItem.tag_name)

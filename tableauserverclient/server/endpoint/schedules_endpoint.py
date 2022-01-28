@@ -4,24 +4,29 @@ from .. import RequestFactory, PaginationItem, ScheduleItem, TaskItem
 import logging
 import copy
 from collections import namedtuple
+from typing import TYPE_CHECKING, Callable, List, Optional, Tuple, Union
 
 logger = logging.getLogger("tableau.endpoint.schedules")
 # Oh to have a first class Result concept in Python...
 AddResponse = namedtuple("AddResponse", ("result", "error", "warnings", "task_created"))
 OK = AddResponse(result=True, error=None, warnings=None, task_created=None)
 
+if TYPE_CHECKING:
+    from ..request_options import RequestOptions
+    from ...models import DatasourceItem, WorkbookItem
+
 
 class Schedules(Endpoint):
     @property
-    def baseurl(self):
+    def baseurl(self) -> str:
         return "{0}/schedules".format(self.parent_srv.baseurl)
 
     @property
-    def siteurl(self):
+    def siteurl(self) -> str:
         return "{0}/sites/{1}/schedules".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     @api(version="2.3")
-    def get(self, req_options=None):
+    def get(self, req_options: Optional["RequestOptions"] = None) -> Tuple[List[ScheduleItem], PaginationItem]:
         logger.info("Querying all schedules")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -30,7 +35,7 @@ class Schedules(Endpoint):
         return all_schedule_items, pagination_item
 
     @api(version="2.3")
-    def delete(self, schedule_id):
+    def delete(self, schedule_id: str) -> None:
         if not schedule_id:
             error = "Schedule ID undefined"
             raise ValueError(error)
@@ -39,7 +44,7 @@ class Schedules(Endpoint):
         logger.info("Deleted single schedule (ID: {0})".format(schedule_id))
 
     @api(version="2.3")
-    def update(self, schedule_item):
+    def update(self, schedule_item: ScheduleItem) -> ScheduleItem:
         if not schedule_item.id:
             error = "Schedule item missing ID."
             raise MissingRequiredFieldError(error)
@@ -52,7 +57,7 @@ class Schedules(Endpoint):
         return updated_schedule._parse_common_tags(server_response.content, self.parent_srv.namespace)
 
     @api(version="2.3")
-    def create(self, schedule_item):
+    def create(self, schedule_item: ScheduleItem) -> ScheduleItem:
         if schedule_item.interval_item is None:
             error = "Interval item must be defined."
             raise MissingRequiredFieldError(error)
@@ -67,15 +72,25 @@ class Schedules(Endpoint):
     @api(version="2.8")
     def add_to_schedule(
         self,
-        schedule_id,
-        workbook=None,
-        datasource=None,
-        task_type=TaskItem.Type.ExtractRefresh,
-    ):
-        def add_to(resource, type_, req_factory):
+        schedule_id: str,
+        workbook: "WorkbookItem" = None,
+        datasource: "DatasourceItem" = None,
+        task_type: str = TaskItem.Type.ExtractRefresh,
+    ) -> List[AddResponse]:
+        def add_to(
+            resource: Union["DatasourceItem", "WorkbookItem"],
+            type_: str,
+            req_factory: Callable[
+                [
+                    str,
+                    str,
+                ],
+                bytes,
+            ],
+        ) -> AddResponse:
             id_ = resource.id
             url = "{0}/{1}/{2}s".format(self.siteurl, schedule_id, type_)
-            add_req = req_factory(id_, task_type=task_type)
+            add_req = req_factory(id_, task_type=task_type)  # type: ignore[call-arg, arg-type]
             response = self.put_request(url, add_req)
 
             error, warnings, task_created = ScheduleItem.parse_add_to_schedule_response(
@@ -99,8 +114,10 @@ class Schedules(Endpoint):
         if workbook is not None:
             items.append((workbook, "workbook", RequestFactory.Schedule.add_workbook_req))
         if datasource is not None:
-            items.append((datasource, "datasource", RequestFactory.Schedule.add_datasource_req))
+            items.append(
+                (datasource, "datasource", RequestFactory.Schedule.add_datasource_req)  # type:ignore[arg-type]
+            )
 
         results = (add_to(*x) for x in items)
         # list() is needed for python 3.x compatibility
-        return list(filter(lambda x: not x.result, results))
+        return list(filter(lambda x: not x.result, results))  # type:ignore[arg-type]
