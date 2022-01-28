@@ -25,7 +25,7 @@ from .endpoint import (
     Favorites,
     DataAlerts,
     Fileuploads,
-    FlowRuns
+    FlowRuns,
 )
 from .endpoint.exceptions import (
     EndpointUnavailableError,

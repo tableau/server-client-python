@@ -21,18 +21,27 @@ import tableauserverclient as TSC
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Delete the `Europe` region from a published `World Indicators` datasource.')
+    parser = argparse.ArgumentParser(
+        description="Delete the `Europe` region from a published `World Indicators` datasource."
+    )
     # Common options; please keep those in sync across all samples
-    parser.add_argument('--server', '-s', required=True, help='server address')
-    parser.add_argument('--site', '-S', help='site name')
-    parser.add_argument('--token-name', '-p', required=True,
-                        help='name of the personal access token used to sign into the server')
-    parser.add_argument('--token-value', '-v', required=True,
-                        help='value of the personal access token used to sign into the server')
-    parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
-                        help='desired logging level (set to error by default)')
+    parser.add_argument("--server", "-s", required=True, help="server address")
+    parser.add_argument("--site", "-S", help="site name")
+    parser.add_argument(
+        "--token-name", "-p", required=True, help="name of the personal access token used to sign into the server"
+    )
+    parser.add_argument(
+        "--token-value", "-v", required=True, help="value of the personal access token used to sign into the server"
+    )
+    parser.add_argument(
+        "--logging-level",
+        "-l",
+        choices=["debug", "info", "error"],
+        default="error",
+        help="desired logging level (set to error by default)",
+    )
     # Options specific to this sample
-    parser.add_argument('datasource_id', help="The LUID of the `World Indicators` datasource")
+    parser.add_argument("datasource_id", help="The LUID of the `World Indicators` datasource")
 
     args = parser.parse_args()
 
@@ -61,7 +70,7 @@ def main():
                 "action": "delete",
                 "target-table": "Extract",
                 "target-schema": "Extract",
-                "condition": {"op": "eq", "target-col": "Region", "const": {"type": "string", "v": "Europe"}}
+                "condition": {"op": "eq", "target-col": "Region", "const": {"type": "string", "v": "Europe"}},
             }
         ]
 
@@ -74,5 +83,5 @@ def main():
         print("Job finished succesfully")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

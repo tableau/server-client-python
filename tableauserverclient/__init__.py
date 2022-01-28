@@ -35,7 +35,7 @@ from .models import (
     WebhookItem,
     PersonalAccessTokenAuth,
     FlowRunItem,
-    RevisionItem
+    RevisionItem,
 )
 from .server import (
     RequestOptions,

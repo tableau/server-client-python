@@ -11,7 +11,6 @@ logger = logging.getLogger("tableau.endpoint.jobs")
 from typing import List, Optional, Tuple, TYPE_CHECKING, Union
 
 
-
 class Jobs(Endpoint):
     @property
     def baseurl(self):
@@ -20,7 +19,7 @@ class Jobs(Endpoint):
     @api(version="2.6")
     def get(
         self, job_id: Optional[str] = None, req_options: Optional[RequestOptionsBase] = None
-        ) -> Tuple[List[BackgroundJobItem], PaginationItem]:
+    ) -> Tuple[List[BackgroundJobItem], PaginationItem]:
         # Backwards Compatibility fix until we rev the major version
         if job_id is not None and isinstance(job_id, str):
             import warnings

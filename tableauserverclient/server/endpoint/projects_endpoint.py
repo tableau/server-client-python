@@ -52,7 +52,7 @@ class Projects(Endpoint):
             error = "Project item missing ID."
             raise MissingRequiredFieldError(error)
 
-        params = {"params": {RequestOptions.Field.PublishSamples: samples }}
+        params = {"params": {RequestOptions.Field.PublishSamples: samples}}
         url = "{0}/{1}".format(self.baseurl, project_item.id)
         update_req = RequestFactory.Project.update_req(project_item)
         server_response = self.put_request(url, update_req, XML_CONTENT_TYPE, params)
@@ -62,7 +62,7 @@ class Projects(Endpoint):
 
     @api(version="2.0")
     def create(self, project_item: ProjectItem, samples: bool = False) -> ProjectItem:
-        params = {"params": {RequestOptions.Field.PublishSamples: samples }}
+        params = {"params": {RequestOptions.Field.PublishSamples: samples}}
         url = self.baseurl
         create_req = RequestFactory.Project.create_req(project_item)
         server_response = self.post_request(url, create_req, XML_CONTENT_TYPE, params)
