@@ -23,21 +23,27 @@ from tableauserverclient import ConnectionCredentials, ConnectionItem
 
 def main():
 
-    parser = argparse.ArgumentParser(description='Publish a workbook to server.')
+    parser = argparse.ArgumentParser(description="Publish a workbook to server.")
     # Common options; please keep those in sync across all samples
-    parser.add_argument('--server', '-s', required=True, help='server address')
-    parser.add_argument('--site', '-S', help='site name')
-    parser.add_argument('--token-name', '-p', required=True,
-                        help='name of the personal access token used to sign into the server')
-    parser.add_argument('--token-value', '-v', required=True,
-                        help='value of the personal access token used to sign into the server')
-    parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
-                        help='desired logging level (set to error by default)')
+    parser.add_argument("--server", "-s", required=True, help="server address")
+    parser.add_argument("--site", "-S", help="site name")
+    parser.add_argument(
+        "--token-name", "-p", required=True, help="name of the personal access token used to sign into the server"
+    )
+    parser.add_argument(
+        "--token-value", "-v", required=True, help="value of the personal access token used to sign into the server"
+    )
+    parser.add_argument(
+        "--logging-level",
+        "-l",
+        choices=["debug", "info", "error"],
+        default="error",
+        help="desired logging level (set to error by default)",
+    )
     # Options specific to this sample
-    parser.add_argument('--file', '-f', required=True, help='local filepath of the workbook to publish')
-    parser.add_argument('--as-job', '-a', help='Publishing asynchronously', action='store_true')
-    parser.add_argument('--skip-connection-check', '-c', help='Skip live connection check', action='store_true')
-
+    parser.add_argument("--file", "-f", required=True, help="local filepath of the workbook to publish")
+    parser.add_argument("--as-job", "-a", help="Publishing asynchronously", action="store_true")
+    parser.add_argument("--skip-connection-check", "-c", help="Skip live connection check", action="store_true")
 
     args = parser.parse_args()
 
@@ -72,19 +78,29 @@ def main():
         if default_project is not None:
             new_workbook = TSC.WorkbookItem(default_project.id)
             if args.as_job:
-                new_job = server.workbooks.publish(new_workbook, args.filepath, overwrite_true,
-                                                   connections=all_connections, as_job=args.as_job,
-                                                   skip_connection_check=args.skip_connection_check)
+                new_job = server.workbooks.publish(
+                    new_workbook,
+                    args.filepath,
+                    overwrite_true,
+                    connections=all_connections,
+                    as_job=args.as_job,
+                    skip_connection_check=args.skip_connection_check,
+                )
                 print("Workbook published. JOB ID: {0}".format(new_job.id))
             else:
-                new_workbook = server.workbooks.publish(new_workbook, args.filepath, overwrite_true,
-                                                        connections=all_connections, as_job=args.as_job,
-                                                        skip_connection_check=args.skip_connection_check)
+                new_workbook = server.workbooks.publish(
+                    new_workbook,
+                    args.filepath,
+                    overwrite_true,
+                    connections=all_connections,
+                    as_job=args.as_job,
+                    skip_connection_check=args.skip_connection_check,
+                )
                 print("Workbook published. ID: {0}".format(new_workbook.id))
         else:
             error = "The default project could not be found."
             raise LookupError(error)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

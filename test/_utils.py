@@ -2,7 +2,7 @@ from contextlib import contextmanager
 import unittest
 import os.path
 
-TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
+TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
 
 def asset(filename):
@@ -10,8 +10,8 @@ def asset(filename):
 
 
 def read_xml_asset(filename):
-    with open(asset(filename), 'rb') as f:
-        return f.read().decode('utf-8')
+    with open(asset(filename), "rb") as f:
+        return f.read().decode("utf-8")
 
 
 def read_xml_assets(*args):
@@ -28,7 +28,7 @@ def mocked_time():
 
     def get_time():
         return mock_time
-    
+
     try:
         patch = unittest.mock.patch
     except AttributeError:

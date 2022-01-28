@@ -13,21 +13,28 @@ import tableauserverclient as TSC
 
 
 def usage(args):
-    parser = argparse.ArgumentParser(description='Set refresh schedule for a workbook or datasource.')
+    parser = argparse.ArgumentParser(description="Set refresh schedule for a workbook or datasource.")
     # Common options; please keep those in sync across all samples
-    parser.add_argument('--server', '-s', required=True, help='server address')
-    parser.add_argument('--site', '-S', help='site name')
-    parser.add_argument('--token-name', '-p', required=True,
-                        help='name of the personal access token used to sign into the server')
-    parser.add_argument('--token-value', '-v', required=True,
-                        help='value of the personal access token used to sign into the server')
-    parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
-                        help='desired logging level (set to error by default)')
+    parser.add_argument("--server", "-s", required=True, help="server address")
+    parser.add_argument("--site", "-S", help="site name")
+    parser.add_argument(
+        "--token-name", "-p", required=True, help="name of the personal access token used to sign into the server"
+    )
+    parser.add_argument(
+        "--token-value", "-v", required=True, help="value of the personal access token used to sign into the server"
+    )
+    parser.add_argument(
+        "--logging-level",
+        "-l",
+        choices=["debug", "info", "error"],
+        default="error",
+        help="desired logging level (set to error by default)",
+    )
     # Options specific to this sample
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('--workbook', '-w')
-    group.add_argument('--datasource', '-d')
-    parser.add_argument('schedule')
+    group.add_argument("--workbook", "-w")
+    group.add_argument("--datasource", "-d")
+    parser.add_argument("schedule")
 
     return parser.parse_args(args)
 
@@ -84,6 +91,7 @@ def run(args):
 
 def main():
     import sys
+
     args = usage(sys.argv[1:])
     run(args)
 
