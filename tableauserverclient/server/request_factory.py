@@ -3,10 +3,9 @@ import xml.etree.ElementTree as ET
 from requests.packages.urllib3.fields import RequestField
 from requests.packages.urllib3.filepost import encode_multipart_formdata
 
-from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteItem
+from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteItem, DataAlertItem
 
 from typing import Iterable
-
 
 def _add_multipart(parts):
     mime_multipart_parts = list()
@@ -89,22 +88,26 @@ class ColumnRequest(object):
 
 
 class DataAlertRequest(object):
-    def add_user_to_alert(self, alert_item, user_id):
+    def add_user_to_alert(self, alert_item: "DataAlertItem", user_id: str) -> bytes:
         xml_request = ET.Element("tsRequest")
         user_element = ET.SubElement(xml_request, "user")
         user_element.attrib["id"] = user_id
 
         return ET.tostring(xml_request)
 
-    def update_req(self, alert_item):
+    def update_req(self, alert_item: "DataAlertItem") -> bytes:
         xml_request = ET.Element("tsRequest")
         dataAlert_element = ET.SubElement(xml_request, "dataAlert")
-        dataAlert_element.attrib["subject"] = alert_item.subject
-        dataAlert_element.attrib["frequency"] = alert_item.frequency.lower()
-        dataAlert_element.attrib["public"] = alert_item.public
+        if alert_item.subject is not None:
+            dataAlert_element.attrib["subject"] = alert_item.subject
+        if alert_item.frequency is not None:
+            dataAlert_element.attrib["frequency"] = alert_item.frequency.lower()
+        if alert_item.public is not None:
+            dataAlert_element.attrib["public"] = str(alert_item.public).lower()
 
         owner = ET.SubElement(dataAlert_element, "owner")
-        owner.attrib["id"] = alert_item.owner_id
+        if alert_item.owner_id is not None:
+            owner.attrib["id"] = alert_item.owner_id
 
         return ET.tostring(xml_request)
 
@@ -235,7 +238,7 @@ class DQWRequest(object):
 
 
 class FavoriteRequest(object):
-    def _add_to_req(self, id_, target_type, label):
+    def _add_to_req(self, id_: str, target_type: str, label: str) -> bytes:
         """
         <favorite label="...">
         <target_type id="..." />
@@ -249,16 +252,39 @@ class FavoriteRequest(object):
 
         return ET.tostring(xml_request)
 
-    def add_datasource_req(self, id_, name):
+    def add_datasource_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
+        if id_ is None:
+            raise ValueError("id must exist to add to favorites")
+        if name is None:
+            raise ValueError("Name must exist to add to favorites.")
         return self._add_to_req(id_, FavoriteItem.Type.Datasource, name)
 
-    def add_project_req(self, id_, name):
+    def add_flow_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
+        if id_ is None:
+            raise ValueError("id must exist to add to favorites")
+        if name is None:
+            raise ValueError("Name must exist to add to favorites.")
+        return self._add_to_req(id_, FavoriteItem.Type.Flow, name)
+
+    def add_project_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
+        if id_ is None:
+            raise ValueError("id must exist to add to favorites")
+        if name is None:
+            raise ValueError("Name must exist to add to favorites.")
         return self._add_to_req(id_, FavoriteItem.Type.Project, name)
 
-    def add_view_req(self, id_, name):
+    def add_view_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
+        if id_ is None:
+            raise ValueError("id must exist to add to favorites")
+        if name is None:
+            raise ValueError("Name must exist to add to favorites.")
         return self._add_to_req(id_, FavoriteItem.Type.View, name)
 
-    def add_workbook_req(self, id_, name):
+    def add_workbook_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
+        if id_ is None:
+            raise ValueError("id must exist to add to favorites")
+        if name is None:
+            raise ValueError("Name must exist to add to favorites.")
         return self._add_to_req(id_, FavoriteItem.Type.Workbook, name)
 
 
@@ -794,7 +820,7 @@ class WorkbookRequest(object):
                 _add_connections_element(connections_element, connection)
 
         if workbook_item.hidden_views is not None:
-            views_element = ET.SubElement(workbook_element, 'views')
+            views_element = ET.SubElement(workbook_element, "views")
             for view_name in workbook_item.hidden_views:
                 _add_hiddenview_element(views_element, view_name)
 

@@ -18,21 +18,29 @@ import tableauserverclient as TSC
 
 def main():
 
-    parser = argparse.ArgumentParser(description='Explore workbook functions supported by the Server API.')
+    parser = argparse.ArgumentParser(description="Explore workbook functions supported by the Server API.")
     # Common options; please keep those in sync across all samples
-    parser.add_argument('--server', '-s', required=True, help='server address')
-    parser.add_argument('--site', '-S', help='site name')
-    parser.add_argument('--token-name', '-p', required=True,
-                        help='name of the personal access token used to sign into the server')
-    parser.add_argument('--token-value', '-v', required=True,
-                        help='value of the personal access token used to sign into the server')
-    parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
-                        help='desired logging level (set to error by default)')
+    parser.add_argument("--server", "-s", required=True, help="server address")
+    parser.add_argument("--site", "-S", help="site name")
+    parser.add_argument(
+        "--token-name", "-p", required=True, help="name of the personal access token used to sign into the server"
+    )
+    parser.add_argument(
+        "--token-value", "-v", required=True, help="value of the personal access token used to sign into the server"
+    )
+    parser.add_argument(
+        "--logging-level",
+        "-l",
+        choices=["debug", "info", "error"],
+        default="error",
+        help="desired logging level (set to error by default)",
+    )
     # Options specific to this sample
-    parser.add_argument('--publish', metavar='FILEPATH', help='path to workbook to publish')
-    parser.add_argument('--download', metavar='FILEPATH', help='path to save downloaded workbook')
-    parser.add_argument('--preview-image', '-i', metavar='FILENAME',
-                        help='filename (a .png file) to save the preview image')
+    parser.add_argument("--publish", metavar="FILEPATH", help="path to workbook to publish")
+    parser.add_argument("--download", metavar="FILEPATH", help="path to save downloaded workbook")
+    parser.add_argument(
+        "--preview-image", "-i", metavar="FILENAME", help="filename (a .png file) to save the preview image"
+    )
 
     args = parser.parse_args()
 
@@ -56,7 +64,7 @@ def main():
                 new_workbook = server.workbooks.publish(new_workbook, args.publish, overwrite_true)
                 print("Workbook published. ID: {}".format(new_workbook.id))
             else:
-                print('Publish failed. Could not find the default project.')
+                print("Publish failed. Could not find the default project.")
 
         # Gets all workbook items
         all_workbooks, pagination_item = server.workbooks.get()
@@ -75,12 +83,16 @@ def main():
             # Populate connections
             server.workbooks.populate_connections(sample_workbook)
             print("\nConnections for {}: ".format(sample_workbook.name))
-            print(["{0}({1})".format(connection.id, connection.datasource_name)
-                   for connection in sample_workbook.connections])
+            print(
+                [
+                    "{0}({1})".format(connection.id, connection.datasource_name)
+                    for connection in sample_workbook.connections
+                ]
+            )
 
             # Update tags and show_tabs flag
             original_tag_set = set(sample_workbook.tags)
-            sample_workbook.tags.update('a', 'b', 'c', 'd')
+            sample_workbook.tags.update("a", "b", "c", "d")
             sample_workbook.show_tabs = True
             server.workbooks.update(sample_workbook)
             print("\nWorkbook's old tag set: {}".format(original_tag_set))
@@ -111,10 +123,10 @@ def main():
             if args.preview_image:
                 # Populate workbook preview image
                 server.workbooks.populate_preview_image(sample_workbook)
-                with open(args.preview_image, 'wb') as f:
+                with open(args.preview_image, "wb") as f:
                     f.write(sample_workbook.preview_image)
                 print("\nDownloaded preview image of workbook to {}".format(os.path.abspath(args.preview_image)))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

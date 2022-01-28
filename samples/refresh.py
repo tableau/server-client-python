@@ -11,19 +11,26 @@ import tableauserverclient as TSC
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Trigger a refresh task on a workbook or datasource.')
+    parser = argparse.ArgumentParser(description="Trigger a refresh task on a workbook or datasource.")
     # Common options; please keep those in sync across all samples
-    parser.add_argument('--server', '-s', required=True, help='server address')
-    parser.add_argument('--site', '-S', help='site name')
-    parser.add_argument('--token-name', '-p', required=True,
-                        help='name of the personal access token used to sign into the server')
-    parser.add_argument('--token-value', '-v', required=True,
-                        help='value of the personal access token used to sign into the server')
-    parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
-                        help='desired logging level (set to error by default)')
+    parser.add_argument("--server", "-s", required=True, help="server address")
+    parser.add_argument("--site", "-S", help="site name")
+    parser.add_argument(
+        "--token-name", "-p", required=True, help="name of the personal access token used to sign into the server"
+    )
+    parser.add_argument(
+        "--token-value", "-v", required=True, help="value of the personal access token used to sign into the server"
+    )
+    parser.add_argument(
+        "--logging-level",
+        "-l",
+        choices=["debug", "info", "error"],
+        default="error",
+        help="desired logging level (set to error by default)",
+    )
     # Options specific to this sample
-    parser.add_argument('resource_type', choices=['workbook', 'datasource'])
-    parser.add_argument('resource_id')
+    parser.add_argument("resource_type", choices=["workbook", "datasource"])
+    parser.add_argument("resource_id")
 
     args = parser.parse_args()
 
@@ -46,7 +53,7 @@ def main():
 
             # trigger the refresh, you'll get a job id back which can be used to poll for when the refresh is done
             job = server.datasources.refresh(resource)
- 
+
         print(f"Update job posted (ID: {job.id})")
         print("Waiting for job...")
         # `wait_for_job` will throw if the job isn't executed successfully
@@ -54,5 +61,5 @@ def main():
         print("Job finished succesfully")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
