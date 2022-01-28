@@ -148,7 +148,6 @@ class GroupTests(unittest.TestCase):
 
     def test_add_user_missing_group_id(self) -> None:
         single_group = TSC.GroupItem("test")
-        single_group._users = []
         self.assertRaises(
             TSC.MissingRequiredFieldError,
             self.server.groups.add_user,
@@ -183,7 +182,6 @@ class GroupTests(unittest.TestCase):
 
     def test_remove_user_missing_group_id(self) -> None:
         single_group = TSC.GroupItem("test")
-        single_group._users = []
         self.assertRaises(
             TSC.MissingRequiredFieldError,
             self.server.groups.remove_user,
