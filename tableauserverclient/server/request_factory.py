@@ -5,13 +5,15 @@ from requests.packages.urllib3.filepost import encode_multipart_formdata
 
 from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteItem
 
-from typing import Optional, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple
 
 if TYPE_CHECKING:
     from ..models import DataAlertItem
+    from ..models import FlowItem
+    from ..models import ConnectionItem
 
 
-def _add_multipart(parts):
+def _add_multipart(parts: Dict) -> Tuple[Any, str]:
     mime_multipart_parts = list()
     for name, (filename, data, content_type) in parts.items():
         multipart_part = RequestField(name=name, data=data, filename=filename)
@@ -302,10 +304,11 @@ class FileuploadRequest(object):
 
 
 class FlowRequest(object):
-    def _generate_xml(self, flow_item, connections=None):
+    def _generate_xml(self, flow_item: "FlowItem", connections: Optional[List["ConnectionItem"]] = None) -> bytes:
         xml_request = ET.Element("tsRequest")
         flow_element = ET.SubElement(xml_request, "flow")
-        flow_element.attrib["name"] = flow_item.name
+        if flow_item.name is not None:
+            flow_element.attrib["name"] = flow_item.name
         project_element = ET.SubElement(flow_element, "project")
         project_element.attrib["id"] = flow_item.project_id
 
@@ -315,7 +318,7 @@ class FlowRequest(object):
                 _add_connections_element(connections_element, connection)
         return ET.tostring(xml_request)
 
-    def update_req(self, flow_item):
+    def update_req(self, flow_item: "FlowItem") -> bytes:
         xml_request = ET.Element("tsRequest")
         flow_element = ET.SubElement(xml_request, "flow")
         if flow_item.project_id:
@@ -327,7 +330,13 @@ class FlowRequest(object):
 
         return ET.tostring(xml_request)
 
-    def publish_req(self, flow_item, filename, file_contents, connections=None):
+    def publish_req(
+        self,
+        flow_item: "FlowItem",
+        filename: str,
+        file_contents: bytes,
+        connections: Optional[List["ConnectionItem"]] = None,
+    ) -> Tuple[Any, str]:
         xml_request = self._generate_xml(flow_item, connections)
 
         parts = {
@@ -336,7 +345,7 @@ class FlowRequest(object):
         }
         return _add_multipart(parts)
 
-    def publish_req_chunked(self, flow_item, connections=None):
+    def publish_req_chunked(self, flow_item, connections=None) -> Tuple[Any, str]:
         xml_request = self._generate_xml(flow_item, connections)
 
         parts = {"request_payload": ("", xml_request, "text/xml")}
