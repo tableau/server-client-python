@@ -36,3 +36,4 @@ from .subscription_item import SubscriptionItem
 from .permissions_item import PermissionsRule, Permission
 from .webhook_item import WebhookItem
 from .personal_access_token_auth import PersonalAccessTokenAuth
+from .revision_item import RevisionItem

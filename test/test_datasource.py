@@ -5,6 +5,7 @@ import os
 import requests_mock
 import xml.etree.ElementTree as ET
 from zipfile import ZipFile
+import tempfile
 
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
@@ -12,19 +13,19 @@ from tableauserverclient.server.endpoint.exceptions import InternalServerError
 from tableauserverclient.server.request_factory import RequestFactory
 from ._utils import read_xml_asset, read_xml_assets, asset
 
-
-ADD_TAGS_XML = "datasource_add_tags.xml"
-GET_XML = "datasource_get.xml"
-GET_EMPTY_XML = "datasource_get_empty.xml"
-GET_BY_ID_XML = "datasource_get_by_id.xml"
-POPULATE_CONNECTIONS_XML = "datasource_populate_connections.xml"
-POPULATE_PERMISSIONS_XML = "datasource_populate_permissions.xml"
-PUBLISH_XML = "datasource_publish.xml"
-PUBLISH_XML_ASYNC = "datasource_publish_async.xml"
-REFRESH_XML = "datasource_refresh.xml"
-UPDATE_XML = "datasource_update.xml"
-UPDATE_HYPER_DATA_XML = "datasource_data_update.xml"
-UPDATE_CONNECTION_XML = "datasource_connection_update.xml"
+ADD_TAGS_XML = 'datasource_add_tags.xml'
+GET_XML = 'datasource_get.xml'
+GET_EMPTY_XML = 'datasource_get_empty.xml'
+GET_BY_ID_XML = 'datasource_get_by_id.xml'
+POPULATE_CONNECTIONS_XML = 'datasource_populate_connections.xml'
+POPULATE_PERMISSIONS_XML = 'datasource_populate_permissions.xml'
+PUBLISH_XML = 'datasource_publish.xml'
+PUBLISH_XML_ASYNC = 'datasource_publish_async.xml'
+REFRESH_XML = 'datasource_refresh.xml'
+REVISION_XML = 'datasource_revision.xml'
+UPDATE_XML = 'datasource_update.xml'
+UPDATE_HYPER_DATA_XML = 'datasource_data_update.xml'
+UPDATE_CONNECTION_XML = 'datasource_connection_update.xml'
 
 
 class DatasourceTests(unittest.TestCase):
@@ -631,7 +632,50 @@ class DatasourceTests(unittest.TestCase):
 
         response_xml = read_xml_asset(PUBLISH_XML_ASYNC)
         with requests_mock.mock() as m:
-            m.post(
-                self.baseurl + "/3cc6cd06-89ce-4fdc-b935-5294135d6d42/createExtract", status_code=200, text=response_xml
-            )
-            self.server.datasources.create_extract("3cc6cd06-89ce-4fdc-b935-5294135d6d42", True)
+            m.post(self.baseurl + '/3cc6cd06-89ce-4fdc-b935-5294135d6d42/createExtract',
+                   status_code=200, text=response_xml)
+            self.server.datasources.create_extract('3cc6cd06-89ce-4fdc-b935-5294135d6d42', True)
+
+    def test_revisions(self) -> None:
+        datasource = TSC.DatasourceItem('project', 'test')
+        datasource._id = '06b944d2-959d-4604-9305-12323c95e70e'
+
+        response_xml = read_xml_asset(REVISION_XML)
+        with requests_mock.mock() as m:
+            m.get("{0}/{1}/revisions".format(self.baseurl, datasource.id), text=response_xml)
+            self.server.datasources.populate_revisions(datasource)
+            revisions = datasource.revisions
+
+        self.assertEqual(len(revisions), 3)
+        self.assertEqual("2016-07-26T20:34:56Z", format_datetime(revisions[0].created_at))
+        self.assertEqual("2016-07-27T20:34:56Z", format_datetime(revisions[1].created_at))
+        self.assertEqual("2016-07-28T20:34:56Z", format_datetime(revisions[2].created_at))
+
+        self.assertEqual(False, revisions[0].deleted)
+        self.assertEqual(False, revisions[0].current)
+        self.assertEqual(False, revisions[1].deleted)
+        self.assertEqual(False, revisions[1].current)
+        self.assertEqual(False, revisions[2].deleted)
+        self.assertEqual(True, revisions[2].current)
+
+        self.assertEqual("Cassie", revisions[0].user_name)
+        self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", revisions[0].user_id)
+        self.assertIsNone(revisions[1].user_name)
+        self.assertIsNone(revisions[1].user_id)
+        self.assertEqual("Cassie", revisions[2].user_name)
+        self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", revisions[2].user_id)
+
+    def test_delete_revision(self) -> None:
+        datasource = TSC.DatasourceItem('project', 'test')
+        datasource._id = '06b944d2-959d-4604-9305-12323c95e70e'
+
+        with requests_mock.mock() as m:
+            m.delete("{0}/{1}/revisions/3".format(self.baseurl, datasource.id))
+            self.server.datasources.delete_revision(datasource.id, "3")
+
+    def test_download_revision(self) -> None:
+        with requests_mock.mock() as m, tempfile.TemporaryDirectory() as td:
+            m.get(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/revisions/3/content',
+                  headers={'Content-Disposition': 'name="tableau_datasource"; filename="Sample datasource.tds"'})
+            file_path = self.server.datasources.download_revision('9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', "3", td)
+            self.assertTrue(os.path.exists(file_path))
