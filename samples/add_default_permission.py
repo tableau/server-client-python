@@ -16,16 +16,23 @@ import tableauserverclient as TSC
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Add workbook default permissions for a given project.')
+    parser = argparse.ArgumentParser(description="Add workbook default permissions for a given project.")
     # Common options; please keep those in sync across all samples
-    parser.add_argument('--server', '-s', required=True, help='server address')
-    parser.add_argument('--site', '-S', help='site name')
-    parser.add_argument('--token-name', '-p', required=True,
-                        help='name of the personal access token used to sign into the server')
-    parser.add_argument('--token-value', '-v', required=True,
-                        help='value of the personal access token used to sign into the server')
-    parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
-                        help='desired logging level (set to error by default)')
+    parser.add_argument("--server", "-s", required=True, help="server address")
+    parser.add_argument("--site", "-S", help="site name")
+    parser.add_argument(
+        "--token-name", "-p", required=True, help="name of the personal access token used to sign into the server"
+    )
+    parser.add_argument(
+        "--token-value", "-v", required=True, help="value of the personal access token used to sign into the server"
+    )
+    parser.add_argument(
+        "--logging-level",
+        "-l",
+        choices=["debug", "info", "error"],
+        default="error",
+        help="desired logging level (set to error by default)",
+    )
     # Options specific to this sample
     # This sample has no additional options, yet. If you add some, please add them here
 
@@ -53,10 +60,7 @@ def main():
             new_capabilities = {TSC.Permission.Capability.ExportXml: TSC.Permission.Mode.Allow}
 
             # Each PermissionRule in the list contains a grantee and a dict of capabilities
-            new_rules = [TSC.PermissionsRule(
-                grantee=default_permissions.grantee,
-                capabilities=new_capabilities
-            )]
+            new_rules = [TSC.PermissionsRule(grantee=default_permissions.grantee, capabilities=new_capabilities)]
 
             new_default_permissions = server.projects.update_workbook_default_permissions(project, new_rules)
 
@@ -78,5 +82,5 @@ def main():
         # server.projects.delete(project.id)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -817,7 +817,7 @@ class WorkbookRequest(object):
                 _add_connections_element(connections_element, connection)
 
         if workbook_item.hidden_views is not None:
-            views_element = ET.SubElement(workbook_element, 'views')
+            views_element = ET.SubElement(workbook_element, "views")
             for view_name in workbook_item.hidden_views:
                 _add_hiddenview_element(views_element, view_name)
 
