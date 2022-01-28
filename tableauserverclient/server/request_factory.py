@@ -16,7 +16,7 @@ from ..models import SubscriptionItem
 from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteItem
 from ..models import WebhookItem
 
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..models import DataAlertItem
