@@ -101,11 +101,11 @@ class DailyInterval(object):
     @property_not_nullable
     def start_time(self, value):
         self._start_time = value
-        
+
     @property
     def interval(self):
         return self._interval
-    
+
     @interval.setter
     def interval(self, interval):
         self._interval = interval
