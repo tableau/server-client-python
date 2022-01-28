@@ -18,26 +18,26 @@ from tableauserverclient.models.group_item import GroupItem
 from ._utils import asset
 
 
-TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), 'assets')
+TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
-ADD_TAGS_XML = os.path.join(TEST_ASSET_DIR, 'workbook_add_tags.xml')
-GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, 'workbook_get_by_id.xml')
-GET_BY_ID_XML_PERSONAL = os.path.join(TEST_ASSET_DIR, 'workbook_get_by_id_personal.xml')
-GET_EMPTY_XML = os.path.join(TEST_ASSET_DIR, 'workbook_get_empty.xml')
-GET_INVALID_DATE_XML = os.path.join(TEST_ASSET_DIR, 'workbook_get_invalid_date.xml')
-GET_XML = os.path.join(TEST_ASSET_DIR, 'workbook_get.xml')
-POPULATE_CONNECTIONS_XML = os.path.join(TEST_ASSET_DIR, 'workbook_populate_connections.xml')
-POPULATE_PDF = os.path.join(TEST_ASSET_DIR, 'populate_pdf.pdf')
-POPULATE_PERMISSIONS_XML = os.path.join(TEST_ASSET_DIR, 'workbook_populate_permissions.xml')
-POPULATE_PREVIEW_IMAGE = os.path.join(TEST_ASSET_DIR, 'RESTAPISample Image.png')
-POPULATE_VIEWS_XML = os.path.join(TEST_ASSET_DIR, 'workbook_populate_views.xml')
-POPULATE_VIEWS_USAGE_XML = os.path.join(TEST_ASSET_DIR, 'workbook_populate_views_usage.xml')
-PUBLISH_XML = os.path.join(TEST_ASSET_DIR, 'workbook_publish.xml')
-PUBLISH_ASYNC_XML = os.path.join(TEST_ASSET_DIR, 'workbook_publish_async.xml')
-REFRESH_XML = os.path.join(TEST_ASSET_DIR, 'workbook_refresh.xml')
-REVISION_XML = os.path.join(TEST_ASSET_DIR, 'workbook_revision.xml')
-UPDATE_XML = os.path.join(TEST_ASSET_DIR, 'workbook_update.xml')
-UPDATE_PERMISSIONS = os.path.join(TEST_ASSET_DIR, 'workbook_update_permissions.xml')
+ADD_TAGS_XML = os.path.join(TEST_ASSET_DIR, "workbook_add_tags.xml")
+GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, "workbook_get_by_id.xml")
+GET_BY_ID_XML_PERSONAL = os.path.join(TEST_ASSET_DIR, "workbook_get_by_id_personal.xml")
+GET_EMPTY_XML = os.path.join(TEST_ASSET_DIR, "workbook_get_empty.xml")
+GET_INVALID_DATE_XML = os.path.join(TEST_ASSET_DIR, "workbook_get_invalid_date.xml")
+GET_XML = os.path.join(TEST_ASSET_DIR, "workbook_get.xml")
+POPULATE_CONNECTIONS_XML = os.path.join(TEST_ASSET_DIR, "workbook_populate_connections.xml")
+POPULATE_PDF = os.path.join(TEST_ASSET_DIR, "populate_pdf.pdf")
+POPULATE_PERMISSIONS_XML = os.path.join(TEST_ASSET_DIR, "workbook_populate_permissions.xml")
+POPULATE_PREVIEW_IMAGE = os.path.join(TEST_ASSET_DIR, "RESTAPISample Image.png")
+POPULATE_VIEWS_XML = os.path.join(TEST_ASSET_DIR, "workbook_populate_views.xml")
+POPULATE_VIEWS_USAGE_XML = os.path.join(TEST_ASSET_DIR, "workbook_populate_views_usage.xml")
+PUBLISH_XML = os.path.join(TEST_ASSET_DIR, "workbook_publish.xml")
+PUBLISH_ASYNC_XML = os.path.join(TEST_ASSET_DIR, "workbook_publish_async.xml")
+REFRESH_XML = os.path.join(TEST_ASSET_DIR, "workbook_refresh.xml")
+REVISION_XML = os.path.join(TEST_ASSET_DIR, "workbook_revision.xml")
+UPDATE_XML = os.path.join(TEST_ASSET_DIR, "workbook_update.xml")
+UPDATE_PERMISSIONS = os.path.join(TEST_ASSET_DIR, "workbook_update_permissions.xml")
 
 
 class WorkbookTests(unittest.TestCase):
@@ -591,7 +591,7 @@ class WorkbookTests(unittest.TestCase):
             sample_workbook = os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")
             publish_mode = self.server.PublishMode.CreateNew
 
-            new_workbook.hidden_views = ['GDP per capita']
+            new_workbook.hidden_views = ["GDP per capita"]
             new_workbook = self.server.workbooks.publish(new_workbook, sample_workbook, publish_mode)
             request_body = m._adapter.request_history[0]._request.body
             # order of attributes in xml is unspecified
@@ -787,11 +787,11 @@ class WorkbookTests(unittest.TestCase):
 
     def test_revisions(self) -> None:
         self.baseurl = self.server.workbooks.baseurl
-        workbook = TSC.WorkbookItem('project', 'test')
-        workbook._id = '06b944d2-959d-4604-9305-12323c95e70e'
+        workbook = TSC.WorkbookItem("project", "test")
+        workbook._id = "06b944d2-959d-4604-9305-12323c95e70e"
 
-        with open(REVISION_XML, 'rb') as f:
-            response_xml = f.read().decode('utf-8')
+        with open(REVISION_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             m.get("{0}/{1}/revisions".format(self.baseurl, workbook.id), text=response_xml)
             self.server.workbooks.populate_revisions(workbook)
@@ -818,8 +818,8 @@ class WorkbookTests(unittest.TestCase):
 
     def test_delete_revision(self) -> None:
         self.baseurl = self.server.workbooks.baseurl
-        workbook = TSC.WorkbookItem('project', 'test')
-        workbook._id = '06b944d2-959d-4604-9305-12323c95e70e'
+        workbook = TSC.WorkbookItem("project", "test")
+        workbook._id = "06b944d2-959d-4604-9305-12323c95e70e"
 
         with requests_mock.mock() as m:
             m.delete("{0}/{1}/revisions/3".format(self.baseurl, workbook.id))
@@ -827,8 +827,9 @@ class WorkbookTests(unittest.TestCase):
 
     def test_download_revision(self) -> None:
         with requests_mock.mock() as m, tempfile.TemporaryDirectory() as td:
-            m.get(self.baseurl + '/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/revisions/3/content',
-                  headers={'Content-Disposition': 'name="tableau_datasource"; filename="Sample datasource.tds"'})
-            file_path = self.server.workbooks.download_revision('9dbd2263-16b5-46e1-9c43-a76bb8ab65fb', "3", td)
+            m.get(
+                self.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/revisions/3/content",
+                headers={"Content-Disposition": 'name="tableau_datasource"; filename="Sample datasource.tds"'},
+            )
+            file_path = self.server.workbooks.download_revision("9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", "3", td)
             self.assertTrue(os.path.exists(file_path))
-

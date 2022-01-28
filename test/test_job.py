@@ -18,8 +18,8 @@ GET_BY_ID_INPROGRESS_XML = "job_get_by_id_inprogress.xml"
 
 class JobTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.server = TSC.Server('http://test')
-        self.server.version = '3.1'
+        self.server = TSC.Server("http://test")
+        self.server.version = "3.1"
 
         # Fake signin
         self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"
@@ -68,8 +68,7 @@ class JobTests(unittest.TestCase):
     def test_cancel_item(self) -> None:
         created_at = datetime(2018, 5, 22, 13, 0, 29, tzinfo=utc)
         started_at = datetime(2018, 5, 22, 13, 0, 37, tzinfo=utc)
-        job = TSC.JobItem('ee8c6e70-43b6-11e6-af4f-f7b0d8e20760', 'backgroundJob',
-                          "0", created_at, started_at, None, 0)
+        job = TSC.JobItem("ee8c6e70-43b6-11e6-af4f-f7b0d8e20760", "backgroundJob", "0", created_at, started_at, None, 0)
         with requests_mock.mock() as m:
             m.put(self.baseurl + "/ee8c6e70-43b6-11e6-af4f-f7b0d8e20760", status_code=204)
             self.server.jobs.cancel(job)
