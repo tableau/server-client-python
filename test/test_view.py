@@ -79,7 +79,7 @@ class ViewTests(unittest.TestCase):
         self.assertEqual("2002-06-05T08:00:59Z", format_datetime(view.updated_at))
         self.assertEqual("story", view.sheet_type)
 
-    def test_get_by_id_missing_id(self):
+    def test_get_by_id_missing_id(self) -> None:
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.views.get_by_id, None)
 
     def test_get_with_usage(self):
@@ -117,7 +117,7 @@ class ViewTests(unittest.TestCase):
         self.assertEqual("Overview", all_views[1].name)
         self.assertEqual(13, all_views[1].total_views)
 
-    def test_get_before_signin(self):
+    def test_get_before_signin(self) -> None:
         self.server._auth_token = None
         self.assertRaises(TSC.NotSignedInError, self.server.views.get)
 
@@ -136,7 +136,7 @@ class ViewTests(unittest.TestCase):
             self.server.views.populate_preview_image(single_view)
             self.assertEqual(response, single_view.preview_image)
 
-    def test_populate_preview_image_missing_id(self):
+    def test_populate_preview_image_missing_id(self) -> None:
         single_view = TSC.ViewItem()
         single_view._id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.views.populate_preview_image, single_view)
@@ -211,7 +211,7 @@ class ViewTests(unittest.TestCase):
             csv_file = b"".join(single_view.csv)
             self.assertEqual(response, csv_file)
 
-    def test_populate_image_missing_id(self):
+    def test_populate_image_missing_id(self) -> None:
         single_view = TSC.ViewItem()
         single_view._id = None
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.views.populate_image, single_view)
