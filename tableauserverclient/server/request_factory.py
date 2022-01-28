@@ -22,6 +22,7 @@ if TYPE_CHECKING:
     from ..models import DataAlertItem
     from ..models import FlowItem
     from ..models import ConnectionItem
+    from ..models import SiteItem
     from ..models import ProjectItem
 
 
