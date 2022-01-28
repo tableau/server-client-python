@@ -1,3 +1,4 @@
+from datetime import datetime
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from typing import Dict, List, Optional, TYPE_CHECKING
@@ -12,6 +13,11 @@ from .property_decorators import (
 )
 from .reference_item import ResourceReference
 from ..datetime_helpers import parse_datetime
+
+if TYPE_CHECKING:
+    from ..server.pager import Pager
+
+from typing import Dict, List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..server.pager import Pager
