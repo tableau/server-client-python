@@ -108,7 +108,6 @@ class DataAlertTests(unittest.TestCase):
             self.server.data_alerts.delete("0448d2ed-590d-4fa0-b272-a2a8a24555b5")
 
     def test_delete_user_from_alert(self) -> None:
-    def test_delete_user_from_alert(self):
         alert_id = "5ea59b45-e497-5673-8809-bfe213236f75"
         user_id = "5de011f8-5aa9-4d5b-b991-f462c8dd6bb7"
         with requests_mock.mock() as m:
