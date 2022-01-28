@@ -19,6 +19,7 @@ from ..models import WebhookItem
 from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple, Iterable
 
 if TYPE_CHECKING:
+    from ..models import SubscriptionItem
     from ..models import DataAlertItem
     from ..models import FlowItem
     from ..models import ConnectionItem
