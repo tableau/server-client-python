@@ -9,6 +9,12 @@ from .user_item import UserItem
 from .view_item import ViewItem
 
 
+from typing import List, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from datetime import datetime
+
+
 class DataAlertItem(object):
     class Frequency:
         Once = "Once"
@@ -18,35 +24,35 @@ class DataAlertItem(object):
         Weekly = "Weekly"
 
     def __init__(self):
-        self._id = None
-        self._subject = None
-        self._creatorId = None
-        self._createdAt = None
-        self._updatedAt = None
-        self._frequency = None
-        self._public = None
-        self._owner_id = None
-        self._owner_name = None
-        self._view_id = None
-        self._view_name = None
-        self._workbook_id = None
-        self._workbook_name = None
-        self._project_id = None
-        self._project_name = None
-        self._recipients = None
+        self._id: Optional[str] = None
+        self._subject: Optional[str] = None
+        self._creatorId: Optional[str] = None
+        self._createdAt: Optional["datetime"] = None
+        self._updatedAt: Optional["datetime"] = None
+        self._frequency: Optional[str] = None
+        self._public: Optional[bool] = None
+        self._owner_id: Optional[str] = None
+        self._owner_name: Optional[str] = None
+        self._view_id: Optional[str] = None
+        self._view_name: Optional[str] = None
+        self._workbook_id: Optional[str] = None
+        self._workbook_name: Optional[str] = None
+        self._project_id: Optional[str] = None
+        self._project_name: Optional[str] = None
+        self._recipients: Optional[List[str]] = None
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<Data Alert {_id} subject={_subject} frequency={_frequency} \
                 public={_public}>".format(
             **self.__dict__
         )
 
     @property
-    def id(self):
+    def id(self) -> Optional[str]:
         return self._id
 
     @property
-    def subject(self):
+    def subject(self) -> Optional[str]:
         return self._subject
 
     @subject.setter
@@ -55,69 +61,69 @@ class DataAlertItem(object):
         self._subject = value
 
     @property
-    def frequency(self):
+    def frequency(self) -> Optional[str]:
         return self._frequency
 
     @frequency.setter
     @property_is_enum(Frequency)
-    def frequency(self, value):
+    def frequency(self, value: str) -> None:
         self._frequency = value
 
     @property
-    def public(self):
+    def public(self) -> Optional[bool]:
         return self._public
 
     @public.setter
     @property_is_boolean
-    def public(self, value):
+    def public(self, value: bool) -> None:
         self._public = value
 
     @property
-    def creatorId(self):
+    def creatorId(self) -> Optional[str]:
         return self._creatorId
 
     @property
-    def recipients(self):
+    def recipients(self) -> List[str]:
         return self._recipients or list()
 
     @property
-    def createdAt(self):
+    def createdAt(self) -> Optional["datetime"]:
         return self._createdAt
 
     @property
-    def updatedAt(self):
+    def updatedAt(self) -> Optional["datetime"]:
         return self._updatedAt
 
     @property
-    def owner_id(self):
+    def owner_id(self) -> Optional[str]:
         return self._owner_id
 
     @property
-    def owner_name(self):
+    def owner_name(self) -> Optional[str]:
         return self._owner_name
 
     @property
-    def view_id(self):
+    def view_id(self) -> Optional[str]:
         return self._view_id
 
     @property
-    def view_name(self):
+    def view_name(self) -> Optional[str]:
         return self._view_name
 
     @property
-    def workbook_id(self):
+    def workbook_id(self) -> Optional[str]:
         return self._workbook_id
 
     @property
-    def workbook_name(self):
+    def workbook_name(self) -> Optional[str]:
         return self._workbook_name
 
     @property
-    def project_id(self):
+    def project_id(self) -> Optional[str]:
         return self._project_id
 
     @property
-    def project_name(self):
+    def project_name(self) -> Optional[str]:
         return self._project_name
 
     def _set_values(
@@ -173,7 +179,7 @@ class DataAlertItem(object):
             self._recipients = recipients
 
     @classmethod
-    def from_response(cls, resp, ns):
+    def from_response(cls, resp, ns) -> List["DataAlertItem"]:
         all_alert_items = list()
         parsed_response = ET.fromstring(resp)
         all_alert_xml = parsed_response.findall(".//t:dataAlert", namespaces=ns)
