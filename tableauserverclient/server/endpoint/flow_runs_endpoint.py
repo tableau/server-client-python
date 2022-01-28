@@ -37,18 +37,16 @@ class FlowRuns(QuerysetEndpoint):
         server_response = self.get_request(url)
         return FlowRunItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
-
     # Cancel 1 flow run by id
     @api(version="3.10")
     def cancel(self, flow_run_id):
         if not flow_run_id:
             error = "Flow ID undefined."
             raise ValueError(error)
-        id_ = getattr(flow_run_id, 'id', flow_run_id)
+        id_ = getattr(flow_run_id, "id", flow_run_id)
         url = "{0}/{1}".format(self.baseurl, id_)
         self.put_request(url)
         logger.info("Deleted single flow (ID: {0})".format(id_))
-
 
     @api(version="3.10")
     def wait_for_job(self, flow_run_id, *, timeout=None):
