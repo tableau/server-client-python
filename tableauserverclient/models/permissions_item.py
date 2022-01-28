@@ -76,7 +76,6 @@ class PermissionsRule(object):
             rule = PermissionsRule(grantee, capability_dict)
             rules.append(rule)
 
-
         return rules
 
     @staticmethod
