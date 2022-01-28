@@ -17,41 +17,33 @@ class FlowRunItem(object):
         self._progress: Optional[str] = None
         self._background_job_id: Optional[str] = None
 
-    
     @property
     def id(self) -> str:
         return self._id
-
 
     @property
     def flow_id(self) -> Optional[str]:
         return self._flow_id
 
-
     @property
     def status(self) -> Optional[str]:
         return self._status
-
 
     @property
     def started_at(self) -> Optional["datetime"]:
         return self._started_at
 
-
     @property
     def completed_at(self) -> Optional["datetime"]:
         return self._completed_at
-
 
     @property
     def progress(self) -> Optional[str]:
         return self._progress
 
-
     @property
     def background_job_id(self) -> Optional[str]:
         return self._background_job_id
-
 
     def _set_values(
         self,
@@ -78,14 +70,13 @@ class FlowRunItem(object):
         if background_job_id is not None:
             self._background_job_id = background_job_id
 
-
     @classmethod
     def from_response(cls: Type["FlowRunItem"], resp: bytes, ns: Optional[Dict]) -> List["FlowRunItem"]:
         all_flowrun_items = list()
         parsed_response = ET.fromstring(resp)
         all_flowrun_xml = itertools.chain(
             parsed_response.findall(".//t:flowRun[@id]", namespaces=ns),
-            parsed_response.findall(".//t:flowRuns[@id]", namespaces=ns)
+            parsed_response.findall(".//t:flowRuns[@id]", namespaces=ns),
         )
 
         for flowrun_xml in all_flowrun_xml:
@@ -95,16 +86,15 @@ class FlowRunItem(object):
             all_flowrun_items.append(flowrun_item)
         return all_flowrun_items
 
-
     @staticmethod
     def _parse_element(flowrun_xml, ns):
         result = {}
-        result['id'] = flowrun_xml.get("id", None)
-        result['flow_id'] = flowrun_xml.get("flowId", None)
-        result['status'] = flowrun_xml.get("status", None)
-        result['started_at'] = parse_datetime(flowrun_xml.get("startedAt", None))
-        result['completed_at'] = parse_datetime(flowrun_xml.get("completedAt", None))
-        result['progress'] = flowrun_xml.get("progress", None)
-        result['background_job_id'] = flowrun_xml.get("backgroundJobId", None)
+        result["id"] = flowrun_xml.get("id", None)
+        result["flow_id"] = flowrun_xml.get("flowId", None)
+        result["status"] = flowrun_xml.get("status", None)
+        result["started_at"] = parse_datetime(flowrun_xml.get("startedAt", None))
+        result["completed_at"] = parse_datetime(flowrun_xml.get("completedAt", None))
+        result["progress"] = flowrun_xml.get("progress", None)
+        result["background_job_id"] = flowrun_xml.get("backgroundJobId", None)
 
         return result

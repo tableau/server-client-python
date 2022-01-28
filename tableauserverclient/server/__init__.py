@@ -32,7 +32,8 @@ from .. import (
     ColumnItem,
     FlowItem,
     WebhookItem,
-    FlowRunItem
+    FlowRunItem,
+    RevisionItem,
 )
 from .endpoint import (
     Auth,
