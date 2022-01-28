@@ -146,7 +146,6 @@ class GroupTests(unittest.TestCase):
 
         self.assertRaises(ValueError, self.server.groups.add_user, single_group, "")
 
-
     def test_add_user_missing_group_id(self) -> None:
         single_group = TSC.GroupItem("test")
         single_group._users = []
