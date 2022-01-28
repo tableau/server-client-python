@@ -25,24 +25,31 @@ import tableauserverclient as TSC
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Publish a datasource to server.')
+    parser = argparse.ArgumentParser(description="Publish a datasource to server.")
     # Common options; please keep those in sync across all samples
-    parser.add_argument('--server', '-s', required=True, help='server address')
-    parser.add_argument('--site', '-S', help='site name')
-    parser.add_argument('--token-name', '-p', required=True,
-                        help='name of the personal access token used to sign into the server')
-    parser.add_argument('--token-value', '-v', required=True,
-                        help='value of the personal access token used to sign into the server')
-    parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
-                        help='desired logging level (set to error by default)')
+    parser.add_argument("--server", "-s", required=True, help="server address")
+    parser.add_argument("--site", "-S", help="site name")
+    parser.add_argument(
+        "--token-name", "-p", required=True, help="name of the personal access token used to sign into the server"
+    )
+    parser.add_argument(
+        "--token-value", "-v", required=True, help="value of the personal access token used to sign into the server"
+    )
+    parser.add_argument(
+        "--logging-level",
+        "-l",
+        choices=["debug", "info", "error"],
+        default="error",
+        help="desired logging level (set to error by default)",
+    )
     # Options specific to this sample
-    parser.add_argument('--file', '-f', required=True, help='filepath to the datasource to publish')
-    parser.add_argument('--project', help='Project within which to publish the datasource')
-    parser.add_argument('--async', '-a', help='Publishing asynchronously', dest='async_', action='store_true')
-    parser.add_argument('--conn-username', help='connection username')
-    parser.add_argument('--conn-password', help='connection password')
-    parser.add_argument('--conn-embed', help='embed connection password to datasource', action='store_true')
-    parser.add_argument('--conn-oauth', help='connection is configured to use oAuth', action='store_true')
+    parser.add_argument("--file", "-f", required=True, help="filepath to the datasource to publish")
+    parser.add_argument("--project", help="Project within which to publish the datasource")
+    parser.add_argument("--async", "-a", help="Publishing asynchronously", dest="async_", action="store_true")
+    parser.add_argument("--conn-username", help="connection username")
+    parser.add_argument("--conn-password", help="connection password")
+    parser.add_argument("--conn-embed", help="embed connection password to datasource", action="store_true")
+    parser.add_argument("--conn-oauth", help="connection is configured to use oAuth", action="store_true")
 
     args = parser.parse_args()
 
@@ -64,9 +71,9 @@ def main():
         # Retrieve the project id, if a project name was passed
         if args.project is not None:
             req_options = TSC.RequestOptions()
-            req_options.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name,
-                                   TSC.RequestOptions.Operator.Equals,
-                                   args.project))
+            req_options.filter.add(
+                TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, args.project)
+            )
             projects = list(TSC.Pager(server.projects, req_options))
             if len(projects) > 1:
                 raise ValueError("The project name is not unique")
@@ -78,8 +85,9 @@ def main():
         # Create a connection_credentials item if connection details are provided
         new_conn_creds = None
         if args.conn_username:
-            new_conn_creds = TSC.ConnectionCredentials(args.conn_username, args.conn_password,
-                                                       embed=args.conn_embed, oauth=args.conn_oauth)
+            new_conn_creds = TSC.ConnectionCredentials(
+                args.conn_username, args.conn_password, embed=args.conn_embed, oauth=args.conn_oauth
+            )
 
         # Define publish mode - Overwrite, Append, or CreateNew
         publish_mode = TSC.Server.PublishMode.Overwrite
@@ -87,15 +95,17 @@ def main():
         # Publish datasource
         if args.async_:
             # Async publishing, returns a job_item
-            new_job = server.datasources.publish(new_datasource, args.filepath, publish_mode,
-                                                 connection_credentials=new_conn_creds, as_job=True)
+            new_job = server.datasources.publish(
+                new_datasource, args.filepath, publish_mode, connection_credentials=new_conn_creds, as_job=True
+            )
             print("Datasource published asynchronously. Job ID: {0}".format(new_job.id))
         else:
             # Normal publishing, returns a datasource_item
-            new_datasource = server.datasources.publish(new_datasource, args.filepath, publish_mode,
-                                                        connection_credentials=new_conn_creds)
+            new_datasource = server.datasources.publish(
+                new_datasource, args.filepath, publish_mode, connection_credentials=new_conn_creds
+            )
             print("Datasource published. Datasource ID: {0}".format(new_datasource.id))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
