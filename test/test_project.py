@@ -131,16 +131,16 @@ class ProjectTests(unittest.TestCase):
         self.assertEqual("Allow", updated_capabilities["Read"])
         self.assertEqual("Allow", updated_capabilities["Write"])
         self.assertEqual("Allow", updated_capabilities["Connect"])
-        
+
     def test_update_missing_id(self) -> None:
         single_project = TSC.ProjectItem("test")
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.projects.update, single_project)
 
     def test_create(self) -> None:
 
-      with open(CREATE_XML, "rb") as f:
+        with open(CREATE_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
-      with requests_mock.mock() as m:
+        with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
             new_project = TSC.ProjectItem(name="Test Project", description="Project created for testing")
             new_project.content_permissions = "ManagedByOwner"
