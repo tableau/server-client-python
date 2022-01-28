@@ -5,7 +5,7 @@ from requests.packages.urllib3.filepost import encode_multipart_formdata
 
 from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteItem
 
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..models import DataAlertItem
@@ -242,7 +242,7 @@ class DQWRequest(object):
 
 
 class FavoriteRequest(object):
-    def _add_to_req(self, id_, target_type, label):
+    def _add_to_req(self, id_: str, target_type: str, label: str) -> bytes:
         """
         <favorite label="...">
         <target_type id="..." />
@@ -256,16 +256,39 @@ class FavoriteRequest(object):
 
         return ET.tostring(xml_request)
 
-    def add_datasource_req(self, id_, name):
+    def add_datasource_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
+        if id_ is None:
+            raise ValueError("id must exist to add to favorites")
+        if name is None:
+            raise ValueError("Name must exist to add to favorites.")
         return self._add_to_req(id_, FavoriteItem.Type.Datasource, name)
 
-    def add_project_req(self, id_, name):
+    def add_flow_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
+        if id_ is None:
+            raise ValueError("id must exist to add to favorites")
+        if name is None:
+            raise ValueError("Name must exist to add to favorites.")
+        return self._add_to_req(id_, FavoriteItem.Type.Flow, name)
+
+    def add_project_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
+        if id_ is None:
+            raise ValueError("id must exist to add to favorites")
+        if name is None:
+            raise ValueError("Name must exist to add to favorites.")
         return self._add_to_req(id_, FavoriteItem.Type.Project, name)
 
-    def add_view_req(self, id_, name):
+    def add_view_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
+        if id_ is None:
+            raise ValueError("id must exist to add to favorites")
+        if name is None:
+            raise ValueError("Name must exist to add to favorites.")
         return self._add_to_req(id_, FavoriteItem.Type.View, name)
 
-    def add_workbook_req(self, id_, name):
+    def add_workbook_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
+        if id_ is None:
+            raise ValueError("id must exist to add to favorites")
+        if name is None:
+            raise ValueError("Name must exist to add to favorites.")
         return self._add_to_req(id_, FavoriteItem.Type.Workbook, name)
 
 
