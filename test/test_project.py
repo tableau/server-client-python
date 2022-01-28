@@ -140,7 +140,7 @@ class ProjectTests(unittest.TestCase):
 
       with open(CREATE_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
-        with requests_mock.mock() as m:
+      with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
             new_project = TSC.ProjectItem(name="Test Project", description="Project created for testing")
             new_project.content_permissions = "ManagedByOwner"
