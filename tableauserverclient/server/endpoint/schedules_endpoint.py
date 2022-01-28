@@ -114,7 +114,9 @@ class Schedules(Endpoint):
         if workbook is not None:
             items.append((workbook, "workbook", RequestFactory.Schedule.add_workbook_req))
         if datasource is not None:
-            items.append((datasource, "datasource", RequestFactory.Schedule.add_datasource_req))  # type:ignore[arg-type]
+            items.append(
+                (datasource, "datasource", RequestFactory.Schedule.add_datasource_req)  # type:ignore[arg-type]
+            )
 
         results = (add_to(*x) for x in items)
         # list() is needed for python 3.x compatibility
