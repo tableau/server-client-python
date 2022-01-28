@@ -15,7 +15,6 @@ class QuerySet:
         self._result_cache = None
         self._pagination_item = None
 
-
     def __iter__(self):
         self.request_options.pagenumber = 1
         self._result_cache = None
@@ -28,12 +27,11 @@ class QuerySet:
             self._fetch_all()
             yield from self._result_cache
 
-
     def __getitem__(self, k):
         page = self.page_number
         size = self.page_size
 
-        page_range = range((page - 1) * size, page*size)
+        page_range = range((page - 1) * size, page * size)
 
         if isinstance(k, slice):
             step = k.step if k.step is not None else 1
@@ -66,7 +64,6 @@ class QuerySet:
             return self[k]
         else:
             raise IndexError
-
 
     def _fetch_all(self):
         """

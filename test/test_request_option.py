@@ -7,13 +7,13 @@ import tableauserverclient as TSC
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
-PAGINATION_XML = os.path.join(TEST_ASSET_DIR, 'request_option_pagination.xml')
-PAGE_NUMBER_XML = os.path.join(TEST_ASSET_DIR, 'request_option_page_number.xml')
-PAGE_SIZE_XML = os.path.join(TEST_ASSET_DIR, 'request_option_page_size.xml')
-FILTER_EQUALS = os.path.join(TEST_ASSET_DIR, 'request_option_filter_equals.xml')
-FILTER_TAGS_IN = os.path.join(TEST_ASSET_DIR, 'request_option_filter_tags_in.xml')
-FILTER_MULTIPLE = os.path.join(TEST_ASSET_DIR, 'request_option_filter_tags_in.xml')
-SLICING_QUERYSET = os.path.join(TEST_ASSET_DIR, 'request_option_slicing_queryset.xml')
+PAGINATION_XML = os.path.join(TEST_ASSET_DIR, "request_option_pagination.xml")
+PAGE_NUMBER_XML = os.path.join(TEST_ASSET_DIR, "request_option_page_number.xml")
+PAGE_SIZE_XML = os.path.join(TEST_ASSET_DIR, "request_option_page_size.xml")
+FILTER_EQUALS = os.path.join(TEST_ASSET_DIR, "request_option_filter_equals.xml")
+FILTER_TAGS_IN = os.path.join(TEST_ASSET_DIR, "request_option_filter_tags_in.xml")
+FILTER_MULTIPLE = os.path.join(TEST_ASSET_DIR, "request_option_filter_tags_in.xml")
+SLICING_QUERYSET = os.path.join(TEST_ASSET_DIR, "request_option_slicing_queryset.xml")
 
 
 class RequestOptionTests(unittest.TestCase):
@@ -246,10 +246,10 @@ class RequestOptionTests(unittest.TestCase):
                 self.assertEqual(3, matching_workbooks.total_available)
 
     def test_slicing_queryset(self):
-        with open(SLICING_QUERYSET, 'rb') as f:
-            response_xml = f.read().decode('utf-8')
+        with open(SLICING_QUERYSET, "rb") as f:
+            response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
-            m.get(self.baseurl + '/views?pageNumber=1', text=response_xml)
+            m.get(self.baseurl + "/views?pageNumber=1", text=response_xml)
             all_views = self.server.views.all()
 
             self.assertEqual(10, len(all_views[::]))
@@ -262,10 +262,7 @@ class RequestOptionTests(unittest.TestCase):
             self.assertEqual(3, len(all_views[3:6:-1]))
             self.assertEqual(3, len(all_views[6:3:-1]))
             self.assertEqual(10, len(all_views[::-1]))
-            self.assertEqual(
-                all_views[3:6],
-                list(reversed(all_views[3:6:-1]))
-            )
+            self.assertEqual(all_views[3:6], list(reversed(all_views[3:6:-1])))
 
             self.assertEqual(all_views[-3].id, "2df55de2-3a2d-4e34-b515-6d4e70b830e9")
 
