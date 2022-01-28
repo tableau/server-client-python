@@ -5,6 +5,7 @@ from typing import List, Optional, TYPE_CHECKING, Type
 if TYPE_CHECKING:
     from datetime import datetime
 
+
 class RevisionItem(object):
     def __init__(self):
         self._resource_id: Optional[str] = None
@@ -55,12 +56,7 @@ class RevisionItem(object):
         )
 
     @classmethod
-    def from_response(
-        cls,
-        resp: bytes,
-        ns,
-        resource_item
-    ) -> List["RevisionItem"]:
+    def from_response(cls, resp: bytes, ns, resource_item) -> List["RevisionItem"]:
         all_revision_items = list()
         parsed_response = ET.fromstring(resp)
         all_revision_xml = parsed_response.findall(".//t:revision", namespaces=ns)
@@ -72,7 +68,7 @@ class RevisionItem(object):
             revision_item._current = string_to_bool(revision_xml.get("isCurrent", ""))
             revision_item._deleted = string_to_bool(revision_xml.get("isDeleted", ""))
             revision_item._created_at = parse_datetime(revision_xml.get("createdAt", None))
-            for user in revision_xml.findall('.//t:user', namespaces=ns):
+            for user in revision_xml.findall(".//t:user", namespaces=ns):
                 revision_item._user_id = user.get("id", None)
                 revision_item._user_name = user.get("name", None)
 
