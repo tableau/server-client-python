@@ -16,14 +16,10 @@ from ..models import SubscriptionItem
 from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteItem
 from ..models import WebhookItem
 
+from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
-    from ..models import SubscriptionItem
     from ..models import DataAlertItem
-    from ..models import FlowItem
-    from ..models import ConnectionItem
-    from ..models import SiteItem
-    from ..models import ProjectItem
-    from tableauserverclient.server import Server
 
 
 def _add_multipart(parts: Dict) -> Tuple[Any, str]:
