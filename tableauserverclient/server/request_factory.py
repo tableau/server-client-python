@@ -798,7 +798,7 @@ class TagRequest(object):
 
 
 class UserRequest(object):
-    def update_req(self, user_item, password):
+    def update_req(self, user_item: UserItem, password: Optional[str]) -> bytes:
         xml_request = ET.Element("tsRequest")
         user_element = ET.SubElement(xml_request, "user")
         if user_item.fullname:
@@ -814,11 +814,18 @@ class UserRequest(object):
             user_element.attrib["password"] = password
         return ET.tostring(xml_request)
 
-    def add_req(self, user_item):
+    def add_req(self, user_item: UserItem) -> bytes:
         xml_request = ET.Element("tsRequest")
         user_element = ET.SubElement(xml_request, "user")
-        user_element.attrib["name"] = user_item.name
-        user_element.attrib["siteRole"] = user_item.site_role
+        if isinstance(user_item.name, str):
+            user_element.attrib["name"] = user_item.name
+        else:
+            raise ValueError(f"{user_item} missing name.")
+        if isinstance(user_item.site_role, str):
+            user_element.attrib["siteRole"] = user_item.site_role
+        else:
+            raise ValueError(f"{user_item} must have site role populated.")
+
         if user_item.auth_setting:
             user_element.attrib["authSetting"] = user_item.auth_setting
         return ET.tostring(xml_request)
