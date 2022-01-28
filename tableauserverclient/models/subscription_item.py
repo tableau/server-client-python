@@ -2,9 +2,14 @@ import xml.etree.ElementTree as ET
 from .target import Target
 from .property_decorators import property_is_boolean
 
+from typing import List, Type, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .target import Target
+
 
 class SubscriptionItem(object):
-    def __init__(self, subject, schedule_id, user_id, target):
+    def __init__(self, subject: str, schedule_id: str, user_id: str, target: "Target") -> None:
         self._id = None
         self.attach_image = True
         self.attach_pdf = False
@@ -18,7 +23,7 @@ class SubscriptionItem(object):
         self.target = target
         self.user_id = user_id
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         if self.id is not None:
             return "<Subscription#{_id} subject({subject}) schedule_id({schedule_id}) user_id({user_id}) \
                 target({target})".format(
@@ -35,43 +40,43 @@ class SubscriptionItem(object):
         return self._id
 
     @property
-    def attach_image(self):
+    def attach_image(self) -> bool:
         return self._attach_image
 
     @attach_image.setter
     @property_is_boolean
-    def attach_image(self, value):
+    def attach_image(self, value: bool):
         self._attach_image = value
 
     @property
-    def attach_pdf(self):
+    def attach_pdf(self) -> bool:
         return self._attach_pdf
 
     @attach_pdf.setter
     @property_is_boolean
-    def attach_pdf(self, value):
+    def attach_pdf(self, value: bool) -> None:
         self._attach_pdf = value
 
     @property
-    def send_if_view_empty(self):
+    def send_if_view_empty(self) -> bool:
         return self._send_if_view_empty
 
     @send_if_view_empty.setter
     @property_is_boolean
-    def send_if_view_empty(self, value):
+    def send_if_view_empty(self, value: bool) -> None:
         self._send_if_view_empty = value
 
     @property
-    def suspended(self):
+    def suspended(self) -> bool:
         return self._suspended
 
     @suspended.setter
     @property_is_boolean
-    def suspended(self, value):
+    def suspended(self, value: bool) -> None:
         self._suspended = value
 
     @classmethod
-    def from_response(cls, xml, ns):
+    def from_response(cls: Type, xml: bytes, ns) -> List["SubscriptionItem"]:
         parsed_response = ET.fromstring(xml)
         all_subscriptions_xml = parsed_response.findall(".//t:subscription", namespaces=ns)
 
@@ -126,5 +131,5 @@ class SubscriptionItem(object):
 
 
 # Used to convert string represented boolean to a boolean type
-def string_to_bool(s):
+def string_to_bool(s: str) -> bool:
     return s.lower() == "true"
