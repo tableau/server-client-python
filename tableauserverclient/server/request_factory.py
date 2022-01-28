@@ -16,6 +16,11 @@ from ..models import SubscriptionItem
 from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteItem
 from ..models import WebhookItem
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..models import DataAlertItem
+
 
 def _add_multipart(parts: Dict) -> Tuple[Any, str]:
     mime_multipart_parts = list()

@@ -12,6 +12,12 @@ if TYPE_CHECKING:
     from datetime import datetime
 
 
+from typing import List, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from datetime import datetime
+
+
 class DataAlertItem(object):
     class Frequency:
         Once = "Once"
