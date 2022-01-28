@@ -8,6 +8,7 @@ from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteIte
 from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple, Iterable
 
 if TYPE_CHECKING:
+    from ..models import SubscriptionItem
     from ..models import DataAlertItem
     from ..models import FlowItem
     from ..models import ConnectionItem
@@ -953,7 +954,7 @@ class TaskRequest(object):
 
 class SubscriptionRequest(object):
     @_tsrequest_wrapped
-    def create_req(self, xml_request, subscription_item):
+    def create_req(self, xml_request: ET.Element, subscription_item: "SubscriptionItem") -> bytes:
         subscription_element = ET.SubElement(xml_request, "subscription")
 
         # Main attributes
@@ -986,7 +987,7 @@ class SubscriptionRequest(object):
         return ET.tostring(xml_request)
 
     @_tsrequest_wrapped
-    def update_req(self, xml_request, subscription_item):
+    def update_req(self, xml_request: ET.Element, subscription_item: "SubscriptionItem") -> bytes:
         subscription = ET.SubElement(xml_request, "subscription")
 
         # Main attributes
