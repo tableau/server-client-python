@@ -3,7 +3,7 @@ class PersonalAccessTokenAuth(object):
         self.token_name = token_name
         self.personal_access_token = personal_access_token
         self.site_id = site_id if site_id is not None else ''
-        # Personal Access Tokens doesn't support impersonation.
+        # Personal Access Tokens doesn't support impersonation
         self.user_id_to_impersonate = None
 
     @property
