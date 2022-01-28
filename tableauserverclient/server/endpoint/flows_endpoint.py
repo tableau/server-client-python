@@ -153,11 +153,7 @@ class Flows(Endpoint):
     # Publish flow
     @api(version="3.3")
     def publish(
-        self,
-        flow_item: FlowItem,
-        file_path: FilePath,
-        mode: str,
-        connections: Optional[List[ConnectionItem]] = None
+        self, flow_item: FlowItem, file_path: FilePath, mode: str, connections: Optional[List[ConnectionItem]] = None
     ) -> FlowItem:
         if not os.path.isfile(file_path):
             error = "File path does not lead to an existing file."

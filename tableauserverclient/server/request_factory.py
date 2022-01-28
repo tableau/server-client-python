@@ -307,7 +307,7 @@ class FlowRequest(object):
         flow_item: "FlowItem",
         filename: str,
         file_contents: bytes,
-        connections: Optional[List["ConnectionItem"]] = None
+        connections: Optional[List["ConnectionItem"]] = None,
     ) -> Tuple[Any, str]:
         xml_request = self._generate_xml(flow_item, connections)
 
