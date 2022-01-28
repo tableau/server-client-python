@@ -10,13 +10,14 @@ METRICS_GET = assets / "metrics_get.xml"
 METRICS_GET_BY_ID = assets / "metrics_get_by_id.xml"
 METRICS_UPDATE = assets / "metrics_update.xml"
 
+
 class TestMetrics(unittest.TestCase):
     def setUp(self) -> None:
-        self.server = TSC.Server('http://test')
+        self.server = TSC.Server("http://test")
 
         # Fake signin
-        self.server._site_id = 'dad65087-b08b-4603-af4e-2887b8aafc67'
-        self.server._auth_token = 'j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM'
+        self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"
+        self.server._auth_token = "j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM"
         self.server.version = "3.9"
 
         self.baseurl = self.server.metrics.baseurl

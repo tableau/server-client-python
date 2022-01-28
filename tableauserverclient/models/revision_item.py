@@ -51,8 +51,7 @@ class RevisionItem(object):
 
     def __repr__(self):
         return (
-            "<RevisionItem# revisionNumber={_revision_number} "
-            "current={_current} deleted={_deleted} user={_user_id}>"
+            "<RevisionItem# revisionNumber={_revision_number} " "current={_current} deleted={_deleted} user={_user_id}>"
         ).format(**self.__dict__)
 
     @classmethod
