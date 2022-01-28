@@ -27,7 +27,7 @@ jobs:
 
     - name: Format with black
       run: |
-        black --line-length 120 tableauserverclient samples test
+        black --check --line-length 120 tableauserverclient samples test
 
     - name: Test with pytest
       if: always()
