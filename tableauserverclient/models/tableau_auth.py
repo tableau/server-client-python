@@ -4,14 +4,14 @@ class TableauAuth(object):
             import warnings
 
             warnings.warn(
-                'TableauAuth(..., site=...) is deprecated, ' 'please use TableauAuth(..., site_id=...) instead.',
+                "TableauAuth(..., site=...) is deprecated, " "please use TableauAuth(..., site_id=...) instead.",
                 DeprecationWarning,
             )
             site_id = site
 
         self.user_id_to_impersonate = user_id_to_impersonate
         self.password = password
-        self.site_id = site_id if site_id is not None else ''
+        self.site_id = site_id if site_id is not None else ""
         self.username = username
 
     @property
