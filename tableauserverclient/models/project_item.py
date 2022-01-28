@@ -9,6 +9,9 @@ from .property_decorators import property_is_enum, property_not_empty
 from typing import List, Optional
 
 
+from typing import List, Optional, TYPE_CHECKING
+
+
 class ProjectItem(object):
     class ContentPermissions:
         LockedToProject: str = "LockedToProject"
