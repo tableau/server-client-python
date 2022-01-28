@@ -167,9 +167,7 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual("2016-09-16T16:15:00Z", format_datetime(new_schedule.next_run_at))
         self.assertEqual(TSC.ScheduleItem.ExecutionOrder.Parallel, new_schedule.execution_order)
         self.assertEqual(time(9, 15), new_schedule.interval_item.start_time)
-        self.assertEqual(
-            ("Monday", "Wednesday", "Friday"), new_schedule.interval_item.interval
-        )  # type: ignore[union-attr]
+        self.assertEqual(("Monday", "Wednesday", "Friday"), new_schedule.interval_item.interval)
         self.assertEqual(2, len(new_schedule.warnings))
         self.assertEqual("warning 1", new_schedule.warnings[0])
         self.assertEqual("warning 2", new_schedule.warnings[1])
