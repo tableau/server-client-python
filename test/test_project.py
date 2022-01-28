@@ -119,7 +119,7 @@ class ProjectTests(unittest.TestCase):
 
             capabilities = {TSC.Permission.Capability.ExportXml: TSC.Permission.Mode.Deny}
 
-            rules = [TSC.PermissionsRule(grantee=group, capabilities=capabilities)]
+            rules = [TSC.PermissionsRule(grantee=group.to_reference(), capabilities=capabilities)]
 
             new_rules = self.server.projects.update_datasource_default_permissions(project, rules)
 
@@ -236,7 +236,7 @@ class ProjectTests(unittest.TestCase):
                     if permission.grantee.id == single_group._id:
                         capabilities = permission.capabilities
 
-            rules = TSC.PermissionsRule(grantee=single_group, capabilities=capabilities)
+            rules = TSC.PermissionsRule(grantee=single_group.to_reference(), capabilities=capabilities)
 
             endpoint = "{}/permissions/groups/{}".format(single_project._id, single_group._id)
             m.delete("{}/{}/Read/Allow".format(self.baseurl, endpoint), status_code=204)
@@ -282,7 +282,7 @@ class ProjectTests(unittest.TestCase):
                 TSC.Permission.Capability.ChangePermissions: TSC.Permission.Mode.Allow,
             }
 
-            rules = TSC.PermissionsRule(grantee=single_group, capabilities=capabilities)
+            rules = TSC.PermissionsRule(grantee=single_group.to_reference(), capabilities=capabilities)
 
             endpoint = "{}/default-permissions/workbooks/groups/{}".format(single_project._id, single_group._id)
             m.delete("{}/{}/Read/Allow".format(self.baseurl, endpoint), status_code=204)
