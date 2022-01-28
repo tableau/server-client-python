@@ -22,6 +22,8 @@ if TYPE_CHECKING:
     from ..models import DataAlertItem
     from ..models import FlowItem
     from ..models import ConnectionItem
+    from ..models import ProjectItem
+
 
 def _add_multipart(parts: Dict) -> Tuple[Any, str]:
     mime_multipart_parts = list()
