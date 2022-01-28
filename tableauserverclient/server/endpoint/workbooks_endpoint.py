@@ -335,6 +335,7 @@ class Workbooks(QuerysetEndpoint):
         connection_credentials: Optional["ConnectionCredentials"] = None,
         connections: Optional[Sequence[ConnectionItem]] = None,
         as_job: bool = False,
+        hidden_views: Optional[Sequence[str]] = None,
         skip_connection_check: bool = False,
     ):
 
