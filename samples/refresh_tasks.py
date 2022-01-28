@@ -28,28 +28,35 @@ def handle_info(server, args):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Get all of the refresh tasks available on a server')
+    parser = argparse.ArgumentParser(description="Get all of the refresh tasks available on a server")
     # Common options; please keep those in sync across all samples
-    parser.add_argument('--server', '-s', required=True, help='server address')
-    parser.add_argument('--site', '-S', help='site name')
-    parser.add_argument('--token-name', '-p', required=True,
-                        help='name of the personal access token used to sign into the server')
-    parser.add_argument('--token-value', '-v', required=True,
-                        help='value of the personal access token used to sign into the server')
-    parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
-                        help='desired logging level (set to error by default)')
+    parser.add_argument("--server", "-s", required=True, help="server address")
+    parser.add_argument("--site", "-S", help="site name")
+    parser.add_argument(
+        "--token-name", "-p", required=True, help="name of the personal access token used to sign into the server"
+    )
+    parser.add_argument(
+        "--token-value", "-v", required=True, help="value of the personal access token used to sign into the server"
+    )
+    parser.add_argument(
+        "--logging-level",
+        "-l",
+        choices=["debug", "info", "error"],
+        default="error",
+        help="desired logging level (set to error by default)",
+    )
     # Options specific to this sample
     subcommands = parser.add_subparsers()
 
-    list_arguments = subcommands.add_parser('list')
+    list_arguments = subcommands.add_parser("list")
     list_arguments.set_defaults(func=handle_list)
 
-    run_arguments = subcommands.add_parser('run')
-    run_arguments.add_argument('id', default=None)
+    run_arguments = subcommands.add_parser("run")
+    run_arguments.add_argument("id", default=None)
     run_arguments.set_defaults(func=handle_run)
 
-    info_arguments = subcommands.add_parser('info')
-    info_arguments.add_argument('id', default=None)
+    info_arguments = subcommands.add_parser("info")
+    info_arguments.add_argument("id", default=None)
     info_arguments.set_defaults(func=handle_info)
 
     args = parser.parse_args()
@@ -65,5 +72,5 @@ def main():
         args.func(server, args)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

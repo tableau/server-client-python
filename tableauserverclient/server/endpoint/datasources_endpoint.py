@@ -12,7 +12,7 @@ from ...filesys_helpers import (
     get_file_object_size,
 )
 from ...models.job_item import JobItem
-from ...models import ConnectionCredentials
+from ...models import ConnectionCredentials, RevisionItem
 
 import io
 import os
@@ -393,7 +393,8 @@ class Datasources(QuerysetEndpoint):
         self._data_quality_warnings.clear(item)
 
     # Populate datasource item's revisions
-    def populate_revisions(self, datasource_item):
+    @api(version="2.3")
+    def populate_revisions(self, datasource_item: DatasourceItem) -> None:
         if not datasource_item.id:
             error = "Datasource item missing ID. Datasource must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -402,33 +403,30 @@ class Datasources(QuerysetEndpoint):
             return self._get_datasource_revisions(datasource_item)
 
         datasource_item._set_revisions(revisions_fetcher)
-        logger.info(
-            "Populated revisions for datasource (ID: {0})".format(datasource_item.id)
-        )
+        logger.info("Populated revisions for datasource (ID: {0})".format(datasource_item.id))
 
-    def _get_datasource_revisions(self, datasource_item, req_options=None):
+    def _get_datasource_revisions(
+        self, datasource_item: DatasourceItem, req_options: Optional["RequestOptions"] = None
+    ) -> List[RevisionItem]:
         url = "{0}/{1}/revisions".format(self.baseurl, datasource_item.id)
         server_response = self.get_request(url, req_options)
-        revisions = RevisionItem.from_response(
-            server_response.content, self.parent_srv.namespace, datasource_item
-        )
+        revisions = RevisionItem.from_response(server_response.content, self.parent_srv.namespace, datasource_item)
         return revisions
 
     # Download 1 datasource revision by revision number
+    @api(version="2.3")
     def download_revision(
         self,
-        datasource_id,
-        revision_number,
-        filepath=None,
-        include_extract=True,
-        no_extract=None,
-    ):
+        datasource_id: str,
+        revision_number: str,
+        filepath: Optional[PathOrFile] = None,
+        include_extract: bool = True,
+        no_extract: Optional[bool] = None,
+    ) -> str:
         if not datasource_id:
             error = "Datasource ID undefined."
             raise ValueError(error)
-        url = "{0}/{1}/revisions/{2}/content".format(
-            self.baseurl, datasource_id, revision_number
-        )
+        url = "{0}/{1}/revisions/{2}/content".format(self.baseurl, datasource_id, revision_number)
         if no_extract is False or no_extract is True:
             import warnings
 
@@ -441,9 +439,7 @@ class Datasources(QuerysetEndpoint):
         if not include_extract:
             url += "?includeExtract=False"
 
-        with closing(
-            self.get_request(url, parameters={"stream": True})
-        ) as server_response:
+        with closing(self.get_request(url, parameters={"stream": True})) as server_response:
             _, params = cgi.parse_header(server_response.headers["Content-Disposition"])
             filename = to_filename(os.path.basename(params["filename"]))
 
@@ -454,8 +450,17 @@ class Datasources(QuerysetEndpoint):
                     f.write(chunk)
 
         logger.info(
-            "Downloaded datasource revision {0} to {1} (ID: {2})".format(
-                revision_number, download_path, datasource_id
-            )
+            "Downloaded datasource revision {0} to {1} (ID: {2})".format(revision_number, download_path, datasource_id)
         )
         return os.path.abspath(download_path)
+
+    @api(version="2.3")
+    def delete_revision(self, datasource_id: str, revision_number: str) -> None:
+        if datasource_id is None or revision_number is None:
+            raise ValueError
+        url = "/".join([self.baseurl, datasource_id, "revisions", revision_number])
+
+        self.delete_request(url)
+        logger.info(
+            "Deleted single datasource revsision (ID: {0}) (Revision: {1})".format(datasource_id, revision_number)
+        )
