@@ -80,7 +80,13 @@ class Schedules(Endpoint):
         def add_to(
             resource: Union["DatasourceItem", "WorkbookItem"],
             type_: str,
-            req_factory: Callable[[str, str,], bytes]
+            req_factory: Callable[
+                [
+                    str,
+                    str,
+                ],
+                bytes,
+            ],
         ) -> AddResponse:
             id_ = resource.id
             url = "{0}/{1}/{2}s".format(self.siteurl, schedule_id, type_)
@@ -112,4 +118,4 @@ class Schedules(Endpoint):
 
         results = (add_to(*x) for x in items)
         # list() is needed for python 3.x compatibility
-        return list(filter(lambda x: not x.result, results))   # type:ignore[arg-type]
+        return list(filter(lambda x: not x.result, results))  # type:ignore[arg-type]
