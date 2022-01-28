@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from ..models import DataAlertItem
     from ..models import FlowItem
     from ..models import ConnectionItem
+    from ..models import SiteItem
     from ..models import ProjectItem
 
 
@@ -556,7 +557,7 @@ class ScheduleRequest(object):
 
 
 class SiteRequest(object):
-    def update_req(self, site_item):
+    def update_req(self, site_item: "SiteItem"):
         xml_request = ET.Element("tsRequest")
         site_element = ET.SubElement(xml_request, "site")
         if site_item.name:
@@ -662,7 +663,7 @@ class SiteRequest(object):
 
         return ET.tostring(xml_request)
 
-    def create_req(self, site_item):
+    def create_req(self, site_item: "SiteItem"):
         xml_request = ET.Element("tsRequest")
         site_element = ET.SubElement(xml_request, "site")
         site_element.attrib["name"] = site_item.name
