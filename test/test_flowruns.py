@@ -82,7 +82,6 @@ class FlowRunTests(unittest.TestCase):
             self.assertEqual(flow_run_id, flow_run.id)
             self.assertEqual(flow_run.progress, "100")
 
-            
     def test_wait_for_job_failed(self) -> None:
         # Waiting for a failed job raises an exception
         response_xml = read_xml_asset(GET_BY_ID_FAILED_XML)
@@ -92,7 +91,6 @@ class FlowRunTests(unittest.TestCase):
             with self.assertRaises(FlowRunFailedException):
                 self.server.flow_runs.wait_for_job(flow_run_id)
 
-                
     def test_wait_for_job_timeout(self) -> None:
         # Waiting for a job which doesn't terminate will throw an exception
         response_xml = read_xml_asset(GET_BY_ID_INPROGRESS_XML)

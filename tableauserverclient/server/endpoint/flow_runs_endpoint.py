@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from ..server import Server
     from ..request_options import RequestOptions
 
+
 class FlowRuns(QuerysetEndpoint):
     def __init__(self, parent_srv: "Server") -> None:
         super(FlowRuns, self).__init__(parent_srv)
@@ -24,7 +25,7 @@ class FlowRuns(QuerysetEndpoint):
 
     # Get all flows
     @api(version="3.10")
-    def get(self, req_options: Optional["RequestOptions"]=None) -> Tuple[List[FlowRunItem], PaginationItem]:
+    def get(self, req_options: Optional["RequestOptions"] = None) -> Tuple[List[FlowRunItem], PaginationItem]:
         logger.info("Querying all flow runs on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)

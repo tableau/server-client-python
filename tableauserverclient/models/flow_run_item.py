@@ -7,9 +7,10 @@ from typing import Dict, List, Optional, Type, TYPE_CHECKING
 if TYPE_CHECKING:
     from datetime import datetime
 
+
 class FlowRunItem(object):
     def __init__(self) -> None:
-        self._id: str = ''
+        self._id: str = ""
         self._flow_id: Optional[str] = None
         self._status: Optional[str] = None
         self._started_at: Optional["datetime"] = None
