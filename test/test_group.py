@@ -118,7 +118,7 @@ class GroupTests(unittest.TestCase):
             self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", user.id)
             self.assertEqual("testuser", user.name)
             self.assertEqual("ServerAdministrator", user.site_role)
-            
+
     def test_add_user_before_populating(self) -> None:
         with open(GET_XML, "rb") as f:
             get_xml_response = f.read().decode("utf-8")
