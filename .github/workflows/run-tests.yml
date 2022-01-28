@@ -30,9 +30,11 @@ jobs:
         black --check --line-length 120 tableauserverclient samples test
 
     - name: Test with pytest
+      if: always()
       run: |
         pytest test
 
     - name: Run Mypy tests
+      if: always()
       run: |
         mypy --show-error-codes --disable-error-code misc --disable-error-code import tableauserverclient test
