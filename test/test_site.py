@@ -13,7 +13,7 @@ CREATE_XML = os.path.join(TEST_ASSET_DIR, "site_create.xml")
 
 
 class SiteTests(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server = TSC.Server("http://test")
         self.server.version = "3.10"
 
@@ -22,7 +22,7 @@ class SiteTests(unittest.TestCase):
         self.server._site_id = "0626857c-1def-4503-a7d8-7907c3ff9d9f"
         self.baseurl = self.server.sites.baseurl
 
-    def test_get(self):
+    def test_get(self) -> None:
         with open(GET_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -61,11 +61,11 @@ class SiteTests(unittest.TestCase):
         self.assertEqual(False, all_sites[1].flows_enabled)
         self.assertEqual(None, all_sites[1].data_acceleration_mode)
 
-    def test_get_before_signin(self):
+    def test_get_before_signin(self) -> None:
         self.server._auth_token = None
         self.assertRaises(TSC.NotSignedInError, self.server.sites.get)
 
-    def test_get_by_id(self):
+    def test_get_by_id(self) -> None:
         with open(GET_BY_ID_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -83,10 +83,10 @@ class SiteTests(unittest.TestCase):
         self.assertEqual(False, single_site.commenting_mentions_enabled)
         self.assertEqual(True, single_site.catalog_obfuscation_enabled)
 
-    def test_get_by_id_missing_id(self):
+    def test_get_by_id_missing_id(self) -> None:
         self.assertRaises(ValueError, self.server.sites.get_by_id, "")
 
-    def test_get_by_name(self):
+    def test_get_by_name(self) -> None:
         with open(GET_BY_NAME_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -101,10 +101,10 @@ class SiteTests(unittest.TestCase):
         self.assertEqual(True, single_site.subscribe_others_enabled)
         self.assertEqual(False, single_site.disable_subscriptions)
 
-    def test_get_by_name_missing_name(self):
+    def test_get_by_name_missing_name(self) -> None:
         self.assertRaises(ValueError, self.server.sites.get_by_name, "")
 
-    def test_update(self):
+    def test_update(self) -> None:
         with open(UPDATE_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -173,11 +173,11 @@ class SiteTests(unittest.TestCase):
         self.assertEqual(True, single_site.auto_suspend_refresh_enabled)
         self.assertEqual(55, single_site.auto_suspend_refresh_inactivity_window)
 
-    def test_update_missing_id(self):
+    def test_update_missing_id(self) -> None:
         single_site = TSC.SiteItem("test", "test")
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.sites.update, single_site)
 
-    def test_create(self):
+    def test_create(self) -> None:
         with open(CREATE_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -202,25 +202,25 @@ class SiteTests(unittest.TestCase):
         self.assertEqual(True, new_site.disable_subscriptions)
         self.assertEqual(15, new_site.user_quota)
 
-    def test_delete(self):
+    def test_delete(self) -> None:
         with requests_mock.mock() as m:
             m.delete(self.baseurl + "/0626857c-1def-4503-a7d8-7907c3ff9d9f", status_code=204)
             self.server.sites.delete("0626857c-1def-4503-a7d8-7907c3ff9d9f")
 
-    def test_delete_missing_id(self):
+    def test_delete_missing_id(self) -> None:
         self.assertRaises(ValueError, self.server.sites.delete, "")
 
-    def test_encrypt(self):
+    def test_encrypt(self) -> None:
         with requests_mock.mock() as m:
             m.post(self.baseurl + "/0626857c-1def-4503-a7d8-7907c3ff9d9f/encrypt-extracts", status_code=200)
             self.server.sites.encrypt_extracts("0626857c-1def-4503-a7d8-7907c3ff9d9f")
 
-    def test_recrypt(self):
+    def test_recrypt(self) -> None:
         with requests_mock.mock() as m:
             m.post(self.baseurl + "/0626857c-1def-4503-a7d8-7907c3ff9d9f/reencrypt-extracts", status_code=200)
             self.server.sites.re_encrypt_extracts("0626857c-1def-4503-a7d8-7907c3ff9d9f")
 
-    def test_decrypt(self):
+    def test_decrypt(self) -> None:
         with requests_mock.mock() as m:
             m.post(self.baseurl + "/0626857c-1def-4503-a7d8-7907c3ff9d9f/decrypt-extracts", status_code=200)
             self.server.sites.decrypt_extracts("0626857c-1def-4503-a7d8-7907c3ff9d9f")

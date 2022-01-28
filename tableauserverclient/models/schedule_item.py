@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 from datetime import datetime
+from typing import Optional, Union
 
 from .interval_item import (
     IntervalItem,
@@ -14,6 +15,8 @@ from .property_decorators import (
     property_is_int,
 )
 from ..datetime_helpers import parse_datetime
+
+Interval = Union[HourlyInterval, DailyInterval, WeeklyInterval, MonthlyInterval]
 
 
 class ScheduleItem(object):
@@ -31,86 +34,86 @@ class ScheduleItem(object):
         Active = "Active"
         Suspended = "Suspended"
 
-    def __init__(self, name, priority, schedule_type, execution_order, interval_item):
-        self._created_at = None
-        self._end_schedule_at = None
-        self._id = None
-        self._next_run_at = None
-        self._state = None
-        self._updated_at = None
-        self.interval_item = interval_item
-        self.execution_order = execution_order
-        self.name = name
-        self.priority = priority
-        self.schedule_type = schedule_type
+    def __init__(self, name: str, priority: int, schedule_type: str, execution_order: str, interval_item: Interval):
+        self._created_at: Optional[datetime] = None
+        self._end_schedule_at: Optional[datetime] = None
+        self._id: Optional[str] = None
+        self._next_run_at: Optional[datetime] = None
+        self._state: Optional[str] = None
+        self._updated_at: Optional[datetime] = None
+        self.interval_item: Interval = interval_item
+        self.execution_order: str = execution_order
+        self.name: str = name
+        self.priority: int = priority
+        self.schedule_type: str = schedule_type
 
     def __repr__(self):
-        return '<Schedule#{_id} "{_name}" {interval_item}>'.format(**self.__dict__)
+        return '<Schedule#{_id} "{_name}" {interval_item}>'.format(**vars(self))
 
     @property
-    def created_at(self):
+    def created_at(self) -> Optional[datetime]:
         return self._created_at
 
     @property
-    def end_schedule_at(self):
+    def end_schedule_at(self) -> Optional[datetime]:
         return self._end_schedule_at
 
     @property
-    def execution_order(self):
+    def execution_order(self) -> str:
         return self._execution_order
 
     @execution_order.setter
     @property_is_enum(ExecutionOrder)
-    def execution_order(self, value):
+    def execution_order(self, value: str):
         self._execution_order = value
 
     @property
-    def id(self):
+    def id(self) -> Optional[str]:
         return self._id
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @name.setter
     @property_not_nullable
-    def name(self, value):
+    def name(self, value: str):
         self._name = value
 
     @property
-    def next_run_at(self):
+    def next_run_at(self) -> Optional[datetime]:
         return self._next_run_at
 
     @property
-    def priority(self):
+    def priority(self) -> int:
         return self._priority
 
     @priority.setter
     @property_is_int(range=(1, 100))
-    def priority(self, value):
+    def priority(self, value: int):
         self._priority = value
 
     @property
-    def schedule_type(self):
+    def schedule_type(self) -> str:
         return self._schedule_type
 
     @schedule_type.setter
     @property_is_enum(Type)
     @property_not_nullable
-    def schedule_type(self, value):
+    def schedule_type(self, value: str):
         self._schedule_type = value
 
     @property
-    def state(self):
+    def state(self) -> Optional[str]:
         return self._state
 
     @state.setter
     @property_is_enum(State)
-    def state(self, value):
+    def state(self, value: str):
         self._state = value
 
     @property
-    def updated_at(self):
+    def updated_at(self) -> Optional[datetime]:
         return self._updated_at
 
     @property

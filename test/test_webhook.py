@@ -70,7 +70,7 @@ class WebhookTests(unittest.TestCase):
 
             self.assertNotEqual(new_webhook.id, None)
 
-    def test_request_factory(self) -> None:
+    def test_request_factory(self):
         with open(CREATE_REQUEST_XML, "rb") as f:
             webhook_request_expected = f.read().decode("utf-8")
 

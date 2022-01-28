@@ -1,3 +1,4 @@
+from datetime import datetime
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import (
@@ -8,10 +9,15 @@ from .property_decorators import (
 from ..datetime_helpers import parse_datetime
 from .reference_item import ResourceReference
 
+from typing import Dict, List, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..server.pager import Pager
+
 
 class UserItem(object):
 
-    tag_name = "user"
+    tag_name: str = "user"
 
     class Roles:
         Interactor = "Interactor"
@@ -39,23 +45,27 @@ class UserItem(object):
         SAML = "SAML"
         ServerDefault = "ServerDefault"
 
-    def __init__(self, name=None, site_role=None, auth_setting=None):
-        self._auth_setting = None
-        self._domain_name = None
-        self._external_auth_user_id = None
-        self._id = None
-        self._last_login = None
+    def __init__(
+        self, name: Optional[str] = None, site_role: Optional[str] = None, auth_setting: Optional[str] = None
+    ) -> None:
+        self._auth_setting: Optional[str] = None
+        self._domain_name: Optional[str] = None
+        self._external_auth_user_id: Optional[str] = None
+        self._id: Optional[str] = None
+        self._last_login: Optional[datetime] = None
         self._workbooks = None
-        self._favorites = None
+        self._favorites: Optional[Dict[str, List]] = None
         self._groups = None
-        self.email = None
-        self.fullname = None
-        self.name = name
-        self.site_role = site_role
-        self.auth_setting = auth_setting
+        self.email: Optional[str] = None
+        self.fullname: Optional[str] = None
+        self.name: Optional[str] = name
+        self.site_role: Optional[str] = site_role
+        self.auth_setting: Optional[str] = auth_setting
+
+        return None
 
     @property
-    def auth_setting(self):
+    def auth_setting(self) -> Optional[str]:
         return self._auth_setting
 
     @auth_setting.setter
@@ -64,32 +74,32 @@ class UserItem(object):
         self._auth_setting = value
 
     @property
-    def domain_name(self):
+    def domain_name(self) -> Optional[str]:
         return self._domain_name
 
     @property
-    def external_auth_user_id(self):
+    def external_auth_user_id(self) -> Optional[str]:
         return self._external_auth_user_id
 
     @property
-    def id(self):
+    def id(self) -> Optional[str]:
         return self._id
 
     @property
-    def last_login(self):
+    def last_login(self) -> Optional[datetime]:
         return self._last_login
 
     @property
-    def name(self):
+    def name(self) -> Optional[str]:
         return self._name
 
     @name.setter
     @property_not_empty
-    def name(self, value):
+    def name(self, value: str):
         self._name = value
 
     @property
-    def site_role(self):
+    def site_role(self) -> Optional[str]:
         return self._site_role
 
     @site_role.setter
@@ -99,36 +109,36 @@ class UserItem(object):
         self._site_role = value
 
     @property
-    def workbooks(self):
+    def workbooks(self) -> "Pager":
         if self._workbooks is None:
             error = "User item must be populated with workbooks first."
             raise UnpopulatedPropertyError(error)
         return self._workbooks()
 
     @property
-    def favorites(self):
+    def favorites(self) -> Dict[str, List]:
         if self._favorites is None:
             error = "User item must be populated with favorites first."
             raise UnpopulatedPropertyError(error)
         return self._favorites
 
     @property
-    def groups(self):
+    def groups(self) -> "Pager":
         if self._groups is None:
             error = "User item must be populated with groups first."
             raise UnpopulatedPropertyError(error)
         return self._groups()
 
-    def to_reference(self):
+    def to_reference(self) -> ResourceReference:
         return ResourceReference(id_=self.id, tag_name=self.tag_name)
 
-    def _set_workbooks(self, workbooks):
+    def _set_workbooks(self, workbooks) -> None:
         self._workbooks = workbooks
 
-    def _set_groups(self, groups):
+    def _set_groups(self, groups) -> None:
         self._groups = groups
 
-    def _parse_common_tags(self, user_xml, ns):
+    def _parse_common_tags(self, user_xml, ns) -> "UserItem":
         if not isinstance(user_xml, ET.Element):
             user_xml = ET.fromstring(user_xml).find(".//t:user", namespaces=ns)
         if user_xml is not None:
@@ -178,7 +188,7 @@ class UserItem(object):
             self._domain_name = domain_name
 
     @classmethod
-    def from_response(cls, resp, ns):
+    def from_response(cls, resp, ns) -> List["UserItem"]:
         all_user_items = []
         parsed_response = ET.fromstring(resp)
         all_user_xml = parsed_response.findall(".//t:user", namespaces=ns)
@@ -210,7 +220,7 @@ class UserItem(object):
         return all_user_items
 
     @staticmethod
-    def as_reference(id_):
+    def as_reference(id_) -> ResourceReference:
         return ResourceReference(id_, UserItem.tag_name)
 
     @staticmethod
@@ -241,5 +251,5 @@ class UserItem(object):
             domain_name,
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<User {} name={} role={}>".format(self.id, self.name, self.site_role)

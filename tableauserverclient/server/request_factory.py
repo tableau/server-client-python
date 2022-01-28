@@ -5,13 +5,13 @@ from requests.packages.urllib3.filepost import encode_multipart_formdata
 
 from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteItem
 
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple
-
-if TYPE_CHECKING:
-    from ..models import DataAlertItem
-    from ..models import FlowItem
-    from ..models import ConnectionItem
-    from ..models import WebhookItem
+from ..models import SubscriptionItem
+from ..models import DataAlertItem
+from ..models import FlowItem
+from ..models import ConnectionItem
+from ..models import SiteItem
+from ..models import ProjectItem
+from ..models import WebhookItem
 
 
 def _add_multipart(parts: Dict) -> Tuple[Any, str]:
@@ -354,24 +354,30 @@ class FlowRequest(object):
 
 
 class GroupRequest(object):
-    def add_user_req(self, user_id):
+    def add_user_req(self, user_id: str) -> bytes:
         xml_request = ET.Element("tsRequest")
         user_element = ET.SubElement(xml_request, "user")
         user_element.attrib["id"] = user_id
         return ET.tostring(xml_request)
 
-    def create_local_req(self, group_item):
+    def create_local_req(self, group_item: GroupItem) -> bytes:
         xml_request = ET.Element("tsRequest")
         group_element = ET.SubElement(xml_request, "group")
-        group_element.attrib["name"] = group_item.name
+        if group_item.name is not None:
+            group_element.attrib["name"] = group_item.name
+        else:
+            raise ValueError("Group name must be populated")
         if group_item.minimum_site_role is not None:
             group_element.attrib["minimumSiteRole"] = group_item.minimum_site_role
         return ET.tostring(xml_request)
 
-    def create_ad_req(self, group_item):
+    def create_ad_req(self, group_item: GroupItem) -> bytes:
         xml_request = ET.Element("tsRequest")
         group_element = ET.SubElement(xml_request, "group")
-        group_element.attrib["name"] = group_item.name
+        if group_item.name is not None:
+            group_element.attrib["name"] = group_item.name
+        else:
+            raise ValueError("Group name must be populated")
         import_element = ET.SubElement(group_element, "import")
         import_element.attrib["source"] = "ActiveDirectory"
         if group_item.domain_name is None:
@@ -385,7 +391,7 @@ class GroupRequest(object):
             import_element.attrib["siteRole"] = group_item.minimum_site_role
         return ET.tostring(xml_request)
 
-    def update_req(self, group_item, default_site_role=None):
+    def update_req(self, group_item: GroupItem, default_site_role: Optional[str] = None) -> bytes:
         # (1/8/2021): Deprecated starting v0.15
         if default_site_role is not None:
             import warnings
@@ -400,13 +406,20 @@ class GroupRequest(object):
 
         xml_request = ET.Element("tsRequest")
         group_element = ET.SubElement(xml_request, "group")
-        group_element.attrib["name"] = group_item.name
+
+        if group_item.name is not None:
+            group_element.attrib["name"] = group_item.name
+        else:
+            raise ValueError("Group name must be populated")
         if group_item.domain_name is not None and group_item.domain_name != "local":
             # Import element is only accepted in the request for AD groups
             import_element = ET.SubElement(group_element, "import")
             import_element.attrib["source"] = "ActiveDirectory"
             import_element.attrib["domainName"] = group_item.domain_name
-            import_element.attrib["siteRole"] = group_item.minimum_site_role
+            if isinstance(group_item.minimum_site_role, str):
+                import_element.attrib["siteRole"] = group_item.minimum_site_role
+            else:
+                raise ValueError("Minimum site role must be provided.")
             if group_item.license_mode is not None:
                 import_element.attrib["grantLicenseMode"] = group_item.license_mode
         else:
@@ -418,7 +431,7 @@ class GroupRequest(object):
 
 
 class PermissionRequest(object):
-    def add_req(self, rules):
+    def add_req(self, rules: Iterable[PermissionsRule]) -> bytes:
         xml_request = ET.Element("tsRequest")
         permissions_element = ET.SubElement(xml_request, "permissions")
 
@@ -440,7 +453,7 @@ class PermissionRequest(object):
 
 
 class ProjectRequest(object):
-    def update_req(self, project_item):
+    def update_req(self, project_item: "ProjectItem") -> bytes:
         xml_request = ET.Element("tsRequest")
         project_element = ET.SubElement(xml_request, "project")
         if project_item.name:
@@ -453,7 +466,7 @@ class ProjectRequest(object):
             project_element.attrib["parentProjectId"] = project_item.parent_id
         return ET.tostring(xml_request)
 
-    def create_req(self, project_item):
+    def create_req(self, project_item: "ProjectItem") -> bytes:
         xml_request = ET.Element("tsRequest")
         project_element = ET.SubElement(xml_request, "project")
         project_element.attrib["name"] = project_item.name
@@ -516,7 +529,7 @@ class ScheduleRequest(object):
                     single_interval_element.attrib[expression] = value
         return ET.tostring(xml_request)
 
-    def _add_to_req(self, id_, target_type, task_type=TaskItem.Type.ExtractRefresh):
+    def _add_to_req(self, id_: Optional[str], target_type: str, task_type: str = TaskItem.Type.ExtractRefresh) -> bytes:
         """
         <task>
           <target_type>
@@ -525,6 +538,8 @@ class ScheduleRequest(object):
         </task>
 
         """
+        if not isinstance(id_, str):
+            raise ValueError(f"id_ should be a string, reeceived: {type(id_)}")
         xml_request = ET.Element("tsRequest")
         task_element = ET.SubElement(xml_request, "task")
         task = ET.SubElement(task_element, task_type)
@@ -533,15 +548,15 @@ class ScheduleRequest(object):
 
         return ET.tostring(xml_request)
 
-    def add_workbook_req(self, id_, task_type=TaskItem.Type.ExtractRefresh):
+    def add_workbook_req(self, id_: Optional[str], task_type: str = TaskItem.Type.ExtractRefresh) -> bytes:
         return self._add_to_req(id_, "workbook", task_type)
 
-    def add_datasource_req(self, id_, task_type=TaskItem.Type.ExtractRefresh):
+    def add_datasource_req(self, id_: Optional[str], task_type: str = TaskItem.Type.ExtractRefresh) -> bytes:
         return self._add_to_req(id_, "datasource", task_type)
 
 
 class SiteRequest(object):
-    def update_req(self, site_item):
+    def update_req(self, site_item: "SiteItem"):
         xml_request = ET.Element("tsRequest")
         site_element = ET.SubElement(xml_request, "site")
         if site_item.name:
@@ -647,7 +662,7 @@ class SiteRequest(object):
 
         return ET.tostring(xml_request)
 
-    def create_req(self, site_item):
+    def create_req(self, site_item: "SiteItem"):
         xml_request = ET.Element("tsRequest")
         site_element = ET.SubElement(xml_request, "site")
         site_element.attrib["name"] = site_item.name
@@ -781,7 +796,7 @@ class TagRequest(object):
 
 
 class UserRequest(object):
-    def update_req(self, user_item, password):
+    def update_req(self, user_item: UserItem, password: Optional[str]) -> bytes:
         xml_request = ET.Element("tsRequest")
         user_element = ET.SubElement(xml_request, "user")
         if user_item.fullname:
@@ -797,11 +812,18 @@ class UserRequest(object):
             user_element.attrib["password"] = password
         return ET.tostring(xml_request)
 
-    def add_req(self, user_item):
+    def add_req(self, user_item: UserItem) -> bytes:
         xml_request = ET.Element("tsRequest")
         user_element = ET.SubElement(xml_request, "user")
-        user_element.attrib["name"] = user_item.name
-        user_element.attrib["siteRole"] = user_item.site_role
+        if isinstance(user_item.name, str):
+            user_element.attrib["name"] = user_item.name
+        else:
+            raise ValueError(f"{user_item} missing name.")
+        if isinstance(user_item.site_role, str):
+            user_element.attrib["siteRole"] = user_item.site_role
+        else:
+            raise ValueError(f"{user_item} must have site role populated.")
+
         if user_item.auth_setting:
             user_element.attrib["authSetting"] = user_item.auth_setting
         return ET.tostring(xml_request)
@@ -937,7 +959,7 @@ class TaskRequest(object):
 
 class SubscriptionRequest(object):
     @_tsrequest_wrapped
-    def create_req(self, xml_request, subscription_item):
+    def create_req(self, xml_request: ET.Element, subscription_item: "SubscriptionItem") -> bytes:
         subscription_element = ET.SubElement(xml_request, "subscription")
 
         # Main attributes
@@ -970,7 +992,7 @@ class SubscriptionRequest(object):
         return ET.tostring(xml_request)
 
     @_tsrequest_wrapped
-    def update_req(self, xml_request, subscription_item):
+    def update_req(self, xml_request: ET.Element, subscription_item: "SubscriptionItem") -> bytes:
         subscription = ET.SubElement(xml_request, "subscription")
 
         # Main attributes

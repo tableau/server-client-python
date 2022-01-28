@@ -16,9 +16,9 @@ class JobItem(object):
         https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#query_job
         """
 
-        Success = 0
-        Failed = 1
-        Cancelled = 2
+        Success: int = 0
+        Failed: int = 1
+        Cancelled: int = 2
 
     def __init__(
         self,

@@ -17,7 +17,7 @@ POPULATE_GROUPS_XML = os.path.join(TEST_ASSET_DIR, "user_populate_groups.xml")
 
 
 class UserTests(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server = TSC.Server("http://test")
 
         # Fake signin
@@ -26,7 +26,7 @@ class UserTests(unittest.TestCase):
 
         self.baseurl = self.server.users.baseurl
 
-    def test_get(self):
+    def test_get(self) -> None:
         with open(GET_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -51,7 +51,7 @@ class UserTests(unittest.TestCase):
         self.assertEqual("Bob Smith", single_user.fullname)
         self.assertEqual("bob@test.com", single_user.email)
 
-    def test_get_empty(self):
+    def test_get_empty(self) -> None:
         with open(GET_EMPTY_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -61,11 +61,11 @@ class UserTests(unittest.TestCase):
         self.assertEqual(0, pagination_item.total_available)
         self.assertEqual([], all_users)
 
-    def test_get_before_signin(self):
+    def test_get_before_signin(self) -> None:
         self.server._auth_token = None
         self.assertRaises(TSC.NotSignedInError, self.server.users.get)
 
-    def test_get_by_id(self):
+    def test_get_by_id(self) -> None:
         with open(GET_BY_ID_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -80,10 +80,10 @@ class UserTests(unittest.TestCase):
         self.assertEqual("2016-08-16T23:17:06Z", format_datetime(single_user.last_login))
         self.assertEqual("local", single_user.domain_name)
 
-    def test_get_by_id_missing_id(self):
+    def test_get_by_id_missing_id(self) -> None:
         self.assertRaises(ValueError, self.server.users.get_by_id, "")
 
-    def test_update(self):
+    def test_update(self) -> None:
         with open(UPDATE_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -100,19 +100,19 @@ class UserTests(unittest.TestCase):
         self.assertEqual("cassie@email.com", single_user.email)
         self.assertEqual("Viewer", single_user.site_role)
 
-    def test_update_missing_id(self):
+    def test_update_missing_id(self) -> None:
         single_user = TSC.UserItem("test", "Interactor")
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.users.update, single_user)
 
-    def test_remove(self):
+    def test_remove(self) -> None:
         with requests_mock.mock() as m:
             m.delete(self.baseurl + "/dd2239f6-ddf1-4107-981a-4cf94e415794", status_code=204)
             self.server.users.remove("dd2239f6-ddf1-4107-981a-4cf94e415794")
 
-    def test_remove_missing_id(self):
+    def test_remove_missing_id(self) -> None:
         self.assertRaises(ValueError, self.server.users.remove, "")
 
-    def test_add(self):
+    def test_add(self) -> None:
         with open(ADD_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -125,7 +125,7 @@ class UserTests(unittest.TestCase):
         self.assertEqual("Viewer", new_user.site_role)
         self.assertEqual("ServerDefault", new_user.auth_setting)
 
-    def test_populate_workbooks(self):
+    def test_populate_workbooks(self) -> None:
         with open(POPULATE_WORKBOOKS_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -147,11 +147,11 @@ class UserTests(unittest.TestCase):
             self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", workbook_list[0].owner_id)
             self.assertEqual(set(["Safari", "Sample"]), workbook_list[0].tags)
 
-    def test_populate_workbooks_missing_id(self):
+    def test_populate_workbooks_missing_id(self) -> None:
         single_user = TSC.UserItem("test", "Interactor")
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.users.populate_workbooks, single_user)
 
-    def test_populate_favorites(self):
+    def test_populate_favorites(self) -> None:
         self.server.version = "2.5"
         baseurl = self.server.favorites.baseurl
         single_user = TSC.UserItem("test", "Interactor")
@@ -176,7 +176,7 @@ class UserTests(unittest.TestCase):
         self.assertEqual(datasource.id, "e76a1461-3b1d-4588-bf1b-17551a879ad9")
         self.assertEqual(project.id, "1d0304cd-3796-429f-b815-7258370b9b74")
 
-    def test_populate_groups(self):
+    def test_populate_groups(self) -> None:
         self.server.version = "3.7"
         with open(POPULATE_GROUPS_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
