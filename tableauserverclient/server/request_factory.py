@@ -5,7 +5,7 @@ from requests.packages.urllib3.filepost import encode_multipart_formdata
 
 from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteItem
 
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple, Iterable
 
 if TYPE_CHECKING:
     from ..models import DataAlertItem
@@ -429,7 +429,7 @@ class GroupRequest(object):
 
 
 class PermissionRequest(object):
-    def add_req(self, rules):
+    def add_req(self, rules: Iterable[PermissionsRule]) -> bytes:
         xml_request = ET.Element("tsRequest")
         permissions_element = ET.SubElement(xml_request, "permissions")
 
