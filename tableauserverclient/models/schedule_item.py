@@ -18,6 +18,7 @@ from ..datetime_helpers import parse_datetime
 
 Interval = Union[HourlyInterval, DailyInterval, WeeklyInterval, MonthlyInterval]
 
+
 class ScheduleItem(object):
     class Type:
         Extract = "Extract"
