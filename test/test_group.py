@@ -19,7 +19,7 @@ UPDATE_XML = os.path.join(TEST_ASSET_DIR, "group_update.xml")
 
 
 class GroupTests(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server = TSC.Server("http://test")
 
         # Fake signin
@@ -28,7 +28,7 @@ class GroupTests(unittest.TestCase):
 
         self.baseurl = self.server.groups.baseurl
 
-    def test_get(self):
+    def test_get(self) -> None:
         with open(GET_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -48,11 +48,11 @@ class GroupTests(unittest.TestCase):
         self.assertEqual("TableauExample", all_groups[2].name)
         self.assertEqual("local", all_groups[2].domain_name)
 
-    def test_get_before_signin(self):
+    def test_get_before_signin(self) -> None:
         self.server._auth_token = None
         self.assertRaises(TSC.NotSignedInError, self.server.groups.get)
 
-    def test_populate_users(self):
+    def test_populate_users(self) -> None:
         with open(POPULATE_USERS, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -72,12 +72,12 @@ class GroupTests(unittest.TestCase):
             self.assertEqual("Publisher", user.site_role)
             self.assertEqual("2016-08-16T23:17:06Z", format_datetime(user.last_login))
 
-    def test_delete(self):
+    def test_delete(self) -> None:
         with requests_mock.mock() as m:
             m.delete(self.baseurl + "/e7833b48-c6f7-47b5-a2a7-36e7dd232758", status_code=204)
             self.server.groups.delete("e7833b48-c6f7-47b5-a2a7-36e7dd232758")
 
-    def test_remove_user(self):
+    def test_remove_user(self) -> None:
         with open(POPULATE_USERS, "rb") as f:
             response_xml_populate = f.read().decode("utf-8")
 
@@ -100,7 +100,7 @@ class GroupTests(unittest.TestCase):
             m.get(self.baseurl + "/e7833b48-c6f7-47b5-a2a7-36e7dd232758/users", text=response_xml_empty)
             self.assertEqual(0, len(list(single_group.users)))
 
-    def test_add_user(self):
+    def test_add_user(self) -> None:
         with open(ADD_USER, "rb") as f:
             response_xml_add = f.read().decode("utf-8")
         with open(ADD_USER_POPULATE, "rb") as f:
@@ -119,7 +119,7 @@ class GroupTests(unittest.TestCase):
             self.assertEqual("testuser", user.name)
             self.assertEqual("ServerAdministrator", user.site_role)
 
-    def test_add_user_before_populating(self):
+    def test_add_user_before_populating(self) -> None:
         with open(GET_XML, "rb") as f:
             get_xml_response = f.read().decode("utf-8")
         with open(ADD_USER, "rb") as f:
@@ -135,7 +135,7 @@ class GroupTests(unittest.TestCase):
             single_group = all_groups[0]
             self.server.groups.add_user(single_group, "5de011f8-5aa9-4d5b-b991-f462c8dd6bb7")
 
-    def test_add_user_missing_user_id(self):
+    def test_add_user_missing_user_id(self) -> None:
         with open(POPULATE_USERS, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -146,7 +146,8 @@ class GroupTests(unittest.TestCase):
 
         self.assertRaises(ValueError, self.server.groups.add_user, single_group, "")
 
-    def test_add_user_missing_group_id(self):
+
+    def test_add_user_missing_group_id(self) -> None:
         single_group = TSC.GroupItem("test")
         single_group._users = []
         self.assertRaises(
@@ -156,7 +157,7 @@ class GroupTests(unittest.TestCase):
             "5de011f8-5aa9-4d5b-b991-f462c8dd6bb7",
         )
 
-    def test_remove_user_before_populating(self):
+    def test_remove_user_before_populating(self) -> None:
         with open(GET_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -170,7 +171,7 @@ class GroupTests(unittest.TestCase):
             single_group = all_groups[0]
             self.server.groups.remove_user(single_group, "5de011f8-5aa9-4d5b-b991-f462c8dd6bb7")
 
-    def test_remove_user_missing_user_id(self):
+    def test_remove_user_missing_user_id(self) -> None:
         with open(POPULATE_USERS, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -181,7 +182,7 @@ class GroupTests(unittest.TestCase):
 
         self.assertRaises(ValueError, self.server.groups.remove_user, single_group, "")
 
-    def test_remove_user_missing_group_id(self):
+    def test_remove_user_missing_group_id(self) -> None:
         single_group = TSC.GroupItem("test")
         single_group._users = []
         self.assertRaises(
@@ -191,7 +192,7 @@ class GroupTests(unittest.TestCase):
             "5de011f8-5aa9-4d5b-b991-f462c8dd6bb7",
         )
 
-    def test_create_group(self):
+    def test_create_group(self) -> None:
         with open(CREATE_GROUP, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -201,7 +202,7 @@ class GroupTests(unittest.TestCase):
             self.assertEqual(group.name, u"試供品")
             self.assertEqual(group.id, "3e4a9ea0-a07a-4fe6-b50f-c345c8c81034")
 
-    def test_create_ad_group(self):
+    def test_create_ad_group(self) -> None:
         with open(CREATE_GROUP_AD, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -214,7 +215,7 @@ class GroupTests(unittest.TestCase):
             self.assertEqual(group.minimum_site_role, "Creator")
             self.assertEqual(group.domain_name, "active-directory-domain-name")
 
-    def test_create_group_async(self):
+    def test_create_group_async(self) -> None:
         with open(CREATE_GROUP_ASYNC, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -225,7 +226,7 @@ class GroupTests(unittest.TestCase):
             self.assertEqual(job.mode, "Asynchronous")
             self.assertEqual(job.type, "GroupImport")
 
-    def test_update(self):
+    def test_update(self) -> None:
         with open(UPDATE_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -241,7 +242,7 @@ class GroupTests(unittest.TestCase):
         self.assertEqual("onLogin", group.license_mode)
 
     # async update is not supported for local groups
-    def test_update_local_async(self):
+    def test_update_local_async(self) -> None:
         group = TSC.GroupItem("myGroup")
         group._id = "ef8b19c0-43b6-11e6-af50-63f5805dbe3c"
         self.assertRaises(ValueError, self.server.groups.update, group, as_job=True)
