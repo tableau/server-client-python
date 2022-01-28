@@ -1,3 +1,4 @@
+from tableauserverclient.server.request_factory import ProjectRequest
 from .endpoint import api, Endpoint, XML_CONTENT_TYPE
 from .exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
@@ -9,20 +10,26 @@ import logging
 
 logger = logging.getLogger("tableau.endpoint.projects")
 
+from typing import List, Optional, Tuple, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..server import Server
+    from ..request_options import RequestOptions
+
 
 class Projects(Endpoint):
-    def __init__(self, parent_srv):
+    def __init__(self, parent_srv: "Server") -> None:
         super(Projects, self).__init__(parent_srv)
 
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
         self._default_permissions = _DefaultPermissionsEndpoint(parent_srv, lambda: self.baseurl)
 
     @property
-    def baseurl(self):
+    def baseurl(self) -> str:
         return "{0}/sites/{1}/projects".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     @api(version="2.0")
-    def get(self, req_options=None):
+    def get(self, req_options: Optional["RequestOptions"] = None) -> Tuple[List[ProjectItem], PaginationItem]:
         logger.info("Querying all projects on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -31,7 +38,7 @@ class Projects(Endpoint):
         return all_project_items, pagination_item
 
     @api(version="2.0")
-    def delete(self, project_id):
+    def delete(self, project_id: str) -> None:
         if not project_id:
             error = "Project ID undefined."
             raise ValueError(error)
@@ -40,12 +47,12 @@ class Projects(Endpoint):
         logger.info("Deleted single project (ID: {0})".format(project_id))
 
     @api(version="2.0")
-    def update(self, project_item, samples=False):
+    def update(self, project_item: ProjectItem, samples: bool = False) -> ProjectItem:
         if not project_item.id:
             error = "Project item missing ID."
             raise MissingRequiredFieldError(error)
 
-        params = {"params": {RequestOptions.Field.PublishSamples: samples }}
+        params = {"params": {RequestOptions.Field.PublishSamples: samples}}
         url = "{0}/{1}".format(self.baseurl, project_item.id)
         update_req = RequestFactory.Project.update_req(project_item)
         server_response = self.put_request(url, update_req, XML_CONTENT_TYPE, params)
@@ -54,8 +61,8 @@ class Projects(Endpoint):
         return updated_project
 
     @api(version="2.0")
-    def create(self, project_item, samples=False):
-        params = {"params": {RequestOptions.Field.PublishSamples: samples }}
+    def create(self, project_item: ProjectItem, samples: bool = False) -> ProjectItem:
+        params = {"params": {RequestOptions.Field.PublishSamples: samples}}
         url = self.baseurl
         create_req = RequestFactory.Project.create_req(project_item)
         server_response = self.post_request(url, create_req, XML_CONTENT_TYPE, params)
@@ -64,7 +71,7 @@ class Projects(Endpoint):
         return new_project
 
     @api(version="2.0")
-    def populate_permissions(self, item):
+    def populate_permissions(self, item: ProjectItem) -> None:
         self._permissions.populate(item)
 
     @api(version="2.0")

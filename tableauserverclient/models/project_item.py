@@ -6,19 +6,28 @@ from .property_decorators import property_is_enum, property_not_empty
 from .exceptions import UnpopulatedPropertyError
 
 
+from typing import List, Optional, TYPE_CHECKING
+
+
 class ProjectItem(object):
     class ContentPermissions:
-        LockedToProject = "LockedToProject"
-        ManagedByOwner = "ManagedByOwner"
-        LockedToProjectWithoutNested = "LockedToProjectWithoutNested"
+        LockedToProject: str = "LockedToProject"
+        ManagedByOwner: str = "ManagedByOwner"
+        LockedToProjectWithoutNested: str = "LockedToProjectWithoutNested"
 
-    def __init__(self, name, description=None, content_permissions=None, parent_id=None):
+    def __init__(
+        self,
+        name: str,
+        description: Optional[str] = None,
+        content_permissions: Optional[str] = None,
+        parent_id: Optional[str] = None,
+    ) -> None:
         self._content_permissions = None
-        self._id = None
-        self.description = description
-        self.name = name
-        self.content_permissions = content_permissions
-        self.parent_id = parent_id
+        self._id: Optional[str] = None
+        self.description: Optional[str] = description
+        self.name: str = name
+        self.content_permissions: Optional[str] = content_permissions
+        self.parent_id: Optional[str] = parent_id
 
         self._permissions = None
         self._default_workbook_permissions = None
@@ -31,7 +40,7 @@ class ProjectItem(object):
 
     @content_permissions.setter
     @property_is_enum(ContentPermissions)
-    def content_permissions(self, value):
+    def content_permissions(self, value: Optional[str]) -> None:
         self._content_permissions = value
 
     @property
@@ -63,24 +72,24 @@ class ProjectItem(object):
         return self._default_flow_permissions()
 
     @property
-    def id(self):
+    def id(self) -> Optional[str]:
         return self._id
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @name.setter
     @property_not_empty
-    def name(self, value):
+    def name(self, value: str) -> None:
         self._name = value
 
     @property
-    def owner_id(self):
+    def owner_id(self) -> Optional[str]:
         return self._owner_id
 
     @owner_id.setter
-    def owner_id(self, value):
+    def owner_id(self, value: str) -> None:
         raise NotImplementedError("REST API does not currently support updating project owner.")
 
     def is_default(self):
@@ -126,7 +135,7 @@ class ProjectItem(object):
         )
 
     @classmethod
-    def from_response(cls, resp, ns):
+    def from_response(cls, resp, ns) -> List["ProjectItem"]:
         all_project_items = list()
         parsed_response = ET.fromstring(resp)
         all_project_xml = parsed_response.findall(".//t:project", namespaces=ns)

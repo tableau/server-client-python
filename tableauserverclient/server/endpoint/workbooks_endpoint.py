@@ -440,20 +440,14 @@ class Workbooks(QuerysetEndpoint):
             return self._get_workbook_revisions(workbook_item)
 
         workbook_item._set_revisions(revisions_fetcher)
-        logger.info(
-            "Populated revisions for workbook (ID: {0})".format(workbook_item.id)
-        )
+        logger.info("Populated revisions for workbook (ID: {0})".format(workbook_item.id))
 
     def _get_workbook_revisions(
-        self,
-        workbook_item: WorkbookItem,
-        req_options: Optional["RequestOptions"]=None
+        self, workbook_item: WorkbookItem, req_options: Optional["RequestOptions"] = None
     ) -> List[RevisionItem]:
         url = "{0}/{1}/revisions".format(self.baseurl, workbook_item.id)
         server_response = self.get_request(url, req_options)
-        revisions = RevisionItem.from_response(
-            server_response.content, self.parent_srv.namespace, workbook_item
-        )
+        revisions = RevisionItem.from_response(server_response.content, self.parent_srv.namespace, workbook_item)
         return revisions
 
     # Download 1 workbook revision by revision number
@@ -469,9 +463,7 @@ class Workbooks(QuerysetEndpoint):
         if not workbook_id:
             error = "Workbook ID undefined."
             raise ValueError(error)
-        url = "{0}/{1}/revisions/{2}/content".format(
-            self.baseurl, workbook_id, revision_number
-        )
+        url = "{0}/{1}/revisions/{2}/content".format(self.baseurl, workbook_id, revision_number)
 
         if no_extract is False or no_extract is True:
             import warnings
@@ -485,9 +477,7 @@ class Workbooks(QuerysetEndpoint):
         if not include_extract:
             url += "?includeExtract=False"
 
-        with closing(
-            self.get_request(url, parameters={"stream": True})
-        ) as server_response:
+        with closing(self.get_request(url, parameters={"stream": True})) as server_response:
             _, params = cgi.parse_header(server_response.headers["Content-Disposition"])
             filename = to_filename(os.path.basename(params["filename"]))
 
@@ -497,9 +487,7 @@ class Workbooks(QuerysetEndpoint):
                 for chunk in server_response.iter_content(1024):  # 1KB
                     f.write(chunk)
         logger.info(
-            "Downloaded workbook revision {0} to {1} (ID: {2})".format(
-                revision_number, download_path, workbook_id
-            )
+            "Downloaded workbook revision {0} to {1} (ID: {2})".format(revision_number, download_path, workbook_id)
         )
         return os.path.abspath(download_path)
 

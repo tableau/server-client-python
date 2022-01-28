@@ -11,20 +11,27 @@ import tableauserverclient as TSC
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Initialize a server with content.')
+    parser = argparse.ArgumentParser(description="Initialize a server with content.")
     # Common options; please keep those in sync across all samples
-    parser.add_argument('--server', '-s', required=True, help='server address')
-    parser.add_argument('--site', '-S', help='site name')
-    parser.add_argument('--token-name', '-p', required=True,
-                        help='name of the personal access token used to sign into the server')
-    parser.add_argument('--token-value', '-v', required=True,
-                        help='value of the personal access token used to sign into the server')
-    parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
-                        help='desired logging level (set to error by default)')
+    parser.add_argument("--server", "-s", required=True, help="server address")
+    parser.add_argument("--site", "-S", help="site name")
+    parser.add_argument(
+        "--token-name", "-p", required=True, help="name of the personal access token used to sign into the server"
+    )
+    parser.add_argument(
+        "--token-value", "-v", required=True, help="value of the personal access token used to sign into the server"
+    )
+    parser.add_argument(
+        "--logging-level",
+        "-l",
+        choices=["debug", "info", "error"],
+        default="error",
+        help="desired logging level (set to error by default)",
+    )
     # Options specific to this sample
-    parser.add_argument('--datasources-folder', '-df', required=True, help='folder containing datasources')
-    parser.add_argument('--workbooks-folder', '-wf', required=True, help='folder containing workbooks')
-    parser.add_argument('--project', required=False, default='Default', help='project to use')
+    parser.add_argument("--datasources-folder", "-df", required=True, help="folder containing datasources")
+    parser.add_argument("--workbooks-folder", "-wf", required=True, help="folder containing workbooks")
+    parser.add_argument("--project", required=False, default="Default", help="project to use")
 
     args = parser.parse_args()
 
@@ -50,8 +57,11 @@ def main():
         # Create the site if it doesn't exist
         if existing_site is None:
             print("Site not found: {0} Creating it...").format(args.site_id)
-            new_site = TSC.SiteItem(name=args.site_id, content_url=args.site_id.replace(" ", ""),
-                                    admin_mode=TSC.SiteItem.AdminMode.ContentAndUsers)
+            new_site = TSC.SiteItem(
+                name=args.site_id,
+                content_url=args.site_id.replace(" ", ""),
+                admin_mode=TSC.SiteItem.AdminMode.ContentAndUsers,
+            )
             server.sites.create(new_site)
         else:
             print("Site {0} exists. Moving on...").format(args.site_id)
@@ -70,6 +80,7 @@ def main():
         # Step 4: Create the project we need only if it doesn't exist
         ################################################################################
         import time
+
         time.sleep(2)  # sad panda...something about eventually consistent model
         all_projects = TSC.Pager(server_upload.projects)
         project = next((p for p in all_projects if p.name.lower() == args.project.lower()), None)
@@ -90,7 +101,7 @@ def main():
 
 
 def publish_datasources_to_site(server_object, project, folder):
-    path = folder + '/*.tds*'
+    path = folder + "/*.tds*"
 
     for fname in glob.glob(path):
         new_ds = TSC.DatasourceItem(project.id)
@@ -99,7 +110,7 @@ def publish_datasources_to_site(server_object, project, folder):
 
 
 def publish_workbooks_to_site(server_object, project, folder):
-    path = folder + '/*.twb*'
+    path = folder + "/*.twb*"
 
     for fname in glob.glob(path):
         new_workbook = TSC.WorkbookItem(project.id)
