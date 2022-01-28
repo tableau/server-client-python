@@ -4,21 +4,39 @@ from .workbook_item import WorkbookItem
 from .view_item import ViewItem
 from .project_item import ProjectItem
 from .datasource_item import DatasourceItem
+from .flow_item import FlowItem
 
 logger = logging.getLogger("tableau.models.favorites_item")
+
+from typing import Dict, List, Union
+
+FavoriteType = Dict[
+    str,
+    List[
+        Union[
+            DatasourceItem,
+            ProjectItem,
+            FlowItem,
+            ViewItem,
+            WorkbookItem,
+        ]
+    ],
+]
 
 
 class FavoriteItem:
     class Type:
-        Workbook = "workbook"
-        Datasource = "datasource"
-        View = "view"
-        Project = "project"
+        Workbook: str = "workbook"
+        Datasource: str = "datasource"
+        View: str = "view"
+        Project: str = "project"
+        Flow: str = "flow"
 
     @classmethod
-    def from_response(cls, xml, namespace):
-        favorites = {
+    def from_response(cls, xml: str, namespace: Dict) -> FavoriteType:
+        favorites: FavoriteType = {
             "datasources": [],
+            "flows": [],
             "projects": [],
             "views": [],
             "workbooks": [],
@@ -45,5 +63,10 @@ class FavoriteItem:
             fav_project._set_values(*fav_project._parse_element(project))
             if fav_project:
                 favorites["projects"].append(fav_project)
+        for flow in parsed_response.findall(".//t:favorite/t:flow", namespace):
+            fav_flow = FlowItem("flows")
+            fav_flow._set_values(*fav_flow._parse_element(flow, namespace))
+            if fav_flow:
+                favorites["flows"].append(fav_flow)
 
         return favorites
