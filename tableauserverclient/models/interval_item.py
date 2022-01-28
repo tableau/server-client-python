@@ -108,7 +108,7 @@ class DailyInterval(object):
     
     @interval.setter
     def interval(self, interval):
-        self._interval = interval_values
+        self._interval = interval
 
 
 class WeeklyInterval(object):
