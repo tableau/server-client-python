@@ -8,7 +8,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [3.6, 3.7, 3.8, 3.9, 3.10.0-rc.2]
+        python-version: ['3.6', '3.7', '3.8', '3.9', '3.10']
 
     runs-on: ${{ matrix.os }}
 
@@ -25,10 +25,16 @@ jobs:
         python -m pip install --upgrade pip
         pip install -e .[test]
 
+    - name: Format with black
+      run: |
+        black --check --line-length 120 tableauserverclient samples test
+
     - name: Test with pytest
+      if: always()
       run: |
         pytest test
 
     - name: Run Mypy tests
+      if: always()
       run: |
         mypy --show-error-codes --disable-error-code misc --disable-error-code import tableauserverclient test

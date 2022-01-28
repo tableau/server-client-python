@@ -15,6 +15,9 @@ logger = logging.getLogger("tableau.endpoint")
 
 Success_codes = [200, 201, 202, 204]
 
+XML_CONTENT_TYPE = "text/xml"
+JSON_CONTENT_TYPE = "application/json"
+
 
 class Endpoint(object):
     def __init__(self, parent_srv):

@@ -1,0 +1,10 @@
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.10.xsd">
+    <flowRun id="c2b35d5a-e130-471a-aec8-7bc5435fe0e7"
+        flowId="8b1a3367-f7ed-49fc-90cb-807b723273bb"
+        status="Failed"
+        startedAt="2021-02-11T01:42:55Z"
+        completedAt="2021-02-11T01:57:38Z"
+        progress="100"
+        backgroundJobId="02084489-e6fd-4018-b9a2-4516b4365cfb">
+    </flowRun>
+</tsResponse> 

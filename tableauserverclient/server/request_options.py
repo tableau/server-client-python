@@ -48,6 +48,7 @@ class RequestOptions(RequestOptionsBase):
         OwnerName = "ownerName"
         Progress = "progress"
         ProjectName = "projectName"
+        PublishSamples = "publishSamples"
         SiteRole = "siteRole"
         Subtitle = "subtitle"
         Tags = "tags"

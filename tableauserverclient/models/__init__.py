@@ -10,6 +10,7 @@ from .exceptions import UnpopulatedPropertyError
 from .favorites_item import FavoriteItem
 from .group_item import GroupItem
 from .flow_item import FlowItem
+from .flow_run_item import FlowRunItem
 from .interval_item import (
     IntervalItem,
     DailyInterval,
@@ -35,3 +36,4 @@ from .subscription_item import SubscriptionItem
 from .permissions_item import PermissionsRule, Permission
 from .webhook_item import WebhookItem
 from .personal_access_token_auth import PersonalAccessTokenAuth
+from .revision_item import RevisionItem

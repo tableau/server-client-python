@@ -1,9 +1,9 @@
-from .endpoint import api, Endpoint
+from .endpoint import api, Endpoint, XML_CONTENT_TYPE
 from .exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .default_permissions_endpoint import _DefaultPermissionsEndpoint
 
-from .. import RequestFactory, ProjectItem, PaginationItem, Permission
+from .. import RequestFactory, RequestOptions, ProjectItem, PaginationItem, Permission
 
 import logging
 
@@ -40,23 +40,25 @@ class Projects(Endpoint):
         logger.info("Deleted single project (ID: {0})".format(project_id))
 
     @api(version="2.0")
-    def update(self, project_item):
+    def update(self, project_item, samples=False):
         if not project_item.id:
             error = "Project item missing ID."
             raise MissingRequiredFieldError(error)
 
+        params = {"params": {RequestOptions.Field.PublishSamples: samples}}
         url = "{0}/{1}".format(self.baseurl, project_item.id)
         update_req = RequestFactory.Project.update_req(project_item)
-        server_response = self.put_request(url, update_req)
+        server_response = self.put_request(url, update_req, XML_CONTENT_TYPE, params)
         logger.info("Updated project item (ID: {0})".format(project_item.id))
         updated_project = ProjectItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return updated_project
 
     @api(version="2.0")
-    def create(self, project_item):
+    def create(self, project_item, samples=False):
+        params = {"params": {RequestOptions.Field.PublishSamples: samples}}
         url = self.baseurl
         create_req = RequestFactory.Project.create_req(project_item)
-        server_response = self.post_request(url, create_req)
+        server_response = self.post_request(url, create_req, XML_CONTENT_TYPE, params)
         new_project = ProjectItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         logger.info("Created new project (ID: {0})".format(new_project.id))
         return new_project
