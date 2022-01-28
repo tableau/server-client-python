@@ -15,7 +15,7 @@ UPDATE_XML = "data_alerts_update.xml"
 
 
 class DataAlertTests(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server = TSC.Server("http://test")
 
         # Fake signin
@@ -25,7 +25,7 @@ class DataAlertTests(unittest.TestCase):
 
         self.baseurl = self.server.data_alerts.baseurl
 
-    def test_get(self):
+    def test_get(self) -> None:
         response_xml = read_xml_asset(GET_XML)
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
@@ -48,7 +48,7 @@ class DataAlertTests(unittest.TestCase):
         self.assertEqual("5241e88d-d384-4fd7-9c2f-648b5247efc5", all_alerts[0].project_id)
         self.assertEqual("Default", all_alerts[0].project_name)
 
-    def test_get_by_id(self):
+    def test_get_by_id(self) -> None:
         response_xml = read_xml_asset(GET_BY_ID_XML)
         with requests_mock.mock() as m:
             m.get(self.baseurl + "/5ea59b45-e497-5673-8809-bfe213236f75", text=response_xml)
@@ -58,7 +58,7 @@ class DataAlertTests(unittest.TestCase):
         self.assertEqual(len(alert.recipients), 1)
         self.assertEqual(alert.recipients[0], "dd2239f6-ddf1-4107-981a-4cf94e415794")
 
-    def test_update(self):
+    def test_update(self) -> None:
         response_xml = read_xml_asset(UPDATE_XML)
         with requests_mock.mock() as m:
             m.put(self.baseurl + "/5ea59b45-e497-5673-8809-bfe213236f75", text=response_xml)
@@ -66,7 +66,7 @@ class DataAlertTests(unittest.TestCase):
             single_alert._id = "5ea59b45-e497-5673-8809-bfe213236f75"
             single_alert._subject = "Data Alert test"
             single_alert._frequency = "Daily"
-            single_alert._public = "true"
+            single_alert._public = True
             single_alert._owner_id = "5de011f8-5aa9-4d5b-b991-f462c8dd6bb7"
             single_alert = self.server.data_alerts.update(single_alert)
 
@@ -86,7 +86,7 @@ class DataAlertTests(unittest.TestCase):
         self.assertEqual("5241e88d-d384-4fd7-9c2f-648b5247efc5", single_alert.project_id)
         self.assertEqual("Default", single_alert.project_name)
 
-    def test_add_user_to_alert(self):
+    def test_add_user_to_alert(self) -> None:
         response_xml = read_xml_asset(ADD_USER_TO_ALERT)
         single_alert = TSC.DataAlertItem()
         single_alert._id = "0448d2ed-590d-4fa0-b272-a2a8a24555b5"
@@ -102,12 +102,12 @@ class DataAlertTests(unittest.TestCase):
             self.assertEqual(out_user.name, in_user.name)
             self.assertEqual(out_user.site_role, in_user.site_role)
 
-    def test_delete(self):
+    def test_delete(self) -> None:
         with requests_mock.mock() as m:
             m.delete(self.baseurl + "/0448d2ed-590d-4fa0-b272-a2a8a24555b5", status_code=204)
             self.server.data_alerts.delete("0448d2ed-590d-4fa0-b272-a2a8a24555b5")
 
-    def test_delete_user_from_alert(self):
+    def test_delete_user_from_alert(self) -> None:
         alert_id = "5ea59b45-e497-5673-8809-bfe213236f75"
         user_id = "5de011f8-5aa9-4d5b-b991-f462c8dd6bb7"
         with requests_mock.mock() as m:

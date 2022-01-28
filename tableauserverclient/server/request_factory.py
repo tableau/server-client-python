@@ -8,6 +8,7 @@ from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteIte
 from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple
 
 if TYPE_CHECKING:
+    from ..models import DataAlertItem
     from ..models import FlowItem
     from ..models import ConnectionItem
 
@@ -93,22 +94,26 @@ class ColumnRequest(object):
 
 
 class DataAlertRequest(object):
-    def add_user_to_alert(self, alert_item, user_id):
+    def add_user_to_alert(self, alert_item: "DataAlertItem", user_id: str) -> bytes:
         xml_request = ET.Element("tsRequest")
         user_element = ET.SubElement(xml_request, "user")
         user_element.attrib["id"] = user_id
 
         return ET.tostring(xml_request)
 
-    def update_req(self, alert_item):
+    def update_req(self, alert_item: "DataAlertItem") -> bytes:
         xml_request = ET.Element("tsRequest")
         dataAlert_element = ET.SubElement(xml_request, "dataAlert")
-        dataAlert_element.attrib["subject"] = alert_item.subject
-        dataAlert_element.attrib["frequency"] = alert_item.frequency.lower()
-        dataAlert_element.attrib["public"] = alert_item.public
+        if alert_item.subject is not None:
+            dataAlert_element.attrib["subject"] = alert_item.subject
+        if alert_item.frequency is not None:
+            dataAlert_element.attrib["frequency"] = alert_item.frequency.lower()
+        if alert_item.public is not None:
+            dataAlert_element.attrib["public"] = str(alert_item.public).lower()
 
         owner = ET.SubElement(dataAlert_element, "owner")
-        owner.attrib["id"] = alert_item.owner_id
+        if alert_item.owner_id is not None:
+            owner.attrib["id"] = alert_item.owner_id
 
         return ET.tostring(xml_request)
 
