@@ -23,7 +23,6 @@ if TYPE_CHECKING:
     from ..models import FlowItem
     from ..models import ConnectionItem
 
-
 def _add_multipart(parts: Dict) -> Tuple[Any, str]:
     mime_multipart_parts = list()
     for name, (filename, data, content_type) in parts.items():
