@@ -112,4 +112,4 @@ class Schedules(Endpoint):
 
         results = (add_to(*x) for x in items)
         # list() is needed for python 3.x compatibility
-        return list(filter(lambda x: not x.result, results))
+        return list(filter(lambda x: not x.result, results))   # type:ignore[arg-type]
