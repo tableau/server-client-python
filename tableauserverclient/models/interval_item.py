@@ -84,8 +84,9 @@ class HourlyInterval(object):
 
 
 class DailyInterval(object):
-    def __init__(self, start_time):
+    def __init__(self, start_time, *interval_values):
         self.start_time = start_time
+        self.interval = interval_values
 
     @property
     def _frequency(self):
@@ -100,6 +101,13 @@ class DailyInterval(object):
     @property_not_nullable
     def start_time(self, value):
         self._start_time = value
+        
+    @property
+    def interval(self):
+        return self._interval
+    
+    @interval.setter
+    def interval(self, interval):
 
 
 class WeeklyInterval(object):
