@@ -26,6 +26,9 @@ class WebhookTests(unittest.TestCase):
 
     def test_get(self) -> None:
         with open(GET_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            m.get(self.baseurl, text=response_xml)
             webhooks, _ = self.server.webhooks.get()
             self.assertEqual(len(webhooks), 1)
             webhook = webhooks[0]
