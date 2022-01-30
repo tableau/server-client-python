@@ -194,9 +194,9 @@ class GroupTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
-            group_to_create = TSC.GroupItem(u"試供品")
+            group_to_create = TSC.GroupItem("試供品")
             group = self.server.groups.create(group_to_create)
-            self.assertEqual(group.name, u"試供品")
+            self.assertEqual(group.name, "試供品")
             self.assertEqual(group.id, "3e4a9ea0-a07a-4fe6-b50f-c345c8c81034")
 
     def test_create_ad_group(self) -> None:
@@ -204,10 +204,10 @@ class GroupTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
-            group_to_create = TSC.GroupItem(u"試供品")
+            group_to_create = TSC.GroupItem("試供品")
             group_to_create.domain_name = "just-has-to-exist"
             group = self.server.groups.create_AD_group(group_to_create, False)
-            self.assertEqual(group.name, u"試供品")
+            self.assertEqual(group.name, "試供品")
             self.assertEqual(group.license_mode, "onLogin")
             self.assertEqual(group.minimum_site_role, "Creator")
             self.assertEqual(group.domain_name, "active-directory-domain-name")
@@ -217,7 +217,7 @@ class GroupTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
-            group_to_create = TSC.GroupItem(u"試供品")
+            group_to_create = TSC.GroupItem("試供品")
             group_to_create.domain_name = "woohoo"
             job = self.server.groups.create_AD_group(group_to_create, True)
             self.assertEqual(job.mode, "Asynchronous")
