@@ -47,7 +47,7 @@ class Groups(Endpoint):
 
     def _get_users_for_group(
         self, group_item, req_options: Optional["RequestOptions"] = None
-    ) -> Tuple[List[UserItem], PaginationItem]:
+    ) -> Tuple[List[GroupItem], PaginationItem]:
         url = "{0}/{1}/users".format(self.baseurl, group_item.id)
         server_response = self.get_request(url, req_options)
         user_item = UserItem.from_response(server_response.content, self.parent_srv.namespace)
