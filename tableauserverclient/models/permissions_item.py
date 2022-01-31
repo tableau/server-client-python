@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 import logging
 
-from .exceptions import UnknownGranteeTypeError
+from .exceptions import UnknownGranteeTypeError, UnpopulatedPropertyError
 from .user_item import UserItem
 from .group_item import GroupItem
 
@@ -47,7 +47,7 @@ class Permission:
 
 
 class PermissionsRule(object):
-    def __init__(self, grantee: "ResourceReference", capabilities: Dict[Optional[str], Optional[str]]) -> None:
+    def __init__(self, grantee: "ResourceReference", capabilities: Dict[str, str]) -> None:
         self.grantee = grantee
         self.capabilities = capabilities
 
@@ -59,7 +59,7 @@ class PermissionsRule(object):
         permissions_rules_list_xml = parsed_response.findall(".//t:granteeCapabilities", namespaces=ns)
 
         for grantee_capability_xml in permissions_rules_list_xml:
-            capability_dict: Dict[Optional[str], Optional[str]] = {}
+            capability_dict: Dict[str, str] = {}
 
             grantee = PermissionsRule._parse_grantee_element(grantee_capability_xml, ns)
 
@@ -67,7 +67,11 @@ class PermissionsRule(object):
                 name = capability_xml.get("name")
                 mode = capability_xml.get("mode")
 
-                capability_dict[name] = mode
+                if name is None or mode is None:
+                    logger.error("Capability was not valid: ", capability_xml)
+                    raise UnpopulatedPropertyError()
+                else:
+                    capability_dict[name] = mode
 
             rule = PermissionsRule(grantee, capability_dict)
             rules.append(rule)
