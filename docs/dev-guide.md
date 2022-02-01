@@ -68,8 +68,9 @@ Here's a quick checklist to follow when coding to ensure a good pull request
 - Ensure all indentation is done as 4-spaces and your editor is set to unix line
   endings.
 - The code matches PEP8 style guides, enforced by the black formatter. Make sure to run
-  `black --check --line-length 120 tableauserverclient samples test` to catch and fix any style
-  issues before submitting your pull request.
+  `black --line-length 120 tableauserverclient samples test` to catch and fix any style
+  issues before submitting your pull request. (Run black with the `--check` option if
+  you want to check whether formatting is valid without changing any files.)
 - Keep commit messages clean and descriptive.
 
 ### Use git pre-commit hook
