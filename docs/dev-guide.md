@@ -67,9 +67,10 @@ Here's a quick checklist to follow when coding to ensure a good pull request
   goal.
 - Ensure all indentation is done as 4-spaces and your editor is set to unix line
   endings.
-- The code matches PEP8 style guides. Make sure to run
-  `pycodestyle tableauserverclient test samples` to catch and fix any style
-  issues before submitting your pull request.
+- The code matches PEP8 style guides, enforced by the black formatter. Make sure to run
+  `black --line-length 120 tableauserverclient samples test` to catch and fix any style
+  issues before submitting your pull request. (Run black with the `--check` option if
+  you want to check whether formatting is valid without changing any files.)
 - Keep commit messages clean and descriptive.
 
 ### Use git pre-commit hook
@@ -84,7 +85,7 @@ Create a file `pre-commit` with the contents below and mark it as executable
 
 To test that the hook is working correctly, make a style-inconsistent change (for
 example, changing some indentation to not be a multiple of 4), then try to commit
-locally. You should get a failure with an explanation from pycodestyle with the
+locally. You should get a failure with an explanation from black with the
 issue.
 
 ```shell
@@ -94,8 +95,8 @@ issue.
 if [ -e tableauserverclient/__init__.py ];
 then
    # check for style conventions in all code dirs
-   echo Running pycodestyle
-   pycodestyle tableauserverclient test samples
+   echo Running black format check
+   black --check --line-length 120 tableauserverclient samples test
 fi
 ```
 
