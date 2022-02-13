@@ -13,7 +13,7 @@ SERVER_INFO_AUTH_INFO_XML = os.path.join(TEST_ASSET_DIR, "server_info_auth_info.
 
 class ServerInfoTests(unittest.TestCase):
     def setUp(self):
-        self.server = TSC.Server("http://test")
+        self.server = TSC.Server("http://test", False)
         self.baseurl = self.server.server_info.baseurl
         self.server.version = "2.4"
 

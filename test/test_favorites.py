@@ -17,7 +17,7 @@ ADD_FAVORITE_PROJECT_XML = "favorites_add_project.xml"
 
 class FavoritesTests(unittest.TestCase):
     def setUp(self):
-        self.server = TSC.Server("http://test")
+        self.server = TSC.Server("http://test", False)
         self.server.version = "2.5"
 
         # Fake signin

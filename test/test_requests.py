@@ -10,7 +10,7 @@ from tableauserverclient.server.endpoint.exceptions import InternalServerError, 
 
 class RequestTests(unittest.TestCase):
     def setUp(self):
-        self.server = TSC.Server("http://test")
+        self.server = TSC.Server("http://test", False)
 
         # Fake sign in
         self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"
