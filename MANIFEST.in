@@ -21,3 +21,5 @@ recursive-include test *.tdsx
 recursive-include test *.twb
 recursive-include test *.twbx
 recursive-include test *.xml
+global-include *.pyi
+global-include *.typed
