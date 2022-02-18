@@ -440,20 +440,14 @@ class Workbooks(QuerysetEndpoint):
             return self._get_workbook_revisions(workbook_item)
 
         workbook_item._set_revisions(revisions_fetcher)
-        logger.info(
-            "Populated revisions for workbook (ID: {0})".format(workbook_item.id)
-        )
+        logger.info("Populated revisions for workbook (ID: {0})".format(workbook_item.id))
 
     def _get_workbook_revisions(
-        self,
-        workbook_item: WorkbookItem,
-        req_options: Optional["RequestOptions"]=None
+        self, workbook_item: WorkbookItem, req_options: Optional["RequestOptions"] = None
     ) -> List[RevisionItem]:
         url = "{0}/{1}/revisions".format(self.baseurl, workbook_item.id)
         server_response = self.get_request(url, req_options)
-        revisions = RevisionItem.from_response(
-            server_response.content, self.parent_srv.namespace, workbook_item
-        )
+        revisions = RevisionItem.from_response(server_response.content, self.parent_srv.namespace, workbook_item)
         return revisions
 
     # Download 1 workbook revision by revision number
