@@ -30,7 +30,7 @@ EXPECTED_DICT_ERROR = [{"message": "Reached time limit of PT5S for query executi
 
 class MetadataTests(unittest.TestCase):
     def setUp(self):
-        self.server = TSC.Server("http://test")
+        self.server = TSC.Server("http://test", False)
         self.baseurl = self.server.metadata.baseurl
         self.server.version = "3.5"
 

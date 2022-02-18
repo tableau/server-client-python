@@ -17,7 +17,7 @@ FILTER_MULTIPLE = os.path.join(TEST_ASSET_DIR, "request_option_filter_tags_in.xm
 
 class RequestOptionTests(unittest.TestCase):
     def setUp(self):
-        self.server = TSC.Server("http://test")
+        self.server = TSC.Server("http://test", False)
 
         # Fake signin
         self.server.version = "3.10"

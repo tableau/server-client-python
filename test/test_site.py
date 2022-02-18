@@ -14,7 +14,7 @@ CREATE_XML = os.path.join(TEST_ASSET_DIR, "site_create.xml")
 
 class SiteTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.server = TSC.Server("http://test")
+        self.server = TSC.Server("http://test", False)
         self.server.version = "3.10"
 
         # Fake signin

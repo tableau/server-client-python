@@ -12,7 +12,7 @@ FILEUPLOAD_APPEND = os.path.join(TEST_ASSET_DIR, "fileupload_append.xml")
 
 class FileuploadsTests(unittest.TestCase):
     def setUp(self):
-        self.server = Server("http://test")
+        self.server = Server("http://test", False)
 
         # Fake sign in
         self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"
