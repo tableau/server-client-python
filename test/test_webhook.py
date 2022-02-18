@@ -15,7 +15,7 @@ CREATE_REQUEST_XML = asset("webhook_create_request.xml")
 
 class WebhookTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.server = TSC.Server("http://test")
+        self.server = TSC.Server("http://test", False)
         self.server.version = "3.6"
 
         # Fake signin

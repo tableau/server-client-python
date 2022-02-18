@@ -17,7 +17,7 @@ GET_XML_RUN_NOW_RESPONSE = os.path.join(TEST_ASSET_DIR, "tasks_run_now_response.
 
 class TaskTests(unittest.TestCase):
     def setUp(self):
-        self.server = TSC.Server("http://test")
+        self.server = TSC.Server("http://test", False)
         self.server.version = "3.8"
 
         # Fake Signin

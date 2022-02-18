@@ -51,7 +51,7 @@ class Server(object):
         Overwrite = "Overwrite"
         CreateNew = "CreateNew"
 
-    def __init__(self, server_address, use_server_version=False):
+    def __init__(self, server_address, use_server_version=True):
         self._server_address = server_address
         self._auth_token = None
         self._site_id = None

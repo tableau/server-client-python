@@ -62,9 +62,9 @@ class Endpoint(object):
         if content is not None:
             parameters["data"] = content
 
-        logger.debug(u"request {}, url: {}".format(method.__name__, url))
+        logger.debug("request {}, url: {}".format(method.__name__, url))
         if content:
-            logger.debug(u"request content: {}".format(content[:1000]))
+            logger.debug("request content: {}".format(content[:1000]))
 
         server_response = method(url, **parameters)
         self.parent_srv._namespace.detect(server_response.content)
@@ -74,9 +74,7 @@ class Endpoint(object):
         # so that we do not attempt to log bytes and other binary data.
         if len(server_response.content) > 0 and server_response.encoding:
             logger.debug(
-                u"Server response from {0}:\n\t{1}".format(
-                    url, server_response.content.decode(server_response.encoding)
-                )
+                "Server response from {0}:\n\t{1}".format(url, server_response.content.decode(server_response.encoding))
             )
         return server_response
 

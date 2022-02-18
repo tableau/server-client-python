@@ -12,7 +12,7 @@ GET_XML_BY_ID = os.path.join(TEST_ASSET_DIR, "subscription_get_by_id.xml")
 
 class SubscriptionTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.server = TSC.Server("http://test")
+        self.server = TSC.Server("http://test", False)
         self.server.version = "2.6"
 
         # Fake Signin

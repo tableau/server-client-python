@@ -22,7 +22,7 @@ UPDATE_XML = os.path.join(TEST_ASSET_DIR, "workbook_update.xml")
 
 class ViewTests(unittest.TestCase):
     def setUp(self):
-        self.server = TSC.Server("http://test")
+        self.server = TSC.Server("http://test", False)
         self.server.version = "3.2"
 
         # Fake sign in

@@ -24,7 +24,7 @@ DATASOURCE_GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, "datasource_get_by_id.xm
 
 class ScheduleTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.server = TSC.Server("http://test")
+        self.server = TSC.Server("http://test", False)
 
         # Fake Signin
         self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"

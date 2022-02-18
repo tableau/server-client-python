@@ -7,7 +7,7 @@ import tableauserverclient as TSC
 
 class SortTests(unittest.TestCase):
     def setUp(self):
-        self.server = TSC.Server("http://test")
+        self.server = TSC.Server("http://test", False)
         self.server.version = "3.10"
         self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"
         self.server._auth_token = "j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM"
