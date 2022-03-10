@@ -1,4 +1,4 @@
-import xml.etree.ElementTree as ET
+from defusedxml.ElementTree import fromstring
 
 
 class ServerInfoItem(object):
@@ -21,7 +21,7 @@ class ServerInfoItem(object):
 
     @classmethod
     def from_response(cls, resp, ns):
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         product_version_tag = parsed_response.find(".//t:productVersion", namespaces=ns)
         rest_api_version_tag = parsed_response.find(".//t:restApiVersion", namespaces=ns)
 

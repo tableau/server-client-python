@@ -1,8 +1,8 @@
+import json
+import logging
+
 from .endpoint import Endpoint, api
 from .exceptions import GraphQLError, InvalidGraphQLQuery
-import logging
-import json
-
 
 logger = logging.getLogger("tableau.endpoint.metadata")
 

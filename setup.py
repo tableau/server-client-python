@@ -33,6 +33,7 @@ setup(
     test_suite='test',
     setup_requires=pytest_runner,
     install_requires=[
+        'defusedxml>=0.7.1',
         'requests>=2.11,<3.0',
     ],
     tests_require=test_requirements,

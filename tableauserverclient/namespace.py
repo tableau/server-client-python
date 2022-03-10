@@ -1,5 +1,5 @@
-from xml.etree import ElementTree as ET
 import re
+from defusedxml.ElementTree import fromstring
 
 OLD_NAMESPACE = "http://tableausoftware.com/api"
 NEW_NAMESPACE = "http://tableau.com/api"
@@ -25,7 +25,7 @@ class Namespace(object):
         if not xml.startswith(b"<?xml"):
             return  # Not an xml file, don't detect anything
 
-        root = ET.fromstring(xml)
+        root = fromstring(xml)
         matches = NAMESPACE_RE.match(root.tag)
         if matches:
             detected_ns = matches.group(1)

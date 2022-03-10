@@ -1,4 +1,4 @@
-import xml.etree.ElementTree as ET
+from defusedxml.ElementTree import fromstring
 
 
 class DataAccelerationReportItem(object):
@@ -70,7 +70,7 @@ class DataAccelerationReportItem(object):
     @classmethod
     def from_response(cls, resp, ns):
         comparison_records = list()
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         all_comparison_records_xml = parsed_response.findall(".//t:comparisonRecord", namespaces=ns)
         for comparison_record_xml in all_comparison_records_xml:
             (
