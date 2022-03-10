@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+from defusedxml.ElementTree import fromstring
 from datetime import datetime
 from typing import Optional, Union
 
@@ -122,7 +123,7 @@ class ScheduleItem(object):
 
     def _parse_common_tags(self, schedule_xml, ns):
         if not isinstance(schedule_xml, ET.Element):
-            schedule_xml = ET.fromstring(schedule_xml).find(".//t:schedule", namespaces=ns)
+            schedule_xml = fromstring(schedule_xml).find(".//t:schedule", namespaces=ns)
         if schedule_xml is not None:
             (
                 _,
@@ -196,7 +197,7 @@ class ScheduleItem(object):
 
     @classmethod
     def from_response(cls, resp, ns):
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         return cls.from_element(parsed_response, ns)
 
     @classmethod
@@ -311,7 +312,7 @@ class ScheduleItem(object):
 
     @staticmethod
     def parse_add_to_schedule_response(response, ns):
-        parsed_response = ET.fromstring(response.content)
+        parsed_response = fromstring(response.content)
         warnings = ScheduleItem._read_warnings(parsed_response, ns)
         all_task_xml = parsed_response.findall(".//t:task", namespaces=ns)
 

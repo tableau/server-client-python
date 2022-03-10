@@ -1,3 +1,4 @@
+from defusedxml.ElementTree import fromstring
 import xml.etree.ElementTree as ET
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_not_nullable
@@ -105,7 +106,7 @@ class FlowItem(object):
 
     def _parse_common_elements(self, flow_xml, ns):
         if not isinstance(flow_xml, ET.Element):
-            flow_xml = ET.fromstring(flow_xml).find(".//t:flow", namespaces=ns)
+            flow_xml = fromstring(flow_xml).find(".//t:flow", namespaces=ns)
         if flow_xml is not None:
             (
                 _,
@@ -171,7 +172,7 @@ class FlowItem(object):
     @classmethod
     def from_response(cls, resp, ns) -> List["FlowItem"]:
         all_flow_items = list()
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         all_flow_xml = parsed_response.findall(".//t:flow", namespaces=ns)
 
         for flow_xml in all_flow_xml:

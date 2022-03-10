@@ -1,4 +1,4 @@
-import xml.etree.ElementTree as ET
+from defusedxml.ElementTree import fromstring
 from ..datetime_helpers import parse_datetime
 from typing import List, Optional, TYPE_CHECKING, Type
 
@@ -58,7 +58,7 @@ class RevisionItem(object):
     @classmethod
     def from_response(cls, resp: bytes, ns, resource_item) -> List["RevisionItem"]:
         all_revision_items = list()
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         all_revision_xml = parsed_response.findall(".//t:revision", namespaces=ns)
         for revision_xml in all_revision_xml:
             revision_item = cls()

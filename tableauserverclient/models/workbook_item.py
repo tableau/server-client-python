@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+from defusedxml.ElementTree import fromstring
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import (
     property_not_nullable,
@@ -184,7 +185,7 @@ class WorkbookItem(object):
 
     def _parse_common_tags(self, workbook_xml, ns):
         if not isinstance(workbook_xml, ET.Element):
-            workbook_xml = ET.fromstring(workbook_xml).find(".//t:workbook", namespaces=ns)
+            workbook_xml = fromstring(workbook_xml).find(".//t:workbook", namespaces=ns)
         if workbook_xml is not None:
             (
                 _,
@@ -277,7 +278,7 @@ class WorkbookItem(object):
     @classmethod
     def from_response(cls, resp: str, ns: Dict[str, str]) -> List["WorkbookItem"]:
         all_workbook_items = list()
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         all_workbook_xml = parsed_response.findall(".//t:workbook", namespaces=ns)
         for workbook_xml in all_workbook_xml:
             (

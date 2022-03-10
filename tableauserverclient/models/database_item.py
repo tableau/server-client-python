@@ -1,4 +1,5 @@
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree
+from defusedxml.ElementTree import fromstring
 
 from .property_decorators import (
     property_is_enum,
@@ -254,7 +255,7 @@ class DatabaseItem(object):
     @classmethod
     def from_response(cls, resp, ns):
         all_database_items = list()
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         all_database_xml = parsed_response.findall(".//t:database", namespaces=ns)
 
         for database_xml in all_database_xml:

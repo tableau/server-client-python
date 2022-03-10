@@ -1,4 +1,4 @@
-import xml.etree.ElementTree as ET
+from defusedxml.ElementTree import fromstring
 import logging
 from .workbook_item import WorkbookItem
 from .view_item import ViewItem
@@ -42,7 +42,7 @@ class FavoriteItem:
             "workbooks": [],
         }
 
-        parsed_response = ET.fromstring(xml)
+        parsed_response = fromstring(xml)
         for workbook in parsed_response.findall(".//t:favorite/t:workbook", namespace):
             fav_workbook = WorkbookItem("")
             fav_workbook._set_values(*fav_workbook._parse_element(workbook, namespace))

@@ -1,7 +1,7 @@
 from ..request_factory import RequestFactory
 from .exceptions import ServerResponseError
 from .endpoint import Endpoint, api
-import xml.etree.ElementTree as ET
+from defusedxml.ElementTree import fromstring
 import logging
 
 logger = logging.getLogger("tableau.endpoint.auth")
@@ -29,7 +29,7 @@ class Auth(Endpoint):
         server_response = self.parent_srv.session.post(url, data=signin_req, **self.parent_srv.http_options)
         self.parent_srv._namespace.detect(server_response.content)
         self._check_status(server_response)
-        parsed_response = ET.fromstring(server_response.content)
+        parsed_response = fromstring(server_response.content)
         site_id = parsed_response.find(".//t:site", namespaces=self.parent_srv.namespace).get("id", None)
         user_id = parsed_response.find(".//t:user", namespaces=self.parent_srv.namespace).get("id", None)
         auth_token = parsed_response.find("t:credentials", namespaces=self.parent_srv.namespace).get("token", None)
@@ -65,7 +65,7 @@ class Auth(Endpoint):
                 raise e
         self.parent_srv._namespace.detect(server_response.content)
         self._check_status(server_response)
-        parsed_response = ET.fromstring(server_response.content)
+        parsed_response = fromstring(server_response.content)
         site_id = parsed_response.find(".//t:site", namespaces=self.parent_srv.namespace).get("id", None)
         user_id = parsed_response.find(".//t:user", namespaces=self.parent_srv.namespace).get("id", None)
         auth_token = parsed_response.find("t:credentials", namespaces=self.parent_srv.namespace).get("token", None)

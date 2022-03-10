@@ -1,4 +1,4 @@
-import xml.etree.ElementTree as ET
+from defusedxml.ElementTree import fromstring
 from ..datetime_helpers import parse_datetime
 from .exceptions import UnpopulatedPropertyError
 from .tag_item import TagItem
@@ -126,7 +126,7 @@ class ViewItem(object):
 
     @classmethod
     def from_response(cls, resp, ns, workbook_id="") -> List["ViewItem"]:
-        return cls.from_xml_element(ET.fromstring(resp), ns, workbook_id)
+        return cls.from_xml_element(fromstring(resp), ns, workbook_id)
 
     @classmethod
     def from_xml_element(cls, parsed_response, ns, workbook_id="") -> List["ViewItem"]:

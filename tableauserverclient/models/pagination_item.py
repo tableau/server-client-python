@@ -1,4 +1,5 @@
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree
+from defusedxml.ElementTree import fromstring
 
 
 class PaginationItem(object):
@@ -21,7 +22,7 @@ class PaginationItem(object):
 
     @classmethod
     def from_response(cls, resp, ns) -> "PaginationItem":
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         pagination_xml = parsed_response.find("t:pagination", namespaces=ns)
         pagination_item = cls()
         if pagination_xml is not None:

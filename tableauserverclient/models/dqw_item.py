@@ -1,4 +1,4 @@
-import xml.etree.ElementTree as ET
+from defusedxml.ElementTree import fromstring
 from ..datetime_helpers import parse_datetime
 
 
@@ -98,7 +98,7 @@ class DQWItem(object):
 
     @classmethod
     def from_response(cls, resp, ns):
-        return cls.from_xml_element(ET.fromstring(resp), ns)
+        return cls.from_xml_element(fromstring(resp), ns)
 
     @classmethod
     def from_xml_element(cls, parsed_response, ns):

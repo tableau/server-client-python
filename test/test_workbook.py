@@ -5,6 +5,7 @@ import re
 import requests_mock
 import tableauserverclient as TSC
 import xml.etree.ElementTree as ET
+from defusedxml.ElementTree import fromstring
 from pathlib import Path
 import tempfile
 
@@ -698,7 +699,7 @@ class WorkbookTests(unittest.TestCase):
 
         response = RequestFactory.Workbook._generate_xml(new_workbook, connections=[connection1, connection2])
         # Can't use ConnectionItem parser due to xml namespace problems
-        connection_results = ET.fromstring(response).findall(".//connection")
+        connection_results = fromstring(response).findall(".//connection")
 
         self.assertEqual(connection_results[0].get("serverAddress", None), "mysql.test.com")
         self.assertEqual(connection_results[0].find("connectionCredentials").get("name", None), "test")  # type: ignore[union-attr]
@@ -713,7 +714,7 @@ class WorkbookTests(unittest.TestCase):
 
         response = RequestFactory.Workbook._generate_xml(new_workbook, connection_credentials=connection_creds)
         # Can't use ConnectionItem parser due to xml namespace problems
-        credentials = ET.fromstring(response).findall(".//connectionCredentials")
+        credentials = fromstring(response).findall(".//connectionCredentials")
         self.assertEqual(len(credentials), 1)
         self.assertEqual(credentials[0].get("name", None), "test")
         self.assertEqual(credentials[0].get("password", None), "secret")

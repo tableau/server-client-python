@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+from defusedxml.ElementTree import fromstring
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import (
     property_not_nullable,
@@ -189,7 +190,7 @@ class DatasourceItem(object):
 
     def _parse_common_elements(self, datasource_xml, ns):
         if not isinstance(datasource_xml, ET.Element):
-            datasource_xml = ET.fromstring(datasource_xml).find(".//t:datasource", namespaces=ns)
+            datasource_xml = fromstring(datasource_xml).find(".//t:datasource", namespaces=ns)
         if datasource_xml is not None:
             (
                 ask_data_enablement,
@@ -294,7 +295,7 @@ class DatasourceItem(object):
     @classmethod
     def from_response(cls, resp: str, ns: Dict) -> List["DatasourceItem"]:
         all_datasource_items = list()
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         all_datasource_xml = parsed_response.findall(".//t:datasource", namespaces=ns)
 
         for datasource_xml in all_datasource_xml:
