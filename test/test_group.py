@@ -1,7 +1,9 @@
 # encoding=utf-8
-import unittest
 import os
+import unittest
+
 import requests_mock
+
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
 

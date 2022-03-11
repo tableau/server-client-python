@@ -1,8 +1,8 @@
+import logging
+
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from .. import TaskItem, PaginationItem, RequestFactory
-
-import logging
 
 logger = logging.getLogger("tableau.endpoint.tasks")
 

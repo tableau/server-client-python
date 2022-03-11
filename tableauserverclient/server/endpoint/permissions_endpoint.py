@@ -5,10 +5,9 @@ from .. import RequestFactory, PermissionsRule
 from .endpoint import Endpoint
 from .exceptions import MissingRequiredFieldError
 
+from typing import Callable, TYPE_CHECKING, List, Union
 
 logger = logging.getLogger(__name__)
-
-from typing import Callable, TYPE_CHECKING, List, Union
 
 if TYPE_CHECKING:
     from ...models import DatasourceItem, ProjectItem, WorkbookItem, ViewItem
@@ -21,9 +20,9 @@ TableauItem = Union["DatasourceItem", "ProjectItem", "WorkbookItem", "ViewItem"]
 class _PermissionsEndpoint(Endpoint):
     """Adds permission model to another endpoint
 
-    Tableau permissions model is identical between objects but they are nested under
+    Tableau permissions model is identical between objects, but they are nested under
     the parent object endpoint (i.e. permissions for workbooks are under
-    /workbooks/:id/permission).  This class is meant to be instantated inside a
+    /workbooks/:id/permission).  This class is meant to be instantiated inside a
     parent endpoint which has these supported endpoints
     """
 

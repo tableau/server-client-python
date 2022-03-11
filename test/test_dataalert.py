@@ -1,12 +1,9 @@
 import unittest
-import os
+
 import requests_mock
-import xml.etree.ElementTree as ET
+
 import tableauserverclient as TSC
-from tableauserverclient.datetime_helpers import format_datetime
-from tableauserverclient.server.endpoint.exceptions import InternalServerError
-from tableauserverclient.server.request_factory import RequestFactory
-from ._utils import read_xml_asset, read_xml_assets, asset
+from ._utils import read_xml_asset
 
 GET_XML = "data_alerts_get.xml"
 GET_BY_ID_XML = "data_alerts_get_by_id.xml"

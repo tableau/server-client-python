@@ -1,6 +1,7 @@
 # coding=utf-8
 
 import unittest
+
 import tableauserverclient as TSC
 
 

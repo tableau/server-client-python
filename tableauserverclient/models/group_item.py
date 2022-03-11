@@ -1,10 +1,11 @@
-import xml.etree.ElementTree as ET
+from typing import Callable, List, Optional, TYPE_CHECKING
+
+from defusedxml.ElementTree import fromstring
+
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_not_empty, property_is_enum
 from .reference_item import ResourceReference
 from .user_item import UserItem
-
-from typing import Callable, List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..server import Pager
@@ -82,7 +83,7 @@ class GroupItem(object):
     @classmethod
     def from_response(cls, resp, ns) -> List["GroupItem"]:
         all_group_items = list()
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         all_group_xml = parsed_response.findall(".//t:group", namespaces=ns)
         for group_xml in all_group_xml:
             name = group_xml.get("name", None)

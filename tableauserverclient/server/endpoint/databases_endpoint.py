@@ -1,12 +1,11 @@
+import logging
+
+from .default_permissions_endpoint import _DefaultPermissionsEndpoint
+from .dqw_endpoint import _DataQualityWarningEndpoint
 from .endpoint import api, Endpoint
 from .exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
-from .default_permissions_endpoint import _DefaultPermissionsEndpoint
-from .dqw_endpoint import _DataQualityWarningEndpoint
-
 from .. import RequestFactory, DatabaseItem, TableItem, PaginationItem, Permission
-
-import logging
 
 logger = logging.getLogger("tableau.endpoint.databases")
 

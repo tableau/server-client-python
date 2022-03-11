@@ -1,4 +1,5 @@
-import xml.etree.ElementTree as ET
+from defusedxml.ElementTree import fromstring
+
 from .connection_credentials import ConnectionCredentials
 
 
@@ -39,7 +40,7 @@ class ConnectionItem(object):
     @classmethod
     def from_response(cls, resp, ns):
         all_connection_items = list()
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         all_connection_xml = parsed_response.findall(".//t:connection", namespaces=ns)
         for connection_xml in all_connection_xml:
             connection_item = cls()

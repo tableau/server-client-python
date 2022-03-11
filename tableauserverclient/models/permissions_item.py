@@ -1,9 +1,11 @@
-import xml.etree.ElementTree as ET
 import logging
+import xml.etree.ElementTree as ET
+
+from defusedxml.ElementTree import fromstring
 
 from .exceptions import UnknownGranteeTypeError, UnpopulatedPropertyError
-from .user_item import UserItem
 from .group_item import GroupItem
+from .user_item import UserItem
 
 logger = logging.getLogger("tableau.models.permissions_item")
 
@@ -53,7 +55,7 @@ class PermissionsRule(object):
 
     @classmethod
     def from_response(cls, resp, ns=None) -> List["PermissionsRule"]:
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
 
         rules = []
         permissions_rules_list_xml = parsed_response.findall(".//t:granteeCapabilities", namespaces=ns)

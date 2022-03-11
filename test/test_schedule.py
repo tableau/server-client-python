@@ -1,7 +1,9 @@
-from datetime import time
-import unittest
 import os
+import unittest
+from datetime import time
+
 import requests_mock
+
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
 

@@ -1,4 +1,7 @@
 import xml.etree.ElementTree as ET
+
+from defusedxml.ElementTree import fromstring
+
 from .property_decorators import (
     property_is_enum,
     property_is_boolean,
@@ -7,7 +10,6 @@ from .property_decorators import (
     property_not_nullable,
     property_is_int,
 )
-
 
 VALID_CONTENT_URL_RE = r"^[a-zA-Z0-9_\-]*$"
 
@@ -541,7 +543,7 @@ class SiteItem(object):
 
     def _parse_common_tags(self, site_xml, ns):
         if not isinstance(site_xml, ET.Element):
-            site_xml = ET.fromstring(site_xml).find(".//t:site", namespaces=ns)
+            site_xml = fromstring(site_xml).find(".//t:site", namespaces=ns)
         if site_xml is not None:
             (
                 _,
@@ -812,7 +814,7 @@ class SiteItem(object):
     @classmethod
     def from_response(cls, resp, ns) -> List["SiteItem"]:
         all_site_items = list()
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         all_site_xml = parsed_response.findall(".//t:site", namespaces=ns)
         for site_xml in all_site_xml:
             (

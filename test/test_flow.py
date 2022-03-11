@@ -1,12 +1,10 @@
 import unittest
-import os
+
 import requests_mock
-import xml.etree.ElementTree as ET
+
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
-from tableauserverclient.server.endpoint.exceptions import InternalServerError
-from tableauserverclient.server.request_factory import RequestFactory
-from ._utils import read_xml_asset, read_xml_assets, asset
+from ._utils import read_xml_asset, asset
 
 GET_XML = "flow_get.xml"
 POPULATE_CONNECTIONS_XML = "flow_populate_connections.xml"

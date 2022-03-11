@@ -1,6 +1,6 @@
-from contextlib import contextmanager
-import unittest
 import os.path
+import unittest
+from contextlib import contextmanager
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 

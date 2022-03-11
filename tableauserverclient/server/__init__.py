@@ -1,3 +1,4 @@
+# These two imports must come first
 from .request_factory import RequestFactory
 from .request_options import (
     CSVRequestOptions,
@@ -5,35 +6,36 @@ from .request_options import (
     PDFRequestOptions,
     RequestOptions,
 )
+
 from .filter import Filter
 from .sort import Sort
 from .. import (
-    ConnectionItem,
-    DataAlertItem,
-    DatasourceItem,
-    DatabaseItem,
-    DQWItem,
-    JobItem,
     BackgroundJobItem,
+    ColumnItem,
+    ConnectionItem,
+    DQWItem,
+    DataAlertItem,
+    DatabaseItem,
+    DatasourceItem,
+    FlowItem,
+    FlowRunItem,
     GroupItem,
+    JobItem,
     PaginationItem,
+    Permission,
+    PermissionsRule,
     ProjectItem,
+    RevisionItem,
     ScheduleItem,
     SiteItem,
+    SubscriptionItem,
+    TableItem,
     TableauAuth,
+    TaskItem,
     UserItem,
     ViewItem,
-    WorkbookItem,
-    TableItem,
-    TaskItem,
-    SubscriptionItem,
-    PermissionsRule,
-    Permission,
-    ColumnItem,
-    FlowItem,
     WebhookItem,
-    FlowRunItem,
-    RevisionItem,
+    WorkbookItem,
 )
 from .endpoint import (
     Auth,

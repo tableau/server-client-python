@@ -1,5 +1,5 @@
-from .request_options import RequestOptions
 from .filter import Filter
+from .request_options import RequestOptions
 from .sort import Sort
 
 

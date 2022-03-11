@@ -1,8 +1,9 @@
-import xml.etree.ElementTree as ET
-from ..datetime_helpers import parse_datetime
 import itertools
-
 from typing import Dict, List, Optional, Type, TYPE_CHECKING
+
+from defusedxml.ElementTree import fromstring
+
+from ..datetime_helpers import parse_datetime
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -74,7 +75,7 @@ class FlowRunItem(object):
     @classmethod
     def from_response(cls: Type["FlowRunItem"], resp: bytes, ns: Optional[Dict]) -> List["FlowRunItem"]:
         all_flowrun_items = list()
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         all_flowrun_xml = itertools.chain(
             parsed_response.findall(".//t:flowRun[@id]", namespaces=ns),
             parsed_response.findall(".//t:flowRuns[@id]", namespaces=ns),
