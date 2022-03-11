@@ -1,3 +1,14 @@
+# These two imports must come first
+from .request_factory import RequestFactory
+from .request_options import (
+    CSVRequestOptions,
+    ImageRequestOptions,
+    PDFRequestOptions,
+    RequestOptions,
+)
+
+from .filter import Filter
+from .sort import Sort
 from .. import (
     BackgroundJobItem,
     ColumnItem,
@@ -45,15 +56,6 @@ from .endpoint import (
     Flows,
     Favorites,
 )
-from .exceptions import NotSignedInError
-from .filter import Filter
-from .pager import Pager
-from .request_factory import RequestFactory
-from .request_options import (
-    CSVRequestOptions,
-    ImageRequestOptions,
-    PDFRequestOptions,
-    RequestOptions,
-)
 from .server import Server
-from .sort import Sort
+from .pager import Pager
+from .exceptions import NotSignedInError
