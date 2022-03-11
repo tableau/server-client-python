@@ -1,10 +1,8 @@
 import logging
 
-from .. import RequestFactory, DQWItem
-
 from .endpoint import Endpoint
 from .exceptions import MissingRequiredFieldError
-
+from .. import RequestFactory, DQWItem
 
 logger = logging.getLogger(__name__)
 

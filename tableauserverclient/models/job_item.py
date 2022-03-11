@@ -1,9 +1,9 @@
-import xml.etree.ElementTree as ET
+from typing import List, Optional, TYPE_CHECKING
+
+from defusedxml.ElementTree import fromstring
+
 from .flow_run_item import FlowRunItem
 from ..datetime_helpers import parse_datetime
-
-
-from typing import List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     import datetime
@@ -101,7 +101,7 @@ class JobItem(object):
 
     @classmethod
     def from_response(cls, xml, ns) -> List["JobItem"]:
-        parsed_response = ET.fromstring(xml)
+        parsed_response = fromstring(xml)
         all_tasks_xml = parsed_response.findall(".//t:job", namespaces=ns)
 
         all_tasks = [JobItem._parse_element(x, ns) for x in all_tasks_xml]
@@ -214,7 +214,7 @@ class BackgroundJobItem(object):
 
     @classmethod
     def from_response(cls, xml, ns) -> List["BackgroundJobItem"]:
-        parsed_response = ET.fromstring(xml)
+        parsed_response = fromstring(xml)
         all_tasks_xml = parsed_response.findall(".//t:backgroundJob", namespaces=ns)
         return [cls._parse_element(x, ns) for x in all_tasks_xml]
 

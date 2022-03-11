@@ -1,12 +1,10 @@
 import xml.etree.ElementTree as ET
+from typing import List, Optional
 
-from .permissions_item import Permission
+from defusedxml.ElementTree import fromstring
 
-from .property_decorators import property_is_enum, property_not_empty
 from .exceptions import UnpopulatedPropertyError
-
-
-from typing import List, Optional, TYPE_CHECKING
+from .property_decorators import property_is_enum, property_not_empty
 
 
 class ProjectItem(object):
@@ -97,7 +95,7 @@ class ProjectItem(object):
 
     def _parse_common_tags(self, project_xml, ns):
         if not isinstance(project_xml, ET.Element):
-            project_xml = ET.fromstring(project_xml).find(".//t:project", namespaces=ns)
+            project_xml = fromstring(project_xml).find(".//t:project", namespaces=ns)
 
         if project_xml is not None:
             (
@@ -137,7 +135,7 @@ class ProjectItem(object):
     @classmethod
     def from_response(cls, resp, ns) -> List["ProjectItem"]:
         all_project_items = list()
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         all_project_xml = parsed_response.findall(".//t:project", namespaces=ns)
 
         for project_xml in all_project_xml:

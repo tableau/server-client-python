@@ -1,8 +1,9 @@
-import xml.etree.ElementTree as ET
-from .target import Target
-from .property_decorators import property_is_boolean
-
 from typing import List, Type, TYPE_CHECKING
+
+from defusedxml.ElementTree import fromstring
+
+from .property_decorators import property_is_boolean
+from .target import Target
 
 if TYPE_CHECKING:
     from .target import Target
@@ -77,7 +78,7 @@ class SubscriptionItem(object):
 
     @classmethod
     def from_response(cls: Type, xml: bytes, ns) -> List["SubscriptionItem"]:
-        parsed_response = ET.fromstring(xml)
+        parsed_response = fromstring(xml)
         all_subscriptions_xml = parsed_response.findall(".//t:subscription", namespaces=ns)
 
         all_subscriptions = [SubscriptionItem._parse_element(x, ns) for x in all_subscriptions_xml]
