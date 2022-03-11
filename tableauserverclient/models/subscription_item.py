@@ -1,8 +1,9 @@
-from defusedxml.ElementTree import fromstring
-from .target import Target
-from .property_decorators import property_is_boolean
-
 from typing import List, Type, TYPE_CHECKING
+
+from defusedxml.ElementTree import fromstring
+
+from .property_decorators import property_is_boolean
+from .target import Target
 
 if TYPE_CHECKING:
     from .target import Target

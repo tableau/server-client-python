@@ -1,5 +1,9 @@
+import copy
 import xml.etree.ElementTree as ET
+from typing import Dict, List, Optional, Set, Tuple, TYPE_CHECKING
+
 from defusedxml.ElementTree import fromstring
+
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import (
     property_not_nullable,
@@ -8,9 +12,6 @@ from .property_decorators import (
 )
 from .tag_item import TagItem
 from ..datetime_helpers import parse_datetime
-import copy
-
-from typing import Dict, List, Optional, Set, Tuple, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from .permissions_item import PermissionsRule

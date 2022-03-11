@@ -1,23 +1,21 @@
-import unittest
-from io import BytesIO
 import os
 import re
-import requests_mock
-import tableauserverclient as TSC
-import xml.etree.ElementTree as ET
-from defusedxml.ElementTree import fromstring
-from pathlib import Path
 import tempfile
+import unittest
+from io import BytesIO
+from pathlib import Path
 
+import requests_mock
+from defusedxml.ElementTree import fromstring
+
+import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
-from tableauserverclient.server.endpoint.exceptions import InternalServerError
-from tableauserverclient.server.request_factory import RequestFactory
+from tableauserverclient.models.group_item import GroupItem
 from tableauserverclient.models.permissions_item import PermissionsRule
 from tableauserverclient.models.user_item import UserItem
-from tableauserverclient.models.group_item import GroupItem
-
+from tableauserverclient.server.endpoint.exceptions import InternalServerError
+from tableauserverclient.server.request_factory import RequestFactory
 from ._utils import asset
-
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 

@@ -1,8 +1,10 @@
-from ..request_factory import RequestFactory
-from .exceptions import ServerResponseError
-from .endpoint import Endpoint, api
-from defusedxml.ElementTree import fromstring
 import logging
+
+from defusedxml.ElementTree import fromstring
+
+from .endpoint import Endpoint, api
+from .exceptions import ServerResponseError
+from ..request_factory import RequestFactory
 
 logger = logging.getLogger("tableau.endpoint.auth")
 

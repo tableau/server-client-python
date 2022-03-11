@@ -1,6 +1,12 @@
+import copy
+import uuid
 import xml.etree.ElementTree as ET
+from typing import Dict, List, Optional, Set, TYPE_CHECKING
+
 from defusedxml.ElementTree import fromstring
+
 from .exceptions import UnpopulatedPropertyError
+from .permissions_item import PermissionsRule
 from .property_decorators import (
     property_not_nullable,
     property_is_boolean,
@@ -8,12 +14,7 @@ from .property_decorators import (
 )
 from .tag_item import TagItem
 from .view_item import ViewItem
-from .permissions_item import PermissionsRule
 from ..datetime_helpers import parse_datetime
-import copy
-import uuid
-
-from typing import Dict, List, Optional, Set, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from .connection_item import ConnectionItem

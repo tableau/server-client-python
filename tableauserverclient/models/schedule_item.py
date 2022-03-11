@@ -1,7 +1,8 @@
 import xml.etree.ElementTree as ET
-from defusedxml.ElementTree import fromstring
 from datetime import datetime
 from typing import Optional, Union
+
+from defusedxml.ElementTree import fromstring
 
 from .interval_item import (
     IntervalItem,

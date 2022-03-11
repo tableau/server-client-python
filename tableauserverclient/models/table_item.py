@@ -1,6 +1,7 @@
 from defusedxml.ElementTree import fromstring
-from .property_decorators import property_not_empty, property_is_boolean
+
 from .exceptions import UnpopulatedPropertyError
+from .property_decorators import property_not_empty, property_is_boolean
 
 
 class TableItem(object):

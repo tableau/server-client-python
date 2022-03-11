@@ -1,5 +1,7 @@
 import xml.etree.ElementTree as ET
+
 from defusedxml.ElementTree import fromstring
+
 from .property_decorators import (
     property_is_enum,
     property_is_boolean,
@@ -8,7 +10,6 @@ from .property_decorators import (
     property_not_nullable,
     property_is_int,
 )
-
 
 VALID_CONTENT_URL_RE = r"^[a-zA-Z0-9_\-]*$"
 

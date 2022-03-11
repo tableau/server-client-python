@@ -1,10 +1,9 @@
+import logging
+
+from .default_permissions_endpoint import _DefaultPermissionsEndpoint
 from .endpoint import api, Endpoint
 from .permissions_endpoint import _PermissionsEndpoint
-from .default_permissions_endpoint import _DefaultPermissionsEndpoint
-
 from ...models.data_acceleration_report_item import DataAccelerationReportItem
-
-import logging
 
 logger = logging.getLogger("tableau.endpoint.data_acceleration_report")
 

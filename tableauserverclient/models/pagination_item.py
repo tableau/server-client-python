@@ -1,4 +1,3 @@
-import xml.etree.ElementTree
 from defusedxml.ElementTree import fromstring
 
 

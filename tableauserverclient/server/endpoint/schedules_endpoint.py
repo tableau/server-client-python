@@ -1,10 +1,11 @@
+import copy
+import logging
+from collections import namedtuple
+from typing import TYPE_CHECKING, Callable, List, Optional, Tuple, Union
+
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, PaginationItem, ScheduleItem, TaskItem
-import logging
-import copy
-from collections import namedtuple
-from typing import TYPE_CHECKING, Callable, List, Optional, Tuple, Union
 
 logger = logging.getLogger("tableau.endpoint.schedules")
 # Oh to have a first class Result concept in Python...

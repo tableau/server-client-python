@@ -1,9 +1,9 @@
+import copy
+import logging
+
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, SiteItem, PaginationItem
-
-import copy
-import logging
 
 logger = logging.getLogger("tableau.endpoint.sites")
 

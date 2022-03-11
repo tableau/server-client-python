@@ -1,4 +1,5 @@
-import xml.etree.ElementTree
+from typing import List, Optional, TYPE_CHECKING
+
 from defusedxml.ElementTree import fromstring
 
 from .property_decorators import (
@@ -6,11 +7,6 @@ from .property_decorators import (
     property_is_enum,
     property_is_boolean,
 )
-from .user_item import UserItem
-from .view_item import ViewItem
-
-
-from typing import List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from datetime import datetime

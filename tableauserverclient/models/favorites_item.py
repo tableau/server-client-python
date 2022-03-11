@@ -1,10 +1,12 @@
-from defusedxml.ElementTree import fromstring
 import logging
-from .workbook_item import WorkbookItem
-from .view_item import ViewItem
-from .project_item import ProjectItem
+
+from defusedxml.ElementTree import fromstring
+
 from .datasource_item import DatasourceItem
 from .flow_item import FlowItem
+from .project_item import ProjectItem
+from .view_item import ViewItem
+from .workbook_item import WorkbookItem
 
 logger = logging.getLogger("tableau.models.favorites_item")
 

@@ -1,6 +1,7 @@
 from defusedxml.ElementTree import fromstring
-from .target import Target
+
 from .schedule_item import ScheduleItem
+from .target import Target
 from ..datetime_helpers import parse_datetime
 
 

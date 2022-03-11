@@ -1,9 +1,10 @@
-import unittest
 import os
-import requests_mock
-import tableauserverclient as TSC
+import unittest
 
-from ._utils import read_xml_asset, read_xml_assets, asset
+import requests_mock
+
+import tableauserverclient as TSC
+from ._utils import read_xml_asset, asset
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 

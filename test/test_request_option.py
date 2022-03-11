@@ -1,8 +1,9 @@
-import unittest
 import os
 import re
-import requests
+import unittest
+
 import requests_mock
+
 import tableauserverclient as TSC
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")

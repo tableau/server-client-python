@@ -1,9 +1,9 @@
-import xml.etree.ElementTree
-from defusedxml.ElementTree import fromstring
-from ..datetime_helpers import parse_datetime
 import itertools
-
 from typing import Dict, List, Optional, Type, TYPE_CHECKING
+
+from defusedxml.ElementTree import fromstring
+
+from ..datetime_helpers import parse_datetime
 
 if TYPE_CHECKING:
     from datetime import datetime

@@ -1,16 +1,17 @@
-from datetime import datetime
 import xml.etree.ElementTree as ET
+from datetime import datetime
+from typing import Dict, List, Optional, TYPE_CHECKING
+
 from defusedxml.ElementTree import fromstring
+
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import (
     property_is_enum,
     property_not_empty,
     property_not_nullable,
 )
-from ..datetime_helpers import parse_datetime
 from .reference_item import ResourceReference
-
-from typing import Dict, List, Optional, TYPE_CHECKING
+from ..datetime_helpers import parse_datetime
 
 if TYPE_CHECKING:
     from ..server.pager import Pager

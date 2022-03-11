@@ -1,15 +1,16 @@
-from tableauserverclient.server.endpoint.fileuploads_endpoint import Fileuploads
+import os
+import tempfile
 import unittest
 from io import BytesIO
-import os
+from zipfile import ZipFile
+
 import requests_mock
 from defusedxml.ElementTree import fromstring
-from zipfile import ZipFile
-import tempfile
 
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
 from tableauserverclient.server.endpoint.exceptions import InternalServerError
+from tableauserverclient.server.endpoint.fileuploads_endpoint import Fileuploads
 from tableauserverclient.server.request_factory import RequestFactory
 from ._utils import read_xml_asset, read_xml_assets, asset
 

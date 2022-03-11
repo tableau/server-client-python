@@ -1,12 +1,11 @@
-import xml.etree.ElementTree
 from defusedxml.ElementTree import fromstring
 
+from .exceptions import UnpopulatedPropertyError
 from .property_decorators import (
     property_is_enum,
     property_not_empty,
     property_is_boolean,
 )
-from .exceptions import UnpopulatedPropertyError
 
 
 class DatabaseItem(object):

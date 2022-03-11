@@ -1,10 +1,11 @@
+import copy
+import logging
+import urllib.parse
+
 from .endpoint import Endpoint
 from .exceptions import EndpointUnavailableError, ServerResponseError
 from .. import RequestFactory
 from ...models.tag_item import TagItem
-import logging
-import copy
-import urllib.parse
 
 logger = logging.getLogger("tableau.endpoint.resource_tagger")
 

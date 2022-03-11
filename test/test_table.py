@@ -1,5 +1,7 @@
 import unittest
+
 import requests_mock
+
 import tableauserverclient as TSC
 from ._utils import read_xml_asset
 

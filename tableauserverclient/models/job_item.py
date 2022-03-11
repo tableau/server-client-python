@@ -1,10 +1,9 @@
-import xml.etree.ElementTree
+from typing import List, Optional, TYPE_CHECKING
+
 from defusedxml.ElementTree import fromstring
+
 from .flow_run_item import FlowRunItem
 from ..datetime_helpers import parse_datetime
-
-
-from typing import List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     import datetime

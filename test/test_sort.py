@@ -1,7 +1,8 @@
-import unittest
 import re
-import requests
+import unittest
+
 import requests_mock
+
 import tableauserverclient as TSC
 
 

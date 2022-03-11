@@ -1,18 +1,16 @@
-from defusedxml.ElementTree import fromstring
+import copy
 import xml.etree.ElementTree as ET
+from typing import List, Optional, TYPE_CHECKING, Set
+
+from defusedxml.ElementTree import fromstring
+
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_not_nullable
 from .tag_item import TagItem
 from ..datetime_helpers import parse_datetime
-import copy
-
-from typing import List, Optional, TYPE_CHECKING, Set
 
 if TYPE_CHECKING:
     import datetime
-    from .connection_item import ConnectionItem
-    from .permissions_item import Permission
-    from .dqw_item import DQWItem
 
 
 class FlowItem(object):

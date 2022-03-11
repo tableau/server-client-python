@@ -1,10 +1,11 @@
+import copy
+from typing import Callable, Iterable, List, Optional, Set, TYPE_CHECKING
+
 from defusedxml.ElementTree import fromstring
-from ..datetime_helpers import parse_datetime
+
 from .exceptions import UnpopulatedPropertyError
 from .tag_item import TagItem
-import copy
-
-from typing import ByteString, Callable, Iterable, List, Optional, Set, TYPE_CHECKING
+from ..datetime_helpers import parse_datetime
 
 if TYPE_CHECKING:
     from datetime import datetime

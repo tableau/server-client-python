@@ -1,11 +1,10 @@
 import xml.etree.ElementTree as ET
+from typing import List, Optional
+
 from defusedxml.ElementTree import fromstring
 
-from .property_decorators import property_is_enum, property_not_empty
 from .exceptions import UnpopulatedPropertyError
-
-
-from typing import List, Optional, TYPE_CHECKING
+from .property_decorators import property_is_enum, property_not_empty
 
 
 class ProjectItem(object):

@@ -1,4 +1,5 @@
 import re
+
 from defusedxml.ElementTree import fromstring
 
 OLD_NAMESPACE = "http://tableausoftware.com/api"
