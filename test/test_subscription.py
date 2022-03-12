@@ -1,6 +1,8 @@
-import unittest
 import os
+import unittest
+
 import requests_mock
+
 import tableauserverclient as TSC
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
@@ -12,7 +14,7 @@ GET_XML_BY_ID = os.path.join(TEST_ASSET_DIR, "subscription_get_by_id.xml")
 
 class SubscriptionTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.server = TSC.Server("http://test")
+        self.server = TSC.Server("http://test", False)
         self.server.version = "2.6"
 
         # Fake Signin

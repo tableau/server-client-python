@@ -1,12 +1,9 @@
 import unittest
-import os
+
 import requests_mock
-import xml.etree.ElementTree as ET
+
 import tableauserverclient as TSC
-from tableauserverclient.datetime_helpers import format_datetime
-from tableauserverclient.server.endpoint.exceptions import InternalServerError
-from tableauserverclient.server.request_factory import RequestFactory
-from ._utils import read_xml_asset, read_xml_assets, asset
+from ._utils import read_xml_asset
 
 GET_XML = "table_get.xml"
 UPDATE_XML = "table_update.xml"
@@ -14,7 +11,7 @@ UPDATE_XML = "table_update.xml"
 
 class TableTests(unittest.TestCase):
     def setUp(self):
-        self.server = TSC.Server("http://test")
+        self.server = TSC.Server("http://test", False)
 
         # Fake signin
         self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"

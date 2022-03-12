@@ -1,6 +1,8 @@
-import unittest
 import os.path
+import unittest
+
 import requests_mock
+
 import tableauserverclient as TSC
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
@@ -12,7 +14,7 @@ SIGN_IN_ERROR_XML = os.path.join(TEST_ASSET_DIR, "auth_sign_in_error.xml")
 
 class AuthTests(unittest.TestCase):
     def setUp(self):
-        self.server = TSC.Server("http://test")
+        self.server = TSC.Server("http://test", False)
         self.baseurl = self.server.auth.baseurl
 
     def test_sign_in(self):

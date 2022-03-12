@@ -1,9 +1,9 @@
+import logging
+
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, GroupItem, UserItem, PaginationItem, JobItem
 from ..pager import Pager
-
-import logging
 
 logger = logging.getLogger("tableau.endpoint.groups")
 

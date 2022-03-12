@@ -1,4 +1,4 @@
-import xml.etree.ElementTree as ET
+from defusedxml.ElementTree import fromstring
 
 from .property_decorators import property_not_empty
 
@@ -47,7 +47,7 @@ class ColumnItem(object):
     @classmethod
     def from_response(cls, resp, ns):
         all_column_items = list()
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         all_column_xml = parsed_response.findall(".//t:column", namespaces=ns)
 
         for column_xml in all_column_xml:

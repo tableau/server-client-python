@@ -1,9 +1,10 @@
 import os
-import requests_mock
 import unittest
 
-from ._utils import asset
+import requests_mock
+
 from tableauserverclient.server import Server
+from ._utils import asset
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 FILEUPLOAD_INITIALIZE = os.path.join(TEST_ASSET_DIR, "fileupload_initialize.xml")
@@ -12,7 +13,7 @@ FILEUPLOAD_APPEND = os.path.join(TEST_ASSET_DIR, "fileupload_append.xml")
 
 class FileuploadsTests(unittest.TestCase):
     def setUp(self):
-        self.server = Server("http://test")
+        self.server = Server("http://test", False)
 
         # Fake sign in
         self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"

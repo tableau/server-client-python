@@ -1,10 +1,11 @@
-import unittest
 import os
+import unittest
+
 import requests_mock
+
 import tableauserverclient as TSC
 from tableauserverclient.server import RequestFactory, WebhookItem
-
-from ._utils import read_xml_asset, read_xml_assets, asset
+from ._utils import asset
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
@@ -15,7 +16,7 @@ CREATE_REQUEST_XML = asset("webhook_create_request.xml")
 
 class WebhookTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.server = TSC.Server("http://test")
+        self.server = TSC.Server("http://test", False)
         self.server.version = "3.6"
 
         # Fake signin

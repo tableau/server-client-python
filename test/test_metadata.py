@@ -1,9 +1,10 @@
-import unittest
-import os.path
 import json
-import requests_mock
-import tableauserverclient as TSC
+import os.path
+import unittest
 
+import requests_mock
+
+import tableauserverclient as TSC
 from tableauserverclient.server.endpoint.exceptions import GraphQLError
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
@@ -30,7 +31,7 @@ EXPECTED_DICT_ERROR = [{"message": "Reached time limit of PT5S for query executi
 
 class MetadataTests(unittest.TestCase):
     def setUp(self):
-        self.server = TSC.Server("http://test")
+        self.server = TSC.Server("http://test", False)
         self.baseurl = self.server.metadata.baseurl
         self.server.version = "3.5"
 

@@ -1,15 +1,12 @@
-import xml.etree.ElementTree as ET
+from typing import List, Optional, TYPE_CHECKING
+
+from defusedxml.ElementTree import fromstring
 
 from .property_decorators import (
     property_not_empty,
     property_is_enum,
     property_is_boolean,
 )
-from .user_item import UserItem
-from .view_item import ViewItem
-
-
-from typing import List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -181,7 +178,7 @@ class DataAlertItem(object):
     @classmethod
     def from_response(cls, resp, ns) -> List["DataAlertItem"]:
         all_alert_items = list()
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         all_alert_xml = parsed_response.findall(".//t:dataAlert", namespaces=ns)
 
         for alert_xml in all_alert_xml:

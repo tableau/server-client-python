@@ -1,9 +1,10 @@
-import unittest
 import os
-import requests_mock
-import tableauserverclient as TSC
+import unittest
 
-from ._utils import read_xml_asset, read_xml_assets, asset
+import requests_mock
+
+import tableauserverclient as TSC
+from ._utils import read_xml_asset, asset
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
@@ -18,7 +19,7 @@ UPDATE_DATASOURCE_DEFAULT_PERMISSIONS_XML = "project_update_datasource_default_p
 
 class ProjectTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.server = TSC.Server("http://test")
+        self.server = TSC.Server("http://test", False)
 
         # Fake signin
         self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"

@@ -1,10 +1,11 @@
-import unittest
 import os
-import requests_mock
-import tableauserverclient as TSC
+import unittest
 
-from tableauserverclient.datetime_helpers import format_datetime
+import requests_mock
+
+import tableauserverclient as TSC
 from tableauserverclient import UserItem, GroupItem, PermissionsRule
+from tableauserverclient.datetime_helpers import format_datetime
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
@@ -22,7 +23,7 @@ UPDATE_XML = os.path.join(TEST_ASSET_DIR, "workbook_update.xml")
 
 class ViewTests(unittest.TestCase):
     def setUp(self):
-        self.server = TSC.Server("http://test")
+        self.server = TSC.Server("http://test", False)
         self.server.version = "3.2"
 
         # Fake sign in

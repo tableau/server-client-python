@@ -1,17 +1,16 @@
 import xml.etree.ElementTree as ET
+from typing import Any, Dict, List, Optional, Tuple, Iterable
 
 from requests.packages.urllib3.fields import RequestField
 from requests.packages.urllib3.filepost import encode_multipart_formdata
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple, Iterable
 
-from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteItem
-
-from ..models import SubscriptionItem
+from ..models import ConnectionItem
 from ..models import DataAlertItem
 from ..models import FlowItem
-from ..models import ConnectionItem
-from ..models import SiteItem
 from ..models import ProjectItem
+from ..models import SiteItem
+from ..models import SubscriptionItem
+from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteItem
 from ..models import WebhookItem
 
 

@@ -1,7 +1,8 @@
+import logging
+
 from .endpoint import Endpoint, api
 from .. import RequestFactory
 from ...models import FavoriteItem
-import logging
 
 logger = logging.getLogger("tableau.endpoint.favorites")
 

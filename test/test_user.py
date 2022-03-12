@@ -1,6 +1,8 @@
-import unittest
 import os
+import unittest
+
 import requests_mock
+
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
 
@@ -18,7 +20,7 @@ POPULATE_GROUPS_XML = os.path.join(TEST_ASSET_DIR, "user_populate_groups.xml")
 
 class UserTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.server = TSC.Server("http://test")
+        self.server = TSC.Server("http://test", False)
 
         # Fake signin
         self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"

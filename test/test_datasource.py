@@ -1,15 +1,16 @@
-from tableauserverclient.server.endpoint.fileuploads_endpoint import Fileuploads
+import os
+import tempfile
 import unittest
 from io import BytesIO
-import os
-import requests_mock
-import xml.etree.ElementTree as ET
 from zipfile import ZipFile
-import tempfile
+
+import requests_mock
+from defusedxml.ElementTree import fromstring
 
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
 from tableauserverclient.server.endpoint.exceptions import InternalServerError
+from tableauserverclient.server.endpoint.fileuploads_endpoint import Fileuploads
 from tableauserverclient.server.request_factory import RequestFactory
 from ._utils import read_xml_asset, read_xml_assets, asset
 
@@ -30,7 +31,7 @@ UPDATE_CONNECTION_XML = "datasource_connection_update.xml"
 
 class DatasourceTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.server = TSC.Server("http://test")
+        self.server = TSC.Server("http://test", False)
 
         # Fake signin
         self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"
@@ -558,7 +559,7 @@ class DatasourceTests(unittest.TestCase):
 
         response = RequestFactory.Datasource._generate_xml(new_datasource, connections=[connection1, connection2])
         # Can't use ConnectionItem parser due to xml namespace problems
-        connection_results = ET.fromstring(response).findall(".//connection")
+        connection_results = fromstring(response).findall(".//connection")
 
         self.assertEqual(connection_results[0].get("serverAddress", None), "mysql.test.com")
         self.assertEqual(connection_results[0].find("connectionCredentials").get("name", None), "test")  # type: ignore[union-attr]
@@ -571,7 +572,7 @@ class DatasourceTests(unittest.TestCase):
 
         response = RequestFactory.Datasource._generate_xml(new_datasource, connection_credentials=connection_creds)
         #  Can't use ConnectionItem parser due to xml namespace problems
-        credentials = ET.fromstring(response).findall(".//connectionCredentials")
+        credentials = fromstring(response).findall(".//connectionCredentials")
 
         self.assertEqual(len(credentials), 1)
         self.assertEqual(credentials[0].get("name", None), "test")

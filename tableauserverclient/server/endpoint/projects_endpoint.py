@@ -1,12 +1,10 @@
-from tableauserverclient.server.request_factory import ProjectRequest
+import logging
+
+from .default_permissions_endpoint import _DefaultPermissionsEndpoint
 from .endpoint import api, Endpoint, XML_CONTENT_TYPE
 from .exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
-from .default_permissions_endpoint import _DefaultPermissionsEndpoint
-
 from .. import RequestFactory, RequestOptions, ProjectItem, PaginationItem, Permission
-
-import logging
 
 logger = logging.getLogger("tableau.endpoint.projects")
 

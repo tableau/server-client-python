@@ -1,7 +1,9 @@
-import unittest
 import os
+import unittest
 from datetime import datetime
+
 import requests_mock
+
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import utc
 from tableauserverclient.server.endpoint.exceptions import JobFailedException
@@ -18,7 +20,7 @@ GET_BY_ID_INPROGRESS_XML = "job_get_by_id_inprogress.xml"
 
 class JobTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.server = TSC.Server("http://test")
+        self.server = TSC.Server("http://test", False)
         self.server.version = "3.1"
 
         # Fake signin
