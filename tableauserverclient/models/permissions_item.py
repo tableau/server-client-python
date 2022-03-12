@@ -2,7 +2,6 @@ import logging
 import xml.etree.ElementTree as ET
 
 from defusedxml.ElementTree import fromstring
-
 from .exceptions import UnknownGranteeTypeError, UnpopulatedPropertyError
 from .group_item import GroupItem
 from .user_item import UserItem

@@ -194,6 +194,9 @@ class SiteTests(unittest.TestCase):
             )
             new_site = self.server.sites.create(new_site)
 
+        new_site._tier_viewer_capacity = None
+        new_site._tier_creator_capacity = None
+        new_site._tier_explorer_capacity = None
         self.assertEqual("0626857c-1def-4503-a7d8-7907c3ff9d9f", new_site.id)
         self.assertEqual("tableau", new_site.content_url)
         self.assertEqual("Tableau", new_site.name)
