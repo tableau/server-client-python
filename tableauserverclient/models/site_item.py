@@ -1,3 +1,4 @@
+import warnings
 import xml.etree.ElementTree as ET
 
 from defusedxml.ElementTree import fromstring
@@ -17,6 +18,11 @@ from typing import List, Optional, Union
 
 
 class SiteItem(object):
+    _user_quota: Optional[int] = None
+    _tier_creator_capacity: Optional[int] = None
+    _tier_explorer_capacity: Optional[int] = None
+    _tier_viewer_capacity: Optional[int] = None
+
     class AdminMode:
         ContentAndUsers: str = "ContentAndUsers"
         ContentOnly: str = "ContentOnly"
@@ -209,6 +215,20 @@ class SiteItem(object):
     @property
     def storage(self) -> Optional[str]:
         return self._storage
+
+    @property
+    def user_quota(self) -> Optional[int]:
+        if any((self.tier_creator_capacity, self.tier_explorer_capacity, self.tier_viewer_capacity)):
+            warnings.warn("Tiered license level is set. Returning None for user_quota")
+            return None
+        else:
+            return self._user_quota
+
+    @user_quota.setter
+    def user_quota(self, value: Optional[int]) -> None:
+        if any((self.tier_creator_capacity, self.tier_explorer_capacity, self.tier_viewer_capacity)):
+            raise ValueError("User quota conflicts with setting tiered license levels. Set those to None first.")
+        self._user_quota = value
 
     @property
     def subscribe_others_enabled(self) -> bool:
