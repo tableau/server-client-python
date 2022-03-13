@@ -1,11 +1,11 @@
+import logging
+from contextlib import closing
+
 from .endpoint import QuerysetEndpoint, api
 from .exceptions import MissingRequiredFieldError
-from .resource_tagger import _ResourceTagger
 from .permissions_endpoint import _PermissionsEndpoint
+from .resource_tagger import _ResourceTagger
 from .. import ViewItem, PaginationItem
-
-from contextlib import closing
-import logging
 
 logger = logging.getLogger("tableau.endpoint.views")
 
@@ -125,6 +125,25 @@ class Views(QuerysetEndpoint):
         with closing(self.get_request(url, request_object=req_options, parameters={"stream": True})) as server_response:
             csv = server_response.iter_content(1024)
         return csv
+
+    @api(version="3.8")
+    def populate_excel(self, view_item: ViewItem, req_options: Optional["CSVRequestOptions"] = None) -> None:
+        if not view_item.id:
+            error = "View item missing ID."
+            raise MissingRequiredFieldError(error)
+
+        def excel_fetcher():
+            return self._get_view_excel(view_item, req_options)
+
+        view_item._set_excel(excel_fetcher)
+        logger.info("Populated excel for view (ID: {0})".format(view_item.id))
+
+    def _get_view_excel(self, view_item: ViewItem, req_options: Optional["CSVRequestOptions"]) -> Iterable[bytes]:
+        url = "{0}/{1}/crosstab/excel".format(self.baseurl, view_item.id)
+
+        with closing(self.get_request(url, request_object=req_options, parameters={"stream": True})) as server_response:
+            excel = server_response.iter_content(1024)
+        return excel
 
     @api(version="3.2")
     def populate_permissions(self, item: ViewItem) -> None:

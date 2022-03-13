@@ -1,11 +1,10 @@
-from .endpoint import Endpoint, QuerysetEndpoint, api
+import logging
+from typing import List, Optional, Tuple, TYPE_CHECKING
+
+from .endpoint import QuerysetEndpoint, api
 from .exceptions import FlowRunFailedException, FlowRunCancelledException
 from .. import FlowRunItem, PaginationItem
 from ...exponential_backoff import ExponentialBackoffTimer
-
-import logging
-
-from typing import List, Optional, Tuple, TYPE_CHECKING, Union
 
 logger = logging.getLogger("tableau.endpoint.flowruns")
 

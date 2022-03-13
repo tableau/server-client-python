@@ -1,6 +1,7 @@
-import xml.etree.ElementTree as ET
-from .target import Target
+from defusedxml.ElementTree import fromstring
+
 from .schedule_item import ScheduleItem
+from .target import Target
 from ..datetime_helpers import parse_datetime
 
 
@@ -43,7 +44,7 @@ class TaskItem(object):
 
     @classmethod
     def from_response(cls, xml, ns, task_type=Type.ExtractRefresh):
-        parsed_response = ET.fromstring(xml)
+        parsed_response = fromstring(xml)
         all_tasks_xml = parsed_response.findall(".//t:task/t:{}".format(task_type), namespaces=ns)
 
         all_tasks = (TaskItem._parse_element(x, ns) for x in all_tasks_xml)

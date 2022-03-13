@@ -1,15 +1,17 @@
-from datetime import datetime
 import xml.etree.ElementTree as ET
+from datetime import datetime
+from typing import Dict, List, Optional, TYPE_CHECKING
+
+from defusedxml.ElementTree import fromstring
+
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import (
     property_is_enum,
     property_not_empty,
     property_not_nullable,
 )
-from ..datetime_helpers import parse_datetime
 from .reference_item import ResourceReference
-
-from typing import Dict, List, Optional, TYPE_CHECKING
+from ..datetime_helpers import parse_datetime
 
 if TYPE_CHECKING:
     from ..server.pager import Pager
@@ -140,7 +142,7 @@ class UserItem(object):
 
     def _parse_common_tags(self, user_xml, ns) -> "UserItem":
         if not isinstance(user_xml, ET.Element):
-            user_xml = ET.fromstring(user_xml).find(".//t:user", namespaces=ns)
+            user_xml = fromstring(user_xml).find(".//t:user", namespaces=ns)
         if user_xml is not None:
             (
                 _,
@@ -190,7 +192,7 @@ class UserItem(object):
     @classmethod
     def from_response(cls, resp, ns) -> List["UserItem"]:
         all_user_items = []
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         all_user_xml = parsed_response.findall(".//t:user", namespaces=ns)
         for user_xml in all_user_xml:
             (

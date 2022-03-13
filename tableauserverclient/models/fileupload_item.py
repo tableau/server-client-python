@@ -1,4 +1,4 @@
-import xml.etree.ElementTree as ET
+from defusedxml.ElementTree import fromstring
 
 
 class FileuploadItem(object):
@@ -16,7 +16,7 @@ class FileuploadItem(object):
 
     @classmethod
     def from_response(cls, resp, ns):
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         fileupload_elem = parsed_response.find(".//t:fileUpload", namespaces=ns)
         fileupload_item = cls()
         fileupload_item._upload_session_id = fileupload_elem.get("uploadSessionId", None)

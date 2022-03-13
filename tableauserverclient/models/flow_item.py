@@ -1,17 +1,16 @@
+import copy
 import xml.etree.ElementTree as ET
+from typing import List, Optional, TYPE_CHECKING, Set
+
+from defusedxml.ElementTree import fromstring
+
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_not_nullable
 from .tag_item import TagItem
 from ..datetime_helpers import parse_datetime
-import copy
-
-from typing import List, Optional, TYPE_CHECKING, Set
 
 if TYPE_CHECKING:
     import datetime
-    from .connection_item import ConnectionItem
-    from .permissions_item import Permission
-    from .dqw_item import DQWItem
 
 
 class FlowItem(object):
@@ -105,7 +104,7 @@ class FlowItem(object):
 
     def _parse_common_elements(self, flow_xml, ns):
         if not isinstance(flow_xml, ET.Element):
-            flow_xml = ET.fromstring(flow_xml).find(".//t:flow", namespaces=ns)
+            flow_xml = fromstring(flow_xml).find(".//t:flow", namespaces=ns)
         if flow_xml is not None:
             (
                 _,
@@ -171,7 +170,7 @@ class FlowItem(object):
     @classmethod
     def from_response(cls, resp, ns) -> List["FlowItem"]:
         all_flow_items = list()
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         all_flow_xml = parsed_response.findall(".//t:flow", namespaces=ns)
 
         for flow_xml in all_flow_xml:

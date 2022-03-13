@@ -1,8 +1,8 @@
-import xml.etree.ElementTree as ET
-
 import re
+import xml.etree.ElementTree as ET
+from typing import List, Optional, Tuple, Type
 
-from typing import List, Optional, TYPE_CHECKING, Tuple, Type
+from defusedxml.ElementTree import fromstring
 
 NAMESPACE_RE = re.compile(r"^{.*}")
 
@@ -50,7 +50,7 @@ class WebhookItem(object):
     @classmethod
     def from_response(cls: Type["WebhookItem"], resp: bytes, ns) -> List["WebhookItem"]:
         all_webhooks_items = list()
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         all_webhooks_xml = parsed_response.findall(".//t:webhook", namespaces=ns)
         for webhook_xml in all_webhooks_xml:
             values = cls._parse_element(webhook_xml, ns)

@@ -1,4 +1,8 @@
+import warnings
 import xml.etree.ElementTree as ET
+
+from defusedxml.ElementTree import fromstring
+
 from .property_decorators import (
     property_is_enum,
     property_is_boolean,
@@ -8,13 +12,17 @@ from .property_decorators import (
     property_is_int,
 )
 
-
 VALID_CONTENT_URL_RE = r"^[a-zA-Z0-9_\-]*$"
 
 from typing import List, Optional, Union
 
 
 class SiteItem(object):
+    _user_quota: Optional[int] = None
+    _tier_creator_capacity: Optional[int] = None
+    _tier_explorer_capacity: Optional[int] = None
+    _tier_viewer_capacity: Optional[int] = None
+
     class AdminMode:
         ContentAndUsers: str = "ContentAndUsers"
         ContentOnly: str = "ContentOnly"
@@ -207,6 +215,20 @@ class SiteItem(object):
     @property
     def storage(self) -> Optional[str]:
         return self._storage
+
+    @property
+    def user_quota(self) -> Optional[int]:
+        if any((self.tier_creator_capacity, self.tier_explorer_capacity, self.tier_viewer_capacity)):
+            warnings.warn("Tiered license level is set. Returning None for user_quota")
+            return None
+        else:
+            return self._user_quota
+
+    @user_quota.setter
+    def user_quota(self, value: Optional[int]) -> None:
+        if any((self.tier_creator_capacity, self.tier_explorer_capacity, self.tier_viewer_capacity)):
+            raise ValueError("User quota conflicts with setting tiered license levels. Set those to None first.")
+        self._user_quota = value
 
     @property
     def subscribe_others_enabled(self) -> bool:
@@ -541,7 +563,7 @@ class SiteItem(object):
 
     def _parse_common_tags(self, site_xml, ns):
         if not isinstance(site_xml, ET.Element):
-            site_xml = ET.fromstring(site_xml).find(".//t:site", namespaces=ns)
+            site_xml = fromstring(site_xml).find(".//t:site", namespaces=ns)
         if site_xml is not None:
             (
                 _,
@@ -812,7 +834,7 @@ class SiteItem(object):
     @classmethod
     def from_response(cls, resp, ns) -> List["SiteItem"]:
         all_site_items = list()
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         all_site_xml = parsed_response.findall(".//t:site", namespaces=ns)
         for site_xml in all_site_xml:
             (

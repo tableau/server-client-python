@@ -1,9 +1,9 @@
 import unittest
-import os
+
 import requests_mock
-import xml.etree.ElementTree as ET
+
 import tableauserverclient as TSC
-from ._utils import read_xml_asset, read_xml_assets, asset
+from ._utils import read_xml_asset
 
 GET_XML = "data_acceleration_report.xml"
 

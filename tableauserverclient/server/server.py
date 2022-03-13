@@ -1,7 +1,8 @@
-import xml.etree.ElementTree as ET
+from distutils.version import LooseVersion as Version
 
-from .exceptions import NotSignedInError
-from ..namespace import Namespace
+import requests
+from defusedxml.ElementTree import fromstring
+
 from .endpoint import (
     Sites,
     Views,
@@ -32,10 +33,8 @@ from .endpoint.exceptions import (
     EndpointUnavailableError,
     ServerInfoEndpointNotFoundError,
 )
-
-import requests
-
-from distutils.version import LooseVersion as Version
+from .exceptions import NotSignedInError
+from ..namespace import Namespace
 
 _PRODUCT_TO_REST_VERSION = {
     "10.0": "2.3",
@@ -109,7 +108,7 @@ class Server(object):
 
     def _get_legacy_version(self):
         response = self._session.get(self.server_address + "/auth?format=xml")
-        info_xml = ET.fromstring(response.content)
+        info_xml = fromstring(response.content)
         prod_version = info_xml.find(".//product_version").text
         version = _PRODUCT_TO_REST_VERSION.get(prod_version, "2.1")  # 2.1
         return version

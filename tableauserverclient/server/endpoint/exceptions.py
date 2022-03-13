@@ -1,4 +1,4 @@
-import xml.etree.ElementTree as ET
+from defusedxml.ElementTree import fromstring
 
 
 class ServerResponseError(Exception):
@@ -14,7 +14,7 @@ class ServerResponseError(Exception):
     @classmethod
     def from_response(cls, resp, ns):
         # Check elements exist before .text
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         error_response = cls(
             parsed_response.find("t:error", namespaces=ns).get("code", ""),
             parsed_response.find(".//t:summary", namespaces=ns).text,

@@ -1,7 +1,9 @@
-import unittest
 import os
+import unittest
 from datetime import datetime
+
 import requests_mock
+
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import utc
 from tableauserverclient.server.endpoint.exceptions import JobFailedException

@@ -1,4 +1,4 @@
-from .namespace import NEW_NAMESPACE as DEFAULT_NAMESPACE
+from ._version import get_versions
 from .models import (
     ConnectionCredentials,
     ConnectionItem,
@@ -38,6 +38,7 @@ from .models import (
     RevisionItem,
     MetricItem,
 )
+from .namespace import NEW_NAMESPACE as DEFAULT_NAMESPACE
 from .server import (
     RequestOptions,
     CSVRequestOptions,
@@ -51,7 +52,6 @@ from .server import (
     NotSignedInError,
     Pager,
 )
-from ._version import get_versions
 
 __version__ = get_versions()["version"]
 __VERSION__ = __version__
