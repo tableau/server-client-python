@@ -1,6 +1,7 @@
 import unittest
-from ._utils import mocked_time
+
 from tableauserverclient.exponential_backoff import ExponentialBackoffTimer
+from ._utils import mocked_time
 
 
 class ExponentialBackoffTests(unittest.TestCase):

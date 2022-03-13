@@ -1,4 +1,7 @@
+import copy
+import logging
 from typing import List, Tuple
+
 from .endpoint import QuerysetEndpoint, api
 from .exceptions import MissingRequiredFieldError
 from .. import (
@@ -10,9 +13,6 @@ from .. import (
     GroupItem,
 )
 from ..pager import Pager
-
-import copy
-import logging
 
 logger = logging.getLogger("tableau.endpoint.users")
 

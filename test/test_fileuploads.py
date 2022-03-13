@@ -1,9 +1,10 @@
 import os
-import requests_mock
 import unittest
 
-from ._utils import asset
+import requests_mock
+
 from tableauserverclient.server import Server
+from ._utils import asset
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 FILEUPLOAD_INITIALIZE = os.path.join(TEST_ASSET_DIR, "fileupload_initialize.xml")

@@ -1,25 +1,10 @@
-from .endpoint import QuerysetEndpoint, api, parameter_added_in
-from .exceptions import InternalServerError, MissingRequiredFieldError
-from .permissions_endpoint import _PermissionsEndpoint
-from .resource_tagger import _ResourceTagger
-from .. import RequestFactory, WorkbookItem, ConnectionItem, ViewItem, PaginationItem
-from ...models.job_item import JobItem
-from ...models.revision_item import RevisionItem
-from ...filesys_helpers import (
-    to_filename,
-    make_download_path,
-    get_file_type,
-    get_file_object_size,
-)
-
-import os
-from pathlib import Path
+import cgi
+import copy
 import io
 import logging
-import copy
-import cgi
+import os
 from contextlib import closing
-
+from pathlib import Path
 from typing import (
     List,
     Optional,
@@ -28,6 +13,20 @@ from typing import (
     TYPE_CHECKING,
     Union,
 )
+
+from .endpoint import QuerysetEndpoint, api, parameter_added_in
+from .exceptions import InternalServerError, MissingRequiredFieldError
+from .permissions_endpoint import _PermissionsEndpoint
+from .resource_tagger import _ResourceTagger
+from .. import RequestFactory, WorkbookItem, ConnectionItem, ViewItem, PaginationItem
+from ...filesys_helpers import (
+    to_filename,
+    make_download_path,
+    get_file_type,
+    get_file_object_size,
+)
+from ...models.job_item import JobItem
+from ...models.revision_item import RevisionItem
 
 if TYPE_CHECKING:
     from ..server import Server

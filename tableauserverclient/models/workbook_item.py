@@ -1,5 +1,12 @@
+import copy
+import uuid
 import xml.etree.ElementTree as ET
+from typing import Dict, List, Optional, Set, TYPE_CHECKING
+
+from defusedxml.ElementTree import fromstring
+
 from .exceptions import UnpopulatedPropertyError
+from .permissions_item import PermissionsRule
 from .property_decorators import (
     property_not_nullable,
     property_is_boolean,
@@ -7,12 +14,8 @@ from .property_decorators import (
 )
 from .tag_item import TagItem
 from .view_item import ViewItem
-from .permissions_item import PermissionsRule
 from ..datetime_helpers import parse_datetime
-import copy
-import uuid
 
-from typing import Dict, List, Optional, Set, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .connection_item import ConnectionItem
@@ -184,7 +187,7 @@ class WorkbookItem(object):
 
     def _parse_common_tags(self, workbook_xml, ns):
         if not isinstance(workbook_xml, ET.Element):
-            workbook_xml = ET.fromstring(workbook_xml).find(".//t:workbook", namespaces=ns)
+            workbook_xml = fromstring(workbook_xml).find(".//t:workbook", namespaces=ns)
         if workbook_xml is not None:
             (
                 _,
@@ -277,7 +280,7 @@ class WorkbookItem(object):
     @classmethod
     def from_response(cls, resp: str, ns: Dict[str, str]) -> List["WorkbookItem"]:
         all_workbook_items = list()
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         all_workbook_xml = parsed_response.findall(".//t:workbook", namespaces=ns)
         for workbook_xml in all_workbook_xml:
             (

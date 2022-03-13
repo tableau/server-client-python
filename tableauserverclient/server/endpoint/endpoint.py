@@ -1,15 +1,15 @@
+import logging
+from distutils.version import LooseVersion as Version
+from functools import wraps
+from xml.etree.ElementTree import ParseError
+
 from .exceptions import (
     ServerResponseError,
     InternalServerError,
     NonXMLResponseError,
     EndpointUnavailableError,
 )
-from functools import wraps
-from xml.etree.ElementTree import ParseError
 from ..query import QuerySet
-import logging
-
-from distutils.version import LooseVersion as Version
 
 logger = logging.getLogger("tableau.endpoint")
 

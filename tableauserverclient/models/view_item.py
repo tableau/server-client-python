@@ -1,10 +1,11 @@
-import xml.etree.ElementTree as ET
-from ..datetime_helpers import parse_datetime
+import copy
+from typing import Callable, Iterable, List, Optional, Set, TYPE_CHECKING
+
+from defusedxml.ElementTree import fromstring
+
 from .exceptions import UnpopulatedPropertyError
 from .tag_item import TagItem
-import copy
-
-from typing import ByteString, Callable, Iterable, List, Optional, Set, TYPE_CHECKING
+from ..datetime_helpers import parse_datetime
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -24,6 +25,7 @@ class ViewItem(object):
         self._project_id: Optional[str] = None
         self._pdf: Optional[Callable[[], bytes]] = None
         self._csv: Optional[Callable[[], Iterable[bytes]]] = None
+        self._excel: Optional[Callable[[], Iterable[bytes]]] = None
         self._total_views: Optional[int] = None
         self._sheet_type: Optional[str] = None
         self._updated_at: Optional["datetime"] = None
@@ -42,6 +44,9 @@ class ViewItem(object):
 
     def _set_csv(self, csv):
         self._csv = csv
+
+    def _set_excel(self, excel):
+        self._excel = excel
 
     @property
     def content_url(self) -> Optional[str]:
@@ -96,6 +101,13 @@ class ViewItem(object):
         return self._csv()
 
     @property
+    def excel(self) -> Iterable[bytes]:
+        if self._excel is None:
+            error = "View item must be populated with its excel first."
+            raise UnpopulatedPropertyError(error)
+        return self._excel()
+
+    @property
     def sheet_type(self) -> Optional[str]:
         return self._sheet_type
 
@@ -126,7 +138,7 @@ class ViewItem(object):
 
     @classmethod
     def from_response(cls, resp, ns, workbook_id="") -> List["ViewItem"]:
-        return cls.from_xml_element(ET.fromstring(resp), ns, workbook_id)
+        return cls.from_xml_element(fromstring(resp), ns, workbook_id)
 
     @classmethod
     def from_xml_element(cls, parsed_response, ns, workbook_id="") -> List["ViewItem"]:

@@ -1,14 +1,14 @@
+import logging
+
 from .endpoint import Endpoint, api
 from .exceptions import JobCancelledException, JobFailedException
 from .. import JobItem, BackgroundJobItem, PaginationItem
 from ..request_options import RequestOptionsBase
 from ...exponential_backoff import ExponentialBackoffTimer
 
-import logging
-
 logger = logging.getLogger("tableau.endpoint.jobs")
 
-from typing import List, Optional, Tuple, TYPE_CHECKING, Union
+from typing import List, Optional, Tuple, Union
 
 
 class Jobs(Endpoint):

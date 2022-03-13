@@ -1,6 +1,6 @@
+import os
 import unittest
 from io import BytesIO
-import os
 from xml.etree import ElementTree as ET
 from zipfile import ZipFile
 

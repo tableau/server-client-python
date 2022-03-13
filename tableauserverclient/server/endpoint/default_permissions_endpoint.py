@@ -1,11 +1,9 @@
 import logging
 
-from .. import RequestFactory
-from ...models import PermissionsRule
-
 from .endpoint import Endpoint
 from .exceptions import MissingRequiredFieldError
-
+from .. import RequestFactory
+from ...models import PermissionsRule
 
 logger = logging.getLogger(__name__)
 

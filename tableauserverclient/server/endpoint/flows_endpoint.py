@@ -1,19 +1,18 @@
+import cgi
+import copy
+import logging
+import os
+from contextlib import closing
+from typing import Iterable, List, Optional, TYPE_CHECKING, Tuple, Union
+
+from .dqw_endpoint import _DataQualityWarningEndpoint
 from .endpoint import Endpoint, QuerysetEndpoint, api
 from .exceptions import InternalServerError, MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
-from .dqw_endpoint import _DataQualityWarningEndpoint
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, FlowItem, PaginationItem, ConnectionItem
 from ...filesys_helpers import to_filename, make_download_path
 from ...models.job_item import JobItem
-
-import os
-import logging
-import copy
-import cgi
-from contextlib import closing
-
-from typing import Iterable, List, Optional, TYPE_CHECKING, Tuple, Union
 
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
@@ -25,7 +24,7 @@ logger = logging.getLogger("tableau.endpoint.flows")
 if TYPE_CHECKING:
     from .. import DQWItem
     from ..request_options import RequestOptions
-    from ...models.permissions_item import Permission, PermissionsRule
+    from ...models.permissions_item import PermissionsRule
 
 
 FilePath = Union[str, os.PathLike]
