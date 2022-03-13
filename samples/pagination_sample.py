@@ -56,8 +56,22 @@ def main():
         # Here we print the workbook id for each workbook
 
         print("Your server contains the following workbooks:\n")
-        for wb in TSC.Pager(server.workbooks):
+        count = 0
+        page_size = 5
+        page_options = TSC.RequestOptions(1, page_size)
+        print("Fetching workbooks in pages of 5")
+        for wb in TSC.Pager(server.workbooks, page_options):
             print(wb.name)
+            count = count + 1
+        print("Total: {}".format(count))
+
+        count = 0
+        new_page_options = TSC.RequestOptions(2, page_size)
+        print("Fetching workbooks again, starting at the 2nd page of results")
+        for wb in TSC.Pager(server.workbooks, new_page_options):
+            print(wb.name)
+            count = count + 1
+        print("2nd Total: {}".format(count))
 
         # Pager can also be used in list comprehensions or generator expressions
         # for compactness and easy filtering. Generator expressions will use less
