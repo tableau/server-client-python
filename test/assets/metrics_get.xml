@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.5.xsd">
+  <pagination pageNumber="1" pageSize="100" totalAvailable="27"/>
+  <metric id="6561daa3-20e8-407f-ba09-709b178c0b4a"
+    name="Example metric"
+    description="Description of my metric."
+    webpageUrl="https://test/#/site/site-name/metrics/3"
+    createdAt="2020-01-02T01:02:03Z"
+    updatedAt="2020-01-02T01:02:03Z"
+    suspended="true">
+      <project id="32e79edb-6cfd-47dc-ad79-e8ec2fbb1d33"
+        name="Default"/>
+      <owner id="32e79edb-6cfd-47dc-ad79-e8ec2fbb1d33"/>
+      <tags/>
+      <underlyingView id="29dae0cd-1862-4a20-a638-e2c2dfa682d4"/>
+  </metric>
+  <metric id="721760d9-0aa4-4029-87ae-371c956cea07"
+    name="Another Example metric"
+    description="Description of another metric."
+    webpageUrl="https://test/#/site/site-name/metrics/4"
+    createdAt="2020-01-03T01:02:03Z"
+    updatedAt="2020-01-04T01:02:03Z"
+    suspended="false">
+      <project id="486e0de0-2258-45bd-99cf-b62013e19f4e"
+        name="Assets"/>
+      <owner id="1bbbc2b9-847d-443c-9a1f-dbcf112b8814"/>
+      <tags>
+        <tag label="Test" />
+        <tag label="Asset" />
+      </tags>
+      <underlyingView id="7dbfdb63-a6ca-4723-93ee-4fefc71992d3"/>
+  </metric>
+</tsResponse>
