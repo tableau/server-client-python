@@ -52,10 +52,10 @@ class FileSysHelpers(unittest.TestCase):
     def test_make_download_path(self):
         no_file_path = (None, "file.ext")
         has_file_path_folder = ("/root/folder/", "file.ext")
-        has_file_path_file = ("out", "file.ext")
+        has_file_path_file = ("outx", "file.ext")
 
         self.assertEqual("file.ext", make_download_path(*no_file_path))
-        self.assertEqual("out.ext", make_download_path(*has_file_path_file))
+        self.assertEqual("outx.ext", make_download_path(*has_file_path_file))
 
         with mock.patch("os.path.isdir") as mocked_isdir:
             mocked_isdir.return_value = True
