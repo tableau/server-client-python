@@ -16,6 +16,7 @@ from .flows_endpoint import Flows
 from .groups_endpoint import Groups
 from .jobs_endpoint import Jobs
 from .metadata_endpoint import Metadata
+from .metrics_endpoint import Metrics
 from .projects_endpoint import Projects
 from .schedules_endpoint import Schedules
 from .server_info_endpoint import ServerInfo
