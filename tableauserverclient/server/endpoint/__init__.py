@@ -3,7 +3,7 @@ from .data_acceleration_report_endpoint import DataAccelerationReport
 from .data_alert_endpoint import DataAlerts
 from .databases_endpoint import Databases
 from .datasources_endpoint import Datasources
-from .endpoint import Endpoint
+from .endpoint import Endpoint, QuerysetEndpoint
 from .exceptions import (
     ServerResponseError,
     MissingRequiredFieldError,

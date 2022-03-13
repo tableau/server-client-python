@@ -1,6 +1,6 @@
 import logging
 
-from .endpoint import Endpoint, api
+from .endpoint import QuerysetEndpoint, api
 from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, GroupItem, UserItem, PaginationItem, JobItem
 from ..pager import Pager
