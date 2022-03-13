@@ -16,6 +16,7 @@ GET_XML_USAGE = os.path.join(TEST_ASSET_DIR, "view_get_usage.xml")
 POPULATE_PREVIEW_IMAGE = os.path.join(TEST_ASSET_DIR, "Sample View Image.png")
 POPULATE_PDF = os.path.join(TEST_ASSET_DIR, "populate_pdf.pdf")
 POPULATE_CSV = os.path.join(TEST_ASSET_DIR, "populate_csv.csv")
+POPULATE_EXCEL = os.path.join(TEST_ASSET_DIR, "populate_excel.xlsx")
 POPULATE_PERMISSIONS_XML = os.path.join(TEST_ASSET_DIR, "view_populate_permissions.xml")
 UPDATE_PERMISSIONS = os.path.join(TEST_ASSET_DIR, "view_update_permissions.xml")
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, "workbook_update.xml")
@@ -33,7 +34,7 @@ class ViewTests(unittest.TestCase):
         self.baseurl = self.server.views.baseurl
         self.siteurl = self.server.views.siteurl
 
-    def test_get(self):
+    def test_get(self) -> None:
         with open(GET_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -62,7 +63,7 @@ class ViewTests(unittest.TestCase):
         self.assertEqual("2002-06-05T08:00:59Z", format_datetime(all_views[1].updated_at))
         self.assertEqual("story", all_views[1].sheet_type)
 
-    def test_get_by_id(self):
+    def test_get_by_id(self) -> None:
         with open(GET_XML_ID, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -83,7 +84,7 @@ class ViewTests(unittest.TestCase):
     def test_get_by_id_missing_id(self) -> None:
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.views.get_by_id, None)
 
-    def test_get_with_usage(self):
+    def test_get_with_usage(self) -> None:
         with open(GET_XML_USAGE, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -102,7 +103,7 @@ class ViewTests(unittest.TestCase):
         self.assertEqual("2002-06-05T08:00:59Z", format_datetime(all_views[1].updated_at))
         self.assertEqual("story", all_views[1].sheet_type)
 
-    def test_get_with_usage_and_filter(self):
+    def test_get_with_usage_and_filter(self) -> None:
         with open(GET_XML_USAGE, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -122,7 +123,7 @@ class ViewTests(unittest.TestCase):
         self.server._auth_token = None
         self.assertRaises(TSC.NotSignedInError, self.server.views.get)
 
-    def test_populate_preview_image(self):
+    def test_populate_preview_image(self) -> None:
         with open(POPULATE_PREVIEW_IMAGE, "rb") as f:
             response = f.read()
         with requests_mock.mock() as m:
@@ -146,7 +147,7 @@ class ViewTests(unittest.TestCase):
         single_view._workbook_id = "3cc6cd06-89ce-4fdc-b935-5294135d6d42"
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.views.populate_preview_image, single_view)
 
-    def test_populate_image(self):
+    def test_populate_image(self) -> None:
         with open(POPULATE_PREVIEW_IMAGE, "rb") as f:
             response = f.read()
         with requests_mock.mock() as m:
@@ -156,7 +157,7 @@ class ViewTests(unittest.TestCase):
             self.server.views.populate_image(single_view)
             self.assertEqual(response, single_view.image)
 
-    def test_populate_image_with_options(self):
+    def test_populate_image_with_options(self) -> None:
         with open(POPULATE_PREVIEW_IMAGE, "rb") as f:
             response = f.read()
         with requests_mock.mock() as m:
@@ -169,7 +170,7 @@ class ViewTests(unittest.TestCase):
             self.server.views.populate_image(single_view, req_option)
             self.assertEqual(response, single_view.image)
 
-    def test_populate_pdf(self):
+    def test_populate_pdf(self) -> None:
         with open(POPULATE_PDF, "rb") as f:
             response = f.read()
         with requests_mock.mock() as m:
@@ -187,7 +188,7 @@ class ViewTests(unittest.TestCase):
             self.server.views.populate_pdf(single_view, req_option)
             self.assertEqual(response, single_view.pdf)
 
-    def test_populate_csv(self):
+    def test_populate_csv(self) -> None:
         with open(POPULATE_CSV, "rb") as f:
             response = f.read()
         with requests_mock.mock() as m:
@@ -200,7 +201,7 @@ class ViewTests(unittest.TestCase):
             csv_file = b"".join(single_view.csv)
             self.assertEqual(response, csv_file)
 
-    def test_populate_csv_default_maxage(self):
+    def test_populate_csv_default_maxage(self) -> None:
         with open(POPULATE_CSV, "rb") as f:
             response = f.read()
         with requests_mock.mock() as m:
@@ -217,7 +218,7 @@ class ViewTests(unittest.TestCase):
         single_view._id = None
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.views.populate_image, single_view)
 
-    def test_populate_permissions(self):
+    def test_populate_permissions(self) -> None:
         with open(POPULATE_PERMISSIONS_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -241,7 +242,7 @@ class ViewTests(unittest.TestCase):
                 },
             )
 
-    def test_add_permissions(self):
+    def test_add_permissions(self) -> None:
         with open(UPDATE_PERMISSIONS, "rb") as f:
             response_xml = f.read().decode("utf-8")
 
@@ -265,7 +266,7 @@ class ViewTests(unittest.TestCase):
         self.assertEqual(permissions[1].grantee.id, "7c37ee24-c4b1-42b6-a154-eaeab7ee330a")
         self.assertDictEqual(permissions[1].capabilities, {TSC.Permission.Capability.Write: TSC.Permission.Mode.Allow})
 
-    def test_update_tags(self):
+    def test_update_tags(self) -> None:
         with open(ADD_TAGS_XML, "rb") as f:
             add_tags_xml = f.read().decode("utf-8")
         with open(UPDATE_XML, "rb") as f:
@@ -283,3 +284,18 @@ class ViewTests(unittest.TestCase):
 
         self.assertEqual(single_view.tags, updated_view.tags)
         self.assertEqual(single_view._initial_tags, updated_view._initial_tags)
+
+    def test_populate_excel(self) -> None:
+        self.server.version = "3.8"
+        self.baseurl = self.server.views.baseurl
+        with open(POPULATE_EXCEL, "rb") as f:
+            response = f.read()
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + "/d79634e1-6063-4ec9-95ff-50acbf609ff5/crosstab/excel?maxAge=1", content=response)
+            single_view = TSC.ViewItem()
+            single_view._id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
+            request_option = TSC.CSVRequestOptions(maxage=1)
+            self.server.views.populate_excel(single_view, request_option)
+
+            excel_file = b"".join(single_view.excel)
+            self.assertEqual(response, excel_file)
