@@ -24,6 +24,7 @@ setup(
     author='Tableau',
     author_email='github@tableau.com',
     url='https://github.com/tableau/server-client-python',
+    package_data={'tableauserverclient':['py.typed']},
     packages=['tableauserverclient', 'tableauserverclient.models', 'tableauserverclient.server',
               'tableauserverclient.server.endpoint'],
     license='MIT',
@@ -39,5 +40,6 @@ setup(
     tests_require=test_requirements,
     extras_require={
         'test': test_requirements
-    }
+    },
+    zip_safe=False
 )
