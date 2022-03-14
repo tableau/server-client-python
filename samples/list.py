@@ -62,5 +62,6 @@ def main():
             print(resource.id, resource.name)
         print("Total: {}".format(count))
 
+
 if __name__ == "__main__":
     main()

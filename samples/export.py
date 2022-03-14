@@ -82,5 +82,6 @@ def main():
                 f.write(getattr(view, member_name))
         print("saved to " + filename)
 
+
 if __name__ == "__main__":
     main()
