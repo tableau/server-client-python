@@ -36,6 +36,7 @@ from .models import (
     PersonalAccessTokenAuth,
     FlowRunItem,
     RevisionItem,
+    MetricItem,
 )
 from .namespace import NEW_NAMESPACE as DEFAULT_NAMESPACE
 from .server import (
