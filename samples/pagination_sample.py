@@ -49,15 +49,15 @@ def main():
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
     server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
-
+        you = server.users.get_by_id(server.user_id)
+        print(you.name, you.id)
         # 1. Pager: Pager takes a server Endpoint as its first parameter, and a RequestOptions
         # object as the second parameter. The Endpoint defines which type of objects it returns, and
         # RequestOptions defines any restrictions on the objects: filter by name, sort, or select a page
         print("Your server contains the following workbooks:\n")
         count = 0
         # Using a small number here so that you can see it work. Default is 100 and mostly doesn't need to change
-        page_size = 5
-        page_options = TSC.RequestOptions(1, page_size)
+        page_options = TSC.RequestOptions(1, 5)
         print("Fetching workbooks in pages of 5")
         for wb in TSC.Pager(server.workbooks, page_options):
             print(wb.name)
@@ -65,19 +65,36 @@ def main():
         print("Total: {}\n".format(count))
 
         count = 0
-        new_page_options = TSC.RequestOptions(2, page_size)
-        print("Fetching workbooks again, starting at the 2nd page of results")
-        for wb in TSC.Pager(server.workbooks, new_page_options):
+        page_options = TSC.RequestOptions(2, 3)
+        print("Paging: start at the second page of workbooks, using pagesize = 3")
+        for wb in TSC.Pager(server.workbooks, page_options):
             print(wb.name)
             count = count + 1
-        print("2nd Total: {}\n".format(count))
+        print("Truncated Total: {}\n".format(count))
+
+        print("Your id: ", you.name, you.id, "\n")
+        count = 0
+        filtered_page_options = TSC.RequestOptions(1, 3)
+        filter_owner = TSC.Filter("ownerEmail", TSC.RequestOptions.Operator.Equals, "jfitzgerald@tableau.com")
+        filtered_page_options.filter.add(filter_owner)
+        print("Fetching workbooks again, filtering by owner")
+        for wb in TSC.Pager(server.workbooks, filtered_page_options):
+            print(wb.name, " -- ", wb.owner_id)
+            count = count + 1
+        print("Filtered Total: {}\n".format(count))
 
         # 2. QuerySet offers a fluent interface on top of the RequestOptions object
-        # TODO: (bug) QuerySet doesn't have a way to page through more results yet
+        print("Fetching workbooks again - this time filtered with QuerySet")
         count = 0
-        for wb in server.workbooks.filter(ownerEmail="jfitzgerald@tableau.com").paginate(page_size=3):
-            print(wb.name)
-            count = count + 1
+        page = 1
+        more = True
+        while more:
+            queryset = server.workbooks.filter(ownerEmail="jfitzgerald@tableau.com")
+            for wb in queryset.paginate(page_number=page, page_size=3):
+                print(wb.name, " -- ", wb.owner_id)
+                count = count + 1
+            more = queryset.total_available > count
+            page = page + 1
         print("QuerySet Total: {}".format(count))
 
 
