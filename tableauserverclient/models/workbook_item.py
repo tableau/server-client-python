@@ -16,6 +16,7 @@ from .tag_item import TagItem
 from .view_item import ViewItem
 from ..datetime_helpers import parse_datetime
 
+
 if TYPE_CHECKING:
     from .connection_item import ConnectionItem
     from .permissions_item import PermissionsRule

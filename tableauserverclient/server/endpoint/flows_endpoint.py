@@ -6,7 +6,7 @@ from contextlib import closing
 from typing import Iterable, List, Optional, TYPE_CHECKING, Tuple, Union
 
 from .dqw_endpoint import _DataQualityWarningEndpoint
-from .endpoint import Endpoint, api
+from .endpoint import Endpoint, QuerysetEndpoint, api
 from .exceptions import InternalServerError, MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .resource_tagger import _ResourceTagger
@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 FilePath = Union[str, os.PathLike]
 
 
-class Flows(Endpoint):
+class Flows(QuerysetEndpoint):
     def __init__(self, parent_srv):
         super(Flows, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)
