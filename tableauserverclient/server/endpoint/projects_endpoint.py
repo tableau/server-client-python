@@ -1,7 +1,7 @@
 import logging
 
 from .default_permissions_endpoint import _DefaultPermissionsEndpoint
-from .endpoint import api, Endpoint, XML_CONTENT_TYPE
+from .endpoint import QuerysetEndpoint, api, XML_CONTENT_TYPE
 from .exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .. import RequestFactory, RequestOptions, ProjectItem, PaginationItem, Permission
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from ..request_options import RequestOptions
 
 
-class Projects(Endpoint):
+class Projects(QuerysetEndpoint):
     def __init__(self, parent_srv: "Server") -> None:
         super(Projects, self).__init__(parent_srv)
 

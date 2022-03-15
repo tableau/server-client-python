@@ -228,7 +228,9 @@ class QuerysetEndpoint(Endpoint):
         return queryset
 
     @api(version="2.0")
-    def filter(self, *args, **kwargs):
+    def filter(self, *_, **kwargs):
+        if _:
+            raise RuntimeError("Only keyword arguments accepted.")
         queryset = QuerySet(self).filter(**kwargs)
         return queryset
 

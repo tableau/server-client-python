@@ -14,6 +14,7 @@ PAGE_SIZE_XML = os.path.join(TEST_ASSET_DIR, "request_option_page_size.xml")
 FILTER_EQUALS = os.path.join(TEST_ASSET_DIR, "request_option_filter_equals.xml")
 FILTER_TAGS_IN = os.path.join(TEST_ASSET_DIR, "request_option_filter_tags_in.xml")
 FILTER_MULTIPLE = os.path.join(TEST_ASSET_DIR, "request_option_filter_tags_in.xml")
+SLICING_QUERYSET = os.path.join(TEST_ASSET_DIR, "request_option_slicing_queryset.xml")
 
 
 class RequestOptionTests(unittest.TestCase):
@@ -244,3 +245,31 @@ class RequestOptionTests(unittest.TestCase):
             for _ in range(100):
                 matching_workbooks = self.server.workbooks.filter(tags__in=["sample", "safari", "weather"], name="foo")
                 self.assertEqual(3, matching_workbooks.total_available)
+
+    def test_slicing_queryset(self):
+        with open(SLICING_QUERYSET, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + "/views?pageNumber=1", text=response_xml)
+            all_views = self.server.views.all()
+
+            self.assertEqual(10, len(all_views[::]))
+            self.assertEqual(5, len(all_views[::2]))
+            self.assertEqual(8, len(all_views[2:]))
+            self.assertEqual(2, len(all_views[:2]))
+            self.assertEqual(3, len(all_views[2:5]))
+            self.assertEqual(3, len(all_views[-3:]))
+            self.assertEqual(3, len(all_views[-6:-3]))
+            self.assertEqual(3, len(all_views[3:6:-1]))
+            self.assertEqual(3, len(all_views[6:3:-1]))
+            self.assertEqual(10, len(all_views[::-1]))
+            self.assertEqual(all_views[3:6], list(reversed(all_views[3:6:-1])))
+
+            self.assertEqual(all_views[-3].id, "2df55de2-3a2d-4e34-b515-6d4e70b830e9")
+
+        with self.assertRaises(IndexError):
+            all_views[100]
+
+    def test_queryset_filter_args_error(self):
+        with self.assertRaises(RuntimeError):
+            workbooks = self.server.workbooks.filter("argument")

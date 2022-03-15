@@ -1,6 +1,6 @@
 import logging
 
-from .endpoint import Endpoint, api
+from .endpoint import QuerysetEndpoint, api
 from .exceptions import JobCancelledException, JobFailedException
 from .. import JobItem, BackgroundJobItem, PaginationItem
 from ..request_options import RequestOptionsBase
@@ -11,7 +11,7 @@ logger = logging.getLogger("tableau.endpoint.jobs")
 from typing import List, Optional, Tuple, Union
 
 
-class Jobs(Endpoint):
+class Jobs(QuerysetEndpoint):
     @property
     def baseurl(self):
         return "{0}/sites/{1}/jobs".format(self.parent_srv.baseurl, self.parent_srv.site_id)
