@@ -16,11 +16,15 @@ class QuerySet:
         self._pagination_item = None
 
     def __iter__(self):
+        # Not built to be re-entrant. Starts back at page 1, and empties
+        # the result cache.
         self.request_options.pagenumber = 1
         self._result_cache = None
         total = self.total_available
         size = self.page_size
         yield from self._result_cache
+
+        # Loop through the subsequent pages.
         for page in range(1, math.ceil(total / size)):
             self.request_options.pagenumber = page + 1
             self._result_cache = None
@@ -31,12 +35,16 @@ class QuerySet:
         page = self.page_number
         size = self.page_size
 
+        # Create a range object for quick checking if k is in the cached result.
         page_range = range((page - 1) * size, page * size)
 
         if isinstance(k, slice):
+            # Parse out the slice object, and assume reasonable defaults if no value provided.
             step = k.step if k.step is not None else 1
             start = k.start if k.start is not None else 0
             stop = k.stop if k.stop is not None else self.total_available
+
+            # If negative values present in slice, convert to positive values
             if start < 0:
                 start += self.total_available
             if stop < 0:
@@ -48,6 +56,7 @@ class QuerySet:
                 slice_stop = stop if stop > 0 else None
                 k = slice(start, slice_stop, step)
 
+            # Fetch items from cache if present, otherwise, recursively fetch.
             k_range = range(start, stop, step)
             if all(i in page_range for i in k_range):
                 return self._result_cache[k]
@@ -57,12 +66,15 @@ class QuerySet:
             k += self.total_available
 
         if k in page_range:
+            # Fetch item from cache if present
             return self._result_cache[k % size]
         elif k in range(self.total_available):
+            # Otherwise, check if k is even sensible to return
             self._result_cache = None
             self.request_options.pagenumber = max(1, math.ceil(k / size))
             return self[k]
         else:
+            # If k is unreasonable, raise an IndexError.
             raise IndexError
 
     def _fetch_all(self):
