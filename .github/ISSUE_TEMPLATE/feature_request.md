@@ -23,4 +23,6 @@ Requests for totally new functionality will generally be passed to the relevant 
 
 
 ## Description
-A clear and concise description of what the feature request is. If you think that the value of this feature might not be obvious, include information like how often it is needed, amount of work saved, etc. If your feature request is related to a file or server in a specific state, describe the starting state when the feature can be used, and the end state after using it. If it involves modifying files, an example file may be helpful. (**NOTE:** Be careful not to post user names, passwords, auth tokens or any other private or sensitive information.)
+A clear and concise description of what the feature request is. If you think that the value of this feature might not be obvious, include information like how often it is needed, amount of work saved, etc. If your feature request is related to a file or server in a specific state, describe the starting state when the feature can be used, and the end state after using it. If it involves modifying files, an example file may be helpful. 
+![](https://img.shields.io/badge/warning-Be%20careful%20not%20to%20post%20user%20names%2C%20passwords%2C%20auth%20tokens%20or%20any%20other%20private%20or%20sensitive%20information-red)
+
