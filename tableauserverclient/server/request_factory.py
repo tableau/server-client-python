@@ -838,6 +838,7 @@ class WorkbookRequest(object):
         workbook_item,
         connection_credentials=None,
         connections=None,
+        hidden_views=None,
     ):
         xml_request = ET.Element("tsRequest")
         workbook_element = ET.SubElement(xml_request, "workbook")
@@ -857,6 +858,17 @@ class WorkbookRequest(object):
             connections_element = ET.SubElement(workbook_element, "connections")
             for connection in connections:
                 _add_connections_element(connections_element, connection)
+
+        if hidden_views is not None:
+            import warnings
+
+            warnings.simplefilter("always", DeprecationWarning)
+            warnings.warn(
+                "the hidden_views parameter should now be set on the workbook directly",
+                DeprecationWarning,
+            )
+            if workbook_item.hidden_views is None:
+                workbook_item.hidden_views = hidden_views
 
         if workbook_item.hidden_views is not None:
             views_element = ET.SubElement(workbook_element, "views")
@@ -898,11 +910,13 @@ class WorkbookRequest(object):
         file_contents,
         connection_credentials=None,
         connections=None,
+        hidden_views=None,
     ):
         xml_request = self._generate_xml(
             workbook_item,
             connection_credentials=connection_credentials,
             connections=connections,
+            hidden_views=hidden_views,
         )
 
         parts = {
@@ -916,11 +930,13 @@ class WorkbookRequest(object):
         workbook_item,
         connection_credentials=None,
         connections=None,
+        hidden_views=None,
     ):
         xml_request = self._generate_xml(
             workbook_item,
             connection_credentials=connection_credentials,
             connections=connections,
+            hidden_views=hidden_views,
         )
 
         parts = {"request_payload": ("", xml_request, "text/xml")}

@@ -577,7 +577,7 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual("GDP per capita", new_workbook.views[0].name)
         self.assertEqual("RESTAPISample_0/sheets/GDPpercapita", new_workbook.views[0].content_url)
 
-    def test_publish_with_hidden_view(self) -> None:
+    def test_publish_with_hidden_views_on_workbook(self) -> None:
         with open(PUBLISH_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -592,6 +592,31 @@ class WorkbookTests(unittest.TestCase):
 
             new_workbook.hidden_views = ["GDP per capita"]
             new_workbook = self.server.workbooks.publish(new_workbook, sample_workbook, publish_mode)
+            request_body = m._adapter.request_history[0]._request.body
+            # order of attributes in xml is unspecified
+            self.assertTrue(re.search(rb"<views><view.*?hidden=\"true\".*?\/><\/views>", request_body))
+            self.assertTrue(re.search(rb"<views><view.*?name=\"GDP per capita\".*?\/><\/views>", request_body))
+
+    # this tests the old method of including workbook views as a parameter for publishing
+    # should be removed when that functionality is removed
+    # see https://github.com/tableau/server-client-python/pull/617
+    def test_publish_with_hidden_view(self) -> None:
+        with open(PUBLISH_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            m.post(self.baseurl, text=response_xml)
+
+            new_workbook = TSC.WorkbookItem(
+                name="Sample", show_tabs=False, project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760"
+            )
+
+            sample_workbook = os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")
+            publish_mode = self.server.PublishMode.CreateNew
+
+            new_workbook = self.server.workbooks.publish(
+                new_workbook, sample_workbook, publish_mode, hidden_views=["GDP per capita"]
+            )
+
             request_body = m._adapter.request_history[0]._request.body
             # order of attributes in xml is unspecified
             self.assertTrue(re.search(rb"<views><view.*?hidden=\"true\".*?\/><\/views>", request_body))
