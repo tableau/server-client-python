@@ -44,16 +44,23 @@ def main():
     server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
         endpoint = {
-            "workbook": server.workbooks,
             "datasource": server.datasources,
-            "view": server.views,
             "job": server.jobs,
+            "metric": server.metrics,
             "project": server.projects,
+            "view": server.views,
             "webhooks": server.webhooks,
+            "workbook": server.workbooks,
         }.get(args.resource_type)
 
-        for resource in TSC.Pager(endpoint.get):
+        options = TSC.RequestOptions()
+        options.sort.add(TSC.Sort(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Direction.Desc))
+
+        count = 0
+        for resource in TSC.Pager(endpoint.get, options):
+            count = count + 1
             print(resource.id, resource.name)
+        print("Total: {}".format(count))
 
 
 if __name__ == "__main__":
