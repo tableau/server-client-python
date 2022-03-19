@@ -8,6 +8,7 @@
 
 import argparse
 import logging
+import urllib.parse
 
 import tableauserverclient as TSC
 
@@ -63,7 +64,7 @@ def main():
 
         # URL Encode the name of the group that we want to filter on
         # i.e. turn spaces into plus signs
-        filter_group_name = "SALES+ROMANIA"
+        filter_group_name = urllib.parse.quote_plus(group_name)
         options = TSC.RequestOptions()
         options.filter.add(
             TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, filter_group_name)
@@ -77,6 +78,14 @@ def main():
         else:
             error = "No project named '{}' found".format(filter_group_name)
             print(error)
+
+        # Or, try the above with the django style filtering
+        try:
+            group = server.groups.filter(name=filter_group_name)[0]
+        except IndexError:
+            print(f"No project named '{filter_group_name}' found")
+        else:
+            print(group.name)
 
         options = TSC.RequestOptions()
         options.filter.add(
@@ -92,6 +101,13 @@ def main():
         matching_groups, pagination_item = server.groups.get(req_options=options)
         print("Filtered groups are:")
         for group in matching_groups:
+            print(group.name)
+
+        # or, try the above with the django style filtering.
+
+        groups = ["SALES NORTHWEST", "SALES ROMANIA", "this_group"]
+        groups = [urllib.parse.quote_plus(group) for group in groups]
+        for group in server.groups.filter(name__in=groups).sort("-name"):
             print(group.name)
 
 

@@ -7,6 +7,7 @@
 
 import argparse
 import logging
+import urllib.parse
 
 import tableauserverclient as TSC
 
@@ -94,6 +95,12 @@ def main():
         matching_projects, pagination_item = server.projects.get(req_options=options)
         print("Filtered projects are:")
         for project in matching_projects:
+            print(project.name, project.id)
+
+        # Or, try the django style filtering.
+        projects = ["Example 1", "Example 2", "Example 3"]
+        projects = [urllib.parse.quote_plus(p) for p in projects]
+        for project in server.projects.filter(name__in=projects).sort("-name"):
             print(project.name, project.id)
 
 

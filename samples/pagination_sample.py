@@ -97,6 +97,13 @@ def main():
             page = page + 1
         print("QuerySet Total: {}".format(count))
 
+        # 3. QuerySet also allows you to iterate over all objects without explicitly paging.
+        print("Fetching again - this time without manually paging")
+        for i, wb in enumerate(server.workbooks.filter(owner_email="jfitzgerald@tableau.com"), start=1):
+            print(wb.name, "--", wb.owner_id)
+
+        print(f"QuerySet Total, implicit paging: {i}")
+
 
 if __name__ == "__main__":
     main()
