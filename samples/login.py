@@ -11,13 +11,39 @@ import logging
 import tableauserverclient as TSC
 
 
-def main():
+# If a sample has additional arguments, then it should copy this code and insert them after the call to
+# sample_define_common_options
+# If it has no additional arguments, it can just call this method
+def set_up_and_log_in():
     parser = argparse.ArgumentParser(description="Logs in to the server.")
-    # This command is special, as it doesn't take `token-value` and it offer both token-based and password based authentication.
-    # Please still try to keep common options like `server` and `site` consistent across samples
-    # Common options:
+    sample_define_common_options(parser)
+    args = parser.parse_args()
+
+    # Set logging level based on user input, or error by default.
+    logging_level = getattr(logging, args.logging_level.upper())
+    logging.basicConfig(level=logging_level)
+
+    return sample_connect_to_server()
+
+
+def sample_define_common_options(parser):
+    # Common options; please keep these in sync across all samples by copying or calling this method directly
     parser.add_argument("--server", "-s", required=True, help="server address")
-    parser.add_argument("--site", "-S", help="site name")
+    parser.add_argument("--site", "-t", help="site name")
+    auth = parser.add_mutually_exclusive_group(required=True)
+    auth.add_argument(
+        "--token-name", "-tn", help="name of the personal access token used to sign into the server"
+    )
+    auth.add_argument(
+        "--username", "-u", help="username to sign into the server"
+    )
+
+    parser.add_argument(
+        "--token-value", "-tv", help="value of the personal access token used to sign into the server"
+    )
+    parser.add_argument(
+        "--password", "-p", help="value of the password used to sign into the server"
+    )
     parser.add_argument(
         "--logging-level",
         "-l",
@@ -25,40 +51,38 @@ def main():
         default="error",
         help="desired logging level (set to error by default)",
     )
-    # Options specific to this sample
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--username", "-u", help="username to sign into the server")
-    group.add_argument("--token-name", "-n", help="name of the personal access token used to sign into the server")
 
-    args = parser.parse_args()
 
-    # Set logging level based on user input, or error by default.
-    logging_level = getattr(logging, args.logging_level.upper())
-    logging.basicConfig(level=logging_level)
-
-    # Make sure we use an updated version of the rest apis.
-    server = TSC.Server(args.server, use_server_version=True)
+def sample_connect_to_server(args):
 
     if args.username:
         # Trying to authenticate using username and password.
-        password = getpass.getpass("Password: ")
+        password = args.password or getpass.getpass("Password: ")
 
-        print("\nSigning in...\nServer: {}\nSite: {}\nUsername: {}".format(args.server, args.site, args.username))
         tableau_auth = TSC.TableauAuth(args.username, password, site_id=args.site)
-        with server.auth.sign_in(tableau_auth):
-            print("Logged in successfully")
+        print("\nSigning in...\nServer: {}\nSite: {}\nUsername: {}".format(args.server, args.site, args.username))
 
     else:
         # Trying to authenticate using personal access tokens.
-        personal_access_token = getpass.getpass("Personal Access Token: ")
+        token = args.token_value or getpass.getpass("Personal Access Token: ")
 
-        print("\nSigning in...\nServer: {}\nSite: {}\nToken name: {}".format(args.server, args.site, args.token_name))
         tableau_auth = TSC.PersonalAccessTokenAuth(
-            token_name=args.token_name, personal_access_token=personal_access_token, site_id=args.site
+            token_name=args.token_name, personal_access_token=token, site_id=args.site
         )
-        with server.auth.sign_in_with_personal_access_token(tableau_auth):
-            print("Logged in successfully")
+        print("\nSigning in...\nServer: {}\nSite: {}\nToken name: {}".format(args.server, args.site, args.token_name))
+
+    if not tableau_auth:
+        raise TabError("Did not create authentication object. Check arguments.")
+
+    # Only set this to False if you are running against a server you trust AND you know why the cert is broken
+    check_ssl_certificate = True
+    # Make sure we use an updated version of the rest apis.
+    server = TSC.Server(args.server, use_server_version=True, http_options={'verify', check_ssl_certificate})
+    with server.auth.sign_in(tableau_auth):
+        print("Logged in successfully")
+
+    return server
 
 
 if __name__ == "__main__":
-    main()
+    set_up_and_log_in()

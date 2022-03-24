@@ -35,6 +35,7 @@ from .endpoint.exceptions import (
 )
 from .exceptions import NotSignedInError
 from ..namespace import Namespace
+import urllib3
 
 _PRODUCT_TO_REST_VERSION = {
     "10.0": "2.3",
@@ -44,14 +45,13 @@ _PRODUCT_TO_REST_VERSION = {
     "9.0": "2.0",
 }
 
-
 class Server(object):
     class PublishMode:
         Append = "Append"
         Overwrite = "Overwrite"
         CreateNew = "CreateNew"
 
-    def __init__(self, server_address, use_server_version=True):
+    def __init__(self, server_address, use_server_version=True, http_options=None):
         self._server_address = server_address
         self._auth_token = None
         self._site_id = None
@@ -86,11 +86,17 @@ class Server(object):
         self.flow_runs = FlowRuns(self)
         self.metrics = Metrics(self)
 
+        if http_options:
+            self.add_http_options(http_options)
+
         if use_server_version:
             self.use_server_version()
 
     def add_http_options(self, options_dict):
+        print(options_dict)
         self._http_options.update(options_dict)
+        if options_dict.get('verify') == False:
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     def clear_http_options(self):
         self._http_options = dict()
