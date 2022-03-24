@@ -10,6 +10,7 @@ from tableauserverclient.datetime_helpers import format_datetime
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
 GET_XML = os.path.join(TEST_ASSET_DIR, "schedule_get.xml")
+GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_by_id.xml")
 GET_EMPTY_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_empty.xml")
 CREATE_HOURLY_XML = os.path.join(TEST_ASSET_DIR, "schedule_create_hourly.xml")
 CREATE_DAILY_XML = os.path.join(TEST_ASSET_DIR, "schedule_create_daily.xml")
@@ -82,6 +83,20 @@ class ScheduleTests(unittest.TestCase):
 
         self.assertEqual(0, pagination_item.total_available)
         self.assertEqual([], all_schedules)
+
+    def test_get_by_id(self) -> None:
+        self.server.version = "3.8"
+        with open(GET_BY_ID_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            schedule_id = "c9cff7f9-309c-4361-99ff-d4ba8c9f5467"
+            baseurl = "{}/schedules/{}".format(self.server.baseurl, schedule_id)
+            m.get(baseurl, text=response_xml)
+            schedule = self.server.schedules.get_by_id(schedule_id)
+            self.assertIsNotNone(schedule)
+            self.assertEqual(schedule_id, schedule.id)
+            self.assertEqual("Weekday early mornings", schedule.name)
+            self.assertEqual("Active", schedule.state)
 
     def test_delete(self) -> None:
         with requests_mock.mock() as m:

@@ -76,7 +76,7 @@ Our CI runs include a Python lint run, so you should run this locally and fix co
 black --line-length 120 tableauserverclient --check
 
 # this will format the directory and code for you
-black --line-length 120 tableauserverclient
+black --line-length 120 tableauserverclient test samples
 
 # this will run type checking
 pip install mypy
