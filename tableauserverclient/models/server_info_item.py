@@ -8,8 +8,15 @@ class ServerInfoItem(object):
         self._rest_api_version = rest_api_version
 
     def __str__(self):
-        return "ServerInfoItem: [product version: " + self._product_version + ", build no.:" + self._build_number + \
-               ", REST API version:" + self.rest_api_version + "]"
+        return (
+            "ServerInfoItem: [product version: "
+            + self._product_version
+            + ", build no.:"
+            + self._build_number
+            + ", REST API version:"
+            + self.rest_api_version
+            + "]"
+        )
 
     @property
     def product_version(self):

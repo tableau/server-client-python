@@ -95,7 +95,7 @@ class Server(object):
 
     def add_http_options(self, options_dict):
         self._http_options.update(options_dict)
-        if options_dict.get('verify') == False:
+        if options_dict.get("verify") == False:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     def clear_http_options(self):
