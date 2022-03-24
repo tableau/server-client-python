@@ -9,6 +9,7 @@
 
 import argparse
 import logging
+import urllib.parse
 
 import tableauserverclient as TSC
 
@@ -46,30 +47,22 @@ def main():
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
     server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
-        # Step 2: Query workbook to move
-        req_option = TSC.RequestOptions()
-        req_option.filter.add(
-            TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, args.workbook_name)
-        )
-        all_workbooks, pagination_item = server.workbooks.get(req_option)
+        # Step 2: Find destination project
+        try:
+            dest_project = server.projects.filter(name=urllib.parse.quote_plus(args.destination_project))[0]
+        except IndexError:
+            raise LookupError(f"No project named {args.destination_project} found.")
 
-        # Step 3: Find destination project
-        all_projects, pagination_item = server.projects.get()
-        dest_project = next((project for project in all_projects if project.name == args.destination_project), None)
+        # Step 3: Query workbook to move
+        try:
+            workbook = server.workbooks.filter(name=urllib.parse.quote_plus(args.workbook_name))[0]
+        except IndexError:
+            raise LookupError(f"No workbook named {args.workbook_name} found")
 
-        if dest_project is not None:
-            # Step 4: Update workbook with new project id
-            if all_workbooks:
-                print("Old project: {}".format(all_workbooks[0].project_name))
-                all_workbooks[0].project_id = dest_project.id
-                target_workbook = server.workbooks.update(all_workbooks[0])
-                print("New project: {}".format(target_workbook.project_name))
-            else:
-                error = "No workbook named {} found.".format(args.workbook_name)
-                raise LookupError(error)
-        else:
-            error = "No project named {} found.".format(args.destination_project)
-            raise LookupError(error)
+        # Step 4: Update workbook with new project id
+        workbook.project_id = dest_project.id
+        target_workbook = server.workbooks.update(workbook)
+        print(f"New project: {target_workbook.project_name}")
 
 
 if __name__ == "__main__":
