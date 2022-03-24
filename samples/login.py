@@ -23,7 +23,9 @@ def set_up_and_log_in():
     logging_level = getattr(logging, args.logging_level.upper())
     logging.basicConfig(level=logging_level)
 
-    return sample_connect_to_server()
+    server = sample_connect_to_server(args)
+    print(server.server_info.get())
+    print(server.server_address, "site:", server.site_id, "user:", server.user_id)
 
 
 def sample_define_common_options(parser):
@@ -76,10 +78,11 @@ def sample_connect_to_server(args):
 
     # Only set this to False if you are running against a server you trust AND you know why the cert is broken
     check_ssl_certificate = True
-    # Make sure we use an updated version of the rest apis.
-    server = TSC.Server(args.server, use_server_version=True, http_options={'verify', check_ssl_certificate})
-    with server.auth.sign_in(tableau_auth):
-        print("Logged in successfully")
+
+    # Make sure we use an updated version of the rest apis, and pass in our cert handling choice
+    server = TSC.Server(args.server, use_server_version=True, http_options={'verify': check_ssl_certificate})
+    server.auth.sign_in(tableau_auth)
+    print("Logged in successfully")
 
     return server
 

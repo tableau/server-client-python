@@ -1,5 +1,5 @@
 from distutils.version import LooseVersion as Version
-
+import urllib3
 import requests
 from defusedxml.ElementTree import fromstring
 
@@ -35,7 +35,7 @@ from .endpoint.exceptions import (
 )
 from .exceptions import NotSignedInError
 from ..namespace import Namespace
-import urllib3
+
 
 _PRODUCT_TO_REST_VERSION = {
     "10.0": "2.3",
@@ -44,6 +44,7 @@ _PRODUCT_TO_REST_VERSION = {
     "9.1": "2.0",
     "9.0": "2.0",
 }
+
 
 class Server(object):
     class PublishMode:
@@ -93,7 +94,6 @@ class Server(object):
             self.use_server_version()
 
     def add_http_options(self, options_dict):
-        print(options_dict)
         self._http_options.update(options_dict)
         if options_dict.get('verify') == False:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
