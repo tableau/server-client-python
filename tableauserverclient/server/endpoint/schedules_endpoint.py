@@ -35,6 +35,16 @@ class Schedules(Endpoint):
         all_schedule_items = ScheduleItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_schedule_items, pagination_item
 
+    @api(version="3.8")
+    def get_by_id(self, schedule_id):
+        if not schedule_id:
+            error = "No Schedule ID provided"
+            raise ValueError(error)
+        logger.info("Querying a single schedule by id ({})".format(schedule_id))
+        url = "{0}/{1}".format(self.baseurl, schedule_id)
+        server_response = self.get_request(url)
+        return ScheduleItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+
     @api(version="2.3")
     def delete(self, schedule_id: str) -> None:
         if not schedule_id:

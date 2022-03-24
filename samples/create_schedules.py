@@ -33,7 +33,7 @@ def main():
         default="error",
         help="desired logging level (set to error by default)",
     )
-    # Options specific to this sample
+    # Options specific to this sample:
     # This sample has no additional options, yet. If you add some, please add them here
 
     args = parser.parse_args()
@@ -43,7 +43,9 @@ def main():
     logging.basicConfig(level=logging_level)
 
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
-    server = TSC.Server(args.server, use_server_version=True)
+    server = TSC.Server(args.server, use_server_version=False)
+    server.add_http_options({"verify": False})
+    server.use_server_version()
     with server.auth.sign_in(tableau_auth):
         # Hourly Schedule
         # This schedule will run every 2 hours between 2:30AM and 11:00PM
@@ -56,8 +58,11 @@ def main():
             TSC.ScheduleItem.ExecutionOrder.Parallel,
             hourly_interval,
         )
-        hourly_schedule = server.schedules.create(hourly_schedule)
-        print("Hourly schedule created (ID: {}).".format(hourly_schedule.id))
+        try:
+            hourly_schedule = server.schedules.create(hourly_schedule)
+            print("Hourly schedule created (ID: {}).".format(hourly_schedule.id))
+        except Exception as e:
+            print(e)
 
         # Daily Schedule
         # This schedule will run every day at 5AM
@@ -69,8 +74,11 @@ def main():
             TSC.ScheduleItem.ExecutionOrder.Serial,
             daily_interval,
         )
-        daily_schedule = server.schedules.create(daily_schedule)
-        print("Daily schedule created (ID: {}).".format(daily_schedule.id))
+        try:
+            daily_schedule = server.schedules.create(daily_schedule)
+            print("Daily schedule created (ID: {}).".format(daily_schedule.id))
+        except Exception as e:
+            print(e)
 
         # Weekly Schedule
         # This schedule will wun every Monday, Wednesday, and Friday at 7:15PM
@@ -84,8 +92,18 @@ def main():
             TSC.ScheduleItem.ExecutionOrder.Serial,
             weekly_interval,
         )
-        weekly_schedule = server.schedules.create(weekly_schedule)
-        print("Weekly schedule created (ID: {}).".format(weekly_schedule.id))
+        try:
+            weekly_schedule = server.schedules.create(weekly_schedule)
+            print("Weekly schedule created (ID: {}).".format(weekly_schedule.id))
+        except Exception as e:
+            print(e)
+            options = TSC.RequestOptions()
+            options.filter.add(
+                TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, "Weekly Schedule")
+            )
+            schedules, _ = server.schedules.get(req_options=options)
+            weekly_schedule = schedules[0]
+            print(weekly_schedule)
 
         # Monthly Schedule
         # This schedule will run on the 15th of every month at 11:30PM
@@ -97,8 +115,16 @@ def main():
             TSC.ScheduleItem.ExecutionOrder.Parallel,
             monthly_interval,
         )
-        monthly_schedule = server.schedules.create(monthly_schedule)
-        print("Monthly schedule created (ID: {}).".format(monthly_schedule.id))
+        try:
+            monthly_schedule = server.schedules.create(monthly_schedule)
+            print("Monthly schedule created (ID: {}).".format(monthly_schedule.id))
+        except Exception as e:
+            print(e)
+
+        # Now fetch the weekly schedule by id
+        fetched_schedule = server.schedules.get_by_id(weekly_schedule.id)
+        fetched_interval = fetched_schedule.interval_item
+        print("Fetched back our weekly schedule, it shows interval ", fetched_interval)
 
 
 if __name__ == "__main__":
