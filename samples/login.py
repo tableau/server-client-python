@@ -33,19 +33,11 @@ def sample_define_common_options(parser):
     parser.add_argument("--server", "-s", required=True, help="server address")
     parser.add_argument("--site", "-t", help="site name")
     auth = parser.add_mutually_exclusive_group(required=True)
-    auth.add_argument(
-        "--token-name", "-tn", help="name of the personal access token used to sign into the server"
-    )
-    auth.add_argument(
-        "--username", "-u", help="username to sign into the server"
-    )
+    auth.add_argument("--token-name", "-tn", help="name of the personal access token used to sign into the server")
+    auth.add_argument("--username", "-u", help="username to sign into the server")
 
-    parser.add_argument(
-        "--token-value", "-tv", help="value of the personal access token used to sign into the server"
-    )
-    parser.add_argument(
-        "--password", "-p", help="value of the password used to sign into the server"
-    )
+    parser.add_argument("--token-value", "-tv", help="value of the personal access token used to sign into the server")
+    parser.add_argument("--password", "-p", help="value of the password used to sign into the server")
     parser.add_argument(
         "--logging-level",
         "-l",
@@ -80,7 +72,7 @@ def sample_connect_to_server(args):
     check_ssl_certificate = True
 
     # Make sure we use an updated version of the rest apis, and pass in our cert handling choice
-    server = TSC.Server(args.server, use_server_version=True, http_options={'verify': check_ssl_certificate})
+    server = TSC.Server(args.server, use_server_version=True, http_options={"verify": check_ssl_certificate})
     server.auth.sign_in(tableau_auth)
     print("Logged in successfully")
 
