@@ -8,6 +8,8 @@ class TableauAuth(object):
                 DeprecationWarning,
             )
             site_id = site
+        if password is None:
+            raise TabError("Must provide a password when using traditional authentication")
 
         self.user_id_to_impersonate = user_id_to_impersonate
         self.password = password
