@@ -45,7 +45,6 @@ class Schedules(Endpoint):
         server_response = self.get_request(url)
         return ScheduleItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
-
     @api(version="2.3")
     def delete(self, schedule_id: str) -> None:
         if not schedule_id:
