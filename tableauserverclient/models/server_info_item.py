@@ -7,6 +7,17 @@ class ServerInfoItem(object):
         self._build_number = build_number
         self._rest_api_version = rest_api_version
 
+    def __str__(self):
+        return (
+            "ServerInfoItem: [product version: "
+            + self._product_version
+            + ", build no.:"
+            + self._build_number
+            + ", REST API version:"
+            + self.rest_api_version
+            + "]"
+        )
+
     @property
     def product_version(self):
         return self._product_version
