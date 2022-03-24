@@ -1,4 +1,4 @@
-name: Python tests
+name: types and style checks
 
 on: [push, pull_request]
 
@@ -8,7 +8,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.6', '3.7', '3.8', '3.9', '3.10']
+        python-version: ['3.10']
 
     runs-on: ${{ matrix.os }}
 
@@ -25,7 +25,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install -e .[test]
 
-    - name: Test with pytest
+    - name: Format with black
+      run: |
+        black --check --line-length 120 tableauserverclient samples test
+
+    - name: Run Mypy tests
       if: always()
       run: |
-        pytest test
+        mypy --show-error-codes --disable-error-code misc --disable-error-code import tableauserverclient test
