@@ -1,7 +1,7 @@
 import copy
 import uuid
 import xml.etree.ElementTree as ET
-from typing import Dict, List, Optional, Set, TYPE_CHECKING
+from typing import Callable, Dict, List, Optional, Set, TYPE_CHECKING
 
 from defusedxml.ElementTree import fromstring
 
@@ -33,6 +33,7 @@ class WorkbookItem(object):
         self._id: Optional[str] = None
         self._initial_tags: set = set()
         self._pdf = None
+        self._powerpoint = None
         self._preview_image = None
         self._project_name = None
         self._revisions = None
@@ -91,14 +92,21 @@ class WorkbookItem(object):
         return self._id
 
     @property
-    def pdf(self):
+    def powerpoint(self) -> bytes:
+        if self._powerpoint is None:
+            error = "Workbook item must be populated with its powerpoint first."
+            raise UnpopulatedPropertyError(error)
+        return self._powerpoint()
+
+    @property
+    def pdf(self) -> bytes:
         if self._pdf is None:
             error = "Workbook item must be populated with its pdf first."
             raise UnpopulatedPropertyError(error)
         return self._pdf()
 
     @property
-    def preview_image(self):
+    def preview_image(self) -> bytes:
         if self._preview_image is None:
             error = "Workbook item must be populated with its preview image first."
             raise UnpopulatedPropertyError(error)
@@ -173,13 +181,16 @@ class WorkbookItem(object):
     def _set_permissions(self, permissions):
         self._permissions = permissions
 
-    def _set_views(self, views):
+    def _set_views(self, views: Callable[[], List[ViewItem]]) -> None:
         self._views = views
 
-    def _set_pdf(self, pdf):
+    def _set_pdf(self, pdf: Callable[[], bytes]) -> None:
         self._pdf = pdf
 
-    def _set_preview_image(self, preview_image):
+    def _set_powerpoint(self, pptx: Callable[[], bytes]) -> None:
+        self._powerpoint = pptx
+
+    def _set_preview_image(self, preview_image: Callable[[], bytes]) -> None:
         self._preview_image = preview_image
 
     def _set_revisions(self, revisions):

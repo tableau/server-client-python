@@ -27,6 +27,7 @@ GET_INVALID_DATE_XML = os.path.join(TEST_ASSET_DIR, "workbook_get_invalid_date.x
 GET_XML = os.path.join(TEST_ASSET_DIR, "workbook_get.xml")
 POPULATE_CONNECTIONS_XML = os.path.join(TEST_ASSET_DIR, "workbook_populate_connections.xml")
 POPULATE_PDF = os.path.join(TEST_ASSET_DIR, "populate_pdf.pdf")
+POPULATE_POWERPOINT = os.path.join(TEST_ASSET_DIR, "populate_powerpoint.pptx")
 POPULATE_PERMISSIONS_XML = os.path.join(TEST_ASSET_DIR, "workbook_populate_permissions.xml")
 POPULATE_PREVIEW_IMAGE = os.path.join(TEST_ASSET_DIR, "RESTAPISample Image.png")
 POPULATE_VIEWS_XML = os.path.join(TEST_ASSET_DIR, "workbook_populate_views.xml")
@@ -438,6 +439,22 @@ class WorkbookTests(unittest.TestCase):
 
             self.server.workbooks.populate_pdf(single_workbook, req_option)
             self.assertEqual(response, single_workbook.pdf)
+
+    def test_populate_powerpoint(self) -> None:
+        self.server.version = "3.8"
+        self.baseurl = self.server.workbooks.baseurl
+        with open(POPULATE_POWERPOINT, "rb") as f:
+            response = f.read()
+        with requests_mock.mock() as m:
+            m.get(
+                self.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/powerpoint",
+                content=response,
+            )
+            single_workbook = TSC.WorkbookItem("test")
+            single_workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
+
+            self.server.workbooks.populate_powerpoint(single_workbook)
+            self.assertEqual(response, single_workbook.powerpoint)
 
     def test_populate_preview_image(self) -> None:
         with open(POPULATE_PREVIEW_IMAGE, "rb") as f:

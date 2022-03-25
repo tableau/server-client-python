@@ -206,7 +206,7 @@ class Workbooks(QuerysetEndpoint):
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
 
-        def view_fetcher():
+        def view_fetcher() -> List[ViewItem]:
             return self._get_views_for_workbook(workbook_item, usage)
 
         workbook_item._set_views(view_fetcher)
@@ -252,17 +252,35 @@ class Workbooks(QuerysetEndpoint):
             error = "Workbook item missing ID."
             raise MissingRequiredFieldError(error)
 
-        def pdf_fetcher():
+        def pdf_fetcher() -> bytes:
             return self._get_wb_pdf(workbook_item, req_options)
 
         workbook_item._set_pdf(pdf_fetcher)
         logger.info("Populated pdf for workbook (ID: {0})".format(workbook_item.id))
 
-    def _get_wb_pdf(self, workbook_item, req_options):
+    def _get_wb_pdf(self, workbook_item: WorkbookItem, req_options: Optional["RequestOptions"]) -> bytes:
         url = "{0}/{1}/pdf".format(self.baseurl, workbook_item.id)
         server_response = self.get_request(url, req_options)
         pdf = server_response.content
         return pdf
+
+    @api(version="3.8")
+    def populate_powerpoint(self, workbook_item: WorkbookItem, req_options: Optional["RequestOptions"] = None) -> None:
+        if not workbook_item.id:
+            error = "Workbook item missing ID."
+            raise MissingRequiredFieldError(error)
+
+        def pptx_fetcher() -> bytes:
+            return self._get_wb_pptx(workbook_item, req_options)
+
+        workbook_item._set_powerpoint(pptx_fetcher)
+        logger.info("Populated powerpoint for workbook (ID: {0})".format(workbook_item.id))
+
+    def _get_wb_pptx(self, workbook_item: WorkbookItem, req_options: Optional["RequestOptions"]) -> bytes:
+        url = "{0}/{1}/powerpoint".format(self.baseurl, workbook_item.id)
+        server_response = self.get_request(url, req_options)
+        pptx = server_response.content
+        return pptx
 
     # Get preview image of workbook
     @api(version="2.0")
@@ -271,13 +289,13 @@ class Workbooks(QuerysetEndpoint):
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
 
-        def image_fetcher():
+        def image_fetcher() -> bytes:
             return self._get_wb_preview_image(workbook_item)
 
         workbook_item._set_preview_image(image_fetcher)
         logger.info("Populated preview image for workbook (ID: {0})".format(workbook_item.id))
 
-    def _get_wb_preview_image(self, workbook_item):
+    def _get_wb_preview_image(self, workbook_item: WorkbookItem) -> bytes:
         url = "{0}/{1}/previewImage".format(self.baseurl, workbook_item.id)
         server_response = self.get_request(url)
         preview_image = server_response.content
