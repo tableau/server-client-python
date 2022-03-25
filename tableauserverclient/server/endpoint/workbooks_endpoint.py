@@ -115,10 +115,7 @@ class Workbooks(QuerysetEndpoint):
 
     # delete all the extracts on 1 workbook
     @api(version="3.3")
-    def delete_extract(self,
-                       workbook_item: WorkbookItem,
-                       includeAll: bool = True
-                       ) -> None:
+    def delete_extract(self, workbook_item: WorkbookItem, includeAll: bool = True) -> None:
         id_ = getattr(workbook_item, "id", workbook_item)
         url = "{0}/{1}/deleteExtract".format(self.baseurl, id_)
         datasource_req = RequestFactory.Workbook.embedded_extract_req(includeAll, None)
