@@ -1,3 +1,4 @@
+from multiprocessing.sharedctypes import Value
 import warnings
 import xml.etree.ElementTree as ET
 
@@ -749,7 +750,11 @@ class SiteItem(object):
         if revision_history_enabled is not None:
             self._revision_history_enabled = revision_history_enabled
         if user_quota:
-            self.user_quota = user_quota
+            try:
+                self.user_quota = user_quota
+            except ValueError:
+                warnings.warn("Tiered license level is set. Setting user_quota to None.")
+                self.user_quota = None
         if storage_quota:
             self.storage_quota = storage_quota
         if revision_limit:
