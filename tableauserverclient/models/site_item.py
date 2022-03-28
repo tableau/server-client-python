@@ -226,7 +226,9 @@ class SiteItem(object):
 
     @user_quota.setter
     def user_quota(self, value: Optional[int]) -> None:
-        if any((self.tier_creator_capacity, self.tier_explorer_capacity, self.tier_viewer_capacity)):
+        if value is not None and any(
+            (self.tier_creator_capacity, self.tier_explorer_capacity, self.tier_viewer_capacity)
+        ):
             raise ValueError("User quota conflicts with setting tiered license levels. Set those to None first.")
         self._user_quota = value
 
