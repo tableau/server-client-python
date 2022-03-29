@@ -97,6 +97,8 @@ then
    # check for style conventions in all code dirs
    echo Running black format check
    black --check --line-length 120 tableauserverclient samples test
+   echo Running mypy type checking
+   mypy --show-error-codes --disable-error-code misc --disable-error-code import tableauserverclient test
 fi
 ```
 
@@ -128,11 +130,14 @@ depending on how and where git is installed on your system, for example:
 1. Add testing by getting real xml responses from the server, and asserting that
    all properties are parsed and set correctly.
 
-1. Add a sample to show users how to use the new feature. Try to keep the command
+1. Add type hints to all new classes and functions added. Including type hinting
+   on unit tests.
+
+2. Add a sample to show users how to use the new feature. Try to keep the command
    line arguments of your sample consistent with the [Samples documentation page](samples)
    and with other samples.
 
-1. Add documentation (most likely in api-ref.md) in a separate pull request
+3. Add documentation (most likely in api-ref.md) in a separate pull request
    (see more below).
 
 ### Add tests
