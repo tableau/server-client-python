@@ -186,7 +186,7 @@ class SiteTests(unittest.TestCase):
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.sites.update, single_site)
 
     def test_null_site_quota(self) -> None:
-        test_site = TSC.SiteItem('testname', 'testcontenturl', tier_explorer_capacity=1, user_quota=None)
+        test_site = TSC.SiteItem("testname", "testcontenturl", tier_explorer_capacity=1, user_quota=None)
         assert test_site.tier_explorer_capacity == 1
         with self.assertRaises(ValueError):
             test_site.user_quota = 1
@@ -194,14 +194,13 @@ class SiteTests(unittest.TestCase):
         test_site.user_quota = 1
 
     def test_replace_license_tiers_with_user_quota(self) -> None:
-        test_site = TSC.SiteItem('testname', 'testcontenturl', tier_explorer_capacity=1, user_quota=None)
+        test_site = TSC.SiteItem("testname", "testcontenturl", tier_explorer_capacity=1, user_quota=None)
         assert test_site.tier_explorer_capacity == 1
         with self.assertRaises(ValueError):
             test_site.user_quota = 1
         test_site.replace_license_tiers_with_user_quota(1)
         self.assertEqual(1, test_site.user_quota)
         self.assertIsNone(test_site.tier_explorer_capacity)
-
 
     def test_create(self) -> None:
         with open(CREATE_XML, "rb") as f:
