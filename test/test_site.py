@@ -139,6 +139,9 @@ class SiteTests(unittest.TestCase):
                 time_zone="America/Los_Angeles",
                 auto_suspend_refresh_enabled=True,
                 auto_suspend_refresh_inactivity_window=55,
+                tier_creator_capacity=5,
+                tier_explorer_capacity=5,
+                tier_viewer_capacity=5,
             )
             single_site._id = "6b7179ba-b82b-4f0f-91ed-812074ac5da6"
             single_site = self.server.sites.update(single_site)
@@ -151,7 +154,10 @@ class SiteTests(unittest.TestCase):
         self.assertEqual(True, single_site.revision_history_enabled)
         self.assertEqual(13, single_site.revision_limit)
         self.assertEqual(True, single_site.disable_subscriptions)
-        self.assertEqual(15, single_site.user_quota)
+        self.assertEqual(None, single_site.user_quota)
+        self.assertEqual(5, single_site.tier_creator_capacity)
+        self.assertEqual(5, single_site.tier_explorer_capacity)
+        self.assertEqual(5, single_site.tier_viewer_capacity)
         self.assertEqual("disable", single_site.data_acceleration_mode)
         self.assertEqual(True, single_site.flows_enabled)
         self.assertEqual(True, single_site.cataloging_enabled)
@@ -178,6 +184,24 @@ class SiteTests(unittest.TestCase):
     def test_update_missing_id(self) -> None:
         single_site = TSC.SiteItem("test", "test")
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.sites.update, single_site)
+
+    def test_null_site_quota(self) -> None:
+        test_site = TSC.SiteItem('testname', 'testcontenturl', tier_explorer_capacity=1, user_quota=None)
+        assert test_site.tier_explorer_capacity == 1
+        with self.assertRaises(ValueError):
+            test_site.user_quota = 1
+        test_site.tier_explorer_capacity = None
+        test_site.user_quota = 1
+
+    def test_replace_license_tiers_with_user_quota(self) -> None:
+        test_site = TSC.SiteItem('testname', 'testcontenturl', tier_explorer_capacity=1, user_quota=None)
+        assert test_site.tier_explorer_capacity == 1
+        with self.assertRaises(ValueError):
+            test_site.user_quota = 1
+        test_site.replace_license_tiers_with_user_quota(1)
+        self.assertEqual(1, test_site.user_quota)
+        self.assertIsNone(test_site.tier_explorer_capacity)
+
 
     def test_create(self) -> None:
         with open(CREATE_XML, "rb") as f:
