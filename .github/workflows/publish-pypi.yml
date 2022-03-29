@@ -31,11 +31,9 @@ jobs:
           pip install -e .[test]
           python setup.py sdist --formats=gztar,zip
       - name: Publish distribution 📦 to Test PyPI
-        env:
-            TEST_PYPI_API_TOKEN: ${{ secrets.TEST_PYPI_API_TOKEN }}
         uses: pypa/gh-action-pypi-publish@release/v1  # license BSD-2
         with:
-          password: $TEST_PYPI_API_TOKEN
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
       - name: Publish distribution 📦 to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1  # license BSD-2
