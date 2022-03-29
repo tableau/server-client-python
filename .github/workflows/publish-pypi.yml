@@ -25,6 +25,7 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: 3.8
+          fetch-depth: 0
       - name: Build dist files
         run: |
           python -m pip install --upgrade pip
@@ -38,4 +39,4 @@ jobs:
       - name: Publish distribution 📦 to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1  # license BSD-2
         with:
-          password: ${{ secrets.PYPI_API_TOKEN_WRONG }}
+          password: ${{ secrets.PYPI_API_TOKEN }}
