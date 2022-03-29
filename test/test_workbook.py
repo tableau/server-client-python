@@ -797,8 +797,13 @@ class WorkbookTests(unittest.TestCase):
     def test_delete_extracts_all(self) -> None:
         self.server.version = "3.10"
         self.baseurl = self.server.workbooks.baseurl
+
+        with open(PUBLISH_ASYNC_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
-            m.post(self.baseurl + "/3cc6cd06-89ce-4fdc-b935-5294135d6d42/deleteExtract", status_code=200)
+            m.post(
+                self.baseurl + "/3cc6cd06-89ce-4fdc-b935-5294135d6d42/deleteExtract", status_code=200, text=response_xml
+            )
             self.server.workbooks.delete_extract("3cc6cd06-89ce-4fdc-b935-5294135d6d42")
 
     def test_create_extracts_all(self) -> None:
