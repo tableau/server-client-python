@@ -230,7 +230,11 @@ class SiteItem(object):
         if value is not None and any(
             (self.tier_creator_capacity, self.tier_explorer_capacity, self.tier_viewer_capacity)
         ):
-            raise ValueError("User quota conflicts with setting tiered license levels. Set those to None first.")
+            raise ValueError(
+                "User quota conflicts with setting tiered license levels. "
+                "Use replace_license_tiers_with_user_quota to set those to None, "
+                "and set user_quota to the desired value."
+            )
         self._user_quota = value
 
     @property
@@ -563,6 +567,12 @@ class SiteItem(object):
     @auto_suspend_refresh_enabled.setter
     def auto_suspend_refresh_enabled(self, value: bool):
         self._auto_suspend_refresh_enabled = value
+
+    def replace_license_tiers_with_user_quota(self, value: int) -> None:
+        self.tier_creator_capacity = None
+        self.tier_explorer_capacity = None
+        self.tier_viewer_capacity = None
+        self.user_quota = value
 
     def _parse_common_tags(self, site_xml, ns):
         if not isinstance(site_xml, ET.Element):
