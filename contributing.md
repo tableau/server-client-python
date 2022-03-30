@@ -73,7 +73,7 @@ Our CI runs include a Python lint run, so you should run this locally and fix co
 
 ```shell
 # this will run the formatter without making changes
-black --line-length 120 tableauserverclient --check
+black --line-length 120 tableauserverclient test samples --check
 
 # this will format the directory and code for you
 black --line-length 120 tableauserverclient test samples
