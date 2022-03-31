@@ -94,11 +94,9 @@ class Schedules(Endpoint):
         # There doesn't seem to be a good reason to allow one item of each type?
         if workbook and datasource:
             warnings.warn("Passing in multiple items for add_to_schedule will be deprecated", PendingDeprecationWarning)
-        items: List[Tuple[str,
-                          Union[WorkbookItem, FlowItem, DatasourceItem],
-                          str,
-                          Callable[[Optional[str], str], bytes],
-                          str]] = []
+        items: List[
+            Tuple[str, Union[WorkbookItem, FlowItem, DatasourceItem], str, Callable[[Optional[str], str], bytes], str]
+        ] = []
 
         if workbook is not None:
             if not task_type:
@@ -107,9 +105,7 @@ class Schedules(Endpoint):
         if datasource is not None:
             if not task_type:
                 task_type = TaskItem.Type.ExtractRefresh
-            items.append(
-                (schedule_id, datasource, "datasource", RequestFactory.Schedule.add_datasource_req, task_type)
-            )
+            items.append((schedule_id, datasource, "datasource", RequestFactory.Schedule.add_datasource_req, task_type))
         if flow is not None and not (workbook or datasource):  # Cannot pass a flow with any other type
             if not task_type:
                 task_type = TaskItem.Type.RunFlow
