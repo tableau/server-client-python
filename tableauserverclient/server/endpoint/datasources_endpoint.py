@@ -466,4 +466,4 @@ class Datasources(QuerysetEndpoint):
     # a convenience method
     @api(version="2.8")
     def schedule_extract_refresh(self, schedule_id: int, item: DatasourceItem) -> None:  # actually should return a task
-        return self.server.schedules.add_to_schedule(schedule_id, datasource=item)
+        return self.parent_srv.schedules.add_to_schedule(schedule_id, datasource=item)

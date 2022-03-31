@@ -241,4 +241,4 @@ class Flows(QuerysetEndpoint):
     # a convenience method
     @api(version="3.3")
     def schedule_flow_run(self, schedule_id: int, item: FlowItem) -> None:  # actually should return a task
-        return self.server.schedules.add_to_schedule(schedule_id, flow=item)
+        return self.parent_srv.schedules.add_to_schedule(schedule_id, flow=item)

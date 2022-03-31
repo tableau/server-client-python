@@ -9,13 +9,12 @@ from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, PaginationItem, ScheduleItem, TaskItem
 
 logger = logging.getLogger("tableau.endpoint.schedules")
-# Oh to have a first class Result concept in Python...
 AddResponse = namedtuple("AddResponse", ("result", "error", "warnings", "task_created"))
 OK = AddResponse(result=True, error=None, warnings=None, task_created=None)
 
 if TYPE_CHECKING:
     from ..request_options import RequestOptions
-    from ...models import DatasourceItem, WorkbookItem
+    from ...models import DatasourceItem, WorkbookItem, FlowItem
 
 
 class Schedules(Endpoint):
@@ -95,7 +94,11 @@ class Schedules(Endpoint):
         # There doesn't seem to be a good reason to allow one item of each type?
         if workbook and datasource:
             warnings.warn("Passing in multiple items for add_to_schedule will be deprecated", PendingDeprecationWarning)
-        items = []
+        items: List[Tuple[str,
+                          Union[WorkbookItem, FlowItem, DatasourceItem],
+                          str,
+                          Callable[[Optional[str], str], bytes],
+                          str]] = []
 
         if workbook is not None:
             if not task_type:
@@ -106,7 +109,6 @@ class Schedules(Endpoint):
                 task_type = TaskItem.Type.ExtractRefresh
             items.append(
                 (schedule_id, datasource, "datasource", RequestFactory.Schedule.add_datasource_req, task_type)
-                # type:ignore[arg-type]
             )
         if flow is not None and not (workbook or datasource):  # Cannot pass a flow with any other type
             if not task_type:

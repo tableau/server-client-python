@@ -523,4 +523,4 @@ class Workbooks(QuerysetEndpoint):
     # a convenience method
     @api(version="2.8")
     def schedule_extract_refresh(self, schedule_id: int, item: WorkbookItem) -> None:  # actually should return a task
-        return self.server.schedules.add_to_schedule(schedule_id, workbook=item)
+        return self.parent_srv.schedules.add_to_schedule(schedule_id, workbook=item)
