@@ -28,6 +28,15 @@ from ...filesys_helpers import (
 from ...models.job_item import JobItem
 from ...models.revision_item import RevisionItem
 
+from typing import (
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    TYPE_CHECKING,
+    Union,
+)
+
 if TYPE_CHECKING:
     from ..server import Server
     from ..request_options import RequestOptions
@@ -105,12 +114,13 @@ class Workbooks(QuerysetEndpoint):
         return new_job
 
     # delete all the extracts on 1 workbook
-    @api(version="3.5")
-    def delete_extract(self, workbook_item: WorkbookItem) -> None:
+    @api(version="3.3")
+    def delete_extract(self, workbook_item: WorkbookItem, includeAll: bool = True) -> None:
         id_ = getattr(workbook_item, "id", workbook_item)
         url = "{0}/{1}/deleteExtract".format(self.baseurl, id_)
-        empty_req = RequestFactory.Empty.empty_req()
-        server_response = self.post_request(url, empty_req)
+        datasource_req = RequestFactory.Workbook.embedded_extract_req(includeAll, None)
+        server_response = self.post_request(url, datasource_req)
+        new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     # Delete 1 workbook by id
     @api(version="2.0")

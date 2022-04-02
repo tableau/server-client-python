@@ -22,6 +22,7 @@ from .exceptions import InternalServerError, MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, DatasourceItem, PaginationItem, ConnectionItem, RequestOptions
+from ..query import QuerySet
 from ...filesys_helpers import (
     to_filename,
     make_download_path,
@@ -30,6 +31,20 @@ from ...filesys_helpers import (
 )
 from ...models import ConnectionCredentials, RevisionItem
 from ...models.job_item import JobItem
+from ...models import ConnectionCredentials
+
+io_types = (io.BytesIO, io.BufferedReader)
+
+from pathlib import Path
+from typing import (
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    TYPE_CHECKING,
+    Union,
+)
 
 io_types = (io.BytesIO, io.BufferedReader)
 
