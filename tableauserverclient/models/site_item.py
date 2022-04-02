@@ -228,6 +228,15 @@ class SiteItem(object):
     def user_quota(self, value: Optional[int]) -> None:
         if any((self.tier_creator_capacity, self.tier_explorer_capacity, self.tier_viewer_capacity)):
             raise ValueError("User quota conflicts with setting tiered license levels. Set those to None first.")
+        if value is not None and any(
+            (self.tier_creator_capacity, self.tier_explorer_capacity, self.tier_viewer_capacity)
+        ):
+            raise ValueError(
+                "User quota conflicts with setting tiered license levels. "
+                "Use replace_license_tiers_with_user_quota to set those to None, "
+                "and set user_quota to the desired value."
+            )
+>>>>>>> development
         self._user_quota = value
 
     @property
@@ -561,6 +570,12 @@ class SiteItem(object):
     def auto_suspend_refresh_enabled(self, value: bool):
         self._auto_suspend_refresh_enabled = value
 
+    def replace_license_tiers_with_user_quota(self, value: int) -> None:
+        self.tier_creator_capacity = None
+        self.tier_explorer_capacity = None
+        self.tier_viewer_capacity = None
+        self.user_quota = value
+
     def _parse_common_tags(self, site_xml, ns):
         if not isinstance(site_xml, ET.Element):
             site_xml = fromstring(site_xml).find(".//t:site", namespaces=ns)
@@ -747,7 +762,11 @@ class SiteItem(object):
         if revision_history_enabled is not None:
             self._revision_history_enabled = revision_history_enabled
         if user_quota:
-            self.user_quota = user_quota
+            try:
+                self.user_quota = user_quota
+            except ValueError:
+                warnings.warn("Tiered license level is set. Setting user_quota to None.")
+                self.user_quota = None
         if storage_quota:
             self.storage_quota = storage_quota
         if revision_limit:
