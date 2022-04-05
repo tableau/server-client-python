@@ -34,6 +34,7 @@ def usage(args):
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--workbook", "-w")
     group.add_argument("--datasource", "-d")
+    group.add_argument("--flow", "-f")
     parser.add_argument("schedule")
 
     return parser.parse_args(args)
@@ -61,6 +62,13 @@ def get_datasource_by_name(server, name):
     return datasources.pop()
 
 
+def get_flow_by_name(server, name):
+    request_filter = make_filter(Name=name)
+    flows, _ = server.flows.get(request_filter)
+    assert len(flows) == 1
+    return flows.pop()
+
+
 def get_schedule_by_name(server, name):
     schedules = [x for x in TSC.Pager(server.schedules) if x.name == name]
     assert len(schedules) == 1
@@ -82,8 +90,13 @@ def run(args):
     with server.auth.sign_in(tableau_auth):
         if args.workbook:
             item = get_workbook_by_name(server, args.workbook)
-        else:
+        elif args.datasource:
             item = get_datasource_by_name(server, args.datasource)
+        elif args.flow:
+            item = get_flow_by_name(server, args.flow)
+        else:
+            print("A scheduleable item must be included")
+            return
         schedule = get_schedule_by_name(server, args.schedule)
 
         assign_to_schedule(server, item, schedule)

@@ -9,6 +9,7 @@ class TaskItem(object):
     class Type:
         ExtractRefresh = "extractRefresh"
         DataAcceleration = "dataAcceleration"
+        RunFlow = "runFlow"
 
     # This mapping is used to convert task type returned from server
     _TASK_TYPE_MAPPING = {

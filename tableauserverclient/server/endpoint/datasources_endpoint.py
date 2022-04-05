@@ -475,5 +475,10 @@ class Datasources(QuerysetEndpoint):
 
         self.delete_request(url)
         logger.info(
-            "Deleted single datasource revsision (ID: {0}) (Revision: {1})".format(datasource_id, revision_number)
+            "Deleted single datasource revision (ID: {0}) (Revision: {1})".format(datasource_id, revision_number)
         )
+
+    # a convenience method
+    @api(version="2.8")
+    def schedule_extract_refresh(self, schedule_id: int, item: DatasourceItem) -> None:  # actually should return a task
+        return self.parent_srv.schedules.add_to_schedule(schedule_id, datasource=item)

@@ -1,20 +1,20 @@
 import copy
 import logging
+import warnings
 from collections import namedtuple
 from typing import TYPE_CHECKING, Callable, List, Optional, Tuple, Union
 
-from .endpoint import Endpoint, api
+from .endpoint import Endpoint, api, parameter_added_in
 from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, PaginationItem, ScheduleItem, TaskItem
 
 logger = logging.getLogger("tableau.endpoint.schedules")
-# Oh to have a first class Result concept in Python...
 AddResponse = namedtuple("AddResponse", ("result", "error", "warnings", "task_created"))
 OK = AddResponse(result=True, error=None, warnings=None, task_created=None)
 
 if TYPE_CHECKING:
     from ..request_options import RequestOptions
-    from ...models import DatasourceItem, WorkbookItem
+    from ...models import DatasourceItem, WorkbookItem, FlowItem
 
 
 class Schedules(Endpoint):
@@ -81,54 +81,71 @@ class Schedules(Endpoint):
         return new_schedule
 
     @api(version="2.8")
+    @parameter_added_in(flow="3.3")
     def add_to_schedule(
         self,
         schedule_id: str,
         workbook: "WorkbookItem" = None,
         datasource: "DatasourceItem" = None,
-        task_type: str = TaskItem.Type.ExtractRefresh,
+        flow: "FlowItem" = None,
+        task_type: str = None,
     ) -> List[AddResponse]:
-        def add_to(
-            resource: Union["DatasourceItem", "WorkbookItem"],
-            type_: str,
-            req_factory: Callable[
-                [
-                    str,
-                    str,
-                ],
-                bytes,
-            ],
-        ) -> AddResponse:
-            id_ = resource.id
-            url = "{0}/{1}/{2}s".format(self.siteurl, schedule_id, type_)
-            add_req = req_factory(id_, task_type=task_type)  # type: ignore[call-arg, arg-type]
-            response = self.put_request(url, add_req)
 
-            error, warnings, task_created = ScheduleItem.parse_add_to_schedule_response(
-                response, self.parent_srv.namespace
-            )
-            if task_created:
-                logger.info("Added {} to {} to schedule {}".format(type_, id_, schedule_id))
-
-            if error is not None or warnings is not None:
-                return AddResponse(
-                    result=False,
-                    error=error,
-                    warnings=warnings,
-                    task_created=task_created,
-                )
-            else:
-                return OK
-
-        items = []
+        # There doesn't seem to be a good reason to allow one item of each type?
+        if workbook and datasource:
+            warnings.warn("Passing in multiple items for add_to_schedule will be deprecated", PendingDeprecationWarning)
+        items: List[
+            Tuple[str, Union[WorkbookItem, FlowItem, DatasourceItem], str, Callable[[Optional[str], str], bytes], str]
+        ] = []
 
         if workbook is not None:
-            items.append((workbook, "workbook", RequestFactory.Schedule.add_workbook_req))
+            if not task_type:
+                task_type = TaskItem.Type.ExtractRefresh
+            items.append((schedule_id, workbook, "workbook", RequestFactory.Schedule.add_workbook_req, task_type))
         if datasource is not None:
+            if not task_type:
+                task_type = TaskItem.Type.ExtractRefresh
+            items.append((schedule_id, datasource, "datasource", RequestFactory.Schedule.add_datasource_req, task_type))
+        if flow is not None and not (workbook or datasource):  # Cannot pass a flow with any other type
+            if not task_type:
+                task_type = TaskItem.Type.RunFlow
             items.append(
-                (datasource, "datasource", RequestFactory.Schedule.add_datasource_req)  # type:ignore[arg-type]
-            )
+                (schedule_id, flow, "flow", RequestFactory.Schedule.add_flow_req, task_type)
+            )  # type:ignore[arg-type]
 
-        results = (add_to(*x) for x in items)
+        results = (self._add_to(*x) for x in items)
         # list() is needed for python 3.x compatibility
         return list(filter(lambda x: not x.result, results))  # type:ignore[arg-type]
+
+    def _add_to(
+        self,
+        schedule_id,
+        resource: Union["DatasourceItem", "WorkbookItem", "FlowItem"],
+        type_: str,
+        req_factory: Callable[
+            [
+                str,
+                str,
+            ],
+            bytes,
+        ],
+        item_task_type,
+    ) -> AddResponse:
+        id_ = resource.id
+        url = "{0}/{1}/{2}s".format(self.siteurl, schedule_id, type_)
+        add_req = req_factory(id_, task_type=item_task_type)  # type: ignore[call-arg, arg-type]
+        response = self.put_request(url, add_req)
+
+        error, warnings, task_created = ScheduleItem.parse_add_to_schedule_response(response, self.parent_srv.namespace)
+        if task_created:
+            logger.info("Added {} to {} to schedule {}".format(type_, id_, schedule_id))
+
+        if error is not None or warnings is not None:
+            return AddResponse(
+                result=False,
+                error=error,
+                warnings=warnings,
+                task_created=task_created,
+            )
+        else:
+            return OK

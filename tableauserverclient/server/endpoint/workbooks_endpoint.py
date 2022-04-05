@@ -528,4 +528,9 @@ class Workbooks(QuerysetEndpoint):
         url = "/".join([self.baseurl, workbook_id, "revisions", revision_number])
 
         self.delete_request(url)
-        logger.info("Deleted single workbook revsision (ID: {0}) (Revision: {1})".format(workbook_id, revision_number))
+        logger.info("Deleted single workbook revision (ID: {0}) (Revision: {1})".format(workbook_id, revision_number))
+
+    # a convenience method
+    @api(version="2.8")
+    def schedule_extract_refresh(self, schedule_id: int, item: WorkbookItem) -> None:  # actually should return a task
+        return self.parent_srv.schedules.add_to_schedule(schedule_id, workbook=item)

@@ -20,9 +20,11 @@ UPDATE_XML = os.path.join(TEST_ASSET_DIR, "schedule_update.xml")
 ADD_WORKBOOK_TO_SCHEDULE = os.path.join(TEST_ASSET_DIR, "schedule_add_workbook.xml")
 ADD_WORKBOOK_TO_SCHEDULE_WITH_WARNINGS = os.path.join(TEST_ASSET_DIR, "schedule_add_workbook_with_warnings.xml")
 ADD_DATASOURCE_TO_SCHEDULE = os.path.join(TEST_ASSET_DIR, "schedule_add_datasource.xml")
+ADD_FLOW_TO_SCHEDULE = os.path.join(TEST_ASSET_DIR, "schedule_add_flow.xml")
 
 WORKBOOK_GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, "workbook_get_by_id.xml")
 DATASOURCE_GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, "datasource_get_by_id.xml")
+FLOW_GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, "flow_get_by_id.xml")
 
 
 class ScheduleTests(unittest.TestCase):
@@ -313,4 +315,19 @@ class ScheduleTests(unittest.TestCase):
             m.put(baseurl + "/foo/datasources", text=add_datasource_response)
             datasource = self.server.datasources.get_by_id("bar")
             result = self.server.schedules.add_to_schedule("foo", datasource=datasource)
+        self.assertEqual(0, len(result), "Added properly")
+
+    def test_add_flow(self) -> None:
+        self.server.version = "3.3"
+        baseurl = "{}/sites/{}/schedules".format(self.server.baseurl, self.server.site_id)
+
+        with open(FLOW_GET_BY_ID_XML, "rb") as f:
+            flow_response = f.read().decode("utf-8")
+        with open(ADD_FLOW_TO_SCHEDULE, "rb") as f:
+            add_flow_response = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            m.get(self.server.flows.baseurl + "/bar", text=flow_response)
+            m.put(baseurl + "/foo/flows", text=flow_response)
+            flow = self.server.flows.get_by_id("bar")
+            result = self.server.schedules.add_to_schedule("foo", flow=flow)
         self.assertEqual(0, len(result), "Added properly")

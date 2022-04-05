@@ -557,6 +557,9 @@ class ScheduleRequest(object):
     def add_datasource_req(self, id_: Optional[str], task_type: str = TaskItem.Type.ExtractRefresh) -> bytes:
         return self._add_to_req(id_, "datasource", task_type)
 
+    def add_flow_req(self, id_: Optional[str], task_type: str = TaskItem.Type.RunFlow) -> bytes:
+        return self._add_to_req(id_, "flow", task_type)
+
 
 class SiteRequest(object):
     def update_req(self, site_item: "SiteItem"):

@@ -237,3 +237,8 @@ class Flows(QuerysetEndpoint):
     @api(version="3.5")
     def delete_dqw(self, item: FlowItem) -> None:
         self._data_quality_warnings.clear(item)
+
+    # a convenience method
+    @api(version="3.3")
+    def schedule_flow_run(self, schedule_id: int, item: FlowItem) -> None:  # actually should return a task
+        return self.parent_srv.schedules.add_to_schedule(schedule_id, flow=item)
