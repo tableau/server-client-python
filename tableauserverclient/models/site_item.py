@@ -1,4 +1,3 @@
-from multiprocessing.sharedctypes import Value
 import warnings
 import xml.etree.ElementTree as ET
 
