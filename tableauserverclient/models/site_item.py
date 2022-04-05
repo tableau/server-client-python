@@ -226,8 +226,6 @@ class SiteItem(object):
 
     @user_quota.setter
     def user_quota(self, value: Optional[int]) -> None:
-        if any((self.tier_creator_capacity, self.tier_explorer_capacity, self.tier_viewer_capacity)):
-            raise ValueError("User quota conflicts with setting tiered license levels. Set those to None first.")
         if value is not None and any(
             (self.tier_creator_capacity, self.tier_explorer_capacity, self.tier_viewer_capacity)
         ):
@@ -236,7 +234,6 @@ class SiteItem(object):
                 "Use replace_license_tiers_with_user_quota to set those to None, "
                 "and set user_quota to the desired value."
             )
->>>>>>> development
         self._user_quota = value
 
     @property
