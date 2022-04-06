@@ -1,3 +1,13 @@
+
+## 0.18.0 (6 April 2022)    
+* Switched to using defused_xml for xml attack protection
+* added linting and type hints
+* improve experience with self-signed certificates/invalid ssl
+* updated samples
+* new item types: metrics, revisions for datasources and workbooks
+* features: support adding flows to schedules, exporting workbooks to powerpoint
+* fixes: delete extracts
+
 ## 0.17.0 (20 October 2021)
 * Added support for accepting parameters for post request of the metadata api (#850)
 * Fixed jobs.get_by_id(job_id) example & reference docs (#867, #868) 
