@@ -58,6 +58,7 @@ logger = logging.getLogger("tableau.endpoint.datasources")
 if TYPE_CHECKING:
     from ..server import Server
     from ...models import PermissionsRule
+    from .schedules_endpoint import AddResponse
 
 FilePath = Union[str, os.PathLike]
 FileObject = Union[io.BufferedReader, io.BytesIO]
@@ -480,5 +481,7 @@ class Datasources(QuerysetEndpoint):
 
     # a convenience method
     @api(version="2.8")
-    def schedule_extract_refresh(self, schedule_id: int, item: DatasourceItem) -> None:  # actually should return a task
+    def schedule_extract_refresh(
+        self, schedule_id: str, item: DatasourceItem
+    ) -> List["AddResponse"]:  # actually should return a task
         return self.parent_srv.schedules.add_to_schedule(schedule_id, datasource=item)

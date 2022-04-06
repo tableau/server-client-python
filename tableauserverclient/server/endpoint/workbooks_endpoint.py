@@ -42,6 +42,7 @@ if TYPE_CHECKING:
     from ..request_options import RequestOptions
     from .. import DatasourceItem
     from ...models.connection_credentials import ConnectionCredentials
+    from .schedules_endpoint import AddResponse
 
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
@@ -532,5 +533,7 @@ class Workbooks(QuerysetEndpoint):
 
     # a convenience method
     @api(version="2.8")
-    def schedule_extract_refresh(self, schedule_id: int, item: WorkbookItem) -> None:  # actually should return a task
+    def schedule_extract_refresh(
+        self, schedule_id: str, item: WorkbookItem
+    ) -> List["AddResponse"]:  # actually should return a task
         return self.parent_srv.schedules.add_to_schedule(schedule_id, workbook=item)

@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from .. import DQWItem
     from ..request_options import RequestOptions
     from ...models.permissions_item import PermissionsRule
+    from .schedules_endpoint import AddResponse
 
 
 FilePath = Union[str, os.PathLike]
@@ -240,5 +241,7 @@ class Flows(QuerysetEndpoint):
 
     # a convenience method
     @api(version="3.3")
-    def schedule_flow_run(self, schedule_id: int, item: FlowItem) -> None:  # actually should return a task
+    def schedule_flow_run(
+        self, schedule_id: str, item: FlowItem
+    ) -> List["AddResponse"]:  # actually should return a task
         return self.parent_srv.schedules.add_to_schedule(schedule_id, flow=item)
