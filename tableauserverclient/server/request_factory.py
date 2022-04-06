@@ -1,12 +1,23 @@
+from os import name
 import xml.etree.ElementTree as ET
+from typing import Any, Dict, List, Optional, Tuple, Iterable
 
 from requests.packages.urllib3.fields import RequestField
 from requests.packages.urllib3.filepost import encode_multipart_formdata
 
+from tableauserverclient.models.metric_item import MetricItem
+
+from ..models import ConnectionItem
+from ..models import DataAlertItem
+from ..models import FlowItem
+from ..models import ProjectItem
+from ..models import SiteItem
+from ..models import SubscriptionItem
 from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteItem
+from ..models import WebhookItem
 
 
-def _add_multipart(parts):
+def _add_multipart(parts: Dict) -> Tuple[Any, str]:
     mime_multipart_parts = list()
     for name, (filename, data, content_type) in parts.items():
         multipart_part = RequestField(name=name, data=data, filename=filename)
@@ -87,22 +98,26 @@ class ColumnRequest(object):
 
 
 class DataAlertRequest(object):
-    def add_user_to_alert(self, alert_item, user_id):
+    def add_user_to_alert(self, alert_item: "DataAlertItem", user_id: str) -> bytes:
         xml_request = ET.Element("tsRequest")
         user_element = ET.SubElement(xml_request, "user")
         user_element.attrib["id"] = user_id
 
         return ET.tostring(xml_request)
 
-    def update_req(self, alert_item):
+    def update_req(self, alert_item: "DataAlertItem") -> bytes:
         xml_request = ET.Element("tsRequest")
         dataAlert_element = ET.SubElement(xml_request, "dataAlert")
-        dataAlert_element.attrib["subject"] = alert_item.subject
-        dataAlert_element.attrib["frequency"] = alert_item.frequency.lower()
-        dataAlert_element.attrib["public"] = alert_item.public
+        if alert_item.subject is not None:
+            dataAlert_element.attrib["subject"] = alert_item.subject
+        if alert_item.frequency is not None:
+            dataAlert_element.attrib["frequency"] = alert_item.frequency.lower()
+        if alert_item.public is not None:
+            dataAlert_element.attrib["public"] = str(alert_item.public).lower()
 
         owner = ET.SubElement(dataAlert_element, "owner")
-        owner.attrib["id"] = alert_item.owner_id
+        if alert_item.owner_id is not None:
+            owner.attrib["id"] = alert_item.owner_id
 
         return ET.tostring(xml_request)
 
@@ -232,38 +247,8 @@ class DQWRequest(object):
         return ET.tostring(xml_request)
 
 
-class DQWRequest(object):
-    def add_req(self, dqw_item):
-        xml_request = ET.Element("tsRequest")
-        dqw_element = ET.SubElement(xml_request, "dataQualityWarning")
-
-        dqw_element.attrib["isActive"] = str(dqw_item.active).lower()
-        dqw_element.attrib["isSevere"] = str(dqw_item.severe).lower()
-
-        dqw_element.attrib["type"] = dqw_item.warning_type
-
-        if dqw_item.message:
-            dqw_element.attrib["message"] = str(dqw_item.message)
-
-        return ET.tostring(xml_request)
-
-    def update_req(self, database_item):
-        xml_request = ET.Element("tsRequest")
-        dqw_element = ET.SubElement(xml_request, "dataQualityWarning")
-
-        dqw_element.attrib["isActive"] = str(dqw_item.active).lower()
-        dqw_element.attrib["isSevere"] = str(dqw_item.severe).lower()
-
-        dqw_element.attrib["type"] = dqw_item.warning_type
-
-        if dqw_item.message:
-            dqw_element.attrib["message"] = str(dqw_item.message)
-
-        return ET.tostring(xml_request)
-
-
 class FavoriteRequest(object):
-    def _add_to_req(self, id_, target_type, label):
+    def _add_to_req(self, id_: str, target_type: str, label: str) -> bytes:
         """
         <favorite label="...">
         <target_type id="..." />
@@ -277,16 +262,39 @@ class FavoriteRequest(object):
 
         return ET.tostring(xml_request)
 
-    def add_datasource_req(self, id_, name):
+    def add_datasource_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
+        if id_ is None:
+            raise ValueError("id must exist to add to favorites")
+        if name is None:
+            raise ValueError("Name must exist to add to favorites.")
         return self._add_to_req(id_, FavoriteItem.Type.Datasource, name)
 
-    def add_project_req(self, id_, name):
+    def add_flow_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
+        if id_ is None:
+            raise ValueError("id must exist to add to favorites")
+        if name is None:
+            raise ValueError("Name must exist to add to favorites.")
+        return self._add_to_req(id_, FavoriteItem.Type.Flow, name)
+
+    def add_project_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
+        if id_ is None:
+            raise ValueError("id must exist to add to favorites")
+        if name is None:
+            raise ValueError("Name must exist to add to favorites.")
         return self._add_to_req(id_, FavoriteItem.Type.Project, name)
 
-    def add_view_req(self, id_, name):
+    def add_view_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
+        if id_ is None:
+            raise ValueError("id must exist to add to favorites")
+        if name is None:
+            raise ValueError("Name must exist to add to favorites.")
         return self._add_to_req(id_, FavoriteItem.Type.View, name)
 
-    def add_workbook_req(self, id_, name):
+    def add_workbook_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
+        if id_ is None:
+            raise ValueError("id must exist to add to favorites")
+        if name is None:
+            raise ValueError("Name must exist to add to favorites.")
         return self._add_to_req(id_, FavoriteItem.Type.Workbook, name)
 
 
@@ -300,10 +308,11 @@ class FileuploadRequest(object):
 
 
 class FlowRequest(object):
-    def _generate_xml(self, flow_item, connections=None):
+    def _generate_xml(self, flow_item: "FlowItem", connections: Optional[List["ConnectionItem"]] = None) -> bytes:
         xml_request = ET.Element("tsRequest")
         flow_element = ET.SubElement(xml_request, "flow")
-        flow_element.attrib["name"] = flow_item.name
+        if flow_item.name is not None:
+            flow_element.attrib["name"] = flow_item.name
         project_element = ET.SubElement(flow_element, "project")
         project_element.attrib["id"] = flow_item.project_id
 
@@ -313,7 +322,7 @@ class FlowRequest(object):
                 _add_connections_element(connections_element, connection)
         return ET.tostring(xml_request)
 
-    def update_req(self, flow_item):
+    def update_req(self, flow_item: "FlowItem") -> bytes:
         xml_request = ET.Element("tsRequest")
         flow_element = ET.SubElement(xml_request, "flow")
         if flow_item.project_id:
@@ -325,7 +334,13 @@ class FlowRequest(object):
 
         return ET.tostring(xml_request)
 
-    def publish_req(self, flow_item, filename, file_contents, connections=None):
+    def publish_req(
+        self,
+        flow_item: "FlowItem",
+        filename: str,
+        file_contents: bytes,
+        connections: Optional[List["ConnectionItem"]] = None,
+    ) -> Tuple[Any, str]:
         xml_request = self._generate_xml(flow_item, connections)
 
         parts = {
@@ -334,7 +349,7 @@ class FlowRequest(object):
         }
         return _add_multipart(parts)
 
-    def publish_req_chunked(self, flow_item, connections=None):
+    def publish_req_chunked(self, flow_item, connections=None) -> Tuple[Any, str]:
         xml_request = self._generate_xml(flow_item, connections)
 
         parts = {"request_payload": ("", xml_request, "text/xml")}
@@ -342,24 +357,30 @@ class FlowRequest(object):
 
 
 class GroupRequest(object):
-    def add_user_req(self, user_id):
+    def add_user_req(self, user_id: str) -> bytes:
         xml_request = ET.Element("tsRequest")
         user_element = ET.SubElement(xml_request, "user")
         user_element.attrib["id"] = user_id
         return ET.tostring(xml_request)
 
-    def create_local_req(self, group_item):
+    def create_local_req(self, group_item: GroupItem) -> bytes:
         xml_request = ET.Element("tsRequest")
         group_element = ET.SubElement(xml_request, "group")
-        group_element.attrib["name"] = group_item.name
+        if group_item.name is not None:
+            group_element.attrib["name"] = group_item.name
+        else:
+            raise ValueError("Group name must be populated")
         if group_item.minimum_site_role is not None:
             group_element.attrib["minimumSiteRole"] = group_item.minimum_site_role
         return ET.tostring(xml_request)
 
-    def create_ad_req(self, group_item):
+    def create_ad_req(self, group_item: GroupItem) -> bytes:
         xml_request = ET.Element("tsRequest")
         group_element = ET.SubElement(xml_request, "group")
-        group_element.attrib["name"] = group_item.name
+        if group_item.name is not None:
+            group_element.attrib["name"] = group_item.name
+        else:
+            raise ValueError("Group name must be populated")
         import_element = ET.SubElement(group_element, "import")
         import_element.attrib["source"] = "ActiveDirectory"
         if group_item.domain_name is None:
@@ -373,7 +394,7 @@ class GroupRequest(object):
             import_element.attrib["siteRole"] = group_item.minimum_site_role
         return ET.tostring(xml_request)
 
-    def update_req(self, group_item, default_site_role=None):
+    def update_req(self, group_item: GroupItem, default_site_role: Optional[str] = None) -> bytes:
         # (1/8/2021): Deprecated starting v0.15
         if default_site_role is not None:
             import warnings
@@ -388,13 +409,20 @@ class GroupRequest(object):
 
         xml_request = ET.Element("tsRequest")
         group_element = ET.SubElement(xml_request, "group")
-        group_element.attrib["name"] = group_item.name
+
+        if group_item.name is not None:
+            group_element.attrib["name"] = group_item.name
+        else:
+            raise ValueError("Group name must be populated")
         if group_item.domain_name is not None and group_item.domain_name != "local":
             # Import element is only accepted in the request for AD groups
             import_element = ET.SubElement(group_element, "import")
             import_element.attrib["source"] = "ActiveDirectory"
             import_element.attrib["domainName"] = group_item.domain_name
-            import_element.attrib["siteRole"] = group_item.minimum_site_role
+            if isinstance(group_item.minimum_site_role, str):
+                import_element.attrib["siteRole"] = group_item.minimum_site_role
+            else:
+                raise ValueError("Minimum site role must be provided.")
             if group_item.license_mode is not None:
                 import_element.attrib["grantLicenseMode"] = group_item.license_mode
         else:
@@ -406,7 +434,7 @@ class GroupRequest(object):
 
 
 class PermissionRequest(object):
-    def add_req(self, rules):
+    def add_req(self, rules: Iterable[PermissionsRule]) -> bytes:
         xml_request = ET.Element("tsRequest")
         permissions_element = ET.SubElement(xml_request, "permissions")
 
@@ -428,7 +456,7 @@ class PermissionRequest(object):
 
 
 class ProjectRequest(object):
-    def update_req(self, project_item):
+    def update_req(self, project_item: "ProjectItem") -> bytes:
         xml_request = ET.Element("tsRequest")
         project_element = ET.SubElement(xml_request, "project")
         if project_item.name:
@@ -441,7 +469,7 @@ class ProjectRequest(object):
             project_element.attrib["parentProjectId"] = project_item.parent_id
         return ET.tostring(xml_request)
 
-    def create_req(self, project_item):
+    def create_req(self, project_item: "ProjectItem") -> bytes:
         xml_request = ET.Element("tsRequest")
         project_element = ET.SubElement(xml_request, "project")
         project_element.attrib["name"] = project_item.name
@@ -504,7 +532,7 @@ class ScheduleRequest(object):
                     single_interval_element.attrib[expression] = value
         return ET.tostring(xml_request)
 
-    def _add_to_req(self, id_, target_type, task_type=TaskItem.Type.ExtractRefresh):
+    def _add_to_req(self, id_: Optional[str], target_type: str, task_type: str = TaskItem.Type.ExtractRefresh) -> bytes:
         """
         <task>
           <target_type>
@@ -513,6 +541,8 @@ class ScheduleRequest(object):
         </task>
 
         """
+        if not isinstance(id_, str):
+            raise ValueError(f"id_ should be a string, reeceived: {type(id_)}")
         xml_request = ET.Element("tsRequest")
         task_element = ET.SubElement(xml_request, "task")
         task = ET.SubElement(task_element, task_type)
@@ -521,15 +551,18 @@ class ScheduleRequest(object):
 
         return ET.tostring(xml_request)
 
-    def add_workbook_req(self, id_, task_type=TaskItem.Type.ExtractRefresh):
+    def add_workbook_req(self, id_: Optional[str], task_type: str = TaskItem.Type.ExtractRefresh) -> bytes:
         return self._add_to_req(id_, "workbook", task_type)
 
-    def add_datasource_req(self, id_, task_type=TaskItem.Type.ExtractRefresh):
+    def add_datasource_req(self, id_: Optional[str], task_type: str = TaskItem.Type.ExtractRefresh) -> bytes:
         return self._add_to_req(id_, "datasource", task_type)
+
+    def add_flow_req(self, id_: Optional[str], task_type: str = TaskItem.Type.RunFlow) -> bytes:
+        return self._add_to_req(id_, "flow", task_type)
 
 
 class SiteRequest(object):
-    def update_req(self, site_item):
+    def update_req(self, site_item: "SiteItem"):
         xml_request = ET.Element("tsRequest")
         site_element = ET.SubElement(xml_request, "site")
         if site_item.name:
@@ -635,7 +668,7 @@ class SiteRequest(object):
 
         return ET.tostring(xml_request)
 
-    def create_req(self, site_item):
+    def create_req(self, site_item: "SiteItem"):
         xml_request = ET.Element("tsRequest")
         site_element = ET.SubElement(xml_request, "site")
         site_element.attrib["name"] = site_item.name
@@ -769,7 +802,7 @@ class TagRequest(object):
 
 
 class UserRequest(object):
-    def update_req(self, user_item, password):
+    def update_req(self, user_item: UserItem, password: Optional[str]) -> bytes:
         xml_request = ET.Element("tsRequest")
         user_element = ET.SubElement(xml_request, "user")
         if user_item.fullname:
@@ -785,11 +818,18 @@ class UserRequest(object):
             user_element.attrib["password"] = password
         return ET.tostring(xml_request)
 
-    def add_req(self, user_item):
+    def add_req(self, user_item: UserItem) -> bytes:
         xml_request = ET.Element("tsRequest")
         user_element = ET.SubElement(xml_request, "user")
-        user_element.attrib["name"] = user_item.name
-        user_element.attrib["siteRole"] = user_item.site_role
+        if isinstance(user_item.name, str):
+            user_element.attrib["name"] = user_item.name
+        else:
+            raise ValueError(f"{user_item} missing name.")
+        if isinstance(user_item.site_role, str):
+            user_element.attrib["siteRole"] = user_item.site_role
+        else:
+            raise ValueError(f"{user_item} must have site role populated.")
+
         if user_item.auth_setting:
             user_element.attrib["authSetting"] = user_item.auth_setting
         return ET.tostring(xml_request)
@@ -823,8 +863,19 @@ class WorkbookRequest(object):
                 _add_connections_element(connections_element, connection)
 
         if hidden_views is not None:
+            import warnings
+
+            warnings.simplefilter("always", DeprecationWarning)
+            warnings.warn(
+                "the hidden_views parameter should now be set on the workbook directly",
+                DeprecationWarning,
+            )
+            if workbook_item.hidden_views is None:
+                workbook_item.hidden_views = hidden_views
+
+        if workbook_item.hidden_views is not None:
             views_element = ET.SubElement(workbook_element, "views")
-            for view_name in hidden_views:
+            for view_name in workbook_item.hidden_views:
                 _add_hiddenview_element(views_element, view_name)
 
         return ET.tostring(xml_request)
@@ -930,7 +981,7 @@ class TaskRequest(object):
 
 class SubscriptionRequest(object):
     @_tsrequest_wrapped
-    def create_req(self, xml_request, subscription_item):
+    def create_req(self, xml_request: ET.Element, subscription_item: "SubscriptionItem") -> bytes:
         subscription_element = ET.SubElement(xml_request, "subscription")
 
         # Main attributes
@@ -963,7 +1014,7 @@ class SubscriptionRequest(object):
         return ET.tostring(xml_request)
 
     @_tsrequest_wrapped
-    def update_req(self, xml_request, subscription_item):
+    def update_req(self, xml_request: ET.Element, subscription_item: "SubscriptionItem") -> bytes:
         subscription = ET.SubElement(xml_request, "subscription")
 
         # Main attributes
@@ -1000,17 +1051,46 @@ class EmptyRequest(object):
 
 class WebhookRequest(object):
     @_tsrequest_wrapped
-    def create_req(self, xml_request, webhook_item):
+    def create_req(self, xml_request: ET.Element, webhook_item: "WebhookItem") -> bytes:
         webhook = ET.SubElement(xml_request, "webhook")
-        webhook.attrib["name"] = webhook_item.name
+        if isinstance(webhook_item.name, str):
+            webhook.attrib["name"] = webhook_item.name
+        else:
+            raise ValueError(f"Name must be provided for {webhook_item}")
 
         source = ET.SubElement(webhook, "webhook-source")
-        ET.SubElement(source, webhook_item._event)
+        if isinstance(webhook_item._event, str):
+            ET.SubElement(source, webhook_item._event)
+        else:
+            raise ValueError(f"_event for Webhook must be provided. {webhook_item}")
 
         destination = ET.SubElement(webhook, "webhook-destination")
         post = ET.SubElement(destination, "webhook-destination-http")
         post.attrib["method"] = "POST"
-        post.attrib["url"] = webhook_item.url
+        if isinstance(webhook_item.url, str):
+            post.attrib["url"] = webhook_item.url
+        else:
+            raise ValueError(f"URL must be provided on {webhook_item}")
+
+        return ET.tostring(xml_request)
+
+
+class MetricRequest:
+    @_tsrequest_wrapped
+    def update_req(self, xml_request: ET.Element, metric_item: MetricItem) -> bytes:
+        metric_element = ET.SubElement(xml_request, "metric")
+        if metric_item.id is not None:
+            metric_element.attrib["id"] = metric_item.id
+        if metric_item.name is not None:
+            metric_element.attrib["name"] = metric_item.name
+        if metric_item.description is not None:
+            metric_element.attrib["description"] = metric_item.description
+        if metric_item.suspended is not None:
+            metric_element.attrib["suspended"] = str(metric_item.suspended).lower()
+        if metric_item.project_id is not None:
+            ET.SubElement(metric_element, "project", {"id": metric_item.project_id})
+        if metric_item.owner_id is not None:
+            ET.SubElement(metric_element, "owner", {"id": metric_item.owner_id})
 
         return ET.tostring(xml_request)
 
@@ -1028,6 +1108,7 @@ class RequestFactory(object):
     Fileupload = FileuploadRequest()
     Flow = FlowRequest()
     Group = GroupRequest()
+    Metric = MetricRequest()
     Permission = PermissionRequest()
     Project = ProjectRequest()
     Schedule = ScheduleRequest()

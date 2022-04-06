@@ -1,4 +1,9 @@
+import copy
 import xml.etree.ElementTree as ET
+from typing import Dict, List, Optional, Set, Tuple, TYPE_CHECKING
+
+from defusedxml.ElementTree import fromstring
+
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import (
     property_not_nullable,
@@ -7,7 +12,19 @@ from .property_decorators import (
 )
 from .tag_item import TagItem
 from ..datetime_helpers import parse_datetime
-import copy
+
+if TYPE_CHECKING:
+    from .permissions_item import PermissionsRule
+    from .connection_item import ConnectionItem
+    from .revision_item import RevisionItem
+    import datetime
+
+from typing import Dict, List, Optional, Set, Tuple, TYPE_CHECKING, Union
+
+if TYPE_CHECKING:
+    from .permissions_item import PermissionsRule
+    from .connection_item import ConnectionItem
+    import datetime
 
 
 class DatasourceItem(object):
@@ -16,79 +33,82 @@ class DatasourceItem(object):
         Disabled = "Disabled"
         SiteDefault = "SiteDefault"
 
-    def __init__(self, project_id, name=None):
+    def __init__(self, project_id: str, name: str = None) -> None:
         self._ask_data_enablement = None
         self._certified = None
         self._certification_note = None
         self._connections = None
-        self._content_url = None
+        self._content_url: Optional[str] = None
         self._created_at = None
         self._datasource_type = None
         self._description = None
         self._encrypt_extracts = None
         self._has_extracts = None
-        self._id = None
-        self._initial_tags = set()
-        self._project_name = None
+        self._id: Optional[str] = None
+        self._initial_tags: Set = set()
+        self._project_name: Optional[str] = None
+        self._revisions = None
         self._updated_at = None
         self._use_remote_query_agent = None
         self._webpage_url = None
         self.description = None
         self.name = name
-        self.owner_id = None
+        self.owner_id: Optional[str] = None
         self.project_id = project_id
-        self.tags = set()
+        self.tags: Set[str] = set()
 
         self._permissions = None
         self._data_quality_warnings = None
 
+        return None
+
     @property
-    def ask_data_enablement(self):
+    def ask_data_enablement(self) -> Optional["DatasourceItem.AskDataEnablement"]:
         return self._ask_data_enablement
 
     @ask_data_enablement.setter
     @property_is_enum(AskDataEnablement)
-    def ask_data_enablement(self, value):
+    def ask_data_enablement(self, value: Optional["DatasourceItem.AskDataEnablement"]):
         self._ask_data_enablement = value
 
     @property
-    def connections(self):
+    def connections(self) -> Optional[List["ConnectionItem"]]:
         if self._connections is None:
             error = "Datasource item must be populated with connections first."
             raise UnpopulatedPropertyError(error)
         return self._connections()
 
     @property
-    def permissions(self):
+    def permissions(self) -> Optional[List["PermissionsRule"]]:
         if self._permissions is None:
             error = "Project item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
         return self._permissions()
 
     @property
-    def content_url(self):
+    def content_url(self) -> Optional[str]:
         return self._content_url
 
     @property
-    def created_at(self):
+    def created_at(self) -> Optional["datetime.datetime"]:
         return self._created_at
 
     @property
-    def certified(self):
+    def certified(self) -> Optional[bool]:
         return self._certified
 
     @certified.setter
     @property_not_nullable
     @property_is_boolean
-    def certified(self, value):
+    def certified(self, value: Optional[bool]):
         self._certified = value
 
     @property
-    def certification_note(self):
+    def certification_note(self) -> Optional[str]:
         return self._certification_note
 
     @certification_note.setter
-    def certification_note(self, value):
+    def certification_note(self, value: Optional[str]):
         self._certification_note = value
 
     @property
@@ -97,7 +117,7 @@ class DatasourceItem(object):
 
     @encrypt_extracts.setter
     @property_is_boolean
-    def encrypt_extracts(self, value):
+    def encrypt_extracts(self, value: Optional[bool]):
         self._encrypt_extracts = value
 
     @property
@@ -108,54 +128,61 @@ class DatasourceItem(object):
         return self._data_quality_warnings()
 
     @property
-    def has_extracts(self):
+    def has_extracts(self) -> Optional[bool]:
         return self._has_extracts
 
     @property
-    def id(self):
+    def id(self) -> Optional[str]:
         return self._id
 
     @property
-    def project_id(self):
+    def project_id(self) -> str:
         return self._project_id
 
     @project_id.setter
     @property_not_nullable
-    def project_id(self, value):
+    def project_id(self, value: str):
         self._project_id = value
 
     @property
-    def project_name(self):
+    def project_name(self) -> Optional[str]:
         return self._project_name
 
     @property
-    def datasource_type(self):
+    def datasource_type(self) -> Optional[str]:
         return self._datasource_type
 
     @property
-    def description(self):
+    def description(self) -> Optional[str]:
         return self._description
 
     @description.setter
-    def description(self, value):
+    def description(self, value: str):
         self._description = value
 
     @property
-    def updated_at(self):
+    def updated_at(self) -> Optional["datetime.datetime"]:
         return self._updated_at
 
     @property
-    def use_remote_query_agent(self):
+    def use_remote_query_agent(self) -> Optional[bool]:
         return self._use_remote_query_agent
 
     @use_remote_query_agent.setter
     @property_is_boolean
-    def use_remote_query_agent(self, value):
+    def use_remote_query_agent(self, value: bool):
         self._use_remote_query_agent = value
 
     @property
-    def webpage_url(self):
+    def webpage_url(self) -> Optional[str]:
         return self._webpage_url
+
+    @property
+    def revisions(self) -> List["RevisionItem"]:
+        if self._revisions is None:
+            error = "Datasource item must be populated with revisions first."
+            raise UnpopulatedPropertyError(error)
+        return self._revisions()
 
     def _set_connections(self, connections):
         self._connections = connections
@@ -166,9 +193,12 @@ class DatasourceItem(object):
     def _set_data_quality_warnings(self, dqws):
         self._data_quality_warnings = dqws
 
+    def _set_revisions(self, revisions):
+        self._revisions = revisions
+
     def _parse_common_elements(self, datasource_xml, ns):
         if not isinstance(datasource_xml, ET.Element):
-            datasource_xml = ET.fromstring(datasource_xml).find(".//t:datasource", namespaces=ns)
+            datasource_xml = fromstring(datasource_xml).find(".//t:datasource", namespaces=ns)
         if datasource_xml is not None:
             (
                 ask_data_enablement,
@@ -271,9 +301,9 @@ class DatasourceItem(object):
             self._webpage_url = webpage_url
 
     @classmethod
-    def from_response(cls, resp, ns):
+    def from_response(cls, resp: str, ns: Dict) -> List["DatasourceItem"]:
         all_datasource_items = list()
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         all_datasource_xml = parsed_response.findall(".//t:datasource", namespaces=ns)
 
         for datasource_xml in all_datasource_xml:
@@ -322,16 +352,16 @@ class DatasourceItem(object):
         return all_datasource_items
 
     @staticmethod
-    def _parse_element(datasource_xml, ns):
-        id_ = datasource_xml.get('id', None)
-        name = datasource_xml.get('name', None)
-        datasource_type = datasource_xml.get('type', None)
-        description = datasource_xml.get('description', None)
-        content_url = datasource_xml.get('contentUrl', None)
-        created_at = parse_datetime(datasource_xml.get('createdAt', None))
-        updated_at = parse_datetime(datasource_xml.get('updatedAt', None))
-        certification_note = datasource_xml.get('certificationNote', None)
-        certified = str(datasource_xml.get('isCertified', None)).lower() == 'true'
+    def _parse_element(datasource_xml: ET.Element, ns: Dict) -> Tuple:
+        id_ = datasource_xml.get("id", None)
+        name = datasource_xml.get("name", None)
+        datasource_type = datasource_xml.get("type", None)
+        description = datasource_xml.get("description", None)
+        content_url = datasource_xml.get("contentUrl", None)
+        created_at = parse_datetime(datasource_xml.get("createdAt", None))
+        updated_at = parse_datetime(datasource_xml.get("updatedAt", None))
+        certification_note = datasource_xml.get("certificationNote", None)
+        certified = str(datasource_xml.get("isCertified", None)).lower() == "true"
         certification_note = datasource_xml.get("certificationNote", None)
         certified = str(datasource_xml.get("isCertified", None)).lower() == "true"
         content_url = datasource_xml.get("contentUrl", None)

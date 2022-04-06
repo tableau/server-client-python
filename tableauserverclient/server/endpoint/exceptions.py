@@ -1,4 +1,4 @@
-import xml.etree.ElementTree as ET
+from defusedxml.ElementTree import fromstring
 
 
 class ServerResponseError(Exception):
@@ -14,7 +14,7 @@ class ServerResponseError(Exception):
     @classmethod
     def from_response(cls, resp, ns):
         # Check elements exist before .text
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         error_response = cls(
             parsed_response.find("t:error", namespaces=ns).get("code", ""),
             parsed_response.find(".//t:summary", namespaces=ns).text,
@@ -70,13 +70,15 @@ class JobFailedException(Exception):
     def __init__(self, job):
         self.notes = job.notes
         self.job = job
-    
+
     def __str__(self):
         return f"Job {self.job.id} failed with notes {self.notes}"
 
 
 class JobCancelledException(JobFailedException):
     pass
+
+
 class FlowRunFailedException(Exception):
     def __init__(self, flow_run):
         self.background_job_id = flow_run.background_job_id
@@ -87,4 +89,4 @@ class FlowRunFailedException(Exception):
 
 
 class FlowRunCancelledException(FlowRunFailedException):
-    pass 
+    pass

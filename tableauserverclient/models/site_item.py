@@ -1,4 +1,8 @@
+import warnings
 import xml.etree.ElementTree as ET
+
+from defusedxml.ElementTree import fromstring
+
 from .property_decorators import (
     property_is_enum,
     property_is_boolean,
@@ -8,74 +12,80 @@ from .property_decorators import (
     property_is_int,
 )
 
-
 VALID_CONTENT_URL_RE = r"^[a-zA-Z0-9_\-]*$"
+
+from typing import List, Optional, Union
 
 
 class SiteItem(object):
+    _user_quota: Optional[int] = None
+    _tier_creator_capacity: Optional[int] = None
+    _tier_explorer_capacity: Optional[int] = None
+    _tier_viewer_capacity: Optional[int] = None
+
     class AdminMode:
-        ContentAndUsers = "ContentAndUsers"
-        ContentOnly = "ContentOnly"
+        ContentAndUsers: str = "ContentAndUsers"
+        ContentOnly: str = "ContentOnly"
 
     class State:
-        Active = "Active"
-        Suspended = "Suspended"
+        Active: str = "Active"
+        Suspended: str = "Suspended"
 
     def __init__(
         self,
-        name,
-        content_url,
-        admin_mode=None,
-        user_quota=None,
-        storage_quota=None,
-        disable_subscriptions=False,
-        subscribe_others_enabled=True,
-        revision_history_enabled=False,
-        revision_limit=25,
-        data_acceleration_mode=None,
-        flows_enabled=True,
-        cataloging_enabled=True,
-        editing_flows_enabled=True,
-        scheduling_flows_enabled=True,
-        allow_subscription_attachments=True,
-        guest_access_enabled=False,
-        cache_warmup_enabled=True,
-        commenting_enabled=True,
-        extract_encryption_mode=None,
-        request_access_enabled=False,
-        run_now_enabled=True,
-        tier_explorer_capacity=None,
-        tier_creator_capacity=None,
-        tier_viewer_capacity=None,
-        data_alerts_enabled=True,
-        commenting_mentions_enabled=True,
-        catalog_obfuscation_enabled=True,
-        flow_auto_save_enabled=True,
-        web_extraction_enabled=True,
-        metrics_content_type_enabled=True,
-        notify_site_admins_on_throttle=False,
-        authoring_enabled=True,
-        custom_subscription_email_enabled=False,
-        custom_subscription_email=False,
-        custom_subscription_footer_enabled=False,
-        custom_subscription_footer=False,
-        ask_data_mode="EnabledByDefault",
-        named_sharing_enabled=True,
-        mobile_biometrics_enabled=False,
-        sheet_image_enabled=True,
-        derived_permissions_enabled=False,
-        user_visibility_mode="FULL",
-        use_default_time_zone=True,
+        name: str,
+        content_url: str,
+        admin_mode: str = None,
+        user_quota: int = None,
+        storage_quota: int = None,
+        disable_subscriptions: bool = False,
+        subscribe_others_enabled: bool = True,
+        revision_history_enabled: bool = False,
+        revision_limit: int = 25,
+        data_acceleration_mode: Optional[str] = None,
+        flows_enabled: bool = True,
+        cataloging_enabled: bool = True,
+        editing_flows_enabled: bool = True,
+        scheduling_flows_enabled: bool = True,
+        allow_subscription_attachments: bool = True,
+        guest_access_enabled: bool = False,
+        cache_warmup_enabled: bool = True,
+        commenting_enabled: bool = True,
+        extract_encryption_mode: Optional[str] = None,
+        request_access_enabled: bool = False,
+        run_now_enabled: bool = True,
+        tier_explorer_capacity: Optional[int] = None,
+        tier_creator_capacity: Optional[int] = None,
+        tier_viewer_capacity: Optional[int] = None,
+        data_alerts_enabled: bool = True,
+        commenting_mentions_enabled: bool = True,
+        catalog_obfuscation_enabled: bool = True,
+        flow_auto_save_enabled: bool = True,
+        web_extraction_enabled: bool = True,
+        metrics_content_type_enabled: bool = True,
+        notify_site_admins_on_throttle: bool = False,
+        authoring_enabled: bool = True,
+        custom_subscription_email_enabled: bool = False,
+        custom_subscription_email: Union[str, bool] = False,
+        custom_subscription_footer_enabled: bool = False,
+        custom_subscription_footer: Union[str, bool] = False,
+        ask_data_mode: str = "EnabledByDefault",
+        named_sharing_enabled: bool = True,
+        mobile_biometrics_enabled: bool = False,
+        sheet_image_enabled: bool = True,
+        derived_permissions_enabled: bool = False,
+        user_visibility_mode: str = "FULL",
+        use_default_time_zone: bool = True,
         time_zone=None,
-        auto_suspend_refresh_enabled=True,
-        auto_suspend_refresh_inactivity_window=30,
+        auto_suspend_refresh_enabled: bool = True,
+        auto_suspend_refresh_inactivity_window: int = 30,
     ):
         self._admin_mode = None
-        self._id = None
+        self._id: Optional[str] = None
         self._num_users = None
         self._state = None
         self._status_reason = None
-        self._storage = None
+        self._storage: Optional[str] = None
         self.user_quota = user_quota
         self.storage_quota = storage_quota
         self.content_url = content_url
@@ -124,16 +134,16 @@ class SiteItem(object):
         self.auto_suspend_refresh_inactivity_window = auto_suspend_refresh_inactivity_window
 
     @property
-    def admin_mode(self):
+    def admin_mode(self) -> Optional[str]:
         return self._admin_mode
 
     @admin_mode.setter
     @property_is_enum(AdminMode)
-    def admin_mode(self, value):
+    def admin_mode(self, value: Optional[str]) -> None:
         self._admin_mode = value
 
     @property
-    def content_url(self):
+    def content_url(self) -> str:
         return self._content_url
 
     @content_url.setter
@@ -142,29 +152,29 @@ class SiteItem(object):
         VALID_CONTENT_URL_RE,
         "content_url can contain only letters, numbers, dashes, and underscores",
     )
-    def content_url(self, value):
+    def content_url(self, value: str) -> None:
         self._content_url = value
 
     @property
-    def disable_subscriptions(self):
+    def disable_subscriptions(self) -> bool:
         return self._disable_subscriptions
 
     @disable_subscriptions.setter
     @property_is_boolean
-    def disable_subscriptions(self, value):
+    def disable_subscriptions(self, value: bool):
         self._disable_subscriptions = value
 
     @property
-    def id(self):
+    def id(self) -> Optional[str]:
         return self._id
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @name.setter
     @property_not_empty
-    def name(self, value):
+    def name(self, value: str):
         self._name = value
 
     @property
@@ -172,337 +182,357 @@ class SiteItem(object):
         return self._num_users
 
     @property
-    def revision_history_enabled(self):
+    def revision_history_enabled(self) -> bool:
         return self._revision_history_enabled
 
     @revision_history_enabled.setter
     @property_is_boolean
-    def revision_history_enabled(self, value):
+    def revision_history_enabled(self, value: bool):
         self._revision_history_enabled = value
 
     @property
-    def revision_limit(self):
+    def revision_limit(self) -> int:
         return self._revision_limit
 
     @revision_limit.setter
     @property_is_int((2, 10000), allowed=[-1])
-    def revision_limit(self, value):
+    def revision_limit(self, value: int):
         self._revision_limit = value
 
     @property
-    def state(self):
+    def state(self) -> Optional[str]:
         return self._state
 
     @state.setter
     @property_is_enum(State)
-    def state(self, value):
+    def state(self, value: Optional[str]) -> None:
         self._state = value
 
     @property
-    def status_reason(self):
+    def status_reason(self) -> Optional[str]:
         return self._status_reason
 
     @property
-    def storage(self):
+    def storage(self) -> Optional[str]:
         return self._storage
 
     @property
-    def subscribe_others_enabled(self):
+    def user_quota(self) -> Optional[int]:
+        if any((self.tier_creator_capacity, self.tier_explorer_capacity, self.tier_viewer_capacity)):
+            warnings.warn("Tiered license level is set. Returning None for user_quota")
+            return None
+        else:
+            return self._user_quota
+
+    @user_quota.setter
+    def user_quota(self, value: Optional[int]) -> None:
+        if value is not None and any(
+            (self.tier_creator_capacity, self.tier_explorer_capacity, self.tier_viewer_capacity)
+        ):
+            raise ValueError(
+                "User quota conflicts with setting tiered license levels. "
+                "Use replace_license_tiers_with_user_quota to set those to None, "
+                "and set user_quota to the desired value."
+            )
+        self._user_quota = value
+
+    @property
+    def subscribe_others_enabled(self) -> bool:
         return self._subscribe_others_enabled
 
     @subscribe_others_enabled.setter
     @property_is_boolean
-    def subscribe_others_enabled(self, value):
+    def subscribe_others_enabled(self, value: bool) -> None:
         self._subscribe_others_enabled = value
 
     @property
-    def data_acceleration_mode(self):
+    def data_acceleration_mode(self) -> Optional[str]:
         return self._data_acceleration_mode
 
     @data_acceleration_mode.setter
-    def data_acceleration_mode(self, value):
+    def data_acceleration_mode(self, value: Optional[str]):
         self._data_acceleration_mode = value
 
     @property
-    def cataloging_enabled(self):
+    def cataloging_enabled(self) -> bool:
         return self._cataloging_enabled
 
     @cataloging_enabled.setter
-    def cataloging_enabled(self, value):
+    def cataloging_enabled(self, value: bool):
         self._cataloging_enabled = value
 
     @property
-    def flows_enabled(self):
+    def flows_enabled(self) -> bool:
         return self._flows_enabled
 
     @flows_enabled.setter
     @property_is_boolean
-    def flows_enabled(self, value):
+    def flows_enabled(self, value: bool) -> None:
         self._flows_enabled = value
 
-    def is_default(self):
+    def is_default(self) -> bool:
         return self.name.lower() == "default"
 
     @property
-    def editing_flows_enabled(self):
+    def editing_flows_enabled(self) -> bool:
         return self._editing_flows_enabled
 
     @editing_flows_enabled.setter
     @property_is_boolean
-    def editing_flows_enabled(self, value):
+    def editing_flows_enabled(self, value: bool) -> None:
         self._editing_flows_enabled = value
 
     @property
-    def scheduling_flows_enabled(self):
+    def scheduling_flows_enabled(self) -> bool:
         return self._scheduling_flows_enabled
 
     @scheduling_flows_enabled.setter
     @property_is_boolean
-    def scheduling_flows_enabled(self, value):
+    def scheduling_flows_enabled(self, value: bool):
         self._scheduling_flows_enabled = value
 
     @property
-    def allow_subscription_attachments(self):
+    def allow_subscription_attachments(self) -> bool:
         return self._allow_subscription_attachments
 
     @allow_subscription_attachments.setter
     @property_is_boolean
-    def allow_subscription_attachments(self, value):
+    def allow_subscription_attachments(self, value: bool):
         self._allow_subscription_attachments = value
 
     @property
-    def guest_access_enabled(self):
+    def guest_access_enabled(self) -> bool:
         return self._guest_access_enabled
 
     @guest_access_enabled.setter
     @property_is_boolean
-    def guest_access_enabled(self, value):
+    def guest_access_enabled(self, value: bool) -> None:
         self._guest_access_enabled = value
 
     @property
-    def cache_warmup_enabled(self):
+    def cache_warmup_enabled(self) -> bool:
         return self._cache_warmup_enabled
 
     @cache_warmup_enabled.setter
     @property_is_boolean
-    def cache_warmup_enabled(self, value):
+    def cache_warmup_enabled(self, value: bool):
         self._cache_warmup_enabled = value
 
     @property
-    def commenting_enabled(self):
+    def commenting_enabled(self) -> bool:
         return self._commenting_enabled
 
     @commenting_enabled.setter
     @property_is_boolean
-    def commenting_enabled(self, value):
+    def commenting_enabled(self, value: bool):
         self._commenting_enabled = value
 
     @property
-    def extract_encryption_mode(self):
+    def extract_encryption_mode(self) -> Optional[str]:
         return self._extract_encryption_mode
 
     @extract_encryption_mode.setter
-    def extract_encryption_mode(self, value):
+    def extract_encryption_mode(self, value: Optional[str]):
         self._extract_encryption_mode = value
 
     @property
-    def request_access_enabled(self):
+    def request_access_enabled(self) -> bool:
         return self._request_access_enabled
 
     @request_access_enabled.setter
     @property_is_boolean
-    def request_access_enabled(self, value):
+    def request_access_enabled(self, value: bool) -> None:
         self._request_access_enabled = value
 
     @property
-    def run_now_enabled(self):
+    def run_now_enabled(self) -> bool:
         return self._run_now_enabled
 
     @run_now_enabled.setter
     @property_is_boolean
-    def run_now_enabled(self, value):
+    def run_now_enabled(self, value: bool):
         self._run_now_enabled = value
 
     @property
-    def tier_explorer_capacity(self):
+    def tier_explorer_capacity(self) -> Optional[int]:
         return self._tier_explorer_capacity
 
     @tier_explorer_capacity.setter
-    def tier_explorer_capacity(self, value):
+    def tier_explorer_capacity(self, value: Optional[int]) -> None:
         self._tier_explorer_capacity = value
 
     @property
-    def tier_creator_capacity(self):
+    def tier_creator_capacity(self) -> Optional[int]:
         return self._tier_creator_capacity
 
     @tier_creator_capacity.setter
-    def tier_creator_capacity(self, value):
+    def tier_creator_capacity(self, value: Optional[int]) -> None:
         self._tier_creator_capacity = value
 
     @property
-    def tier_viewer_capacity(self):
+    def tier_viewer_capacity(self) -> Optional[int]:
         return self._tier_viewer_capacity
 
     @tier_viewer_capacity.setter
-    def tier_viewer_capacity(self, value):
+    def tier_viewer_capacity(self, value: Optional[int]):
         self._tier_viewer_capacity = value
 
     @property
-    def data_alerts_enabled(self):
+    def data_alerts_enabled(self) -> bool:
         return self._data_alerts_enabled
 
     @data_alerts_enabled.setter
     @property_is_boolean
-    def data_alerts_enabled(self, value):
+    def data_alerts_enabled(self, value: bool) -> None:
         self._data_alerts_enabled = value
 
     @property
-    def commenting_mentions_enabled(self):
+    def commenting_mentions_enabled(self) -> bool:
         return self._commenting_mentions_enabled
 
     @commenting_mentions_enabled.setter
     @property_is_boolean
-    def commenting_mentions_enabled(self, value):
+    def commenting_mentions_enabled(self, value: bool) -> None:
         self._commenting_mentions_enabled = value
 
     @property
-    def catalog_obfuscation_enabled(self):
+    def catalog_obfuscation_enabled(self) -> bool:
         return self._catalog_obfuscation_enabled
 
     @catalog_obfuscation_enabled.setter
     @property_is_boolean
-    def catalog_obfuscation_enabled(self, value):
+    def catalog_obfuscation_enabled(self, value: bool) -> None:
         self._catalog_obfuscation_enabled = value
 
     @property
-    def flow_auto_save_enabled(self):
+    def flow_auto_save_enabled(self) -> bool:
         return self._flow_auto_save_enabled
 
     @flow_auto_save_enabled.setter
     @property_is_boolean
-    def flow_auto_save_enabled(self, value):
+    def flow_auto_save_enabled(self, value: bool) -> None:
         self._flow_auto_save_enabled = value
 
     @property
-    def web_extraction_enabled(self):
+    def web_extraction_enabled(self) -> bool:
         return self._web_extraction_enabled
 
     @web_extraction_enabled.setter
     @property_is_boolean
-    def web_extraction_enabled(self, value):
+    def web_extraction_enabled(self, value: bool) -> None:
         self._web_extraction_enabled = value
 
     @property
-    def metrics_content_type_enabled(self):
+    def metrics_content_type_enabled(self) -> bool:
         return self._metrics_content_type_enabled
 
     @metrics_content_type_enabled.setter
     @property_is_boolean
-    def metrics_content_type_enabled(self, value):
+    def metrics_content_type_enabled(self, value: bool) -> None:
         self._metrics_content_type_enabled = value
 
     @property
-    def notify_site_admins_on_throttle(self):
+    def notify_site_admins_on_throttle(self) -> bool:
         return self._notify_site_admins_on_throttle
 
     @notify_site_admins_on_throttle.setter
     @property_is_boolean
-    def notify_site_admins_on_throttle(self, value):
+    def notify_site_admins_on_throttle(self, value: bool) -> None:
         self._notify_site_admins_on_throttle = value
 
     @property
-    def authoring_enabled(self):
+    def authoring_enabled(self) -> bool:
         return self._authoring_enabled
 
     @authoring_enabled.setter
     @property_is_boolean
-    def authoring_enabled(self, value):
+    def authoring_enabled(self, value: bool) -> None:
         self._authoring_enabled = value
 
     @property
-    def custom_subscription_email_enabled(self):
+    def custom_subscription_email_enabled(self) -> bool:
         return self._custom_subscription_email_enabled
 
     @custom_subscription_email_enabled.setter
     @property_is_boolean
-    def custom_subscription_email_enabled(self, value):
+    def custom_subscription_email_enabled(self, value: bool) -> None:
         self._custom_subscription_email_enabled = value
 
     @property
-    def custom_subscription_email(self):
+    def custom_subscription_email(self) -> Union[str, bool]:
         return self._custom_subscription_email
 
     @custom_subscription_email.setter
-    def custom_subscription_email(self, value):
+    def custom_subscription_email(self, value: Union[str, bool]):
         self._custom_subscription_email = value
 
     @property
-    def custom_subscription_footer_enabled(self):
+    def custom_subscription_footer_enabled(self) -> bool:
         return self._custom_subscription_footer_enabled
 
     @custom_subscription_footer_enabled.setter
     @property_is_boolean
-    def custom_subscription_footer_enabled(self, value):
+    def custom_subscription_footer_enabled(self, value: bool) -> None:
         self._custom_subscription_footer_enabled = value
 
     @property
-    def custom_subscription_footer(self):
+    def custom_subscription_footer(self) -> Union[str, bool]:
         return self._custom_subscription_footer
 
     @custom_subscription_footer.setter
-    def custom_subscription_footer(self, value):
+    def custom_subscription_footer(self, value: Union[str, bool]) -> None:
         self._custom_subscription_footer = value
 
     @property
-    def ask_data_mode(self):
+    def ask_data_mode(self) -> str:
         return self._ask_data_mode
 
     @ask_data_mode.setter
-    def ask_data_mode(self, value):
+    def ask_data_mode(self, value: str) -> None:
         self._ask_data_mode = value
 
     @property
-    def named_sharing_enabled(self):
+    def named_sharing_enabled(self) -> bool:
         return self._named_sharing_enabled
 
     @named_sharing_enabled.setter
     @property_is_boolean
-    def named_sharing_enabled(self, value):
+    def named_sharing_enabled(self, value: bool) -> None:
         self._named_sharing_enabled = value
 
     @property
-    def mobile_biometrics_enabled(self):
+    def mobile_biometrics_enabled(self) -> bool:
         return self._mobile_biometrics_enabled
 
     @mobile_biometrics_enabled.setter
     @property_is_boolean
-    def mobile_biometrics_enabled(self, value):
+    def mobile_biometrics_enabled(self, value: bool) -> None:
         self._mobile_biometrics_enabled = value
 
     @property
-    def sheet_image_enabled(self):
+    def sheet_image_enabled(self) -> bool:
         return self._sheet_image_enabled
 
     @sheet_image_enabled.setter
     @property_is_boolean
-    def sheet_image_enabled(self, value):
+    def sheet_image_enabled(self, value: bool) -> None:
         self._sheet_image_enabled = value
 
     @property
-    def derived_permissions_enabled(self):
+    def derived_permissions_enabled(self) -> bool:
         return self._derived_permissions_enabled
 
     @derived_permissions_enabled.setter
     @property_is_boolean
-    def derived_permissions_enabled(self, value):
+    def derived_permissions_enabled(self, value: bool) -> None:
         self._derived_permissions_enabled = value
 
     @property
-    def user_visibility_mode(self):
+    def user_visibility_mode(self) -> str:
         return self._user_visibility_mode
 
     @user_visibility_mode.setter
-    def user_visibility_mode(self, value):
+    def user_visibility_mode(self, value: str):
         self._user_visibility_mode = value
 
     @property
@@ -530,16 +560,22 @@ class SiteItem(object):
         self._auto_suspend_refresh_inactivity_window = value
 
     @property
-    def auto_suspend_refresh_enabled(self):
+    def auto_suspend_refresh_enabled(self) -> bool:
         return self._auto_suspend_refresh_enabled
 
     @auto_suspend_refresh_enabled.setter
-    def auto_suspend_refresh_enabled(self, value):
+    def auto_suspend_refresh_enabled(self, value: bool):
         self._auto_suspend_refresh_enabled = value
+
+    def replace_license_tiers_with_user_quota(self, value: int) -> None:
+        self.tier_creator_capacity = None
+        self.tier_explorer_capacity = None
+        self.tier_viewer_capacity = None
+        self.user_quota = value
 
     def _parse_common_tags(self, site_xml, ns):
         if not isinstance(site_xml, ET.Element):
-            site_xml = ET.fromstring(site_xml).find(".//t:site", namespaces=ns)
+            site_xml = fromstring(site_xml).find(".//t:site", namespaces=ns)
         if site_xml is not None:
             (
                 _,
@@ -723,7 +759,11 @@ class SiteItem(object):
         if revision_history_enabled is not None:
             self._revision_history_enabled = revision_history_enabled
         if user_quota:
-            self.user_quota = user_quota
+            try:
+                self.user_quota = user_quota
+            except ValueError:
+                warnings.warn("Tiered license level is set. Setting user_quota to None.")
+                self.user_quota = None
         if storage_quota:
             self.storage_quota = storage_quota
         if revision_limit:
@@ -808,9 +848,9 @@ class SiteItem(object):
             self.auto_suspend_refresh_inactivity_window = auto_suspend_refresh_inactivity_window
 
     @classmethod
-    def from_response(cls, resp, ns):
+    def from_response(cls, resp, ns) -> List["SiteItem"]:
         all_site_items = list()
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         all_site_xml = parsed_response.findall(".//t:site", namespaces=ns)
         for site_xml in all_site_xml:
             (
@@ -1058,5 +1098,5 @@ class SiteItem(object):
 
 
 # Used to convert string represented boolean to a boolean type
-def string_to_bool(s):
+def string_to_bool(s: str) -> bool:
     return s.lower() == "true"

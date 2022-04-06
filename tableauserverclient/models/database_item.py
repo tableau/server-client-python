@@ -1,11 +1,11 @@
-import xml.etree.ElementTree as ET
+from defusedxml.ElementTree import fromstring
 
+from .exceptions import UnpopulatedPropertyError
 from .property_decorators import (
     property_is_enum,
     property_not_empty,
     property_is_boolean,
 )
-from .exceptions import UnpopulatedPropertyError
 
 
 class DatabaseItem(object):
@@ -53,6 +53,11 @@ class DatabaseItem(object):
     def content_permissions(self):
         return self._content_permissions
 
+    @content_permissions.setter
+    @property_is_enum(ContentPermissions)
+    def content_permissions(self, value):
+        self._content_permissions = value
+
     @property
     def permissions(self):
         if self._permissions is None:
@@ -66,11 +71,6 @@ class DatabaseItem(object):
             error = "Project item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
         return self._default_table_permissions()
-
-    @content_permissions.setter
-    @property_is_enum(ContentPermissions)
-    def content_permissions(self, value):
-        self._content_permissions = value
 
     @property
     def id(self):
@@ -254,7 +254,7 @@ class DatabaseItem(object):
     @classmethod
     def from_response(cls, resp, ns):
         all_database_items = list()
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         all_database_xml = parsed_response.findall(".//t:database", namespaces=ns)
 
         for database_xml in all_database_xml:

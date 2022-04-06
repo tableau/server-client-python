@@ -1,21 +1,22 @@
 from .auth_endpoint import Auth
 from .data_acceleration_report_endpoint import DataAccelerationReport
 from .data_alert_endpoint import DataAlerts
-from .datasources_endpoint import Datasources
 from .databases_endpoint import Databases
-from .endpoint import Endpoint
-from .favorites_endpoint import Favorites
-from .fileuploads_endpoint import Fileuploads
-from .flows_endpoint import Flows
-from .flow_runs_endpoint import FlowRuns
+from .datasources_endpoint import Datasources
+from .endpoint import Endpoint, QuerysetEndpoint
 from .exceptions import (
     ServerResponseError,
     MissingRequiredFieldError,
     ServerInfoEndpointNotFoundError,
 )
+from .favorites_endpoint import Favorites
+from .fileuploads_endpoint import Fileuploads
+from .flow_runs_endpoint import FlowRuns
+from .flows_endpoint import Flows
 from .groups_endpoint import Groups
 from .jobs_endpoint import Jobs
 from .metadata_endpoint import Metadata
+from .metrics_endpoint import Metrics
 from .projects_endpoint import Projects
 from .schedules_endpoint import Schedules
 from .server_info_endpoint import ServerInfo

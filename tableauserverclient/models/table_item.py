@@ -1,7 +1,7 @@
-import xml.etree.ElementTree as ET
+from defusedxml.ElementTree import fromstring
 
-from .property_decorators import property_not_empty, property_is_boolean
 from .exceptions import UnpopulatedPropertyError
+from .property_decorators import property_not_empty, property_is_boolean
 
 
 class TableItem(object):
@@ -128,7 +128,7 @@ class TableItem(object):
     @classmethod
     def from_response(cls, resp, ns):
         all_table_items = list()
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         all_table_xml = parsed_response.findall(".//t:table", namespaces=ns)
 
         for table_xml in all_table_xml:

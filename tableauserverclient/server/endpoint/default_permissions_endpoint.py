@@ -1,13 +1,27 @@
 import logging
 
+from .endpoint import Endpoint
+from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory
 from ...models import PermissionsRule
 
-from .endpoint import Endpoint
-from .exceptions import MissingRequiredFieldError
-
-
 logger = logging.getLogger(__name__)
+
+from typing import TYPE_CHECKING, Callable, List, Optional, Sequence, Union
+
+if TYPE_CHECKING:
+    from ...models import (
+        DatasourceItem,
+        FlowItem,
+        ProjectItem,
+        ViewItem,
+        WorkbookItem,
+    )
+
+    from ..server import Server
+    from ..request_options import RequestOptions
+
+    TableauItem = Union[DatasourceItem, FlowItem, ProjectItem, ViewItem, WorkbookItem]
 
 
 class _DefaultPermissionsEndpoint(Endpoint):
@@ -19,7 +33,7 @@ class _DefaultPermissionsEndpoint(Endpoint):
     has these supported endpoints
     """
 
-    def __init__(self, parent_srv, owner_baseurl):
+    def __init__(self, parent_srv: "Server", owner_baseurl: Callable[[], str]) -> None:
         super(_DefaultPermissionsEndpoint, self).__init__(parent_srv)
 
         # owner_baseurl is the baseurl of the parent.  The MUST be a lambda
@@ -27,7 +41,9 @@ class _DefaultPermissionsEndpoint(Endpoint):
         # populated without, we will get a sign-in error
         self.owner_baseurl = owner_baseurl
 
-    def update_default_permissions(self, resource, permissions, content_type):
+    def update_default_permissions(
+        self, resource: "TableauItem", permissions: Sequence[PermissionsRule], content_type: str
+    ) -> List[PermissionsRule]:
         url = "{0}/{1}/default-permissions/{2}".format(self.owner_baseurl(), resource.id, content_type + "s")
         update_req = RequestFactory.Permission.add_req(permissions)
         response = self.put_request(url, update_req)
@@ -36,7 +52,7 @@ class _DefaultPermissionsEndpoint(Endpoint):
 
         return permissions
 
-    def delete_default_permission(self, resource, rule, content_type):
+    def delete_default_permission(self, resource: "TableauItem", rule: PermissionsRule, content_type: str) -> None:
         for capability, mode in rule.capabilities.items():
             # Made readability better but line is too long, will make this look better
             url = (
@@ -60,18 +76,20 @@ class _DefaultPermissionsEndpoint(Endpoint):
             "Deleted permission for {0} {1} item {2}".format(rule.grantee.tag_name, rule.grantee.id, resource.id)
         )
 
-    def populate_default_permissions(self, item, content_type):
+    def populate_default_permissions(self, item: "ProjectItem", content_type: str) -> None:
         if not item.id:
             error = "Server item is missing ID. Item must be retrieved from server first."
             raise MissingRequiredFieldError(error)
 
-        def permission_fetcher():
+        def permission_fetcher() -> List[PermissionsRule]:
             return self._get_default_permissions(item, content_type)
 
         item._set_default_permissions(permission_fetcher, content_type)
         logger.info("Populated {0} permissions for item (ID: {1})".format(item.id, content_type))
 
-    def _get_default_permissions(self, item, content_type, req_options=None):
+    def _get_default_permissions(
+        self, item: "TableauItem", content_type: str, req_options: Optional["RequestOptions"] = None
+    ) -> List[PermissionsRule]:
         url = "{0}/{1}/default-permissions/{2}".format(self.owner_baseurl(), item.id, content_type + "s")
         server_response = self.get_request(url, req_options)
         permissions = PermissionsRule.from_response(server_response.content, self.parent_srv.namespace)

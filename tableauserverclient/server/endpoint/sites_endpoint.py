@@ -1,21 +1,26 @@
+import copy
+import logging
+
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory, SiteItem, PaginationItem
 
-import copy
-import logging
-
 logger = logging.getLogger("tableau.endpoint.sites")
+
+from typing import TYPE_CHECKING, List, Optional, Tuple
+
+if TYPE_CHECKING:
+    from ..request_options import RequestOptions
 
 
 class Sites(Endpoint):
     @property
-    def baseurl(self):
+    def baseurl(self) -> str:
         return "{0}/sites".format(self.parent_srv.baseurl)
 
     # Gets all sites
     @api(version="2.0")
-    def get(self, req_options=None):
+    def get(self, req_options: Optional["RequestOptions"] = None) -> Tuple[List[SiteItem], PaginationItem]:
         logger.info("Querying all sites on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -25,7 +30,7 @@ class Sites(Endpoint):
 
     # Gets 1 site by id
     @api(version="2.0")
-    def get_by_id(self, site_id):
+    def get_by_id(self, site_id: str) -> SiteItem:
         if not site_id:
             error = "Site ID undefined."
             raise ValueError(error)
@@ -36,7 +41,7 @@ class Sites(Endpoint):
 
     # Gets 1 site by name
     @api(version="2.0")
-    def get_by_name(self, site_name):
+    def get_by_name(self, site_name: str) -> SiteItem:
         if not site_name:
             error = "Site Name undefined."
             raise ValueError(error)
@@ -47,7 +52,7 @@ class Sites(Endpoint):
 
     # Gets 1 site by content url
     @api(version="2.0")
-    def get_by_content_url(self, content_url):
+    def get_by_content_url(self, content_url: str) -> SiteItem:
         if content_url is None:
             error = "Content URL undefined."
             raise ValueError(error)
@@ -58,7 +63,7 @@ class Sites(Endpoint):
 
     # Update site
     @api(version="2.0")
-    def update(self, site_item):
+    def update(self, site_item: SiteItem) -> SiteItem:
         if not site_item.id:
             error = "Site item missing ID."
             raise MissingRequiredFieldError(error)
@@ -76,7 +81,7 @@ class Sites(Endpoint):
 
     # Delete 1 site object
     @api(version="2.0")
-    def delete(self, site_id):
+    def delete(self, site_id: str) -> None:
         if not site_id:
             error = "Site ID undefined."
             raise ValueError(error)
@@ -91,7 +96,7 @@ class Sites(Endpoint):
 
     # Create new site
     @api(version="2.0")
-    def create(self, site_item):
+    def create(self, site_item: SiteItem) -> SiteItem:
         if site_item.admin_mode:
             if site_item.admin_mode == SiteItem.AdminMode.ContentOnly and site_item.user_quota:
                 error = "You cannot set admin_mode to ContentOnly and also set a user quota"
@@ -105,7 +110,7 @@ class Sites(Endpoint):
         return new_site
 
     @api(version="3.5")
-    def encrypt_extracts(self, site_id):
+    def encrypt_extracts(self, site_id: str) -> None:
         if not site_id:
             error = "Site ID undefined."
             raise ValueError(error)
@@ -114,7 +119,7 @@ class Sites(Endpoint):
         self.post_request(url, empty_req)
 
     @api(version="3.5")
-    def decrypt_extracts(self, site_id):
+    def decrypt_extracts(self, site_id: str) -> None:
         if not site_id:
             error = "Site ID undefined."
             raise ValueError(error)
@@ -123,7 +128,7 @@ class Sites(Endpoint):
         self.post_request(url, empty_req)
 
     @api(version="3.5")
-    def re_encrypt_extracts(self, site_id):
+    def re_encrypt_extracts(self, site_id: str) -> None:
         if not site_id:
             error = "Site ID undefined."
             raise ValueError(error)

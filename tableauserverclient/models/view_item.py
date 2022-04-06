@@ -1,29 +1,37 @@
-import xml.etree.ElementTree as ET
-from ..datetime_helpers import parse_datetime
+import copy
+from typing import Callable, Iterable, List, Optional, Set, TYPE_CHECKING
+
+from defusedxml.ElementTree import fromstring
+
 from .exceptions import UnpopulatedPropertyError
 from .tag_item import TagItem
-import copy
+from ..datetime_helpers import parse_datetime
+
+if TYPE_CHECKING:
+    from datetime import datetime
+    from .permissions_item import PermissionsRule
 
 
 class ViewItem(object):
-    def __init__(self):
-        self._content_url = None
-        self._created_at = None
-        self._id = None
-        self._image = None
-        self._initial_tags = set()
-        self._name = None
-        self._owner_id = None
-        self._preview_image = None
-        self._project_id = None
-        self._pdf = None
-        self._csv = None
-        self._total_views = None
-        self._sheet_type = None
-        self._updated_at = None
-        self._workbook_id = None
-        self._permissions = None
-        self.tags = set()
+    def __init__(self) -> None:
+        self._content_url: Optional[str] = None
+        self._created_at: Optional["datetime"] = None
+        self._id: Optional[str] = None
+        self._image: Optional[Callable[[], bytes]] = None
+        self._initial_tags: Set[str] = set()
+        self._name: Optional[str] = None
+        self._owner_id: Optional[str] = None
+        self._preview_image: Optional[Callable[[], bytes]] = None
+        self._project_id: Optional[str] = None
+        self._pdf: Optional[Callable[[], bytes]] = None
+        self._csv: Optional[Callable[[], Iterable[bytes]]] = None
+        self._excel: Optional[Callable[[], Iterable[bytes]]] = None
+        self._total_views: Optional[int] = None
+        self._sheet_type: Optional[str] = None
+        self._updated_at: Optional["datetime"] = None
+        self._workbook_id: Optional[str] = None
+        self._permissions: Optional[Callable[[], List["PermissionsRule"]]] = None
+        self.tags: Set[str] = set()
 
     def _set_preview_image(self, preview_image):
         self._preview_image = preview_image
@@ -37,60 +45,70 @@ class ViewItem(object):
     def _set_csv(self, csv):
         self._csv = csv
 
+    def _set_excel(self, excel):
+        self._excel = excel
+
     @property
-    def content_url(self):
+    def content_url(self) -> Optional[str]:
         return self._content_url
 
     @property
-    def created_at(self):
+    def created_at(self) -> Optional["datetime"]:
         return self._created_at
 
     @property
-    def id(self):
+    def id(self) -> Optional[str]:
         return self._id
 
     @property
-    def image(self):
+    def image(self) -> bytes:
         if self._image is None:
             error = "View item must be populated with its png image first."
             raise UnpopulatedPropertyError(error)
         return self._image()
 
     @property
-    def name(self):
+    def name(self) -> Optional[str]:
         return self._name
 
     @property
-    def owner_id(self):
+    def owner_id(self) -> Optional[str]:
         return self._owner_id
 
     @property
-    def preview_image(self):
+    def preview_image(self) -> bytes:
         if self._preview_image is None:
             error = "View item must be populated with its preview image first."
             raise UnpopulatedPropertyError(error)
         return self._preview_image()
 
     @property
-    def project_id(self):
+    def project_id(self) -> Optional[str]:
         return self._project_id
 
     @property
-    def pdf(self):
+    def pdf(self) -> bytes:
         if self._pdf is None:
             error = "View item must be populated with its pdf first."
             raise UnpopulatedPropertyError(error)
         return self._pdf()
 
     @property
-    def csv(self):
+    def csv(self) -> Iterable[bytes]:
         if self._csv is None:
             error = "View item must be populated with its csv first."
             raise UnpopulatedPropertyError(error)
         return self._csv()
 
     @property
-    def sheet_type(self):
+    def excel(self) -> Iterable[bytes]:
+        if self._excel is None:
+            error = "View item must be populated with its excel first."
+            raise UnpopulatedPropertyError(error)
+        return self._excel()
+
+    @property
+    def sheet_type(self) -> Optional[str]:
         return self._sheet_type
 
     @property
@@ -101,29 +119,29 @@ class ViewItem(object):
         return self._total_views
 
     @property
-    def updated_at(self):
+    def updated_at(self) -> Optional["datetime"]:
         return self._updated_at
 
     @property
-    def workbook_id(self):
+    def workbook_id(self) -> Optional[str]:
         return self._workbook_id
 
     @property
-    def permissions(self):
+    def permissions(self) -> List["PermissionsRule"]:
         if self._permissions is None:
             error = "View item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
         return self._permissions()
 
-    def _set_permissions(self, permissions):
+    def _set_permissions(self, permissions: Callable[[], List["PermissionsRule"]]) -> None:
         self._permissions = permissions
 
     @classmethod
-    def from_response(cls, resp, ns, workbook_id=""):
-        return cls.from_xml_element(ET.fromstring(resp), ns, workbook_id)
+    def from_response(cls, resp, ns, workbook_id="") -> List["ViewItem"]:
+        return cls.from_xml_element(fromstring(resp), ns, workbook_id)
 
     @classmethod
-    def from_xml_element(cls, parsed_response, ns, workbook_id=""):
+    def from_xml_element(cls, parsed_response, ns, workbook_id="") -> List["ViewItem"]:
         all_view_items = list()
         all_view_xml = parsed_response.findall(".//t:view", namespaces=ns)
         for view_xml in all_view_xml:

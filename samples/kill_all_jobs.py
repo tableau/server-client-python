@@ -11,16 +11,23 @@ import tableauserverclient as TSC
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Cancel all of the running background jobs.')
+    parser = argparse.ArgumentParser(description="Cancel all of the running background jobs.")
     # Common options; please keep those in sync across all samples
-    parser.add_argument('--server', '-s', required=True, help='server address')
-    parser.add_argument('--site', '-S', help='site name')
-    parser.add_argument('--token-name', '-p', required=True,
-                        help='name of the personal access token used to sign into the server')
-    parser.add_argument('--token-value', '-v', required=True,
-                        help='value of the personal access token used to sign into the server')
-    parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
-                        help='desired logging level (set to error by default)')
+    parser.add_argument("--server", "-s", required=True, help="server address")
+    parser.add_argument("--site", "-S", help="site name")
+    parser.add_argument(
+        "--token-name", "-p", required=True, help="name of the personal access token used to sign into the server"
+    )
+    parser.add_argument(
+        "--token-value", "-v", required=True, help="value of the personal access token used to sign into the server"
+    )
+    parser.add_argument(
+        "--logging-level",
+        "-l",
+        choices=["debug", "info", "error"],
+        default="error",
+        help="desired logging level (set to error by default)",
+    )
     # Options specific to this sample
     # This sample has no additional options, yet. If you add some, please add them here
 
@@ -40,5 +47,5 @@ def main():
             print(server.jobs.cancel(job.id), job.id, job.status, job.type)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

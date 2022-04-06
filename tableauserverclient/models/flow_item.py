@@ -1,24 +1,31 @@
+import copy
 import xml.etree.ElementTree as ET
+from typing import List, Optional, TYPE_CHECKING, Set
+
+from defusedxml.ElementTree import fromstring
+
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_not_nullable
 from .tag_item import TagItem
 from ..datetime_helpers import parse_datetime
-import copy
+
+if TYPE_CHECKING:
+    import datetime
 
 
 class FlowItem(object):
-    def __init__(self, project_id, name=None):
-        self._webpage_url = None
-        self._created_at = None
-        self._id = None
-        self._initial_tags = set()
-        self._project_name = None
-        self._updated_at = None
-        self.name = name
-        self.owner_id = None
-        self.project_id = project_id
-        self.tags = set()
-        self.description = None
+    def __init__(self, project_id: str, name: Optional[str] = None) -> None:
+        self._webpage_url: Optional[str] = None
+        self._created_at: Optional["datetime.datetime"] = None
+        self._id: Optional[str] = None
+        self._initial_tags: Set[str] = set()
+        self._project_name: Optional[str] = None
+        self._updated_at: Optional["datetime.datetime"] = None
+        self.name: Optional[str] = name
+        self.owner_id: Optional[str] = None
+        self.project_id: str = project_id
+        self.tags: Set[str] = set()
+        self.description: Optional[str] = None
 
         self._connections = None
         self._permissions = None
@@ -39,11 +46,11 @@ class FlowItem(object):
         return self._permissions()
 
     @property
-    def webpage_url(self):
+    def webpage_url(self) -> Optional[str]:
         return self._webpage_url
 
     @property
-    def created_at(self):
+    def created_at(self) -> Optional["datetime.datetime"]:
         return self._created_at
 
     @property
@@ -54,36 +61,36 @@ class FlowItem(object):
         return self._data_quality_warnings()
 
     @property
-    def id(self):
+    def id(self) -> Optional[str]:
         return self._id
 
     @property
-    def project_id(self):
+    def project_id(self) -> str:
         return self._project_id
 
     @project_id.setter
     @property_not_nullable
-    def project_id(self, value):
+    def project_id(self, value: str) -> None:
         self._project_id = value
 
     @property
-    def description(self):
+    def description(self) -> Optional[str]:
         return self._description
 
     @description.setter
-    def description(self, value):
+    def description(self, value: str) -> None:
         self._description = value
 
     @property
-    def project_name(self):
+    def project_name(self) -> Optional[str]:
         return self._project_name
 
     @property
-    def flow_type(self):
+    def flow_type(self):  # What is this? It doesn't seem to get set anywhere.
         return self._flow_type
 
     @property
-    def updated_at(self):
+    def updated_at(self) -> Optional["datetime.datetime"]:
         return self._updated_at
 
     def _set_connections(self, connections):
@@ -97,7 +104,7 @@ class FlowItem(object):
 
     def _parse_common_elements(self, flow_xml, ns):
         if not isinstance(flow_xml, ET.Element):
-            flow_xml = ET.fromstring(flow_xml).find(".//t:flow", namespaces=ns)
+            flow_xml = fromstring(flow_xml).find(".//t:flow", namespaces=ns)
         if flow_xml is not None:
             (
                 _,
@@ -161,9 +168,9 @@ class FlowItem(object):
             self.owner_id = owner_id
 
     @classmethod
-    def from_response(cls, resp, ns):
+    def from_response(cls, resp, ns) -> List["FlowItem"]:
         all_flow_items = list()
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         all_flow_xml = parsed_response.findall(".//t:flow", namespaces=ns)
 
         for flow_xml in all_flow_xml:

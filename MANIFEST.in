@@ -15,9 +15,6 @@ recursive-include test *.json
 recursive-include test *.pdf
 recursive-include test *.png
 recursive-include test *.py
-recursive-include test *.tde
-recursive-include test *.tds
-recursive-include test *.tdsx
-recursive-include test *.twb
-recursive-include test *.twbx
 recursive-include test *.xml
+global-include *.pyi
+global-include *.typed

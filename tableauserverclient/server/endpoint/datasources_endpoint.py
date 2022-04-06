@@ -1,9 +1,27 @@
+import cgi
+import copy
+import io
+import json
+import logging
+import os
+from contextlib import closing
+from pathlib import Path
+from typing import (
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    TYPE_CHECKING,
+    Union,
+)
+
+from .dqw_endpoint import _DataQualityWarningEndpoint
 from .endpoint import QuerysetEndpoint, api, parameter_added_in
 from .exceptions import InternalServerError, MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
-from .dqw_endpoint import _DataQualityWarningEndpoint
 from .resource_tagger import _ResourceTagger
-from .. import RequestFactory, DatasourceItem, PaginationItem, ConnectionItem
+from .. import RequestFactory, DatasourceItem, PaginationItem, ConnectionItem, RequestOptions
 from ..query import QuerySet
 from ...filesys_helpers import (
     to_filename,
@@ -11,14 +29,24 @@ from ...filesys_helpers import (
     get_file_type,
     get_file_object_size,
 )
+from ...models import ConnectionCredentials, RevisionItem
 from ...models.job_item import JobItem
+from ...models import ConnectionCredentials
 
-import os
-import logging
-import copy
-import cgi
-from contextlib import closing
-import json
+io_types = (io.BytesIO, io.BufferedReader)
+
+from pathlib import Path
+from typing import (
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    TYPE_CHECKING,
+    Union,
+)
+
+io_types = (io.BytesIO, io.BufferedReader)
 
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
@@ -27,21 +55,32 @@ ALLOWED_FILE_EXTENSIONS = ["tds", "tdsx", "tde", "hyper", "parquet"]
 
 logger = logging.getLogger("tableau.endpoint.datasources")
 
+if TYPE_CHECKING:
+    from ..server import Server
+    from ...models import PermissionsRule
+    from .schedules_endpoint import AddResponse
+
+FilePath = Union[str, os.PathLike]
+FileObject = Union[io.BufferedReader, io.BytesIO]
+PathOrFile = Union[FilePath, FileObject]
+
 
 class Datasources(QuerysetEndpoint):
-    def __init__(self, parent_srv):
+    def __init__(self, parent_srv: "Server") -> None:
         super(Datasources, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
         self._data_quality_warnings = _DataQualityWarningEndpoint(self.parent_srv, "datasource")
 
+        return None
+
     @property
-    def baseurl(self):
+    def baseurl(self) -> str:
         return "{0}/sites/{1}/datasources".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     # Get all datasources
     @api(version="2.0")
-    def get(self, req_options=None):
+    def get(self, req_options: RequestOptions = None) -> Tuple[List[DatasourceItem], PaginationItem]:
         logger.info("Querying all datasources on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -51,7 +90,7 @@ class Datasources(QuerysetEndpoint):
 
     # Get 1 datasource by id
     @api(version="2.0")
-    def get_by_id(self, datasource_id):
+    def get_by_id(self, datasource_id: str) -> DatasourceItem:
         if not datasource_id:
             error = "Datasource ID undefined."
             raise ValueError(error)
@@ -62,7 +101,7 @@ class Datasources(QuerysetEndpoint):
 
     # Populate datasource item's connections
     @api(version="2.0")
-    def populate_connections(self, datasource_item):
+    def populate_connections(self, datasource_item: DatasourceItem) -> None:
         if not datasource_item.id:
             error = "Datasource item missing ID. Datasource must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -81,7 +120,7 @@ class Datasources(QuerysetEndpoint):
 
     # Delete 1 datasource by id
     @api(version="2.0")
-    def delete(self, datasource_id):
+    def delete(self, datasource_id: str) -> None:
         if not datasource_id:
             error = "Datasource ID undefined."
             raise ValueError(error)
@@ -93,7 +132,13 @@ class Datasources(QuerysetEndpoint):
     @api(version="2.0")
     @parameter_added_in(no_extract="2.5")
     @parameter_added_in(include_extract="2.5")
-    def download(self, datasource_id, filepath=None, include_extract=True, no_extract=None):
+    def download(
+        self,
+        datasource_id: str,
+        filepath: FilePath = None,
+        include_extract: bool = True,
+        no_extract: Optional[bool] = None,
+    ) -> str:
         if not datasource_id:
             error = "Datasource ID undefined."
             raise ValueError(error)
@@ -126,7 +171,7 @@ class Datasources(QuerysetEndpoint):
 
     # Update datasource
     @api(version="2.0")
-    def update(self, datasource_item):
+    def update(self, datasource_item: DatasourceItem) -> DatasourceItem:
         if not datasource_item.id:
             error = "Datasource item missing ID. Datasource must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -143,7 +188,7 @@ class Datasources(QuerysetEndpoint):
 
     # Update datasource connections
     @api(version="2.3")
-    def update_connection(self, datasource_item, connection_item):
+    def update_connection(self, datasource_item: DatasourceItem, connection_item: ConnectionItem) -> ConnectionItem:
         url = "{0}/{1}/connections/{2}".format(self.baseurl, datasource_item.id, connection_item.id)
 
         update_req = RequestFactory.Connection.update_req(connection_item)
@@ -156,7 +201,7 @@ class Datasources(QuerysetEndpoint):
         return connection
 
     @api(version="2.8")
-    def refresh(self, datasource_item):
+    def refresh(self, datasource_item: DatasourceItem) -> JobItem:
         id_ = getattr(datasource_item, "id", datasource_item)
         url = "{0}/{1}/refresh".format(self.baseurl, id_)
         empty_req = RequestFactory.Empty.empty_req()
@@ -165,7 +210,7 @@ class Datasources(QuerysetEndpoint):
         return new_job
 
     @api(version="3.5")
-    def create_extract(self, datasource_item, encrypt=False):
+    def create_extract(self, datasource_item: DatasourceItem, encrypt: bool = False) -> JobItem:
         id_ = getattr(datasource_item, "id", datasource_item)
         url = "{0}/{1}/createExtract?encrypt={2}".format(self.baseurl, id_, encrypt)
         empty_req = RequestFactory.Empty.empty_req()
@@ -174,7 +219,7 @@ class Datasources(QuerysetEndpoint):
         return new_job
 
     @api(version="3.5")
-    def delete_extract(self, datasource_item):
+    def delete_extract(self, datasource_item: DatasourceItem) -> None:
         id_ = getattr(datasource_item, "id", datasource_item)
         url = "{0}/{1}/deleteExtract".format(self.baseurl, id_)
         empty_req = RequestFactory.Empty.empty_req()
@@ -186,16 +231,15 @@ class Datasources(QuerysetEndpoint):
     @parameter_added_in(as_job="3.0")
     def publish(
         self,
-        datasource_item,
-        file,
-        mode,
-        connection_credentials=None,
-        connections=None,
-        as_job=False,
-    ):
+        datasource_item: DatasourceItem,
+        file: PathOrFile,
+        mode: str,
+        connection_credentials: ConnectionCredentials = None,
+        connections: Sequence[ConnectionItem] = None,
+        as_job: bool = False,
+    ) -> Union[DatasourceItem, JobItem]:
 
-        try:
-
+        if isinstance(file, (os.PathLike, str)):
             if not os.path.isfile(file):
                 error = "File path does not lead to an existing file."
                 raise IOError(error)
@@ -211,7 +255,7 @@ class Datasources(QuerysetEndpoint):
                 error = "Only {} files can be published as datasources.".format(", ".join(ALLOWED_FILE_EXTENSIONS))
                 raise ValueError(error)
 
-        except TypeError:
+        elif isinstance(file, io_types):
 
             if not datasource_item.name:
                 error = "Datasource item must have a name when passing a file object"
@@ -228,6 +272,9 @@ class Datasources(QuerysetEndpoint):
 
             filename = "{}.{}".format(datasource_item.name, file_extension)
             file_size = get_file_object_size(file)
+
+        else:
+            raise TypeError("file should be a filepath or file object.")
 
         if not mode or not hasattr(self.parent_srv.PublishMode, mode):
             error = "Invalid mode defined."
@@ -252,11 +299,13 @@ class Datasources(QuerysetEndpoint):
         else:
             logger.info("Publishing {0} to server".format(filename))
 
-            try:
+            if isinstance(file, (Path, str)):
                 with open(file, "rb") as f:
                     file_contents = f.read()
-            except TypeError:
+            elif isinstance(file, io_types):
                 file_contents = file.read()
+            else:
+                raise TypeError("file should be a filepath or file object.")
 
             xml_request, content_type = RequestFactory.Datasource.publish_req(
                 datasource_item,
@@ -284,7 +333,14 @@ class Datasources(QuerysetEndpoint):
             return new_datasource
 
     @api(version="3.13")
-    def update_hyper_data(self, datasource_or_connection_item, *, request_id, actions, payload = None):
+    def update_hyper_data(
+        self,
+        datasource_or_connection_item: Union[DatasourceItem, ConnectionItem, str],
+        *,
+        request_id: str,
+        actions: Sequence[Mapping],
+        payload: Optional[FilePath] = None
+    ) -> JobItem:
         if isinstance(datasource_or_connection_item, DatasourceItem):
             datasource_id = datasource_or_connection_item.id
             url = "{0}/{1}/data".format(self.baseurl, datasource_id)
@@ -312,7 +368,7 @@ class Datasources(QuerysetEndpoint):
         return new_job
 
     @api(version="2.0")
-    def populate_permissions(self, item):
+    def populate_permissions(self, item: DatasourceItem) -> None:
         self._permissions.populate(item)
 
     @api(version="2.0")
@@ -327,11 +383,11 @@ class Datasources(QuerysetEndpoint):
         self._permissions.update(item, permission_item)
 
     @api(version="2.0")
-    def update_permissions(self, item, permission_item):
+    def update_permissions(self, item: DatasourceItem, permission_item: List["PermissionsRule"]) -> None:
         self._permissions.update(item, permission_item)
 
     @api(version="2.0")
-    def delete_permission(self, item, capability_item):
+    def delete_permission(self, item: DatasourceItem, capability_item: "PermissionsRule") -> None:
         self._permissions.delete(item, capability_item)
 
     @api(version="3.5")
@@ -349,3 +405,83 @@ class Datasources(QuerysetEndpoint):
     @api(version="3.5")
     def delete_dqw(self, item):
         self._data_quality_warnings.clear(item)
+
+    # Populate datasource item's revisions
+    @api(version="2.3")
+    def populate_revisions(self, datasource_item: DatasourceItem) -> None:
+        if not datasource_item.id:
+            error = "Datasource item missing ID. Datasource must be retrieved from server first."
+            raise MissingRequiredFieldError(error)
+
+        def revisions_fetcher():
+            return self._get_datasource_revisions(datasource_item)
+
+        datasource_item._set_revisions(revisions_fetcher)
+        logger.info("Populated revisions for datasource (ID: {0})".format(datasource_item.id))
+
+    def _get_datasource_revisions(
+        self, datasource_item: DatasourceItem, req_options: Optional["RequestOptions"] = None
+    ) -> List[RevisionItem]:
+        url = "{0}/{1}/revisions".format(self.baseurl, datasource_item.id)
+        server_response = self.get_request(url, req_options)
+        revisions = RevisionItem.from_response(server_response.content, self.parent_srv.namespace, datasource_item)
+        return revisions
+
+    # Download 1 datasource revision by revision number
+    @api(version="2.3")
+    def download_revision(
+        self,
+        datasource_id: str,
+        revision_number: str,
+        filepath: Optional[PathOrFile] = None,
+        include_extract: bool = True,
+        no_extract: Optional[bool] = None,
+    ) -> str:
+        if not datasource_id:
+            error = "Datasource ID undefined."
+            raise ValueError(error)
+        url = "{0}/{1}/revisions/{2}/content".format(self.baseurl, datasource_id, revision_number)
+        if no_extract is False or no_extract is True:
+            import warnings
+
+            warnings.warn(
+                "no_extract is deprecated, use include_extract instead.",
+                DeprecationWarning,
+            )
+            include_extract = not no_extract
+
+        if not include_extract:
+            url += "?includeExtract=False"
+
+        with closing(self.get_request(url, parameters={"stream": True})) as server_response:
+            _, params = cgi.parse_header(server_response.headers["Content-Disposition"])
+            filename = to_filename(os.path.basename(params["filename"]))
+
+            download_path = make_download_path(filepath, filename)
+
+            with open(download_path, "wb") as f:
+                for chunk in server_response.iter_content(1024):  # 1KB
+                    f.write(chunk)
+
+        logger.info(
+            "Downloaded datasource revision {0} to {1} (ID: {2})".format(revision_number, download_path, datasource_id)
+        )
+        return os.path.abspath(download_path)
+
+    @api(version="2.3")
+    def delete_revision(self, datasource_id: str, revision_number: str) -> None:
+        if datasource_id is None or revision_number is None:
+            raise ValueError
+        url = "/".join([self.baseurl, datasource_id, "revisions", revision_number])
+
+        self.delete_request(url)
+        logger.info(
+            "Deleted single datasource revision (ID: {0}) (Revision: {1})".format(datasource_id, revision_number)
+        )
+
+    # a convenience method
+    @api(version="2.8")
+    def schedule_extract_refresh(
+        self, schedule_id: str, item: DatasourceItem
+    ) -> List["AddResponse"]:  # actually should return a task
+        return self.parent_srv.schedules.add_to_schedule(schedule_id, datasource=item)

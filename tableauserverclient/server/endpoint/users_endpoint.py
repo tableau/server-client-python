@@ -1,3 +1,7 @@
+import copy
+import logging
+from typing import List, Tuple
+
 from .endpoint import QuerysetEndpoint, api
 from .exceptions import MissingRequiredFieldError
 from .. import (
@@ -10,20 +14,17 @@ from .. import (
 )
 from ..pager import Pager
 
-import copy
-import logging
-
 logger = logging.getLogger("tableau.endpoint.users")
 
 
 class Users(QuerysetEndpoint):
     @property
-    def baseurl(self):
+    def baseurl(self) -> str:
         return "{0}/sites/{1}/users".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     # Gets all users
     @api(version="2.0")
-    def get(self, req_options=None):
+    def get(self, req_options: RequestOptions = None) -> Tuple[List[UserItem], PaginationItem]:
         logger.info("Querying all users on site")
 
         if req_options is None:
@@ -38,7 +39,7 @@ class Users(QuerysetEndpoint):
 
     # Gets 1 user by id
     @api(version="2.0")
-    def get_by_id(self, user_id):
+    def get_by_id(self, user_id: str) -> UserItem:
         if not user_id:
             error = "User ID undefined."
             raise ValueError(error)
@@ -49,7 +50,7 @@ class Users(QuerysetEndpoint):
 
     # Update user
     @api(version="2.0")
-    def update(self, user_item, password=None):
+    def update(self, user_item: UserItem, password: str = None) -> UserItem:
         if not user_item.id:
             error = "User item missing ID."
             raise MissingRequiredFieldError(error)
@@ -63,7 +64,7 @@ class Users(QuerysetEndpoint):
 
     # Delete 1 user by id
     @api(version="2.0")
-    def remove(self, user_id):
+    def remove(self, user_id: str) -> None:
         if not user_id:
             error = "User ID undefined."
             raise ValueError(error)
@@ -73,7 +74,7 @@ class Users(QuerysetEndpoint):
 
     # Add new user to site
     @api(version="2.0")
-    def add(self, user_item):
+    def add(self, user_item: UserItem) -> UserItem:
         url = self.baseurl
         add_req = RequestFactory.User.add_req(user_item)
         server_response = self.post_request(url, add_req)
@@ -83,7 +84,7 @@ class Users(QuerysetEndpoint):
 
     # Get workbooks for user
     @api(version="2.0")
-    def populate_workbooks(self, user_item, req_options=None):
+    def populate_workbooks(self, user_item: UserItem, req_options: RequestOptions = None) -> None:
         if not user_item.id:
             error = "User item missing ID."
             raise MissingRequiredFieldError(error)
@@ -93,7 +94,9 @@ class Users(QuerysetEndpoint):
 
         user_item._set_workbooks(wb_pager)
 
-    def _get_wbs_for_user(self, user_item, req_options=None):
+    def _get_wbs_for_user(
+        self, user_item: UserItem, req_options: RequestOptions = None
+    ) -> Tuple[List[WorkbookItem], PaginationItem]:
         url = "{0}/{1}/workbooks".format(self.baseurl, user_item.id)
         server_response = self.get_request(url, req_options)
         logger.info("Populated workbooks for user (ID: {0})".format(user_item.id))
@@ -101,12 +104,12 @@ class Users(QuerysetEndpoint):
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         return workbook_item, pagination_item
 
-    def populate_favorites(self, user_item):
+    def populate_favorites(self, user_item: UserItem) -> None:
         self.parent_srv.favorites.get(user_item)
 
     # Get groups for user
     @api(version="3.7")
-    def populate_groups(self, user_item, req_options=None):
+    def populate_groups(self, user_item: UserItem, req_options: RequestOptions = None) -> None:
         if not user_item.id:
             error = "User item missing ID."
             raise MissingRequiredFieldError(error)
@@ -119,7 +122,9 @@ class Users(QuerysetEndpoint):
 
         user_item._set_groups(groups_for_user_pager)
 
-    def _get_groups_for_user(self, user_item, req_options=None):
+    def _get_groups_for_user(
+        self, user_item: UserItem, req_options: RequestOptions = None
+    ) -> Tuple[List[GroupItem], PaginationItem]:
         url = "{0}/{1}/groups".format(self.baseurl, user_item.id)
         server_response = self.get_request(url, req_options)
         logger.info("Populated groups for user (ID: {0})".format(user_item.id))

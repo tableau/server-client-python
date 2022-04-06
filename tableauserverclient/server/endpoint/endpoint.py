@@ -1,22 +1,22 @@
+import logging
+from distutils.version import LooseVersion as Version
+from functools import wraps
+from xml.etree.ElementTree import ParseError
+
 from .exceptions import (
     ServerResponseError,
     InternalServerError,
     NonXMLResponseError,
     EndpointUnavailableError,
 )
-from functools import wraps
-from xml.etree.ElementTree import ParseError
 from ..query import QuerySet
-import logging
-
-try:
-    from distutils2.version import NormalizedVersion as Version
-except ImportError:
-    from packaging.version import Version
 
 logger = logging.getLogger("tableau.endpoint")
 
 Success_codes = [200, 201, 202, 204]
+
+XML_CONTENT_TYPE = "text/xml"
+JSON_CONTENT_TYPE = "application/json"
 
 
 class Endpoint(object):
@@ -62,9 +62,9 @@ class Endpoint(object):
         if content is not None:
             parameters["data"] = content
 
-        logger.debug(u"request {}, url: {}".format(method.__name__, url))
+        logger.debug("request {}, url: {}".format(method.__name__, url))
         if content:
-            logger.debug(u"request content: {}".format(content[:1000]))
+            logger.debug("request content: {}".format(content[:1000]))
 
         server_response = method(url, **parameters)
         self.parent_srv._namespace.detect(server_response.content)
@@ -74,9 +74,7 @@ class Endpoint(object):
         # so that we do not attempt to log bytes and other binary data.
         if len(server_response.content) > 0 and server_response.encoding:
             logger.debug(
-                u"Server response from {0}:\n\t{1}".format(
-                    url, server_response.content.decode(server_response.encoding)
-                )
+                "Server response from {0}:\n\t{1}".format(url, server_response.content.decode(server_response.encoding))
             )
         return server_response
 
@@ -230,7 +228,9 @@ class QuerysetEndpoint(Endpoint):
         return queryset
 
     @api(version="2.0")
-    def filter(self, *args, **kwargs):
+    def filter(self, *_, **kwargs):
+        if _:
+            raise RuntimeError("Only keyword arguments accepted.")
         queryset = QuerySet(self).filter(**kwargs)
         return queryset
 

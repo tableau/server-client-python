@@ -1,6 +1,7 @@
 import unittest
-from ._utils import mocked_time
+
 from tableauserverclient.exponential_backoff import ExponentialBackoffTimer
+from ._utils import mocked_time
 
 
 class ExponentialBackoffTests(unittest.TestCase):
@@ -21,7 +22,6 @@ class ExponentialBackoffTests(unittest.TestCase):
             exponentialBackoff.sleep()
             self.assertAlmostEqual(mock_time(), 5.4728)
 
-
     def test_exponential_saturation(self):
         with mocked_time() as mock_time:
             exponentialBackoff = ExponentialBackoffTimer()
@@ -35,7 +35,6 @@ class ExponentialBackoffTests(unittest.TestCase):
                 exponentialBackoff.sleep()
                 slept = mock_time() - s
                 self.assertAlmostEqual(slept, 30)
-
 
     def test_timeout(self):
         with mocked_time() as mock_time:
@@ -52,11 +51,10 @@ class ExponentialBackoffTests(unittest.TestCase):
             with self.assertRaises(TimeoutError):
                 exponentialBackoff.sleep()
 
-
     def test_timeout_zero(self):
         with mocked_time() as mock_time:
             # The construction of the timer doesn't throw, yet
-            exponentialBackoff = ExponentialBackoffTimer(timeout = 0)
+            exponentialBackoff = ExponentialBackoffTimer(timeout=0)
             # But the first `sleep` immediately throws
             with self.assertRaises(TimeoutError):
                 exponentialBackoff.sleep()

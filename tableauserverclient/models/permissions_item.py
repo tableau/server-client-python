@@ -1,11 +1,17 @@
-import xml.etree.ElementTree as ET
 import logging
+import xml.etree.ElementTree as ET
 
-from .exceptions import UnknownGranteeTypeError
-from .user_item import UserItem
+from defusedxml.ElementTree import fromstring
+from .exceptions import UnknownGranteeTypeError, UnpopulatedPropertyError
 from .group_item import GroupItem
+from .user_item import UserItem
 
 logger = logging.getLogger("tableau.models.permissions_item")
+
+from typing import Dict, List, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .reference_item import ResourceReference
 
 
 class Permission:
@@ -42,19 +48,19 @@ class Permission:
 
 
 class PermissionsRule(object):
-    def __init__(self, grantee, capabilities):
+    def __init__(self, grantee: "ResourceReference", capabilities: Dict[str, str]) -> None:
         self.grantee = grantee
         self.capabilities = capabilities
 
     @classmethod
-    def from_response(cls, resp, ns=None):
-        parsed_response = ET.fromstring(resp)
+    def from_response(cls, resp, ns=None) -> List["PermissionsRule"]:
+        parsed_response = fromstring(resp)
 
         rules = []
         permissions_rules_list_xml = parsed_response.findall(".//t:granteeCapabilities", namespaces=ns)
 
         for grantee_capability_xml in permissions_rules_list_xml:
-            capability_dict = {}
+            capability_dict: Dict[str, str] = {}
 
             grantee = PermissionsRule._parse_grantee_element(grantee_capability_xml, ns)
 
@@ -62,7 +68,11 @@ class PermissionsRule(object):
                 name = capability_xml.get("name")
                 mode = capability_xml.get("mode")
 
-                capability_dict[name] = mode
+                if name is None or mode is None:
+                    logger.error("Capability was not valid: ", capability_xml)
+                    raise UnpopulatedPropertyError()
+                else:
+                    capability_dict[name] = mode
 
             rule = PermissionsRule(grantee, capability_dict)
             rules.append(rule)
@@ -70,7 +80,7 @@ class PermissionsRule(object):
         return rules
 
     @staticmethod
-    def _parse_grantee_element(grantee_capability_xml, ns):
+    def _parse_grantee_element(grantee_capability_xml: ET.Element, ns: Optional[Dict[str, str]]) -> "ResourceReference":
         """Use Xpath magic and some string splitting to get the right object type from the xml"""
 
         # Get the first element in the tree with an 'id' attribute
