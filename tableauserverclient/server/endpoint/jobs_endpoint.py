@@ -17,9 +17,7 @@ class Jobs(QuerysetEndpoint):
         return "{0}/sites/{1}/jobs".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     @api(version="2.6")
-    def get(
-        self, req_options: Optional[RequestOptionsBase] = None
-    ) -> Tuple[List[BackgroundJobItem], PaginationItem]:
+    def get(self, req_options: Optional[RequestOptionsBase] = None) -> Tuple[List[BackgroundJobItem], PaginationItem]:
         self.parent_srv.assert_at_least_version("3.1")
         server_response = self.get_request(self.baseurl, req_options)
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
