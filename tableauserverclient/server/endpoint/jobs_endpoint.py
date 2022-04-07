@@ -18,17 +18,8 @@ class Jobs(QuerysetEndpoint):
 
     @api(version="2.6")
     def get(
-        self, job_id: Optional[str] = None, req_options: Optional[RequestOptionsBase] = None
+        self, req_options: Optional[RequestOptionsBase] = None
     ) -> Tuple[List[BackgroundJobItem], PaginationItem]:
-        # Backwards Compatibility fix until we rev the major version
-        if job_id is not None and isinstance(job_id, str):
-            import warnings
-
-            warnings.warn("Jobs.get(job_id) is deprecated, update code to use Jobs.get_by_id(job_id)")
-            return self.get_by_id(job_id)
-        if isinstance(job_id, RequestOptionsBase):
-            req_options = job_id
-
         self.parent_srv.assert_at_least_version("3.1")
         server_response = self.get_request(self.baseurl, req_options)
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)

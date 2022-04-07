@@ -50,6 +50,8 @@ class RequestOptions(RequestOptionsBase):
         ProjectName = "projectName"
         PublishSamples = "publishSamples"
         SiteRole = "siteRole"
+        StartedAt = "startedAt"
+        Status = "status"
         Subtitle = "subtitle"
         Tags = "tags"
         Title = "title"
