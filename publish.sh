@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 
+# tag the release version and confirm a clean version number
+git tag vxxxx
+git describe --tag --dirty --always 
+
 set -e
 
 rm -rf dist
-python3 setup.py sdist
-python3 setup.py bdist_wheel
+python setup.py sdist bdist_wheel
 twine upload dist/*
