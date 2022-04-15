@@ -950,7 +950,7 @@ class WorkbookRequest(object):
         list_element = ET.SubElement(xml_request, "datasources")
         if include_all:
             list_element.attrib["includeAll"] = "true"
-        else:
+        elif datasources:
             for datasource_item in datasources:
                 datasource_element = list_element.SubElement(xml_request, "datasource")
                 datasource_element.attrib["id"] = datasource_item.id
