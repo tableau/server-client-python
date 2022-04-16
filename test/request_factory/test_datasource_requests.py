@@ -5,9 +5,8 @@ from tableauserverclient import DatasourceItem
 
 
 class DatasourceRequestTests(unittest.TestCase):
-
     def test_generate_xml(self):
-        datasource_item: TSC.DatasourceItem = TSC.DatasourceItem('name')
+        datasource_item: TSC.DatasourceItem = TSC.DatasourceItem("name")
         datasource_item.name = "a ds"
         datasource_item.description = "described"
         datasource_item.use_remote_query_agent = False
