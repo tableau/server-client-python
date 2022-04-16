@@ -877,7 +877,6 @@ class WorkbookRequest(object):
             views_element = ET.SubElement(workbook_element, "views")
             for view_name in workbook_item.hidden_views:
                 _add_hiddenview_element(views_element, view_name)
-
         return ET.tostring(xml_request)
 
     def update_req(self, workbook_item):
@@ -952,7 +951,7 @@ class WorkbookRequest(object):
             list_element.attrib["includeAll"] = "true"
         elif datasources:
             for datasource_item in datasources:
-                datasource_element = list_element.SubElement(xml_request, "datasource")
+                datasource_element = ET.SubElement(list_element, "datasource")
                 datasource_element.attrib["id"] = datasource_item.id
 
 
