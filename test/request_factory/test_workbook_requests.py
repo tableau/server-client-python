@@ -10,7 +10,7 @@ class WorkbookRequestTests(unittest.TestCase):
         xml_result = TSC_RF.RequestFactory.Workbook.embedded_extract_req(include_all, embedded_datasources)
 
     def test_generate_xml(self):
-        workbook_item: TSC.WorkbookItem = TSC.WorkbookItem("name")
-        workbook_item.project_id = "testval"
-        workbook_item.show_tabs = False
+        workbook_item: TSC.WorkbookItem = TSC.WorkbookItem("name", "project_id")
         TSC_RF.RequestFactory.Workbook._generate_xml(workbook_item)
+
+
