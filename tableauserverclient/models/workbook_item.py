@@ -124,7 +124,6 @@ class WorkbookItem(object):
         return self._project_id
 
     @project_id.setter
-    @property_not_nullable
     def project_id(self, value: str):
         self._project_id = value
 
