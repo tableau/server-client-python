@@ -26,7 +26,7 @@ add your contributions to the **development** branch.
 1. Fork the repository. We follow the "Fork and Pull" model as described
    [here](https://help.github.com/articles/about-collaborative-development-models/).
 
-1. Clone your fork:
+1. Clone your fork:(using SSH)
 
    ```shell
    git clone git@github.com:<user-name>/server-client-python.git
