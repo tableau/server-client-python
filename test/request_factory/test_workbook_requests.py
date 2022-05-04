@@ -12,5 +12,3 @@ class WorkbookRequestTests(unittest.TestCase):
     def test_generate_xml(self):
         workbook_item: TSC.WorkbookItem = TSC.WorkbookItem("name", "project_id")
         TSC_RF.RequestFactory.Workbook._generate_xml(workbook_item)
-
-
