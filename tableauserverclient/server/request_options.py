@@ -46,6 +46,7 @@ class RequestOptions(RequestOptionsBase):
         OwnerDomain = "ownerDomain"
         OwnerEmail = "ownerEmail"
         OwnerName = "ownerName"
+        ParentProjectId = "parentProjectId"
         Progress = "progress"
         ProjectName = "projectName"
         PublishSamples = "publishSamples"
