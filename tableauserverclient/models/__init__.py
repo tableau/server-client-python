@@ -24,6 +24,7 @@ from .pagination_item import PaginationItem
 from .permissions_item import PermissionsRule, Permission
 from .personal_access_token_auth import PersonalAccessTokenAuth
 from .personal_access_token_auth import PersonalAccessTokenAuth
+from .json_web_token_auth import JsonWebTokenAuth
 from .project_item import ProjectItem
 from .revision_item import RevisionItem
 from .schedule_item import ScheduleItem

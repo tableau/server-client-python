@@ -13,6 +13,7 @@ from .models import (
     ScheduleItem,
     SiteItem,
     TableauAuth,
+    JsonWebTokenAuth,
     PersonalAccessTokenAuth,
     UserItem,
     ViewItem,

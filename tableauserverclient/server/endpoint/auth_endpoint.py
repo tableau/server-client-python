@@ -44,6 +44,11 @@ class Auth(Endpoint):
         # We use the same request that username/password login uses.
         return self.sign_in(auth_req)
 
+    @api(version="3.6")
+    def sign_in_with_json_web_token(self, auth_req):
+        # We use the same request that username/password login uses.
+        return self.sign_in(auth_req)
+
     @api(version="2.0")
     def sign_out(self):
         url = "{0}/{1}".format(self.baseurl, "signout")
