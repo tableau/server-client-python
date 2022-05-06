@@ -52,10 +52,15 @@ def main():
     logging.basicConfig(level=logging_level)
 
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
-    server = TSC.Server(args.server, use_server_version=True)
+    server = TSC.Server(args.server, use_server_version=True, http_options={"verify": False})
     with server.auth.sign_in(tableau_auth):
-        views = filter(lambda x: x.id == args.resource_id or x.name == args.resource_id, TSC.Pager(server.views.get))
-        view = list(views).pop()  # in python 3 filter() returns a filter object
+        views = list(filter(lambda x: x.id == args.resource_id or x.name == args.resource_id,
+                            TSC.Pager(server.views.get)))
+
+        if len(views):
+            view = views.pop()
+        else:
+            exit("No view found for argument")
 
         # We have a number of different types and functions for each different export type.
         # We encode that information above in the const=(...) parameter to the add_argument function to make
