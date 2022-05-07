@@ -6,7 +6,8 @@ except ImportError:
     import mock  # type: ignore[no-redef]
 
 import tableauserverclient.server.request_factory as factory
-from tableauserverclient.server.endpoint import Endpoint
+from tableauserverclient.models.workbook_item import WorkbookItem
+from tableauserverclient.helpers.strings import redact, safe_to_log
 from tableauserverclient.filesys_helpers import to_filename, make_download_path
 
 
@@ -25,8 +26,7 @@ class BugFix273(unittest.TestCase):
             status_code = 200
 
         server_response = FakeResponse()
-
-        self.assertEqual(Endpoint._safe_to_log(server_response), "[Truncated File Contents]")
+        self.assertEqual(safe_to_log(server_response), "[Truncated File Contents]")
 
 
 class FileSysHelpers(unittest.TestCase):
@@ -60,3 +60,14 @@ class FileSysHelpers(unittest.TestCase):
         with mock.patch("os.path.isdir") as mocked_isdir:
             mocked_isdir.return_value = True
             self.assertEqual("/root/folder/file.ext", make_download_path(*has_file_path_folder))
+
+
+class LoggingTest(unittest.TestCase):
+
+    def test_redact_password_string(self):
+        redacted = redact("this is a long password string with at least a password or two in it")
+        assert redacted.find("password") == -1
+
+    def test_redact_password_bytes(self):
+        redacted = redact(b"this is a long password string with at least a password or two in it")
+        assert redacted.find(b"password") == -1
