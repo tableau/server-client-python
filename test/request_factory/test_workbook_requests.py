@@ -3,6 +3,7 @@ import tableauserverclient as TSC
 import tableauserverclient.server.request_factory as TSC_RF
 from tableauserverclient.helpers.strings import redact
 
+
 class WorkbookRequestTests(unittest.TestCase):
     def test_embedded_extract_req(self):
         include_all = True
@@ -49,4 +50,3 @@ class WorkbookRequestTests(unittest.TestCase):
         assert request.find(b"DELETEME") > 0
         assert redact(request).find(b"password") == -1
         assert redact(request).find(b"DELETEME") == -1
-
