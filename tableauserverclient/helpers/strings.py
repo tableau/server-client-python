@@ -1,6 +1,8 @@
 from functools import singledispatch
 from typing import TypeVar
 import requests
+import sys
+
 
 # the redact method can handle either strings or bytes, but it can't mix them.
 # Generic type so we can write the actual logic once, then use singledispatch to
@@ -46,6 +48,10 @@ def _redact_typeful(content: T, target: T, replacement: T) -> T:
 
 @singledispatch
 def redact(content):
+    # softly failing to redact in python 3.6, which is not technically supported
+    current_version = ".".join(map(str, sys.version_info[0:2]))
+    if current_version is "3.6":
+        return content
     # this will only be called if it didn't get directed to the str or bytes overloads
     raise TypeError("Redaction only works on str or bytes")
 
