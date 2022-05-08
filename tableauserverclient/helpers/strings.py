@@ -38,11 +38,11 @@ def _redact_typeful(content: T, target: T, replacement: T) -> T:
     while search_start >= 0:
         try:
             replacement_begin: int = content.index(target, search_start) + 8
-            content = content.replace(target, replacement)
             content = _replace(content, replacement_begin, replacement)
-            search_start = replacement_begin + 8 + 10
+            search_start = replacement_begin + 8
         except ValueError:
             search_start = -1
+    content = content.replace(target, replacement)
     return content
 
 
@@ -50,7 +50,7 @@ def _redact_typeful(content: T, target: T, replacement: T) -> T:
 def redact(content):
     # softly failing to redact in python 3.6, which is not technically supported
     current_version = ".".join(map(str, sys.version_info[0:2]))
-    if current_version is "3.6":
+    if current_version == "3.6":
         return content
     # this will only be called if it didn't get directed to the str or bytes overloads
     raise TypeError("Redaction only works on str or bytes")

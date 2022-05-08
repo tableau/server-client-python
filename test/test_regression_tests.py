@@ -64,9 +64,11 @@ class FileSysHelpers(unittest.TestCase):
 
 class LoggingTest(unittest.TestCase):
     def test_redact_password_string(self):
-        redacted = redact("this is a long password string with at least a password or two in it")
+        redacted = redact("this is a long password: value string with at least a password: value or two in it")
         assert redacted.find("password") == -1
+        assert redacted.find("value") == -1
 
     def test_redact_password_bytes(self):
-        redacted = redact(b"this is a long password string with at least a password or two in it")
+        redacted = redact(b"this is a long password: value string with at least a password: valuesecret or two in it")
         assert redacted.find(b"password") == -1
+        assert redacted.find(b"value") == -1
