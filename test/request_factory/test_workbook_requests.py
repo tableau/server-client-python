@@ -5,6 +5,7 @@ from tableauserverclient.helpers.strings import redact
 import pytest
 import sys
 
+
 class WorkbookRequestTests(unittest.TestCase):
     def test_embedded_extract_req(self):
         include_all = True
