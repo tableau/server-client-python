@@ -1,5 +1,6 @@
 import unittest
-
+import pytest
+import sys
 try:
     from unittest import mock
 except ImportError:
@@ -64,11 +65,15 @@ class FileSysHelpers(unittest.TestCase):
 
 class LoggingTest(unittest.TestCase):
     def test_redact_password_string(self):
+        if sys.version_info < (3, 7):
+            pytest.skip("Redaction is only implemented for 3.7+.")
         redacted = redact("this is a long password: value string with at least a password: value or two in it")
         assert redacted.find("password") == -1
         assert redacted.find("value") == -1
 
     def test_redact_password_bytes(self):
+        if sys.version_info < (3, 7):
+            pytest.skip("Redaction is only implemented for 3.7+.")
         redacted = redact(b"this is a long password: value string with at least a password: valuesecret or two in it")
         assert redacted.find(b"password") == -1
         assert redacted.find(b"value") == -1

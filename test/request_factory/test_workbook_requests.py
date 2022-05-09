@@ -2,7 +2,8 @@ import unittest
 import tableauserverclient as TSC
 import tableauserverclient.server.request_factory as TSC_RF
 from tableauserverclient.helpers.strings import redact
-
+import pytest
+import sys
 
 class WorkbookRequestTests(unittest.TestCase):
     def test_embedded_extract_req(self):
@@ -40,6 +41,8 @@ class WorkbookRequestTests(unittest.TestCase):
         assert request.find(b"DELETEME") > 0
 
     def test_redact_passwords_in_xml(self):
+        if sys.version_info < (3, 7):
+            pytest.skip("Redaction is only implemented for 3.7+.")
         workbook_item: TSC.WorkbookItem = TSC.WorkbookItem("name", "project_id")
         conn = TSC.ConnectionItem()
         conn.server_address = "address"
