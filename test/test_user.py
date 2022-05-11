@@ -111,6 +111,16 @@ class UserTests(unittest.TestCase):
             m.delete(self.baseurl + "/dd2239f6-ddf1-4107-981a-4cf94e415794", status_code=204)
             self.server.users.remove("dd2239f6-ddf1-4107-981a-4cf94e415794")
 
+    def test_remove_with_replacement(self) -> None:
+        with requests_mock.mock() as m:
+            m.delete(
+                self.baseurl
+                + "/dd2239f6-ddf1-4107-981a-4cf94e415794"
+                + "?mapAssetsTo=4cc4c17f-898a-4de4-abed-a1681c673ced",
+                status_code=204,
+            )
+            self.server.users.remove("dd2239f6-ddf1-4107-981a-4cf94e415794", "4cc4c17f-898a-4de4-abed-a1681c673ced")
+
     def test_remove_missing_id(self) -> None:
         self.assertRaises(ValueError, self.server.users.remove, "")
 
