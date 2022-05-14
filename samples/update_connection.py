@@ -1,7 +1,7 @@
 ####
 # This script demonstrates how to update a connections credentials on a server to embed the credentials
 #
-# To run the script, you must have installed Python 3.6 or later.
+# To run the script, you must have installed Python 3.7 or later.
 ####
 
 import argparse

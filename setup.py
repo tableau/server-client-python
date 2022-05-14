@@ -40,6 +40,7 @@ setup(
         'defusedxml>=0.7.1',
         'requests>=2.11,<3.0',
     ],
+    python_requires='>3.7.0',
     tests_require=test_requirements,
     extras_require={
         'test': test_requirements
