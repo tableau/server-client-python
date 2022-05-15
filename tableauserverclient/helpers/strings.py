@@ -42,14 +42,14 @@ def _redact_any_type(content: T, target: T, replacement: Any, get_element: Any) 
         try:
             replacement_begin: int = content.index(target, search_start) + 10
             i: int = replacement_begin
-            # replace until we hit a space or quote or xml end-bracket
+            # replace until we hit a quote or xml end-bracket
             # this *could* mean it stops partway into a password, if that character is present
             # so do a minimum of 8 characters
             next_char = None
             n_replaced = 0
             while i < len(content) and \
                     (n_replaced < 8 or
-                     not (next_char == " " or next_char == '"' or next_char == ">")):
+                     not (next_char == '"' or next_char == ">")):
                 next_char = get_element(content, i)
                 content = content[:i] + replacement + content[i + 1:]
                 i = i + 1
