@@ -1,5 +1,5 @@
 from functools import singledispatch
-from typing import TypeVar
+from typing import TypeVar, Any
 import requests
 import sys
 
@@ -29,20 +29,34 @@ def safe_to_log(server_response: requests.Response) -> str:
 
 
 def _replace(text: T, position: int, replacement: T) -> T:
-    result: T = text[:position] + replacement + text[position + len(replacement) :]
+    result: T = text[:position] + replacement + text[position + len(replacement):]
     return result
 
 
-def _redact_typeful(content: T, target: T, replacement: T) -> T:
+# usage: _redact_typeful("<xml workbook password= cooliothesecond>", "password", "redacted",
+#                           get_element=get_char_from_str)
+# -> "<xml workbook password =***************">
+def _redact_any_type(content: T, target: T, replacement: Any, get_element: Any) -> T:
     search_start: int = 0
     while search_start >= 0:
         try:
-            replacement_begin: int = content.index(target, search_start) + 8
-            content = _replace(content, replacement_begin, replacement)
-            search_start = replacement_begin + 8
-        except ValueError:
+            replacement_begin: int = content.index(target, search_start) + 10
+            i: int = replacement_begin
+            # replace until we hit a space or quote or xml end-bracket
+            # this *could* mean it stops partway into a password, if that character is present
+            # so do a minimum of 8 characters
+            next_char = None
+            n_replaced = 0
+            while i < len(content) and \
+                    (n_replaced < 8 or
+                     not (next_char == " " or next_char == '"' or next_char == ">")):
+                next_char = get_element(content, i)
+                content = content[:i] + replacement + content[i + 1:]
+                i = i + 1
+                n_replaced = n_replaced + 1
+            search_start = i
+        except ValueError:  # thrown when we don't find any more uses of target string
             search_start = -1
-    content = content.replace(target, replacement)
     return content
 
 
@@ -52,11 +66,19 @@ def redact(content):
     raise TypeError("Redaction only works on str or bytes")
 
 
+def get_char_from_str(content, i):
+    return content[i]
+
+
 @redact.register
 def _(arg: str) -> str:
-    return _redact_typeful(arg, target="password", replacement="redacted")
+    return _redact_any_type(arg, target="password", replacement="*", get_element=get_char_from_str)
+
+
+def get_char_from_bytes(element_list, i):
+    return chr(element_list[i])
 
 
 @redact.register  # type: ignore[no-redef]
 def _(arg: bytes) -> bytes:
-    return _redact_typeful(arg, target=b"password", replacement=b"redacted")
+    return _redact_any_type(bytearray(arg), b"password", b"*", get_char_from_bytes)

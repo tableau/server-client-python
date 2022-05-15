@@ -66,15 +66,19 @@ class FileSysHelpers(unittest.TestCase):
 
 class LoggingTest(unittest.TestCase):
     def test_redact_password_string(self):
-        if sys.version_info < (3, 7):
-            pytest.skip("Redaction is only implemented for 3.7+.")
-        redacted = redact("this is a long password: value string with at least a password: value or two in it")
-        assert redacted.find("password") == -1
+        redacted = redact("this is password: my_super_secret_passphrase_which_nobody_should_ever_see  password: value")
         assert redacted.find("value") == -1
+        assert redacted.find("secret") == -1
+        assert redacted.find("ever_see") == -1
+        assert redacted.find("my_super_secret_passphrase_which_nobody_should_ever_see") == -1
 
     def test_redact_password_bytes(self):
-        if sys.version_info < (3, 7):
-            pytest.skip("Redaction is only implemented for 3.7+.")
         redacted = redact(b"this is a long password: value string with at least a password: valuesecret or two in it")
-        assert redacted.find(b"password") == -1
         assert redacted.find(b"value") == -1
+        assert redacted.find(b"secret") == -1
+
+    def test_redact_password_with_special_char(self):
+        redacted = redact(
+            "this is a long password: my_s per_secre>_passphrase_which_nobody_should_ever_see  with password: value")
+        assert redacted.find("per") == -1
+        assert redacted.find("my_super_secret_passphrase_which_nobody_should_ever_see") == -1

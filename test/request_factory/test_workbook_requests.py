@@ -50,7 +50,5 @@ class WorkbookRequestTests(unittest.TestCase):
         creds = TSC.ConnectionCredentials("username", "DELETEME")
         conn.connection_credentials = creds
         request = TSC_RF.RequestFactory.Workbook._generate_xml(workbook_item, connections=[conn])
-        assert request.find(b"password") > 0
         assert request.find(b"DELETEME") > 0
-        assert redact(request).find(b"password") == -1
         assert redact(request).find(b"DELETEME") == -1
