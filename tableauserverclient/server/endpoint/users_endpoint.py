@@ -1,6 +1,6 @@
 import copy
 import logging
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from .endpoint import QuerysetEndpoint, api
 from .exceptions import MissingRequiredFieldError
@@ -64,11 +64,13 @@ class Users(QuerysetEndpoint):
 
     # Delete 1 user by id
     @api(version="2.0")
-    def remove(self, user_id: str) -> None:
+    def remove(self, user_id: str, map_assets_to: Optional[str] = None) -> None:
         if not user_id:
             error = "User ID undefined."
             raise ValueError(error)
         url = "{0}/{1}".format(self.baseurl, user_id)
+        if map_assets_to is not None:
+            url += f"?mapAssetsTo={map_assets_to}"
         self.delete_request(url)
         logger.info("Removed single user (ID: {0})".format(user_id))
 
