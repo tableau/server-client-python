@@ -79,7 +79,8 @@ class LoggingTest(unittest.TestCase):
 
     def test_redact_password_with_special_char(self):
         redacted = redact(
-            "this is a long password: my_s per_secre>_passphrase_which_nobody_should_ever_see  with password: value")
+            "this is a long password: my_s per_secre>_passphrase_which_nobody_should_ever_see  with password: value"
+        )
         assert redacted.find("per") == -1
         assert redacted.find("my_super_secret_passphrase_which_nobody_should_ever_see") == -1
         assert redacted.find("passphrase") > 0  # we stopped at the > character

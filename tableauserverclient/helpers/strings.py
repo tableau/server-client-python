@@ -29,7 +29,7 @@ def safe_to_log(server_response: requests.Response) -> str:
 
 
 def _replace(text: T, position: int, replacement: T) -> T:
-    result: T = text[:position] + replacement + text[position + len(replacement):]
+    result: T = text[:position] + replacement + text[position + len(replacement) :]
     return result
 
 
@@ -47,11 +47,9 @@ def _redact_any_type(content: T, target: T, replacement: Any, get_element: Any) 
             # so do a minimum of 8 characters
             next_char = None
             n_replaced = 0
-            while i < len(content) and \
-                    (n_replaced < 8 or
-                     not (next_char == '"' or next_char == ">")):
+            while i < len(content) and (n_replaced < 8 or not (next_char == '"' or next_char == ">")):
                 next_char = get_element(content, i)
-                content = content[:i] + replacement + content[i + 1:]
+                content = content[:i] + replacement + content[i + 1 :]
                 i = i + 1
                 n_replaced = n_replaced + 1
             search_start = i
