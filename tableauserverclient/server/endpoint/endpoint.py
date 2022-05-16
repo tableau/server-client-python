@@ -2,6 +2,7 @@ import logging
 from distutils.version import LooseVersion as Version
 from functools import wraps
 from xml.etree.ElementTree import ParseError
+from typing import Any, Callable, Dict, Optional, TYPE_CHECKING
 
 from .exceptions import (
     ServerResponseError,
@@ -18,9 +19,13 @@ Success_codes = [200, 201, 202, 204]
 XML_CONTENT_TYPE = "text/xml"
 JSON_CONTENT_TYPE = "application/json"
 
+if TYPE_CHECKING:
+    from ..server import Server
+    from requests import Response
+
 
 class Endpoint(object):
-    def __init__(self, parent_srv):
+    def __init__(self, parent_srv: "Server"):
         self.parent_srv = parent_srv
 
     @staticmethod
@@ -46,13 +51,13 @@ class Endpoint(object):
 
     def _make_request(
         self,
-        method,
-        url,
-        content=None,
-        auth_token=None,
-        content_type=None,
-        parameters=None,
-    ):
+        method: Callable[..., "Response"],
+        url: str,
+        content: Optional[bytes] = None,
+        auth_token: Optional[str] = None,
+        content_type: Optional[str] = None,
+        parameters: Optional[Dict[str, Any]] = None,
+    ) -> "Response":
         parameters = parameters or {}
         parameters.update(self.parent_srv.http_options)
         if not "headers" in parameters:
@@ -64,11 +69,18 @@ class Endpoint(object):
 
         logger.debug("request {}, url: {}".format(method.__name__, url))
         if content:
-            logger.debug("request content: {}".format(content[:1000]))
+            logger.debug("request content: %r", content[:1000])
 
         server_response = method(url, **parameters)
-        self.parent_srv._namespace.detect(server_response.content)
+
+        # Response.content is a property. Calling it will load the entire response into memory. Checking if the
+        # content-type is an octet-stream accomplishes the same goal without eagerly loading content.
+        if server_response.headers.get("Content-Type") != "application/octet-stream":
+            self.parent_srv._namespace.detect(server_response.content)
         self._check_status(server_response)
+
+        if server_response.headers.get("Content-Type") == "application/octet-stream":
+            return server_response
 
         # This check is to determine if the response is a text response (xml or otherwise)
         # so that we do not attempt to log bytes and other binary data.
