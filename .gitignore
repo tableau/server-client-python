@@ -78,7 +78,6 @@ target/
 
 # poetry
 poetry.lock
-pyproject.toml
 
 # celery beat schedule file
 celerybeat-schedule
