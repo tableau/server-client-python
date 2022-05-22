@@ -7,6 +7,7 @@ import requests_mock
 
 ASSETS = Path(__file__).parent / "assets"
 
+
 class TestEndpoint(unittest.TestCase):
     def setUp(self) -> None:
         self.server = TSC.Server("http://test/", use_server_version=False)
@@ -16,7 +17,6 @@ class TestEndpoint(unittest.TestCase):
         self.server._auth_token = "j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM"
 
         return super().setUp()
-
 
     def test_get_request_stream(self) -> None:
         url = "http://test/"

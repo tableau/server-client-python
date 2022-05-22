@@ -75,7 +75,7 @@ class Endpoint(object):
 
         # Response.content is a property. Calling it will load the entire response into memory. Checking if the
         # content-type is an octet-stream accomplishes the same goal without eagerly loading content.
-        stream = parameters.get('stream', False)
+        stream = parameters.get("stream", False)
         stream = stream or (server_response.headers.get("Content-Type") == "application/octet-stream")
         if stream:
             return server_response
