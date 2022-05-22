@@ -75,12 +75,13 @@ class Endpoint(object):
 
         # Response.content is a property. Calling it will load the entire response into memory. Checking if the
         # content-type is an octet-stream accomplishes the same goal without eagerly loading content.
-        if server_response.headers.get("Content-Type") != "application/octet-stream":
-            self.parent_srv._namespace.detect(server_response.content)
-        self._check_status(server_response)
-
-        if server_response.headers.get("Content-Type") == "application/octet-stream":
+        stream = parameters.get('stream', False)
+        stream = stream or (server_response.headers.get("Content-Type") == "application/octet-stream")
+        if stream:
             return server_response
+
+        self.parent_srv._namespace.detect(server_response.content)
+        self._check_status(server_response)
 
         # This check is to determine if the response is a text response (xml or otherwise)
         # so that we do not attempt to log bytes and other binary data.
