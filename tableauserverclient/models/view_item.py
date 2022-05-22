@@ -1,5 +1,5 @@
 import copy
-from typing import Callable, Iterable, List, Optional, Set, TYPE_CHECKING
+from typing import Callable, Generator, Iterator, List, Optional, Set, TYPE_CHECKING
 
 from defusedxml.ElementTree import fromstring
 
@@ -24,8 +24,8 @@ class ViewItem(object):
         self._preview_image: Optional[Callable[[], bytes]] = None
         self._project_id: Optional[str] = None
         self._pdf: Optional[Callable[[], bytes]] = None
-        self._csv: Optional[Callable[[], Iterable[bytes]]] = None
-        self._excel: Optional[Callable[[], Iterable[bytes]]] = None
+        self._csv: Optional[Callable[[], Iterator[bytes]]] = None
+        self._excel: Optional[Callable[[], Iterator[bytes]]] = None
         self._total_views: Optional[int] = None
         self._sheet_type: Optional[str] = None
         self._updated_at: Optional["datetime"] = None
@@ -94,14 +94,14 @@ class ViewItem(object):
         return self._pdf()
 
     @property
-    def csv(self) -> Iterable[bytes]:
+    def csv(self) -> Iterator[bytes]:
         if self._csv is None:
             error = "View item must be populated with its csv first."
             raise UnpopulatedPropertyError(error)
         return self._csv()
 
     @property
-    def excel(self) -> Iterable[bytes]:
+    def excel(self) -> Iterator[bytes]:
         if self._excel is None:
             error = "View item must be populated with its excel first."
             raise UnpopulatedPropertyError(error)
