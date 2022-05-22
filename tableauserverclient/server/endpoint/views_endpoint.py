@@ -1,4 +1,3 @@
-from email.generator import Generator
 import logging
 from contextlib import closing
 
