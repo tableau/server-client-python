@@ -9,7 +9,7 @@ except ImportError:
 
 import tableauserverclient.server.request_factory as factory
 from tableauserverclient.models.workbook_item import WorkbookItem
-from tableauserverclient.helpers.strings import redact, safe_to_log
+from tableauserverclient.helpers.strings import redact_xml, safe_to_log
 from tableauserverclient.filesys_helpers import to_filename, make_download_path
 
 
@@ -66,21 +66,19 @@ class FileSysHelpers(unittest.TestCase):
 
 class LoggingTest(unittest.TestCase):
     def test_redact_password_string(self):
-        redacted = redact("this is password: my_super_secret_passphrase_which_nobody_should_ever_see  password: value")
+        redacted = redact_xml("<?xml version='1.0'?><workbook><password>this is password: my_super_secret_passphrase_which_nobody_should_ever_see  password: value</password></workbook>")
         assert redacted.find("value") == -1
         assert redacted.find("secret") == -1
         assert redacted.find("ever_see") == -1
         assert redacted.find("my_super_secret_passphrase_which_nobody_should_ever_see") == -1
 
     def test_redact_password_bytes(self):
-        redacted = redact(b"this is a long password: value string with at least a password: valuesecret or two in it")
+        redacted = redact_xml(b"<?xml version='1.0'?><datasource><data-connection name='con-artist' password='value string with at least a password: valuesecret or two in it'/></datasource>")
         assert redacted.find(b"value") == -1
         assert redacted.find(b"secret") == -1
 
     def test_redact_password_with_special_char(self):
-        redacted = redact(
-            "this is a long password: my_s per_secre>_passphrase_which_nobody_should_ever_see  with password: value"
+        redacted = redact_xml(
+            "<?xml version='1.0'?><content><safe_text value='this is a nondescript text line which is public' password='my_s per_secre>_passphrase_which_nobody_should_ever_see with password: value'> </safe_text></content>"
         )
-        assert redacted.find("per") == -1
-        assert redacted.find("my_super_secret_passphrase_which_nobody_should_ever_see") == -1
-        assert redacted.find("passphrase") > 0  # we stopped at the > character
+        assert redacted.find("my_s per_secre>_passphrase_which_nobody_should_ever_see with password: value") == -1

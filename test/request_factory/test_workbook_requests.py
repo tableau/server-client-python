@@ -1,7 +1,7 @@
 import unittest
 import tableauserverclient as TSC
 import tableauserverclient.server.request_factory as TSC_RF
-from tableauserverclient.helpers.strings import redact
+from tableauserverclient.helpers.strings import redact_xml
 import pytest
 import sys
 
@@ -50,5 +50,6 @@ class WorkbookRequestTests(unittest.TestCase):
         creds = TSC.ConnectionCredentials("username", "DELETEME")
         conn.connection_credentials = creds
         request = TSC_RF.RequestFactory.Workbook._generate_xml(workbook_item, connections=[conn])
-        assert request.find(b"DELETEME") > 0
-        assert redact(request).find(b"DELETEME") == -1
+        redacted = redact_xml(request)
+        assert request.find(b"DELETEME") > 0, request
+        assert redacted.find(b"DELETEME") == -1, redacted

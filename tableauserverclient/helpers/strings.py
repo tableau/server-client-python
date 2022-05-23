@@ -1,7 +1,8 @@
-from functools import singledispatch
-from typing import TypeVar, Any
 import requests
-import sys
+
+from defusedxml.ElementTree import fromstring, tostring
+from functools import singledispatch
+from typing import TypeVar
 
 
 # the redact method can handle either strings or bytes, but it can't mix them.
@@ -24,59 +25,42 @@ def safe_to_log(server_response: requests.Response) -> str:
         return ""
     # max length 1000
     loggable_response: str = server_response.content.decode(server_response.encoding)[:1000]
-    redacted_response: str = redact(loggable_response)
+    redacted_response: str = redact_xml(loggable_response)
     return redacted_response
 
 
-def _replace(text: T, position: int, replacement: T) -> T:
-    result: T = text[:position] + replacement + text[position + len(replacement) :]
-    return result
+# usage: _redact_any_type("<xml workbook password= cooliothesecond>")
+# -> b"<xml workbook password =***************">
+def _redact_any_type(xml: T, sensitive_word: T, replacement: T, encoding=None) -> T:
+    try:
+        root = fromstring(xml)
+        matches = root.findall(".//*[@password]")
+        for item in matches:
+            item.attrib['password'] = "********"
+        matches = root.findall(".//password")
+        for item in matches:
+            item.text = "********"
+        # tostring returns bytes unless an encoding value is passed
+        return tostring(root, encoding=encoding)
+    except Exception:
+        # something about the xml handling failed. Just cut off the text at the first occurrence of "password"
+        location = xml.find(sensitive_word)
+        return xml[:location] + replacement
 
-
-# usage: _redact_typeful("<xml workbook password= cooliothesecond>", "password", "redacted",
-#                           get_element=get_char_from_str)
-# -> "<xml workbook password =***************">
-def _redact_any_type(content: T, target: T, replacement: Any, get_element: Any) -> T:
-    search_start: int = 0
-    while search_start >= 0:
-        try:
-            replacement_begin: int = content.index(target, search_start) + 10
-            i: int = replacement_begin
-            # replace until we hit a quote or xml end-bracket
-            # this *could* mean it stops partway into a password, if that character is present
-            # so do a minimum of 8 characters
-            next_char = None
-            n_replaced = 0
-            while i < len(content) and (n_replaced < 8 or not (next_char == '"' or next_char == ">")):
-                next_char = get_element(content, i)
-                content = content[:i] + replacement + content[i + 1 :]
-                i = i + 1
-                n_replaced = n_replaced + 1
-            search_start = i
-        except ValueError:  # thrown when we don't find any more uses of target string
-            search_start = -1
-    return content
 
 
 @singledispatch
-def redact(content):
+def redact_xml(content):
     # this will only be called if it didn't get directed to the str or bytes overloads
-    raise TypeError("Redaction only works on str or bytes")
+    raise TypeError("Redaction only works on xml saved as str or bytes")
 
 
-def get_char_from_str(content, i):
-    return content[i]
+@redact_xml.register
+def _(xml: str) -> str:
+    out = _redact_any_type(xml, "password", "...[redacted]", encoding="unicode")
+    return out
 
 
-@redact.register
-def _(arg: str) -> str:
-    return _redact_any_type(arg, target="password", replacement="*", get_element=get_char_from_str)
-
-
-def get_char_from_bytes(element_list, i):
-    return chr(element_list[i])
-
-
-@redact.register  # type: ignore[no-redef]
-def _(arg: bytes) -> bytes:
-    return _redact_any_type(bytearray(arg), b"password", b"*", get_char_from_bytes)
+@redact_xml.register  # type: ignore[no-redef]
+def _(xml: bytes) -> bytes:
+    return _redact_any_type(bytearray(xml), b"password", b"..[redacted]")

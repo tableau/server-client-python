@@ -54,13 +54,16 @@ class Endpoint(object):
 
         logger.debug("request {}, url: {}".format(method.__name__, url))
         if content:
-            logger.debug("request content: {}".format(helpers.strings.redact(content[:1000])))
+            logger.debug("request content: {}".format(helpers.strings.redact_xml(content[:1000])))
 
         server_response = method(url, **parameters)
-        self.parent_srv._namespace.detect(server_response.content)
         self._check_status(server_response)
-        loggable_response = helpers.strings.safe_to_log(server_response)
-        logger.debug("Server response from {0}:\n\t{1}".format(url, loggable_response))
+        if server_response.headers.get("Content-Type") == "application/octet-stream":
+            logger.debug("Server response from {0} was of type application/octet-stream".format(url))
+        else:
+            loggable_response = helpers.strings.safe_to_log(server_response)
+            self.parent_srv._namespace.detect(server_response.content)
+            logger.debug("Server response from {0}:\n\t{1}".format(url, loggable_response))
         return server_response
 
     def _check_status(self, server_response):
