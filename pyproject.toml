@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=45.0", "versioneer-518", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 120
+target-version = ['py37', 'py38', 'py39', 'py310']
+
+[tool.mypy]
+disable_error_code = [
+    'misc',
+    'import'
+]
+files = [
+    "tableauserverclient",
+    "test"
+]
+show_error_codes = true

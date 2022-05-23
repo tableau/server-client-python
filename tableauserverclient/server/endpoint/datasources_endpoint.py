@@ -339,7 +339,7 @@ class Datasources(QuerysetEndpoint):
         *,
         request_id: str,
         actions: Sequence[Mapping],
-        payload: Optional[FilePath] = None
+        payload: Optional[FilePath] = None,
     ) -> JobItem:
         if isinstance(datasource_or_connection_item, DatasourceItem):
             datasource_id = datasource_or_connection_item.id
