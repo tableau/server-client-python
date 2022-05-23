@@ -36,7 +36,7 @@ def _redact_any_type(xml: T, sensitive_word: T, replacement: T, encoding=None) -
         root = fromstring(xml)
         matches = root.findall(".//*[@password]")
         for item in matches:
-            item.attrib['password'] = "********"
+            item.attrib["password"] = "********"
         matches = root.findall(".//password")
         for item in matches:
             item.text = "********"
@@ -46,7 +46,6 @@ def _redact_any_type(xml: T, sensitive_word: T, replacement: T, encoding=None) -
         # something about the xml handling failed. Just cut off the text at the first occurrence of "password"
         location = xml.find(sensitive_word)
         return xml[:location] + replacement
-
 
 
 @singledispatch

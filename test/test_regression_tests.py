@@ -66,14 +66,18 @@ class FileSysHelpers(unittest.TestCase):
 
 class LoggingTest(unittest.TestCase):
     def test_redact_password_string(self):
-        redacted = redact_xml("<?xml version='1.0'?><workbook><password>this is password: my_super_secret_passphrase_which_nobody_should_ever_see  password: value</password></workbook>")
+        redacted = redact_xml(
+            "<?xml version='1.0'?><workbook><password>this is password: my_super_secret_passphrase_which_nobody_should_ever_see  password: value</password></workbook>"
+        )
         assert redacted.find("value") == -1
         assert redacted.find("secret") == -1
         assert redacted.find("ever_see") == -1
         assert redacted.find("my_super_secret_passphrase_which_nobody_should_ever_see") == -1
 
     def test_redact_password_bytes(self):
-        redacted = redact_xml(b"<?xml version='1.0'?><datasource><data-connection name='con-artist' password='value string with at least a password: valuesecret or two in it'/></datasource>")
+        redacted = redact_xml(
+            b"<?xml version='1.0'?><datasource><data-connection name='con-artist' password='value string with at least a password: valuesecret or two in it'/></datasource>"
+        )
         assert redacted.find(b"value") == -1
         assert redacted.find(b"secret") == -1
 
