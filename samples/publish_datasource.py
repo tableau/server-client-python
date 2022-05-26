@@ -15,7 +15,7 @@
 # more information on personal access tokens, refer to the documentations:
 # (https://help.tableau.com/current/server/en-us/security_personal_access_tokens.htm)
 #
-# To run the script, you must have installed Python 3.6 or later.
+# To run the script, you must have installed Python 3.7 or later.
 ####
 
 import argparse

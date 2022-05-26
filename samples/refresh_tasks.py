@@ -2,7 +2,7 @@
 # This script demonstrates how to use the Tableau Server Client
 # to query extract refresh tasks and run them as needed.
 #
-# To run the script, you must have installed Python 3.6 or later.
+# To run the script, you must have installed Python 3.7 or later.
 ####
 
 import argparse
