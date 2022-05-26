@@ -37,6 +37,9 @@ class Permission:
         ViewUnderlyingData = "ViewUnderlyingData"
         WebAuthoring = "WebAuthoring"
         Write = "Write"
+        RunExplainData='RunExplainData'
+        CreateRefreshMetrics='CreateRefreshMetrics'
+        SaveAs='SaveAs'
 
     class Resource:
         Workbook = "workbook"
@@ -45,6 +48,7 @@ class Permission:
         Table = "table"
         Database = "database"
         View = "view"
+        Lense = 'lense'
 
 
 class PermissionsRule(object):
