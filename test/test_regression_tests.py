@@ -94,7 +94,6 @@ class LoggingTest(unittest.TestCase):
         assert redacted.find("my_s per_secre>_passphrase_which_nobody_should_ever_see") == -1
         assert redacted.find("</content>") == -1, redacted
 
-
     def test_redact_password_really_not_xml(self):
         redacted = redact_xml(
             "value='this is a nondescript text line which is public' password='my_s per_secre>_passphrase_which_nobody_should_ever_see with password: value and then a cookie "
