@@ -1,6 +1,6 @@
 ####
 # This script demonstrates how to add default permissions using TSC
-# To run the script, you must have installed Python 3.6 or later.
+# To run the script, you must have installed Python 3.7 or later.
 #
 # In order to demonstrate adding a new default permission, this sample will create
 # a new project and add a new capability to the new project, for the default "All users" group.
