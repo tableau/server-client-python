@@ -86,3 +86,19 @@ class LoggingTest(unittest.TestCase):
             "<?xml version='1.0'?><content><safe_text value='this is a nondescript text line which is public' password='my_s per_secre>_passphrase_which_nobody_should_ever_see with password: value'> </safe_text></content>"
         )
         assert redacted.find("my_s per_secre>_passphrase_which_nobody_should_ever_see with password: value") == -1
+
+    def test_redact_password_not_xml(self):
+        redacted = redact_xml(
+            "<content><safe_text value='this is a nondescript text line which is public' password='my_s per_secre>_passphrase_which_nobody_should_ever_see with password: value'> </safe_text></content>"
+        )
+        assert redacted.find("my_s per_secre>_passphrase_which_nobody_should_ever_see") == -1
+        assert redacted.find("</content>") == -1, redacted
+
+
+    def test_redact_password_really_not_xml(self):
+        redacted = redact_xml(
+            "value='this is a nondescript text line which is public' password='my_s per_secre>_passphrase_which_nobody_should_ever_see with password: value and then a cookie "
+        )
+        assert redacted.find("my_s per_secre>_passphrase_which_nobody_should_ever_see") == -1
+        assert redacted.find("passphrase") == -1, redacted
+        assert redacted.find("cookie") == -1, redacted
