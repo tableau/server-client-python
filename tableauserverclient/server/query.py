@@ -60,7 +60,24 @@ class QuerySet:
             k_range = range(start, stop, step)
             if all(i in page_range for i in k_range):
                 return self._result_cache[k]
-            return [self[i] for i in k_range]
+            else:
+                # To collect all results for the requested slice, we have to
+                # find what page range query. If the step size is one, pull
+                # the entire result cache. If it is anything other than one,
+                # figure out what to pull from the cache.
+                results = []
+                min_page = max(1, math.ceil(start / size))
+                max_page = max(1, math.ceil(stop / size)) + 1
+                for page in range(min_page, max_page):
+                    self.request_options.page_number = page
+                    self._fetch_all()
+                    if step == 1:
+                        results += self._result_cache
+                    else:
+                        x = page * size
+                        y = x + size
+                        results = [self._result_cache[i % size] for i in range(x, y) if i in k_range]
+                return results
 
         if k < 0:
             k += self.total_available
