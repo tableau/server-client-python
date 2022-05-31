@@ -31,6 +31,8 @@ class JobItem(object):
         finish_code: int = 0,
         notes: Optional[List[str]] = None,
         mode: Optional[str] = None,
+        workbook_id: Optional[str] = None,
+        datasource_id: Optional[str] = None,
         flow_run: Optional[FlowRunItem] = None,
     ):
         self._id = id_
@@ -42,6 +44,8 @@ class JobItem(object):
         self._finish_code = finish_code
         self._notes: List[str] = notes or []
         self._mode = mode
+        self._workbook_id = workbook_id
+        self._datasource_id = datasource_id
         self._flow_run = flow_run
 
     @property
@@ -86,6 +90,22 @@ class JobItem(object):
         self._mode = value
 
     @property
+    def workbook_id(self) -> Optional[str]:
+        return self._workbook_id
+
+    @workbook_id.setter
+    def workbook_id(self, value: Optional[str]) -> None:
+        self._workbook_id = value
+
+    @property
+    def datasource_id(self) -> Optional[str]:
+        return self._datasource_id
+
+    @datasource_id.setter
+    def datasource_id(self, value: Optional[str]) -> None:
+        self._datasource_id = value
+
+    @property
     def flow_run(self):
         return self._flow_run
 
@@ -119,6 +139,10 @@ class JobItem(object):
         finish_code = int(element.get("finishCode", -1))
         notes = [note.text for note in element.findall(".//t:notes", namespaces=ns)] or None
         mode = element.get("mode", None)
+        workbook = element.find(".//t:workbook[@id]", namespaces=ns)
+        workbook_id = workbook.get("id") if workbook is not None else None
+        datasource = element.find(".//t:datasource[@id]", namespaces=ns)
+        datasource_id = datasource.get("id") if datasource is not None else None
         flow_run = None
         for flow_job in element.findall(".//t:runFlowJobType", namespaces=ns):
             flow_run = FlowRunItem()
@@ -136,6 +160,8 @@ class JobItem(object):
             finish_code,
             notes,
             mode,
+            workbook_id,
+            datasource_id,
             flow_run,
         )
 

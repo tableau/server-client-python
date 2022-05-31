@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api https://help.tableau.com/samples/en-us/rest_api/ts-api_3_14.xsd">
+    <job id="bb1aab79-db54-4e96-9dd3-461d8f081d08" mode="Asynchronous" type="RefreshExtract" progress="100" createdAt="2021-10-05T18:53:34Z" startedAt="2021-10-05T18:53:34Z" completedAt="2021-10-05T18:53:35Z" finishCode="1">
+        <extractRefreshJob>
+            <workbook id="5998aaaf-1abe-4d38-b4d9-bc53e85bdd13" name="Superstore"/>
+            <notes>java.lang.RuntimeException: [Microsoft][ODBC Driver 17 for SQL Server][SQL Server]Login failed for user.\nIntegrated authentication failed.</notes>
+        </extractRefreshJob>
+    </job>
+</tsResponse>
