@@ -1,6 +1,4 @@
 import unittest
-import pytest
-import sys
 
 try:
     from unittest import mock
@@ -8,8 +6,7 @@ except ImportError:
     import mock  # type: ignore[no-redef]
 
 import tableauserverclient.server.request_factory as factory
-from tableauserverclient.models.workbook_item import WorkbookItem
-from tableauserverclient.helpers.strings import redact_xml, safe_to_log
+from tableauserverclient.helpers.strings import redact_xml
 from tableauserverclient.filesys_helpers import to_filename, make_download_path
 
 
@@ -17,18 +14,6 @@ class BugFix257(unittest.TestCase):
     def test_empty_request_works(self):
         result = factory.EmptyRequest().empty_req()
         self.assertEqual(b"<tsRequest />", result)
-
-
-class BugFix273(unittest.TestCase):
-    def test_binary_log_truncated(self):
-        class FakeResponse(object):
-
-            headers = {"Content-Type": "application/octet-stream"}
-            content = b"\x1337" * 1000
-            status_code = 200
-
-        server_response = FakeResponse()
-        self.assertEqual(safe_to_log(server_response), "[Truncated File Contents]")
 
 
 class FileSysHelpers(unittest.TestCase):
