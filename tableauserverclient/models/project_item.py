@@ -31,7 +31,7 @@ class ProjectItem(object):
         self._default_workbook_permissions = None
         self._default_datasource_permissions = None
         self._default_flow_permissions = None
-        self._default_lense_permissions = None
+        self._default_lens_permissions = None
 
     @property
     def content_permissions(self):
@@ -71,11 +71,11 @@ class ProjectItem(object):
         return self._default_flow_permissions()
 
     @property
-    def default_lense_permissions(self):
-        if self._default_lense_permissions is None:
+    def default_lens_permissions(self):
+        if self._default_lens_permissions is None:
             error = "Project item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
-        return self._default_lense_permissions()
+        return self._default_lens_permissions()
 
     @property
     def id(self) -> Optional[str]:
