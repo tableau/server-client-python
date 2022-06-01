@@ -104,8 +104,8 @@ class Projects(QuerysetEndpoint):
         self._default_permissions.populate_default_permissions(item, Permission.Resource.Flow)
 
     @api(version='3.4')
-    def populate_lense_default_permissions(self, item):
-        self._default_permissions.populate_default_permissions(item, Permission.Resource.Lense)
+    def populate_lens_default_permissions(self, item):
+        self._default_permissions.populate_default_permissions(item, Permission.Resource.Lens)
 
     @api(version="2.1")
     def update_workbook_default_permissions(self, item, rules):
@@ -120,8 +120,8 @@ class Projects(QuerysetEndpoint):
         return self._default_permissions.update_default_permissions(item, rules, Permission.Resource.Flow)
 
     @api(version='3.4')
-    def update_lense_default_permissions(self, item, rules):
-        return self._default_permissions.update_default_permissions(item, rules, Permission.Resource.Lense)
+    def update_lens_default_permissions(self, item, rules):
+        return self._default_permissions.update_default_permissions(item, rules, Permission.Resource.Lens)
 
     @api(version="2.1")
     def delete_workbook_default_permissions(self, item, rule):
@@ -136,5 +136,5 @@ class Projects(QuerysetEndpoint):
         self._default_permissions.delete_default_permission(item, rule, Permission.Resource.Flow)
 
     @api(version='3.4')
-    def delete_lense_default_permissions(self, item, rule):
-        self._default_permissions.delete_default_permission(item, rule, Permission.Resource.Lense)
+    def delete_lens_default_permissions(self, item, rule):
+        self._default_permissions.delete_default_permission(item, rule, Permission.Resource.Lens)
