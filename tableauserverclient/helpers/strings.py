@@ -1,5 +1,3 @@
-import requests
-
 from defusedxml.ElementTree import fromstring, tostring
 from functools import singledispatch
 from typing import TypeVar
@@ -9,24 +7,6 @@ from typing import TypeVar
 # Generic type so we can write the actual logic once, then use singledispatch to
 # create the replacement text with the correct type
 T = TypeVar("T", str, bytes)
-
-
-# TODO: ideally this would be in the logging config
-def safe_to_log(server_response: requests.Response) -> str:
-    """Checks if the server_response content is not xml (eg binary image or zip)
-    and replaces it with a constant"""
-    ALLOWED_CONTENT_TYPES = ("application/xml", "application/xml;charset=utf-8")
-    if server_response.headers.get("Content-Type", None) not in ALLOWED_CONTENT_TYPES:
-        return "[Truncated File Contents]"
-
-    """ Check to determine if the response is a text response (xml or otherwise)
-        so that we do not attempt to log bytes and other binary data. """
-    if not server_response.content or not server_response.encoding:
-        return ""
-    # max length 1000
-    loggable_response: str = server_response.content.decode(server_response.encoding)[:1000]
-    redacted_response: str = redact_xml(loggable_response)
-    return redacted_response
 
 
 # usage: _redact_any_type("<xml workbook password= cooliothesecond>")
