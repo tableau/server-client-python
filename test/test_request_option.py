@@ -277,8 +277,6 @@ class RequestOptionTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.get(self.baseurl + "/views?pageNumber=1", text=SLICING_QUERYSET_PAGE_1.read_text())
             m.get(self.baseurl + "/views?pageNumber=2", text=SLICING_QUERYSET_PAGE_2.read_text())
-            all_views_queryset = self.server.views.all()
-            all_views_queryset.request_options.page_size = 10
             sliced_views = self.server.views.all()[9:12]
 
         self.assertEqual(sliced_views[0].id, "2e6d6c81-da71-4b41-892c-ba80d4e7a6d0")
