@@ -48,7 +48,7 @@ class Permission:
         Table = "table"
         Database = "database"
         View = "view"
-        Lens = "lense"
+        Lens = "lens"
 
 
 class PermissionsRule(object):
