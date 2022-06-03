@@ -36,6 +36,9 @@ from .. import (
     ViewItem,
     WebhookItem,
     WorkbookItem,
+    TableauItem,
+    Resource,
+    plural_type
 )
 from .endpoint import (
     Auth,

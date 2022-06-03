@@ -1,10 +1,12 @@
+import logging
 import xml.etree.ElementTree as ET
-from typing import List, Optional
 
 from defusedxml.ElementTree import fromstring
 
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_is_enum, property_not_empty
+
+from typing import List, Optional
 
 
 from typing import List, Optional, TYPE_CHECKING
@@ -137,11 +139,15 @@ class ProjectItem(object):
         self._permissions = permissions
 
     def _set_default_permissions(self, permissions, content_type):
+        attr = "_default_{content}_permissions".format(content=content_type)
         setattr(
             self,
-            "_default_{content}_permissions".format(content=content_type),
+            attr,
             permissions,
         )
+        fetch_call = getattr(self, attr)
+        logging.getLogger().info({"type" :attr, "value": fetch_call()})
+        return fetch_call()
 
     @classmethod
     def from_response(cls, resp, ns) -> List["ProjectItem"]:

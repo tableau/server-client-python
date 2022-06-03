@@ -4,15 +4,15 @@ from .default_permissions_endpoint import _DefaultPermissionsEndpoint
 from .endpoint import QuerysetEndpoint, api, XML_CONTENT_TYPE
 from .exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
-from .. import RequestFactory, RequestOptions, ProjectItem, PaginationItem, Permission
-
-logger = logging.getLogger("tableau.endpoint.projects")
+from .. import RequestFactory, RequestOptions, ProjectItem, PaginationItem, Resource
 
 from typing import List, Optional, Tuple, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..server import Server
     from ..request_options import RequestOptions
+
+logger = logging.getLogger("tableau.endpoint.projects")
 
 
 class Projects(QuerysetEndpoint):
@@ -93,48 +93,52 @@ class Projects(QuerysetEndpoint):
 
     @api(version="2.1")
     def populate_workbook_default_permissions(self, item):
-        self._default_permissions.populate_default_permissions(item, Permission.Resource.Workbook)
+        self._default_permissions.populate_default_permissions(item, Resource.Workbook)
 
     @api(version="2.1")
     def populate_datasource_default_permissions(self, item):
-        self._default_permissions.populate_default_permissions(item, Permission.Resource.Datasource)
+        self._default_permissions.populate_default_permissions(item, Resource.Datasource)
 
     @api(version="3.4")
     def populate_flow_default_permissions(self, item):
-        self._default_permissions.populate_default_permissions(item, Permission.Resource.Flow)
+        self._default_permissions.populate_default_permissions(item, Resource.Flow)
 
     @api(version="3.4")
     def populate_lens_default_permissions(self, item):
-        self._default_permissions.populate_default_permissions(item, Permission.Resource.Lens)
+        self._default_permissions.populate_default_permissions(item, Resource.Lens)
 
     @api(version="2.1")
     def update_workbook_default_permissions(self, item, rules):
-        return self._default_permissions.update_default_permissions(item, rules, Permission.Resource.Workbook)
+        return self._default_permissions.update_default_permissions(item, rules, Resource.Workbook)
 
     @api(version="2.1")
     def update_datasource_default_permissions(self, item, rules):
-        return self._default_permissions.update_default_permissions(item, rules, Permission.Resource.Datasource)
+        return self._default_permissions.update_default_permissions(item, rules, Resource.Datasource)
 
     @api(version="3.4")
     def update_flow_default_permissions(self, item, rules):
-        return self._default_permissions.update_default_permissions(item, rules, Permission.Resource.Flow)
+        return self._default_permissions.update_default_permissions(item, rules, Resource.Flow)
 
     @api(version="3.4")
     def update_lens_default_permissions(self, item, rules):
-        return self._default_permissions.update_default_permissions(item, rules, Permission.Resource.Lens)
+        return self._default_permissions.update_default_permissions(item, rules, Resource.Lens)
+
+    @api(version="3.4")
+    def update_lens_default_permissions(self, item, rules):
+        return self._default_permissions.update_default_permissions(item, rules, Resource.Lens)
 
     @api(version="2.1")
     def delete_workbook_default_permissions(self, item, rule):
-        self._default_permissions.delete_default_permission(item, rule, Permission.Resource.Workbook)
+        self._default_permissions.delete_default_permission(item, rule, Resource.Workbook)
 
     @api(version="2.1")
     def delete_datasource_default_permissions(self, item, rule):
-        self._default_permissions.delete_default_permission(item, rule, Permission.Resource.Datasource)
+        self._default_permissions.delete_default_permission(item, rule, Resource.Datasource)
 
     @api(version="3.4")
     def delete_flow_default_permissions(self, item, rule):
-        self._default_permissions.delete_default_permission(item, rule, Permission.Resource.Flow)
+        self._default_permissions.delete_default_permission(item, rule, Resource.Flow)
 
     @api(version="3.4")
     def delete_lens_default_permissions(self, item, rule):
-        self._default_permissions.delete_default_permission(item, rule, Permission.Resource.Lens)
+        self._default_permissions.delete_default_permission(item, rule, Resource.Lens)

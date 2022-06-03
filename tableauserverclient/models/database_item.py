@@ -1,3 +1,5 @@
+import logging
+
 from defusedxml.ElementTree import fromstring
 
 from .exceptions import UnpopulatedPropertyError
@@ -242,11 +244,13 @@ class DatabaseItem(object):
         self._tables = tables
 
     def _set_default_permissions(self, permissions, content_type):
+        attr = "_default_{content}_permissions".format(content=content_type)
         setattr(
             self,
-            "_default_{content}_permissions".format(content=content_type),
+            attr,
             permissions,
         )
+        logging.getLogger().debug({"type": attr, "value": getattr(self, attr)})
 
     def _set_data_quality_warnings(self, dqw):
         self._data_quality_warnings = dqw

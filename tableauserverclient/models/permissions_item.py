@@ -41,20 +41,16 @@ class Permission:
         CreateRefreshMetrics = "CreateRefreshMetrics"
         SaveAs = "SaveAs"
 
-    class Resource:
-        Workbook = "workbook"
-        Datasource = "datasource"
-        Flow = "flow"
-        Table = "table"
-        Database = "database"
-        View = "view"
-        Lens = "lens"
-
 
 class PermissionsRule(object):
     def __init__(self, grantee: "ResourceReference", capabilities: Dict[str, str]) -> None:
         self.grantee = grantee
         self.capabilities = capabilities
+
+    def __str__(self):
+        return "<PermissionsRule grantee={}, capabilities={}>".format(self.grantee, self.capabilities)
+
+    __repr__ = __str__
 
     @classmethod
     def from_response(cls, resp, ns=None) -> List["PermissionsRule"]:
