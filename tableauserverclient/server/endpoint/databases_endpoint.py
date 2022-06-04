@@ -5,7 +5,7 @@ from .dqw_endpoint import _DataQualityWarningEndpoint
 from .endpoint import api, Endpoint
 from .exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
-from .. import RequestFactory, DatabaseItem, TableItem, PaginationItem, Permission
+from .. import RequestFactory, DatabaseItem, TableItem, PaginationItem, Resource
 
 logger = logging.getLogger("tableau.endpoint.databases")
 
@@ -16,7 +16,7 @@ class Databases(Endpoint):
 
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
         self._default_permissions = _DefaultPermissionsEndpoint(parent_srv, lambda: self.baseurl)
-        self._data_quality_warnings = _DataQualityWarningEndpoint(parent_srv, "database")
+        self._data_quality_warnings = _DataQualityWarningEndpoint(parent_srv, Resource.Database)
 
     @property
     def baseurl(self):
@@ -108,15 +108,15 @@ class Databases(Endpoint):
 
     @api(version="3.5")
     def populate_table_default_permissions(self, item):
-        self._default_permissions.populate_default_permissions(item, Permission.Resource.Table)
+        self._default_permissions.populate_default_permissions(item, Resource.Table)
 
     @api(version="3.5")
     def update_table_default_permissions(self, item):
-        return self._default_permissions.update_default_permissions(item, Permission.Resource.Table)
+        return self._default_permissions.update_default_permissions(item, Resource.Table)
 
     @api(version="3.5")
     def delete_table_default_permissions(self, item):
-        self._default_permissions.delete_default_permissions(item, Permission.Resource.Table)
+        self._default_permissions.delete_default_permissions(item, Resource.Table)
 
     @api(version="3.5")
     def populate_dqw(self, item):

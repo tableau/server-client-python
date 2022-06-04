@@ -30,6 +30,7 @@ from .site_item import SiteItem
 from .subscription_item import SubscriptionItem
 from .table_item import TableItem
 from .tableau_auth import Credentials, TableauAuth, PersonalAccessTokenAuth
+from .tableau_types import Resource, TableauItem, plural_type
 from .target import Target
 from .task_item import TaskItem
 from .user_item import UserItem

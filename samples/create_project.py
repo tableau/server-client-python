@@ -21,7 +21,8 @@ def create_project(server, project_item, samples=False):
         return project_item
     except TSC.ServerResponseError:
         print("We have already created this project: %s" % project_item.name)
-        sys.exit(1)
+    project_items = server.projects.filter(name=project_item.name)
+    return project_items[0]
 
 
 def main():
@@ -52,7 +53,8 @@ def main():
     logging.basicConfig(level=logging_level)
 
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
-    server = TSC.Server(args.server)
+    server = TSC.Server(args.server, http_options={"verify": False})
+
     server.use_server_version()
     with server.auth.sign_in(tableau_auth):
         # Use highest Server REST API version available
@@ -72,6 +74,21 @@ def main():
 
         # Projects can be updated
         changed_project = server.projects.update(grand_child_project, samples=True)
+
+        server.projects.populate_workbook_default_permissions(changed_project),
+        server.projects.populate_flow_default_permissions(changed_project),
+        server.projects.populate_lens_default_permissions(changed_project),  # uses same as workbook
+        server.projects.populate_datasource_default_permissions(changed_project),
+        server.projects.populate_permissions(changed_project)
+        # Projects have default permissions set for the object types they contain
+        print("Permissions from project {}:".format(changed_project.id))
+        print(changed_project.permissions)
+        print(
+            changed_project.default_workbook_permissions,
+            changed_project.default_datasource_permissions,
+            changed_project.default_lens_permissions,
+            changed_project.default_flow_permissions,
+        )
 
 
 if __name__ == "__main__":
