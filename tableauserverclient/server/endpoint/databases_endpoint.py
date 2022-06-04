@@ -108,15 +108,15 @@ class Databases(Endpoint):
 
     @api(version="3.5")
     def populate_table_default_permissions(self, item):
-        self._default_permissions.populate_default_permissions(item,Resource.Table)
+        self._default_permissions.populate_default_permissions(item, Resource.Table)
 
     @api(version="3.5")
     def update_table_default_permissions(self, item):
-        return self._default_permissions.update_default_permissions(item,Resource.Table)
+        return self._default_permissions.update_default_permissions(item, Resource.Table)
 
     @api(version="3.5")
     def delete_table_default_permissions(self, item):
-        self._default_permissions.delete_default_permissions(item,Resource.Table)
+        self._default_permissions.delete_default_permissions(item, Resource.Table)
 
     @api(version="3.5")
     def populate_dqw(self, item):

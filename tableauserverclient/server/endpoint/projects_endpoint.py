@@ -123,10 +123,6 @@ class Projects(QuerysetEndpoint):
     def update_lens_default_permissions(self, item, rules):
         return self._default_permissions.update_default_permissions(item, rules, Resource.Lens)
 
-    @api(version="3.4")
-    def update_lens_default_permissions(self, item, rules):
-        return self._default_permissions.update_default_permissions(item, rules, Resource.Lens)
-
     @api(version="2.1")
     def delete_workbook_default_permissions(self, item, rule):
         self._default_permissions.delete_default_permission(item, rule, Resource.Workbook)

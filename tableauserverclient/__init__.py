@@ -39,7 +39,7 @@ from .models import (
     MetricItem,
     TableauItem,
     Resource,
-    plural_type
+    plural_type,
 )
 from .namespace import NEW_NAMESPACE as DEFAULT_NAMESPACE
 from .server import (

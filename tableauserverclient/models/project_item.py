@@ -146,7 +146,7 @@ class ProjectItem(object):
             permissions,
         )
         fetch_call = getattr(self, attr)
-        logging.getLogger().info({"type" :attr, "value": fetch_call()})
+        logging.getLogger().info({"type": attr, "value": fetch_call()})
         return fetch_call()
 
     @classmethod

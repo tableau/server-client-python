@@ -22,6 +22,8 @@ from .job_item import JobItem, BackgroundJobItem
 from .metric_item import MetricItem
 from .pagination_item import PaginationItem
 from .permissions_item import PermissionsRule, Permission
+from .personal_access_token_auth import PersonalAccessTokenAuth
+from .personal_access_token_auth import PersonalAccessTokenAuth
 from .project_item import ProjectItem
 from .revision_item import RevisionItem
 from .schedule_item import ScheduleItem

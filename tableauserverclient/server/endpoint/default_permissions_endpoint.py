@@ -90,5 +90,5 @@ class _DefaultPermissionsEndpoint(Endpoint):
         url = "{0}/{1}/default-permissions/{2}".format(self.owner_baseurl(), item.id, plural_type(content_type))
         server_response = self.get_request(url, req_options)
         permissions = PermissionsRule.from_response(server_response.content, self.parent_srv.namespace)
-        logger.info({"content_type": content_type, "permissions":permissions})
+        logger.info({"content_type": content_type, "permissions": permissions})
         return permissions

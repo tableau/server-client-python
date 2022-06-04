@@ -38,7 +38,7 @@ from .. import (
     WorkbookItem,
     TableauItem,
     Resource,
-    plural_type
+    plural_type,
 )
 from .endpoint import (
     Auth,

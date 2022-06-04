@@ -53,7 +53,7 @@ def main():
     logging.basicConfig(level=logging_level)
 
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
-    server = TSC.Server(args.server, http_options={'verify': False})
+    server = TSC.Server(args.server, http_options={"verify": False})
 
     server.use_server_version()
     with server.auth.sign_in(tableau_auth):
@@ -88,7 +88,8 @@ def main():
             changed_project.default_datasource_permissions,
             changed_project.default_lens_permissions,
             changed_project.default_flow_permissions,
-              )
+        )
+
 
 if __name__ == "__main__":
     main()
