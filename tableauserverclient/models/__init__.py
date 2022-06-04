@@ -22,8 +22,6 @@ from .job_item import JobItem, BackgroundJobItem
 from .metric_item import MetricItem
 from .pagination_item import PaginationItem
 from .permissions_item import PermissionsRule, Permission
-from .personal_access_token_auth import PersonalAccessTokenAuth
-from .personal_access_token_auth import PersonalAccessTokenAuth
 from .project_item import ProjectItem
 from .revision_item import RevisionItem
 from .schedule_item import ScheduleItem
@@ -31,7 +29,7 @@ from .server_info_item import ServerInfoItem
 from .site_item import SiteItem
 from .subscription_item import SubscriptionItem
 from .table_item import TableItem
-from .tableau_auth import TableauAuth
+from .tableau_auth import Credentials, TableauAuth, PersonalAccessTokenAuth
 from .tableau_types import Resource, TableauItem, plural_type
 from .target import Target
 from .task_item import TaskItem
