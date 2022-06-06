@@ -2,7 +2,7 @@
 # This script demonstrates how to filter and sort groups using the Tableau
 # Server Client.
 #
-# To run the script, you must have installed Python 3.6 or later.
+# To run the script, you must have installed Python 3.7 or later.
 ####
 
 

@@ -9,13 +9,12 @@ from tableauserverclient.datetime_helpers import utc
 from tableauserverclient.server.endpoint.exceptions import JobFailedException
 from ._utils import read_xml_asset, mocked_time
 
-TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
-
 GET_XML = "job_get.xml"
 GET_BY_ID_XML = "job_get_by_id.xml"
 GET_BY_ID_FAILED_XML = "job_get_by_id_failed.xml"
 GET_BY_ID_CANCELLED_XML = "job_get_by_id_cancelled.xml"
 GET_BY_ID_INPROGRESS_XML = "job_get_by_id_inprogress.xml"
+GET_BY_ID_WORKBOOK = "job_get_by_id_failed_workbook.xml"
 
 
 class JobTests(unittest.TestCase):
@@ -103,3 +102,19 @@ class JobTests(unittest.TestCase):
             m.get("{0}/{1}".format(self.baseurl, job_id), text=response_xml)
             with self.assertRaises(TimeoutError):
                 self.server.jobs.wait_for_job(job_id, timeout=30)
+
+    def test_get_job_datasource_id(self) -> None:
+        response_xml = read_xml_asset(GET_BY_ID_FAILED_XML)
+        job_id = "777bf7c4-421d-4b2c-a518-11b90187c545"
+        with requests_mock.mock() as m:
+            m.get(f"{self.baseurl}/{job_id}", text=response_xml)
+            job = self.server.jobs.get_by_id(job_id)
+        self.assertEqual(job.datasource_id, "03b9fbec-81f6-4160-ae49-5f9f6d412758")
+
+    def test_get_job_workbook_id(self) -> None:
+        response_xml = read_xml_asset(GET_BY_ID_WORKBOOK)
+        job_id = "bb1aab79-db54-4e96-9dd3-461d8f081d08"
+        with requests_mock.mock() as m:
+            m.get(f"{self.baseurl}/{job_id}", text=response_xml)
+            job = self.server.jobs.get_by_id(job_id)
+        self.assertEqual(job.workbook_id, "5998aaaf-1abe-4d38-b4d9-bc53e85bdd13")

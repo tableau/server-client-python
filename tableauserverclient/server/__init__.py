@@ -36,6 +36,9 @@ from .. import (
     ViewItem,
     WebhookItem,
     WorkbookItem,
+    TableauItem,
+    Resource,
+    plural_type,
 )
 from .endpoint import (
     Auth,
@@ -59,3 +62,4 @@ from .endpoint import (
 from .server import Server
 from .pager import Pager
 from .exceptions import NotSignedInError
+from ..helpers import *

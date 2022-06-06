@@ -53,7 +53,7 @@ class Tasks(Endpoint):
     @api(version="2.6")
     def run(self, task_item):
         if not task_item.id:
-            error = "User item missing ID."
+            error = "Task item missing ID."
             raise MissingRequiredFieldError(error)
 
         url = "{0}/{1}/{2}/runNow".format(
@@ -63,7 +63,7 @@ class Tasks(Endpoint):
         )
         run_req = RequestFactory.Task.run_req(task_item)
         server_response = self.post_request(url, run_req)
-        return server_response.content
+        return server_response.content  # Todo add typing
 
     # Delete 1 task by id
     @api(version="3.6")

@@ -8,6 +8,11 @@ from ..datetime_helpers import parse_datetime
 if TYPE_CHECKING:
     from datetime import datetime
 
+from typing import Dict, List, Optional, Type, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from datetime import datetime
+
 
 class FlowRunItem(object):
     def __init__(self) -> None:

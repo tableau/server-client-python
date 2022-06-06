@@ -1,7 +1,9 @@
+import requests
 import logging
 from distutils.version import LooseVersion as Version
 from functools import wraps
 from xml.etree.ElementTree import ParseError
+from typing import Any, Callable, Dict, Optional, TYPE_CHECKING
 
 from .exceptions import (
     ServerResponseError,
@@ -10,6 +12,7 @@ from .exceptions import (
     EndpointUnavailableError,
 )
 from ..query import QuerySet
+from ... import helpers
 
 logger = logging.getLogger("tableau.endpoint")
 
@@ -18,9 +21,13 @@ Success_codes = [200, 201, 202, 204]
 XML_CONTENT_TYPE = "text/xml"
 JSON_CONTENT_TYPE = "application/json"
 
+if TYPE_CHECKING:
+    from ..server import Server
+    from requests import Response
+
 
 class Endpoint(object):
-    def __init__(self, parent_srv):
+    def __init__(self, parent_srv: "Server"):
         self.parent_srv = parent_srv
 
     @staticmethod
@@ -33,29 +40,18 @@ class Endpoint(object):
 
         return headers
 
-    @staticmethod
-    def _safe_to_log(server_response):
-        """Checks if the server_response content is not xml (eg binary image or zip)
-        and replaces it with a constant
-        """
-        ALLOWED_CONTENT_TYPES = ("application/xml", "application/xml;charset=utf-8")
-        if server_response.headers.get("Content-Type", None) not in ALLOWED_CONTENT_TYPES:
-            return "[Truncated File Contents]"
-        else:
-            return server_response.content
-
     def _make_request(
         self,
-        method,
-        url,
-        content=None,
-        auth_token=None,
-        content_type=None,
-        parameters=None,
-    ):
+        method: Callable[..., "Response"],
+        url: str,
+        content: Optional[bytes] = None,
+        auth_token: Optional[str] = None,
+        content_type: Optional[str] = None,
+        parameters: Optional[Dict[str, Any]] = None,
+    ) -> "Response":
         parameters = parameters or {}
         parameters.update(self.parent_srv.http_options)
-        if not "headers" in parameters:
+        if "headers" not in parameters:
             parameters["headers"] = {}
         parameters["headers"].update(Endpoint._make_common_headers(auth_token, content_type))
 
@@ -64,35 +60,50 @@ class Endpoint(object):
 
         logger.debug("request {}, url: {}".format(method.__name__, url))
         if content:
-            logger.debug("request content: {}".format(content[:1000]))
+            logger.debug("request content: {}".format(helpers.strings.redact_xml(content[:1000])))
 
         server_response = method(url, **parameters)
-        self.parent_srv._namespace.detect(server_response.content)
         self._check_status(server_response)
 
-        # This check is to determine if the response is a text response (xml or otherwise)
-        # so that we do not attempt to log bytes and other binary data.
-        if len(server_response.content) > 0 and server_response.encoding:
-            logger.debug(
-                "Server response from {0}:\n\t{1}".format(url, server_response.content.decode(server_response.encoding))
-            )
+        loggable_response = self.log_response_safely(server_response)
+        logger.debug("Server response from {0}:\n\t{1}".format(url, loggable_response))
+
+        if content_type == "application/xml":
+            self.parent_srv._namespace.detect(server_response.content)
+
         return server_response
 
     def _check_status(self, server_response):
         if server_response.status_code >= 500:
             raise InternalServerError(server_response)
         elif server_response.status_code not in Success_codes:
+            # todo: is an error reliably of content-type application/xml?
             try:
                 raise ServerResponseError.from_response(server_response.content, self.parent_srv.namespace)
             except ParseError:
                 # This will happen if we get a non-success HTTP code that
-                # doesn't return an xml error object (like metadata endpoints)
+                # doesn't return an xml error object (like metadata endpoints or 503 pages)
                 # we convert this to a better exception and pass through the raw
                 # response body
                 raise NonXMLResponseError(server_response.content)
             except Exception:
                 # anything else re-raise here
                 raise
+
+    def log_response_safely(self, server_response: requests.Response) -> str:
+        # Checking the content type header prevents eager evaluation of streaming requests.
+        content_type = server_response.headers.get("Content-Type")
+
+        # Response.content is a property. Calling it will load the entire response into memory. Checking if the
+        # content-type is an octet-stream accomplishes the same goal without eagerly loading content.
+        # This check is to determine if the response is a text response (xml or otherwise)
+        # so that we do not attempt to log bytes and other binary data.
+        loggable_response = "Content type {}".format(content_type)
+        if content_type == "application/octet-stream":
+            loggable_response = "A stream of type {} [Truncated File Contents]".format(content_type)
+        elif server_response.encoding and len(server_response.content) > 0:
+            loggable_response = helpers.strings.redact_xml(server_response.content.decode(server_response.encoding))
+        return loggable_response
 
     def get_unauthenticated_request(self, url):
         return self._make_request(self.parent_srv.session.get, url)
@@ -118,7 +129,7 @@ class Endpoint(object):
         # We don't return anything for a delete
         self._make_request(self.parent_srv.session.delete, url, auth_token=self.parent_srv.auth_token)
 
-    def put_request(self, url, xml_request=None, content_type="text/xml", parameters=None):
+    def put_request(self, url, xml_request=None, content_type=XML_CONTENT_TYPE, parameters=None):
         return self._make_request(
             self.parent_srv.session.put,
             url,
@@ -128,7 +139,7 @@ class Endpoint(object):
             parameters=parameters,
         )
 
-    def post_request(self, url, xml_request, content_type="text/xml", parameters=None):
+    def post_request(self, url, xml_request, content_type=XML_CONTENT_TYPE, parameters=None):
         return self._make_request(
             self.parent_srv.session.post,
             url,
@@ -138,7 +149,7 @@ class Endpoint(object):
             parameters=parameters,
         )
 
-    def patch_request(self, url, xml_request, content_type="text/xml", parameters=None):
+    def patch_request(self, url, xml_request, content_type=XML_CONTENT_TYPE, parameters=None):
         return self._make_request(
             self.parent_srv.session.patch,
             url,

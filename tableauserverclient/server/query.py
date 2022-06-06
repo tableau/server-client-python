@@ -71,7 +71,8 @@ class QuerySet:
         elif k in range(self.total_available):
             # Otherwise, check if k is even sensible to return
             self._result_cache = None
-            self.request_options.pagenumber = max(1, math.ceil(k / size))
+            # Add one to k, otherwise it gets stuck at page boundaries, e.g. 100
+            self.request_options.pagenumber = max(1, math.ceil((k + 1) / size))
             return self[k]
         else:
             # If k is unreasonable, raise an IndexError.

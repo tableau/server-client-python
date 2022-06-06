@@ -1,10 +1,15 @@
+import logging
 import xml.etree.ElementTree as ET
-from typing import List, Optional
 
 from defusedxml.ElementTree import fromstring
 
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_is_enum, property_not_empty
+
+from typing import List, Optional
+
+
+from typing import List, Optional, TYPE_CHECKING
 
 
 class ProjectItem(object):
@@ -31,6 +36,7 @@ class ProjectItem(object):
         self._default_workbook_permissions = None
         self._default_datasource_permissions = None
         self._default_flow_permissions = None
+        self._default_lens_permissions = None
 
     @property
     def content_permissions(self):
@@ -68,6 +74,13 @@ class ProjectItem(object):
             error = "Project item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
         return self._default_flow_permissions()
+
+    @property
+    def default_lens_permissions(self):
+        if self._default_lens_permissions is None:
+            error = "Project item must be populated with permissions first."
+            raise UnpopulatedPropertyError(error)
+        return self._default_lens_permissions()
 
     @property
     def id(self) -> Optional[str]:
@@ -126,11 +139,15 @@ class ProjectItem(object):
         self._permissions = permissions
 
     def _set_default_permissions(self, permissions, content_type):
+        attr = "_default_{content}_permissions".format(content=content_type)
         setattr(
             self,
-            "_default_{content}_permissions".format(content=content_type),
+            attr,
             permissions,
         )
+        fetch_call = getattr(self, attr)
+        logging.getLogger().info({"type": attr, "value": fetch_call()})
+        return fetch_call()
 
     @classmethod
     def from_response(cls, resp, ns) -> List["ProjectItem"]:

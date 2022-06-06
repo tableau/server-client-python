@@ -5,16 +5,14 @@ from .. import RequestFactory, PermissionsRule
 from .endpoint import Endpoint
 from .exceptions import MissingRequiredFieldError
 
+from ...models import TableauItem
 from typing import Callable, TYPE_CHECKING, List, Union
 
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from ...models import DatasourceItem, ProjectItem, WorkbookItem, ViewItem
     from ..server import Server
     from ..request_options import RequestOptions
-
-TableauItem = Union["DatasourceItem", "ProjectItem", "WorkbookItem", "ViewItem"]
 
 
 class _PermissionsEndpoint(Endpoint):
@@ -34,12 +32,15 @@ class _PermissionsEndpoint(Endpoint):
         # populated without, we will get a sign-in error
         self.owner_baseurl = owner_baseurl
 
+    def __str__(self):
+        return "<PermissionsEndpoint baseurl={}>".format(self.owner_baseurl)
+
     def update(self, resource: TableauItem, permissions: List[PermissionsRule]) -> List[PermissionsRule]:
         url = "{0}/{1}/permissions".format(self.owner_baseurl(), resource.id)
         update_req = RequestFactory.Permission.add_req(permissions)
         response = self.put_request(url, update_req)
         permissions = PermissionsRule.from_response(response.content, self.parent_srv.namespace)
-        logger.info("Updated permissions for resource {0}".format(resource.id))
+        logger.info("Updated permissions for resource {0}: {1}".format(resource.id, permissions))
 
         return permissions
 
@@ -62,7 +63,7 @@ class _PermissionsEndpoint(Endpoint):
                     mode,
                 )
 
-                logger.debug("Removing {0} permission for capabilty {1}".format(mode, capability))
+                logger.debug("Removing {0} permission for capability {1}".format(mode, capability))
 
                 self.delete_request(url)
 
@@ -85,5 +86,6 @@ class _PermissionsEndpoint(Endpoint):
         url = "{0}/{1}/permissions".format(self.owner_baseurl(), item.id)
         server_response = self.get_request(url, req_options)
         permissions = PermissionsRule.from_response(server_response.content, self.parent_srv.namespace)
+        logger.info("Permissions for resource {0}: {1}".format(item.id, permissions))
 
         return permissions

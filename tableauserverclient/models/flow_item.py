@@ -12,6 +12,14 @@ from ..datetime_helpers import parse_datetime
 if TYPE_CHECKING:
     import datetime
 
+from typing import List, Optional, TYPE_CHECKING, Set
+
+if TYPE_CHECKING:
+    import datetime
+    from .connection_item import ConnectionItem
+    from .permissions_item import Permission
+    from .dqw_item import DQWItem
+
 
 class FlowItem(object):
     def __init__(self, project_id: str, name: Optional[str] = None) -> None:

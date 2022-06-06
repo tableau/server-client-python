@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import re
 import unittest
 
@@ -6,7 +7,7 @@ import requests_mock
 
 import tableauserverclient as TSC
 
-TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
+TEST_ASSET_DIR = Path(__file__).parent / "assets"
 
 PAGINATION_XML = os.path.join(TEST_ASSET_DIR, "request_option_pagination.xml")
 PAGE_NUMBER_XML = os.path.join(TEST_ASSET_DIR, "request_option_page_number.xml")
@@ -15,10 +16,12 @@ FILTER_EQUALS = os.path.join(TEST_ASSET_DIR, "request_option_filter_equals.xml")
 FILTER_TAGS_IN = os.path.join(TEST_ASSET_DIR, "request_option_filter_tags_in.xml")
 FILTER_MULTIPLE = os.path.join(TEST_ASSET_DIR, "request_option_filter_tags_in.xml")
 SLICING_QUERYSET = os.path.join(TEST_ASSET_DIR, "request_option_slicing_queryset.xml")
+SLICING_QUERYSET_PAGE_1 = TEST_ASSET_DIR / "queryset_slicing_page_1.xml"
+SLICING_QUERYSET_PAGE_2 = TEST_ASSET_DIR / "queryset_slicing_page_2.xml"
 
 
 class RequestOptionTests(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server = TSC.Server("http://test", False)
 
         # Fake signin
@@ -28,7 +31,7 @@ class RequestOptionTests(unittest.TestCase):
 
         self.baseurl = "{0}/{1}".format(self.server.sites.baseurl, self.server._site_id)
 
-    def test_pagination(self):
+    def test_pagination(self) -> None:
         with open(PAGINATION_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -41,7 +44,7 @@ class RequestOptionTests(unittest.TestCase):
         self.assertEqual(33, pagination_item.total_available)
         self.assertEqual(10, len(all_views))
 
-    def test_page_number(self):
+    def test_page_number(self) -> None:
         with open(PAGE_NUMBER_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -54,7 +57,7 @@ class RequestOptionTests(unittest.TestCase):
         self.assertEqual(210, pagination_item.total_available)
         self.assertEqual(10, len(all_views))
 
-    def test_page_size(self):
+    def test_page_size(self) -> None:
         with open(PAGE_SIZE_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -67,7 +70,7 @@ class RequestOptionTests(unittest.TestCase):
         self.assertEqual(33, pagination_item.total_available)
         self.assertEqual(5, len(all_views))
 
-    def test_filter_equals(self):
+    def test_filter_equals(self) -> None:
         with open(FILTER_EQUALS, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -82,7 +85,7 @@ class RequestOptionTests(unittest.TestCase):
         self.assertEqual("RESTAPISample", matching_workbooks[0].name)
         self.assertEqual("RESTAPISample", matching_workbooks[1].name)
 
-    def test_filter_equals_shorthand(self):
+    def test_filter_equals_shorthand(self) -> None:
         with open(FILTER_EQUALS, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -93,7 +96,7 @@ class RequestOptionTests(unittest.TestCase):
             self.assertEqual("RESTAPISample", matching_workbooks[0].name)
             self.assertEqual("RESTAPISample", matching_workbooks[1].name)
 
-    def test_filter_tags_in(self):
+    def test_filter_tags_in(self) -> None:
         with open(FILTER_TAGS_IN, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -111,7 +114,7 @@ class RequestOptionTests(unittest.TestCase):
         self.assertEqual(set(["safari"]), matching_workbooks[1].tags)
         self.assertEqual(set(["sample"]), matching_workbooks[2].tags)
 
-    def test_filter_tags_in_shorthand(self):
+    def test_filter_tags_in_shorthand(self) -> None:
         with open(FILTER_TAGS_IN, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -123,11 +126,11 @@ class RequestOptionTests(unittest.TestCase):
             self.assertEqual(set(["safari"]), matching_workbooks[1].tags)
             self.assertEqual(set(["sample"]), matching_workbooks[2].tags)
 
-    def test_invalid_shorthand_option(self):
+    def test_invalid_shorthand_option(self) -> None:
         with self.assertRaises(ValueError):
             self.server.workbooks.filter(nonexistant__in=["sample", "safari"])
 
-    def test_multiple_filter_options(self):
+    def test_multiple_filter_options(self) -> None:
         with open(FILTER_MULTIPLE, "rb") as f:
             response_xml = f.read().decode("utf-8")
         # To ensure that this is deterministic, run this a few times
@@ -153,7 +156,7 @@ class RequestOptionTests(unittest.TestCase):
                 self.assertEqual(3, pagination_item.total_available)
 
     # Test req_options if url already has query params
-    def test_double_query_params(self):
+    def test_double_query_params(self) -> None:
         with requests_mock.mock() as m:
             m.get(requests_mock.ANY)
             url = self.baseurl + "/views?queryParamExists=true"
@@ -170,7 +173,7 @@ class RequestOptionTests(unittest.TestCase):
             self.assertTrue(re.search("sort=name%3aasc", resp.request.query))
 
     # Test req_options for versions below 3.7
-    def test_filter_sort_legacy(self):
+    def test_filter_sort_legacy(self) -> None:
         self.server.version = "3.6"
         with requests_mock.mock() as m:
             m.get(requests_mock.ANY)
@@ -187,7 +190,7 @@ class RequestOptionTests(unittest.TestCase):
             self.assertTrue(re.search("filter=tags:in:%5bstocks,market%5d", resp.request.query))
             self.assertTrue(re.search("sort=name:asc", resp.request.query))
 
-    def test_vf(self):
+    def test_vf(self) -> None:
         with requests_mock.mock() as m:
             m.get(requests_mock.ANY)
             url = self.baseurl + "/views/456/data"
@@ -202,7 +205,7 @@ class RequestOptionTests(unittest.TestCase):
             self.assertTrue(re.search("type=tabloid", resp.request.query))
 
     # Test req_options for versions beloe 3.7
-    def test_vf_legacy(self):
+    def test_vf_legacy(self) -> None:
         self.server.version = "3.6"
         with requests_mock.mock() as m:
             m.get(requests_mock.ANY)
@@ -217,7 +220,7 @@ class RequestOptionTests(unittest.TestCase):
             self.assertTrue(re.search("vf_name2\\$=value2", resp.request.query))
             self.assertTrue(re.search("type=tabloid", resp.request.query))
 
-    def test_all_fields(self):
+    def test_all_fields(self) -> None:
         with requests_mock.mock() as m:
             m.get(requests_mock.ANY)
             url = self.baseurl + "/views/456/data"
@@ -227,7 +230,7 @@ class RequestOptionTests(unittest.TestCase):
             resp = self.server.users.get_request(url, request_object=opts)
             self.assertTrue(re.search("fields=_all_", resp.request.query))
 
-    def test_multiple_filter_options_shorthand(self):
+    def test_multiple_filter_options_shorthand(self) -> None:
         with open(FILTER_MULTIPLE, "rb") as f:
             response_xml = f.read().decode("utf-8")
         # To ensure that this is deterministic, run this a few times
@@ -246,7 +249,7 @@ class RequestOptionTests(unittest.TestCase):
                 matching_workbooks = self.server.workbooks.filter(tags__in=["sample", "safari", "weather"], name="foo")
                 self.assertEqual(3, matching_workbooks.total_available)
 
-    def test_slicing_queryset(self):
+    def test_slicing_queryset(self) -> None:
         with open(SLICING_QUERYSET, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -270,6 +273,16 @@ class RequestOptionTests(unittest.TestCase):
         with self.assertRaises(IndexError):
             all_views[100]
 
-    def test_queryset_filter_args_error(self):
+    def test_slicing_queryset_multi_page(self) -> None:
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + "/views?pageNumber=1", text=SLICING_QUERYSET_PAGE_1.read_text())
+            m.get(self.baseurl + "/views?pageNumber=2", text=SLICING_QUERYSET_PAGE_2.read_text())
+            sliced_views = self.server.views.all()[9:12]
+
+        self.assertEqual(sliced_views[0].id, "2e6d6c81-da71-4b41-892c-ba80d4e7a6d0")
+        self.assertEqual(sliced_views[1].id, "47ffcb8e-3f7a-4ecf-8ab3-605da9febe20")
+        self.assertEqual(sliced_views[2].id, "6757fea8-0aa9-4160-a87c-9be27b1d1c8c")
+
+    def test_queryset_filter_args_error(self) -> None:
         with self.assertRaises(RuntimeError):
             workbooks = self.server.workbooks.filter("argument")

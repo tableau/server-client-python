@@ -3,6 +3,11 @@ class ResourceReference(object):
         self.id = id_
         self.tag_name = tag_name
 
+    def __str__(self):
+        return "<ResourceReference id={} tag={}>".format(self._id, self._tag_name)
+
+    __repr__ = __str__
+
     @property
     def id(self):
         return self._id

@@ -9,7 +9,7 @@ from .. import ViewItem, PaginationItem
 
 logger = logging.getLogger("tableau.endpoint.views")
 
-from typing import Iterable, List, Optional, Tuple, TYPE_CHECKING
+from typing import Iterator, List, Optional, Tuple, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..request_options import RequestOptions, CSVRequestOptions, PDFRequestOptions, ImageRequestOptions
@@ -119,12 +119,11 @@ class Views(QuerysetEndpoint):
         view_item._set_csv(csv_fetcher)
         logger.info("Populated csv for view (ID: {0})".format(view_item.id))
 
-    def _get_view_csv(self, view_item: ViewItem, req_options: Optional["CSVRequestOptions"]) -> Iterable[bytes]:
+    def _get_view_csv(self, view_item: ViewItem, req_options: Optional["CSVRequestOptions"]) -> Iterator[bytes]:
         url = "{0}/{1}/data".format(self.baseurl, view_item.id)
 
         with closing(self.get_request(url, request_object=req_options, parameters={"stream": True})) as server_response:
-            csv = server_response.iter_content(1024)
-        return csv
+            yield from server_response.iter_content(1024)
 
     @api(version="3.8")
     def populate_excel(self, view_item: ViewItem, req_options: Optional["CSVRequestOptions"] = None) -> None:
@@ -138,12 +137,11 @@ class Views(QuerysetEndpoint):
         view_item._set_excel(excel_fetcher)
         logger.info("Populated excel for view (ID: {0})".format(view_item.id))
 
-    def _get_view_excel(self, view_item: ViewItem, req_options: Optional["CSVRequestOptions"]) -> Iterable[bytes]:
+    def _get_view_excel(self, view_item: ViewItem, req_options: Optional["CSVRequestOptions"]) -> Iterator[bytes]:
         url = "{0}/{1}/crosstab/excel".format(self.baseurl, view_item.id)
 
         with closing(self.get_request(url, request_object=req_options, parameters={"stream": True})) as server_response:
-            excel = server_response.iter_content(1024)
-        return excel
+            yield from server_response.iter_content(1024)
 
     @api(version="3.2")
     def populate_permissions(self, item: ViewItem) -> None:

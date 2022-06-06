@@ -16,6 +16,7 @@ from typing import (
 
 from .endpoint import QuerysetEndpoint, api, parameter_added_in
 from .exceptions import InternalServerError, MissingRequiredFieldError
+from ...helpers import redact_xml
 from .permissions_endpoint import _PermissionsEndpoint
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, WorkbookItem, ConnectionItem, ViewItem, PaginationItem
@@ -441,7 +442,7 @@ class Workbooks(QuerysetEndpoint):
                 connections=connections,
                 hidden_views=hidden_views,
             )
-        logger.debug("Request xml: {0} ".format(xml_request[:1000]))
+        logger.debug("Request xml: {0} ".format(redact_xml(xml_request[:1000])))
 
         # Send the publishing request to server
         try:

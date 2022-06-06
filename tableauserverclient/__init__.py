@@ -37,6 +37,9 @@ from .models import (
     FlowRunItem,
     RevisionItem,
     MetricItem,
+    TableauItem,
+    Resource,
+    plural_type,
 )
 from .namespace import NEW_NAMESPACE as DEFAULT_NAMESPACE
 from .server import (
@@ -52,6 +55,7 @@ from .server import (
     NotSignedInError,
     Pager,
 )
+from .helpers import *
 
 __version__ = get_versions()["version"]
 __VERSION__ = __version__

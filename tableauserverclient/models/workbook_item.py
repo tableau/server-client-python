@@ -29,6 +29,7 @@ if TYPE_CHECKING:
     from .connection_item import ConnectionItem
     from .permissions_item import PermissionsRule
     import datetime
+    from .revision_item import RevisionItem
 
 
 class WorkbookItem(object):
@@ -124,7 +125,6 @@ class WorkbookItem(object):
         return self._project_id
 
     @project_id.setter
-    @property_not_nullable
     def project_id(self, value: str):
         self._project_id = value
 
