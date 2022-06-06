@@ -1,9 +1,7 @@
 # encoding=utf-8
-import os
 import unittest
-
+import os
 import requests_mock
-
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
 
@@ -129,7 +127,7 @@ class GroupTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=get_xml_response)
             m.post(
-                "http://test/api/2.3/sites/dad65087-b08b-4603-af4e-2887b8aafc67/groups/ef8b19c0-43b6-11e6-af50"
+                self.baseurl + "/dad65087-b08b-4603-af4e-2887b8aafc67/groups/ef8b19c0-43b6-11e6-af50"
                 "-63f5805dbe3c/users",
                 text=add_user_response,
             )
@@ -163,7 +161,7 @@ class GroupTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
             m.delete(
-                "http://test/api/2.3/sites/dad65087-b08b-4603-af4e-2887b8aafc67/groups/ef8b19c0-43b6-11e6-af50"
+                self.baseurl + "/dad65087-b08b-4603-af4e-2887b8aafc67/groups/ef8b19c0-43b6-11e6-af50"
                 "-63f5805dbe3c/users/5de011f8-5aa9-4d5b-b991-f462c8dd6bb7",
                 text="ok",
             )
