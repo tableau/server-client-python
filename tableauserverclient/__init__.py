@@ -1,4 +1,4 @@
-from ._version import get_versions
+from .namespace import NEW_NAMESPACE as DEFAULT_NAMESPACE
 from .models import (
     ConnectionCredentials,
     ConnectionItem,
@@ -36,12 +36,7 @@ from .models import (
     PersonalAccessTokenAuth,
     FlowRunItem,
     RevisionItem,
-    MetricItem,
-    TableauItem,
-    Resource,
-    plural_type,
 )
-from .namespace import NEW_NAMESPACE as DEFAULT_NAMESPACE
 from .server import (
     RequestOptions,
     CSVRequestOptions,
@@ -55,8 +50,3 @@ from .server import (
     NotSignedInError,
     Pager,
 )
-from .helpers import *
-
-__version__ = get_versions()["version"]
-__VERSION__ = __version__
-del get_versions
