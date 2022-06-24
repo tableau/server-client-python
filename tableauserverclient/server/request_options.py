@@ -142,6 +142,28 @@ class CSVRequestOptions(_FilterOptionsBase):
         return params
 
 
+class ExcelRequestOptions(RequestOptionsBase):
+    def __init__(self, maxage: int = -1) -> None:
+        super().__init__()
+        self.max_age = maxage
+
+    @property
+    def max_age(self) -> int:
+        return self._max_age
+
+    @max_age.setter
+    @property_is_int(range=(0, 240), allowed=[-1])
+    def max_age(self, value: int) -> None:
+        self._max_age = value
+
+    def get_query_params(self):
+        params = {}
+        if self.max_age != -1:
+            params["maxAge"] = self.max_age
+
+        return params
+
+
 class ImageRequestOptions(_FilterOptionsBase):
     # if 'high' isn't specified, the REST API endpoint returns an image with standard resolution
     class Resolution:
