@@ -1,10 +1,11 @@
+from typing import Tuple
 from .filter import Filter
 from .request_options import RequestOptions
 from .sort import Sort
 import math
 
 
-def to_camel_case(word):
+def to_camel_case(word: str) -> str:
     return word.split("_")[0] + "".join(x.capitalize() or "_" for x in word.split("_")[1:])
 
 
@@ -85,18 +86,21 @@ class QuerySet:
         if self._result_cache is None:
             self._result_cache, self._pagination_item = self.model.get(self.request_options)
 
+    def __len__(self) -> int:
+        return self.total_available
+
     @property
-    def total_available(self):
+    def total_available(self) -> int:
         self._fetch_all()
         return self._pagination_item.total_available
 
     @property
-    def page_number(self):
+    def page_number(self) -> int:
         self._fetch_all()
         return self._pagination_item.page_number
 
     @property
-    def page_size(self):
+    def page_size(self) -> int:
         self._fetch_all()
         return self._pagination_item.page_size
 
@@ -121,7 +125,7 @@ class QuerySet:
             self.request_options.pagesize = kwargs["page_size"]
         return self
 
-    def _parse_shorthand_filter(self, key):
+    def _parse_shorthand_filter(self, key: str) -> Tuple[str, str]:
         tokens = key.split("__", 1)
         if len(tokens) == 1:
             operator = RequestOptions.Operator.Equals
@@ -135,7 +139,7 @@ class QuerySet:
             raise ValueError("Field name `{}` is not valid.".format(field))
         return (field, operator)
 
-    def _parse_shorthand_sort(self, key):
+    def _parse_shorthand_sort(self, key: str) -> Tuple[str, str]:
         direction = RequestOptions.Direction.Asc
         if key.startswith("-"):
             direction = RequestOptions.Direction.Desc
