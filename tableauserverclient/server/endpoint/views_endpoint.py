@@ -12,7 +12,13 @@ logger = logging.getLogger("tableau.endpoint.views")
 from typing import Iterator, List, Optional, Tuple, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ..request_options import RequestOptions, CSVRequestOptions, PDFRequestOptions, ImageRequestOptions
+    from ..request_options import (
+        RequestOptions,
+        CSVRequestOptions,
+        PDFRequestOptions,
+        ImageRequestOptions,
+        ExcelRequestOptions,
+    )
 
 
 class Views(QuerysetEndpoint):
@@ -126,7 +132,7 @@ class Views(QuerysetEndpoint):
             yield from server_response.iter_content(1024)
 
     @api(version="3.8")
-    def populate_excel(self, view_item: ViewItem, req_options: Optional["CSVRequestOptions"] = None) -> None:
+    def populate_excel(self, view_item: ViewItem, req_options: Optional["ExcelRequestOptions"] = None) -> None:
         if not view_item.id:
             error = "View item missing ID."
             raise MissingRequiredFieldError(error)
@@ -137,7 +143,7 @@ class Views(QuerysetEndpoint):
         view_item._set_excel(excel_fetcher)
         logger.info("Populated excel for view (ID: {0})".format(view_item.id))
 
-    def _get_view_excel(self, view_item: ViewItem, req_options: Optional["CSVRequestOptions"]) -> Iterator[bytes]:
+    def _get_view_excel(self, view_item: ViewItem, req_options: Optional["ExcelRequestOptions"]) -> Iterator[bytes]:
         url = "{0}/{1}/crosstab/excel".format(self.baseurl, view_item.id)
 
         with closing(self.get_request(url, request_object=req_options, parameters={"stream": True})) as server_response:
