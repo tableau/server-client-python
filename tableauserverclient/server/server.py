@@ -97,9 +97,6 @@ class Server(object):
         self.flow_runs = FlowRuns(self)
         self.metrics = Metrics(self)
 
-        if http_options:
-            self.add_http_options(http_options)
-
         # must set this before calling use_server_version, because that's a server call
         if http_options_dict:
             self.add_http_options(http_options_dict)
