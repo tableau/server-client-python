@@ -4,7 +4,8 @@ from .dqw_endpoint import _DataQualityWarningEndpoint
 from .endpoint import api, Endpoint
 from .exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
-from .. import RequestFactory, TableItem, ColumnItem, PaginationItem
+from .. import RequestFactory
+from tableauserverclient.models import TableItem, ColumnItem, PaginationItem
 from ..pager import Pager
 
 logger = logging.getLogger("tableau.endpoint.tables")

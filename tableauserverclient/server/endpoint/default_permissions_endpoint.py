@@ -3,7 +3,7 @@ import logging
 from .endpoint import Endpoint
 from .exceptions import MissingRequiredFieldError
 from .. import RequestFactory
-from ...models import DatabaseItem, PermissionsRule, ProjectItem, plural_type, Resource
+from tableauserverclient.models import DatabaseItem, PermissionsRule, ProjectItem, plural_type, Resource
 from typing import TYPE_CHECKING, Callable, List, Optional, Sequence, Union
 
 if TYPE_CHECKING:

@@ -6,7 +6,7 @@ from .exceptions import (
     ServerInfoEndpointNotFoundError,
     EndpointUnavailableError,
 )
-from ...models import ServerInfoItem
+from tableauserverclient.models import ServerInfoItem
 
 logger = logging.getLogger("tableau.endpoint.server_info")
 

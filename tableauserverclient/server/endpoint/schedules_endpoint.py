@@ -6,7 +6,8 @@ from typing import TYPE_CHECKING, Callable, List, Optional, Tuple, Union
 
 from .endpoint import Endpoint, api, parameter_added_in
 from .exceptions import MissingRequiredFieldError
-from .. import RequestFactory, PaginationItem, ScheduleItem, TaskItem
+from .. import RequestFactory
+from tableauserverclient.models import PaginationItem, ScheduleItem, TaskItem
 
 logger = logging.getLogger("tableau.endpoint.schedules")
 AddResponse = namedtuple("AddResponse", ("result", "error", "warnings", "task_created"))

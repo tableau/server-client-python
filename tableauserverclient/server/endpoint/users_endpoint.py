@@ -4,14 +4,8 @@ from typing import List, Optional, Tuple
 
 from .endpoint import QuerysetEndpoint, api
 from .exceptions import MissingRequiredFieldError
-from .. import (
-    RequestFactory,
-    RequestOptions,
-    UserItem,
-    WorkbookItem,
-    PaginationItem,
-    GroupItem,
-)
+from .. import RequestFactory, RequestOptions
+from tableauserverclient.models import UserItem, WorkbookItem, PaginationItem, GroupItem
 from ..pager import Pager
 
 logger = logging.getLogger("tableau.endpoint.users")

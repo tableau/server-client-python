@@ -2,7 +2,8 @@ import logging
 
 from .endpoint import QuerysetEndpoint, api
 from .exceptions import MissingRequiredFieldError
-from .. import RequestFactory, GroupItem, UserItem, PaginationItem, JobItem
+from .. import RequestFactory
+from tableauserverclient.models import GroupItem, UserItem, PaginationItem, JobItem
 from ..pager import Pager
 
 logger = logging.getLogger("tableau.endpoint.groups")
