@@ -79,6 +79,7 @@ class Sites(Endpoint):
         if not site_item.id:
             error = "Site item missing ID."
             raise MissingRequiredFieldError(error)
+        print(self.parent_srv.site_id, site_item.id)
         if not site_item.id == self.parent_srv.site_id:
             error = "You can only update the site you are currently authenticated for"
             raise ValueError(error)

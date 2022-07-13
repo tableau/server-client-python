@@ -141,6 +141,7 @@ class Server(object):
     def use_highest_version(self):
         self.use_server_version()
         import warnings
+
         warnings.warn("use use_server_version instead", DeprecationWarning)
 
     # sometimes a model changes in newer versions

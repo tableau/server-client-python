@@ -647,13 +647,15 @@ class SiteRequest(object):
         if site_item.authoring_enabled is not None:
             site_element.attrib["authoringEnabled"] = str(site_item.authoring_enabled).lower()
         if site_item.custom_subscription_email_enabled is not None:
-            site_element.attrib["customSubscriptionEmailEnabled"] = \
-                str(site_item.custom_subscription_email_enabled).lower()
+            site_element.attrib["customSubscriptionEmailEnabled"] = str(
+                site_item.custom_subscription_email_enabled
+            ).lower()
         if site_item.custom_subscription_email is not None:
             site_element.attrib["customSubscriptionEmail"] = str(site_item.custom_subscription_email).lower()
         if site_item.custom_subscription_footer_enabled is not None:
-            site_element.attrib["customSubscriptionFooterEnabled"] = \
-                str(site_item.custom_subscription_footer_enabled).lower()
+            site_element.attrib["customSubscriptionFooterEnabled"] = str(
+                site_item.custom_subscription_footer_enabled
+            ).lower()
         if site_item.custom_subscription_footer is not None:
             site_element.attrib["customSubscriptionFooter"] = str(site_item.custom_subscription_footer).lower()
         if site_item.ask_data_mode is not None:
@@ -682,7 +684,7 @@ class SiteRequest(object):
         return ET.tostring(xml_request)
 
     # server: the site request model changes based on api version
-    def create_req(self, site_item: "SiteItem", parent_srv: object=None):
+    def create_req(self, site_item: "SiteItem", parent_srv: object = None):
         xml_request = ET.Element("tsRequest")
         site_element = ET.SubElement(xml_request, "site")
         site_element.attrib["name"] = site_item.name
@@ -710,8 +712,11 @@ class SiteRequest(object):
                 flows_edit = flows_edit or flows_all
                 flows_schedule = flows_schedule or flows_all
                 import warnings
-                warnings.warn("FlowsEnabled has been removed and become two options:"
-                              " SchedulingFlowsEnabled and EditingFlowsEnabled")
+
+                warnings.warn(
+                    "FlowsEnabled has been removed and become two options:"
+                    " SchedulingFlowsEnabled and EditingFlowsEnabled"
+                )
             if site_item.editing_flows_enabled is not None:
                 site_element.attrib["editingFlowsEnabled"] = flows_edit
             if site_item.scheduling_flows_enabled is not None:
@@ -724,6 +729,7 @@ class SiteRequest(object):
                 flows_all = flows_all or flows_edit or flows_schedule
                 site_element.attrib["flowsEnabled"] = flows_all
                 import warnings
+
                 warnings.warn("In version 3.10 and earlier there is only one option: FlowsEnabled")
 
         if site_item.allow_subscription_attachments is not None:

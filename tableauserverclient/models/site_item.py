@@ -24,10 +24,17 @@ class SiteItem(object):
     _tier_viewer_capacity: Optional[int] = None
 
     def __str__(self):
-        return "<" + __name__ + ": "\
-               + (self.name or "unnamed") + ", "\
-               + (self.id or "unknown-id") + ", " \
-               + (self.state or "unknown-state") + ">"
+        return (
+            "<"
+            + __name__
+            + ": "
+            + (self.name or "unnamed")
+            + ", "
+            + (self.id or "unknown-id")
+            + ", "
+            + (self.state or "unknown-state")
+            + ">"
+        )
 
     class AdminMode:
         ContentAndUsers: str = "ContentAndUsers"
