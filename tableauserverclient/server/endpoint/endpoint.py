@@ -63,7 +63,7 @@ class Endpoint(object):
             logger.debug("request content: {}".format(helpers.strings.redact_xml(content[:1000])))
 
         server_response = method(url, **parameters)
-        self._check_status(server_response)
+        self._check_status(server_response, url)
 
         loggable_response = self.log_response_safely(server_response)
         logger.debug("Server response from {0}:\n\t{1}".format(url, loggable_response))
@@ -73,9 +73,9 @@ class Endpoint(object):
 
         return server_response
 
-    def _check_status(self, server_response):
+    def _check_status(self, server_response, request_url=None):
         if server_response.status_code >= 500:
-            raise InternalServerError(server_response)
+            raise InternalServerError(server_response, request_url)
         elif server_response.status_code not in Success_codes:
             # todo: is an error reliably of content-type application/xml?
             try:
