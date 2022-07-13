@@ -23,6 +23,12 @@ class SiteItem(object):
     _tier_explorer_capacity: Optional[int] = None
     _tier_viewer_capacity: Optional[int] = None
 
+    def __str__(self):
+        return "<" + __name__ + ": "\
+               + (self.name or "unnamed") + ", "\
+               + (self.id or "unknown-id") + ", " \
+               + (self.state or "unknown-state") + ">"
+
     class AdminMode:
         ContentAndUsers: str = "ContentAndUsers"
         ContentOnly: str = "ContentOnly"
@@ -261,6 +267,9 @@ class SiteItem(object):
     def cataloging_enabled(self, value: bool):
         self._cataloging_enabled = value
 
+    def is_default(self) -> bool:
+        return self.name.lower() == "default"
+
     @property
     def flows_enabled(self) -> bool:
         return self._flows_enabled
@@ -268,10 +277,9 @@ class SiteItem(object):
     @flows_enabled.setter
     @property_is_boolean
     def flows_enabled(self, value: bool) -> None:
+        # Flows Enabled' is not a supported site setting in API Version [3.17].
+        # In Version 3.10+ use the more granular settings 'Editing Flows Enabled' and/or 'Scheduling Flows Enabled'
         self._flows_enabled = value
-
-    def is_default(self) -> bool:
-        return self.name.lower() == "default"
 
     @property
     def editing_flows_enabled(self) -> bool:

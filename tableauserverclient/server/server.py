@@ -141,15 +141,21 @@ class Server(object):
     def use_highest_version(self):
         self.use_server_version()
         import warnings
-
         warnings.warn("use use_server_version instead", DeprecationWarning)
 
-    def assert_at_least_version(self, version):
+    # sometimes a model changes in newer versions
+    def check_at_least_version(self, comparison: str):
         server_version = Version(self.version or "0.0")
-        minimum_supported = Version(version)
-        if server_version < minimum_supported:
-            error = "This endpoint is not available in API version {}. Requires {}".format(
-                server_version, minimum_supported
+        compared_version = Version(comparison)
+        return not server_version < compared_version
+
+    def assert_at_least_version(self, comparison: str):
+        if self.check_at_least_version(comparison):
+            return
+        else:
+            server_version = Version(self.version or "0.0")
+            error = "This endpoint (or model) is not available in API version {}. Requires {}".format(
+                server_version, comparison
             )
             raise EndpointUnavailableError(error)
 
