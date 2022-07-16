@@ -1,5 +1,7 @@
 from ..models.property_decorators import property_is_int
+import logging
 
+logger = logging.getLogger("tableau.request_options")
 
 class RequestOptionsBase(object):
     # This method is used if server api version is below 3.7 (2020.1)
@@ -7,6 +9,8 @@ class RequestOptionsBase(object):
         try:
             params = self.get_query_params()
             params_list = ["{}={}".format(k, v) for (k, v) in params.items()]
+
+            logger.debug("Applying options to request: <%s(%s)>", self.__class__.__name__, ",".join(params_list))
 
             if "?" in url:
                 url, existing_params = url.split("?")
