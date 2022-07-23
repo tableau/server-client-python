@@ -36,6 +36,7 @@ from .exceptions import NotSignedInError
 from ..namespace import Namespace
 
 from tableauserverclient._version import get_versions
+
 __TSC_VERSION__ = get_versions()["version"]
 del get_versions
 
