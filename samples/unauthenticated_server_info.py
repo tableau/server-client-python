@@ -14,11 +14,12 @@ import tableauserverclient as TSC
 
 def main():
 
-    server = '' # Use a link from http://webhook.site to troubleshoot outgoing requests
+    server = ""  # Use a link from http://webhook.site to troubleshoot outgoing requests
 
     server = TSC.Server(server)
     print(server)
     server.use_highest_version()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
