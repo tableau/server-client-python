@@ -2,7 +2,8 @@ import logging
 
 from .endpoint import api, Endpoint
 from .exceptions import MissingRequiredFieldError
-from .. import RequestFactory, DataAlertItem, PaginationItem, UserItem
+from .. import RequestFactory
+from tableauserverclient.models import DataAlertItem, PaginationItem, UserItem
 
 logger = logging.getLogger("tableau.endpoint.dataAlerts")
 

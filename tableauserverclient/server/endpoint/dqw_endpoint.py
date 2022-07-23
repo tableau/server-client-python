@@ -2,7 +2,8 @@ import logging
 
 from .endpoint import Endpoint
 from .exceptions import MissingRequiredFieldError
-from .. import RequestFactory, DQWItem
+from .. import RequestFactory
+from tableauserverclient.models import DQWItem
 
 logger = logging.getLogger(__name__)
 

@@ -1,17 +1,9 @@
-from ..models.property_decorators import property_is_int
-import logging
-
-logger = logging.getLogger("tableau.request_options")
-
-
 class RequestOptionsBase(object):
     # This method is used if server api version is below 3.7 (2020.1)
     def apply_query_params(self, url):
         try:
             params = self.get_query_params()
             params_list = ["{}={}".format(k, v) for (k, v) in params.items()]
-
-            logger.debug("Applying options to request: <%s(%s)>", self.__class__.__name__, ",".join(params_list))
 
             if "?" in url:
                 url, existing_params = url.split("?")
@@ -109,8 +101,9 @@ class RequestOptions(RequestOptionsBase):
 class _FilterOptionsBase(RequestOptionsBase):
     """Provide a basic implementation of adding view filters to the url"""
 
-    def __init__(self):
+    def __init__(self, maxage):
         self.view_filters = []
+        self.max_age = maxage
 
     def get_query_params(self):
         raise NotImplementedError()
@@ -123,48 +116,40 @@ class _FilterOptionsBase(RequestOptionsBase):
         for name, value in self.view_filters:
             params["vf_" + name] = value
 
-
-class CSVRequestOptions(_FilterOptionsBase):
-    def __init__(self, maxage=-1):
-        super(CSVRequestOptions, self).__init__()
-        self.max_age = maxage
-
     @property
     def max_age(self):
         return self._max_age
 
     @max_age.setter
-    @property_is_int(range=(0, 240), allowed=[-1])
     def max_age(self, value):
-        self._max_age = value
+        if value == -1 or value in range(0, 240):
+            self._max_age = value
+        else:
+            raise ValueError("Invalid value for max_age")
 
-    def get_query_params(self):
-        params = {}
+    def _append_max_age(self, params):
         if self.max_age != -1:
             params["maxAge"] = self.max_age
 
+
+class CSVRequestOptions(_FilterOptionsBase):
+    def __init__(self, maxage=-1):
+        super(CSVRequestOptions, self).__init__(maxage)
+
+    def get_query_params(self):
+        params = {}
+        self._append_max_age(params)
         self._append_view_filters(params)
         return params
 
 
 class ExcelRequestOptions(RequestOptionsBase):
     def __init__(self, maxage: int = -1) -> None:
-        super().__init__()
-        self.max_age = maxage
-
-    @property
-    def max_age(self) -> int:
-        return self._max_age
-
-    @max_age.setter
-    @property_is_int(range=(0, 240), allowed=[-1])
-    def max_age(self, value: int) -> None:
-        self._max_age = value
+        super(ExcelRequestOptions, self).__init__(maxage)
 
     def get_query_params(self):
         params = {}
-        if self.max_age != -1:
-            params["maxAge"] = self.max_age
+        self._append_max_age(params)
 
         return params
 
@@ -175,25 +160,14 @@ class ImageRequestOptions(_FilterOptionsBase):
         High = "high"
 
     def __init__(self, imageresolution=None, maxage=-1):
-        super(ImageRequestOptions, self).__init__()
+        super(ImageRequestOptions, self).__init__(maxage)
         self.image_resolution = imageresolution
-        self.max_age = maxage
-
-    @property
-    def max_age(self):
-        return self._max_age
-
-    @max_age.setter
-    @property_is_int(range=(0, 240), allowed=[-1])
-    def max_age(self, value):
-        self._max_age = value
 
     def get_query_params(self):
         params = {}
         if self.image_resolution:
             params["resolution"] = self.image_resolution
-        if self.max_age != -1:
-            params["maxAge"] = self.max_age
+        self._append_max_age(params)
         self._append_view_filters(params)
         return params
 
@@ -220,31 +194,17 @@ class PDFRequestOptions(_FilterOptionsBase):
         Landscape = "landscape"
 
     def __init__(self, page_type=None, orientation=None, maxage=-1):
-        super(PDFRequestOptions, self).__init__()
+        super(PDFRequestOptions, self).__init__(maxage)
         self.page_type = page_type
         self.orientation = orientation
-        self.max_age = maxage
-
-    @property
-    def max_age(self):
-        return self._max_age
-
-    @max_age.setter
-    @property_is_int(range=(0, 240), allowed=[-1])
-    def max_age(self, value):
-        self._max_age = value
 
     def get_query_params(self):
         params = {}
         if self.page_type:
             params["type"] = self.page_type
-
         if self.orientation:
             params["orientation"] = self.orientation
-
-        if self.max_age != -1:
-            params["maxAge"] = self.max_age
-
+        self._append_max_age(params)
         self._append_view_filters(params)
 
         return params

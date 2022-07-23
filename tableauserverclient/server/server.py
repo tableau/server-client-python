@@ -37,6 +37,7 @@ from .exceptions import NotSignedInError
 from ..namespace import Namespace
 
 from tableauserverclient._version import get_versions
+
 __TSC_VERSION__ = get_versions()["version"]
 del get_versions
 
@@ -96,9 +97,6 @@ class Server(object):
         self._namespace = Namespace()
         self.flow_runs = FlowRuns(self)
         self.metrics = Metrics(self)
-
-        if http_options:
-            self.add_http_options(http_options)
 
         # must set this before calling use_server_version, because that's a server call
         if http_options_dict:

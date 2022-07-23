@@ -32,13 +32,17 @@ class RequestTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.post(requests_mock.ANY)
             url = "http://test/api/2.3/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks"
-            resp = self.server.workbooks._make_request(requests.post, url, content=b'1337',
-                                                       auth_token='j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM',
-                                                       content_type='multipart/mixed')
-            self.assertEqual(resp.request.headers['x-tableau-auth'], 'j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM')
-            self.assertEqual(resp.request.headers['content-type'], 'multipart/mixed')
-            self.assertTrue(re.search('Tableau Server Client', resp.request.headers['user-agent']))
-            self.assertEqual(resp.request.body, b'1337')
+            resp = self.server.workbooks._make_request(
+                requests.post,
+                url,
+                content=b"1337",
+                auth_token="j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM",
+                content_type="multipart/mixed",
+            )
+            self.assertEqual(resp.request.headers["x-tableau-auth"], "j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM")
+            self.assertEqual(resp.request.headers["content-type"], "multipart/mixed")
+            self.assertTrue(re.search("Tableau Server Client", resp.request.headers["user-agent"]))
+            self.assertEqual(resp.request.body, b"1337")
 
     # Test that 500 server errors are handled properly
     def test_internal_server_error(self):

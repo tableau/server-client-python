@@ -4,7 +4,8 @@ from .default_permissions_endpoint import _DefaultPermissionsEndpoint
 from .endpoint import QuerysetEndpoint, api, XML_CONTENT_TYPE
 from .exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
-from .. import RequestFactory, RequestOptions, ProjectItem, PaginationItem, Resource
+from .. import RequestFactory, RequestOptions
+from tableauserverclient.models import ProjectItem, PaginationItem, Resource
 
 from typing import List, Optional, Tuple, TYPE_CHECKING
 

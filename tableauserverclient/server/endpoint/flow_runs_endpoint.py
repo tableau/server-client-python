@@ -3,8 +3,8 @@ from typing import List, Optional, Tuple, TYPE_CHECKING
 
 from .endpoint import QuerysetEndpoint, api
 from .exceptions import FlowRunFailedException, FlowRunCancelledException
-from .. import FlowRunItem, PaginationItem
-from ...exponential_backoff import ExponentialBackoffTimer
+from tableauserverclient.models import FlowRunItem, PaginationItem
+from tableauserverclient.exponential_backoff import ExponentialBackoffTimer
 
 logger = logging.getLogger("tableau.endpoint.flowruns")
 

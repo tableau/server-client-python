@@ -3,7 +3,8 @@ import logging
 
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
-from .. import RequestFactory, SiteItem, PaginationItem
+from .. import RequestFactory
+from tableauserverclient.models import SiteItem, PaginationItem
 
 logger = logging.getLogger("tableau.endpoint.sites")
 

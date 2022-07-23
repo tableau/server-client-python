@@ -13,6 +13,7 @@ from .exceptions import (
 )
 from ..query import QuerySet
 from ... import helpers
+from ... import _version
 
 logger = logging.getLogger("tableau.endpoint")
 
@@ -33,11 +34,12 @@ class Endpoint(object):
     @staticmethod
     def _make_common_headers(auth_token, content_type):
         headers = {}
+        version_string = _version.get_versions()["version"]
         if auth_token is not None:
             headers["x-tableau-auth"] = auth_token
         if content_type is not None:
             headers["content-type"] = content_type
-        headers["User-Agent"] = "Tableau Server Client {}".format(get_versions()['version'])
+        headers["User-Agent"] = "Tableau Server Client {}".format(version_string)
         return headers
 
     def _make_request(

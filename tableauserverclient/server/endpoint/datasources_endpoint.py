@@ -5,33 +5,27 @@ import json
 import logging
 import os
 from contextlib import closing
-from pathlib import Path
-from typing import (
-    List,
-    Mapping,
-    Optional,
-    Sequence,
-    Tuple,
-    TYPE_CHECKING,
-    Union,
-)
 
 from .dqw_endpoint import _DataQualityWarningEndpoint
 from .endpoint import QuerysetEndpoint, api, parameter_added_in
 from .exceptions import InternalServerError, MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .resource_tagger import _ResourceTagger
-from .. import RequestFactory, DatasourceItem, PaginationItem, ConnectionItem, RequestOptions
-from ..query import QuerySet
-from ...filesys_helpers import (
+from tableauserverclient.server import RequestFactory, RequestOptions
+from tableauserverclient.filesys_helpers import (
     to_filename,
     make_download_path,
     get_file_type,
     get_file_object_size,
 )
-from ...models import ConnectionCredentials, RevisionItem
-from ...models.job_item import JobItem
-from ...models import ConnectionCredentials
+from tableauserverclient.models import (
+    RevisionItem,
+    ConnectionCredentials,
+    ConnectionItem,
+    DatasourceItem,
+    JobItem,
+    PaginationItem,
+)
 
 io_types = (io.BytesIO, io.BufferedReader)
 

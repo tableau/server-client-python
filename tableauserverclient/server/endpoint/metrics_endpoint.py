@@ -3,11 +3,10 @@ from .exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .dqw_endpoint import _DataQualityWarningEndpoint
 from .resource_tagger import _ResourceTagger
-from .. import RequestFactory, PaginationItem
-from ...models.metric_item import MetricItem
+from .. import RequestFactory
+from tableauserverclient.models import MetricItem, PaginationItem
 
 import logging
-import copy
 
 from typing import List, Optional, TYPE_CHECKING, Tuple
 

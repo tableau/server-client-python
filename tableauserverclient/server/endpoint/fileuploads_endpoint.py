@@ -2,7 +2,7 @@ import logging
 
 from .endpoint import Endpoint, api
 from .. import RequestFactory
-from ...models.fileupload_item import FileuploadItem
+from tableauserverclient.models import FileuploadItem
 
 # For when a datasource is over 64MB, break it into 5MB(standard chunk size) chunks
 CHUNK_SIZE = 1024 * 1024 * 5  # 5MB
