@@ -2682,6 +2682,55 @@ The schedule methods are based upon the endpoints for schedules in the REST API 
 
 Source files: server/endpoint/schedules_endpoint.py
 
+#### schedule.add_to_schedule
+
+```py
+schedules.add_to_schedule(schedule_id)
+```
+
+Adds a `DataSourceItem` or a `WorkbookItem` to a schedule.
+
+
+REST API: [Add Data Source to Schedule](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#add_data_source_to_schedule)
+
+
+
+**Parameters**
+
+Name  |  Description
+:--- | :---
+`schedule_id` | The Tableau-internal identifier of the schedule to add to. Can be retrieved from a `ScheduleItem`, e.g., by performing `schedules.get()`
+`workbook` | (Optional) A `WorkbookItem` that should be added to the schedule. Only provide either `workbook` or `datasource`, passing multiple items will be deprecated.
+`datasource` | (Optional) A `DataSourceItem` that should be added to the schedule. Only provide either `workbook` or `datasource`, passing multiple items will be deprecated.
+`flow` | (Optional) A `FlowItem` that should be added to the schedule. Only applicable if `workbook = None` and `datasource = None`.
+`task_type` | (Optional) Determines the type of task. One of `TaskItem.Type`: `ExtractRefresh`, `DataAcceleration`, `RunFlow`.
+
+
+**Returns**
+Returns a List of `AddResponses`.
+
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+# sign in, etc.
+# get a datasource item that should be added to a schedule
+datasource_item = server.datasources.get("d14dd951-01c1-4879-8bc2-e96d7dec9f0")
+
+# retrieve the id of the target schedule 
+schedule_id = schedule_item.id  # can be a freshly created schedule or one queried via `schedules.get()`
+
+# Add the data source to the schedule
+server.schedules.add_to_schedule(
+    schedule_id=schedule_id,
+    datasource=datasource_item,
+)
+```
+<br>
+<br>
+
+
 #### schedule.create
 
 ```py
