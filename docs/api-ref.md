@@ -1501,6 +1501,229 @@ See the `metadata_query.py` sample in the Samples directory.
 
 ---
 
+## Metrics
+
+Using the TSC library, you can get information about all metrics on a site, update, or delete metrics.
+
+<br>
+
+### MetricItem class
+
+```py
+MetricItem(name: Optional[str]=None)
+```
+The metrics resources for Tableau are defined in the `MetricItem` class. The class corresponds to the metric resource you can access using the Tableau Server REST API.
+
+**Attributes**
+Name | Description
+:--- | :---
+`name` | Name of the metric
+`id` | The REST API id for the metric
+`description` | The description of the metric
+`webpage_url` | The URL for the metric
+`created_at` | The datetime object for when the metric was created
+`updated_at` | The datetime object for when the metric was updated
+`suspended` | Boolean for if the metric is in a suspended state
+`project_id` | REST API id for the project containing the metric
+`project_name` | The name of the project containing the metric
+`owner_id` | REST API id for the user who owns the metric
+`view_id` | REST API id for the view from which the metric was created
+
+
+
+Source file: models/metric_item.py
+
+<br>
+<br>
+
+### Metric methods
+
+The metric methods are based upon the endpoints for metrics in the REST API and operate on the `MetricItem` class. The metrics endpoint also supports the django style filtering.
+See [Filter and Sort](filter-sort) for more information.
+
+Source files: server/endpoint/metrics_endpoint.py
+
+<br>
+<br>
+
+#### metrics.delete
+
+```py
+metrics.delete(metric_id)
+
+```
+
+Deletes a metric item from a site.
+
+
+To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site.  See the [TableauAuth class](#tableauauth-class).
+
+REST API: [Delete Metric](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#delete_metric)
+
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`metric_id` | The id of the metric to delete
+
+
+
+**Returns**
+
+None
+
+
+
+ **Example**
+
+```py
+# import tableauserverclient as TSC
+# server = TSC.Server('https://MY-SERVER')
+# sign in, etc
+
+server.metrics.delete("6561daa3-20e8-407f-ba09-709b178c0b4a")
+
+```
+
+<br>
+<br>
+
+#### metrics.get
+
+```py
+metrics.get()
+
+```
+
+Return a list of metrics items for a site.
+
+
+To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site.  See the [TableauAuth class](#tableauauth-class).
+
+REST API: [List Metrics for Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#list_metrics_for_site)
+
+
+**Parameters**
+
+None.
+
+**Returns**
+
+Returns a Tuple containing a  list of all `MetricItem` objects and a `PaginationItem`. Use these values to iterate through the results.
+
+
+
+ **Example**
+
+```py
+import tableauserverclient as TSC
+tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD', site_id='CONTENTURL')
+server = TSC.Server('https://SERVER')
+
+with server.auth.sign_in(tableau_auth):
+        # get all metrics on site
+        all_metric_items, pagination_item = server.metrics.get()
+        print([metric.name for metric in all_metric_items])
+
+```
+
+<br>
+<br>
+
+#### metrics.get_by_id
+
+```py
+metrics.get_by_id(metric_id)
+
+```
+
+Return a specific metric item from the site.
+
+
+To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site.  See the [TableauAuth class](#tableauauth-class).
+
+REST API: [Get Metric](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#get_metric)
+
+
+**Parameters**
+
+
+Name | Description
+:--- | :---
+`metric_id` | The id of the desired metric
+
+
+
+**Returns**
+
+Returns a `MetricItem` object corresponding to the ID requested.
+
+
+
+ **Example**
+
+```py
+# import tableauserverclient as TSC
+# server = TSC.Server('https://MY-SERVER')
+# sign in, etc
+
+server.metrics.get_by_id("6561daa3-20e8-407f-ba09-709b178c0b4a")
+
+```
+
+<br>
+<br>
+
+#### metrics.update
+
+```py
+metrics.update(item)
+
+```
+
+Updates a metric item on the Tableau Server.
+
+
+To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site.  See the [TableauAuth class](#tableauauth-class).
+
+REST API: [Update Metric](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_metric)
+
+
+**Parameters**
+
+
+Name | Description
+:--- | :---
+`metric_item` | The altered `MetricItem` to be updated on the Tableau Server
+
+
+**Returns**
+
+Returns a `MetricItem` object reflecting the changes applied to Tableau Server.
+
+
+
+ **Example**
+
+```py
+# import tableauserverclient as TSC
+# server = TSC.Server('https://MY-SERVER')
+# sign in, etc
+
+metric = server.metrics.get_by_id("6561daa3-20e8-407f-ba09-709b178c0b4a")
+metric.owner_id = "1bbbc2b9-847d-443c-9a1f-dbcf112b8814"
+server.metrics.update(metric)
+```
+
+<br>
+<br>
+
+
+
+
+---
+
 ## Projects
 
 Using the TSC library, you can get information about all the projects on a site, or you can create, update projects, or remove projects.
@@ -2838,7 +3061,7 @@ Attribute | Description
 `name` | The name of the site. The name of the default site is "".
 `content_url` | The path to the site.
 `admin_mode` | (Optional) For Tableau Server only. Specify `ContentAndUsers` to allow site administrators to use the server interface and **tabcmd** commands to add and remove users. (Specifying this option does not give site administrators permissions to manage users using the REST API.) Specify `ContentOnly` to prevent site administrators from adding or removing users. (Server administrators can always add or remove users.)
-`user_quota`| (Optional) Specifies the maximum number of users for the site. If you do not specify this value, the limit depends on the type of licensing configured for the server. For user-based license, the maximum number of users is set by the license. For core-based licensing, there is no limit to the number of users. If you specify a maximum value, only licensed users are counted and server administrators are excluded.
+`user_quota`| (Optional) Specifies the maximum number of users for the site. If you do not specify this value, the limit depends on the type of licensing configured for the server. For user-based license, the maximum number of users is set by the license. For core-based licensing, there is no limit to the number of users. If you specify a maximum value, only licensed users are counted and server administrators are excluded. Mutually exclusive with tiered license level settings.
 `storage_quota` | (Optional) 	Specifies the maximum amount of space for the new site, in megabytes. If you set a quota and the site exceeds it, publishers will be prevented from uploading new content until the site is under the limit again.
 `disable_subscriptions` | (Optional) Specify `true` to prevent users from being able to subscribe to workbooks on the specified site. The default is `false`.
 `subscribe_others_enabled` | (Optional) Specify `false` to prevent server administrators, site administrators, and project or content owners from being able to subscribe other users to workbooks on the specified site. The default is `true`.
