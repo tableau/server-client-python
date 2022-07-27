@@ -92,7 +92,7 @@ server.auth.sign_in(tableau_auth)
 server.auth.sign_out()
 ```
 
-The TSC library uses the Python Requests library under the hood, so you can learn more about the `verify` option on the [Python Requests advanced usage](https://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification) documentation.
+The TSC library uses the Python Requests library under the hood, so you can learn more about the `verify` option on the [Python Requests advanced usage](https://requests.readthedocs.io/en/latest/user/advanced/#ssl-cert-verification) documentation.
 
 You can also set `verify` to `False` to disable the SSL certificate verification step, but this is only useful for development and _should not be used for real production work_.
 
