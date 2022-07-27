@@ -297,7 +297,7 @@ Name | Description
 `certification_note` |  The optional note that describes the certified data source.
 `datasource_type` | The type of data source, for example, `sqlserver` or `excel-direct`.
 `description` | The description for the data source.
-`encrypt_extracts` | A Boolean value to determine if a datasource should be encrypted or not. See [Extract and Encryption Methods](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_extract_encryption.htm) for more information.
+`encrypt_extracts` | A Boolean value to determine if a datasource should be encrypted or not. See [Extract and Encryption Methods](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_extract_and_encryption.htm) for more information.
 `has_extracts` | A Boolean value that indicates whether the datasource has extracts.
 `id` |  The identifier for the data source. You need this value to query a specific data source or to delete a data source with the `get_by_id` and `delete` methods.
 `name`  |  The name of the data source. If not specified, the name of the published data source file is used.
@@ -1253,7 +1253,7 @@ groups.update(group_item, as_job=False)
 
 Updates a group in Tableau Server.
 
-REST API: [Update Group](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_usersgroups.htm#update_group)
+REST API: [Update Group](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_users_and_groups.htm#update_group)
 
 
 **Parameters**
@@ -3664,7 +3664,7 @@ tasks.delete(task_id)
 
 Deletes an extract refresh task.
 
-REST API: [Run Extract Refresh Task](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobstasksschedules.htm#delete_workbook){:target="_blank"}
+REST API: [Delete Extract Refresh Task](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#delete_extract_refresh_task){:target="_blank"}
 
 **Parameters**
 
@@ -4727,7 +4727,7 @@ workbooks.refresh(workbook_item)
 
 Refreshes the extract of an existing workbook.
 
-REST API: [Update Workbook Now](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooksviews.htm#update_workbook_now)
+REST API: [Update Workbook Now](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_workbook_now)
 
 **Parameters**
 
@@ -5153,7 +5153,7 @@ Populates the PDF content of the specified workbook.
 
 This method populates a PDF with image(s) of the workbook view(s) you specify.
 
-REST API: [Download Workbook PDF](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooksviews.htm#download_workbook_pdf)
+REST API: [Download Workbook PDF](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#download_workbook_pdf)
 
 **Version**
 
