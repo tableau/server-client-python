@@ -1,6 +1,5 @@
 from distutils.version import LooseVersion as Version
 import urllib3
-import requests
 from defusedxml.ElementTree import fromstring
 
 from .endpoint import (
@@ -30,8 +29,8 @@ from .endpoint import (
     Metrics,
 )
 from .endpoint.exceptions import (
-    EndpointUnavailableError,
     ServerInfoEndpointNotFoundError,
+    EndpointUnavailableError,
 )
 from .exceptions import NotSignedInError
 from ..namespace import Namespace
@@ -144,20 +143,14 @@ class Server(object):
 
         warnings.warn("use use_server_version instead", DeprecationWarning)
 
-    # sometimes a model changes in newer versions
-    def check_at_least_version(self, comparison: str):
+    def check_at_least_version(self, target: str):
         server_version = Version(self.version or "0.0")
-        compared_version = Version(comparison)
-        return not server_version < compared_version
+        target_version = Version(target)
+        return server_version >= target_version
 
-    def assert_at_least_version(self, comparison: str):
-        if self.check_at_least_version(comparison):
-            return
-        else:
-            server_version = Version(self.version or "0.0")
-            error = "This endpoint (or model) is not available in API version {}. Requires {}".format(
-                server_version, comparison
-            )
+    def assert_at_least_version(self, comparison: str, reason: str):
+        if not self.check_at_least_version(comparison):
+            error = "{} is not available in API version {}. Requires {}".format(reason, self.version, comparison)
             raise EndpointUnavailableError(error)
 
     @property

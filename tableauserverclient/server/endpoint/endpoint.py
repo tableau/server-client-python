@@ -112,7 +112,7 @@ class Endpoint(object):
         if request_object is not None:
             try:
                 # Query param delimiters don't need to be encoded for versions before 3.7 (2020.1)
-                self.parent_srv.assert_at_least_version("3.7")
+                self.parent_srv.assert_at_least_version("3.7", "Query param encoding")
                 parameters = parameters or {}
                 parameters["params"] = request_object.get_query_params()
             except EndpointUnavailableError:
@@ -182,7 +182,7 @@ def api(version):
     def _decorator(func):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
-            self.parent_srv.assert_at_least_version(version)
+            self.parent_srv.assert_at_least_version(version, "endpoint")
             return func(self, *args, **kwargs)
 
         return wrapper

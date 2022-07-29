@@ -90,7 +90,7 @@ class Sites(Endpoint):
                 raise ValueError(error)
 
         url = "{0}/{1}".format(self.baseurl, site_item.id)
-        update_req = RequestFactory.Site.update_req(site_item)
+        update_req = RequestFactory.Site.update_req(site_item, self.parent_srv)
         server_response = self.put_request(url, update_req)
         logger.info("Updated site item (ID: {0})".format(site_item.id))
         update_site = copy.copy(site_item)

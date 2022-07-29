@@ -1,8 +1,8 @@
 import warnings
 import xml.etree.ElementTree as ET
 
+from distutils.version import Version
 from defusedxml.ElementTree import fromstring
-
 from .property_decorators import (
     property_is_enum,
     property_is_boolean,
@@ -14,7 +14,10 @@ from .property_decorators import (
 
 VALID_CONTENT_URL_RE = r"^[a-zA-Z0-9_\-]*$"
 
-from typing import List, Optional, Union
+from typing import List, Optional, Union, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from tableauserverclient.server import Server
 
 
 class SiteItem(object):
@@ -276,6 +279,10 @@ class SiteItem(object):
 
     def is_default(self) -> bool:
         return self.name.lower() == "default"
+
+    @staticmethod
+    def use_new_flow_settings(parent_srv: "Server") -> bool:
+        return parent_srv is not None and parent_srv.check_at_least_version("3.10")
 
     @property
     def flows_enabled(self) -> bool:
