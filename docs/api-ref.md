@@ -560,7 +560,7 @@ None. A list of `ConnectionItem` objects are added to the data source (`datasour
 #### datasources.publish
 
 ```py
-datasources.publish(datasource_item, file_path, mode, connection_credentials=None)
+datasources.publish(datasource_item, file, mode, connection_credentials=None, as_job=False)
 ```
 
 Publishes a data source to a server, or appends data to an existing data source.
@@ -2682,13 +2682,13 @@ The schedule methods are based upon the endpoints for schedules in the REST API 
 
 Source files: server/endpoint/schedules_endpoint.py
 
-#### schedule.add_to_schedule
+#### schedules.add_to_schedule
 
 ```py
 schedules.add_to_schedule(schedule_id)
 ```
 
-Adds a `DataSourceItem` or a `WorkbookItem` to a schedule.
+Adds a `DatasourceItem`, `FlowItem`, or `WorkbookItem` to a schedule.
 
 
 REST API: [Add Data Source to Schedule](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#add_data_source_to_schedule)
@@ -2701,7 +2701,7 @@ Name  |  Description
 :--- | :---
 `schedule_id` | The Tableau-internal identifier of the schedule to add to. Can be retrieved from a `ScheduleItem`, e.g., by performing `schedules.get()`
 `workbook` | (Optional) A `WorkbookItem` that should be added to the schedule. Only provide either `workbook` or `datasource`, passing multiple items will be deprecated.
-`datasource` | (Optional) A `DataSourceItem` that should be added to the schedule. Only provide either `workbook` or `datasource`, passing multiple items will be deprecated.
+`datasource` | (Optional) A `DatasourceItem` that should be added to the schedule. Only provide either `workbook` or `datasource`, passing multiple items will be deprecated.
 `flow` | (Optional) A `FlowItem` that should be added to the schedule. Only applicable if `workbook = None` and `datasource = None`.
 `task_type` | (Optional) Determines the type of task. One of `TaskItem.Type`: `ExtractRefresh`, `DataAcceleration`, `RunFlow`.
 
@@ -2731,7 +2731,7 @@ server.schedules.add_to_schedule(
 <br>
 
 
-#### schedule.create
+#### schedules.create
 
 ```py
 schedules.create(schedule_item)
@@ -2779,7 +2779,7 @@ import tableauserverclient as TSC
 <br>
 
 
-#### schedule.delete
+#### schedules.delete
 
 ```py
 schedules.delete(schedule_id)
@@ -2810,7 +2810,7 @@ Error  |  Description
 `Schedule ID undefined`  |  The identifier is not a valid identifier for a schedule on the server.
 
 
-#### schedule.get
+#### schedules.get
 
 ```py
 schedules.get([req_options=None])
@@ -2829,7 +2829,7 @@ Name  |  Description
 :--- | :---
 `req_options` | (Optional) Additional request options to send to the endpoint.
 
-#### schedule.update
+#### schedules.update
 
 <br>
 <br>
