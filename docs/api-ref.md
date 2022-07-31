@@ -2685,7 +2685,7 @@ Source files: server/endpoint/schedules_endpoint.py
 #### schedules.add_to_schedule
 
 ```py
-schedules.add_to_schedule(schedule_id)
+schedules.add_to_schedule(schedule_id, workbook=None, datasource=None, flow=None, task_type=None)
 ```
 
 Adds a `DatasourceItem`, `FlowItem`, or `WorkbookItem` to a schedule.
@@ -2699,7 +2699,7 @@ REST API: [Add Data Source to Schedule](https://help.tableau.com/current/api/res
 
 Name  |  Description
 :--- | :---
-`schedule_id` | The Tableau-internal identifier of the schedule to add to. Can be retrieved from a `ScheduleItem`, e.g., by performing `schedules.get()`
+`schedule_id` | The identifier (id) of the schedule to add the data source or workbook to. Can be retrieved from a `ScheduleItem`, e.g., by performing `schedules.get()`.
 `workbook` | (Optional) A `WorkbookItem` that should be added to the schedule. Only provide either `workbook` or `datasource`, passing multiple items will be deprecated.
 `datasource` | (Optional) A `DatasourceItem` that should be added to the schedule. Only provide either `workbook` or `datasource`, passing multiple items will be deprecated.
 `flow` | (Optional) A `FlowItem` that should be added to the schedule. Only applicable if `workbook = None` and `datasource = None`.
