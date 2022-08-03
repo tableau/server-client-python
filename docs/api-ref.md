@@ -4779,11 +4779,12 @@ Returns the new webhook item.
  # create a webhook item
  with server.auth.sign_in(tableau_auth):
     new_webhook = TSC.WebhookItem()
-    new_webhook.name ='testWebhook'
-    new_webhook.event ="workbook-refresh-failed" # alternately, you can also use new_webhook.source="webhook-source-event-workbook-refresh-failed" 
-    new_webhook.url ="https://webhook.site/6e4c957d-dd40-422c-8fc6-7151afe7fc0b"    
+    new_webhook.name = 'testWebhook'
+    new_webhook.event = "workbook-refresh-failed" # alternately, you can also use new_webhook.source="webhook-source-event-workbook-refresh-failed" 
+    new_webhook.url = "https://webhook.site/6e4c957d-dd40-422c-8fc6-7151afe7fc0b"    
     # create the webhook
     new_webhook = server.webhooks.create(new_webhook)
+    
     print("Webhook created. ID: {}".format(new_webhook.id))
 
 ```
@@ -4856,6 +4857,7 @@ Returns a list of all `ProjectItem` objects and a `PagainationItem`. Use  these 
 # get a list of all the webhooks on a site
 with server.auth.sign_in(tableau_auth):
    all_webhooks, pagination_item = server.webhooks.get()
+   
 print("\nThere are {} webhooks on site: ".format(pagination_item.total_available))
 print(["Webhook Name:"+ webhook.name+ ";" + "ID:" + webhook.id for webhook in all_webhooks])
 
@@ -4892,6 +4894,7 @@ Error|Description
 
 with server.auth.sign_in(tableau_auth):
   webhook = server.webhooks.get_by_id ('7d60d364-b9f5-4a9c-8aa5-4bdaa38c5dd3')
+  
 print (webhook.name, webhook.url)
 
 
@@ -5014,7 +5017,7 @@ tableau_auth = TSC.TableauAuth('username', 'password', site_id='site')
 server = TSC.Server('https://servername')
 
 with server.auth.sign_in(tableau_auth):
-  all_workbooks_items, pagination_item = server.workbooks.get()
+  all_workbooks_items, pagination_item = server.workbooks.get()  
   # print names of first 100 workbooks
   print([workbook.name for workbook in all_workbooks_items])
 
