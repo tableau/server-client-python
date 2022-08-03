@@ -4723,17 +4723,17 @@ Name | Description
 `id` |  The identifier (*luid*) for the webhook. You need this value to query a specific Webhook  with the `get_by_id` method or to delete a Webhook with the  `delete` method.
 `name`  |  The name of the webhook. You must specify this when you create an instance of the `WebhookItem`.
 `url` | The destination URL for the webhook. The webhook destination URL must be https and have a valid certificate. You must specify this when you create an instance of the `WebhookItem`.
-`event` | The name of the Tableau event that triggers your webhook.This  is either `api-event-name` or `webhook-source-api-event-name`: one of this is required to create an instance of the `WebhookItem`.  <br> The event name must be one of the supported events listed in the Trigger Events table. The event and webhook-source use different name values for the same event.
+`event` | The name of the Tableau event that triggers your webhook.This  is either `api-event-name` or `webhook-source-api-event-name`: one of these is required to create an instance of the `WebhookItem`.  <br> The event name must be one of the supported events listed in the Trigger Events table. The event and webhook-source use different name values for the same event.
 `owner_id` |  The identifier of the owner of the webhook.
 
 **Example**
 
 ```py
-    import tableauserverclient as TSC
+import tableauserverclient as TSC
 
-    # Create new Webhook_item
+# Create new Webhook_item
 
-    new_webhook = TSC.WebhookItem()
+new_webhook = TSC.WebhookItem()
 ```
 Source file:  models/webhook_item.py
 
