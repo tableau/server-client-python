@@ -4776,8 +4776,6 @@ Returns the new webhook item.
 # server = TSC.Server('https://SERVER')
 # sign in . For authentication examples, see https://github.com/tableau/server-client-python/blob/master/samples/login.py
 
----
-
  # create a webhook item
  with server.auth.sign_in(tableau_auth):
     new_webhook = TSC.WebhookItem()
@@ -4820,7 +4818,7 @@ Error|Description
 # import tableauserverclient as TSC
 # server = TSC.Server('https://SERVER')
 # sign in . For authentication examples, see https://github.com/tableau/server-client-python/blob/master/samples/login.py
----
+
 # Delete the webhook
 with server.auth.sign_in(tableau_auth):
   server.webhooks.delete('7d60d364-b9f5-4a9c-8aa5-4bdaa38c5dd3')
@@ -4854,7 +4852,7 @@ Returns a list of all `ProjectItem` objects and a `PagainationItem`. Use  these 
 # import tableauserverclient as TSC
 # server = TSC.Server('https://SERVER')
 # sign in . For authentication examples, see https://github.com/tableau/server-client-python/blob/master/samples/login.py
----
+
 # get a list of all the webhooks on a site
 with server.auth.sign_in(tableau_auth):
    all_webhooks, pagination_item = server.webhooks.get()
@@ -4891,7 +4889,7 @@ Error|Description
 # import tableauserverclient as TSC
 # server = TSC.Server('https://SERVER')
 # sign in . For authentication examples, see https://github.com/tableau/server-client-python/blob/master/samples/login.py
----
+
 with server.auth.sign_in(tableau_auth):
   webhook = server.webhooks.get_by_id ('7d60d364-b9f5-4a9c-8aa5-4bdaa38c5dd3')
 print (webhook.name, webhook.url)
