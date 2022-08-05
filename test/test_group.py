@@ -127,8 +127,7 @@ class GroupTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=get_xml_response)
             m.post(
-                self.baseurl + "/dad65087-b08b-4603-af4e-2887b8aafc67/groups/ef8b19c0-43b6-11e6-af50"
-                "-63f5805dbe3c/users",
+                self.baseurl + "/ef8b19c0-43b6-11e6-af50-63f5805dbe3c/users",
                 text=add_user_response,
             )
             all_groups, pagination_item = self.server.groups.get()
@@ -161,8 +160,7 @@ class GroupTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
             m.delete(
-                self.baseurl + "/dad65087-b08b-4603-af4e-2887b8aafc67/groups/ef8b19c0-43b6-11e6-af50"
-                "-63f5805dbe3c/users/5de011f8-5aa9-4d5b-b991-f462c8dd6bb7",
+                self.baseurl + "/ef8b19c0-43b6-11e6-af50-63f5805dbe3c/users/5de011f8-5aa9-4d5b-b991-f462c8dd6bb7",
                 text="ok",
             )
             all_groups, pagination_item = self.server.groups.get()
