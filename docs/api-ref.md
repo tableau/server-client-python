@@ -4703,27 +4703,27 @@ See [ViewItem class](#viewitem-class)
 ## Webhooks
 <br>
 <br>
-Using the Tableau Server Client (TSC), you can create a new webhook, get a list of all the Webhooks, get details about a specific webhook, or delete a webhook. 
+Using the Tableau Server Client (TSC), you can create a new webhook, get a list of all the webhooks, get details about a specific webhook, or delete a webhook. 
 <br>
 
-The Webhook resource for Tableau Server and Tableau Cloud are defined in the WebhookItem class. The class corresponds to the Webhook resources you can access using the Tableau REST API.  For example, using REST API, you can gather information about a workbook, like the name of the Webbook, the event it is associated with, and the destination URL, and you can get the same information using TSC as well.
+The webhook resource for Tableau Server and Tableau Cloud are defined in the `WebhookItem` class. The class corresponds to the webhook resources you can access using the Tableau REST API.  For example, using REST API, you can gather information about a workbook, like the name of the Webbook, the event it is associated with, and the destination URL, and you can get the same information using TSC as well.
 <br>
 
-Tableau Webhook REST API endpoints are available in **REST API version 3.16** and later. 
+Tableau webhook REST API endpoints are available in **REST API version 3.16** and later. 
 <br>
 <br>
 
 ### WebhookItem class
-The `WebhookItem` represents the Webhook resources on Tableau Server or Tableau Cloud. This is the information that can be sent or returned in response to a REST API request for Webhooks.  
+The `WebhookItem` represents the webhook resources on Tableau Server or Tableau Cloud. This is the information that can be sent or returned in response to a REST API request for webhooks.  
 
 **Attributes**
 
 Name | Description
 :--- | :---
-`id` |  The identifier (*luid*) for the webhook. You need this value to query a specific Webhook  with the `get_by_id` method or to delete a Webhook with the  `delete` method.
+`id` |  The identifier (*luid*) for the webhook. You need this value to query a specific webhook  with the `get_by_id` method or to delete a webhook with the  `delete` method.
 `name`  |  The name of the webhook. You must specify this when you create an instance of the `WebhookItem`.
 `url` | The destination URL for the webhook. The webhook destination URL must be https and have a valid certificate. You must specify this when you create an instance of the `WebhookItem`.
-`event` | The name of the Tableau event that triggers your webhook.This  is either `api-event-name` or `webhook-source-api-event-name`: one of these is required to create an instance of the `WebhookItem`.  <br> The event name must be one of the supported events listed in the Trigger Events table. The event and webhook-source use different name values for the same event.
+`event` | The name of the Tableau event that triggers your webhook.This  is either `api-event-name` or `webhook-source-api-event-name`: one of these is required to create an instance of the `WebhookItem`. We recommend using the `api-event-name`. <br> The event name must be one of the supported events listed in the [Trigger Events](https://help.tableau.com/current/developer/webhooks/en-us/docs/webhooks-events-payload.html) table. 
 `owner_id` |  The identifier of the owner of the webhook.
 
 **Example**
@@ -4785,7 +4785,7 @@ Returns the new webhook item.
     # create the webhook
     new_webhook = server.webhooks.create(new_webhook)
     
-    print("Webhook created. ID: {}".format(new_webhook.id))
+  print("Webhook created. ID: {}".format(new_webhook.id))
 
 ```
 <br>
@@ -4857,7 +4857,7 @@ Returns a list of all `ProjectItem` objects and a `PagainationItem`. Use  these 
 # get a list of all the webhooks on a site
 with server.auth.sign_in(tableau_auth):
    all_webhooks, pagination_item = server.webhooks.get()
-   
+
 print("\nThere are {} webhooks on site: ".format(pagination_item.total_available))
 print(["Webhook Name:"+ webhook.name+ ";" + "ID:" + webhook.id for webhook in all_webhooks])
 
