@@ -63,7 +63,7 @@ class Endpoint(object):
             logger.debug("request content: {}".format(helpers.strings.redact_xml(content[:1000])))
 
         server_response = method(url, **parameters)
-        self._check_status(server_response)
+        self._check_status(server_response, url)
 
         loggable_response = self.log_response_safely(server_response)
         logger.debug("Server response from {0}:\n\t{1}".format(url, loggable_response))
@@ -73,13 +73,13 @@ class Endpoint(object):
 
         return server_response
 
-    def _check_status(self, server_response):
+    def _check_status(self, server_response, url: str = None):
         if server_response.status_code >= 500:
-            raise InternalServerError(server_response)
+            raise InternalServerError(server_response, url)
         elif server_response.status_code not in Success_codes:
             # todo: is an error reliably of content-type application/xml?
             try:
-                raise ServerResponseError.from_response(server_response.content, self.parent_srv.namespace)
+                raise ServerResponseError.from_response(server_response.content, self.parent_srv.namespace, url)
             except ParseError:
                 # This will happen if we get a non-success HTTP code that
                 # doesn't return an xml error object (like metadata endpoints or 503 pages)
@@ -126,7 +126,7 @@ class Endpoint(object):
         )
 
     def delete_request(self, url):
-        # We don't return anything for a delete
+        # We don't return anything for a delete request
         self._make_request(self.parent_srv.session.delete, url, auth_token=self.parent_srv.auth_token)
 
     def put_request(self, url, xml_request=None, content_type=XML_CONTENT_TYPE, parameters=None):
