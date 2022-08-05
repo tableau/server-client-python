@@ -24,6 +24,9 @@ class SiteTests(unittest.TestCase):
         self.server._site_id = "0626857c-1def-4503-a7d8-7907c3ff9d9f"
         self.baseurl = self.server.sites.baseurl
 
+        # sites APIs can only be called on the site being logged in to
+        self.logged_in_site = self.server.site_id
+
     def test_get(self) -> None:
         with open(GET_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
@@ -71,10 +74,10 @@ class SiteTests(unittest.TestCase):
         with open(GET_BY_ID_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
-            m.get(self.baseurl + "/dad65087-b08b-4603-af4e-2887b8aafc67", text=response_xml)
-            single_site = self.server.sites.get_by_id("dad65087-b08b-4603-af4e-2887b8aafc67")
+            m.get(self.baseurl + "/" + self.logged_in_site, text=response_xml)
+            single_site = self.server.sites.get_by_id(self.logged_in_site)
 
-        self.assertEqual("dad65087-b08b-4603-af4e-2887b8aafc67", single_site.id)
+        self.assertEqual(self.logged_in_site, single_site.id)
         self.assertEqual("Active", single_site.state)
         self.assertEqual("Default", single_site.name)
         self.assertEqual("ContentOnly", single_site.admin_mode)
@@ -95,7 +98,7 @@ class SiteTests(unittest.TestCase):
             m.get(self.baseurl + "/testsite?key=name", text=response_xml)
             single_site = self.server.sites.get_by_name("testsite")
 
-        self.assertEqual("dad65087-b08b-4603-af4e-2887b8aafc67", single_site.id)
+        self.assertEqual(self.logged_in_site, single_site.id)
         self.assertEqual("Active", single_site.state)
         self.assertEqual("testsite", single_site.name)
         self.assertEqual("ContentOnly", single_site.admin_mode)
@@ -110,7 +113,7 @@ class SiteTests(unittest.TestCase):
         with open(UPDATE_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
-            m.put(self.baseurl + "/6b7179ba-b82b-4f0f-91ed-812074ac5da6", text=response_xml)
+            m.put(self.baseurl + "/" + self.logged_in_site, text=response_xml)
             single_site = TSC.SiteItem(
                 name="Tableau",
                 content_url="tableau",
@@ -143,10 +146,11 @@ class SiteTests(unittest.TestCase):
                 tier_explorer_capacity=5,
                 tier_viewer_capacity=5,
             )
-            single_site._id = "6b7179ba-b82b-4f0f-91ed-812074ac5da6"
+            single_site._id = self.logged_in_site
+            self.server.sites.parent_srv = self.server
             single_site = self.server.sites.update(single_site)
 
-        self.assertEqual("6b7179ba-b82b-4f0f-91ed-812074ac5da6", single_site.id)
+        self.assertEqual(self.logged_in_site, single_site.id)
         self.assertEqual("tableau", single_site.content_url)
         self.assertEqual("Suspended", single_site.state)
         self.assertEqual("Tableau", single_site.name)

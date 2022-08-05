@@ -63,7 +63,7 @@ class Endpoint(object):
             logger.debug("request content: {}".format(helpers.strings.redact_xml(content[:1000])))
 
         server_response = method(url, **parameters)
-        self._check_status(server_response)
+        self._check_status(server_response, url)
 
         loggable_response = self.log_response_safely(server_response)
         logger.debug("Server response from {0}:\n\t{1}".format(url, loggable_response))
@@ -73,9 +73,9 @@ class Endpoint(object):
 
         return server_response
 
-    def _check_status(self, server_response):
+    def _check_status(self, server_response, request_url=None):
         if server_response.status_code >= 500:
-            raise InternalServerError(server_response)
+            raise InternalServerError(server_response, request_url)
         elif server_response.status_code not in Success_codes:
             # todo: is an error reliably of content-type application/xml?
             try:
@@ -112,7 +112,7 @@ class Endpoint(object):
         if request_object is not None:
             try:
                 # Query param delimiters don't need to be encoded for versions before 3.7 (2020.1)
-                self.parent_srv.assert_at_least_version("3.7")
+                self.parent_srv.assert_at_least_version("3.7", "Query param encoding")
                 parameters = parameters or {}
                 parameters["params"] = request_object.get_query_params()
             except EndpointUnavailableError:
@@ -182,7 +182,7 @@ def api(version):
     def _decorator(func):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
-            self.parent_srv.assert_at_least_version(version)
+            self.parent_srv.assert_at_least_version(version, "endpoint")
             return func(self, *args, **kwargs)
 
         return wrapper
