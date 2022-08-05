@@ -132,6 +132,7 @@ class UserDataTest(unittest.TestCase):
         valid, invalid = TSC.UserItem.CSVImportFileItem.validate_file_for_import(test_data, UserDataTest.logger)
         assert valid == 2, "Expected two lines to be parsed, got {}".format(valid)
         assert invalid == 0, "Expected no failures, got {}".format(invalid)
+
     def test_validate_usernames_file(self):
         test_data = self._mock_file_content(UserDataTest.usernames)
         valid, invalid = TSC.UserItem.CSVImportFileItem.validate_file_for_import(test_data, UserDataTest.logger)

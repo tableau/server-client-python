@@ -305,15 +305,17 @@ class UserItem(object):
                     values[UserItem.CSVImportFileItem.Column.PUBLISHER],
                 )
 
-                user._set_values(None,
-                                 values[UserItem.CSVImportFileItem.Column.USERNAME],
-                                 site_role,
-                                 None,
-                                 None,
-                                 values[UserItem.CSVImportFileItem.Column.DISPLAY_NAME],
-                                 values[UserItem.CSVImportFileItem.Column.EMAIL],
-                                 values[UserItem.CSVImportFileItem.Column.AUTH],
-                                 None)
+                user._set_values(
+                    None,
+                    values[UserItem.CSVImportFileItem.Column.USERNAME],
+                    site_role,
+                    None,
+                    None,
+                    values[UserItem.CSVImportFileItem.Column.DISPLAY_NAME],
+                    values[UserItem.CSVImportFileItem.Column.EMAIL],
+                    values[UserItem.CSVImportFileItem.Column.AUTH],
+                    None,
+                )
             return user
 
         @staticmethod
@@ -344,7 +346,7 @@ class UserItem(object):
                 raise AttributeError("Username cannot contain spaces")
             at_symbol = username.find("@")
             if at_symbol >= 0:
-                username = username[:at_symbol] + "X" + username[at_symbol + 1:]
+                username = username[:at_symbol] + "X" + username[at_symbol + 1 :]
                 if username.find("@") >= 0:
                     raise AttributeError("Username cannot repeat '@'")
 
@@ -357,12 +359,10 @@ class UserItem(object):
             logger.debug("> details - {}".format(username))
             UserItem.CSVImportFileItem._validate_username_or_throw(username)
             for i in range(1, len(line)):
-                logger.debug("column {}: {}".format(UserItem.CSVImportFileItem.Column(i).name,
-                                                    line[i]))
+                logger.debug("column {}: {}".format(UserItem.CSVImportFileItem.Column(i).name, line[i]))
                 UserItem.CSVImportFileItem._validate_item(
-                    line[i],
-                    UserItem.CHOICES[i],
-                    UserItem.CSVImportFileItem.Column(i))
+                    line[i], UserItem.CHOICES[i], UserItem.CSVImportFileItem.Column(i)
+                )
 
         @staticmethod
         def _validate_item(item: str, possible_values: List[str], column_type) -> None:
@@ -371,7 +371,7 @@ class UserItem(object):
                 return
             if item in possible_values or possible_values == []:
                 return
-            raise AttributeError("Invalid value {} for {}").format(item, column_type)
+            raise AttributeError("Invalid value {} for {}".format(item, column_type))
 
         # https://help.tableau.com/current/server/en-us/csvguidelines.htm#settings_and_site_roles
         @staticmethod
@@ -410,4 +410,3 @@ class UserItem(object):
             if site_role is None:
                 site_role = "Unlicensed"
             return site_role
-

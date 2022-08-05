@@ -23,6 +23,7 @@ POPULATE_GROUPS_XML = os.path.join(TEST_ASSET_DIR, "user_populate_groups.xml")
 USERNAMES = os.path.join(TEST_ASSET_DIR, "Data", "usernames.csv")
 USERS = os.path.join(TEST_ASSET_DIR, "Data", "user_details.csv")
 
+
 class UserTests(unittest.TestCase):
     def setUp(self) -> None:
         self.server = TSC.Server("http://test", False)

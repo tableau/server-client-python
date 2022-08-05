@@ -5,14 +5,7 @@ from typing import List, Optional, Tuple, Union
 
 from .endpoint import QuerysetEndpoint, api
 from .exceptions import MissingRequiredFieldError, ServerResponseError
-from .. import (
-    RequestFactory,
-    RequestOptions,
-    UserItem,
-    WorkbookItem,
-    PaginationItem,
-    GroupItem
-)
+from .. import RequestFactory, RequestOptions, UserItem, WorkbookItem, PaginationItem, GroupItem
 from ..pager import Pager
 
 # duplicate defined in workbooks_endpoint
@@ -106,7 +99,7 @@ class Users(QuerysetEndpoint):
     # helping the user by parsing a file they could have used to add users through the UI
     # line format: Username [required], password, display name, license, admin, publish
     @api(version="2.0")
-    def create_from_file(self, filepath: FilePath = None) -> (List[UserItem], List[UserItem]):
+    def create_from_file(self, filepath: str) -> Tuple[List[UserItem], List[Tuple[UserItem, ServerResponseError]]]:
         created = []
         failed = []
         if not filepath.find("csv"):

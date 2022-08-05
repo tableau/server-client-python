@@ -14,6 +14,8 @@ This interface allows more fluent queries against Tableau Server
 e.g server.users.get(name="user@domain.com")
 see pagination_sample
 """
+
+
 class QuerySet:
     def __init__(self, model):
         self.model = model

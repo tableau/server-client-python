@@ -2,7 +2,7 @@ from defusedxml.ElementTree import fromstring
 
 
 class ServerResponseError(Exception):
-    def __init__(self, code, summary, detail, url = None):
+    def __init__(self, code, summary, detail, url=None):
         self.code = code
         self.summary = summary
         self.detail = detail
@@ -21,7 +21,7 @@ class ServerResponseError(Exception):
                 parsed_response.find("t:error", namespaces=ns).get("code", ""),
                 parsed_response.find(".//t:summary", namespaces=ns).text,
                 parsed_response.find(".//t:detail", namespaces=ns).text,
-                url
+                url,
             )
         except Exception as e:
             raise NonXMLResponseError(resp)
