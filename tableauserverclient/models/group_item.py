@@ -79,9 +79,6 @@ class GroupItem(object):
         #  Each call to `.users` should create a new pager, this just runs the callable
         return self._users()
 
-    def to_reference(self) -> ResourceReference:
-        return ResourceReference(id_=self.id, tag_name=self.tag_name)
-
     def _set_users(self, users: Callable[..., "Pager"]) -> None:
         self._users = users
 
