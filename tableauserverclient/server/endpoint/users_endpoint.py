@@ -109,7 +109,7 @@ class Users(QuerysetEndpoint):
             csv_file.seek(0)  # set to start of file in case it has been read earlier
             line: str = csv_file.readline()
             while line and line != "":
-                user: UserItem = UserItem.CSVImportFileItem._create_from_csv_line(line)
+                user: UserItem = UserItem.CSVImport.create_user_from_line(line)
                 try:
                     print(user)
                     result = self.add(user)
