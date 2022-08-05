@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from ..models import ConnectionItem
     from ..models import SiteItem
     from ..models import ProjectItem
+    from tableauserverclient.server import Server
 
 
 def _add_multipart(parts: Dict) -> Tuple[Any, str]:

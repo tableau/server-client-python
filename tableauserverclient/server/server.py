@@ -1,8 +1,7 @@
-import requests
+from distutils.version import LooseVersion as Version
 import urllib3
-
 from defusedxml.ElementTree import fromstring
-from packaging.version import Version
+
 from .endpoint import (
     Sites,
     Views,
@@ -36,11 +35,9 @@ from .endpoint.exceptions import (
 from .exceptions import NotSignedInError
 from ..namespace import Namespace
 
+import requests
 
-from .._version import get_versions
-
-__TSC_VERSION__ = get_versions()["version"]
-del get_versions
+from distutils.version import LooseVersion as Version
 
 _PRODUCT_TO_REST_VERSION = {
     "10.0": "2.3",
@@ -49,9 +46,6 @@ _PRODUCT_TO_REST_VERSION = {
     "9.1": "2.0",
     "9.0": "2.0",
 }
-minimum_supported_server_version = "2.3"
-default_server_version = "2.3"
-client_version_header = "X-TableauServerClient-Version"
 
 
 class Server(object):
@@ -68,7 +62,7 @@ class Server(object):
         self._session = requests.Session()
         self._http_options = dict()
 
-        self.version = default_server_version
+        self.version = "2.3"
         self.auth = Auth(self)
         self.views = Views(self)
         self.users = Users(self)
@@ -95,10 +89,8 @@ class Server(object):
         self.flow_runs = FlowRuns(self)
         self.metrics = Metrics(self)
 
-        # must set this before calling use_server_version, because that's a server call
         if http_options:
             self.add_http_options(http_options)
-            self.add_http_version_header()
 
         if use_server_version:
             self.use_server_version()
@@ -108,13 +100,8 @@ class Server(object):
         if options_dict.get("verify") == False:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-    def add_http_version_header(self):
-        if not self._http_options[client_version_header]:
-            self._http_options.update({client_version_header: __TSC_VERSION__})
-
     def clear_http_options(self):
         self._http_options = dict()
-        self.add_http_version_header()
 
     def _clear_auth(self):
         self._site_id = None
