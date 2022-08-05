@@ -4700,19 +4700,220 @@ See [ViewItem class](#viewitem-class)
 
 
 ---
+## Webhooks
+<br>
+<br>
+Using the Tableau Server Client (TSC), you can create a new webhook, get a list of all the webhooks, get details about a specific webhook, or delete a webhook. 
+<br>
+
+The webhook resource for Tableau Server and Tableau Cloud are defined in the `WebhookItem` class. The class corresponds to the webhook resources you can access using the Tableau REST API.  For example, using REST API, you can gather information about a workbook, like the name of the Webbook, the event it is associated with, and the destination URL, and you can get the same information using TSC as well.
+<br>
+
+Tableau webhook REST API endpoints are available in **REST API version 3.16** and later. 
+<br>
+<br>
+
+### WebhookItem class
+The `WebhookItem` represents the webhook resources on Tableau Server or Tableau Cloud. This is the information that can be sent or returned in response to a REST API request for webhooks.  
+
+**Attributes**
+
+Name | Description
+:--- | :---
+`id` |  The identifier (*luid*) for the webhook. You need this value to query a specific webhook  with the `get_by_id` method or to delete a webhook with the  `delete` method.
+`name`  |  The name of the webhook. You must specify this when you create an instance of the `WebhookItem`.
+`url` | The destination URL for the webhook. The webhook destination URL must be https and have a valid certificate. You must specify this when you create an instance of the `WebhookItem`.
+`event` | The name of the Tableau event that triggers your webhook.This  is either `api-event-name` or `webhook-source-api-event-name`: one of these is required to create an instance of the `WebhookItem`. We recommend using the `api-event-name`. <br> The event name must be one of the supported events listed in the [Trigger Events](https://help.tableau.com/current/developer/webhooks/en-us/docs/webhooks-events-payload.html) table. 
+`owner_id` |  The identifier of the owner of the webhook.
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+
+# Create new Webhook_item
+
+new_webhook = TSC.WebhookItem()
+```
+Source file:  models/webhook_item.py
+
+<br>
+<br>
+
+### Webhook methods
+The Tableau Server Client provides several methods for interacting with webhook resources, or endpoints. These methods correspond to endpoints in the Tableau REST API.
+
+Source file: server/endpoint/webhooks_endpoint.py
+
+<br>
+<br>
+
+#### webhook.create
+```py
+webhooks.create(webhook_item)
+
+```
+Creates a new webhook on a specified site.
+
+To create a webhook, you must first create a new instance of a `WebhookItem` and pass it to the create method. 
+
+To specify the site to create  the new webhook in, create a `TableauAuth` instance using the content URL for the site `(site_id)` and sign in to that site. For more information on how to specify a site, see the [TableauAuth class](#tableauauth-class).
+
+REST API: [Create Webhook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_notifications.htm#create_webhook)
+
+##### **Parmeters**
+
+Name | Description
+:--- | :---
+webhook_item | Specifies the properties for the webhook.  The webhook_item is the request package. To create a request package, create a new instance of `WebhokItem`.  The `WebhookItem` includes the `name`, destination `url`, and the `event` or `source`.  The `event` or `source` specifies the Tableau event that should be associated with the webhook.  
+
+**Returns** 
+Returns the new webhook item. 
+
+**Example**
+```py
+# import tableauserverclient as TSC
+# server = TSC.Server('https://SERVER')
+# sign in . For authentication examples, see https://github.com/tableau/server-client-python/blob/master/samples/login.py
+
+ # create a webhook item
+ with server.auth.sign_in(tableau_auth):
+    new_webhook = TSC.WebhookItem()
+    new_webhook.name = 'testWebhook'
+    new_webhook.event = "workbook-refresh-failed" # alternately, you can also use new_webhook.source="webhook-source-event-workbook-refresh-failed" 
+    new_webhook.url = "https://webhook.site/6e4c957d-dd40-422c-8fc6-7151afe7fc0b"    
+    # create the webhook
+    new_webhook = server.webhooks.create(new_webhook)
+    
+  print("Webhook created. ID: {}".format(new_webhook.id))
+
+```
+<br>
+<br>
+
+### webhook.delete
+```py
+webhooks.delete(webhook_id)
+```
+
+Deletes a webhook by ID.
+
+To specify the site, create a `TableauAuth` instance using the content URL for the site `(site_id)` and sign in to the site. For more information on how to specify a site, see the [TableauAuth class](#tableauauth-class).
+
+REST API:  [Delete Webhook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_notifications.htm#delete_webhook)
+
+**Parameters**
+
+Name|Description
+:---|:---
+`webhook_id`| The ID of the webhook to delete.
+
+**Exceptions**
+
+Error|Description
+:---|:---
+`Webhook ID undefined`| Raises an exception if a `webhook_id` is not provided. 
+
+**Example**
+```py
+# import tableauserverclient as TSC
+# server = TSC.Server('https://SERVER')
+# sign in . For authentication examples, see https://github.com/tableau/server-client-python/blob/master/samples/login.py
+
+# Delete the webhook
+with server.auth.sign_in(tableau_auth):
+  server.webhooks.delete('7d60d364-b9f5-4a9c-8aa5-4bdaa38c5dd3')
+```
+<br>
+<br>
+
+#### webhook.get()
+```py
+webhooks.get()
+```
+Returns a list of all the webhooks for a site.  
+To specify the site, create a `TableauAuth` instance using the content URL for the site `(site_id)`, and sign in to that site. For more information on how to specify a site, see the [TableauAuth class](#tableauauth-class).
+
+REST API: [List Webhooks](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_notifications.htm#list_webhooks_for_site)
 
 
+**Parameters**
+
+Name |Description
+:---|:---
+`req_option`| (Optional) You can pass themthod oa request object that contains additional parameters to filter the request.  For example, you could specify the name of the webhook or the name of the owner. For more information, see [Filter and Sort](filter-sort).
+
+**Returns**
+
+Returns a list of all `ProjectItem` objects and a `PagainationItem`. Use  these values to iterate through the results. 
+
+**Example**
+
+```py
+# import tableauserverclient as TSC
+# server = TSC.Server('https://SERVER')
+# sign in . For authentication examples, see https://github.com/tableau/server-client-python/blob/master/samples/login.py
+
+# get a list of all the webhooks on a site
+with server.auth.sign_in(tableau_auth):
+   all_webhooks, pagination_item = server.webhooks.get()
+
+print("\nThere are {} webhooks on site: ".format(pagination_item.total_available))
+print(["Webhook Name:"+ webhook.name+ ";" + "ID:" + webhook.id for webhook in all_webhooks])
+
+```
+
+#### webhook.get_by_id
+
+```py
+webhooks.get_by_ide(webhook_id)
+```
+
+Returns information about the specified workbook for a site.
+
+To specify the site, create a `TableauAuth` instance using the content URL for the site `(site_id)`, and sign in to that site. For more information on how to specify a site, see the [TableauAuth class](#tableauauth-class). 
+
+**Parameters**
+
+Name|Description
+:---|:---
+`webhook_id`| The ID of the webhook.  The ID is a *luid*.
+
+**Exceptions**
+
+Error|Description
+:---|:---
+`Webhook ID undefined`| Raises an exception if a `webhook_id` is not provided. 
+
+
+**Example**
+```py
+# import tableauserverclient as TSC
+# server = TSC.Server('https://SERVER')
+# sign in . For authentication examples, see https://github.com/tableau/server-client-python/blob/master/samples/login.py
+
+with server.auth.sign_in(tableau_auth):
+  webhook = server.webhooks.get_by_id ('7d60d364-b9f5-4a9c-8aa5-4bdaa38c5dd3')
+  
+print (webhook.name, webhook.url)
+
+
+```
+<br>
+<br>
+
+### Additional Resources
+- [REST API Endpoints](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_notifications.htm)
+- [Webhooks Documentation](https://help.tableau.com/current/developer/webhooks/en-us/)
+- [TSC webhooks samples](https://github.com/tableau/server-client-python/blob/master/samples/explore_webhooks.py)
+
+---
 ## Workbooks
 
 Using the TSC library, you can get information about a specific workbook or all the workbooks on a site, and  you can publish, update, or delete workbooks.
 
 The project resources for Tableau are defined in the `WorkbookItem` class. The class corresponds to the workbook resources you can access using the Tableau REST API. The workbook methods are based upon the endpoints for projects in the REST API and operate on the `WorkbookItem` class.
 
-
-
-
-
-<br>
 <br>
 
 ### WorkbookItem class
@@ -4816,7 +5017,7 @@ tableau_auth = TSC.TableauAuth('username', 'password', site_id='site')
 server = TSC.Server('https://servername')
 
 with server.auth.sign_in(tableau_auth):
-  all_workbooks_items, pagination_item = server.workbooks.get()
+  all_workbooks_items, pagination_item = server.workbooks.get()  
   # print names of first 100 workbooks
   print([workbook.name for workbook in all_workbooks_items])
 
