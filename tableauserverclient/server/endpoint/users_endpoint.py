@@ -1,18 +1,22 @@
 import copy
 import logging
-from typing import List, Optional, Tuple
+import os
+from typing import List, Optional, Tuple, Union
 
 from .endpoint import QuerysetEndpoint, api
-from .exceptions import MissingRequiredFieldError
+from .exceptions import MissingRequiredFieldError, ServerResponseError
 from .. import (
     RequestFactory,
     RequestOptions,
     UserItem,
     WorkbookItem,
     PaginationItem,
-    GroupItem,
+    GroupItem
 )
 from ..pager import Pager
+
+# duplicate defined in workbooks_endpoint
+FilePath = Union[str, os.PathLike]
 
 logger = logging.getLogger("tableau.endpoint.users")
 
@@ -78,11 +82,50 @@ class Users(QuerysetEndpoint):
     @api(version="2.0")
     def add(self, user_item: UserItem) -> UserItem:
         url = self.baseurl
+        logger.info("Add user {}".format(user_item.name))
         add_req = RequestFactory.User.add_req(user_item)
         server_response = self.post_request(url, add_req)
+        logger.info(server_response)
         new_user = UserItem.from_response(server_response.content, self.parent_srv.namespace).pop()
         logger.info("Added new user (ID: {0})".format(new_user.id))
         return new_user
+
+    # Add new users to site. This does not actually perform a bulk action, it's syntactic sugar
+    @api(version="2.0")
+    def add_all(self, users: List[UserItem]):
+        created = []
+        failed = []
+        for user in users:
+            try:
+                result = self.add(user)
+                created.append(result)
+            except Exception as e:
+                failed.append(user)
+        return created, failed
+
+    # helping the user by parsing a file they could have used to add users through the UI
+    # line format: Username [required], password, display name, license, admin, publish
+    @api(version="2.0")
+    def create_from_file(self, filepath: FilePath = None) -> (List[UserItem], List[UserItem]):
+        created = []
+        failed = []
+        if not filepath.find("csv"):
+            raise ValueError("Only csv files are accepted")
+
+        with open(filepath) as csv_file:
+            csv_file.seek(0)  # set to start of file in case it has been read earlier
+            line: str = csv_file.readline()
+            while line and line != "":
+                user: UserItem = UserItem.CSVImportFileItem._create_from_csv_line(line)
+                try:
+                    print(user)
+                    result = self.add(user)
+                    created.append(result)
+                except ServerResponseError as serverError:
+                    print("failed")
+                    failed.append((user, serverError))
+                line = csv_file.readline()
+        return created, failed
 
     # Get workbooks for user
     @api(version="2.0")

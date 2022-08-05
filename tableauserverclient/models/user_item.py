@@ -1,7 +1,8 @@
-from datetime import datetime
+import io
+import logging
 import xml.etree.ElementTree as ET
 from datetime import datetime
-from typing import Dict, List, Optional, TYPE_CHECKING
+from enum import IntEnum
 
 from defusedxml.ElementTree import fromstring
 
@@ -9,13 +10,9 @@ from .exceptions import UnpopulatedPropertyError
 from .property_decorators import (
     property_is_enum,
     property_not_empty,
-    property_not_nullable,
 )
 from .reference_item import ResourceReference
 from ..datetime_helpers import parse_datetime
-
-if TYPE_CHECKING:
-    from ..server.pager import Pager
 
 from typing import Dict, List, Optional, TYPE_CHECKING
 
@@ -111,7 +108,6 @@ class UserItem(object):
         return self._site_role
 
     @site_role.setter
-    @property_not_nullable
     @property_is_enum(Roles)
     def site_role(self, value):
         self._site_role = value
@@ -260,4 +256,158 @@ class UserItem(object):
         )
 
     def __repr__(self) -> str:
-        return "<User {} name={} role={}>".format(self.id, self.name, self.site_role)
+        str_site_role = self.site_role or "None"
+        return "<User {} name={} role={}>".format(self.id, self.name, str_site_role)
+
+    # valid values for each field
+    CHOICES: List[List[str]] = [
+        [],
+        [],
+        [],
+        ["creator", "explorer", "viewer", "unlicensed"],  # license
+        ["system", "site", "none", "no"],  # admin
+        ["yes", "true", "1", "no", "false", "0"],  # publisher
+        [],
+        [Auth.SAML, Auth.OpenID, Auth.ServerDefault],  # auth
+    ]
+
+    class CSVImportFileItem(object):
+
+        # CSV import file format
+        # username, password, display_name, license, admin_level, publishing, email, auth type
+        class Column(IntEnum):
+            USERNAME = 0
+            PASS = 1
+            DISPLAY_NAME = 2
+            LICENSE = 3  # aka site role
+            ADMIN = 4
+            PUBLISHER = 5
+            EMAIL = 6
+            AUTH = 7
+
+            MAX = 7
+
+        @staticmethod
+        def _create_from_csv_line(line: str):
+            if line is None or line is False or line == "\n" or line == "":
+                return None
+            line = line.strip().lower()
+            values: List[str] = list(map(str.strip, line.split(",")))
+            user = UserItem(values[UserItem.CSVImportFileItem.Column.USERNAME])
+            if len(values) > 1:
+                if len(values) > UserItem.CSVImportFileItem.Column.MAX:
+                    raise ValueError("Too many attributes for user import")
+                while len(values) <= UserItem.CSVImportFileItem.Column.MAX:
+                    values.append("")
+                site_role = UserItem.CSVImportFileItem.evaluate_site_role(
+                    values[UserItem.CSVImportFileItem.Column.LICENSE],
+                    values[UserItem.CSVImportFileItem.Column.ADMIN],
+                    values[UserItem.CSVImportFileItem.Column.PUBLISHER],
+                )
+
+                user._set_values(None,
+                                 values[UserItem.CSVImportFileItem.Column.USERNAME],
+                                 site_role,
+                                 None,
+                                 None,
+                                 values[UserItem.CSVImportFileItem.Column.DISPLAY_NAME],
+                                 values[UserItem.CSVImportFileItem.Column.EMAIL],
+                                 values[UserItem.CSVImportFileItem.Column.AUTH],
+                                 None)
+            return user
+
+        @staticmethod
+        def validate_file_for_import(csv_file: io.TextIOWrapper, logger) -> List[int]:
+            num_errors = 0
+            num_valid_lines = 0
+            csv_file.seek(0)  # set to start of file in case it has been read earlier
+            line: str = csv_file.readline()
+            while line and line != "":
+                try:
+                    # do not print passwords
+                    logger.info("Reading user {}".format(line[:4]))
+                    UserItem.CSVImportFileItem._validate_imported_attributes_or_throw(line, logger)
+                    num_valid_lines += 1
+                except Exception as exc:
+                    logger.info("Error parsing {}: {}".format(line[:4], exc))
+                    num_errors += 1
+                line = csv_file.readline()
+            return [num_valid_lines, num_errors]
+
+        # this might belong in the main User class
+        # valid: username, domain/username, username@domain, domain/username@email
+        @staticmethod
+        def _validate_username_or_throw(username) -> None:
+            if username is None or username == "" or username.strip(" ") == "":
+                raise AttributeError("Username cannot be empty")
+            if username.find(" ") >= 0:
+                raise AttributeError("Username cannot contain spaces")
+            at_symbol = username.find("@")
+            if at_symbol >= 0:
+                username = username[:at_symbol] + "X" + username[at_symbol + 1:]
+                if username.find("@") >= 0:
+                    raise AttributeError("Username cannot repeat '@'")
+
+        @staticmethod
+        def _validate_imported_attributes_or_throw(incoming, logger) -> None:
+            line = list(map(str.strip, incoming.split(",")))
+            if len(line) > UserItem.CSVImportFileItem.Column.MAX:
+                raise AttributeError("Too many attributes in line")
+            username = line[UserItem.CSVImportFileItem.Column.USERNAME.value]
+            logger.debug("> details - {}".format(username))
+            UserItem.CSVImportFileItem._validate_username_or_throw(username)
+            for i in range(1, len(line)):
+                logger.debug("column {}: {}".format(UserItem.CSVImportFileItem.Column(i).name,
+                                                    line[i]))
+                UserItem.CSVImportFileItem._validate_item(
+                    line[i],
+                    UserItem.CHOICES[i],
+                    UserItem.CSVImportFileItem.Column(i))
+
+        @staticmethod
+        def _validate_item(item: str, possible_values: List[str], column_type) -> None:
+            if item is None or item == "":
+                # value can be empty for any column except user, which is checked elsewhere
+                return
+            if item in possible_values or possible_values == []:
+                return
+            raise AttributeError("Invalid value {} for {}").format(item, column_type)
+
+        # https://help.tableau.com/current/server/en-us/csvguidelines.htm#settings_and_site_roles
+        @staticmethod
+        def evaluate_site_role(license_level, admin_level, publisher):
+            if not license_level or not admin_level or not publisher:
+                return "Unlicensed"
+            # ignore case everywhere
+            license_level = license_level.lower()
+            admin_level = admin_level.lower()
+            publisher = publisher.lower()
+            # don't need to check publisher for system/site admin
+            if admin_level == "system":
+                site_role = "SiteAdministrator"
+            elif admin_level == "site":
+                if license_level == "creator":
+                    site_role = "SiteAdministratorCreator"
+                elif license_level == "explorer":
+                    site_role = "SiteAdministratorExplorer"
+                else:
+                    site_role = "SiteAdministratorExplorer"
+            else:  # if it wasn't 'system' or 'site' then we can treat it as 'none'
+                if publisher == "yes":
+                    if license_level == "creator":
+                        site_role = "Creator"
+                    elif license_level == "explorer":
+                        site_role = "ExplorerCanPublish"
+                    else:
+                        site_role = "Unlicensed"  # is this the expected outcome?
+                else:  # publisher == 'no':
+                    if license_level == "explorer" or license_level == "creator":
+                        site_role = "Explorer"
+                    elif license_level == "viewer":
+                        site_role = "Viewer"
+                    else:  # if license_level == 'unlicensed'
+                        site_role = "Unlicensed"
+            if site_role is None:
+                site_role = "Unlicensed"
+            return site_role
+

@@ -1,5 +1,8 @@
+import io
 import os
 import unittest
+from typing import List
+from unittest.mock import MagicMock
 
 import requests_mock
 
@@ -17,6 +20,8 @@ POPULATE_WORKBOOKS_XML = os.path.join(TEST_ASSET_DIR, "user_populate_workbooks.x
 GET_FAVORITES_XML = os.path.join(TEST_ASSET_DIR, "favorites_get.xml")
 POPULATE_GROUPS_XML = os.path.join(TEST_ASSET_DIR, "user_populate_groups.xml")
 
+USERNAMES = os.path.join(TEST_ASSET_DIR, "Data", "usernames.csv")
+USERS = os.path.join(TEST_ASSET_DIR, "Data", "user_details.csv")
 
 class UserTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -212,3 +217,21 @@ class UserTests(unittest.TestCase):
             self.assertEqual("86a66d40-f289-472a-83d0-927b0f954dc8", group_list[2].id)
             self.assertEqual("TableauExample", group_list[2].name)
             self.assertEqual("local", group_list[2].domain_name)
+
+    def test_get_usernames_from_file(self):
+        with open(ADD_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            m.post(self.server.users.baseurl, text=response_xml)
+            user_list, failures = self.server.users.create_from_file(USERNAMES)
+        assert user_list[0].name == "Cassie", user_list
+        assert failures == [], failures
+
+    def test_get_users_from_file(self):
+        with open(ADD_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            m.post(self.server.users.baseurl, text=response_xml)
+            users, failures = self.server.users.create_from_file(USERS)
+        assert users[0].name == "Cassie", users
+        assert failures == []
