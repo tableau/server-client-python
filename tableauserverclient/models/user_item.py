@@ -14,7 +14,7 @@ from .property_decorators import (
 from .reference_item import ResourceReference
 from ..datetime_helpers import parse_datetime
 
-from typing import Dict, List, Optional, TYPE_CHECKING
+from typing import Dict, List, Optional, TYPE_CHECKING, Tuple
 
 if TYPE_CHECKING:
     from ..server.pager import Pager
@@ -69,6 +69,10 @@ class UserItem(object):
 
         return None
 
+    def __repr__(self) -> str:
+        str_site_role = self.site_role or "None"
+        return "<User {} name={} role={}>".format(self.id, self.name, str_site_role)
+
     @property
     def auth_setting(self) -> Optional[str]:
         return self._auth_setting
@@ -103,6 +107,19 @@ class UserItem(object):
     def name(self, value: str):
         self._name = value
 
+    # valid: username, domain/username, username@domain, domain/username@email
+    @staticmethod
+    def validate_username_or_throw(username) -> None:
+        if username is None or username == "" or username.strip(" ") == "":
+            raise AttributeError("Username cannot be empty")
+        if username.find(" ") >= 0:
+            raise AttributeError("Username cannot contain spaces")
+        at_symbol = username.find("@")
+        if at_symbol >= 0:
+            username = username[:at_symbol] + "X" + username[at_symbol + 1 :]
+            if username.find("@") >= 0:
+                raise AttributeError("Username cannot repeat '@'")
+
     @property
     def site_role(self) -> Optional[str]:
         return self._site_role
@@ -132,9 +149,6 @@ class UserItem(object):
             error = "User item must be populated with groups first."
             raise UnpopulatedPropertyError(error)
         return self._groups()
-
-    def to_reference(self) -> ResourceReference:
-        return ResourceReference(id_=self.id, tag_name=self.tag_name)
 
     def _set_workbooks(self, workbooks) -> None:
         self._workbooks = workbooks
@@ -255,27 +269,14 @@ class UserItem(object):
             domain_name,
         )
 
-    def __repr__(self) -> str:
-        str_site_role = self.site_role or "None"
-        return "<User {} name={} role={}>".format(self.id, self.name, str_site_role)
+    class CSVImport(object):
+        """
+        This class includes hardcoded options and logic for the CSV file format defined for user import
+        https://help.tableau.com/current/server/en-us/users_import.htm
+        """
 
-    # valid values for each field
-    CHOICES: List[List[str]] = [
-        [],
-        [],
-        [],
-        ["creator", "explorer", "viewer", "unlicensed"],  # license
-        ["system", "site", "none", "no"],  # admin
-        ["yes", "true", "1", "no", "false", "0"],  # publisher
-        [],
-        [Auth.SAML, Auth.OpenID, Auth.ServerDefault],  # auth
-    ]
-
-    class CSVImportFileItem(object):
-
-        # CSV import file format
         # username, password, display_name, license, admin_level, publishing, email, auth type
-        class Column(IntEnum):
+        class ColumnType(IntEnum):
             USERNAME = 0
             PASS = 1
             DISPLAY_NAME = 2
@@ -287,85 +288,88 @@ class UserItem(object):
 
             MAX = 7
 
+        # Read a csv line and create a user item populated by the given attributes
         @staticmethod
-        def _create_from_csv_line(line: str):
+        def create_user_from_line(line: str):
             if line is None or line is False or line == "\n" or line == "":
                 return None
             line = line.strip().lower()
             values: List[str] = list(map(str.strip, line.split(",")))
-            user = UserItem(values[UserItem.CSVImportFileItem.Column.USERNAME])
+            user = UserItem(values[UserItem.CSVImport.ColumnType.USERNAME])
             if len(values) > 1:
-                if len(values) > UserItem.CSVImportFileItem.Column.MAX:
+                if len(values) > UserItem.CSVImport.ColumnType.MAX:
                     raise ValueError("Too many attributes for user import")
-                while len(values) <= UserItem.CSVImportFileItem.Column.MAX:
+                while len(values) <= UserItem.CSVImport.ColumnType.MAX:
                     values.append("")
-                site_role = UserItem.CSVImportFileItem.evaluate_site_role(
-                    values[UserItem.CSVImportFileItem.Column.LICENSE],
-                    values[UserItem.CSVImportFileItem.Column.ADMIN],
-                    values[UserItem.CSVImportFileItem.Column.PUBLISHER],
+                site_role = UserItem.CSVImport._evaluate_site_role(
+                    values[UserItem.CSVImport.ColumnType.LICENSE],
+                    values[UserItem.CSVImport.ColumnType.ADMIN],
+                    values[UserItem.CSVImport.ColumnType.PUBLISHER],
                 )
 
                 user._set_values(
                     None,
-                    values[UserItem.CSVImportFileItem.Column.USERNAME],
+                    values[UserItem.CSVImport.ColumnType.USERNAME],
                     site_role,
                     None,
                     None,
-                    values[UserItem.CSVImportFileItem.Column.DISPLAY_NAME],
-                    values[UserItem.CSVImportFileItem.Column.EMAIL],
-                    values[UserItem.CSVImportFileItem.Column.AUTH],
+                    values[UserItem.CSVImport.ColumnType.DISPLAY_NAME],
+                    values[UserItem.CSVImport.ColumnType.EMAIL],
+                    values[UserItem.CSVImport.ColumnType.AUTH],
                     None,
                 )
             return user
 
+        # Read through an entire CSV file meant for user import
+        # Return the number of valid lines and a list of all the invalid lines
         @staticmethod
-        def validate_file_for_import(csv_file: io.TextIOWrapper, logger) -> List[int]:
-            num_errors = 0
+        def validate_file_for_import(csv_file: io.TextIOWrapper, logger) -> Tuple[int, List[str]]:
             num_valid_lines = 0
+            invalid_lines = []
             csv_file.seek(0)  # set to start of file in case it has been read earlier
             line: str = csv_file.readline()
             while line and line != "":
                 try:
                     # do not print passwords
                     logger.info("Reading user {}".format(line[:4]))
-                    UserItem.CSVImportFileItem._validate_imported_attributes_or_throw(line, logger)
+                    UserItem.CSVImport._validate_import_line_or_throw(line, logger)
                     num_valid_lines += 1
                 except Exception as exc:
                     logger.info("Error parsing {}: {}".format(line[:4], exc))
-                    num_errors += 1
+                    invalid_lines.append(line)
                 line = csv_file.readline()
-            return [num_valid_lines, num_errors]
+            return num_valid_lines, invalid_lines
 
-        # this might belong in the main User class
-        # valid: username, domain/username, username@domain, domain/username@email
+        # Some fields in the import file are restricted to specific values
+        # Iterate through each field and validate the given value against hardcoded constraints
         @staticmethod
-        def _validate_username_or_throw(username) -> None:
-            if username is None or username == "" or username.strip(" ") == "":
-                raise AttributeError("Username cannot be empty")
-            if username.find(" ") >= 0:
-                raise AttributeError("Username cannot contain spaces")
-            at_symbol = username.find("@")
-            if at_symbol >= 0:
-                username = username[:at_symbol] + "X" + username[at_symbol + 1 :]
-                if username.find("@") >= 0:
-                    raise AttributeError("Username cannot repeat '@'")
+        def _validate_import_line_or_throw(incoming, logger) -> None:
+            _valid_attributes: List[List[str]] = [
+                [],
+                [],
+                [],
+                ["creator", "explorer", "viewer", "unlicensed"],  # license
+                ["system", "site", "none", "no"],  # admin
+                ["yes", "true", "1", "no", "false", "0"],  # publisher
+                [],
+                [UserItem.Auth.SAML, UserItem.Auth.OpenID, UserItem.Auth.ServerDefault],  # auth
+            ]
 
-        @staticmethod
-        def _validate_imported_attributes_or_throw(incoming, logger) -> None:
             line = list(map(str.strip, incoming.split(",")))
-            if len(line) > UserItem.CSVImportFileItem.Column.MAX:
+            if len(line) > UserItem.CSVImport.ColumnType.MAX:
                 raise AttributeError("Too many attributes in line")
-            username = line[UserItem.CSVImportFileItem.Column.USERNAME.value]
+            username = line[UserItem.CSVImport.ColumnType.USERNAME.value]
             logger.debug("> details - {}".format(username))
-            UserItem.CSVImportFileItem._validate_username_or_throw(username)
+            UserItem.validate_username_or_throw(username)
             for i in range(1, len(line)):
-                logger.debug("column {}: {}".format(UserItem.CSVImportFileItem.Column(i).name, line[i]))
-                UserItem.CSVImportFileItem._validate_item(
-                    line[i], UserItem.CHOICES[i], UserItem.CSVImportFileItem.Column(i)
+                logger.debug("column {}: {}".format(UserItem.CSVImport.ColumnType(i).name, line[i]))
+                UserItem.CSVImport._validate_attribute_value(
+                    line[i], _valid_attributes[i], UserItem.CSVImport.ColumnType(i)
                 )
 
+        # Given a restricted set of possible values, confirm the item is in that set
         @staticmethod
-        def _validate_item(item: str, possible_values: List[str], column_type) -> None:
+        def _validate_attribute_value(item: str, possible_values: List[str], column_type) -> None:
             if item is None or item == "":
                 # value can be empty for any column except user, which is checked elsewhere
                 return
@@ -374,8 +378,9 @@ class UserItem(object):
             raise AttributeError("Invalid value {} for {}".format(item, column_type))
 
         # https://help.tableau.com/current/server/en-us/csvguidelines.htm#settings_and_site_roles
+        # This logic is hardcoded to match the existing rules for import csv files
         @staticmethod
-        def evaluate_site_role(license_level, admin_level, publisher):
+        def _evaluate_site_role(license_level, admin_level, publisher):
             if not license_level or not admin_level or not publisher:
                 return "Unlicensed"
             # ignore case everywhere
