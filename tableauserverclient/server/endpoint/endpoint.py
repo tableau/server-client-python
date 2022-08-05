@@ -11,6 +11,7 @@ from .exceptions import (
     NonXMLResponseError,
     EndpointUnavailableError,
 )
+from .. import endpoint
 from ..query import QuerySet
 from ... import helpers
 
@@ -26,18 +27,29 @@ if TYPE_CHECKING:
     from requests import Response
 
 
+_version_header: Optional[str] = None
+
+
 class Endpoint(object):
     def __init__(self, parent_srv: "Server"):
+        global _version_header
         self.parent_srv = parent_srv
 
     @staticmethod
     def _make_common_headers(auth_token, content_type):
+        global _version_header
+
+        if not _version_header:
+            from ..server import __TSC_VERSION__
+
+            _version_header = __TSC_VERSION__
+
         headers = {}
         if auth_token is not None:
             headers["x-tableau-auth"] = auth_token
         if content_type is not None:
             headers["content-type"] = content_type
-        headers["User-Agent"] = "Tableau Server Client {}".format(get_versions()["version"])
+        headers["User-Agent"] = "Tableau Server Client {}".format(_version_header)
         return headers
 
     def _make_request(
