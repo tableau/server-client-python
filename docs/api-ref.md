@@ -256,10 +256,8 @@ The `ConnectionCredentials` class is used for workbook and data source publish r
 Attribute | Description
 :--- | :---
 `name`     | The username for the connection.
-`embed_password`  |  (Boolean) Determines whether to embed the password (`True`) for the workbook or data source connection or not (`False`).
+`embed`  |  (Boolean) Determines whether to embed the password (`True`) for the workbook or data source connection or not (`False`).
 `password`  |  The password used for the connection.
-`server_address`   |  The server address for the connection.
-`server_port`   |  The port used by the server.
 `ouath`  |  (Boolean) Specifies whether OAuth is used for the data source of workbook connection. For more information, see [OAuth Connections](https://help.tableau.com/current/server/en-us/protected_auth.htm).
 
 
@@ -562,7 +560,7 @@ None. A list of `ConnectionItem` objects are added to the data source (`datasour
 #### datasources.publish
 
 ```py
-datasources.publish(datasource_item, file_path, mode, connection_credentials=None)
+datasources.publish(datasource_item, file, mode, connection_credentials=None, as_job=False)
 ```
 
 Publishes a data source to a server, or appends data to an existing data source.
@@ -576,9 +574,10 @@ REST API: [Publish Datasource](https://help.tableau.com/current/api/rest_api/en-
 Name | Description
 :--- | :---
 `datasource_item`  |  The `datasource_item` specifies the new data source you are adding, or the data source you are appending to. If you are adding a new data source, you need to create a new `datasource_item` with a `project_id` of an existing project. The name of the data source will be the name of the file, unless you also specify a name for the new data source when you create the instance. See [DatasourceItem](#datasourceitem-class).
-`file_path`  |  The path and name of the data source to publish.
+`file`  |  The file path or file object of the data source to publish.
 `mode`     |  Specifies whether you are publishing a new data source (`CreateNew`), overwriting an existing data source (`Overwrite`), or appending data to a data source (`Append`). If you are appending to a data source, the data source on the server and the data source you are publishing must be be extracts (.tde files) and they must share the same schema. You can also use the publish mode attributes, for example: `TSC.Server.PublishMode.Overwrite`.
 `connection_credentials` | (Optional)  The credentials required to connect to the data source. The `ConnectionCredentials` object contains the authentication information for the data source (user name and password, and whether the credentials are embedded or OAuth is used).
+`as_job` | (Optional) If this value is set to `True`, the publish operation will be asynchronous and return a JobItem.
 
 
 
@@ -2655,7 +2654,7 @@ Source file: models/schedule_item.py
 Name  |  Description
 :--- | :---
 `name`  |  The `name` of the schedule.
-`id` | The identifier for the schedule. Use the `schedules.get()` method to get the identifiers of the schedules on the server.
+`priority` | The priority of the schedule (integer). Lower values represent higher priorities, with `0` indicating the highest priority. 
 `schedule_type` | The type of task. The types are either an `Extract` for an extract refresh task or a `Subscription` for a scheduled subscription.
 `execution_order` | Specifies how the scheduled task should run. The choices are `Parallel`which uses all available background processes for this scheduled task, or `Serial`, which limits this schedule to one background process.
 `interval_item` | Specifies the frequency that the scheduled task should run. The `interval_item` is an instance of the `IntervalItem` class. The `interval_item` has properties for frequency (hourly, daily, weekly, monthly), and what time and date the scheduled item runs. You set this value by declaring an `IntervalItem` object that is one of the following: `HourlyInterval`, `DailyInterval`, `WeeklyInterval`, or `MonthlyInterval`.
@@ -2683,10 +2682,59 @@ The schedule methods are based upon the endpoints for schedules in the REST API 
 
 Source files: server/endpoint/schedules_endpoint.py
 
-#### schedule.create
+#### schedules.add_to_schedule
 
 ```py
-schedule.create(schedule_item)
+schedules.add_to_schedule(schedule_id, workbook=None, datasource=None, flow=None, task_type=None)
+```
+
+Adds a `DatasourceItem`, `FlowItem`, or `WorkbookItem` to a schedule.
+
+
+REST API: [Add Data Source to Schedule](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#add_data_source_to_schedule)
+
+
+
+**Parameters**
+
+Name  |  Description
+:--- | :---
+`schedule_id` | The identifier (id) of the schedule to add the data source or workbook to. Can be retrieved from a `ScheduleItem`, e.g., by performing `schedules.get()`.
+`workbook` | (Optional) A `WorkbookItem` that should be added to the schedule. Only provide either `workbook` or `datasource`, passing multiple items will be deprecated.
+`datasource` | (Optional) A `DatasourceItem` that should be added to the schedule. Only provide either `workbook` or `datasource`, passing multiple items will be deprecated.
+`flow` | (Optional) A `FlowItem` that should be added to the schedule. Only applicable if `workbook = None` and `datasource = None`.
+`task_type` | (Optional) Determines the type of task. One of `TaskItem.Type`: `ExtractRefresh`, `DataAcceleration`, `RunFlow`.
+
+
+**Returns**
+Returns a List of `AddResponses`.
+
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+# sign in, etc.
+# get a datasource item that should be added to a schedule
+datasource_item = server.datasources.get("d14dd951-01c1-4879-8bc2-e96d7dec9f0")
+
+# retrieve the id of the target schedule 
+schedule_id = schedule_item.id  # can be a freshly created schedule or one queried via `schedules.get()`
+
+# Add the data source to the schedule
+server.schedules.add_to_schedule(
+    schedule_id=schedule_id,
+    datasource=datasource_item,
+)
+```
+<br>
+<br>
+
+
+#### schedules.create
+
+```py
+schedules.create(schedule_item)
 ```
 Creates a new schedule for an extract refresh or a subscription.
 
@@ -2731,10 +2779,10 @@ import tableauserverclient as TSC
 <br>
 
 
-#### schedule.delete
+#### schedules.delete
 
 ```py
-schedule.delete(schedule_id)
+schedules.delete(schedule_id)
 ```
 
 Deletes an existing schedule for an extract refresh or a subscription.
@@ -2762,10 +2810,10 @@ Error  |  Description
 `Schedule ID undefined`  |  The identifier is not a valid identifier for a schedule on the server.
 
 
-#### schedule.get
+#### schedules.get
 
 ```py
-schedule.get([req_options=None])
+schedules.get([req_options=None])
 ```
 
 Returns all schedule items from the server.
@@ -2781,7 +2829,7 @@ Name  |  Description
 :--- | :---
 `req_options` | (Optional) Additional request options to send to the endpoint.
 
-#### schedule.update
+#### schedules.update
 
 <br>
 <br>
@@ -5100,7 +5148,7 @@ Name | Description
 `workbook_item`  |  The `workbook_item` specifies the workbook you are publishing. When you are adding a workbook, you need to first create a new instance of a `workbook_item` that includes a `project_id` of an existing project. The name of the workbook will be the name of the file, unless you also specify a name for the new workbook when you create the instance. See [WorkbookItem](#workbookitem-class).
 `file_path`  |  The path and name of the workbook to publish.
 `mode`     |  Specifies whether you are publishing a new workbook (`CreateNew`) or overwriting an existing workbook (`Overwrite`).  You cannot appending workbooks.  You can also use the publish mode attributes, for example: `TSC.Server.PublishMode.Overwrite`.
-`connections` | List of `ConnectionCredentials` objects for the connections created within the workbook.
+`connections` | List of `ConnectionItems` objects for the connections created within the workbook.
 `connection_credentials` | (Optional)  The credentials (if required) to connect to the workbook's data source. The `ConnectionCredentials` object contains the authentication information for the data source (user name and password, and whether the credentials are embedded or OAuth is used). **Deprecated since API server version 2.3.**
 `skip_connection_check` | (Optional) Set to `True` to skip connection check at time of upload. Publishing will succeed but unchecked connection issues may result in a non-functioning workbook. Defaults to `False`.
 `as_job` | (Optional) Set to `True` to run the upload as a job (asynchronous upload). If set to `True` a job will start to perform the publishing process and a `Job` object is returned. Defaults to `False`.
