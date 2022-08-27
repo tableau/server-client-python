@@ -1,7 +1,11 @@
 from defusedxml.ElementTree import fromstring
 
 
-class ServerResponseError(Exception):
+class TableauError(Exception):
+    pass
+
+
+class ServerResponseError(TableauError):
     def __init__(self, code, summary, detail, url=None):
         self.code = code
         self.summary = summary
@@ -28,41 +32,41 @@ class ServerResponseError(Exception):
         return error_response
 
 
-class InternalServerError(ServerResponseError):
-    def __init__(self, server_response, url=None):
+class InternalServerError(TableauError):
+    def __init__(self, server_response, request_url: str=None):
         self.code = server_response.status_code
         self.content = server_response.content
-        self.url = url
+        self.url = request_url or "server"
 
     def __str__(self):
-        return "\n\nError status code: {0}\n{1}\n{2}".format(self.code, self.content, self.url)
+        return "\n\nInternal error {0} at {1}\n{2}".format(self.code, self.url, self.content)
 
 
-class MissingRequiredFieldError(Exception):
+class MissingRequiredFieldError(TableauError):
     pass
 
 
-class ServerInfoEndpointNotFoundError(Exception):
+class ServerInfoEndpointNotFoundError(TableauError):
     pass
 
 
-class EndpointUnavailableError(Exception):
+class EndpointUnavailableError(TableauError):
     pass
 
 
-class ItemTypeNotAllowed(Exception):
+class ItemTypeNotAllowed(TableauError):
     pass
 
 
-class NonXMLResponseError(Exception):
+class NonXMLResponseError(TableauError):
     pass
 
 
-class InvalidGraphQLQuery(Exception):
+class InvalidGraphQLQuery(TableauError):
     pass
 
 
-class GraphQLError(Exception):
+class GraphQLError(TableauError):
     def __init__(self, error_payload):
         self.error = error_payload
 
@@ -72,7 +76,7 @@ class GraphQLError(Exception):
         return pformat(self.error)
 
 
-class JobFailedException(Exception):
+class JobFailedException(TableauError):
     def __init__(self, job):
         self.notes = job.notes
         self.job = job
@@ -85,7 +89,7 @@ class JobCancelledException(JobFailedException):
     pass
 
 
-class FlowRunFailedException(Exception):
+class FlowRunFailedException(TableauError):
     def __init__(self, flow_run):
         self.background_job_id = flow_run.background_job_id
         self.flow_run = flow_run
