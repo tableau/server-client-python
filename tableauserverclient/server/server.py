@@ -1,7 +1,8 @@
-from distutils.version import LooseVersion as Version
+import requests
 import urllib3
-from defusedxml.ElementTree import fromstring
 
+from defusedxml.ElementTree import fromstring
+from distutils.version import LooseVersion as Version
 from .endpoint import (
     Sites,
     Views,
