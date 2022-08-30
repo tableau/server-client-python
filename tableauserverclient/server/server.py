@@ -1,6 +1,6 @@
+from dataclasses import dataclass
 from distutils.version import LooseVersion as Version
 import urllib3
-import requests
 from defusedxml.ElementTree import fromstring
 
 from .endpoint import (
@@ -30,8 +30,8 @@ from .endpoint import (
     Metrics,
 )
 from .endpoint.exceptions import (
-    EndpointUnavailableError,
     ServerInfoEndpointNotFoundError,
+    EndpointUnavailableError,
 )
 from .exceptions import NotSignedInError
 from ..namespace import Namespace
@@ -50,18 +50,22 @@ _PRODUCT_TO_REST_VERSION = {
 
 
 class Server(object):
+    @dataclass(frozen=True)
+    class ExistingAuthorization:
+        authorization_token: str
+        site_id: str
+        user_id: str
+
     class PublishMode:
         Append = "Append"
         Overwrite = "Overwrite"
         CreateNew = "CreateNew"
 
-    def __init__(self, server_address, use_server_version=True, http_options=None):
+    def __init__(self, server_address, use_server_version=True, http_options=None, existing_authorization: ExistingAuthorization = None):
         self._server_address = server_address
-        self._auth_token = None
-        self._site_id = None
-        self._user_id = None
+        self._auth_token, self._site_id, self._user_id = (None, None, None) if existing_authorization is None else (existing_authorization.authorization_token, existing_authorization.site_id, existing_authorization.user_id)
         self._session = requests.Session()
-        self._http_options = dict()
+        self._http_options: dict = dict()
 
         self.version = "2.3"
         self.auth = Auth(self)
@@ -144,13 +148,14 @@ class Server(object):
 
         warnings.warn("use use_server_version instead", DeprecationWarning)
 
-    def assert_at_least_version(self, version):
+    def check_at_least_version(self, target: str):
         server_version = Version(self.version or "0.0")
-        minimum_supported = Version(version)
-        if server_version < minimum_supported:
-            error = "This endpoint is not available in API version {}. Requires {}".format(
-                server_version, minimum_supported
-            )
+        target_version = Version(target)
+        return server_version >= target_version
+
+    def assert_at_least_version(self, comparison: str, reason: str):
+        if not self.check_at_least_version(comparison):
+            error = "{} is not available in API version {}. Requires {}".format(reason, self.version, comparison)
             raise EndpointUnavailableError(error)
 
     @property
