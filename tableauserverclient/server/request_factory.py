@@ -1,6 +1,6 @@
 from os import name
 import xml.etree.ElementTree as ET
-from typing import Any, Dict, List, Optional, Tuple, Iterable
+from typing import Any, Dict, Iterable, List, Optional, Tuple, TYPE_CHECKING
 
 from requests.packages.urllib3.fields import RequestField
 from requests.packages.urllib3.filepost import encode_multipart_formdata
@@ -15,8 +15,6 @@ from ..models import SiteItem
 from ..models import SubscriptionItem
 from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteItem
 from ..models import WebhookItem
-
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple, Iterable
 
 if TYPE_CHECKING:
     from ..models import SubscriptionItem
@@ -39,7 +37,7 @@ def _add_multipart(parts: Dict) -> Tuple[Any, str]:
 
 
 def _tsrequest_wrapped(func):
-    def wrapper(self, *args, **kwargs):
+    def wrapper(self, *args, **kwargs) -> bytes:
         xml_request = ET.Element("tsRequest")
         func(self, xml_request, *args, **kwargs)
         return ET.tostring(xml_request)
@@ -971,15 +969,15 @@ class WorkbookRequest(object):
 
 class Connection(object):
     @_tsrequest_wrapped
-    def update_req(self, xml_request, connection_item):
+    def update_req(self, xml_request: ET.Element, connection_item: "ConnectionItem") -> None:
         connection_element = ET.SubElement(xml_request, "connection")
-        if connection_item.server_address:
+        if connection_item.server_address is not None:
             connection_element.attrib["serverAddress"] = connection_item.server_address.lower()
-        if connection_item.server_port:
+        if connection_item.server_port is not None:
             connection_element.attrib["serverPort"] = str(connection_item.server_port)
-        if connection_item.username:
+        if connection_item.username is not None:
             connection_element.attrib["userName"] = connection_item.username
-        if connection_item.password:
+        if connection_item.password is not None:
             connection_element.attrib["password"] = connection_item.password
         if connection_item.embed_password is not None:
             connection_element.attrib["embedPassword"] = str(connection_item.embed_password).lower()
