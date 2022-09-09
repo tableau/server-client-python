@@ -1,7 +1,7 @@
-from distutils.version import LooseVersion as Version
 import urllib3
 import requests
 from defusedxml.ElementTree import fromstring
+from packaging.version import Version
 
 from .endpoint import (
     Sites,
@@ -38,7 +38,7 @@ from ..namespace import Namespace
 
 import requests
 
-from distutils.version import LooseVersion as Version
+from packaging.version import Version
 
 _PRODUCT_TO_REST_VERSION = {
     "10.0": "2.3",
