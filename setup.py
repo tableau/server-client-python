@@ -23,13 +23,14 @@ setup(
         'requests>=2.28',
     ],
     python_requires='>3.7.0',
-    tests_require=[
-        'argparse',  # technically only needed to run samples
-        'black',
-        'mock',
-        'pytest',
-        'requests-mock>=1.0,<2.0',
-        'mypy>=0.920'
-    ],
-    extras_require={"test": test_requirements},
+    extras_require={
+        'tests': [
+            'argparse',  # technically only needed to run samples
+            'black',
+            'mock',
+            'pytest',
+            'requests-mock>=1.0,<2.0',
+            'mypy>=0.920'
+        ]
+    }
 )
