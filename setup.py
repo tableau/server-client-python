@@ -1,36 +1,22 @@
 import versioneer
 from setuptools import setup
 
+"""
+once versioneer 0.25 gets released, we can move this from setup.cfg to pyproject.toml
+[tool.versioneer]
+VCS = "git"
+style = "pep440-pre"
+versionfile_source = "tableauserverclient/_version.py"
+versionfile_build = "tableauserverclient/_version.py"
+tag_prefix = "v"
+"""
 setup(
-    name="tableauserverclient",
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
-    author='Tableau',
-    author_email='github@tableau.com',
-    url='https://github.com/tableau/server-client-python',
-    package_data={'tableauserverclient': ['py.typed']},
+    # not yet sure how to move this to pyproject.toml
     packages=['tableauserverclient',
               'tableauserverclient.helpers',
               'tableauserverclient.models',
               'tableauserverclient.server',
               'tableauserverclient.server.endpoint'],
-    license='MIT',
-    description='A Python module for working with the Tableau Server REST API.',
-    long_description="file: README.md",
-    long_description_content_type='text/markdown',
-    install_requires=[
-        'defusedxml>=0.7.1',
-        'requests>=2.28',
-    ],
-    python_requires='>3.7.0',
-    extras_require={
-        'tests': [
-            'argparse',  # technically only needed to run samples
-            'black',
-            'mock',
-            'pytest',
-            'requests-mock>=1.0,<2.0',
-            'mypy>=0.920'
-        ]
-    }
 )
