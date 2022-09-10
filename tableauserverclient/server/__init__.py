@@ -9,7 +9,7 @@ from .request_options import (
 
 from .filter import Filter
 from .sort import Sort
-from .. import (
+from ..models import (
     BackgroundJobItem,
     ColumnItem,
     ConnectionItem,

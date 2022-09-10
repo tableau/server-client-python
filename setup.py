@@ -2,7 +2,7 @@ import versioneer
 from setuptools import setup
 
 setup(
-    name='tableauserverclient',
+    name="tableauserverclient",
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     author='Tableau',

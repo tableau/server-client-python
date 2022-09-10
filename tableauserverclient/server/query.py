@@ -9,6 +9,13 @@ def to_camel_case(word: str) -> str:
     return word.split("_")[0] + "".join(x.capitalize() or "_" for x in word.split("_")[1:])
 
 
+"""
+This interface allows more fluent queries against Tableau Server
+e.g server.users.get(name="user@domain.com")
+see pagination_sample
+"""
+
+
 class QuerySet:
     def __init__(self, model):
         self.model = model
