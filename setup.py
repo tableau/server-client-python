@@ -20,7 +20,7 @@ setup(
     long_description_content_type='text/markdown',
     install_requires=[
         'defusedxml>=0.7.1',
-        'requests>=2.11,<3.0',
+        'requests>=2.28',
     ],
     python_requires='>3.7.0',
     tests_require=[
