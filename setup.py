@@ -30,5 +30,6 @@ setup(
         'pytest',
         'requests-mock>=1.0,<2.0',
         'mypy>=0.920'
-    ]
+    ],
+    extras_require={"test": test_requirements},
 )
