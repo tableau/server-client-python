@@ -45,6 +45,7 @@ The following people have contributed to this project to make it possible, and w
 * [John Vandenberg](https://github.com/jayvdb)
 * [Lee Boynton](https://github.com/lboynton)
 * [annematronic](https://github.com/annematronic)
+* [Tahseen Begum](https://github.com/tahseen-7412)
 
 ## Core Team
 
