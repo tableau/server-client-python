@@ -57,9 +57,8 @@ somewhere.
 ## Getting Started
 
 ```shell
-pip install versioneer
-python setup.py build
-python setup.py test
+python -m build
+pytest
 ```
 
 ### To use your locally built version
