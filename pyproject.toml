@@ -1,6 +1,36 @@
 [build-system]
-requires = ["setuptools>=45.0", "versioneer-518", "wheel"]
+requires = ["setuptools>=45.0", "versioneer>=0.24", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name="tableauserverclient"
+
+dynamic = ["version"]
+description='A Python module for working with the Tableau Server REST API.'
+authors = [{name="Tableau", email="github@tableau.com"}]
+license = {file = "LICENSE"}
+readme = "README.md"
+
+dependencies = [
+    'defusedxml>=0.7.1',
+    'packaging~=21.3',
+    'requests>=2.28',
+    'urllib3~=1.26.8',
+]
+requires-python = ">=3.7"
+classifiers = [
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10"
+]
+[project.urls]
+repository = "https://github.com/tableau/server-client-python"
+
+[project.optional-dependencies]
+test = ["argparse", "black", "mock", "mypy", "pytest>=7.0", "requests-mock>=1.0,<2.0"]
 
 [tool.black]
 line-length = 120
@@ -11,8 +41,10 @@ disable_error_code = [
     'misc',
     'import'
 ]
-files = [
-    "tableauserverclient",
-    "test"
-]
+files = ["tableauserverclient", "test"]
 show_error_codes = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+addopts = "--junitxml=./test.junit.xml"

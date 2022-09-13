@@ -1,13 +1,14 @@
-include versioneer.py
-include tableauserverclient/_version.py
+include CHANGELOG.md
+include contributing.md
+include CONTRIBUTORS.md
 include LICENSE
 include LICENSE.versioneer
 include README.md
-include CHANGELOG.md
+include tableauserverclient/_version.py
+include versioneer.py
 recursive-include docs *.md
 recursive-include samples *.py
 recursive-include samples *.txt
-recursive-include smoke *.py
 recursive-include test *.csv
 recursive-include test *.dict
 recursive-include test *.hyper
@@ -16,5 +17,6 @@ recursive-include test *.pdf
 recursive-include test *.png
 recursive-include test *.py
 recursive-include test *.xml
+recursive-include test *.tde
 global-include *.pyi
 global-include *.typed

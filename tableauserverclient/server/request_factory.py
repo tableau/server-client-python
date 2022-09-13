@@ -1,6 +1,6 @@
 from os import name
 import xml.etree.ElementTree as ET
-from typing import Any, Dict, List, Optional, Tuple, Iterable
+from typing import Any, Dict, Iterable, List, Optional, Tuple, TYPE_CHECKING
 
 from requests.packages.urllib3.fields import RequestField
 from requests.packages.urllib3.filepost import encode_multipart_formdata
@@ -16,8 +16,6 @@ from ..models import SubscriptionItem
 from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteItem
 from ..models import WebhookItem
 
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple, Iterable
-
 if TYPE_CHECKING:
     from ..models import SubscriptionItem
     from ..models import DataAlertItem
@@ -25,6 +23,7 @@ if TYPE_CHECKING:
     from ..models import ConnectionItem
     from ..models import SiteItem
     from ..models import ProjectItem
+    from tableauserverclient.server import Server
 
 
 def _add_multipart(parts: Dict) -> Tuple[Any, str]:
@@ -39,7 +38,7 @@ def _add_multipart(parts: Dict) -> Tuple[Any, str]:
 
 
 def _tsrequest_wrapped(func):
-    def wrapper(self, *args, **kwargs):
+    def wrapper(self, *args, **kwargs) -> bytes:
         xml_request = ET.Element("tsRequest")
         func(self, xml_request, *args, **kwargs)
         return ET.tostring(xml_request)
@@ -556,7 +555,7 @@ class ScheduleRequest(object):
 
         """
         if not isinstance(id_, str):
-            raise ValueError(f"id_ should be a string, reeceived: {type(id_)}")
+            raise ValueError(f"id_ should be a string, received: {type(id_)}")
         xml_request = ET.Element("tsRequest")
         task_element = ET.SubElement(xml_request, "task")
         task = ET.SubElement(task_element, task_type)
@@ -576,7 +575,7 @@ class ScheduleRequest(object):
 
 
 class SiteRequest(object):
-    def update_req(self, site_item: "SiteItem"):
+    def update_req(self, site_item: "SiteItem", parent_srv: "Server" = None):
         xml_request = ET.Element("tsRequest")
         site_element = ET.SubElement(xml_request, "site")
         if site_item.name:
@@ -601,14 +600,15 @@ class SiteRequest(object):
             site_element.attrib["revisionHistoryEnabled"] = str(site_item.revision_history_enabled).lower()
         if site_item.data_acceleration_mode is not None:
             site_element.attrib["dataAccelerationMode"] = str(site_item.data_acceleration_mode).lower()
-        if site_item.flows_enabled is not None:
-            site_element.attrib["flowsEnabled"] = str(site_item.flows_enabled).lower()
         if site_item.cataloging_enabled is not None:
             site_element.attrib["catalogingEnabled"] = str(site_item.cataloging_enabled).lower()
-        if site_item.editing_flows_enabled is not None:
-            site_element.attrib["editingFlowsEnabled"] = str(site_item.editing_flows_enabled).lower()
-        if site_item.scheduling_flows_enabled is not None:
-            site_element.attrib["schedulingFlowsEnabled"] = str(site_item.scheduling_flows_enabled).lower()
+
+        flows_edit = str(site_item.editing_flows_enabled).lower()
+        flows_schedule = str(site_item.scheduling_flows_enabled).lower()
+        flows_all = str(site_item.flows_enabled).lower()
+
+        self.set_versioned_flow_attributes(flows_all, flows_edit, flows_schedule, parent_srv, site_element, site_item)
+
         if site_item.allow_subscription_attachments is not None:
             site_element.attrib["allowSubscriptionAttachments"] = str(site_item.allow_subscription_attachments).lower()
         if site_item.guest_access_enabled is not None:
@@ -682,7 +682,8 @@ class SiteRequest(object):
 
         return ET.tostring(xml_request)
 
-    def create_req(self, site_item: "SiteItem"):
+    # server: the site request model changes based on api version
+    def create_req(self, site_item: "SiteItem", parent_srv: "Server" = None):
         xml_request = ET.Element("tsRequest")
         site_element = ET.SubElement(xml_request, "site")
         site_element.attrib["name"] = site_item.name
@@ -701,12 +702,13 @@ class SiteRequest(object):
             site_element.attrib["revisionLimit"] = str(site_item.revision_limit)
         if site_item.data_acceleration_mode is not None:
             site_element.attrib["dataAccelerationMode"] = str(site_item.data_acceleration_mode).lower()
-        if site_item.flows_enabled is not None:
-            site_element.attrib["flowsEnabled"] = str(site_item.flows_enabled).lower()
-        if site_item.editing_flows_enabled is not None:
-            site_element.attrib["editingFlowsEnabled"] = str(site_item.editing_flows_enabled).lower()
-        if site_item.scheduling_flows_enabled is not None:
-            site_element.attrib["schedulingFlowsEnabled"] = str(site_item.scheduling_flows_enabled).lower()
+
+        flows_edit = str(site_item.editing_flows_enabled).lower()
+        flows_schedule = str(site_item.scheduling_flows_enabled).lower()
+        flows_all = str(site_item.flows_enabled).lower()
+
+        self.set_versioned_flow_attributes(flows_all, flows_edit, flows_schedule, parent_srv, site_element, site_item)
+
         if site_item.allow_subscription_attachments is not None:
             site_element.attrib["allowSubscriptionAttachments"] = str(site_item.allow_subscription_attachments).lower()
         if site_item.guest_access_enabled is not None:
@@ -783,6 +785,32 @@ class SiteRequest(object):
             )
 
         return ET.tostring(xml_request)
+
+    def set_versioned_flow_attributes(self, flows_all, flows_edit, flows_schedule, parent_srv, site_element, site_item):
+        if (not parent_srv) or SiteItem.use_new_flow_settings(parent_srv):
+            if site_item.flows_enabled is not None:
+                flows_edit = flows_edit or flows_all
+                flows_schedule = flows_schedule or flows_all
+                import warnings
+
+                warnings.warn(
+                    "FlowsEnabled has been removed and become two options:"
+                    " SchedulingFlowsEnabled and EditingFlowsEnabled"
+                )
+            if site_item.editing_flows_enabled is not None:
+                site_element.attrib["editingFlowsEnabled"] = flows_edit
+            if site_item.scheduling_flows_enabled is not None:
+                site_element.attrib["schedulingFlowsEnabled"] = flows_schedule
+
+        else:
+            if site_item.flows_enabled is not None:
+                site_element.attrib["flowsEnabled"] = str(site_item.flows_enabled).lower()
+            if site_item.editing_flows_enabled is not None or site_item.scheduling_flows_enabled is not None:
+                flows_all = flows_all or flows_edit or flows_schedule
+                site_element.attrib["flowsEnabled"] = flows_all
+                import warnings
+
+                warnings.warn("In version 3.10 and earlier there is only one option: FlowsEnabled")
 
 
 class TableRequest(object):
@@ -971,15 +999,15 @@ class WorkbookRequest(object):
 
 class Connection(object):
     @_tsrequest_wrapped
-    def update_req(self, xml_request, connection_item):
+    def update_req(self, xml_request: ET.Element, connection_item: "ConnectionItem") -> None:
         connection_element = ET.SubElement(xml_request, "connection")
-        if connection_item.server_address:
+        if connection_item.server_address is not None:
             connection_element.attrib["serverAddress"] = connection_item.server_address.lower()
-        if connection_item.server_port:
+        if connection_item.server_port is not None:
             connection_element.attrib["serverPort"] = str(connection_item.server_port)
-        if connection_item.username:
+        if connection_item.username is not None:
             connection_element.attrib["userName"] = connection_item.username
-        if connection_item.password:
+        if connection_item.password is not None:
             connection_element.attrib["password"] = connection_item.password
         if connection_item.embed_password is not None:
             connection_element.attrib["embedPassword"] = str(connection_item.embed_password).lower()
