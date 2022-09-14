@@ -80,7 +80,7 @@ def main():
             if args.as_job:
                 new_job = server.workbooks.publish(
                     new_workbook,
-                    args.filepath,
+                    args.file,
                     overwrite_true,
                     connections=all_connections,
                     as_job=args.as_job,
@@ -90,7 +90,7 @@ def main():
             else:
                 new_workbook = server.workbooks.publish(
                     new_workbook,
-                    args.filepath,
+                    args.file,
                     overwrite_true,
                     connections=all_connections,
                     as_job=args.as_job,
