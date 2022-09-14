@@ -11,6 +11,7 @@ from .exceptions import (
     NonXMLResponseError,
     EndpointUnavailableError,
 )
+from .. import endpoint
 from ..query import QuerySet
 from ... import helpers
 
@@ -26,18 +27,29 @@ if TYPE_CHECKING:
     from requests import Response
 
 
+_version_header: Optional[str] = None
+
+
 class Endpoint(object):
     def __init__(self, parent_srv: "Server"):
+        global _version_header
         self.parent_srv = parent_srv
 
     @staticmethod
     def _make_common_headers(auth_token, content_type):
+        global _version_header
+
+        if not _version_header:
+            from ..server import __TSC_VERSION__
+
+            _version_header = __TSC_VERSION__
+
         headers = {}
         if auth_token is not None:
             headers["x-tableau-auth"] = auth_token
         if content_type is not None:
             headers["content-type"] = content_type
-
+        headers["User-Agent"] = "Tableau Server Client/{}".format(_version_header)
         return headers
 
     def _make_request(
@@ -63,7 +75,7 @@ class Endpoint(object):
             logger.debug("request content: {}".format(helpers.strings.redact_xml(content[:1000])))
 
         server_response = method(url, **parameters)
-        self._check_status(server_response)
+        self._check_status(server_response, url)
 
         loggable_response = self.log_response_safely(server_response)
         logger.debug("Server response from {0}:\n\t{1}".format(url, loggable_response))
@@ -73,13 +85,13 @@ class Endpoint(object):
 
         return server_response
 
-    def _check_status(self, server_response):
+    def _check_status(self, server_response, url: str = None):
         if server_response.status_code >= 500:
-            raise InternalServerError(server_response)
+            raise InternalServerError(server_response, url)
         elif server_response.status_code not in Success_codes:
             # todo: is an error reliably of content-type application/xml?
             try:
-                raise ServerResponseError.from_response(server_response.content, self.parent_srv.namespace)
+                raise ServerResponseError.from_response(server_response.content, self.parent_srv.namespace, url)
             except ParseError:
                 # This will happen if we get a non-success HTTP code that
                 # doesn't return an xml error object (like metadata endpoints or 503 pages)
@@ -112,7 +124,7 @@ class Endpoint(object):
         if request_object is not None:
             try:
                 # Query param delimiters don't need to be encoded for versions before 3.7 (2020.1)
-                self.parent_srv.assert_at_least_version("3.7")
+                self.parent_srv.assert_at_least_version("3.7", "Query param encoding")
                 parameters = parameters or {}
                 parameters["params"] = request_object.get_query_params()
             except EndpointUnavailableError:
@@ -126,7 +138,7 @@ class Endpoint(object):
         )
 
     def delete_request(self, url):
-        # We don't return anything for a delete
+        # We don't return anything for a delete request
         self._make_request(self.parent_srv.session.delete, url, auth_token=self.parent_srv.auth_token)
 
     def put_request(self, url, xml_request=None, content_type=XML_CONTENT_TYPE, parameters=None):
@@ -182,7 +194,7 @@ def api(version):
     def _decorator(func):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
-            self.parent_srv.assert_at_least_version(version)
+            self.parent_srv.assert_at_least_version(version, "endpoint")
             return func(self, *args, **kwargs)
 
         return wrapper

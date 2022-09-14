@@ -1,4 +1,7 @@
 from ..models.property_decorators import property_is_int
+import logging
+
+logger = logging.getLogger("tableau.request_options")
 
 
 class RequestOptionsBase(object):
@@ -7,6 +10,8 @@ class RequestOptionsBase(object):
         try:
             params = self.get_query_params()
             params_list = ["{}={}".format(k, v) for (k, v) in params.items()]
+
+            logger.debug("Applying options to request: <%s(%s)>", self.__class__.__name__, ",".join(params_list))
 
             if "?" in url:
                 url, existing_params = url.split("?")
@@ -139,6 +144,28 @@ class CSVRequestOptions(_FilterOptionsBase):
             params["maxAge"] = self.max_age
 
         self._append_view_filters(params)
+        return params
+
+
+class ExcelRequestOptions(RequestOptionsBase):
+    def __init__(self, maxage: int = -1) -> None:
+        super().__init__()
+        self.max_age = maxage
+
+    @property
+    def max_age(self) -> int:
+        return self._max_age
+
+    @max_age.setter
+    @property_is_int(range=(0, 240), allowed=[-1])
+    def max_age(self, value: int) -> None:
+        self._max_age = value
+
+    def get_query_params(self):
+        params = {}
+        if self.max_age != -1:
+            params["maxAge"] = self.max_age
+
         return params
 
 

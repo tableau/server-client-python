@@ -1,44 +1,48 @@
+from typing import TYPE_CHECKING, List, Optional
 from defusedxml.ElementTree import fromstring
 
 from .connection_credentials import ConnectionCredentials
 
+if TYPE_CHECKING:
+    from tableauserverclient.models.connection_credentials import ConnectionCredentials
+
 
 class ConnectionItem(object):
     def __init__(self):
-        self._datasource_id = None
-        self._datasource_name = None
-        self._id = None
-        self._connection_type = None
-        self.embed_password = None
-        self.password = None
-        self.server_address = None
-        self.server_port = None
-        self.username = None
-        self.connection_credentials = None
+        self._datasource_id: Optional[str] = None
+        self._datasource_name: Optional[str] = None
+        self._id: Optional[str] = None
+        self._connection_type: Optional[str] = None
+        self.embed_password: bool = None
+        self.password: Optional[str] = None
+        self.server_address: Optional[str] = None
+        self.server_port: Optional[str] = None
+        self.username: Optional[str] = None
+        self.connection_credentials: Optional["ConnectionCredentials"] = None
 
     @property
-    def datasource_id(self):
+    def datasource_id(self) -> Optional[str]:
         return self._datasource_id
 
     @property
-    def datasource_name(self):
+    def datasource_name(self) -> Optional[str]:
         return self._datasource_name
 
     @property
-    def id(self):
+    def id(self) -> Optional[str]:
         return self._id
 
     @property
-    def connection_type(self):
+    def connection_type(self) -> Optional[str]:
         return self._connection_type
 
     def __repr__(self):
-        return "<ConnectionItem#{_id} embed={embed_password} " "type={_connection_type} username={username}>".format(
+        return "<ConnectionItem#{_id} embed={embed_password} type={_connection_type} username={username}>".format(
             **self.__dict__
         )
 
     @classmethod
-    def from_response(cls, resp, ns):
+    def from_response(cls, resp, ns) -> List["ConnectionItem"]:
         all_connection_items = list()
         parsed_response = fromstring(resp)
         all_connection_xml = parsed_response.findall(".//t:connection", namespaces=ns)
@@ -58,7 +62,7 @@ class ConnectionItem(object):
         return all_connection_items
 
     @classmethod
-    def from_xml_element(cls, parsed_response, ns):
+    def from_xml_element(cls, parsed_response, ns) -> List["ConnectionItem"]:
         """
         <connections>
             <connection serverAddress="mysql.test.com">
@@ -69,7 +73,7 @@ class ConnectionItem(object):
                 </connection>
         </connections>
         """
-        all_connection_items = list()
+        all_connection_items: List["ConnectionItem"] = list()
         all_connection_xml = parsed_response.findall(".//t:connection", namespaces=ns)
 
         for connection_xml in all_connection_xml:
@@ -82,11 +86,13 @@ class ConnectionItem(object):
 
             if connection_credentials is not None:
 
-                connection_item.connection_credentials = ConnectionCredentials.from_xml_element(connection_credentials)
+                connection_item.connection_credentials = ConnectionCredentials.from_xml_element(
+                    connection_credentials, ns
+                )
 
         return all_connection_items
 
 
 # Used to convert string represented boolean to a boolean type
-def string_to_bool(s):
+def string_to_bool(s: str) -> bool:
     return s.lower() == "true"
