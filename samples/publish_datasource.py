@@ -96,13 +96,13 @@ def main():
         if args.async_:
             # Async publishing, returns a job_item
             new_job = server.datasources.publish(
-                new_datasource, args.filepath, publish_mode, connection_credentials=new_conn_creds, as_job=True
+                new_datasource, args.file, publish_mode, connection_credentials=new_conn_creds, as_job=True
             )
             print("Datasource published asynchronously. Job ID: {0}".format(new_job.id))
         else:
             # Normal publishing, returns a datasource_item
             new_datasource = server.datasources.publish(
-                new_datasource, args.filepath, publish_mode, connection_credentials=new_conn_creds
+                new_datasource, args.file, publish_mode, connection_credentials=new_conn_creds
             )
             print("Datasource published. Datasource ID: {0}".format(new_datasource.id))
 
