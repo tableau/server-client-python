@@ -2,7 +2,7 @@ import requests
 import urllib3
 
 from defusedxml.ElementTree import fromstring
-from distutils.version import LooseVersion as Version
+from packaging.version import Version
 from .endpoint import (
     Sites,
     Views,
@@ -35,6 +35,7 @@ from .endpoint.exceptions import (
 )
 from .exceptions import NotSignedInError
 from ..namespace import Namespace
+
 
 from .._version import get_versions
 
