@@ -11,8 +11,8 @@ versionfile_build = "tableauserverclient/_version.py"
 tag_prefix = "v"
 """
 setup(
-    version=versioneer.get_version(),
-    cmdclass=versioneer.get_cmdclass(),
+    version=versioneer / versioneer.get_version(),
+    cmdclass=versioneer / versioneer.get_cmdclass(),
     # not yet sure how to move this to pyproject.toml
     packages=[
         "tableauserverclient",

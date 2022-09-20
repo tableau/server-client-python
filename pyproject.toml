@@ -9,7 +9,7 @@ dynamic = ["version"]
 description='A Python module for working with the Tableau Server REST API.'
 authors = [{name="Tableau", email="github@tableau.com"}]
 license = {file = "LICENSE"}
-readme = "README.md"
+readme = {file = "README.md"}
 
 dependencies = [
     'defusedxml>=0.7.1',

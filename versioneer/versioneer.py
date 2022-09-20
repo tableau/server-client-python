@@ -301,12 +301,12 @@ def get_root():
     directory that contains setup.py, setup.cfg, and versioneer.py .
     """
     root = os.path.realpath(os.path.abspath(os.getcwd()))
-    setup_py = os.path.join(root, "setup.py")
+    setup_py = os.path.join(root, "../setup.py")
     versioneer_py = os.path.join(root, "versioneer.py")
     if not (os.path.exists(setup_py) or os.path.exists(versioneer_py)):
         # allow 'python path/to/setup.py COMMAND'
         root = os.path.dirname(os.path.realpath(os.path.abspath(sys.argv[0])))
-        setup_py = os.path.join(root, "setup.py")
+        setup_py = os.path.join(root, "../setup.py")
         versioneer_py = os.path.join(root, "versioneer.py")
     if not (os.path.exists(setup_py) or os.path.exists(versioneer_py)):
         err = (
@@ -340,7 +340,7 @@ def get_config_from_root(root):
     # configparser.NoSectionError (if it lacks a [versioneer] section), or
     # configparser.NoOptionError (if it lacks "VCS="). See the docstring at
     # the top of versioneer.py for instructions on writing your setup.cfg .
-    setup_cfg = os.path.join(root, "setup.cfg")
+    setup_cfg = os.path.join(root, "../setup.cfg")
     parser = configparser.SafeConfigParser()
     with open(setup_cfg, "r") as f:
         parser.readfp(f)
@@ -1145,7 +1145,7 @@ def do_vcs_install(manifest_in, versionfile_source, ipy):
     files.append(versioneer_file)
     present = False
     try:
-        f = open(".gitattributes", "r")
+        f = open("../.gitattributes", "r")
         for line in f.readlines():
             if line.strip().startswith(versionfile_source):
                 if "export-subst" in line.strip().split()[1:]:
@@ -1154,7 +1154,7 @@ def do_vcs_install(manifest_in, versionfile_source, ipy):
     except EnvironmentError:
         pass
     if not present:
-        f = open(".gitattributes", "a+")
+        f = open("../.gitattributes", "a+")
         f.write("%s export-subst\n" % versionfile_source)
         f.close()
         files.append(".gitattributes")
@@ -1726,7 +1726,7 @@ def do_setup():
     except (EnvironmentError, configparser.NoSectionError, configparser.NoOptionError) as e:
         if isinstance(e, (EnvironmentError, configparser.NoSectionError)):
             print("Adding sample versioneer config to setup.cfg", file=sys.stderr)
-            with open(os.path.join(root, "setup.cfg"), "a") as f:
+            with open(os.path.join(root, "../setup.cfg"), "a") as f:
                 f.write(SAMPLE_CONFIG)
         print(CONFIG_ERROR, file=sys.stderr)
         return 1
@@ -1766,7 +1766,7 @@ def do_setup():
     # (PKG/_version.py, used by runtime code) are in MANIFEST.in, so
     # they'll be copied into source distributions. Pip won't be able to
     # install the package without this.
-    manifest_in = os.path.join(root, "MANIFEST.in")
+    manifest_in = os.path.join(root, "../MANIFEST.in")
     simple_includes = set()
     try:
         with open(manifest_in, "r") as f:
@@ -1805,7 +1805,7 @@ def scan_setup_py():
     found = set()
     setters = False
     errors = 0
-    with open("setup.py", "r") as f:
+    with open("../setup.py", "r") as f:
         for line in f.readlines():
             if "import versioneer" in line:
                 found.add("import")
