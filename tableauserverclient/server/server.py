@@ -37,11 +37,6 @@ from .exceptions import NotSignedInError
 from ..namespace import Namespace
 
 
-from .._version import get_versions
-
-__TSC_VERSION__ = get_versions()["version"]
-del get_versions
-
 _PRODUCT_TO_REST_VERSION = {
     "10.0": "2.3",
     "9.3": "2.2",
@@ -51,7 +46,6 @@ _PRODUCT_TO_REST_VERSION = {
 }
 minimum_supported_server_version = "2.3"
 default_server_version = "2.3"
-client_version_header = "X-TableauServerClient-Version"
 
 
 class Server(object):
@@ -98,23 +92,29 @@ class Server(object):
         # must set this before calling use_server_version, because that's a server call
         if http_options:
             self.add_http_options(http_options)
-            self.add_http_version_header()
 
         if use_server_version:
             self.use_server_version()
 
-    def add_http_options(self, options_dict):
-        self._http_options.update(options_dict)
-        if options_dict.get("verify") == False:
+    def add_http_options(self, option_pair: dict):
+        if not option_pair:
+            # log debug message
+            return
+        if len(option_pair) != 1:
+            raise ValueError(
+                "Update headers one at a time. Expected type: ",
+                {"key": 12}.__class__,
+                "Actual type: ",
+                option_pair,
+                option_pair.__class__,
+            )
+        self._http_options.update(option_pair)
+        if "verify" in option_pair.keys() and self._http_options.get("verify") is False:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-    def add_http_version_header(self):
-        if not self._http_options[client_version_header]:
-            self._http_options.update({client_version_header: __TSC_VERSION__})
+            # would be nice if you could turn them back on
 
     def clear_http_options(self):
         self._http_options = dict()
-        self.add_http_version_header()
 
     def _clear_auth(self):
         self._site_id = None

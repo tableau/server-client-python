@@ -11,9 +11,12 @@ from .exceptions import (
     NonXMLResponseError,
     EndpointUnavailableError,
 )
-from .. import endpoint
 from ..query import QuerySet
 from ... import helpers
+from ..._version import get_versions
+
+__TSC_VERSION__ = get_versions()["version"]
+del get_versions
 
 logger = logging.getLogger("tableau.endpoint")
 
@@ -22,34 +25,25 @@ Success_codes = [200, 201, 202, 204]
 XML_CONTENT_TYPE = "text/xml"
 JSON_CONTENT_TYPE = "application/json"
 
+USERAGENT_HEADER = "User-Agent"
+
 if TYPE_CHECKING:
     from ..server import Server
     from requests import Response
 
 
-_version_header: Optional[str] = None
-
-
 class Endpoint(object):
     def __init__(self, parent_srv: "Server"):
-        global _version_header
         self.parent_srv = parent_srv
 
     @staticmethod
     def _make_common_headers(auth_token, content_type):
-        global _version_header
-
-        if not _version_header:
-            from ..server import __TSC_VERSION__
-
-            _version_header = __TSC_VERSION__
-
         headers = {}
         if auth_token is not None:
             headers["x-tableau-auth"] = auth_token
         if content_type is not None:
             headers["content-type"] = content_type
-        headers["User-Agent"] = "Tableau Server Client/{}".format(_version_header)
+        headers["User-Agent"] = "Tableau Server Client/{}".format(__TSC_VERSION__)
         return headers
 
     def _make_request(
@@ -62,9 +56,9 @@ class Endpoint(object):
         parameters: Optional[Dict[str, Any]] = None,
     ) -> "Response":
         parameters = parameters or {}
-        parameters.update(self.parent_srv.http_options)
         if "headers" not in parameters:
             parameters["headers"] = {}
+        parameters.update(self.parent_srv.http_options)
         parameters["headers"].update(Endpoint._make_common_headers(auth_token, content_type))
 
         if content is not None:
