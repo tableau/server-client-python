@@ -1,6 +1,6 @@
 import requests
 import logging
-from distutils.version import LooseVersion as Version
+from packaging.version import Version
 from functools import wraps
 from xml.etree.ElementTree import ParseError
 from typing import Any, Callable, Dict, Optional, TYPE_CHECKING
@@ -14,7 +14,6 @@ from .exceptions import (
 from ..query import QuerySet
 from ... import helpers
 from ..._version import get_versions
-
 __TSC_VERSION__ = get_versions()["version"]
 del get_versions
 

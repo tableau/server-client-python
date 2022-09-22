@@ -1,7 +1,6 @@
 import warnings
 import xml.etree.ElementTree as ET
 
-from distutils.version import Version
 from defusedxml.ElementTree import fromstring
 from .property_decorators import (
     property_is_enum,
