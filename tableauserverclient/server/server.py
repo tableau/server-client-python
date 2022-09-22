@@ -96,6 +96,9 @@ class Server(object):
         if use_server_version:
             self.use_server_version()
 
+    def __repr__(self):
+        return "<TableauServerClient> [Connection: {}, {}]".format(self.baseurl, self.server_info.serverInfo)
+
     def add_http_options(self, option_pair: dict):
         if not option_pair:
             # log debug message

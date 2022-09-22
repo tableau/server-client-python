@@ -13,6 +13,15 @@ logger = logging.getLogger("tableau.endpoint.server_info")
 
 class ServerInfo(Endpoint):
     @property
+    def serverInfo(self):
+        if not self._info:
+            self.get()
+        return self._info
+
+    def __repr__(self):
+        return "<Endpoint {}>".format(self._info)
+
+    @property
     def baseurl(self):
         return "{0}/serverInfo".format(self.parent_srv.baseurl)
 
@@ -28,5 +37,5 @@ class ServerInfo(Endpoint):
                 raise EndpointUnavailableError
             raise e
 
-        server_info = ServerInfoItem.from_response(server_response.content, self.parent_srv.namespace)
-        return server_info
+        self._info = ServerInfoItem.from_response(server_response.content, self.parent_srv.namespace)
+        return self._info
