@@ -54,12 +54,13 @@ class Server(object):
         Overwrite = "Overwrite"
         CreateNew = "CreateNew"
 
-    def __init__(self, server_address, use_server_version=False, http_options=None):
+    def __init__(self, server_address, use_server_version=False, http_options=None, session_factory=requests.Session):
         self._server_address = server_address
         self._auth_token = None
         self._site_id = None
         self._user_id = None
-        self._session = requests.Session()
+        self._session_factory = session_factory
+        self._session = session_factory()
         self._http_options = dict()
 
         self.version = default_server_version
@@ -120,7 +121,7 @@ class Server(object):
         self._site_id = None
         self._user_id = None
         self._auth_token = None
-        self._session = requests.Session()
+        self._session = self._session_factory()
 
     def _set_auth(self, site_id, user_id, auth_token):
         self._site_id = site_id
