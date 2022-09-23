@@ -1,3 +1,5 @@
+import warnings
+
 import requests
 import urllib3
 
@@ -54,16 +56,14 @@ class Server(object):
         Overwrite = "Overwrite"
         CreateNew = "CreateNew"
 
-    def __init__(self, server_address, use_server_version=False, http_options=None, session_factory=requests.Session):
-        self._server_address = server_address
+    def __init__(self, server_address, use_server_version=False, http_options=None, session_factory=None):
         self._auth_token = None
         self._site_id = None
         self._user_id = None
-        self._session_factory = session_factory
-        self._session = session_factory()
-        self._http_options = dict()
 
-        self.version = default_server_version
+        self._server_address = server_address
+        self._session_factory = session_factory or requests.session
+
         self.auth = Auth(self)
         self.views = Views(self)
         self.users = Users(self)
@@ -90,29 +90,39 @@ class Server(object):
         self.flow_runs = FlowRuns(self)
         self.metrics = Metrics(self)
 
-        # must set this before calling use_server_version, because that's a server call
+        self._session = self._session_factory()
+        self._http_options = dict()  # must set this before making a server call
         if http_options:
             self.add_http_options(http_options)
 
-        if use_server_version:
-            self.use_server_version()
+        self.validate_server_connection()
 
-    def add_http_options(self, option_pair: dict):
-        if not option_pair:
-            # log debug message
-            return
-        if len(option_pair) != 1:
-            raise ValueError(
-                "Update headers one at a time. Expected type: ",
-                {"key": 12}.__class__,
-                "Actual type: ",
-                option_pair,
-                option_pair.__class__,
-            )
-        self._http_options.update(option_pair)
-        if "verify" in option_pair.keys() and self._http_options.get("verify") is False:
-            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-            # would be nice if you could turn them back on
+        self.version = default_server_version
+        if use_server_version:
+            self.use_server_version()  # this makes a server call
+
+    def validate_server_connection(self):
+        try:
+            self._session.prepare_request(requests.Request("GET", url=self._server_address, params=self._http_options))
+        except Exception as req_ex:
+            warnings.warn("Invalid server initialization\n  {}".format(req_ex.__str__()), UserWarning)
+        print("==================")
+
+    def __repr__(self):
+        return "<TableauServerClient> [Connection: {}, {}]".format(self.baseurl, self.server_info.serverInfo)
+
+    def add_http_options(self, options_dict: dict):
+        try:
+            self._http_options.update(options_dict)
+            if "verify" in options_dict.keys() and self._http_options.get("verify") is False:
+                urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+                # would be nice if you could turn them back on
+        except BaseException as be:
+            print(be)
+            # expected errors on invalid input:
+            # 'set' object has no attribute 'keys', 'list' object has no attribute 'keys'
+            # TypeError: cannot convert dictionary update sequence element #0 to a sequence (input is a tuple)
+            raise ValueError("Invalid http options given: {}".format(options_dict))
 
     def clear_http_options(self):
         self._http_options = dict()
@@ -142,9 +152,10 @@ class Server(object):
             version = self.server_info.get().rest_api_version
         except ServerInfoEndpointNotFoundError:
             version = self._get_legacy_version()
+        except BaseException:
+            version = self._get_legacy_version()
 
-        finally:
-            self.version = old_version
+        self.version = old_version
 
         return version
 

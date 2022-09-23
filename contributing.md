@@ -66,18 +66,22 @@ pytest
 pip install .
 ```
 
+### Debugging Tools
+See what your outgoing requests look like: https://requestbin.net/ (unaffiliated link not under our control)
+
+
 ### Before Committing
 
 Our CI runs include a Python lint run, so you should run this locally and fix complaints before committing as this will fail your checkin.
 
 ```shell
 # this will run the formatter without making changes
-black --line-length 120 tableauserverclient test samples --check
+black . --check
 
 # this will format the directory and code for you
-black --line-length 120 tableauserverclient test samples
+black .
 
 # this will run type checking
 pip install mypy
-mypy --show-error-codes --disable-error-code misc --disable-error-code import tableauserverclient test
+mypy tableauserverclient test samples
 ```
