@@ -1,5 +1,8 @@
 import tableauserverclient as TSC
 import unittest
+import requests
+
+from requests_mock import adapter, mock
 from requests.exceptions import MissingSchema
 
 
@@ -33,7 +36,6 @@ class ServerTests(unittest.TestCase):
         server = TSC.Server("fake-url", use_server_version=False, http_options={"foo": 1})
 
     def test_init_server_model_bad_server_name_not_version_check_real_options(self):
-        # by default, it will attempt to contact the server to check it's version
         server = TSC.Server("fake-url", use_server_version=False, http_options={"verify": False})
 
     def test_http_options_skip_ssl_works(self):
@@ -54,3 +56,19 @@ class ServerTests(unittest.TestCase):
         server = TSC.Server("http://fake-url")
         with self.assertRaises(ValueError):
             server.add_http_options({1, 2, 3})
+
+
+class SessionTests(unittest.TestCase):
+    test_header = {"x-test": "true"}
+
+    @staticmethod
+    def session_factory():
+        session = requests.session()
+        session.headers.update(SessionTests.test_header)
+        return session
+
+    def test_session_factory_adds_headers(self):
+        test_request_bin = "http://capture-this-with-mock.com"
+        with mock() as m:
+            m.get(url="http://capture-this-with-mock.com/api/2.4/serverInfo", request_headers=SessionTests.test_header)
+            server = TSC.Server(test_request_bin, use_server_version=True, session_factory=SessionTests.session_factory)
