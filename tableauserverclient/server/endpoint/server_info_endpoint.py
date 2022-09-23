@@ -12,6 +12,11 @@ logger = logging.getLogger("tableau.endpoint.server_info")
 
 
 class ServerInfo(Endpoint):
+
+    def __init__(self, server):
+        self.parent_srv = server
+        self._info = None
+
     @property
     def serverInfo(self):
         if not self._info:
@@ -19,7 +24,7 @@ class ServerInfo(Endpoint):
         return self._info
 
     def __repr__(self):
-        return "<Endpoint {}>".format(self._info)
+        return "<Endpoint {}>".format(self.serverInfo)
 
     @property
     def baseurl(self):
@@ -32,9 +37,9 @@ class ServerInfo(Endpoint):
             server_response = self.get_unauthenticated_request(self.baseurl)
         except ServerResponseError as e:
             if e.code == "404003":
-                raise ServerInfoEndpointNotFoundError
+                raise ServerInfoEndpointNotFoundError(e)
             if e.code == "404001":
-                raise EndpointUnavailableError
+                raise EndpointUnavailableError(e)
             raise e
 
         self._info = ServerInfoItem.from_response(server_response.content, self.parent_srv.namespace)
