@@ -43,8 +43,13 @@ class ServerTests(unittest.TestCase):
         server = TSC.Server("http://fake-url")
         server.add_http_options(http_options)
 
+    def test_http_options_multiple_options_works(self):
+        http_options = {"verify": False, "birdname": "Parrot"}
+        server = TSC.Server("http://fake-url")
+        server.add_http_options(http_options)
+
     # ValueError: dictionary update sequence element #0 has length 1; 2 is required
-    def test_http_options_multiple_options_fails(self):
+    def test_http_options_multiple_dicts_fails(self):
         http_options_1 = {"verify": False}
         http_options_2 = {"birdname": "Parrot"}
         server = TSC.Server("http://fake-url")
