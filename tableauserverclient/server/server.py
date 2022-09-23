@@ -1,3 +1,5 @@
+import warnings
+
 import requests
 import urllib3
 
@@ -54,15 +56,14 @@ class Server(object):
         Overwrite = "Overwrite"
         CreateNew = "CreateNew"
 
-    def __init__(self, server_address, use_server_version=False, http_options=None):
-        self._server_address = server_address
+    def __init__(self, server_address, use_server_version=False, http_options=None, session_factory=requests.Session):
         self._auth_token = None
         self._site_id = None
         self._user_id = None
-        self._session = requests.Session()
-        self._http_options = dict()
 
-        self.version = default_server_version
+        self._server_address = server_address
+        self._session_factory = session_factory
+
         self.auth = Auth(self)
         self.views = Views(self)
         self.users = Users(self)
@@ -89,12 +90,23 @@ class Server(object):
         self.flow_runs = FlowRuns(self)
         self.metrics = Metrics(self)
 
+        self._session = session_factory()
+        self._http_options = dict()
         # must set this before calling use_server_version, because that's a server call
         if http_options:
             self.add_http_options(http_options)
+        self.validate_server_connection()
 
+        self.version = default_server_version
         if use_server_version:
             self.use_server_version()
+
+    def validate_server_connection(self):
+        try:
+            self._session.prepare_request(requests.Request("GET", url=self._server_address, params=self._http_options))
+        except Exception as req_ex:
+            warnings.warn("Invalid server initialization\n  {}".format(req_ex.__str__()), UserWarning)
+        print("==================")
 
     def __repr__(self):
         return "<TableauServerClient> [Connection: {}, {}]".format(self.baseurl, self.server_info.serverInfo)
@@ -123,7 +135,7 @@ class Server(object):
         self._site_id = None
         self._user_id = None
         self._auth_token = None
-        self._session = requests.Session()
+        self._session = self._session_factory()
 
     def _set_auth(self, site_id, user_id, auth_token):
         self._site_id = site_id
