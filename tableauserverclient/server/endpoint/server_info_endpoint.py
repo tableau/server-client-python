@@ -12,7 +12,6 @@ logger = logging.getLogger("tableau.endpoint.server_info")
 
 
 class ServerInfo(Endpoint):
-
     def __init__(self, server):
         self.parent_srv = server
         self._info = None

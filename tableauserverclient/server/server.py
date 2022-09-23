@@ -91,15 +91,15 @@ class Server(object):
         self.metrics = Metrics(self)
 
         self._session = session_factory()
-        self._http_options = dict()
-        # must set this before calling use_server_version, because that's a server call
+        self._http_options = dict()  # must set this before making a server call
         if http_options:
             self.add_http_options(http_options)
+
         self.validate_server_connection()
 
         self.version = default_server_version
         if use_server_version:
-            self.use_server_version()
+            self.use_server_version()  # this makes a server call
 
     def validate_server_connection(self):
         try:

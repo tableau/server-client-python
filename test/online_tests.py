@@ -8,7 +8,7 @@ test_request_bin = "o3sis36a9xu2byiu.b.requestbin.net"
 
 def session_factory():
     session = requests.session()
-    session.headers.update({'x-test': 'true'})
+    session.headers.update({"x-test": "true"})
     return session
 
 

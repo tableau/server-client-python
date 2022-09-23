@@ -14,6 +14,7 @@ from .exceptions import (
 from ..query import QuerySet
 from ... import helpers
 from ..._version import get_versions
+
 __TSC_VERSION__ = get_versions()["version"]
 del get_versions
 
