@@ -47,7 +47,6 @@ def main():
 
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
     server = TSC.Server(args.server, use_server_version=True, http_options={"verify": False})
-    print(server)
     with server.auth.sign_in(tableau_auth):
         # this code shows 3 different error codes that mean "resource is already in collection"
         # 409009: group already exists on server
