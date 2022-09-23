@@ -99,6 +99,14 @@ class Projects(QuerysetEndpoint):
     def populate_datasource_default_permissions(self, item):
         self._default_permissions.populate_default_permissions(item, Resource.Datasource)
 
+    @api(version="3.2")
+    def populate_metric_default_permissions(self, item):
+        self._default_permissions.populate_default_permissions(item, Resource.Metric)
+
+    @api(version="3.4")
+    def populate_datarole_default_permissions(self, item):
+        self._default_permissions.populate_default_permissions(item, Resource.Datarole)
+
     @api(version="3.4")
     def populate_flow_default_permissions(self, item):
         self._default_permissions.populate_default_permissions(item, Resource.Flow)
@@ -115,6 +123,14 @@ class Projects(QuerysetEndpoint):
     def update_datasource_default_permissions(self, item, rules):
         return self._default_permissions.update_default_permissions(item, rules, Resource.Datasource)
 
+    @api(version="3.2")
+    def update_metric_default_permissions(self, item, rules):
+        return self._default_permissions.update_default_permissions(item, rules, Resource.Metric)
+
+    @api(version="3.4")
+    def update_datarole_default_permissions(self, item, rules):
+        return self._default_permissions.update_default_permissions(item, rules, Resource.Datarole)
+
     @api(version="3.4")
     def update_flow_default_permissions(self, item, rules):
         return self._default_permissions.update_default_permissions(item, rules, Resource.Flow)
@@ -126,6 +142,14 @@ class Projects(QuerysetEndpoint):
     @api(version="2.1")
     def delete_workbook_default_permissions(self, item, rule):
         self._default_permissions.delete_default_permission(item, rule, Resource.Workbook)
+
+    @api(version="3.2")
+    def delete_metric_default_permissions(self, item, rule):
+        self._default_permissions.delete_default_permission(item, rule, Resource.Metric)
+
+    @api(version="3.4")
+    def delete_datarole_default_permissions(self, item, rule):
+        self._default_permissions.delete_default_permission(item, rule, Resource.Datarole)
 
     @api(version="2.1")
     def delete_datasource_default_permissions(self, item, rule):

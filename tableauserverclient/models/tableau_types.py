@@ -11,9 +11,11 @@ from typing import Union
 
 class Resource:
     Database = "database"
+    Datarole = "datarole"
     Datasource = "datasource"
     Flow = "flow"
     Lens = "lens"
+    Metric = "metric"
     Project = "project"
     Table = "table"
     View = "view"
@@ -27,5 +29,9 @@ TableauItem = Union[DatasourceItem, FlowItem, ProjectItem, ViewItem, WorkbookIte
 def plural_type(content_type: Resource) -> str:
     if content_type == Resource.Lens:
         return "lenses"
+    elif content_type == Resource.Datarole:
+        return "dataroles"
+    elif content_type == Resource.Metric:
+        return "metrics"
     else:
         return "{}s".format(content_type)
