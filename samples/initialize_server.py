@@ -56,7 +56,7 @@ def main():
 
         # Create the site if it doesn't exist
         if existing_site is None:
-            print("Site not found: {0} Creating it...").format(args.site_id)
+            print("Site not found: {0} Creating it...".format(args.site_id))
             new_site = TSC.SiteItem(
                 name=args.site_id,
                 content_url=args.site_id.replace(" ", ""),
@@ -64,7 +64,7 @@ def main():
             )
             server.sites.create(new_site)
         else:
-            print("Site {0} exists. Moving on...").format(args.site_id)
+            print("Site {0} exists. Moving on...".format(args.site_id))
 
     ################################################################################
     # Step 3: Sign-in to our target site
@@ -87,7 +87,7 @@ def main():
 
         # Create our project if it doesn't exist
         if project is None:
-            print("Project not found: {0} Creating it...").format(args.project)
+            print("Project not found: {0} Creating it...".format(args.project))
             new_project = TSC.ProjectItem(name=args.project)
             project = server_upload.projects.create(new_project)
 
