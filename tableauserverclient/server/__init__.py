@@ -2,6 +2,7 @@
 from .request_factory import RequestFactory
 from .request_options import (
     CSVRequestOptions,
+    ExcelRequestOptions,
     ImageRequestOptions,
     PDFRequestOptions,
     RequestOptions,

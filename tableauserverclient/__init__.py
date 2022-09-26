@@ -39,6 +39,7 @@ from .models import (
 )
 from .server import (
     CSVRequestOptions,
+    ExcelRequestOptions,
     ImageRequestOptions,
     PDFRequestOptions,
     RequestOptions,
