@@ -9,7 +9,7 @@ class Credentials:
         +"This method returns values to set as an attribute on the credentials element of the request"
 
     def __repr__(self):
-        display = "All Credentials types must have a debug display that does not print secrets"
+        return "All Credentials types must have a debug display that does not print secrets"
 
 
 def deprecate_site_attribute():

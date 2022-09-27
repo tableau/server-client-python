@@ -53,8 +53,9 @@ class RevisionItem(object):
 
     def __repr__(self):
         return (
-            "<RevisionItem# revisionNumber={_revision_number} " "current={_current} deleted={_deleted} user={_user_id}>"
-        ).format(**self.__dict__)
+            "<RevisionItem# revisionNumber={_revision_number} "
+            "current={_current} deleted={_deleted} user={_user_id}>".format(**self.__dict__)
+        )
 
     @classmethod
     def from_response(cls, resp: bytes, ns, resource_item) -> List["RevisionItem"]:

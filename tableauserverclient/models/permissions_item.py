@@ -69,7 +69,7 @@ class PermissionsRule(object):
                 mode = capability_xml.get("mode")
 
                 if name is None or mode is None:
-                    logger.error("Capability was not valid: ", capability_xml)
+                    logger.error("Capability was not valid: {}".format(capability_xml))
                     raise UnpopulatedPropertyError()
                 else:
                     capability_dict[name] = mode
