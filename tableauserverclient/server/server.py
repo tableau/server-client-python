@@ -1,5 +1,4 @@
 import logging
-import warnings
 
 import requests
 import urllib3
@@ -63,10 +62,6 @@ class Server(object):
         self._site_id = None
         self._user_id = None
 
-        # TODO: this needs to change to default to https, but without breaking existing code
-        if not server_address.startswith("http://") and not server_address.startswith("https://"):
-            server_address = "http://" + server_address
-
         self._server_address: str = server_address
         self._session_factory = session_factory or requests.session
 
@@ -96,6 +91,8 @@ class Server(object):
         self.flow_runs = FlowRuns(self)
         self.metrics = Metrics(self)
 
+        self.logger = logging.getLogger("TSC.server")
+
         self._session = self._session_factory()
         self._http_options = dict()  # must set this before making a server call
         if http_options:
@@ -110,6 +107,9 @@ class Server(object):
     def validate_connection_settings(self):
         try:
             Endpoint(self).set_parameters(self._http_options, None, None, None, None)
+            if not server_address.startswith("http://") and not server_address.startswith("https://"):
+                self._server_address = "http://" + self._server_address
+            self._session.prepare_request(requests.Request("GET", url=self._server_address, params=self._http_options))
         except Exception as req_ex:
             raise ValueError("Server connection settings not valid", req_ex)
 
@@ -149,8 +149,8 @@ class Server(object):
         try:
             info_xml = fromstring(response.content)
         except ParseError as parseError:
-            logging.getLogger("TSC.server").info(parseError)
-            logging.getLogger("TSC.server").info(
+            logger.info(parseError)
+            logger.info(
                 "Could not read server version info. The server may not be running or configured."
             )
             return self.version
@@ -165,7 +165,8 @@ class Server(object):
             version = self.server_info.get().rest_api_version
         except ServerInfoEndpointNotFoundError:
             version = self._get_legacy_version()
-        except BaseException:
+        except BaseException as e:
+            logger.info("Could not get version info from server, guessing {}".format(e.__class__))
             version = self._get_legacy_version()
 
         self.version = old_version
@@ -177,7 +178,7 @@ class Server(object):
 
     def use_highest_version(self):
         self.use_server_version()
-        warnings.warn("use use_server_version instead", DeprecationWarning)
+        logger.info("use use_server_version instead", DeprecationWarning)
 
     def check_at_least_version(self, target: str):
         server_version = Version(self.version or "0.0")

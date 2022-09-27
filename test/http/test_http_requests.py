@@ -43,9 +43,9 @@ class ServerTests(unittest.TestCase):
     def test_init_server_model_bad_server_name_not_version_check(self):
         server = TSC.Server("fake-url", use_server_version=False)
 
-    def test_init_server_model_bad_server_name_do_version_check(self):
-        with self.assertRaises(requests.exceptions.ConnectionError):
-            server = TSC.Server("fake-url", use_server_version=True)
+    @mock.patch("requests.sessions.Session.get", side_effect=mocked_requests_get)
+    def test_init_server_model_bad_server_name_do_version_check(self, mock_get):
+        server = TSC.Server("fake-url", use_server_version=True)
 
     def test_init_server_model_bad_server_name_not_version_check_random_options(self):
         # with self.assertRaises(MissingSchema):
