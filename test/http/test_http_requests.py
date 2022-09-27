@@ -1,9 +1,28 @@
 import tableauserverclient as TSC
 import unittest
 import requests
+import requests_mock
 
-from requests_mock import adapter, mock
+from unittest import mock
 from requests.exceptions import MissingSchema
+
+
+# This method will be used by the mock to replace requests.get
+def mocked_requests_get(*args, **kwargs):
+    class MockResponse:
+        def __init__(self, status_code):
+            self.content = (
+                "<xml>"
+                "<version version='0.31'>"
+                "<api_version>0.31</api_version>"
+                "<server_api_version>0.31</server_api_version>"
+                "<product_version>2022.3</product_version>"
+                "</version>"
+                "</xml>"
+            )
+            self.status_code = status_code
+
+    return MockResponse(200)
 
 
 class ServerTests(unittest.TestCase):
@@ -27,9 +46,9 @@ class ServerTests(unittest.TestCase):
         # by default, it will just set the version to 2.3
         server = TSC.Server("fake-url", use_server_version=False)
 
-    def test_init_server_model_bad_server_name_do_version_check(self):
-        with self.assertRaises(MissingSchema):
-            server = TSC.Server("fake-url", use_server_version=True)
+    @mock.patch("requests.sessions.Session.get", side_effect=mocked_requests_get)
+    def test_init_server_model_bad_server_name_do_version_check(self, mock_get):
+        server = TSC.Server("fake-url", use_server_version=True)
 
     def test_init_server_model_bad_server_name_not_version_check_random_options(self):
         # by default, it will just set the version to 2.3
@@ -62,6 +81,25 @@ class ServerTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             server.add_http_options({1, 2, 3})
 
+    def test_validate_connection_http(self):
+        url = "http://cookies.com"
+        server = TSC.Server(url)
+        server.validate_server_connection()
+        self.assertEqual(url, server.server_address)
+
+    def test_validate_connection_https(self):
+        url = "https://cookies.com"
+        server = TSC.Server(url)
+        server.validate_server_connection()
+        self.assertEqual(url, server.server_address)
+
+    def test_validate_connection_no_protocol(self):
+        url = "cookies.com"
+        fixed_url = "http://cookies.com"
+        server = TSC.Server(url)
+        server.validate_server_connection()
+        self.assertEqual(fixed_url, server.server_address)
+
 
 class SessionTests(unittest.TestCase):
     test_header = {"x-test": "true"}
@@ -74,6 +112,6 @@ class SessionTests(unittest.TestCase):
 
     def test_session_factory_adds_headers(self):
         test_request_bin = "http://capture-this-with-mock.com"
-        with mock() as m:
+        with requests_mock.mock() as m:
             m.get(url="http://capture-this-with-mock.com/api/2.4/serverInfo", request_headers=SessionTests.test_header)
             server = TSC.Server(test_request_bin, use_server_version=True, session_factory=SessionTests.session_factory)

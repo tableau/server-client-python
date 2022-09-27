@@ -61,7 +61,7 @@ class Server(object):
         self._site_id = None
         self._user_id = None
 
-        self._server_address = server_address
+        self._server_address: str = server_address
         self._session_factory = session_factory or requests.session
 
         self.auth = Auth(self)
@@ -103,6 +103,8 @@ class Server(object):
 
     def validate_server_connection(self):
         try:
+            if not self._server_address.startswith("http"):
+                self._server_address = "http://" + self._server_address
             self._session.prepare_request(requests.Request("GET", url=self._server_address, params=self._http_options))
         except Exception as req_ex:
             warnings.warn("Invalid server initialization\n  {}".format(req_ex.__str__()), UserWarning)
@@ -152,7 +154,8 @@ class Server(object):
             version = self.server_info.get().rest_api_version
         except ServerInfoEndpointNotFoundError:
             version = self._get_legacy_version()
-        except BaseException:
+        except BaseException as e:
+            warnings.warn("Could not get version info from server, guessing {}".format(e.__class__))
             version = self._get_legacy_version()
 
         self.version = old_version
