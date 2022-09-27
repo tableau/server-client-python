@@ -26,11 +26,11 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    - name: pip install Tabcmd
+    - name: pip install
       run: |
         pip uninstall tableauserverclient
         pip install tableauserverclient
     - name: Launch app
       run: |
         python -c "import tableauserverclient as TSC
-        server = TSC.Server('Fake-Server-Url', use_server_version=False)"
+        server = TSC.Server('http://example.com', use_server_version=False)"
