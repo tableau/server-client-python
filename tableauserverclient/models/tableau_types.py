@@ -29,9 +29,5 @@ TableauItem = Union[DatasourceItem, FlowItem, ProjectItem, ViewItem, WorkbookIte
 def plural_type(content_type: Resource) -> str:
     if content_type == Resource.Lens:
         return "lenses"
-    elif content_type == Resource.Datarole:
-        return "dataroles"
-    elif content_type == Resource.Metric:
-        return "metrics"
     else:
         return "{}s".format(content_type)
