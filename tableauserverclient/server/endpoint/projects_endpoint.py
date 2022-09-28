@@ -143,6 +143,10 @@ class Projects(QuerysetEndpoint):
     def delete_workbook_default_permissions(self, item, rule):
         self._default_permissions.delete_default_permission(item, rule, Resource.Workbook)
 
+    @api(version="2.1")
+    def delete_datasource_default_permissions(self, item, rule):
+        self._default_permissions.delete_default_permission(item, rule, Resource.Datasource)
+        
     @api(version="3.2")
     def delete_metric_default_permissions(self, item, rule):
         self._default_permissions.delete_default_permission(item, rule, Resource.Metric)
@@ -150,10 +154,6 @@ class Projects(QuerysetEndpoint):
     @api(version="3.4")
     def delete_datarole_default_permissions(self, item, rule):
         self._default_permissions.delete_default_permission(item, rule, Resource.Datarole)
-
-    @api(version="2.1")
-    def delete_datasource_default_permissions(self, item, rule):
-        self._default_permissions.delete_default_permission(item, rule, Resource.Datasource)
 
     @api(version="3.4")
     def delete_flow_default_permissions(self, item, rule):
