@@ -1,3 +1,5 @@
+import warnings
+
 import requests
 import urllib3
 
@@ -37,11 +39,6 @@ from .exceptions import NotSignedInError
 from ..namespace import Namespace
 
 
-from .._version import get_versions
-
-__TSC_VERSION__ = get_versions()["version"]
-del get_versions
-
 _PRODUCT_TO_REST_VERSION = {
     "10.0": "2.3",
     "9.3": "2.2",
@@ -51,7 +48,6 @@ _PRODUCT_TO_REST_VERSION = {
 }
 minimum_supported_server_version = "2.3"
 default_server_version = "2.3"
-client_version_header = "X-TableauServerClient-Version"
 
 
 class Server(object):
@@ -60,15 +56,14 @@ class Server(object):
         Overwrite = "Overwrite"
         CreateNew = "CreateNew"
 
-    def __init__(self, server_address, use_server_version=False, http_options=None):
-        self._server_address = server_address
+    def __init__(self, server_address, use_server_version=False, http_options=None, session_factory=None):
         self._auth_token = None
         self._site_id = None
         self._user_id = None
-        self._session = requests.Session()
-        self._http_options = dict()
 
-        self.version = default_server_version
+        self._server_address = server_address
+        self._session_factory = session_factory or requests.session
+
         self.auth = Auth(self)
         self.views = Views(self)
         self.users = Users(self)
@@ -95,32 +90,48 @@ class Server(object):
         self.flow_runs = FlowRuns(self)
         self.metrics = Metrics(self)
 
-        # must set this before calling use_server_version, because that's a server call
+        self._session = self._session_factory()
+        self._http_options = dict()  # must set this before making a server call
         if http_options:
             self.add_http_options(http_options)
-            self.add_http_version_header()
 
+        self.validate_server_connection()
+
+        self.version = default_server_version
         if use_server_version:
-            self.use_server_version()
+            self.use_server_version()  # this makes a server call
 
-    def add_http_options(self, options_dict):
-        self._http_options.update(options_dict)
-        if options_dict.get("verify") == False:
-            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+    def validate_server_connection(self):
+        try:
+            self._session.prepare_request(requests.Request("GET", url=self._server_address, params=self._http_options))
+        except Exception as req_ex:
+            warnings.warn("Invalid server initialization\n  {}".format(req_ex.__str__()), UserWarning)
+        print("==================")
 
-    def add_http_version_header(self):
-        if not self._http_options[client_version_header]:
-            self._http_options.update({client_version_header: __TSC_VERSION__})
+    def __repr__(self):
+        return "<TableauServerClient> [Connection: {}, {}]".format(self.baseurl, self.server_info.serverInfo)
+
+    def add_http_options(self, options_dict: dict):
+        try:
+            self._http_options.update(options_dict)
+            if "verify" in options_dict.keys() and self._http_options.get("verify") is False:
+                urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+                # would be nice if you could turn them back on
+        except BaseException as be:
+            print(be)
+            # expected errors on invalid input:
+            # 'set' object has no attribute 'keys', 'list' object has no attribute 'keys'
+            # TypeError: cannot convert dictionary update sequence element #0 to a sequence (input is a tuple)
+            raise ValueError("Invalid http options given: {}".format(options_dict))
 
     def clear_http_options(self):
         self._http_options = dict()
-        self.add_http_version_header()
 
     def _clear_auth(self):
         self._site_id = None
         self._user_id = None
         self._auth_token = None
-        self._session = requests.Session()
+        self._session = self._session_factory()
 
     def _set_auth(self, site_id, user_id, auth_token):
         self._site_id = site_id
@@ -141,9 +152,10 @@ class Server(object):
             version = self.server_info.get().rest_api_version
         except ServerInfoEndpointNotFoundError:
             version = self._get_legacy_version()
+        except BaseException:
+            version = self._get_legacy_version()
 
-        finally:
-            self.version = old_version
+        self.version = old_version
 
         return version
 

@@ -294,7 +294,7 @@ class ViewTests(unittest.TestCase):
             m.get(self.baseurl + "/d79634e1-6063-4ec9-95ff-50acbf609ff5/crosstab/excel?maxAge=1", content=response)
             single_view = TSC.ViewItem()
             single_view._id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
-            request_option = TSC.CSVRequestOptions(maxage=1)
+            request_option = TSC.ExcelRequestOptions(maxage=1)
             self.server.views.populate_excel(single_view, request_option)
 
             excel_file = b"".join(single_view.excel)

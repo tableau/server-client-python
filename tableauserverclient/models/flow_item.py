@@ -94,10 +94,6 @@ class FlowItem(object):
         return self._project_name
 
     @property
-    def flow_type(self):  # What is this? It doesn't seem to get set anywhere.
-        return self._flow_type
-
-    @property
     def updated_at(self) -> Optional["datetime.datetime"]:
         return self._updated_at
 
