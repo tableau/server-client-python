@@ -30,12 +30,10 @@ class ServerTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             server = TSC.Server()
 
-    def test_init_server_model_bad_server_name_complains(self):
-        # by default, it will just set the version to 2.3
+    def test_init_server_model_no_protocol_defaults_htt(self):
         server = TSC.Server("fake-url")
 
     def test_init_server_model_valid_server_name_works(self):
-        # by default, it will just set the version to 2.3
         server = TSC.Server("http://fake-url")
 
     def test_init_server_model_valid_https_server_name_works(self):
@@ -43,18 +41,18 @@ class ServerTests(unittest.TestCase):
         server = TSC.Server("https://fake-url")
 
     def test_init_server_model_bad_server_name_not_version_check(self):
-        # by default, it will just set the version to 2.3
         server = TSC.Server("fake-url", use_server_version=False)
 
-    @mock.patch("requests.sessions.Session.get", side_effect=mocked_requests_get)
-    def test_init_server_model_bad_server_name_do_version_check(self, mock_get):
-        server = TSC.Server("fake-url", use_server_version=True)
+    def test_init_server_model_bad_server_name_do_version_check(self):
+        with self.assertRaises(requests.exceptions.ConnectionError):
+            server = TSC.Server("fake-url", use_server_version=True)
 
     def test_init_server_model_bad_server_name_not_version_check_random_options(self):
-        # by default, it will just set the version to 2.3
+        # with self.assertRaises(MissingSchema):
         server = TSC.Server("fake-url", use_server_version=False, http_options={"foo": 1})
 
     def test_init_server_model_bad_server_name_not_version_check_real_options(self):
+        # with self.assertRaises(ValueError):
         server = TSC.Server("fake-url", use_server_version=False, http_options={"verify": False})
 
     def test_http_options_skip_ssl_works(self):
