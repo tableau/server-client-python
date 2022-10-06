@@ -1,3 +1,4 @@
+from ._version import get_versions
 from .namespace import NEW_NAMESPACE as DEFAULT_NAMESPACE
 from .models import (
     BackgroundJobItem,
