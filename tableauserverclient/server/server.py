@@ -1,9 +1,10 @@
+import logging
 import warnings
 
 import requests
 import urllib3
 
-from defusedxml.ElementTree import fromstring
+from defusedxml.ElementTree import fromstring, ParseError
 from packaging.version import Version
 from .endpoint import (
     Sites,
@@ -61,7 +62,7 @@ class Server(object):
         self._site_id = None
         self._user_id = None
 
-        self._server_address = server_address
+        self._server_address: str = server_address
         self._session_factory = session_factory or requests.session
 
         self.auth = Auth(self)
@@ -103,10 +104,13 @@ class Server(object):
 
     def validate_server_connection(self):
         try:
-            self._session.prepare_request(requests.Request("GET", url=self._server_address, params=self._http_options))
+            if not self._server_address.startswith("http://") and not self._server_address.startswith("https://"):
+                self._server_address = "http://" + self._server_address
+                self._session.prepare_request(
+                    requests.Request("GET", url=self._server_address, params=self._http_options)
+                )
         except Exception as req_ex:
-            warnings.warn("Invalid server initialization\n  {}".format(req_ex.__str__()), UserWarning)
-        print("==================")
+            raise ValueError("Invalid server initialization", req_ex)
 
     def __repr__(self):
         return "<TableauServerClient> [Connection: {}, {}]".format(self.baseurl, self.server_info.serverInfo)
@@ -140,7 +144,13 @@ class Server(object):
 
     def _get_legacy_version(self):
         response = self._session.get(self.server_address + "/auth?format=xml")
-        info_xml = fromstring(response.content)
+        try:
+            info_xml = fromstring(response.content)
+        except ParseError as parseError:
+            logging.getLogger("TSC.server").info(
+                "Could not read server version info. The server may not be running or configured."
+            )
+            return self.version
         prod_version = info_xml.find(".//product_version").text
         version = _PRODUCT_TO_REST_VERSION.get(prod_version, "2.1")  # 2.1
         return version
@@ -152,8 +162,6 @@ class Server(object):
             version = self.server_info.get().rest_api_version
         except ServerInfoEndpointNotFoundError:
             version = self._get_legacy_version()
-        except BaseException:
-            version = self._get_legacy_version()
 
         self.version = old_version
 
@@ -164,8 +172,6 @@ class Server(object):
 
     def use_highest_version(self):
         self.use_server_version()
-        import warnings
-
         warnings.warn("use use_server_version instead", DeprecationWarning)
 
     def check_at_least_version(self, target: str):

@@ -65,6 +65,6 @@ class PersonalAccessTokenAuth(Credentials):
         }
 
     def __repr__(self):
-        return "<PersonalAccessToken name={} token={} site={}>".format(
+        return "<PersonalAccessToken name={} token={}>(site={})".format(
             self.token_name, self.personal_access_token[:2] + "...", self.site_id
         )
