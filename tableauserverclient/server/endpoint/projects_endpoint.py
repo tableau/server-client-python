@@ -146,7 +146,7 @@ class Projects(QuerysetEndpoint):
     @api(version="2.1")
     def delete_datasource_default_permissions(self, item, rule):
         self._default_permissions.delete_default_permission(item, rule, Resource.Datasource)
-        
+
     @api(version="3.2")
     def delete_metric_default_permissions(self, item, rule):
         self._default_permissions.delete_default_permission(item, rule, Resource.Metric)
