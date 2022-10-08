@@ -1,6 +1,6 @@
 import requests
 import logging
-from distutils.version import LooseVersion as Version
+from packaging.version import Version
 from functools import wraps
 from xml.etree.ElementTree import ParseError
 from typing import Any, Callable, Dict, Optional, TYPE_CHECKING
@@ -27,7 +27,6 @@ JSON_CONTENT_TYPE = "application/json"
 
 CONTENT_TYPE_HEADER = "content-type"
 TABLEAU_AUTH_HEADER = "x-tableau-auth"
-CLIENT_VERSION_HEADER = "X-TableauServerClient-Version"
 USER_AGENT_HEADER = "User-Agent"
 
 
@@ -56,9 +55,9 @@ class Endpoint(object):
         parameters: Optional[Dict[str, Any]] = None,
     ) -> "Response":
         parameters = parameters or {}
-        parameters.update(self.parent_srv.http_options)
         if "headers" not in parameters:
             parameters["headers"] = {}
+        parameters.update(self.parent_srv.http_options)
         parameters["headers"].update(Endpoint._make_common_headers(auth_token, content_type))
 
         if content is not None:
@@ -83,14 +82,12 @@ class Endpoint(object):
         if server_response.status_code >= 500:
             raise InternalServerError(server_response, url)
         elif server_response.status_code not in Success_codes:
-            # todo: is an error reliably of content-type application/xml?
             try:
                 raise ServerResponseError.from_response(server_response.content, self.parent_srv.namespace, url)
             except ParseError:
-                # This will happen if we get a non-success HTTP code that
-                # doesn't return an xml error object (like metadata endpoints or 503 pages)
-                # we convert this to a better exception and pass through the raw
-                # response body
+                # This will happen if we get a non-success HTTP code that doesn't return an xml error object
+                # e.g metadata endpoints, 503 pages, totally different servers
+                # we convert this to a better exception and pass through the raw response body
                 raise NonXMLResponseError(server_response.content)
             except Exception:
                 # anything else re-raise here
@@ -188,7 +185,7 @@ def api(version):
     def _decorator(func):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
-            self.parent_srv.assert_at_least_version(version, "endpoint")
+            self.parent_srv.assert_at_least_version(version, self.__class__.__name__)
             return func(self, *args, **kwargs)
 
         return wrapper

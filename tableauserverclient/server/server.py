@@ -162,6 +162,8 @@ class Server(object):
             version = self.server_info.get().rest_api_version
         except ServerInfoEndpointNotFoundError:
             version = self._get_legacy_version()
+        except BaseException:
+            version = self._get_legacy_version()
 
         self.version = old_version
 
