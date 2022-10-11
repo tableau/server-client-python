@@ -12,11 +12,11 @@ from .exceptions import (
     EndpointUnavailableError,
 )
 from ..query import QuerySet
-from ... import helpers
-from ..._version import get_versions
+from ... import helpers, get_versions
 
-__TSC_VERSION__ = get_versions()["version"]
-del get_versions
+if TYPE_CHECKING:
+    from ..server import Server
+    from requests import Response
 
 logger = logging.getLogger("tableau.endpoint")
 
@@ -25,11 +25,9 @@ Success_codes = [200, 201, 202, 204]
 XML_CONTENT_TYPE = "text/xml"
 JSON_CONTENT_TYPE = "application/json"
 
-USERAGENT_HEADER = "User-Agent"
-
-if TYPE_CHECKING:
-    from ..server import Server
-    from requests import Response
+CONTENT_TYPE_HEADER = "content-type"
+TABLEAU_AUTH_HEADER = "x-tableau-auth"
+USER_AGENT_HEADER = "User-Agent"
 
 
 class Endpoint(object):
@@ -38,12 +36,13 @@ class Endpoint(object):
 
     @staticmethod
     def _make_common_headers(auth_token, content_type):
+        _client_version: Optional[str] = get_versions()["version"]
         headers = {}
         if auth_token is not None:
-            headers["x-tableau-auth"] = auth_token
+            headers[TABLEAU_AUTH_HEADER] = auth_token
         if content_type is not None:
-            headers["content-type"] = content_type
-        headers["User-Agent"] = "Tableau Server Client/{}".format(__TSC_VERSION__)
+            headers[CONTENT_TYPE_HEADER] = content_type
+        headers[USER_AGENT_HEADER] = "Tableau Server Client/{}".format(_client_version)
         return headers
 
     def _make_request(

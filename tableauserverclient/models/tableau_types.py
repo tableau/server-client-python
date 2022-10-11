@@ -11,9 +11,11 @@ from typing import Union
 
 class Resource:
     Database = "database"
+    Datarole = "datarole"
     Datasource = "datasource"
     Flow = "flow"
     Lens = "lens"
+    Metric = "metric"
     Project = "project"
     Table = "table"
     View = "view"

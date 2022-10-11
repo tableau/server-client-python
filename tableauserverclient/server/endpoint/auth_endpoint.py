@@ -28,7 +28,18 @@ class Auth(Endpoint):
     def sign_in(self, auth_req):
         url = "{0}/{1}".format(self.baseurl, "signin")
         signin_req = RequestFactory.Auth.signin_req(auth_req)
-        server_response = self.parent_srv.session.post(url, data=signin_req, **self.parent_srv.http_options)
+        server_response = self.parent_srv.session.post(
+            url, data=signin_req, **self.parent_srv.http_options, allow_redirects=False
+        )
+        # manually handle a redirect so that we send the correct POST request instead of GET
+        # this will make e.g http://online.tableau.com work to redirect to http://east.online.tableau.com
+        if server_response.status_code == 301:
+            server_response = self.parent_srv.session.post(
+                server_response.headers["Location"],
+                data=signin_req,
+                **self.parent_srv.http_options,
+                allow_redirects=False,
+            )
         self.parent_srv._namespace.detect(server_response.content)
         self._check_status(server_response, url)
         parsed_response = fromstring(server_response.content)
