@@ -5,13 +5,6 @@ name: Publish to PyPi
 # TODO: maybe move this into the package job so all release-based actions are together
 on:
   workflow_dispatch:
-    inputs: 
-      name:
-        type: choice
-        description: Pypi instance
-        options: 
-        - test
-        - prod
   push:
     tags:
       - 'v*.*.*'
@@ -33,13 +26,15 @@ jobs:
           pip install -e .[test] build
           python -m build
           git describe --tag --dirty --always
-      - name: Publish distribution 📦 to Test PyPI
+          
+      - name: Publish distribution 📦 to Test PyPI  # always run
         uses: pypa/gh-action-pypi-publish@release/v1  # license BSD-2
         with:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
+          
       - name: Publish distribution 📦 to PyPI
-        if: github.event.inputs.name == 'prod'
+        if: $GITHUB_REF == 'refs/heads/master'
         uses: pypa/gh-action-pypi-publish@release/v1  # license BSD-2
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
