@@ -44,34 +44,15 @@ class Sites(Endpoint):
         server_response = self.get_request(url)
         return SiteItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
-    # Gets 1 site by name
+    # Gets current site - just a shortcut method
     @api(version="2.0")
-    def get_by_name(self, site_name: str) -> SiteItem:
-        if not site_name:
-            error = "Site Name undefined."
+    def get_current_site(self) -> SiteItem:
+        site_id = self.parent_srv.site_id
+        if not site_id:
+            error = "Site ID undefined."
             raise ValueError(error)
-        print("Note: You can only work with the site for which you are currently authenticated")
-        logger.info("Querying single site (Name: {0})".format(site_name))
-        url = "{0}/{1}?key=name".format(self.baseurl, site_name)
-        print(self.baseurl, url)
-        server_response = self.get_request(url)
-        return SiteItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        return self.get_by_id(site_id)
 
-    # Gets 1 site by content url
-    @api(version="2.0")
-    def get_by_content_url(self, content_url: str) -> SiteItem:
-        if content_url is None:
-            error = "Content URL undefined."
-            raise ValueError(error)
-        if not self.parent_srv.baseurl.index(content_url) > 0:
-            error = "You can only work with the site you are currently authenticated for"
-            raise ValueError(error)
-
-        logger.info("Querying single site (Content URL: {0})".format(content_url))
-        logger.debug("Querying other sites requires Server Admin permissions")
-        url = "{0}/{1}?key=contentUrl".format(self.baseurl, content_url)
-        server_response = self.get_request(url)
-        return SiteItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     # Update site
     @api(version="2.0")

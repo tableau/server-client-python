@@ -9,7 +9,6 @@ TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
 GET_XML = os.path.join(TEST_ASSET_DIR, "site_get.xml")
 GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, "site_get_by_id.xml")
-GET_BY_NAME_XML = os.path.join(TEST_ASSET_DIR, "site_get_by_name.xml")
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, "site_update.xml")
 CREATE_XML = os.path.join(TEST_ASSET_DIR, "site_create.xml")
 
@@ -90,25 +89,6 @@ class SiteTests(unittest.TestCase):
 
     def test_get_by_id_missing_id(self) -> None:
         self.assertRaises(ValueError, self.server.sites.get_by_id, "")
-
-    def test_get_by_name(self) -> None:
-        with open(GET_BY_NAME_XML, "rb") as f:
-            response_xml = f.read().decode("utf-8")
-        with requests_mock.mock() as m:
-            m.get(self.baseurl + "/testsite?key=name", text=response_xml)
-            single_site = self.server.sites.get_by_name("testsite")
-
-        self.assertEqual(self.logged_in_site, single_site.id)
-        self.assertEqual("Active", single_site.state)
-        self.assertEqual("testsite", single_site.name)
-        self.assertEqual("ContentOnly", single_site.admin_mode)
-        self.assertEqual(False, single_site.revision_history_enabled)
-        self.assertEqual(True, single_site.subscribe_others_enabled)
-        self.assertEqual(False, single_site.disable_subscriptions)
-
-    def test_get_by_name_missing_name(self) -> None:
-        self.assertRaises(ValueError, self.server.sites.get_by_name, "")
-
     def test_update(self) -> None:
         with open(UPDATE_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
