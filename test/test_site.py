@@ -89,6 +89,14 @@ class SiteTests(unittest.TestCase):
 
     def test_get_by_id_missing_id(self) -> None:
         self.assertRaises(ValueError, self.server.sites.get_by_id, "")
+
+    def test_get_current(self) -> None:
+        with open(GET_BY_ID_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + "/" + self.logged_in_site, text=response_xml)
+            self.server.sites.get_current_site()
+
     def test_update(self) -> None:
         with open(UPDATE_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")

@@ -53,7 +53,6 @@ class Sites(Endpoint):
             raise ValueError(error)
         return self.get_by_id(site_id)
 
-
     # Update site
     @api(version="2.0")
     def update(self, site_item: SiteItem) -> SiteItem:
