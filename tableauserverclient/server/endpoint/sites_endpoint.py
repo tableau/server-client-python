@@ -50,10 +50,8 @@ class Sites(Endpoint):
         if not site_name:
             error = "Site Name undefined."
             raise ValueError(error)
-        print("Note: You can only work with the site for which you are currently authenticated")
         logger.info("Querying single site (Name: {0})".format(site_name))
         url = "{0}/{1}?key=name".format(self.baseurl, site_name)
-        print(self.baseurl, url)
         server_response = self.get_request(url)
         return SiteItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
@@ -62,9 +60,6 @@ class Sites(Endpoint):
     def get_by_content_url(self, content_url: str) -> SiteItem:
         if content_url is None:
             error = "Content URL undefined."
-            raise ValueError(error)
-        if not self.parent_srv.baseurl.index(content_url) > 0:
-            error = "You can only work with the site you are currently authenticated for"
             raise ValueError(error)
 
         logger.info("Querying single site (Content URL: {0})".format(content_url))
@@ -79,7 +74,6 @@ class Sites(Endpoint):
         if not site_item.id:
             error = "Site item missing ID."
             raise MissingRequiredFieldError(error)
-        print(self.parent_srv.site_id, site_item.id)
         if not site_item.id == self.parent_srv.site_id:
             error = "You can only update the site you are currently authenticated for"
             raise ValueError(error)

@@ -29,8 +29,10 @@ class SiteItem(object):
         return (
             "<"
             + __name__
-            + ": "
+            + " name: "
             + (self.name or "unnamed")
+            + ", url:"
+            + (self.content_url or "(content-url not set)")
             + ", "
             + (self.id or "unknown-id")
             + ", "
