@@ -10,12 +10,12 @@ layout: docs
 
 
 
-The Tableau Server Client (TSC) is a Python library for the Tableau Server REST API. Using the TSC library, you can manage and change many of the Tableau Server and Tableau Online resources programmatically. You can use this library to create your own custom applications.
+The Tableau Server Client (TSC) is a Python library for the Tableau Server REST API. Using the TSC library, you can manage and change many of the Tableau Server and Tableau Cloud resources programmatically. You can use this library to create your own custom applications.
 
 The TSC API reference is organized by resource. The TSC library is modeled after the REST API. The methods, for example, `workbooks.get()`, correspond to the endpoints for resources, such as [workbooks](#workbooks), [users](#users), [views](#views), and [data sources](#data-sources). The model classes (for example, the [WorkbookItem class](#workbookitem-class) have attributes that represent the fields (`name`, `id`, `owner_id`) that are in the REST API request and response packages, or payloads.
 
 |:---  |
-| **Note:**  Some methods and features provided in the REST API might not be currently available in the TSC library (and in some cases, the opposite is true).  In addition, the same limitations apply to the TSC library that apply to the REST API with respect to resources on Tableau Server and Tableau Online. For more information, see the [Tableau Server REST API Reference](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm).|
+| **Note:**  Some methods and features provided in the REST API might not be currently available in the TSC library (and in some cases, the opposite is true).  In addition, the same limitations apply to the TSC library that apply to the REST API with respect to resources on Tableau Server and Tableau Clous. For more information, see the [Tableau Server REST API Reference](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm).|
 
 
 
@@ -29,7 +29,7 @@ The TSC API reference is organized by resource. The TSC library is modeled after
 
 ## Authentication
 
-You can use the TSC library to sign in and sign out of Tableau Server and Tableau Online. The credentials for signing in are defined in the `TableauAuth` class and they correspond to the attributes you specify when you sign in using the Tableau Server REST API.
+You can use the TSC library to sign in and sign out of Tableau Server and Tableau Cloud. The credentials for signing in are defined in the `TableauAuth` class and they correspond to the attributes you specify when you sign in using the Tableau Server REST API.
 
 <br>
 <br>
@@ -50,7 +50,7 @@ Name | Description
 :--- | :---
 `username` | The name of the user whose credentials will be used to sign in.
 `password` | The password of the user.
-`site_id` | This corresponds to the `contentUrl` attribute in the Tableau REST API. The `site_id` is the portion of the URL that follows the `/site/` in the URL. For example, "MarketingTeam" is the `site_id` in the following URL *MyServer*/#/site/**MarketingTeam**/projects. To specify the default site on Tableau Server, you can use an empty string `''`  (single quotes, no space).  For Tableau Online, you must provide a value for the `site_id`.
+`site_id` | This corresponds to the `contentUrl` attribute in the Tableau REST API. The `site_id` is the portion of the URL that follows the `/site/` in the URL. For example, "MarketingTeam" is the `site_id` in the following URL *MyServer*/#/site/**MarketingTeam**/projects. To specify the default site on Tableau Server, you can use an empty string `''`  (single quotes, no space).  For Tableau Cloud, you must provide a value for the `site_id`.
 `user_id_to_impersonate` |  Specifies the id (not the name) of the user to sign in as.
 
 Source file: models/tableau_auth.py
@@ -81,7 +81,7 @@ Name | Description
 :--- | :---
 `token_name` | The personal access token name.
 `personal_access_token` | The personal access token value.
-`site_id` | This corresponds to the `contentUrl` attribute in the Tableau REST API. The `site_id` is the portion of the URL that follows the `/site/` in the URL. For example, "MarketingTeam" is the `site_id` in the following URL *MyServer*/#/site/**MarketingTeam**/projects. To specify the default site on Tableau Server, you can use an empty string `''` (single quotes, no space). For Tableau Online, you must provide a value for the `site_id`.
+`site_id` | This corresponds to the `contentUrl` attribute in the Tableau REST API. The `site_id` is the portion of the URL that follows the `/site/` in the URL. For example, "MarketingTeam" is the `site_id` in the following URL *MyServer*/#/site/**MarketingTeam**/projects. To specify the default site on Tableau Server, you can use an empty string `''` (single quotes, no space). For Tableau Cloud, you must provide a value for the `site_id`.
 
 Source file: models/personal_access_token_auth.py
 
@@ -118,7 +118,7 @@ auth.sign_in(auth_req)
 Signs you in to Tableau Server.
 
 
-The method signs into Tableau Server or Tableau Online and manages the authentication token. You call this method from the server object you create. For information about the server object, see [Server](#server). The authentication token keeps you signed in for 240 minutes, or until you call the `auth.sign_out` method. Before you use this method, you first need to create the sign-in request (`auth_req`) object by creating an instance of the `TableauAuth`. To call this method, create a server object for your server. For more information, see [Sign in and Out](sign-in-out).
+The method signs into Tableau Server or Tableau Cloud and manages the authentication token. You call this method from the server object you create. For information about the server object, see [Server](#server). The authentication token keeps you signed in for 240 minutes, or until you call the `auth.sign_out` method. Before you use this method, you first need to create the sign-in request (`auth_req`) object by creating an instance of the `TableauAuth`. To call this method, create a server object for your server. For more information, see [Sign in and Out](sign-in-out).
 
 REST API: [Sign In](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#sign_in)
 
@@ -174,7 +174,7 @@ auth.switch_site(site_id)
 
 Switch to a different site on the current Tableau Server.
 
-Switching avoids the need for reauthenticating to the same server. (Note: This method is not available in Tableau Online.)
+Switching avoids the need for reauthenticating to the same server. (Note: This method is not available in Tableau Cloud.)
 
 REST API: [Switch Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_authentication.htm#switch_site)
 
@@ -304,7 +304,7 @@ Name | Description
 `project_name` |  The name of the project associated with the data source.
 `tags` |  The tags (list of strings) that have been added to the data source.
 `updated_at` |  The date and time when the data source was last updated.
-`use_remote_query_agent` | A Boolean value that indicates whether to allow or disallow your Tableau Online site to use Tableau Bridge clients. Bridge allows you to maintain data sources with live connections to supported on-premises data sources. See [Configure and Manage the Bridge Client Pool](https://help.tableau.com/current/online/en-us/to_enable_bridge_live_connections.htm) for more information.
+`use_remote_query_agent` | A Boolean value that indicates whether to allow or disallow your Tableau Cloud site to use Tableau Bridge clients. Bridge allows you to maintain data sources with live connections to supported on-premises data sources. See [Configure and Manage the Bridge Client Pool](https://help.tableau.com/current/online/en-us/to_enable_bridge_live_connections.htm) for more information.
 `webpage_url` | The url of the datasource as displayed in browsers.
 
 
@@ -2924,7 +2924,7 @@ The `Server` class contains the attributes that represent the server on Tableau 
 
 Attribute | Description
 :--- | :---
-`server_address`  |  Specifies the address of the Tableau Server or Tableau Online (for example, `https://MY-SERVER/`).
+`server_address`  |  Specifies the address of the Tableau Server or Tableau Cloud (for example, `https://MY-SERVER/`).
 `version`   |  Specifies the version of the REST API to use (for example, `'2.5'`). When you use the TSC library to call methods that access Tableau Server, the `version` is passed to the endpoint as part of the URI (`https://MY-SERVER/api/2.5/`). Each release of Tableau Server supports specific versions of the REST API. New versions of the REST API are released with Tableau Server. By default, the value of `version` is set to `'2.3'`, which corresponds to Tableau Server 10.0.  You can view or set this value. You might need to set this to a different value, for example, if you want to access features that are supported by the server and a later version of the REST API.  For more information, see [REST API Versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
 
 
@@ -3022,7 +3022,7 @@ The `ServerInfoItem` class contains the build and version information for Tablea
 
 Name  |  Description
 :--- | :---
-`product_version`  |  Shows the version of the Tableau Server or Tableau Online (for example, 10.2.0).
+`product_version`  |  Shows the version of the Tableau Server or Tableau Cloud (for example, 10.2.0).
 `build_number`   |  Shows the specific build number (for example, 10200.17.0329.1446).
 `rest_api_version`  |  Shows the supported REST API version number. Note that this might be different from the default value specified for the server, with the `Server.version` attribute. To take advantage of new features, you should query the server and set the `Server.version` to match the supported REST API version number.
 
@@ -3088,7 +3088,7 @@ print("\tBuild number: {0}".format(s_info.build_number))
 
 Using the TSC library, you can query a site or sites on a server, or create or delete a site on the server.
 
-The site resources for Tableau Server and Tableau Online are defined in the `SiteItem` class. The class corresponds to the site resources you can access using the Tableau Server REST API. The site methods are based upon the endpoints for sites in the REST API and operate on the `SiteItem` class.
+The site resources for Tableau Server and Tableau Cloud are defined in the `SiteItem` class. The class corresponds to the site resources you can access using the Tableau Server REST API. The site methods are based upon the endpoints for sites in the REST API and operate on the `SiteItem` class.
 
 <br>
 <br>
@@ -3100,7 +3100,7 @@ SiteItem(name, content_url, admin_mode=None, user_quota=None, storage_quota=None
                  disable_subscriptions=False, subscribe_others_enabled=True, revision_history_enabled=False)
 ```
 
-The `SiteItem` class contains the members or attributes for the site resources on Tableau Server or Tableau Online. The `SiteItem` class defines the information you can request or query from Tableau Server or Tableau Online. The class members correspond to the attributes of a server request or response payload.
+The `SiteItem` class contains the members or attributes for the site resources on Tableau Server or Tableau Cloud. The `SiteItem` class defines the information you can request or query from Tableau Server or Tableau Cloud. The class members correspond to the attributes of a server request or response payload.
 
 **Attributes**
 
@@ -3136,7 +3136,7 @@ Source file: models/site_item.py
 
 ### Site methods
 
-The TSC library provides methods that operate on sites for Tableau Server and Tableau Online. These methods correspond to endpoints or methods for sites in the Tableau REST API.
+The TSC library provides methods that operate on sites for Tableau Server and Tableau Cloud. These methods correspond to endpoints or methods for sites in the Tableau REST API.
 
 
 Source file: server/endpoint/sites_endpoint.py
@@ -3983,9 +3983,9 @@ The `UserItem` class contains the members or attributes for the view resources o
 
 Name | Description
 :--- | :---
-`auth_setting` | (Optional) This attribute is only for Tableau Online. The new authentication type for the user. You can assign the following values for this attribute: `SAML` (the user signs in using SAML) or `ServerDefault` (the user signs in using the authentication method that's set for the server). These values appear in the **Authentication** tab on the **Settings** page in Tableau Online -- the `SAML` attribute value corresponds to **Single sign-on**, and the `ServerDefault` value corresponds to **TableauID**.
+`auth_setting` | (Optional) This attribute is only for Tableau Cloud. The new authentication type for the user. You can assign the following values for this attribute: `SAML` (the user signs in using SAML) or `ServerDefault` (the user signs in using the authentication method that's set for the server). These values appear in the **Authentication** tab on the **Settings** page in Tableau Cloud -- the `SAML` attribute value corresponds to **Single sign-on**, and the `ServerDefault` value corresponds to **TableauID**.
 `domain_name`  |    The name of the site.
-`external_auth_user_id` |   Represents ID stored in Tableau's single sign-on (SSO) system. The `externalAuthUserId` value is returned for Tableau Online. For other server configurations, this field contains null.
+`external_auth_user_id` |   Represents ID stored in Tableau's single sign-on (SSO) system. The `externalAuthUserId` value is returned for Tableau Cloud. For other server configurations, this field contains null.
 `id` |   The id of the user on the site.
 `last_login` | The date and time the user last logged in.
 `workbooks` |  The workbooks the user owns. You must run the populate_workbooks method to add the workbooks to the `UserItem`.
@@ -4046,7 +4046,7 @@ users.add(user_item)
 
 Adds the user to the site.
 
-To add a new user to the site you need to first create a new `user_item` (from `UserItem` class). When you create a new user, you specify the name of the user and their site role. For Tableau Online, you also specify the `auth_setting` attribute in your request.  When you add user to Tableau Online, the name of the user must be the email address that is used to sign in to Tableau Online. After you add a user, Tableau Online sends the user an email invitation. The user can click the link in the invitation to sign in and update their full name and password.
+To add a new user to the site you need to first create a new `user_item` (from `UserItem` class). When you create a new user, you specify the name of the user and their site role. For Tableau Cloud, you also specify the `auth_setting` attribute in your request.  When you add user to Tableau Cloud, the name of the user must be the email address that is used to sign in to Tableau Cloud. After you add a user, Tableau Cloud sends the user an email invitation. The user can click the link in the invitation to sign in and update their full name and password.
 
 REST API: [Add User to Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#add_user_to_site)
 
@@ -4344,7 +4344,7 @@ users.update(user_item, password=None)
 
 Updates information about the specified user.
 
-The information you can modify depends upon whether you are using Tableau Server or Tableau Online, and whether you have configured Tableau Server to use local authentication or Active Directory. For more information, see [Update User](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_user).
+The information you can modify depends upon whether you are using Tableau Server or Tableau Cloud, and whether you have configured Tableau Server to use local authentication or Active Directory. For more information, see [Update User](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_user).
 
 
 

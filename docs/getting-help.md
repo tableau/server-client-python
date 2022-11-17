@@ -11,7 +11,7 @@ As a first step, please search existing issues to see if your problem or bug is 
 
 If not, go ahead and create a new issue and include the following:
 
-* Tableau Server version (or indicate if using Tableau Online)
+* Tableau Server version (or indicate if using Tableau Cloud)
 * TSC library version
 * Python version
 * Environment (Mac, Win, Linux)
