@@ -66,4 +66,4 @@ The following list describes the samples available in the repository:
 * `update_connection.py` Updates and embeds connection credentials of a datasource.
 * `update_datasource_data.py` Updates the data within a published live-to-Hyper datasource.
 
-**Note**: For all of the samples, ensure that your Tableau Server user account has permission to access the resources. Also keep in mind that some example operations (like create group) are not allowed on Tableau Online.
+**Note**: For all of the samples, ensure that your Tableau Server user account has permission to access the resources. Also keep in mind that some example operations (like create group) are not allowed on Tableau Cloud.
