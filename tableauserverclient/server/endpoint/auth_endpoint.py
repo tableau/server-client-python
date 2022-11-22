@@ -40,13 +40,13 @@ class Auth(Endpoint):
                 **self.parent_srv.http_options,
                 allow_redirects=False,
             )
-        self.parent_srv._namespace.detect(server_response.content)
+        self.parent_srv.detect_namespace(server_response.content)
         self._check_status(server_response, url)
         parsed_response = fromstring(server_response.content)
         site_id = parsed_response.find(".//t:site", namespaces=self.parent_srv.namespace).get("id", None)
         user_id = parsed_response.find(".//t:user", namespaces=self.parent_srv.namespace).get("id", None)
         auth_token = parsed_response.find("t:credentials", namespaces=self.parent_srv.namespace).get("token", None)
-        self.parent_srv._set_auth(site_id, user_id, auth_token)
+        self.parent_srv.save_session(site_id, user_id, auth_token)
         logger.info("Signed into {0} as user with id {1}".format(self.parent_srv.server_address, user_id))
         return Auth.contextmgr(self.sign_out)
 
@@ -62,7 +62,7 @@ class Auth(Endpoint):
         if not self.parent_srv.is_signed_in():
             return
         self.post_request(url, "")
-        self.parent_srv._clear_auth()
+        self.parent_srv.delete_session()
         logger.info("Signed out")
 
     @api(version="2.6")
@@ -76,13 +76,13 @@ class Auth(Endpoint):
                 return Auth.contextmgr(self.sign_out)
             else:
                 raise e
-        self.parent_srv._namespace.detect(server_response.content)
+        self.parent_srv.detect_namespace(server_response.content)
         self._check_status(server_response, url)
         parsed_response = fromstring(server_response.content)
         site_id = parsed_response.find(".//t:site", namespaces=self.parent_srv.namespace).get("id", None)
         user_id = parsed_response.find(".//t:user", namespaces=self.parent_srv.namespace).get("id", None)
         auth_token = parsed_response.find("t:credentials", namespaces=self.parent_srv.namespace).get("token", None)
-        self.parent_srv._set_auth(site_id, user_id, auth_token)
+        self.parent_srv.save_session(site_id, user_id, auth_token)
         logger.info("Signed into {0} as user with id {1}".format(self.parent_srv.server_address, user_id))
         return Auth.contextmgr(self.sign_out)
 
