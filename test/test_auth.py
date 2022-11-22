@@ -99,7 +99,7 @@ class AuthTests(unittest.TestCase):
         self.server.version = "2.6"
         baseurl = self.server.auth.baseurl
         site_id, user_id, auth_token = list("123")
-        self.server._set_auth(site_id, user_id, auth_token)
+        self.server.save_session(site_id, user_id, auth_token)
         with open(SIGN_IN_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:

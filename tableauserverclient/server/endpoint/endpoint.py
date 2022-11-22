@@ -74,7 +74,7 @@ class Endpoint(object):
         logger.debug("Server response from {0}:\n\t{1}".format(url, loggable_response))
 
         if content_type == "application/xml":
-            self.parent_srv._namespace.detect(server_response.content)
+            self.parent_srv.detect_namespace(server_response.content)
 
         return server_response
 

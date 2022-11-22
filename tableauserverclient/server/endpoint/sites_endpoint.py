@@ -2,8 +2,7 @@ import copy
 import logging
 
 from .endpoint import Endpoint, api
-from .exceptions import MissingRequiredFieldError
-from .. import RequestFactory, SiteItem, PaginationItem
+from .. import RequestFactory, SiteItem, PaginationItem, Auth
 
 logger = logging.getLogger("tableau.endpoint.sites")
 
@@ -32,12 +31,7 @@ class Sites(Endpoint):
     # Gets 1 site by id
     @api(version="2.0")
     def get_by_id(self, site_id: str) -> SiteItem:
-        if not site_id:
-            error = "Site ID undefined."
-            raise ValueError(error)
-        if not site_id == self.parent_srv.site_id:
-            error = "You can only retrieve the site for which you are currently authenticated."
-            raise ValueError(error)
+        self._check_site_id(self, site_id)
 
         logger.info("Querying single site (ID: {0})".format(site_id))
         url = "{0}/{1}".format(self.baseurl, site_id)
@@ -61,9 +55,12 @@ class Sites(Endpoint):
         if content_url is None:
             error = "Content URL undefined."
             raise ValueError(error)
+        if not self.parent_srv.baseurl.index(content_url) > 0:
+            error = "You can only work with the site you are currently authenticated for"
+            logger.debug("Querying other sites requires Server Admin permissions")
+            raise ValueError(error.format(""))
 
         logger.info("Querying single site (Content URL: {0})".format(content_url))
-        logger.debug("Querying other sites requires Server Admin permissions")
         url = "{0}/{1}?key=contentUrl".format(self.baseurl, content_url)
         server_response = self.get_request(url)
         return SiteItem.from_response(server_response.content, self.parent_srv.namespace)[0]
@@ -71,12 +68,7 @@ class Sites(Endpoint):
     # Update site
     @api(version="2.0")
     def update(self, site_item: SiteItem) -> SiteItem:
-        if not site_item.id:
-            error = "Site item missing ID."
-            raise MissingRequiredFieldError(error)
-        if not site_item.id == self.parent_srv.site_id:
-            error = "You can only update the site you are currently authenticated for"
-            raise ValueError(error)
+        self._check_site_id(self, site_item.id, "update")
 
         if site_item.admin_mode:
             if site_item.admin_mode == SiteItem.AdminMode.ContentOnly and site_item.user_quota:
@@ -93,15 +85,13 @@ class Sites(Endpoint):
     # Delete 1 site object
     @api(version="2.0")
     def delete(self, site_id: str) -> None:
-        if not site_id:
-            error = "Site ID undefined."
-            raise ValueError(error)
+        self._check_site_id(self, site_id, "delete")
         url = "{0}/{1}".format(self.baseurl, site_id)
         if not site_id == self.parent_srv.site_id:
             error = "You can only delete the site you are currently authenticated for"
             raise ValueError(error)
         self.delete_request(url)
-        self.parent_srv._clear_auth()
+        Auth.sign_out()
         logger.info("Deleted single site (ID: {0}) and signed out".format(site_id))
 
     # Create new site
@@ -121,24 +111,27 @@ class Sites(Endpoint):
 
     @api(version="3.5")
     def encrypt_extracts(self, site_id: str) -> None:
-        if not site_id:
-            error = "Site ID undefined."
-            raise ValueError(error)
+        self._check_site_id(site_id)
         url = "{0}/{1}/encrypt-extracts".format(self.baseurl, site_id)
         empty_req = RequestFactory.Empty.empty_req()
         self.post_request(url, empty_req)
 
     @api(version="3.5")
     def decrypt_extracts(self, site_id: str) -> None:
-        if not site_id:
-            error = "Site ID undefined."
-            raise ValueError(error)
+        self._check_site_id(self, site_id)
         url = "{0}/{1}/decrypt-extracts".format(self.baseurl, site_id)
         empty_req = RequestFactory.Empty.empty_req()
         self.post_request(url, empty_req)
 
     @api(version="3.5")
     def re_encrypt_extracts(self, site_id: str) -> None:
+        self._check_site_id(self, site_id)
+        url = "{0}/{1}/reencrypt-extracts".format(self.baseurl, site_id)
+        empty_req = RequestFactory.Empty.empty_req()
+        self.post_request(url, empty_req)
+
+    def _check_site_id(self, site_id, action="work with"):
+        logger.debug("Logged in to site {0}, called site {1}".format(self.parent_srv.site_id, site_id))
         if not site_id:
             error = "Site ID undefined."
             raise ValueError(error)

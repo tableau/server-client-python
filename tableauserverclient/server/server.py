@@ -131,16 +131,19 @@ class Server(object):
     def clear_http_options(self):
         self._http_options = dict()
 
-    def _clear_auth(self):
+    def delete_session(self):
         self._site_id = None
         self._user_id = None
         self._auth_token = None
         self._session = self._session_factory()
 
-    def _set_auth(self, site_id, user_id, auth_token):
+    def save_session(self, site_id, user_id, auth_token):
         self._site_id = site_id
         self._user_id = user_id
         self._auth_token = auth_token
+
+    def detect_namespace(self, content):
+        self._namespace.detect(content)
 
     def _get_legacy_version(self):
         response = self._session.get(self.server_address + "/auth?format=xml")
