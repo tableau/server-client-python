@@ -92,9 +92,6 @@ class Sites(Endpoint):
     def delete(self, site_id: str) -> None:
         self._check_site_id(site_id, "delete")
         url = "{0}/{1}".format(self.baseurl, site_id)
-        if not site_id == self.parent_srv.site_id:
-            error = "You can only delete the site you are currently authenticated for"
-            raise ValueError(error)
         self.delete_request(url)
         Auth(self.parent_srv).sign_out()
         logger.info("Deleted single site (ID: {0}) and signed out".format(site_id))
@@ -140,7 +137,5 @@ class Sites(Endpoint):
         if not site_id:
             error = "Site ID undefined."
             raise ValueError(error)
-        url = "{0}/{1}/reencrypt-extracts".format(self.baseurl, site_id)
-
-        empty_req = RequestFactory.Empty.empty_req()
-        self.post_request(url, empty_req)
+        if not site_id == self.parent_srv.site_id:
+            raise ValueError(wrong_site_error.format(action))

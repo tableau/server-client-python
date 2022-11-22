@@ -60,18 +60,13 @@ def main():
         all_projects, pagination_item = server.projects.get()
         default_project = next((project for project in all_projects if project.is_default()), None)
 
+        # --tabbed --overwrite --db-username  --db-password  --save-db-password
         connection1 = ConnectionItem()
-        connection1.server_address = "mssql.test.com"
-        connection1.connection_credentials = ConnectionCredentials("test", "password", True)
-
-        connection2 = ConnectionItem()
-        connection2.server_address = "postgres.test.com"
-        connection2.server_port = "5432"
-        connection2.connection_credentials = ConnectionCredentials("test", "password", True)
+        connection1.server_address = "server"
+        connection1.connection_credentials = ConnectionCredentials("username", "password", True)
 
         all_connections = list()
         all_connections.append(connection1)
-        all_connections.append(connection2)
 
         # Step 3: If default project is found, form a new workbook item and publish.
         overwrite_true = TSC.Server.PublishMode.Overwrite

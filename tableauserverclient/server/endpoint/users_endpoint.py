@@ -3,6 +3,7 @@ import logging
 import os
 from typing import List, Optional, Tuple, Union
 
+from csv import reader
 from .endpoint import QuerysetEndpoint, api
 from .exceptions import MissingRequiredFieldError, ServerResponseError
 from .. import RequestFactory, RequestOptions, UserItem, WorkbookItem, PaginationItem, GroupItem
@@ -105,19 +106,16 @@ class Users(QuerysetEndpoint):
         if not filepath.find("csv"):
             raise ValueError("Only csv files are accepted")
 
-        with open(filepath) as csv_file:
+        with open(filepath, encoding='utf-8-sig') as csv_file:
             csv_file.seek(0)  # set to start of file in case it has been read earlier
-            line: str = csv_file.readline()
-            while line and line != "":
+            csv_data = reader(csv_file, delimiter=',')
+            for line in csv_data:
                 user: UserItem = UserItem.CSVImport.create_user_from_line(line)
                 try:
-                    print(user)
                     result = self.add(user)
                     created.append(result)
                 except ServerResponseError as serverError:
-                    print("failed")
                     failed.append((user, serverError))
-                line = csv_file.readline()
         return created, failed
 
     # Get workbooks for user
