@@ -1,15 +1,16 @@
 import copy
 import logging
 
+from .auth_endpoint import Auth
 from .endpoint import Endpoint, api
-from .. import RequestFactory, SiteItem, PaginationItem, Auth
-
-logger = logging.getLogger("tableau.endpoint.sites")
+from .. import RequestFactory, SiteItem, PaginationItem
 
 from typing import TYPE_CHECKING, List, Optional, Tuple
-
 if TYPE_CHECKING:
     from ..request_options import RequestOptions
+
+logger = logging.getLogger("tableau.endpoint.sites")
+wrong_site_error = "You can only {0} the site for which you are currently authenticated."
 
 
 class Sites(Endpoint):
@@ -28,10 +29,14 @@ class Sites(Endpoint):
         all_site_items = SiteItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_site_items, pagination_item
 
+    @api(version="2.0")
+    def get_current_site(self):
+        return self.get_by_id(self.parent_srv.site_id)
+
     # Gets 1 site by id
     @api(version="2.0")
     def get_by_id(self, site_id: str) -> SiteItem:
-        self._check_site_id(self, site_id)
+        self._check_site_id(site_id)
 
         logger.info("Querying single site (ID: {0})".format(site_id))
         url = "{0}/{1}".format(self.baseurl, site_id)
@@ -68,7 +73,7 @@ class Sites(Endpoint):
     # Update site
     @api(version="2.0")
     def update(self, site_item: SiteItem) -> SiteItem:
-        self._check_site_id(self, site_item.id, "update")
+        self._check_site_id(site_item.id, "update")
 
         if site_item.admin_mode:
             if site_item.admin_mode == SiteItem.AdminMode.ContentOnly and site_item.user_quota:
@@ -85,13 +90,13 @@ class Sites(Endpoint):
     # Delete 1 site object
     @api(version="2.0")
     def delete(self, site_id: str) -> None:
-        self._check_site_id(self, site_id, "delete")
+        self._check_site_id(site_id, "delete")
         url = "{0}/{1}".format(self.baseurl, site_id)
         if not site_id == self.parent_srv.site_id:
             error = "You can only delete the site you are currently authenticated for"
             raise ValueError(error)
         self.delete_request(url)
-        Auth.sign_out()
+        Auth(self.parent_srv).sign_out()
         logger.info("Deleted single site (ID: {0}) and signed out".format(site_id))
 
     # Create new site
@@ -118,14 +123,14 @@ class Sites(Endpoint):
 
     @api(version="3.5")
     def decrypt_extracts(self, site_id: str) -> None:
-        self._check_site_id(self, site_id)
+        self._check_site_id(site_id)
         url = "{0}/{1}/decrypt-extracts".format(self.baseurl, site_id)
         empty_req = RequestFactory.Empty.empty_req()
         self.post_request(url, empty_req)
 
     @api(version="3.5")
     def re_encrypt_extracts(self, site_id: str) -> None:
-        self._check_site_id(self, site_id)
+        self._check_site_id(site_id)
         url = "{0}/{1}/reencrypt-extracts".format(self.baseurl, site_id)
         empty_req = RequestFactory.Empty.empty_req()
         self.post_request(url, empty_req)
