@@ -355,9 +355,9 @@ class Users(QuerysetEndpoint[UserItem]):
                 failed.append(user)
         return created, failed
 
-    # helping the user by parsing a file they could have used to add users through the UI
+    # takes in a csv file of the same format used to add users through the UI
     # line format: Username [required], password, display name, license, admin, publish
-    @api(version="2.0")
+    """
     def create_from_file(self, filepath: str) -> tuple[list[UserItem], list[tuple[UserItem, ServerResponseError]]]:
         created = []
         failed = []
@@ -378,6 +378,12 @@ class Users(QuerysetEndpoint[UserItem]):
                     failed.append((user, serverError))
                 line = csv_file.readline()
         return created, failed
+    """
+    @api(version="2.0")
+    def create_from_file(self, filepath: str) -> tuple[list[UserItem], list[tuple[UserItem, Exception]]]:
+        user_models, valid_lines, errors = UserItem.CSVImport.process_file_for_import(filepath, logger)
+        users, server_errors = self.add_all(user_models)
+        return users, server_errors + errors
 
     # Get workbooks for user
     @api(version="2.0")

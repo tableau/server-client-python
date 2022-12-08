@@ -1,5 +1,5 @@
-import io
 import xml.etree.ElementTree as ET
+from csv import reader
 from datetime import datetime
 from enum import IntEnum
 from typing import Optional, TYPE_CHECKING
@@ -66,6 +66,15 @@ class UserItem:
 
         # Online only
         SupportUser = "SupportUser"
+    # These roles are deprecated as of 2018/REST v3.0
+    DeprecatedRoles: list[str] = [
+        Roles.ReadOnly.value,
+        Roles.Interactor.value,
+        Roles.Publisher.value,
+        Roles.SiteAdministrator.value,
+        Roles.ViewerWithPublish.value,
+        Roles.UnlicensedWithPublish.value,
+    ]
 
     class Auth:
         """
@@ -332,13 +341,13 @@ class UserItem:
 
             MAX = 7
 
-        # Read a csv line and create a user item populated by the given attributes
+        # Take in a list of strings in expected order
+        # and create a user item populated by the given attributes
         @staticmethod
-        def create_user_from_line(line: str):
-            if line is None or line is False or line == "\n" or line == "":
-                return None
-            line = line.strip().lower()
-            values: list[str] = list(map(str.strip, line.split(",")))
+        def create_user_model_from_line(line_values: list[str], logger) -> "UserItem":
+            UserItem.CSVImport._validate_import_line_or_throw(line_values, logger)
+            values: list[str] = list(map(lambda x: x.strip(), line_values))
+            values = list(map(lambda x: x.lower(), values))
             user = UserItem(values[UserItem.CSVImport.ColumnType.USERNAME])
             if len(values) > 1:
                 if len(values) > UserItem.CSVImport.ColumnType.MAX:
@@ -364,30 +373,36 @@ class UserItem:
                 )
             return user
 
-        # Read through an entire CSV file meant for user import
-        # Return the number of valid lines and a list of all the invalid lines
+        # helper method: validates an import file and creates user models for valid lines
+        # result: (users[], valid_lines[], (line, error)[])
         @staticmethod
-        def validate_file_for_import(csv_file: io.TextIOWrapper, logger) -> tuple[int, list[str]]:
-            num_valid_lines = 0
-            invalid_lines = []
-            csv_file.seek(0)  # set to start of file in case it has been read earlier
-            line: str = csv_file.readline()
-            while line and line != "":
-                try:
-                    # do not print passwords
-                    logger.info(f"Reading user {line[:4]}")
-                    UserItem.CSVImport._validate_import_line_or_throw(line, logger)
-                    num_valid_lines += 1
-                except Exception as exc:
-                    logger.info(f"Error parsing {line[:4]}: {exc}")
-                    invalid_lines.append(line)
-                line = csv_file.readline()
-            return num_valid_lines, invalid_lines
+        def process_file_for_import(
+            filepath: str, logger, validate_only=False
+        ) -> tuple[list["UserItem"], list[str], list[tuple[str, Exception]]]:
+            users: list[UserItem] = []
+            failed: list[tuple[str, Exception]] = []
+            if not filepath.find("csv"):
+                raise ValueError("Only csv files are accepted")
+
+            with open(filepath, encoding="utf-8-sig") as csv_file:
+                csv_file.seek(0)  # set to start of file in case it has been read earlier
+                csv_data = reader(csv_file, delimiter=",")
+                valid: list[str] = []
+                for line in csv_data:
+                    try:
+                        UserItem.CSVImport._validate_import_line_or_throw(line, logger)
+                        if not validate_only:
+                            user: UserItem = UserItem.CSVImport.create_user_model_from_line(line, logger)
+                            users.append(user)
+                        valid.append(line)
+                    except Exception as e:
+                        failed.append((" ".join(line), e))
+            return users, valid, failed
 
         # Some fields in the import file are restricted to specific values
         # Iterate through each field and validate the given value against hardcoded constraints
         @staticmethod
-        def _validate_import_line_or_throw(incoming, logger) -> None:
+        def _validate_import_line_or_throw(line, logger) -> None:
             _valid_attributes: list[list[str]] = [
                 [],
                 [],
@@ -399,7 +414,9 @@ class UserItem:
                 [UserItem.Auth.SAML, UserItem.Auth.OpenID, UserItem.Auth.ServerDefault],  # auth
             ]
 
-            line = list(map(str.strip, incoming.split(",")))
+            if line is None or line is False or len(line) == 0 or line == "":
+                raise AttributeError("Empty line")
+
             if len(line) > UserItem.CSVImport.ColumnType.MAX:
                 raise AttributeError("Too many attributes in line")
             username = line[UserItem.CSVImport.ColumnType.USERNAME.value]
@@ -417,9 +434,14 @@ class UserItem:
             if item is None or item == "":
                 # value can be empty for any column except user, which is checked elsewhere
                 return
+            item = item.strip()
             if item in possible_values or possible_values == []:
                 return
-            raise AttributeError(f"Invalid value {item} for {column_type}")
+            raise AttributeError(
+                "Invalid value {} for {}. Valid values: {}".format(
+                    item, UserItem.CSVImport.ColumnType(column_type).name, possible_values
+                )
+            )
 
         # https://help.tableau.com/current/server/en-us/csvguidelines.htm#settings_and_site_roles
         # This logic is hardcoded to match the existing rules for import csv files

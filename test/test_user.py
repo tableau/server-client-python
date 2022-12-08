@@ -216,14 +216,19 @@ class UserTests(unittest.TestCase):
             self.assertEqual("TableauExample", group_list[2].name)
             self.assertEqual("local", group_list[2].domain_name)
 
+    # these tests are weird. The input file USERNAMES will be parsed and invalid lines put in 'failures'
+    # Then we will send the valid lines to the server, and the response from that, ADD_XML, is our 'users'.
+    # not covered: the server rejects one of our 'valid' lines
     def test_get_usernames_from_file(self):
         with open(ADD_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             m.post(self.server.users.baseurl, text=response_xml)
             user_list, failures = self.server.users.create_from_file(USERNAMES)
+        assert failures != [], failures
+        assert len(failures) == 2, failures
+        assert user_list is not None, user_list
         assert user_list[0].name == "Cassie", user_list
-        assert failures == [], failures
 
     def test_get_users_from_file(self):
         with open(ADD_XML, "rb") as f:
@@ -231,5 +236,7 @@ class UserTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.post(self.server.users.baseurl, text=response_xml)
             users, failures = self.server.users.create_from_file(USERS)
+        assert failures != [], failures
+        assert len(failures) == 1, failures
+        assert users != [], users
         assert users[0].name == "Cassie", users
-        assert failures == []
