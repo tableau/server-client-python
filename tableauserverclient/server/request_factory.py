@@ -782,12 +782,6 @@ class SiteRequest(object):
             if site_item.flows_enabled is not None:
                 flows_edit = flows_edit or flows_all
                 flows_schedule = flows_schedule or flows_all
-                import warnings
-
-                warnings.warn(
-                    "FlowsEnabled has been removed and become two options:"
-                    " SchedulingFlowsEnabled and EditingFlowsEnabled"
-                )
             if site_item.editing_flows_enabled is not None:
                 site_element.attrib["editingFlowsEnabled"] = flows_edit
             if site_item.scheduling_flows_enabled is not None:

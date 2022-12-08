@@ -70,7 +70,7 @@ def main():
             print("Add users to site from file {}:".format(filepath))
             added: List[TSC.UserItem]
             failed: List[TSC.UserItem, TSC.ServerResponseError]
-            added, failed = server.users.create_from_file(filepath)
+            added, failed = TSC.UserItem.create_from_file(filepath)
             for user, error in failed:
                 print(user, error.code)
                 if error.code == "409017":

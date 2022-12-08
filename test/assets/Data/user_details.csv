@@ -1,1 +1,2 @@
-username, pword, , yes, email
+username, pword, , yes, none, email
+username, pword, ,viewer, none, yes, email
