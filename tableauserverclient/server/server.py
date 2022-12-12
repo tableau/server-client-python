@@ -147,8 +147,8 @@ class Server(object):
         self._auth_token = auth_token
 
     def _get_legacy_version(self):
-        dest = Endpoint(self)
-        response = dest._make_request(method=self.session.get, url=self.server_address + "/auth?format=xml")
+        # the serverInfo call was introduced in 2.4, earlier than that we have this different call
+        response = self._session.get(self.server_address + "/auth?format=xml")
         try:
             info_xml = fromstring(response.content)
         except ParseError as parseError:
@@ -163,7 +163,11 @@ class Server(object):
         try:
             old_version = self.version
             version = self.server_info.get().rest_api_version
+        except ServerInfoEndpointNotFoundError as e:
+            self.logger.info("Could not get version info from server: {}{}".format(e.__class__, e))
+            version = self._get_legacy_version()
         except EndpointUnavailableError as e:
+            self.logger.info("Could not get version info from server: {}{}".format(e.__class__, e))
             version = self._get_legacy_version()
         except Exception as e:
             self.logger.info("Could not get version info from server: {}{}".format(e.__class__, e))
