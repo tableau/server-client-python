@@ -21,7 +21,7 @@ class Users(QuerysetEndpoint):
 
     # Gets all users
     @api(version="2.0")
-    def get(self, req_options: RequestOptions = None) -> Tuple[List[UserItem], PaginationItem]:
+    def get(self, req_options: Optional[RequestOptions] = None) -> Tuple[List[UserItem], PaginationItem]:
         logger.info("Querying all users on site")
 
         if req_options is None:
@@ -47,7 +47,7 @@ class Users(QuerysetEndpoint):
 
     # Update user
     @api(version="2.0")
-    def update(self, user_item: UserItem, password: str = None) -> UserItem:
+    def update(self, user_item: UserItem, password: Optional[str] = None) -> UserItem:
         if not user_item.id:
             error = "User item missing ID."
             raise MissingRequiredFieldError(error)
@@ -122,7 +122,7 @@ class Users(QuerysetEndpoint):
 
     # Get workbooks for user
     @api(version="2.0")
-    def populate_workbooks(self, user_item: UserItem, req_options: RequestOptions = None) -> None:
+    def populate_workbooks(self, user_item: UserItem, req_options: Optional[RequestOptions] = None) -> None:
         if not user_item.id:
             error = "User item missing ID."
             raise MissingRequiredFieldError(error)
@@ -133,7 +133,7 @@ class Users(QuerysetEndpoint):
         user_item._set_workbooks(wb_pager)
 
     def _get_wbs_for_user(
-        self, user_item: UserItem, req_options: RequestOptions = None
+        self, user_item: UserItem, req_options: Optional[RequestOptions] = None
     ) -> Tuple[List[WorkbookItem], PaginationItem]:
         url = "{0}/{1}/workbooks".format(self.baseurl, user_item.id)
         server_response = self.get_request(url, req_options)
@@ -147,7 +147,7 @@ class Users(QuerysetEndpoint):
 
     # Get groups for user
     @api(version="3.7")
-    def populate_groups(self, user_item: UserItem, req_options: RequestOptions = None) -> None:
+    def populate_groups(self, user_item: UserItem, req_options: Optional[RequestOptions] = None) -> None:
         if not user_item.id:
             error = "User item missing ID."
             raise MissingRequiredFieldError(error)
@@ -161,7 +161,7 @@ class Users(QuerysetEndpoint):
         user_item._set_groups(groups_for_user_pager)
 
     def _get_groups_for_user(
-        self, user_item: UserItem, req_options: RequestOptions = None
+        self, user_item: UserItem, req_options: Optional[RequestOptions] = None
     ) -> Tuple[List[GroupItem], PaginationItem]:
         url = "{0}/{1}/groups".format(self.baseurl, user_item.id)
         server_response = self.get_request(url, req_options)

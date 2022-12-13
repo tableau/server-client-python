@@ -6,7 +6,7 @@ from .endpoint import Endpoint
 from .exceptions import MissingRequiredFieldError
 
 from ...models import TableauItem
-from typing import Callable, TYPE_CHECKING, List, Union
+from typing import Optional, Callable, TYPE_CHECKING, List, Union
 
 logger = logging.getLogger(__name__)
 
@@ -82,7 +82,7 @@ class _PermissionsEndpoint(Endpoint):
         item._set_permissions(permission_fetcher)
         logger.info("Populated permissions for item (ID: {0})".format(item.id))
 
-    def _get_permissions(self, item: TableauItem, req_options: "RequestOptions" = None):
+    def _get_permissions(self, item: TableauItem, req_options: Optional["RequestOptions"] = None):
         url = "{0}/{1}/permissions".format(self.owner_baseurl(), item.id)
         server_response = self.get_request(url, req_options)
         permissions = PermissionsRule.from_response(server_response.content, self.parent_srv.namespace)

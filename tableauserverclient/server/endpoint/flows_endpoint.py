@@ -94,7 +94,7 @@ class Flows(QuerysetEndpoint):
 
     # Download 1 flow by id
     @api(version="3.3")
-    def download(self, flow_id: str, filepath: FilePath = None) -> str:
+    def download(self, flow_id: str, filepath: Optional[FilePath] = None) -> str:
         if not flow_id:
             error = "Flow ID undefined."
             raise ValueError(error)

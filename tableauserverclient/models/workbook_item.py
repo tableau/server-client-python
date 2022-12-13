@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 
 
 class WorkbookItem(object):
-    def __init__(self, project_id: str, name: str = None, show_tabs: bool = False) -> None:
+    def __init__(self, project_id: str, name: Optional[str] = None, show_tabs: bool = False) -> None:
         self._connections = None
         self._content_url = None
         self._webpage_url = None
