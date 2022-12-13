@@ -1,4 +1,5 @@
 from defusedxml.ElementTree import fromstring
+from typing import Optional
 
 
 class TableauError(Exception):
@@ -33,7 +34,7 @@ class ServerResponseError(TableauError):
 
 
 class InternalServerError(TableauError):
-    def __init__(self, server_response, request_url: str = None):
+    def __init__(self, server_response, request_url: Optional[str] = None):
         self.code = server_response.status_code
         self.content = server_response.content
         self.url = request_url or "server"

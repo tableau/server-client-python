@@ -80,7 +80,7 @@ class Datasources(QuerysetEndpoint):
 
     # Get all datasources
     @api(version="2.0")
-    def get(self, req_options: RequestOptions = None) -> Tuple[List[DatasourceItem], PaginationItem]:
+    def get(self, req_options: Optional[RequestOptions] = None) -> Tuple[List[DatasourceItem], PaginationItem]:
         logger.info("Querying all datasources on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -135,7 +135,7 @@ class Datasources(QuerysetEndpoint):
     def download(
         self,
         datasource_id: str,
-        filepath: FilePath = None,
+        filepath: Optional[FilePath] = None,
         include_extract: bool = True,
         no_extract: Optional[bool] = None,
     ) -> str:
@@ -234,8 +234,8 @@ class Datasources(QuerysetEndpoint):
         datasource_item: DatasourceItem,
         file: PathOrFile,
         mode: str,
-        connection_credentials: ConnectionCredentials = None,
-        connections: Sequence[ConnectionItem] = None,
+        connection_credentials: Optional[ConnectionCredentials] = None,
+        connections: Optional[Sequence[ConnectionItem]] = None,
         as_job: bool = False,
     ) -> Union[DatasourceItem, JobItem]:
 

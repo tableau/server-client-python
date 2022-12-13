@@ -78,7 +78,7 @@ class Endpoint(object):
 
         return server_response
 
-    def _check_status(self, server_response, url: str = None):
+    def _check_status(self, server_response, url: Optional[str] = None):
         if server_response.status_code >= 500:
             raise InternalServerError(server_response, url)
         elif server_response.status_code not in Success_codes:
