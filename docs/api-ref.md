@@ -2025,7 +2025,7 @@ Name  |  Description
 projects.update_permission(item, rules)
 ```
 
-Add or update project permissions.
+Add project permissions for a user or group.  
 
 REST API: [Add Project Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#add_project_permissions){:target="_blank"}
 
