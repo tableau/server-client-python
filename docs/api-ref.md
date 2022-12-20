@@ -647,7 +647,7 @@ Error   |  Description
 
 **Returns**
 
-A refreshed `DatasourceItem`.
+A refreshed `JobItem`.
 
 
 **Example**
