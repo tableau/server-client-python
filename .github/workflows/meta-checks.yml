@@ -32,4 +32,4 @@ jobs:
     - name: Run Mypy tests
       if: always()
       run: |
-        mypy --show-error-codes --disable-error-code misc --disable-error-code import tableauserverclient test
+        mypy --show-error-codes --disable-error-code misc --disable-error-code import --implicit-optional tableauserverclient test
