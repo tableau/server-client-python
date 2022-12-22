@@ -35,7 +35,7 @@ API help](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_conc
 
 To filter on a field, you need to specify the field name, an operator criteria and a value criteria.
 
-**Note**: Ampersands and commas in filters are not supported by the rest api as they are used as delimiters.
+**Note**: Ampersands and commas in filters are not supported by the REST API as they are used as delimiters.
 
 ### Operator criteria
 
