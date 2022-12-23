@@ -2747,7 +2747,7 @@ REST API: [Create Schedule](https://help.tableau.com/current/api/rest_api/en-us/
 
 Name  |  Description
 :--- | :---
-`schedule_item` | The settings for the schedule that you want to create. You need to create an instance of `schedule_item` and pass it to the `create` method. The `schedule_item` includes the `interval_item` which specifies the frequency, or interval, that the schedule should run. See `ScheduleItem` and `IntervalItem`.
+`schedule_item` | The settings for the schedule that you want to create. You need to create an instance of `ScheduleItem` and pass it to the `create` method. The `ScheduleItem` includes the `IntervalItem` which specifies the frequency, or interval, that the schedule should run.
 
 
 **Returns**
@@ -2765,15 +2765,21 @@ Error  |  Description
 
 ```py
 import tableauserverclient as TSC
+from datetime import time
+
 # sign in, etc.
- # Create an interval to run every 2 hours between 2:30AM and 11:00PM
-        hourly_interval = TSC.HourlyInterval(start_time=time(2, 30),
-                                             end_time=time(23, 0),
-                                             interval_value=2)
- # Create schedule item
-        hourly_schedule = TSC.ScheduleItem("Hourly-Schedule", 50, TSC.ScheduleItem.Type.Extract, TSC.ScheduleItem.ExecutionOrder.Parallel, hourly_interval)
- # Create schedule
-        hourly_schedule = server.schedules.create(hourly_schedule)
+# Create an interval to run every 2 hours between 2:30AM and 11:00PM
+hourly_interval = TSC.HourlyInterval(start_time=time(2, 30),
+                                     end_time=time(23, 0),
+                                     interval_value=2)
+# Create schedule item
+hourly_schedule = TSC.ScheduleItem("Hourly-Schedule",
+                                   50,
+                                   TSC.ScheduleItem.Type.Extract,
+                                   TSC.ScheduleItem.ExecutionOrder.Parallel,
+                                   hourly_interval)
+# Create schedule
+hourly_schedule = server.schedules.create(hourly_schedule)
 ```
 <br>
 <br>
@@ -2813,13 +2819,25 @@ Error  |  Description
 #### schedules.get
 
 ```py
-schedules.get([req_options=None])
+schedules.get()
 ```
 
 Returns all schedule items from the server.
 
 
 REST API: [Query Schedules](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_schedules)
+
+
+#### schedules.get_by_id
+
+```py
+schedules.get_by_id(schedule_id)
+```
+
+Returns the specified schedule.
+
+
+REST API: [Get Schedule](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#get-schedule)
 
 
 
@@ -2831,6 +2849,19 @@ Name  |  Description
 
 #### schedules.update
 
+```py
+schedules.update(schedule_item)
+```
+
+**Parameters**
+
+Name  |  Description
+:--- | :---
+`schedule_item` | The settings for the schedule that you want to update. You need to fetch an existing instance of `ScheduleItem` from the `get` method, make your changes, and then pass it to the `update` method to update the schedule on the server. The `ScheduleItem` includes the `IntervalItem` which specifies the frequency, or interval, that the schedule should run.
+
+
+REST API: [Update Schedules](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_schedule)
+
 <br>
 <br>
 
@@ -2838,61 +2869,81 @@ Name  |  Description
 **Hourly schedule example**
 ```py
 import tableauserverclient as TSC
+from datetime import time
 # sign in, etc.
- # Create an interval to run every 2 hours between 2:30AM and 11:00PM
-        hourly_interval = TSC.HourlyInterval(start_time=time(2, 30),
-                                             end_time=time(23, 0),
-                                             interval_value=2)
- # Create schedule item
-        hourly_schedule = TSC.ScheduleItem("Hourly-Schedule", 50, TSC.ScheduleItem.Type.Extract, TSC.ScheduleItem.ExecutionOrder.Parallel, hourly_interval)
- # Create schedule
-        hourly_schedule = server.schedules.create(hourly_schedule)
+
+# Create an interval to run every 2 hours between 2:30AM and 11:00PM
+hourly_interval = TSC.HourlyInterval(start_time=time(2, 30),
+                                     end_time=time(23, 0),
+                                     interval_value=2)
+
+# Create schedule item
+hourly_schedule = TSC.ScheduleItem("Hourly-Schedule",
+                                   50,
+                                   TSC.ScheduleItem.Type.Extract,
+                                   TSC.ScheduleItem.ExecutionOrder.Parallel,
+                                   hourly_interval)
+
+# Create schedule
+hourly_schedule = server.schedules.create(hourly_schedule)
 ```
 
 **Daily schedule example**
 ```py
 import tableauserverclient as TSC
+from datetime import time
 # sign in, etc.
- # Create a daily interval to run every day at 12:30AM
-        Daily_interval = TSC.DailyInterval(start_time=time(0, 30))
- # Create schedule item using daily interval
-        daily_schedule = TSC.ScheduleItem("Daily-Schedule", 60, TSC.ScheduleItem.Type.Subscription, TSC.ScheduleItem.ExecutionOrder.Serial, daily_interval)
- # Create daily schedule
-        daily_schedule = server.schedules.create(daily_schedule)
 
+# Create a daily interval to run every day at 12:30AM
+daily_interval = TSC.DailyInterval(start_time=time(0, 30))
+
+# Create schedule item using daily interval
+daily_schedule = TSC.ScheduleItem("Daily-Schedule",
+                                  60,
+                                  TSC.ScheduleItem.Type.Subscription,
+                                  TSC.ScheduleItem.ExecutionOrder.Serial,
+                                  daily_interval)
+
+# Create daily schedule
+daily_schedule = server.schedules.create(daily_schedule)
 ```
 
 **Weekly schedule example**
 ```py
 import tableauserverclient as TSC
+from datetime import time
 # sign in, etc.
- # Create a weekly interval to run every Monday, Wednesday, and Friday at 7:15PM
-        weekly_interval = TSC.WeeklyInterval(time(19, 15),
-                                             TSC.IntervalItem.Day.Monday,
-                                             TSC.IntervalItem.Day.Wednesday,
-                                             TSC.IntervalItem.Day.Friday)
- # Create schedule item using weekly interval
-        weekly_schedule = TSC.ScheduleItem("Weekly-Schedule", 70,
-                                          TSC.ScheduleItem.Type.Extract,
-                                          TSC.ScheduleItem.ExecutionOrder.Serial, weekly_interval)
- # Create weekly schedule
-        weekly_schedule = server.schedules.create(weekly_schedule)
 
+# Create a weekly interval to run every Monday, Wednesday, and Friday at 7:15PM
+weekly_interval = TSC.WeeklyInterval(time(19, 15),
+                                     TSC.IntervalItem.Day.Monday,
+                                     TSC.IntervalItem.Day.Wednesday,
+                                     TSC.IntervalItem.Day.Friday)
+# Create schedule item using weekly interval
+weekly_schedule = TSC.ScheduleItem("Weekly-Schedule", 70,
+                                  TSC.ScheduleItem.Type.Extract,
+                                  TSC.ScheduleItem.ExecutionOrder.Serial,
+                                  weekly_interval)
+# Create weekly schedule
+weekly_schedule = server.schedules.create(weekly_schedule)
 ```
 
 **Monthly schedule example**
 ```py
 import tableauserverclient as TSC
+from datetime import time
 # sign in, etc.
- # Create a monthly interval to run on the 15th of every month at 11:30PM
-        monthly_interval = TSC.MonthlyInterval(start_time=time(23, 30),
-                                               interval_value=15)
- # Create schedule item using monthly interval
-        monthly_schedule = TSC.ScheduleItem("Monthly-Schedule", 80,
-                                           TSC.ScheduleItem.Type.Subscription
-                                           TSC.ScheduleItem.ExecutionOrder.Parallel, monthly_interval)
- # Create monthly schedule
-        monthly_schedule = server.schedules.create(monthly_schedule)
+
+# Create a monthly interval to run on the 15th of every month at 11:30PM
+monthly_interval = TSC.MonthlyInterval(start_time=time(23, 30),
+                                        interval_value=15)
+# Create schedule item using monthly interval
+monthly_schedule = TSC.ScheduleItem("Monthly-Schedule",
+                                    80,
+                                    TSC.ScheduleItem.Type.Subscription
+                                    TSC.ScheduleItem.ExecutionOrder.Parallel, monthly_interval)
+# Create monthly schedule
+monthly_schedule = server.schedules.create(monthly_schedule)
 ```
 
 
