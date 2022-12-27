@@ -2548,6 +2548,34 @@ csv_req_option.vf('Category', 'Furniture')
 # retrieve the csv data for the view
 server.views.populate_csv(view_item, csv_req_option)
 ```
+### ExcelRequestOptions class
+
+```py
+ExcelRequestOptions(maxage=-1)
+```
+Use this class to specify view filters to be applied when data is generated in an Excel file format. Optionally, you can specify the maximum age of the Excel data cached on the server by providing a `maxage` value. See `views.populate_csv`.
+
+**Attributes**
+
+Name  |  Description
+:--- | :---
+`maxage` | Optional. The maximum number of minutes the Excel data will be cached on the server before being refreshed. The value must be an integer between `1` and `240` minutes. `0` will be interpreted as 1 minute on server, as that is the shortest interval allowed. By default, `maxage` is set to `-1`, indicating the default behavior configured in server settings.
+
+**Example**
+
+```py
+# import tableauserverclient as TSC
+# server = TSC.Server('https://MY-SERVER')
+# sign in, get a specific view, etc.
+
+# set view filters
+excel_req_option = TSC.ExcelRequestOptions(maxage=5)
+excel_req_option.vf('Region', 'South')
+excel_req_option.vf('Category', 'Furniture')
+
+# retrieve the excel data for the view
+server.views.populate_excel(view_item, excel_req_option)
+```
 
 ### ImageRequestOptions class
 
