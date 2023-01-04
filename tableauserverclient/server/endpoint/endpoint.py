@@ -3,7 +3,7 @@ import logging
 from packaging.version import Version
 from functools import wraps
 from xml.etree.ElementTree import ParseError
-from typing import Any, Callable, Dict, Optional, TYPE_CHECKING
+from typing import Any, Callable, Dict, Optional, TYPE_CHECKING, Mapping
 
 from .exceptions import (
     ServerResponseError,
@@ -35,7 +35,7 @@ class Endpoint(object):
         self.parent_srv = parent_srv
 
     @staticmethod
-    def set_parameters(http_options, auth_token, content, content_type, parameters):
+    def set_parameters(http_options, auth_token, content, content_type, parameters) -> Dict[str, Any]:
         parameters = parameters or {}
         parameters.update(http_options)
         if "headers" not in parameters:
@@ -49,7 +49,7 @@ class Endpoint(object):
         Endpoint.set_user_agent(parameters)
         if content is not None:
             parameters["data"] = content
-        return parameters
+        return parameters or {}
 
     @staticmethod
     def set_user_agent(parameters):
@@ -74,11 +74,14 @@ class Endpoint(object):
         content_type: Optional[str] = None,
         parameters: Optional[Dict[str, Any]] = None,
     ) -> "Response":
-        parameters = Endpoint.set_parameters(self.parent_srv.http_options, auth_token, content, content_type, parameters)
+        parameters = Endpoint.set_parameters(
+            self.parent_srv.http_options, auth_token, content, content_type, parameters
+        )
 
         logger.debug("request {}, url: {}".format(method, url))
         if content:
-            logger.debug("request content: {}".format(helpers.strings.redact_xml(content[:1000])))
+            redacted = helpers.strings.redact_xml(content[:1000])
+            logger.debug("request content: {}".format(redacted))
 
         server_response = method(url, **parameters)
         self._check_status(server_response, url)

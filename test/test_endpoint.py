@@ -39,12 +39,13 @@ class TestEndpoint(unittest.TestCase):
         log = endpoint.log_response_safely(server_response)
         self.assertTrue(log.find("[Truncated File Contents]") > 0, log)
 
-    def test_set_user_agent_from_options(self):
+    def test_set_user_agent_from_options_in_two_places(self):
         params = {"User-Agent": "1", "headers": {"User-Agent": "2"}}
         result = TSC.server.Endpoint.set_user_agent(params)
+        # it should use the value under 'headers' if more than one is given
         self.assertTrue(result["headers"]["User-Agent"] == 1)
 
-    def test_set_user_agent_from_options(self):
+    def test_set_user_agent_from_options_headers(self):
         params = {"headers": {"User-Agent": 2}}
         result = TSC.server.Endpoint.set_user_agent(params)
         self.assertTrue(result["headers"]["User-Agent"] == 2)
