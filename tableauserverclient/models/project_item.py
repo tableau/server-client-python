@@ -34,6 +34,8 @@ class ProjectItem(object):
         self._default_datasource_permissions = None
         self._default_flow_permissions = None
         self._default_lens_permissions = None
+        self._default_datarole_permissions = None
+        self._default_metric_permissions = None
 
     @property
     def content_permissions(self):
@@ -78,6 +80,20 @@ class ProjectItem(object):
             error = "Project item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
         return self._default_lens_permissions()
+
+    @property
+    def default_datarole_permissions(self):
+        if self._default_datarole_permissions is None:
+            error = "Project item must be populated with permissions first."
+            raise UnpopulatedPropertyError(error)
+        return self._default_datarole_permissions()
+
+    @property
+    def default_metric_permissions(self):
+        if self._default_metric_permissions is None:
+            error = "Project item must be populated with permissions first."
+            raise UnpopulatedPropertyError(error)
+        return self._default_metric_permissions()
 
     @property
     def id(self) -> Optional[str]:
