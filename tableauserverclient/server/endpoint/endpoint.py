@@ -3,7 +3,7 @@ import logging
 from packaging.version import Version
 from functools import wraps
 from xml.etree.ElementTree import ParseError
-from typing import Any, Callable, Dict, Optional, TYPE_CHECKING
+from typing import Any, Callable, Dict, Optional, TYPE_CHECKING, Mapping
 
 from .exceptions import (
     ServerResponseError,
@@ -35,15 +35,35 @@ class Endpoint(object):
         self.parent_srv = parent_srv
 
     @staticmethod
-    def _make_common_headers(auth_token, content_type):
-        _client_version: Optional[str] = get_versions()["version"]
-        headers = {}
+    def set_parameters(http_options, auth_token, content, content_type, parameters) -> Dict[str, Any]:
+        parameters = parameters or {}
+        parameters.update(http_options)
+        if "headers" not in parameters:
+            parameters["headers"] = {}
+
         if auth_token is not None:
-            headers[TABLEAU_AUTH_HEADER] = auth_token
+            parameters["headers"][TABLEAU_AUTH_HEADER] = auth_token
         if content_type is not None:
-            headers[CONTENT_TYPE_HEADER] = content_type
-        headers[USER_AGENT_HEADER] = "Tableau Server Client/{}".format(_client_version)
-        return headers
+            parameters["headers"][CONTENT_TYPE_HEADER] = content_type
+
+        Endpoint.set_user_agent(parameters)
+        if content is not None:
+            parameters["data"] = content
+        return parameters or {}
+
+    @staticmethod
+    def set_user_agent(parameters):
+        if USER_AGENT_HEADER not in parameters["headers"]:
+            if USER_AGENT_HEADER in parameters:
+                parameters["headers"][USER_AGENT_HEADER] = parameters[USER_AGENT_HEADER]
+            else:
+                # only set the TSC user agent if not already populated
+                _client_version: Optional[str] = get_versions()["version"]
+                parameters["headers"][USER_AGENT_HEADER] = "Tableau Server Client/{}".format(_client_version)
+
+        # result: parameters["headers"]["User-Agent"] is set
+        # return explicitly for testing only
+        return parameters
 
     def _make_request(
         self,
@@ -54,18 +74,14 @@ class Endpoint(object):
         content_type: Optional[str] = None,
         parameters: Optional[Dict[str, Any]] = None,
     ) -> "Response":
-        parameters = parameters or {}
-        if "headers" not in parameters:
-            parameters["headers"] = {}
-        parameters.update(self.parent_srv.http_options)
-        parameters["headers"].update(Endpoint._make_common_headers(auth_token, content_type))
+        parameters = Endpoint.set_parameters(
+            self.parent_srv.http_options, auth_token, content, content_type, parameters
+        )
 
-        if content is not None:
-            parameters["data"] = content
-
-        logger.debug("request {}, url: {}".format(method.__name__, url))
+        logger.debug("request {}, url: {}".format(method, url))
         if content:
-            logger.debug("request content: {}".format(helpers.strings.redact_xml(content[:1000])))
+            redacted = helpers.strings.redact_xml(content[:1000])
+            logger.debug("request content: {}".format(redacted))
 
         server_response = method(url, **parameters)
         self._check_status(server_response, url)

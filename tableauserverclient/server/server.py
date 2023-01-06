@@ -31,6 +31,7 @@ from .endpoint import (
     Fileuploads,
     FlowRuns,
     Metrics,
+    Endpoint,
 )
 from .endpoint.exceptions import (
     ServerInfoEndpointNotFoundError,
@@ -61,6 +62,10 @@ class Server(object):
         self._auth_token = None
         self._site_id = None
         self._user_id = None
+
+        # TODO: this needs to change to default to https, but without breaking existing code
+        if not server_address.startswith("http://") and not server_address.startswith("https://"):
+            server_address = "http://" + server_address
 
         self._server_address: str = server_address
         self._session_factory = session_factory or requests.session
@@ -96,21 +101,17 @@ class Server(object):
         if http_options:
             self.add_http_options(http_options)
 
-        self.validate_server_connection()
+        self.validate_connection_settings()  # does not make an actual outgoing request
 
         self.version = default_server_version
         if use_server_version:
             self.use_server_version()  # this makes a server call
 
-    def validate_server_connection(self):
+    def validate_connection_settings(self):
         try:
-            if not self._server_address.startswith("http://") and not self._server_address.startswith("https://"):
-                self._server_address = "http://" + self._server_address
-                self._session.prepare_request(
-                    requests.Request("GET", url=self._server_address, params=self._http_options)
-                )
+            Endpoint(self).set_parameters(self._http_options, None, None, None, None)
         except Exception as req_ex:
-            raise ValueError("Invalid server initialization", req_ex)
+            raise ValueError("Server connection settings not valid", req_ex)
 
     def __repr__(self):
         return "<TableauServerClient> [Connection: {}, {}]".format(self.baseurl, self.server_info.serverInfo)
@@ -143,10 +144,12 @@ class Server(object):
         self._auth_token = auth_token
 
     def _get_legacy_version(self):
-        response = self._session.get(self.server_address + "/auth?format=xml")
+        dest = Endpoint(self)
+        response = dest._make_request(method=self.session.get, url=self.server_address + "/auth?format=xml")
         try:
             info_xml = fromstring(response.content)
         except ParseError as parseError:
+            logging.getLogger("TSC.server").info(parseError)
             logging.getLogger("TSC.server").info(
                 "Could not read server version info. The server may not be running or configured."
             )

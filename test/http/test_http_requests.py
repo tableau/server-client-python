@@ -82,20 +82,20 @@ class ServerTests(unittest.TestCase):
     def test_validate_connection_http(self):
         url = "http://cookies.com"
         server = TSC.Server(url)
-        server.validate_server_connection()
+        server.validate_connection_settings()
         self.assertEqual(url, server.server_address)
 
     def test_validate_connection_https(self):
         url = "https://cookies.com"
         server = TSC.Server(url)
-        server.validate_server_connection()
+        server.validate_connection_settings()
         self.assertEqual(url, server.server_address)
 
     def test_validate_connection_no_protocol(self):
         url = "cookies.com"
         fixed_url = "http://cookies.com"
         server = TSC.Server(url)
-        server.validate_server_connection()
+        server.validate_connection_settings()
         self.assertEqual(fixed_url, server.server_address)
 
 
