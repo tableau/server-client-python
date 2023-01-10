@@ -45,6 +45,9 @@ if TYPE_CHECKING:
     from ...models.connection_credentials import ConnectionCredentials
     from .schedules_endpoint import AddResponse
 
+io_types_r = (io.BytesIO, io.BufferedReader)
+io_types_w = (io.BytesIO, io.BufferedWriter)
+
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
 
@@ -53,7 +56,10 @@ ALLOWED_FILE_EXTENSIONS = ["twb", "twbx"]
 logger = logging.getLogger("tableau.endpoint.workbooks")
 FilePath = Union[str, os.PathLike]
 FileObject = Union[io.BufferedReader, io.BytesIO]
-PathOrFile = Union[FilePath, FileObject]
+FileObjectR = Union[io.BufferedReader, io.BytesIO]
+FileObjectW = Union[io.BufferedWriter, io.BytesIO]
+PathOrFileR = Union[FilePath, FileObjectR]
+PathOrFileW = Union[FilePath, FileObjectW]
 
 
 class Workbooks(QuerysetEndpoint):
@@ -179,38 +185,11 @@ class Workbooks(QuerysetEndpoint):
     def download(
         self,
         workbook_id: str,
-        filepath: Optional[FilePath] = None,
+        filepath: Optional[PathOrFileW] = None,
         include_extract: bool = True,
         no_extract: Optional[bool] = None,
     ) -> str:
-        if not workbook_id:
-            error = "Workbook ID undefined."
-            raise ValueError(error)
-        url = "{0}/{1}/content".format(self.baseurl, workbook_id)
-
-        if no_extract is False or no_extract is True:
-            import warnings
-
-            warnings.warn(
-                "no_extract is deprecated, use include_extract instead.",
-                DeprecationWarning,
-            )
-            include_extract = not no_extract
-
-        if not include_extract:
-            url += "?includeExtract=False"
-
-        with closing(self.get_request(url, parameters={"stream": True})) as server_response:
-            _, params = cgi.parse_header(server_response.headers["Content-Disposition"])
-            filename = to_filename(os.path.basename(params["filename"]))
-
-            download_path = make_download_path(filepath, filename)
-
-            with open(download_path, "wb") as f:
-                for chunk in server_response.iter_content(1024):  # 1KB
-                    f.write(chunk)
-        logger.info("Downloaded workbook to {0} (ID: {1})".format(download_path, workbook_id))
-        return os.path.abspath(download_path)
+        return self.download_revision(workbook_id, None, filepath, include_extract, no_extract)
 
     # Get all views of workbook
     @api(version="2.0")
@@ -332,7 +311,7 @@ class Workbooks(QuerysetEndpoint):
     def publish(
         self,
         workbook_item: WorkbookItem,
-        file: PathOrFile,
+        file: PathOrFileR,
         mode: str,
         connection_credentials: Optional["ConnectionCredentials"] = None,
         connections: Optional[Sequence[ConnectionItem]] = None,
@@ -350,7 +329,6 @@ class Workbooks(QuerysetEndpoint):
             )
 
         if isinstance(file, (str, os.PathLike)):
-            # Expect file to be a filepath
             if not os.path.isfile(file):
                 error = "File path does not lead to an existing file."
                 raise IOError(error)
@@ -366,12 +344,12 @@ class Workbooks(QuerysetEndpoint):
                 error = "Only {} files can be published as workbooks.".format(", ".join(ALLOWED_FILE_EXTENSIONS))
                 raise ValueError(error)
 
-        elif isinstance(file, (io.BytesIO, io.BufferedReader)):
-            # Expect file to be a file object
-            file_size = get_file_object_size(file)
+        elif isinstance(file, io_types_r):
+            if not workbook_item.name:
+                error = "Workbook item must have a name when passing a file object"
+                raise ValueError(error)
 
             file_type = get_file_type(file)
-
             if file_type == "zip":
                 file_extension = "twbx"
             elif file_type == "xml":
@@ -380,13 +358,10 @@ class Workbooks(QuerysetEndpoint):
                 error = "Unsupported file type {}!".format(file_type)
                 raise ValueError(error)
 
-            if not workbook_item.name:
-                error = "Workbook item must have a name when passing a file object"
-                raise ValueError(error)
-
             # Generate filename for file object.
             # This is needed when publishing the workbook in a single request
             filename = "{}.{}".format(workbook_item.name, file_extension)
+            file_size = get_file_object_size(file)
 
         else:
             raise TypeError("file should be a filepath or file object.")
@@ -428,7 +403,7 @@ class Workbooks(QuerysetEndpoint):
                 with open(file, "rb") as f:
                     file_contents = f.read()
 
-            elif isinstance(file, (io.BytesIO, io.BufferedReader)):
+            elif isinstance(file, io_types_r):
                 file_contents = file.read()
 
             else:
@@ -489,14 +464,17 @@ class Workbooks(QuerysetEndpoint):
         self,
         workbook_id: str,
         revision_number: str,
-        filepath: Optional[PathOrFile] = None,
+        filepath: Optional[PathOrFileW] = None,
         include_extract: bool = True,
         no_extract: Optional[bool] = None,
-    ) -> str:
+    ) -> PathOrFileW:
         if not workbook_id:
             error = "Workbook ID undefined."
             raise ValueError(error)
-        url = "{0}/{1}/revisions/{2}/content".format(self.baseurl, workbook_id, revision_number)
+        if revision_number is None:
+            url = "{0}/{1}/content".format(self.baseurl, workbook_id)
+        else:
+            url = "{0}/{1}/revisions/{2}/content".format(self.baseurl, workbook_id, revision_number)
 
         if no_extract is False or no_extract is True:
             import warnings
@@ -512,17 +490,22 @@ class Workbooks(QuerysetEndpoint):
 
         with closing(self.get_request(url, parameters={"stream": True})) as server_response:
             _, params = cgi.parse_header(server_response.headers["Content-Disposition"])
-            filename = to_filename(os.path.basename(params["filename"]))
-
-            download_path = make_download_path(filepath, filename)
-
-            with open(download_path, "wb") as f:
+            if isinstance(filepath, io_types_w):
                 for chunk in server_response.iter_content(1024):  # 1KB
-                    f.write(chunk)
+                    filepath.write(chunk)
+                return_path = filepath
+            else:
+                filename = to_filename(os.path.basename(params["filename"]))
+                download_path = make_download_path(filepath, filename)
+                with open(download_path, "wb") as f:
+                    for chunk in server_response.iter_content(1024):  # 1KB
+                        f.write(chunk)
+                return_path = os.path.abspath(download_path)
+
         logger.info(
-            "Downloaded workbook revision {0} to {1} (ID: {2})".format(revision_number, download_path, workbook_id)
+            "Downloaded workbook revision {0} to {1} (ID: {2})".format(revision_number, return_path, workbook_id)
         )
-        return os.path.abspath(download_path)
+        return return_path
 
     @api(version="2.3")
     def delete_revision(self, workbook_id: str, revision_number: str) -> None:
