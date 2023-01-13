@@ -67,10 +67,10 @@ class RevisionItem(object):
             revision_item._resource_id = resource_item.id
             revision_item._resource_name = resource_item.name
             revision_item._revision_number = revision_xml.get("revisionNumber", None)
-            revision_item._current = string_to_bool(revision_xml.get("isCurrent", ""))
-            revision_item._deleted = string_to_bool(revision_xml.get("isDeleted", ""))
-            revision_item._created_at = parse_datetime(revision_xml.get("createdAt", None))
-            for user in revision_xml.findall(".//t:user", namespaces=ns):
+            revision_item._current = string_to_bool(revision_xml.get("current", ""))
+            revision_item._deleted = string_to_bool(revision_xml.get("deleted", ""))
+            revision_item._created_at = parse_datetime(revision_xml.get("publishedAt", None))
+            for user in revision_xml.findall(".//t:publisher", namespaces=ns):
                 revision_item._user_id = user.get("id", None)
                 revision_item._user_name = user.get("name", None)
 
