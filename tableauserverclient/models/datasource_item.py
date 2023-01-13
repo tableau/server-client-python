@@ -34,7 +34,7 @@ class DatasourceItem(object):
         Disabled = "Disabled"
         SiteDefault = "SiteDefault"
 
-    def __init__(self, project_id: str, name: str = None) -> None:
+    def __init__(self, project_id: str, name: Optional[str] = None) -> None:
         self._ask_data_enablement = None
         self._certified = None
         self._certification_note = None

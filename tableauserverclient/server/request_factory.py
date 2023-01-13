@@ -575,7 +575,7 @@ class ScheduleRequest(object):
 
 
 class SiteRequest(object):
-    def update_req(self, site_item: "SiteItem", parent_srv: "Server" = None):
+    def update_req(self, site_item: "SiteItem", parent_srv: Optional["Server"] = None):
         xml_request = ET.Element("tsRequest")
         site_element = ET.SubElement(xml_request, "site")
         if site_item.name:
@@ -683,7 +683,7 @@ class SiteRequest(object):
         return ET.tostring(xml_request)
 
     # server: the site request model changes based on api version
-    def create_req(self, site_item: "SiteItem", parent_srv: "Server" = None):
+    def create_req(self, site_item: "SiteItem", parent_srv: Optional["Server"] = None):
         xml_request = ET.Element("tsRequest")
         site_element = ET.SubElement(xml_request, "site")
         site_element.attrib["name"] = site_item.name

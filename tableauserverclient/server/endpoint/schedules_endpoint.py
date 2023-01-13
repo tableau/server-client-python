@@ -85,10 +85,10 @@ class Schedules(Endpoint):
     def add_to_schedule(
         self,
         schedule_id: str,
-        workbook: "WorkbookItem" = None,
-        datasource: "DatasourceItem" = None,
-        flow: "FlowItem" = None,
-        task_type: str = None,
+        workbook: Optional["WorkbookItem"] = None,
+        datasource: Optional["DatasourceItem"] = None,
+        flow: Optional["FlowItem"] = None,
+        task_type: Optional[str] = None,
     ) -> List[AddResponse]:
 
         # There doesn't seem to be a good reason to allow one item of each type?
