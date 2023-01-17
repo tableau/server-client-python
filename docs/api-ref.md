@@ -227,11 +227,12 @@ Name   |  Description
 `datasource_name` |  The name of the data source.
 `id`  |  The identifier of the connection.
 `connection_type`  |  The type of connection.
-`username`     | The username for the connection.
-`password`  |  The password used for the connection.
-`embed_password`  |  (Boolean) Determines whether to embed the password (`True`) for the workbook or data source connection or not (`False`).
+`username`     | The username for the connection. (see ConnectionCredentials)
+`password`  |  The password used for the connection. (see ConnectionCredentials)
+`embed_password`  |  (Boolean) Determines whether to embed the password (`True`) for the workbook or data source connection or not (`False`). (see ConnectionCredentials)
 `server_address`   |  The server address for the connection.
 `server_port`   |  The port used for the connection.
+`connection_credentials` | The Connection Credentials object containing authentication details for the connection. Replaces username/password/embed_password when publishing a flow, document or workbook file in the request body.
 
 Source file: models/connection_item.py
 
