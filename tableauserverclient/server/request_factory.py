@@ -174,10 +174,10 @@ class DatasourceRequest(object):
         if connection_credentials is not None and connections is not None:
             raise RuntimeError("You cannot set both `connections` and `connection_credentials`")
 
-        if connection_credentials is not None:
+        if connection_credentials is not None and connection_credentials != False:
             _add_credentials_element(datasource_element, connection_credentials)
 
-        if connections is not None:
+        if connections is not None and connections != False:
             connections_element = ET.SubElement(datasource_element, "connections")
             for connection in connections:
                 _add_connections_element(connections_element, connection)
@@ -329,7 +329,7 @@ class FlowRequest(object):
         project_element = ET.SubElement(flow_element, "project")
         project_element.attrib["id"] = flow_item.project_id
 
-        if connections is not None:
+        if connections is not None and connections != False:
             connections_element = ET.SubElement(flow_element, "connections")
             for connection in connections:
                 _add_connections_element(connections_element, connection)
@@ -896,10 +896,10 @@ class WorkbookRequest(object):
         if connection_credentials is not None and connections is not None:
             raise RuntimeError("You cannot set both `connections` and `connection_credentials`")
 
-        if connection_credentials is not None:
+        if connection_credentials is not None and connection_credentials != False:
             _add_credentials_element(workbook_element, connection_credentials)
 
-        if connections is not None:
+        if connections is not None and connections != False:
             connections_element = ET.SubElement(workbook_element, "connections")
             for connection in connections:
                 _add_connections_element(connections_element, connection)
