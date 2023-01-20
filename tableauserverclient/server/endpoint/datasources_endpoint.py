@@ -31,22 +31,9 @@ from ...filesys_helpers import (
 )
 from ...models import ConnectionCredentials, RevisionItem
 from ...models.job_item import JobItem
-from ...models import ConnectionCredentials
 
-io_types = (io.BytesIO, io.BufferedReader)
-
-from pathlib import Path
-from typing import (
-    List,
-    Mapping,
-    Optional,
-    Sequence,
-    Tuple,
-    TYPE_CHECKING,
-    Union,
-)
-
-io_types = (io.BytesIO, io.BufferedReader)
+io_types_r = (io.BytesIO, io.BufferedReader)
+io_types_w = (io.BytesIO, io.BufferedWriter)
 
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
@@ -61,8 +48,10 @@ if TYPE_CHECKING:
     from .schedules_endpoint import AddResponse
 
 FilePath = Union[str, os.PathLike]
-FileObject = Union[io.BufferedReader, io.BytesIO]
-PathOrFile = Union[FilePath, FileObject]
+FileObjectR = Union[io.BufferedReader, io.BytesIO]
+FileObjectW = Union[io.BufferedWriter, io.BytesIO]
+PathOrFileR = Union[FilePath, FileObjectR]
+PathOrFileW = Union[FilePath, FileObjectW]
 
 
 class Datasources(QuerysetEndpoint):
@@ -135,39 +124,11 @@ class Datasources(QuerysetEndpoint):
     def download(
         self,
         datasource_id: str,
-        filepath: Optional[FilePath] = None,
+        filepath: Optional[PathOrFileW] = None,
         include_extract: bool = True,
         no_extract: Optional[bool] = None,
     ) -> str:
-        if not datasource_id:
-            error = "Datasource ID undefined."
-            raise ValueError(error)
-        url = "{0}/{1}/content".format(self.baseurl, datasource_id)
-
-        if no_extract is False or no_extract is True:
-            import warnings
-
-            warnings.warn(
-                "no_extract is deprecated, use include_extract instead.",
-                DeprecationWarning,
-            )
-            include_extract = not no_extract
-
-        if not include_extract:
-            url += "?includeExtract=False"
-
-        with closing(self.get_request(url, parameters={"stream": True})) as server_response:
-            _, params = cgi.parse_header(server_response.headers["Content-Disposition"])
-            filename = to_filename(os.path.basename(params["filename"]))
-
-            download_path = make_download_path(filepath, filename)
-
-            with open(download_path, "wb") as f:
-                for chunk in server_response.iter_content(1024):  # 1KB
-                    f.write(chunk)
-
-        logger.info("Downloaded datasource to {0} (ID: {1})".format(download_path, datasource_id))
-        return os.path.abspath(download_path)
+        return self.download_revision(datasource_id, None, filepath, include_extract, no_extract)
 
     # Update datasource
     @api(version="2.0")
@@ -232,7 +193,7 @@ class Datasources(QuerysetEndpoint):
     def publish(
         self,
         datasource_item: DatasourceItem,
-        file: PathOrFile,
+        file: PathOrFileR,
         mode: str,
         connection_credentials: Optional[ConnectionCredentials] = None,
         connections: Optional[Sequence[ConnectionItem]] = None,
@@ -255,8 +216,7 @@ class Datasources(QuerysetEndpoint):
                 error = "Only {} files can be published as datasources.".format(", ".join(ALLOWED_FILE_EXTENSIONS))
                 raise ValueError(error)
 
-        elif isinstance(file, io_types):
-
+        elif isinstance(file, io_types_r):
             if not datasource_item.name:
                 error = "Datasource item must have a name when passing a file object"
                 raise ValueError(error)
@@ -302,7 +262,7 @@ class Datasources(QuerysetEndpoint):
             if isinstance(file, (Path, str)):
                 with open(file, "rb") as f:
                     file_contents = f.read()
-            elif isinstance(file, io_types):
+            elif isinstance(file, io_types_r):
                 file_contents = file.read()
             else:
                 raise TypeError("file should be a filepath or file object.")
@@ -433,14 +393,17 @@ class Datasources(QuerysetEndpoint):
         self,
         datasource_id: str,
         revision_number: str,
-        filepath: Optional[PathOrFile] = None,
+        filepath: Optional[PathOrFileW] = None,
         include_extract: bool = True,
         no_extract: Optional[bool] = None,
-    ) -> str:
+    ) -> PathOrFileW:
         if not datasource_id:
             error = "Datasource ID undefined."
             raise ValueError(error)
-        url = "{0}/{1}/revisions/{2}/content".format(self.baseurl, datasource_id, revision_number)
+        if revision_number is None:
+            url = "{0}/{1}/content".format(self.baseurl, datasource_id)
+        else:
+            url = "{0}/{1}/revisions/{2}/content".format(self.baseurl, datasource_id, revision_number)
         if no_extract is False or no_extract is True:
             import warnings
 
@@ -455,18 +418,22 @@ class Datasources(QuerysetEndpoint):
 
         with closing(self.get_request(url, parameters={"stream": True})) as server_response:
             _, params = cgi.parse_header(server_response.headers["Content-Disposition"])
-            filename = to_filename(os.path.basename(params["filename"]))
-
-            download_path = make_download_path(filepath, filename)
-
-            with open(download_path, "wb") as f:
+            if isinstance(filepath, io_types_w):
                 for chunk in server_response.iter_content(1024):  # 1KB
-                    f.write(chunk)
+                    filepath.write(chunk)
+                return_path = filepath
+            else:
+                filename = to_filename(os.path.basename(params["filename"]))
+                download_path = make_download_path(filepath, filename)
+                with open(download_path, "wb") as f:
+                    for chunk in server_response.iter_content(1024):  # 1KB
+                        f.write(chunk)
+                return_path = os.path.abspath(download_path)
 
         logger.info(
-            "Downloaded datasource revision {0} to {1} (ID: {2})".format(revision_number, download_path, datasource_id)
+            "Downloaded datasource revision {0} to {1} (ID: {2})".format(revision_number, return_path, datasource_id)
         )
-        return os.path.abspath(download_path)
+        return return_path
 
     @api(version="2.3")
     def delete_revision(self, datasource_id: str, revision_number: str) -> None:

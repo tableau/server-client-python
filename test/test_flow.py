@@ -1,16 +1,21 @@
+import os
+import requests_mock
 import unittest
 
-import requests_mock
+from io import BytesIO
 
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
 from ._utils import read_xml_asset, asset
 
-GET_XML = "flow_get.xml"
-POPULATE_CONNECTIONS_XML = "flow_populate_connections.xml"
-POPULATE_PERMISSIONS_XML = "flow_populate_permissions.xml"
-UPDATE_XML = "flow_update.xml"
-REFRESH_XML = "flow_refresh.xml"
+TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
+
+GET_XML = os.path.join(TEST_ASSET_DIR, "flow_get.xml")
+POPULATE_CONNECTIONS_XML = os.path.join(TEST_ASSET_DIR, "flow_populate_connections.xml")
+POPULATE_PERMISSIONS_XML = os.path.join(TEST_ASSET_DIR, "flow_populate_permissions.xml")
+PUBLISH_XML = os.path.join(TEST_ASSET_DIR, "flow_publish.xml")
+UPDATE_XML = os.path.join(TEST_ASSET_DIR, "flow_update.xml")
+REFRESH_XML = os.path.join(TEST_ASSET_DIR, "flow_refresh.xml")
 
 
 class FlowTests(unittest.TestCase):
@@ -23,6 +28,26 @@ class FlowTests(unittest.TestCase):
         self.server.version = "3.5"
 
         self.baseurl = self.server.flows.baseurl
+
+    def test_download(self) -> None:
+        with requests_mock.mock() as m:
+            m.get(
+                self.baseurl + "/587daa37-b84d-4400-a9a2-aa90e0be7837/content",
+                headers={"Content-Disposition": 'name="tableau_flow"; filename="FlowOne.tfl"'},
+            )
+            file_path = self.server.flows.download("587daa37-b84d-4400-a9a2-aa90e0be7837")
+            self.assertTrue(os.path.exists(file_path))
+        os.remove(file_path)
+
+    def test_download_object(self) -> None:
+        with BytesIO() as file_object:
+            with requests_mock.mock() as m:
+                m.get(
+                    self.baseurl + "/587daa37-b84d-4400-a9a2-aa90e0be7837/content",
+                    headers={"Content-Disposition": 'name="tableau_flow"; filename="FlowOne.tfl"'},
+                )
+                file_path = self.server.flows.download("587daa37-b84d-4400-a9a2-aa90e0be7837", filepath=file_object)
+                self.assertTrue(isinstance(file_path, BytesIO))
 
     def test_get(self) -> None:
         response_xml = read_xml_asset(GET_XML)
@@ -115,6 +140,52 @@ class FlowTests(unittest.TestCase):
                     TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow,
                 },
             )
+
+    def test_publish(self) -> None:
+        with open(PUBLISH_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            m.post(self.baseurl, text=response_xml)
+
+            new_flow = TSC.FlowItem(name="SampleFlow", project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760")
+
+            sample_flow = os.path.join(TEST_ASSET_DIR, "SampleFlow.tfl")
+            publish_mode = self.server.PublishMode.CreateNew
+
+            new_flow = self.server.flows.publish(new_flow, sample_flow, publish_mode)
+
+        self.assertEqual("2457c468-1b24-461a-8f95-a461b3209d32", new_flow.id)
+        self.assertEqual("SampleFlow", new_flow.name)
+        self.assertEqual("2023-01-13T09:50:55Z", format_datetime(new_flow.created_at))
+        self.assertEqual("2023-01-13T09:50:55Z", format_datetime(new_flow.updated_at))
+        self.assertEqual("ee8c6e70-43b6-11e6-af4f-f7b0d8e20760", new_flow.project_id)
+        self.assertEqual("default", new_flow.project_name)
+        self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", new_flow.owner_id)
+
+    def test_publish_file_object(self) -> None:
+        with open(PUBLISH_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            m.post(self.baseurl, text=response_xml)
+
+            new_flow = TSC.FlowItem(name="SampleFlow", project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760")
+
+            sample_flow = os.path.join(TEST_ASSET_DIR, "SampleFlow.tfl")
+            publish_mode = self.server.PublishMode.CreateNew
+
+            with open(sample_flow, "rb") as fp:
+
+                publish_mode = self.server.PublishMode.CreateNew
+
+                new_flow = self.server.flows.publish(new_flow, fp, publish_mode)
+
+        self.assertEqual("2457c468-1b24-461a-8f95-a461b3209d32", new_flow.id)
+        self.assertEqual("SampleFlow", new_flow.name)
+        self.assertEqual("2023-01-13T09:50:55Z", format_datetime(new_flow.created_at))
+        self.assertEqual("2023-01-13T09:50:55Z", format_datetime(new_flow.updated_at))
+        self.assertEqual("ee8c6e70-43b6-11e6-af4f-f7b0d8e20760", new_flow.project_id)
+        self.assertEqual("default", new_flow.project_name)
+        self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", new_flow.owner_id)
 
     def test_refresh(self):
         with open(asset(REFRESH_XML), "rb") as f:

@@ -267,6 +267,16 @@ class WorkbookTests(unittest.TestCase):
             self.assertTrue(os.path.exists(file_path))
         os.remove(file_path)
 
+    def test_download_object(self) -> None:
+        with BytesIO() as file_object:
+            with requests_mock.mock() as m:
+                m.get(
+                    self.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/content",
+                    headers={"Content-Disposition": 'name="tableau_workbook"; filename="RESTAPISample.twbx"'},
+                )
+                file_path = self.server.workbooks.download("1f951daf-4061-451a-9df1-69a8062664f2", filepath=file_object)
+                self.assertTrue(isinstance(file_path, BytesIO))
+
     def test_download_sanitizes_name(self) -> None:
         filename = "Name,With,Commas.twbx"
         disposition = 'name="tableau_workbook"; filename="{}"'.format(filename)
