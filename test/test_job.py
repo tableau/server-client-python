@@ -53,8 +53,10 @@ class JobTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.get("{0}/{1}".format(self.baseurl, job_id), text=response_xml)
             job = self.server.jobs.get_by_id(job_id)
+            updated_at = datetime(2020, 5, 13, 20, 25, 18, tzinfo=utc)
 
             self.assertEqual(job_id, job.id)
+            self.assertEqual(updated_at, job.updated_at)
             self.assertListEqual(job.notes, ["Job detail notes"])
 
     def test_get_before_signin(self) -> None:

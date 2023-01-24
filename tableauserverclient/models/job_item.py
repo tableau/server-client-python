@@ -34,6 +34,7 @@ class JobItem(object):
         workbook_id: Optional[str] = None,
         datasource_id: Optional[str] = None,
         flow_run: Optional[FlowRunItem] = None,
+        updated_at: Optional["datetime.datetime"] = None,
     ):
         self._id = id_
         self._type = job_type
@@ -47,6 +48,7 @@ class JobItem(object):
         self._workbook_id = workbook_id
         self._datasource_id = datasource_id
         self._flow_run = flow_run
+        self._updated_at = updated_at
 
     @property
     def id(self) -> str:
@@ -113,9 +115,13 @@ class JobItem(object):
     def flow_run(self, value):
         self._flow_run = value
 
+    @property
+    def updated_at(self) -> Optional["datetime.datetime"]:
+        return self._updated_at
+
     def __repr__(self):
         return (
-            "<Job#{_id} {_type} created_at({_created_at}) started_at({_started_at}) completed_at({_completed_at})"
+            "<Job#{_id} {_type} created_at({_created_at}) started_at({_started_at}) updated_at({_updated_at}) completed_at({_completed_at})"
             " progress ({_progress}) finish_code({_finish_code})>".format(**self.__dict__)
         )
 
@@ -144,6 +150,7 @@ class JobItem(object):
         datasource = element.find(".//t:datasource[@id]", namespaces=ns)
         datasource_id = datasource.get("id") if datasource is not None else None
         flow_run = None
+        updated_at = parse_datetime(element.get("updatedAt", None))
         for flow_job in element.findall(".//t:runFlowJobType", namespaces=ns):
             flow_run = FlowRunItem()
             flow_run._id = flow_job.get("flowRunId", None)
@@ -163,6 +170,7 @@ class JobItem(object):
             workbook_id,
             datasource_id,
             flow_run,
+            updated_at,
         )
 
 
