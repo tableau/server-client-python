@@ -1415,6 +1415,45 @@ Returns the `JobItem` requested.
 <br>
 <br>
 
+#### jobs.cancel
+
+```py
+jobs.cancel(job_id)
+```
+
+Cancels the currently running job.  Can be used to cancel currently running jobs like extract refreshes.  
+
+**Parameters**
+
+Name | Description
+:----|:----
+`job_id`  |  The `job_id` specifies the id of the job that we want to cancel. It is the id of the job that is retunred from an asynchronous taks, such as extract refresh, run a flow, or import or update to groups using Active Directory.
+
+**Exceptions**
+
+Error | Description
+:----|:----
+404 Resource Not Found | Raises an error if the `job_id` is not found.
+
+**Returns** Returns the details of the canceled job including the URL of the site where the job was created.
+
+**Example**
+```py
+#  Query a Job
+
+# import tableauserverclient as TSC
+# tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
+# server = TSC.Server('https://SERVERURL')
+
+  with server.auth.sign_in(tableau_auth):
+
+     # get the id of the job from response from the query job method.
+     # in this example, "576b781d-331c-4539-b61d-1ed0eb9db548"
+    cancelJobId = '576b781d-331c-4539-b61d-1ed0eb9db548'
+    jobs.cancel (cancelJobId)
+
+```
+
 #### jobs.wait_for_job
 
 
@@ -3188,7 +3227,8 @@ Attribute | Description
 `name` | The name of the site. The name of the default site is "".
 `content_url` | The path to the site.
 `admin_mode` | (Optional) For Tableau Server only. Specify `ContentAndUsers` to allow site administrators to use the server interface and **tabcmd** commands to add and remove users. (Specifying this option does not give site administrators permissions to manage users using the REST API.) Specify `ContentOnly` to prevent site administrators from adding or removing users. (Server administrators can always add or remove users.)
-`user_quota`| (Optional) Specifies the maximum number of users for the site. If you do not specify this value, the limit depends on the type of licensing configured for the server. For user-based license, the maximum number of users is set by the license. For core-based licensing, there is no limit to the number of users. If you specify a maximum value, only licensed users are counted and server administrators are excluded. Mutually exclusive with tiered license level settings.
+`user_quota`| (Optional) Specifies the total number of users for the site. The number can't exceed the number of licenses activated for the site; and if tiered capacity attributes are set, then `user_quota` will equal the sum of the tiered capacity values, and attempting to set `user_quota` will cause an error. 
+Tiered capacity attributes: `tier_explorer_capacitytier_explorer_capacity` `tier_creator_capacitytier_creator_capacity` `tier_viewer_capacity`| (Optional) The maximum number of licenses for users with the Creator, Explorer, or Viewer role, respectively, allowed on a site.(Optional) The maximum number of licenses for users with the Creator, Explorer, or Viewer role, respectively, allowed on a site.  
 `storage_quota` | (Optional) 	Specifies the maximum amount of space for the new site, in megabytes. If you set a quota and the site exceeds it, publishers will be prevented from uploading new content until the site is under the limit again.
 `disable_subscriptions` | (Optional) Specify `true` to prevent users from being able to subscribe to workbooks on the specified site. The default is `false`.
 `subscribe_others_enabled` | (Optional) Specify `false` to prevent server administrators, site administrators, and project or content owners from being able to subscribe other users to workbooks on the specified site. The default is `true`.
@@ -4241,7 +4281,6 @@ The `UserItem`.  See [UserItem class](#useritem-class)
 ```
 
 <br>
-<br>
 
 
 #### users.populate_favorites
@@ -5068,6 +5107,7 @@ Name  |  Description
 `project_name` | The name of the project.
 `size` | The size of the workbook (in megabytes).
 `show_tabs`  |  (Boolean) Determines whether the workbook shows tabs for the view.
+`hidden_views` | (Optional) List of string names of views that need to be hidden when the workbook is published.`hidden_views` | (Optional) List of string names of views that need to be hidden.
 `tags` |  The tags that have been added to the workbook.
 `updated_at` |  The date and time when the workbook was last updated.
 `views`   | The list of views (`ViewItem`) for the workbook. You must first call the [workbooks.populate_views](#workbooks.populate_views) method to access this data. See the [ViewItem class](#viewitem-class).
@@ -5225,7 +5265,7 @@ REST API: [Publish Workbook](https://help.tableau.com/current/api/rest_api/en-us
 Name | Description
 :--- | :---
 `workbook_item`  |  The `workbook_item` specifies the workbook you are publishing. When you are adding a workbook, you need to first create a new instance of a `workbook_item` that includes a `project_id` of an existing project. The name of the workbook will be the name of the file, unless you also specify a name for the new workbook when you create the instance. See [WorkbookItem](#workbookitem-class).
-`file_path`  |  The path and name of the workbook to publish.
+`file`  |  The file path or file object of the workbook to publish. When providing a file object, you must also specifiy the name of the workbook in your instance of the `workbook_item``workbook_item` , as the name cannot be derived from the file name.
 `mode`     |  Specifies whether you are publishing a new workbook (`CreateNew`) or overwriting an existing workbook (`Overwrite`).  You cannot appending workbooks.  You can also use the publish mode attributes, for example: `TSC.Server.PublishMode.Overwrite`.
 `connections` | List of `ConnectionItems` objects for the connections created within the workbook.
 `connection_credentials` | (Optional)  The credentials (if required) to connect to the workbook's data source. The `ConnectionCredentials` object contains the authentication information for the data source (user name and password, and whether the credentials are embedded or OAuth is used). **Deprecated since API server version 2.3.**
