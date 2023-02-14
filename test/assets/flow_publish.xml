@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api https://help.tableau.com/samples/en-us/rest_api/ts-api_3_17.xsd">
+	<flowOutputSteps/>
+	<flow id="2457c468-1b24-461a-8f95-a461b3209d32" name="SampleFlow" description="Sample Flow Description" fileType="tfl" createdAt="2023-01-13T09:50:55Z" updatedAt="2023-01-13T09:50:55Z">
+		<project id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760" name="default"/>
+		<owner id="5de011f8-5aa9-4d5b-b991-f462c8dd6bb7" />
+		<tags/>
+		<parameters/>
+	</flow>
+</tsResponse>
