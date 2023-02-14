@@ -3228,7 +3228,7 @@ Attribute | Description
 `content_url` | The path to the site.
 `admin_mode` | (Optional) For Tableau Server only. Specify `ContentAndUsers` to allow site administrators to use the server interface and **tabcmd** commands to add and remove users. (Specifying this option does not give site administrators permissions to manage users using the REST API.) Specify `ContentOnly` to prevent site administrators from adding or removing users. (Server administrators can always add or remove users.)
 `user_quota`| (Optional) Specifies the total number of users for the site. The number can't exceed the number of licenses activated for the site; and if tiered capacity attributes are set, then `user_quota` will equal the sum of the tiered capacity values, and attempting to set `user_quota` will cause an error. 
-Tiered capacity attributes: `tier_explorer_capacitytier_explorer_capacity` `tier_creator_capacitytier_creator_capacity` `tier_viewer_capacity`| (Optional) The maximum number of licenses for users with the Creator, Explorer, or Viewer role, respectively, allowed on a site.(Optional) The maximum number of licenses for users with the Creator, Explorer, or Viewer role, respectively, allowed on a site.  
+Tiered capacity attributes: `tier_explorer_capacitytier_explorer_capacity` `tier_creator_capacitytier_creator_capacity` `tier_viewer_capacity`| (Optional) The maximum number of licenses for users with the Creator, Explorer, or Viewer role, respectively, allowed on a site.  
 `storage_quota` | (Optional) 	Specifies the maximum amount of space for the new site, in megabytes. If you set a quota and the site exceeds it, publishers will be prevented from uploading new content until the site is under the limit again.
 `disable_subscriptions` | (Optional) Specify `true` to prevent users from being able to subscribe to workbooks on the specified site. The default is `false`.
 `subscribe_others_enabled` | (Optional) Specify `false` to prevent server administrators, site administrators, and project or content owners from being able to subscribe other users to workbooks on the specified site. The default is `true`.
@@ -5107,7 +5107,7 @@ Name  |  Description
 `project_name` | The name of the project.
 `size` | The size of the workbook (in megabytes).
 `show_tabs`  |  (Boolean) Determines whether the workbook shows tabs for the view.
-`hidden_views` | (Optional) List of string names of views that need to be hidden when the workbook is published.`hidden_views` | (Optional) List of string names of views that need to be hidden.
+`hidden_views` | (Optional) List of string names of views that need to be hidden when the workbook is published.
 `tags` |  The tags that have been added to the workbook.
 `updated_at` |  The date and time when the workbook was last updated.
 `views`   | The list of views (`ViewItem`) for the workbook. You must first call the [workbooks.populate_views](#workbooks.populate_views) method to access this data. See the [ViewItem class](#viewitem-class).
