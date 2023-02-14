@@ -30,7 +30,8 @@ class TestAllModels(TestCase):
     Resource wrapper_descriptor
     """
 
-    @pytest.mark.xfail("not all models have __repr__ yet: see above list")
+    # not all models have __repr__ yet: see above list
+    @pytest.mark.xfail()
     def test_repr_is_implemented(self):
         m = _models.get_defined_models()
         for model in m:
