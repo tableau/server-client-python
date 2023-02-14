@@ -17,8 +17,8 @@ class ProjectItem(object):
 
     def __repr__(self):
         return "<Project {0} {1} parent={2} permissions={3}>".format(
-            self._id, self.name, self.parent_id or "None (Top level)", self.content_permissions or "Not Set")
-
+            self._id, self.name, self.parent_id or "None (Top level)", self.content_permissions or "Not Set"
+        )
 
     def __init__(
         self,

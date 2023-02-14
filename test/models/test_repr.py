@@ -37,5 +37,4 @@ class TestAllModels(TestCase):
         for model in m:
             with self.subTest(model.__name__, model=model):
                 print(model.__name__, type(model.__repr__).__name__)
-                self.assertEqual(type(model.__repr__).__name__, 'function')
-
+                self.assertEqual(type(model.__repr__).__name__, "function")

@@ -49,7 +49,7 @@ _PRODUCT_TO_REST_VERSION = {
     "9.0": "2.0",
 }
 minimum_supported_server_version = "2.3"
-default_server_version = "3.0" # at least use the current major version
+default_server_version = "3.0"  # at least use the current major version
 
 
 class Server(object):

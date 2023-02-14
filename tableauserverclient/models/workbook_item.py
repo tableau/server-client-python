@@ -33,7 +33,6 @@ if TYPE_CHECKING:
 
 
 class WorkbookItem(object):
-
     def __init__(self, project_id: str, name: Optional[str] = None, show_tabs: bool = False) -> None:
         self._connections = None
         self._content_url = None
@@ -68,7 +67,8 @@ class WorkbookItem(object):
 
     def __repr__(self):
         return "<WorkbookItem {0} '{1}' contentUrl='{2}' project={3}>".format(
-            self._id, self.name, self.content_url, self.project_id)
+            self._id, self.name, self.content_url, self.project_id
+        )
 
     @property
     def connections(self) -> List["ConnectionItem"]:
