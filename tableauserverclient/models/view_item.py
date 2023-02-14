@@ -33,6 +33,10 @@ class ViewItem(object):
         self._permissions: Optional[Callable[[], List["PermissionsRule"]]] = None
         self.tags: Set[str] = set()
 
+    def __repr__(self):
+        return "<ViewItem {0} '{1}' contentUrl='{2}' project={3}>".format(
+            self._id, self.name, self.content_url, self.project_id)
+
     def _set_preview_image(self, preview_image):
         self._preview_image = preview_image
 
