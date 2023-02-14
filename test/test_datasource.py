@@ -470,6 +470,18 @@ class DatasourceTests(unittest.TestCase):
             self.assertTrue(os.path.exists(file_path))
         os.remove(file_path)
 
+    def test_download_object(self) -> None:
+        with BytesIO() as file_object:
+            with requests_mock.mock() as m:
+                m.get(
+                    self.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/content",
+                    headers={"Content-Disposition": 'name="tableau_datasource"; filename="Sample datasource.tds"'},
+                )
+                file_path = self.server.datasources.download(
+                    "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", filepath=file_object
+                )
+                self.assertTrue(isinstance(file_path, BytesIO))
+
     def test_download_sanitizes_name(self) -> None:
         filename = "Name,With,Commas.tds"
         disposition = 'name="tableau_workbook"; filename="{}"'.format(filename)

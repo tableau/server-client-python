@@ -267,6 +267,16 @@ class WorkbookTests(unittest.TestCase):
             self.assertTrue(os.path.exists(file_path))
         os.remove(file_path)
 
+    def test_download_object(self) -> None:
+        with BytesIO() as file_object:
+            with requests_mock.mock() as m:
+                m.get(
+                    self.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/content",
+                    headers={"Content-Disposition": 'name="tableau_workbook"; filename="RESTAPISample.twbx"'},
+                )
+                file_path = self.server.workbooks.download("1f951daf-4061-451a-9df1-69a8062664f2", filepath=file_object)
+                self.assertTrue(isinstance(file_path, BytesIO))
+
     def test_download_sanitizes_name(self) -> None:
         filename = "Name,With,Commas.twbx"
         disposition = 'name="tableau_workbook"; filename="{}"'.format(filename)
@@ -748,6 +758,30 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual(connection_results[1].get("serverAddress", None), "pgsql.test.com")
         self.assertEqual(connection_results[1].find("connectionCredentials").get("password", None), "secret")  # type: ignore[union-attr]
 
+    def test_publish_multi_connection_flat(self) -> None:
+        new_workbook = TSC.WorkbookItem(
+            name="Sample", show_tabs=False, project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760"
+        )
+        connection1 = TSC.ConnectionItem()
+        connection1.server_address = "mysql.test.com"
+        connection1.username = "test"
+        connection1.password = "secret"
+        connection1.embed_password = True
+        connection2 = TSC.ConnectionItem()
+        connection2.server_address = "pgsql.test.com"
+        connection2.username = "test"
+        connection2.password = "secret"
+        connection2.embed_password = True
+
+        response = RequestFactory.Workbook._generate_xml(new_workbook, connections=[connection1, connection2])
+        # Can't use ConnectionItem parser due to xml namespace problems
+        connection_results = fromstring(response).findall(".//connection")
+
+        self.assertEqual(connection_results[0].get("serverAddress", None), "mysql.test.com")
+        self.assertEqual(connection_results[0].find("connectionCredentials").get("name", None), "test")  # type: ignore[union-attr]
+        self.assertEqual(connection_results[1].get("serverAddress", None), "pgsql.test.com")
+        self.assertEqual(connection_results[1].find("connectionCredentials").get("password", None), "secret")  # type: ignore[union-attr]
+
     def test_publish_single_connection(self) -> None:
         new_workbook = TSC.WorkbookItem(
             name="Sample", show_tabs=False, project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760"
@@ -759,6 +793,33 @@ class WorkbookTests(unittest.TestCase):
         credentials = fromstring(response).findall(".//connectionCredentials")
         self.assertEqual(len(credentials), 1)
         self.assertEqual(credentials[0].get("name", None), "test")
+        self.assertEqual(credentials[0].get("password", None), "secret")
+        self.assertEqual(credentials[0].get("embed", None), "true")
+
+    def test_publish_single_connection_username_none(self) -> None:
+        new_workbook = TSC.WorkbookItem(
+            name="Sample", show_tabs=False, project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760"
+        )
+        connection_creds = TSC.ConnectionCredentials(None, "secret", True)
+
+        self.assertRaises(
+            ValueError,
+            RequestFactory.Workbook._generate_xml,
+            new_workbook,
+            connection_credentials=connection_creds,
+        )
+
+    def test_publish_single_connection_username_empty(self) -> None:
+        new_workbook = TSC.WorkbookItem(
+            name="Sample", show_tabs=False, project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760"
+        )
+        connection_creds = TSC.ConnectionCredentials("", "secret", True)
+
+        response = RequestFactory.Workbook._generate_xml(new_workbook, connection_credentials=connection_creds)
+        # Can't use ConnectionItem parser due to xml namespace problems
+        credentials = fromstring(response).findall(".//connectionCredentials")
+        self.assertEqual(len(credentials), 1)
+        self.assertEqual(credentials[0].get("name", None), "")
         self.assertEqual(credentials[0].get("password", None), "secret")
         self.assertEqual(credentials[0].get("embed", None), "true")
 

@@ -1,8 +1,10 @@
 import cgi
 import copy
+import io
 import logging
 import os
 from contextlib import closing
+from pathlib import Path
 from typing import Iterable, List, Optional, TYPE_CHECKING, Tuple, Union
 
 from .dqw_endpoint import _DataQualityWarningEndpoint
@@ -11,8 +13,16 @@ from .exceptions import InternalServerError, MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .resource_tagger import _ResourceTagger
 from .. import RequestFactory, FlowItem, PaginationItem, ConnectionItem
-from ...filesys_helpers import to_filename, make_download_path
+from ...filesys_helpers import (
+    to_filename,
+    make_download_path,
+    get_file_type,
+    get_file_object_size,
+)
 from ...models.job_item import JobItem
+
+io_types_r = (io.BytesIO, io.BufferedReader)
+io_types_w = (io.BytesIO, io.BufferedWriter)
 
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
@@ -29,6 +39,10 @@ if TYPE_CHECKING:
 
 
 FilePath = Union[str, os.PathLike]
+FileObjectR = Union[io.BufferedReader, io.BytesIO]
+FileObjectW = Union[io.BufferedWriter, io.BytesIO]
+PathOrFileR = Union[FilePath, FileObjectR]
+PathOrFileW = Union[FilePath, FileObjectW]
 
 
 class Flows(QuerysetEndpoint):
@@ -94,7 +108,7 @@ class Flows(QuerysetEndpoint):
 
     # Download 1 flow by id
     @api(version="3.3")
-    def download(self, flow_id: str, filepath: FilePath = None) -> str:
+    def download(self, flow_id: str, filepath: Optional[PathOrFileW] = None) -> PathOrFileW:
         if not flow_id:
             error = "Flow ID undefined."
             raise ValueError(error)
@@ -102,16 +116,20 @@ class Flows(QuerysetEndpoint):
 
         with closing(self.get_request(url, parameters={"stream": True})) as server_response:
             _, params = cgi.parse_header(server_response.headers["Content-Disposition"])
-            filename = to_filename(os.path.basename(params["filename"]))
-
-            download_path = make_download_path(filepath, filename)
-
-            with open(download_path, "wb") as f:
+            if isinstance(filepath, io_types_w):
                 for chunk in server_response.iter_content(1024):  # 1KB
-                    f.write(chunk)
+                    filepath.write(chunk)
+                return_path = filepath
+            else:
+                filename = to_filename(os.path.basename(params["filename"]))
+                download_path = make_download_path(filepath, filename)
+                with open(download_path, "wb") as f:
+                    for chunk in server_response.iter_content(1024):  # 1KB
+                        f.write(chunk)
+                return_path = os.path.abspath(download_path)
 
-        logger.info("Downloaded flow to {0} (ID: {1})".format(download_path, flow_id))
-        return os.path.abspath(download_path)
+        logger.info("Downloaded flow to {0} (ID: {1})".format(return_path, flow_id))
+        return return_path
 
     # Update flow
     @api(version="3.3")
@@ -153,24 +171,49 @@ class Flows(QuerysetEndpoint):
     # Publish flow
     @api(version="3.3")
     def publish(
-        self, flow_item: FlowItem, file_path: FilePath, mode: str, connections: Optional[List[ConnectionItem]] = None
+        self, flow_item: FlowItem, file: PathOrFileR, mode: str, connections: Optional[List[ConnectionItem]] = None
     ) -> FlowItem:
-        if not os.path.isfile(file_path):
-            error = "File path does not lead to an existing file."
-            raise IOError(error)
         if not mode or not hasattr(self.parent_srv.PublishMode, mode):
             error = "Invalid mode defined."
             raise ValueError(error)
 
-        filename = os.path.basename(file_path)
-        file_extension = os.path.splitext(filename)[1][1:]
+        if isinstance(file, (str, os.PathLike)):
+            if not os.path.isfile(file):
+                error = "File path does not lead to an existing file."
+                raise IOError(error)
 
-        # If name is not defined, grab the name from the file to publish
-        if not flow_item.name:
-            flow_item.name = os.path.splitext(filename)[0]
-        if file_extension not in ALLOWED_FILE_EXTENSIONS:
-            error = "Only {} files can be published as flows.".format(", ".join(ALLOWED_FILE_EXTENSIONS))
-            raise ValueError(error)
+            filename = os.path.basename(file)
+            file_extension = os.path.splitext(filename)[1][1:]
+            file_size = os.path.getsize(file)
+
+            # If name is not defined, grab the name from the file to publish
+            if not flow_item.name:
+                flow_item.name = os.path.splitext(filename)[0]
+            if file_extension not in ALLOWED_FILE_EXTENSIONS:
+                error = "Only {} files can be published as flows.".format(", ".join(ALLOWED_FILE_EXTENSIONS))
+                raise ValueError(error)
+
+        elif isinstance(file, io_types_r):
+            if not flow_item.name:
+                error = "Flow item must have a name when passing a file object"
+                raise ValueError(error)
+
+            file_type = get_file_type(file)
+            if file_type == "zip":
+                file_extension = "tflx"
+            elif file_type == "xml":
+                file_extension = "tfl"
+            else:
+                error = "Unsupported file type {}!".format(file_type)
+                raise ValueError(error)
+
+            # Generate filename for file object.
+            # This is needed when publishing the flow in a single request
+            filename = "{}.{}".format(flow_item.name, file_extension)
+            file_size = get_file_object_size(file)
+
+        else:
+            raise TypeError("file should be a filepath or file object.")
 
         # Construct the url with the defined mode
         url = "{0}?flowType={1}".format(self.baseurl, file_extension)
@@ -178,15 +221,24 @@ class Flows(QuerysetEndpoint):
             url += "&{0}=true".format(mode.lower())
 
         # Determine if chunking is required (64MB is the limit for single upload method)
-        if os.path.getsize(file_path) >= FILESIZE_LIMIT:
+        if file_size >= FILESIZE_LIMIT:
             logger.info("Publishing {0} to server with chunking method (flow over 64MB)".format(filename))
-            upload_session_id = self.parent_srv.fileuploads.upload(file_path)
+            upload_session_id = self.parent_srv.fileuploads.upload(file)
             url = "{0}&uploadSessionId={1}".format(url, upload_session_id)
             xml_request, content_type = RequestFactory.Flow.publish_req_chunked(flow_item, connections)
         else:
             logger.info("Publishing {0} to server".format(filename))
-            with open(file_path, "rb") as f:
-                file_contents = f.read()
+
+            if isinstance(file, (str, Path)):
+                with open(file, "rb") as f:
+                    file_contents = f.read()
+
+            elif isinstance(file, io_types_r):
+                file_contents = file.read()
+
+            else:
+                raise TypeError("file should be a filepath or file object.")
+
             xml_request, content_type = RequestFactory.Flow.publish_req(flow_item, filename, file_contents, connections)
 
         # Send the publishing request to server

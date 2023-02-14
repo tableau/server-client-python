@@ -7,6 +7,7 @@ from requests.packages.urllib3.filepost import encode_multipart_formdata
 
 from tableauserverclient.models.metric_item import MetricItem
 
+from ..models import ConnectionCredentials
 from ..models import ConnectionItem
 from ..models import DataAlertItem
 from ..models import FlowItem
@@ -55,6 +56,13 @@ def _add_connections_element(connections_element, connection):
         connection_element.attrib["serverPort"] = connection.server_port
     if connection.connection_credentials:
         connection_credentials = connection.connection_credentials
+    elif connection.username is not None and connection.password is not None and connection.embed_password is not None:
+        connection_credentials = ConnectionCredentials(
+            connection.username, connection.password, embed=connection.embed_password
+        )
+    else:
+        connection_credentials = None
+    if connection_credentials:
         _add_credentials_element(connection_element, connection_credentials)
 
 
@@ -66,7 +74,7 @@ def _add_hiddenview_element(views_element, view_name):
 
 def _add_credentials_element(parent_element, connection_credentials):
     credentials_element = ET.SubElement(parent_element, "connectionCredentials")
-    if not connection_credentials.password or not connection_credentials.name:
+    if connection_credentials.password is None or connection_credentials.name is None:
         raise ValueError("Connection Credentials must have a name and password")
     credentials_element.attrib["name"] = connection_credentials.name
     credentials_element.attrib["password"] = connection_credentials.password
@@ -174,10 +182,10 @@ class DatasourceRequest(object):
         if connection_credentials is not None and connections is not None:
             raise RuntimeError("You cannot set both `connections` and `connection_credentials`")
 
-        if connection_credentials is not None:
+        if connection_credentials is not None and connection_credentials != False:
             _add_credentials_element(datasource_element, connection_credentials)
 
-        if connections is not None:
+        if connections is not None and connections != False and len(connections) > 0:
             connections_element = ET.SubElement(datasource_element, "connections")
             for connection in connections:
                 _add_connections_element(connections_element, connection)
@@ -329,7 +337,7 @@ class FlowRequest(object):
         project_element = ET.SubElement(flow_element, "project")
         project_element.attrib["id"] = flow_item.project_id
 
-        if connections is not None:
+        if connections is not None and connections != False:
             connections_element = ET.SubElement(flow_element, "connections")
             for connection in connections:
                 _add_connections_element(connections_element, connection)
@@ -575,7 +583,7 @@ class ScheduleRequest(object):
 
 
 class SiteRequest(object):
-    def update_req(self, site_item: "SiteItem", parent_srv: "Server" = None):
+    def update_req(self, site_item: "SiteItem", parent_srv: Optional["Server"] = None):
         xml_request = ET.Element("tsRequest")
         site_element = ET.SubElement(xml_request, "site")
         if site_item.name:
@@ -683,7 +691,7 @@ class SiteRequest(object):
         return ET.tostring(xml_request)
 
     # server: the site request model changes based on api version
-    def create_req(self, site_item: "SiteItem", parent_srv: "Server" = None):
+    def create_req(self, site_item: "SiteItem", parent_srv: Optional["Server"] = None):
         xml_request = ET.Element("tsRequest")
         site_element = ET.SubElement(xml_request, "site")
         site_element.attrib["name"] = site_item.name
@@ -896,10 +904,10 @@ class WorkbookRequest(object):
         if connection_credentials is not None and connections is not None:
             raise RuntimeError("You cannot set both `connections` and `connection_credentials`")
 
-        if connection_credentials is not None:
+        if connection_credentials is not None and connection_credentials != False:
             _add_credentials_element(workbook_element, connection_credentials)
 
-        if connections is not None:
+        if connections is not None and connections != False and len(connections) > 0:
             connections_element = ET.SubElement(workbook_element, "connections")
             for connection in connections:
                 _add_connections_element(connections_element, connection)

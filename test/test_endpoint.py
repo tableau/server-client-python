@@ -38,3 +38,21 @@ class TestEndpoint(unittest.TestCase):
         server_response = FakeResponse()
         log = endpoint.log_response_safely(server_response)
         self.assertTrue(log.find("[Truncated File Contents]") > 0, log)
+
+    def test_set_user_agent_from_options_headers(self):
+        params = {"User-Agent": "1", "headers": {"User-Agent": "2"}}
+        result = TSC.server.Endpoint.set_user_agent(params)
+        # it should use the value under 'headers' if more than one is given
+        print(result)
+        print(result["headers"]["User-Agent"])
+        self.assertTrue(result["headers"]["User-Agent"] == "2")
+
+    def test_set_user_agent_from_options(self):
+        params = {"headers": {"User-Agent": "2"}}
+        result = TSC.server.Endpoint.set_user_agent(params)
+        self.assertTrue(result["headers"]["User-Agent"] == "2")
+
+    def test_set_user_agent_when_blank(self):
+        params = {"headers": {}}
+        result = TSC.server.Endpoint.set_user_agent(params)
+        self.assertTrue(result["headers"]["User-Agent"].startswith("Tableau Server Client"))
