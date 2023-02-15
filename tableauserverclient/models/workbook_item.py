@@ -14,7 +14,7 @@ from .property_decorators import (
 )
 from .tag_item import TagItem
 from .view_item import ViewItem
-from ..datetime_helpers import parse_datetime
+from tableauserverclient.datetime_helpers import parse_datetime
 
 
 if TYPE_CHECKING:

@@ -2,7 +2,7 @@ from typing import List, Optional, TYPE_CHECKING
 
 from defusedxml.ElementTree import fromstring
 
-from ..datetime_helpers import parse_datetime
+from tableauserverclient.datetime_helpers import parse_datetime
 
 if TYPE_CHECKING:
     from datetime import datetime

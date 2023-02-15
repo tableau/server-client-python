@@ -5,7 +5,7 @@ from defusedxml.ElementTree import fromstring
 
 from .exceptions import UnpopulatedPropertyError
 from .tag_item import TagItem
-from ..datetime_helpers import parse_datetime
+from tableauserverclient.datetime_helpers import parse_datetime
 
 if TYPE_CHECKING:
     from datetime import datetime

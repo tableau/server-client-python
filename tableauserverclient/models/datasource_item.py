@@ -11,7 +11,7 @@ from .property_decorators import (
     property_is_enum,
 )
 from .tag_item import TagItem
-from ..datetime_helpers import parse_datetime
+from tableauserverclient.datetime_helpers import parse_datetime
 
 if TYPE_CHECKING:
     from .permissions_item import PermissionsRule

@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from ..datetime_helpers import parse_datetime
+from tableauserverclient.datetime_helpers import parse_datetime
 from .property_decorators import property_is_boolean, property_is_datetime
 from .tag_item import TagItem
 from typing import List, Optional, TYPE_CHECKING, Set

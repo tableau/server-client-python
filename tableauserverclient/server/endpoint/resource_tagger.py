@@ -4,8 +4,8 @@ import urllib.parse
 
 from .endpoint import Endpoint
 from .exceptions import EndpointUnavailableError, ServerResponseError
-from .. import RequestFactory
-from ...models.tag_item import TagItem
+from tableauserverclient.server import RequestFactory
+from tableauserverclient.models import TagItem
 
 logger = logging.getLogger("tableau.endpoint.resource_tagger")
 

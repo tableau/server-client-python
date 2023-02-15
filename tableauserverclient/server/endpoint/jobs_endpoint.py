@@ -2,9 +2,9 @@ import logging
 
 from .endpoint import QuerysetEndpoint, api
 from .exceptions import JobCancelledException, JobFailedException
-from .. import JobItem, BackgroundJobItem, PaginationItem
+from tableauserverclient.models import JobItem, BackgroundJobItem, PaginationItem
 from ..request_options import RequestOptionsBase
-from ...exponential_backoff import ExponentialBackoffTimer
+from tableauserverclient.exponential_backoff import ExponentialBackoffTimer
 
 logger = logging.getLogger("tableau.endpoint.jobs")
 

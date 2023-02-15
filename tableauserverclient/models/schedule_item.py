@@ -16,7 +16,7 @@ from .property_decorators import (
     property_not_nullable,
     property_is_int,
 )
-from ..datetime_helpers import parse_datetime
+from tableauserverclient.datetime_helpers import parse_datetime
 
 Interval = Union[HourlyInterval, DailyInterval, WeeklyInterval, MonthlyInterval]
 

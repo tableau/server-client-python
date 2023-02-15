@@ -3,7 +3,7 @@ import logging
 from .default_permissions_endpoint import _DefaultPermissionsEndpoint
 from .endpoint import api, Endpoint
 from .permissions_endpoint import _PermissionsEndpoint
-from ...models.data_acceleration_report_item import DataAccelerationReportItem
+from tableauserverclient.models import DataAccelerationReportItem
 
 logger = logging.getLogger("tableau.endpoint.data_acceleration_report")
 

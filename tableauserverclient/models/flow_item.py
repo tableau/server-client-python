@@ -7,12 +7,7 @@ from defusedxml.ElementTree import fromstring
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_not_nullable
 from .tag_item import TagItem
-from ..datetime_helpers import parse_datetime
-
-if TYPE_CHECKING:
-    import datetime
-
-from typing import List, Optional, TYPE_CHECKING, Set
+from tableauserverclient.datetime_helpers import parse_datetime
 
 if TYPE_CHECKING:
     import datetime

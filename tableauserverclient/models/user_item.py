@@ -1,10 +1,8 @@
-import io
-import logging
-import xml.etree.ElementTree as ET
 from datetime import datetime
-from enum import IntEnum
-
 from defusedxml.ElementTree import fromstring
+from enum import IntEnum
+import io
+import xml.etree.ElementTree as ET
 
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import (
@@ -12,12 +10,12 @@ from .property_decorators import (
     property_not_empty,
 )
 from .reference_item import ResourceReference
-from ..datetime_helpers import parse_datetime
+from tableauserverclient.datetime_helpers import parse_datetime
 
 from typing import Dict, List, Optional, TYPE_CHECKING, Tuple
 
 if TYPE_CHECKING:
-    from ..server.pager import Pager
+    from tableauserverclient.server import Pager
 
 
 class UserItem(object):

@@ -1,16 +1,16 @@
 import logging
 
 from .endpoint import Endpoint, api
-from .. import RequestFactory
-from ...models import FavoriteItem
-
-logger = logging.getLogger("tableau.endpoint.favorites")
+from tableauserverclient.server import RequestFactory
+from tableauserverclient.models import FavoriteItem
 
 from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ...models import DatasourceItem, FlowItem, ProjectItem, UserItem, ViewItem, WorkbookItem
     from ..request_options import RequestOptions
+
+logger = logging.getLogger("tableau.endpoint.favorites")
 
 
 class Favorites(Endpoint):
