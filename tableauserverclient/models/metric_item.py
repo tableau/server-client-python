@@ -1,11 +1,10 @@
 import xml.etree.ElementTree as ET
+from datetime import datetime
+from typing import List, Optional, Set
+
 from tableauserverclient.datetime_helpers import parse_datetime
 from .property_decorators import property_is_boolean, property_is_datetime
 from .tag_item import TagItem
-from typing import List, Optional, TYPE_CHECKING, Set
-
-if TYPE_CHECKING:
-    from datetime import datetime
 
 
 class MetricItem(object):
@@ -14,8 +13,8 @@ class MetricItem(object):
         self._name: Optional[str] = name
         self._description: Optional[str] = None
         self._webpage_url: Optional[str] = None
-        self._created_at: Optional["datetime"] = None
-        self._updated_at: Optional["datetime"] = None
+        self._created_at: Optional[datetime] = None
+        self._updated_at: Optional[datetime] = None
         self._suspended: Optional[bool] = None
         self._project_id: Optional[str] = None
         self._project_name: Optional[str] = None
@@ -53,7 +52,7 @@ class MetricItem(object):
         return self._webpage_url
 
     @property
-    def created_at(self) -> Optional["datetime"]:
+    def created_at(self) -> Optional[datetime]:
         return self._created_at
 
     @created_at.setter
@@ -62,7 +61,7 @@ class MetricItem(object):
         self._created_at = value
 
     @property
-    def updated_at(self) -> Optional["datetime"]:
+    def updated_at(self) -> Optional[datetime]:
         return self._updated_at
 
     @updated_at.setter

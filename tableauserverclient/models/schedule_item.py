@@ -4,6 +4,7 @@ from typing import Optional, Union
 
 from defusedxml.ElementTree import fromstring
 
+from tableauserverclient.datetime_helpers import parse_datetime
 from .interval_item import (
     IntervalItem,
     HourlyInterval,
@@ -16,7 +17,6 @@ from .property_decorators import (
     property_not_nullable,
     property_is_int,
 )
-from tableauserverclient.datetime_helpers import parse_datetime
 
 Interval = Union[HourlyInterval, DailyInterval, WeeklyInterval, MonthlyInterval]
 

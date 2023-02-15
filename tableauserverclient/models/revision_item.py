@@ -1,11 +1,9 @@
-from typing import List, Optional, TYPE_CHECKING
+from datetime import datetime
+from typing import List, Optional
 
 from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.datetime_helpers import parse_datetime
-
-if TYPE_CHECKING:
-    from datetime import datetime
 
 
 class RevisionItem(object):
@@ -15,7 +13,7 @@ class RevisionItem(object):
         self._revision_number: Optional[str] = None
         self._current: Optional[bool] = None
         self._deleted: Optional[bool] = None
-        self._created_at: Optional["datetime"] = None
+        self._created_at: Optional[datetime] = None
         self._user_id: Optional[str] = None
         self._user_name: Optional[str] = None
 
@@ -40,7 +38,7 @@ class RevisionItem(object):
         return self._deleted
 
     @property
-    def created_at(self) -> Optional["datetime"]:
+    def created_at(self) -> Optional[datetime]:
         return self._created_at
 
     @property

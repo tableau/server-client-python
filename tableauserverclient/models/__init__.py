@@ -8,9 +8,9 @@ from .datasource_item import DatasourceItem
 from .dqw_item import DQWItem
 from .exceptions import UnpopulatedPropertyError
 from .favorites_item import FavoriteItem
+from .fileupload_item import FileuploadItem
 from .flow_item import FlowItem
 from .flow_run_item import FlowRunItem
-from .fileupload_item import FileuploadItem
 from .group_item import GroupItem
 from .interval_item import (
     IntervalItem,

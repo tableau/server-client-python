@@ -1,18 +1,18 @@
-from datetime import datetime
-from defusedxml.ElementTree import fromstring
-from enum import IntEnum
 import io
 import xml.etree.ElementTree as ET
+from datetime import datetime
+from enum import IntEnum
+from typing import Dict, List, Optional, TYPE_CHECKING, Tuple
 
+from defusedxml.ElementTree import fromstring
+
+from tableauserverclient.datetime_helpers import parse_datetime
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import (
     property_is_enum,
     property_not_empty,
 )
 from .reference_item import ResourceReference
-from tableauserverclient.datetime_helpers import parse_datetime
-
-from typing import Dict, List, Optional, TYPE_CHECKING, Tuple
 
 if TYPE_CHECKING:
     from tableauserverclient.server import Pager
