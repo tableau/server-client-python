@@ -97,6 +97,8 @@ class Server(object):
 
         self.logger = logging.getLogger("TSC.server")
 
+        self.logger = logging.getLogger("TSC.server")
+
         self._session = self._session_factory()
         self._http_options = dict()  # must set this before making a server call
         if http_options:
