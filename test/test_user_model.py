@@ -92,6 +92,14 @@ class UserDataTest(unittest.TestCase):
         assert test_user.site_role == "Unlicensed", test_user.site_role
         assert test_user.email == "email", test_user.email
 
+    def test_get_user_detail_variation(self):
+        test_line = ["username", "pword", "fname", "license", "admin", "pub", "email"]
+        test_user: TSC.UserItem = TSC.UserItem.CSVImport.create_user_model_from_line(test_line, UserDataTest.logger)
+        assert test_user.name == "username", test_user.name
+        assert test_user.fullname == "fname", test_user.fullname
+        assert test_user.site_role == "license", test_user.site_role
+        assert test_user.email == "email", test_user.email
+
     def test_get_user_details_only_username(self):
         test_line = ["username"]
         test_user: TSC.UserItem = TSC.UserItem.CSVImport.create_user_model_from_line(test_line, UserDataTest.logger)

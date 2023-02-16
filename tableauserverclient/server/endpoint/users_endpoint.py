@@ -1,3 +1,4 @@
+import _csv
 import copy
 import logging
 from typing import List, Optional, Tuple
@@ -12,6 +13,11 @@ logger = logging.getLogger("tableau.endpoint.users")
 
 
 class Users(QuerysetEndpoint):
+    def _check_user_id(self, user_item: UserItem):
+        if not user_item.id:
+            error = "User item missing ID."
+            raise MissingRequiredFieldError(error)
+
     @property
     def baseurl(self) -> str:
         return "{0}/sites/{1}/users".format(self.parent_srv.baseurl, self.parent_srv.site_id)
@@ -45,9 +51,7 @@ class Users(QuerysetEndpoint):
     # Update user
     @api(version="2.0")
     def update(self, user_item: UserItem, password: Optional[str] = None) -> UserItem:
-        if not user_item.id:
-            error = "User item missing ID."
-            raise MissingRequiredFieldError(error)
+        self._check_user_id(user_item)
 
         url = "{0}/{1}".format(self.baseurl, user_item.id)
         update_req = RequestFactory.User.update_req(user_item, password)
@@ -104,9 +108,7 @@ class Users(QuerysetEndpoint):
     # Get workbooks for user
     @api(version="2.0")
     def populate_workbooks(self, user_item: UserItem, req_options: Optional[RequestOptions] = None) -> None:
-        if not user_item.id:
-            error = "User item missing ID."
-            raise MissingRequiredFieldError(error)
+        self._check_user_id(user_item)
 
         def wb_pager():
             return Pager(lambda options: self._get_wbs_for_user(user_item, options), req_options)
@@ -116,6 +118,8 @@ class Users(QuerysetEndpoint):
     def _get_wbs_for_user(
         self, user_item: UserItem, req_options: Optional[RequestOptions] = None
     ) -> Tuple[List[WorkbookItem], PaginationItem]:
+        self._check_user_id(user_item)
+
         url = "{0}/{1}/workbooks".format(self.baseurl, user_item.id)
         server_response = self.get_request(url, req_options)
         logger.info("Populated workbooks for user (ID: {0})".format(user_item.id))
@@ -129,9 +133,7 @@ class Users(QuerysetEndpoint):
     # Get groups for user
     @api(version="3.7")
     def populate_groups(self, user_item: UserItem, req_options: Optional[RequestOptions] = None) -> None:
-        if not user_item.id:
-            error = "User item missing ID."
-            raise MissingRequiredFieldError(error)
+        self._check_user_id(user_item)
 
         def groups_for_user_pager():
             return Pager(
