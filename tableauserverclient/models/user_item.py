@@ -86,6 +86,8 @@ class UserItem:
         SAML = "SAML"
         TableauIDWithMFA = "TableauIDWithMFA"
         ServerDefault = "ServerDefault"
+        TableauID = "TableauID"
+        Local = "Local"
 
     def __init__(
         self, name: Optional[str] = None, site_role: Optional[str] = None, auth_setting: Optional[str] = None
@@ -394,7 +396,7 @@ class UserItem:
                         if not validate_only:
                             user: UserItem = UserItem.CSVImport.create_user_model_from_line(line, logger)
                             users.append(user)
-                        valid.append(line)
+                        valid.append(" ".join(line))
                     except Exception as e:
                         failed.append((" ".join(line), e))
             return users, valid, failed
@@ -419,6 +421,7 @@ class UserItem:
 
             if len(line) > UserItem.CSVImport.ColumnType.MAX:
                 raise AttributeError("Too many attributes in line")
+            # sometimes usernames are case sensitive
             username = line[UserItem.CSVImport.ColumnType.USERNAME.value]
             logger.debug(f"> details - {username}")
             UserItem.validate_username_or_throw(username)

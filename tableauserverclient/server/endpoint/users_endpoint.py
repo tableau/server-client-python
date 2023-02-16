@@ -1,3 +1,4 @@
+import _csv
 import copy
 import logging
 from typing import Optional
@@ -21,6 +22,10 @@ class Users(QuerysetEndpoint[UserItem]):
     users in the REST API and operate on the UserItem class. Only server and
     site administrators can access the user resources.
     """
+    def _check_user_id(self, user_item: UserItem):
+        if not user_item.id:
+            error = "User item missing ID."
+            raise MissingRequiredFieldError(error)
 
     @property
     def baseurl(self) -> str:
@@ -193,9 +198,7 @@ class Users(QuerysetEndpoint[UserItem]):
         >>> updated_user = server.users.update(user)
 
         """
-        if not user_item.id:
-            error = "User item missing ID."
-            raise MissingRequiredFieldError(error)
+        self._check_user_id(user_item)
 
         url = f"{self.baseurl}/{user_item.id}"
         update_req = RequestFactory.User.update_req(user_item, password)
@@ -424,9 +427,7 @@ class Users(QuerysetEndpoint[UserItem]):
         >>> for wb in user.workbooks:
         >>>     print(wb.name)
         """
-        if not user_item.id:
-            error = "User item missing ID."
-            raise MissingRequiredFieldError(error)
+        self._check_user_id(user_item)
 
         def wb_pager():
             return Pager(lambda options: self._get_wbs_for_user(user_item, options), req_options)
@@ -436,6 +437,8 @@ class Users(QuerysetEndpoint[UserItem]):
     def _get_wbs_for_user(
         self, user_item: UserItem, req_options: Optional[RequestOptions] = None
     ) -> tuple[list[WorkbookItem], PaginationItem]:
+        
+        self._check_user_id(user_item)
         url = f"{self.baseurl}/{user_item.id}/workbooks"
         server_response = self.get_request(url, req_options)
         logger.info(f"Populated workbooks for user (ID: {user_item.id})")
@@ -500,9 +503,7 @@ class Users(QuerysetEndpoint[UserItem]):
         >>> for group in user.groups:
         >>>     print(group.name)
         """
-        if not user_item.id:
-            error = "User item missing ID."
-            raise MissingRequiredFieldError(error)
+        self._check_user_id(user_item)
 
         def groups_for_user_pager():
             return Pager(
