@@ -13,6 +13,8 @@ GET_BY_NAME_XML = os.path.join(TEST_ASSET_DIR, "site_get_by_name.xml")
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, "site_update.xml")
 CREATE_XML = os.path.join(TEST_ASSET_DIR, "site_create.xml")
 
+DEFAULT_SITE_ID = "0626857c-1def-4503-a7d8-7907c3ff9d9f"
+
 
 class SiteTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -21,11 +23,11 @@ class SiteTests(unittest.TestCase):
 
         # Fake signin
         self.server._auth_token = "j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM"
-        self.server._site_id = "0626857c-1def-4503-a7d8-7907c3ff9d9f"
+        self.server._site_id = DEFAULT_SITE_ID
         self.baseurl = self.server.sites.baseurl
 
         # sites APIs can only be called on the site being logged in to
-        self.logged_in_site = self.server.site_id
+        self.logged_in_site = DEFAULT_SITE_ID
 
     def test_get(self) -> None:
         with open(GET_XML, "rb") as f:
@@ -90,6 +92,13 @@ class SiteTests(unittest.TestCase):
 
     def test_get_by_id_missing_id(self) -> None:
         self.assertRaises(ValueError, self.server.sites.get_by_id, "")
+
+    def test_get_current(self) -> None:
+        with open(GET_BY_ID_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + "/" + self.logged_in_site, text=response_xml)
+            self.server.sites.get_current_site()
 
     def test_get_by_name(self) -> None:
         with open(GET_BY_NAME_XML, "rb") as f:
@@ -187,7 +196,7 @@ class SiteTests(unittest.TestCase):
 
     def test_update_missing_id(self) -> None:
         single_site = TSC.SiteItem("test", "test")
-        self.assertRaises(TSC.MissingRequiredFieldError, self.server.sites.update, single_site)
+        self.assertRaises(ValueError, self.server.sites.update, single_site)
 
     def test_null_site_quota(self) -> None:
         test_site = TSC.SiteItem("testname", "testcontenturl", tier_explorer_capacity=1, user_quota=None)
@@ -237,6 +246,7 @@ class SiteTests(unittest.TestCase):
     def test_delete(self) -> None:
         with requests_mock.mock() as m:
             m.delete(self.baseurl + "/0626857c-1def-4503-a7d8-7907c3ff9d9f", status_code=204)
+            m.post(self.server.auth.baseurl + "/signout")
             self.server.sites.delete("0626857c-1def-4503-a7d8-7907c3ff9d9f")
 
     def test_delete_missing_id(self) -> None:
