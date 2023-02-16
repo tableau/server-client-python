@@ -107,8 +107,8 @@ class Server(object):
     def validate_connection_settings(self):
         try:
             Endpoint(self).set_parameters(self._http_options, None, None, None, None)
-            if not server_address.startswith("http://") and not server_address.startswith("https://"):
-                self._server_address = "http://" + self._server_address
+            if not self._server_address.startswith("http://") and not self._server_address.startswith("https://"):
+                self._server_address = "http://" + self.server_address
             self._session.prepare_request(requests.Request("GET", url=self._server_address, params=self._http_options))
         except Exception as req_ex:
             raise ValueError("Server connection settings not valid", req_ex)
@@ -149,8 +149,8 @@ class Server(object):
         try:
             info_xml = fromstring(response.content)
         except ParseError as parseError:
-            logger.info(parseError)
-            logger.info("Could not read server version info. The server may not be running or configured.")
+            self.logger.info(parseError)
+            self.logger.info("Could not read server version info. The server may not be running or configured.")
             return self.version
         prod_version = info_xml.find(".//product_version").text
         version = _PRODUCT_TO_REST_VERSION.get(prod_version, "2.1")  # 2.1
@@ -164,7 +164,7 @@ class Server(object):
         except ServerInfoEndpointNotFoundError:
             version = self._get_legacy_version()
         except BaseException as e:
-            logger.info("Could not get version info from server, guessing {}".format(e.__class__))
+            self.logger.info("Could not get version info from server, guessing {}".format(e.__class__))
             version = self._get_legacy_version()
 
         self.version = old_version
@@ -176,7 +176,7 @@ class Server(object):
 
     def use_highest_version(self):
         self.use_server_version()
-        logger.info("use use_server_version instead", DeprecationWarning)
+        self.logger.info("use use_server_version instead", DeprecationWarning)
 
     def check_at_least_version(self, target: str):
         server_version = Version(self.version or "0.0")
