@@ -150,9 +150,7 @@ class Server(object):
             info_xml = fromstring(response.content)
         except ParseError as parseError:
             logger.info(parseError)
-            logger.info(
-                "Could not read server version info. The server may not be running or configured."
-            )
+            logger.info("Could not read server version info. The server may not be running or configured.")
             return self.version
         prod_version = info_xml.find(".//product_version").text
         version = _PRODUCT_TO_REST_VERSION.get(prod_version, "2.1")  # 2.1
