@@ -1,17 +1,10 @@
 import itertools
-from typing import Dict, List, Optional, Type, TYPE_CHECKING
+from datetime import datetime
+from typing import Dict, List, Optional, Type
 
 from defusedxml.ElementTree import fromstring
 
-from ..datetime_helpers import parse_datetime
-
-if TYPE_CHECKING:
-    from datetime import datetime
-
-from typing import Dict, List, Optional, Type, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from datetime import datetime
+from tableauserverclient.datetime_helpers import parse_datetime
 
 
 class FlowRunItem(object):
@@ -19,8 +12,8 @@ class FlowRunItem(object):
         self._id: str = ""
         self._flow_id: Optional[str] = None
         self._status: Optional[str] = None
-        self._started_at: Optional["datetime"] = None
-        self._completed_at: Optional["datetime"] = None
+        self._started_at: Optional[datetime] = None
+        self._completed_at: Optional[datetime] = None
         self._progress: Optional[str] = None
         self._background_job_id: Optional[str] = None
 
@@ -37,11 +30,11 @@ class FlowRunItem(object):
         return self._status
 
     @property
-    def started_at(self) -> Optional["datetime"]:
+    def started_at(self) -> Optional[datetime]:
         return self._started_at
 
     @property
-    def completed_at(self) -> Optional["datetime"]:
+    def completed_at(self) -> Optional[datetime]:
         return self._completed_at
 
     @property

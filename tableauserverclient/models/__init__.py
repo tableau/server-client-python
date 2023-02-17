@@ -8,6 +8,7 @@ from .datasource_item import DatasourceItem
 from .dqw_item import DQWItem
 from .exceptions import UnpopulatedPropertyError
 from .favorites_item import FavoriteItem
+from .fileupload_item import FileuploadItem
 from .flow_item import FlowItem
 from .flow_run_item import FlowRunItem
 from .group_item import GroupItem
@@ -31,6 +32,7 @@ from .subscription_item import SubscriptionItem
 from .table_item import TableItem
 from .tableau_auth import Credentials, TableauAuth, PersonalAccessTokenAuth
 from .tableau_types import Resource, TableauItem, plural_type
+from .tag_item import TagItem
 from .target import Target
 from .task_item import TaskItem
 from .user_item import UserItem

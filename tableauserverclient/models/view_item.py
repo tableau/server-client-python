@@ -1,21 +1,19 @@
 import copy
-from typing import Callable, Generator, Iterator, List, Optional, Set, TYPE_CHECKING
+from datetime import datetime
+from typing import Callable, Iterator, List, Optional, Set
 
 from defusedxml.ElementTree import fromstring
 
+from tableauserverclient.datetime_helpers import parse_datetime
 from .exceptions import UnpopulatedPropertyError
+from .permissions_item import PermissionsRule
 from .tag_item import TagItem
-from ..datetime_helpers import parse_datetime
-
-if TYPE_CHECKING:
-    from datetime import datetime
-    from .permissions_item import PermissionsRule
 
 
 class ViewItem(object):
     def __init__(self) -> None:
         self._content_url: Optional[str] = None
-        self._created_at: Optional["datetime"] = None
+        self._created_at: Optional[datetime] = None
         self._id: Optional[str] = None
         self._image: Optional[Callable[[], bytes]] = None
         self._initial_tags: Set[str] = set()
@@ -28,9 +26,9 @@ class ViewItem(object):
         self._excel: Optional[Callable[[], Iterator[bytes]]] = None
         self._total_views: Optional[int] = None
         self._sheet_type: Optional[str] = None
-        self._updated_at: Optional["datetime"] = None
+        self._updated_at: Optional[datetime] = None
         self._workbook_id: Optional[str] = None
-        self._permissions: Optional[Callable[[], List["PermissionsRule"]]] = None
+        self._permissions: Optional[Callable[[], List[PermissionsRule]]] = None
         self.tags: Set[str] = set()
 
     def _set_preview_image(self, preview_image):
@@ -53,7 +51,7 @@ class ViewItem(object):
         return self._content_url
 
     @property
-    def created_at(self) -> Optional["datetime"]:
+    def created_at(self) -> Optional[datetime]:
         return self._created_at
 
     @property
@@ -119,7 +117,7 @@ class ViewItem(object):
         return self._total_views
 
     @property
-    def updated_at(self) -> Optional["datetime"]:
+    def updated_at(self) -> Optional[datetime]:
         return self._updated_at
 
     @property
@@ -127,13 +125,13 @@ class ViewItem(object):
         return self._workbook_id
 
     @property
-    def permissions(self) -> List["PermissionsRule"]:
+    def permissions(self) -> List[PermissionsRule]:
         if self._permissions is None:
             error = "View item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
         return self._permissions()
 
-    def _set_permissions(self, permissions: Callable[[], List["PermissionsRule"]]) -> None:
+    def _set_permissions(self, permissions: Callable[[], List[PermissionsRule]]) -> None:
         self._permissions = permissions
 
     @classmethod

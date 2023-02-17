@@ -1,4 +1,5 @@
-from typing import List, Optional, TYPE_CHECKING
+from datetime import datetime
+from typing import List, Optional
 
 from defusedxml.ElementTree import fromstring
 
@@ -7,15 +8,6 @@ from .property_decorators import (
     property_is_enum,
     property_is_boolean,
 )
-
-if TYPE_CHECKING:
-    from datetime import datetime
-
-
-from typing import List, Optional, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from datetime import datetime
 
 
 class DataAlertItem(object):
@@ -30,8 +22,8 @@ class DataAlertItem(object):
         self._id: Optional[str] = None
         self._subject: Optional[str] = None
         self._creatorId: Optional[str] = None
-        self._createdAt: Optional["datetime"] = None
-        self._updatedAt: Optional["datetime"] = None
+        self._createdAt: Optional[datetime] = None
+        self._updatedAt: Optional[datetime] = None
         self._frequency: Optional[str] = None
         self._public: Optional[bool] = None
         self._owner_id: Optional[str] = None
@@ -90,11 +82,11 @@ class DataAlertItem(object):
         return self._recipients or list()
 
     @property
-    def createdAt(self) -> Optional["datetime"]:
+    def createdAt(self) -> Optional[datetime]:
         return self._createdAt
 
     @property
-    def updatedAt(self) -> Optional["datetime"]:
+    def updatedAt(self) -> Optional[datetime]:
         return self._updatedAt
 
     @property

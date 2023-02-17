@@ -11,6 +11,8 @@ from requests.exceptions import MissingSchema
 def mocked_requests_get(*args, **kwargs):
     class MockResponse:
         def __init__(self, status_code):
+            self.headers = {}
+            self.encoding = None
             self.content = (
                 "<xml>"
                 "<version version='0.31'>"

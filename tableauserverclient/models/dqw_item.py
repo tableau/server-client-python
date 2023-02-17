@@ -1,6 +1,6 @@
 from defusedxml.ElementTree import fromstring
 
-from ..datetime_helpers import parse_datetime
+from tableauserverclient.datetime_helpers import parse_datetime
 
 
 class DQWItem(object):

@@ -1,10 +1,8 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import List, Optional
+
 from defusedxml.ElementTree import fromstring
 
 from .connection_credentials import ConnectionCredentials
-
-if TYPE_CHECKING:
-    from tableauserverclient.models.connection_credentials import ConnectionCredentials
 
 
 class ConnectionItem(object):
@@ -18,7 +16,7 @@ class ConnectionItem(object):
         self.server_address: Optional[str] = None
         self.server_port: Optional[str] = None
         self.username: Optional[str] = None
-        self.connection_credentials: Optional["ConnectionCredentials"] = None
+        self.connection_credentials: Optional[ConnectionCredentials] = None
 
     @property
     def datasource_id(self) -> Optional[str]:

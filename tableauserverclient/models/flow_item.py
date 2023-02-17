@@ -1,43 +1,36 @@
 import copy
+import datetime
 import xml.etree.ElementTree as ET
-from typing import List, Optional, TYPE_CHECKING, Set
+from typing import List, Optional, Set
 
 from defusedxml.ElementTree import fromstring
 
+from tableauserverclient.datetime_helpers import parse_datetime
+from .connection_item import ConnectionItem
+from .dqw_item import DQWItem
 from .exceptions import UnpopulatedPropertyError
+from .permissions_item import Permission
 from .property_decorators import property_not_nullable
 from .tag_item import TagItem
-from ..datetime_helpers import parse_datetime
-
-if TYPE_CHECKING:
-    import datetime
-
-from typing import List, Optional, TYPE_CHECKING, Set
-
-if TYPE_CHECKING:
-    import datetime
-    from .connection_item import ConnectionItem
-    from .permissions_item import Permission
-    from .dqw_item import DQWItem
 
 
 class FlowItem(object):
     def __init__(self, project_id: str, name: Optional[str] = None) -> None:
         self._webpage_url: Optional[str] = None
-        self._created_at: Optional["datetime.datetime"] = None
+        self._created_at: Optional[datetime.datetime] = None
         self._id: Optional[str] = None
         self._initial_tags: Set[str] = set()
         self._project_name: Optional[str] = None
-        self._updated_at: Optional["datetime.datetime"] = None
+        self._updated_at: Optional[datetime.datetime] = None
         self.name: Optional[str] = name
         self.owner_id: Optional[str] = None
         self.project_id: str = project_id
         self.tags: Set[str] = set()
         self.description: Optional[str] = None
 
-        self._connections = None
-        self._permissions = None
-        self._data_quality_warnings = None
+        self._connections: Optional[ConnectionItem] = None
+        self._permissions: Optional[Permission] = None
+        self._data_quality_warnings: Optional[DQWItem] = None
 
     @property
     def connections(self):
@@ -58,7 +51,7 @@ class FlowItem(object):
         return self._webpage_url
 
     @property
-    def created_at(self) -> Optional["datetime.datetime"]:
+    def created_at(self) -> Optional[datetime.datetime]:
         return self._created_at
 
     @property
@@ -94,7 +87,7 @@ class FlowItem(object):
         return self._project_name
 
     @property
-    def updated_at(self) -> Optional["datetime.datetime"]:
+    def updated_at(self) -> Optional[datetime.datetime]:
         return self._updated_at
 
     def _set_connections(self, connections):

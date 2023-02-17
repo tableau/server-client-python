@@ -2,7 +2,7 @@ import datetime
 import re
 from functools import wraps
 
-from ..datetime_helpers import parse_datetime
+from tableauserverclient.datetime_helpers import parse_datetime
 
 
 def property_is_enum(enum_type):

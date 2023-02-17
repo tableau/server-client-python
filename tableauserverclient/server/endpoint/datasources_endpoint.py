@@ -1,39 +1,48 @@
 import cgi
 import copy
-import io
 import json
 import logging
+import io
 import os
+
 from contextlib import closing
 from pathlib import Path
-from typing import (
-    List,
-    Mapping,
-    Optional,
-    Sequence,
-    Tuple,
-    TYPE_CHECKING,
-    Union,
-)
+from typing import List, Mapping, Optional, Sequence, Tuple, TYPE_CHECKING, Union
+
+if TYPE_CHECKING:
+    from tableauserverclient.server import Server
+    from tableauserverclient.models import PermissionsRule
+    from .schedules_endpoint import AddResponse
 
 from .dqw_endpoint import _DataQualityWarningEndpoint
 from .endpoint import QuerysetEndpoint, api, parameter_added_in
 from .exceptions import InternalServerError, MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .resource_tagger import _ResourceTagger
-from .. import RequestFactory, DatasourceItem, PaginationItem, ConnectionItem, RequestOptions
-from ..query import QuerySet
-from ...filesys_helpers import (
+
+from tableauserverclient.server import RequestFactory, RequestOptions
+from tableauserverclient.filesys_helpers import (
     to_filename,
     make_download_path,
     get_file_type,
     get_file_object_size,
 )
-from ...models import ConnectionCredentials, RevisionItem
-from ...models.job_item import JobItem
+from tableauserverclient.models import (
+    ConnectionCredentials,
+    ConnectionItem,
+    DatasourceItem,
+    JobItem,
+    RevisionItem,
+    PaginationItem,
+)
 
+io_types = (io.BytesIO, io.BufferedReader)
 io_types_r = (io.BytesIO, io.BufferedReader)
 io_types_w = (io.BytesIO, io.BufferedWriter)
+
+FilePath = Union[str, os.PathLike]
+FileObject = Union[io.BufferedReader, io.BytesIO]
+PathOrFile = Union[FilePath, FileObject]
 
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
@@ -41,11 +50,6 @@ FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
 ALLOWED_FILE_EXTENSIONS = ["tds", "tdsx", "tde", "hyper", "parquet"]
 
 logger = logging.getLogger("tableau.endpoint.datasources")
-
-if TYPE_CHECKING:
-    from ..server import Server
-    from ...models import PermissionsRule
-    from .schedules_endpoint import AddResponse
 
 FilePath = Union[str, os.PathLike]
 FileObjectR = Union[io.BufferedReader, io.BytesIO]

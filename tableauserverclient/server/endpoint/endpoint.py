@@ -3,7 +3,7 @@ import logging
 from packaging.version import Version
 from functools import wraps
 from xml.etree.ElementTree import ParseError
-from typing import Any, Callable, Dict, Optional, TYPE_CHECKING, Mapping
+from typing import Any, Callable, Dict, Optional, TYPE_CHECKING
 
 from .exceptions import (
     ServerResponseError,
@@ -11,8 +11,8 @@ from .exceptions import (
     NonXMLResponseError,
     EndpointUnavailableError,
 )
-from ..query import QuerySet
-from ... import helpers, get_versions
+from tableauserverclient.server.query import QuerySet
+from tableauserverclient import helpers, get_versions
 
 if TYPE_CHECKING:
     from ..server import Server

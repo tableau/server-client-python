@@ -8,18 +8,18 @@ from pathlib import Path
 from typing import Iterable, List, Optional, TYPE_CHECKING, Tuple, Union
 
 from .dqw_endpoint import _DataQualityWarningEndpoint
-from .endpoint import Endpoint, QuerysetEndpoint, api
+from .endpoint import QuerysetEndpoint, api
 from .exceptions import InternalServerError, MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .resource_tagger import _ResourceTagger
-from .. import RequestFactory, FlowItem, PaginationItem, ConnectionItem
-from ...filesys_helpers import (
+from tableauserverclient.models import FlowItem, PaginationItem, ConnectionItem, JobItem
+from tableauserverclient.server import RequestFactory
+from tableauserverclient.filesys_helpers import (
     to_filename,
     make_download_path,
     get_file_type,
     get_file_object_size,
 )
-from ...models.job_item import JobItem
 
 io_types_r = (io.BytesIO, io.BufferedReader)
 io_types_w = (io.BytesIO, io.BufferedWriter)
