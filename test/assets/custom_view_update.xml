@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+    <customView id="1f951daf-4061-451a-9df1-69a8062664f2" name="Best test ever" contentUrl="RESTAPISample" shared="True" createdAt="2016-08-18T18:25:36Z" updatedAt="2016-08-18T18:29:36Z">
+        <workbook id="1d0304cd-3796-429f-b815-7258370b9b74" name="Tableau" />
+        <owner id="dd2239f6-ddf1-4107-981a-4cf94e415794" />
+        <view id="aa2239f6-ddf1-4107-981a-4cf94e415794" />
+    </customView>
+</tsResponse>

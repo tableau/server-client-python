@@ -92,6 +92,10 @@ class UserItem(object):
     def id(self) -> Optional[str]:
         return self._id
 
+    @id.setter
+    def id(self, value:str) -> None:
+        self._id = value
+
     @property
     def last_login(self) -> Optional[datetime]:
         return self._last_login

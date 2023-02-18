@@ -11,6 +11,7 @@ TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 GET_XML = os.path.join(TEST_ASSET_DIR, "custom_view_get.xml")
 GET_XML_ID = os.path.join(TEST_ASSET_DIR, "custom_view_get_id.xml")
 POPULATE_PREVIEW_IMAGE = os.path.join(TEST_ASSET_DIR, "Sample View Image.png")
+CUSTOM_VIEW_UPDATE_XML = os.path.join(TEST_ASSET_DIR, "custom_view_update.xml")
 
 
 class CustomViewTests(unittest.TestCase):
@@ -99,3 +100,30 @@ class CustomViewTests(unittest.TestCase):
         single_view = TSC.CustomViewItem()
         single_view._id = None
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.custom_views.populate_image, single_view)
+
+    def test_delete(self) -> None:
+        with requests_mock.mock() as m:
+            m.delete(self.baseurl + "/3cc6cd06-89ce-4fdc-b935-5294135d6d42", status_code=204)
+            self.server.custom_views.delete("3cc6cd06-89ce-4fdc-b935-5294135d6d42")
+
+    def test_delete_missing_id(self) -> None:
+        self.assertRaises(ValueError, self.server.custom_views.delete, "")
+
+    def test_update(self) -> None:
+        with open(CUSTOM_VIEW_UPDATE_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            m.put(self.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2", text=response_xml)
+            the_custom_view = TSC.CustomViewItem("1d0304cd-3796-429f-b815-7258370b9b74", name="Best test ever")
+            the_custom_view._id = "1f951daf-4061-451a-9df1-69a8062664f2"
+            the_custom_view.owner = TSC.UserItem()
+            the_custom_view.owner.id="dd2239f6-ddf1-4107-981a-4cf94e415794"
+            the_custom_view = self.server.custom_views.update(the_custom_view)
+
+        self.assertEqual("1f951daf-4061-451a-9df1-69a8062664f2", the_custom_view.id)
+        self.assertEqual("dd2239f6-ddf1-4107-981a-4cf94e415794", the_custom_view.owner.id)
+        self.assertEqual("Best test ever", the_custom_view.name)
+
+    def test_update_missing_id(self) -> None:
+        single_workbook = TSC.CustomViewItem("test")
+        self.assertRaises(TSC.MissingRequiredFieldError, self.server.workbooks.update, single_workbook)

@@ -12,30 +12,30 @@ from ..datetime_helpers import parse_datetime
 
 
 class CustomViewItem(object):
-    def __init__(self) -> None:
+    def __init__(self, id: Optional[str] = None, name: Optional[str] = None) -> None:
         self._content_url: Optional[str] = None  # ?
         self._created_at: Optional["datetime"] = None
-        self._id: Optional[str] = None
+        self._id: Optional[str] = id
         self._image: Optional[Callable[[], bytes]] = None
-        self._name: Optional[str] = None
+        self._name: Optional[str] = name
         self._shared: Optional[bool] = False
         self._updated_at: Optional["datetime"] = None
 
-        self._owner: Optional[UserItem]
+        self._owner: Optional[UserItem] = None
         self._view: Optional[ViewItem] = None
         self._workbook: Optional[WorkbookItem] = None
 
     def __repr__(self: "CustomViewItem"):
-        view_info = "not listed"
+        view_info = ""
         if self._view:
-            view_info = self._view.name or self._view.id or "no data"
-        wb_info = "not listed"
+            view_info = " view='{}'".format(self._view.name or self._view.id or "unknown")
+        wb_info = ""
         if self._workbook:
-            wb_info = self._workbook.name or self._workbook.id or "no data"
-        owner_info = "not listed"
+            wb_info = " workbook='{}'".format(self._workbook.name or self._workbook.id or "unknown")
+        owner_info = ""
         if self._owner:
-            owner_info = self._owner.name or self._owner.id or "no data"
-        return "<CustomViewItem id={} name=`{}` view=`{}` workbook=`{}` owner=`{}`>".format(
+            owner_info = " owner='{}'".format(self._owner.name or self._owner.id or "unknown")
+        return "<CustomViewItem id={} name=`{}`{}{}{}>".format(
             self.id, self.name, view_info, wb_info, owner_info
         )
 

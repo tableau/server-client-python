@@ -1127,10 +1127,21 @@ class MetricRequest:
         return ET.tostring(xml_request)
 
 
+class CustomViewRequest(object):
+    @_tsrequest_wrapped
+    def update_req(self, xml_request:ET.Element, custom_view_item: CustomViewItem):
+        updating_element = ET.SubElement(xml_request, "customView")
+        if custom_view_item.owner is not None and custom_view_item.owner.id is not None:
+            ET.SubElement(updating_element, "owner", {"id": custom_view_item.owner.id})
+        if custom_view_item.name is not None:
+            updating_element.attrib["name"] = custom_view_item.name
+
+
 class RequestFactory(object):
     Auth = AuthRequest()
     Connection = Connection()
     Column = ColumnRequest()
+    CustomView = CustomViewRequest()
     DataAlert = DataAlertRequest()
     Datasource = DatasourceRequest()
     Database = DatabaseRequest()
