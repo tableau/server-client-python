@@ -131,7 +131,6 @@ def main():
                     f.write(sample_workbook.preview_image)
                 print("\nDownloaded preview image of workbook to {}".format(os.path.abspath(args.preview_image)))
 
-
             # get custom views
             cvs, _ = server.custom_views.get()
             for c in cvs:

@@ -82,6 +82,9 @@ class CustomViews(QuerysetEndpoint):
         if not view_item.id:
             error = "Custom view item missing ID."
             raise MissingRequiredFieldError(error)
+        if not (view_item.owner or view_item.name or view_item.shared):
+            logger.debug("No changes to make")
+            return view_item
 
         # Update the custom view owner or name
         url = "{0}/{1}".format(self.baseurl, view_item.id)

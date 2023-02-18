@@ -129,5 +129,5 @@ class CustomViewTests(unittest.TestCase):
         self.assertEqual("Best test ever", the_custom_view.name)
 
     def test_update_missing_id(self) -> None:
-        single_workbook = TSC.CustomViewItem("test")
-        self.assertRaises(TSC.MissingRequiredFieldError, self.server.workbooks.update, single_workbook)
+        cv = TSC.CustomViewItem(name="test")
+        self.assertRaises(TSC.MissingRequiredFieldError, self.server.custom_views.update, cv)
