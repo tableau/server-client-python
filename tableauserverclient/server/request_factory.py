@@ -1129,7 +1129,7 @@ class MetricRequest:
 
 class CustomViewRequest(object):
     @_tsrequest_wrapped
-    def update_req(self, xml_request:ET.Element, custom_view_item: CustomViewItem):
+    def update_req(self, xml_request: ET.Element, custom_view_item: CustomViewItem):
         updating_element = ET.SubElement(xml_request, "customView")
         if custom_view_item.owner is not None and custom_view_item.owner.id is not None:
             ET.SubElement(updating_element, "owner", {"id": custom_view_item.owner.id})

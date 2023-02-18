@@ -35,9 +35,7 @@ class CustomViewItem(object):
         owner_info = ""
         if self._owner:
             owner_info = " owner='{}'".format(self._owner.name or self._owner.id or "unknown")
-        return "<CustomViewItem id={} name=`{}`{}{}{}>".format(
-            self.id, self.name, view_info, wb_info, owner_info
-        )
+        return "<CustomViewItem id={} name=`{}`{}{}{}>".format(self.id, self.name, view_info, wb_info, owner_info)
 
     def _set_image(self, image):
         self._image = image
@@ -98,7 +96,7 @@ class CustomViewItem(object):
         return self._view
 
     @classmethod
-    def from_response(cls, resp, ns, workbook_id="") -> "CustomViewItem":
+    def from_response(cls, resp, ns, workbook_id="") -> Optional["CustomViewItem"]:
         item = cls.list_from_response(resp, ns, workbook_id)
         if not item or len(item) == 0:
             return None

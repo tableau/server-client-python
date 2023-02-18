@@ -74,6 +74,10 @@ def main():
         if all_workbooks:
             # Pick one workbook from the list
             sample_workbook = all_workbooks[0]
+            sample_workbook.name = "Name me something cooler"
+            sample_workbook.description = "That doesn't work"
+            updated: TSC.WorkbookItem = server.workbooks.update(sample_workbook)
+            print(updated.name, updated.description)
 
             # Populate views
             server.workbooks.populate_views(sample_workbook)
@@ -126,6 +130,32 @@ def main():
                 with open(args.preview_image, "wb") as f:
                     f.write(sample_workbook.preview_image)
                 print("\nDownloaded preview image of workbook to {}".format(os.path.abspath(args.preview_image)))
+
+
+            # get custom views
+            cvs, _ = server.custom_views.get()
+            for c in cvs:
+                print(c)
+
+            # for the last custom view in the list
+
+            # update the name
+            # note that this will fail if the name is already changed to this value
+            changed: TSC.CustomViewItem(id=c.id, name="I was updated by tsc")
+            verified_change = server.custom_views.update(changed)
+            print(verified_change)
+
+            # export as image. Filters etc could be added here as usual
+            server.custom_views.populate_image(c)
+            filename = c.id + "-image-export.png"
+            with open(filename, "wb") as f:
+                f.write(c.image)
+            print("saved to " + filename)
+
+            if args.delete:
+                print("deleting {}".format(c.id))
+                unlucky = TSC.CustomViewItem(c.id)
+                server.custom_views.delete(unlucky.id)
 
 
 if __name__ == "__main__":

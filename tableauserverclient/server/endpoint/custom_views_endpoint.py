@@ -55,7 +55,6 @@ class CustomViews(QuerysetEndpoint):
         server_response = self.get_request(url)
         return CustomViewItem.from_response(server_response.content, self.parent_srv.namespace)
 
-
     @api(version="3.18")
     def populate_image(self, view_item: CustomViewItem, req_options: Optional["ImageRequestOptions"] = None) -> None:
         if not view_item.id:
@@ -79,7 +78,7 @@ class CustomViews(QuerysetEndpoint):
     """
 
     @api(version="3.18")
-    def update(self, view_item: CustomViewItem) -> CustomViewItem:
+    def update(self, view_item: CustomViewItem) -> Optional[CustomViewItem]:
         if not view_item.id:
             error = "Custom view item missing ID."
             raise MissingRequiredFieldError(error)
@@ -100,4 +99,3 @@ class CustomViews(QuerysetEndpoint):
         url = "{0}/{1}".format(self.baseurl, view_id)
         self.delete_request(url)
         logger.info("Deleted single custom view (ID: {0})".format(view_id))
-

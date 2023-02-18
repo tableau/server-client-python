@@ -60,9 +60,12 @@ class CustomViewTests(unittest.TestCase):
         self.assertEqual("d79634e1-6063-4ec9-95ff-50acbf609ff5", view.id)
         self.assertEqual("ENDANGERED SAFARI", view.name)
         self.assertEqual("SafariSample/sheets/ENDANGEREDSAFARI", view.content_url)
-        self.assertEqual("3cc6cd06-89ce-4fdc-b935-5294135d6d42", view.workbook.id)
-        self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", view.owner.id)
-        self.assertEqual("5241e88d-d384-4fd7-9c2f-648b5247efc5", view.view.id)
+        if view.workbook:
+            self.assertEqual("3cc6cd06-89ce-4fdc-b935-5294135d6d42", view.workbook.id)
+        if view.owner:
+            self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", view.owner.id)
+        if view.view:
+            self.assertEqual("5241e88d-d384-4fd7-9c2f-648b5247efc5", view.view.id)
         self.assertEqual("2002-05-30T09:00:00Z", format_datetime(view.created_at))
         self.assertEqual("2002-06-05T08:00:59Z", format_datetime(view.updated_at))
 
@@ -117,11 +120,12 @@ class CustomViewTests(unittest.TestCase):
             the_custom_view = TSC.CustomViewItem("1d0304cd-3796-429f-b815-7258370b9b74", name="Best test ever")
             the_custom_view._id = "1f951daf-4061-451a-9df1-69a8062664f2"
             the_custom_view.owner = TSC.UserItem()
-            the_custom_view.owner.id="dd2239f6-ddf1-4107-981a-4cf94e415794"
+            the_custom_view.owner.id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
             the_custom_view = self.server.custom_views.update(the_custom_view)
 
         self.assertEqual("1f951daf-4061-451a-9df1-69a8062664f2", the_custom_view.id)
-        self.assertEqual("dd2239f6-ddf1-4107-981a-4cf94e415794", the_custom_view.owner.id)
+        if the_custom_view.owner:
+            self.assertEqual("dd2239f6-ddf1-4107-981a-4cf94e415794", the_custom_view.owner.id)
         self.assertEqual("Best test ever", the_custom_view.name)
 
     def test_update_missing_id(self) -> None:

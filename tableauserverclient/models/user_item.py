@@ -93,7 +93,7 @@ class UserItem(object):
         return self._id
 
     @id.setter
-    def id(self, value:str) -> None:
+    def id(self, value: str) -> None:
         self._id = value
 
     @property
