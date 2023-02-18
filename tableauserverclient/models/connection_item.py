@@ -17,6 +17,7 @@ class ConnectionItem(object):
         self.server_port: Optional[str] = None
         self.username: Optional[str] = None
         self.connection_credentials: Optional[ConnectionCredentials] = None
+        self.query_tagging: bool = None
 
     @property
     def datasource_id(self) -> Optional[str]:
@@ -52,6 +53,7 @@ class ConnectionItem(object):
             connection_item.server_address = connection_xml.get("serverAddress", None)
             connection_item.server_port = connection_xml.get("serverPort", None)
             connection_item.username = connection_xml.get("userName", None)
+            connection_item.query_tagging = connection_xml.get("queryTaggingEnabled", None)
             datasource_elem = connection_xml.find(".//t:datasource", namespaces=ns)
             if datasource_elem is not None:
                 connection_item._datasource_id = datasource_elem.get("id", None)

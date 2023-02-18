@@ -1002,6 +1002,8 @@ class Connection(object):
             connection_element.attrib["password"] = connection_item.password
         if connection_item.embed_password is not None:
             connection_element.attrib["embedPassword"] = str(connection_item.embed_password).lower()
+        if connection_item.query_tagging is not None:
+            connection_element.attrib["queryTaggingEnabled"] = str(connection_item.query_tagging).lower()
 
 
 class TaskRequest(object):
