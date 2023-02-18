@@ -42,18 +42,19 @@ class CustomViews(QuerysetEndpoint):
         url = self.baseurl
         server_response = self.get_request(url, req_options)
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
-        all_view_items = CustomViewItem.from_response(server_response.content, self.parent_srv.namespace)
+        all_view_items = CustomViewItem.list_from_response(server_response.content, self.parent_srv.namespace)
         return all_view_items, pagination_item
 
     @api(version="3.18")
-    def get_by_id(self, view_id: str) -> CustomViewItem:
+    def get_by_id(self, view_id: str) -> Optional[CustomViewItem]:
         if not view_id:
             error = "Custom view item missing ID."
             raise MissingRequiredFieldError(error)
         logger.info("Querying custom view (ID: {0})".format(view_id))
         url = "{0}/{1}".format(self.baseurl, view_id)
         server_response = self.get_request(url)
-        return CustomViewItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        return CustomViewItem.from_response(server_response.content, self.parent_srv.namespace)
+
 
     @api(version="3.18")
     def populate_image(self, view_item: CustomViewItem, req_options: Optional["ImageRequestOptions"] = None) -> None:
@@ -85,7 +86,18 @@ class CustomViews(QuerysetEndpoint):
 
         # Update the custom view owner or name
         url = "{0}/{1}".format(self.baseurl, view_item.id)
-        update_req = RequestFactory.Workbook.update_req(view_item)
+        update_req = RequestFactory.CustomView.update_req(view_item)
         server_response = self.put_request(url, update_req)
-        logger.info("Updated workbook item (ID: {0})".format(view_item.id))
-        return CustomViewItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        logger.info("Updated custom view (ID: {0})".format(view_item.id))
+        return CustomViewItem.from_response(server_response.content, self.parent_srv.namespace)
+
+    # Delete 1 view by id
+    @api(version="3.19")
+    def delete(self, view_id: str) -> None:
+        if not view_id:
+            error = "Custom View ID undefined."
+            raise ValueError(error)
+        url = "{0}/{1}".format(self.baseurl, view_id)
+        self.delete_request(url)
+        logger.info("Deleted single custom view (ID: {0})".format(view_id))
+
