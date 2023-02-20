@@ -18,7 +18,6 @@ def create_example_project(
     description="Project created for testing",
     server=None,
 ):
-
     new_project = TSC.ProjectItem(name=name, content_permissions=content_permissions, description=description)
     try:
         server.projects.create(new_project)

@@ -319,7 +319,6 @@ class Workbooks(QuerysetEndpoint):
         hidden_views: Optional[Sequence[str]] = None,
         skip_connection_check: bool = False,
     ):
-
         if connection_credentials is not None:
             import warnings
 

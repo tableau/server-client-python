@@ -16,7 +16,6 @@ import tableauserverclient as TSC
 
 
 def main():
-
     parser = argparse.ArgumentParser(
         description="Move one workbook from the"
         "default project of the default site to"
@@ -84,7 +83,6 @@ def main():
                 # Signing into another site requires another server object
                 # because of the different auth token and site ID.
                 with dest_server.auth.sign_in(tableau_auth):
-
                     # Step 5: Create a new workbook item and publish workbook. Note that
                     # an empty project_id will publish to the 'Default' project.
                     new_workbook = TSC.WorkbookItem(name=args.workbook_name, project_id="")

@@ -12,7 +12,6 @@ if TYPE_CHECKING:
 
 
 class GroupItem(object):
-
     tag_name: str = "group"
 
     class LicenseMode:

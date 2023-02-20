@@ -199,7 +199,6 @@ class Datasources(QuerysetEndpoint):
         connections: Optional[Sequence[ConnectionItem]] = None,
         as_job: bool = False,
     ) -> Union[DatasourceItem, JobItem]:
-
         if isinstance(file, (os.PathLike, str)):
             if not os.path.isfile(file):
                 error = "File path does not lead to an existing file."

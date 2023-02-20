@@ -22,7 +22,6 @@ from tableauserverclient import ConnectionCredentials, ConnectionItem
 
 
 def main():
-
     parser = argparse.ArgumentParser(description="Publish a workbook to server.")
     # Common options; please keep those in sync across all samples
     parser.add_argument("--server", "-s", required=True, help="server address")
@@ -55,7 +54,6 @@ def main():
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
     server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
-
         # Step 2: Get all the projects on server, then look for the default one.
         all_projects, pagination_item = server.projects.get()
         default_project = next((project for project in all_projects if project.is_default()), None)

@@ -32,7 +32,6 @@ class UserModelTests(unittest.TestCase):
 
 
 class UserDataTest(unittest.TestCase):
-
     logger = logging.getLogger("UserDataTest")
 
     role_inputs = [

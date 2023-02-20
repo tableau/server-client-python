@@ -140,7 +140,6 @@ class TableItem(object):
 
     @staticmethod
     def _parse_element(table_xml, ns):
-
         table_values = table_xml.attrib.copy()
 
         contact = table_xml.find(".//t:contact", namespaces=ns)
