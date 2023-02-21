@@ -28,7 +28,7 @@ class ServerInfoTests(unittest.TestCase):
 
             self.assertEqual("10.1.0", actual.product_version)
             self.assertEqual("10100.16.1024.2100", actual.build_number)
-            self.assertEqual("2.4", actual.rest_api_version)
+            self.assertEqual("3.10", actual.rest_api_version)
 
     def test_server_info_use_highest_version_downgrades(self):
         with open(SERVER_INFO_AUTH_INFO_XML, "rb") as f:
@@ -42,18 +42,18 @@ class ServerInfoTests(unittest.TestCase):
             m.get(self.server.server_address + "/api/2.4/serverInfo", text=si_response_xml, status_code=404)
             m.get(self.server.server_address + "/auth?format=xml", text=auth_response_xml)
             self.server.use_server_version()
-            self.assertEqual(self.server.version, "2.2")
+            self.assertEqual(self.server.version, "2.4")
 
     def test_server_info_use_highest_version_upgrades(self):
         with open(SERVER_INFO_GET_XML, "rb") as f:
             si_response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
-            m.get(self.server.server_address + "/api/2.4/serverInfo", text=si_response_xml)
+            m.get(self.server.server_address + "/api/2.8/serverInfo", text=si_response_xml)
             # Pretend we're old
-            self.server.version = "2.0"
+            self.server.version = "2.8"
             self.server.use_server_version()
-            # Did we upgrade to 2.4?
-            self.assertEqual(self.server.version, "2.4")
+            # Did we upgrade to 3.10?
+            self.assertEqual(self.server.version, "3.10")
 
     def test_server_use_server_version_flag(self):
         with open(SERVER_INFO_25_XML, "rb") as f:

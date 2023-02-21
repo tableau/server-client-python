@@ -1,6 +1,7 @@
 from .column_item import ColumnItem
 from .connection_credentials import ConnectionCredentials
 from .connection_item import ConnectionItem
+from .custom_view_item import CustomViewItem
 from .data_acceleration_report_item import DataAccelerationReportItem
 from .data_alert_item import DataAlertItem
 from .database_item import DatabaseItem

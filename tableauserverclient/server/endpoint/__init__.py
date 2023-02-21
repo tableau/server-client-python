@@ -1,4 +1,5 @@
 from .auth_endpoint import Auth
+from .custom_views_endpoint import CustomViews
 from .data_acceleration_report_endpoint import DataAccelerationReport
 from .data_alert_endpoint import DataAlerts
 from .databases_endpoint import Databases

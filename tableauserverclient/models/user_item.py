@@ -92,6 +92,10 @@ class UserItem(object):
     def id(self) -> Optional[str]:
         return self._id
 
+    @id.setter
+    def id(self, value: str) -> None:
+        self._id = value
+
     @property
     def last_login(self) -> Optional[datetime]:
         return self._last_login
@@ -101,7 +105,6 @@ class UserItem(object):
         return self._name
 
     @name.setter
-    @property_not_empty
     def name(self, value: str):
         self._name = value
 
@@ -205,9 +208,19 @@ class UserItem(object):
 
     @classmethod
     def from_response(cls, resp, ns) -> List["UserItem"]:
+        element_name = ".//t:user"
+        return cls._parse_xml(element_name, resp, ns)
+
+    @classmethod
+    def from_response_as_owner(cls, resp, ns) -> List["UserItem"]:
+        element_name = ".//t:owner"
+        return cls._parse_xml(element_name, resp, ns)
+
+    @classmethod
+    def _parse_xml(cls, element_name, resp, ns):
         all_user_items = []
         parsed_response = fromstring(resp)
-        all_user_xml = parsed_response.findall(".//t:user", namespaces=ns)
+        all_user_xml = parsed_response.findall(element_name, namespaces=ns)
         for user_xml in all_user_xml:
             (
                 id,
