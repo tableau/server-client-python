@@ -78,16 +78,16 @@ class Endpoint(object):
             self.parent_srv.http_options, auth_token, content, content_type, parameters
         )
 
-        logger.debug("request {}, url: {}".format(method, url))
+        logger.debug("request method {}, url: {}".format(method.__name__, url))
         if content:
             redacted = helpers.strings.redact_xml(content[:1000])
-            logger.debug("request content: {}".format(redacted))
+            # logger.debug("request content: {}".format(redacted))
 
         server_response = method(url, **parameters)
         self._check_status(server_response, url)
 
         loggable_response = self.log_response_safely(server_response)
-        logger.debug("Server response from {0}:\n\t{1}".format(url, loggable_response))
+        # logger.debug("Server response from {0}:\n\t{1}".format(url, loggable_response))
 
         if content_type == "application/xml":
             self.parent_srv._namespace.detect(server_response.content)
@@ -258,7 +258,7 @@ class QuerysetEndpoint(Endpoint):
         return queryset
 
     @api(version="2.0")
-    def filter(self, *_, **kwargs):
+    def filter(self, *_, **kwargs) -> QuerySet:
         if _:
             raise RuntimeError("Only keyword arguments accepted.")
         queryset = QuerySet(self).filter(**kwargs)

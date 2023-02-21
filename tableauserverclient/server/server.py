@@ -49,8 +49,9 @@ _PRODUCT_TO_REST_VERSION = {
     "9.1": "2.0",
     "9.0": "2.0",
 }
-minimum_supported_server_version = "2.4"
-default_server_version = "2.4"
+
+minimum_supported_server_version = "2.3"
+default_server_version = "3.0"  # at least use the current major version
 
 
 class Server(object):
@@ -117,7 +118,7 @@ class Server(object):
             raise ValueError("Server connection settings not valid", req_ex)
 
     def __repr__(self):
-        return "<TableauServerClient> [Connection: {}, {}]".format(self.baseurl, self.server_info.serverInfo)
+        return "<TableauServerClient [Connection: {}, {}]>".format(self.baseurl, self.server_info.serverInfo)
 
     def add_http_options(self, options_dict: dict):
         try:

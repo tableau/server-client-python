@@ -15,6 +15,11 @@ from .tag_item import TagItem
 
 
 class FlowItem(object):
+    def __repr__(self):
+        return "<Flow {0} '{1}' ({2}) Project={3} createdAt={4}".format(
+            self._id, self.name, self.description, self.project_id, self.created_at
+        )
+
     def __init__(self, project_id: str, name: Optional[str] = None) -> None:
         self._webpage_url: Optional[str] = None
         self._created_at: Optional[datetime.datetime] = None
