@@ -24,6 +24,14 @@ class DatasourceItem(object):
         Disabled = "Disabled"
         SiteDefault = "SiteDefault"
 
+    def __repr__(self):
+        return "<Datasource {0} '{1}' ({2} parent={3} >".format(
+            self._id,
+            self.name,
+            self.description or "No Description",
+            self.project_id,
+        )
+
     def __init__(self, project_id: str, name: Optional[str] = None) -> None:
         self._ask_data_enablement = None
         self._certified = None
