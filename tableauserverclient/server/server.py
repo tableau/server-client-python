@@ -51,7 +51,7 @@ _PRODUCT_TO_REST_VERSION = {
 }
 
 minimum_supported_server_version = "2.3"
-default_server_version = "3.0"  # at least use the current major version
+default_server_version = "2.4"  # first version that dropped the legacy auth endpoint
 
 
 class Server(object):
