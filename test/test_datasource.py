@@ -542,7 +542,6 @@ class DatasourceTests(unittest.TestCase):
             )
 
     def test_publish_tde_file_object_raises_exception(self) -> None:
-
         new_datasource = TSC.DatasourceItem("ee8c6e70-43b6-11e6-af4f-f7b0d8e20760", "test")
         tds_asset = asset(os.path.join("Data", "Tableau Samples", "World Indicators.tde"))
         with open(tds_asset, "rb") as file_object:

@@ -525,7 +525,6 @@ class WorkbookTests(unittest.TestCase):
             sample_workbook = os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")
 
             with open(sample_workbook, "rb") as fp:
-
                 publish_mode = self.server.PublishMode.CreateNew
 
                 new_workbook = self.server.workbooks.publish(new_workbook, fp, publish_mode)
@@ -545,7 +544,6 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual("RESTAPISample_0/sheets/GDPpercapita", new_workbook.views[0].content_url)
 
     def test_publish_non_packeged_file_object(self) -> None:
-
         with open(PUBLISH_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -558,7 +556,6 @@ class WorkbookTests(unittest.TestCase):
             sample_workbook = os.path.join(TEST_ASSET_DIR, "RESTAPISample.twb")
 
             with open(sample_workbook, "rb") as fp:
-
                 publish_mode = self.server.PublishMode.CreateNew
 
                 new_workbook = self.server.workbooks.publish(new_workbook, fp, publish_mode)
@@ -715,7 +712,6 @@ class WorkbookTests(unittest.TestCase):
         new_workbook = TSC.WorkbookItem("test")
 
         with open(os.path.join(TEST_ASSET_DIR, "SampleWB.twbx"), "rb") as f:
-
             self.assertRaises(
                 ValueError, self.server.workbooks.publish, new_workbook, f, self.server.PublishMode.CreateNew
             )
@@ -724,7 +720,6 @@ class WorkbookTests(unittest.TestCase):
         new_workbook = TSC.WorkbookItem("test")
 
         with open(os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")) as f:
-
             self.assertRaises(
                 TypeError, self.server.workbooks.publish, new_workbook, f, self.server.PublishMode.CreateNew
             )

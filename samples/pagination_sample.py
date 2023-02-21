@@ -18,7 +18,6 @@ import tableauserverclient as TSC
 
 
 def main():
-
     parser = argparse.ArgumentParser(description="Demonstrate pagination on the list of workbooks on the server.")
     # Common options; please keep those in sync across all samples
     parser.add_argument("--server", "-s", required=True, help="server address")

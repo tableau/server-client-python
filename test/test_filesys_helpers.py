@@ -10,7 +10,6 @@ from ._utils import asset, TEST_ASSET_DIR
 
 class FilesysTests(unittest.TestCase):
     def test_get_file_size_returns_correct_size(self):
-
         target_size = 1000  # bytes
 
         with BytesIO() as f:
@@ -21,14 +20,12 @@ class FilesysTests(unittest.TestCase):
         self.assertEqual(file_size, target_size)
 
     def test_get_file_size_returns_zero_for_empty_file(self):
-
         with BytesIO() as f:
             file_size = get_file_object_size(f)
 
         self.assertEqual(file_size, 0)
 
     def test_get_file_size_coincides_with_built_in_method(self):
-
         asset_path = asset("SampleWB.twbx")
         target_size = os.path.getsize(asset_path)
         with open(asset_path, "rb") as f:
@@ -37,7 +34,6 @@ class FilesysTests(unittest.TestCase):
         self.assertEqual(file_size, target_size)
 
     def test_get_file_type_identifies_a_zip_file(self):
-
         with BytesIO() as file_object:
             with ZipFile(file_object, "w") as zf:
                 with BytesIO() as stream:
@@ -59,7 +55,6 @@ class FilesysTests(unittest.TestCase):
         self.assertEqual(file_type, "zip")
 
     def test_get_file_type_identifies_xml_file(self):
-
         root = ET.Element("root")
         child = ET.SubElement(root, "child")
         child.text = "This is a child element"
@@ -95,7 +90,6 @@ class FilesysTests(unittest.TestCase):
         self.assertEqual(file_type, "tde")
 
     def test_get_file_type_handles_unknown_file_type(self):
-
         # Create a dummy png file
         with BytesIO() as file_object:
             png_signature = bytes.fromhex("89504E470D0A1A0A")

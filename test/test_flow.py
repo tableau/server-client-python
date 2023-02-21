@@ -174,7 +174,6 @@ class FlowTests(unittest.TestCase):
             publish_mode = self.server.PublishMode.CreateNew
 
             with open(sample_flow, "rb") as fp:
-
                 publish_mode = self.server.PublishMode.CreateNew
 
                 new_flow = self.server.flows.publish(new_flow, fp, publish_mode)

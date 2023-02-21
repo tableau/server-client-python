@@ -45,7 +45,6 @@ def main():
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
     server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
-
         ################################################################################
         # Step 2: Create the site we need only if it doesn't exist
         ################################################################################
@@ -75,7 +74,6 @@ def main():
     tableau_auth.site_id = args.site_id
 
     with server_upload.auth.sign_in(tableau_auth):
-
         ################################################################################
         # Step 4: Create the project we need only if it doesn't exist
         ################################################################################

@@ -139,7 +139,6 @@ class ProjectTests(unittest.TestCase):
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.projects.update, single_project)
 
     def test_create(self) -> None:
-
         with open(CREATE_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
