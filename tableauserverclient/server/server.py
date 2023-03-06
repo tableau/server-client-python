@@ -158,7 +158,7 @@ class Server(object):
             self.logger.info("Could not read server version info. The server may not be running or configured.")
             return self.version
         prod_version = info_xml.find(".//product_version").text
-        version = _PRODUCT_TO_REST_VERSION.get(prod_version, default_server_version)  # 2.4
+        version = _PRODUCT_TO_REST_VERSION.get(prod_version, minimum_supported_server_version)
         return version
 
     def _determine_highest_version(self):
