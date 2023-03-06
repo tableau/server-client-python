@@ -1,3 +1,4 @@
+import logging
 import warnings
 import xml
 
@@ -35,13 +36,16 @@ class ServerInfoItem(object):
 
     @classmethod
     def from_response(cls, resp, ns):
+        logger = logging.getLogger("TSC.ServerInfo")
         try:
             parsed_response = fromstring(resp)
         except xml.etree.ElementTree.ParseError as error:
-            print("Unexpected response for ServerInfo: {}".format(resp))
+            logger.info("Unexpected response for ServerInfo: {}".format(resp))
+            logger.info(error)
             return cls("Unknown", "Unknown", "Unknown")
-        except Exception as e:
-            warnings.warn("Unexpected response for ServerInfo: {}".format(resp))
+        except Exception as error:
+            logger.info("Unexpected response for ServerInfo: {}".format(resp))
+            logger.info(error)
             return cls("Unknown", "Unknown", "Unknown")
 
         product_version_tag = parsed_response.find(".//t:productVersion", namespaces=ns)
