@@ -142,7 +142,7 @@ class Datasources(QuerysetEndpoint):
             raise MissingRequiredFieldError(error)
         # bug - before v3.15 you must always include the project id
         if datasource_item.owner_id and not datasource_item.project_id:
-            if not self.parent_srv.check_at_least_version(self, "3.15"):
+            if not self.parent_srv.check_at_least_version("3.15"):
                 error = (
                     "Attempting to set new owner but datasource is missing Project ID."
                     "In versions before 3.15 the project id must be included to update the owner."
