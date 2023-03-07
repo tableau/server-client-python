@@ -140,11 +140,20 @@ class Datasources(QuerysetEndpoint):
         if not datasource_item.id:
             error = "Datasource item missing ID. Datasource must be retrieved from server first."
             raise MissingRequiredFieldError(error)
+        # bug - before v3.15 you must always include the project id
+        if datasource_item.owner_id and not datasource_item.project_id:
+            if not self.parent_srv.check_at_least_version("3.15"):
+                error = (
+                    "Attempting to set new owner but datasource is missing Project ID."
+                    "In versions before 3.15 the project id must be included to update the owner."
+                )
+                raise MissingRequiredFieldError(error)
 
         self._resource_tagger.update_tags(self.baseurl, datasource_item)
 
         # Update the datasource itself
         url = "{0}/{1}".format(self.baseurl, datasource_item.id)
+
         update_req = RequestFactory.Datasource.update_req(datasource_item)
         server_response = self.put_request(url, update_req)
         logger.info("Updated datasource item (ID: {0})".format(datasource_item.id))
