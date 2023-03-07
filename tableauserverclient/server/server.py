@@ -172,7 +172,7 @@ class Server(object):
         except Exception as e:
             self.logger.info("Could not get version info from server: {}{}".format(e.__class__, e))
             version = None
-        self.logger.info(version, old_version)
+        self.logger.info("versions: {}, {}".format(version, old_version))
         return version or old_version
 
     def use_server_version(self):
