@@ -41,5 +41,9 @@ class ServerInfo(Endpoint):
                 raise EndpointUnavailableError(e)
             raise e
 
-        self._info = ServerInfoItem.from_response(server_response.content, self.parent_srv.namespace)
+        try:
+            self._info = ServerInfoItem.from_response(server_response.content, self.parent_srv.namespace)
+        except Exception as e:
+            logging.getLogger(self.__class__.__name__).debug(e)
+            logging.getLogger(self.__class__.__name__).debug(server_response.content)
         return self._info

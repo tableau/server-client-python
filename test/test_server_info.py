@@ -42,7 +42,8 @@ class ServerInfoTests(unittest.TestCase):
             m.get(self.server.server_address + "/api/2.4/serverInfo", text=si_response_xml, status_code=404)
             m.get(self.server.server_address + "/auth?format=xml", text=auth_response_xml)
             self.server.use_server_version()
-            self.assertEqual(self.server.version, "2.4")
+            # does server-version[9.2] lookup in PRODUCT_TO_REST_VERSION
+            self.assertEqual(self.server.version, "2.2")
 
     def test_server_info_use_highest_version_upgrades(self):
         with open(SERVER_INFO_GET_XML, "rb") as f:
