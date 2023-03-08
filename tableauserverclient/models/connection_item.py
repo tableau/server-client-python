@@ -1,3 +1,4 @@
+import logging
 from typing import List, Optional
 
 from defusedxml.ElementTree import fromstring
@@ -17,7 +18,7 @@ class ConnectionItem(object):
         self.server_port: Optional[str] = None
         self.username: Optional[str] = None
         self.connection_credentials: Optional[ConnectionCredentials] = None
-        self.query_tagging: bool = None
+        self._query_tagging: bool = None
 
     @property
     def datasource_id(self) -> Optional[str]:
@@ -34,6 +35,19 @@ class ConnectionItem(object):
     @property
     def connection_type(self) -> Optional[str]:
         return self._connection_type
+
+    @property
+    def query_tagging(self) -> Optional[bool]:
+        return self._query_tagging
+
+    @query_tagging.setter
+    def query_tagging(self, value: Optional[bool]):
+        # if connection type = hyper, Snowflake, or Teradata, we can't change this value: it is always true
+        if self._connection_type in ["hyper", "snowflake", "teradata"]:
+            logger = logging.getLogger("tableauserverclient.models.connection_item")
+            logger.debug("Cannot update value: Query tagging is always enabled for {} connections".format(self._connection_type))
+            return
+        self._query_tagging = value
 
     def __repr__(self):
         return "<ConnectionItem#{_id} embed={embed_password} type={_connection_type} username={username}>".format(
@@ -53,7 +67,7 @@ class ConnectionItem(object):
             connection_item.server_address = connection_xml.get("serverAddress", None)
             connection_item.server_port = connection_xml.get("serverPort", None)
             connection_item.username = connection_xml.get("userName", None)
-            connection_item.query_tagging = connection_xml.get("queryTaggingEnabled", None)
+            connection_item._query_tagging = connection_xml.get("queryTaggingEnabled", None)
             datasource_elem = connection_xml.find(".//t:datasource", namespaces=ns)
             if datasource_elem is not None:
                 connection_item._datasource_id = datasource_elem.get("id", None)
