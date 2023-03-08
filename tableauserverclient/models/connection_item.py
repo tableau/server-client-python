@@ -18,7 +18,7 @@ class ConnectionItem(object):
         self.server_port: Optional[str] = None
         self.username: Optional[str] = None
         self.connection_credentials: Optional[ConnectionCredentials] = None
-        self._query_tagging: bool = None
+        self._query_tagging: Optional[bool] = None
 
     @property
     def datasource_id(self) -> Optional[str]:
@@ -45,7 +45,9 @@ class ConnectionItem(object):
         # if connection type = hyper, Snowflake, or Teradata, we can't change this value: it is always true
         if self._connection_type in ["hyper", "snowflake", "teradata"]:
             logger = logging.getLogger("tableauserverclient.models.connection_item")
-            logger.debug("Cannot update value: Query tagging is always enabled for {} connections".format(self._connection_type))
+            logger.debug(
+                "Cannot update value: Query tagging is always enabled for {} connections".format(self._connection_type)
+            )
             return
         self._query_tagging = value
 
