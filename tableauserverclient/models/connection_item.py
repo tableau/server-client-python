@@ -103,7 +103,6 @@ class ConnectionItem(object):
             connection_credentials = connection_xml.find(".//t:connectionCredentials", namespaces=ns)
 
             if connection_credentials is not None:
-
                 connection_item.connection_credentials = ConnectionCredentials.from_xml_element(
                     connection_credentials, ns
                 )

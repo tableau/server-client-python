@@ -19,7 +19,6 @@ if TYPE_CHECKING:
 
 
 class UserItem(object):
-
     tag_name: str = "user"
 
     class Roles:

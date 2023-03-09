@@ -48,7 +48,6 @@ def sample_define_common_options(parser):
 
 
 def sample_connect_to_server(args):
-
     if args.username:
         # Trying to authenticate using username and password.
         password = args.password or getpass.getpass("Password: ")

@@ -17,7 +17,6 @@ import tableauserverclient as TSC
 
 
 def main():
-
     parser = argparse.ArgumentParser(description="Explore extract functions supported by the Server API.")
     # Common options; please keep those in sync across all samples
     parser.add_argument("--server", "-s", required=True, help="server address")
@@ -50,7 +49,6 @@ def main():
     server.add_http_options({"verify": False})
     server.use_server_version()
     with server.auth.sign_in(tableau_auth):
-
         # Gets all workbook items
         all_workbooks, pagination_item = server.workbooks.get()
         print("\nThere are {} workbooks on site: ".format(pagination_item.total_available))

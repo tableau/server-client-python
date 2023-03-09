@@ -65,6 +65,10 @@ class Server(object):
         self._site_id = None
         self._user_id = None
 
+        # TODO: this needs to change to default to https, but without breaking existing code
+        if not server_address.startswith("http://") and not server_address.startswith("https://"):
+            server_address = "http://" + server_address
+
         self._server_address: str = server_address
         self._session_factory = session_factory or requests.session
 

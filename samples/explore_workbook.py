@@ -17,7 +17,6 @@ import tableauserverclient as TSC
 
 
 def main():
-
     parser = argparse.ArgumentParser(description="Explore workbook functions supported by the Server API.")
     # Common options; please keep those in sync across all samples
     parser.add_argument("--server", "-s", required=True, help="server address")
@@ -52,7 +51,6 @@ def main():
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
     server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
-
         # Publish workbook if publish flag is set (-publish, -p)
         overwrite_true = TSC.Server.PublishMode.Overwrite
         if args.publish:

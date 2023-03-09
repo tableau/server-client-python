@@ -15,7 +15,6 @@ import tableauserverclient as TSC
 
 
 def main():
-
     parser = argparse.ArgumentParser(description="Move one workbook from the default project to another.")
     # Common options; please keep those in sync across all samples
     parser.add_argument("--server", "-s", required=True, help="server address")

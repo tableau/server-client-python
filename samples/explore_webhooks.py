@@ -17,7 +17,6 @@ import tableauserverclient as TSC
 
 
 def main():
-
     parser = argparse.ArgumentParser(description="Explore webhook functions supported by the Server API.")
     # Common options; please keep those in sync across all samples
     parser.add_argument("--server", "-s", required=True, help="server address")
@@ -49,10 +48,8 @@ def main():
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
     server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
-
         # Create webhook if create flag is set (-create, -c)
         if args.create:
-
             new_webhook = TSC.WebhookItem()
             new_webhook.name = args.create
             new_webhook.url = "https://ifttt.com/maker-url"

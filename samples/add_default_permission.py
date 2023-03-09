@@ -46,7 +46,6 @@ def main():
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
     server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
-
         # Create a sample project
         project = TSC.ProjectItem("sample_project")
         project = server.projects.create(project)

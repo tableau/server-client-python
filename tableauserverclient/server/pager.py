@@ -13,7 +13,6 @@ class Pager(object):
     """
 
     def __init__(self, endpoint, request_opts=None, **kwargs):
-
         if hasattr(endpoint, "get"):
             # The simpliest case is to take an Endpoint and call its get
             endpoint = partial(endpoint.get, **kwargs)

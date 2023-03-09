@@ -24,6 +24,9 @@ from tableauserverclient.filesys_helpers import (
 io_types_r = (io.BytesIO, io.BufferedReader)
 io_types_w = (io.BytesIO, io.BufferedWriter)
 
+io_types_r = (io.BytesIO, io.BufferedReader)
+io_types_w = (io.BytesIO, io.BufferedWriter)
+
 # The maximum size of a file that can be published in a single request is 64MB
 FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
 

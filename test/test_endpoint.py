@@ -29,7 +29,6 @@ class TestEndpoint(unittest.TestCase):
 
     def test_binary_log_truncated(self):
         class FakeResponse(object):
-
             headers = {"Content-Type": "application/octet-stream"}
             content = b"\x1337" * 1000
             status_code = 200

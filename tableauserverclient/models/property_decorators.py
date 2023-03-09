@@ -101,7 +101,6 @@ def property_is_int(range, allowed=None):
 
 
 def property_matches(regex_to_match, error):
-
     compiled_re = re.compile(regex_to_match)
 
     def wrapper(func):

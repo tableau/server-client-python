@@ -91,7 +91,6 @@ class Schedules(Endpoint):
         flow: Optional["FlowItem"] = None,
         task_type: Optional[str] = None,
     ) -> List[AddResponse]:
-
         # There doesn't seem to be a good reason to allow one item of each type?
         if workbook and datasource:
             warnings.warn("Passing in multiple items for add_to_schedule will be deprecated", PendingDeprecationWarning)

@@ -27,7 +27,6 @@ class IntervalItem(object):
 
 class HourlyInterval(object):
     def __init__(self, start_time, end_time, interval_value):
-
         self.start_time = start_time
         self.end_time = end_time
         self.interval = interval_value
@@ -70,7 +69,6 @@ class HourlyInterval(object):
         self._interval = interval
 
     def _interval_type_pairs(self):
-
         # We use fractional hours for the two minute-based intervals.
         # Need to convert to minutes from hours here
         if self.interval in {0.25, 0.5}:
