@@ -4,6 +4,7 @@ from typing import List, Optional
 from defusedxml.ElementTree import fromstring
 
 from .connection_credentials import ConnectionCredentials
+from .property_decorators import property_is_boolean
 
 
 class ConnectionItem(object):
@@ -41,6 +42,7 @@ class ConnectionItem(object):
         return self._query_tagging
 
     @query_tagging.setter
+    @property_is_boolean
     def query_tagging(self, value: Optional[bool]):
         # if connection type = hyper, Snowflake, or Teradata, we can't change this value: it is always true
         if self._connection_type in ["hyper", "snowflake", "teradata"]:
@@ -69,7 +71,7 @@ class ConnectionItem(object):
             connection_item.server_address = connection_xml.get("serverAddress", None)
             connection_item.server_port = connection_xml.get("serverPort", None)
             connection_item.username = connection_xml.get("userName", None)
-            connection_item._query_tagging = connection_xml.get("queryTaggingEnabled", None)
+            connection_item._query_tagging = string_to_bool(connection_xml.get("queryTaggingEnabled", None))
             datasource_elem = connection_xml.find(".//t:datasource", namespaces=ns)
             if datasource_elem is not None:
                 connection_item._datasource_id = datasource_elem.get("id", None)
@@ -111,4 +113,4 @@ class ConnectionItem(object):
 
 # Used to convert string represented boolean to a boolean type
 def string_to_bool(s: str) -> bool:
-    return s.lower() == "true"
+    return s is not None and s.lower() == "true"
