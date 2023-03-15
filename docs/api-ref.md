@@ -4108,7 +4108,7 @@ Name | Description
 `external_auth_user_id` |   Represents ID stored in Tableau's single sign-on (SSO) system. The `externalAuthUserId` value is returned for Tableau Cloud. For other server configurations, this field contains null.
 `id` |   The id of the user on the site.
 `last_login` | The date and time the user last logged in.
-`workbooks` |  The workbooks the user owns. You must run the populate_workbooks method to add the workbooks to the `UserItem`.
+`workbooks` |  The workbooks the user owns or has Read (view) permissions. You must run the populate_workbooks method to add the workbooks to the `UserItem`.
 `email` |  The email address of the user.
 `fullname` | The full name of the user.
 `name` |   The name of the user. This attribute is required when you are creating a `UserItem` instance.
