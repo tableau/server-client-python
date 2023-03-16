@@ -1,35 +1,22 @@
 import copy
+import datetime
 import uuid
 import xml.etree.ElementTree as ET
-from typing import Callable, Dict, List, Optional, Set, TYPE_CHECKING
+from typing import Callable, Dict, List, Optional, Set
 
 from defusedxml.ElementTree import fromstring
 
+from tableauserverclient.datetime_helpers import parse_datetime
+from .connection_item import ConnectionItem
 from .exceptions import UnpopulatedPropertyError
 from .permissions_item import PermissionsRule
 from .property_decorators import (
-    property_not_nullable,
     property_is_boolean,
     property_is_data_acceleration_config,
 )
+from .revision_item import RevisionItem
 from .tag_item import TagItem
 from .view_item import ViewItem
-from ..datetime_helpers import parse_datetime
-
-
-if TYPE_CHECKING:
-    from .connection_item import ConnectionItem
-    from .permissions_item import PermissionsRule
-    import datetime
-    from .revision_item import RevisionItem
-
-from typing import Dict, List, Optional, Set, TYPE_CHECKING, Union
-
-if TYPE_CHECKING:
-    from .connection_item import ConnectionItem
-    from .permissions_item import PermissionsRule
-    import datetime
-    from .revision_item import RevisionItem
 
 
 class WorkbookItem(object):
@@ -65,15 +52,20 @@ class WorkbookItem(object):
 
         return None
 
+    def __repr__(self):
+        return "<WorkbookItem {0} '{1}' contentUrl='{2}' project={3}>".format(
+            self._id, self.name, self.content_url, self.project_id
+        )
+
     @property
-    def connections(self) -> List["ConnectionItem"]:
+    def connections(self) -> List[ConnectionItem]:
         if self._connections is None:
             error = "Workbook item must be populated with connections first."
             raise UnpopulatedPropertyError(error)
         return self._connections()
 
     @property
-    def permissions(self) -> List["PermissionsRule"]:
+    def permissions(self) -> List[PermissionsRule]:
         if self._permissions is None:
             error = "Workbook item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
@@ -88,7 +80,7 @@ class WorkbookItem(object):
         return self._webpage_url
 
     @property
-    def created_at(self) -> Optional["datetime.datetime"]:
+    def created_at(self) -> Optional[datetime.datetime]:
         return self._created_at
 
     @property
@@ -146,7 +138,7 @@ class WorkbookItem(object):
         return self._size
 
     @property
-    def updated_at(self) -> Optional["datetime.datetime"]:
+    def updated_at(self) -> Optional[datetime.datetime]:
         return self._updated_at
 
     @property
@@ -176,7 +168,7 @@ class WorkbookItem(object):
         self._data_acceleration_config = value
 
     @property
-    def revisions(self) -> List["RevisionItem"]:
+    def revisions(self) -> List[RevisionItem]:
         if self._revisions is None:
             error = "Workbook item must be populated with revisions first."
             raise UnpopulatedPropertyError(error)

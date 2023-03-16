@@ -1,12 +1,12 @@
 import logging
 
-from .. import RequestFactory, PermissionsRule
+from tableauserverclient.server import RequestFactory
+from tableauserverclient.models import TableauItem, PermissionsRule
 
 from .endpoint import Endpoint
 from .exceptions import MissingRequiredFieldError
 
-from ...models import TableauItem
-from typing import Optional, Callable, TYPE_CHECKING, List, Union
+from typing import Callable, TYPE_CHECKING, List, Optional, Union
 
 logger = logging.getLogger(__name__)
 

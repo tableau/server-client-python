@@ -5,29 +5,21 @@ import logging
 import os
 from contextlib import closing
 from pathlib import Path
-from typing import (
-    List,
-    Optional,
-    Sequence,
-    Tuple,
-    TYPE_CHECKING,
-    Union,
-)
 
 from .endpoint import QuerysetEndpoint, api, parameter_added_in
 from .exceptions import InternalServerError, MissingRequiredFieldError
-from ...helpers import redact_xml
 from .permissions_endpoint import _PermissionsEndpoint
 from .resource_tagger import _ResourceTagger
-from .. import RequestFactory, WorkbookItem, ConnectionItem, ViewItem, PaginationItem
-from ...filesys_helpers import (
+
+from tableauserverclient.filesys_helpers import (
     to_filename,
     make_download_path,
     get_file_type,
     get_file_object_size,
 )
-from ...models.job_item import JobItem
-from ...models.revision_item import RevisionItem
+from tableauserverclient.helpers import redact_xml
+from tableauserverclient.models import WorkbookItem, ConnectionItem, ViewItem, PaginationItem, JobItem, RevisionItem
+from tableauserverclient.server import RequestFactory
 
 from typing import (
     List,
@@ -39,10 +31,9 @@ from typing import (
 )
 
 if TYPE_CHECKING:
-    from ..server import Server
-    from ..request_options import RequestOptions
-    from .. import DatasourceItem
-    from ...models.connection_credentials import ConnectionCredentials
+    from tableauserverclient.server import Server
+    from tableauserverclient.server.request_options import RequestOptions
+    from tableauserverclient.models import DatasourceItem, ConnectionCredentials
     from .schedules_endpoint import AddResponse
 
 io_types_r = (io.BytesIO, io.BufferedReader)

@@ -1,17 +1,15 @@
 import logging
 import xml.etree.ElementTree as ET
+from typing import Dict, List, Optional
 
 from defusedxml.ElementTree import fromstring
+
 from .exceptions import UnknownGranteeTypeError, UnpopulatedPropertyError
 from .group_item import GroupItem
+from .reference_item import ResourceReference
 from .user_item import UserItem
 
 logger = logging.getLogger("tableau.models.permissions_item")
-
-from typing import Dict, List, Optional, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from .reference_item import ResourceReference
 
 
 class Permission:
@@ -43,7 +41,7 @@ class Permission:
 
 
 class PermissionsRule(object):
-    def __init__(self, grantee: "ResourceReference", capabilities: Dict[str, str]) -> None:
+    def __init__(self, grantee: ResourceReference, capabilities: Dict[str, str]) -> None:
         self.grantee = grantee
         self.capabilities = capabilities
 
@@ -80,7 +78,7 @@ class PermissionsRule(object):
         return rules
 
     @staticmethod
-    def _parse_grantee_element(grantee_capability_xml: ET.Element, ns: Optional[Dict[str, str]]) -> "ResourceReference":
+    def _parse_grantee_element(grantee_capability_xml: ET.Element, ns: Optional[Dict[str, str]]) -> ResourceReference:
         """Use Xpath magic and some string splitting to get the right object type from the xml"""
 
         # Get the first element in the tree with an 'id' attribute

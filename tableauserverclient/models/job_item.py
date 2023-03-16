@@ -1,12 +1,10 @@
-from typing import List, Optional, TYPE_CHECKING
+import datetime
+from typing import List, Optional
 
 from defusedxml.ElementTree import fromstring
 
+from tableauserverclient.datetime_helpers import parse_datetime
 from .flow_run_item import FlowRunItem
-from ..datetime_helpers import parse_datetime
-
-if TYPE_CHECKING:
-    import datetime
 
 
 class JobItem(object):
@@ -25,16 +23,16 @@ class JobItem(object):
         id_: str,
         job_type: str,
         progress: str,
-        created_at: "datetime.datetime",
-        started_at: Optional["datetime.datetime"] = None,
-        completed_at: Optional["datetime.datetime"] = None,
+        created_at: datetime.datetime,
+        started_at: Optional[datetime.datetime] = None,
+        completed_at: Optional[datetime.datetime] = None,
         finish_code: int = 0,
         notes: Optional[List[str]] = None,
         mode: Optional[str] = None,
         workbook_id: Optional[str] = None,
         datasource_id: Optional[str] = None,
         flow_run: Optional[FlowRunItem] = None,
-        updated_at: Optional["datetime.datetime"] = None,
+        updated_at: Optional[datetime.datetime] = None,
     ):
         self._id = id_
         self._type = job_type
@@ -63,15 +61,15 @@ class JobItem(object):
         return self._progress
 
     @property
-    def created_at(self) -> "datetime.datetime":
+    def created_at(self) -> datetime.datetime:
         return self._created_at
 
     @property
-    def started_at(self) -> Optional["datetime.datetime"]:
+    def started_at(self) -> Optional[datetime.datetime]:
         return self._started_at
 
     @property
-    def completed_at(self) -> Optional["datetime.datetime"]:
+    def completed_at(self) -> Optional[datetime.datetime]:
         return self._completed_at
 
     @property
@@ -116,7 +114,7 @@ class JobItem(object):
         self._flow_run = value
 
     @property
-    def updated_at(self) -> Optional["datetime.datetime"]:
+    def updated_at(self) -> Optional[datetime.datetime]:
         return self._updated_at
 
     def __repr__(self):
@@ -185,14 +183,14 @@ class BackgroundJobItem(object):
     def __init__(
         self,
         id_: str,
-        created_at: "datetime.datetime",
+        created_at: datetime.datetime,
         priority: int,
         job_type: str,
         status: str,
         title: Optional[str] = None,
         subtitle: Optional[str] = None,
-        started_at: Optional["datetime.datetime"] = None,
-        ended_at: Optional["datetime.datetime"] = None,
+        started_at: Optional[datetime.datetime] = None,
+        ended_at: Optional[datetime.datetime] = None,
     ):
         self._id = id_
         self._type = job_type
@@ -223,15 +221,15 @@ class BackgroundJobItem(object):
         return self._type
 
     @property
-    def created_at(self) -> "datetime.datetime":
+    def created_at(self) -> datetime.datetime:
         return self._created_at
 
     @property
-    def started_at(self) -> Optional["datetime.datetime"]:
+    def started_at(self) -> Optional[datetime.datetime]:
         return self._started_at
 
     @property
-    def ended_at(self) -> Optional["datetime.datetime"]:
+    def ended_at(self) -> Optional[datetime.datetime]:
         return self._ended_at
 
     @property

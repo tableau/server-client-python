@@ -1,15 +1,12 @@
 import copy
 import logging
-import os
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple
 
 from .endpoint import QuerysetEndpoint, api
 from .exceptions import MissingRequiredFieldError, ServerResponseError
-from .. import RequestFactory, RequestOptions, UserItem, WorkbookItem, PaginationItem, GroupItem
+from tableauserverclient.server import RequestFactory, RequestOptions
+from tableauserverclient.models import UserItem, WorkbookItem, PaginationItem, GroupItem
 from ..pager import Pager
-
-# duplicate defined in workbooks_endpoint
-FilePath = Union[str, os.PathLike]
 
 logger = logging.getLogger("tableau.endpoint.users")
 

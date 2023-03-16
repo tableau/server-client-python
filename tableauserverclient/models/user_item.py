@@ -1,23 +1,21 @@
 import io
-import logging
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from enum import IntEnum
+from typing import Dict, List, Optional, TYPE_CHECKING, Tuple
 
 from defusedxml.ElementTree import fromstring
 
+from tableauserverclient.datetime_helpers import parse_datetime
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import (
     property_is_enum,
     property_not_empty,
 )
 from .reference_item import ResourceReference
-from ..datetime_helpers import parse_datetime
-
-from typing import Dict, List, Optional, TYPE_CHECKING, Tuple
 
 if TYPE_CHECKING:
-    from ..server.pager import Pager
+    from tableauserverclient.server import Pager
 
 
 class UserItem(object):
@@ -93,6 +91,10 @@ class UserItem(object):
     def id(self) -> Optional[str]:
         return self._id
 
+    @id.setter
+    def id(self, value: str) -> None:
+        self._id = value
+
     @property
     def last_login(self) -> Optional[datetime]:
         return self._last_login
@@ -102,7 +104,6 @@ class UserItem(object):
         return self._name
 
     @name.setter
-    @property_not_empty
     def name(self, value: str):
         self._name = value
 
@@ -206,9 +207,19 @@ class UserItem(object):
 
     @classmethod
     def from_response(cls, resp, ns) -> List["UserItem"]:
+        element_name = ".//t:user"
+        return cls._parse_xml(element_name, resp, ns)
+
+    @classmethod
+    def from_response_as_owner(cls, resp, ns) -> List["UserItem"]:
+        element_name = ".//t:owner"
+        return cls._parse_xml(element_name, resp, ns)
+
+    @classmethod
+    def _parse_xml(cls, element_name, resp, ns):
         all_user_items = []
         parsed_response = fromstring(resp)
-        all_user_xml = parsed_response.findall(".//t:user", namespaces=ns)
+        all_user_xml = parsed_response.findall(element_name, namespaces=ns)
         for user_xml in all_user_xml:
             (
                 id,

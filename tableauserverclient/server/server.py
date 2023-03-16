@@ -1,11 +1,12 @@
 import logging
-import warnings
 
 import requests
 import urllib3
 
 from defusedxml.ElementTree import fromstring, ParseError
 from packaging.version import Version
+
+from . import CustomViews
 from .endpoint import (
     Sites,
     Views,
@@ -48,8 +49,9 @@ _PRODUCT_TO_REST_VERSION = {
     "9.1": "2.0",
     "9.0": "2.0",
 }
+
 minimum_supported_server_version = "2.3"
-default_server_version = "2.3"
+default_server_version = "2.4"  # first version that dropped the legacy auth endpoint
 
 
 class Server(object):
@@ -95,6 +97,9 @@ class Server(object):
         self._namespace = Namespace()
         self.flow_runs = FlowRuns(self)
         self.metrics = Metrics(self)
+        self.custom_views = CustomViews(self)
+
+        self.logger = logging.getLogger("TSC.server")
 
         self._session = self._session_factory()
         self._http_options = dict()  # must set this before making a server call
@@ -110,11 +115,14 @@ class Server(object):
     def validate_connection_settings(self):
         try:
             Endpoint(self).set_parameters(self._http_options, None, None, None, None)
+            if not self._server_address.startswith("http://") and not self._server_address.startswith("https://"):
+                self._server_address = "http://" + self._server_address
+            self._session.prepare_request(requests.Request("GET", url=self._server_address, params=self._http_options))
         except Exception as req_ex:
             raise ValueError("Server connection settings not valid", req_ex)
 
     def __repr__(self):
-        return "<TableauServerClient> [Connection: {}, {}]".format(self.baseurl, self.server_info.serverInfo)
+        return "<TableauServerClient [Connection: {}, {}]>".format(self.baseurl, self.server_info.serverInfo)
 
     def add_http_options(self, options_dict: dict):
         try:
@@ -122,8 +130,7 @@ class Server(object):
             if "verify" in options_dict.keys() and self._http_options.get("verify") is False:
                 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
                 # would be nice if you could turn them back on
-        except BaseException as be:
-            print(be)
+        except Exception as be:
             # expected errors on invalid input:
             # 'set' object has no attribute 'keys', 'list' object has no attribute 'keys'
             # TypeError: cannot convert dictionary update sequence element #0 to a sequence (input is a tuple)
@@ -144,43 +151,43 @@ class Server(object):
         self._auth_token = auth_token
 
     def _get_legacy_version(self):
-        dest = Endpoint(self)
-        response = dest._make_request(method=self.session.get, url=self.server_address + "/auth?format=xml")
+        # the serverInfo call was introduced in 2.4, earlier than that we have this different call
+        response = self._session.get(self.server_address + "/auth?format=xml")
         try:
             info_xml = fromstring(response.content)
         except ParseError as parseError:
-            logging.getLogger("TSC.server").info(parseError)
-            logging.getLogger("TSC.server").info(
-                "Could not read server version info. The server may not be running or configured."
-            )
+            self.logger.info(parseError)
+            self.logger.info("Could not read server version info. The server may not be running or configured.")
             return self.version
         prod_version = info_xml.find(".//product_version").text
-        version = _PRODUCT_TO_REST_VERSION.get(prod_version, "2.1")  # 2.1
+        version = _PRODUCT_TO_REST_VERSION.get(prod_version, minimum_supported_server_version)
         return version
 
     def _determine_highest_version(self):
         try:
             old_version = self.version
-            self.version = "2.4"
             version = self.server_info.get().rest_api_version
-        except ServerInfoEndpointNotFoundError:
+        except ServerInfoEndpointNotFoundError as e:
+            self.logger.info("Could not get version info from server: {}{}".format(e.__class__, e))
             version = self._get_legacy_version()
-        except BaseException:
+        except EndpointUnavailableError as e:
+            self.logger.info("Could not get version info from server: {}{}".format(e.__class__, e))
             version = self._get_legacy_version()
-
-        self.version = old_version
-
-        return version
+        except Exception as e:
+            self.logger.info("Could not get version info from server: {}{}".format(e.__class__, e))
+            version = None
+        self.logger.info("versions: {}, {}".format(version, old_version))
+        return version or old_version
 
     def use_server_version(self):
         self.version = self._determine_highest_version()
 
     def use_highest_version(self):
         self.use_server_version()
-        warnings.warn("use use_server_version instead", DeprecationWarning)
+        self.logger.info("use use_server_version instead", DeprecationWarning)
 
     def check_at_least_version(self, target: str):
-        server_version = Version(self.version or "0.0")
+        server_version = Version(self.version or "2.4")
         target_version = Version(target)
         return server_version >= target_version
 

@@ -1,31 +1,21 @@
 import copy
+import datetime
 import xml.etree.ElementTree as ET
-from typing import Dict, List, Optional, Set, Tuple, TYPE_CHECKING
+from typing import Dict, List, Optional, Set, Tuple
 
 from defusedxml.ElementTree import fromstring
 
+from tableauserverclient.datetime_helpers import parse_datetime
+from .connection_item import ConnectionItem
 from .exceptions import UnpopulatedPropertyError
+from .permissions_item import PermissionsRule
 from .property_decorators import (
     property_not_nullable,
     property_is_boolean,
     property_is_enum,
 )
+from .revision_item import RevisionItem
 from .tag_item import TagItem
-from ..datetime_helpers import parse_datetime
-
-if TYPE_CHECKING:
-    from .permissions_item import PermissionsRule
-    from .connection_item import ConnectionItem
-    from .revision_item import RevisionItem
-    import datetime
-
-from typing import Dict, List, Optional, Set, Tuple, TYPE_CHECKING, Union
-
-if TYPE_CHECKING:
-    from .permissions_item import PermissionsRule
-    from .connection_item import ConnectionItem
-    from .revision_item import RevisionItem
-    import datetime
 
 
 class DatasourceItem(object):
@@ -33,6 +23,14 @@ class DatasourceItem(object):
         Enabled = "Enabled"
         Disabled = "Disabled"
         SiteDefault = "SiteDefault"
+
+    def __repr__(self):
+        return "<Datasource {0} '{1}' ({2} parent={3} >".format(
+            self._id,
+            self.name,
+            self.description or "No Description",
+            self.project_id,
+        )
 
     def __init__(self, project_id: str, name: Optional[str] = None) -> None:
         self._ask_data_enablement = None
@@ -64,23 +62,23 @@ class DatasourceItem(object):
         return None
 
     @property
-    def ask_data_enablement(self) -> Optional["DatasourceItem.AskDataEnablement"]:
+    def ask_data_enablement(self) -> Optional[AskDataEnablement]:
         return self._ask_data_enablement
 
     @ask_data_enablement.setter
     @property_is_enum(AskDataEnablement)
-    def ask_data_enablement(self, value: Optional["DatasourceItem.AskDataEnablement"]):
+    def ask_data_enablement(self, value: Optional[AskDataEnablement]):
         self._ask_data_enablement = value
 
     @property
-    def connections(self) -> Optional[List["ConnectionItem"]]:
+    def connections(self) -> Optional[List[ConnectionItem]]:
         if self._connections is None:
             error = "Datasource item must be populated with connections first."
             raise UnpopulatedPropertyError(error)
         return self._connections()
 
     @property
-    def permissions(self) -> Optional[List["PermissionsRule"]]:
+    def permissions(self) -> Optional[List[PermissionsRule]]:
         if self._permissions is None:
             error = "Project item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
@@ -91,7 +89,7 @@ class DatasourceItem(object):
         return self._content_url
 
     @property
-    def created_at(self) -> Optional["datetime.datetime"]:
+    def created_at(self) -> Optional[datetime.datetime]:
         return self._created_at
 
     @property
@@ -162,7 +160,7 @@ class DatasourceItem(object):
         self._description = value
 
     @property
-    def updated_at(self) -> Optional["datetime.datetime"]:
+    def updated_at(self) -> Optional[datetime.datetime]:
         return self._updated_at
 
     @property
@@ -179,7 +177,7 @@ class DatasourceItem(object):
         return self._webpage_url
 
     @property
-    def revisions(self) -> List["RevisionItem"]:
+    def revisions(self) -> List[RevisionItem]:
         if self._revisions is None:
             error = "Datasource item must be populated with revisions first."
             raise UnpopulatedPropertyError(error)

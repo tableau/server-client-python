@@ -3,7 +3,7 @@ import logging
 from packaging.version import Version
 from functools import wraps
 from xml.etree.ElementTree import ParseError
-from typing import Any, Callable, Dict, Optional, TYPE_CHECKING, Mapping
+from typing import Any, Callable, Dict, Optional, TYPE_CHECKING
 
 from .exceptions import (
     ServerResponseError,
@@ -11,8 +11,8 @@ from .exceptions import (
     NonXMLResponseError,
     EndpointUnavailableError,
 )
-from ..query import QuerySet
-from ... import helpers, get_versions
+from tableauserverclient.server.query import QuerySet
+from tableauserverclient import helpers, get_versions
 
 if TYPE_CHECKING:
     from ..server import Server
@@ -78,16 +78,16 @@ class Endpoint(object):
             self.parent_srv.http_options, auth_token, content, content_type, parameters
         )
 
-        logger.debug("request {}, url: {}".format(method, url))
+        logger.debug("request method {}, url: {}".format(method.__name__, url))
         if content:
             redacted = helpers.strings.redact_xml(content[:1000])
-            logger.debug("request content: {}".format(redacted))
+            # logger.debug("request content: {}".format(redacted))
 
         server_response = method(url, **parameters)
         self._check_status(server_response, url)
 
         loggable_response = self.log_response_safely(server_response)
-        logger.debug("Server response from {0}:\n\t{1}".format(url, loggable_response))
+        # logger.debug("Server response from {0}:\n\t{1}".format(url, loggable_response))
 
         if content_type == "application/xml":
             self.parent_srv._namespace.detect(server_response.content)
@@ -258,7 +258,7 @@ class QuerysetEndpoint(Endpoint):
         return queryset
 
     @api(version="2.0")
-    def filter(self, *_, **kwargs):
+    def filter(self, *_, **kwargs) -> QuerySet:
         if _:
             raise RuntimeError("Only keyword arguments accepted.")
         queryset = QuerySet(self).filter(**kwargs)

@@ -8,7 +8,7 @@ from .reference_item import ResourceReference
 from .user_item import UserItem
 
 if TYPE_CHECKING:
-    from ..server import Pager
+    from tableauserverclient.server import Pager
 
 
 class GroupItem(object):

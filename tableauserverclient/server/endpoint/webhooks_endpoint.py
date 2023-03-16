@@ -1,8 +1,8 @@
 import logging
 
 from .endpoint import Endpoint, api
-from .. import RequestFactory
-from ...models import WebhookItem, PaginationItem
+from tableauserverclient.server import RequestFactory
+from tableauserverclient.models import WebhookItem, PaginationItem
 
 logger = logging.getLogger("tableau.endpoint.webhooks")
 

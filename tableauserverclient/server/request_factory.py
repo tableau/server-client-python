@@ -1,29 +1,12 @@
-from os import name
 import xml.etree.ElementTree as ET
 from typing import Any, Dict, Iterable, List, Optional, Tuple, TYPE_CHECKING
 
 from requests.packages.urllib3.fields import RequestField
 from requests.packages.urllib3.filepost import encode_multipart_formdata
 
-from tableauserverclient.models.metric_item import MetricItem
-
-from ..models import ConnectionCredentials
-from ..models import ConnectionItem
-from ..models import DataAlertItem
-from ..models import FlowItem
-from ..models import ProjectItem
-from ..models import SiteItem
-from ..models import SubscriptionItem
-from ..models import TaskItem, UserItem, GroupItem, PermissionsRule, FavoriteItem
-from ..models import WebhookItem
+from tableauserverclient.models import *
 
 if TYPE_CHECKING:
-    from ..models import SubscriptionItem
-    from ..models import DataAlertItem
-    from ..models import FlowItem
-    from ..models import ConnectionItem
-    from ..models import SiteItem
-    from ..models import ProjectItem
     from tableauserverclient.server import Server
 
 
@@ -1019,6 +1002,8 @@ class Connection(object):
             connection_element.attrib["password"] = connection_item.password
         if connection_item.embed_password is not None:
             connection_element.attrib["embedPassword"] = str(connection_item.embed_password).lower()
+        if connection_item.query_tagging is not None:
+            connection_element.attrib["queryTaggingEnabled"] = str(connection_item.query_tagging).lower()
 
 
 class TaskRequest(object):
@@ -1144,10 +1129,21 @@ class MetricRequest:
         return ET.tostring(xml_request)
 
 
+class CustomViewRequest(object):
+    @_tsrequest_wrapped
+    def update_req(self, xml_request: ET.Element, custom_view_item: CustomViewItem):
+        updating_element = ET.SubElement(xml_request, "customView")
+        if custom_view_item.owner is not None and custom_view_item.owner.id is not None:
+            ET.SubElement(updating_element, "owner", {"id": custom_view_item.owner.id})
+        if custom_view_item.name is not None:
+            updating_element.attrib["name"] = custom_view_item.name
+
+
 class RequestFactory(object):
     Auth = AuthRequest()
     Connection = Connection()
     Column = ColumnRequest()
+    CustomView = CustomViewRequest()
     DataAlert = DataAlertRequest()
     Datasource = DatasourceRequest()
     Database = DatabaseRequest()

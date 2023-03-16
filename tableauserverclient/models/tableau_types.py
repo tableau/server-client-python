@@ -1,12 +1,10 @@
-from tableauserverclient.models.database_item import DatabaseItem
-from tableauserverclient.models.datasource_item import DatasourceItem
-from tableauserverclient.models.flow_item import FlowItem
-from tableauserverclient.models.project_item import ProjectItem
-from tableauserverclient.models.table_item import TableItem
-from tableauserverclient.models.view_item import ViewItem
-from tableauserverclient.models.workbook_item import WorkbookItem
-
 from typing import Union
+
+from .datasource_item import DatasourceItem
+from .flow_item import FlowItem
+from .project_item import ProjectItem
+from .view_item import ViewItem
+from .workbook_item import WorkbookItem
 
 
 class Resource:

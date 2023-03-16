@@ -1,20 +1,15 @@
 import os
 import re
 import requests_mock
-import tableauserverclient as TSC
 import tempfile
 import unittest
-import xml.etree.ElementTree as ET
-
 from defusedxml.ElementTree import fromstring
 from io import BytesIO
 from pathlib import Path
 
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
-from tableauserverclient.models.group_item import GroupItem
-from tableauserverclient.models.permissions_item import PermissionsRule
-from tableauserverclient.models.user_item import UserItem
+from tableauserverclient.models import UserItem, GroupItem, PermissionsRule
 from tableauserverclient.server.endpoint.exceptions import InternalServerError
 from tableauserverclient.server.request_factory import RequestFactory
 from ._utils import asset
