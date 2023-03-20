@@ -19,7 +19,6 @@ class UserModelTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             user.site_role = "Hello"
 
-
 class UserDataTest(unittest.TestCase):
     logger = logging.getLogger("UserDataTest")
 
@@ -92,11 +91,11 @@ class UserDataTest(unittest.TestCase):
         assert test_user.email == "email", test_user.email
 
     def test_get_user_detail_variation(self):
-        test_line = ["username", "pword", "fname", "license", "admin", "pub", "email"]
+        test_line = ["username", "pword", "fname", "creator", "site", "yes", "email"]
         test_user: TSC.UserItem = TSC.UserItem.CSVImport.create_user_model_from_line(test_line, UserDataTest.logger)
         assert test_user.name == "username", test_user.name
         assert test_user.fullname == "fname", test_user.fullname
-        assert test_user.site_role == "license", test_user.site_role
+        assert test_user.site_role == "SiteAdministratorCreator", test_user.site_role
         assert test_user.email == "email", test_user.email
 
     def test_create_user_invalid_license(self):
@@ -108,13 +107,10 @@ class UserDataTest(unittest.TestCase):
         test_line = ["username", "pword", "fname", "creator", "role", "yes", "email"]
         with self.assertRaises(AttributeError):
             test_user: TSC.UserItem = TSC.UserItem.CSVImport.create_user_model_from_line(test_line, UserDataTest.logger)
-
-        test_line = ["username", "pword", "fname", "license", "admin", "pub", "email"]
-        test_user: TSC.UserItem = TSC.UserItem.CSVImport.create_user_model_from_line(test_line, UserDataTest.logger)
-        assert test_user.name == "username", test_user.name
-        assert test_user.fullname == "fname", test_user.fullname
-        assert test_user.site_role == "license", test_user.site_role
-        assert test_user.email == "email", test_user.email
+            assert test_user.name == "username", test_user.name
+            assert test_user.fullname == "fname", test_user.fullname
+            assert test_user.site_role == "license", test_user.site_role
+            assert test_user.email == "email", test_user.email
 
     def test_get_user_details_only_username(self):
         test_line = ["username"]
