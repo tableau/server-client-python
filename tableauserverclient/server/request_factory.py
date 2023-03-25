@@ -9,6 +9,8 @@ from tableauserverclient.models import *
 if TYPE_CHECKING:
     from tableauserverclient.server import Server
 
+# this file could be largely replaced if we were willing to import the huge file from generateDS
+
 
 def _add_multipart(parts: Dict) -> Tuple[Any, str]:
     mime_multipart_parts = list()
@@ -146,7 +148,7 @@ class DatabaseRequest(object):
 
 
 class DatasourceRequest(object):
-    def _generate_xml(self, datasource_item, connection_credentials=None, connections=None):
+    def _generate_xml(self, datasource_item: DatasourceItem, connection_credentials=None, connections=None):
         xml_request = ET.Element("tsRequest")
         datasource_element = ET.SubElement(xml_request, "datasource")
         datasource_element.attrib["name"] = datasource_item.name
@@ -158,6 +160,11 @@ class DatasourceRequest(object):
         if datasource_item.ask_data_enablement:
             ask_data_element = ET.SubElement(datasource_element, "askData")
             ask_data_element.attrib["enablement"] = datasource_item.ask_data_enablement
+
+        if datasource_item.certified:
+            datasource_element.attrib["isCertified"] = datasource_item.certified
+        if datasource_item.certification_note:
+            datasource_element.attrib["certificationNote"] = datasource_item.certification_note
 
         project_element = ET.SubElement(datasource_element, "project")
         project_element.attrib["id"] = datasource_item.project_id
