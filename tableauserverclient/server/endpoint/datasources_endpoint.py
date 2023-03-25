@@ -162,12 +162,20 @@ class Datasources(QuerysetEndpoint):
 
     # Update datasource connections
     @api(version="2.3")
-    def update_connection(self, datasource_item: DatasourceItem, connection_item: ConnectionItem) -> ConnectionItem:
+    def update_connection(
+        self, datasource_item: DatasourceItem, connection_item: ConnectionItem
+    ) -> Optional[ConnectionItem]:
         url = "{0}/{1}/connections/{2}".format(self.baseurl, datasource_item.id, connection_item.id)
 
         update_req = RequestFactory.Connection.update_req(connection_item)
         server_response = self.put_request(url, update_req)
-        connection = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        connections = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
+        if not connections:
+            return None
+
+        if len(connections) > 1:
+            logger.debug("Multiple connections returned ({0})".format(len(connections)))
+        connection = list(filter(lambda x: x.id == connection_item.id, connections))[0]
 
         logger.info(
             "Updated datasource item (ID: {0} & connection item {1}".format(datasource_item.id, connection_item.id)

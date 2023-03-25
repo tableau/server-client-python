@@ -15,8 +15,31 @@ class TestEndpoint(unittest.TestCase):
         # Fake signin
         self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"
         self.server._auth_token = "j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM"
-
         return super().setUp()
+
+    def test_fallback_request_logic(self) -> None:
+        url = "http://test/"
+        endpoint = TSC.server.Endpoint(self.server)
+        with requests_mock.mock() as m:
+            m.get(url)
+            response = endpoint.get_request(url=url)
+            self.assertIsNotNone(response)
+
+    def test_user_friendly_request_returns(self) -> None:
+        url = "http://test/"
+        endpoint = TSC.server.Endpoint(self.server)
+        with requests_mock.mock() as m:
+            m.get(url)
+            response = endpoint._user_friendly_blocking_request(
+                endpoint.parent_srv.session.get, url=url, test_timeout=1
+            )
+            self.assertIsNotNone(response)
+
+    def test_blocking_request_returns(self) -> None:
+        url = "http://test/"
+        endpoint = TSC.server.Endpoint(self.server)
+        response = endpoint._blocking_request(endpoint.parent_srv.session.get, url=url)
+        self.assertIsNotNone(response)
 
     def test_get_request_stream(self) -> None:
         url = "http://test/"

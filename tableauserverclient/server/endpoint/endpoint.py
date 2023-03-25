@@ -1,3 +1,6 @@
+from threading import Thread
+from time import sleep
+
 import requests
 import logging
 from packaging.version import Version
@@ -34,6 +37,10 @@ class Endpoint(object):
     def __init__(self, parent_srv: "Server"):
         self.parent_srv = parent_srv
 
+    logger = logging.getLogger("tableau.endpoint")
+
+    async_response = None
+
     @staticmethod
     def set_parameters(http_options, auth_token, content, content_type, parameters) -> Dict[str, Any]:
         parameters = parameters or {}
@@ -65,6 +72,46 @@ class Endpoint(object):
         # return explicitly for testing only
         return parameters
 
+    def _blocking_request(self, method, url, parameters={}) -> "Response":
+        self.async_response = None
+        logger.debug("Begin blocking request to {}".format(url))
+        try:
+            self.async_response = method(url, **parameters)
+            logger.debug("Successful response saved")
+        except Exception as e:
+            logger.debug("Error making request to server: {}".format(e))
+            self.async_response = e
+        finally:
+            if not self.async_response:
+                logger.debug("Request response not saved")
+                self.async_response or -1
+        return self.async_response
+
+    def _user_friendly_blocking_request(self, method, url, parameters={}, test_timeout=0) -> Optional["Response"]:
+        minutes: int = 0
+        request_thread = None
+        try:
+            request_thread = Thread(target=self._blocking_request, args=(method, url, parameters))
+            request_thread.async_response = None  # type:ignore # this is an invented attribute for thread comms
+            request_thread.start()
+        except Exception as e:
+            logger.debug("Error starting server request on separate thread: {}".format(e))
+            return None
+
+        while self.async_response is None:
+            if minutes % 5 == 0:
+                if minutes > 0:
+                    logger.info("Waiting {} minutes for request to {}".format(minutes, url))
+            elif minutes % 1 == 0:
+                logger.debug("Waiting for request to {}".format(url))
+            sleep_seconds = 5
+            sleep(sleep_seconds)
+            minutes = int(minutes + (60 / sleep_seconds))
+            if test_timeout and minutes > test_timeout:
+                raise RuntimeError("Test waited longer than it expected (expected {})".format(test_timeout))
+
+        return self.async_response
+
     def _make_request(
         self,
         method: Callable[..., "Response"],
@@ -74,6 +121,7 @@ class Endpoint(object):
         content_type: Optional[str] = None,
         parameters: Optional[Dict[str, Any]] = None,
     ) -> "Response":
+
         parameters = Endpoint.set_parameters(
             self.parent_srv.http_options, auth_token, content, content_type, parameters
         )
@@ -83,11 +131,16 @@ class Endpoint(object):
             redacted = helpers.strings.redact_xml(content[:1000])
             # logger.debug("request content: {}".format(redacted))
 
-        server_response = method(url, **parameters)
+        # a request can, for stuff like publishing, spin for 40 minutes or 2 hours waiting for a response.
+        # we need some user-facing activity so they know it's not dead.
+        server_response = self._user_friendly_blocking_request(method, url, parameters)
+        # is this blocking retry really necessary? I guess if it was just the threading messing it up?
+        if not server_response:
+            server_response = self._blocking_request(method, url, parameters)
         self._check_status(server_response, url)
 
         loggable_response = self.log_response_safely(server_response)
-        # logger.debug("Server response from {0}:\n\t{1}".format(url, loggable_response))
+        logger.debug("Server response from {0}:\n\t{1}".format(url, loggable_response))
 
         if content_type == "application/xml":
             self.parent_srv._namespace.detect(server_response.content)
@@ -95,6 +148,7 @@ class Endpoint(object):
         return server_response
 
     def _check_status(self, server_response, url: Optional[str] = None):
+        logger.debug(server_response.status_code)
         if server_response.status_code >= 500:
             raise InternalServerError(server_response, url)
         elif server_response.status_code not in Success_codes:
@@ -117,7 +171,7 @@ class Endpoint(object):
         # content-type is an octet-stream accomplishes the same goal without eagerly loading content.
         # This check is to determine if the response is a text response (xml or otherwise)
         # so that we do not attempt to log bytes and other binary data.
-        loggable_response = "Content type {}".format(content_type)
+        loggable_response = "Content type `{}`".format(content_type)
         if content_type == "application/octet-stream":
             loggable_response = "A stream of type {} [Truncated File Contents]".format(content_type)
         elif server_response.encoding and len(server_response.content) > 0:
