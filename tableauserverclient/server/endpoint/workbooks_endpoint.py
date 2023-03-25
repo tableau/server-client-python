@@ -309,6 +309,7 @@ class Workbooks(QuerysetEndpoint):
         as_job: bool = False,
         hidden_views: Optional[Sequence[str]] = None,
         skip_connection_check: bool = False,
+        parameters=None
     ):
         if connection_credentials is not None:
             import warnings
@@ -412,7 +413,7 @@ class Workbooks(QuerysetEndpoint):
 
         # Send the publishing request to server
         try:
-            server_response = self.post_request(url, xml_request, content_type)
+            server_response = self.post_request(url, xml_request, content_type, parameters)
         except InternalServerError as err:
             if err.code == 504 and not as_job:
                 err.content = "Timeout error while publishing. Please use asynchronous publishing to avoid timeouts."
