@@ -38,6 +38,7 @@ class RequestOptions(RequestOptionsBase):
     class Field:
         Args = "args"
         CompletedAt = "completedAt"
+        ContentUrl = "contentUrl"
         CreatedAt = "createdAt"
         DomainName = "domainName"
         DomainNickname = "domainNickname"
