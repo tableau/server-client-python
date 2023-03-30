@@ -13,13 +13,13 @@ import tableauserverclient as TSC
 def main():
     parser = argparse.ArgumentParser(description="Initialize a server with content.")
     # Common options; please keep those in sync across all samples
-    parser.add_argument("--server", "-s", required=True, help="server address")
+    parser.add_argument("--server", "-s",  help="server address")
     parser.add_argument("--site", "-S", help="site name")
     parser.add_argument(
-        "--token-name", "-p", required=True, help="name of the personal access token used to sign into the server"
+        "--token-name", "-p",  help="name of the personal access token used to sign into the server"
     )
     parser.add_argument(
-        "--token-value", "-v", required=True, help="value of the personal access token used to sign into the server"
+        "--token-value", "-v",  help="value of the personal access token used to sign into the server"
     )
     parser.add_argument(
         "--logging-level",
@@ -29,8 +29,8 @@ def main():
         help="desired logging level (set to error by default)",
     )
     # Options specific to this sample
-    parser.add_argument("--datasources-folder", "-df", required=True, help="folder containing datasources")
-    parser.add_argument("--workbooks-folder", "-wf", required=True, help="folder containing workbooks")
+    parser.add_argument("--datasources-folder", "-df",  help="folder containing datasources")
+    parser.add_argument("--workbooks-folder", "-wf",  help="folder containing workbooks")
     parser.add_argument("--project", required=False, default="Default", help="project to use")
 
     args = parser.parse_args()

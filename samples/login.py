@@ -30,7 +30,7 @@ def set_up_and_log_in():
 
 def sample_define_common_options(parser):
     # Common options; please keep these in sync across all samples by copying or calling this method directly
-    parser.add_argument("--server", "-s", required=True, help="server address")
+    parser.add_argument("--server", "-s",  help="server address")
     parser.add_argument("--site", "-t", help="site name")
     auth = parser.add_mutually_exclusive_group(required=True)
     auth.add_argument("--token-name", "-tn", help="name of the personal access token used to sign into the server")
