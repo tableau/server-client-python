@@ -162,7 +162,8 @@ class Datasources(QuerysetEndpoint):
 
     # Update datasource connections
     @api(version="2.3")
-    def update_connection(self, datasource_item: DatasourceItem, connection_item: ConnectionItem) -> ConnectionItem:
+    def update_connection(self, datasource_item: DatasourceItem, connection_item: ConnectionItem) -> \
+            Optional[ConnectionItem]:
         url = "{0}/{1}/connections/{2}".format(self.baseurl, datasource_item.id, connection_item.id)
 
         update_req = RequestFactory.Connection.update_req(connection_item)

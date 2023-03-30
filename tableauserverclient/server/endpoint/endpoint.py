@@ -88,17 +88,17 @@ class Endpoint(object):
         return self.async_response
 
     def _user_friendly_blocking_request(self, method, url, parameters={}, test_timeout=0) -> Optional["Response"]:
-        minutes = 0
+        minutes: int = 0
         request_thread = None
         try:
             request_thread = Thread(target=self._blocking_request, args=(method, url, parameters))
-            request_thread.async_response = None
+            request_thread.async_response = None  # type:ignore # this is an invented attribute for thread comms
             request_thread.start()
         except Exception as e:
             logger.debug("Error starting server request on separate thread: {}".format(e))
             return None
 
-        while self.async_response == None:
+        while self.async_response is None:
             if minutes % 5 == 0:
                 if minutes > 0:
                     logger.info("Waiting {} minutes for request to {}".format(minutes, url))
@@ -106,7 +106,7 @@ class Endpoint(object):
                 logger.debug("Waiting for request to {}".format(url))
             sleep_seconds = 5
             sleep(sleep_seconds)
-            minutes = minutes + (60 / sleep_seconds)
+            minutes = int(minutes + (60 / sleep_seconds))
             if test_timeout and minutes > test_timeout:
                 raise RuntimeError("Test waited longer than it expected (expected {})".format(test_timeout))
 
