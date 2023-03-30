@@ -23,17 +23,18 @@ import logging
 
 import tableauserverclient as TSC
 
+import env
 
 def main():
     parser = argparse.ArgumentParser(description="Publish a datasource to server.")
     # Common options; please keep those in sync across all samples
-    parser.add_argument("--server", "-s", required=True, help="server address")
+    parser.add_argument("--server", "-s",  help="server address")
     parser.add_argument("--site", "-S", help="site name")
     parser.add_argument(
-        "--token-name", "-p", required=True, help="name of the personal access token used to sign into the server"
+        "--token-name", "-p",  help="name of the personal access token used to sign into the server"
     )
     parser.add_argument(
-        "--token-value", "-v", required=True, help="value of the personal access token used to sign into the server"
+        "--token-value", "-v",  help="value of the personal access token used to sign into the server"
     )
     parser.add_argument(
         "--logging-level",
@@ -43,7 +44,7 @@ def main():
         help="desired logging level (set to error by default)",
     )
     # Options specific to this sample
-    parser.add_argument("--file", "-f", required=True, help="filepath to the datasource to publish")
+    parser.add_argument("--file", "-f",  help="filepath to the datasource to publish")
     parser.add_argument("--project", help="Project within which to publish the datasource")
     parser.add_argument("--async", "-a", help="Publishing asynchronously", dest="async_", action="store_true")
     parser.add_argument("--conn-username", help="connection username")
@@ -52,6 +53,17 @@ def main():
     parser.add_argument("--conn-oauth", help="connection is configured to use oAuth", action="store_true")
 
     args = parser.parse_args()
+    if not args.server:
+        args.server = env.server
+    if not args.site:
+        args.site = env.site
+    if not args.token_name:
+        args.token_name = env.token_name
+    if not args.token_value:
+        args.token_value = env.token_value
+    args.logging = "debug"
+    args.file = "C:/dev/tab-samples/World Indicators.hyper"
+    args.async_ = True
 
     # Ensure that both the connection username and password are provided, or none at all
     if (args.conn_username and not args.conn_password) or (not args.conn_username and args.conn_password):
