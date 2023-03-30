@@ -30,7 +30,9 @@ class TestEndpoint(unittest.TestCase):
         endpoint = TSC.server.Endpoint(self.server)
         with requests_mock.mock() as m:
             m.get(url)
-            response = endpoint._user_friendly_blocking_request(endpoint.parent_srv.session.get, url=url, test_timeout=1)
+            response = endpoint._user_friendly_blocking_request(
+                endpoint.parent_srv.session.get, url=url, test_timeout=1
+            )
             self.assertIsNotNone(response)
 
     def test_blocking_request_returns(self) -> None:

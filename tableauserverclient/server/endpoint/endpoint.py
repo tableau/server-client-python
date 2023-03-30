@@ -106,7 +106,7 @@ class Endpoint(object):
                 logger.debug("Waiting for request to {}".format(url))
             sleep_seconds = 5
             sleep(sleep_seconds)
-            minutes = minutes + (60/sleep_seconds)
+            minutes = minutes + (60 / sleep_seconds)
             if test_timeout and minutes > test_timeout:
                 raise RuntimeError("Test waited longer than it expected (expected {})".format(test_timeout))
 
