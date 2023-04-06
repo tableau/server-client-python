@@ -9,7 +9,7 @@ from .exceptions import MissingRequiredFieldError
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import PaginationItem, ScheduleItem, TaskItem
 
-logger = logging.getLogger("tableau.endpoint.schedules")
+from tableauserverclient.helpers.logging import logger
 AddResponse = namedtuple("AddResponse", ("result", "error", "warnings", "task_created"))
 OK = AddResponse(result=True, error=None, warnings=None, task_created=None)
 

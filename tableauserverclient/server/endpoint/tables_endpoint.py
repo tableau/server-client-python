@@ -8,7 +8,7 @@ from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import TableItem, ColumnItem, PaginationItem
 from ..pager import Pager
 
-logger = logging.getLogger("tableau.endpoint.tables")
+from tableauserverclient.helpers.logging import logger
 
 
 class Tables(Endpoint):

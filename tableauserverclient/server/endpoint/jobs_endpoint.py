@@ -6,7 +6,7 @@ from tableauserverclient.models import JobItem, BackgroundJobItem, PaginationIte
 from ..request_options import RequestOptionsBase
 from tableauserverclient.exponential_backoff import ExponentialBackoffTimer
 
-logger = logging.getLogger("tableau.endpoint.jobs")
+from tableauserverclient.helpers.logging import logger
 
 from typing import List, Optional, Tuple, Union
 

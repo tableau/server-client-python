@@ -1,7 +1,7 @@
 from tableauserverclient.models.property_decorators import property_is_int
 import logging
 
-logger = logging.getLogger("tableau.request_options")
+from tableauserverclient.helpers.logging import logger
 
 
 class RequestOptionsBase(object):

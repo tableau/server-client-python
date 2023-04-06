@@ -44,7 +44,7 @@ FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
 
 ALLOWED_FILE_EXTENSIONS = ["twb", "twbx"]
 
-logger = logging.getLogger("tableau.endpoint.workbooks")
+from tableauserverclient.helpers.logging import logger
 FilePath = Union[str, os.PathLike]
 FileObject = Union[io.BufferedReader, io.BytesIO]
 FileObjectR = Union[io.BufferedReader, io.BytesIO]

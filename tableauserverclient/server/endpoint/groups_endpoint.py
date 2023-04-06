@@ -6,7 +6,7 @@ from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import GroupItem, UserItem, PaginationItem, JobItem
 from ..pager import Pager
 
-logger = logging.getLogger("tableau.endpoint.groups")
+from tableauserverclient.helpers.logging import logger
 
 from typing import List, Optional, TYPE_CHECKING, Tuple, Union
 

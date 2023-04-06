@@ -6,7 +6,7 @@ from .endpoint import Endpoint, api
 from .exceptions import ServerResponseError
 from ..request_factory import RequestFactory
 
-logger = logging.getLogger("tableau.endpoint.auth")
+from tableauserverclient.helpers.logging import logger
 
 
 class Auth(Endpoint):

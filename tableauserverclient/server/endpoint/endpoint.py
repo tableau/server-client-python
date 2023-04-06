@@ -1,6 +1,6 @@
 from threading import Thread
 from time import sleep
-from datetime import datetime
+from tableauserverclient import datetime_helpers as datetime
 
 import requests
 from packaging.version import Version
@@ -77,18 +77,18 @@ class Endpoint(object):
 
     def _blocking_request(self, method, url, parameters={}) -> "Response":
         self.async_response = None
-        logger.debug("[{}] Begin blocking request to {}".format(self.timestamp(), url))
+        logger.debug("[{}] Begin blocking request to {}".format(datetime.timestamp(), url))
         try:
             self.async_response = method(url, **parameters)
-            logger.debug("[{}] Saving successful response".format(self.timestamp()))
+            logger.debug("[{}] Call finished".format(datetime.timestamp()))
         except Exception as e:
             logger.debug("Error making request to server: {}".format(e))
             self.async_response = e
         finally:
             if not self.async_response:
                 logger.debug("Request response not saved")
-                self.async_response or -1
-        logger.debug("[{}] Request complete".format(self.timestamp()))
+                return self.async_response or -1
+        logger.debug("[{}] Request complete".format(datetime.timestamp()))
         return self.async_response
 
     def _user_friendly_blocking_request(self, method, url, parameters={}, test_timeout=0) -> Optional["Response"]:
@@ -101,22 +101,23 @@ class Endpoint(object):
             logger.debug("Error starting server request on separate thread: {}".format(e))
             return None
 
+        seconds = 0
         while self.async_response is None:
-            if minutes % 5 == 0:
-                if minutes > 0:
-                    logger.info("[{}] Waiting {} minutes for request to {}".format(self.timestamp(), minutes, url))
-            elif minutes % 1 == 0:
-                logger.debug("[{}] Waiting for request to {}".format(self.timestamp(), url))
+            logger.debug("{} Waiting....".format(datetime.timestamp()))
+            if minutes % 5 == 0 and seconds >= 60:
+                logger.info("[{}] Waiting ({} minutes so far) for request to {}".format(datetime.timestamp(), minutes, url))
+            elif minutes % 1 == 0 and seconds >= 60:
+                logger.debug("[{}] Waiting for request to {}".format(datetime.timestamp(), url))
             sleep(DELAY_SLEEP_SECONDS)
-            minutes = minutes + 1
+            seconds = seconds + DELAY_SLEEP_SECONDS
+            if seconds >= 60:
+                seconds = 0
+                minutes = minutes + 1
 
             if test_timeout and minutes > test_timeout:
                 raise RuntimeError("Test waited longer than it expected (expected {})".format(test_timeout))
 
         return self.async_response
-
-    def timestamp(self):
-        return datetime.now().strftime("%H:%M:%S")
 
     def _make_request(
         self,
@@ -134,19 +135,23 @@ class Endpoint(object):
 
         logger.debug("request method {}, url: {}".format(method.__name__, url))
         if content:
-            redacted = helpers.strings.redact_xml(content[:1000])
+            redacted = helpers.strings.redact_xml(content[:200])
+            # this needs to be under a trace or something, it's a LOT
             # logger.debug("request content: {}".format(redacted))
 
         # a request can, for stuff like publishing, spin for 40 minutes or 2 hours waiting for a response.
         # we need some user-facing activity so they know it's not dead.
         server_response = self._user_friendly_blocking_request(method, url, parameters)
+        logger.debug("[{}] Async request returned: received {}".format(datetime.timestamp(), server_response))
         # is this blocking retry really necessary? I guess if it was just the threading messing it up?
-        if not server_response:
+        if not server_response or server_response == -1:
+            logger.debug("[{}] Async request failed: retrying".format(datetime.timestamp()))
             server_response = self._blocking_request(method, url, parameters)
         self._check_status(server_response, url)
 
         loggable_response = self.log_response_safely(server_response)
-        logger.debug("Server response from {0}:\n\t{1}".format(url, loggable_response))
+        logger.debug("Server response from {0}".format(url))
+        # logger.debug("\n\t{1}".format(loggable_response))
 
         if content_type == "application/xml":
             self.parent_srv._namespace.detect(server_response.content)

@@ -9,7 +9,7 @@ from .group_item import GroupItem
 from .reference_item import ResourceReference
 from .user_item import UserItem
 
-logger = logging.getLogger("tableau.models.permissions_item")
+from tableauserverclient.helpers.logging import logger
 
 
 class Permission:

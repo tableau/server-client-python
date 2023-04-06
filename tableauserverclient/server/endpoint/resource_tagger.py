@@ -7,7 +7,7 @@ from .exceptions import EndpointUnavailableError, ServerResponseError
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import TagItem
 
-logger = logging.getLogger("tableau.endpoint.resource_tagger")
+from tableauserverclient.helpers.logging import logger
 
 
 class _ResourceTagger(Endpoint):
