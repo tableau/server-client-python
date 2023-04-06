@@ -32,7 +32,7 @@ FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
 
 ALLOWED_FILE_EXTENSIONS = ["tfl", "tflx"]
 
-logger = logging.getLogger("tableau.endpoint.flows")
+from tableauserverclient.helpers.logging import logger
 
 if TYPE_CHECKING:
     from .. import DQWItem

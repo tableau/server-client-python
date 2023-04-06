@@ -5,7 +5,7 @@ from .exceptions import MissingRequiredFieldError
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import DataAlertItem, PaginationItem, UserItem
 
-logger = logging.getLogger("tableau.endpoint.dataAlerts")
+from tableauserverclient.helpers.logging import logger
 
 from typing import List, Optional, TYPE_CHECKING, Tuple, Union
 

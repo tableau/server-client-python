@@ -4,10 +4,9 @@ from .endpoint import Endpoint, api
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import FileuploadItem
 
-# For when a datasource is over 64MB, break it into 5MB(standard chunk size) chunks
-CHUNK_SIZE = 1024 * 1024 * 5  # 5MB
 
-logger = logging.getLogger("tableau.endpoint.fileuploads")
+from tableauserverclient.helpers.logging import logger
+from tableauserverclient.config import CHUNK_SIZE
 
 
 class Fileuploads(Endpoint):

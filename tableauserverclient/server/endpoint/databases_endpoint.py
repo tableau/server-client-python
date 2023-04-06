@@ -8,7 +8,7 @@ from .permissions_endpoint import _PermissionsEndpoint
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import DatabaseItem, TableItem, PaginationItem, Resource
 
-logger = logging.getLogger("tableau.endpoint.databases")
+from tableauserverclient.helpers.logging import logger
 
 
 class Databases(Endpoint):

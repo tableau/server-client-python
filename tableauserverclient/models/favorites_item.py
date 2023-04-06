@@ -8,8 +8,7 @@ from .project_item import ProjectItem
 from .view_item import ViewItem
 from .workbook_item import WorkbookItem
 
-logger = logging.getLogger("tableau.models.favorites_item")
-
+from tableauserverclient.helpers.logging import logger
 from typing import Dict, List, Union
 
 FavoriteType = Dict[

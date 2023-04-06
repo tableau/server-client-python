@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from ...server import Server
 
 
-logger = logging.getLogger("tableau.endpoint.metrics")
+from tableauserverclient.helpers.logging import logger
 
 
 class Metrics(QuerysetEndpoint):

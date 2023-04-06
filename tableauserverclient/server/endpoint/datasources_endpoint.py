@@ -9,8 +9,6 @@ from contextlib import closing
 from pathlib import Path
 from typing import List, Mapping, Optional, Sequence, Tuple, TYPE_CHECKING, Union
 
-import tableauserverclient
-
 if TYPE_CHECKING:
     from tableauserverclient.server import Server
     from tableauserverclient.models import PermissionsRule

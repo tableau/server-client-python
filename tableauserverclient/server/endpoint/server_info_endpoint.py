@@ -8,7 +8,7 @@ from .exceptions import (
 )
 from tableauserverclient.models import ServerInfoItem
 
-logger = logging.getLogger("tableau.endpoint.server_info")
+from tableauserverclient.helpers.logging import logger
 
 
 class ServerInfo(Endpoint):

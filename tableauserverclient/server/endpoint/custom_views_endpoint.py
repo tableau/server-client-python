@@ -6,7 +6,7 @@ from .exceptions import MissingRequiredFieldError
 from tableauserverclient.models import CustomViewItem, PaginationItem
 from tableauserverclient.server import RequestFactory, RequestOptions, ImageRequestOptions
 
-logger = logging.getLogger("tableau.endpoint.custom_views")
+from tableauserverclient.helpers.logging import logger
 
 """
 Get a list of custom views on a site

@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from ...models import DatasourceItem, FlowItem, ProjectItem, UserItem, ViewItem, WorkbookItem
     from ..request_options import RequestOptions
 
-logger = logging.getLogger("tableau.endpoint.favorites")
+from tableauserverclient.helpers.logging import logger
 
 
 class Favorites(Endpoint):
