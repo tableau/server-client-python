@@ -9,6 +9,8 @@ from contextlib import closing
 from pathlib import Path
 from typing import List, Mapping, Optional, Sequence, Tuple, TYPE_CHECKING, Union
 
+import tableauserverclient
+
 if TYPE_CHECKING:
     from tableauserverclient.server import Server
     from tableauserverclient.models import PermissionsRule
@@ -27,6 +29,7 @@ from tableauserverclient.filesys_helpers import (
     get_file_type,
     get_file_object_size,
 )
+from tableauserverclient.helpers.logging import logger
 from tableauserverclient.models import (
     ConnectionCredentials,
     ConnectionItem,
@@ -48,8 +51,6 @@ PathOrFile = Union[FilePath, FileObject]
 FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
 
 ALLOWED_FILE_EXTENSIONS = ["tds", "tdsx", "tde", "hyper", "parquet"]
-
-logger = logging.getLogger("tableau.endpoint.datasources")
 
 FilePath = Union[str, os.PathLike]
 FileObjectR = Union[io.BufferedReader, io.BytesIO]
@@ -228,7 +229,7 @@ class Datasources(QuerysetEndpoint):
             filename = os.path.basename(file)
             file_extension = os.path.splitext(filename)[1][1:]
             file_size = os.path.getsize(file)
-
+            logger.debug(filename)
             # If name is not defined, grab the name from the file to publish
             if not datasource_item.name:
                 datasource_item.name = os.path.splitext(filename)[0]

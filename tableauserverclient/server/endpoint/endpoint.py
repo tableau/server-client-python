@@ -1,8 +1,8 @@
 from threading import Thread
 from time import sleep
+from datetime import datetime
 
 import requests
-import logging
 from packaging.version import Version
 from functools import wraps
 from xml.etree.ElementTree import ParseError
@@ -16,12 +16,13 @@ from .exceptions import (
 )
 from tableauserverclient.server.query import QuerySet
 from tableauserverclient import helpers, get_versions
+from tableauserverclient.helpers.logging import logger
+from tableauserverclient.config import DELAY_SLEEP_SECONDS
 
 if TYPE_CHECKING:
     from ..server import Server
     from requests import Response
 
-logger = logging.getLogger("tableau.endpoint")
 
 Success_codes = [200, 201, 202, 204]
 
@@ -37,7 +38,7 @@ class Endpoint(object):
     def __init__(self, parent_srv: "Server"):
         self.parent_srv = parent_srv
 
-    logger = logging.getLogger("tableau.endpoint")
+    from tableauserverclient.helpers.logging import logger
 
     async_response = None
 
@@ -60,6 +61,8 @@ class Endpoint(object):
 
     @staticmethod
     def set_user_agent(parameters):
+        if "headers" not in parameters:
+            parameters["headers"] = {}
         if USER_AGENT_HEADER not in parameters["headers"]:
             if USER_AGENT_HEADER in parameters:
                 parameters["headers"][USER_AGENT_HEADER] = parameters[USER_AGENT_HEADER]
@@ -74,10 +77,10 @@ class Endpoint(object):
 
     def _blocking_request(self, method, url, parameters={}) -> "Response":
         self.async_response = None
-        logger.debug("Begin blocking request to {}".format(url))
+        logger.debug("[{}] Begin blocking request to {}".format(self.timestamp(), url))
         try:
             self.async_response = method(url, **parameters)
-            logger.debug("Successful response saved")
+            logger.debug("[{}] Saving successful response".format(self.timestamp()))
         except Exception as e:
             logger.debug("Error making request to server: {}".format(e))
             self.async_response = e
@@ -85,11 +88,11 @@ class Endpoint(object):
             if not self.async_response:
                 logger.debug("Request response not saved")
                 self.async_response or -1
+        logger.debug("[{}] Request complete".format(self.timestamp()))
         return self.async_response
 
     def _user_friendly_blocking_request(self, method, url, parameters={}, test_timeout=0) -> Optional["Response"]:
         minutes: int = 0
-        request_thread = None
         try:
             request_thread = Thread(target=self._blocking_request, args=(method, url, parameters))
             request_thread.async_response = None  # type:ignore # this is an invented attribute for thread comms
@@ -101,16 +104,19 @@ class Endpoint(object):
         while self.async_response is None:
             if minutes % 5 == 0:
                 if minutes > 0:
-                    logger.info("Waiting {} minutes for request to {}".format(minutes, url))
+                    logger.info("[{}] Waiting {} minutes for request to {}".format(self.timestamp(), minutes, url))
             elif minutes % 1 == 0:
-                logger.debug("Waiting for request to {}".format(url))
-            sleep_seconds = 5
-            sleep(sleep_seconds)
-            minutes = int(minutes + (60 / sleep_seconds))
+                logger.debug("[{}] Waiting for request to {}".format(self.timestamp(), url))
+            sleep(DELAY_SLEEP_SECONDS)
+            minutes = minutes + 1
+
             if test_timeout and minutes > test_timeout:
                 raise RuntimeError("Test waited longer than it expected (expected {})".format(test_timeout))
 
         return self.async_response
+
+    def timestamp(self):
+        return datetime.now().strftime("%H:%M:%S")
 
     def _make_request(
         self,
