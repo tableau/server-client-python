@@ -12,10 +12,13 @@ from .exceptions import (
     ServerResponseError,
     InternalServerError,
     NonXMLResponseError,
-    EndpointUnavailableError,
+    NotSignedInError,
 )
+from ..exceptions import EndpointUnavailableError
+
 from tableauserverclient.server.query import QuerySet
 from tableauserverclient import helpers, get_versions
+
 from tableauserverclient.helpers.logging import logger
 from tableauserverclient.config import DELAY_SLEEP_SECONDS
 
@@ -139,7 +142,7 @@ class Endpoint(object):
             # this needs to be under a trace or something, it's a LOT
             # logger.debug("request content: {}".format(redacted))
 
-        # a request can, for stuff like publishing, spin for 40 minutes or 2 hours waiting for a response.
+        # a request can, for stuff like publishing, spin for ages waiting for a response.
         # we need some user-facing activity so they know it's not dead.
         server_response = self._user_friendly_blocking_request(method, url, parameters)
         logger.debug("[{}] Async request returned: received {}".format(datetime.timestamp(), server_response))
@@ -159,15 +162,18 @@ class Endpoint(object):
         return server_response
 
     def _check_status(self, server_response, url: Optional[str] = None):
-        logger.debug(server_response.status_code)
+        logger.debug("Response status: {}".format(server_response.status_code))
         if server_response.status_code >= 500:
             raise InternalServerError(server_response, url)
         elif server_response.status_code not in Success_codes:
             try:
+                if server_response.status_code == 401:
+                    raise NotSignedInError.from_response(server_response.content, self.parent_srv.namespace, url)
+
                 raise ServerResponseError.from_response(server_response.content, self.parent_srv.namespace, url)
             except ParseError:
                 # This will happen if we get a non-success HTTP code that doesn't return an xml error object
-                # e.g metadata endpoints, 503 pages, totally different servers
+                # e.g. metadata endpoints, 503 pages, totally different servers
                 # we convert this to a better exception and pass through the raw response body
                 raise NonXMLResponseError(server_response.content)
             except Exception:

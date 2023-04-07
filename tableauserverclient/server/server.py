@@ -34,11 +34,11 @@ from .endpoint import (
     Metrics,
     Endpoint,
 )
-from .endpoint.exceptions import (
+from .exceptions import (
     ServerInfoEndpointNotFoundError,
     EndpointUnavailableError,
 )
-from .exceptions import NotSignedInError
+from .endpoint.exceptions import NotSignedInError
 from ..namespace import Namespace
 
 
@@ -98,7 +98,6 @@ class Server(object):
         self.flow_runs = FlowRuns(self)
         self.metrics = Metrics(self)
         self.custom_views = CustomViews(self)
-
 
         self._session = self._session_factory()
         self._http_options = dict()  # must set this before making a server call

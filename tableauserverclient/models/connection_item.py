@@ -7,6 +7,7 @@ from .connection_credentials import ConnectionCredentials
 from .property_decorators import property_is_boolean
 from tableauserverclient.helpers.logging import logger
 
+
 class ConnectionItem(object):
     def __init__(self):
         self._datasource_id: Optional[str] = None
