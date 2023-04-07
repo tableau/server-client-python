@@ -7,8 +7,7 @@ from .datasources_endpoint import Datasources
 from .endpoint import Endpoint, QuerysetEndpoint
 from .exceptions import (
     ServerResponseError,
-    MissingRequiredFieldError,
-    ServerInfoEndpointNotFoundError,
+    MissingRequiredFieldError
 )
 from .favorites_endpoint import Favorites
 from .fileuploads_endpoint import Fileuploads
