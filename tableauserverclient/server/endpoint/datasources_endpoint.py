@@ -9,6 +9,8 @@ from contextlib import closing
 from pathlib import Path
 from typing import List, Mapping, Optional, Sequence, Tuple, TYPE_CHECKING, Union
 
+import tableauserverclient.config
+
 if TYPE_CHECKING:
     from tableauserverclient.server import Server
     from tableauserverclient.models import PermissionsRule
@@ -227,7 +229,7 @@ class Datasources(QuerysetEndpoint):
             filename = os.path.basename(file)
             file_extension = os.path.splitext(filename)[1][1:]
             file_size = os.path.getsize(file)
-            logger.debug(filename)
+            logger.debug("Publishing file `{}`, size `{}`".format(filename, file_size))
             # If name is not defined, grab the name from the file to publish
             if not datasource_item.name:
                 datasource_item.name = os.path.splitext(filename)[0]
@@ -269,7 +271,8 @@ class Datasources(QuerysetEndpoint):
 
         # Determine if chunking is required (64MB is the limit for single upload method)
         if file_size >= FILESIZE_LIMIT:
-            logger.info("Publishing {0} to server with chunking method (datasource over 64MB)".format(filename))
+            logger.info("Publishing {} to server with chunking method (datasource over {}MB, chunk size {}MB)"
+                        .format(filename, FILESIZE_LIMIT, tableauserverclient.config.CHUNK_SIZE))
             upload_session_id = self.parent_srv.fileuploads.upload(file)
             url = "{0}&uploadSessionId={1}".format(url, upload_session_id)
             xml_request, content_type = RequestFactory.Datasource.publish_req_chunked(

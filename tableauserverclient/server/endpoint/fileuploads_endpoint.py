@@ -3,6 +3,7 @@ import logging
 from .endpoint import Endpoint, api
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import FileuploadItem
+from tableauserverclient import datetime_helpers as datetime
 
 
 from tableauserverclient.helpers.logging import logger
@@ -54,8 +55,10 @@ class Fileuploads(Endpoint):
     def upload(self, file):
         upload_id = self.initiate()
         for chunk in self._read_chunks(file):
+            logger.debug("{} processing chunk...".format(datetime.timestamp()))
             request, content_type = RequestFactory.Fileupload.chunk_req(chunk)
+            logger.debug("{} created chunk request".format(datetime.timestamp()))
             fileupload_item = self.append(upload_id, request, content_type)
-            logger.info("\tPublished {0}MB".format(fileupload_item.file_size))
+            logger.info("\t{0} Published {1}MB".format(datetime.timestamp(), fileupload_item.file_size))
         logger.info("File upload finished (ID: {0})".format(upload_id))
         return upload_id
