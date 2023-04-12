@@ -148,7 +148,7 @@ class CSVRequestOptions(_FilterOptionsBase):
         return params
 
 
-class ExcelRequestOptions(RequestOptionsBase):
+class ExcelRequestOptions(_FilterOptionsBase):
     def __init__(self, maxage: int = -1) -> None:
         super().__init__()
         self.max_age = maxage
