@@ -26,14 +26,10 @@ def create_example_group(group_name="Example Group", server=None):
 def main():
     parser = argparse.ArgumentParser(description="Filter and sort groups.")
     # Common options; please keep those in sync across all samples
-    parser.add_argument("--server", "-s",  help="server address")
+    parser.add_argument("--server", "-s", help="server address")
     parser.add_argument("--site", "-S", help="site name")
-    parser.add_argument(
-        "--token-name", "-p",  help="name of the personal access token used to sign into the server"
-    )
-    parser.add_argument(
-        "--token-value", "-v",  help="value of the personal access token used to sign into the server"
-    )
+    parser.add_argument("--token-name", "-p", help="name of the personal access token used to sign into the server")
+    parser.add_argument("--token-value", "-v", help="value of the personal access token used to sign into the server")
     parser.add_argument(
         "--logging-level",
         "-l",

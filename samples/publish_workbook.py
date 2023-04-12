@@ -24,14 +24,10 @@ from tableauserverclient import ConnectionCredentials, ConnectionItem
 def main():
     parser = argparse.ArgumentParser(description="Publish a workbook to server.")
     # Common options; please keep those in sync across all samples
-    parser.add_argument("--server", "-s",  help="server address")
+    parser.add_argument("--server", "-s", help="server address")
     parser.add_argument("--site", "-S", help="site name")
-    parser.add_argument(
-        "--token-name", "-p",  help="name of the personal access token used to sign into the server"
-    )
-    parser.add_argument(
-        "--token-value", "-v",  help="value of the personal access token used to sign into the server"
-    )
+    parser.add_argument("--token-name", "-p", help="name of the personal access token used to sign into the server")
+    parser.add_argument("--token-value", "-v", help="value of the personal access token used to sign into the server")
     parser.add_argument(
         "--logging-level",
         "-l",
@@ -40,7 +36,7 @@ def main():
         help="desired logging level (set to error by default)",
     )
     # Options specific to this sample
-    parser.add_argument("--file", "-f",  help="local filepath of the workbook to publish")
+    parser.add_argument("--file", "-f", help="local filepath of the workbook to publish")
     parser.add_argument("--as-job", "-a", help="Publishing asynchronously", action="store_true")
     parser.add_argument("--skip-connection-check", "-c", help="Skip live connection check", action="store_true")
 

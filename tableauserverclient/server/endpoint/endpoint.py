@@ -147,16 +147,17 @@ class Endpoint(object):
         # a request can, for stuff like publishing, spin for ages waiting for a response.
         # we need some user-facing activity so they know it's not dead.
         request_timeout = self.parent_srv.http_options.get("timeout") or 0
-        server_response: Optional[Response] = self._user_friendly_blocking_request(
+        server_response: Optional["Response"] = self._user_friendly_blocking_request(
             method, url, parameters, request_timeout
         )
         logger.debug("[{}] Async request returned: received {}".format(datetime.timestamp(), server_response))
         # is this blocking retry really necessary? I guess if it was just the threading messing it up?
-        if not server_response:
+        if server_response is None:
+            logger.debug(server_response)
             logger.debug("[{}] Async request failed: retrying".format(datetime.timestamp()))
             server_response = self._blocking_request(method, url, parameters)
-        if not server_response:
-            logger.debug("[{}] Async request failed: retrying".format(datetime.timestamp()))
+        if server_response is None:
+            logger.debug("[{}] Request failed".format(datetime.timestamp()))
             raise RuntimeError
         self._check_status(server_response, url)
 
@@ -169,7 +170,7 @@ class Endpoint(object):
 
         return server_response
 
-    def _check_status(self, server_response: Response, url: Optional[str] = None):
+    def _check_status(self, server_response: "Response", url: Optional[str] = None):
         logger.debug("Response status: {}".format(server_response))
         if not hasattr(server_response, "status_code"):
             raise EnvironmentError("Response is not a http response?")
@@ -191,7 +192,7 @@ class Endpoint(object):
                 # anything else re-raise here
                 raise
 
-    def log_response_safely(self, server_response: requests.Response) -> str:
+    def log_response_safely(self, server_response: "Response") -> str:
         # Checking the content type header prevents eager evaluation of streaming requests.
         content_type = server_response.headers.get("Content-Type")
 
