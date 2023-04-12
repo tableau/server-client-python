@@ -45,6 +45,7 @@ class UserItem(object):
     class Auth:
         OpenID = "OpenID"
         SAML = "SAML"
+        TableauIDWithMFA = "TableauIDWithMFA"
         ServerDefault = "ServerDefault"
 
     def __init__(
