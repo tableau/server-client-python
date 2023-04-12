@@ -4103,7 +4103,7 @@ The `UserItem` class contains the members or attributes for the view resources o
 
 Name | Description
 :--- | :---
-`auth_setting` | (Optional) This attribute is only for Tableau Cloud. The new authentication type for the user. You can assign the following values for this attribute: `SAML` (the user signs in using SAML) or `ServerDefault` (the user signs in using the authentication method that's set for the server). These values appear in the **Authentication** tab on the **Settings** page in Tableau Cloud -- the `SAML` attribute value corresponds to **Single sign-on**, and the `ServerDefault` value corresponds to **TableauID**.
+`auth_setting` | (Optional) This attribute is only for Tableau Cloud. The new authentication type for the user - see **User Auth** below for values.
 `domain_name`  |    The name of the site.
 `external_auth_user_id` |   Represents ID stored in Tableau's single sign-on (SSO) system. The `externalAuthUserId` value is returned for Tableau Cloud. For other server configurations, this field contains null.
 `id` |   The id of the user on the site.
@@ -4114,6 +4114,15 @@ Name | Description
 `name` |   The name of the user. This attribute is required when you are creating a `UserItem` instance.
 `site_role` |  The role the user has on the site. This attribute is required if you are creating a `UserItem` instance. See *User Roles* below for details.
 `groups` | The groups that the user belongs to. You must run the populate_groups method to add the groups to the `UserItem`.
+
+**User Auth**
+
+ You can assign the following values for this attribute: 
+* `OpenID` 
+* `SAML` (the user signs in using **Single sign-on**) 
+* `ServerDefault` (the user signs in using the default authentication method for the server - in Tableau Cloud this is **TableauID**)
+* `TableauIDWithMFA`
+ These options appear in the **Authentication** tab on the **Settings** page in Tableau Cloud.
 
 **User Roles**
 
