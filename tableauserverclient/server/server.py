@@ -111,7 +111,6 @@ class Server(object):
             self.use_server_version()  # this makes a server call
 
     def validate_connection_settings(self):
-
         try:
             params = Endpoint(self).set_parameters(self._http_options, None, None, None, None)
             Endpoint.set_user_agent(params)

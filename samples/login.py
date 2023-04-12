@@ -9,6 +9,7 @@ import getpass
 import logging
 
 import tableauserverclient as TSC
+import env
 
 
 # If a sample has additional arguments, then it should copy this code and insert them after the call to
@@ -18,10 +19,15 @@ def set_up_and_log_in():
     parser = argparse.ArgumentParser(description="Logs in to the server.")
     sample_define_common_options(parser)
     args = parser.parse_args()
-
-    # Set logging level based on user input, or error by default.
-    logging_level = getattr(logging, args.logging_level.upper())
-    logging.basicConfig(level=logging_level)
+    if not args.server:
+        args.server = env.server
+    if not args.site:
+        args.site = env.site
+    if not args.token_name:
+        args.token_name = env.token_name
+    if not args.token_value:
+        args.token_value = env.token_value
+    args.logging_level = "debug"
 
     server = sample_connect_to_server(args)
     print(server.server_info.get())
@@ -30,9 +36,9 @@ def set_up_and_log_in():
 
 def sample_define_common_options(parser):
     # Common options; please keep these in sync across all samples by copying or calling this method directly
-    parser.add_argument("--server", "-s",  help="server address")
+    parser.add_argument("--server", "-s", help="server address")
     parser.add_argument("--site", "-t", help="site name")
-    auth = parser.add_mutually_exclusive_group(required=True)
+    auth = parser.add_mutually_exclusive_group(required=False)
     auth.add_argument("--token-name", "-tn", help="name of the personal access token used to sign into the server")
     auth.add_argument("--username", "-u", help="username to sign into the server")
 
@@ -73,6 +79,9 @@ def sample_connect_to_server(args):
     # Make sure we use an updated version of the rest apis, and pass in our cert handling choice
     server = TSC.Server(args.server, use_server_version=True, http_options={"verify": check_ssl_certificate})
     server.auth.sign_in(tableau_auth)
+    server.version = "2.6"
+    new_site: TSC.SiteItem = TSC.SiteItem("cdnear", content_url=env.site)
+    server.auth.switch_site(new_site)
     print("Logged in successfully")
 
     return server

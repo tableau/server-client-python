@@ -59,6 +59,9 @@ def main():
         args.token_name = env.token_name
     if not args.token_value:
         args.token_value = env.token_value
+    args.logging = "debug"
+    args.file = "C:/dev/tab-samples/5M.tdsx"
+    args.async_ = True
 
     # Ensure that both the connection username and password are provided, or none at all
     if (args.conn_username and not args.conn_password) or (not args.conn_username and args.conn_password):
@@ -103,6 +106,7 @@ def main():
 
         # Publish datasource
         if args.async_:
+            print("Publish as a job")
             # Async publishing, returns a job_item
             new_job = server.datasources.publish(
                 new_datasource, args.file, publish_mode, connection_credentials=new_conn_creds, as_job=True
@@ -113,8 +117,11 @@ def main():
             new_datasource = server.datasources.publish(
                 new_datasource, args.file, publish_mode, connection_credentials=new_conn_creds
             )
-            print("{0}Datasource published. Datasource ID: {1}".format(new_datasource.id,
-                                                                       tableauserverclient.datetime_helpers.timestamp()))
+            print(
+                "{0}Datasource published. Datasource ID: {1}".format(
+                    new_datasource.id, tableauserverclient.datetime_helpers.timestamp()
+                )
+            )
             print("\t\tClosing connection")
 
 

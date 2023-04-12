@@ -133,7 +133,6 @@ class Endpoint(object):
         content_type: Optional[str] = None,
         parameters: Optional[Dict[str, Any]] = None,
     ) -> "Response":
-
         parameters = Endpoint.set_parameters(
             self.parent_srv.http_options, auth_token, content, content_type, parameters
         )
