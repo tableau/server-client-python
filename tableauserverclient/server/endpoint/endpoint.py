@@ -6,7 +6,7 @@ import requests
 from packaging.version import Version
 from functools import wraps
 from xml.etree.ElementTree import ParseError
-from typing import Any, Callable, Dict, Optional, TYPE_CHECKING
+from typing import Any, Callable, Dict, Optional, TYPE_CHECKING, Union
 
 from .exceptions import (
     ServerResponseError,
@@ -40,8 +40,6 @@ USER_AGENT_HEADER = "User-Agent"
 class Endpoint(object):
     def __init__(self, parent_srv: "Server"):
         self.parent_srv = parent_srv
-
-    from tableauserverclient.helpers.logging import logger
 
     async_response = None
 
@@ -78,24 +76,25 @@ class Endpoint(object):
         # return explicitly for testing only
         return parameters
 
-    def _blocking_request(self, method, url, parameters={}) -> "Response":
+    def _blocking_request(self, method, url, parameters={}) -> Union["Response", int]:
         self.async_response = None
+        response = None
         logger.debug("[{}] Begin blocking request to {}".format(datetime.timestamp(), url))
         try:
-            self.async_response = method(url, **parameters)
+            response = method(url, **parameters)
+            self.async_response = response
             logger.debug("[{}] Call finished".format(datetime.timestamp()))
         except Exception as e:
             logger.debug("Error making request to server: {}".format(e))
             self.async_response = e
         finally:
-            if not self.async_response:
+            if response and not self.async_response:
                 logger.debug("Request response not saved")
                 return self.async_response or -1
         logger.debug("[{}] Request complete".format(datetime.timestamp()))
         return self.async_response
 
-    def _user_friendly_blocking_request(self, method, url, parameters={}, test_timeout=0) -> Optional["Response"]:
-        minutes: int = 0
+    def _user_friendly_blocking_request(self, method, url, parameters={}, request_timeout=0) -> Optional["Response"]:
         try:
             request_thread = Thread(target=self._blocking_request, args=(method, url, parameters))
             request_thread.async_response = None  # type:ignore # this is an invented attribute for thread comms
@@ -103,24 +102,27 @@ class Endpoint(object):
         except Exception as e:
             logger.debug("Error starting server request on separate thread: {}".format(e))
             return None
-
         seconds = 0
-        while self.async_response is None:
-            logger.debug("{} Waiting....".format(datetime.timestamp()))
-            if minutes % 5 == 0 and seconds >= 60:
-                logger.info("[{}] Waiting ({} minutes so far) for request to {}".format(datetime.timestamp(), minutes, url))
-            elif minutes % 1 == 0 and seconds >= 60:
-                logger.debug("[{}] Waiting for request to {}".format(datetime.timestamp(), url))
-            sleep(DELAY_SLEEP_SECONDS)
+        minutes = 0
+        sleep(1)
+        if self.async_response:
+            # a quick return for any immediate responses
+            return self.async_response
+        while self.async_response is None and (request_timeout == 0 or seconds < request_timeout):
+            self.wait_for_response(minutes, seconds, url)
             seconds = seconds + DELAY_SLEEP_SECONDS
             if seconds >= 60:
                 seconds = 0
                 minutes = minutes + 1
-
-            if test_timeout and minutes > test_timeout:
-                raise RuntimeError("Test waited longer than it expected (expected {})".format(test_timeout))
-
         return self.async_response
+
+    def wait_for_response(self, minutes, seconds, url):
+        logger.debug("{} Waiting....".format(datetime.timestamp()))
+        if minutes % 5 == 0 and seconds >= 60:
+            logger.info("[{}] Waiting ({} minutes so far) for request to {}".format(datetime.timestamp(), minutes, url))
+        elif minutes % 1 == 0 and seconds >= 60:
+            logger.debug("[{}] Waiting for request to {}".format(datetime.timestamp(), url))
+        sleep(DELAY_SLEEP_SECONDS)
 
     def _make_request(
         self,
@@ -144,7 +146,8 @@ class Endpoint(object):
 
         # a request can, for stuff like publishing, spin for ages waiting for a response.
         # we need some user-facing activity so they know it's not dead.
-        server_response = self._user_friendly_blocking_request(method, url, parameters)
+        request_timeout = self.parent_srv.http_options.get("timeout") or 0
+        server_response = self._user_friendly_blocking_request(method, url, parameters, request_timeout)
         logger.debug("[{}] Async request returned: received {}".format(datetime.timestamp(), server_response))
         # is this blocking retry really necessary? I guess if it was just the threading messing it up?
         if not server_response or server_response == -1:
@@ -162,13 +165,16 @@ class Endpoint(object):
         return server_response
 
     def _check_status(self, server_response, url: Optional[str] = None):
-        logger.debug("Response status: {}".format(server_response.status_code))
+        logger.debug("Response status: {}".format(server_response))
+        if not hasattr(server_response, "status_code"):
+            raise EnvironmentError("Response is not a http response?")
         if server_response.status_code >= 500:
             raise InternalServerError(server_response, url)
         elif server_response.status_code not in Success_codes:
             try:
                 if server_response.status_code == 401:
-                    raise NotSignedInError.from_response(server_response.content, self.parent_srv.namespace, url)
+                    # TODO: catch this in server.py and attempt to sign in again, in case it's a session expiry
+                    raise NotSignedInError(server_response.content, url)
 
                 raise ServerResponseError.from_response(server_response.content, self.parent_srv.namespace, url)
             except ParseError:

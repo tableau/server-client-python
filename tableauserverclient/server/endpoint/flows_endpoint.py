@@ -35,10 +35,10 @@ ALLOWED_FILE_EXTENSIONS = ["tfl", "tflx"]
 from tableauserverclient.helpers.logging import logger
 
 if TYPE_CHECKING:
-    from .. import DQWItem
-    from ..request_options import RequestOptions
-    from ...models.permissions_item import PermissionsRule
-    from .schedules_endpoint import AddResponse
+    from tableauserverclient.models import DQWItem
+    from tableauserverclient.models.permissions_item import PermissionsRule
+    from tableauserverclient.server.request_options import RequestOptions
+    from tableauserverclient.server.endpoint.schedules_endpoint import AddResponse
 
 
 FilePath = Union[str, os.PathLike]

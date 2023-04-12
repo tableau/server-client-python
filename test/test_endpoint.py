@@ -31,7 +31,7 @@ class TestEndpoint(unittest.TestCase):
         with requests_mock.mock() as m:
             m.get(url)
             response = endpoint._user_friendly_blocking_request(
-                endpoint.parent_srv.session.get, url=url, test_timeout=1
+                endpoint.parent_srv.session.get, url=url, request_timeout=2
             )
             self.assertIsNotNone(response)
 

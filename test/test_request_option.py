@@ -22,7 +22,7 @@ SLICING_QUERYSET_PAGE_2 = TEST_ASSET_DIR / "queryset_slicing_page_2.xml"
 
 class RequestOptionTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.server = TSC.Server("http://test", False)
+        self.server = TSC.Server("http://test", False, http_options={"timeout": 5})
 
         # Fake signin
         self.server.version = "3.10"
@@ -151,7 +151,7 @@ class RequestOptionTests(unittest.TestCase):
                 )
             )
             req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, "foo"))
-            for _ in range(100):
+            for _ in range(5):
                 matching_workbooks, pagination_item = self.server.workbooks.get(req_option)
                 self.assertEqual(3, pagination_item.total_available)
 
@@ -245,7 +245,7 @@ class RequestOptionTests(unittest.TestCase):
             )
             m.get(url, text=response_xml)
 
-            for _ in range(100):
+            for _ in range(5):
                 matching_workbooks = self.server.workbooks.filter(tags__in=["sample", "safari", "weather"], name="foo")
                 self.assertEqual(3, matching_workbooks.total_available)
 

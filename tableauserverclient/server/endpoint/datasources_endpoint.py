@@ -271,8 +271,11 @@ class Datasources(QuerysetEndpoint):
 
         # Determine if chunking is required (64MB is the limit for single upload method)
         if file_size >= FILESIZE_LIMIT:
-            logger.info("Publishing {} to server with chunking method (datasource over {}MB, chunk size {}MB)"
-                        .format(filename, FILESIZE_LIMIT, tableauserverclient.config.CHUNK_SIZE))
+            logger.info(
+                "Publishing {} to server with chunking method (datasource over {}MB, chunk size {}MB)".format(
+                    filename, FILESIZE_LIMIT, tableauserverclient.config.CHUNK_SIZE
+                )
+            )
             upload_session_id = self.parent_srv.fileuploads.upload(file)
             url = "{0}&uploadSessionId={1}".format(url, upload_session_id)
             xml_request, content_type = RequestFactory.Datasource.publish_req_chunked(
