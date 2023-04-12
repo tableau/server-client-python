@@ -309,7 +309,7 @@ class Workbooks(QuerysetEndpoint):
         as_job: bool = False,
         hidden_views: Optional[Sequence[str]] = None,
         skip_connection_check: bool = False,
-        parameters=None
+        parameters=None,
     ):
         if connection_credentials is not None:
             import warnings

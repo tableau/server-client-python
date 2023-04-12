@@ -32,7 +32,7 @@ class DatasourceItem(object):
             self.project_id,
         )
 
-    def __init__(self, project_id: str, name: Optional[str] = None) -> None:
+    def __init__(self, project_id: Optional[str] = None, name: Optional[str] = None) -> None:
         self._ask_data_enablement = None
         self._certified = None
         self._certification_note = None
@@ -135,11 +135,11 @@ class DatasourceItem(object):
         return self._id
 
     @property
-    def project_id(self) -> str:
+    def project_id(self) -> Optional[str]:
         return self._project_id
 
     @project_id.setter
-    def project_id(self, value: str):
+    def project_id(self, value: Optional[str]):
         self._project_id = value
 
     @property
