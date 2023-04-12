@@ -20,14 +20,10 @@ import tableauserverclient as TSC
 def main():
     parser = argparse.ArgumentParser(description="Demonstrate pagination on the list of workbooks on the server.")
     # Common options; please keep those in sync across all samples
-    parser.add_argument("--server", "-s",  help="server address")
+    parser.add_argument("--server", "-s", help="server address")
     parser.add_argument("--site", "-S", help="site name")
-    parser.add_argument(
-        "--token-name", "-n",  help="name of the personal access token used to sign into the server"
-    )
-    parser.add_argument(
-        "--token-value", "-v",  help="value of the personal access token used to sign into the server"
-    )
+    parser.add_argument("--token-name", "-n", help="name of the personal access token used to sign into the server")
+    parser.add_argument("--token-value", "-v", help="value of the personal access token used to sign into the server")
     parser.add_argument(
         "--logging-level",
         "-l",

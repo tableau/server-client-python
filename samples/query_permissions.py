@@ -15,14 +15,10 @@ import tableauserverclient as TSC
 def main():
     parser = argparse.ArgumentParser(description="Query permissions of a given resource.")
     # Common options; please keep those in sync across all samples
-    parser.add_argument("--server", "-s",  help="server address")
+    parser.add_argument("--server", "-s", help="server address")
     parser.add_argument("--site", "-S", help="site name")
-    parser.add_argument(
-        "--token-name", "-p",  help="name of the personal access token used to sign into the server"
-    )
-    parser.add_argument(
-        "--token-value", "-v",  help="value of the personal access token used to sign into the server"
-    )
+    parser.add_argument("--token-name", "-p", help="name of the personal access token used to sign into the server")
+    parser.add_argument("--token-value", "-v", help="value of the personal access token used to sign into the server")
     parser.add_argument(
         "--logging-level",
         "-l",

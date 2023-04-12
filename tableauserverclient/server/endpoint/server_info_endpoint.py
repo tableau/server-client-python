@@ -1,8 +1,7 @@
 import logging
 
 from .endpoint import Endpoint, api
-from .exceptions import (
-    ServerResponseError)
+from .exceptions import ServerResponseError
 from ..exceptions import (
     ServerInfoEndpointNotFoundError,
     EndpointUnavailableError,
