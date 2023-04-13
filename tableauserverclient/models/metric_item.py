@@ -123,35 +123,34 @@ class MetricItem(object):
         parsed_response = ET.fromstring(resp)
         all_metric_xml = parsed_response.findall(".//t:metric", namespaces=ns)
         for metric_xml in all_metric_xml:
-            metric_item = cls()
-            metric_item._id = metric_xml.get("id", None)
-            metric_item._name = metric_xml.get("name", None)
-            metric_item._description = metric_xml.get("description", None)
-            metric_item._webpage_url = metric_xml.get("webpageUrl", None)
-            metric_item._created_at = parse_datetime(metric_xml.get("createdAt", None))
-            metric_item._updated_at = parse_datetime(metric_xml.get("updatedAt", None))
-            metric_item._suspended = string_to_bool(metric_xml.get("suspended", ""))
-            for owner in metric_xml.findall(".//t:owner", namespaces=ns):
-                metric_item._owner_id = owner.get("id", None)
-
-            for project in metric_xml.findall(".//t:project", namespaces=ns):
-                metric_item._project_id = project.get("id", None)
-                metric_item._project_name = project.get("name", None)
-
-            for view in metric_xml.findall(".//t:underlyingView", namespaces=ns):
-                metric_item._view_id = view.get("id", None)
-
-            tags = set()
-            tags_elem = metric_xml.find(".//t:tags", namespaces=ns)
-            if tags_elem is not None:
-                all_tags = TagItem.from_xml_element(tags_elem, ns)
-                tags = all_tags
-
-            metric_item.tags = tags
-            metric_item._initial_tags = tags
-
-            all_metric_items.append(metric_item)
+            all_metric_items.append(cls.from_xml(metric_xml, ns))
         return all_metric_items
+
+    @classmethod
+    def from_xml(cls, metric_xml, ns):
+        metric_item = cls()
+        metric_item._id = metric_xml.get("id", None)
+        metric_item._name = metric_xml.get("name", None)
+        metric_item._description = metric_xml.get("description", None)
+        metric_item._webpage_url = metric_xml.get("webpageUrl", None)
+        metric_item._created_at = parse_datetime(metric_xml.get("createdAt", None))
+        metric_item._updated_at = parse_datetime(metric_xml.get("updatedAt", None))
+        metric_item._suspended = string_to_bool(metric_xml.get("suspended", ""))
+        for owner in metric_xml.findall(".//t:owner", namespaces=ns):
+            metric_item._owner_id = owner.get("id", None)
+        for project in metric_xml.findall(".//t:project", namespaces=ns):
+            metric_item._project_id = project.get("id", None)
+            metric_item._project_name = project.get("name", None)
+        for view in metric_xml.findall(".//t:underlyingView", namespaces=ns):
+            metric_item._view_id = view.get("id", None)
+        tags = set()
+        tags_elem = metric_xml.find(".//t:tags", namespaces=ns)
+        if tags_elem is not None:
+            all_tags = TagItem.from_xml_element(tags_elem, ns)
+            tags = all_tags
+        metric_item.tags = tags
+        metric_item._initial_tags = tags
+        return metric_item
 
 
 # Used to convert string represented boolean to a boolean type

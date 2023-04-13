@@ -5,23 +5,25 @@ from .flow_item import FlowItem
 from .project_item import ProjectItem
 from .view_item import ViewItem
 from .workbook_item import WorkbookItem
+from .metric_item import MetricItem
 
 
 class Resource:
     Database = "database"
     Datarole = "datarole"
+    Table = "table"
     Datasource = "datasource"
     Flow = "flow"
     Lens = "lens"
     Metric = "metric"
     Project = "project"
-    Table = "table"
     View = "view"
     Workbook = "workbook"
 
 
 # resource types that have permissions, can be renamed, etc
-TableauItem = Union[DatasourceItem, FlowItem, ProjectItem, ViewItem, WorkbookItem]
+# todo: refactoring: should actually define TableauItem as an interface and let all these implement it
+TableauItem = Union[DatasourceItem, FlowItem, MetricItem, ProjectItem, ViewItem, WorkbookItem]
 
 
 def plural_type(content_type: Resource) -> str:

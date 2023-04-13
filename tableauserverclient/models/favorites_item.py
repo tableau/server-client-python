@@ -1,38 +1,28 @@
 import logging
 
 from defusedxml.ElementTree import fromstring
+from .tableau_types import TableauItem
 
 from .datasource_item import DatasourceItem
 from .flow_item import FlowItem
 from .project_item import ProjectItem
+from .metric_item import MetricItem
 from .view_item import ViewItem
 from .workbook_item import WorkbookItem
+from typing import Dict, List
 
 logger = logging.getLogger("tableau.models.favorites_item")
 
-from typing import Dict, List, Union
 
 FavoriteType = Dict[
     str,
     List[
-        Union[
-            DatasourceItem,
-            ProjectItem,
-            FlowItem,
-            ViewItem,
-            WorkbookItem,
-        ]
+        TableauItem
     ],
 ]
 
 
 class FavoriteItem:
-    class Type:
-        Workbook: str = "workbook"
-        Datasource: str = "datasource"
-        View: str = "view"
-        Project: str = "project"
-        Flow: str = "flow"
 
     @classmethod
     def from_response(cls, xml: str, namespace: Dict) -> FavoriteType:
@@ -40,35 +30,62 @@ class FavoriteItem:
             "datasources": [],
             "flows": [],
             "projects": [],
+            "metrics": [],
             "views": [],
             "workbooks": [],
         }
-
         parsed_response = fromstring(xml)
-        for workbook in parsed_response.findall(".//t:favorite/t:workbook", namespace):
-            fav_workbook = WorkbookItem("")
-            fav_workbook._set_values(*fav_workbook._parse_element(workbook, namespace))
-            if fav_workbook:
-                favorites["workbooks"].append(fav_workbook)
-        for view in parsed_response.findall(".//t:favorite[t:view]", namespace):
-            fav_views = ViewItem.from_xml_element(view, namespace)
-            if fav_views:
-                for fav_view in fav_views:
-                    favorites["views"].append(fav_view)
-        for datasource in parsed_response.findall(".//t:favorite/t:datasource", namespace):
-            fav_datasource = DatasourceItem("")
-            fav_datasource._set_values(*fav_datasource._parse_element(datasource, namespace))
+
+        datasources_xml = parsed_response.findall(".//t:favorite/t:datasource", namespace)
+        flows_xml = parsed_response.findall(".//t:favorite/t:flow", namespace)
+        metrics_xml = parsed_response.findall(".//t:favorite/t:metric", namespace)
+        projects_xml = parsed_response.findall(".//t:favorite/t:project", namespace)
+        views_xml = parsed_response.findall(".//t:favorite[t:view]", namespace)
+        workbooks_xml = parsed_response.findall(".//t:favorite/t:workbook", namespace)
+
+        logger.debug("ds: {}, flows: {}, metrics: {}, projects: {}, views: {}, wbs: {}"
+                     .format(len(datasources_xml),
+                             len(flows_xml),
+                             len(metrics_xml),
+                             len(projects_xml),
+                             len(views_xml),
+                             len(workbooks_xml)
+                             ))
+        for datasource in datasources_xml:
+            fav_datasource = DatasourceItem.from_xml(datasource, namespace)
             if fav_datasource:
+                logger.debug(fav_datasource)
                 favorites["datasources"].append(fav_datasource)
-        for project in parsed_response.findall(".//t:favorite/t:project", namespace):
-            fav_project = ProjectItem("p")
-            fav_project._set_values(*fav_project._parse_element(project))
-            if fav_project:
-                favorites["projects"].append(fav_project)
-        for flow in parsed_response.findall(".//t:favorite/t:flow", namespace):
-            fav_flow = FlowItem("flows")
-            fav_flow._set_values(*fav_flow._parse_element(flow, namespace))
+
+        for flow in flows_xml:
+            fav_flow = FlowItem.from_xml(flow, namespace)
             if fav_flow:
+                logger.debug(fav_flow)
                 favorites["flows"].append(fav_flow)
 
+        for metric in metrics_xml:
+            fav_metric = MetricItem.from_xml(metric, namespace)
+            if fav_metric:
+                logger.debug(fav_metric)
+                favorites["metrics"].append(fav_metric)
+
+        for project in projects_xml:
+            fav_project = ProjectItem.from_xml(project, namespace)
+            if fav_project:
+                logger.debug(fav_project)
+                favorites["projects"].append(fav_project)
+
+        for view in views_xml:
+            fav_view = ViewItem.from_xml_element(view, namespace)
+            if fav_view:
+                logger.debug(fav_view)
+                favorites["views"].append(fav_view)
+
+        for workbook in workbooks_xml:
+            fav_workbook = WorkbookItem.from_xml(workbook, namespace)
+            if fav_workbook:
+                logger.debug(fav_workbook)
+                favorites["workbooks"].append(fav_workbook)
+
+        logger.debug(favorites)
         return favorites

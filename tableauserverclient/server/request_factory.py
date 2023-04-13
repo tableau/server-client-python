@@ -261,7 +261,8 @@ class DQWRequest(object):
 
 
 class FavoriteRequest(object):
-    def _add_to_req(self, id_: str, target_type: str, label: str) -> bytes:
+
+    def add_request(self, id_: str, target_type: str, label: str) -> bytes:
         """
         <favorite label="...">
         <target_type id="..." />
@@ -280,35 +281,35 @@ class FavoriteRequest(object):
             raise ValueError("id must exist to add to favorites")
         if name is None:
             raise ValueError("Name must exist to add to favorites.")
-        return self._add_to_req(id_, FavoriteItem.Type.Datasource, name)
+        return self.add_request(id_, Resource.Datasource, name)
 
     def add_flow_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
         if id_ is None:
             raise ValueError("id must exist to add to favorites")
         if name is None:
             raise ValueError("Name must exist to add to favorites.")
-        return self._add_to_req(id_, FavoriteItem.Type.Flow, name)
+        return self.add_request(id_, Resource.Flow, name)
 
     def add_project_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
         if id_ is None:
             raise ValueError("id must exist to add to favorites")
         if name is None:
             raise ValueError("Name must exist to add to favorites.")
-        return self._add_to_req(id_, FavoriteItem.Type.Project, name)
+        return self.add_request(id_, Resource.Project, name)
 
     def add_view_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
         if id_ is None:
             raise ValueError("id must exist to add to favorites")
         if name is None:
             raise ValueError("Name must exist to add to favorites.")
-        return self._add_to_req(id_, FavoriteItem.Type.View, name)
+        return self.add_request(id_, Resource.View, name)
 
     def add_workbook_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
         if id_ is None:
             raise ValueError("id must exist to add to favorites")
         if name is None:
             raise ValueError("Name must exist to add to favorites.")
-        return self._add_to_req(id_, FavoriteItem.Type.Workbook, name)
+        return self.add_request(id_, Resource.Workbook, name)
 
 
 class FileuploadRequest(object):
