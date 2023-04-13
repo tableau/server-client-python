@@ -299,3 +299,19 @@ class ViewTests(unittest.TestCase):
 
             excel_file = b"".join(single_view.excel)
             self.assertEqual(response, excel_file)
+
+    def test_filter_excel(self) -> None:
+        self.server.version = "3.8"
+        self.baseurl = self.server.views.baseurl
+        with open(POPULATE_EXCEL, "rb") as f:
+            response = f.read()
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + "/d79634e1-6063-4ec9-95ff-50acbf609ff5/crosstab/excel?maxAge=1", content=response)
+            single_view = TSC.ViewItem()
+            single_view._id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
+            request_option = TSC.ExcelRequestOptions(maxage=1)
+            request_option.vf("stuff", "1")
+            self.server.views.populate_excel(single_view, request_option)
+
+            excel_file = b"".join(single_view.excel)
+            self.assertEqual(response, excel_file)
