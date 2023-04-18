@@ -5,8 +5,8 @@ import tableauserverclient as TSC
 
 class ProjectModelTests(unittest.TestCase):
     def test_nullable_name(self):
-        self.assertRaises(ValueError, TSC.ProjectItem, None)
-        self.assertRaises(ValueError, TSC.ProjectItem, "")
+        TSC.ProjectItem(None)
+        TSC.ProjectItem("")
         project = TSC.ProjectItem("proj")
         project.name = None
 

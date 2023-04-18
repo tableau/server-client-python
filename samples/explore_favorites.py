@@ -13,12 +13,8 @@ def main():
     # Common options; please keep those in sync across all samples
     parser.add_argument("--server", "-s", help="server address")
     parser.add_argument("--site", "-S", help="site name")
-    parser.add_argument(
-        "--token-name", "-p", help="name of the personal access token used to sign into the server"
-    )
-    parser.add_argument(
-        "--token-value", "-v", help="value of the personal access token used to sign into the server"
-    )
+    parser.add_argument("--token-name", "-p", help="name of the personal access token used to sign into the server")
+    parser.add_argument("--token-value", "-v", help="value of the personal access token used to sign into the server")
     parser.add_argument(
         "--logging-level",
         "-l",
@@ -37,7 +33,6 @@ def main():
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
     server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
-
         print(server)
         my_workbook = None
         my_view = None
@@ -54,7 +49,7 @@ def main():
         all_workbook_items, pagination_item = server.workbooks.get()
         if all_workbook_items is not None and len(all_workbook_items) > 0:
             my_workbook: TSC.WorkbookItem = all_workbook_items[0]
-            server.favorites.add_favorite(server, user, Resource.Workbook, all_workbook_items[0])
+            server.favorites.add_favorite(server, user, Resource.Workbook.name(), all_workbook_items[0])
             print(
                 "Workbook added to favorites. Workbook Name: {}, Workbook ID: {}".format(
                     my_workbook.name, my_workbook.id
@@ -78,9 +73,7 @@ def main():
 
     delete_workbook = server.favorites.delete_favorite_workbook(user, my_workbook)
     print(
-        "Workbook deleted from favorites. Workbook Name: {}, Workbook ID: {}".format(
-            my_workbook.name, my_workbook.id
-        )
+        "Workbook deleted from favorites. Workbook Name: {}, Workbook ID: {}".format(my_workbook.name, my_workbook.id)
     )
 
     delete_view = server.favorites.delete_favorite_view(user, my_view)

@@ -1,9 +1,20 @@
 import logging
 
 from .endpoint import Endpoint, api
+from requests import Response
+
 from tableauserverclient.server import RequestFactory, RequestOptions, Resource
-from tableauserverclient.models import DatasourceItem, FavoriteItem, FlowItem, MetricItem, \
-    ProjectItem, UserItem, ViewItem, WorkbookItem, TableauItem
+from tableauserverclient.models import (
+    DatasourceItem,
+    FavoriteItem,
+    FlowItem,
+    MetricItem,
+    ProjectItem,
+    UserItem,
+    ViewItem,
+    WorkbookItem,
+    TableauItem,
+)
 
 from typing import Optional
 
@@ -23,10 +34,10 @@ class Favorites(Endpoint):
         server_response = self.get_request(url, req_options)
         user_item._favorites = FavoriteItem.from_response(server_response.content, self.parent_srv.namespace)
 
-    #---------add to favorites
+    # ---------add to favorites
 
     @api(version="3.15")
-    def add_favorite(self, user_item: UserItem, content_type: Resource, item: TableauItem) -> "Response":
+    def add_favorite(self, user_item: UserItem, content_type: str, item: TableauItem) -> "Response":
         url = "{0}/{1}".format(self.baseurl, user_item.id)
         add_req = RequestFactory.Favorite.add_request(item.id, content_type, item.name)
         server_response = self.put_request(url, add_req)

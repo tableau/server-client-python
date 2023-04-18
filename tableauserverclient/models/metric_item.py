@@ -5,6 +5,7 @@ from typing import List, Optional, Set
 from tableauserverclient.datetime_helpers import parse_datetime
 from .property_decorators import property_is_boolean, property_is_datetime
 from .tag_item import TagItem
+from .permissions_item import Permission
 
 
 class MetricItem(object):
@@ -22,6 +23,7 @@ class MetricItem(object):
         self._view_id: Optional[str] = None
         self._initial_tags: Set[str] = set()
         self.tags: Set[str] = set()
+        self._permissions: Optional[Permission] = None
 
     @property
     def id(self) -> Optional[str]:
@@ -109,6 +111,9 @@ class MetricItem(object):
     @view_id.setter
     def view_id(self, value: Optional[str]) -> None:
         self._view_id = value
+
+    def _set_permissions(self, permissions):
+        self._permissions = permissions
 
     def __repr__(self):
         return "<MetricItem# name={_name} id={_id} owner_id={_owner_id}>".format(**vars(self))

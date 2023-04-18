@@ -38,7 +38,8 @@ class WorkbookItem(object):
         self.name = name
         self._description = None
         self.owner_id: Optional[str] = None
-        self.project_id = project_id or uuid.uuid4()  # workaround for Personal Space workbooks without a project
+        # workaround for Personal Space workbooks without a project
+        self.project_id: Optional[str] = project_id or uuid.uuid4().__str__()
         self.show_tabs = show_tabs
         self.hidden_views: Optional[List[str]] = None
         self.tags: Set[str] = set()

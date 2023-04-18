@@ -16,14 +16,11 @@ logger = logging.getLogger("tableau.models.favorites_item")
 
 FavoriteType = Dict[
     str,
-    List[
-        TableauItem
-    ],
+    List[TableauItem],
 ]
 
 
 class FavoriteItem:
-
     @classmethod
     def from_response(cls, xml: str, namespace: Dict) -> FavoriteType:
         favorites: FavoriteType = {
@@ -43,14 +40,16 @@ class FavoriteItem:
         views_xml = parsed_response.findall(".//t:favorite/t:view", namespace)
         workbooks_xml = parsed_response.findall(".//t:favorite/t:workbook", namespace)
 
-        logger.debug("ds: {}, flows: {}, metrics: {}, projects: {}, views: {}, wbs: {}"
-                     .format(len(datasources_xml),
-                             len(flows_xml),
-                             len(metrics_xml),
-                             len(projects_xml),
-                             len(views_xml),
-                             len(workbooks_xml)
-                             ))
+        logger.debug(
+            "ds: {}, flows: {}, metrics: {}, projects: {}, views: {}, wbs: {}".format(
+                len(datasources_xml),
+                len(flows_xml),
+                len(metrics_xml),
+                len(projects_xml),
+                len(views_xml),
+                len(workbooks_xml),
+            )
+        )
         for datasource in datasources_xml:
             fav_datasource = DatasourceItem.from_xml(datasource, namespace)
             if fav_datasource:
