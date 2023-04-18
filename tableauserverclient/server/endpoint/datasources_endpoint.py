@@ -1,15 +1,12 @@
 import cgi
 import copy
 import json
-import logging
 import io
 import os
 
 from contextlib import closing
 from pathlib import Path
 from typing import List, Mapping, Optional, Sequence, Tuple, TYPE_CHECKING, Union
-
-import tableauserverclient.config
 
 if TYPE_CHECKING:
     from tableauserverclient.server import Server
@@ -22,12 +19,12 @@ from .exceptions import InternalServerError, MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .resource_tagger import _ResourceTagger
 
-from tableauserverclient.server import RequestFactory, RequestOptions
+from tableauserverclient.config import ALLOWED_FILE_EXTENSIONS, FILESIZE_LIMIT_MB, BYTES_PER_MB, CHUNK_SIZE_MB
 from tableauserverclient.filesys_helpers import (
-    to_filename,
     make_download_path,
     get_file_type,
     get_file_object_size,
+    to_filename,
 )
 from tableauserverclient.helpers.logging import logger
 from tableauserverclient.models import (
@@ -38,6 +35,7 @@ from tableauserverclient.models import (
     RevisionItem,
     PaginationItem,
 )
+from tableauserverclient.server import RequestFactory, RequestOptions
 
 io_types = (io.BytesIO, io.BufferedReader)
 io_types_r = (io.BytesIO, io.BufferedReader)
@@ -46,11 +44,6 @@ io_types_w = (io.BytesIO, io.BufferedWriter)
 FilePath = Union[str, os.PathLike]
 FileObject = Union[io.BufferedReader, io.BytesIO]
 PathOrFile = Union[FilePath, FileObject]
-
-# The maximum size of a file that can be published in a single request is 64MB
-FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
-
-ALLOWED_FILE_EXTENSIONS = ["tds", "tdsx", "tde", "hyper", "parquet"]
 
 FilePath = Union[str, os.PathLike]
 FileObjectR = Union[io.BufferedReader, io.BytesIO]
@@ -270,10 +263,10 @@ class Datasources(QuerysetEndpoint):
             url += "&{0}=true".format("asJob")
 
         # Determine if chunking is required (64MB is the limit for single upload method)
-        if file_size >= FILESIZE_LIMIT:
+        if file_size >= FILESIZE_LIMIT_MB * BYTES_PER_MB:
             logger.info(
                 "Publishing {} to server with chunking method (datasource over {}MB, chunk size {}MB)".format(
-                    filename, FILESIZE_LIMIT, tableauserverclient.config.CHUNK_SIZE
+                    filename, FILESIZE_LIMIT_MB, CHUNK_SIZE_MB
                 )
             )
             upload_session_id = self.parent_srv.fileuploads.upload(file)
