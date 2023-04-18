@@ -94,7 +94,9 @@ class Endpoint(object):
         logger.debug("[{}] Request complete".format(datetime.timestamp()))
         return self.async_response
 
-    def _user_friendly_blocking_request(self, method, url, parameters={}, request_timeout=0) -> Optional["Response"]:
+    def send_request_while_show_progress_threaded(
+        self, method, url, parameters={}, request_timeout=0
+    ) -> Optional["Response"]:
         try:
             request_thread = Thread(target=self._blocking_request, args=(method, url, parameters))
             request_thread.async_response = -1  # type:ignore # this is an invented attribute for thread comms
@@ -109,19 +111,22 @@ class Endpoint(object):
             # a quick return for any immediate responses
             return self.async_response
         while self.async_response == -1 and (request_timeout == 0 or seconds < request_timeout):
-            self.wait_for_response(minutes, seconds, url)
+            self.log_wait_time_then_sleep(minutes, seconds, url)
             seconds = seconds + DELAY_SLEEP_SECONDS
             if seconds >= 60:
                 seconds = 0
                 minutes = minutes + 1
         return self.async_response
 
-    def wait_for_response(self, minutes, seconds, url):
+    def log_wait_time_then_sleep(self, minutes, seconds, url):
         logger.debug("{} Waiting....".format(datetime.timestamp()))
-        if minutes % 5 == 0 and seconds >= 60:
-            logger.info("[{}] Waiting ({} minutes so far) for request to {}".format(datetime.timestamp(), minutes, url))
-        elif minutes % 1 == 0 and seconds >= 60:
-            logger.debug("[{}] Waiting for request to {}".format(datetime.timestamp(), url))
+        if seconds >= 60:  # detailed log message ~every minute
+            if minutes % 5 == 0:
+                logger.info(
+                    "[{}] Waiting ({} minutes so far) for request to {}".format(datetime.timestamp(), minutes, url)
+                )
+            else:
+                logger.debug("[{}] Waiting for request to {}".format(datetime.timestamp(), url))
         sleep(DELAY_SLEEP_SECONDS)
 
     def _make_request(
@@ -146,7 +151,7 @@ class Endpoint(object):
         # a request can, for stuff like publishing, spin for ages waiting for a response.
         # we need some user-facing activity so they know it's not dead.
         request_timeout = self.parent_srv.http_options.get("timeout") or 0
-        server_response: Optional["Response"] = self._user_friendly_blocking_request(
+        server_response: Optional["Response"] = self.send_request_while_show_progress_threaded(
             method, url, parameters, request_timeout
         )
         logger.debug("[{}] Async request returned: received {}".format(datetime.timestamp(), server_response))
