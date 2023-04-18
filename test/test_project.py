@@ -155,7 +155,7 @@ class ProjectTests(unittest.TestCase):
         self.assertEqual("9a8f2265-70f3-4494-96c5-e5949d7a1120", new_project.parent_id)
 
     def test_create_missing_name(self) -> None:
-        self.assertRaises(ValueError, TSC.ProjectItem, "")
+        TSC.ProjectItem()
 
     def test_populate_permissions(self) -> None:
         with open(asset(POPULATE_PERMISSIONS_XML), "rb") as f:

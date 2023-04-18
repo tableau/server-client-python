@@ -312,7 +312,7 @@ class DatasourceItem(object):
     @classmethod
     def from_xml(cls, datasource_xml, ns):
         datasource_item = cls()
-        datasource_item._set_values(cls._parse_element(datasource_xml, ns))
+        datasource_item._set_values(*cls._parse_element(datasource_xml, ns))
         return datasource_item
 
     @staticmethod

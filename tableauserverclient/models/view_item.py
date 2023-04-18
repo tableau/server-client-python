@@ -148,13 +148,12 @@ class ViewItem(object):
         all_view_items = list()
         all_view_xml = parsed_response.findall(".//t:view", namespaces=ns)
         for view_xml in all_view_xml:
-            view_item = cls.from_xml(ns, view_xml, workbook_id)
-
+            view_item = cls.from_xml(view_xml, ns, workbook_id)
             all_view_items.append(view_item)
         return all_view_items
 
     @classmethod
-    def from_xml(cls, ns, view_xml, workbook_id):
+    def from_xml(cls, view_xml, ns, workbook_id="") -> "ViewItem":
         view_item = cls()
         usage_elem = view_xml.find(".//t:usage", namespaces=ns)
         workbook_elem = view_xml.find(".//t:workbook", namespaces=ns)

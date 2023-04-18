@@ -40,7 +40,7 @@ class FavoriteItem:
         flows_xml = parsed_response.findall(".//t:favorite/t:flow", namespace)
         metrics_xml = parsed_response.findall(".//t:favorite/t:metric", namespace)
         projects_xml = parsed_response.findall(".//t:favorite/t:project", namespace)
-        views_xml = parsed_response.findall(".//t:favorite[t:view]", namespace)
+        views_xml = parsed_response.findall(".//t:favorite/t:view", namespace)
         workbooks_xml = parsed_response.findall(".//t:favorite/t:workbook", namespace)
 
         logger.debug("ds: {}, flows: {}, metrics: {}, projects: {}, views: {}, wbs: {}"
@@ -76,7 +76,7 @@ class FavoriteItem:
                 favorites["projects"].append(fav_project)
 
         for view in views_xml:
-            fav_view = ViewItem.from_xml_element(view, namespace)
+            fav_view = ViewItem.from_xml(view, namespace)
             if fav_view:
                 logger.debug(fav_view)
                 favorites["views"].append(fav_view)
