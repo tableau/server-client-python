@@ -1,11 +1,9 @@
 # This script demonstrates how to get all favorites, or add/delete a favorite.
-# favorites_item and favorites_endpoint may be updated
-# these method examples were made prior to any updates to the favorites code
 
 import argparse
 import logging
 import tableauserverclient as TSC
-from tableauserverclient import UserItem, Resource
+from tableauserverclient import Resource
 
 
 def main():
@@ -64,22 +62,22 @@ def main():
         all_datasource_items, pagination_item = server.datasources.get()
         if all_datasource_items:
             my_datasource = all_datasource_items[0]
-        add_datasource = server.favorites.add_favorite_datasource(user, my_datasource)
+        server.favorites.add_favorite_datasource(user, my_datasource)
         print(
             "Datasource added to favorites. Datasource Name: {}, Datasource ID: {}".format(
                 my_datasource.name, my_datasource.id
             )
         )
 
-    delete_workbook = server.favorites.delete_favorite_workbook(user, my_workbook)
+    server.favorites.delete_favorite_workbook(user, my_workbook)
     print(
         "Workbook deleted from favorites. Workbook Name: {}, Workbook ID: {}".format(my_workbook.name, my_workbook.id)
     )
 
-    delete_view = server.favorites.delete_favorite_view(user, my_view)
+    server.favorites.delete_favorite_view(user, my_view)
     print("View deleted from favorites. View Name: {}, View ID: {}".format(my_view.name, my_view.id))
 
-    delete_datasource = server.favorites.delete_favorite_datasource(user, my_datasource)
+    server.favorites.delete_favorite_datasource(user, my_datasource)
     print(
         "Datasource deleted from favorites. Datasource Name: {}, Datasource ID: {}".format(
             my_datasource.name, my_datasource.id
