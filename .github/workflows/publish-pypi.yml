@@ -5,6 +5,9 @@ name: Publish to PyPi
 # TODO: maybe move this into the package job so all release-based actions are together
 on: [push, pull_request]
 
+permissions:
+  id-token: write
+
 jobs:
   build-n-publish:
     name: Build dist files for PyPi
