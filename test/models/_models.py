@@ -1,61 +1,59 @@
 from tableauserverclient import *
 
-# mmm. why aren't these available in the tsc namespace?
+# TODO why aren't these available in the tsc namespace? Probably a bug.
 from tableauserverclient.models import (
     DataAccelerationReportItem,
-    FavoriteItem,
     Credentials,
     ServerInfoItem,
     Resource,
     TableauItem,
-    plural_type,
 )
 
 
 def get_defined_models():
-    # not clever: copied from tsc/models/__init__.py
+    # nothing clever here: list was manually copied from tsc/models/__init__.py
     return [
-        ColumnItem,
-        ConnectionCredentials,
         ConnectionItem,
-        DataAccelerationReportItem,
         DataAlertItem,
-        DatabaseItem,
         DatasourceItem,
-        DQWItem,
-        UnpopulatedPropertyError,
-        FavoriteItem,
         FlowItem,
-        FlowRunItem,
         GroupItem,
-        IntervalItem,
-        DailyInterval,
-        WeeklyInterval,
-        MonthlyInterval,
-        HourlyInterval,
         JobItem,
-        BackgroundJobItem,
         MetricItem,
-        PaginationItem,
         PermissionsRule,
-        Permission,
         ProjectItem,
         RevisionItem,
         ScheduleItem,
-        ServerInfoItem,
-        SiteItem,
         SubscriptionItem,
-        TableItem,
         Credentials,
+        JWTAuth,
         TableauAuth,
         PersonalAccessTokenAuth,
-        Resource,
-        TableauItem,
-        plural_type,
-        Target,
+        ServerInfoItem,
+        SiteItem,
         TaskItem,
         UserItem,
         ViewItem,
         WebhookItem,
         WorkbookItem,
+    ]
+
+
+# manually identified. As these are implemented, they should move to the other list.
+def get_unimplemented_models():
+    return [
+        BackgroundJobItem,
+        DataAccelerationReportItem,
+        FavoriteItem,
+        IntervalItem,
+        DailyInterval,
+        WeeklyInterval,
+        MonthlyInterval,
+        HourlyInterval,
+        PaginationItem,
+        Permission,
+        Resource,
+        TableItem,
+        TableauItem,
+        Target
     ]

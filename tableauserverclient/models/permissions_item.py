@@ -45,10 +45,8 @@ class PermissionsRule(object):
         self.grantee = grantee
         self.capabilities = capabilities
 
-    def __str__(self):
+    def __repr__(self):
         return "<PermissionsRule grantee={}, capabilities={}>".format(self.grantee, self.capabilities)
-
-    __repr__ = __str__
 
     @classmethod
     def from_response(cls, resp, ns=None) -> List["PermissionsRule"]:
