@@ -8,7 +8,7 @@ from .exceptions import MissingRequiredFieldError
 
 from typing import Callable, TYPE_CHECKING, List, Optional, Union
 
-logger = logging.getLogger(__name__)
+from tableauserverclient.helpers.logging import logger
 
 if TYPE_CHECKING:
     from ..server import Server

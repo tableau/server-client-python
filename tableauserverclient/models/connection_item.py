@@ -5,6 +5,7 @@ from defusedxml.ElementTree import fromstring
 
 from .connection_credentials import ConnectionCredentials
 from .property_decorators import property_is_boolean
+from tableauserverclient.helpers.logging import logger
 
 
 class ConnectionItem(object):
@@ -46,7 +47,6 @@ class ConnectionItem(object):
     def query_tagging(self, value: Optional[bool]):
         # if connection type = hyper, Snowflake, or Teradata, we can't change this value: it is always true
         if self._connection_type in ["hyper", "snowflake", "teradata"]:
-            logger = logging.getLogger("tableauserverclient.models.connection_item")
             logger.debug(
                 "Cannot update value: Query tagging is always enabled for {} connections".format(self._connection_type)
             )

@@ -1,13 +1,13 @@
 import copy
-import logging
 import urllib.parse
 
 from .endpoint import Endpoint
-from .exceptions import EndpointUnavailableError, ServerResponseError
+from .exceptions import ServerResponseError
+from ..exceptions import EndpointUnavailableError
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import TagItem
 
-logger = logging.getLogger("tableau.endpoint.resource_tagger")
+from tableauserverclient.helpers.logging import logger
 
 
 class _ResourceTagger(Endpoint):

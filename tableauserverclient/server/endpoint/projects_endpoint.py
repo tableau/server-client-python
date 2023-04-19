@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from ..server import Server
     from ..request_options import RequestOptions
 
-logger = logging.getLogger("tableau.endpoint.projects")
+from tableauserverclient.helpers.logging import logger
 
 
 class Projects(QuerysetEndpoint):
