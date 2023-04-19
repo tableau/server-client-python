@@ -261,12 +261,16 @@ class DQWRequest(object):
 
 
 class FavoriteRequest(object):
-    def _add_to_req(self, id_: str, target_type: str, label: str) -> bytes:
+    def add_request(self, id_: Optional[str], target_type: str, label: Optional[str]) -> bytes:
         """
         <favorite label="...">
         <target_type id="..." />
         </favorite>
         """
+        if id_ is None:
+            raise ValueError("Cannot add item as favorite without ID")
+        if label is None:
+            label = target_type
         xml_request = ET.Element("tsRequest")
         favorite_element = ET.SubElement(xml_request, "favorite")
         target = ET.SubElement(favorite_element, target_type)
@@ -280,35 +284,35 @@ class FavoriteRequest(object):
             raise ValueError("id must exist to add to favorites")
         if name is None:
             raise ValueError("Name must exist to add to favorites.")
-        return self._add_to_req(id_, FavoriteItem.Type.Datasource, name)
+        return self.add_request(id_, Resource.Datasource, name)
 
     def add_flow_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
         if id_ is None:
             raise ValueError("id must exist to add to favorites")
         if name is None:
             raise ValueError("Name must exist to add to favorites.")
-        return self._add_to_req(id_, FavoriteItem.Type.Flow, name)
+        return self.add_request(id_, Resource.Flow, name)
 
     def add_project_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
         if id_ is None:
             raise ValueError("id must exist to add to favorites")
         if name is None:
             raise ValueError("Name must exist to add to favorites.")
-        return self._add_to_req(id_, FavoriteItem.Type.Project, name)
+        return self.add_request(id_, Resource.Project, name)
 
     def add_view_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
         if id_ is None:
             raise ValueError("id must exist to add to favorites")
         if name is None:
             raise ValueError("Name must exist to add to favorites.")
-        return self._add_to_req(id_, FavoriteItem.Type.View, name)
+        return self.add_request(id_, Resource.View, name)
 
     def add_workbook_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
         if id_ is None:
             raise ValueError("id must exist to add to favorites")
         if name is None:
             raise ValueError("Name must exist to add to favorites.")
-        return self._add_to_req(id_, FavoriteItem.Type.Workbook, name)
+        return self.add_request(id_, Resource.Workbook, name)
 
 
 class FileuploadRequest(object):
@@ -485,7 +489,8 @@ class ProjectRequest(object):
     def create_req(self, project_item: "ProjectItem") -> bytes:
         xml_request = ET.Element("tsRequest")
         project_element = ET.SubElement(xml_request, "project")
-        project_element.attrib["name"] = project_item.name
+        if project_item.name:
+            project_element.attrib["name"] = project_item.name
         if project_item.description:
             project_element.attrib["description"] = project_item.description
         if project_item.content_permissions:
