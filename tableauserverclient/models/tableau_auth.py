@@ -82,3 +82,10 @@ class JWTAuth(Credentials):
     @property
     def credentials(self):
         return {"jwt": self.jwt}
+
+    def __repr__(self):
+        if self.user_id_to_impersonate:
+            uid = f", user_id_to_impersonate=f{self.user_id_to_impersonate}"
+        else:
+            uid = ""
+        return f"<JWTAuth(jwt={self.jwt[:5]}..., site_id={self.site_id}{uid})>"
