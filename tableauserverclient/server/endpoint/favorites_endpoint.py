@@ -1,4 +1,5 @@
 from .endpoint import Endpoint, api
+<<<<<<< HEAD
 from requests import Response
 
 from tableauserverclient.helpers.logging import logger
@@ -16,6 +17,18 @@ from tableauserverclient.models import (
 )
 from tableauserverclient.server import RequestFactory, RequestOptions
 from typing import Optional
+=======
+from tableauserverclient.server import RequestFactory
+from tableauserverclient.models import FavoriteItem
+
+from typing import Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ...models import DatasourceItem, FlowItem, ProjectItem, UserItem, ViewItem, WorkbookItem
+    from ..request_options import RequestOptions
+
+from tableauserverclient.helpers.logging import logger
+>>>>>>> 3cc28be (run long requests on second thread (#1212))
 
 
 class Favorites(Endpoint):
