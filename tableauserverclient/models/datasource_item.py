@@ -305,49 +305,15 @@ class DatasourceItem(object):
         all_datasource_xml = parsed_response.findall(".//t:datasource", namespaces=ns)
 
         for datasource_xml in all_datasource_xml:
-            (
-                ask_data_enablement,
-                certified,
-                certification_note,
-                content_url,
-                created_at,
-                datasource_type,
-                description,
-                encrypt_extracts,
-                has_extracts,
-                id_,
-                name,
-                owner_id,
-                project_id,
-                project_name,
-                tags,
-                updated_at,
-                use_remote_query_agent,
-                webpage_url,
-            ) = cls._parse_element(datasource_xml, ns)
-            datasource_item = cls(project_id)
-            datasource_item._set_values(
-                ask_data_enablement,
-                certified,
-                certification_note,
-                content_url,
-                created_at,
-                datasource_type,
-                description,
-                encrypt_extracts,
-                has_extracts,
-                id_,
-                name,
-                owner_id,
-                None,
-                project_name,
-                tags,
-                updated_at,
-                use_remote_query_agent,
-                webpage_url,
-            )
+            datasource_item = cls.from_xml(datasource_xml, ns)
             all_datasource_items.append(datasource_item)
         return all_datasource_items
+
+    @classmethod
+    def from_xml(cls, datasource_xml, ns):
+        datasource_item = cls()
+        datasource_item._set_values(*cls._parse_element(datasource_xml, ns))
+        return datasource_item
 
     @staticmethod
     def _parse_element(datasource_xml: ET.Element, ns: Dict) -> Tuple:

@@ -37,6 +37,8 @@ class FavoritesTests(unittest.TestCase):
         self.assertEqual(len(self.user.favorites["datasources"]), 1)
 
         workbook = self.user.favorites["workbooks"][0]
+        print("favorited: ")
+        print(workbook)
         view = self.user.favorites["views"][0]
         datasource = self.user.favorites["datasources"][0]
         project = self.user.favorites["projects"][0]

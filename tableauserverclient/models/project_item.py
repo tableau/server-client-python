@@ -21,7 +21,7 @@ class ProjectItem(object):
 
     def __init__(
         self,
-        name: str,
+        name: Optional[str] = None,
         description: Optional[str] = None,
         content_permissions: Optional[str] = None,
         parent_id: Optional[str] = None,
@@ -104,11 +104,10 @@ class ProjectItem(object):
         return self._id
 
     @property
-    def name(self) -> str:
+    def name(self) -> Optional[str]:
         return self._name
 
     @name.setter
-    @property_not_empty
     def name(self, value: str) -> None:
         self._name = value
 
@@ -173,18 +172,15 @@ class ProjectItem(object):
         all_project_xml = parsed_response.findall(".//t:project", namespaces=ns)
 
         for project_xml in all_project_xml:
-            (
-                id,
-                name,
-                description,
-                content_permissions,
-                parent_id,
-                owner_id,
-            ) = cls._parse_element(project_xml)
-            project_item = cls(name)
-            project_item._set_values(id, name, description, content_permissions, parent_id, owner_id)
+            project_item = cls.from_xml(project_xml)
             all_project_items.append(project_item)
         return all_project_items
+
+    @classmethod
+    def from_xml(cls, project_xml, namespace=None) -> "ProjectItem":
+        project_item = cls()
+        project_item._set_values(*cls._parse_element(project_xml))
+        return project_item
 
     @staticmethod
     def _parse_element(project_xml):
