@@ -5,7 +5,7 @@ from .exceptions import MissingRequiredFieldError
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import SubscriptionItem, PaginationItem
 
-logger = logging.getLogger("tableau.endpoint.subscriptions")
+from tableauserverclient.helpers.logging import logger
 
 from typing import List, Optional, TYPE_CHECKING, Tuple
 

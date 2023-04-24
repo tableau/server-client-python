@@ -4,7 +4,7 @@ from .endpoint import Endpoint, api
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import WebhookItem, PaginationItem
 
-logger = logging.getLogger("tableau.endpoint.webhooks")
+from tableauserverclient.helpers.logging import logger
 
 from typing import List, Optional, TYPE_CHECKING, Tuple
 

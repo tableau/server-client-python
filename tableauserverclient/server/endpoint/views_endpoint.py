@@ -7,7 +7,7 @@ from .permissions_endpoint import _PermissionsEndpoint
 from .resource_tagger import _ResourceTagger
 from tableauserverclient.models import ViewItem, PaginationItem
 
-logger = logging.getLogger("tableau.endpoint.views")
+from tableauserverclient.helpers.logging import logger
 
 from typing import Iterator, List, Optional, Tuple, TYPE_CHECKING
 

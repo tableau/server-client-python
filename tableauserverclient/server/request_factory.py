@@ -197,6 +197,8 @@ class DatasourceRequest(object):
         if datasource_item.owner_id:
             owner_element = ET.SubElement(datasource_element, "owner")
             owner_element.attrib["id"] = datasource_item.owner_id
+        if datasource_item.use_remote_query_agent is not None:
+            datasource_element.attrib["useRemoteQueryAgent"] = str(datasource_item.use_remote_query_agent).lower()
 
         datasource_element.attrib["isCertified"] = str(datasource_item.certified).lower()
 

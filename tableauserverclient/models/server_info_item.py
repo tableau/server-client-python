@@ -3,6 +3,7 @@ import warnings
 import xml
 
 from defusedxml.ElementTree import fromstring
+from tableauserverclient.helpers.logging import logger
 
 
 class ServerInfoItem(object):
@@ -36,7 +37,6 @@ class ServerInfoItem(object):
 
     @classmethod
     def from_response(cls, resp, ns):
-        logger = logging.getLogger("TSC.ServerInfo")
         try:
             parsed_response = fromstring(resp)
         except xml.etree.ElementTree.ParseError as error:

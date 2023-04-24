@@ -11,8 +11,8 @@ class FileuploadItem(object):
         return self._upload_session_id
 
     @property
-    def file_size(self):
-        return self._file_size
+    def file_size(self) -> int:
+        return int(self._file_size)
 
     @classmethod
     def from_response(cls, resp, ns):

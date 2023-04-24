@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from ..server import Server
     from ..request_options import RequestOptions
 
-logger = logging.getLogger(__name__)
+from tableauserverclient.helpers.logging import logger
 
 # these are the only two items that can hold default permissions for another type
 BaseItem = Union[DatabaseItem, ProjectItem]

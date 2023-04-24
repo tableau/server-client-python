@@ -1,4 +1,4 @@
-import logging
+from tableauserverclient.helpers.logging import logger
 
 import requests
 import urllib3
@@ -34,11 +34,11 @@ from .endpoint import (
     Metrics,
     Endpoint,
 )
-from .endpoint.exceptions import (
+from .exceptions import (
     ServerInfoEndpointNotFoundError,
     EndpointUnavailableError,
 )
-from .exceptions import NotSignedInError
+from .endpoint.exceptions import NotSignedInError
 from ..namespace import Namespace
 
 
@@ -99,8 +99,6 @@ class Server(object):
         self.metrics = Metrics(self)
         self.custom_views = CustomViews(self)
 
-        self.logger = logging.getLogger("TSC.server")
-
         self._session = self._session_factory()
         self._http_options = dict()  # must set this before making a server call
         if http_options:
@@ -114,7 +112,8 @@ class Server(object):
 
     def validate_connection_settings(self):
         try:
-            Endpoint(self).set_parameters(self._http_options, None, None, None, None)
+            params = Endpoint(self).set_parameters(self._http_options, None, None, None, None)
+            Endpoint.set_user_agent(params)
             if not self._server_address.startswith("http://") and not self._server_address.startswith("https://"):
                 self._server_address = "http://" + self._server_address
             self._session.prepare_request(requests.Request("GET", url=self._server_address, params=self._http_options))
@@ -156,8 +155,8 @@ class Server(object):
         try:
             info_xml = fromstring(response.content)
         except ParseError as parseError:
-            self.logger.info(parseError)
-            self.logger.info("Could not read server version info. The server may not be running or configured.")
+            logger.info(parseError)
+            logger.info("Could not read server version info. The server may not be running or configured.")
             return self.version
         prod_version = info_xml.find(".//product_version").text
         version = _PRODUCT_TO_REST_VERSION.get(prod_version, minimum_supported_server_version)
@@ -168,15 +167,15 @@ class Server(object):
             old_version = self.version
             version = self.server_info.get().rest_api_version
         except ServerInfoEndpointNotFoundError as e:
-            self.logger.info("Could not get version info from server: {}{}".format(e.__class__, e))
+            logger.info("Could not get version info from server: {}{}".format(e.__class__, e))
             version = self._get_legacy_version()
         except EndpointUnavailableError as e:
-            self.logger.info("Could not get version info from server: {}{}".format(e.__class__, e))
+            logger.info("Could not get version info from server: {}{}".format(e.__class__, e))
             version = self._get_legacy_version()
         except Exception as e:
-            self.logger.info("Could not get version info from server: {}{}".format(e.__class__, e))
+            logger.info("Could not get version info from server: {}{}".format(e.__class__, e))
             version = None
-        self.logger.info("versions: {}, {}".format(version, old_version))
+        logger.info("versions: {}, {}".format(version, old_version))
         return version or old_version
 
     def use_server_version(self):
@@ -184,7 +183,7 @@ class Server(object):
 
     def use_highest_version(self):
         self.use_server_version()
-        self.logger.info("use use_server_version instead", DeprecationWarning)
+        logger.info("use use_server_version instead", DeprecationWarning)
 
     def check_at_least_version(self, target: str):
         server_version = Version(self.version or "2.4")

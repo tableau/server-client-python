@@ -43,7 +43,7 @@ class FileuploadsTests(unittest.TestCase):
             append_response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=initialize_response_xml)
-            m.put(self.baseurl + "/" + upload_id, text=append_response_xml)
+            m.put("{}/{}".format(self.baseurl, upload_id), text=append_response_xml)
             actual = self.server.fileuploads.upload(file_path)
 
         self.assertEqual(upload_id, actual)
@@ -58,7 +58,7 @@ class FileuploadsTests(unittest.TestCase):
                 append_response_xml = f.read().decode("utf-8")
             with requests_mock.mock() as m:
                 m.post(self.baseurl, text=initialize_response_xml)
-                m.put(self.baseurl + "/" + upload_id, text=append_response_xml)
+                m.put("{}/{}".format(self.baseurl, upload_id), text=append_response_xml)
                 actual = self.server.fileuploads.upload(file_content)
 
         self.assertEqual(upload_id, actual)

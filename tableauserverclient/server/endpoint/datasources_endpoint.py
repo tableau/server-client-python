@@ -1,7 +1,6 @@
 import cgi
 import copy
 import json
-import logging
 import io
 import os
 
@@ -20,13 +19,14 @@ from .exceptions import InternalServerError, MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .resource_tagger import _ResourceTagger
 
-from tableauserverclient.server import RequestFactory, RequestOptions
+from tableauserverclient.config import ALLOWED_FILE_EXTENSIONS, FILESIZE_LIMIT_MB, BYTES_PER_MB, CHUNK_SIZE_MB
 from tableauserverclient.filesys_helpers import (
-    to_filename,
     make_download_path,
     get_file_type,
     get_file_object_size,
+    to_filename,
 )
+from tableauserverclient.helpers.logging import logger
 from tableauserverclient.models import (
     ConnectionCredentials,
     ConnectionItem,
@@ -35,6 +35,7 @@ from tableauserverclient.models import (
     RevisionItem,
     PaginationItem,
 )
+from tableauserverclient.server import RequestFactory, RequestOptions
 
 io_types = (io.BytesIO, io.BufferedReader)
 io_types_r = (io.BytesIO, io.BufferedReader)
@@ -43,13 +44,6 @@ io_types_w = (io.BytesIO, io.BufferedWriter)
 FilePath = Union[str, os.PathLike]
 FileObject = Union[io.BufferedReader, io.BytesIO]
 PathOrFile = Union[FilePath, FileObject]
-
-# The maximum size of a file that can be published in a single request is 64MB
-FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
-
-ALLOWED_FILE_EXTENSIONS = ["tds", "tdsx", "tde", "hyper", "parquet"]
-
-logger = logging.getLogger("tableau.endpoint.datasources")
 
 FilePath = Union[str, os.PathLike]
 FileObjectR = Union[io.BufferedReader, io.BytesIO]
@@ -162,12 +156,20 @@ class Datasources(QuerysetEndpoint):
 
     # Update datasource connections
     @api(version="2.3")
-    def update_connection(self, datasource_item: DatasourceItem, connection_item: ConnectionItem) -> ConnectionItem:
+    def update_connection(
+        self, datasource_item: DatasourceItem, connection_item: ConnectionItem
+    ) -> Optional[ConnectionItem]:
         url = "{0}/{1}/connections/{2}".format(self.baseurl, datasource_item.id, connection_item.id)
 
         update_req = RequestFactory.Connection.update_req(connection_item)
         server_response = self.put_request(url, update_req)
-        connection = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        connections = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
+        if not connections:
+            return None
+
+        if len(connections) > 1:
+            logger.debug("Multiple connections returned ({0})".format(len(connections)))
+        connection = list(filter(lambda x: x.id == connection_item.id, connections))[0]
 
         logger.info(
             "Updated datasource item (ID: {0} & connection item {1}".format(datasource_item.id, connection_item.id)
@@ -220,7 +222,7 @@ class Datasources(QuerysetEndpoint):
             filename = os.path.basename(file)
             file_extension = os.path.splitext(filename)[1][1:]
             file_size = os.path.getsize(file)
-
+            logger.debug("Publishing file `{}`, size `{}`".format(filename, file_size))
             # If name is not defined, grab the name from the file to publish
             if not datasource_item.name:
                 datasource_item.name = os.path.splitext(filename)[0]
@@ -261,8 +263,12 @@ class Datasources(QuerysetEndpoint):
             url += "&{0}=true".format("asJob")
 
         # Determine if chunking is required (64MB is the limit for single upload method)
-        if file_size >= FILESIZE_LIMIT:
-            logger.info("Publishing {0} to server with chunking method (datasource over 64MB)".format(filename))
+        if file_size >= FILESIZE_LIMIT_MB * BYTES_PER_MB:
+            logger.info(
+                "Publishing {} to server with chunking method (datasource over {}MB, chunk size {}MB)".format(
+                    filename, FILESIZE_LIMIT_MB, CHUNK_SIZE_MB
+                )
+            )
             upload_session_id = self.parent_srv.fileuploads.upload(file)
             url = "{0}&uploadSessionId={1}".format(url, upload_session_id)
             xml_request, content_type = RequestFactory.Datasource.publish_req_chunked(

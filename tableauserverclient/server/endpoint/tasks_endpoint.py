@@ -5,7 +5,7 @@ from .exceptions import MissingRequiredFieldError
 from tableauserverclient.models import TaskItem, PaginationItem
 from tableauserverclient.server import RequestFactory
 
-logger = logging.getLogger("tableau.endpoint.tasks")
+from tableauserverclient.helpers.logging import logger
 
 
 class Tasks(Endpoint):

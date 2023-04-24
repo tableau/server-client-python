@@ -4,7 +4,7 @@ import logging
 from .endpoint import Endpoint, api
 from .exceptions import GraphQLError, InvalidGraphQLQuery
 
-logger = logging.getLogger("tableau.endpoint.metadata")
+from tableauserverclient.helpers.logging import logger
 
 
 def is_valid_paged_query(parsed_query):
