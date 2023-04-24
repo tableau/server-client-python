@@ -1,24 +1,21 @@
-import logging
-
 from .endpoint import Endpoint, api
 from requests import Response
 
-from tableauserverclient.server import RequestFactory, RequestOptions, Resource
+from tableauserverclient.helpers.logging import logger
 from tableauserverclient.models import (
     DatasourceItem,
     FavoriteItem,
     FlowItem,
     MetricItem,
     ProjectItem,
+    Resource,
+    TableauItem,
     UserItem,
     ViewItem,
     WorkbookItem,
-    TableauItem,
 )
-
+from tableauserverclient.server import RequestFactory, RequestOptions
 from typing import Optional
-
-from tableauserverclient.helpers.logging import logger
 
 
 class Favorites(Endpoint):
