@@ -88,4 +88,4 @@ class JWTAuth(Credentials):
             uid = f", user_id_to_impersonate=f{self.user_id_to_impersonate}"
         else:
             uid = ""
-        return f"<JWTAuth(jwt={self.jwt[:5]}..., site_id={self.site_id}{uid})>"
+        return f"<{self.__class__.__qualname__}(jwt={self.jwt[:5]}..., site_id={self.site_id}{uid})>"
