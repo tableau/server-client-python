@@ -1,13 +1,18 @@
-class Credentials:
+import abc
+
+
+class Credentials(abc.ABC):
     def __init__(self, site_id=None, user_id_to_impersonate=None):
         self.site_id = site_id or ""
         self.user_id_to_impersonate = user_id_to_impersonate or None
 
     @property
+    @abc.abstractmethod
     def credentials(self):
         credentials = "Credentials can be username/password, Personal Access Token, or JWT"
         +"This method returns values to set as an attribute on the credentials element of the request"
 
+    @abc.abstractmethod
     def __repr__(self):
         return "All Credentials types must have a debug display that does not print secrets"
 
