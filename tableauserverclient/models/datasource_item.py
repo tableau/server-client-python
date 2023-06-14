@@ -326,17 +326,8 @@ class DatasourceItem(object):
         updated_at = parse_datetime(datasource_xml.get("updatedAt", None))
         certification_note = datasource_xml.get("certificationNote", None)
         certified = str(datasource_xml.get("isCertified", None)).lower() == "true"
-        certification_note = datasource_xml.get("certificationNote", None)
-        certified = str(datasource_xml.get("isCertified", None)).lower() == "true"
-        content_url = datasource_xml.get("contentUrl", None)
-        created_at = parse_datetime(datasource_xml.get("createdAt", None))
-        datasource_type = datasource_xml.get("type", None)
-        description = datasource_xml.get("description", None)
         encrypt_extracts = datasource_xml.get("encryptExtracts", None)
         has_extracts = datasource_xml.get("hasExtracts", None)
-        id_ = datasource_xml.get("id", None)
-        name = datasource_xml.get("name", None)
-        updated_at = parse_datetime(datasource_xml.get("updatedAt", None))
         use_remote_query_agent = datasource_xml.get("useRemoteQueryAgent", None)
         webpage_url = datasource_xml.get("webpageUrl", None)
 
