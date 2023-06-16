@@ -78,7 +78,7 @@ class ScheduleItem(object):
         return self._name
 
     @name.setter
-    #@property_not_nullable
+    # @property_not_nullable
     def name(self, value: str):
         self._name = value
 
@@ -91,7 +91,7 @@ class ScheduleItem(object):
         return self._priority
 
     @priority.setter
-    #@property_is_int(range=(1, 100))
+    # @property_is_int(range=(1, 100))
     def priority(self, value: int):
         self._priority = value
 
@@ -101,7 +101,7 @@ class ScheduleItem(object):
 
     @schedule_type.setter
     @property_is_enum(Type)
-    #@property_not_nullable
+    # @property_not_nullable
     def schedule_type(self, value: str):
         self._schedule_type = value
 
