@@ -82,15 +82,16 @@ class Endpoint(object):
         self.async_response = None
         logger.debug("[{}] Begin blocking request to {}".format(self.timestamp(), url))
         try:
-            self.async_response = method(url, **parameters)
+            response = method(url, **parameters)
+            self.async_response = response or {}
             logger.debug("[{}] Saving successful response".format(self.timestamp()))
         except Exception as e:
             logger.debug("Error making request to server: {}".format(e))
             self.async_response = e
         finally:
-            if not self.async_response:
+            if response and not self.async_response:
                 logger.debug("Request response not saved")
-                return self.async_response or -1
+                return -1
         logger.debug("[{}] Request complete".format(self.timestamp()))
         return self.async_response
 
@@ -158,7 +159,9 @@ class Endpoint(object):
         return server_response
 
     def _check_status(self, server_response, url: Optional[str] = None):
-        logger.debug("Response status: {}".format(server_response.status_code))
+        logger.debug("Response status: {}".format(server_response))
+        if not hasattr(server_response, "status_code"):
+            raise AttributeError("Response is not a http response")
         if server_response.status_code >= 500:
             raise InternalServerError(server_response, url)
         elif server_response.status_code not in Success_codes:
