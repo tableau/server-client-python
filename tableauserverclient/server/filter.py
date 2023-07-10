@@ -11,7 +11,7 @@ class Filter(object):
     def __str__(self):
         value_string = str(self._value)
         if isinstance(self._value, list):
-            value_string = value_string.replace(" ", "").replace("'", "")
+            value_string = value_string.replace(" ", "%20").replace("'", "")
         return "{0}:{1}:{2}".format(self.field, self.operator, value_string)
 
     @property
