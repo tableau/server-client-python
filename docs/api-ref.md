@@ -1788,7 +1788,7 @@ The project resources for Tableau are defined in the `ProjectItem` class. The cl
 
 Name  |  Description
 :--- | :---
-`content_permissions`  |  Sets or shows the permissions for the content in the project. The options are either `LockedToProject` or `ManagedByOwner`.
+`content_permissions`  |  Sets or shows the permissions for the content in the project. The options are either `LockedToProject`, `ManagedByOwner` or `LockedToProjectWithoutNested`.
 `name` | Name of the project.
 `description` | The description of the project.
 `id`  | The project id.
@@ -1801,12 +1801,13 @@ Source file: models/project_item.py
 
 #### ProjectItem.ContentPermissions
 
-The `ProjectItem` class has a sub-class that defines the permissions for the project (`ProjectItem.ContentPermissions`).  The options are `LockedToProject` and `ManagedByOwner`.  For information on these content permissions, see [Lock Content Permissions to the Project](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#create_project).
+The `ProjectItem` class has a sub-class that defines the permissions for the project (`ProjectItem.ContentPermissions`).  The options are `LockedToProject`, `ManagedByOwner` and `LockedToProjectWithoutNested`.  For information on these content permissions, see [Lock Content Permissions to the Project](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#create_project).
 
 Name | Description
 :--- | :---
 `ProjectItem.ContentPermissions.LockedToProject`    |     Locks all content permissions to the project.
 `ProjectItem.ContentPermissions.ManagedByOwner`  |  Users can manage permissions for content that they own. This is the default.
+`ProjectItem.ContentPermissions.LockedToProjectWithoutNested`  |   Lock the permissions of a parent project, but not those of its child projects.
 
 **Example**
 
