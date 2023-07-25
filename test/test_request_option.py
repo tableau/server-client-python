@@ -13,6 +13,7 @@ PAGINATION_XML = os.path.join(TEST_ASSET_DIR, "request_option_pagination.xml")
 PAGE_NUMBER_XML = os.path.join(TEST_ASSET_DIR, "request_option_page_number.xml")
 PAGE_SIZE_XML = os.path.join(TEST_ASSET_DIR, "request_option_page_size.xml")
 FILTER_EQUALS = os.path.join(TEST_ASSET_DIR, "request_option_filter_equals.xml")
+FILTER_NAME_IN = os.path.join(TEST_ASSET_DIR, "request_option_filter_name_in.xml")
 FILTER_TAGS_IN = os.path.join(TEST_ASSET_DIR, "request_option_filter_tags_in.xml")
 FILTER_MULTIPLE = os.path.join(TEST_ASSET_DIR, "request_option_filter_tags_in.xml")
 SLICING_QUERYSET = os.path.join(TEST_ASSET_DIR, "request_option_slicing_queryset.xml")
@@ -113,6 +114,30 @@ class RequestOptionTests(unittest.TestCase):
         self.assertEqual(set(["weather"]), matching_workbooks[0].tags)
         self.assertEqual(set(["safari"]), matching_workbooks[1].tags)
         self.assertEqual(set(["sample"]), matching_workbooks[2].tags)
+
+    # check if filtered projects with spaces & special characters
+    # get correctly returned
+    def test_filter_name_in(self) -> None:
+        with open(FILTER_NAME_IN, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            m.get(
+                self.baseurl + "/projects?filter=name%3Ain%3A%5Bdefault%2CSalesforce+Sales+Proje%C5%9Bt%5D",
+                text=response_xml,
+            )
+            req_option = TSC.RequestOptions()
+            req_option.filter.add(
+                TSC.Filter(
+                    TSC.RequestOptions.Field.Name,
+                    TSC.RequestOptions.Operator.In,
+                    ["default", "Salesforce Sales Projeśt"],
+                )
+            )
+            matching_projects, pagination_item = self.server.projects.get(req_option)
+
+        self.assertEqual(2, pagination_item.total_available)
+        self.assertEqual("default", matching_projects[0].name)
+        self.assertEqual("Salesforce Sales Projeśt", matching_projects[1].name)
 
     def test_filter_tags_in_shorthand(self) -> None:
         with open(FILTER_TAGS_IN, "rb") as f:
