@@ -63,6 +63,8 @@ class Projects(QuerysetEndpoint):
     def create(self, project_item: ProjectItem, samples: bool = False) -> ProjectItem:
         params = {"params": {RequestOptions.Field.PublishSamples: samples}}
         url = self.baseurl
+        if project_item._samples:
+            url = "{0}?publishSamples={1}".format(self.baseurl, project_item._samples)
         create_req = RequestFactory.Project.create_req(project_item)
         server_response = self.post_request(url, create_req, XML_CONTENT_TYPE, params)
         new_project = ProjectItem.from_response(server_response.content, self.parent_srv.namespace)[0]

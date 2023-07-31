@@ -25,6 +25,7 @@ class ProjectItem(object):
         description: Optional[str] = None,
         content_permissions: Optional[str] = None,
         parent_id: Optional[str] = None,
+        samples: Optional[bool] = None,
     ) -> None:
         self._content_permissions = None
         self._id: Optional[str] = None
@@ -32,6 +33,7 @@ class ProjectItem(object):
         self.name: str = name
         self.content_permissions: Optional[str] = content_permissions
         self.parent_id: Optional[str] = parent_id
+        self._samples: Optional[bool] = samples
 
         self._permissions = None
         self._default_workbook_permissions = None

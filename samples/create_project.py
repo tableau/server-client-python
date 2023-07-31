@@ -57,7 +57,14 @@ def main():
         server.use_server_version()
 
         # Without parent_id specified, projects are created at the top level.
-        top_level_project = TSC.ProjectItem(name="Top Level Project")
+        # With the publish-samples attribute, the project will be created with sample items
+        top_level_project = TSC.ProjectItem(
+            name="Top Level Project",
+            description="A sample tsc project",
+            content_permissions=None,
+            parent_id=None,
+            samples=True,
+        )
         top_level_project = create_project(server, top_level_project)
 
         # Specifying parent_id creates a nested projects.
