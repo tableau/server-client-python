@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=45.0", "versioneer>=0.24", "wheel"]
+requires = ["setuptools>=68.0", "versioneer>=0.29", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -12,19 +12,20 @@ license = {file = "LICENSE"}
 readme = "README.md"
 
 dependencies = [
-    'defusedxml>=0.7.1',
-    'packaging>=22.0',  # bumping to minimum version required by black
-    'requests>=2.28',
-    'urllib3~=1.26.8',
+    'defusedxml>=0.7.1',  # latest as at 7/31/23
+    'packaging>=23.1',   # latest as at 7/31/23
+    'requests>=2.31',  # latest as at 7/31/23
+    'urllib3==2.0.4',  # latest as at 7/31/23
 ]
 requires-python = ">=3.7"
 classifiers = [
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.7",
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10"
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12"
 ]
 [project.urls]
 repository = "https://github.com/tableau/server-client-python"
@@ -34,17 +35,20 @@ test = ["argparse", "black==23.7", "mock", "mypy==1.4", "pytest>=7.0", "pytest-s
 
 [tool.black]
 line-length = 120
-target-version = ['py37', 'py38', 'py39', 'py310']
+target-version = ['py37', 'py38', 'py39', 'py310', 'py311', 'py312']
 
 [tool.mypy]
+check_untyped_defs = false
 disable_error_code = [
     'misc',
-    'import'
+    # tableauserverclient\server\endpoint\datasources_endpoint.py:48: error: Cannot assign multiple types to name "FilePath" without an explicit "Type[...]" annotation  [misc]
+    # test\test_datasource.py:173: error: "None" object is not iterable  [misc]
+    'annotation-unchecked'  # can be removed when check_untyped_defs = true
 ]
 files = ["tableauserverclient", "test"]
 show_error_codes = true
-ignore_missing_imports = true
-
+ignore_missing_imports = true  # defusedxml library has no types
+# fix this one: est\models\test_repr.py:4: error: Cannot find implementation or library stub for module named "_models"  [import]
 [tool.pytest.ini_options]
 testpaths = ["test"]
 addopts = "--junitxml=./test.junit.xml"
