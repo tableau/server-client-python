@@ -2,12 +2,14 @@ import os
 import tempfile
 import unittest
 from io import BytesIO
+from typing import Optional
 from zipfile import ZipFile
 
 import requests_mock
 from defusedxml.ElementTree import fromstring
 
 import tableauserverclient as TSC
+from tableauserverclient import ConnectionItem
 from tableauserverclient.datetime_helpers import format_datetime
 from tableauserverclient.server.endpoint.exceptions import InternalServerError
 from tableauserverclient.server.endpoint.fileuploads_endpoint import Fileuploads
@@ -167,9 +169,9 @@ class DatasourceTests(unittest.TestCase):
             single_datasource._id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
             self.server.datasources.populate_connections(single_datasource)
             self.assertEqual("9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", single_datasource.id)
-            connections = single_datasource.connections
+            connections: Optional[list[ConnectionItem]] = single_datasource.connections
 
-        self.assertTrue(connections)
+        self.assertIsNotNone(connections)
         ds1, ds2 = connections
         self.assertEqual("be786ae0-d2bf-4a4b-9b34-e2de8d2d4488", ds1.id)
         self.assertEqual("textscan", ds1.connection_type)
