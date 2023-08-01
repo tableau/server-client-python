@@ -42,13 +42,11 @@ check_untyped_defs = false
 disable_error_code = [
     'misc',
     # tableauserverclient\server\endpoint\datasources_endpoint.py:48: error: Cannot assign multiple types to name "FilePath" without an explicit "Type[...]" annotation  [misc]
-    # test\test_datasource.py:173: error: "None" object is not iterable  [misc]
     'annotation-unchecked'  # can be removed when check_untyped_defs = true
 ]
 files = ["tableauserverclient", "test"]
 show_error_codes = true
 ignore_missing_imports = true  # defusedxml library has no types
-# fix this one: est\models\test_repr.py:4: error: Cannot find implementation or library stub for module named "_models"  [import]
 [tool.pytest.ini_options]
 testpaths = ["test"]
 addopts = "--junitxml=./test.junit.xml"
