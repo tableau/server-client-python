@@ -36,6 +36,9 @@ def main():
     parser.add_argument(
         "--preview-image", "-i", metavar="FILENAME", help="filename (a .png file) to save the preview image"
     )
+    parser.add_argument(
+        "--powerpoint", "-ppt", metavar="FILENAME", help="filename (a .ppt file) to save the powerpoint deck"
+    )
 
     args = parser.parse_args()
 
@@ -144,6 +147,13 @@ def main():
             with open(filename, "wb") as f:
                 f.write(c.image)
             print("saved to " + filename)
+
+            if args.powerpoint:
+                # Populate workbook preview image
+                server.workbooks.populate_powerpoint(sample_workbook)
+                with open(args.powerpoint, "wb") as f:
+                    f.write(sample_workbook.powerpoint)
+                print("\nDownloaded powerpoint of workbook to {}".format(os.path.abspath(args.powerpoint)))
 
             if args.delete:
                 print("deleting {}".format(c.id))
