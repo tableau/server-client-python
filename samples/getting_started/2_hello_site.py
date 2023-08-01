@@ -12,7 +12,6 @@ import tableauserverclient as TSC
 
 # 0 - launch your Tableau site in a web browser and look at the url to set the values below
 def main():
-
     # 1 - replace with your server domain: stop at the slash
     server_url = "https://10ax.online.tableau.com"
 
@@ -38,7 +37,6 @@ def main():
     # tableau_auth = TSC.PersonalAccessTokenAuth(token_name, token_value, site_id=site_url_name)
 
     with server.auth.sign_in(tableau_auth):
-
         projects, pagination = server.projects.get()
         if projects:
             print("{} projects".format(pagination.total_available))

@@ -34,7 +34,6 @@ def main():
     # tableau_auth = TSC.PersonalAccessTokenAuth(token_name, token_value, site_id=site_url_name)
 
     with server.auth.sign_in(tableau_auth):
-
         projects, pagination = server.projects.get()
         if projects:
             print("{} projects".format(pagination.total_available))
