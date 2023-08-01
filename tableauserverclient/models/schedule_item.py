@@ -14,8 +14,6 @@ from .interval_item import (
 )
 from .property_decorators import (
     property_is_enum,
-    property_not_nullable,
-    property_is_int,
 )
 
 Interval = Union[HourlyInterval, DailyInterval, WeeklyInterval, MonthlyInterval]
@@ -27,6 +25,7 @@ class ScheduleItem(object):
         Flow = "Flow"
         Subscription = "Subscription"
         DataAcceleration = "DataAcceleration"
+        ActiveDirectorySync = "ActiveDirectorySync"
 
     class ExecutionOrder:
         Parallel = "Parallel"
@@ -74,11 +73,10 @@ class ScheduleItem(object):
         return self._id
 
     @property
-    def name(self) -> str:
+    def name(self) -> Optional[str]:
         return self._name
 
     @name.setter
-    @property_not_nullable
     def name(self, value: str):
         self._name = value
 
@@ -91,7 +89,6 @@ class ScheduleItem(object):
         return self._priority
 
     @priority.setter
-    @property_is_int(range=(1, 100))
     def priority(self, value: int):
         self._priority = value
 
@@ -101,7 +98,6 @@ class ScheduleItem(object):
 
     @schedule_type.setter
     @property_is_enum(Type)
-    @property_not_nullable
     def schedule_type(self, value: str):
         self._schedule_type = value
 
