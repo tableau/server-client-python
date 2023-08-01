@@ -1,7 +1,7 @@
 import pytest
 
 from unittest import TestCase
-import _models   # type: ignore  # did not set types for this
+import _models  # type: ignore  # did not set types for this
 
 
 # ensure that all models have a __repr__ method implemented
