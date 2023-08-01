@@ -30,7 +30,7 @@ classifiers = [
 repository = "https://github.com/tableau/server-client-python"
 
 [project.optional-dependencies]
-test = ["argparse", "black", "mock", "mypy", "pytest>=7.0", "pytest-subtests", "requests-mock>=1.0,<2.0"]
+test = ["argparse", "black==23.7", "mock", "mypy==1.4", "pytest>=7.0", "pytest-subtests", "requests-mock>=1.0,<2.0"]
 
 [tool.black]
 line-length = 120
