@@ -8,6 +8,10 @@ The TSC samples are included in the `samples` directory of the TSC repository [o
 * TOC
 {:toc}
 
+## Prerequisites
+
+Before running any of the sample scripts, install the TSC library in your Python environment following the [Get Started](https://tableau.github.io/server-client-python/docs/) instructions.
+
 ## Run the samples
 
 Each of the samples accepts the following arguments:
