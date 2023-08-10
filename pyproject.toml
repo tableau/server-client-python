@@ -3,12 +3,12 @@ requires = ["setuptools>=68.0", "versioneer>=0.29", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name="tableauserverclient"
+name = "tableauserverclient"
 
 dynamic = ["version"]
-description='A Python module for working with the Tableau Server REST API.'
-authors = [{name="Tableau", email="github@tableau.com"}]
-license = {file = "LICENSE"}
+description = 'A Python module for working with the Tableau Server REST API.'
+authors = [{ name = "Tableau", email = "github@tableau.com" }]
+license = { file = "LICENSE" }
 readme = "README.md"
 
 dependencies = [
@@ -31,8 +31,8 @@ classifiers = [
 repository = "https://github.com/tableau/server-client-python"
 
 [project.optional-dependencies]
-test = ["argparse", "black==23.7", "mock", "mypy==1.4", "pytest>=7.0", "pytest-cov", "pytest-subtests",
-    "requests-mock>=1.0,<2.0"]
+test = ["argparse", "black==23.7", "mock", "mypy==1.4", "pytest>=7.0", "pytest-cov", "pytest-subtests", "requests-mock>=1.0,<2.0",
+    "pytest-benchmark>=4.0"]
 
 [tool.black]
 line-length = 120
