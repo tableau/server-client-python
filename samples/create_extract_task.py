@@ -53,8 +53,12 @@ def main():
             monthly_interval,
         )
 
+        # Default to using first workbook found in server
+        all_workbook_items, pagination_item = server.workbooks.get()
+        my_workbook: TSC.WorkbookItem = all_workbook_items[0]
+
         target_item = TSC.Target(
-            "6582fdd0-1df8-43f5-9f18-dacc5238ec0a",  # the id of the workbook or datasource
+            my_workbook.id,  # the id of the workbook or datasource
             "workbook",  # alternatively can be "datasource"
         )
 
