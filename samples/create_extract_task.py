@@ -1,6 +1,6 @@
 ####
-# This script demonstrates how to create schedules using the Tableau
-# Server Client.
+# This script demonstrates how to create extract tasks in Tableau Cloud
+# using the Tableau Server Client.
 #
 # To run the script, you must have installed Python 3.7 or later.
 ####
@@ -54,8 +54,8 @@ def main():
         )
 
         target_item = TSC.Target(
-            "6582fdd0-1df8-43f5-9f18-dacc5238ec0a", # the id of the workbook or datasource
-            "workbook" # alternatively can be "datasource"
+            "6582fdd0-1df8-43f5-9f18-dacc5238ec0a",  # the id of the workbook or datasource
+            "workbook",  # alternatively can be "datasource"
         )
 
         extract_item = TSC.TaskItem(
@@ -66,8 +66,8 @@ def main():
             None,
             monthly_schedule,
             None,
-            target_item, )
-
+            target_item,
+        )
 
         try:
             response = server.tasks.create(extract_item)
