@@ -1028,6 +1028,34 @@ class TaskRequest(object):
         # Send an empty tsRequest
         pass
 
+    @_tsrequest_wrapped
+    def create_extract_req(self, xml_request: ET.Element, extract_item: "TaskItem") -> bytes:
+        extract_element = ET.SubElement(xml_request, "extractRefresh")
+
+        # Schedule attributes
+        schedule_element = ET.SubElement(xml_request, "schedule")
+
+        interval_item = extract_item.schedule_item.interval_item
+        schedule_element.attrib["frequency"] = interval_item._frequency
+        frequency_element = ET.SubElement(schedule_element, "frequencyDetails")
+        frequency_element.attrib["start"] = str(interval_item.start_time)
+        if hasattr(interval_item, "end_time") and interval_item.end_time is not None:
+            frequency_element.attrib["end"] = str(interval_item.end_time)
+        if hasattr(interval_item, "interval") and interval_item.interval:
+            intervals_element = ET.SubElement(frequency_element, "intervals")
+            for interval in interval_item._interval_type_pairs():
+                expression, value = interval
+                single_interval_element = ET.SubElement(intervals_element, "interval")
+                single_interval_element.attrib[expression] = value
+
+        # Main attributes
+        extract_element.attrib["type"] = extract_item.task_type
+
+        target_element = ET.SubElement(extract_element, extract_item.target.type)
+        target_element.attrib["id"] = extract_item.target.id
+
+        return ET.tostring(xml_request)
+
 
 class SubscriptionRequest(object):
     @_tsrequest_wrapped

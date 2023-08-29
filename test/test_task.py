@@ -1,5 +1,6 @@
 import os
 import unittest
+from datetime import time
 
 import requests_mock
 
@@ -15,12 +16,13 @@ GET_XML_WITH_DATASOURCE = os.path.join(TEST_ASSET_DIR, "tasks_with_datasource.xm
 GET_XML_WITH_WORKBOOK_AND_DATASOURCE = os.path.join(TEST_ASSET_DIR, "tasks_with_workbook_and_datasource.xml")
 GET_XML_DATAACCELERATION_TASK = os.path.join(TEST_ASSET_DIR, "tasks_with_dataacceleration_task.xml")
 GET_XML_RUN_NOW_RESPONSE = os.path.join(TEST_ASSET_DIR, "tasks_run_now_response.xml")
+GET_XML_CREATE_TASK_RESPONSE = os.path.join(TEST_ASSET_DIR, "tasks_create_extract_task.xml")
 
 
 class TaskTests(unittest.TestCase):
     def setUp(self):
         self.server = TSC.Server("http://test", False)
-        self.server.version = "3.8"
+        self.server.version = "3.19"
 
         # Fake Signin
         self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"
@@ -141,3 +143,26 @@ class TaskTests(unittest.TestCase):
 
         self.assertTrue("7b6b59a8-ac3c-4d1d-2e9e-0b5b4ba8a7b6" in job_response_content)
         self.assertTrue("RefreshExtract" in job_response_content)
+
+    def test_create_extract_task(self):
+        monthly_interval = TSC.MonthlyInterval(start_time=time(23, 30), interval_value=15)
+        monthly_schedule = TSC.ScheduleItem(
+            None,
+            None,
+            None,
+            None,
+            monthly_interval,
+        )
+        target_item = TSC.Target("workbook_id", "workbook")
+
+        task = TaskItem(None, "FullRefresh", None, schedule_item=monthly_schedule, target=target_item)
+
+        with open(GET_XML_CREATE_TASK_RESPONSE, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            m.post("{}".format(self.baseurl), text=response_xml)
+            create_response_content = self.server.tasks.create(task).decode("utf-8")
+
+        self.assertTrue("task_id" in create_response_content)
+        self.assertTrue("workbook_id" in create_response_content)
+        self.assertTrue("FullRefresh" in create_response_content)
