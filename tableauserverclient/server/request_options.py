@@ -167,6 +167,7 @@ class ExcelRequestOptions(_FilterOptionsBase):
         if self.max_age != -1:
             params["maxAge"] = self.max_age
 
+        self._append_view_filters(params)
         return params
 
 
