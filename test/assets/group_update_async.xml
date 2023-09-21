@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+  <job id="c2566efc-0767-4f15-89cb-56acb4349c1b"
+    mode="Asynchronous"
+    type="GroupSync"
+    progress="0"
+    createdAt="time-job-created" />
+</tsResponse>

@@ -82,14 +82,17 @@ class Groups(QuerysetEndpoint):
             )
             group_item.minimum_site_role = default_site_role
 
+        url = "{0}/{1}".format(self.baseurl, group_item.id)
+
         if not group_item.id:
             error = "Group item missing ID."
             raise MissingRequiredFieldError(error)
         if as_job and (group_item.domain_name is None or group_item.domain_name == "local"):
             error = "Local groups cannot be updated asynchronously."
             raise ValueError(error)
+        elif as_job:
+            url = "?".join([url, "asJob=True"])
 
-        url = "{0}/{1}".format(self.baseurl, group_item.id)
         update_req = RequestFactory.Group.update_req(group_item, None)
         server_response = self.put_request(url, update_req)
         logger.info("Updated group item (ID: {0})".format(group_item.id))
