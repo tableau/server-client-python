@@ -1,12 +1,10 @@
 from .endpoint import Endpoint, api
 from tableauserverclient.server import RequestFactory
-from tableauserverclient.models import FavoriteItem
+from tableauserverclient.models import FavoriteItem, UserItem, Resource
 
 from typing import Optional, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from ...models import DatasourceItem, FlowItem, ProjectItem, UserItem, ViewItem, WorkbookItem
-    from ..request_options import RequestOptions
+from ..request_options import RequestOptions
+from ...models import DatasourceItem, FlowItem, ProjectItem, ViewItem, WorkbookItem, TableauItem, MetricItem
 
 from tableauserverclient.helpers.logging import logger
 
