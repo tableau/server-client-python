@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api https://help.tableau.com/samples/en-us/rest_api/ts-api_3_18.xsd">
+    <pagination pageNumber="1" pageSize="100" totalAvailable="2"/>
+    <projects>
+        <project id="26558843-133c-45fc-9f67-697f30d25e62" name="default" description="The default project that was automatically created by Tableau." createdAt="2022-06-21T07:52:28Z" updatedAt="2022-06-21T07:52:28Z" contentPermissions="ManagedByOwner">
+            <owner id="19aadc25-d3d8-4467-96cc-09db69687b28"/>
+        </project>
+        <project id="7dce3c52-f058-4484-932c-3fc264638618" name="Salesforce Sales Projeśt" description="" createdAt="2023-02-21T02:53:34Z" updatedAt="2023-07-10T04:09:29Z" contentPermissions="ManagedByOwner">
+            <owner id="bc38ea93-af2b-4004-9ef8-2144a57d3777"/>
+        </project>
+    </projects>
+</tsResponse>

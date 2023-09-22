@@ -134,6 +134,7 @@ class CustomViewItem(object):
             cv_item._content_url = custom_view_xml.get("contentUrl", None)
             cv_item._id = custom_view_xml.get("id", None)
             cv_item._name = custom_view_xml.get("name", None)
+            cv_item._shared = string_to_bool(custom_view_xml.get("shared", None))
 
             if owner_elem is not None:
                 parsed_owners = UserItem.from_response_as_owner(tostring(custom_view_xml), ns)
@@ -154,3 +155,7 @@ class CustomViewItem(object):
 
             all_view_items.append(cv_item)
         return all_view_items
+
+
+def string_to_bool(s: Optional[str]) -> bool:
+    return (s or "").lower() == "true"
