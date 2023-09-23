@@ -48,6 +48,13 @@ class JobItem(object):
         self._flow_run = flow_run
         self._updated_at = updated_at
 
+    def __str__(self):
+        return f"<{self.__class__.__name__} {self._id} {self.type} progress={self._finish_code} >"
+
+    def __repr__(self):
+        return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"
+
+
     @property
     def id(self) -> str:
         return self._id
@@ -201,6 +208,12 @@ class BackgroundJobItem(object):
         self._priority = priority
         self._title = title
         self._subtitle = subtitle
+
+    def __str__(self):
+        return f"<{self.__class__.name} {self._id} {self._type}>"
+
+    def __repr__(self):
+        return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"
 
     @property
     def id(self) -> str:

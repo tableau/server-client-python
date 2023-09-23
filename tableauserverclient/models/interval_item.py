@@ -31,6 +31,9 @@ class HourlyInterval(object):
         self.end_time = end_time
         self.interval = interval_value
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__} start={self.start_time} end={self.end_time} interval={self.interval}>"
+
     @property
     def _frequency(self):
         return IntervalItem.Frequency.Hourly
@@ -86,6 +89,9 @@ class DailyInterval(object):
         self.start_time = start_time
         self.interval = interval_values
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__} start={self.start_time} interval={self.interval}>"
+
     @property
     def _frequency(self):
         return IntervalItem.Frequency.Daily
@@ -113,6 +119,9 @@ class WeeklyInterval(object):
     def __init__(self, start_time, *interval_values):
         self.start_time = start_time
         self.interval = interval_values
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} start={self.start_time} interval={self.interval}>"
 
     @property
     def _frequency(self):
@@ -147,6 +156,9 @@ class MonthlyInterval(object):
     def __init__(self, start_time, interval_value):
         self.start_time = start_time
         self.interval = str(interval_value)
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} start={self.start_time} interval={self.interval}>"
 
     @property
     def _frequency(self):

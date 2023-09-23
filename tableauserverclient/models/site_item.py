@@ -26,8 +26,7 @@ class SiteItem(object):
     _tier_explorer_capacity: Optional[int] = None
     _tier_viewer_capacity: Optional[int] = None
 
-    # TODO should have a debug representation that just lists all the attributes?
-    def __repr__(self):
+    def __str__(self):
         return (
             "<"
             + __name__
@@ -39,6 +38,9 @@ class SiteItem(object):
             + (self.state or "unknown-state")
             + ">"
         )
+
+    def __repr__(self):
+        return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"
 
     class AdminMode:
         ContentAndUsers: str = "ContentAndUsers"

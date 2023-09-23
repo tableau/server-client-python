@@ -13,7 +13,9 @@ from tableauserverclient.models import (
 def get_defined_models():
     # nothing clever here: list was manually copied from tsc/models/__init__.py
     return [
+        BackgroundJobItem,
         ConnectionItem,
+        DataAccelerationReportItem,
         DataAlertItem,
         DatasourceItem,
         FlowItem,
@@ -36,24 +38,21 @@ def get_defined_models():
         ViewItem,
         WebhookItem,
         WorkbookItem,
-    ]
-
-
-# manually identified. As these are implemented, they should move to the other list.
-def get_unimplemented_models():
-    return [
-        BackgroundJobItem,
-        DataAccelerationReportItem,
-        FavoriteItem,
-        IntervalItem,
+        PaginationItem,
+        Permission.Mode,
+        Permission.Capability,
         DailyInterval,
         WeeklyInterval,
         MonthlyInterval,
         HourlyInterval,
-        PaginationItem,
-        Permission,
-        Resource,
         TableItem,
-        TableauItem,
         Target
+    ]
+
+
+def get_unimplemented_models():
+    return [
+        FavoriteItem,  # no repr because there is no state
+        Resource,  # list of type names
+        TableauItem,  # should be an interface
     ]

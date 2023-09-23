@@ -67,9 +67,12 @@ class UserItem(object):
 
         return None
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         str_site_role = self.site_role or "None"
         return "<User {} name={} role={}>".format(self.id, self.name, str_site_role)
+
+    def __repr__(self):
+        return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"
 
     @property
     def auth_setting(self) -> Optional[str]:

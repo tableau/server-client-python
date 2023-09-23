@@ -1,4 +1,3 @@
-import logging
 import xml.etree.ElementTree as ET
 from typing import Dict, List, Optional
 
@@ -16,6 +15,9 @@ class Permission:
     class Mode:
         Allow = "Allow"
         Deny = "Deny"
+
+        def __repr__(self):
+            return "<Enum Mode: Allow | Deny>"
 
     class Capability:
         AddComment = "AddComment"
@@ -38,6 +40,9 @@ class Permission:
         RunExplainData = "RunExplainData"
         CreateRefreshMetrics = "CreateRefreshMetrics"
         SaveAs = "SaveAs"
+
+        def __repr__(self):
+            return "<Enum Capability: AddComment | ChangeHierarchy | ChangePermission ... (17 more) >"
 
 
 class PermissionsRule(object):

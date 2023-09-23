@@ -26,7 +26,7 @@ class MetricItem(object):
         self._permissions: Optional[Permission] = None
 
     def __str__(self):
-        return f"<{self.__class__.__name__} {self._id} {self._name}>"
+        return f"<{self.__class__name__} {self._id} {self._name}>"
 
     def __repr__(self):
         return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"
