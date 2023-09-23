@@ -126,7 +126,6 @@ class JobItem(object):
     def __repr__(self):
         return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"
 
-
     @classmethod
     def from_response(cls, xml, ns) -> List["JobItem"]:
         parsed_response = fromstring(xml)
