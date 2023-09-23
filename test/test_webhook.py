@@ -4,7 +4,8 @@ import unittest
 import requests_mock
 
 import tableauserverclient as TSC
-from tableauserverclient.server import RequestFactory, WebhookItem
+from tableauserverclient.server import RequestFactory
+from tableauserverclient.models import WebhookItem
 from ._utils import asset
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")

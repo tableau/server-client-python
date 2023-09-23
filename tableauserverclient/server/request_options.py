@@ -1,7 +1,7 @@
 from tableauserverclient.models.property_decorators import property_is_int
 import logging
 
-logger = logging.getLogger("tableau.request_options")
+from tableauserverclient.helpers.logging import logger
 
 
 class RequestOptionsBase(object):
@@ -38,6 +38,7 @@ class RequestOptions(RequestOptionsBase):
     class Field:
         Args = "args"
         CompletedAt = "completedAt"
+        ContentUrl = "contentUrl"
         CreatedAt = "createdAt"
         DomainName = "domainName"
         DomainNickname = "domainNickname"
@@ -147,7 +148,7 @@ class CSVRequestOptions(_FilterOptionsBase):
         return params
 
 
-class ExcelRequestOptions(RequestOptionsBase):
+class ExcelRequestOptions(_FilterOptionsBase):
     def __init__(self, maxage: int = -1) -> None:
         super().__init__()
         self.max_age = maxage
@@ -166,6 +167,7 @@ class ExcelRequestOptions(RequestOptionsBase):
         if self.max_age != -1:
             params["maxAge"] = self.max_age
 
+        self._append_view_filters(params)
         return params
 
 

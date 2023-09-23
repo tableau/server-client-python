@@ -13,6 +13,7 @@ PAGINATION_XML = os.path.join(TEST_ASSET_DIR, "request_option_pagination.xml")
 PAGE_NUMBER_XML = os.path.join(TEST_ASSET_DIR, "request_option_page_number.xml")
 PAGE_SIZE_XML = os.path.join(TEST_ASSET_DIR, "request_option_page_size.xml")
 FILTER_EQUALS = os.path.join(TEST_ASSET_DIR, "request_option_filter_equals.xml")
+FILTER_NAME_IN = os.path.join(TEST_ASSET_DIR, "request_option_filter_name_in.xml")
 FILTER_TAGS_IN = os.path.join(TEST_ASSET_DIR, "request_option_filter_tags_in.xml")
 FILTER_MULTIPLE = os.path.join(TEST_ASSET_DIR, "request_option_filter_tags_in.xml")
 SLICING_QUERYSET = os.path.join(TEST_ASSET_DIR, "request_option_slicing_queryset.xml")
@@ -22,7 +23,7 @@ SLICING_QUERYSET_PAGE_2 = TEST_ASSET_DIR / "queryset_slicing_page_2.xml"
 
 class RequestOptionTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.server = TSC.Server("http://test", False)
+        self.server = TSC.Server("http://test", False, http_options={"timeout": 5})
 
         # Fake signin
         self.server.version = "3.10"
@@ -114,6 +115,30 @@ class RequestOptionTests(unittest.TestCase):
         self.assertEqual(set(["safari"]), matching_workbooks[1].tags)
         self.assertEqual(set(["sample"]), matching_workbooks[2].tags)
 
+    # check if filtered projects with spaces & special characters
+    # get correctly returned
+    def test_filter_name_in(self) -> None:
+        with open(FILTER_NAME_IN, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            m.get(
+                self.baseurl + "/projects?filter=name%3Ain%3A%5Bdefault%2CSalesforce+Sales+Proje%C5%9Bt%5D",
+                text=response_xml,
+            )
+            req_option = TSC.RequestOptions()
+            req_option.filter.add(
+                TSC.Filter(
+                    TSC.RequestOptions.Field.Name,
+                    TSC.RequestOptions.Operator.In,
+                    ["default", "Salesforce Sales Projeśt"],
+                )
+            )
+            matching_projects, pagination_item = self.server.projects.get(req_option)
+
+        self.assertEqual(2, pagination_item.total_available)
+        self.assertEqual("default", matching_projects[0].name)
+        self.assertEqual("Salesforce Sales Projeśt", matching_projects[1].name)
+
     def test_filter_tags_in_shorthand(self) -> None:
         with open(FILTER_TAGS_IN, "rb") as f:
             response_xml = f.read().decode("utf-8")
@@ -151,7 +176,7 @@ class RequestOptionTests(unittest.TestCase):
                 )
             )
             req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, "foo"))
-            for _ in range(100):
+            for _ in range(5):
                 matching_workbooks, pagination_item = self.server.workbooks.get(req_option)
                 self.assertEqual(3, pagination_item.total_available)
 
@@ -245,7 +270,7 @@ class RequestOptionTests(unittest.TestCase):
             )
             m.get(url, text=response_xml)
 
-            for _ in range(100):
+            for _ in range(5):
                 matching_workbooks = self.server.workbooks.filter(tags__in=["sample", "safari", "weather"], name="foo")
                 self.assertEqual(3, matching_workbooks.total_available)
 

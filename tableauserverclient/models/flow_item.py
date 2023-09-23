@@ -176,33 +176,38 @@ class FlowItem(object):
         all_flow_xml = parsed_response.findall(".//t:flow", namespaces=ns)
 
         for flow_xml in all_flow_xml:
-            (
-                id_,
-                name,
-                description,
-                webpage_url,
-                created_at,
-                updated_at,
-                tags,
-                project_id,
-                project_name,
-                owner_id,
-            ) = cls._parse_element(flow_xml, ns)
-            flow_item = cls(project_id)
-            flow_item._set_values(
-                id_,
-                name,
-                description,
-                webpage_url,
-                created_at,
-                updated_at,
-                tags,
-                None,
-                project_name,
-                owner_id,
-            )
+            flow_item = cls.from_xml(flow_xml, ns)
             all_flow_items.append(flow_item)
         return all_flow_items
+
+    @classmethod
+    def from_xml(cls, flow_xml, ns) -> "FlowItem":
+        (
+            id_,
+            name,
+            description,
+            webpage_url,
+            created_at,
+            updated_at,
+            tags,
+            project_id,
+            project_name,
+            owner_id,
+        ) = cls._parse_element(flow_xml, ns)
+        flow_item = cls(project_id)
+        flow_item._set_values(
+            id_,
+            name,
+            description,
+            webpage_url,
+            created_at,
+            updated_at,
+            tags,
+            None,
+            project_name,
+            owner_id,
+        )
+        return flow_item
 
     @staticmethod
     def _parse_element(flow_xml, ns):

@@ -9,6 +9,8 @@ from tableauserverclient.models import *
 if TYPE_CHECKING:
     from tableauserverclient.server import Server
 
+# this file could be largely replaced if we were willing to import the huge file from generateDS
+
 
 def _add_multipart(parts: Dict) -> Tuple[Any, str]:
     mime_multipart_parts = list()
@@ -146,10 +148,11 @@ class DatabaseRequest(object):
 
 
 class DatasourceRequest(object):
-    def _generate_xml(self, datasource_item, connection_credentials=None, connections=None):
+    def _generate_xml(self, datasource_item: DatasourceItem, connection_credentials=None, connections=None):
         xml_request = ET.Element("tsRequest")
         datasource_element = ET.SubElement(xml_request, "datasource")
-        datasource_element.attrib["name"] = datasource_item.name
+        if datasource_item.name:
+            datasource_element.attrib["name"] = datasource_item.name
         if datasource_item.description:
             datasource_element.attrib["description"] = str(datasource_item.description)
         if datasource_item.use_remote_query_agent is not None:
@@ -157,10 +160,16 @@ class DatasourceRequest(object):
 
         if datasource_item.ask_data_enablement:
             ask_data_element = ET.SubElement(datasource_element, "askData")
-            ask_data_element.attrib["enablement"] = datasource_item.ask_data_enablement
+            ask_data_element.attrib["enablement"] = datasource_item.ask_data_enablement.__str__()
 
-        project_element = ET.SubElement(datasource_element, "project")
-        project_element.attrib["id"] = datasource_item.project_id
+        if datasource_item.certified:
+            datasource_element.attrib["isCertified"] = datasource_item.certified.__str__()
+        if datasource_item.certification_note:
+            datasource_element.attrib["certificationNote"] = datasource_item.certification_note
+
+        if datasource_item.project_id:
+            project_element = ET.SubElement(datasource_element, "project")
+            project_element.attrib["id"] = datasource_item.project_id
 
         if connection_credentials is not None and connections is not None:
             raise RuntimeError("You cannot set both `connections` and `connection_credentials`")
@@ -188,6 +197,8 @@ class DatasourceRequest(object):
         if datasource_item.owner_id:
             owner_element = ET.SubElement(datasource_element, "owner")
             owner_element.attrib["id"] = datasource_item.owner_id
+        if datasource_item.use_remote_query_agent is not None:
+            datasource_element.attrib["useRemoteQueryAgent"] = str(datasource_item.use_remote_query_agent).lower()
 
         datasource_element.attrib["isCertified"] = str(datasource_item.certified).lower()
 
@@ -252,12 +263,16 @@ class DQWRequest(object):
 
 
 class FavoriteRequest(object):
-    def _add_to_req(self, id_: str, target_type: str, label: str) -> bytes:
+    def add_request(self, id_: Optional[str], target_type: str, label: Optional[str]) -> bytes:
         """
         <favorite label="...">
         <target_type id="..." />
         </favorite>
         """
+        if id_ is None:
+            raise ValueError("Cannot add item as favorite without ID")
+        if label is None:
+            label = target_type
         xml_request = ET.Element("tsRequest")
         favorite_element = ET.SubElement(xml_request, "favorite")
         target = ET.SubElement(favorite_element, target_type)
@@ -271,35 +286,35 @@ class FavoriteRequest(object):
             raise ValueError("id must exist to add to favorites")
         if name is None:
             raise ValueError("Name must exist to add to favorites.")
-        return self._add_to_req(id_, FavoriteItem.Type.Datasource, name)
+        return self.add_request(id_, Resource.Datasource, name)
 
     def add_flow_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
         if id_ is None:
             raise ValueError("id must exist to add to favorites")
         if name is None:
             raise ValueError("Name must exist to add to favorites.")
-        return self._add_to_req(id_, FavoriteItem.Type.Flow, name)
+        return self.add_request(id_, Resource.Flow, name)
 
     def add_project_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
         if id_ is None:
             raise ValueError("id must exist to add to favorites")
         if name is None:
             raise ValueError("Name must exist to add to favorites.")
-        return self._add_to_req(id_, FavoriteItem.Type.Project, name)
+        return self.add_request(id_, Resource.Project, name)
 
     def add_view_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
         if id_ is None:
             raise ValueError("id must exist to add to favorites")
         if name is None:
             raise ValueError("Name must exist to add to favorites.")
-        return self._add_to_req(id_, FavoriteItem.Type.View, name)
+        return self.add_request(id_, Resource.View, name)
 
     def add_workbook_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
         if id_ is None:
             raise ValueError("id must exist to add to favorites")
         if name is None:
             raise ValueError("Name must exist to add to favorites.")
-        return self._add_to_req(id_, FavoriteItem.Type.Workbook, name)
+        return self.add_request(id_, Resource.Workbook, name)
 
 
 class FileuploadRequest(object):
@@ -476,7 +491,8 @@ class ProjectRequest(object):
     def create_req(self, project_item: "ProjectItem") -> bytes:
         xml_request = ET.Element("tsRequest")
         project_element = ET.SubElement(xml_request, "project")
-        project_element.attrib["name"] = project_item.name
+        if project_item.name:
+            project_element.attrib["name"] = project_item.name
         if project_item.description:
             project_element.attrib["description"] = project_item.description
         if project_item.content_permissions:
@@ -1005,6 +1021,34 @@ class TaskRequest(object):
     def run_req(self, xml_request, task_item):
         # Send an empty tsRequest
         pass
+
+    @_tsrequest_wrapped
+    def create_extract_req(self, xml_request: ET.Element, extract_item: "TaskItem") -> bytes:
+        extract_element = ET.SubElement(xml_request, "extractRefresh")
+
+        # Schedule attributes
+        schedule_element = ET.SubElement(xml_request, "schedule")
+
+        interval_item = extract_item.schedule_item.interval_item
+        schedule_element.attrib["frequency"] = interval_item._frequency
+        frequency_element = ET.SubElement(schedule_element, "frequencyDetails")
+        frequency_element.attrib["start"] = str(interval_item.start_time)
+        if hasattr(interval_item, "end_time") and interval_item.end_time is not None:
+            frequency_element.attrib["end"] = str(interval_item.end_time)
+        if hasattr(interval_item, "interval") and interval_item.interval:
+            intervals_element = ET.SubElement(frequency_element, "intervals")
+            for interval in interval_item._interval_type_pairs():
+                expression, value = interval
+                single_interval_element = ET.SubElement(intervals_element, "interval")
+                single_interval_element.attrib[expression] = value
+
+        # Main attributes
+        extract_element.attrib["type"] = extract_item.task_type
+
+        target_element = ET.SubElement(extract_element, extract_item.target.type)
+        target_element.attrib["id"] = extract_item.target.id
+
+        return ET.tostring(xml_request)
 
 
 class SubscriptionRequest(object):

@@ -1,0 +1,12 @@
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api https://help.tableau.com/samples/en-us/rest_api/ts-api_3_19.xsd">
+    <extractRefresh id="task_id" type="FullRefresh">
+        <workbook id="workbook_id"/>
+    </extractRefresh>
+    <schedule createdAt="2023-08-17T15:36:37-0700" updatedAt="2023-08-17T15:36:37-0700" frequency="Monthly" nextRunAt="2023-09-15T23:30:00-0700">
+        <frequencyDetails start="23:30:00">
+            <intervals>
+                <interval monthDay="15"/>
+            </intervals>
+        </frequencyDetails>
+    </schedule>
+</tsResponse>

@@ -5,7 +5,7 @@ from .exceptions import MissingRequiredFieldError
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import DQWItem
 
-logger = logging.getLogger(__name__)
+from tableauserverclient.helpers.logging import logger
 
 
 class _DataQualityWarningEndpoint(Endpoint):

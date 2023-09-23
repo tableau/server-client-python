@@ -23,18 +23,17 @@ import logging
 
 import tableauserverclient as TSC
 
+import env
+import tableauserverclient.datetime_helpers
+
 
 def main():
     parser = argparse.ArgumentParser(description="Publish a datasource to server.")
     # Common options; please keep those in sync across all samples
-    parser.add_argument("--server", "-s", required=True, help="server address")
+    parser.add_argument("--server", "-s", help="server address")
     parser.add_argument("--site", "-S", help="site name")
-    parser.add_argument(
-        "--token-name", "-p", required=True, help="name of the personal access token used to sign into the server"
-    )
-    parser.add_argument(
-        "--token-value", "-v", required=True, help="value of the personal access token used to sign into the server"
-    )
+    parser.add_argument("--token-name", "-p", help="name of the personal access token used to sign into the server")
+    parser.add_argument("--token-value", "-v", help="value of the personal access token used to sign into the server")
     parser.add_argument(
         "--logging-level",
         "-l",
@@ -43,7 +42,7 @@ def main():
         help="desired logging level (set to error by default)",
     )
     # Options specific to this sample
-    parser.add_argument("--file", "-f", required=True, help="filepath to the datasource to publish")
+    parser.add_argument("--file", "-f", help="filepath to the datasource to publish")
     parser.add_argument("--project", help="Project within which to publish the datasource")
     parser.add_argument("--async", "-a", help="Publishing asynchronously", dest="async_", action="store_true")
     parser.add_argument("--conn-username", help="connection username")
@@ -52,14 +51,27 @@ def main():
     parser.add_argument("--conn-oauth", help="connection is configured to use oAuth", action="store_true")
 
     args = parser.parse_args()
+    if not args.server:
+        args.server = env.server
+    if not args.site:
+        args.site = env.site
+    if not args.token_name:
+        args.token_name = env.token_name
+    if not args.token_value:
+        args.token_value = env.token_value
+    args.logging = "debug"
+    args.file = "C:/dev/tab-samples/5M.tdsx"
+    args.async_ = True
 
     # Ensure that both the connection username and password are provided, or none at all
     if (args.conn_username and not args.conn_password) or (not args.conn_username and args.conn_password):
         parser.error("Both the connection username and password must be provided")
 
     # Set logging level based on user input, or error by default
-    logging_level = getattr(logging, args.logging_level.upper())
-    logging.basicConfig(level=logging_level)
+
+    _logger = logging.getLogger(__name__)
+    _logger.setLevel(logging.DEBUG)
+    _logger.addHandler(logging.StreamHandler())
 
     # Sign in to server
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
@@ -94,6 +106,7 @@ def main():
 
         # Publish datasource
         if args.async_:
+            print("Publish as a job")
             # Async publishing, returns a job_item
             new_job = server.datasources.publish(
                 new_datasource, args.file, publish_mode, connection_credentials=new_conn_creds, as_job=True
@@ -104,7 +117,12 @@ def main():
             new_datasource = server.datasources.publish(
                 new_datasource, args.file, publish_mode, connection_credentials=new_conn_creds
             )
-            print("Datasource published. Datasource ID: {0}".format(new_datasource.id))
+            print(
+                "{0}Datasource published. Datasource ID: {1}".format(
+                    new_datasource.id, tableauserverclient.datetime_helpers.timestamp()
+                )
+            )
+            print("\t\tClosing connection")
 
 
 if __name__ == "__main__":

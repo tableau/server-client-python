@@ -3,6 +3,7 @@ import warnings
 import xml
 
 from defusedxml.ElementTree import fromstring
+from tableauserverclient.helpers.logging import logger
 
 
 class ServerInfoItem(object):

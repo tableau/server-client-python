@@ -47,11 +47,7 @@ class MissingRequiredFieldError(TableauError):
     pass
 
 
-class ServerInfoEndpointNotFoundError(TableauError):
-    pass
-
-
-class EndpointUnavailableError(TableauError):
+class NotSignedInError(TableauError):
     pass
 
 

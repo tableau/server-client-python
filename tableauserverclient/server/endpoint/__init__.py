@@ -5,11 +5,7 @@ from .data_alert_endpoint import DataAlerts
 from .databases_endpoint import Databases
 from .datasources_endpoint import Datasources
 from .endpoint import Endpoint, QuerysetEndpoint
-from .exceptions import (
-    ServerResponseError,
-    MissingRequiredFieldError,
-    ServerInfoEndpointNotFoundError,
-)
+from .exceptions import ServerResponseError, MissingRequiredFieldError
 from .favorites_endpoint import Favorites
 from .fileuploads_endpoint import Fileuploads
 from .flow_runs_endpoint import FlowRuns

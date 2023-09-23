@@ -1,11 +1,14 @@
 # encoding=utf-8
+from pathlib import Path
 import unittest
 import os
 import requests_mock
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
 
-TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
+TEST_ASSET_DIR = Path(__file__).absolute().parent / "assets"
+
+# TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
 GET_XML = os.path.join(TEST_ASSET_DIR, "group_get.xml")
 POPULATE_USERS = os.path.join(TEST_ASSET_DIR, "group_populate_users.xml")
@@ -16,6 +19,7 @@ CREATE_GROUP = os.path.join(TEST_ASSET_DIR, "group_create.xml")
 CREATE_GROUP_AD = os.path.join(TEST_ASSET_DIR, "group_create_ad.xml")
 CREATE_GROUP_ASYNC = os.path.join(TEST_ASSET_DIR, "group_create_async.xml")
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, "group_update.xml")
+UPDATE_ASYNC_XML = TEST_ASSET_DIR / "group_update_async.xml"
 
 
 class GroupTests(unittest.TestCase):
@@ -245,3 +249,16 @@ class GroupTests(unittest.TestCase):
         # mimic group returned from server where domain name is set to 'local'
         group.domain_name = "local"
         self.assertRaises(ValueError, self.server.groups.update, group, as_job=True)
+
+    def test_update_ad_async(self) -> None:
+        group = TSC.GroupItem("myGroup", "example.com")
+        group._id = "ef8b19c0-43b6-11e6-af50-63f5805dbe3c"
+        group.minimum_site_role = TSC.UserItem.Roles.Viewer
+
+        with requests_mock.mock() as m:
+            m.put(f"{self.baseurl}/{group.id}?asJob=True", text=UPDATE_ASYNC_XML.read_bytes().decode("utf8"))
+            job = self.server.groups.update(group, as_job=True)
+
+        self.assertEqual(job.id, "c2566efc-0767-4f15-89cb-56acb4349c1b")
+        self.assertEqual(job.mode, "Asynchronous")
+        self.assertEqual(job.type, "GroupSync")

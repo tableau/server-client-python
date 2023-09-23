@@ -44,7 +44,8 @@ FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
 
 ALLOWED_FILE_EXTENSIONS = ["twb", "twbx"]
 
-logger = logging.getLogger("tableau.endpoint.workbooks")
+from tableauserverclient.helpers.logging import logger
+
 FilePath = Union[str, os.PathLike]
 FileObject = Union[io.BufferedReader, io.BytesIO]
 FileObjectR = Union[io.BufferedReader, io.BytesIO]
@@ -309,6 +310,7 @@ class Workbooks(QuerysetEndpoint):
         as_job: bool = False,
         hidden_views: Optional[Sequence[str]] = None,
         skip_connection_check: bool = False,
+        parameters=None,
     ):
         if connection_credentials is not None:
             import warnings
@@ -412,7 +414,7 @@ class Workbooks(QuerysetEndpoint):
 
         # Send the publishing request to server
         try:
-            server_response = self.post_request(url, xml_request, content_type)
+            server_response = self.post_request(url, xml_request, content_type, parameters)
         except InternalServerError as err:
             if err.code == 504 and not as_job:
                 err.content = "Timeout error while publishing. Please use asynchronous publishing to avoid timeouts."

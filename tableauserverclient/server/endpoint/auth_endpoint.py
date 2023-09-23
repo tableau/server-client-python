@@ -1,4 +1,6 @@
 import logging
+from typing import TYPE_CHECKING
+import warnings
 
 from defusedxml.ElementTree import fromstring
 
@@ -6,7 +8,11 @@ from .endpoint import Endpoint, api
 from .exceptions import ServerResponseError
 from ..request_factory import RequestFactory
 
-logger = logging.getLogger("tableau.endpoint.auth")
+from tableauserverclient.helpers.logging import logger
+
+if TYPE_CHECKING:
+    from tableauserverclient.models.site_item import SiteItem
+    from tableauserverclient.models.tableau_auth import Credentials
 
 
 class Auth(Endpoint):
@@ -21,11 +27,21 @@ class Auth(Endpoint):
             self._callback()
 
     @property
-    def baseurl(self):
+    def baseurl(self) -> str:
         return "{0}/auth".format(self.parent_srv.baseurl)
 
     @api(version="2.0")
-    def sign_in(self, auth_req):
+    def sign_in(self, auth_req: "Credentials") -> contextmgr:
+        """
+        Sign in to a Tableau Server or Tableau Online using a credentials object.
+
+        The credentials object can either be a TableauAuth object, a
+        PersonalAccessTokenAuth object, or a JWTAuth object. This method now
+        accepts them all. The object should be populated with the site_id and
+        optionally a user_id to impersonate.
+
+        Creates a context manager that will sign out of the server upon exit.
+        """
         url = "{0}/{1}".format(self.baseurl, "signin")
         signin_req = RequestFactory.Auth.signin_req(auth_req)
         server_response = self.parent_srv.session.post(
@@ -51,12 +67,12 @@ class Auth(Endpoint):
         return Auth.contextmgr(self.sign_out)
 
     @api(version="3.6")
-    def sign_in_with_personal_access_token(self, auth_req):
+    def sign_in_with_personal_access_token(self, auth_req: "Credentials") -> contextmgr:
         # We use the same request that username/password login uses.
         return self.sign_in(auth_req)
 
     @api(version="2.0")
-    def sign_out(self):
+    def sign_out(self) -> None:
         url = "{0}/{1}".format(self.baseurl, "signout")
         # If there are no auth tokens you're already signed out. No-op
         if not self.parent_srv.is_signed_in():
@@ -66,7 +82,7 @@ class Auth(Endpoint):
         logger.info("Signed out")
 
     @api(version="2.6")
-    def switch_site(self, site_item):
+    def switch_site(self, site_item: "SiteItem") -> contextmgr:
         url = "{0}/{1}".format(self.baseurl, "switchSite")
         switch_req = RequestFactory.Auth.switch_req(site_item.content_url)
         try:
@@ -87,7 +103,7 @@ class Auth(Endpoint):
         return Auth.contextmgr(self.sign_out)
 
     @api(version="3.10")
-    def revoke_all_server_admin_tokens(self):
+    def revoke_all_server_admin_tokens(self) -> None:
         url = "{0}/{1}".format(self.baseurl, "revokeAllServerAdminTokens")
         self.post_request(url, "")
         logger.info("Revoked all tokens for all server admins")

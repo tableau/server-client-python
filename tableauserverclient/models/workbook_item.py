@@ -20,7 +20,7 @@ from .view_item import ViewItem
 
 
 class WorkbookItem(object):
-    def __init__(self, project_id: str, name: Optional[str] = None, show_tabs: bool = False) -> None:
+    def __init__(self, project_id: Optional[str] = None, name: Optional[str] = None, show_tabs: bool = False) -> None:
         self._connections = None
         self._content_url = None
         self._webpage_url = None
@@ -38,7 +38,8 @@ class WorkbookItem(object):
         self.name = name
         self._description = None
         self.owner_id: Optional[str] = None
-        self.project_id = project_id
+        # workaround for Personal Space workbooks without a project
+        self.project_id: Optional[str] = project_id or uuid.uuid4().__str__()
         self.show_tabs = show_tabs
         self.hidden_views: Optional[List[str]] = None
         self.tags: Set[str] = set()
@@ -293,48 +294,15 @@ class WorkbookItem(object):
         parsed_response = fromstring(resp)
         all_workbook_xml = parsed_response.findall(".//t:workbook", namespaces=ns)
         for workbook_xml in all_workbook_xml:
-            (
-                id,
-                name,
-                content_url,
-                webpage_url,
-                created_at,
-                description,
-                updated_at,
-                size,
-                show_tabs,
-                project_id,
-                project_name,
-                owner_id,
-                tags,
-                views,
-                data_acceleration_config,
-            ) = cls._parse_element(workbook_xml, ns)
-
-            # workaround for Personal Space workbooks which won't have a project
-            if not project_id:
-                project_id = uuid.uuid4()
-
-            workbook_item = cls(project_id)
-            workbook_item._set_values(
-                id,
-                name,
-                content_url,
-                webpage_url,
-                created_at,
-                description,
-                updated_at,
-                size,
-                show_tabs,
-                None,
-                project_name,
-                owner_id,
-                tags,
-                views,
-                data_acceleration_config,
-            )
+            workbook_item = cls.from_xml(workbook_xml, ns)
             all_workbook_items.append(workbook_item)
         return all_workbook_items
+
+    @classmethod
+    def from_xml(cls, workbook_xml, ns):
+        workbook_item = cls()
+        workbook_item._set_values(*cls._parse_element(workbook_xml, ns))
+        return workbook_item
 
     @staticmethod
     def _parse_element(workbook_xml, ns):

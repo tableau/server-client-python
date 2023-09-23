@@ -2,12 +2,14 @@ import os
 import tempfile
 import unittest
 from io import BytesIO
+from typing import Optional
 from zipfile import ZipFile
 
 import requests_mock
 from defusedxml.ElementTree import fromstring
 
 import tableauserverclient as TSC
+from tableauserverclient import ConnectionItem
 from tableauserverclient.datetime_helpers import format_datetime
 from tableauserverclient.server.endpoint.exceptions import InternalServerError
 from tableauserverclient.server.endpoint.fileuploads_endpoint import Fileuploads
@@ -145,9 +147,9 @@ class DatasourceTests(unittest.TestCase):
     def test_update_tags(self) -> None:
         add_tags_xml, update_xml = read_xml_assets(ADD_TAGS_XML, UPDATE_XML)
         with requests_mock.mock() as m:
-            m.put(self.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/tags", text=add_tags_xml)
             m.delete(self.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/tags/b", status_code=204)
             m.delete(self.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/tags/d", status_code=204)
+            m.put(self.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/tags", text=add_tags_xml)
             m.put(self.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", text=update_xml)
             single_datasource = TSC.DatasourceItem("1d0304cd-3796-429f-b815-7258370b9b74")
             single_datasource._id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
@@ -167,9 +169,9 @@ class DatasourceTests(unittest.TestCase):
             single_datasource._id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
             self.server.datasources.populate_connections(single_datasource)
             self.assertEqual("9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", single_datasource.id)
-            connections = single_datasource.connections
+            connections: Optional[list[ConnectionItem]] = single_datasource.connections
 
-        self.assertTrue(connections)
+        self.assertIsNotNone(connections)
         ds1, ds2 = connections
         self.assertEqual("be786ae0-d2bf-4a4b-9b34-e2de8d2d4488", ds1.id)
         self.assertEqual("textscan", ds1.connection_type)
@@ -191,7 +193,7 @@ class DatasourceTests(unittest.TestCase):
                 self.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/connections/be786ae0-d2bf-4a4b-9b34-e2de8d2d4488",
                 text=response_xml,
             )
-            single_datasource = TSC.DatasourceItem("1d0304cd-3796-429f-b815-7258370b9b74")
+            single_datasource = TSC.DatasourceItem("be786ae0-d2bf-4a4b-9b34-e2de8d2d4488")
             single_datasource.owner_id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
             single_datasource._id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
             self.server.datasources.populate_connections(single_datasource)
@@ -610,7 +612,7 @@ class DatasourceTests(unittest.TestCase):
 
             new_datasource = TSC.DatasourceItem(project_id="")
             publish_mode = self.server.PublishMode.CreateNew
-
+            # http://test/api/2.4/sites/dad65087-b08b-4603-af4e-2887b8aafc67/datasources?datasourceType=tds
             self.assertRaisesRegex(
                 InternalServerError,
                 "Please use asynchronous publishing to avoid timeouts.",

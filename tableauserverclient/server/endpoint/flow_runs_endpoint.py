@@ -6,7 +6,7 @@ from .exceptions import FlowRunFailedException, FlowRunCancelledException
 from tableauserverclient.models import FlowRunItem, PaginationItem
 from tableauserverclient.exponential_backoff import ExponentialBackoffTimer
 
-logger = logging.getLogger("tableau.endpoint.flowruns")
+from tableauserverclient.helpers.logging import logger
 
 if TYPE_CHECKING:
     from ..server import Server

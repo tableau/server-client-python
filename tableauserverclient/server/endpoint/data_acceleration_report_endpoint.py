@@ -5,7 +5,7 @@ from .endpoint import api, Endpoint
 from .permissions_endpoint import _PermissionsEndpoint
 from tableauserverclient.models import DataAccelerationReportItem
 
-logger = logging.getLogger("tableau.endpoint.data_acceleration_report")
+from tableauserverclient.helpers.logging import logger
 
 
 class DataAccelerationReport(Endpoint):

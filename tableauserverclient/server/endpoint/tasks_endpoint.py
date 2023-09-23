@@ -5,7 +5,7 @@ from .exceptions import MissingRequiredFieldError
 from tableauserverclient.models import TaskItem, PaginationItem
 from tableauserverclient.server import RequestFactory
 
-logger = logging.getLogger("tableau.endpoint.tasks")
+from tableauserverclient.helpers.logging import logger
 
 
 class Tasks(Endpoint):
@@ -50,6 +50,17 @@ class Tasks(Endpoint):
         )
         server_response = self.get_request(url)
         return TaskItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+
+    @api(version="3.19")
+    def create(self, extract_item: TaskItem) -> TaskItem:
+        if not extract_item:
+            error = "No extract refresh provided"
+            raise ValueError(error)
+        logger.info("Creating an extract refresh ({})".format(extract_item))
+        url = "{0}/{1}".format(self.baseurl, self.__normalize_task_type(TaskItem.Type.ExtractRefresh))
+        create_req = RequestFactory.Task.create_extract_req(extract_item)
+        server_response = self.post_request(url, create_req)
+        return server_response.content
 
     @api(version="2.6")
     def run(self, task_item):

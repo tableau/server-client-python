@@ -4,6 +4,7 @@ from defusedxml.ElementTree import fromstring
 
 from .property_decorators import property_is_boolean
 from .target import Target
+from tableauserverclient.models import ScheduleItem
 
 if TYPE_CHECKING:
     from .target import Target
@@ -23,6 +24,7 @@ class SubscriptionItem(object):
         self.suspended = False
         self.target = target
         self.user_id = user_id
+        self.schedule = None
 
     def __repr__(self) -> str:
         if self.id is not None:
@@ -92,8 +94,13 @@ class SubscriptionItem(object):
 
         # Schedule element
         schedule_id = None
+        schedule = None
         if schedule_element is not None:
             schedule_id = schedule_element.get("id", None)
+
+            # If schedule id is not provided, then TOL with full schedule provided
+            if schedule_id is None:
+                schedule = ScheduleItem.from_element(element, ns)
 
         # Content element
         target = None
@@ -127,6 +134,7 @@ class SubscriptionItem(object):
         sub.page_size_option = page_size_option
         sub.send_if_view_empty = send_if_view_empty
         sub.suspended = suspended
+        sub.schedule = schedule
 
         return sub
 
