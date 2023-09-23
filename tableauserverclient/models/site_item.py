@@ -600,6 +600,7 @@ class SiteItem(object):
         return self._attribute_capture_enabled
 
     @attribute_capture_enabled.setter
+    @property_is_boolean
     def attribute_capture_enabled(self, value: bool):
         self._attribute_capture_enabled = value
 

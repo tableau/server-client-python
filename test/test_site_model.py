@@ -65,3 +65,9 @@ class SiteModelTests(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             site.subscribe_others_enabled = None
+
+    def test_user_attribute_capture(self):
+        site = TSC.SiteItem("site", "content_url")
+        site.attribute_capture_enabled = True
+        with self.assertRaises(ValueError):
+            site.attribute_capture_enabled = 1
