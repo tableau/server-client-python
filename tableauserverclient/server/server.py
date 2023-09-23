@@ -6,6 +6,8 @@ import urllib3
 from defusedxml.ElementTree import fromstring, ParseError
 from packaging.version import Version
 
+from tableauserverclient.helpers.exceptions import NotSignedInError
+# this isn't right, it should be importing an endpoint, not a model
 from . import CustomViews
 from .endpoint import (
     Sites,
@@ -34,11 +36,10 @@ from .endpoint import (
     Metrics,
     Endpoint,
 )
-from .exceptions import (
+from tableauserverclient.helpers.exceptions import (
     ServerInfoEndpointNotFoundError,
     EndpointUnavailableError,
 )
-from .endpoint.exceptions import NotSignedInError
 from ..namespace import Namespace
 
 

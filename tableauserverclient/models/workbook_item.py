@@ -6,11 +6,11 @@ from typing import Callable, Dict, List, Optional, Set
 
 from defusedxml.ElementTree import fromstring
 
-from tableauserverclient.datetime_helpers import parse_datetime
+from tableauserverclient.helpers.datetime import parse_datetime
 from .connection_item import ConnectionItem
-from .exceptions import UnpopulatedPropertyError
+from tableauserverclient.helpers.exceptions import UnpopulatedPropertyError
 from .permissions_item import PermissionsRule
-from .property_decorators import (
+from tableauserverclient.helpers.property_decorators import (
     property_is_boolean,
     property_is_data_acceleration_config,
 )

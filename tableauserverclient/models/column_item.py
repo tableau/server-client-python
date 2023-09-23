@@ -1,6 +1,6 @@
 from defusedxml.ElementTree import fromstring
 
-from .property_decorators import property_not_empty
+from tableauserverclient.helpers.property_decorators import property_not_empty
 
 
 class ColumnItem(object):

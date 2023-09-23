@@ -2,8 +2,7 @@ import copy
 import urllib.parse
 
 from .endpoint import Endpoint
-from .exceptions import ServerResponseError
-from ..exceptions import EndpointUnavailableError
+from tableauserverclient.helpers.exceptions import EndpointUnavailableError, ServerResponseError
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import TagItem
 

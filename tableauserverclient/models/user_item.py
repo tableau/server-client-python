@@ -6,13 +6,13 @@ from typing import Dict, List, Optional, TYPE_CHECKING, Tuple
 
 from defusedxml.ElementTree import fromstring
 
-from tableauserverclient.datetime_helpers import parse_datetime
-from .exceptions import UnpopulatedPropertyError
-from .property_decorators import (
+from tableauserverclient.helpers.datetime import parse_datetime
+from tableauserverclient.helpers.exceptions import UnpopulatedPropertyError
+from tableauserverclient.helpers.property_decorators import (
     property_is_enum,
     property_not_empty,
 )
-from .reference_item import ResourceReference
+from tableauserverclient.models.metadata import ResourceReference
 
 if TYPE_CHECKING:
     from tableauserverclient.server import Pager

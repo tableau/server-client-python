@@ -9,11 +9,11 @@ from pathlib import Path
 from tableauserverclient.helpers.headers import fix_filename
 
 from .endpoint import QuerysetEndpoint, api, parameter_added_in
-from .exceptions import InternalServerError, MissingRequiredFieldError
+from tableauserverclient.helpers.exceptions import InternalServerError, MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .resource_tagger import _ResourceTagger
 
-from tableauserverclient.filesys_helpers import (
+from tableauserverclient.helpers.filesys import (
     to_filename,
     make_download_path,
     get_file_type,

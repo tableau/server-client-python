@@ -2,8 +2,8 @@ from typing import List, Type, TYPE_CHECKING
 
 from defusedxml.ElementTree import fromstring
 
-from .property_decorators import property_is_boolean
-from .target import Target
+from tableauserverclient.helpers.property_decorators import property_is_boolean
+from tableauserverclient.models.metadata.target import Target
 from tableauserverclient.models import ScheduleItem
 
 if TYPE_CHECKING:

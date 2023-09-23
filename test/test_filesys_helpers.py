@@ -4,7 +4,7 @@ from io import BytesIO
 from xml.etree import ElementTree as ET
 from zipfile import ZipFile
 
-from tableauserverclient.filesys_helpers import get_file_object_size, get_file_type
+from tableauserverclient.helpers.filesys import get_file_object_size, get_file_type
 from ._utils import asset, TEST_ASSET_DIR
 
 

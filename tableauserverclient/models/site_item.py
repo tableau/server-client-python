@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 
 from defusedxml.ElementTree import fromstring
 
-from .property_decorators import (
+from tableauserverclient.helpers.property_decorators import (
     property_is_enum,
     property_is_boolean,
     property_matches,

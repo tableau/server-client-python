@@ -5,7 +5,7 @@ import unittest
 import requests_mock
 
 import tableauserverclient as TSC
-from tableauserverclient.server.endpoint.exceptions import GraphQLError
+from tableauserverclient.helpers.exceptions import GraphQLError
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 

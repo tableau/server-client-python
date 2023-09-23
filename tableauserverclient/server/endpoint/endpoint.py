@@ -5,7 +5,7 @@ from functools import wraps
 from xml.etree.ElementTree import ParseError
 from typing import Any, Callable, Dict, Optional, TYPE_CHECKING, Union
 
-from .exceptions import (
+from tableauserverclient.helpers.exceptions import (
     ServerResponseError,
     InternalServerError,
     NonXMLResponseError,

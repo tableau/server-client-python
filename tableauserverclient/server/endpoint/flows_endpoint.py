@@ -11,12 +11,12 @@ from tableauserverclient.helpers.headers import fix_filename
 
 from .dqw_endpoint import _DataQualityWarningEndpoint
 from .endpoint import QuerysetEndpoint, api
-from .exceptions import InternalServerError, MissingRequiredFieldError
+from tableauserverclient.helpers.exceptions import InternalServerError, MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .resource_tagger import _ResourceTagger
 from tableauserverclient.models import FlowItem, PaginationItem, ConnectionItem, JobItem
 from tableauserverclient.server import RequestFactory
-from tableauserverclient.filesys_helpers import (
+from tableauserverclient.helpers.filesys import (
     to_filename,
     make_download_path,
     get_file_type,

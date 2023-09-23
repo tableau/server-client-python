@@ -2,7 +2,7 @@ import json
 import logging
 
 from .endpoint import Endpoint, api
-from .exceptions import GraphQLError, InvalidGraphQLQuery
+from tableauserverclient.helpers.exceptions import GraphQLError, InvalidGraphQLQuery
 
 from tableauserverclient.helpers.logging import logger
 

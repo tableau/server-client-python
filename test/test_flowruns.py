@@ -3,8 +3,8 @@ import unittest
 import requests_mock
 
 import tableauserverclient as TSC
-from tableauserverclient.datetime_helpers import format_datetime
-from tableauserverclient.server.endpoint.exceptions import FlowRunFailedException
+from tableauserverclient.helpers.datetime import format_datetime
+from tableauserverclient.helpers.exceptions import FlowRunFailedException
 from ._utils import read_xml_asset, mocked_time
 
 GET_XML = "flow_runs_get.xml"

@@ -3,9 +3,9 @@ from typing import Dict, List, Optional
 
 from defusedxml.ElementTree import fromstring
 
-from .exceptions import UnknownGranteeTypeError, UnpopulatedPropertyError
+from tableauserverclient.helpers.exceptions import UnknownGranteeTypeError, UnpopulatedPropertyError
 from .group_item import GroupItem
-from .reference_item import ResourceReference
+from tableauserverclient.models.metadata import ResourceReference
 from .user_item import UserItem
 
 from tableauserverclient.helpers.logging import logger

@@ -3,7 +3,7 @@ import requests_mock
 from pathlib import Path
 
 import tableauserverclient as TSC
-from tableauserverclient.datetime_helpers import format_datetime
+from tableauserverclient.helpers.datetime import format_datetime
 
 assets = Path(__file__).parent / "assets"
 METRICS_GET = assets / "metrics_get.xml"

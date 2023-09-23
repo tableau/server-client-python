@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from defusedxml.ElementTree import fromstring
 
-from .property_decorators import (
+from tableauserverclient.helpers.property_decorators import (
     property_not_empty,
     property_is_enum,
     property_is_boolean,

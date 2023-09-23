@@ -1,8 +1,8 @@
 import logging
 from typing import List, Optional, Tuple, TYPE_CHECKING
 
-from tableauserverclient.server.endpoint.endpoint import Endpoint, api
-from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
+from .endpoint import Endpoint, api
+from tableauserverclient.helpers.exceptions import MissingRequiredFieldError
 from tableauserverclient.models import TaskItem, PaginationItem
 from tableauserverclient.server import RequestFactory
 

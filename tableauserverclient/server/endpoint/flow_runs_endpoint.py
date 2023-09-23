@@ -2,7 +2,7 @@ import logging
 from typing import List, Optional, Tuple, TYPE_CHECKING
 
 from .endpoint import QuerysetEndpoint, api
-from .exceptions import FlowRunFailedException, FlowRunCancelledException
+from tableauserverclient.helpers.exceptions import FlowRunFailedException, FlowRunCancelledException
 from tableauserverclient.models import FlowRunItem, PaginationItem
 from tableauserverclient.exponential_backoff import ExponentialBackoffTimer
 

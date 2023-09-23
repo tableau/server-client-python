@@ -2,7 +2,7 @@ import logging
 
 from .dqw_endpoint import _DataQualityWarningEndpoint
 from .endpoint import api, Endpoint
-from .exceptions import MissingRequiredFieldError
+from tableauserverclient.helpers.exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import TableItem, ColumnItem, PaginationItem

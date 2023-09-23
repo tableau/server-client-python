@@ -5,7 +5,7 @@ import warnings
 from defusedxml.ElementTree import fromstring
 
 from .endpoint import Endpoint, api
-from .exceptions import ServerResponseError
+from tableauserverclient.helpers.exceptions import ServerResponseError
 from ..request_factory import RequestFactory
 
 from tableauserverclient.helpers.logging import logger

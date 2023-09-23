@@ -2,8 +2,8 @@ import logging
 
 from defusedxml.ElementTree import fromstring
 
-from .exceptions import UnpopulatedPropertyError
-from .property_decorators import (
+from tableauserverclient.helpers.exceptions import UnpopulatedPropertyError
+from tableauserverclient.helpers.property_decorators import (
     property_is_enum,
     property_not_empty,
     property_is_boolean,

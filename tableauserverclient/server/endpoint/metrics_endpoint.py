@@ -1,5 +1,5 @@
 from .endpoint import QuerysetEndpoint, api
-from .exceptions import MissingRequiredFieldError
+from tableauserverclient.helpers.exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .dqw_endpoint import _DataQualityWarningEndpoint
 from .resource_tagger import _ResourceTagger

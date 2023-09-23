@@ -4,11 +4,11 @@ from defusedxml import ElementTree
 from defusedxml.ElementTree import fromstring, tostring
 from typing import Callable, List, Optional
 
-from .exceptions import UnpopulatedPropertyError
+from tableauserverclient.helpers.exceptions import UnpopulatedPropertyError
+from tableauserverclient.helpers.datetime import parse_datetime
 from .user_item import UserItem
 from .view_item import ViewItem
 from .workbook_item import WorkbookItem
-from ..datetime_helpers import parse_datetime
 
 
 class CustomViewItem(object):

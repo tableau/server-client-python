@@ -51,7 +51,7 @@ def main():
         group = TSC.GroupItem("test")
         try:
             group = server.groups.create(group)
-        except TSC.server.endpoint.exceptions.ServerResponseError as rError:
+        except TSC.helpers.exceptions.ServerResponseError as rError:
             if rError.code == "409009":
                 print("Group already exists")
                 group = server.groups.filter(name=group.name)[0]

@@ -2,7 +2,7 @@ import logging
 
 from .default_permissions_endpoint import _DefaultPermissionsEndpoint
 from .endpoint import QuerysetEndpoint, api, XML_CONTENT_TYPE
-from .exceptions import MissingRequiredFieldError
+from tableauserverclient.helpers.exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from tableauserverclient.server import RequestFactory, RequestOptions
 from tableauserverclient.models import ProjectItem, PaginationItem, Resource

@@ -1,8 +1,8 @@
 import logging
 
 from .endpoint import Endpoint, api
-from .exceptions import ServerResponseError
-from ..exceptions import (
+from tableauserverclient.helpers.exceptions import (
+    ServerResponseError,
     ServerInfoEndpointNotFoundError,
     EndpointUnavailableError,
 )

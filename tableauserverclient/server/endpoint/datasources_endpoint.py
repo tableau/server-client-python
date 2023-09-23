@@ -17,12 +17,13 @@ if TYPE_CHECKING:
 
 from .dqw_endpoint import _DataQualityWarningEndpoint
 from .endpoint import QuerysetEndpoint, api, parameter_added_in
-from .exceptions import InternalServerError, MissingRequiredFieldError
+from tableauserverclient.helpers.exceptions import InternalServerError, MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .resource_tagger import _ResourceTagger
+from tableauserverclient.server import RequestFactory, RequestOptions
 
 from tableauserverclient.config import ALLOWED_FILE_EXTENSIONS, FILESIZE_LIMIT_MB, BYTES_PER_MB, CHUNK_SIZE_MB
-from tableauserverclient.filesys_helpers import (
+from tableauserverclient.helpers.filesys import (
     make_download_path,
     get_file_type,
     get_file_object_size,
@@ -295,6 +296,7 @@ class Datasources(QuerysetEndpoint):
                 connections,
             )
 
+        logger.debug("Datasource upload complete, datasource not yet published.")
         # Send the publishing request to server
         try:
             server_response = self.post_request(url, xml_request, content_type)
@@ -302,7 +304,7 @@ class Datasources(QuerysetEndpoint):
             if err.code == 504 and not as_job:
                 err.content = "Timeout error while publishing. Please use asynchronous publishing to avoid timeouts."
             raise err
-
+        logger.info("Datasource publish request complete")
         if as_job:
             new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
             logger.info("Published {0} (JOB_ID: {1}".format(filename, new_job.id))

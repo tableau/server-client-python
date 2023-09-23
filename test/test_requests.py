@@ -5,7 +5,7 @@ import requests
 import requests_mock
 
 import tableauserverclient as TSC
-from tableauserverclient.server.endpoint.exceptions import InternalServerError, NonXMLResponseError
+from tableauserverclient.helpers.exceptions import InternalServerError, NonXMLResponseError
 
 
 class RequestTests(unittest.TestCase):

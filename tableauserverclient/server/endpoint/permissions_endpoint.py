@@ -4,7 +4,7 @@ from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import TableauItem, PermissionsRule
 
 from .endpoint import Endpoint
-from .exceptions import MissingRequiredFieldError
+from tableauserverclient.helpers.exceptions import MissingRequiredFieldError
 
 from typing import Callable, TYPE_CHECKING, List, Optional, Union
 

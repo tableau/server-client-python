@@ -5,8 +5,8 @@ from typing import Callable, Iterator, List, Optional, Set
 
 from defusedxml.ElementTree import fromstring
 
-from tableauserverclient.datetime_helpers import parse_datetime
-from .exceptions import UnpopulatedPropertyError
+from tableauserverclient.helpers.datetime import parse_datetime
+from tableauserverclient.helpers.exceptions import UnpopulatedPropertyError
 from .permissions_item import PermissionsRule
 from .tag_item import TagItem
 

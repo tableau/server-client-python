@@ -2,7 +2,7 @@ import logging
 from contextlib import closing
 
 from .endpoint import QuerysetEndpoint, api
-from .exceptions import MissingRequiredFieldError
+from tableauserverclient.helpers.exceptions import MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
 from .resource_tagger import _ResourceTagger
 from tableauserverclient.models import ViewItem, PaginationItem
@@ -21,13 +21,14 @@ if TYPE_CHECKING:
     )
 
 
+# should this have a 'get custom views' populator as well?
 class Views(QuerysetEndpoint):
     def __init__(self, parent_srv):
         super(Views, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
 
-    # Used because populate_preview_image functionaliy requires workbook endpoint
+    # Used because populate_preview_image functionality requires workbook endpoint
     @property
     def siteurl(self) -> str:
         return "{0}/sites/{1}".format(self.parent_srv.baseurl, self.parent_srv.site_id)

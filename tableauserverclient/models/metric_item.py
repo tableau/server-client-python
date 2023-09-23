@@ -2,8 +2,8 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 from typing import List, Optional, Set
 
-from tableauserverclient.datetime_helpers import parse_datetime
-from .property_decorators import property_is_boolean, property_is_datetime
+from tableauserverclient.helpers.datetime import parse_datetime
+from tableauserverclient.helpers.property_decorators import property_is_boolean, property_is_datetime
 from .tag_item import TagItem
 from .permissions_item import Permission
 

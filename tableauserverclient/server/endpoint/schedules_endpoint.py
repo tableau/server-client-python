@@ -5,7 +5,7 @@ from collections import namedtuple
 from typing import TYPE_CHECKING, Callable, List, Optional, Tuple, Union
 
 from .endpoint import Endpoint, api, parameter_added_in
-from .exceptions import MissingRequiredFieldError
+from tableauserverclient.helpers.exceptions import MissingRequiredFieldError
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import PaginationItem, ScheduleItem, TaskItem
 

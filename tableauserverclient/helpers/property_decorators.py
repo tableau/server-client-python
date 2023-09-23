@@ -3,7 +3,7 @@ import re
 from functools import wraps
 from typing import Any, Container, Optional, Tuple
 
-from tableauserverclient.datetime_helpers import parse_datetime
+from tableauserverclient.helpers.datetime import parse_datetime
 
 
 def property_is_enum(enum_type):
@@ -155,3 +155,7 @@ def property_is_data_acceleration_config(func):
         return func(self, value)
 
     return wrapper
+
+# Used to convert string represented boolean to a boolean type
+def string_to_bool(s):
+    return s.lower() == "true"

@@ -4,7 +4,7 @@ from typing import Optional, Union
 
 from defusedxml.ElementTree import fromstring
 
-from tableauserverclient.datetime_helpers import parse_datetime
+from tableauserverclient.helpers.datetime import parse_datetime
 from .interval_item import (
     IntervalItem,
     HourlyInterval,
@@ -12,7 +12,7 @@ from .interval_item import (
     WeeklyInterval,
     MonthlyInterval,
 )
-from .property_decorators import (
+from tableauserverclient.helpers.property_decorators import (
     property_is_enum,
 )
 

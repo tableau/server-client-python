@@ -3,9 +3,9 @@ from typing import List, Optional
 
 from defusedxml.ElementTree import fromstring
 
-from tableauserverclient.datetime_helpers import parse_datetime
-from tableauserverclient.models.schedule_item import ScheduleItem
-from tableauserverclient.models.target import Target
+from tableauserverclient.helpers.datetime import parse_datetime
+from .schedule_item import ScheduleItem
+from tableauserverclient.models.metadata.target import Target
 
 
 class TaskItem(object):

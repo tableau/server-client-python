@@ -3,7 +3,7 @@ import logging
 from typing import List, Optional, Tuple
 
 from .endpoint import QuerysetEndpoint, api
-from .exceptions import MissingRequiredFieldError, ServerResponseError
+from tableauserverclient.helpers.exceptions import MissingRequiredFieldError, ServerResponseError
 from tableauserverclient.server import RequestFactory, RequestOptions
 from tableauserverclient.models import UserItem, WorkbookItem, PaginationItem, GroupItem
 from ..pager import Pager

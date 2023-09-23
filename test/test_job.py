@@ -5,8 +5,8 @@ from datetime import datetime
 import requests_mock
 
 import tableauserverclient as TSC
-from tableauserverclient.datetime_helpers import utc
-from tableauserverclient.server.endpoint.exceptions import JobFailedException
+from tableauserverclient.helpers.datetime import utc
+from tableauserverclient.helpers.exceptions import JobFailedException
 from ._utils import read_xml_asset, mocked_time
 
 GET_XML = "job_get.xml"

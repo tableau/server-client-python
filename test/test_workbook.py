@@ -8,9 +8,9 @@ from io import BytesIO
 from pathlib import Path
 
 import tableauserverclient as TSC
-from tableauserverclient.datetime_helpers import format_datetime
+from tableauserverclient.helpers.datetime import format_datetime
 from tableauserverclient.models import UserItem, GroupItem, PermissionsRule
-from tableauserverclient.server.endpoint.exceptions import InternalServerError
+from tableauserverclient.helpers.exceptions import InternalServerError
 from tableauserverclient.server.request_factory import RequestFactory
 from ._utils import asset
 

@@ -4,8 +4,8 @@ from typing import List, Optional
 from defusedxml.ElementTree import fromstring
 
 from .connection_credentials import ConnectionCredentials
-from .property_decorators import property_is_boolean
 from tableauserverclient.helpers.logging import logger
+from tableauserverclient.helpers.property_decorators import property_is_boolean
 
 
 class ConnectionItem(object):

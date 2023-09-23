@@ -2,9 +2,9 @@ from typing import Callable, List, Optional, TYPE_CHECKING
 
 from defusedxml.ElementTree import fromstring
 
-from .exceptions import UnpopulatedPropertyError
-from .property_decorators import property_not_empty, property_is_enum
-from .reference_item import ResourceReference
+from tableauserverclient.helpers.exceptions import UnpopulatedPropertyError
+from tableauserverclient.helpers.property_decorators import property_not_empty, property_is_enum
+from tableauserverclient.models.metadata import ResourceReference
 from .user_item import UserItem
 
 if TYPE_CHECKING:

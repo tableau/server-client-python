@@ -5,12 +5,12 @@ from typing import List, Optional, Set
 
 from defusedxml.ElementTree import fromstring
 
-from tableauserverclient.datetime_helpers import parse_datetime
+from tableauserverclient.helpers.datetime import parse_datetime
 from .connection_item import ConnectionItem
 from .dqw_item import DQWItem
-from .exceptions import UnpopulatedPropertyError
+from tableauserverclient.helpers.exceptions import UnpopulatedPropertyError
 from .permissions_item import Permission
-from .property_decorators import property_not_nullable
+from tableauserverclient.helpers.property_decorators import property_not_nullable
 from .tag_item import TagItem
 
 

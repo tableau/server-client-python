@@ -4,8 +4,8 @@ from typing import List, Optional
 
 from defusedxml.ElementTree import fromstring
 
-from .exceptions import UnpopulatedPropertyError
-from .property_decorators import property_is_enum, property_not_empty
+from tableauserverclient.helpers.exceptions import UnpopulatedPropertyError
+from tableauserverclient.helpers.property_decorators import property_is_enum, property_not_empty
 
 
 class ProjectItem(object):

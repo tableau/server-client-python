@@ -1,4 +1,4 @@
-from .property_decorators import property_is_valid_time, property_not_nullable
+from tableauserverclient.helpers.property_decorators import property_is_valid_time, property_not_nullable
 
 
 class IntervalItem(object):

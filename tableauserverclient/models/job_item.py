@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from defusedxml.ElementTree import fromstring
 
-from tableauserverclient.datetime_helpers import parse_datetime
+from tableauserverclient.helpers.datetime import parse_datetime
 from .flow_run_item import FlowRunItem
 
 

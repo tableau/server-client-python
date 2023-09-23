@@ -2,7 +2,7 @@ import logging
 from typing import List, Optional, Tuple
 
 from .endpoint import QuerysetEndpoint, api
-from .exceptions import MissingRequiredFieldError
+from tableauserverclient.helpers.exceptions import MissingRequiredFieldError
 from tableauserverclient.models import CustomViewItem, PaginationItem
 from tableauserverclient.server import RequestFactory, RequestOptions, ImageRequestOptions
 

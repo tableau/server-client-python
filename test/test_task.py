@@ -6,7 +6,7 @@ from pathlib import Path
 import requests_mock
 
 import tableauserverclient as TSC
-from tableauserverclient.datetime_helpers import parse_datetime
+from tableauserverclient.helpers.datetime import parse_datetime
 from tableauserverclient.models.task_item import TaskItem
 
 TEST_ASSET_DIR = Path(__file__).parent / "assets"

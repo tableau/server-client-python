@@ -21,6 +21,8 @@ class Resource:
     Workbook = "workbook"
 
 
+# this needs to be defined as an interface in /requests b/c it is used by /endpoints
+# it must not refer to the types: they should just say they implement it.
 # resource types that have permissions, can be renamed, etc
 # todo: refactoring: should actually define TableauItem as an interface and let all these implement it
 TableauItem = Union[DatasourceItem, FlowItem, MetricItem, ProjectItem, ViewItem, WorkbookItem]

@@ -4,7 +4,7 @@ from typing import Dict, List, Optional, Type
 
 from defusedxml.ElementTree import fromstring
 
-from tableauserverclient.datetime_helpers import parse_datetime
+from tableauserverclient.helpers.datetime import parse_datetime
 
 
 class FlowRunItem(object):

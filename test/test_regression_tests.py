@@ -7,7 +7,7 @@ except ImportError:
 
 import tableauserverclient.server.request_factory as factory
 from tableauserverclient.helpers.strings import redact_xml
-from tableauserverclient.filesys_helpers import to_filename, make_download_path
+from tableauserverclient.helpers.filesys import to_filename, make_download_path
 
 
 class BugFix257(unittest.TestCase):
