@@ -46,7 +46,6 @@ class GroupItem(object):
         return self._name
 
     @name.setter
-    @property_not_empty
     def name(self, value: str) -> None:
         self._name = value
 
