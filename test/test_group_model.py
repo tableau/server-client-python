@@ -4,7 +4,6 @@ import tableauserverclient as TSC
 
 
 class GroupModelTests(unittest.TestCase):
-
     def test_invalid_minimum_site_role(self):
         group = TSC.GroupItem("grp")
         with self.assertRaises(ValueError):

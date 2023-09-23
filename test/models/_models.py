@@ -46,7 +46,7 @@ def get_defined_models():
         MonthlyInterval,
         HourlyInterval,
         TableItem,
-        Target
+        Target,
     ]
 
 

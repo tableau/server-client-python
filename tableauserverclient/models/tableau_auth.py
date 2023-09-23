@@ -77,13 +77,14 @@ class PersonalAccessTokenAuth(Credentials):
         }
 
     def __repr__(self):
-
         if self.user_id_to_impersonate:
             uid = f", user_id_to_impersonate=f{self.user_id_to_impersonate}"
         else:
             uid = ""
-        return f"<PersonalAccessToken name={self.token_name} token={self.personal_access_token[:2]}..." \
-               f"(site={self.site_id}{uid} >"
+        return (
+            f"<PersonalAccessToken name={self.token_name} token={self.personal_access_token[:2]}..."
+            f"(site={self.site_id}{uid} >"
+        )
 
 
 # A standard JWT generated specifically for Tableau

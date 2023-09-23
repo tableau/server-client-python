@@ -48,13 +48,6 @@ class JobItem(object):
         self._flow_run = flow_run
         self._updated_at = updated_at
 
-    def __str__(self):
-        return f"<{self.__class__.__name__} {self._id} {self.type} progress={self._finish_code} >"
-
-    def __repr__(self):
-        return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"
-
-
     @property
     def id(self) -> str:
         return self._id
@@ -124,11 +117,15 @@ class JobItem(object):
     def updated_at(self) -> Optional[datetime.datetime]:
         return self._updated_at
 
-    def __repr__(self):
+    def __str__(self):
         return (
             "<Job#{_id} {_type} created_at({_created_at}) started_at({_started_at}) updated_at({_updated_at}) completed_at({_completed_at})"
             " progress ({_progress}) finish_code({_finish_code})>".format(**self.__dict__)
         )
+
+    def __repr__(self):
+        return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"
+
 
     @classmethod
     def from_response(cls, xml, ns) -> List["JobItem"]:

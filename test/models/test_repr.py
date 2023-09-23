@@ -1,4 +1,3 @@
-
 import inspect
 
 from unittest import TestCase
@@ -16,7 +15,9 @@ def instantiate_class(name: str, obj: Any):
     if constructor:
         # Get the parameters of the constructor (excluding 'self')
         parameters = inspect.signature(constructor).parameters.values()
-        required_parameters = [param for param in parameters if param.default == inspect.Parameter.empty and param.name != 'self']
+        required_parameters = [
+            param for param in parameters if param.default == inspect.Parameter.empty and param.name != "self"
+        ]
         if required_parameters:
             print(f"Class '{name}' requires the following parameters for instantiation:")
             for param in required_parameters:
@@ -31,7 +32,6 @@ def instantiate_class(name: str, obj: Any):
 
 
 class TestAllModels(TestCase):
-
     # not all models have __repr__ yet: see above list
     def test_repr_is_implemented(self):
         m = _models.get_defined_models()
@@ -49,5 +49,3 @@ class TestAllModels(TestCase):
 
 def is_concrete(obj: Any):
     return inspect.isclass(obj) and not inspect.isabstract(obj)
-
-
