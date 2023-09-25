@@ -15,6 +15,13 @@ class ConnectionCredentials(object):
         self.embed = embed
         self.oauth = oauth
 
+    def __repr__(self):
+        if self.password:
+            print = "redacted"
+        else:
+            print = "None"
+        return f"<{self.__class__.__name__} name={self.name} password={print} embed={self.embed} oauth={self.oauth} >"
+
     @property
     def embed(self):
         return self._embed

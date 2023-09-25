@@ -66,9 +66,14 @@ class Auth(Endpoint):
         logger.info("Signed into {0} as user with id {1}".format(self.parent_srv.server_address, user_id))
         return Auth.contextmgr(self.sign_out)
 
+    # We use the same request that username/password login uses for all auth types.
+    # The distinct methods are mostly useful for explicitly showing api version support for each auth type
     @api(version="3.6")
     def sign_in_with_personal_access_token(self, auth_req: "Credentials") -> contextmgr:
-        # We use the same request that username/password login uses.
+        return self.sign_in(auth_req)
+
+    @api(version="3.17")
+    def sign_in_with_json_web_token(self, auth_req: "Credentials") -> contextmgr:
         return self.sign_in(auth_req)
 
     @api(version="2.0")

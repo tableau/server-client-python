@@ -26,10 +26,8 @@ class GroupItem(object):
         self.name: Optional[str] = name
         self.domain_name: Optional[str] = domain_name
 
-    def __str__(self):
+    def __repr__(self):
         return "{}({!r})".format(self.__class__.__name__, self.__dict__)
-
-    __repr__ = __str__
 
     @property
     def domain_name(self) -> Optional[str]:
@@ -48,7 +46,6 @@ class GroupItem(object):
         return self._name
 
     @name.setter
-    @property_not_empty
     def name(self, value: str) -> None:
         self._name = value
 

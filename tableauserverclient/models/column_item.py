@@ -9,6 +9,9 @@ class ColumnItem(object):
         self.description = description
         self.name = name
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__} {self._id} {self.name} {self.description}>"
+
     @property
     def id(self):
         return self._id

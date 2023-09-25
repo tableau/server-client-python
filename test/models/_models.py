@@ -1,61 +1,58 @@
 from tableauserverclient import *
 
-# mmm. why aren't these available in the tsc namespace?
+# TODO why aren't these available in the tsc namespace? Probably a bug.
 from tableauserverclient.models import (
     DataAccelerationReportItem,
-    FavoriteItem,
     Credentials,
     ServerInfoItem,
     Resource,
     TableauItem,
-    plural_type,
 )
 
 
 def get_defined_models():
-    # not clever: copied from tsc/models/__init__.py
+    # nothing clever here: list was manually copied from tsc/models/__init__.py
     return [
-        ColumnItem,
-        ConnectionCredentials,
+        BackgroundJobItem,
         ConnectionItem,
         DataAccelerationReportItem,
         DataAlertItem,
-        DatabaseItem,
         DatasourceItem,
-        DQWItem,
-        UnpopulatedPropertyError,
-        FavoriteItem,
         FlowItem,
-        FlowRunItem,
         GroupItem,
-        IntervalItem,
-        DailyInterval,
-        WeeklyInterval,
-        MonthlyInterval,
-        HourlyInterval,
         JobItem,
-        BackgroundJobItem,
         MetricItem,
-        PaginationItem,
         PermissionsRule,
-        Permission,
         ProjectItem,
         RevisionItem,
         ScheduleItem,
-        ServerInfoItem,
-        SiteItem,
         SubscriptionItem,
-        TableItem,
         Credentials,
+        JWTAuth,
         TableauAuth,
         PersonalAccessTokenAuth,
-        Resource,
-        TableauItem,
-        plural_type,
-        Target,
+        ServerInfoItem,
+        SiteItem,
         TaskItem,
         UserItem,
         ViewItem,
         WebhookItem,
         WorkbookItem,
+        PaginationItem,
+        Permission.Mode,
+        Permission.Capability,
+        DailyInterval,
+        WeeklyInterval,
+        MonthlyInterval,
+        HourlyInterval,
+        TableItem,
+        Target,
+    ]
+
+
+def get_unimplemented_models():
+    return [
+        FavoriteItem,  # no repr because there is no state
+        Resource,  # list of type names
+        TableauItem,  # should be an interface
     ]
