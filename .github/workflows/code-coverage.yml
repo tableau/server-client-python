@@ -30,7 +30,7 @@ jobs:
 
     #  https://github.com/marketplace/actions/pytest-coverage-comment
     - name: Generate coverage report
-      run: pytest --junitxml=pytest.xml --cov=tableauserverclient tests/ | tee pytest-coverage.txt
+      run: pytest --junitxml=pytest.xml --cov=tableauserverclient test/ | tee pytest-coverage.txt
 
     - name: Comment on pull request with coverage
       uses: MishaKav/pytest-coverage-comment@main

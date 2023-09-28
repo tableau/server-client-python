@@ -19,6 +19,12 @@ class TableItem(object):
         self._columns = None
         self._data_quality_warnings = None
 
+    def __str__(self):
+        return f"<{self.__class__.__name__} {self._id} {self._name} >"
+
+    def __repr__(self):
+        return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"
+
     @property
     def permissions(self):
         if self._permissions is None:

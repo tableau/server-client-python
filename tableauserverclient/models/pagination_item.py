@@ -7,6 +7,9 @@ class PaginationItem(object):
         self._page_size = None
         self._total_available = None
 
+    def __repr__(self):
+        return f"<PaginationItem page_number={self._page_number} page_size={self._page_size} total={self._total_available}>"
+
     @property
     def page_number(self) -> int:
         return self._page_number
