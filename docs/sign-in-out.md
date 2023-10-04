@@ -10,16 +10,15 @@ The first step to using the TSC library is to sign in to your Tableau Server (or
 
 ## Sign In
 
-Signing in can be done two different ways:
+Signing in through tsc and the REST API can be done several different ways - in most cases only some of these options will be available, depending on your server configuration. You can see details of all the underlying APIs for authentication in the [REST API documentation](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_authentication.htm).
 
-* Personal Access Tokens - In most cases this is the preferred method because it improves security by avoiding the need to use or store passwords directly. Access tokens also expire by default if not used after 15 consecutive days. This option is available for Tableau Server 2019.4 and newer. Refer to [Personal Access Tokens](https://help.tableau.com/current/server/en-us/security_personal_access_tokens.htm) for more details.
-* Username and Password - Direct sign in with account username and password.
-
-Examples showing both of these cases are included below.
+Examples for all supported methods are included below.
 
 **Note:** When you sign in, the TSC library manages the authenticated session for you. However, the validity of the underlying credentials token is limited by the maximum session length set on your Tableau Server (2 hours by default).
 
 ### Sign in with Personal Access Token
+
+In most cases this is the preferred method because it improves security by avoiding the need to use or store passwords directly. Access tokens also expire by default if not used after 15 consecutive days. This option is available for Tableau Server 2019.4 and newer. Refer to [Personal Access Tokens](https://help.tableau.com/current/server/en-us/security_personal_access_tokens.htm) for more details.
 
 To sign in to Tableau Server or Tableau Cloud with a personal access token, you'll need the following values:
 
@@ -50,7 +49,10 @@ server.auth.sign_out()
 
 ### Sign in with Username and Password
 
-To sign in to Tableau Server or Tableau Cloud with a username and password, you'll need the following values:
+
+Direct sign in with account username and password. (This is no longer allowed for Tableau Cloud)
+
+To sign in to Tableau Server with a username and password, you'll need the following values:
 
 Name | Description
 :--- | :---
@@ -73,7 +75,45 @@ server.auth.sign_in(tableau_auth)
 server.auth.sign_out()
 ```
 
-### Handling SSL certificates for Tableau Server
+### Sign in with JSON Web Token (JWT)
+
+If you have Connected Apps enabled, you can create JSON Web Tokens and use them to authenticate over the REST API. To learn about Connected Apps, read the docs on [Tableau Connected Apps](https://help.tableau.com/current/server/en-us/security_auth.htm#connected-apps)
+
+To sign in to Tableau Server or Tableau Cloud with a JWT, you'll need to have created a Connected App and generated the token locally (see [instructions to generate a JWT for your Connected App](https://help.tableau.com/current/server/en-us/connected_apps.htm#step-3-configure-the-jwt)):
+
+class JWTAuth(Credentials):
+    def __init__(self, jwt=None, site_id=None, user_id_to_impersonate=None):
+Name | Description
+:--- | :---
+JWT | The generated token value
+SITENAME | The same as described for personal access tokens
+SERVER_URL | The same as described for personal access tokens
+
+This example illustrates using the above values to sign in with a JWT, do some operations, and then sign out:
+
+```py
+import tableauserverclient as TSC
+
+tableau_auth = TSC.JWTAuth('JWT', 'SITENAME')
+server = TSC.Server('https://SERVER_URL', use_server_version=True)
+server.auth.sign_in(tableau_auth)
+
+# Do awesome things here!
+
+server.auth.sign_out()
+```
+
+
+## Impersonation (Tableau Server only)
+On Tableau Server, users with a Server Administrator role can sign in through the REST API and 'impersonate' another user - this may be to validate server permissions, to investigate user problems, or to perform actions on behalf of the user. This can be done in tsc with any type of authentication by adding an extra parameter (`user_id_to_impersonate`) to the TableauAuth object creation
+
+e.g 
+tableau_auth = TSC.PersonalAccessTokenAuth('TOKEN_NAME', 'TOKEN_VALUE', 'SITE_NAME', 'OTHER_USER_ID')
+tableau_auth = TSC.JWTAuth('JWT_VALUE', 'SITE_NAME', 'OTHER_USER_ID')
+tableau_auth = TSC.TSC.TableauAuth('USERNAME', 'PASSWORD', 'SITENAME')
+
+
+## Handling SSL certificates for Tableau Server
 
 If you're connecting to a Tableau Server instance that uses self-signed or non-public SSL certificates, you may need to provide those as part of the sign in process. An example of this could be an on-premise Tableau Server that is using internally-generated SSL certificates. You may see an error like `SSL: CERTIFICATE_VERIFY_FAILED` if you connect with a Tableau Server but don't have the SSL certificates configured correctly.
 
@@ -126,7 +166,7 @@ As shown in the examples above, the sign out call is simply:
 server.auth.sign_out()
 ```
 
-## Simplify by using Python with block
+## Simplify by using Python `with` block
 
 The sign in/out flow can be simplified (and handled in a more Python way) by using the built-in support for the `with` block. After the block execution completes, the sign out is called automatically.
 
