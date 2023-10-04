@@ -1,9 +1,9 @@
 ####
 # Getting started Part Two of Three
-# This script demonstrates how to use the Tableau Server Client to
-# view the content on an existing site on Tableau Server/Online
-# It assumes that you have already got a site and can visit it in a browser
+# This script demonstrates how to use the Tableau Server Client to sign in and view content. 
+# It assumes that you have already got a Tableau site and can visit it in a browser
 #
+# To make it easy to run, it doesn't take any arguments - you need to edit the code with your info
 ####
 
 import getpass
@@ -25,17 +25,26 @@ def main():
     # e.g https://my-server/#/site/this-is-your-site-url-name/not-this-part
     site_url_name = ""  # leave empty if there is no site name in the url (you are on the default site)
 
-    # 4 - replace with your username.
-    # REMEMBER: if you are using Tableau Online, your username is the entire email address
+    # 4 - login
+    # a) replace with your Personal Access Token values from the page 'My Account' on your Tableau site
+    token_name = "your-token-name"
+    token_value = "your-token-value-long-random-string"
+    tableau_auth = TSC.PersonalAccessTokenAuth(token_name, token_value, site_id=site_url_name)
+
+    # OR b) to sign in with a username and password, uncomment this section and remove the three lines above
+    # REMEMBER: if you are using Tableau Online, you cannot log in with username+password.
+    """
     username = "your-username-here"
     password = getpass.getpass("Your password:")  # so you don't save it in this file
     tableau_auth = TSC.TableauAuth(username, password, site_id=site_url_name)
-
-    # OR instead of username+password, uncomment this section to use a Personal Access Token
-    # by commenting out the three lines above, and uncommenting these three lines
-    # token_name = "your-token-name"
-    # token_value = "your-token-value-long-random-string"
-    # tableau_auth = TSC.PersonalAccessTokenAuth(token_name, token_value, site_id=site_url_name)
+    """
+    
+    # OR c) to sign in with a JWT, uncomment this section and remove the three lines for PAT above
+    # You must have configured a Connected App and generated a JWT before you use this method.
+    """
+    jwt = "long-generated-string-that-encodes-information"
+    tableau_auth = TSC.JWTAuth(jwt, site_id=site_url_name)
+    """    
 
     with server.auth.sign_in(tableau_auth):
         projects, pagination = server.projects.get()

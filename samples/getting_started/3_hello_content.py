@@ -23,15 +23,12 @@ def main():
     # e.g https://my-server/#/this-is-your-site-url-name/
     site_url_name = ""  # leave empty if there is no site name in the url (you are on the default site)
 
-    # 4
-    username = "your-username-here"
-    password = getpass.getpass("Your password:")  # so you don't save it in this file
-    tableau_auth = TSC.TableauAuth(username, password, site_id=site_url_name)
+    # 4 - replace with your Personal Access Token values from the page 'My Account' on your Tableau site
+    token_name = "your-token-name"
+    token_value = "your-token-value-long-random-string"
+    tableau_auth = TSC.PersonalAccessTokenAuth(token_name, token_value, site_id=site_url_name)
 
-    # OR instead of username+password, use a Personal Access Token (PAT) (required by Tableau Cloud)
-    # token_name = "your-token-name"
-    # token_value = "your-token-value-long-random-string"
-    # tableau_auth = TSC.PersonalAccessTokenAuth(token_name, token_value, site_id=site_url_name)
+    # (to log in with a username/password or JWT see example 2_hello_site.py))
 
     with server.auth.sign_in(tableau_auth):
         projects, pagination = server.projects.get()
