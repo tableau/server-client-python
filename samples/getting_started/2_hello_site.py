@@ -32,6 +32,7 @@ def main():
     tableau_auth = TSC.TableauAuth(username, password, site_id=site_url_name)
 
     # OR instead of username+password, uncomment this section to use a Personal Access Token
+    # by commenting out the three lines above, and uncommenting these three lines
     # token_name = "your-token-name"
     # token_value = "your-token-value-long-random-string"
     # tableau_auth = TSC.PersonalAccessTokenAuth(token_name, token_value, site_id=site_url_name)
