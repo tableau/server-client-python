@@ -1,4 +1,3 @@
-import logging
 import xml.etree.ElementTree as ET
 from typing import Dict, List, Optional
 
@@ -16,6 +15,9 @@ class Permission:
     class Mode:
         Allow = "Allow"
         Deny = "Deny"
+
+        def __repr__(self):
+            return "<Enum Mode: Allow | Deny>"
 
     class Capability:
         AddComment = "AddComment"
@@ -39,16 +41,17 @@ class Permission:
         CreateRefreshMetrics = "CreateRefreshMetrics"
         SaveAs = "SaveAs"
 
+        def __repr__(self):
+            return "<Enum Capability: AddComment | ChangeHierarchy | ChangePermission ... (17 more) >"
+
 
 class PermissionsRule(object):
     def __init__(self, grantee: ResourceReference, capabilities: Dict[str, str]) -> None:
         self.grantee = grantee
         self.capabilities = capabilities
 
-    def __str__(self):
+    def __repr__(self):
         return "<PermissionsRule grantee={}, capabilities={}>".format(self.grantee, self.capabilities)
-
-    __repr__ = __str__
 
     @classmethod
     def from_response(cls, resp, ns=None) -> List["PermissionsRule"]:

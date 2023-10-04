@@ -39,6 +39,9 @@ class SiteItem(object):
             + ">"
         )
 
+    def __repr__(self):
+        return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"
+
     class AdminMode:
         ContentAndUsers: str = "ContentAndUsers"
         ContentOnly: str = "ContentOnly"
