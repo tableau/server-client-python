@@ -30,12 +30,15 @@ add your contributions to the **development** branch.
 
    ```shell
    git clone git@github.com:<user-name>/server-client-python.git
+   cd server-client-python
    ```
 
-1. Run the tests to make sure everything is passing:
+1. Install dependencies and run the tests to make sure everything is passing:
 
    ```shell
-   python setup.py test
+   python -m pip install --upgrade pip
+   pip install -e .[test] build
+   pytest test
    ```
 
 1. Configure a remote that points to the source (upstream) repository:
