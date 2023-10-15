@@ -1,4 +1,5 @@
-from typing import List
+from datetime import datetime
+from typing import List, Optional
 
 from defusedxml.ElementTree import fromstring
 
@@ -21,14 +22,14 @@ class TaskItem(object):
 
     def __init__(
         self,
-        id_,
-        task_type,
-        priority,
-        consecutive_failed_count=0,
-        schedule_id=None,
-        schedule_item=None,
-        last_run_at=None,
-        target=None,
+        id_: str,
+        task_type: str,
+        priority: int,
+        consecutive_failed_count: int = 0,
+        schedule_id: Optional[str] = None,
+        schedule_item: Optional[str] = None,
+        last_run_at: Optional[datetime]=None,
+        target: Optional[Target] = None,
     ):
         self.id = id_
         self.task_type = task_type
@@ -39,7 +40,7 @@ class TaskItem(object):
         self.last_run_at = last_run_at
         self.target = target
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             "<Task#{id} {task_type} pri({priority}) failed({consecutive_failed_count}) schedule_id({"
             "schedule_id}) target({target})>".format(**self.__dict__)
