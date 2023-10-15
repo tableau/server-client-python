@@ -1032,6 +1032,16 @@ class TaskRequest(object):
     def create_extract_req(self, xml_request: ET.Element, extract_item: "TaskItem") -> bytes:
         extract_element = ET.SubElement(xml_request, "extractRefresh")
 
+        # Main attributes
+        extract_element.attrib["type"] = extract_item.task_type
+
+        if extract_item.target is not None:
+            target_element = ET.SubElement(extract_element, extract_item.target.type)
+            target_element.attrib["id"] = extract_item.target.id
+
+        if extract_item.schedule_item is None:
+            return ET.tostring(xml_request)
+
         # Schedule attributes
         schedule_element = ET.SubElement(xml_request, "schedule")
 
@@ -1043,16 +1053,10 @@ class TaskRequest(object):
             frequency_element.attrib["end"] = str(interval_item.end_time)
         if hasattr(interval_item, "interval") and interval_item.interval:
             intervals_element = ET.SubElement(frequency_element, "intervals")
-            for interval in interval_item._interval_type_pairs():
+            for interval in interval_item._interval_type_pairs():  # type: ignore
                 expression, value = interval
                 single_interval_element = ET.SubElement(intervals_element, "interval")
                 single_interval_element.attrib[expression] = value
-
-        # Main attributes
-        extract_element.attrib["type"] = extract_item.task_type
-
-        target_element = ET.SubElement(extract_element, extract_item.target.type)
-        target_element.attrib["id"] = extract_item.target.id
 
         return ET.tostring(xml_request)
 
