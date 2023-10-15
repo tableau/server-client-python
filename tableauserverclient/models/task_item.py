@@ -65,8 +65,7 @@ class TaskItem(object):
         last_run_at_element = element.find(".//t:lastRunAt", namespaces=ns)
 
         schedule_item_list = ScheduleItem.from_element(element, ns)
-        if len(schedule_item_list) >= 1:
-            schedule_item = schedule_item_list[0]
+        schedule_item = next(iter(schedule_item_list), None)
 
         # according to the Tableau Server REST API documentation,
         # there should be only one of workbook or datasource
@@ -90,7 +89,7 @@ class TaskItem(object):
             task_type,
             priority,
             consecutive_failed_count,
-            schedule_item.id,
+            schedule_item.id if schedule_item is not None else None,
             schedule_item,
             last_run_at,
             target,
