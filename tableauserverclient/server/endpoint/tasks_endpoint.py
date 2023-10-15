@@ -1,7 +1,7 @@
 import logging
 
-from .endpoint import Endpoint, api
-from .exceptions import MissingRequiredFieldError
+from tableauserverclient.server.endpoint import Endpoint, api
+from tableauserverclient.server.exceptions import MissingRequiredFieldError
 from tableauserverclient.models import TaskItem, PaginationItem
 from tableauserverclient.server import RequestFactory
 
