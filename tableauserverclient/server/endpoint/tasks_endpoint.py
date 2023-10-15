@@ -1,4 +1,5 @@
 import logging
+from typing import List, Optional, Tuple, TYPE_CHECKING
 
 from tableauserverclient.server.endpoint.endpoint import Endpoint, api
 from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
@@ -7,13 +8,16 @@ from tableauserverclient.server import RequestFactory
 
 from tableauserverclient.helpers.logging import logger
 
+if TYPE_CHECKING:
+    from tableauserverclient.server.request_options import RequestOptions
+
 
 class Tasks(Endpoint):
     @property
-    def baseurl(self):
+    def baseurl(self) -> str:
         return "{0}/sites/{1}/tasks".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
-    def __normalize_task_type(self, task_type):
+    def __normalize_task_type(self, task_type: str) -> str:
         """
         The word for extract refresh used in API URL is "extractRefreshes".
         It is different than the tag "extractRefresh" used in the request body.
@@ -24,7 +28,9 @@ class Tasks(Endpoint):
             return task_type
 
     @api(version="2.6")
-    def get(self, req_options=None, task_type=TaskItem.Type.ExtractRefresh):
+    def get(
+        self, req_options: Optional["RequestOptions"] = None, task_type: str = TaskItem.Type.ExtractRefresh
+    ) -> Tuple[List[TaskItem], PaginationItem]:
         if task_type == TaskItem.Type.DataAcceleration:
             self.parent_srv.assert_at_least_version("3.8", "Data Acceleration Tasks")
 
@@ -38,7 +44,7 @@ class Tasks(Endpoint):
         return all_tasks, pagination_item
 
     @api(version="2.6")
-    def get_by_id(self, task_id):
+    def get_by_id(self, task_id: str) -> TaskItem:
         if not task_id:
             error = "No Task ID provided"
             raise ValueError(error)
@@ -63,7 +69,7 @@ class Tasks(Endpoint):
         return server_response.content
 
     @api(version="2.6")
-    def run(self, task_item):
+    def run(self, task_item: TaskItem) -> bytes:
         if not task_item.id:
             error = "Task item missing ID."
             raise MissingRequiredFieldError(error)
@@ -79,7 +85,7 @@ class Tasks(Endpoint):
 
     # Delete 1 task by id
     @api(version="3.6")
-    def delete(self, task_id, task_type=TaskItem.Type.ExtractRefresh):
+    def delete(self, task_id: str, task_type: str = TaskItem.Type.ExtractRefresh) -> None:
         if task_type == TaskItem.Type.DataAcceleration:
             self.parent_srv.assert_at_least_version("3.8", "Data Acceleration Tasks")
 
