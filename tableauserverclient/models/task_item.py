@@ -1,8 +1,8 @@
 from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.datetime_helpers import parse_datetime
-from .schedule_item import ScheduleItem
-from .target import Target
+from tableauserverclient.models.schedule_item import ScheduleItem
+from tableauserverclient.models.target import Target
 
 
 class TaskItem(object):
