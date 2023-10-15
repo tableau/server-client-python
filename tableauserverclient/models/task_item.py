@@ -1,3 +1,5 @@
+from typing import List
+
 from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.datetime_helpers import parse_datetime
@@ -44,7 +46,7 @@ class TaskItem(object):
         )
 
     @classmethod
-    def from_response(cls, xml, ns, task_type=Type.ExtractRefresh):
+    def from_response(cls, xml, ns, task_type=Type.ExtractRefresh) -> List["TaskItem"]:
         parsed_response = fromstring(xml)
         all_tasks_xml = parsed_response.findall(".//t:task/t:{}".format(task_type), namespaces=ns)
 
@@ -94,7 +96,7 @@ class TaskItem(object):
         )
 
     @staticmethod
-    def _translate_task_type(task_type):
+    def _translate_task_type(task_type: str) -> str:
         if task_type in TaskItem._TASK_TYPE_MAPPING:
             return TaskItem._TASK_TYPE_MAPPING[task_type]
         else:
