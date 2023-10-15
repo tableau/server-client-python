@@ -28,7 +28,7 @@ class TaskItem(object):
         consecutive_failed_count: int = 0,
         schedule_id: Optional[str] = None,
         schedule_item: Optional[str] = None,
-        last_run_at: Optional[datetime]=None,
+        last_run_at: Optional[datetime] = None,
         target: Optional[Target] = None,
     ):
         self.id = id_
