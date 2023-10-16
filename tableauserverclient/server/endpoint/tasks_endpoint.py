@@ -34,7 +34,7 @@ class Tasks(Endpoint):
         if task_type == TaskItem.Type.DataAcceleration:
             self.parent_srv.assert_at_least_version("3.8", "Data Acceleration Tasks")
 
-        logger.info("Querying all {} tasks for the site".format(task_type))
+        logger.info("Querying all %s tasks for the site", task_type)
 
         url = "{0}/{1}".format(self.baseurl, self.__normalize_task_type(task_type))
         server_response = self.get_request(url, req_options)
@@ -48,7 +48,7 @@ class Tasks(Endpoint):
         if not task_id:
             error = "No Task ID provided"
             raise ValueError(error)
-        logger.info("Querying a single task by id ({})".format(task_id))
+        logger.info("Querying a single task by id %s", task_id)
         url = "{}/{}/{}".format(
             self.baseurl,
             self.__normalize_task_type(TaskItem.Type.ExtractRefresh),
@@ -62,7 +62,7 @@ class Tasks(Endpoint):
         if not extract_item:
             error = "No extract refresh provided"
             raise ValueError(error)
-        logger.info("Creating an extract refresh ({})".format(extract_item))
+        logger.info("Creating an extract refresh %s", extract_item)
         url = "{0}/{1}".format(self.baseurl, self.__normalize_task_type(TaskItem.Type.ExtractRefresh))
         create_req = RequestFactory.Task.create_extract_req(extract_item)
         server_response = self.post_request(url, create_req)
@@ -94,4 +94,4 @@ class Tasks(Endpoint):
             raise ValueError(error)
         url = "{0}/{1}/{2}".format(self.baseurl, self.__normalize_task_type(task_type), task_id)
         self.delete_request(url)
-        logger.info("Deleted single task (ID: {0})".format(task_id))
+        logger.info("Deleted single task (ID: %s)", task_id)
