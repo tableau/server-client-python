@@ -76,7 +76,7 @@ class Endpoint(object):
         # return explicitly for testing only
         return parameters
 
-    def _blocking_request(self, method, url, parameters={}) -> Optional["Response"]:
+    def _blocking_request(self, method, url, parameters={}) -> Optional[Union["Response", Exception]]:
         self.async_response = None
         response = None
         logger.debug("[{}] Begin blocking request to {}".format(datetime.timestamp(), url))
@@ -96,32 +96,31 @@ class Endpoint(object):
 
     def send_request_while_show_progress_threaded(
         self, method, url, parameters={}, request_timeout=0
-    ) -> Optional["Response"]:
+    ) -> Optional[Union["Response", Exception]]:
         try:
             request_thread = Thread(target=self._blocking_request, args=(method, url, parameters))
-            request_thread.async_response = -1  # type:ignore # this is an invented attribute for thread comms
             request_thread.start()
         except Exception as e:
             logger.debug("Error starting server request on separate thread: {}".format(e))
             return None
-        seconds = 0
+        seconds = 0.05
         minutes = 0
-        sleep(1)
-        if self.async_response != -1:
+        sleep(seconds)
+        if self.async_response is not None:
             # a quick return for any immediate responses
             return self.async_response
-        while self.async_response == -1 and (request_timeout == 0 or seconds < request_timeout):
+        while (self.async_response is None) and (request_timeout == 0 or seconds < request_timeout):
             self.log_wait_time_then_sleep(minutes, seconds, url)
             seconds = seconds + DELAY_SLEEP_SECONDS
             if seconds >= 60:
-                seconds = 0
-                minutes = minutes + 1
+                seconds -= 60
+                minutes += 1
         return self.async_response
 
     def log_wait_time_then_sleep(self, minutes, seconds, url):
         logger.debug("{} Waiting....".format(datetime.timestamp()))
         if seconds >= 60:  # detailed log message ~every minute
-            if minutes % 5 == 0:
+            if minutes % 1 == 0:
                 logger.info(
                     "[{}] Waiting ({} minutes so far) for request to {}".format(datetime.timestamp(), minutes, url)
                 )
