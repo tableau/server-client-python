@@ -2,7 +2,6 @@ from threading import Thread
 from time import sleep
 from tableauserverclient import datetime_helpers as datetime
 
-import requests
 from packaging.version import Version
 from functools import wraps
 from xml.etree.ElementTree import ParseError
