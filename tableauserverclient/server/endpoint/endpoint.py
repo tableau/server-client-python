@@ -94,7 +94,7 @@ class Endpoint(object):
         return self.async_response
 
     def send_request_while_show_progress_threaded(
-        self, method, url, parameters={}, request_timeout=0
+        self, method, url, parameters={}, request_timeout=None
     ) -> Optional[Union["Response", Exception]]:
         try:
             request_thread = Thread(target=self._blocking_request, args=(method, url, parameters))
@@ -104,28 +104,29 @@ class Endpoint(object):
             return None
         seconds = 0.05
         minutes = 0
+        last_log_minute = 0
         sleep(seconds)
         if self.async_response is not None:
             # a quick return for any immediate responses
             return self.async_response
-        while (self.async_response is None) and (request_timeout == 0 or seconds < request_timeout):
-            self.log_wait_time_then_sleep(minutes, seconds, url)
+        timed_out: bool = (request_timeout is not None and seconds > request_timeout)
+        while (self.async_response is None) and not timed_out:
+            sleep(DELAY_SLEEP_SECONDS)
             seconds = seconds + DELAY_SLEEP_SECONDS
-            if seconds >= 60:
-                seconds -= 60
-                minutes += 1
+            minutes = int(seconds/60)
+            last_log_minute = self.log_wait_time(minutes, last_log_minute, url)
         return self.async_response
 
-    def log_wait_time_then_sleep(self, minutes, seconds, url):
+    def log_wait_time(self, minutes, last_log_minute, url) -> int:
         logger.debug("{} Waiting....".format(datetime.timestamp()))
-        if seconds >= 60:  # detailed log message ~every minute
-            if minutes % 1 == 0:
-                logger.info(
-                    "[{}] Waiting ({} minutes so far) for request to {}".format(datetime.timestamp(), minutes, url)
-                )
-            else:
-                logger.debug("[{}] Waiting for request to {}".format(datetime.timestamp(), url))
-        sleep(DELAY_SLEEP_SECONDS)
+        if minutes > last_log_minute:  # detailed log message ~every minute
+           logger.info(
+               "[{}] Waiting ({} minutes so far) for request to {}".format(datetime.timestamp(), minutes, url)
+           )
+           last_log_minute = minutes
+        else:
+            logger.debug("[{}] Waiting for request to {}".format(datetime.timestamp(), url))
+        return last_log_minute
 
     def _make_request(
         self,
