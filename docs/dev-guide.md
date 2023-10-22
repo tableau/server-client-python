@@ -64,7 +64,7 @@ For documentation changes, see the documentation section below.
 ### Code and commit
 
 Here's a quick checklist to follow when coding to ensure a good pull request
-(PR):
+(PR) that will pass the PR checks:
 
 - Only touch the fewest number of files possible while still accomplishing the
   goal.
@@ -74,6 +74,8 @@ Here's a quick checklist to follow when coding to ensure a good pull request
   `black --line-length 120 tableauserverclient samples test` to catch and fix any style
   issues before submitting your pull request. (Run black with the `--check` option if
   you want to check whether formatting is valid without changing any files.)
+- Ensure the Mypy static type checker is still passing by running
+  `mypy --show-error-codes --disable-error-code misc --disable-error-code import tableauserverclient test`.
 - Keep commit messages clean and descriptive.
 
 ### Use git pre-commit hook
