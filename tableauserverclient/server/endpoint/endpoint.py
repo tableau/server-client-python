@@ -148,7 +148,7 @@ class Endpoint(object):
         # a request can, for stuff like publishing, spin for ages waiting for a response.
         # we need some user-facing activity so they know it's not dead.
         request_timeout = self.parent_srv.http_options.get("timeout") or 0
-        server_response: Optional["Response"] = self.send_request_while_show_progress_threaded(
+        server_response: Optional[Union["Response",Exception]] = self.send_request_while_show_progress_threaded(
             method, url, parameters, request_timeout
         )
         logger.debug("[{}] Async request returned: received {}".format(datetime.timestamp(), server_response))
@@ -160,6 +160,8 @@ class Endpoint(object):
         if server_response is None:
             logger.debug("[{}] Request failed".format(datetime.timestamp()))
             raise RuntimeError
+        if isinstance(server_response, Exception):
+            raise server_response
         self._check_status(server_response, url)
 
         loggable_response = self.log_response_safely(server_response)
