@@ -73,7 +73,7 @@ server.auth.sign_in(tableau_auth)
 ```py
 PersonalAccessTokenAuth(token_name, personal_access_token, site_id='')
 ```
-The `PersonalAccessTokenAuth` class serves the same purpose and is used in the same way as `TableauAuth`, but using Personal Access Tokens](https://help.tableau.com/current/server/en-us/security_personal_access_tokens.htm) instead of username and password.
+The `PersonalAccessTokenAuth` class serves the same purpose and is used in the same way as `TableauAuth`, but using [Personal Access Tokens](https://help.tableau.com/current/server/en-us/security_personal_access_tokens.htm) instead of username and password.
 
 **Attributes**
 
