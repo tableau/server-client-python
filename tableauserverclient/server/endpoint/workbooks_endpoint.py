@@ -88,8 +88,8 @@ class Workbooks(QuerysetEndpoint):
         return WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     @api(version="2.8")
-    def refresh(self, workbook_id: str) -> JobItem:
-        id_ = getattr(workbook_id, "id", workbook_id)
+    def refresh(self, workbook_item: Union[WorkbookItem, str]) -> JobItem:
+        id_ = getattr(workbook_item, "id", workbook_item)
         url = "{0}/{1}/refresh".format(self.baseurl, id_)
         empty_req = RequestFactory.Empty.empty_req()
         server_response = self.post_request(url, empty_req)
