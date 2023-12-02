@@ -455,7 +455,7 @@ class Workbooks(QuerysetEndpoint):
     def download_revision(
         self,
         workbook_id: str,
-        revision_number: str,
+        revision_number: Optional[str],
         filepath: Optional[PathOrFileW] = None,
         include_extract: bool = True,
         no_extract: Optional[bool] = None,
