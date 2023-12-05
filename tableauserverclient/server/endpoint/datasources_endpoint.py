@@ -441,7 +441,14 @@ class Datasources(QuerysetEndpoint):
                     filepath.write(chunk)
                 return_path = filepath
             else:
+
+            try:
+                filename = to_filename(os.path.basename(params["filename*"]))
+                filename = filename.replace("UTF-8","").replace("+"," ")
+            except KeyError:
                 filename = to_filename(os.path.basename(params["filename"]))
+                
+                # filename = to_filename(os.path.basename(params["filename"]))
                 download_path = make_download_path(filepath, filename)
                 with open(download_path, "wb") as f:
                     for chunk in server_response.iter_content(1024):  # 1KB
