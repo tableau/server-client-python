@@ -1,5 +1,6 @@
 import os
 import requests_mock
+import tempfile
 import unittest
 
 from io import BytesIO
@@ -203,3 +204,17 @@ class FlowTests(unittest.TestCase):
             self.assertEqual(refresh_job.flow_run.id, "e0c3067f-2333-4eee-8028-e0a56ca496f6")
             self.assertEqual(refresh_job.flow_run.flow_id, "92967d2d-c7e2-46d0-8847-4802df58f484")
             self.assertEqual(format_datetime(refresh_job.flow_run.started_at), "2018-05-22T13:00:29Z")
+
+    def test_bad_download_response(self) -> None:
+        with requests_mock.mock() as m, tempfile.TemporaryDirectory() as td:
+            m.get(
+                self.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/content",
+                headers={
+                    "Content-Disposition": '''name="tableau_flow"; filename*=UTF-8''"Sample flow.tfl"'''
+                }
+            )
+            file_path = self.server.flows.download(
+                "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb",
+                td
+            )
+            self.assertTrue(os.path.exists(file_path))
