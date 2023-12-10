@@ -1,13 +1,8 @@
 from copy import deepcopy
-from typing import Any, Generic, Mapping, Optional, TypeVar, Union
 from urllib.parse import unquote_plus
 
-T = TypeVar(
-    "T",
-)
 
-
-def fix_filename(params: Mapping[str, T]) -> Mapping[str, T]:
+def fix_filename(params):
     if "filename*" not in params:
         return params
 
