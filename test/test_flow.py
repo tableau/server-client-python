@@ -209,12 +209,7 @@ class FlowTests(unittest.TestCase):
         with requests_mock.mock() as m, tempfile.TemporaryDirectory() as td:
             m.get(
                 self.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/content",
-                headers={
-                    "Content-Disposition": '''name="tableau_flow"; filename*=UTF-8''"Sample flow.tfl"'''
-                }
+                headers={"Content-Disposition": '''name="tableau_flow"; filename*=UTF-8''"Sample flow.tfl"'''},
             )
-            file_path = self.server.flows.download(
-                "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb",
-                td
-            )
+            file_path = self.server.flows.download("9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", td)
             self.assertTrue(os.path.exists(file_path))

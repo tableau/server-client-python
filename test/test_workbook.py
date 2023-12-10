@@ -937,12 +937,7 @@ class WorkbookTests(unittest.TestCase):
         with requests_mock.mock() as m, tempfile.TemporaryDirectory() as td:
             m.get(
                 self.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/content",
-                headers={
-                    "Content-Disposition": '''name="tableau_workbook"; filename*=UTF-8''"Sample workbook.twb"'''
-                }
+                headers={"Content-Disposition": '''name="tableau_workbook"; filename*=UTF-8''"Sample workbook.twb"'''},
             )
-            file_path = self.server.workbooks.download(
-                "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb",
-                td
-            )
+            file_path = self.server.workbooks.download("9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", td)
             self.assertTrue(os.path.exists(file_path))

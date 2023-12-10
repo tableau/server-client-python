@@ -703,10 +703,7 @@ class DatasourceTests(unittest.TestCase):
                 self.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/content",
                 headers={
                     "Content-Disposition": '''name="tableau_datasource"; filename*=UTF-8''"Sample datasource.tds"'''
-                }
+                },
             )
-            file_path = self.server.datasources.download(
-                "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb",
-                td
-            )
+            file_path = self.server.datasources.download("9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", td)
             self.assertTrue(os.path.exists(file_path))
