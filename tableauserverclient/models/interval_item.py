@@ -29,7 +29,12 @@ class HourlyInterval(object):
     def __init__(self, start_time, end_time, interval_value):
         self.start_time = start_time
         self.end_time = end_time
-        self.interval = interval_value
+
+        # interval should be a tuple, if it is not, assign as a tuple with single value
+        if isinstance(interval_value, tuple):
+            self.interval = interval_value
+        else:
+            self.interval = (interval_value,)
 
     @property
     def _frequency(self):
@@ -60,25 +65,44 @@ class HourlyInterval(object):
         return self._interval
 
     @interval.setter
-    def interval(self, interval):
+    def interval(self, intervals):
         VALID_INTERVALS = {0.25, 0.5, 1, 2, 4, 6, 8, 12}
-        if float(interval) not in VALID_INTERVALS:
-            error = "Invalid interval {} not in {}".format(interval, str(VALID_INTERVALS))
-            raise ValueError(error)
+        for interval in intervals:
+            # if an hourly interval is a string, then it is a weekDay interval
+            if isinstance(interval, str) and not interval.isnumeric() and not hasattr(IntervalItem.Day, interval):
+                error = "Invalid weekDay interval {}".format(interval)
+                raise ValueError(error)
 
-        self._interval = interval
+            # if an hourly interval is a number, it is an hours or minutes interval
+            if isinstance(interval, (int, float)) and float(interval) not in VALID_INTERVALS:
+                error = "Invalid interval {} not in {}".format(interval, str(VALID_INTERVALS))
+                raise ValueError(error)
+
+        self._interval = intervals
 
     def _interval_type_pairs(self):
-        # We use fractional hours for the two minute-based intervals.
-        # Need to convert to minutes from hours here
-        if self.interval in {0.25, 0.5}:
-            calculated_interval = int(self.interval * 60)
-            interval_type = IntervalItem.Occurrence.Minutes
-        else:
-            calculated_interval = self.interval
-            interval_type = IntervalItem.Occurrence.Hours
+        interval_type_pairs = []
+        for interval in self.interval:
+            # We use fractional hours for the two minute-based intervals.
+            # Need to convert to minutes from hours here
+            if interval in {0.25, 0.5}:
+                calculated_interval = int(interval * 60)
+                interval_type = IntervalItem.Occurrence.Minutes
 
-        return [(interval_type, str(calculated_interval))]
+                interval_type_pairs.append((interval_type, str(calculated_interval)))
+            else:
+                # if the interval is a non-numeric string, it will always be a weekDay
+                if isinstance(interval, str) and not interval.isnumeric():
+                    interval_type = IntervalItem.Occurrence.WeekDay
+
+                    interval_type_pairs.append((interval_type, str(interval)))
+                # otherwise the interval is hours
+                else:
+                    interval_type = IntervalItem.Occurrence.Hours
+
+                    interval_type_pairs.append((interval_type, str(interval)))
+
+        return interval_type_pairs
 
 
 class DailyInterval(object):
@@ -105,8 +129,45 @@ class DailyInterval(object):
         return self._interval
 
     @interval.setter
-    def interval(self, interval):
-        self._interval = interval
+    def interval(self, intervals):
+        VALID_INTERVALS = {0.25, 0.5, 1, 2, 4, 6, 8, 12}
+
+        for interval in intervals:
+            # if an hourly interval is a string, then it is a weekDay interval
+            if isinstance(interval, str) and not interval.isnumeric() and not hasattr(IntervalItem.Day, interval):
+                error = "Invalid weekDay interval {}".format(interval)
+                raise ValueError(error)
+
+            # if an hourly interval is a number, it is an hours or minutes interval
+            if isinstance(interval, (int, float)) and float(interval) not in VALID_INTERVALS:
+                error = "Invalid interval {} not in {}".format(interval, str(VALID_INTERVALS))
+                raise ValueError(error)
+
+        self._interval = intervals
+
+    def _interval_type_pairs(self):
+        interval_type_pairs = []
+        for interval in self.interval:
+            # We use fractional hours for the two minute-based intervals.
+            # Need to convert to minutes from hours here
+            if interval in {0.25, 0.5}:
+                calculated_interval = int(interval * 60)
+                interval_type = IntervalItem.Occurrence.Minutes
+
+                interval_type_pairs.append((interval_type, str(calculated_interval)))
+            else:
+                # if the interval is a non-numeric string, it will always be a weekDay
+                if isinstance(interval, str) and not interval.isnumeric():
+                    interval_type = IntervalItem.Occurrence.WeekDay
+
+                    interval_type_pairs.append((interval_type, str(interval)))
+                # otherwise the interval is hours
+                else:
+                    interval_type = IntervalItem.Occurrence.Hours
+
+                    interval_type_pairs.append((interval_type, str(interval)))
+
+        return interval_type_pairs
 
 
 class WeeklyInterval(object):
@@ -146,7 +207,12 @@ class WeeklyInterval(object):
 class MonthlyInterval(object):
     def __init__(self, start_time, interval_value):
         self.start_time = start_time
-        self.interval = str(interval_value)
+
+        # interval should be a tuple, if it is not, assign as a tuple with single value
+        if isinstance(interval_value, tuple):
+            self.interval = interval_value
+        else:
+            self.interval = (interval_value,)
 
     @property
     def _frequency(self):
@@ -167,24 +233,24 @@ class MonthlyInterval(object):
         return self._interval
 
     @interval.setter
-    def interval(self, interval_value):
-        error = "Invalid interval value for a monthly frequency: {}.".format(interval_value)
-
+    def interval(self, interval_values):
         # This is weird because the value could be a str or an int
         # The only valid str is 'LastDay' so we check that first. If that's not it
         # try to convert it to an int, if that fails because it's an incorrect string
         # like 'badstring' we catch and re-raise. Otherwise we convert to int and check
         # that it's in range 1-31
+        for interval_value in interval_values:
+            error = "Invalid interval value for a monthly frequency: {}.".format(interval_value)
 
-        if interval_value != "LastDay":
-            try:
-                if not (1 <= int(interval_value) <= 31):
-                    raise ValueError(error)
-            except ValueError:
-                if interval_value != "LastDay":
-                    raise ValueError(error)
+            if interval_value != "LastDay":
+                try:
+                    if not (1 <= int(interval_value) <= 31):
+                        raise ValueError(error)
+                except ValueError:
+                    if interval_value != "LastDay":
+                        raise ValueError(error)
 
-        self._interval = str(interval_value)
+        self._interval = interval_values
 
     def _interval_type_pairs(self):
         return [(IntervalItem.Occurrence.MonthDay, self.interval)]
