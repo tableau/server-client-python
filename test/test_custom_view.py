@@ -41,14 +41,15 @@ class CustomViewTests(unittest.TestCase):
         self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", all_views[0].owner.id)
         self.assertIsNone(all_views[0].created_at)
         self.assertIsNone(all_views[0].updated_at)
+        self.assertFalse(all_views[0].shared)
 
         self.assertEqual("fd252f73-593c-4c4e-8584-c032b8022adc", all_views[1].id)
         self.assertEqual("Overview", all_views[1].name)
-        self.assertEqual(False, all_views[1].shared)
         self.assertEqual("6d13b0ca-043d-4d42-8c9d-3f3313ea3a00", all_views[1].workbook.id)
         self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", all_views[1].owner.id)
         self.assertEqual("2002-05-30T09:00:00Z", format_datetime(all_views[1].created_at))
         self.assertEqual("2002-06-05T08:00:59Z", format_datetime(all_views[1].updated_at))
+        self.assertTrue(all_views[1].shared)
 
     def test_get_by_id(self) -> None:
         with open(GET_XML_ID, "rb") as f:

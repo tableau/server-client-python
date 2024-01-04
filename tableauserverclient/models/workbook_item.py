@@ -53,10 +53,13 @@ class WorkbookItem(object):
 
         return None
 
-    def __repr__(self):
+    def __str__(self):
         return "<WorkbookItem {0} '{1}' contentUrl='{2}' project={3}>".format(
             self._id, self.name, self.content_url, self.project_id
         )
+
+    def __repr__(self):
+        return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"
 
     @property
     def connections(self) -> List[ConnectionItem]:

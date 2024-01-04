@@ -48,8 +48,11 @@ class ScheduleItem(object):
         self.priority: int = priority
         self.schedule_type: str = schedule_type
 
-    def __repr__(self):
+    def __str__(self):
         return '<Schedule#{_id} "{_name}" {interval_item}>'.format(**vars(self))
+
+    def __repr__(self):
+        return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"
 
     @property
     def created_at(self) -> Optional[datetime]:

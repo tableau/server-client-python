@@ -12,7 +12,7 @@ class ServerInfoItem(object):
         self._build_number = build_number
         self._rest_api_version = rest_api_version
 
-    def __str__(self):
+    def __repr__(self):
         return (
             "ServerInfoItem: [product version: "
             + self._product_version
