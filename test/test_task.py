@@ -1,6 +1,7 @@
 import os
 import unittest
 from datetime import time
+from pathlib import Path
 
 import requests_mock
 
@@ -8,7 +9,7 @@ import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import parse_datetime
 from tableauserverclient.models.task_item import TaskItem
 
-TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
+TEST_ASSET_DIR = Path(__file__).parent / "assets"
 
 GET_XML_NO_WORKBOOK = os.path.join(TEST_ASSET_DIR, "tasks_no_workbook_or_datasource.xml")
 GET_XML_WITH_WORKBOOK = os.path.join(TEST_ASSET_DIR, "tasks_with_workbook.xml")
@@ -17,6 +18,7 @@ GET_XML_WITH_WORKBOOK_AND_DATASOURCE = os.path.join(TEST_ASSET_DIR, "tasks_with_
 GET_XML_DATAACCELERATION_TASK = os.path.join(TEST_ASSET_DIR, "tasks_with_dataacceleration_task.xml")
 GET_XML_RUN_NOW_RESPONSE = os.path.join(TEST_ASSET_DIR, "tasks_run_now_response.xml")
 GET_XML_CREATE_TASK_RESPONSE = os.path.join(TEST_ASSET_DIR, "tasks_create_extract_task.xml")
+GET_XML_WITHOUT_SCHEDULE = TEST_ASSET_DIR / "tasks_without_schedule.xml"
 
 
 class TaskTests(unittest.TestCase):
@@ -85,6 +87,15 @@ class TaskTests(unittest.TestCase):
         self.assertEqual("c7a9327e-1cda-4504-b026-ddb43b976d1d", task.target.id)
         self.assertEqual("workbook", task.target.type)
         self.assertEqual("b60b4efd-a6f7-4599-beb3-cb677e7abac1", task.schedule_id)
+
+    def test_get_task_without_schedule(self):
+        with requests_mock.mock() as m:
+            m.get(self.baseurl, text=GET_XML_WITHOUT_SCHEDULE.read_text())
+            all_tasks, pagination_item = self.server.tasks.get()
+
+        task = all_tasks[0]
+        self.assertEqual("c7a9327e-1cda-4504-b026-ddb43b976d1d", task.target.id)
+        self.assertEqual("datasource", task.target.type)
 
     def test_delete(self):
         with requests_mock.mock() as m:

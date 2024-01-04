@@ -1,8 +1,11 @@
+from datetime import datetime
+from typing import List, Optional
+
 from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.datetime_helpers import parse_datetime
-from .schedule_item import ScheduleItem
-from .target import Target
+from tableauserverclient.models.schedule_item import ScheduleItem
+from tableauserverclient.models.target import Target
 
 
 class TaskItem(object):
@@ -19,14 +22,14 @@ class TaskItem(object):
 
     def __init__(
         self,
-        id_,
-        task_type,
-        priority,
-        consecutive_failed_count=0,
-        schedule_id=None,
-        schedule_item=None,
-        last_run_at=None,
-        target=None,
+        id_: str,
+        task_type: str,
+        priority: int,
+        consecutive_failed_count: int = 0,
+        schedule_id: Optional[str] = None,
+        schedule_item: Optional[ScheduleItem] = None,
+        last_run_at: Optional[datetime] = None,
+        target: Optional[Target] = None,
     ):
         self.id = id_
         self.task_type = task_type
@@ -37,14 +40,14 @@ class TaskItem(object):
         self.last_run_at = last_run_at
         self.target = target
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             "<Task#{id} {task_type} pri({priority}) failed({consecutive_failed_count}) schedule_id({"
             "schedule_id}) target({target})>".format(**self.__dict__)
         )
 
     @classmethod
-    def from_response(cls, xml, ns, task_type=Type.ExtractRefresh):
+    def from_response(cls, xml, ns, task_type=Type.ExtractRefresh) -> List["TaskItem"]:
         parsed_response = fromstring(xml)
         all_tasks_xml = parsed_response.findall(".//t:task/t:{}".format(task_type), namespaces=ns)
 
@@ -62,8 +65,7 @@ class TaskItem(object):
         last_run_at_element = element.find(".//t:lastRunAt", namespaces=ns)
 
         schedule_item_list = ScheduleItem.from_element(element, ns)
-        if len(schedule_item_list) >= 1:
-            schedule_item = schedule_item_list[0]
+        schedule_item = next(iter(schedule_item_list), None)
 
         # according to the Tableau Server REST API documentation,
         # there should be only one of workbook or datasource
@@ -87,14 +89,14 @@ class TaskItem(object):
             task_type,
             priority,
             consecutive_failed_count,
-            schedule_item.id,
+            schedule_item.id if schedule_item is not None else None,
             schedule_item,
             last_run_at,
             target,
         )
 
     @staticmethod
-    def _translate_task_type(task_type):
+    def _translate_task_type(task_type: str) -> str:
         if task_type in TaskItem._TASK_TYPE_MAPPING:
             return TaskItem._TASK_TYPE_MAPPING[task_type]
         else:
