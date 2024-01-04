@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=68.0", "versioneer>=0.29", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name="tableauserverclient"
+
+dynamic = ["version"]
+description='A Python module for working with the Tableau Server REST API.'
+authors = [{name="Tableau", email="github@tableau.com"}]
+license = {file = "LICENSE"}
+readme = "README.md"
+
+dependencies = [
+    'defusedxml>=0.7.1',  # latest as at 7/31/23
+    'packaging>=23.1',   # latest as at 7/31/23
+    'requests>=2.31',  # latest as at 7/31/23
+    'urllib3==2.0.7',  # latest as at 7/31/23
+]
+requires-python = ">=3.7"
+classifiers = [
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12"
+]
+[project.urls]
+repository = "https://github.com/tableau/server-client-python"
+
+[project.optional-dependencies]
+test = ["argparse", "black==23.7", "mock", "mypy==1.4", "pytest>=7.0", "pytest-cov", "pytest-subtests",
+    "requests-mock>=1.0,<2.0"]
+
+[tool.black]
+line-length = 120
+target-version = ['py37', 'py38', 'py39', 'py310', 'py311', 'py312']
+
+[tool.mypy]
+check_untyped_defs = false
+disable_error_code = [
+    'misc',
+    # tableauserverclient\server\endpoint\datasources_endpoint.py:48: error: Cannot assign multiple types to name "FilePath" without an explicit "Type[...]" annotation  [misc]
+    'annotation-unchecked'  # can be removed when check_untyped_defs = true
+]
+files = ["tableauserverclient", "test"]
+show_error_codes = true
+ignore_missing_imports = true  # defusedxml library has no types
+[tool.pytest.ini_options]
+testpaths = ["test"]
+addopts = "--junitxml=./test.junit.xml"

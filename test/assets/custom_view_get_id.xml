@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+    <customView id="d79634e1-6063-4ec9-95ff-50acbf609ff5" name="ENDANGERED SAFARI" contentUrl="SafariSample/sheets/ENDANGEREDSAFARI" createdAt="2002-05-30T09:00:00Z" updatedAt="2002-06-05T08:00:59Z" sheetType="story">
+        <workbook id="3cc6cd06-89ce-4fdc-b935-5294135d6d42" />
+        <owner id="5de011f8-5aa9-4d5b-b991-f462c8dd6bb7" />
+        <view id="5241e88d-d384-4fd7-9c2f-648b5247efc5" />
+    </customView>
+</tsResponse>

@@ -10,7 +10,6 @@
 ####
 
 import argparse
-import getpass
 import logging
 import os.path
 
@@ -18,42 +17,35 @@ import tableauserverclient as TSC
 
 
 def main():
-
-    parser = argparse.ArgumentParser(description='Explore webhook functions supported by the Server API.')
-    parser.add_argument('--server', '-s', required=True, help='server address')
-    parser.add_argument('--username', '-u', required=True, help='username to sign into server')
-    parser.add_argument('--site', '-S', default=None)
-    parser.add_argument('-p', default=None, help='password')
-    parser.add_argument('--create', '-c', help='create a webhook')
-    parser.add_argument('--delete', '-d', help='delete a webhook', action='store_true')
-    parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
-                        help='desired logging level (set to error by default)')
+    parser = argparse.ArgumentParser(description="Explore webhook functions supported by the Server API.")
+    # Common options; please keep those in sync across all samples
+    parser.add_argument("--server", "-s", help="server address")
+    parser.add_argument("--site", "-S", help="site name")
+    parser.add_argument("--token-name", "-p", help="name of the personal access token used to sign into the server")
+    parser.add_argument("--token-value", "-v", help="value of the personal access token used to sign into the server")
+    parser.add_argument(
+        "--logging-level",
+        "-l",
+        choices=["debug", "info", "error"],
+        default="error",
+        help="desired logging level (set to error by default)",
+    )
+    # Options specific to this sample
+    parser.add_argument("--create", help="create a webhook")
+    parser.add_argument("--delete", help="delete a webhook", action="store_true")
 
     args = parser.parse_args()
-    if args.p is None:
-        password = getpass.getpass("Password: ")
-    else:
-        password = args.p
 
     # Set logging level based on user input, or error by default
     logging_level = getattr(logging, args.logging_level.upper())
     logging.basicConfig(level=logging_level)
 
     # SIGN IN
-    tableau_auth = TSC.TableauAuth(args.username, password, args.site)
-    print("Signing in to " + args.server + " [" + args.site + "] as " + args.username)
-    server = TSC.Server(args.server)
-
-    # Set http options to disable verifying SSL
-    server.add_http_options({'verify': False})
-
-    server.use_server_version()
-
+    tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
+    server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
-
         # Create webhook if create flag is set (-create, -c)
         if args.create:
-
             new_webhook = TSC.WebhookItem()
             new_webhook.name = args.create
             new_webhook.url = "https://ifttt.com/maker-url"
@@ -71,12 +63,12 @@ def main():
             # Pick one webhook from the list and delete it
             sample_webhook = all_webhooks[0]
             # sample_webhook.delete()
-            print("+++"+sample_webhook.name)
+            print("+++" + sample_webhook.name)
 
-            if (args.delete):
+            if args.delete:
                 print("Deleting webhook " + sample_webhook.name)
                 server.webhooks.delete(sample_webhook.id)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

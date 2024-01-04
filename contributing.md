@@ -57,15 +57,31 @@ somewhere.
 ## Getting Started
 
 ```shell
-pip install versioneer
-python setup.py build
-python setup.py test
+python -m build
+pytest
 ```
+
+### To use your locally built version
+```shell
+pip install .
+```
+
+### Debugging Tools
+See what your outgoing requests look like: https://requestbin.net/ (unaffiliated link not under our control)
+
 
 ### Before Committing
 
 Our CI runs include a Python lint run, so you should run this locally and fix complaints before committing as this will fail your checkin.
 
 ```shell
-pycodestyle tableauserverclient test samples
+# this will run the formatter without making changes
+black . --check
+
+# this will format the directory and code for you
+black .
+
+# this will run type checking
+pip install mypy
+mypy tableauserverclient test samples
 ```

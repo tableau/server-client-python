@@ -15,6 +15,13 @@ class ConnectionCredentials(object):
         self.embed = embed
         self.oauth = oauth
 
+    def __repr__(self):
+        if self.password:
+            print = "redacted"
+        else:
+            print = "None"
+        return f"<{self.__class__.__name__} name={self.name} password={print} embed={self.embed} oauth={self.oauth} >"
+
     @property
     def embed(self):
         return self._embed
@@ -35,12 +42,12 @@ class ConnectionCredentials(object):
 
     @classmethod
     def from_xml_element(cls, parsed_response, ns):
-        connection_creds_xml = parsed_response.find('.//t:connectionCredentials', namespaces=ns)
+        connection_creds_xml = parsed_response.find(".//t:connectionCredentials", namespaces=ns)
 
-        name = connection_creds_xml.get('name', None)
-        password = connection_creds_xml.get('password', None)
-        embed = connection_creds_xml.get('embed', None)
-        oAuth = connection_creds_xml.get('oAuth', None)
+        name = connection_creds_xml.get("name", None)
+        password = connection_creds_xml.get("password", None)
+        embed = connection_creds_xml.get("embed", None)
+        oAuth = connection_creds_xml.get("oAuth", None)
 
         connection_creds = cls(name, password, embed, oAuth)
         return connection_creds

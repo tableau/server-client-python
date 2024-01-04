@@ -1,3 +1,59 @@
+
+## 0.18.0 (6 April 2022)    
+* Switched to using defused_xml for xml attack protection
+* added linting and type hints
+* improve experience with self-signed certificates/invalid ssl
+* updated samples
+* new item types: metrics, revisions for datasources and workbooks
+* features: support adding flows to schedules, exporting workbooks to powerpoint
+* fixes: delete extracts
+
+## 0.17.0 (20 October 2021)
+* Added support for accepting parameters for post request of the metadata api (#850)
+* Fixed jobs.get_by_id(job_id) example & reference docs (#867, #868) 
+* Fixed handling for workbooks in personal spaces which do not have projectID or Name  (#875) 
+* Updated links to Data Source Methods page in REST API docs (#879)
+* Unified arguments of sample scripts (#889)
+* Updated docs for - links to Datasource API (#879) ,  sample scripts (#892) & metadata query (#896)
+* Added support for scheduling DataUpdate Jobs (#891)
+* Exposed the fileuploads API endpoint (#894)
+* Added a new sample & documentation for metadata API (#895, #896)
+* Added support to the package for getting flow run status, as well as the ability to cancel flow runs. (#884)
+* Added jobs.wait_for_job method (#903)
+* Added description support for datasources item (#912) 
+* Dropped support for Python 3.5 (#911)
+
+## 0.16.0 (15 July 2021)
+* Documentation updates (#800, #818, #839, #842)
+* Fixed data alert repr in subscription item (#821)
+* Added support for Data Quality Warning (#836)
+* Added support for renaming datasources (#843)
+* Improved Datasource tests (#843)
+* Updated catalog obfuscation field (#844)
+* Fixed revision limit field in site_item.py file (#847)
+* Added the Missing content permission field- LockedToProjectWithoutNested (#856)
+
+## 0.15.0 (16 Feb 2021)
+* Added support for python version 3.9 (#744)
+* Added support for 'Get View by ID' (#750)
+* Added docs and test data to MANIFEST.in file (#780)
+* Added owner_id property to ProjectItem (#784)
+* Added support for skipping connection check while publishing workbook (#791)
+* Added support for 'Update Subscription' (#794)
+* Added support for 'Get Groups for a User' (#799)
+* Improved debug logging by including put/post request contents (#743)
+* Improved local and active-directory group creation (#770)
+* Improved 'Update Group' to match server requests/responses (#772)
+* Improved SiteItem with new properties and functions (#777)
+* Improved SubscriptionItem with new properties (#794)
+* Improved the 'type' property of TaskItem to convert server response to enum (#796)
+* Improved repository to use Github Actions for running tests/linter (#798)
+* Fixed data_acceleration field causing error in workbook update payload (#741)
+
+## 0.14.1 (9 Dec 2020)
+* Fixed filter query issue for server version below 2020.1 (#745)
+* Fixed large workbook/datasource publish issue (#757)
+
 ## 0.14.0 (6 Nov 2020)
 * Added django-style filtering and sorting (#615)
 * Added encoding tag-name before deleting (#687)

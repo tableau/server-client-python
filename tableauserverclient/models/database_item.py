@@ -1,13 +1,19 @@
-import xml.etree.ElementTree as ET
+import logging
 
-from .property_decorators import property_is_enum, property_not_empty, property_is_boolean
+from defusedxml.ElementTree import fromstring
+
 from .exceptions import UnpopulatedPropertyError
+from .property_decorators import (
+    property_is_enum,
+    property_not_empty,
+    property_is_boolean,
+)
 
 
 class DatabaseItem(object):
     class ContentPermissions:
-        LockedToProject = 'LockedToDatabase'
-        ManagedByOwner = 'ManagedByOwner'
+        LockedToProject = "LockedToDatabase"
+        ManagedByOwner = "ManagedByOwner"
 
     def __init__(self, name, description=None, content_permissions=None):
         self._id = None
@@ -34,11 +40,25 @@ class DatabaseItem(object):
         self._permissions = None
         self._default_table_permissions = None
 
+        self._data_quality_warnings = None
+
         self._tables = None  # Not implemented yet
+
+    @property
+    def dqws(self):
+        if self._data_quality_warnings is None:
+            error = "Project item must be populated with permissions first."
+            raise UnpopulatedPropertyError(error)
+        return self._data_quality_warnings()
 
     @property
     def content_permissions(self):
         return self._content_permissions
+
+    @content_permissions.setter
+    @property_is_enum(ContentPermissions)
+    def content_permissions(self, value):
+        self._content_permissions = value
 
     @property
     def permissions(self):
@@ -53,11 +73,6 @@ class DatabaseItem(object):
             error = "Project item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
         return self._default_table_permissions()
-
-    @content_permissions.setter
-    @property_is_enum(ContentPermissions)
-    def content_permissions(self, value):
-        self._content_permissions = value
 
     @property
     def id(self):
@@ -163,64 +178,64 @@ class DatabaseItem(object):
 
     def _set_values(self, database_values):
         # ID & Settable
-        if 'id' in database_values:
-            self._id = database_values['id']
+        if "id" in database_values:
+            self._id = database_values["id"]
 
-        if 'contact' in database_values:
-            self._contact_id = database_values['contact']['id']
+        if "contact" in database_values:
+            self._contact_id = database_values["contact"]["id"]
 
-        if 'name' in database_values:
-            self._name = database_values['name']
+        if "name" in database_values:
+            self._name = database_values["name"]
 
-        if 'description' in database_values:
-            self._description = database_values['description']
+        if "description" in database_values:
+            self._description = database_values["description"]
 
-        if 'isCertified' in database_values:
-            self._certified = string_to_bool(database_values['isCertified'])
+        if "isCertified" in database_values:
+            self._certified = string_to_bool(database_values["isCertified"])
 
-        if 'certificationNote' in database_values:
-            self._certification_note = database_values['certificationNote']
+        if "certificationNote" in database_values:
+            self._certification_note = database_values["certificationNote"]
 
         # Not settable, alphabetical
 
-        if 'connectionType' in database_values:
-            self._connection_type = database_values['connectionType']
+        if "connectionType" in database_values:
+            self._connection_type = database_values["connectionType"]
 
-        if 'connectorUrl' in database_values:
-            self._connector_url = database_values['connectorUrl']
+        if "connectorUrl" in database_values:
+            self._connector_url = database_values["connectorUrl"]
 
-        if 'contentPermissions' in database_values:
-            self._content_permissions = database_values['contentPermissions']
+        if "contentPermissions" in database_values:
+            self._content_permissions = database_values["contentPermissions"]
 
-        if 'isEmbedded' in database_values:
-            self._embedded = string_to_bool(database_values['isEmbedded'])
+        if "isEmbedded" in database_values:
+            self._embedded = string_to_bool(database_values["isEmbedded"])
 
-        if 'fileExtension' in database_values:
-            self._file_extension = database_values['fileExtension']
+        if "fileExtension" in database_values:
+            self._file_extension = database_values["fileExtension"]
 
-        if 'fileId' in database_values:
-            self._file_id = database_values['fileId']
+        if "fileId" in database_values:
+            self._file_id = database_values["fileId"]
 
-        if 'filePath' in database_values:
-            self._file_path = database_values['filePath']
+        if "filePath" in database_values:
+            self._file_path = database_values["filePath"]
 
-        if 'hostName' in database_values:
-            self._host_name = database_values['hostName']
+        if "hostName" in database_values:
+            self._host_name = database_values["hostName"]
 
-        if 'mimeType' in database_values:
-            self._mime_type = database_values['mimeType']
+        if "mimeType" in database_values:
+            self._mime_type = database_values["mimeType"]
 
-        if 'port' in database_values:
-            self._port = int(database_values['port'])
+        if "port" in database_values:
+            self._port = int(database_values["port"])
 
-        if 'provider' in database_values:
-            self._provider = database_values['provider']
+        if "provider" in database_values:
+            self._provider = database_values["provider"]
 
-        if 'requestUrl' in database_values:
-            self._request_url = database_values['requestUrl']
+        if "requestUrl" in database_values:
+            self._request_url = database_values["requestUrl"]
 
-        if 'type' in database_values:
-            self._metadata_type = database_values['type']
+        if "type" in database_values:
+            self._metadata_type = database_values["type"]
 
     def _set_permissions(self, permissions):
         self._permissions = permissions
@@ -229,17 +244,26 @@ class DatabaseItem(object):
         self._tables = tables
 
     def _set_default_permissions(self, permissions, content_type):
-        setattr(self, "_default_{content}_permissions".format(content=content_type), permissions)
+        attr = "_default_{content}_permissions".format(content=content_type)
+        setattr(
+            self,
+            attr,
+            permissions,
+        )
+        logging.getLogger().debug({"type": attr, "value": getattr(self, attr)})
+
+    def _set_data_quality_warnings(self, dqw):
+        self._data_quality_warnings = dqw
 
     @classmethod
     def from_response(cls, resp, ns):
         all_database_items = list()
-        parsed_response = ET.fromstring(resp)
-        all_database_xml = parsed_response.findall('.//t:database', namespaces=ns)
+        parsed_response = fromstring(resp)
+        all_database_xml = parsed_response.findall(".//t:database", namespaces=ns)
 
         for database_xml in all_database_xml:
             parsed_database = cls._parse_element(database_xml, ns)
-            database_item = cls(parsed_database['name'])
+            database_item = cls(parsed_database["name"])
             database_item._set_values(parsed_database)
             all_database_items.append(database_item)
         return all_database_items
@@ -247,12 +271,12 @@ class DatabaseItem(object):
     @staticmethod
     def _parse_element(database_xml, ns):
         database_values = database_xml.attrib.copy()
-        contact = database_xml.find('.//t:contact', namespaces=ns)
+        contact = database_xml.find(".//t:contact", namespaces=ns)
         if contact is not None:
-            database_values['contact'] = contact.attrib.copy()
+            database_values["contact"] = contact.attrib.copy()
         return database_values
 
 
 # Used to convert string represented boolean to a boolean type
 def string_to_bool(s):
-    return s.lower() == 'true'
+    return s.lower() == "true"

@@ -41,6 +41,10 @@ The following people have contributed to this project to make it possible, and w
 * [Paul Vickers](https://github.com/paulvic)
 * [Madhura Selvarajan](https://github.com/maddy-at-leisure)
 * [Niklas Nevalainen](https://github.com/nnevalainen)
+* [Terrence Jones](https://github.com/tjones-commits)
+* [John Vandenberg](https://github.com/jayvdb)
+* [Lee Boynton](https://github.com/lboynton)
+* [annematronic](https://github.com/annematronic)
 
 ## Core Team
 
@@ -54,3 +58,5 @@ The following people have contributed to this project to make it possible, and w
 * [Jac Fitzgerald](https://github.com/jacalata)
 * [Dan Zucker](https://github.com/dzucker-tab)
 * [Brian Cantoni](https://github.com/bcantoni)
+* [Ovini Nanayakkara](https://github.com/ovinis)
+* [Manish Muttreja](https://github.com/mmuttreja-tableau)

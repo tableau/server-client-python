@@ -10,7 +10,6 @@
 ####
 
 import argparse
-import getpass
 import logging
 import os.path
 
@@ -18,35 +17,41 @@ import tableauserverclient as TSC
 
 
 def main():
-
-    parser = argparse.ArgumentParser(description='Explore workbook functions supported by the Server API.')
-    parser.add_argument('--server', '-s', required=True, help='server address')
-    parser.add_argument('--username', '-u', required=True, help='username to sign into server')
-    parser.add_argument('--publish', '-p', metavar='FILEPATH', help='path to workbook to publish')
-    parser.add_argument('--download', '-d', metavar='FILEPATH', help='path to save downloaded workbook')
-    parser.add_argument('--preview-image', '-i', metavar='FILENAME',
-                        help='filename (a .png file) to save the preview image')
-    parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
-                        help='desired logging level (set to error by default)')
+    parser = argparse.ArgumentParser(description="Explore workbook functions supported by the Server API.")
+    # Common options; please keep those in sync across all samples
+    parser.add_argument("--server", "-s", help="server address")
+    parser.add_argument("--site", "-S", help="site name")
+    parser.add_argument("--token-name", "-p", help="name of the personal access token used to sign into the server")
+    parser.add_argument("--token-value", "-v", help="value of the personal access token used to sign into the server")
+    parser.add_argument(
+        "--logging-level",
+        "-l",
+        choices=["debug", "info", "error"],
+        default="error",
+        help="desired logging level (set to error by default)",
+    )
+    # Options specific to this sample
+    parser.add_argument("--publish", metavar="FILEPATH", help="path to workbook to publish")
+    parser.add_argument("--download", metavar="FILEPATH", help="path to save downloaded workbook")
+    parser.add_argument(
+        "--preview-image", "-i", metavar="FILENAME", help="filename (a .png file) to save the preview image"
+    )
+    parser.add_argument(
+        "--powerpoint", "-ppt", metavar="FILENAME", help="filename (a .ppt file) to save the powerpoint deck"
+    )
 
     args = parser.parse_args()
-
-    password = getpass.getpass("Password: ")
 
     # Set logging level based on user input, or error by default
     logging_level = getattr(logging, args.logging_level.upper())
     logging.basicConfig(level=logging_level)
 
     # SIGN IN
-    tableau_auth = TSC.TableauAuth(args.username, password)
-    server = TSC.Server(args.server)
-    server.use_highest_version()
-
-    overwrite_true = TSC.Server.PublishMode.Overwrite
-
+    tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
+    server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
-
         # Publish workbook if publish flag is set (-publish, -p)
+        overwrite_true = TSC.Server.PublishMode.Overwrite
         if args.publish:
             all_projects, pagination_item = server.projects.get()
             default_project = next((project for project in all_projects if project.is_default()), None)
@@ -56,7 +61,7 @@ def main():
                 new_workbook = server.workbooks.publish(new_workbook, args.publish, overwrite_true)
                 print("Workbook published. ID: {}".format(new_workbook.id))
             else:
-                print('Publish failed. Could not find the default project.')
+                print("Publish failed. Could not find the default project.")
 
         # Gets all workbook items
         all_workbooks, pagination_item = server.workbooks.get()
@@ -66,6 +71,10 @@ def main():
         if all_workbooks:
             # Pick one workbook from the list
             sample_workbook = all_workbooks[0]
+            sample_workbook.name = "Name me something cooler"
+            sample_workbook.description = "That doesn't work"
+            updated: TSC.WorkbookItem = server.workbooks.update(sample_workbook)
+            print(updated.name, updated.description)
 
             # Populate views
             server.workbooks.populate_views(sample_workbook)
@@ -75,12 +84,16 @@ def main():
             # Populate connections
             server.workbooks.populate_connections(sample_workbook)
             print("\nConnections for {}: ".format(sample_workbook.name))
-            print(["{0}({1})".format(connection.id, connection.datasource_name)
-                   for connection in sample_workbook.connections])
+            print(
+                [
+                    "{0}({1})".format(connection.id, connection.datasource_name)
+                    for connection in sample_workbook.connections
+                ]
+            )
 
             # Update tags and show_tabs flag
             original_tag_set = set(sample_workbook.tags)
-            sample_workbook.tags.update('a', 'b', 'c', 'd')
+            sample_workbook.tags.update("a", "b", "c", "d")
             sample_workbook.show_tabs = True
             server.workbooks.update(sample_workbook)
             print("\nWorkbook's old tag set: {}".format(original_tag_set))
@@ -111,10 +124,42 @@ def main():
             if args.preview_image:
                 # Populate workbook preview image
                 server.workbooks.populate_preview_image(sample_workbook)
-                with open(args.preview_image, 'wb') as f:
+                with open(args.preview_image, "wb") as f:
                     f.write(sample_workbook.preview_image)
                 print("\nDownloaded preview image of workbook to {}".format(os.path.abspath(args.preview_image)))
 
+            # get custom views
+            cvs, _ = server.custom_views.get()
+            for c in cvs:
+                print(c)
 
-if __name__ == '__main__':
+            # for the last custom view in the list
+
+            # update the name
+            # note that this will fail if the name is already changed to this value
+            changed: TSC.CustomViewItem(id=c.id, name="I was updated by tsc")
+            verified_change = server.custom_views.update(changed)
+            print(verified_change)
+
+            # export as image. Filters etc could be added here as usual
+            server.custom_views.populate_image(c)
+            filename = c.id + "-image-export.png"
+            with open(filename, "wb") as f:
+                f.write(c.image)
+            print("saved to " + filename)
+
+            if args.powerpoint:
+                # Populate workbook preview image
+                server.workbooks.populate_powerpoint(sample_workbook)
+                with open(args.powerpoint, "wb") as f:
+                    f.write(sample_workbook.powerpoint)
+                print("\nDownloaded powerpoint of workbook to {}".format(os.path.abspath(args.powerpoint)))
+
+            if args.delete:
+                print("deleting {}".format(c.id))
+                unlucky = TSC.CustomViewItem(c.id)
+                server.custom_views.delete(unlucky.id)
+
+
+if __name__ == "__main__":
     main()

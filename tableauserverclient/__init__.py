@@ -1,13 +1,58 @@
-from .namespace import NEW_NAMESPACE as DEFAULT_NAMESPACE
-from .models import ConnectionCredentials, ConnectionItem, DataAlertItem, DatasourceItem,\
-    GroupItem, JobItem, BackgroundJobItem, PaginationItem, ProjectItem, ScheduleItem,\
-    SiteItem, TableauAuth, PersonalAccessTokenAuth, UserItem, ViewItem, WorkbookItem, UnpopulatedPropertyError,\
-    HourlyInterval, DailyInterval, WeeklyInterval, MonthlyInterval, IntervalItem, TaskItem,\
-    SubscriptionItem, Target, PermissionsRule, Permission, DatabaseItem, TableItem, ColumnItem, FlowItem, \
-    WebhookItem, PersonalAccessTokenAuth
-from .server import RequestOptions, CSVRequestOptions, ImageRequestOptions, PDFRequestOptions, Filter, Sort, \
-    Server, ServerResponseError, MissingRequiredFieldError, NotSignedInError, Pager
 from ._version import get_versions
-__version__ = get_versions()['version']
-__VERSION__ = __version__
-del get_versions
+from .namespace import NEW_NAMESPACE as DEFAULT_NAMESPACE
+from .models import (
+    BackgroundJobItem,
+    ColumnItem,
+    ConnectionCredentials,
+    ConnectionItem,
+    CustomViewItem,
+    DQWItem,
+    DailyInterval,
+    DataAlertItem,
+    DatabaseItem,
+    DatasourceItem,
+    FavoriteItem,
+    FlowItem,
+    FlowRunItem,
+    FileuploadItem,
+    GroupItem,
+    HourlyInterval,
+    IntervalItem,
+    JobItem,
+    JWTAuth,
+    MetricItem,
+    MonthlyInterval,
+    PaginationItem,
+    Permission,
+    PermissionsRule,
+    PersonalAccessTokenAuth,
+    ProjectItem,
+    RevisionItem,
+    ScheduleItem,
+    SiteItem,
+    ServerInfoItem,
+    SubscriptionItem,
+    TableItem,
+    TableauAuth,
+    Target,
+    TaskItem,
+    UserItem,
+    ViewItem,
+    WebhookItem,
+    WeeklyInterval,
+    WorkbookItem,
+)
+from .server import (
+    CSVRequestOptions,
+    ExcelRequestOptions,
+    ImageRequestOptions,
+    PDFRequestOptions,
+    RequestOptions,
+    MissingRequiredFieldError,
+    NotSignedInError,
+    ServerResponseError,
+    Filter,
+    Pager,
+    Server,
+    Sort,
+)

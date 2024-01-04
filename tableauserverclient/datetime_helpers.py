@@ -1,12 +1,16 @@
 import datetime
 
-# This code below is from the python documentation for
-# tzinfo: https://docs.python.org/2.3/lib/datetime-tzinfo.html
 
 ZERO = datetime.timedelta(0)
 HOUR = datetime.timedelta(hours=1)
 
 
+def timestamp():
+    return datetime.datetime.now().strftime("%H:%M:%S")
+
+
+# This class is a concrete implementation of the abstract base class tzinfo
+# docs: https://docs.python.org/2.3/lib/datetime-tzinfo.html
 class UTC(datetime.tzinfo):
     """UTC"""
 

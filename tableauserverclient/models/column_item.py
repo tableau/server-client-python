@@ -1,4 +1,4 @@
-import xml.etree.ElementTree as ET
+from defusedxml.ElementTree import fromstring
 
 from .property_decorators import property_not_empty
 
@@ -8,6 +8,9 @@ class ColumnItem(object):
         self._id = None
         self.description = description
         self.name = name
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} {self._id} {self.name} {self.description}>"
 
     @property
     def id(self):
@@ -47,8 +50,8 @@ class ColumnItem(object):
     @classmethod
     def from_response(cls, resp, ns):
         all_column_items = list()
-        parsed_response = ET.fromstring(resp)
-        all_column_xml = parsed_response.findall('.//t:column', namespaces=ns)
+        parsed_response = fromstring(resp)
+        all_column_xml = parsed_response.findall(".//t:column", namespaces=ns)
 
         for column_xml in all_column_xml:
             (id, name, description, remote_type) = cls._parse_element(column_xml, ns)
@@ -60,9 +63,9 @@ class ColumnItem(object):
 
     @staticmethod
     def _parse_element(column_xml, ns):
-        id = column_xml.get('id', None)
-        name = column_xml.get('name', None)
-        description = column_xml.get('description', None)
-        remote_type = column_xml.get('remoteType', None)
+        id = column_xml.get("id", None)
+        name = column_xml.get("name", None)
+        description = column_xml.get("description", None)
+        remote_type = column_xml.get("remoteType", None)
 
         return id, name, description, remote_type
