@@ -3,7 +3,6 @@
 import argparse
 import logging
 import tableauserverclient as TSC
-from tableauserverclient import Resource
 
 
 def main():
@@ -47,7 +46,8 @@ def main():
         all_workbook_items, pagination_item = server.workbooks.get()
         if all_workbook_items is not None and len(all_workbook_items) > 0:
             my_workbook: TSC.WorkbookItem = all_workbook_items[0]
-            server.favorites.add_favorite(server, user, Resource.Workbook.name(), all_workbook_items[0])
+            # can use a type-specific method like add_favorite_workbook, or pass the type as a parameter
+            server.favorites.add_favorite(server, user, 'workbook', all_workbook_items[0])
             print(
                 "Workbook added to favorites. Workbook Name: {}, Workbook ID: {}".format(
                     my_workbook.name, my_workbook.id
