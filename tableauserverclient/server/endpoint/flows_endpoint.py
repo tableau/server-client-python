@@ -7,6 +7,8 @@ from contextlib import closing
 from pathlib import Path
 from typing import Iterable, List, Optional, TYPE_CHECKING, Tuple, Union
 
+from tableauserverclient.helpers.headers import fix_filename
+
 from .dqw_endpoint import _DataQualityWarningEndpoint
 from .endpoint import QuerysetEndpoint, api
 from .exceptions import InternalServerError, MissingRequiredFieldError
@@ -124,6 +126,7 @@ class Flows(QuerysetEndpoint):
                     filepath.write(chunk)
                 return_path = filepath
             else:
+                params = fix_filename(params)
                 filename = to_filename(os.path.basename(params["filename"]))
                 download_path = make_download_path(filepath, filename)
                 with open(download_path, "wb") as f:
