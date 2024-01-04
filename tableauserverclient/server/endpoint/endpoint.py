@@ -2,7 +2,6 @@ from threading import Thread
 from time import sleep
 from tableauserverclient import datetime_helpers as datetime
 
-import requests
 from packaging.version import Version
 from functools import wraps
 from xml.etree.ElementTree import ParseError
@@ -76,7 +75,7 @@ class Endpoint(object):
         # return explicitly for testing only
         return parameters
 
-    def _blocking_request(self, method, url, parameters={}) -> Optional["Response"]:
+    def _blocking_request(self, method, url, parameters={}) -> Optional[Union["Response", Exception]]:
         self.async_response = None
         response = None
         logger.debug("[{}] Begin blocking request to {}".format(datetime.timestamp(), url))
@@ -95,39 +94,37 @@ class Endpoint(object):
         return self.async_response
 
     def send_request_while_show_progress_threaded(
-        self, method, url, parameters={}, request_timeout=0
-    ) -> Optional["Response"]:
+        self, method, url, parameters={}, request_timeout=None
+    ) -> Optional[Union["Response", Exception]]:
         try:
             request_thread = Thread(target=self._blocking_request, args=(method, url, parameters))
-            request_thread.async_response = -1  # type:ignore # this is an invented attribute for thread comms
             request_thread.start()
         except Exception as e:
             logger.debug("Error starting server request on separate thread: {}".format(e))
             return None
-        seconds = 0
+        seconds = 0.05
         minutes = 0
-        sleep(1)
-        if self.async_response != -1:
+        last_log_minute = 0
+        sleep(seconds)
+        if self.async_response is not None:
             # a quick return for any immediate responses
             return self.async_response
-        while self.async_response == -1 and (request_timeout == 0 or seconds < request_timeout):
-            self.log_wait_time_then_sleep(minutes, seconds, url)
+        timed_out: bool = request_timeout is not None and seconds > request_timeout
+        while (self.async_response is None) and not timed_out:
+            sleep(DELAY_SLEEP_SECONDS)
             seconds = seconds + DELAY_SLEEP_SECONDS
-            if seconds >= 60:
-                seconds = 0
-                minutes = minutes + 1
+            minutes = int(seconds / 60)
+            last_log_minute = self.log_wait_time(minutes, last_log_minute, url)
         return self.async_response
 
-    def log_wait_time_then_sleep(self, minutes, seconds, url):
+    def log_wait_time(self, minutes, last_log_minute, url) -> int:
         logger.debug("{} Waiting....".format(datetime.timestamp()))
-        if seconds >= 60:  # detailed log message ~every minute
-            if minutes % 5 == 0:
-                logger.info(
-                    "[{}] Waiting ({} minutes so far) for request to {}".format(datetime.timestamp(), minutes, url)
-                )
-            else:
-                logger.debug("[{}] Waiting for request to {}".format(datetime.timestamp(), url))
-        sleep(DELAY_SLEEP_SECONDS)
+        if minutes > last_log_minute:  # detailed log message ~every minute
+            logger.info("[{}] Waiting ({} minutes so far) for request to {}".format(datetime.timestamp(), minutes, url))
+            last_log_minute = minutes
+        else:
+            logger.debug("[{}] Waiting for request to {}".format(datetime.timestamp(), url))
+        return last_log_minute
 
     def _make_request(
         self,
@@ -151,7 +148,7 @@ class Endpoint(object):
         # a request can, for stuff like publishing, spin for ages waiting for a response.
         # we need some user-facing activity so they know it's not dead.
         request_timeout = self.parent_srv.http_options.get("timeout") or 0
-        server_response: Optional["Response"] = self.send_request_while_show_progress_threaded(
+        server_response: Optional[Union["Response", Exception]] = self.send_request_while_show_progress_threaded(
             method, url, parameters, request_timeout
         )
         logger.debug("[{}] Async request returned: received {}".format(datetime.timestamp(), server_response))
@@ -163,6 +160,8 @@ class Endpoint(object):
         if server_response is None:
             logger.debug("[{}] Request failed".format(datetime.timestamp()))
             raise RuntimeError
+        if isinstance(server_response, Exception):
+            raise server_response
         self._check_status(server_response, url)
 
         loggable_response = self.log_response_safely(server_response)
