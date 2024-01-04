@@ -3,7 +3,11 @@ title: Getting Help
 layout: docs
 ---
 
-This project is using [GitHub issues](https://github.com/tableau/server-client-python/issues) for tracking help requests, bugs, and feature requests.
+This project is using [GitHub issues](https://github.com/tableau/server-client-python/issues) for tracking help requests, bugs, and feature requests. This enables other users to help troubleshooting and sometimes to contribute fixes. 
+
+It is also fully supported by Tableau Support. Customers with access to Tableau Support can choose to create a support case for assistance in troubleshooting the library and identifying bugs or gaps in the functionality for more guaranteed response times, and these will route internally through the company to the developers on the repo. If you have uncovered a bug blocking your work, it is recommended that you go through Tableau Support for increased visibility of your request.
+
+
 
 ## Filing an issue
 
