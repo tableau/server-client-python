@@ -9,8 +9,6 @@ from typing import TypeVar
 T = TypeVar("T", str, bytes)
 
 
-# usage: _redact_any_type("<xml workbook password= cooliothesecond>")
-# -> b"<xml workbook password =***************">
 def _redact_any_type(xml: T, sensitive_word: T, replacement: T, encoding=None) -> T:
     try:
         root = fromstring(xml)

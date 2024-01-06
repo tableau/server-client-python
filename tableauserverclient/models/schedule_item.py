@@ -254,25 +254,43 @@ class ScheduleItem(object):
             interval.extend(interval_elem.attrib.items())
 
         if frequency == IntervalItem.Frequency.Daily:
-            return DailyInterval(start_time)
+            converted_intervals = []
+
+            for i in interval:
+                # We use fractional hours for the two minute-based intervals.
+                # Need to convert to hours from minutes here
+                if i[0] == IntervalItem.Occurrence.Minutes:
+                    converted_intervals.append(float(i[1]) / 60)
+                elif i[0] == IntervalItem.Occurrence.Hours:
+                    converted_intervals.append(float(i[1]))
+                else:
+                    converted_intervals.append(i[1])
+
+            return DailyInterval(start_time, *converted_intervals)
 
         if frequency == IntervalItem.Frequency.Hourly:
-            interval_occurrence, interval_value = interval.pop()
+            converted_intervals = []
 
-            # We use fractional hours for the two minute-based intervals.
-            # Need to convert to hours from minutes here
-            if interval_occurrence == IntervalItem.Occurrence.Minutes:
-                interval_value = float(interval_value) / 60
+            for i in interval:
+                # We use fractional hours for the two minute-based intervals.
+                # Need to convert to hours from minutes here
+                if i[0] == IntervalItem.Occurrence.Minutes:
+                    converted_intervals.append(float(i[1]) / 60)
+                elif i[0] == IntervalItem.Occurrence.Hours:
+                    converted_intervals.append(i[1])
+                else:
+                    converted_intervals.append(i[1])
 
-            return HourlyInterval(start_time, end_time, interval_value)
+            return HourlyInterval(start_time, end_time, tuple(converted_intervals))
 
         if frequency == IntervalItem.Frequency.Weekly:
             interval_values = [i[1] for i in interval]
             return WeeklyInterval(start_time, *interval_values)
 
         if frequency == IntervalItem.Frequency.Monthly:
-            interval_occurrence, interval_value = interval.pop()
-            return MonthlyInterval(start_time, interval_value)
+            interval_values = [i[1] for i in interval]
+
+            return MonthlyInterval(start_time, tuple(interval_values))
 
     @staticmethod
     def _parse_element(schedule_xml, ns):

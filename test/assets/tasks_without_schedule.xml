@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse 
+    xmlns="http://tableau.com/api" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.6.xsd">
+    <tasks>
+        <task>
+            <extractRefresh id="f84901ac-72ad-4f9b-a87e-7a3500402ad6" priority="50" consecutiveFailedCount="0" type="RefreshExtractTask">
+                <datasource id="c7a9327e-1cda-4504-b026-ddb43b976d1d" />
+            </extractRefresh>
+        </task>
+    </tasks>
+</tsResponse>
