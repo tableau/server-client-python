@@ -166,9 +166,6 @@ class ProjectItem(object):
             attr,
             permissions,
         )
-        fetch_call = getattr(self, attr)
-        logging.getLogger().info({"type": attr, "value": fetch_call()})
-        return fetch_call()
 
     @classmethod
     def from_response(cls, resp, ns) -> List["ProjectItem"]:
