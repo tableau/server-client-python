@@ -8,6 +8,8 @@ from contextlib import closing
 from pathlib import Path
 from typing import List, Mapping, Optional, Sequence, Tuple, TYPE_CHECKING, Union
 
+from tableauserverclient.helpers.headers import fix_filename
+
 if TYPE_CHECKING:
     from tableauserverclient.server import Server
     from tableauserverclient.models import PermissionsRule
@@ -441,6 +443,7 @@ class Datasources(QuerysetEndpoint):
                     filepath.write(chunk)
                 return_path = filepath
             else:
+                params = fix_filename(params)
                 filename = to_filename(os.path.basename(params["filename"]))
                 download_path = make_download_path(filepath, filename)
                 with open(download_path, "wb") as f:

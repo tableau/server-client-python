@@ -11,6 +11,9 @@ TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
 GET_XML = os.path.join(TEST_ASSET_DIR, "schedule_get.xml")
 GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_by_id.xml")
+GET_HOURLY_ID_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_hourly_id.xml")
+GET_DAILY_ID_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_daily_id.xml")
+GET_MONTHLY_ID_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_monthly_id.xml")
 GET_EMPTY_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_empty.xml")
 CREATE_HOURLY_XML = os.path.join(TEST_ASSET_DIR, "schedule_create_hourly.xml")
 CREATE_DAILY_XML = os.path.join(TEST_ASSET_DIR, "schedule_create_daily.xml")
@@ -100,6 +103,51 @@ class ScheduleTests(unittest.TestCase):
             self.assertEqual("Weekday early mornings", schedule.name)
             self.assertEqual("Active", schedule.state)
 
+    def test_get_hourly_by_id(self) -> None:
+        self.server.version = "3.8"
+        with open(GET_HOURLY_ID_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            schedule_id = "c9cff7f9-309c-4361-99ff-d4ba8c9f5467"
+            baseurl = "{}/schedules/{}".format(self.server.baseurl, schedule_id)
+            m.get(baseurl, text=response_xml)
+            schedule = self.server.schedules.get_by_id(schedule_id)
+            self.assertIsNotNone(schedule)
+            self.assertEqual(schedule_id, schedule.id)
+            self.assertEqual("Hourly schedule", schedule.name)
+            self.assertEqual("Active", schedule.state)
+            self.assertEqual(("Monday", 0.5), schedule.interval_item.interval)
+
+    def test_get_daily_by_id(self) -> None:
+        self.server.version = "3.8"
+        with open(GET_DAILY_ID_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            schedule_id = "c9cff7f9-309c-4361-99ff-d4ba8c9f5467"
+            baseurl = "{}/schedules/{}".format(self.server.baseurl, schedule_id)
+            m.get(baseurl, text=response_xml)
+            schedule = self.server.schedules.get_by_id(schedule_id)
+            self.assertIsNotNone(schedule)
+            self.assertEqual(schedule_id, schedule.id)
+            self.assertEqual("Daily schedule", schedule.name)
+            self.assertEqual("Active", schedule.state)
+            self.assertEqual(("Monday", 2.0), schedule.interval_item.interval)
+
+    def test_get_monthly_by_id(self) -> None:
+        self.server.version = "3.8"
+        with open(GET_MONTHLY_ID_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            schedule_id = "c9cff7f9-309c-4361-99ff-d4ba8c9f5467"
+            baseurl = "{}/schedules/{}".format(self.server.baseurl, schedule_id)
+            m.get(baseurl, text=response_xml)
+            schedule = self.server.schedules.get_by_id(schedule_id)
+            self.assertIsNotNone(schedule)
+            self.assertEqual(schedule_id, schedule.id)
+            self.assertEqual("Monthly multiple days", schedule.name)
+            self.assertEqual("Active", schedule.state)
+            self.assertEqual(("1", "2"), schedule.interval_item.interval)
+
     def test_delete(self) -> None:
         with requests_mock.mock() as m:
             m.delete(self.baseurl + "/c9cff7f9-309c-4361-99ff-d4ba8c9f5467", status_code=204)
@@ -131,7 +179,7 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual(TSC.ScheduleItem.ExecutionOrder.Parallel, new_schedule.execution_order)
         self.assertEqual(time(2, 30), new_schedule.interval_item.start_time)
         self.assertEqual(time(23), new_schedule.interval_item.end_time)  # type: ignore[union-attr]
-        self.assertEqual("8", new_schedule.interval_item.interval)  # type: ignore[union-attr]
+        self.assertEqual(("8",), new_schedule.interval_item.interval)  # type: ignore[union-attr]
 
     def test_create_daily(self) -> None:
         with open(CREATE_DAILY_XML, "rb") as f:
@@ -216,7 +264,7 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual("2016-10-12T14:00:00Z", format_datetime(new_schedule.next_run_at))
         self.assertEqual(TSC.ScheduleItem.ExecutionOrder.Serial, new_schedule.execution_order)
         self.assertEqual(time(7), new_schedule.interval_item.start_time)
-        self.assertEqual("12", new_schedule.interval_item.interval)  # type: ignore[union-attr]
+        self.assertEqual(("12",), new_schedule.interval_item.interval)  # type: ignore[union-attr]
 
     def test_update(self) -> None:
         with open(UPDATE_XML, "rb") as f:

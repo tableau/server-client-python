@@ -6,6 +6,8 @@ import os
 from contextlib import closing
 from pathlib import Path
 
+from tableauserverclient.helpers.headers import fix_filename
+
 from .endpoint import QuerysetEndpoint, api, parameter_added_in
 from .exceptions import InternalServerError, MissingRequiredFieldError
 from .permissions_endpoint import _PermissionsEndpoint
@@ -88,8 +90,8 @@ class Workbooks(QuerysetEndpoint):
         return WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     @api(version="2.8")
-    def refresh(self, workbook_id: str) -> JobItem:
-        id_ = getattr(workbook_id, "id", workbook_id)
+    def refresh(self, workbook_item: Union[WorkbookItem, str]) -> JobItem:
+        id_ = getattr(workbook_item, "id", workbook_item)
         url = "{0}/{1}/refresh".format(self.baseurl, id_)
         empty_req = RequestFactory.Empty.empty_req()
         server_response = self.post_request(url, empty_req)
@@ -455,7 +457,7 @@ class Workbooks(QuerysetEndpoint):
     def download_revision(
         self,
         workbook_id: str,
-        revision_number: str,
+        revision_number: Optional[str],
         filepath: Optional[PathOrFileW] = None,
         include_extract: bool = True,
         no_extract: Optional[bool] = None,
@@ -487,6 +489,7 @@ class Workbooks(QuerysetEndpoint):
                     filepath.write(chunk)
                 return_path = filepath
             else:
+                params = fix_filename(params)
                 filename = to_filename(os.path.basename(params["filename"]))
                 download_path = make_download_path(filepath, filename)
                 with open(download_path, "wb") as f:
