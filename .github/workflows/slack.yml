@@ -10,7 +10,7 @@ jobs:
     steps:
       - name: Send message to Slack API
         continue-on-error: true
-        uses: archive/github-actions-slack@v2.2.2
+        uses: archive/github-actions-slack@v2.8.0
         id: notify
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
