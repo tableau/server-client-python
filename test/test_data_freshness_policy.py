@@ -13,6 +13,7 @@ UPDATE_DFP_FRESH_AT_DAILY_XML = os.path.join(TEST_ASSET_DIR, "workbook_update_da
 UPDATE_DFP_FRESH_AT_WEEKLY_XML = os.path.join(TEST_ASSET_DIR, "workbook_update_data_freshness_policy5.xml")
 UPDATE_DFP_FRESH_AT_MONTHLY_XML = os.path.join(TEST_ASSET_DIR, "workbook_update_data_freshness_policy6.xml")
 
+
 class WorkbookTests(unittest.TestCase):
     def setUp(self) -> None:
         self.server = TSC.Server("http://test", False)
@@ -31,7 +32,8 @@ class WorkbookTests(unittest.TestCase):
             single_workbook = TSC.WorkbookItem("1d0304cd-3796-429f-b815-7258370b9b74", show_tabs=True)
             single_workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
             single_workbook.data_freshness_policy = TSC.DataFreshnessPolicyItem(
-               TSC.DataFreshnessPolicyItem.Option.AlwaysLive)
+                TSC.DataFreshnessPolicyItem.Option.AlwaysLive
+            )
             single_workbook = self.server.workbooks.update(single_workbook)
 
         self.assertEqual("1f951daf-4061-451a-9df1-69a8062664f2", single_workbook.id)
@@ -45,7 +47,8 @@ class WorkbookTests(unittest.TestCase):
             single_workbook = TSC.WorkbookItem("1d0304cd-3796-429f-b815-7258370b9b74", show_tabs=True)
             single_workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
             single_workbook.data_freshness_policy = TSC.DataFreshnessPolicyItem(
-                TSC.DataFreshnessPolicyItem.Option.SiteDefault)
+                TSC.DataFreshnessPolicyItem.Option.SiteDefault
+            )
             single_workbook = self.server.workbooks.update(single_workbook)
 
         self.assertEqual("1f951daf-4061-451a-9df1-69a8062664f2", single_workbook.id)
@@ -59,10 +62,10 @@ class WorkbookTests(unittest.TestCase):
             single_workbook = TSC.WorkbookItem("1d0304cd-3796-429f-b815-7258370b9b74", show_tabs=True)
             single_workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
             single_workbook.data_freshness_policy = TSC.DataFreshnessPolicyItem(
-                TSC.DataFreshnessPolicyItem.Option.FreshEvery)
+                TSC.DataFreshnessPolicyItem.Option.FreshEvery
+            )
             fresh_every_ten_hours = TSC.DataFreshnessPolicyItem.FreshEvery(
-                TSC.DataFreshnessPolicyItem.FreshEvery.Frequency.Hours,
-                10
+                TSC.DataFreshnessPolicyItem.FreshEvery.Frequency.Hours, 10
             )
             single_workbook.data_freshness_policy.fresh_every_schedule = fresh_every_ten_hours
             single_workbook = self.server.workbooks.update(single_workbook)
@@ -80,7 +83,8 @@ class WorkbookTests(unittest.TestCase):
             single_workbook = TSC.WorkbookItem("1d0304cd-3796-429f-b815-7258370b9b74", show_tabs=True)
             single_workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
             single_workbook.data_freshness_policy = TSC.DataFreshnessPolicyItem(
-                TSC.DataFreshnessPolicyItem.Option.FreshEvery)
+                TSC.DataFreshnessPolicyItem.Option.FreshEvery
+            )
 
         self.assertRaises(ValueError, self.server.workbooks.update, single_workbook)
 
@@ -92,11 +96,10 @@ class WorkbookTests(unittest.TestCase):
             single_workbook = TSC.WorkbookItem("1d0304cd-3796-429f-b815-7258370b9b74", show_tabs=True)
             single_workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
             single_workbook.data_freshness_policy = TSC.DataFreshnessPolicyItem(
-                TSC.DataFreshnessPolicyItem.Option.FreshAt)
+                TSC.DataFreshnessPolicyItem.Option.FreshAt
+            )
             fresh_at_10pm_daily = TSC.DataFreshnessPolicyItem.FreshAt(
-                TSC.DataFreshnessPolicyItem.FreshAt.Frequency.Day,
-                "22:00:00",
-                " Asia/Singapore"
+                TSC.DataFreshnessPolicyItem.FreshAt.Frequency.Day, "22:00:00", " Asia/Singapore"
             )
             single_workbook.data_freshness_policy.fresh_at_schedule = fresh_at_10pm_daily
             single_workbook = self.server.workbooks.update(single_workbook)
@@ -115,12 +118,13 @@ class WorkbookTests(unittest.TestCase):
             single_workbook = TSC.WorkbookItem("1d0304cd-3796-429f-b815-7258370b9b74", show_tabs=True)
             single_workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
             single_workbook.data_freshness_policy = TSC.DataFreshnessPolicyItem(
-                TSC.DataFreshnessPolicyItem.Option.FreshAt)
+                TSC.DataFreshnessPolicyItem.Option.FreshAt
+            )
             fresh_at_10am_mon_wed = TSC.DataFreshnessPolicyItem.FreshAt(
                 TSC.DataFreshnessPolicyItem.FreshAt.Frequency.Week,
                 "10:00:00",
                 "America/Los_Angeles",
-                ["Monday", "Wednesday"]
+                ["Monday", "Wednesday"],
             )
             single_workbook.data_freshness_policy.fresh_at_schedule = fresh_at_10am_mon_wed
             single_workbook = self.server.workbooks.update(single_workbook)
@@ -140,12 +144,10 @@ class WorkbookTests(unittest.TestCase):
             single_workbook = TSC.WorkbookItem("1d0304cd-3796-429f-b815-7258370b9b74", show_tabs=True)
             single_workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
             single_workbook.data_freshness_policy = TSC.DataFreshnessPolicyItem(
-                TSC.DataFreshnessPolicyItem.Option.FreshAt)
+                TSC.DataFreshnessPolicyItem.Option.FreshAt
+            )
             fresh_at_00am_lastDayOfMonth = TSC.DataFreshnessPolicyItem.FreshAt(
-                TSC.DataFreshnessPolicyItem.FreshAt.Frequency.Month,
-                "00:00:00",
-                "America/Los_Angeles",
-                ["LastDay"]
+                TSC.DataFreshnessPolicyItem.FreshAt.Frequency.Month, "00:00:00", "America/Los_Angeles", ["LastDay"]
             )
             single_workbook.data_freshness_policy.fresh_at_schedule = fresh_at_00am_lastDayOfMonth
             single_workbook = self.server.workbooks.update(single_workbook)
@@ -164,7 +166,8 @@ class WorkbookTests(unittest.TestCase):
             single_workbook = TSC.WorkbookItem("1d0304cd-3796-429f-b815-7258370b9b74", show_tabs=True)
             single_workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
             single_workbook.data_freshness_policy = TSC.DataFreshnessPolicyItem(
-                TSC.DataFreshnessPolicyItem.Option.FreshAt)
+                TSC.DataFreshnessPolicyItem.Option.FreshAt
+            )
 
         self.assertRaises(ValueError, self.server.workbooks.update, single_workbook)
 
@@ -176,11 +179,10 @@ class WorkbookTests(unittest.TestCase):
             single_workbook = TSC.WorkbookItem("1d0304cd-3796-429f-b815-7258370b9b74", show_tabs=True)
             single_workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
             single_workbook.data_freshness_policy = TSC.DataFreshnessPolicyItem(
-                TSC.DataFreshnessPolicyItem.Option.FreshAt)
+                TSC.DataFreshnessPolicyItem.Option.FreshAt
+            )
             fresh_at_month_no_interval = TSC.DataFreshnessPolicyItem.FreshAt(
-                TSC.DataFreshnessPolicyItem.FreshAt.Frequency.Month,
-                "00:00:00",
-                "America/Los_Angeles"
+                TSC.DataFreshnessPolicyItem.FreshAt.Frequency.Month, "00:00:00", "America/Los_Angeles"
             )
             single_workbook.data_freshness_policy.fresh_at_schedule = fresh_at_month_no_interval
 

@@ -40,7 +40,7 @@ def main():
     server = TSC.Server(args.server, use_server_version=False)
     server.add_http_options({"verify": False})
     server.use_server_version()
-    with (server.auth.sign_in(tableau_auth)):
+    with server.auth.sign_in(tableau_auth):
         # Get workbook
         all_workbooks, pagination_item = server.workbooks.get()
         print("\nThere are {} workbooks on site: ".format(pagination_item.total_available))
@@ -56,8 +56,8 @@ def main():
 
             # Enable acceleration for all the views in the workbook
             enable_config = dict()
-            enable_config['acceleration_enabled'] = True
-            enable_config['accelerate_now'] = True
+            enable_config["acceleration_enabled"] = True
+            enable_config["accelerate_now"] = True
 
             sample_workbook.data_acceleration_config = enable_config
             updated: TSC.WorkbookItem = server.workbooks.update(sample_workbook)
@@ -72,8 +72,8 @@ def main():
             sample_workbook.views = [view_to_disable]
 
             disable_config = dict()
-            disable_config['acceleration_enabled'] = False
-            disable_config['accelerate_now'] = True
+            disable_config["acceleration_enabled"] = False
+            disable_config["accelerate_now"] = True
 
             sample_workbook.data_acceleration_config = disable_config
             # To get the acceleration status on the response, set includeViewAccelerationStatus=true
@@ -81,18 +81,28 @@ def main():
             # acceleration status is per view basis (not per workbook)
             updated: TSC.WorkbookItem = server.workbooks.update(sample_workbook, True)
             view1 = updated.views[0]
-            print("Disabled acceleration for 1 view " + view1.name + " in the workbook " + updated.name +".")
+            print("Disabled acceleration for 1 view " + view1.name + " in the workbook " + updated.name + ".")
 
             # Get acceleration status of the views in workbook using workbooks.get_by_id
             # This won't need to do populate_views beforehand
             my_workbook = server.workbooks.get_by_id(sample_workbook.id)
             view1 = my_workbook.views[0]
             view2 = my_workbook.views[1]
-            print("Fetching acceleration status for views in the workbook " + updated.name + ".\n" +
-                  "View \"" + view1.name + "\" has acceleration_status = " +
-                  view1.data_acceleration_config['acceleration_status'] + ".\n" +
-                  "View \"" + view2.name + "\" has acceleration_status = " +
-                  view2.data_acceleration_config['acceleration_status'] + ".")
+            print(
+                "Fetching acceleration status for views in the workbook "
+                + updated.name
+                + ".\n"
+                + 'View "'
+                + view1.name
+                + '" has acceleration_status = '
+                + view1.data_acceleration_config["acceleration_status"]
+                + ".\n"
+                + 'View "'
+                + view2.name
+                + '" has acceleration_status = '
+                + view2.data_acceleration_config["acceleration_status"]
+                + "."
+            )
 
 
 if __name__ == "__main__":

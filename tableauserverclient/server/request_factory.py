@@ -56,9 +56,11 @@ def _add_hiddenview_element(views_element, view_name):
     view_element.attrib["name"] = view_name
     view_element.attrib["hidden"] = "true"
 
+
 def _add_view_element(views_element, view_id):
     view_element = ET.SubElement(views_element, "view")
     view_element.attrib["id"] = view_id
+
 
 def _add_credentials_element(parent_element, connection_credentials):
     credentials_element = ET.SubElement(parent_element, "connectionCredentials")
@@ -961,16 +963,15 @@ class WorkbookRequest(object):
         if workbook_item.data_freshness_policy is not None:
             data_freshness_policy_config = workbook_item.data_freshness_policy
             data_freshness_policy_element = ET.SubElement(workbook_element, "dataFreshnessPolicy")
-            data_freshness_policy_element.attrib["option"] = str(
-                data_freshness_policy_config.option)
+            data_freshness_policy_element.attrib["option"] = str(data_freshness_policy_config.option)
             # Fresh Every Schedule
             if data_freshness_policy_config.option == "FreshEvery":
                 if data_freshness_policy_config.fresh_every_schedule is not None:
                     fresh_every_element = ET.SubElement(data_freshness_policy_element, "freshEverySchedule")
-                    fresh_every_element.attrib["frequency"] = (
-                        data_freshness_policy_config.fresh_every_schedule.frequency)
-                    fresh_every_element.attrib["value"] = str(
-                        data_freshness_policy_config.fresh_every_schedule.value)
+                    fresh_every_element.attrib[
+                        "frequency"
+                    ] = data_freshness_policy_config.fresh_every_schedule.frequency
+                    fresh_every_element.attrib["value"] = str(data_freshness_policy_config.fresh_every_schedule.value)
                 else:
                     raise ValueError(f"data_freshness_policy_config.fresh_every_schedule must be populated.")
             # Fresh At Schedule
@@ -985,7 +986,7 @@ class WorkbookRequest(object):
                     # Fresh At Schedule intervals if Frequency is Week or Month
                     if frequency != DataFreshnessPolicyItem.FreshAt.Frequency.Day:
                         if intervals is not None:
-                             #if intervals is not None or frequency != DataFreshnessPolicyItem.FreshAt.Frequency.Day:
+                            # if intervals is not None or frequency != DataFreshnessPolicyItem.FreshAt.Frequency.Day:
                             intervals_element = ET.SubElement(fresh_at_element, "intervals")
                             for interval in intervals:
                                 expression = IntervalItem.Occurrence.WeekDay
@@ -994,8 +995,9 @@ class WorkbookRequest(object):
                                 single_interval_element = ET.SubElement(intervals_element, "interval")
                                 single_interval_element.attrib[expression] = interval
                         else:
-                            raise ValueError(f"fresh_at_schedule.interval_item must be populated for "
-                                             f"Week & Month frequency.")
+                            raise ValueError(
+                                f"fresh_at_schedule.interval_item must be populated for " f"Week & Month frequency."
+                            )
                 else:
                     raise ValueError(f"data_freshness_policy_config.fresh_at_schedule must be populated.")
 

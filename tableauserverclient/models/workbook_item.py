@@ -182,7 +182,7 @@ class WorkbookItem(object):
         return self._data_freshness_policy
 
     @data_freshness_policy.setter
-    #@property_is_data_freshness_policy
+    # @property_is_data_freshness_policy
     def data_freshness_policy(self, value):
         self._data_freshness_policy = value
 
@@ -234,7 +234,7 @@ class WorkbookItem(object):
                 _,
                 views,
                 data_acceleration_config,
-                data_freshness_policy
+                data_freshness_policy,
             ) = self._parse_element(workbook_xml, ns)
 
             self._set_values(
@@ -253,7 +253,7 @@ class WorkbookItem(object):
                 None,
                 views,
                 data_acceleration_config,
-                data_freshness_policy
+                data_freshness_policy,
             )
 
         return self
@@ -423,6 +423,7 @@ def parse_data_acceleration_config(data_acceleration_elem):
     data_acceleration_config["last_updated_at"] = last_updated_at
     data_acceleration_config["acceleration_status"] = acceleration_status
     return data_acceleration_config
+
 
 # Used to convert string represented boolean to a boolean type
 def string_to_bool(s: str) -> bool:

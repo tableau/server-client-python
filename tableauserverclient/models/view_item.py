@@ -140,6 +140,7 @@ class ViewItem(object):
     @property
     def data_acceleration_config(self):
         return self._data_acceleration_config
+
     @data_acceleration_config.setter
     def data_acceleration_config(self, value):
         self._data_acceleration_config = value

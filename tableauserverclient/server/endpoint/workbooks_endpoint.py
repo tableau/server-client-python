@@ -136,8 +136,11 @@ class Workbooks(QuerysetEndpoint):
     # Update workbook
     @api(version="2.0")
     @parameter_added_in(include_view_acceleration_status="3.22")
-    def update(self, workbook_item: WorkbookItem,
-               include_view_acceleration_status: bool = False,) -> WorkbookItem:
+    def update(
+        self,
+        workbook_item: WorkbookItem,
+        include_view_acceleration_status: bool = False,
+    ) -> WorkbookItem:
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)

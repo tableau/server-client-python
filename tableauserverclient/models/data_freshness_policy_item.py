@@ -6,7 +6,6 @@ from .interval_item import IntervalItem
 
 
 class DataFreshnessPolicyItem:
-
     class Option:
         AlwaysLive = "AlwaysLive"
         SiteDefault = "SiteDefault"
@@ -25,7 +24,7 @@ class DataFreshnessPolicyItem:
             self.value: int = value
 
         def __str__(self):
-            return '<FreshEverySchedule frequency={_frequency} value={_value}>'.format(**vars(self))
+            return "<FreshEverySchedule frequency={_frequency} value={_value}>".format(**vars(self))
 
         @property
         def frequency(self) -> str:
@@ -38,10 +37,11 @@ class DataFreshnessPolicyItem:
 
         @classmethod
         def from_xml_element(cls, fresh_every_schedule_elem: ET.Element):
-            frequency = fresh_every_schedule_elem.get("frequency")
-            value = fresh_every_schedule_elem.get("value")
-            if value:
-                value = int(value)
+            frequency = fresh_every_schedule_elem.get("frequency", None)
+            value_str = fresh_every_schedule_elem.get("value", None)
+            if (frequency is None) or (value_str is None):
+                return None
+            value = int(value_str)
             return DataFreshnessPolicyItem.FreshEvery(frequency, value)
 
     class FreshAt:
@@ -57,8 +57,10 @@ class DataFreshnessPolicyItem:
             self.interval_item: Optional[List[str]] = interval_item
 
         def __str__(self):
-            return ('<FreshAtSchedule frequency={_frequency} time={_time}> timezone={_timezone} '
-                    'interval_item={_interval_time}').format(**vars(self))
+            return (
+                "<FreshAtSchedule frequency={_frequency} time={_time}> timezone={_timezone} "
+                "interval_item={_interval_time}"
+            ).format(**vars(self))
 
         @property
         def interval_item(self) -> Optional[List[str]]:
@@ -98,27 +100,30 @@ class DataFreshnessPolicyItem:
         def from_xml_element(cls, fresh_at_schedule_elem: ET.Element, ns):
             frequency = fresh_at_schedule_elem.get("frequency", None)
             time = fresh_at_schedule_elem.get("time", None)
+            if (frequency is None) or (time is None):
+                return None
             timezone = fresh_at_schedule_elem.get("timezone", None)
             interval = parse_intervals(fresh_at_schedule_elem, frequency, ns)
             return DataFreshnessPolicyItem.FreshAt(frequency, time, timezone, interval)
 
-    def __init__(self, option: Option):
+    def __init__(self, option: str):
         self.option = option
         self.fresh_every_schedule: Optional[DataFreshnessPolicyItem.FreshEvery] = None
         self.fresh_at_schedule: Optional[DataFreshnessPolicyItem.FreshAt] = None
 
     def __str__(self):
-        return '<DataFreshnessPolicy option={_option}>'.format(**vars(self))
+        return "<DataFreshnessPolicy option={_option}>".format(**vars(self))
+
     def __repr__(self):
         return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"
 
     @property
-    def option(self) -> Option:
+    def option(self) -> str:
         return self._option
 
     @option.setter
     @property_is_enum(Option)
-    def option(self, value: Option):
+    def option(self, value: str):
         self._option = value
 
     @property
@@ -126,7 +131,7 @@ class DataFreshnessPolicyItem:
         return self._fresh_every_schedule
 
     @fresh_every_schedule.setter
-    def fresh_every_schedule(self, value: fresh_every_schedule):
+    def fresh_every_schedule(self, value: FreshEvery):
         self._fresh_every_schedule = value
 
     @property
@@ -134,12 +139,11 @@ class DataFreshnessPolicyItem:
         return self._fresh_at_schedule
 
     @fresh_at_schedule.setter
-    def fresh_at_schedule(self, value: fresh_at_schedule):
+    def fresh_at_schedule(self, value: FreshAt):
         self._fresh_at_schedule = value
 
     @classmethod
     def from_xml_element(cls, data_freshness_policy_elem, ns):
-
         option = data_freshness_policy_elem.get("option", None)
         if option is None:
             return None
@@ -147,11 +151,11 @@ class DataFreshnessPolicyItem:
 
         fresh_at_schedule = None
         fresh_every_schedule = None
-        if option == 'FreshAt':
+        if option == "FreshAt":
             fresh_at_schedule_elem = data_freshness_policy_elem.find(".//t:freshAtSchedule", namespaces=ns)
             fresh_at_schedule = DataFreshnessPolicyItem.FreshAt.from_xml_element(fresh_at_schedule_elem, ns)
             data_freshness_policy.fresh_at_schedule = fresh_at_schedule
-        elif option == 'FreshEvery':
+        elif option == "FreshEvery":
             fresh_every_schedule_elem = data_freshness_policy_elem.find(".//t:freshEverySchedule", namespaces=ns)
             fresh_every_schedule = DataFreshnessPolicyItem.FreshEvery.from_xml_element(fresh_every_schedule_elem)
             data_freshness_policy.fresh_every_schedule = fresh_every_schedule
