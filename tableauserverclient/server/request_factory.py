@@ -964,28 +964,40 @@ class WorkbookRequest(object):
             data_freshness_policy_element.attrib["option"] = str(
                 data_freshness_policy_config.option)
             # Fresh Every Schedule
-            if data_freshness_policy_config.fresh_every_schedule is not None:
-                fresh_every_element = ET.SubElement(data_freshness_policy_element, "freshEverySchedule")
-                fresh_every_element.attrib["frequency"] = data_freshness_policy_config.fresh_every_schedule.frequency
-                fresh_every_element.attrib["value"] = str(
-                    data_freshness_policy_config.fresh_every_schedule.value)
+            if data_freshness_policy_config.option == "FreshEvery":
+                if data_freshness_policy_config.fresh_every_schedule is not None:
+                    fresh_every_element = ET.SubElement(data_freshness_policy_element, "freshEverySchedule")
+                    fresh_every_element.attrib["frequency"] = (
+                        data_freshness_policy_config.fresh_every_schedule.frequency)
+                    fresh_every_element.attrib["value"] = str(
+                        data_freshness_policy_config.fresh_every_schedule.value)
+                else:
+                    raise ValueError(f"data_freshness_policy_config.fresh_every_schedule must be populated.")
             # Fresh At Schedule
-            if data_freshness_policy_config.fresh_at_schedule is not None:
-                fresh_at_element = ET.SubElement(data_freshness_policy_element, "freshAtSchedule")
-                frequency = data_freshness_policy_config.fresh_at_schedule.frequency
-                fresh_at_element.attrib["frequency"] = frequency
-                fresh_at_element.attrib["time"] = str(data_freshness_policy_config.fresh_at_schedule.time)
-                fresh_at_element.attrib["timezone"] = str(data_freshness_policy_config.fresh_at_schedule.timezone)
-                intervals = data_freshness_policy_config.fresh_at_schedule.interval_item
-                # Fresh At Schedule intervals if Frequency is Week or Day
-                if intervals is not None or frequency != DataFreshnessPolicyItem.FreshAt.Frequency.Day:
-                    intervals_element = ET.SubElement(fresh_at_element, "intervals")
-                    for interval in intervals:
-                        expression = IntervalItem.Occurrence.WeekDay
-                        if frequency == DataFreshnessPolicyItem.FreshAt.Frequency.Month:
-                            expression = IntervalItem.Occurrence.MonthDay
-                        single_interval_element = ET.SubElement(intervals_element, "interval")
-                        single_interval_element.attrib[expression] = interval
+            if data_freshness_policy_config.option == "FreshAt":
+                if data_freshness_policy_config.fresh_at_schedule is not None:
+                    fresh_at_element = ET.SubElement(data_freshness_policy_element, "freshAtSchedule")
+                    frequency = data_freshness_policy_config.fresh_at_schedule.frequency
+                    fresh_at_element.attrib["frequency"] = frequency
+                    fresh_at_element.attrib["time"] = str(data_freshness_policy_config.fresh_at_schedule.time)
+                    fresh_at_element.attrib["timezone"] = str(data_freshness_policy_config.fresh_at_schedule.timezone)
+                    intervals = data_freshness_policy_config.fresh_at_schedule.interval_item
+                    # Fresh At Schedule intervals if Frequency is Week or Month
+                    if frequency != DataFreshnessPolicyItem.FreshAt.Frequency.Day:
+                        if intervals is not None:
+                             #if intervals is not None or frequency != DataFreshnessPolicyItem.FreshAt.Frequency.Day:
+                            intervals_element = ET.SubElement(fresh_at_element, "intervals")
+                            for interval in intervals:
+                                expression = IntervalItem.Occurrence.WeekDay
+                                if frequency == DataFreshnessPolicyItem.FreshAt.Frequency.Month:
+                                    expression = IntervalItem.Occurrence.MonthDay
+                                single_interval_element = ET.SubElement(intervals_element, "interval")
+                                single_interval_element.attrib[expression] = interval
+                        else:
+                            raise ValueError(f"fresh_at_schedule.interval_item must be populated for "
+                                             f"Week & Month frequency.")
+                else:
+                    raise ValueError(f"data_freshness_policy_config.fresh_at_schedule must be populated.")
 
         return ET.tostring(xml_request)
 
