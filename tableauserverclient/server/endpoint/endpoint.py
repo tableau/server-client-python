@@ -1,5 +1,3 @@
-from threading import Thread
-from time import sleep
 from tableauserverclient import datetime_helpers as datetime
 
 from packaging.version import Version
@@ -76,55 +74,20 @@ class Endpoint(object):
         return parameters
 
     def _blocking_request(self, method, url, parameters={}) -> Optional[Union["Response", Exception]]:
-        self.async_response = None
         response = None
         logger.debug("[{}] Begin blocking request to {}".format(datetime.timestamp(), url))
         try:
             response = method(url, **parameters)
-            self.async_response = response
             logger.debug("[{}] Call finished".format(datetime.timestamp()))
         except Exception as e:
             logger.debug("Error making request to server: {}".format(e))
-            self.async_response = e
-        finally:
-            if response and not self.async_response:
-                logger.debug("Request response not saved")
-                return None
-        logger.debug("[{}] Request complete".format(datetime.timestamp()))
-        return self.async_response
+            raise e
+        return response
 
     def send_request_while_show_progress_threaded(
         self, method, url, parameters={}, request_timeout=None
     ) -> Optional[Union["Response", Exception]]:
-        try:
-            request_thread = Thread(target=self._blocking_request, args=(method, url, parameters))
-            request_thread.start()
-        except Exception as e:
-            logger.debug("Error starting server request on separate thread: {}".format(e))
-            return None
-        seconds = 0.05
-        minutes = 0
-        last_log_minute = 0
-        sleep(seconds)
-        if self.async_response is not None:
-            # a quick return for any immediate responses
-            return self.async_response
-        timed_out: bool = request_timeout is not None and seconds > request_timeout
-        while (self.async_response is None) and not timed_out:
-            sleep(DELAY_SLEEP_SECONDS)
-            seconds = seconds + DELAY_SLEEP_SECONDS
-            minutes = int(seconds / 60)
-            last_log_minute = self.log_wait_time(minutes, last_log_minute, url)
-        return self.async_response
-
-    def log_wait_time(self, minutes, last_log_minute, url) -> int:
-        logger.debug("{} Waiting....".format(datetime.timestamp()))
-        if minutes > last_log_minute:  # detailed log message ~every minute
-            logger.info("[{}] Waiting ({} minutes so far) for request to {}".format(datetime.timestamp(), minutes, url))
-            last_log_minute = minutes
-        else:
-            logger.debug("[{}] Waiting for request to {}".format(datetime.timestamp(), url))
-        return last_log_minute
+        return self._blocking_request(method, url, parameters)
 
     def _make_request(
         self,

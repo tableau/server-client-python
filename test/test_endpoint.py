@@ -1,4 +1,6 @@
 from pathlib import Path
+import pytest
+import requests
 import unittest
 
 import tableauserverclient as TSC
@@ -35,11 +37,12 @@ class TestEndpoint(unittest.TestCase):
             )
             self.assertIsNotNone(response)
 
-    def test_blocking_request_returns(self) -> None:
-        url = "http://test/"
-        endpoint = TSC.server.Endpoint(self.server)
-        response = endpoint._blocking_request(endpoint.parent_srv.session.get, url=url)
-        self.assertIsNotNone(response)
+    def test_blocking_request_raises_request_error(self) -> None:
+        with pytest.raises(requests.exceptions.ConnectionError):
+            url = "http://test/"
+            endpoint = TSC.server.Endpoint(self.server)
+            response = endpoint._blocking_request(endpoint.parent_srv.session.get, url=url)
+            self.assertIsNotNone(response)
 
     def test_get_request_stream(self) -> None:
         url = "http://test/"
