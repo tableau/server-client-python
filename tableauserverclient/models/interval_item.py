@@ -69,7 +69,7 @@ class HourlyInterval(object):
 
     @interval.setter
     def interval(self, intervals):
-        VALID_INTERVALS = {0.25, 0.5, 1, 2, 4, 6, 8, 12}
+        VALID_INTERVALS = {0.25, 0.5, 1, 2, 4, 6, 8, 12, 24}
         for interval in intervals:
             # if an hourly interval is a string, then it is a weekDay interval
             if isinstance(interval, str) and not interval.isnumeric() and not hasattr(IntervalItem.Day, interval):

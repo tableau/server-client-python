@@ -155,3 +155,4 @@ $RECYCLE.BIN/
 docs/_site/
 docs/.jekyll-metadata
 docs/Gemfile.lock
+samples/credentials
