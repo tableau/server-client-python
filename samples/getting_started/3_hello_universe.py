@@ -62,11 +62,6 @@ def main():
             print("{} jobs".format(pagination.total_available))
             print(jobs[0])
 
-        metrics, pagination = server.metrics.get()
-        if metrics:
-            print("{} metrics".format(pagination.total_available))
-            print(metrics[0])
-
         schedules, pagination = server.schedules.get()
         if schedules:
             print("{} schedules".format(pagination.total_available))
@@ -82,7 +77,7 @@ def main():
             print("{} webhooks".format(pagination.total_available))
             print(webhooks[0])
 
-        users, pagination = server.metrics.get()
+        users, pagination = server.users.get()
         if users:
             print("{} users".format(pagination.total_available))
             print(users[0])
@@ -92,5 +87,5 @@ def main():
             print("{} groups".format(pagination.total_available))
             print(groups[0])
 
-    if __name__ == "__main__":
-        main()
+if __name__ == "__main__":
+    main()
