@@ -1,3 +1,5 @@
+import sys
+
 from tableauserverclient.models.property_decorators import property_is_int
 import logging
 
@@ -261,11 +263,13 @@ class PDFRequestOptions(_FilterOptionsBase):
         Portrait = "portrait"
         Landscape = "landscape"
 
-    def __init__(self, page_type=None, orientation=None, maxage=-1):
+    def __init__(self, page_type=None, orientation=None, maxage=-1, viz_height=None, viz_width=None):
         super(PDFRequestOptions, self).__init__()
         self.page_type = page_type
         self.orientation = orientation
         self.max_age = maxage
+        self.viz_height = viz_height
+        self.viz_width = viz_width
 
     @property
     def max_age(self):
@@ -275,6 +279,24 @@ class PDFRequestOptions(_FilterOptionsBase):
     @property_is_int(range=(0, 240), allowed=[-1])
     def max_age(self, value):
         self._max_age = value
+
+    @property
+    def viz_height(self):
+        return self._viz_height
+
+    @viz_height.setter
+    @property_is_int(range=(0, sys.maxsize), allowed=(None,))
+    def viz_height(self, value):
+        self._viz_height = value
+
+    @property
+    def viz_width(self):
+        return self._viz_width
+
+    @viz_width.setter
+    @property_is_int(range=(0, sys.maxsize), allowed=(None,))
+    def viz_width(self, value):
+        self._viz_width = value
 
     def get_query_params(self):
         params = {}
@@ -286,6 +308,15 @@ class PDFRequestOptions(_FilterOptionsBase):
 
         if self.max_age != -1:
             params["maxAge"] = self.max_age
+
+        if (self.viz_height is None) ^ (self.viz_width is None):
+            raise ValueError("viz_height and viz_width must be specified together")
+
+        if self.viz_height is not None:
+            params["vizHeight"] = self.viz_height
+
+        if self.viz_width is not None:
+            params["vizWidth"] = self.viz_width
 
         self._append_view_filters(params)
 
