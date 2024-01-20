@@ -10,8 +10,7 @@ Contribution can include, but are not limited to, any of the following:
 * Fix an Issue/Bug
 * Add/Fix documentation
 
-Contributions must follow the guidelines outlined on the [Tableau Organization](http://tableau.github.io/) page, though filing an issue or requesting
-a feature do not require the CLA.
+Contributions must follow the guidelines outlined on the [Tableau Organization](http://tableau.github.io/) page, though filing an issue or requesting a feature do not require the CLA.
 
 ## Issues and Feature Requests
 
