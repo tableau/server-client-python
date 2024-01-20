@@ -122,7 +122,7 @@ class Flows(QuerysetEndpoint):
         with closing(self.get_request(url, parameters={"stream": True})) as server_response:
             m = Message()
             m["Content-Disposition"] = server_response.headers["Content-Disposition"]
-            params = m.get_filename()
+            params = m.get_filename(failobj="")
             if isinstance(filepath, io_types_w):
                 for chunk in server_response.iter_content(1024):  # 1KB
                     filepath.write(chunk)
