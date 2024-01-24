@@ -309,6 +309,7 @@ class PDFRequestOptions(_FilterOptionsBase):
         if self.max_age != -1:
             params["maxAge"] = self.max_age
 
+        # XOR. Either both are None or both are not None.
         if (self.viz_height is None) ^ (self.viz_width is None):
             raise ValueError("viz_height and viz_width must be specified together")
 
