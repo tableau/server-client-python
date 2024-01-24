@@ -2,7 +2,7 @@ from collections.abc import Container
 import datetime
 import re
 from functools import wraps
-from typing import Any, Optional
+from typing import Any, Optional, Tuple
 
 from tableauserverclient.datetime_helpers import parse_datetime
 
@@ -67,7 +67,7 @@ def property_is_valid_time(func):
     return wrapper
 
 
-def property_is_int(range: tuple[int, int], allowed: Optional[Container[Any]] = None):
+def property_is_int(range: Tuple[int, int], allowed: Optional[Container[Any]] = None):
     """Takes a range of ints and a list of exemptions to check against
     when setting a property on a model. The range is a tuple of (min, max) and the
     allowed list (empty by default) allows values outside that range.
