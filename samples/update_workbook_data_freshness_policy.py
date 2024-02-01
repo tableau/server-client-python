@@ -57,12 +57,16 @@ def main():
             # it could mean the workbook selected does not have live connection, which means it doesn't have
             # data freshness policy. Change to another workbook with live datasource connection.
             sample_workbook_extended = server.workbooks.get_by_id(sample_workbook.id)
-            print(
-                "Workbook "
-                + sample_workbook.name
-                + " has data freshness policy option set to: "
-                + sample_workbook_extended.data_freshness_policy.option
-            )
+            try:
+                print(
+                    "Workbook "
+                    + sample_workbook.name
+                    + " has data freshness policy option set to: "
+                    + sample_workbook_extended.data_freshness_policy.option
+                )
+            except AttributeError as e:
+                print("Workbook does not have data freshness policy, possibly due to the workbook selected "
+                      "does not have live connection. Change to another workbook using live datasource connection.")
 
             # Update Workbook Data Freshness Policy to "AlwaysLive"
             sample_workbook.data_freshness_policy = TSC.DataFreshnessPolicyItem(
