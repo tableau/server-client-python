@@ -26,6 +26,7 @@ class ScheduleItem(object):
         Subscription = "Subscription"
         DataAcceleration = "DataAcceleration"
         ActiveDirectorySync = "ActiveDirectorySync"
+        System = "System"
 
     class ExecutionOrder:
         Parallel = "Parallel"
