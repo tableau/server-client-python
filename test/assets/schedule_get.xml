@@ -5,5 +5,6 @@
         <schedule id="c9cff7f9-309c-4361-99ff-d4ba8c9f5467" name="Weekday early mornings" state="Active" priority="50" createdAt="2016-07-06T20:19:00Z" updatedAt="2016-09-13T11:00:32Z" type="Extract" frequency="Weekly" nextRunAt="2016-09-14T11:00:00Z" />
         <schedule id="bcb79d07-6e47-472f-8a65-d7f51f40c36c" name="Saturday night" state="Active" priority="80" createdAt="2016-07-07T20:19:00Z" updatedAt="2016-09-12T16:39:38Z" type="Subscription" frequency="Weekly" nextRunAt="2016-09-18T06:00:00Z" />
         <schedule id="f456e8f2-aeb2-4a8e-b823-00b6f08640f0" name="First of the month 1:00AM" state="Active" priority="50" createdAt="2019-02-19T18:52:19Z" updatedAt="2019-02-19T18:55:51Z" type="Flow" frequency="Monthly" nextRunAt="2019-03-01T09:00:00Z"/>
+        <schedule id="3cfa4713-ce7c-4fa7-aa2e-f752bfc8dd04" name="First of the month 2:00AM" state="Active" priority="30" createdAt="2019-02-19T18:52:19Z" updatedAt="2019-02-19T18:55:51Z" type="System" frequency="Monthly" nextRunAt="2019-03-01T09:00:00Z"/>
     </schedules>
 </tsResponse>
