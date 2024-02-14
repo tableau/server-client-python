@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse
+    xmlns="http://tableau.com/api"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api https://help.tableau.com/samples/en-us/rest_api/ts-api_3_20.xsd">
+    <tasks>
+        <task>
+            <extractRefresh id="12b07582-7c8b-4f1b-318b-51f6e58e4517" priority="50" consecutiveFailedCount="0" type="RefreshExtractTask">
+                <schedule frequency="Daily" nextRunAt="2024-02-21T02:20:00Z">
+                    <frequencyDetails start="18:20:00" end="18:20:00">
+                        <intervals>
+                            <interval hours="24" />
+                            <interval weekDay="Tuesday" />
+                        </intervals>
+                    </frequencyDetails>
+                </schedule>
+                <datasource id="e4de0575-fcc7-4232-5659-be09bb8e7654" />
+            </extractRefresh>
+        </task>
+    </tasks>
+</tsResponse>
