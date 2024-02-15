@@ -19,6 +19,7 @@ GET_XML_DATAACCELERATION_TASK = os.path.join(TEST_ASSET_DIR, "tasks_with_dataacc
 GET_XML_RUN_NOW_RESPONSE = os.path.join(TEST_ASSET_DIR, "tasks_run_now_response.xml")
 GET_XML_CREATE_TASK_RESPONSE = os.path.join(TEST_ASSET_DIR, "tasks_create_extract_task.xml")
 GET_XML_WITHOUT_SCHEDULE = TEST_ASSET_DIR / "tasks_without_schedule.xml"
+GET_XML_WITH_INTERVAL = TEST_ASSET_DIR / "tasks_with_interval.xml"
 
 
 class TaskTests(unittest.TestCase):
@@ -95,6 +96,15 @@ class TaskTests(unittest.TestCase):
 
         task = all_tasks[0]
         self.assertEqual("c7a9327e-1cda-4504-b026-ddb43b976d1d", task.target.id)
+        self.assertEqual("datasource", task.target.type)
+
+    def test_get_task_with_interval(self):
+        with requests_mock.mock() as m:
+            m.get(self.baseurl, text=GET_XML_WITH_INTERVAL.read_text())
+            all_tasks, pagination_item = self.server.tasks.get()
+
+        task = all_tasks[0]
+        self.assertEqual("e4de0575-fcc7-4232-5659-be09bb8e7654", task.target.id)
         self.assertEqual("datasource", task.target.type)
 
     def test_delete(self):
