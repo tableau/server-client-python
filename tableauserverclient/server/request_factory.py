@@ -911,6 +911,9 @@ class WorkbookRequest(object):
             for connection in connections:
                 _add_connections_element(connections_element, connection)
 
+        if workbook_item.description is not None:
+            workbook_element.attrib["description"] = workbook_item.description
+
         if hidden_views is not None:
             import warnings
 
