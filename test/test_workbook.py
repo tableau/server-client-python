@@ -488,6 +488,8 @@ class WorkbookTests(unittest.TestCase):
                 name="Sample", show_tabs=False, project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760"
             )
 
+            new_workbook.description = "REST API Testing"
+
             sample_workbook = os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")
             publish_mode = self.server.PublishMode.CreateNew
 
@@ -506,6 +508,7 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual("fe0b4e89-73f4-435e-952d-3a263fbfa56c", new_workbook.views[0].id)
         self.assertEqual("GDP per capita", new_workbook.views[0].name)
         self.assertEqual("RESTAPISample_0/sheets/GDPpercapita", new_workbook.views[0].content_url)
+        self.assertEqual("REST API Testing", new_workbook.description)
 
     def test_publish_a_packaged_file_object(self) -> None:
         with open(PUBLISH_XML, "rb") as f:

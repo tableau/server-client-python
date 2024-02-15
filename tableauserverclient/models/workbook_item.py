@@ -91,6 +91,10 @@ class WorkbookItem(object):
     def description(self) -> Optional[str]:
         return self._description
 
+    @description.setter
+    def description(self, value: str):
+        self._description = value
+
     @property
     def id(self) -> Optional[str]:
         return self._id
