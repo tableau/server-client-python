@@ -4104,7 +4104,7 @@ The `UserItem` class contains the members or attributes for the view resources o
 
 Name | Description
 :--- | :---
-`auth_setting` | (Optional) This attribute is only for Tableau Cloud. The new authentication type for the user - see **User Auth** below for values.
+`auth_setting` | This is a required attribute and is only for Tableau Cloud. The new authentication type for the user - see **User Auth** below for values.
 `domain_name`  |    The name of the site.
 `external_auth_user_id` |   Represents ID stored in Tableau's single sign-on (SSO) system. The `externalAuthUserId` value is returned for Tableau Cloud. For other server configurations, this field contains null.
 `id` |   The id of the user on the site.
@@ -4120,8 +4120,7 @@ Name | Description
 
  You can assign the following values for this attribute: 
 * `OpenID` 
-* `SAML` (the user signs in using **Single sign-on**) 
-* `ServerDefault` (the user signs in using the default authentication method for the server - in Tableau Cloud this is **TableauID**)
+* `SAML` (the user signs in using **Single sign-on**)
 * `TableauIDWithMFA`
  These options appear in the **Authentication** tab on the **Settings** page in Tableau Cloud.
 
