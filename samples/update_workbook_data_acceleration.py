@@ -1,5 +1,5 @@
 ####
-# This script demonstrates how to update workbook data freshness policy using the Tableau
+# This script demonstrates how to update workbook data acceleration  using the Tableau
 # Server Client.
 #
 # To run the script, you must have installed Python 3.7 or later.
