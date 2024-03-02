@@ -18,8 +18,10 @@ def main():
     # Common options; please keep those in sync across all samples
     parser.add_argument("--server", "-s", help="server address")
     parser.add_argument("--site", "-S", help="site name")
-    parser.add_argument("--token-name", "-p", help="name of the personal access token used to sign into the server")
-    parser.add_argument("--token-value", "-v", help="value of the personal access token used to sign into the server")
+    parser.add_argument("--token-name", "-p", help="name of the personal access token " "used to sign into the server")
+    parser.add_argument(
+        "--token-value", "-v", help="value of the personal access token " "used to sign into the server"
+    )
     parser.add_argument(
         "--logging-level",
         "-l",
@@ -65,8 +67,10 @@ def main():
                     + sample_workbook_extended.data_freshness_policy.option
                 )
             except AttributeError as e:
-                print("Workbook does not have data freshness policy, possibly due to the workbook selected "
-                      "does not have live connection. Change to another workbook using live datasource connection.")
+                print(
+                    "Workbook does not have data freshness policy, possibly due to the workbook selected "
+                    "does not have live connection. Change to another workbook using live datasource connection."
+                )
 
             # Update Workbook Data Freshness Policy to "AlwaysLive"
             sample_workbook.data_freshness_policy = TSC.DataFreshnessPolicyItem(
