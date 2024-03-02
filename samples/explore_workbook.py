@@ -72,7 +72,7 @@ def main():
             # Pick one workbook from the list
             sample_workbook = all_workbooks[0]
             sample_workbook.name = "Name me something cooler"
-            # sample_workbook.description = "That doesn't work"
+            sample_workbook.description = "That doesn't work"
             updated: TSC.WorkbookItem = server.workbooks.update(sample_workbook)
             print(updated.name, updated.description)
 
