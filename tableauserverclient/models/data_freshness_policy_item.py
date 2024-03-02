@@ -20,7 +20,7 @@ class DataFreshnessPolicyItem:
             Weeks = "Weeks"
 
         def __init__(self, frequency: str, value: int):
-            self.frequency = frequency
+            self.frequency: str = frequency
             self.value: int = value
 
         def __str__(self):

@@ -950,12 +950,13 @@ class WorkbookRequest(object):
             views_element = ET.SubElement(workbook_element, "views")
             for view in workbook_item.views:
                 _add_view_element(views_element, view.id)
-        if workbook_item.data_acceleration_config["acceleration_enabled"] is not None:
+        if workbook_item.data_acceleration_config:
             data_acceleration_config = workbook_item.data_acceleration_config
             data_acceleration_element = ET.SubElement(workbook_element, "dataAccelerationConfig")
-            data_acceleration_element.attrib["accelerationEnabled"] = str(
-                data_acceleration_config["acceleration_enabled"]
-            ).lower()
+            if data_acceleration_config["acceleration_enabled"] is not None:
+                data_acceleration_element.attrib["accelerationEnabled"] = str(
+                    data_acceleration_config["acceleration_enabled"]
+                ).lower()
             if data_acceleration_config["accelerate_now"] is not None:
                 data_acceleration_element.attrib["accelerateNow"] = str(
                     data_acceleration_config["accelerate_now"]
