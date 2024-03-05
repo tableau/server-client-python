@@ -23,8 +23,8 @@ class DataFreshnessPolicyItem:
             self.frequency: str = frequency
             self.value: int = value
 
-        def __str__(self):
-            return "<FreshEverySchedule frequency={_frequency} value={_value}>".format(**vars(self))
+        def __repr__(self):
+            return "<FreshEvery frequency={_frequency} value={_value}>".format(**vars(self))
 
         @property
         def frequency(self) -> str:
@@ -56,9 +56,9 @@ class DataFreshnessPolicyItem:
             self.timezone = timezone
             self.interval_item: Optional[List[str]] = interval_item
 
-        def __str__(self):
+        def __repr__(self):
             return (
-                "<FreshAtSchedule frequency={_frequency} time={_time}> timezone={_timezone} "
+                "<FreshAt frequency={_frequency} time={_time}> timezone={_timezone} "
                 "interval_item={_interval_time}"
             ).format(**vars(self))
 
@@ -111,11 +111,8 @@ class DataFreshnessPolicyItem:
         self.fresh_every_schedule: Optional[DataFreshnessPolicyItem.FreshEvery] = None
         self.fresh_at_schedule: Optional[DataFreshnessPolicyItem.FreshAt] = None
 
-    def __str__(self):
-        return "<DataFreshnessPolicy option={_option}>".format(**vars(self))
-
     def __repr__(self):
-        return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"
+        return "<DataFreshnessPolicy option={_option}>".format(**vars(self))
 
     @property
     def option(self) -> str:

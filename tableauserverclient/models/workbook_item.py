@@ -35,7 +35,7 @@ class WorkbookItem(object):
         self._revisions = None
         self._size = None
         self._updated_at = None
-        self._views = None
+        self._views: Optional[List[ViewItem]] = None
         self.name = name
         self._description = None
         self.owner_id: Optional[str] = None

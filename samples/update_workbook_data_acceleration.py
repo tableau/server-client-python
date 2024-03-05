@@ -61,12 +61,12 @@ def main():
 
             sample_workbook.data_acceleration_config = enable_config
             updated: TSC.WorkbookItem = server.workbooks.update(sample_workbook)
-            # Since we did not set
+            # Since we did not set any specific view, we will enable all views in the workbook
             print("Enable acceleration for all the views in the workbook " + updated.name + ".")
 
             # Disable acceleration on one of the view in the workbook
             # You have to populate_views first, then set the views of the workbook
-            # to the ones you want to update. Note that workbook.views expect List[ViewItem]
+            # to the ones you want to update.
             server.workbooks.populate_views(sample_workbook)
             view_to_disable = sample_workbook.views[0]
             sample_workbook.views = [view_to_disable]
@@ -81,7 +81,7 @@ def main():
             # acceleration status is per view basis (not per workbook)
             updated: TSC.WorkbookItem = server.workbooks.update(sample_workbook, True)
             view1 = updated.views[0]
-            print("Disabled acceleration for 1 view " + view1.name + " in the workbook " + updated.name + ".")
+            print('Disabled acceleration for 1 view "' + view1.name + ' in the workbook ' + updated.name + '.')
 
             # Get acceleration status of the views in workbook using workbooks.get_by_id
             # This won't need to do populate_views beforehand
