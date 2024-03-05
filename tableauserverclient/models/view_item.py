@@ -31,6 +31,10 @@ class ViewItem(object):
         self._workbook_id: Optional[str] = None
         self._permissions: Optional[Callable[[], List[PermissionsRule]]] = None
         self.tags: Set[str] = set()
+        self._data_acceleration_config = {
+            "acceleration_enabled": None,
+            "acceleration_status": None,
+        }
 
     def __str__(self):
         return "<ViewItem {0} '{1}' contentUrl='{2}' project={3}>".format(
@@ -134,6 +138,14 @@ class ViewItem(object):
         return self._workbook_id
 
     @property
+    def data_acceleration_config(self):
+        return self._data_acceleration_config
+
+    @data_acceleration_config.setter
+    def data_acceleration_config(self, value):
+        self._data_acceleration_config = value
+
+    @property
     def permissions(self) -> List[PermissionsRule]:
         if self._permissions is None:
             error = "View item must be populated with permissions first."
@@ -164,6 +176,7 @@ class ViewItem(object):
         owner_elem = view_xml.find(".//t:owner", namespaces=ns)
         project_elem = view_xml.find(".//t:project", namespaces=ns)
         tags_elem = view_xml.find(".//t:tags", namespaces=ns)
+        data_acceleration_config_elem = view_xml.find(".//t:dataAccelerationConfig", namespaces=ns)
         view_item._created_at = parse_datetime(view_xml.get("createdAt", None))
         view_item._updated_at = parse_datetime(view_xml.get("updatedAt", None))
         view_item._id = view_xml.get("id", None)
@@ -186,4 +199,25 @@ class ViewItem(object):
             tags = TagItem.from_xml_element(tags_elem, ns)
             view_item.tags = tags
             view_item._initial_tags = copy.copy(tags)
+        if data_acceleration_config_elem is not None:
+            data_acceleration_config = parse_data_acceleration_config(data_acceleration_config_elem)
+            view_item.data_acceleration_config = data_acceleration_config
         return view_item
+
+
+def parse_data_acceleration_config(data_acceleration_elem):
+    data_acceleration_config = dict()
+
+    acceleration_enabled = data_acceleration_elem.get("accelerationEnabled", None)
+    if acceleration_enabled is not None:
+        acceleration_enabled = string_to_bool(acceleration_enabled)
+
+    acceleration_status = data_acceleration_elem.get("accelerationStatus", None)
+
+    data_acceleration_config["acceleration_enabled"] = acceleration_enabled
+    data_acceleration_config["acceleration_status"] = acceleration_status
+    return data_acceleration_config
+
+
+def string_to_bool(s: str) -> bool:
+    return s.lower() == "true"

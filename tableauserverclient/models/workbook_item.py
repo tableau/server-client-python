@@ -17,6 +17,7 @@ from .property_decorators import (
 from .revision_item import RevisionItem
 from .tag_item import TagItem
 from .view_item import ViewItem
+from .data_freshness_policy_item import DataFreshnessPolicyItem
 
 
 class WorkbookItem(object):
@@ -34,7 +35,7 @@ class WorkbookItem(object):
         self._revisions = None
         self._size = None
         self._updated_at = None
-        self._views = None
+        self._views: Optional[Callable[[], List[ViewItem]]] = None
         self.name = name
         self._description = None
         self.owner_id: Optional[str] = None
@@ -49,6 +50,7 @@ class WorkbookItem(object):
             "last_updated_at": None,
             "acceleration_status": None,
         }
+        self.data_freshness_policy = None
         self._permissions = None
 
         return None
@@ -166,6 +168,10 @@ class WorkbookItem(object):
             # We had views included in a WorkbookItem response
             return self._views
 
+    @views.setter
+    def views(self, value):
+        self._views = value
+
     @property
     def data_acceleration_config(self):
         return self._data_acceleration_config
@@ -174,6 +180,15 @@ class WorkbookItem(object):
     @property_is_data_acceleration_config
     def data_acceleration_config(self, value):
         self._data_acceleration_config = value
+
+    @property
+    def data_freshness_policy(self):
+        return self._data_freshness_policy
+
+    @data_freshness_policy.setter
+    # @property_is_data_freshness_policy
+    def data_freshness_policy(self, value):
+        self._data_freshness_policy = value
 
     @property
     def revisions(self) -> List[RevisionItem]:
@@ -221,8 +236,9 @@ class WorkbookItem(object):
                 project_name,
                 owner_id,
                 _,
-                _,
+                views,
                 data_acceleration_config,
+                data_freshness_policy,
             ) = self._parse_element(workbook_xml, ns)
 
             self._set_values(
@@ -239,8 +255,9 @@ class WorkbookItem(object):
                 project_name,
                 owner_id,
                 None,
-                None,
+                views,
                 data_acceleration_config,
+                data_freshness_policy,
             )
 
         return self
@@ -262,6 +279,7 @@ class WorkbookItem(object):
         tags,
         views,
         data_acceleration_config,
+        data_freshness_policy,
     ):
         if id is not None:
             self._id = id
@@ -290,10 +308,12 @@ class WorkbookItem(object):
         if tags:
             self.tags = tags
             self._initial_tags = copy.copy(tags)
-        if views:
+        if views is not None:
             self._views = views
         if data_acceleration_config is not None:
             self.data_acceleration_config = data_acceleration_config
+        if data_freshness_policy is not None:
+            self.data_freshness_policy = data_freshness_policy
 
     @classmethod
     def from_response(cls, resp: str, ns: Dict[str, str]) -> List["WorkbookItem"]:
@@ -360,6 +380,11 @@ class WorkbookItem(object):
         if data_acceleration_elem is not None:
             data_acceleration_config = parse_data_acceleration_config(data_acceleration_elem)
 
+        data_freshness_policy = None
+        data_freshness_policy_elem = workbook_xml.find(".//t:dataFreshnessPolicy", namespaces=ns)
+        if data_freshness_policy_elem is not None:
+            data_freshness_policy = DataFreshnessPolicyItem.from_xml_element(data_freshness_policy_elem, ns)
+
         return (
             id,
             name,
@@ -376,6 +401,7 @@ class WorkbookItem(object):
             tags,
             views,
             data_acceleration_config,
+            data_freshness_policy,
         )
 
 

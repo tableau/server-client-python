@@ -57,6 +57,11 @@ def _add_hiddenview_element(views_element, view_name):
     view_element.attrib["hidden"] = "true"
 
 
+def _add_view_element(views_element, view_id):
+    view_element = ET.SubElement(views_element, "view")
+    view_element.attrib["id"] = view_id
+
+
 def _add_credentials_element(parent_element, connection_credentials):
     credentials_element = ET.SubElement(parent_element, "connectionCredentials")
     if connection_credentials.password is None or connection_credentials.name is None:
@@ -944,16 +949,61 @@ class WorkbookRequest(object):
         if workbook_item.owner_id:
             owner_element = ET.SubElement(workbook_element, "owner")
             owner_element.attrib["id"] = workbook_item.owner_id
-        if workbook_item.data_acceleration_config["acceleration_enabled"] is not None:
+        if workbook_item._views is not None:
+            views_element = ET.SubElement(workbook_element, "views")
+            for view in workbook_item.views:
+                _add_view_element(views_element, view.id)
+        if workbook_item.data_acceleration_config:
             data_acceleration_config = workbook_item.data_acceleration_config
             data_acceleration_element = ET.SubElement(workbook_element, "dataAccelerationConfig")
-            data_acceleration_element.attrib["accelerationEnabled"] = str(
-                data_acceleration_config["acceleration_enabled"]
-            ).lower()
+            if data_acceleration_config["acceleration_enabled"] is not None:
+                data_acceleration_element.attrib["accelerationEnabled"] = str(
+                    data_acceleration_config["acceleration_enabled"]
+                ).lower()
             if data_acceleration_config["accelerate_now"] is not None:
                 data_acceleration_element.attrib["accelerateNow"] = str(
                     data_acceleration_config["accelerate_now"]
                 ).lower()
+        if workbook_item.data_freshness_policy is not None:
+            data_freshness_policy_config = workbook_item.data_freshness_policy
+            data_freshness_policy_element = ET.SubElement(workbook_element, "dataFreshnessPolicy")
+            data_freshness_policy_element.attrib["option"] = str(data_freshness_policy_config.option)
+            # Fresh Every Schedule
+            if data_freshness_policy_config.option == "FreshEvery":
+                if data_freshness_policy_config.fresh_every_schedule is not None:
+                    fresh_every_element = ET.SubElement(data_freshness_policy_element, "freshEverySchedule")
+                    fresh_every_element.attrib[
+                        "frequency"
+                    ] = data_freshness_policy_config.fresh_every_schedule.frequency
+                    fresh_every_element.attrib["value"] = str(data_freshness_policy_config.fresh_every_schedule.value)
+                else:
+                    raise ValueError(f"data_freshness_policy_config.fresh_every_schedule must be populated.")
+            # Fresh At Schedule
+            if data_freshness_policy_config.option == "FreshAt":
+                if data_freshness_policy_config.fresh_at_schedule is not None:
+                    fresh_at_element = ET.SubElement(data_freshness_policy_element, "freshAtSchedule")
+                    frequency = data_freshness_policy_config.fresh_at_schedule.frequency
+                    fresh_at_element.attrib["frequency"] = frequency
+                    fresh_at_element.attrib["time"] = str(data_freshness_policy_config.fresh_at_schedule.time)
+                    fresh_at_element.attrib["timezone"] = str(data_freshness_policy_config.fresh_at_schedule.timezone)
+                    intervals = data_freshness_policy_config.fresh_at_schedule.interval_item
+                    # Fresh At Schedule intervals if Frequency is Week or Month
+                    if frequency != DataFreshnessPolicyItem.FreshAt.Frequency.Day:
+                        if intervals is not None:
+                            # if intervals is not None or frequency != DataFreshnessPolicyItem.FreshAt.Frequency.Day:
+                            intervals_element = ET.SubElement(fresh_at_element, "intervals")
+                            for interval in intervals:
+                                expression = IntervalItem.Occurrence.WeekDay
+                                if frequency == DataFreshnessPolicyItem.FreshAt.Frequency.Month:
+                                    expression = IntervalItem.Occurrence.MonthDay
+                                single_interval_element = ET.SubElement(intervals_element, "interval")
+                                single_interval_element.attrib[expression] = interval
+                        else:
+                            raise ValueError(
+                                f"fresh_at_schedule.interval_item must be populated for " f"Week & Month frequency."
+                            )
+                else:
+                    raise ValueError(f"data_freshness_policy_config.fresh_at_schedule must be populated.")
 
         return ET.tostring(xml_request)
 
