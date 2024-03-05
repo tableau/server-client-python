@@ -81,7 +81,7 @@ def main():
             # acceleration status is per view basis (not per workbook)
             updated: TSC.WorkbookItem = server.workbooks.update(sample_workbook, True)
             view1 = updated.views[0]
-            print('Disabled acceleration for 1 view "' + view1.name + ' in the workbook ' + updated.name + '.')
+            print('Disabled acceleration for 1 view "' + view1.name + '" in the workbook ' + updated.name + ".")
 
             # Get acceleration status of the views in workbook using workbooks.get_by_id
             # This won't need to do populate_views beforehand

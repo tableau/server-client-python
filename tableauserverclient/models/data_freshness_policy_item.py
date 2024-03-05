@@ -58,8 +58,7 @@ class DataFreshnessPolicyItem:
 
         def __repr__(self):
             return (
-                "<FreshAt frequency={_frequency} time={_time}> timezone={_timezone} "
-                "interval_item={_interval_time}"
+                "<FreshAt frequency={_frequency} time={_time}> timezone={_timezone} " "interval_item={_interval_time}"
             ).format(**vars(self))
 
         @property
