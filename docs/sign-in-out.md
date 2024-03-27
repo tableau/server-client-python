@@ -81,8 +81,11 @@ If you have Connected Apps enabled, you can create JSON Web Tokens and use them 
 
 To sign in to Tableau Server or Tableau Cloud with a JWT, you'll need to have created a Connected App and generated the token locally (see [instructions to generate a JWT for your Connected App](https://help.tableau.com/current/server/en-us/connected_apps.htm#step-3-configure-the-jwt)):
 
+```py
 class JWTAuth(Credentials):
     def __init__(self, jwt=None, site_id=None, user_id_to_impersonate=None):
+```
+
 Name | Description
 :--- | :---
 JWT | The generated token value
