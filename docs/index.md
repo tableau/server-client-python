@@ -21,7 +21,7 @@ This page describes how to:
 
 Before you install TSC, confirm that you have the following dependencies installed:
 
-* Python. You can use TSC with Python 3.5 or later.
+* Python. You can use TSC with Python 3.7 or later. Ideally, use a Python version that hasn't reached end-of-life yet. (Refer to the [Status of Python versions](https://devguide.python.org/versions/)).
 * Git. Optional, but recommended to download the samples or install from the source code.
 
 ## Install TSC
@@ -33,6 +33,7 @@ You can install TSC with pip or from the source code.
 Run the following command to install the latest stable version of TSC:
 
 ```shell
+pip install --upgrade pip
 pip install tableauserverclient
 ```
 
@@ -52,7 +53,7 @@ development version are subject to change at any time before the next stable rel
 
 To install TSC onto a machine without an internet connection, use the following steps:
 
-1) Ensure that Python 3.5 or higher is installed.
+1) Ensure that Python is installed.
 
 2) Download and manually install the `requests` Python library (and its dependencies).
 
