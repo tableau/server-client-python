@@ -15,7 +15,7 @@ dependencies = [
     'defusedxml>=0.7.1',  # latest as at 7/31/23
     'packaging>=23.1',   # latest as at 7/31/23
     'requests>=2.31',  # latest as at 7/31/23
-    'urllib3==2.0.7',  # latest as at 7/31/23
+    'urllib3==1.26.18',  # latest compatible with snowflake connector
 ]
 requires-python = ">=3.7"
 classifiers = [
