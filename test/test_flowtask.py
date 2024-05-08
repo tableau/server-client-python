@@ -22,7 +22,6 @@ GET_XML_WITH_INTERVAL = TEST_ASSET_DIR / "tasks_with_interval.xml"
 GET_XML_CREATE_FLOW_TASK_RESPONSE = os.path.join(TEST_ASSET_DIR, "tasks_create_flow_task.xml")
 
 
-
 class TaskTests(unittest.TestCase):
     def setUp(self):
         self.server = TSC.Server("http://test", False)

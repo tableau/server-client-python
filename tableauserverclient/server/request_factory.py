@@ -972,9 +972,9 @@ class WorkbookRequest(object):
             if data_freshness_policy_config.option == "FreshEvery":
                 if data_freshness_policy_config.fresh_every_schedule is not None:
                     fresh_every_element = ET.SubElement(data_freshness_policy_element, "freshEverySchedule")
-                    fresh_every_element.attrib[
-                        "frequency"
-                    ] = data_freshness_policy_config.fresh_every_schedule.frequency
+                    fresh_every_element.attrib["frequency"] = (
+                        data_freshness_policy_config.fresh_every_schedule.frequency
+                    )
                     fresh_every_element.attrib["value"] = str(data_freshness_policy_config.fresh_every_schedule.value)
                 else:
                     raise ValueError(f"data_freshness_policy_config.fresh_every_schedule must be populated.")
@@ -1113,6 +1113,7 @@ class TaskRequest(object):
 
         return ET.tostring(xml_request)
 
+
 class FlowTaskRequest(object):
     @_tsrequest_wrapped
     def run_req(self, xml_request, task_item):
@@ -1150,6 +1151,7 @@ class FlowTaskRequest(object):
                 single_interval_element.attrib[expression] = value
 
         return ET.tostring(xml_request)
+
 
 class SubscriptionRequest(object):
     @_tsrequest_wrapped
