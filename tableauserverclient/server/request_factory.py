@@ -1113,6 +1113,43 @@ class TaskRequest(object):
 
         return ET.tostring(xml_request)
 
+class FlowTaskRequest(object):
+    @_tsrequest_wrapped
+    def run_req(self, xml_request, task_item):
+        # Send an empty tsRequest
+        pass
+
+    @_tsrequest_wrapped
+    def create_flow_task_req(self, xml_request: ET.Element, flow_item: "TaskItem") -> bytes:
+        flow_element = ET.SubElement(xml_request, "runFlow")
+
+        # Main attributes
+        flow_element.attrib["type"] = flow_item.task_type
+
+        if flow_item.target is not None:
+            target_element = ET.SubElement(flow_element, flow_item.target.type)
+            target_element.attrib["id"] = flow_item.target.id
+
+        if flow_item.schedule_item is None:
+            return ET.tostring(xml_request)
+
+        # Schedule attributes
+        schedule_element = ET.SubElement(xml_request, "schedule")
+
+        interval_item = flow_item.schedule_item.interval_item
+        schedule_element.attrib["frequency"] = interval_item._frequency
+        frequency_element = ET.SubElement(schedule_element, "frequencyDetails")
+        frequency_element.attrib["start"] = str(interval_item.start_time)
+        if hasattr(interval_item, "end_time") and interval_item.end_time is not None:
+            frequency_element.attrib["end"] = str(interval_item.end_time)
+        if hasattr(interval_item, "interval") and interval_item.interval:
+            intervals_element = ET.SubElement(frequency_element, "intervals")
+            for interval in interval_item._interval_type_pairs():  # type: ignore
+                expression, value = interval
+                single_interval_element = ET.SubElement(intervals_element, "interval")
+                single_interval_element.attrib[expression] = value
+
+        return ET.tostring(xml_request)
 
 class SubscriptionRequest(object):
     @_tsrequest_wrapped
