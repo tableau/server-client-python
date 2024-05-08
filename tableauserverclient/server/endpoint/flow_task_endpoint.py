@@ -24,6 +24,6 @@ class FlowTasks(Endpoint):
             raise ValueError(error)
         logger.info("Creating an flow task %s", flow_item)
         url = self.baseurl
-        create_req = RequestFactory.Task.create_flow_task_req(flow_item)
+        create_req = RequestFactory.FlowTask.create_flow_task_req(flow_item)
         server_response = self.post_request(url, create_req)
         return server_response.content

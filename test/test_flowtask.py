@@ -32,8 +32,6 @@ class TaskTests(unittest.TestCase):
         self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"
         self.server._auth_token = "j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM"
 
-        # default task type is extractRefreshes TODO change this
-        # self.baseurl = "{}/{}".format(self.server.tasks.baseurl, "extractRefreshes")
         self.baseurl = self.server.flow_tasks.baseurl
 
     def test_create_flow_task(self):
@@ -48,7 +46,6 @@ class TaskTests(unittest.TestCase):
         target_item = TSC.Target("flow_id", "flow")
 
         task = TaskItem(schedule_item=monthly_schedule, target=target_item)
-        # task = TaskItem(None, "FullRefresh", None, schedule_item=monthly_schedule, target=target_item)
 
         with open(GET_XML_CREATE_FLOW_TASK_RESPONSE, "rb") as f:
             response_xml = f.read().decode("utf-8")
@@ -58,4 +55,3 @@ class TaskTests(unittest.TestCase):
 
         self.assertTrue("task_id" in create_response_content)
         self.assertTrue("flow_id" in create_response_content)
-        #self.assertTrue("FullRefresh" in create_response_content)

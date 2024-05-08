@@ -1290,6 +1290,7 @@ class RequestFactory(object):
     Favorite = FavoriteRequest()
     Fileupload = FileuploadRequest()
     Flow = FlowRequest()
+    FlowTask = FlowTaskRequest()
     Group = GroupRequest()
     Metric = MetricRequest()
     Permission = PermissionRequest()
