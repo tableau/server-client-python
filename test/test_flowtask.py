@@ -27,10 +27,10 @@ class TaskTests(unittest.TestCase):
     def test_create_flow_task(self):
         monthly_interval = TSC.MonthlyInterval(start_time=time(23, 30), interval_value=15)
         monthly_schedule = TSC.ScheduleItem(
-            None,
-            None,
-            None,
-            None,
+            "Monthly Schedule",
+            50,
+            TSC.ScheduleItem.Type.Flow,
+            TSC.ScheduleItem.ExecutionOrder.Parallel,
             monthly_interval,
         )
         target_item = TSC.Target("flow_id", "flow")
