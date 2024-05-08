@@ -35,7 +35,7 @@ class TaskTests(unittest.TestCase):
         )
         target_item = TSC.Target("flow_id", "flow")
 
-        task = TaskItem(schedule_item=monthly_schedule, target=target_item)
+        task = TaskItem(None, "RunFlow", None, schedule_item=monthly_schedule, target=target_item)
 
         with open(GET_XML_CREATE_FLOW_TASK_RESPONSE, "rb") as f:
             response_xml = f.read().decode("utf-8")
