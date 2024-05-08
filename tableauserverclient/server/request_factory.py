@@ -1116,11 +1116,6 @@ class TaskRequest(object):
 
 class FlowTaskRequest(object):
     @_tsrequest_wrapped
-    def run_req(self, xml_request, task_item):
-        # Send an empty tsRequest
-        pass
-
-    @_tsrequest_wrapped
     def create_flow_task_req(self, xml_request: ET.Element, flow_item: "TaskItem") -> bytes:
         flow_element = ET.SubElement(xml_request, "runFlow")
 
