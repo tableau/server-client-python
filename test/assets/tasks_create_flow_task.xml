@@ -1,11 +1,11 @@
 <tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api https://help.tableau.com/samples/en-us/rest_api/ts-api_3_22.xsd">
   <task>
-    <flowRun id="4d49655a-0f3a-45cc-ba61-b108a763e83a" 
+    <flowRun id="flow_run_id" 
       priority="50" 
       consecutiveFailedCount="0" 
       type="RunFlowTask">
-        <schedule id="1060dcb7-fef7-4fb1-8d3b-d0f042932d1a" 
-          name="SSS_e95a9d25-c616-4542-87b6-3725975bdfbd" 
+        <schedule id="schedule_id" 
+          name="schedu;e_name" 
           state="Active" 
           priority="50" 
           createdAt="2024-04-09T18:54:12Z" 
@@ -13,12 +13,12 @@
           type="Flow" 
           frequency="Daily" 
           nextRunAt="2024-04-10T19:30:00Z"/>
-        <flow id="dd3cd2e7-2ede-49c6-945f-e7b2a2f25541" 
+        <flow id="flow_id" 
           name="olympic 1">
         </flow>
-        <flowRunSpec flowId="dd3cd2e7-2ede-49c6-945f-e7b2a2f25541">
+        <flowRunSpec flowId="flow_id">
         <flowOutputSteps>
-          <flowOutputStep id="485c8b5f-5647-466c-b549-e38410b7c7c8" 
+          <flowOutputStep id="flow_output_setp_id" 
             name="Output"/>
         </flowOutputSteps>
         <flowParameterSpecs/>

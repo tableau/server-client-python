@@ -43,5 +43,5 @@ class TaskTests(unittest.TestCase):
             m.post("{}".format(self.baseurl), text=response_xml)
             create_response_content = self.server.flow_tasks.create(task).decode("utf-8")
 
-        self.assertTrue("task_id" in create_response_content)
+        self.assertTrue("schedule_id" in create_response_content)
         self.assertTrue("flow_id" in create_response_content)
