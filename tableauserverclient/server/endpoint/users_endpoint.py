@@ -1,12 +1,11 @@
-import _csv
 import copy
-import logging
 from typing import Optional
 
 from tableauserverclient.server.query import QuerySet
 
 from .endpoint import QuerysetEndpoint, api
 from .exceptions import MissingRequiredFieldError, ServerResponseError
+from tableauserverclient.helpers.importer import UserCSVImport
 from tableauserverclient.server import RequestFactory, RequestOptions
 from tableauserverclient.models import UserItem, WorkbookItem, PaginationItem, GroupItem
 from ..pager import Pager

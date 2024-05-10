@@ -17,9 +17,6 @@ POPULATE_WORKBOOKS_XML = os.path.join(TEST_ASSET_DIR, "user_populate_workbooks.x
 GET_FAVORITES_XML = os.path.join(TEST_ASSET_DIR, "favorites_get.xml")
 POPULATE_GROUPS_XML = os.path.join(TEST_ASSET_DIR, "user_populate_groups.xml")
 
-USERNAMES = os.path.join(TEST_ASSET_DIR, "Data", "usernames.csv")
-USERS = os.path.join(TEST_ASSET_DIR, "Data", "user_details.csv")
-
 
 class UserTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -44,7 +41,7 @@ class UserTests(unittest.TestCase):
         self.assertTrue(any(user.id == "dd2239f6-ddf1-4107-981a-4cf94e415794" for user in all_users))
         single_user = next(user for user in all_users if user.id == "dd2239f6-ddf1-4107-981a-4cf94e415794")
         self.assertEqual("alice", single_user.name)
-        self.assertEqual("Publisher", single_user.site_role)
+        self.assertEqual("Creator", single_user.site_role)
         self.assertEqual("2016-08-16T23:17:06Z", format_datetime(single_user.last_login))
         self.assertEqual("alice cook", single_user.fullname)
         self.assertEqual("alicecook@test.com", single_user.email)
@@ -52,7 +49,7 @@ class UserTests(unittest.TestCase):
         self.assertTrue(any(user.id == "2a47bbf8-8900-4ebb-b0a4-2723bd7c46c3" for user in all_users))
         single_user = next(user for user in all_users if user.id == "2a47bbf8-8900-4ebb-b0a4-2723bd7c46c3")
         self.assertEqual("Bob", single_user.name)
-        self.assertEqual("Interactor", single_user.site_role)
+        self.assertEqual("Explorer", single_user.site_role)
         self.assertEqual("Bob Smith", single_user.fullname)
         self.assertEqual("bob@test.com", single_user.email)
 
@@ -80,7 +77,7 @@ class UserTests(unittest.TestCase):
         self.assertEqual("dd2239f6-ddf1-4107-981a-4cf94e415794", single_user.id)
         self.assertEqual("alice", single_user.name)
         self.assertEqual("Alice", single_user.fullname)
-        self.assertEqual("Publisher", single_user.site_role)
+        self.assertEqual("Creator", single_user.site_role)
         self.assertEqual("ServerDefault", single_user.auth_setting)
         self.assertEqual("2016-08-16T23:17:06Z", format_datetime(single_user.last_login))
         self.assertEqual("local", single_user.domain_name)
@@ -105,8 +102,11 @@ class UserTests(unittest.TestCase):
         self.assertEqual("cassie@email.com", single_user.email)
         self.assertEqual("Viewer", single_user.site_role)
 
-    def test_update_missing_id(self) -> None:
+    def test_old_user_roles(self) -> None:
         single_user = TSC.UserItem("test", "Interactor")
+
+    def test_update_missing_id(self) -> None:
+        single_user = TSC.UserItem("test", "Explorer")
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.users.update, single_user)
 
     def test_remove(self) -> None:
@@ -145,7 +145,7 @@ class UserTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             m.get(self.baseurl + "/dd2239f6-ddf1-4107-981a-4cf94e415794/workbooks", text=response_xml)
-            single_user = TSC.UserItem("test", "Interactor")
+            single_user = TSC.UserItem("test", "Explorer")
             single_user._id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
             self.server.users.populate_workbooks(single_user)
 
@@ -163,13 +163,13 @@ class UserTests(unittest.TestCase):
             self.assertEqual({"Safari", "Sample"}, workbook_list[0].tags)
 
     def test_populate_workbooks_missing_id(self) -> None:
-        single_user = TSC.UserItem("test", "Interactor")
+        single_user = TSC.UserItem("test", "Explorer")
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.users.populate_workbooks, single_user)
 
     def test_populate_favorites(self) -> None:
         self.server.version = "2.5"
         baseurl = self.server.favorites.baseurl
-        single_user = TSC.UserItem("test", "Interactor")
+        single_user = TSC.UserItem("test", "Viewer")
         with open(GET_FAVORITES_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -197,7 +197,7 @@ class UserTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             m.get(self.server.users.baseurl + "/dd2239f6-ddf1-4107-981a-4cf94e415794/groups", text=response_xml)
-            single_user = TSC.UserItem("test", "Interactor")
+            single_user = TSC.UserItem("test", "Creator")
             single_user._id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
             self.server.users.populate_groups(single_user)
 
@@ -215,28 +215,3 @@ class UserTests(unittest.TestCase):
             self.assertEqual("86a66d40-f289-472a-83d0-927b0f954dc8", group_list[2].id)
             self.assertEqual("TableauExample", group_list[2].name)
             self.assertEqual("local", group_list[2].domain_name)
-
-    # these tests are weird. The input file USERNAMES will be parsed and invalid lines put in 'failures'
-    # Then we will send the valid lines to the server, and the response from that, ADD_XML, is our 'users'.
-    # not covered: the server rejects one of our 'valid' lines
-    def test_get_usernames_from_file(self):
-        with open(ADD_XML, "rb") as f:
-            response_xml = f.read().decode("utf-8")
-        with requests_mock.mock() as m:
-            m.post(self.server.users.baseurl, text=response_xml)
-            user_list, failures = self.server.users.create_from_file(USERNAMES)
-        assert failures != [], failures
-        assert len(failures) == 2, failures
-        assert user_list is not None, user_list
-        assert user_list[0].name == "Cassie", user_list
-
-    def test_get_users_from_file(self):
-        with open(ADD_XML, "rb") as f:
-            response_xml = f.read().decode("utf-8")
-        with requests_mock.mock() as m:
-            m.post(self.server.users.baseurl, text=response_xml)
-            users, failures = self.server.users.create_from_file(USERS)
-        assert failures != [], failures
-        assert len(failures) == 1, failures
-        assert users != [], users
-        assert users[0].name == "Cassie", users

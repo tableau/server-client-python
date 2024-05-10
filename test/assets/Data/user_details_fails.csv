@@ -1,0 +1,5 @@
+username, yes, none, email
+username, pword, ,viewer, none, yes, email
+username, pword, , no, none, yes, email
+username, pword, , no, none, yes, email
+username, pword, , lol, none, yes, email

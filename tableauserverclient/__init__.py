@@ -133,3 +133,4 @@ __all__ = [
     "WeeklyInterval",
     "WorkbookItem",
 ]
+from .helpers import importer # for tests

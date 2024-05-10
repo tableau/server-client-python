@@ -1,5 +1,4 @@
 import xml.etree.ElementTree as ET
-from csv import reader
 from datetime import datetime
 from enum import IntEnum
 from typing import Optional, TYPE_CHECKING
@@ -10,7 +9,6 @@ from tableauserverclient.datetime_helpers import parse_datetime
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import (
     property_is_enum,
-    property_not_empty,
 )
 from .reference_item import ResourceReference
 
@@ -41,12 +39,14 @@ class UserItem:
 
     tag_name: str = "user"
 
-    class Roles:
-        """
-        The Roles class contains the possible roles for a user on Tableau
-        Server.
-        """
-
+    """
+    The Roles class contains the possible roles for a user on Tableau
+    Server.
+    # A user's License tells you all the capabilities they *could* have
+    # A user's Site Role tells you which packages of capabilities they *were assigned by default*
+    # A user must be inspected individually to know what capabilities they *actually have*
+    """
+    class Roles(Enum):
         Interactor = "Interactor"
         Publisher = "Publisher"
         ServerAdministrator = "ServerAdministrator"
@@ -63,6 +63,7 @@ class UserItem:
         ReadOnly = "ReadOnly"
         SiteAdministratorCreator = "SiteAdministratorCreator"
         SiteAdministratorExplorer = "SiteAdministratorExplorer"
+        SupportUser = "SupportUser"  # Online only. Can only be created by Tableau admins.
 
         # Online only
         SupportUser = "SupportUser"
@@ -84,15 +85,14 @@ class UserItem:
 
         OpenID = "OpenID"
         SAML = "SAML"
-        TableauIDWithMFA = "TableauIDWithMFA"
-        ServerDefault = "ServerDefault"
-        TableauID = "TableauID"
-        Local = "Local"
+        TableauIDWithMFA = "TableauIDWithMFA"  # Not applicable on Tableau Server
+        ServerDefault = (
+            "ServerDefault"  # legacy value: This can only be used for Tableau Cloud sites that do not have MFA enabled.
+        )
 
     def __init__(
-        self, name: Optional[str] = None, site_role: Optional[str] = None, auth_setting: Optional[str] = None
+        self, name: Optional[str] = None, site_role: Optional[str | Roles] = None, auth_setting: Optional[str] = None
     ) -> None:
-        self._auth_setting: Optional[str] = None
         self._domain_name: Optional[str] = None
         self._external_auth_user_id: Optional[str] = None
         self._id: Optional[str] = None
@@ -102,10 +102,13 @@ class UserItem:
         self._groups = None
         self.email: Optional[str] = None
         self.fullname: Optional[str] = None
-        self.name: Optional[str] = name
-        self.site_role: Optional[str] = site_role
-        self.auth_setting: Optional[str] = auth_setting
-
+        if name is not None:
+            self.name: Optional[str] = name
+        self.site_role = site_role  # type: ignore[assignment]
+        # (mypy is tricked by the different types of the getter/setter)
+        if auth_setting is not None:
+            self.auth_setting: Optional[str] = auth_setting
+        self.password = None
         return None
 
     def __str__(self) -> str:
@@ -114,6 +117,14 @@ class UserItem:
 
     def __repr__(self):
         return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"
+
+    @property
+    def password(self) -> Optional[str]:
+        return self._password
+
+    @property
+    def password_setting(self) -> Optional[str]:
+        return self._password
 
     @property
     def auth_setting(self) -> Optional[str]:
@@ -171,7 +182,14 @@ class UserItem:
 
     @site_role.setter
     @property_is_enum(Roles)
-    def site_role(self, value):
+    def site_role(self, value: Optional[str | Roles]):
+        if value is not None:
+            if isinstance(value, UserItem.Roles):
+                value = value.value
+        if value in UserItem.DeprecatedRoles:
+            import warnings
+
+            warnings.warn("This role is not valid after Tableau 2018/REST version 3.0", DeprecationWarning)
         self._site_role = value
 
     @property

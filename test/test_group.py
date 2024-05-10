@@ -301,7 +301,8 @@ class GroupTests(unittest.TestCase):
     def test_update_ad_async(self) -> None:
         group = TSC.GroupItem("myGroup", "example.com")
         group._id = "ef8b19c0-43b6-11e6-af50-63f5805dbe3c"
-        group.minimum_site_role = TSC.UserItem.Roles.Viewer
+        group.minimum_site_role = TSC.UserItem.Roles.Viewer  # type: ignore[assignment]
+        # (mypy is tricked by the different getter/setter)
 
         with requests_mock.mock() as m:
             m.put(f"{self.baseurl}/{group.id}?asJob=True", text=UPDATE_ASYNC_XML.read_bytes().decode("utf8"))

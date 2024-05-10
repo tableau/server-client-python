@@ -64,7 +64,10 @@ class GroupItem:
 
     @minimum_site_role.setter
     @property_is_enum(UserItem.Roles)
-    def minimum_site_role(self, value: str) -> None:
+    def minimum_site_role(self, value: Optional[str | UserItem.Roles]) -> None:
+        if value is not None:
+            if isinstance(value, UserItem.Roles):
+                value = value.value
         self._minimum_site_role = value
 
     @property
