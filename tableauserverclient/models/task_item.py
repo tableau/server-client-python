@@ -18,6 +18,7 @@ class TaskItem(object):
     _TASK_TYPE_MAPPING = {
         "RefreshExtractTask": Type.ExtractRefresh,
         "MaterializeViewsTask": Type.DataAcceleration,
+        "RunFlowTask": Type.RunFlow,
     }
 
     def __init__(
