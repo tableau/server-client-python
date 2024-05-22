@@ -1,5 +1,7 @@
 import sys
 
+from typing_extensions import Self
+
 from tableauserverclient.models.property_decorators import property_is_int
 import logging
 
@@ -154,17 +156,27 @@ class _FilterOptionsBase(RequestOptionsBase):
 
     def __init__(self):
         self.view_filters = []
+        self.view_parameters = []
 
     def get_query_params(self):
         raise NotImplementedError()
 
-    def vf(self, name, value):
+    def vf(self, name: str, value: str) -> Self:
+        """Apply a filter to the view for a filter that is a normal column
+        within the view."""
         self.view_filters.append((name, value))
         return self
 
-    def _append_view_filters(self, params):
+    def parameter(self, name: str, value: str) -> Self:
+        """Apply a filter based on a parameter within the workbook."""
+        self.view_parameters.append((name, value))
+        return self
+
+    def _append_view_filters(self, params) -> None:
         for name, value in self.view_filters:
             params["vf_" + name] = value
+        for name, value in self.view_parameters:
+            params[name] = value
 
 
 class CSVRequestOptions(_FilterOptionsBase):
