@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 import re
 import unittest
+from urllib.parse import parse_qs
 
 import requests_mock
 
@@ -311,3 +312,22 @@ class RequestOptionTests(unittest.TestCase):
     def test_queryset_filter_args_error(self) -> None:
         with self.assertRaises(RuntimeError):
             workbooks = self.server.workbooks.filter("argument")
+
+    def test_filtering_parameters(self) -> None:
+        self.server.version = "3.6"
+        with requests_mock.mock() as m:
+            m.get(requests_mock.ANY)
+            url = self.baseurl + "/views/456/data"
+            opts = TSC.PDFRequestOptions()
+            opts.parameter("name1@", "value1")
+            opts.parameter("name2$", "value2")
+            opts.page_type = TSC.PDFRequestOptions.PageType.Tabloid
+
+            resp = self.server.workbooks.get_request(url, request_object=opts)
+            query_params = parse_qs(resp.request.query)
+            self.assertIn("name1@", query_params)
+            self.assertIn("value1", query_params["name1@"])
+            self.assertIn("name2$", query_params)
+            self.assertIn("value2", query_params["name2$"])
+            self.assertIn("type", query_params)
+            self.assertIn("tabloid", query_params["type"])
