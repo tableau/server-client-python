@@ -93,7 +93,7 @@ class Groups(QuerysetEndpoint):
         elif as_job:
             url = "?".join([url, "asJob=True"])
 
-        update_req = RequestFactory.Group.update_req(group_item, None)
+        update_req = RequestFactory.Group.update_req(group_item)
         server_response = self.put_request(url, update_req)
         logger.info("Updated group item (ID: {0})".format(group_item.id))
         if as_job:

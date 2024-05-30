@@ -418,19 +418,7 @@ class GroupRequest(object):
             import_element.attrib["siteRole"] = group_item.minimum_site_role
         return ET.tostring(xml_request)
 
-    def update_req(self, group_item: GroupItem, default_site_role: Optional[str] = None) -> bytes:
-        # (1/8/2021): Deprecated starting v0.15
-        if default_site_role is not None:
-            import warnings
-
-            warnings.simplefilter("always", DeprecationWarning)
-            warnings.warn(
-                'RequestFactory.Group.update_req(...default_site_role="") is deprecated, '
-                "please set the minimum_site_role field of GroupItem",
-                DeprecationWarning,
-            )
-            group_item.minimum_site_role = default_site_role
-
+    def update_req(self, group_item: GroupItem, ) -> bytes:
         xml_request = ET.Element("tsRequest")
         group_element = ET.SubElement(xml_request, "group")
 
