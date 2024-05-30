@@ -58,3 +58,49 @@ class TestPermissionsRules(unittest.TestCase):
         self.assertEqual(composite.capabilities.get(TSC.Permission.Capability.Delete), TSC.Permission.Mode.Allow)
         self.assertEqual(composite.capabilities.get(TSC.Permission.Capability.ViewComments), TSC.Permission.Mode.Allow)
         self.assertEqual(composite.capabilities.get(TSC.Permission.Capability.ExportXml), TSC.Permission.Mode.Deny)
+
+    def test_eq_false(self):
+        grantee = ResourceReference("a", "user")
+        rule1 = TSC.PermissionsRule(
+            grantee,
+            {
+                TSC.Permission.Capability.ExportData: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.Delete: TSC.Permission.Mode.Deny,
+                TSC.Permission.Capability.ViewComments: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.ExportXml: TSC.Permission.Mode.Deny,
+            },
+        )
+        rule2 = TSC.PermissionsRule(
+            grantee,
+            {
+                TSC.Permission.Capability.ExportData: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.Delete: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.ExportXml: TSC.Permission.Mode.Deny,
+            },
+        )
+
+        self.assertNotEqual(rule1, rule2)
+
+    def test_eq_true(self):
+        grantee = ResourceReference("a", "user")
+        rule1 = TSC.PermissionsRule(
+            grantee,
+            {
+                TSC.Permission.Capability.ExportData: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.Delete: TSC.Permission.Mode.Deny,
+                TSC.Permission.Capability.ViewComments: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.ExportXml: TSC.Permission.Mode.Deny,
+            },
+        )
+        rule2 = TSC.PermissionsRule(
+            grantee,
+            {
+                TSC.Permission.Capability.ExportData: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.Delete: TSC.Permission.Mode.Deny,
+                TSC.Permission.Capability.ViewComments: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.ExportXml: TSC.Permission.Mode.Deny,
+            },
+        )
+        self.assertEqual(rule1, rule2)
+
+

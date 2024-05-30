@@ -53,9 +53,16 @@ class PermissionsRule(object):
     def __repr__(self):
         return "<PermissionsRule grantee={}, capabilities={}>".format(self.grantee, self.capabilities)
 
+    def __eq__(self, other: "PermissionsRule") -> bool:
+        return self.grantee == other.grantee and self.capabilities == other.capabilities
+
     def __and__(self, other: "PermissionsRule") -> "PermissionsRule":
         if self.grantee != other.grantee:
             raise ValueError("Cannot AND two permissions rules with different grantees")
+
+        if self.capabilities == other.capabilities:
+            return self
+
         capabilities = set((*self.capabilities.keys(), *other.capabilities.keys()))
         new_capabilities = {}
         for capability in capabilities:
@@ -72,6 +79,10 @@ class PermissionsRule(object):
     def __or__(self, other: "PermissionsRule") -> "PermissionsRule":
         if self.grantee != other.grantee:
             raise ValueError("Cannot OR two permissions rules with different grantees")
+
+        if self.capabilities == other.capabilities:
+            return self
+
         capabilities = set((*self.capabilities.keys(), *other.capabilities.keys()))
         new_capabilities = {}
         for capability in capabilities:
