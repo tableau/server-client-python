@@ -160,13 +160,6 @@ class Workbooks(QuerysetEndpoint):
         updated_workbook = copy.copy(workbook_item)
         return updated_workbook._parse_common_tags(server_response.content, self.parent_srv.namespace)
 
-    @api(version="2.3")
-    def update_conn(self, *args, **kwargs):
-        import warnings
-
-        warnings.warn("update_conn is deprecated, please use update_connection instead")
-        return self.update_connection(*args, **kwargs)
-
     # Update workbook_connection
     @api(version="2.3")
     def update_connection(self, workbook_item: WorkbookItem, connection_item: ConnectionItem) -> ConnectionItem:
