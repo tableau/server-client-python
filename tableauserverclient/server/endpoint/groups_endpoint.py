@@ -67,9 +67,7 @@ class Groups(QuerysetEndpoint):
         logger.info("Deleted single group (ID: {0})".format(group_id))
 
     @api(version="2.0")
-    def update(
-        self, group_item: GroupItem, as_job: bool = False
-    ) -> Union[GroupItem, JobItem]:
+    def update(self, group_item: GroupItem, as_job: bool = False) -> Union[GroupItem, JobItem]:
         # (1/8/2021): Deprecated starting v0.15
         url = "{0}/{1}".format(self.baseurl, group_item.id)
 
