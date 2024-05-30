@@ -71,7 +71,7 @@ class PermissionsRule(object):
 
     def __or__(self, other: "PermissionsRule") -> "PermissionsRule":
         if self.grantee != other.grantee:
-            raise ValueError("Cannot AND two permissions rules with different grantees")
+            raise ValueError("Cannot OR two permissions rules with different grantees")
         capabilities = set((*self.capabilities.keys(), *other.capabilities.keys()))
         new_capabilities = {}
         for capability in capabilities:
