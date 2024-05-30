@@ -68,20 +68,9 @@ class Groups(QuerysetEndpoint):
 
     @api(version="2.0")
     def update(
-        self, group_item: GroupItem, default_site_role: Optional[str] = None, as_job: bool = False
+        self, group_item: GroupItem, as_job: bool = False
     ) -> Union[GroupItem, JobItem]:
         # (1/8/2021): Deprecated starting v0.15
-        if default_site_role is not None:
-            import warnings
-
-            warnings.simplefilter("always", DeprecationWarning)
-            warnings.warn(
-                'Groups.update(...default_site_role=""...) is deprecated, '
-                "please set the minimum_site_role field of GroupItem",
-                DeprecationWarning,
-            )
-            group_item.minimum_site_role = default_site_role
-
         url = "{0}/{1}".format(self.baseurl, group_item.id)
 
         if not group_item.id:

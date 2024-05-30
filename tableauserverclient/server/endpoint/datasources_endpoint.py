@@ -352,17 +352,6 @@ class Datasources(QuerysetEndpoint):
         self._permissions.populate(item)
 
     @api(version="2.0")
-    def update_permission(self, item, permission_item):
-        import warnings
-
-        warnings.warn(
-            "Server.datasources.update_permission is deprecated, "
-            "please use Server.datasources.update_permissions instead.",
-            DeprecationWarning,
-        )
-        self._permissions.update(item, permission_item)
-
-    @api(version="2.0")
     def update_permissions(self, item: DatasourceItem, permission_item: List["PermissionsRule"]) -> None:
         self._permissions.update(item, permission_item)
 

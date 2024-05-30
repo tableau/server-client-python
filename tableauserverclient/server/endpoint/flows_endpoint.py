@@ -266,16 +266,6 @@ class Flows(QuerysetEndpoint):
         self._permissions.populate(item)
 
     @api(version="3.3")
-    def update_permission(self, item, permission_item):
-        import warnings
-
-        warnings.warn(
-            "Server.flows.update_permission is deprecated, " "please use Server.flows.update_permissions instead.",
-            DeprecationWarning,
-        )
-        self._permissions.update(item, permission_item)
-
-    @api(version="3.3")
     def update_permissions(self, item: FlowItem, permission_item: Iterable["PermissionsRule"]) -> None:
         self._permissions.update(item, permission_item)
 
