@@ -68,7 +68,6 @@ class Groups(QuerysetEndpoint):
 
     @api(version="2.0")
     def update(self, group_item: GroupItem, as_job: bool = False) -> Union[GroupItem, JobItem]:
-        # (1/8/2021): Deprecated starting v0.15
         url = "{0}/{1}".format(self.baseurl, group_item.id)
 
         if not group_item.id:
