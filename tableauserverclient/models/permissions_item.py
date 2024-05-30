@@ -59,7 +59,10 @@ class PermissionsRule(object):
         capabilities = set((*self.capabilities.keys(), *other.capabilities.keys()))
         new_capabilities = {}
         for capability in capabilities:
-            if (self.capabilities.get(capability), other.capabilities.get(capability)) == (Permission.Mode.Allow, Permission.Mode.Allow):
+            if (self.capabilities.get(capability), other.capabilities.get(capability)) == (
+                Permission.Mode.Allow,
+                Permission.Mode.Allow,
+            ):
                 new_capabilities[capability] = Permission.Mode.Allow
             elif Permission.Mode.Deny in (self.capabilities.get(capability), other.capabilities.get(capability)):
                 new_capabilities[capability] = Permission.Mode.Deny
@@ -74,7 +77,10 @@ class PermissionsRule(object):
         for capability in capabilities:
             if Permission.Mode.Allow in (self.capabilities.get(capability), other.capabilities.get(capability)):
                 new_capabilities[capability] = Permission.Mode.Allow
-            elif (self.capabilities.get(capability), other.capabilities.get(capability)) == (Permission.Mode.Deny, Permission.Mode.Deny):
+            elif (self.capabilities.get(capability), other.capabilities.get(capability)) == (
+                Permission.Mode.Deny,
+                Permission.Mode.Deny,
+            ):
                 new_capabilities[capability] = Permission.Mode.Deny
 
         return PermissionsRule(self.grantee, new_capabilities)
