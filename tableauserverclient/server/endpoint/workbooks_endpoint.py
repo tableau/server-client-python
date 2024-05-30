@@ -308,21 +308,12 @@ class Workbooks(QuerysetEndpoint):
         workbook_item: WorkbookItem,
         file: PathOrFileR,
         mode: str,
-        connection_credentials: Optional["ConnectionCredentials"] = None,
         connections: Optional[Sequence[ConnectionItem]] = None,
         as_job: bool = False,
         hidden_views: Optional[Sequence[str]] = None,
         skip_connection_check: bool = False,
         parameters=None,
     ):
-        if connection_credentials is not None:
-            import warnings
-
-            warnings.warn(
-                "connection_credentials is being deprecated. Use connections instead",
-                DeprecationWarning,
-            )
-
         if isinstance(file, (str, os.PathLike)):
             if not os.path.isfile(file):
                 error = "File path does not lead to an existing file."
@@ -384,12 +375,9 @@ class Workbooks(QuerysetEndpoint):
             logger.info("Publishing {0} to server with chunking method (workbook over 64MB)".format(workbook_item.name))
             upload_session_id = self.parent_srv.fileuploads.upload(file)
             url = "{0}&uploadSessionId={1}".format(url, upload_session_id)
-            conn_creds = connection_credentials
             xml_request, content_type = RequestFactory.Workbook.publish_req_chunked(
                 workbook_item,
-                connection_credentials=conn_creds,
                 connections=connections,
-                hidden_views=hidden_views,
             )
         else:
             logger.info("Publishing {0} to server".format(filename))
@@ -404,14 +392,11 @@ class Workbooks(QuerysetEndpoint):
             else:
                 raise TypeError("file should be a filepath or file object.")
 
-            conn_creds = connection_credentials
             xml_request, content_type = RequestFactory.Workbook.publish_req(
                 workbook_item,
                 filename,
                 file_contents,
-                connection_credentials=conn_creds,
                 connections=connections,
-                hidden_views=hidden_views,
             )
         logger.debug("Request xml: {0} ".format(redact_xml(xml_request[:1000])))
 
