@@ -102,5 +102,3 @@ class TestPermissionsRules(unittest.TestCase):
             },
         )
         self.assertEqual(rule1, rule2)
-
-
