@@ -418,7 +418,10 @@ class GroupRequest(object):
             import_element.attrib["siteRole"] = group_item.minimum_site_role
         return ET.tostring(xml_request)
 
-    def update_req(self, group_item: GroupItem, ) -> bytes:
+    def update_req(
+        self,
+        group_item: GroupItem,
+    ) -> bytes:
         xml_request = ET.Element("tsRequest")
         group_element = ET.SubElement(xml_request, "group")
 
