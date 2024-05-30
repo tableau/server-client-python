@@ -45,7 +45,7 @@ class Permission:
             return "<Enum Capability: AddComment | ChangeHierarchy | ChangePermission ... (17 more) >"
 
 
-class PermissionsRule(object):
+class PermissionsRule:
     def __init__(self, grantee: ResourceReference, capabilities: Dict[str, str]) -> None:
         self.grantee = grantee
         self.capabilities = capabilities
@@ -53,7 +53,9 @@ class PermissionsRule(object):
     def __repr__(self):
         return "<PermissionsRule grantee={}, capabilities={}>".format(self.grantee, self.capabilities)
 
-    def __eq__(self, other: "PermissionsRule") -> bool:
+    def __eq__(self, other: object) -> bool:
+        if not hasattr(other, "grantee") or not hasattr(other, "capabilities"):
+            return False
         return self.grantee == other.grantee and self.capabilities == other.capabilities
 
     def __and__(self, other: "PermissionsRule") -> "PermissionsRule":
