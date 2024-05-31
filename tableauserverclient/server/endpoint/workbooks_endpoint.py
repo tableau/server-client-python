@@ -310,7 +310,6 @@ class Workbooks(QuerysetEndpoint):
         mode: str,
         connections: Optional[Sequence[ConnectionItem]] = None,
         as_job: bool = False,
-        hidden_views: Optional[Sequence[str]] = None,
         skip_connection_check: bool = False,
         parameters=None,
     ):
