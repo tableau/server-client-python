@@ -315,3 +315,32 @@ class ViewTests(unittest.TestCase):
 
             excel_file = b"".join(single_view.excel)
             self.assertEqual(response, excel_file)
+
+    def test_pdf_height(self) -> None:
+        self.server.version = "3.8"
+        self.baseurl = self.server.views.baseurl
+        with open(POPULATE_PDF, "rb") as f:
+            response = f.read()
+        with requests_mock.mock() as m:
+            m.get(
+                self.baseurl + "/d79634e1-6063-4ec9-95ff-50acbf609ff5/pdf?vizHeight=1080&vizWidth=1920",
+                content=response,
+            )
+            single_view = TSC.ViewItem()
+            single_view._id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
+
+            req_option = TSC.PDFRequestOptions(
+                viz_height=1080,
+                viz_width=1920,
+            )
+
+            self.server.views.populate_pdf(single_view, req_option)
+            self.assertEqual(response, single_view.pdf)
+
+    def test_pdf_errors(self) -> None:
+        req_option = TSC.PDFRequestOptions(viz_height=1080)
+        with self.assertRaises(ValueError):
+            req_option.get_query_params()
+        req_option = TSC.PDFRequestOptions(viz_width=1920)
+        with self.assertRaises(ValueError):
+            req_option.get_query_params()

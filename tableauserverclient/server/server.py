@@ -25,6 +25,7 @@ from .endpoint import (
     Databases,
     Tables,
     Flows,
+    FlowTasks,
     Webhooks,
     DataAccelerationReport,
     Favorites,
@@ -82,6 +83,7 @@ class Server(object):
         self.datasources = Datasources(self)
         self.favorites = Favorites(self)
         self.flows = Flows(self)
+        self.flow_tasks = FlowTasks(self)
         self.projects = Projects(self)
         self.schedules = Schedules(self)
         self.server_info = ServerInfo(self)

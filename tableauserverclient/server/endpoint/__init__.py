@@ -10,6 +10,7 @@ from .favorites_endpoint import Favorites
 from .fileuploads_endpoint import Fileuploads
 from .flow_runs_endpoint import FlowRuns
 from .flows_endpoint import Flows
+from .flow_task_endpoint import FlowTasks
 from .groups_endpoint import Groups
 from .jobs_endpoint import Jobs
 from .metadata_endpoint import Metadata

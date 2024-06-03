@@ -5,6 +5,7 @@ from .custom_view_item import CustomViewItem
 from .data_acceleration_report_item import DataAccelerationReportItem
 from .data_alert_item import DataAlertItem
 from .database_item import DatabaseItem
+from .data_freshness_policy_item import DataFreshnessPolicyItem
 from .datasource_item import DatasourceItem
 from .dqw_item import DQWItem
 from .exceptions import UnpopulatedPropertyError

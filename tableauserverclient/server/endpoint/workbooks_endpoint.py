@@ -1,4 +1,4 @@
-import cgi
+from email.message import Message
 import copy
 import io
 import logging
@@ -137,7 +137,12 @@ class Workbooks(QuerysetEndpoint):
 
     # Update workbook
     @api(version="2.0")
-    def update(self, workbook_item: WorkbookItem) -> WorkbookItem:
+    @parameter_added_in(include_view_acceleration_status="3.22")
+    def update(
+        self,
+        workbook_item: WorkbookItem,
+        include_view_acceleration_status: bool = False,
+    ) -> WorkbookItem:
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -146,6 +151,9 @@ class Workbooks(QuerysetEndpoint):
 
         # Update the workbook itself
         url = "{0}/{1}".format(self.baseurl, workbook_item.id)
+        if include_view_acceleration_status:
+            url += "?includeViewAccelerationStatus=True"
+
         update_req = RequestFactory.Workbook.update_req(workbook_item)
         server_response = self.put_request(url, update_req)
         logger.info("Updated workbook item (ID: {0})".format(workbook_item.id))
@@ -483,14 +491,16 @@ class Workbooks(QuerysetEndpoint):
             url += "?includeExtract=False"
 
         with closing(self.get_request(url, parameters={"stream": True})) as server_response:
-            _, params = cgi.parse_header(server_response.headers["Content-Disposition"])
+            m = Message()
+            m["Content-Disposition"] = server_response.headers["Content-Disposition"]
+            params = m.get_filename(failobj="")
             if isinstance(filepath, io_types_w):
                 for chunk in server_response.iter_content(1024):  # 1KB
                     filepath.write(chunk)
                 return_path = filepath
             else:
                 params = fix_filename(params)
-                filename = to_filename(os.path.basename(params["filename"]))
+                filename = to_filename(os.path.basename(params))
                 download_path = make_download_path(filepath, filename)
                 with open(download_path, "wb") as f:
                     for chunk in server_response.iter_content(1024):  # 1KB

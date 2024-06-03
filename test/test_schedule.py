@@ -50,6 +50,7 @@ class ScheduleTests(unittest.TestCase):
         extract = all_schedules[0]
         subscription = all_schedules[1]
         flow = all_schedules[2]
+        system = all_schedules[3]
 
         self.assertEqual(2, pagination_item.total_available)
         self.assertEqual("c9cff7f9-309c-4361-99ff-d4ba8c9f5467", extract.id)
@@ -78,6 +79,15 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual("2019-02-19T18:55:51Z", format_datetime(flow.updated_at))
         self.assertEqual("Flow", flow.schedule_type)
         self.assertEqual("2019-03-01T09:00:00Z", format_datetime(flow.next_run_at))
+
+        self.assertEqual("3cfa4713-ce7c-4fa7-aa2e-f752bfc8dd04", system.id)
+        self.assertEqual("First of the month 2:00AM", system.name)
+        self.assertEqual("Active", system.state)
+        self.assertEqual(30, system.priority)
+        self.assertEqual("2019-02-19T18:52:19Z", format_datetime(system.created_at))
+        self.assertEqual("2019-02-19T18:55:51Z", format_datetime(system.updated_at))
+        self.assertEqual("System", system.schedule_type)
+        self.assertEqual("2019-03-01T09:00:00Z", format_datetime(system.next_run_at))
 
     def test_get_empty(self) -> None:
         with open(GET_EMPTY_XML, "rb") as f:

@@ -47,7 +47,11 @@ class Pager(object):
 
         # Get the rest on demand as a generator
         while self._count < last_pagination_item.total_available:
-            if len(current_item_list) == 0:
+            if (
+                len(current_item_list) == 0
+                and (last_pagination_item.page_number * last_pagination_item.page_size)
+                < last_pagination_item.total_available
+            ):
                 current_item_list, last_pagination_item = self._load_next_page(last_pagination_item)
 
             try:

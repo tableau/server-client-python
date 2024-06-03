@@ -10,6 +10,7 @@ from .models import (
     DailyInterval,
     DataAlertItem,
     DatabaseItem,
+    DataFreshnessPolicyItem,
     DatasourceItem,
     FavoriteItem,
     FlowItem,

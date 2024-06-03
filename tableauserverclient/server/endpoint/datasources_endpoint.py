@@ -1,4 +1,4 @@
-import cgi
+from email.message import Message
 import copy
 import json
 import io
@@ -437,14 +437,16 @@ class Datasources(QuerysetEndpoint):
             url += "?includeExtract=False"
 
         with closing(self.get_request(url, parameters={"stream": True})) as server_response:
-            _, params = cgi.parse_header(server_response.headers["Content-Disposition"])
+            m = Message()
+            m["Content-Disposition"] = server_response.headers["Content-Disposition"]
+            params = m.get_filename(failobj="")
             if isinstance(filepath, io_types_w):
                 for chunk in server_response.iter_content(1024):  # 1KB
                     filepath.write(chunk)
                 return_path = filepath
             else:
                 params = fix_filename(params)
-                filename = to_filename(os.path.basename(params["filename"]))
+                filename = to_filename(os.path.basename(params))
                 download_path = make_download_path(filepath, filename)
                 with open(download_path, "wb") as f:
                     for chunk in server_response.iter_content(1024):  # 1KB

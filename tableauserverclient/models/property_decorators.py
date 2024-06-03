@@ -1,6 +1,7 @@
 import datetime
 import re
 from functools import wraps
+from typing import Any, Container, Optional, Tuple
 
 from tableauserverclient.datetime_helpers import parse_datetime
 
@@ -65,7 +66,7 @@ def property_is_valid_time(func):
     return wrapper
 
 
-def property_is_int(range, allowed=None):
+def property_is_int(range: Tuple[int, int], allowed: Optional[Container[Any]] = None):
     """Takes a range of ints and a list of exemptions to check against
     when setting a property on a model. The range is a tuple of (min, max) and the
     allowed list (empty by default) allows values outside that range.
@@ -89,8 +90,10 @@ def property_is_int(range, allowed=None):
                     raise ValueError(error)
 
             min, max = range
+            if value in allowed:
+                return func(self, value)
 
-            if (value < min or value > max) and (value not in allowed):
+            if value < min or value > max:
                 raise ValueError(error)
 
             return func(self, value)
@@ -144,15 +147,7 @@ def property_is_data_acceleration_config(func):
     def wrapper(self, value):
         if not isinstance(value, dict):
             raise ValueError("{} is not type 'dict', cannot update {})".format(value.__class__.__name__, func.__name__))
-        if len(value) != 4 or not all(
-            attr in value.keys()
-            for attr in (
-                "acceleration_enabled",
-                "accelerate_now",
-                "last_updated_at",
-                "acceleration_status",
-            )
-        ):
+        if len(value) < 2 or not all(attr in value.keys() for attr in ("acceleration_enabled", "accelerate_now")):
             error = "{} should have 2 keys ".format(func.__name__)
             error += "'acceleration_enabled' and 'accelerate_now'"
             error += "instead you have {}".format(value.keys())
