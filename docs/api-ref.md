@@ -2589,6 +2589,22 @@ csv_req_option.vf('Category', 'Furniture')
 # retrieve the csv data for the view
 server.views.populate_csv(view_item, csv_req_option)
 ```
+
+If you set a parameter in the workbook, you can also pass the parameter value as part of the `CSVRequestOptions` object. For example, if you have a parameter named `Region` in the workbook, you can set the parameter value to `South` as follows:
+
+```py
+# import tableauserverclient as TSC
+# server = TSC.Server('https://MY-SERVER')
+# sign in, get a specific view, etc.
+
+# set view filters
+csv_req_option = TSC.CSVRequestOptions(maxage=5)
+csv_req_option.parameter('Region', 'South')
+
+# retrieve the csv data for the view
+server.views.populate_csv(view_item, csv_req_option)
+```
+
 ### ExcelRequestOptions class
 
 ```py
@@ -2613,6 +2629,21 @@ Name  |  Description
 excel_req_option = TSC.ExcelRequestOptions(maxage=5)
 excel_req_option.vf('Region', 'South')
 excel_req_option.vf('Category', 'Furniture')
+
+# retrieve the excel data for the view
+server.views.populate_excel(view_item, excel_req_option)
+```
+
+If you set a parameter in the workbook, you can also pass the parameter value as part of the `ExcelRequestOptions` object. For example, if you have a parameter named `Region` in the workbook, you can set the parameter value to `South` as follows:
+
+```py
+# import tableauserverclient as TSC
+# server = TSC.Server('https://MY-SERVER')
+# sign in, get a specific view, etc.
+
+# set view filters
+excel_req_option = TSC.ExcelRequestOptions(maxage=5)
+excel_req_option.parameter('Region', 'South')
 
 # retrieve the excel data for the view
 server.views.populate_excel(view_item, excel_req_option)
@@ -2654,6 +2685,22 @@ server.views.populate_image(view_item, image_req_option)
 
 ```
 
+
+If you set a parameter in the workbook, you can also pass the parameter value as part of the `ImageRequestOptions` object. For example, if you have a parameter named `Region` in the workbook, you can set the parameter value to `South` as follows:
+
+```py
+# import tableauserverclient as TSC
+# server = TSC.Server('https://MY-SERVER')
+# sign in, get a specific view, etc.
+
+# set view filters
+image_req_option = TSC.ImageRequestOptions(maxage=5)
+image_req_option.parameter('Region', 'South')
+
+# retrieve the image data for the view
+server.views.populate_image(view_item, image_req_option)
+```
+
 ### PDFRequestOptions class
 
 ```py
@@ -2668,6 +2715,8 @@ Name  |  Description
 `page_type` | The type of page returned in PDF format for the view. The page_type is set using the `PageType` class: <br> `PageType.A3`<br> `PageType.A4`<br> `PageType.A5`<br> `PageType.B5`<br> `PageType.Executive`<br> `PageType.Folio`<br>  `PageType.Ledger`<br> `PageType.Legal`<br> `PageType.Letter`<br> `PageType.Note`<br> `PageType.Quarto`<br> `PageType.Tabloid`
 `orientation` | The orientation of the page. The options are portrait and landscape. The options are set using the `Orientation` class: <br>`Orientation.Portrait`<br> `Orientation.Landscape`
 `maxage` | Optional. The maximum number of minutes the rendered PDF will be cached on the server before being refreshed. The value must be an integer between `1` and `240` minutes. `0` will be interpreted as 1 minute on server, as that is the shortest interval allowed. By default, `maxage` is set to `-1`, indicating the default behavior configured in server settings.
+`viz_height` | Optional. The height of the output PDF in pixels. If specified, viz_width must also be specified.
+`viz_width` | Optional. The width of the output PDF in pixels. If specified, viz_height must also be specified.
 
 **View Filters**
 You can use the `vf('filter_name', 'filter_value')` method to add view filters. When the PDF is generated, the specified filters will be applied to the view.
@@ -2692,6 +2741,39 @@ server.views.populate_pdf(view_item, pdf_req_option)
 
 ```
 
+
+You can also specify height and width for the visualization to be rendered in the PDF. If you specify the height and width, you must specify both values. The height and width are set in pixels.
+
+```py
+# import tableauserverclient as TSC
+# server = TSC.Server('https://MY-SERVER')
+# sign in, get a specific view, etc.
+
+# set the PDF request options
+pdf_req_option = TSC.PDFRequestOptions(page_type=TSC.PDFRequestOptions.PageType.A4,
+                       orientation=TSC.PDFRequestOptions.Orientation.Landscape,
+                       maxage=1,
+                       viz_height=800,
+                       viz_width=1200)
+
+server.views.populate_pdf(view_item, pdf_req_option)
+
+```
+
+If you set a parameter in the workbook, you can also pass the parameter value as part of the `PDFRequestOptions` object. For example, if you have a parameter named `Region` in the workbook, you can set the parameter value to `South` as follows:
+
+```py
+# import tableauserverclient as TSC
+# server = TSC.Server('https://MY-SERVER')
+# sign in, get a specific view, etc.
+
+# set view filters
+pdf_req_option = TSC.PDFRequestOptions(maxage=5)
+pdf_req_option.parameter('Region', 'South')
+
+# retrieve the pdf data for the view
+server.views.populate_pdf(view_item, pdf_req_option)
+```
 
 <br>
 <br>
