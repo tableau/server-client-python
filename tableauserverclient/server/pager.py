@@ -1,9 +1,28 @@
+import copy
 from functools import partial
+from typing import Generic, Iterator, List, Optional, Protocol, Tuple, TypeVar, Union, runtime_checkable
 
-from . import RequestOptions
+from tableauserverclient.models.pagination_item import PaginationItem
+from tableauserverclient.server.request_options import RequestOptions
 
 
-class Pager(object):
+T = TypeVar("T")
+ReturnType = Tuple[List[T], PaginationItem]
+
+
+@runtime_checkable
+class Endpoint(Protocol):
+    def get(self, req_options: Optional[RequestOptions], **kwargs) -> ReturnType:
+        ...
+
+
+@runtime_checkable
+class CallableEndpoint(Protocol):
+    def __call__(self, __req_options: Optional[RequestOptions], **kwargs) -> ReturnType:
+        ...
+
+
+class Pager(Generic[T]):
     """
     Generator that takes an endpoint (top level endpoints with `.get)` and lazily loads items from Server.
     Supports all `RequestOptions` including starting on any page. Also used by models to load sub-models
@@ -12,12 +31,17 @@ class Pager(object):
     Will loop over anything that returns (List[ModelItem], PaginationItem).
     """
 
-    def __init__(self, endpoint, request_opts=None, **kwargs):
-        if hasattr(endpoint, "get"):
+    def __init__(
+        self,
+        endpoint: Union[CallableEndpoint, Endpoint],
+        request_opts: Optional[RequestOptions] = None,
+        **kwargs,
+    ) -> None:
+        if isinstance(endpoint, Endpoint):
             # The simpliest case is to take an Endpoint and call its get
             endpoint = partial(endpoint.get, **kwargs)
             self._endpoint = endpoint
-        elif callable(endpoint):
+        elif isinstance(endpoint, CallableEndpoint):
             # but if they pass a callable then use that instead (used internally)
             endpoint = partial(endpoint, **kwargs)
             self._endpoint = endpoint
@@ -25,47 +49,24 @@ class Pager(object):
             # Didn't get something we can page over
             raise ValueError("Pager needs a server endpoint to page through.")
 
-        self._options = request_opts
+        self._options = request_opts or RequestOptions()
 
-        # If we have options we could be starting on any page, backfill the count
-        if self._options:
-            self._count = (self._options.pagenumber - 1) * self._options.pagesize
-        else:
-            self._count = 0
-            self._options = RequestOptions()
+    def __iter__(self) -> Iterator[T]:
+        options = copy.deepcopy(self._options)
+        while True:
+            # Fetch the first page
+            current_item_list, pagination_item = self._endpoint(options)
 
-    def __iter__(self):
-        # Fetch the first page
-        current_item_list, last_pagination_item = self._endpoint(self._options)
+            if pagination_item.total_available is None:
+                # This endpoint does not support pagination, drain the list and return
+                yield from current_item_list
+                return
+            yield from current_item_list
 
-        if last_pagination_item.total_available is None:
-            # This endpoint does not support pagination, drain the list and return
-            while current_item_list:
-                yield current_item_list.pop(0)
-
-            return
-
-        # Get the rest on demand as a generator
-        while self._count < last_pagination_item.total_available:
-            if (
-                len(current_item_list) == 0
-                and (last_pagination_item.page_number * last_pagination_item.page_size)
-                < last_pagination_item.total_available
-            ):
-                current_item_list, last_pagination_item = self._load_next_page(last_pagination_item)
-
-            try:
-                yield current_item_list.pop(0)
-                self._count += 1
-
-            except IndexError:
-                # The total count on Server changed while fetching exit gracefully
+            if pagination_item.page_size * pagination_item.page_number >= pagination_item.total_available:
+                # Last page, exit
                 return
 
-    def _load_next_page(self, last_pagination_item):
-        next_page = last_pagination_item.page_number + 1
-        opts = RequestOptions(pagenumber=next_page, pagesize=last_pagination_item.page_size)
-        if self._options is not None:
-            opts.sort, opts.filter = self._options.sort, self._options.filter
-        current_item_list, last_pagination_item = self._endpoint(opts)
-        return current_item_list, last_pagination_item
+            # Update the options to fetch the next page
+            options.pagenumber = pagination_item.page_number + 1
+            options.pagesize = pagination_item.page_size
