@@ -120,3 +120,11 @@ class JobTests(unittest.TestCase):
             m.get(f"{self.baseurl}/{job_id}", text=response_xml)
             job = self.server.jobs.get_by_id(job_id)
         self.assertEqual(job.workbook_id, "5998aaaf-1abe-4d38-b4d9-bc53e85bdd13")
+
+    def test_get_job_workbook_name(self) -> None:
+        response_xml = read_xml_asset(GET_BY_ID_WORKBOOK)
+        job_id = "bb1aab79-db54-4e96-9dd3-461d8f081d08"
+        with requests_mock.mock() as m:
+            m.get(f"{self.baseurl}/{job_id}", text=response_xml)
+            job = self.server.jobs.get_by_id(job_id)
+        self.assertEqual(job.workbook_name, "Superstore")
