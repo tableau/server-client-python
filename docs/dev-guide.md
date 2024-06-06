@@ -20,9 +20,6 @@ add your contributions to the **development** branch.
 
 ### Get the source code and set up your branch
 
-1. Make sure you have
-   [signed the CLA](https://tableau.github.io/contributing.html).
-
 1. Fork the repository. We follow the "Fork and Pull" model as described
    [here](https://help.github.com/articles/about-collaborative-development-models/).
 
@@ -170,15 +167,20 @@ section below for details.
    [here](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request-from-a-fork)
    against the **development** branch for code changes.
 
+1. In your first pull request, the Salesforce Contributor License Agreement bot
+   (`salesforce-cla`) will add a comment with instructions to follow.
+
 1. Wait for a review and address any feedback. While we try and stay on top of
-   all issues and PRs it might take a few days for someone to respond. Politely
-   pinging the PR after a few days with no response is OK, we'll try and respond
+   all issues and PRs it might take a while for someone to respond. Politely
+   pinging the PR after a few days with no response is OK; we'll try and respond
    with a timeline as soon as we are able.
 
 1. That's it! When the PR has received
    ![](https://github.githubassets.com/images/icons/emoji/unicode/1f680.png){:height="5%"
    width="5%"} (:rocket:'s) from members of the core team they will merge the
-   PR.
+   PR. **Maintainers:** Make sure to choose a Squash Merge when merging a PR into
+   the `development` branch; that will keep the timeline clean with just the
+   final result from each PR.
 
 ## Updating documentation
 
@@ -190,14 +192,10 @@ All of the documentation source files can be found in `/docs` folder in the
 **gh-pages** branch. The docs are hosted on the following URL:
 <https://tableau.github.io/server-client-python>.
 
-If you are just making documentation updates (adding new docs, fixing typos,
-improving wording) the easiest method is to use the built-in `Edit this file`
-feature (the pencil icon) or the `Edit this page` link.
-
-To make more significant changes or additions, please create a pull request
-against the **gh-pages** branch. When submitted along with a code pull request
-(as described above), you can include a link in the PR text so it's clear they
-go together.
+To make changes or additions to the documentation, please create a pull request
+against the **gh-pages** branch. Because the docs are in a separate branch, you
+would need to create a separate PR for your code versus docs changes. It's helpful
+to link them to each other in comments so it's clear they go together.
 
 ### Running docs locally
 
@@ -215,3 +213,37 @@ To preview and run the documentation locally, these are the steps:
 
 For more details, see the GitHub Pages topic on
 [testing locally](https://docs.github.com/en/github/working-with-github-pages/testing-your-github-pages-site-locally-with-jekyll).
+
+## Release process (maintainers)
+
+To do a release and publish a new version to [PyPI](https://pypi.org/project/tableauserverclient/),
+follow these steps:
+
+1. Do a `development` to `master` branch merge. This should be a regular merge
+   (not a squash) to ensure all individual commits are visible.
+
+1. (Optional) Do a test publish to PyPI without creating the next version tag.
+   This will create a pre-release package with a version like `0.30.post0.dev`.
+
+1. On a local clone of the repo, create and push the tag for the *next* version
+   (in this example it's "v0.31"):
+
+   ```shell
+   git fetch
+   git fetch --tags
+   git checkout master
+   git pull
+   git log  # confirm most recent commit on master is the new release commit
+   git tag -a v0.31 -m 'Release v0.31'
+   git push origin tag v0.31
+   ```
+
+1. Publish the updated release to PyPI by running the [Publish](https://github.com/tableau/server-client-python/actions/workflows/publish-pypi.yml)
+   job and choosing the `master` branch.
+
+1. The job should just take a few minutes to complete, then check the updated
+   package exists on [PyPI](https://pypi.org/project/tableauserverclient/).
+
+1. Create a release in GitHub with the title like "v0.31" and release notes
+   with changes from the last release. You can try the automatic generation
+   of notes, or just create a list of merged PR titles with reference PR numbers.
