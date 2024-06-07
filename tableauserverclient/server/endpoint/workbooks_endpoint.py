@@ -183,7 +183,12 @@ class Workbooks(QuerysetEndpoint):
         filepath: Optional[PathOrFileW] = None,
         include_extract: bool = True,
     ) -> str:
-        return self.download_revision(workbook_id, None, filepath, include_extract, )
+        return self.download_revision(
+            workbook_id,
+            None,
+            filepath,
+            include_extract,
+        )
 
     # Get all views of workbook
     @api(version="2.0")

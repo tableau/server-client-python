@@ -10,4 +10,3 @@ class TableauAuthModelTests(unittest.TestCase):
     def test_username_password_required(self):
         with self.assertRaises(TypeError):
             TSC.TableauAuth()
-
