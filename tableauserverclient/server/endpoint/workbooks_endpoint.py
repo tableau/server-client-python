@@ -182,9 +182,8 @@ class Workbooks(QuerysetEndpoint):
         workbook_id: str,
         filepath: Optional[PathOrFileW] = None,
         include_extract: bool = True,
-        no_extract: Optional[bool] = None,
     ) -> str:
-        return self.download_revision(workbook_id, None, filepath, include_extract, no_extract)
+        return self.download_revision(workbook_id, None, filepath, include_extract, )
 
     # Get all views of workbook
     @api(version="2.0")
@@ -445,7 +444,6 @@ class Workbooks(QuerysetEndpoint):
         revision_number: Optional[str],
         filepath: Optional[PathOrFileW] = None,
         include_extract: bool = True,
-        no_extract: Optional[bool] = None,
     ) -> PathOrFileW:
         if not workbook_id:
             error = "Workbook ID undefined."
@@ -454,15 +452,6 @@ class Workbooks(QuerysetEndpoint):
             url = "{0}/{1}/content".format(self.baseurl, workbook_id)
         else:
             url = "{0}/{1}/revisions/{2}/content".format(self.baseurl, workbook_id, revision_number)
-
-        if no_extract is False or no_extract is True:
-            import warnings
-
-            warnings.warn(
-                "no_extract is deprecated, use include_extract instead.",
-                DeprecationWarning,
-            )
-            include_extract = not no_extract
 
         if not include_extract:
             url += "?includeExtract=False"
