@@ -126,9 +126,13 @@ class Datasources(QuerysetEndpoint):
         datasource_id: str,
         filepath: Optional[PathOrFileW] = None,
         include_extract: bool = True,
-        no_extract: Optional[bool] = None,
     ) -> str:
-        return self.download_revision(datasource_id, None, filepath, include_extract, no_extract)
+        return self.download_revision(
+            datasource_id,
+            None,
+            filepath,
+            include_extract,
+        )
 
     # Update datasource
     @api(version="2.0")
@@ -404,7 +408,6 @@ class Datasources(QuerysetEndpoint):
         revision_number: str,
         filepath: Optional[PathOrFileW] = None,
         include_extract: bool = True,
-        no_extract: Optional[bool] = None,
     ) -> PathOrFileW:
         if not datasource_id:
             error = "Datasource ID undefined."
@@ -413,14 +416,6 @@ class Datasources(QuerysetEndpoint):
             url = "{0}/{1}/content".format(self.baseurl, datasource_id)
         else:
             url = "{0}/{1}/revisions/{2}/content".format(self.baseurl, datasource_id, revision_number)
-        if no_extract is False or no_extract is True:
-            import warnings
-
-            warnings.warn(
-                "no_extract is deprecated, use include_extract instead.",
-                DeprecationWarning,
-            )
-            include_extract = not no_extract
 
         if not include_extract:
             url += "?includeExtract=False"
