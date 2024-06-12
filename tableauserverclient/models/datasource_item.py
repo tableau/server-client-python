@@ -47,6 +47,7 @@ class DatasourceItem(object):
         self._initial_tags: Set = set()
         self._project_name: Optional[str] = None
         self._revisions = None
+        self._size: Optional[int] = None
         self._updated_at = None
         self._use_remote_query_agent = None
         self._webpage_url = None
@@ -182,6 +183,10 @@ class DatasourceItem(object):
             raise UnpopulatedPropertyError(error)
         return self._revisions()
 
+    @property
+    def size(self) -> Optional[int]:
+        return self._size
+
     def _set_connections(self, connections):
         self._connections = connections
 
@@ -217,6 +222,7 @@ class DatasourceItem(object):
                 updated_at,
                 use_remote_query_agent,
                 webpage_url,
+                size,
             ) = self._parse_element(datasource_xml, ns)
             self._set_values(
                 ask_data_enablement,
@@ -237,6 +243,7 @@ class DatasourceItem(object):
                 updated_at,
                 use_remote_query_agent,
                 webpage_url,
+                size,
             )
         return self
 
@@ -260,6 +267,7 @@ class DatasourceItem(object):
         updated_at,
         use_remote_query_agent,
         webpage_url,
+        size,
     ):
         if ask_data_enablement is not None:
             self._ask_data_enablement = ask_data_enablement
@@ -297,6 +305,8 @@ class DatasourceItem(object):
             self._use_remote_query_agent = str(use_remote_query_agent).lower() == "true"
         if webpage_url:
             self._webpage_url = webpage_url
+        if size is not None:
+            self._size = int(size)
 
     @classmethod
     def from_response(cls, resp: str, ns: Dict) -> List["DatasourceItem"]:
@@ -330,6 +340,7 @@ class DatasourceItem(object):
         has_extracts = datasource_xml.get("hasExtracts", None)
         use_remote_query_agent = datasource_xml.get("useRemoteQueryAgent", None)
         webpage_url = datasource_xml.get("webpageUrl", None)
+        size = datasource_xml.get("size", None)
 
         tags = None
         tags_elem = datasource_xml.find(".//t:tags", namespaces=ns)
@@ -372,4 +383,5 @@ class DatasourceItem(object):
             updated_at,
             use_remote_query_agent,
             webpage_url,
+            size,
         )
