@@ -1025,8 +1025,13 @@ class Connection(object):
     @_tsrequest_wrapped
     def update_req(self, xml_request: ET.Element, connection_item: "ConnectionItem") -> None:
         connection_element = ET.SubElement(xml_request, "connection")
-        if connection_item.server_address is not None:
-            connection_element.attrib["serverAddress"] = connection_item.server_address.lower()
+        if (server_address := connection_item.server_address) is not None:
+            if (conn_type := connection_item.connection_type) is not None:
+                if conn_type.casefold() != "odata".casefold():
+                    server_address = server_address.lower()
+            else:
+                server_address = server_address.lower()
+            connection_element.attrib["serverAddress"] = server_address
         if connection_item.server_port is not None:
             connection_element.attrib["serverPort"] = str(connection_item.server_port)
         if connection_item.username is not None:
