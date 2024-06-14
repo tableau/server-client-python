@@ -32,7 +32,7 @@ classifiers = [
 repository = "https://github.com/tableau/server-client-python"
 
 [project.optional-dependencies]
-test = ["black==23.7", "mypy==1.4", "pytest>=7.0", "pytest-cov", "pytest-subtests",
+test = ["black==23.7", "build", "mypy==1.4", "pytest>=7.0", "pytest-cov", "pytest-subtests",
     "requests-mock>=1.0,<2.0"]
 
 [tool.black]
