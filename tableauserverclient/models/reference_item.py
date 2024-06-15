@@ -8,6 +8,11 @@ class ResourceReference(object):
 
     __repr__ = __str__
 
+    def __eq__(self, other: object) -> bool:
+        if not hasattr(other, "id") or not hasattr(other, "tag_name"):
+            return False
+        return (self.id == other.id) and (self.tag_name == other.tag_name)
+
     @property
     def id(self):
         return self._id

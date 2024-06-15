@@ -45,13 +45,58 @@ class Permission:
             return "<Enum Capability: AddComment | ChangeHierarchy | ChangePermission ... (17 more) >"
 
 
-class PermissionsRule(object):
+class PermissionsRule:
     def __init__(self, grantee: ResourceReference, capabilities: Dict[str, str]) -> None:
         self.grantee = grantee
         self.capabilities = capabilities
 
     def __repr__(self):
         return "<PermissionsRule grantee={}, capabilities={}>".format(self.grantee, self.capabilities)
+
+    def __eq__(self, other: object) -> bool:
+        if not hasattr(other, "grantee") or not hasattr(other, "capabilities"):
+            return False
+        return self.grantee == other.grantee and self.capabilities == other.capabilities
+
+    def __and__(self, other: "PermissionsRule") -> "PermissionsRule":
+        if self.grantee != other.grantee:
+            raise ValueError("Cannot AND two permissions rules with different grantees")
+
+        if self.capabilities == other.capabilities:
+            return self
+
+        capabilities = set((*self.capabilities.keys(), *other.capabilities.keys()))
+        new_capabilities = {}
+        for capability in capabilities:
+            if (self.capabilities.get(capability), other.capabilities.get(capability)) == (
+                Permission.Mode.Allow,
+                Permission.Mode.Allow,
+            ):
+                new_capabilities[capability] = Permission.Mode.Allow
+            elif Permission.Mode.Deny in (self.capabilities.get(capability), other.capabilities.get(capability)):
+                new_capabilities[capability] = Permission.Mode.Deny
+
+        return PermissionsRule(self.grantee, new_capabilities)
+
+    def __or__(self, other: "PermissionsRule") -> "PermissionsRule":
+        if self.grantee != other.grantee:
+            raise ValueError("Cannot OR two permissions rules with different grantees")
+
+        if self.capabilities == other.capabilities:
+            return self
+
+        capabilities = set((*self.capabilities.keys(), *other.capabilities.keys()))
+        new_capabilities = {}
+        for capability in capabilities:
+            if Permission.Mode.Allow in (self.capabilities.get(capability), other.capabilities.get(capability)):
+                new_capabilities[capability] = Permission.Mode.Allow
+            elif (self.capabilities.get(capability), other.capabilities.get(capability)) == (
+                Permission.Mode.Deny,
+                Permission.Mode.Deny,
+            ):
+                new_capabilities[capability] = Permission.Mode.Deny
+
+        return PermissionsRule(self.grantee, new_capabilities)
 
     @classmethod
     def from_response(cls, resp, ns=None) -> List["PermissionsRule"]:
