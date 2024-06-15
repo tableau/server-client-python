@@ -22,6 +22,7 @@ GET_BY_ID_XML_PERSONAL = os.path.join(TEST_ASSET_DIR, "workbook_get_by_id_person
 GET_EMPTY_XML = os.path.join(TEST_ASSET_DIR, "workbook_get_empty.xml")
 GET_INVALID_DATE_XML = os.path.join(TEST_ASSET_DIR, "workbook_get_invalid_date.xml")
 GET_XML = os.path.join(TEST_ASSET_DIR, "workbook_get.xml")
+ODATA_XML = os.path.join(TEST_ASSET_DIR, "odata_connection.xml")
 POPULATE_CONNECTIONS_XML = os.path.join(TEST_ASSET_DIR, "workbook_populate_connections.xml")
 POPULATE_PDF = os.path.join(TEST_ASSET_DIR, "populate_pdf.pdf")
 POPULATE_POWERPOINT = os.path.join(TEST_ASSET_DIR, "populate_powerpoint.pptx")
@@ -944,3 +945,31 @@ class WorkbookTests(unittest.TestCase):
             )
             file_path = self.server.workbooks.download("9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", td)
             self.assertTrue(os.path.exists(file_path))
+
+    def test_odata_connection(self) -> None:
+        self.baseurl = self.server.workbooks.baseurl
+        workbook = TSC.WorkbookItem("project", "test")
+        workbook._id = "06b944d2-959d-4604-9305-12323c95e70e"
+        connection = TSC.ConnectionItem()
+        url = "https://odata.website.com/TestODataEndpoint"
+        connection.server_address = url
+        connection._connection_type = "odata"
+        connection._id = "17376070-64d1-4d17-acb4-a56e4b5b1768"
+
+        creds = TSC.ConnectionCredentials("", "", True)
+        connection.connection_credentials = creds
+        with open(ODATA_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+
+        with requests_mock.mock() as m:
+            m.put(f"{self.baseurl}/{workbook.id}/connections/{connection.id}", text=response_xml)
+            self.server.workbooks.update_connection(workbook, connection)
+
+            history = m.request_history
+
+        request = history[0]
+        xml = fromstring(request.body)
+        xml_connection = xml.find(".//connection")
+
+        assert xml_connection is not None
+        self.assertEqual(xml_connection.get("serverAddress"), url)
