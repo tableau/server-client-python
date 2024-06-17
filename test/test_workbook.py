@@ -7,6 +7,8 @@ from defusedxml.ElementTree import fromstring
 from io import BytesIO
 from pathlib import Path
 
+import pytest
+
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
 from tableauserverclient.models import UserItem, GroupItem, PermissionsRule
@@ -622,6 +624,7 @@ class WorkbookTests(unittest.TestCase):
             self.assertTrue(re.search(rb"<views><view.*?hidden=\"true\".*?\/><\/views>", request_body))
             self.assertTrue(re.search(rb"<views><view.*?name=\"GDP per capita\".*?\/><\/views>", request_body))
 
+    @pytest.mark.filterwarnings("ignore:'as_job' not available")
     def test_publish_with_query_params(self) -> None:
         with open(PUBLISH_ASYNC_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
