@@ -39,7 +39,7 @@ class QuerySet(Iterable[T], Sized):
         self._result_cache: List[T] = []
         self._pagination_item = PaginationItem()
 
-    def __iter__(self) -> Iterator[T]:
+    def __iter__(self: Self) -> Iterator[T]:
         # Not built to be re-entrant. Starts back at page 1, and empties
         # the result cache. Ensure the result_cache is empty to not yield
         # items from prior usage.
@@ -55,11 +55,11 @@ class QuerySet(Iterable[T], Sized):
                 return
 
     @overload
-    def __getitem__(self, k: Slice) -> List[T]:
+    def __getitem__(self: Self, k: Slice) -> List[T]:
         ...
 
     @overload
-    def __getitem__(self, k: int) -> T:
+    def __getitem__(self: Self, k: int) -> T:
         ...
 
     def __getitem__(self, k):
@@ -109,32 +109,32 @@ class QuerySet(Iterable[T], Sized):
             # If k is unreasonable, raise an IndexError.
             raise IndexError
 
-    def _fetch_all(self) -> None:
+    def _fetch_all(self: Self) -> None:
         """
         Retrieve the data and store result and pagination item in cache
         """
         if not self._result_cache:
             self._result_cache, self._pagination_item = self.model.get(self.request_options)
 
-    def __len__(self) -> int:
+    def __len__(self: Self) -> int:
         return self.total_available
 
     @property
-    def total_available(self) -> int:
+    def total_available(self: Self) -> int:
         self._fetch_all()
         return self._pagination_item.total_available
 
     @property
-    def page_number(self) -> int:
+    def page_number(self: Self) -> int:
         self._fetch_all()
         return self._pagination_item.page_number
 
     @property
-    def page_size(self) -> int:
+    def page_size(self: Self) -> int:
         self._fetch_all()
         return self._pagination_item.page_size
 
-    def filter(self, *invalid, **kwargs) -> Self:
+    def filter(self: Self, *invalid, **kwargs) -> Self:
         if invalid:
             raise RuntimeError("Only accepts keyword arguments.")
         for kwarg_key, value in kwargs.items():
@@ -142,20 +142,20 @@ class QuerySet(Iterable[T], Sized):
             self.request_options.filter.add(Filter(field_name, operator, value))
         return self
 
-    def order_by(self, *args) -> Self:
+    def order_by(self: Self, *args) -> Self:
         for arg in args:
             field_name, direction = self._parse_shorthand_sort(arg)
             self.request_options.sort.add(Sort(field_name, direction))
         return self
 
-    def paginate(self, **kwargs) -> Self:
+    def paginate(self: Self, **kwargs) -> Self:
         if "page_number" in kwargs:
             self.request_options.pagenumber = kwargs["page_number"]
         if "page_size" in kwargs:
             self.request_options.pagesize = kwargs["page_size"]
         return self
 
-    def _parse_shorthand_filter(self, key: str) -> Tuple[str, str]:
+    def _parse_shorthand_filter(self: Self, key: str) -> Tuple[str, str]:
         tokens = key.split("__", 1)
         if len(tokens) == 1:
             operator = RequestOptions.Operator.Equals
@@ -169,7 +169,7 @@ class QuerySet(Iterable[T], Sized):
             raise ValueError("Field name `{}` is not valid.".format(field))
         return (field, operator)
 
-    def _parse_shorthand_sort(self, key: str) -> Tuple[str, str]:
+    def _parse_shorthand_sort(self: Self, key: str) -> Tuple[str, str]:
         direction = RequestOptions.Direction.Asc
         if key.startswith("-"):
             direction = RequestOptions.Direction.Desc
