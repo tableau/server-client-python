@@ -1,6 +1,6 @@
 import copy
 from functools import partial
-from typing import Generic, Iterator, List, Optional, Protocol, Tuple, TypeVar, Union, runtime_checkable
+from typing import Generic, Iterable, Iterator, List, Optional, Protocol, Tuple, TypeVar, Union, runtime_checkable
 
 from tableauserverclient.models.pagination_item import PaginationItem
 from tableauserverclient.server.request_options import RequestOptions
@@ -22,7 +22,7 @@ class CallableEndpoint(Protocol):
         ...
 
 
-class Pager(Generic[T]):
+class Pager(Iterable[T]):
     """
     Generator that takes an endpoint (top level endpoints with `.get)` and lazily loads items from Server.
     Supports all `RequestOptions` including starting on any page. Also used by models to load sub-models
