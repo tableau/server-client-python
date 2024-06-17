@@ -1,6 +1,6 @@
-from collections.abc import Iterable, Sized
+from collections.abc import Sized
 from itertools import count
-from typing import Iterator, List, Optional, Protocol, Tuple, TYPE_CHECKING, TypeVar, overload
+from typing import Iterable, Iterator, List, Optional, Protocol, Tuple, TYPE_CHECKING, TypeVar, overload
 from tableauserverclient.models.pagination_item import PaginationItem
 from tableauserverclient.server.filter import Filter
 from tableauserverclient.server.request_options import RequestOptions
