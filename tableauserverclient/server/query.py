@@ -41,7 +41,9 @@ class QuerySet(Iterable[T], Sized):
 
     def __iter__(self) -> Iterator[T]:
         # Not built to be re-entrant. Starts back at page 1, and empties
-        # the result cache.
+        # the result cache. Ensure the result_cache is empty to not yield
+        # items from prior usage.
+        self._result_cache = []
 
         for page in count(1):
             self.request_options.pagenumber = page
