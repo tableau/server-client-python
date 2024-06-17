@@ -11,7 +11,7 @@ from ..pager import Pager
 from tableauserverclient.helpers.logging import logger
 
 
-class Users(QuerysetEndpoint):
+class Users(QuerysetEndpoint[UserItem]):
     @property
     def baseurl(self) -> str:
         return "{0}/sites/{1}/users".format(self.parent_srv.baseurl, self.parent_srv.site_id)

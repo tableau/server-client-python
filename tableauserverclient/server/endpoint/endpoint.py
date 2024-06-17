@@ -1,9 +1,13 @@
 from tableauserverclient import datetime_helpers as datetime
 
+import abc
 from packaging.version import Version
 from functools import wraps
 from xml.etree.ElementTree import ParseError
-from typing import Any, Callable, Dict, Optional, TYPE_CHECKING, Union
+from typing import Any, Callable, Dict, Generic, List, Optional, TYPE_CHECKING, Tuple, TypeVar, Union
+
+from tableauserverclient.models.pagination_item import PaginationItem
+from tableauserverclient.server.request_options import RequestOptions
 
 from .exceptions import (
     ServerResponseError,
@@ -300,25 +304,36 @@ def parameter_added_in(**params):
     return _decorator
 
 
-class QuerysetEndpoint(Endpoint):
+T = TypeVar("T")
+
+
+class QuerysetEndpoint(Endpoint, Generic[T]):
     @api(version="2.0")
-    def all(self, *args, **kwargs):
+    def all(self, *args, **kwargs) -> QuerySet[T]:
+        if args or kwargs:
+            raise ValueError(".all method takes no arguments.")
         queryset = QuerySet(self)
         return queryset
 
     @api(version="2.0")
-    def filter(self, *_, **kwargs) -> QuerySet:
+    def filter(self, *_, **kwargs) -> QuerySet[T]:
         if _:
             raise RuntimeError("Only keyword arguments accepted.")
         queryset = QuerySet(self).filter(**kwargs)
         return queryset
 
     @api(version="2.0")
-    def order_by(self, *args, **kwargs):
+    def order_by(self, *args, **kwargs) -> QuerySet[T]:
+        if kwargs:
+            raise ValueError(".order_by does not accept keyword arguments.")
         queryset = QuerySet(self).order_by(*args)
         return queryset
 
     @api(version="2.0")
-    def paginate(self, **kwargs):
+    def paginate(self, **kwargs) -> QuerySet[T]:
         queryset = QuerySet(self).paginate(**kwargs)
         return queryset
+
+    @abc.abstractmethod
+    def get(self, request_options: RequestOptions) -> Tuple[List[T], PaginationItem]:
+        raise NotImplementedError(f".get has not been implemented for {self.__class__.__qualname__}")

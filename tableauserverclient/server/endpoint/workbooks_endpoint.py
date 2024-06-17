@@ -56,7 +56,7 @@ PathOrFileR = Union[FilePath, FileObjectR]
 PathOrFileW = Union[FilePath, FileObjectW]
 
 
-class Workbooks(QuerysetEndpoint):
+class Workbooks(QuerysetEndpoint[WorkbookItem]):
     def __init__(self, parent_srv: "Server") -> None:
         super(Workbooks, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)

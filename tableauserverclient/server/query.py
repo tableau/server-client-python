@@ -1,8 +1,24 @@
-from typing import Tuple
-from .filter import Filter
-from .request_options import RequestOptions
-from .sort import Sort
+from collections.abc import Iterable, Sized
+from itertools import count
+from typing import Iterator, List, Optional, Protocol, Tuple, TYPE_CHECKING, TypeVar, overload
+from tableauserverclient.models.pagination_item import PaginationItem
+from tableauserverclient.server.filter import Filter
+from tableauserverclient.server.request_options import RequestOptions
+from tableauserverclient.server.sort import Sort
 import math
+
+from typing_extensions import Self
+
+if TYPE_CHECKING:
+    from tableauserverclient.server.endpoint import QuerysetEndpoint
+
+T = TypeVar("T")
+
+
+class Slice(Protocol):
+    start: Optional[int]
+    step: Optional[int]
+    stop: Optional[int]
 
 
 def to_camel_case(word: str) -> str:
@@ -16,28 +32,33 @@ see pagination_sample
 """
 
 
-class QuerySet:
-    def __init__(self, model):
+class QuerySet(Iterable[T], Sized):
+    def __init__(self, model: "QuerysetEndpoint[T]") -> None:
         self.model = model
         self.request_options = RequestOptions()
-        self._result_cache = None
-        self._pagination_item = None
+        self._result_cache: List[T] = []
+        self._pagination_item = PaginationItem()
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[T]:
         # Not built to be re-entrant. Starts back at page 1, and empties
         # the result cache.
-        self.request_options.pagenumber = 1
-        self._result_cache = None
-        total = self.total_available
-        size = self.page_size
-        yield from self._result_cache
 
-        # Loop through the subsequent pages.
-        for page in range(1, math.ceil(total / size)):
-            self.request_options.pagenumber = page + 1
-            self._result_cache = None
+        for page in count(1):
+            self.request_options.pagenumber = page
             self._fetch_all()
             yield from self._result_cache
+            # Set result_cache to empty so the fetch will populate
+            self._result_cache = []
+            if (page * self.page_size) >= len(self):
+                return
+
+    @overload
+    def __getitem__(self, k: Slice) -> List[T]:
+        ...
+
+    @overload
+    def __getitem__(self, k: int) -> T:
+        ...
 
     def __getitem__(self, k):
         page = self.page_number
@@ -78,7 +99,7 @@ class QuerySet:
             return self._result_cache[k % size]
         elif k in range(self.total_available):
             # Otherwise, check if k is even sensible to return
-            self._result_cache = None
+            self._result_cache = []
             # Add one to k, otherwise it gets stuck at page boundaries, e.g. 100
             self.request_options.pagenumber = max(1, math.ceil((k + 1) / size))
             return self[k]
@@ -86,11 +107,11 @@ class QuerySet:
             # If k is unreasonable, raise an IndexError.
             raise IndexError
 
-    def _fetch_all(self):
+    def _fetch_all(self) -> None:
         """
         Retrieve the data and store result and pagination item in cache
         """
-        if self._result_cache is None:
+        if not self._result_cache:
             self._result_cache, self._pagination_item = self.model.get(self.request_options)
 
     def __len__(self) -> int:
@@ -111,21 +132,21 @@ class QuerySet:
         self._fetch_all()
         return self._pagination_item.page_size
 
-    def filter(self, *invalid, **kwargs):
+    def filter(self, *invalid, **kwargs) -> Self:
         if invalid:
-            raise RuntimeError(f"Only accepts keyword arguments.")
+            raise RuntimeError("Only accepts keyword arguments.")
         for kwarg_key, value in kwargs.items():
             field_name, operator = self._parse_shorthand_filter(kwarg_key)
             self.request_options.filter.add(Filter(field_name, operator, value))
         return self
 
-    def order_by(self, *args):
+    def order_by(self, *args) -> Self:
         for arg in args:
             field_name, direction = self._parse_shorthand_sort(arg)
             self.request_options.sort.add(Sort(field_name, direction))
         return self
 
-    def paginate(self, **kwargs):
+    def paginate(self, **kwargs) -> Self:
         if "page_number" in kwargs:
             self.request_options.pagenumber = kwargs["page_number"]
         if "page_size" in kwargs:

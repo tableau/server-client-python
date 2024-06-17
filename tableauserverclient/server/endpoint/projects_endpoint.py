@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 from tableauserverclient.helpers.logging import logger
 
 
-class Projects(QuerysetEndpoint):
+class Projects(QuerysetEndpoint[ProjectItem]):
     def __init__(self, parent_srv: "Server") -> None:
         super(Projects, self).__init__(parent_srv)
 
