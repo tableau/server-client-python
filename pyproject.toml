@@ -49,6 +49,8 @@ disable_error_code = [
 files = ["tableauserverclient", "test"]
 show_error_codes = true
 ignore_missing_imports = true  # defusedxml library has no types
+no_implicit_reexport = true
+
 [tool.pytest.ini_options]
 testpaths = ["test"]
 addopts = "--junitxml=./test.junit.xml"

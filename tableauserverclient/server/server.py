@@ -5,9 +5,7 @@ import urllib3
 
 from defusedxml.ElementTree import fromstring, ParseError
 from packaging.version import Version
-
-from . import CustomViews
-from .endpoint import (
+from tableauserverclient.server.endpoint import (
     Sites,
     Views,
     Users,
@@ -34,13 +32,14 @@ from .endpoint import (
     FlowRuns,
     Metrics,
     Endpoint,
+    CustomViews,
 )
-from .exceptions import (
+from tableauserverclient.server.exceptions import (
     ServerInfoEndpointNotFoundError,
     EndpointUnavailableError,
 )
-from .endpoint.exceptions import NotSignedInError
-from ..namespace import Namespace
+from tableauserverclient.server.endpoint.exceptions import NotSignedInError
+from tableauserverclient.namespace import Namespace
 
 
 _PRODUCT_TO_REST_VERSION = {
