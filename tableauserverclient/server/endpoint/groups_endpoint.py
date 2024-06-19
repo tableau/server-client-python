@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from ..request_options import RequestOptions
 
 
-class Groups(QuerysetEndpoint):
+class Groups(QuerysetEndpoint[GroupItem]):
     @property
     def baseurl(self) -> str:
         return "{0}/sites/{1}/groups".format(self.parent_srv.baseurl, self.parent_srv.site_id)

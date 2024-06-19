@@ -54,7 +54,7 @@ PathOrFileR = Union[FilePath, FileObjectR]
 PathOrFileW = Union[FilePath, FileObjectW]
 
 
-class Datasources(QuerysetEndpoint):
+class Datasources(QuerysetEndpoint[DatasourceItem]):
     def __init__(self, parent_srv: "Server") -> None:
         super(Datasources, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)

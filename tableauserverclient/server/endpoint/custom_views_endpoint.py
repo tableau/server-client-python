@@ -17,7 +17,7 @@ update the name or owner of a custom view.
 """
 
 
-class CustomViews(QuerysetEndpoint):
+class CustomViews(QuerysetEndpoint[CustomViewItem]):
     def __init__(self, parent_srv):
         super(CustomViews, self).__init__(parent_srv)
 
