@@ -47,10 +47,10 @@ class QuerySet(Iterable[T], Sized):
 
         for page in count(1):
             self.request_options.pagenumber = page
+            self._result_cache = []
             self._fetch_all()
             yield from self._result_cache
             # Set result_cache to empty so the fetch will populate
-            self._result_cache = []
             if (page * self.page_size) >= len(self):
                 return
 
