@@ -155,6 +155,10 @@ class QuerySet(Iterable[T], Sized):
             self.request_options.pagesize = kwargs["page_size"]
         return self
 
+    def with_page_size(self: Self, value: int) -> Self:
+        self.request_options.pagesize = value
+        return self
+
     def _parse_shorthand_filter(self: Self, key: str) -> Tuple[str, str]:
         tokens = key.split("__", 1)
         if len(tokens) == 1:
