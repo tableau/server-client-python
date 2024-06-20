@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     )
 
 
-class Views(QuerysetEndpoint):
+class Views(QuerysetEndpoint[ViewItem]):
     def __init__(self, parent_srv):
         super(Views, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)
@@ -50,12 +50,14 @@ class Views(QuerysetEndpoint):
         return all_view_items, pagination_item
 
     @api(version="3.1")
-    def get_by_id(self, view_id: str) -> ViewItem:
+    def get_by_id(self, view_id: str, usage: bool = False) -> ViewItem:
         if not view_id:
             error = "View item missing ID."
             raise MissingRequiredFieldError(error)
         logger.info("Querying single view (ID: {0})".format(view_id))
         url = "{0}/{1}".format(self.baseurl, view_id)
+        if usage:
+            url += "?includeUsageStatistics=true"
         server_response = self.get_request(url)
         return ViewItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 

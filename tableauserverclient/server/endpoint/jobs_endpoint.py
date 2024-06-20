@@ -11,7 +11,7 @@ from tableauserverclient.helpers.logging import logger
 from typing import List, Optional, Tuple, Union
 
 
-class Jobs(QuerysetEndpoint):
+class Jobs(QuerysetEndpoint[JobItem]):
     @property
     def baseurl(self):
         return "{0}/sites/{1}/jobs".format(self.parent_srv.baseurl, self.parent_srv.site_id)

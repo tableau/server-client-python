@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from ..request_options import RequestOptions
 
 
-class FlowRuns(QuerysetEndpoint):
+class FlowRuns(QuerysetEndpoint[FlowRunItem]):
     def __init__(self, parent_srv: "Server") -> None:
         super(FlowRuns, self).__init__(parent_srv)
         return None

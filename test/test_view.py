@@ -13,6 +13,7 @@ ADD_TAGS_XML = os.path.join(TEST_ASSET_DIR, "view_add_tags.xml")
 GET_XML = os.path.join(TEST_ASSET_DIR, "view_get.xml")
 GET_XML_ID = os.path.join(TEST_ASSET_DIR, "view_get_id.xml")
 GET_XML_USAGE = os.path.join(TEST_ASSET_DIR, "view_get_usage.xml")
+GET_XML_ID_USAGE = os.path.join(TEST_ASSET_DIR, "view_get_id_usage.xml")
 POPULATE_PREVIEW_IMAGE = os.path.join(TEST_ASSET_DIR, "Sample View Image.png")
 POPULATE_PDF = os.path.join(TEST_ASSET_DIR, "populate_pdf.pdf")
 POPULATE_CSV = os.path.join(TEST_ASSET_DIR, "populate_csv.csv")
@@ -80,6 +81,25 @@ class ViewTests(unittest.TestCase):
         self.assertEqual("2002-05-30T09:00:00Z", format_datetime(view.created_at))
         self.assertEqual("2002-06-05T08:00:59Z", format_datetime(view.updated_at))
         self.assertEqual("story", view.sheet_type)
+
+    def test_get_by_id_usage(self) -> None:
+        with open(GET_XML_ID_USAGE, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + "/d79634e1-6063-4ec9-95ff-50acbf609ff5?includeUsageStatistics=true", text=response_xml)
+            view = self.server.views.get_by_id("d79634e1-6063-4ec9-95ff-50acbf609ff5", usage=True)
+
+        self.assertEqual("d79634e1-6063-4ec9-95ff-50acbf609ff5", view.id)
+        self.assertEqual("ENDANGERED SAFARI", view.name)
+        self.assertEqual("SafariSample/sheets/ENDANGEREDSAFARI", view.content_url)
+        self.assertEqual("3cc6cd06-89ce-4fdc-b935-5294135d6d42", view.workbook_id)
+        self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", view.owner_id)
+        self.assertEqual("5241e88d-d384-4fd7-9c2f-648b5247efc5", view.project_id)
+        self.assertEqual(set(["tag1", "tag2"]), view.tags)
+        self.assertEqual("2002-05-30T09:00:00Z", format_datetime(view.created_at))
+        self.assertEqual("2002-06-05T08:00:59Z", format_datetime(view.updated_at))
+        self.assertEqual("story", view.sheet_type)
+        self.assertEqual(7, view.total_views)
 
     def test_get_by_id_missing_id(self) -> None:
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.views.get_by_id, None)

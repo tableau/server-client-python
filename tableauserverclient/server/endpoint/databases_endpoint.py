@@ -89,17 +89,6 @@ class Databases(Endpoint):
         self._permissions.populate(item)
 
     @api(version="3.5")
-    def update_permission(self, item, rules):
-        import warnings
-
-        warnings.warn(
-            "Server.databases.update_permission is deprecated, "
-            "please use Server.databases.update_permissions instead.",
-            DeprecationWarning,
-        )
-        return self._permissions.update(item, rules)
-
-    @api(version="3.5")
     def update_permissions(self, item, rules):
         return self._permissions.update(item, rules)
 

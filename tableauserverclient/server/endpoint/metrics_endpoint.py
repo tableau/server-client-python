@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 from tableauserverclient.helpers.logging import logger
 
 
-class Metrics(QuerysetEndpoint):
+class Metrics(QuerysetEndpoint[MetricItem]):
     def __init__(self, parent_srv: "Server") -> None:
         super(Metrics, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)

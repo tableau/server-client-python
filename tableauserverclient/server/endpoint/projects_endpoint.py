@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 from tableauserverclient.helpers.logging import logger
 
 
-class Projects(QuerysetEndpoint):
+class Projects(QuerysetEndpoint[ProjectItem]):
     def __init__(self, parent_srv: "Server") -> None:
         super(Projects, self).__init__(parent_srv)
 
@@ -74,17 +74,6 @@ class Projects(QuerysetEndpoint):
     @api(version="2.0")
     def populate_permissions(self, item: ProjectItem) -> None:
         self._permissions.populate(item)
-
-    @api(version="2.0")
-    def update_permission(self, item, rules):
-        import warnings
-
-        warnings.warn(
-            "Server.projects.update_permission is deprecated, "
-            "please use Server.projects.update_permissions instead.",
-            DeprecationWarning,
-        )
-        return self._permissions.update(item, rules)
 
     @api(version="2.0")
     def update_permissions(self, item, rules):

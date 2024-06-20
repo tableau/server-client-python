@@ -50,7 +50,7 @@ PathOrFileR = Union[FilePath, FileObjectR]
 PathOrFileW = Union[FilePath, FileObjectW]
 
 
-class Flows(QuerysetEndpoint):
+class Flows(QuerysetEndpoint[FlowItem]):
     def __init__(self, parent_srv):
         super(Flows, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)
@@ -264,16 +264,6 @@ class Flows(QuerysetEndpoint):
     @api(version="3.3")
     def populate_permissions(self, item: FlowItem) -> None:
         self._permissions.populate(item)
-
-    @api(version="3.3")
-    def update_permission(self, item, permission_item):
-        import warnings
-
-        warnings.warn(
-            "Server.flows.update_permission is deprecated, " "please use Server.flows.update_permissions instead.",
-            DeprecationWarning,
-        )
-        self._permissions.update(item, permission_item)
 
     @api(version="3.3")
     def update_permissions(self, item: FlowItem, permission_item: Iterable["PermissionsRule"]) -> None:
