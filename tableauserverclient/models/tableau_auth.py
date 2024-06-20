@@ -28,10 +28,7 @@ def deprecate_site_attribute():
 
 # The traditional auth type: username/password
 class TableauAuth(Credentials):
-    def __init__(self, username, password, site=None, site_id=None, user_id_to_impersonate=None):
-        if site is not None:
-            deprecate_site_attribute()
-            site_id = site
+    def __init__(self, username, password, site_id=None, user_id_to_impersonate=None):
         super().__init__(site_id, user_id_to_impersonate)
         if password is None:
             raise TabError("Must provide a password when using traditional authentication")
@@ -48,16 +45,6 @@ class TableauAuth(Credentials):
         else:
             uid = ""
         return f"<Credentials username={self.username} password=redacted (site={self.site_id}{uid})>"
-
-    @property
-    def site(self):
-        deprecate_site_attribute()
-        return self.site_id
-
-    @site.setter
-    def site(self, value):
-        deprecate_site_attribute()
-        self.site_id = value
 
 
 # A Tableau-generated Personal Access Token
