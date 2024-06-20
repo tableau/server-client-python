@@ -2061,9 +2061,9 @@ Name  |  Description
 ``` 
 
 
-#### projects.update_permission
+#### projects.update_permissions
 ```py
-projects.update_permission(item, rules)
+projects.update_permissions(item, rules)
 ```
 
 Add project permissions for a user or group.  
@@ -2096,7 +2096,7 @@ Name  |  Description
   capabilities=project_capabilities
  )
  
- server.projects.update_permission(project_item, [project_rules])
+ server.projects.update_permissions(project_item, [project_rules])
 ``` 
 
 
@@ -5336,7 +5336,7 @@ print(workbook.name)
 #### workbooks.publish
 
 ```py
-workbooks.publish(workbook_item, file_path, publish_mode, connections, skip_connection_check, as_job, hidden_views)
+workbooks.publish(workbook_item, file_path, publish_mode, connections, skip_connection_check, as_job)
 ```
 
 Publish a workbook to the specified site.
@@ -5360,10 +5360,8 @@ Name | Description
 `file`  |  The file path or file object of the workbook to publish. When providing a file object, you must also specifiy the name of the workbook in your instance of the `workbook_item``workbook_item` , as the name cannot be derived from the file name.
 `mode`     |  Specifies whether you are publishing a new workbook (`CreateNew`) or overwriting an existing workbook (`Overwrite`).  You cannot appending workbooks.  You can also use the publish mode attributes, for example: `TSC.Server.PublishMode.Overwrite`.
 `connections` | List of `ConnectionItems` objects for the connections created within the workbook.
-`connection_credentials` | (Optional)  The credentials (if required) to connect to the workbook's data source. The `ConnectionCredentials` object contains the authentication information for the data source (user name and password, and whether the credentials are embedded or OAuth is used). **Deprecated since API server version 2.3.**
 `skip_connection_check` | (Optional) Set to `True` to skip connection check at time of upload. Publishing will succeed but unchecked connection issues may result in a non-functioning workbook. Defaults to `False`.
 `as_job` | (Optional) Set to `True` to run the upload as a job (asynchronous upload). If set to `True` a job will start to perform the publishing process and a `Job` object is returned. Defaults to `False`.
-`hidden_views` | (Optional) List of string names of views that need to be hidden when the workbook is published.
 
 
 
@@ -5783,7 +5781,7 @@ None. The preview image is added to the view.
 #### workbooks.update_connection
 
 ```py
-workbooks.update_conn(workbook_item, connection_item)
+workbooks.update_connection(workbook_item, connection_item)
 ```
 
 Updates a workbook connection information (server address, server port, user name, and password).
@@ -5821,7 +5819,7 @@ connection.username = 'USERNAME'
 connection.password = 'PASSWORD'
 
 # call the update method
-server.workbooks.update_conn(workbook, connection)
+server.workbooks.update_connection(workbook, connection)
 ```
 
 <br>
