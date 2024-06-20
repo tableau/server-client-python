@@ -42,9 +42,9 @@ def extract_values(obj, key):
 
 
 def get_page_info(result):
-    next_page = extract_values(result, "hasNextPage").pop()
-    cursor = extract_values(result, "endCursor").pop()
-    return next_page, cursor
+    next_page = extract_values(result, "hasNextPage")
+    cursor = extract_values(result, "endCursor")
+    return next_page.pop() if next_page else None, cursor.pop() if cursor else None
 
 
 class Metadata(Endpoint):
