@@ -10,8 +10,10 @@ class Credentials(abc.ABC):
     @property
     @abc.abstractmethod
     def credentials(self) -> Dict[str, str]:
-        credentials = ("Credentials can be username/password, Personal Access Token, or JWT"
-        "This method returns values to set as an attribute on the credentials element of the request")
+        credentials = (
+            "Credentials can be username/password, Personal Access Token, or JWT"
+            "This method returns values to set as an attribute on the credentials element of the request"
+        )
         return {"key": "value"}
 
     @abc.abstractmethod
@@ -30,7 +32,9 @@ def deprecate_site_attribute():
 
 # The traditional auth type: username/password
 class TableauAuth(Credentials):
-    def __init__(self, username: str, password: str, site_id: Optional[str] = None, user_id_to_impersonate: Optional[str] = None) -> None:
+    def __init__(
+        self, username: str, password: str, site_id: Optional[str] = None, user_id_to_impersonate: Optional[str] = None
+    ) -> None:
         super().__init__(site_id, user_id_to_impersonate)
         if password is None:
             raise TabError("Must provide a password when using traditional authentication")
@@ -51,7 +55,13 @@ class TableauAuth(Credentials):
 
 # A Tableau-generated Personal Access Token
 class PersonalAccessTokenAuth(Credentials):
-    def __init__(self, token_name: str, personal_access_token: str, site_id: Optional[str] = None, user_id_to_impersonate: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        token_name: str,
+        personal_access_token: str,
+        site_id: Optional[str] = None,
+        user_id_to_impersonate: Optional[str] = None,
+    ) -> None:
         if personal_access_token is None or token_name is None:
             raise TabError("Must provide a token and token name when using PAT authentication")
         super().__init__(site_id=site_id, user_id_to_impersonate=user_id_to_impersonate)
