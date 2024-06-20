@@ -1,5 +1,5 @@
 import abc
-from typing import Optional
+from typing import Dict, Optional
 
 
 class Credentials(abc.ABC):
@@ -9,7 +9,7 @@ class Credentials(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def credentials(self) -> dict[str, str]:
+    def credentials(self) -> Dict[str, str]:
         credentials = ("Credentials can be username/password, Personal Access Token, or JWT"
         "This method returns values to set as an attribute on the credentials element of the request")
         return {"key": "value"}
@@ -38,7 +38,7 @@ class TableauAuth(Credentials):
         self.username = username
 
     @property
-    def credentials(self) -> dict[str, str]:
+    def credentials(self) -> Dict[str, str]:
         return {"name": self.username, "password": self.password}
 
     def __repr__(self):
@@ -59,7 +59,7 @@ class PersonalAccessTokenAuth(Credentials):
         self.personal_access_token = personal_access_token
 
     @property
-    def credentials(self) -> dict[str, str]:
+    def credentials(self) -> Dict[str, str]:
         return {
             "personalAccessTokenName": self.token_name,
             "personalAccessTokenSecret": self.personal_access_token,
@@ -85,7 +85,7 @@ class JWTAuth(Credentials):
         self.jwt = jwt
 
     @property
-    def credentials(self) -> dict[str, str]:
+    def credentials(self) -> Dict[str, str]:
         return {"jwt": self.jwt}
 
     def __repr__(self):
