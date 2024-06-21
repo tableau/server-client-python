@@ -56,7 +56,7 @@ PathOrFileR = Union[FilePath, FileObjectR]
 PathOrFileW = Union[FilePath, FileObjectW]
 
 
-class Workbooks(QuerysetEndpoint):
+class Workbooks(QuerysetEndpoint[WorkbookItem]):
     def __init__(self, parent_srv: "Server") -> None:
         super(Workbooks, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)
@@ -160,13 +160,6 @@ class Workbooks(QuerysetEndpoint):
         updated_workbook = copy.copy(workbook_item)
         return updated_workbook._parse_common_tags(server_response.content, self.parent_srv.namespace)
 
-    @api(version="2.3")
-    def update_conn(self, *args, **kwargs):
-        import warnings
-
-        warnings.warn("update_conn is deprecated, please use update_connection instead")
-        return self.update_connection(*args, **kwargs)
-
     # Update workbook_connection
     @api(version="2.3")
     def update_connection(self, workbook_item: WorkbookItem, connection_item: ConnectionItem) -> ConnectionItem:
@@ -189,9 +182,13 @@ class Workbooks(QuerysetEndpoint):
         workbook_id: str,
         filepath: Optional[PathOrFileW] = None,
         include_extract: bool = True,
-        no_extract: Optional[bool] = None,
     ) -> str:
-        return self.download_revision(workbook_id, None, filepath, include_extract, no_extract)
+        return self.download_revision(
+            workbook_id,
+            None,
+            filepath,
+            include_extract,
+        )
 
     # Get all views of workbook
     @api(version="2.0")
@@ -315,21 +312,11 @@ class Workbooks(QuerysetEndpoint):
         workbook_item: WorkbookItem,
         file: PathOrFileR,
         mode: str,
-        connection_credentials: Optional["ConnectionCredentials"] = None,
         connections: Optional[Sequence[ConnectionItem]] = None,
         as_job: bool = False,
-        hidden_views: Optional[Sequence[str]] = None,
         skip_connection_check: bool = False,
         parameters=None,
     ):
-        if connection_credentials is not None:
-            import warnings
-
-            warnings.warn(
-                "connection_credentials is being deprecated. Use connections instead",
-                DeprecationWarning,
-            )
-
         if isinstance(file, (str, os.PathLike)):
             if not os.path.isfile(file):
                 error = "File path does not lead to an existing file."
@@ -391,12 +378,9 @@ class Workbooks(QuerysetEndpoint):
             logger.info("Publishing {0} to server with chunking method (workbook over 64MB)".format(workbook_item.name))
             upload_session_id = self.parent_srv.fileuploads.upload(file)
             url = "{0}&uploadSessionId={1}".format(url, upload_session_id)
-            conn_creds = connection_credentials
             xml_request, content_type = RequestFactory.Workbook.publish_req_chunked(
                 workbook_item,
-                connection_credentials=conn_creds,
                 connections=connections,
-                hidden_views=hidden_views,
             )
         else:
             logger.info("Publishing {0} to server".format(filename))
@@ -411,14 +395,11 @@ class Workbooks(QuerysetEndpoint):
             else:
                 raise TypeError("file should be a filepath or file object.")
 
-            conn_creds = connection_credentials
             xml_request, content_type = RequestFactory.Workbook.publish_req(
                 workbook_item,
                 filename,
                 file_contents,
-                connection_credentials=conn_creds,
                 connections=connections,
-                hidden_views=hidden_views,
             )
         logger.debug("Request xml: {0} ".format(redact_xml(xml_request[:1000])))
 
@@ -468,7 +449,6 @@ class Workbooks(QuerysetEndpoint):
         revision_number: Optional[str],
         filepath: Optional[PathOrFileW] = None,
         include_extract: bool = True,
-        no_extract: Optional[bool] = None,
     ) -> PathOrFileW:
         if not workbook_id:
             error = "Workbook ID undefined."
@@ -477,15 +457,6 @@ class Workbooks(QuerysetEndpoint):
             url = "{0}/{1}/content".format(self.baseurl, workbook_id)
         else:
             url = "{0}/{1}/revisions/{2}/content".format(self.baseurl, workbook_id, revision_number)
-
-        if no_extract is False or no_extract is True:
-            import warnings
-
-            warnings.warn(
-                "no_extract is deprecated, use include_extract instead.",
-                DeprecationWarning,
-            )
-            include_extract = not no_extract
 
         if not include_extract:
             url += "?includeExtract=False"

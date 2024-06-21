@@ -32,7 +32,7 @@ classifiers = [
 repository = "https://github.com/tableau/server-client-python"
 
 [project.optional-dependencies]
-test = ["argparse", "black==23.7", "mock", "mypy==1.4", "pytest>=7.0", "pytest-cov", "pytest-subtests",
+test = ["black==23.7", "build", "mypy==1.4", "pytest>=7.0", "pytest-cov", "pytest-subtests",
     "requests-mock>=1.0,<2.0"]
 
 [tool.black]
@@ -49,6 +49,8 @@ disable_error_code = [
 files = ["tableauserverclient", "test"]
 show_error_codes = true
 ignore_missing_imports = true  # defusedxml library has no types
+no_implicit_reexport = true
+
 [tool.pytest.ini_options]
 testpaths = ["test"]
 addopts = "--junitxml=./test.junit.xml"

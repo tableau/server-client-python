@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?><tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api https://help.tableau.com/samples/en-us/rest_api/ts-api_3_23.xsd">
+    <connections>
+        <connection id="17376070-64d1-4d17-acb4-a56e4b5b1768" type="odata" embedPassword="false" serverAddress="https://odata.website.com/TestODataEndpoint" userName="" queryTaggingEnabled="false">
+            <datasource id="d82f784e-178f-4b7e-a723-d8f615155a42" name="People (services.odata.org/ODataPeopleService/People)"/>
+        </connection>
+    </connections>
+</tsResponse>
