@@ -1,4 +1,7 @@
+import csv
+import io
 import os
+from pathlib import Path
 import unittest
 
 from defusedxml import ElementTree as ET
@@ -7,8 +10,9 @@ import requests_mock
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime, parse_datetime
 
-TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
+TEST_ASSET_DIR = Path(__file__).resolve().parent / "assets"
 
+BULK_ADD_XML = TEST_ASSET_DIR / "users_bulk_add_job.xml"
 GET_XML = os.path.join(TEST_ASSET_DIR, "user_get.xml")
 GET_XML_ALL_FIELDS = os.path.join(TEST_ASSET_DIR, "user_get_all_fields.xml")
 GET_EMPTY_XML = os.path.join(TEST_ASSET_DIR, "user_get_empty.xml")
@@ -320,3 +324,82 @@ class UserTests(unittest.TestCase):
         user_elem = tree.find(".//user")
         assert user_elem is not None
         assert user_elem.attrib["idpConfigurationId"] == "012345"
+
+    def test_bulk_add(self):
+        self.server.version = "3.15"
+        users = [
+            TSC.UserItem(
+                "test",
+                "Viewer",
+            )
+        ]
+        with requests_mock.mock() as m:
+            m.post(f"{self.server.users.baseurl}/import", text=BULK_ADD_XML.read_text())
+
+            job = self.server.users.bulk_add(users)
+
+            assert m.last_request.method == "POST"
+            assert m.last_request.url == f"{self.server.users.baseurl}/import"
+
+            body = m.last_request.body.replace(b"\r\n", b"\n")
+            assert body.startswith(b"--")  # Check if it's a multipart request
+            boundary = body.split(b"\n")[0].strip()
+
+            # Body starts and ends with a boundary string. Split the body into
+            # segments and ignore the empty sections at the start and end.
+            segments = [seg for s in body.split(boundary) if (seg := s.strip()) not in [b"", b"--"]]
+            assert len(segments) == 2  # Check if there are two segments
+
+            # Check if the first segment is the csv file and the second segment is the xml
+            assert b'Content-Disposition: form-data; name="tableau_user_import"' in segments[0]
+            assert b'Content-Disposition: form-data; name="request_payload"' in segments[1]
+            assert b"Content-Type: file" in segments[0]
+            assert b"Content-Type: text/xml" in segments[1]
+
+            xml_string = segments[1].split(b"\n\n")[1].strip()
+            xml = ET.fromstring(xml_string)
+            xml_users = xml.findall(".//user", namespaces={})
+            assert len(xml_users) == len(users)
+
+            for user, xml_user in zip(users, xml_users):
+                assert user.name == xml_user.get("name")
+                assert xml_user.get("authSetting") == (user.auth_setting or "ServerDefault")
+
+            license_map = {
+                "Viewer": "Viewer",
+                "Explorer": "Explorer",
+                "ExplorerCanPublish": "Explorer",
+                "Creator": "Creator",
+                "SiteAdministratorExplorer": "Explorer",
+                "SiteAdministratorCreator": "Creator",
+                "ServerAdministrator": "Creator",
+                "Unlicensed": "Unlicensed",
+            }
+            publish_map = {
+                "Unlicensed": 0,
+                "Viewer": 0,
+                "Explorer": 0,
+                "Creator": 1,
+                "ExplorerCanPublish": 1,
+                "SiteAdministratorExplorer": 1,
+                "SiteAdministratorCreator": 1,
+                "ServerAdministrator": 1,
+            }
+            admin_map = {
+                "SiteAdministratorExplorer": "Site",
+                "SiteAdministratorCreator": "Site",
+                "ServerAdministrator": "System",
+            }
+
+            csv_columns = ["name", "password", "fullname", "license", "admin", "publish", "email"]
+            csv_file = io.StringIO(segments[0].split(b"\n\n")[1].decode("utf-8"))
+            csv_reader = csv.reader(csv_file)
+            for user, row in zip(users, csv_reader):
+                site_role = user.site_role or "Unlicensed"
+                csv_user = dict(zip(csv_columns, row))
+                assert user.name == csv_user["name"]
+                assert (user.fullname or "") == csv_user["fullname"]
+                assert (user.email or "") == csv_user["email"]
+                assert license_map[site_role] == csv_user["license"]
+                assert admin_map.get(site_role, "") == csv_user["admin"]
+                assert publish_map[site_role] == int(csv_user["publish"])
