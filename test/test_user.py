@@ -326,7 +326,14 @@ class UserTests(unittest.TestCase):
         assert user_elem.attrib["idpConfigurationId"] == "012345"
 
     def test_bulk_add(self):
-        def make_user(name: str, site_role: str = "", auth_setting: str = "", domain: str = "", fullname: str = "", email: str = "") -> TSC.UserItem:
+        def make_user(
+            name: str,
+            site_role: str = "",
+            auth_setting: str = "",
+            domain: str = "",
+            fullname: str = "",
+            email: str = "",
+        ) -> TSC.UserItem:
             user = TSC.UserItem(name, site_role or None)
             if auth_setting:
                 user.auth_setting = auth_setting
@@ -340,14 +347,14 @@ class UserTests(unittest.TestCase):
 
         self.server.version = "3.15"
         users = [
-                make_user("Alice", "Viewer"),
-                make_user("Bob", "Explorer"),
-                make_user("Charlie", "Creator", "SAML"),
-                make_user("Dave"),
-                make_user("Eve", "ServerAdministrator", "OpenID", "example.com", "Eve Example", "Eve@example.com"),
-                make_user("Frank", "SiteAdministratorExplorer", "TableauIDWithMFA", email="Frank@example.com"),
-                make_user("Grace", "SiteAdministratorCreator", "SAML", "example.com", "Grace Example", "gex@example.com"),
-                make_user("Hank", "Unlicensed")
+            make_user("Alice", "Viewer"),
+            make_user("Bob", "Explorer"),
+            make_user("Charlie", "Creator", "SAML"),
+            make_user("Dave"),
+            make_user("Eve", "ServerAdministrator", "OpenID", "example.com", "Eve Example", "Eve@example.com"),
+            make_user("Frank", "SiteAdministratorExplorer", "TableauIDWithMFA", email="Frank@example.com"),
+            make_user("Grace", "SiteAdministratorCreator", "SAML", "example.com", "Grace Example", "gex@example.com"),
+            make_user("Hank", "Unlicensed"),
         ]
         with requests_mock.mock() as m:
             m.post(f"{self.server.users.baseurl}/import", text=BULK_ADD_XML.read_text())
