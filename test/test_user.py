@@ -326,12 +326,28 @@ class UserTests(unittest.TestCase):
         assert user_elem.attrib["idpConfigurationId"] == "012345"
 
     def test_bulk_add(self):
+        def make_user(name: str, site_role: str = "", auth_setting: str = "", domain: str = "", fullname: str = "", email: str = "") -> TSC.UserItem:
+            user = TSC.UserItem(name, site_role or None)
+            if auth_setting:
+                user.auth_setting = auth_setting
+            if domain:
+                user._domain_name = domain
+            if fullname:
+                user.fullname = fullname
+            if email:
+                user.email = email
+            return user
+
         self.server.version = "3.15"
         users = [
-            TSC.UserItem(
-                "test",
-                "Viewer",
-            )
+                make_user("Alice", "Viewer"),
+                make_user("Bob", "Explorer"),
+                make_user("Charlie", "Creator", "SAML"),
+                make_user("Dave"),
+                make_user("Eve", "ServerAdministrator", "OpenID", "example.com", "Eve Example", "Eve@example.com"),
+                make_user("Frank", "SiteAdministratorExplorer", "TableauIDWithMFA", email="Frank@example.com"),
+                make_user("Grace", "SiteAdministratorCreator", "SAML", "example.com", "Grace Example", "gex@example.com"),
+                make_user("Hank", "Unlicensed")
         ]
         with requests_mock.mock() as m:
             m.post(f"{self.server.users.baseurl}/import", text=BULK_ADD_XML.read_text())
@@ -396,8 +412,9 @@ class UserTests(unittest.TestCase):
             csv_reader = csv.reader(csv_file)
             for user, row in zip(users, csv_reader):
                 site_role = user.site_role or "Unlicensed"
+                name = f"{user.domain_name}\\{user.name}" if user.domain_name else user.name
                 csv_user = dict(zip(csv_columns, row))
-                assert user.name == csv_user["name"]
+                assert name == csv_user["name"]
                 assert (user.fullname or "") == csv_user["fullname"]
                 assert (user.email or "") == csv_user["email"]
                 assert license_map[site_role] == csv_user["license"]
