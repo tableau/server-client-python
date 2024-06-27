@@ -620,7 +620,7 @@ def create_users_csv(users: Iterable[UserItem], identity_pool=None) -> bytes:
 
             writer.writerow(
                 (
-                    user.name,
+                    f"{user.domain_name}\\{user.name}" if user.domain_name else user.name,
                     getattr(user, "password", ""),
                     user.fullname,
                     license,
