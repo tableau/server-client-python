@@ -239,6 +239,7 @@ class UserTests(unittest.TestCase):
             self.assertEqual("TableauExample", group_list[2].name)
             self.assertEqual("local", group_list[2].domain_name)
 
+    @pytest.mark.filterwarnings("ignore:This method is deprecated, use bulk_add instead")
     def test_get_usernames_from_file(self):
         with open(ADD_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
@@ -248,6 +249,7 @@ class UserTests(unittest.TestCase):
         assert user_list[0].name == "Cassie", user_list
         assert failures == [], failures
 
+    @pytest.mark.filterwarnings("ignore:This method is deprecated, use bulk_add instead")
     def test_get_users_from_file(self):
         with open(ADD_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
