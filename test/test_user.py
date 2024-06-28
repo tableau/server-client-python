@@ -403,9 +403,6 @@ class UserTests(unittest.TestCase):
                 assert admin_map.get(site_role, "") == csv_user["admin"]
                 assert publish_map[site_role] == int(csv_user["publish"])
 
-
-
-
     def test_bulk_add(self):
         self.server.version = "3.15"
         users = [
@@ -467,10 +464,9 @@ class UserTests(unittest.TestCase):
     def test_bulk_remove(self):
         self.server.version = "3.15"
         users = [
-            TSC.UserItem("Alice"),
-            TSC.UserItem("Bob"),
+            make_user("Alice"),
+            make_user("Bob", domain="example.com"),
         ]
-        users[1]._domain_name = "example.com"
         with requests_mock.mock() as m:
             m.post(f"{self.server.users.baseurl}/delete")
 
