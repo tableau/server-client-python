@@ -7,6 +7,8 @@ from tableauserverclient.models.group_item import GroupItem
 
 
 class GroupSetItem:
+    tag_name: str = "groupSet"
+
     def __init__(self, name: Optional[str] = None) -> None:
         self.name = name
         self.id: Optional[str] = None
