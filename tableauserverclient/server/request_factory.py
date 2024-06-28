@@ -990,6 +990,12 @@ class UserRequest:
         }
         return _add_multipart(parts)
 
+    def delete_csv_req(self, csv_content: bytes):
+        parts = {
+            "tableau_user_delete": ("tsc_users_file.csv", csv_content, "file"),
+        }
+        return _add_multipart(parts)
+
 
 class WorkbookRequest:
     def _generate_xml(

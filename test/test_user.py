@@ -439,3 +439,32 @@ class UserTests(unittest.TestCase):
 
             with pytest.raises(ValueError, match="User name must be populated."):
                 self.server.users.bulk_add(users)
+
+    def test_bulk_remove(self):
+        self.server.version = "3.15"
+        users = [
+            TSC.UserItem("Alice"),
+            TSC.UserItem("Bob"),
+        ]
+        users[1]._domain_name = "example.com"
+        with requests_mock.mock() as m:
+            m.post(f"{self.server.users.baseurl}/delete")
+
+            self.server.users.bulk_remove(users)
+
+            assert m.last_request.method == "POST"
+            assert m.last_request.url == f"{self.server.users.baseurl}/delete"
+
+            body = m.last_request.body.replace(b"\r\n", b"\n")
+            assert body.startswith(b"--")  # Check if it's a multipart request
+            boundary = body.split(b"\n")[0].strip()
+
+            content = next(seg for seg in body.split(boundary) if seg.strip())
+            assert b'Content-Disposition: form-data; name="tableau_user_delete"' in content
+            assert b"Content-Type: file" in content
+
+            content = content.replace(b"\r\n", b"\n")
+            csv_data = content.split(b"\n\n")[1].decode("utf-8")
+            for user, row in zip(users, csv_data.split("\n")):
+                name, *_ = row.split(",")
+                assert name == f"{user.domain_name}\\{user.name}" if user.domain_name else user.name
