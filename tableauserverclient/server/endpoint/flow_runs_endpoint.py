@@ -1,16 +1,16 @@
 import logging
 from typing import List, Optional, Tuple, TYPE_CHECKING
 
-from .endpoint import QuerysetEndpoint, api
-from .exceptions import FlowRunFailedException, FlowRunCancelledException
+from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
+from tableauserverclient.server.endpoint.exceptions import FlowRunFailedException, FlowRunCancelledException
 from tableauserverclient.models import FlowRunItem, PaginationItem
 from tableauserverclient.exponential_backoff import ExponentialBackoffTimer
 
 from tableauserverclient.helpers.logging import logger
 
 if TYPE_CHECKING:
-    from ..server import Server
-    from ..request_options import RequestOptions
+    from tableauserverclient.server.server import Server
+    from tableauserverclient.server.request_options import RequestOptions
 
 
 class FlowRuns(QuerysetEndpoint[FlowRunItem]):
