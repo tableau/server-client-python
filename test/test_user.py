@@ -5,6 +5,7 @@ from pathlib import Path
 import unittest
 
 from defusedxml import ElementTree as ET
+import pytest
 import requests_mock
 
 import tableauserverclient as TSC
@@ -427,3 +428,14 @@ class UserTests(unittest.TestCase):
                 assert license_map[site_role] == csv_user["license"]
                 assert admin_map.get(site_role, "") == csv_user["admin"]
                 assert publish_map[site_role] == int(csv_user["publish"])
+
+    def test_bulk_add_no_name(self):
+        self.server.version = "3.15"
+        users = [
+            TSC.UserItem(site_role="Viewer"),
+        ]
+        with requests_mock.mock() as m:
+            m.post(f"{self.server.users.baseurl}/import", text=BULK_ADD_XML.read_text())
+
+            with pytest.raises(ValueError, match="User name must be populated."):
+                self.server.users.bulk_add(users)
