@@ -9,11 +9,11 @@ from typing import Iterable, List, Optional, TYPE_CHECKING, Tuple, Union
 
 from tableauserverclient.helpers.headers import fix_filename
 
-from .dqw_endpoint import _DataQualityWarningEndpoint
-from .endpoint import QuerysetEndpoint, api
-from .exceptions import InternalServerError, MissingRequiredFieldError
-from .permissions_endpoint import _PermissionsEndpoint
-from .resource_tagger import _ResourceTagger
+from tableauserverclient.server.endpoint.dqw_endpoint import _DataQualityWarningEndpoint
+from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
+from tableauserverclient.server.endpoint.exceptions import InternalServerError, MissingRequiredFieldError
+from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
+from tableauserverclient.server.endpoint.resource_tagger import _ResourceTagger
 from tableauserverclient.models import FlowItem, PaginationItem, ConnectionItem, JobItem
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.filesys_helpers import (
