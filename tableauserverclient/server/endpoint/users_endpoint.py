@@ -377,6 +377,14 @@ class Users(QuerysetEndpoint[UserItem]):
         server_response = self.post_request(url, xml_request, content_type)
         return JobItem.from_response(server_response.content, self.parent_srv.namespace).pop()
 
+    @api(version="3.15")
+    def bulk_remove(self, users: Iterable[UserItem]) -> None:
+        url = f"{self.baseurl}/delete"
+        csv_content = remove_users_csv(users)
+        request, content_type = RequestFactory.User.delete_csv_req(csv_content)
+        server_response = self.post_request(url, request, content_type)
+        return None
+
     @api(version="2.0")
     def create_from_file(self, filepath: str) -> tuple[list[UserItem], list[tuple[UserItem, ServerResponseError]]]:
         import warnings
@@ -627,6 +635,26 @@ def create_users_csv(users: Iterable[UserItem], identity_pool=None) -> bytes:
                     admin_level,
                     publish,
                     user.email,
+                )
+            )
+        output.seek(0)
+        result = output.read().encode("utf-8")
+    return result
+
+
+def remove_users_csv(users: Iterable[UserItem]) -> bytes:
+    with io.StringIO() as output:
+        writer = csv.writer(output, quoting=csv.QUOTE_MINIMAL)
+        for user in users:
+            writer.writerow(
+                (
+                    f"{user.domain_name}\\{user.name}" if user.domain_name else user.name,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
                 )
             )
         output.seek(0)
