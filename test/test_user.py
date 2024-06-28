@@ -490,5 +490,6 @@ class UserTests(unittest.TestCase):
             content = content.replace(b"\r\n", b"\n")
             csv_data = content.split(b"\n\n")[1].decode("utf-8")
             for user, row in zip(users, csv_data.split("\n")):
-                name, *_ = row.split(",")
-                assert name == f"{user.domain_name}\\{user.name}" if user.domain_name else user.name
+                with self.subTest(user=user):
+                    name, *_ = row.split(",")
+                    assert name == f"{user.domain_name}\\{user.name}" if user.domain_name else user.name
