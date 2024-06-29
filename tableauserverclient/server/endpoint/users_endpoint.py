@@ -366,7 +366,16 @@ class Users(QuerysetEndpoint[UserItem]):
     @api(version="3.15")
     def bulk_add(self, users: Iterable[UserItem]) -> JobItem:
         """
-        line format: Username [required], password, display name, license, admin, publish
+        When adding users in bulk, the server will return a job item that can be used to track the progress of the
+        operation. This method will return the job item that was created when the users were added.
+
+        For each user, name is required, and other fields are optional. If connected to activte directory and
+        the user name is not unique across domains, then the domain attribute must be populated on
+        the UserItem.
+
+        The user's display name is read from the fullname attribute.
+
+        Email is optional, but if provided, it must be a valid email address.
         """
         url = f"{self.baseurl}/import"
         # Allow for iterators to be passed into the function
