@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+    <users>
+        <user id="5de011f8-4aa9-4d5b-b991-f464c8dd6bb7" name="Alice" siteRole="ServerAdministrator" />
+        <user id="5de011f8-3aa9-4d5b-b991-f467c8dd6bb8" name="Bob" siteRole="Explorer" />
+        <user id="5de011f8-2aa9-4d5b-b991-f466c8dd6bb8" name="Charlie" siteRole="Viewer" />
+    </users>
+</tsResponse>
