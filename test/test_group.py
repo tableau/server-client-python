@@ -14,6 +14,7 @@ GET_XML = os.path.join(TEST_ASSET_DIR, "group_get.xml")
 POPULATE_USERS = os.path.join(TEST_ASSET_DIR, "group_populate_users.xml")
 POPULATE_USERS_EMPTY = os.path.join(TEST_ASSET_DIR, "group_populate_users_empty.xml")
 ADD_USER = os.path.join(TEST_ASSET_DIR, "group_add_user.xml")
+ADD_USERS = TEST_ASSET_DIR / "group_add_users.xml"
 ADD_USER_POPULATE = os.path.join(TEST_ASSET_DIR, "group_users_added.xml")
 CREATE_GROUP = os.path.join(TEST_ASSET_DIR, "group_create.xml")
 CREATE_GROUP_AD = os.path.join(TEST_ASSET_DIR, "group_create_ad.xml")
@@ -122,6 +123,54 @@ class GroupTests(unittest.TestCase):
             self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", user.id)
             self.assertEqual("testuser", user.name)
             self.assertEqual("ServerAdministrator", user.site_role)
+
+    def test_add_users(self) -> None:
+        self.server.version = "3.21"
+        self.baseurl = self.server.groups.baseurl
+
+        def make_user(id: str, name: str, siteRole: str) -> TSC.UserItem:
+            user = TSC.UserItem(name, siteRole)
+            user._id = id
+            return user
+
+        users = [
+            make_user(id="5de011f8-4aa9-4d5b-b991-f464c8dd6bb7", name="Alice", siteRole="ServerAdministrator"),
+            make_user(id="5de011f8-3aa9-4d5b-b991-f467c8dd6bb8", name="Bob", siteRole="Explorer"),
+            make_user(id="5de011f8-2aa9-4d5b-b991-f466c8dd6bb8", name="Charlie", siteRole="Viewer"),
+        ]
+        group = TSC.GroupItem("test")
+        group._id = "e7833b48-c6f7-47b5-a2a7-36e7dd232758"
+
+        with requests_mock.mock() as m:
+            m.post(f"{self.baseurl}/{group.id}/users", text=ADD_USERS.read_text())
+            resp_users = self.server.groups.add_users(group, users)
+
+        for user, resp_user in zip(users, resp_users):
+            with self.subTest(user=user, resp_user=resp_user):
+                assert user.id == resp_user.id
+                assert user.name == resp_user.name
+                assert user.site_role == resp_user.site_role
+
+    def test_remove_users(self) -> None:
+        self.server.version = "3.21"
+        self.baseurl = self.server.groups.baseurl
+
+        def make_user(id: str, name: str, siteRole: str) -> TSC.UserItem:
+            user = TSC.UserItem(name, siteRole)
+            user._id = id
+            return user
+
+        users = [
+            make_user(id="5de011f8-4aa9-4d5b-b991-f464c8dd6bb7", name="Alice", siteRole="ServerAdministrator"),
+            make_user(id="5de011f8-3aa9-4d5b-b991-f467c8dd6bb8", name="Bob", siteRole="Explorer"),
+            make_user(id="5de011f8-2aa9-4d5b-b991-f466c8dd6bb8", name="Charlie", siteRole="Viewer"),
+        ]
+        group = TSC.GroupItem("test")
+        group._id = "e7833b48-c6f7-47b5-a2a7-36e7dd232758"
+
+        with requests_mock.mock() as m:
+            m.put(f"{self.baseurl}/{group.id}/users/remove")
+            self.server.groups.remove_users(group, users)
 
     def test_add_user_before_populating(self) -> None:
         with open(GET_XML, "rb") as f:
