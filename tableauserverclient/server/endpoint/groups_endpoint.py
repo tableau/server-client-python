@@ -1,17 +1,17 @@
 import logging
 
-from .endpoint import QuerysetEndpoint, api
-from .exceptions import MissingRequiredFieldError
+from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
+from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import GroupItem, UserItem, PaginationItem, JobItem
-from ..pager import Pager
+from tableauserverclient.server.pager import Pager
 
 from tableauserverclient.helpers.logging import logger
 
-from typing import List, Optional, TYPE_CHECKING, Tuple, Union
+from typing import Iterable, List, Optional, TYPE_CHECKING, Tuple, Union
 
 if TYPE_CHECKING:
-    from ..request_options import RequestOptions
+    from tableauserverclient.server.request_options import RequestOptions
 
 
 class Groups(QuerysetEndpoint[GroupItem]):
@@ -19,9 +19,9 @@ class Groups(QuerysetEndpoint[GroupItem]):
     def baseurl(self) -> str:
         return "{0}/sites/{1}/groups".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
-    # Gets all groups
     @api(version="2.0")
     def get(self, req_options: Optional["RequestOptions"] = None) -> Tuple[List[GroupItem], PaginationItem]:
+        """Gets all groups"""
         logger.info("Querying all groups on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -29,9 +29,9 @@ class Groups(QuerysetEndpoint[GroupItem]):
         all_group_items = GroupItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_group_items, pagination_item
 
-    # Gets all users in a given group
     @api(version="2.0")
-    def populate_users(self, group_item, req_options: Optional["RequestOptions"] = None) -> None:
+    def populate_users(self, group_item: GroupItem, req_options: Optional["RequestOptions"] = None) -> None:
+        """Gets all users in a given group"""
         if not group_item.id:
             error = "Group item missing ID. Group must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -47,7 +47,7 @@ class Groups(QuerysetEndpoint[GroupItem]):
         group_item._set_users(user_pager)
 
     def _get_users_for_group(
-        self, group_item, req_options: Optional["RequestOptions"] = None
+        self, group_item: GroupItem, req_options: Optional["RequestOptions"] = None
     ) -> Tuple[List[UserItem], PaginationItem]:
         url = "{0}/{1}/users".format(self.baseurl, group_item.id)
         server_response = self.get_request(url, req_options)
@@ -56,9 +56,9 @@ class Groups(QuerysetEndpoint[GroupItem]):
         logger.info("Populated users for group (ID: {0})".format(group_item.id))
         return user_item, pagination_item
 
-    # Deletes 1 group by id
     @api(version="2.0")
     def delete(self, group_id: str) -> None:
+        """Deletes 1 group by id"""
         if not group_id:
             error = "Group ID undefined."
             raise ValueError(error)
@@ -87,17 +87,17 @@ class Groups(QuerysetEndpoint[GroupItem]):
         else:
             return GroupItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
-    # Create a 'local' Tableau group
     @api(version="2.0")
     def create(self, group_item: GroupItem) -> GroupItem:
+        """Create a 'local' Tableau group"""
         url = self.baseurl
         create_req = RequestFactory.Group.create_local_req(group_item)
         server_response = self.post_request(url, create_req)
         return GroupItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
-    # Create a group based on Active Directory
     @api(version="2.0")
     def create_AD_group(self, group_item: GroupItem, asJob: bool = False) -> Union[GroupItem, JobItem]:
+        """Create a group based on Active Directory"""
         asJobparameter = "?asJob=true" if asJob else ""
         url = self.baseurl + asJobparameter
         create_req = RequestFactory.Group.create_ad_req(group_item)
@@ -107,9 +107,9 @@ class Groups(QuerysetEndpoint[GroupItem]):
         else:
             return GroupItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
-    # Removes 1 user from 1 group
     @api(version="2.0")
     def remove_user(self, group_item: GroupItem, user_id: str) -> None:
+        """Removes 1 user from 1 group"""
         if not group_item.id:
             error = "Group item missing ID."
             raise MissingRequiredFieldError(error)
@@ -120,9 +120,22 @@ class Groups(QuerysetEndpoint[GroupItem]):
         self.delete_request(url)
         logger.info("Removed user (id: {0}) from group (ID: {1})".format(user_id, group_item.id))
 
-    # Adds 1 user to 1 group
+    @api(version="3.21")
+    def remove_users(self, group_item: GroupItem, users: Iterable[Union[str, UserItem]]) -> None:
+        """Removes multiple users from 1 group"""
+        group_id = group_item.id if hasattr(group_item, "id") else group_item
+        if not isinstance(group_id, str):
+            raise ValueError(f"Invalid group provided: {group_item}")
+
+        url = f"{self.baseurl}/{group_id}/users/remove"
+        add_req = RequestFactory.Group.remove_users_req(users)
+        _ = self.put_request(url, add_req)
+        logger.info("Removed users to group (ID: {0})".format(group_item.id))
+        return None
+
     @api(version="2.0")
     def add_user(self, group_item: GroupItem, user_id: str) -> UserItem:
+        """Adds 1 user to 1 group"""
         if not group_item.id:
             error = "Group item missing ID."
             raise MissingRequiredFieldError(error)
@@ -135,3 +148,17 @@ class Groups(QuerysetEndpoint[GroupItem]):
         user = UserItem.from_response(server_response.content, self.parent_srv.namespace).pop()
         logger.info("Added user (id: {0}) to group (ID: {1})".format(user_id, group_item.id))
         return user
+
+    @api(version="3.21")
+    def add_users(self, group_item: GroupItem, users: Iterable[Union[str, UserItem]]) -> List[UserItem]:
+        """Adds multiple users to 1 group"""
+        group_id = group_item.id if hasattr(group_item, "id") else group_item
+        if not isinstance(group_id, str):
+            raise ValueError(f"Invalid group provided: {group_item}")
+
+        url = f"{self.baseurl}/{group_id}/users"
+        add_req = RequestFactory.Group.add_users_req(users)
+        server_response = self.post_request(url, add_req)
+        users = UserItem.from_response(server_response.content, self.parent_srv.namespace)
+        logger.info("Added users to group (ID: {0})".format(group_item.id))
+        return users
