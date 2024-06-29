@@ -7,17 +7,17 @@ from typing import Callable, Dict, List, Optional, Set
 from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.datetime_helpers import parse_datetime
-from .connection_item import ConnectionItem
-from .exceptions import UnpopulatedPropertyError
-from .permissions_item import PermissionsRule
-from .property_decorators import (
+from tableauserverclient.models.connection_item import ConnectionItem
+from tableauserverclient.models.exceptions import UnpopulatedPropertyError
+from tableauserverclient.models.permissions_item import PermissionsRule
+from tableauserverclient.models.property_decorators import (
     property_is_boolean,
     property_is_data_acceleration_config,
 )
-from .revision_item import RevisionItem
-from .tag_item import TagItem
-from .view_item import ViewItem
-from .data_freshness_policy_item import DataFreshnessPolicyItem
+from tableauserverclient.models.revision_item import RevisionItem
+from tableauserverclient.models.tag_item import TagItem
+from tableauserverclient.models.view_item import ViewItem
+from tableauserverclient.models.data_freshness_policy_item import DataFreshnessPolicyItem
 
 
 class WorkbookItem(object):
