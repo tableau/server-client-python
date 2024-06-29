@@ -15,11 +15,11 @@ if TYPE_CHECKING:
     from tableauserverclient.models import PermissionsRule
     from .schedules_endpoint import AddResponse
 
-from .dqw_endpoint import _DataQualityWarningEndpoint
-from .endpoint import QuerysetEndpoint, api, parameter_added_in
-from .exceptions import InternalServerError, MissingRequiredFieldError
-from .permissions_endpoint import _PermissionsEndpoint
-from .resource_tagger import _ResourceTagger
+from tableauserverclient.server.endpoint.dqw_endpoint import _DataQualityWarningEndpoint
+from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api, parameter_added_in
+from tableauserverclient.server.endpoint.exceptions import InternalServerError, MissingRequiredFieldError
+from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
+from tableauserverclient.server.endpoint.resource_tagger import _ResourceTagger
 
 from tableauserverclient.config import ALLOWED_FILE_EXTENSIONS, FILESIZE_LIMIT_MB, BYTES_PER_MB, CHUNK_SIZE_MB
 from tableauserverclient.filesys_helpers import (

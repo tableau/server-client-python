@@ -6,16 +6,16 @@ from typing import Dict, List, Optional, Set, Tuple
 from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.datetime_helpers import parse_datetime
-from .connection_item import ConnectionItem
-from .exceptions import UnpopulatedPropertyError
-from .permissions_item import PermissionsRule
-from .property_decorators import (
+from tableauserverclient.models.connection_item import ConnectionItem
+from tableauserverclient.models.exceptions import UnpopulatedPropertyError
+from tableauserverclient.models.permissions_item import PermissionsRule
+from tableauserverclient.models.property_decorators import (
     property_not_nullable,
     property_is_boolean,
     property_is_enum,
 )
-from .revision_item import RevisionItem
-from .tag_item import TagItem
+from tableauserverclient.models.revision_item import RevisionItem
+from tableauserverclient.models.tag_item import TagItem
 
 
 class DatasourceItem(object):
