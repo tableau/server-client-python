@@ -1,12 +1,17 @@
 import copy
+import csv
+import io
+import itertools
 import logging
-from typing import List, Optional, Tuple
+from pathlib import Path
+import re
+from typing import List, Iterable, Optional, Tuple, Union
 
-from .endpoint import QuerysetEndpoint, api
+from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
 from .exceptions import MissingRequiredFieldError, ServerResponseError
 from tableauserverclient.server import RequestFactory, RequestOptions
-from tableauserverclient.models import UserItem, WorkbookItem, PaginationItem, GroupItem
-from ..pager import Pager
+from tableauserverclient.models import UserItem, WorkbookItem, PaginationItem, GroupItem, JobItem
+from tableauserverclient.server.pager import Pager
 
 from tableauserverclient.helpers.logging import logger
 
@@ -95,8 +100,42 @@ class Users(QuerysetEndpoint[UserItem]):
 
     # helping the user by parsing a file they could have used to add users through the UI
     # line format: Username [required], password, display name, license, admin, publish
+    @api(version="3.15")
+    def bulk_add(self, users: Iterable[UserItem]) -> JobItem:
+        """
+        When adding users in bulk, the server will return a job item that can be used to track the progress of the
+        operation. This method will return the job item that was created when the users were added.
+
+        For each user, name is required, and other fields are optional. If connected to activte directory and
+        the user name is not unique across domains, then the domain attribute must be populated on
+        the UserItem.
+
+        The user's display name is read from the fullname attribute.
+
+        Email is optional, but if provided, it must be a valid email address.
+        """
+        url = f"{self.baseurl}/import"
+        # Allow for iterators to be passed into the function
+        csv_users, xml_users = itertools.tee(users, 2)
+        csv_content = create_users_csv(csv_users)
+
+        xml_request, content_type = RequestFactory.User.import_from_csv_req(csv_content, xml_users)
+        server_response = self.post_request(url, xml_request, content_type)
+        return JobItem.from_response(server_response.content, self.parent_srv.namespace).pop()
+
+    @api(version="3.15")
+    def bulk_remove(self, users: Iterable[UserItem]) -> None:
+        url = f"{self.baseurl}/delete"
+        csv_content = remove_users_csv(users)
+        request, content_type = RequestFactory.User.delete_csv_req(csv_content)
+        server_response = self.post_request(url, request, content_type)
+        return None
+
     @api(version="2.0")
     def create_from_file(self, filepath: str) -> Tuple[List[UserItem], List[Tuple[UserItem, ServerResponseError]]]:
+        import warnings
+
+        warnings.warn("This method is deprecated, use bulk_add instead", DeprecationWarning)
         created = []
         failed = []
         if not filepath.find("csv"):
@@ -166,3 +205,64 @@ class Users(QuerysetEndpoint[UserItem]):
         group_item = GroupItem.from_response(server_response.content, self.parent_srv.namespace)
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         return group_item, pagination_item
+
+
+def create_users_csv(users: Iterable[UserItem], identity_pool=None) -> bytes:
+    """
+    Create a CSV byte string from an Iterable of UserItem objects
+    """
+    if identity_pool is not None:
+        raise NotImplementedError("Identity pool is not supported in this version")
+    with io.StringIO() as output:
+        writer = csv.writer(output, quoting=csv.QUOTE_MINIMAL)
+        for user in users:
+            site_role = user.site_role or "Unlicensed"
+            if site_role == "ServerAdministrator":
+                license = "Creator"
+                admin_level = "System"
+            elif site_role.startswith("SiteAdministrator"):
+                admin_level = "Site"
+                license = site_role.replace("SiteAdministrator", "")
+            else:
+                license = site_role
+                admin_level = ""
+
+            if any(x in site_role for x in ("Creator", "Admin", "Publish")):
+                publish = 1
+            else:
+                publish = 0
+
+            writer.writerow(
+                (
+                    f"{user.domain_name}\\{user.name}" if user.domain_name else user.name,
+                    getattr(user, "password", ""),
+                    user.fullname,
+                    license,
+                    admin_level,
+                    publish,
+                    user.email,
+                )
+            )
+        output.seek(0)
+        result = output.read().encode("utf-8")
+    return result
+
+
+def remove_users_csv(users: Iterable[UserItem]) -> bytes:
+    with io.StringIO() as output:
+        writer = csv.writer(output, quoting=csv.QUOTE_MINIMAL)
+        for user in users:
+            writer.writerow(
+                (
+                    f"{user.domain_name}\\{user.name}" if user.domain_name else user.name,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                )
+            )
+        output.seek(0)
+        result = output.read().encode("utf-8")
+    return result
