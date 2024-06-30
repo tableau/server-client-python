@@ -309,17 +309,17 @@ T = TypeVar("T")
 
 class QuerysetEndpoint(Endpoint, Generic[T]):
     @api(version="2.0")
-    def all(self, *args, **kwargs) -> QuerySet[T]:
+    def all(self, *args, page_size: Optional[int] = None, **kwargs) -> QuerySet[T]:
         if args or kwargs:
             raise ValueError(".all method takes no arguments.")
-        queryset = QuerySet(self)
+        queryset = QuerySet(self, page_size=page_size)
         return queryset
 
     @api(version="2.0")
-    def filter(self, *_, **kwargs) -> QuerySet[T]:
+    def filter(self, *_, page_size: Optional[int] = None, **kwargs) -> QuerySet[T]:
         if _:
             raise RuntimeError("Only keyword arguments accepted.")
-        queryset = QuerySet(self).filter(**kwargs)
+        queryset = QuerySet(self, page_size=page_size).filter(**kwargs)
         return queryset
 
     @api(version="2.0")
