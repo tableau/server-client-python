@@ -33,9 +33,9 @@ see pagination_sample
 
 
 class QuerySet(Iterable[T], Sized):
-    def __init__(self, model: "QuerysetEndpoint[T]") -> None:
+    def __init__(self, model: "QuerysetEndpoint[T]", page_size: Optional[int] = None) -> None:
         self.model = model
-        self.request_options = RequestOptions()
+        self.request_options = RequestOptions(pagesize=page_size or 100)
         self._result_cache: List[T] = []
         self._pagination_item = PaginationItem()
 
@@ -134,12 +134,15 @@ class QuerySet(Iterable[T], Sized):
         self._fetch_all()
         return self._pagination_item.page_size
 
-    def filter(self: Self, *invalid, **kwargs) -> Self:
+    def filter(self: Self, *invalid, page_size: Optional[int] = None, **kwargs) -> Self:
         if invalid:
             raise RuntimeError("Only accepts keyword arguments.")
         for kwarg_key, value in kwargs.items():
             field_name, operator = self._parse_shorthand_filter(kwarg_key)
             self.request_options.filter.add(Filter(field_name, operator, value))
+
+        if page_size:
+            self.request_options.pagesize = page_size
         return self
 
     def order_by(self: Self, *args) -> Self:
@@ -155,11 +158,8 @@ class QuerySet(Iterable[T], Sized):
             self.request_options.pagesize = kwargs["page_size"]
         return self
 
-    def with_page_size(self: Self, value: int) -> Self:
-        self.request_options.pagesize = value
-        return self
-
-    def _parse_shorthand_filter(self: Self, key: str) -> Tuple[str, str]:
+    @staticmethod
+    def _parse_shorthand_filter(key: str) -> Tuple[str, str]:
         tokens = key.split("__", 1)
         if len(tokens) == 1:
             operator = RequestOptions.Operator.Equals
@@ -173,7 +173,8 @@ class QuerySet(Iterable[T], Sized):
             raise ValueError("Field name `{}` is not valid.".format(field))
         return (field, operator)
 
-    def _parse_shorthand_sort(self: Self, key: str) -> Tuple[str, str]:
+    @staticmethod
+    def _parse_shorthand_sort(key: str) -> Tuple[str, str]:
         direction = RequestOptions.Direction.Asc
         if key.startswith("-"):
             direction = RequestOptions.Direction.Desc
