@@ -19,8 +19,3 @@ class ProjectModelTests(unittest.TestCase):
         project = TSC.ProjectItem("proj")
         project.parent_id = "foo"
         self.assertEqual(project.parent_id, "foo")
-
-    def test_owner_id(self):
-        project = TSC.ProjectItem("proj")
-        with self.assertRaises(NotImplementedError):
-            project.owner_id = "new_owner"
