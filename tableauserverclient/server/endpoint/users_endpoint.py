@@ -10,8 +10,8 @@ import re
 
 from tableauserverclient.server.query import QuerySet
 
-from .endpoint import QuerysetEndpoint, api
-from .exceptions import MissingRequiredFieldError, ServerResponseError
+from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
+from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError, ServerResponseError
 from tableauserverclient.server import RequestFactory, RequestOptions
 from tableauserverclient.models import UserItem, WorkbookItem, PaginationItem, GroupItem, JobItem
 from tableauserverclient.server.pager import Pager
