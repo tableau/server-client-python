@@ -376,6 +376,17 @@ class Users(QuerysetEndpoint[UserItem]):
         The user's display name is read from the fullname attribute.
 
         Email is optional, but if provided, it must be a valid email address.
+
+        If auth_setting is not provided, the default is ServerDefault.
+
+        If site_role is not provided, the default is Unlicensed.
+
+        Password is optional, and only used if the server is using local
+        authentication. If using any other authentication method, the password
+        should not be provided.
+
+        Details about administrator level and publishing capability are
+        inferred from the site_role.
         """
         url = f"{self.baseurl}/import"
         # Allow for iterators to be passed into the function
