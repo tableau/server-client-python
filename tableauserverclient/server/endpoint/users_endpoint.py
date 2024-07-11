@@ -220,7 +220,16 @@ class Users(QuerysetEndpoint[UserItem]):
 
 def create_users_csv(users: Iterable[UserItem], identity_pool=None) -> bytes:
     """
-    Create a CSV byte string from an Iterable of UserItem objects
+    Create a CSV byte string from an Iterable of UserItem objects. The CSV will
+    have the following columns, and no header row:
+
+    - Username
+    - Password
+    - Display Name
+    - License
+    - Admin Level
+    - Publish capability
+    - Email
     """
     if identity_pool is not None:
         raise NotImplementedError("Identity pool is not supported in this version")
