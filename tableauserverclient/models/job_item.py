@@ -222,7 +222,7 @@ class BackgroundJobItem(object):
         self._subtitle = subtitle
 
     def __str__(self):
-        return f"<{self.__class__.name} {self._id} {self._type}>"
+        return f"<{self.__class__.__qualname__} {self._id} {self._type}>"
 
     def __repr__(self):
         return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"

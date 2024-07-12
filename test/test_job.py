@@ -136,3 +136,11 @@ class JobTests(unittest.TestCase):
             m.get(f"{self.baseurl}/{job_id}", text=response_xml)
             job = self.server.jobs.get_by_id(job_id)
         self.assertEqual(job.datasource_name, "World Indicators")
+
+    def test_background_job_str(self) -> None:
+        job = TSC.BackgroundJobItem(
+            "ee8c6e70-43b6-11e6-af4f-f7b0d8e20760", datetime.now(), 1, "extractRefresh", "Failed"
+        )
+        assert not str(job).startswith("<<property")
+        assert not repr(job).startswith("<<property")
+        assert "BackgroundJobItem" in str(job)
