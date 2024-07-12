@@ -1,11 +1,11 @@
 import logging
 
-from tableauserverclient.server.query import QuerySet
 
-from .endpoint import QuerysetEndpoint, api
-from .exceptions import JobCancelledException, JobFailedException
 from tableauserverclient.models import JobItem, BackgroundJobItem, PaginationItem
-from ..request_options import RequestOptionsBase
+from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
+from tableauserverclient.server.endpoint.exceptions import JobCancelledException, JobFailedException
+from tableauserverclient.server.query import QuerySet
+from tableauserverclient.server.request_options import RequestOptionsBase
 from tableauserverclient.exponential_backoff import ExponentialBackoffTimer
 
 from tableauserverclient.helpers.logging import logger
