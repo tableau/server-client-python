@@ -8,10 +8,10 @@ from pathlib import Path
 
 from tableauserverclient.helpers.headers import fix_filename
 
-from .endpoint import QuerysetEndpoint, api, parameter_added_in
-from .exceptions import InternalServerError, MissingRequiredFieldError
-from .permissions_endpoint import _PermissionsEndpoint
-from .resource_tagger import _ResourceTagger
+from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api, parameter_added_in
+from tableauserverclient.server.endpoint.exceptions import InternalServerError, MissingRequiredFieldError
+from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
+from tableauserverclient.server.endpoint.resource_tagger import _ResourceTagger
 
 from tableauserverclient.filesys_helpers import (
     to_filename,
@@ -24,9 +24,11 @@ from tableauserverclient.models import WorkbookItem, ConnectionItem, ViewItem, P
 from tableauserverclient.server import RequestFactory
 
 from typing import (
+    Iterable,
     List,
     Optional,
     Sequence,
+    Set,
     Tuple,
     TYPE_CHECKING,
     Union,
@@ -498,3 +500,32 @@ class Workbooks(QuerysetEndpoint[WorkbookItem]):
         self, schedule_id: str, item: WorkbookItem
     ) -> List["AddResponse"]:  # actually should return a task
         return self.parent_srv.schedules.add_to_schedule(schedule_id, workbook=item)
+
+    @api(version="1.0")
+    def add_tags(self, workbook: Union[WorkbookItem, str], tags: Union[Iterable[str], str]) -> Set[str]:
+        workbook = getattr(workbook, "id", workbook)
+
+        if not isinstance(workbook, str):
+            raise ValueError("Workbook ID not found.")
+
+        if isinstance(tags, str):
+            tag_set = set([tags])
+        else:
+            tag_set = set(tags)
+
+        return self._resource_tagger._add_tags(self.baseurl, workbook, tag_set)
+
+    @api(version="1.0")
+    def delete_tags(self, workbook: Union[WorkbookItem, str], tags: Union[Iterable[str], str]) -> None:
+        workbook = getattr(workbook, "id", workbook)
+
+        if not isinstance(workbook, str):
+            raise ValueError("Workbook ID not found.")
+
+        if isinstance(tags, str):
+            tag_set = set([tags])
+        else:
+            tag_set = set(tags)
+
+        for tag in tag_set:
+            self._resource_tagger._delete_tag(self.baseurl, workbook, tag)

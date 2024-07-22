@@ -18,6 +18,7 @@ from ._utils import asset
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
+ADD_TAG_XML = os.path.join(TEST_ASSET_DIR, "workbook_add_tag.xml")
 ADD_TAGS_XML = os.path.join(TEST_ASSET_DIR, "workbook_add_tags.xml")
 GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, "workbook_get_by_id.xml")
 GET_BY_ID_XML_PERSONAL = os.path.join(TEST_ASSET_DIR, "workbook_get_by_id_personal.xml")
@@ -894,3 +895,70 @@ class WorkbookTests(unittest.TestCase):
 
         assert xml_connection is not None
         self.assertEqual(xml_connection.get("serverAddress"), url)
+
+    def test_add_tags(self) -> None:
+        workbook = TSC.WorkbookItem("project", "test")
+        workbook._id = "06b944d2-959d-4604-9305-12323c95e70e"
+        tags = list("abcd")
+
+        with requests_mock.mock() as m:
+            m.put(
+                f"{self.baseurl}/{workbook.id}/tags",
+                status_code=200,
+                text=Path(ADD_TAGS_XML).read_text(),
+            )
+            tag_result = self.server.workbooks.add_tags(workbook, tags)
+
+        for a, b in zip(sorted(tag_result), sorted(tags)):
+            self.assertEqual(a, b)
+
+    def test_add_tag(self) -> None:
+        workbook = TSC.WorkbookItem("project", "test")
+        workbook._id = "06b944d2-959d-4604-9305-12323c95e70e"
+        tags = "a"
+
+        with requests_mock.mock() as m:
+            m.put(
+                f"{self.baseurl}/{workbook.id}/tags",
+                status_code=200,
+                text=Path(ADD_TAG_XML).read_text(),
+            )
+            tag_result = self.server.workbooks.add_tags(workbook, tags)
+
+        for a, b in zip(sorted(tag_result), sorted(tags)):
+            self.assertEqual(a, b)
+
+    def test_add_tag_id(self) -> None:
+        workbook = TSC.WorkbookItem("project", "test")
+        workbook._id = "06b944d2-959d-4604-9305-12323c95e70e"
+        tags = "a"
+
+        with requests_mock.mock() as m:
+            m.put(
+                f"{self.baseurl}/{workbook.id}/tags",
+                status_code=200,
+                text=Path(ADD_TAG_XML).read_text(),
+            )
+            tag_result = self.server.workbooks.add_tags(workbook.id, tags)
+
+        for a, b in zip(sorted(tag_result), sorted(tags)):
+            self.assertEqual(a, b)
+
+    def test_delete_tags(self) -> None:
+        workbook = TSC.WorkbookItem("project", "test")
+        workbook._id = "06b944d2-959d-4604-9305-12323c95e70e"
+        tags = list("abcd")
+
+        matcher = re.compile(rf"{self.baseurl}\/{workbook.id}\/tags\/[abcd]")
+        with requests_mock.mock() as m:
+            m.delete(
+                matcher,
+                status_code=200,
+                text="",
+            )
+            self.server.workbooks.delete_tags(workbook, tags)
+            history = m.request_history
+
+        self.assertEqual(len(history), len(tags))
+        urls = sorted([r.url.split("/")[-1] for r in history])
+        self.assertEqual(urls, sorted(tags))
