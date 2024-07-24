@@ -4,8 +4,8 @@ from typing import List, Optional
 
 from defusedxml.ElementTree import fromstring
 
-from .exceptions import UnpopulatedPropertyError
-from .property_decorators import property_is_enum, property_not_empty
+from tableauserverclient.models.exceptions import UnpopulatedPropertyError
+from tableauserverclient.models.property_decorators import property_is_enum, property_not_empty
 
 
 class ProjectItem(object):
@@ -34,6 +34,7 @@ class ProjectItem(object):
         self.content_permissions: Optional[str] = content_permissions
         self.parent_id: Optional[str] = parent_id
         self._samples: Optional[bool] = samples
+        self._owner_id: Optional[str] = None
 
         self._permissions = None
         self._default_workbook_permissions = None
@@ -119,7 +120,7 @@ class ProjectItem(object):
 
     @owner_id.setter
     def owner_id(self, value: str) -> None:
-        raise NotImplementedError("REST API does not currently support updating project owner.")
+        self._owner_id = value
 
     def is_default(self):
         return self.name.lower() == "default"

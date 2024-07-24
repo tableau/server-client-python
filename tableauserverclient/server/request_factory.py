@@ -482,6 +482,9 @@ class ProjectRequest(object):
             project_element.attrib["contentPermissions"] = project_item.content_permissions
         if project_item.parent_id is not None:
             project_element.attrib["parentProjectId"] = project_item.parent_id
+        if (owner := project_item.owner_id) is not None:
+            owner_element = ET.SubElement(project_element, "owner")
+            owner_element.attrib["id"] = owner
         return ET.tostring(xml_request)
 
     def create_req(self, project_item: "ProjectItem") -> bytes:

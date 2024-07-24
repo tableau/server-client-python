@@ -1,17 +1,17 @@
 import logging
 
-from .default_permissions_endpoint import _DefaultPermissionsEndpoint
-from .endpoint import QuerysetEndpoint, api, XML_CONTENT_TYPE
-from .exceptions import MissingRequiredFieldError
-from .permissions_endpoint import _PermissionsEndpoint
+from tableauserverclient.server.endpoint.default_permissions_endpoint import _DefaultPermissionsEndpoint
+from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api, XML_CONTENT_TYPE
+from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
+from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
 from tableauserverclient.server import RequestFactory, RequestOptions
 from tableauserverclient.models import ProjectItem, PaginationItem, Resource
 
 from typing import List, Optional, Tuple, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ..server import Server
-    from ..request_options import RequestOptions
+    from tableauserverclient.server.server import Server
+    from tableauserverclient.server.request_options import RequestOptions
 
 from tableauserverclient.helpers.logging import logger
 
