@@ -1,6 +1,9 @@
+import datetime as dt
 from typing import List, Optional
+
 from defusedxml.ElementTree import fromstring
 
+from tableauserverclient.datetime_helpers import parse_datetime
 from tableauserverclient.models.schedule_item import ScheduleItem
 
 
@@ -72,6 +75,27 @@ class LinkedTaskFlowRunItem:
             all_tasks.append(task)
 
         return all_tasks
+
+
+class LinkedTaskJobItem:
+    def __init__(self) -> None:
+        self.id: Optional[str] = None
+        self.linked_task_id: Optional[str] = None
+        self.status: Optional[str] = None
+        self.created_at: Optional[dt.datetime] = None
+
+    @classmethod
+    def from_response(cls, resp: bytes, namespace) -> "LinkedTaskJobItem":
+        parsed_response = fromstring(resp)
+        job = cls()
+        job_xml = parsed_response.find(".//t:linkedTaskJob[@id]", namespaces=namespace)
+        if job_xml is None:
+            raise ValueError("No linked task job found in response")
+        job.id = job_xml.get("id")
+        job.linked_task_id = job_xml.get("linkedTaskId")
+        job.status = job_xml.get("status")
+        job.created_at = parse_datetime(job_xml.get("createdAt"))
+        return job
 
 
 def string_to_bool(s: str) -> bool:

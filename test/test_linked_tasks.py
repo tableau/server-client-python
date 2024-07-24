@@ -6,11 +6,13 @@ import pytest
 import requests_mock
 
 import tableauserverclient as TSC
+from tableauserverclient.datetime_helpers import parse_datetime
 from tableauserverclient.models.linked_tasks_item import LinkedTaskItem, LinkedTaskStepItem, LinkedTaskFlowRunItem
 
 asset_dir = (Path(__file__).parent / "assets").resolve()
 
 GET_LINKED_TASKS = asset_dir / "linked_tasks_get.xml"
+RUN_LINKED_TASK_NOW = asset_dir / "linked_tasks_run_now.xml"
 
 
 class TestLinkedTasks(unittest.TestCase):
@@ -99,3 +101,29 @@ class TestLinkedTasks(unittest.TestCase):
         assert task.num_steps == 1
         assert task.schedule is not None
         assert task.schedule.id == "be077332-d01d-481b-b2f3-917e463d4dca"
+
+    def test_run_now_str_linked_task(self):
+        id_ = "1b8211dc-51a8-45ce-a831-b5921708e03e"
+
+        with requests_mock.mock() as m:
+            m.post(f"{self.baseurl}/{id_}/runNow", text=RUN_LINKED_TASK_NOW.read_text())
+            job = self.server.linked_tasks.run_now(id_)
+
+        assert job.id == "269a1e5a-1220-4a13-ac01-704982693dd8"
+        assert job.status == "InProgress"
+        assert job.created_at == parse_datetime("2022-02-15T00:22:22Z")
+        assert job.linked_task_id == id_
+
+    def test_run_now_obj_linked_task(self):
+        id_ = "1b8211dc-51a8-45ce-a831-b5921708e03e"
+        in_task = LinkedTaskItem()
+        in_task.id = id_
+
+        with requests_mock.mock() as m:
+            m.post(f"{self.baseurl}/{id_}/runNow", text=RUN_LINKED_TASK_NOW.read_text())
+            job = self.server.linked_tasks.run_now(in_task)
+
+        assert job.id == "269a1e5a-1220-4a13-ac01-704982693dd8"
+        assert job.status == "InProgress"
+        assert job.created_at == parse_datetime("2022-02-15T00:22:22Z")
+        assert job.linked_task_id == id_
