@@ -6,6 +6,7 @@ from tableauserverclient.models.pagination_item import PaginationItem
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
 from tableauserverclient.server.request_options import RequestOptions
 
+
 class LinkedTasks(QuerysetEndpoint[LinkedTaskItem]):
     def __init__(self, parent_srv):
         super().__init__(parent_srv)
@@ -23,4 +24,3 @@ class LinkedTasks(QuerysetEndpoint[LinkedTaskItem]):
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         all_group_items = LinkedTaskItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_group_items, pagination_item
-

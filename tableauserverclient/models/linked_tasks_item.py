@@ -3,6 +3,7 @@ from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.models.schedule_item import ScheduleItem
 
+
 class LinkedTaskItem:
     def __init__(self) -> None:
         self.id: Optional[str] = None
@@ -12,7 +13,10 @@ class LinkedTaskItem:
     @classmethod
     def from_response(cls, resp: bytes, namespace) -> List["LinkedTaskItem"]:
         parsed_response = fromstring(resp)
-        return [cls._parse_element(x, namespace) for x in parsed_response.findall(".//t:linkedTasks[@id]", namespaces=namespace)]
+        return [
+            cls._parse_element(x, namespace)
+            for x in parsed_response.findall(".//t:linkedTasks[@id]", namespaces=namespace)
+        ]
 
     @classmethod
     def _parse_element(cls, xml, namespace) -> "LinkedTaskItem":
@@ -22,9 +26,10 @@ class LinkedTaskItem:
         task.schedule = ScheduleItem.from_element(xml, namespace)[0]
         return task
 
+
 class LinkedTaskStepItem:
     def __init__(self) -> None:
-        self.id: Optional[str] = None 
+        self.id: Optional[str] = None
         self.step_number: Optional[int] = None
         self.stop_downstream_on_failure: Optional[bool] = None
         self.task_details: List[LinkedTaskFlowRunItem] = []
@@ -41,6 +46,7 @@ class LinkedTaskStepItem:
         step.stop_downstream_on_failure = string_to_bool(xml.get("stopDownstreamTasksOnFailure"))
         step.task_details = LinkedTaskFlowRunItem._parse_element(xml, namespace)
         return step
+
 
 class LinkedTaskFlowRunItem:
     def __init__(self) -> None:
@@ -66,7 +72,6 @@ class LinkedTaskFlowRunItem:
             all_tasks.append(task)
 
         return all_tasks
-
 
 
 def string_to_bool(s: str) -> bool:

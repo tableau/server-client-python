@@ -12,8 +12,8 @@ asset_dir = (Path(__file__).parent / "assets").resolve()
 
 GET_LINKED_TASKS = asset_dir / "linked_tasks_get.xml"
 
+
 class TestLinkedTasks(unittest.TestCase):
-    
     def setUp(self) -> None:
         self.server = TSC.Server("http://test", False)
         self.server.version = "3.15"
@@ -35,7 +35,6 @@ class TestLinkedTasks(unittest.TestCase):
         self.assertEqual(task.flow_run_task_type, "runFlow")
         self.assertEqual(task.flow_id, "ab1231eb-b8ca-461e-a131-83f3c2b6a673")
         self.assertEqual(task.flow_name, "flow-name")
-
 
     def test_parse_linked_task_step(self):
         xml = fromstring(GET_LINKED_TASKS.read_bytes())
@@ -72,5 +71,3 @@ class TestLinkedTasks(unittest.TestCase):
         self.assertEqual(task.id, "1b8211dc-51a8-45ce-a831-b5921708e03e")
         self.assertEqual(task.num_steps, 1)
         self.assertEqual(task.schedule.id, "be077332-d01d-481b-b2f3-917e463d4dca")
-
-

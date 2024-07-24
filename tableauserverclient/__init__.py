@@ -122,5 +122,4 @@ __all__ = [
     "LinkedTaskItem",
     "LinkedTaskStepItem",
     "LinkedTaskFlowRunItem",
-
 ]
