@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 from tableauserverclient.helpers.logging import logger
 from tableauserverclient.models.linked_tasks_item import LinkedTaskItem
@@ -24,3 +24,12 @@ class LinkedTasks(QuerysetEndpoint[LinkedTaskItem]):
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         all_group_items = LinkedTaskItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_group_items, pagination_item
+
+    @api(version="3.15")
+    def get_by_id(self, linked_task: Union[LinkedTaskItem, str]) -> LinkedTaskItem:
+        task_id = getattr(linked_task, "id", linked_task)
+        logger.info("Querying all linked tasks on site")
+        url = f"{self.baseurl}/{task_id}"
+        server_response = self.get_request(url)
+        all_group_items = LinkedTaskItem.from_response(server_response.content, self.parent_srv.namespace)
+        return all_group_items[0]

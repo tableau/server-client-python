@@ -73,3 +73,29 @@ class TestLinkedTasks(unittest.TestCase):
         assert task.num_steps == 1
         assert task.schedule is not None
         assert task.schedule.id == "be077332-d01d-481b-b2f3-917e463d4dca"
+
+    def test_get_by_id_str_linked_task(self):
+        id_ = "1b8211dc-51a8-45ce-a831-b5921708e03e"
+
+        with requests_mock.mock() as m:
+            m.get(f"{self.baseurl}/{id_}", text=GET_LINKED_TASKS.read_text())
+            task = self.server.linked_tasks.get_by_id(id_)
+
+        assert task.id == "1b8211dc-51a8-45ce-a831-b5921708e03e"
+        assert task.num_steps == 1
+        assert task.schedule is not None
+        assert task.schedule.id == "be077332-d01d-481b-b2f3-917e463d4dca"
+
+    def test_get_by_id_obj_linked_task(self):
+        id_ = "1b8211dc-51a8-45ce-a831-b5921708e03e"
+        in_task = LinkedTaskItem()
+        in_task.id = id_
+
+        with requests_mock.mock() as m:
+            m.get(f"{self.baseurl}/{id_}", text=GET_LINKED_TASKS.read_text())
+            task = self.server.linked_tasks.get_by_id(in_task)
+
+        assert task.id == "1b8211dc-51a8-45ce-a831-b5921708e03e"
+        assert task.num_steps == 1
+        assert task.schedule is not None
+        assert task.schedule.id == "be077332-d01d-481b-b2f3-917e463d4dca"
