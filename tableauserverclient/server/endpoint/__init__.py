@@ -13,6 +13,7 @@ from tableauserverclient.server.endpoint.flows_endpoint import Flows
 from tableauserverclient.server.endpoint.flow_task_endpoint import FlowTasks
 from tableauserverclient.server.endpoint.groups_endpoint import Groups
 from tableauserverclient.server.endpoint.jobs_endpoint import Jobs
+from tableauserverclient.server.endpoint.linked_tasks_endpoint import LinkedTasks
 from tableauserverclient.server.endpoint.metadata_endpoint import Metadata
 from tableauserverclient.server.endpoint.metrics_endpoint import Metrics
 from tableauserverclient.server.endpoint.projects_endpoint import Projects
@@ -44,6 +45,7 @@ __all__ = [
     "FlowTasks",
     "Groups",
     "Jobs",
+    "LinkedTasks",
     "Metadata",
     "Metrics",
     "Projects",

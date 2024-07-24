@@ -21,6 +21,9 @@ from tableauserverclient.models import (
     IntervalItem,
     JobItem,
     JWTAuth,
+    LinkedTaskItem,
+    LinkedTaskStepItem,
+    LinkedTaskFlowRunItem,
     MetricItem,
     MonthlyInterval,
     PaginationItem,
@@ -116,4 +119,8 @@ __all__ = [
     "Pager",
     "Server",
     "Sort",
+    "LinkedTaskItem",
+    "LinkedTaskStepItem",
+    "LinkedTaskFlowRunItem",
+
 ]

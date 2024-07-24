@@ -22,6 +22,11 @@ from tableauserverclient.models.interval_item import (
     HourlyInterval,
 )
 from tableauserverclient.models.job_item import JobItem, BackgroundJobItem
+from tableauserverclient.models.linked_tasks_item import (
+    LinkedTaskItem,
+    LinkedTaskStepItem,
+    LinkedTaskFlowRunItem,
+)
 from tableauserverclient.models.metric_item import MetricItem
 from tableauserverclient.models.pagination_item import PaginationItem
 from tableauserverclient.models.permissions_item import PermissionsRule, Permission
@@ -91,4 +96,7 @@ __all__ = [
     "ViewItem",
     "WebhookItem",
     "WorkbookItem",
+    "LinkedTaskItem",
+    "LinkedTaskStepItem",
+    "LinkedTaskFlowRunItem",
 ]

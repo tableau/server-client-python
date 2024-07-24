@@ -2,7 +2,6 @@ from typing import List, Optional
 from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.models.schedule_item import ScheduleItem
-from tableauserverclient.models.task_item import TaskItem
 
 class LinkedTaskItem:
     def __init__(self) -> None:

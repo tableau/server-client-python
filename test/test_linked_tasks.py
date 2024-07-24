@@ -3,6 +3,7 @@ import unittest
 
 from defusedxml.ElementTree import fromstring
 import pytest
+import requests_mock
 
 import tableauserverclient as TSC
 from tableauserverclient.models.linked_tasks_item import LinkedTaskItem, LinkedTaskStepItem, LinkedTaskFlowRunItem
@@ -15,12 +16,13 @@ class TestLinkedTasks(unittest.TestCase):
     
     def setUp(self) -> None:
         self.server = TSC.Server("http://test", False)
+        self.server.version = "3.15"
 
         # Fake signin
         self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"
         self.server._auth_token = "j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM"
 
-        # self.baseurl = self.server.linked_tasks.baseurl
+        self.baseurl = self.server.linked_tasks.baseurl
 
     def test_parse_linked_task_flow_run(self):
         xml = fromstring(GET_LINKED_TASKS.read_bytes())
@@ -59,4 +61,16 @@ class TestLinkedTasks(unittest.TestCase):
         self.assertEqual(task.id, "1b8211dc-51a8-45ce-a831-b5921708e03e")
         self.assertEqual(task.num_steps, 1)
         self.assertEqual(task.schedule.id, "be077332-d01d-481b-b2f3-917e463d4dca")
+
+    def test_get_linked_tasks(self):
+        with requests_mock.mock() as m:
+            m.get(self.baseurl, text=GET_LINKED_TASKS.read_text())
+            tasks, pagination_item = self.server.linked_tasks.get()
+
+        self.assertEqual(1, len(tasks))
+        task = tasks[0]
+        self.assertEqual(task.id, "1b8211dc-51a8-45ce-a831-b5921708e03e")
+        self.assertEqual(task.num_steps, 1)
+        self.assertEqual(task.schedule.id, "be077332-d01d-481b-b2f3-917e463d4dca")
+
 
