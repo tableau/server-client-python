@@ -1,6 +1,7 @@
 import os.path
 import unittest
 
+import pytest
 import requests_mock
 
 import tableauserverclient as TSC
@@ -109,6 +110,8 @@ class SiteTests(unittest.TestCase):
     def test_get_by_name_missing_name(self) -> None:
         self.assertRaises(ValueError, self.server.sites.get_by_name, "")
 
+    @pytest.mark.filterwarnings("ignore:Tiered license level is set")
+    @pytest.mark.filterwarnings("ignore:FlowsEnabled has been removed")
     def test_update(self) -> None:
         with open(UPDATE_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
@@ -206,6 +209,7 @@ class SiteTests(unittest.TestCase):
         self.assertEqual(1, test_site.user_quota)
         self.assertIsNone(test_site.tier_explorer_capacity)
 
+    @pytest.mark.filterwarnings("ignore:FlowsEnabled has been removed")
     def test_create(self) -> None:
         with open(CREATE_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
