@@ -1,11 +1,14 @@
+from functools import partial
 from typing import List, Optional, TYPE_CHECKING, Tuple
 
+from tableauserverclient.models.connection_item import ConnectionItem
+from tableauserverclient.models.pagination_item import PaginationItem
+from tableauserverclient.models.virtual_connection_item import VirtualConnectionItem
 from tableauserverclient.server.request_options import RequestOptions
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
 from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
 from tableauserverclient.server.endpoint.resource_tagger import _ResourceTagger
-from tableauserverclient.models.pagination_item import PaginationItem
-from tableauserverclient.models.virtual_connection_item import VirtualConnectionItem
+from tableauserverclient.server.pager import Pager
 
 if TYPE_CHECKING:
     from tableauserverclient.server import Server
@@ -27,3 +30,20 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem]):
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         virtual_connections = VirtualConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
         return virtual_connections, pagination_item
+
+    @api(version="3.18")
+    def populate_connections(self, virtual_connection: VirtualConnectionItem) -> VirtualConnectionItem:
+        def _connection_fetcher():
+            return Pager(partial(self._get_virtual_database_connections, virtual_connection))
+
+        virtual_connection._connections = _connection_fetcher
+        return virtual_connection
+
+    def _get_virtual_database_connections(
+        self, virtual_connection: VirtualConnectionItem, req_options: Optional[RequestOptions] = None
+    ) -> Tuple[List[ConnectionItem], PaginationItem]:
+        server_response = self.get_request(f"{self.baseurl}/{virtual_connection.id}/connections", req_options)
+        connections = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
+        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
+
+        return connections, pagination_item

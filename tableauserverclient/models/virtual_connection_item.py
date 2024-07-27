@@ -1,10 +1,11 @@
 import datetime as dt
-from typing import Dict, List, Optional
+from typing import Callable, Dict, Iterable, List, Optional
 from xml.etree.ElementTree import Element
 
 from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.datetime_helpers import parse_datetime
+from tableauserverclient.models.connection_item import ConnectionItem
 
 
 class VirtualConnectionItem:
@@ -16,12 +17,19 @@ class VirtualConnectionItem:
         self.is_certified: Optional[bool] = None
         self.updated_at: Optional[dt.datetime] = None
         self.webpage_url: Optional[str] = None
+        self._connections: Optional[Callable[[], Iterable[ConnectionItem]]] = None
 
     def __str__(self) -> str:
         return f"{self.__class__.__qualname__}(name={self.name})"
 
     def __repr__(self) -> str:
         return f"<{self!s}>"
+
+    @property
+    def connections(self) -> Iterable[ConnectionItem]:
+        if self._connections is None:
+            raise AttributeError("connections not populated. Call populate_connections() first.")
+        return self._connections()
 
     @classmethod
     def from_response(cls, response: bytes, ns: Dict[str, str]) -> List["VirtualConnectionItem"]:
