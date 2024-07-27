@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+  <pagination pageNumber="1" pageSize="1" totalAvailable="1" />
+  <virtualConnections>
+    <virtualConnection 
+      createdAt="2024-05-30T09:00:00Z" 
+      hasExtracts="false" 
+      id="8fd7cc02-bb55-4d15-b8b1-9650239efe79" 
+      isCertified="true" 
+      name="vconn" 
+      updatedAt="2024-06-18T09:00:00Z" 
+    webpageUrl="https://test/#/site/site-name/virtualconnections/3"/>
+  </virtualConnections>
+</tsResponse>
