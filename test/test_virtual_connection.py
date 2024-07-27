@@ -12,6 +12,7 @@ from tableauserverclient.models.virtual_connection_item import VirtualConnection
 ASSET_DIR = Path(__file__).parent / "assets"
 
 VIRTUAL_CONNECTION_GET_XML = ASSET_DIR / "virtual_connections_get.xml"
+VIRTUAL_CONNECTION_POPULATE_CONNECTIONS = ASSET_DIR / "virtual_connection_populate_connections.xml"
 
 
 class TestVirtualConnections(unittest.TestCase):
@@ -46,3 +47,22 @@ class TestVirtualConnections(unittest.TestCase):
         assert len(items) == 1
         assert pagination_item.total_available == 1
         assert items[0].name == "vconn"
+
+    def test_virtual_connection_populate_connections(self):
+        vconn = VirtualConnectionItem("vconn")
+        vconn.id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
+        with requests_mock.mock() as m:
+            m.get(f"{self.baseurl}/{vconn.id}/connections", text=VIRTUAL_CONNECTION_POPULATE_CONNECTIONS.read_text())
+            vc_out = self.server.virtual_connections.populate_connections(vconn)
+            connection_list = list(vconn.connections)
+
+        assert vc_out is vconn
+        assert vc_out._connections is not None
+
+        assert len(connection_list) == 1
+        connection = connection_list[0]
+        assert connection.id == "37ca6ced-58d7-4dcf-99dc-f0a85223cbef"
+        assert connection.connection_type == "postgres"
+        assert connection.server_address == "localhost"
+        assert connection.server_port == "5432"
+        assert connection.username == "pgadmin"
