@@ -1346,6 +1346,19 @@ class GroupSetRequest:
         return ET.tostring(xml_request)
 
 
+class VirtualConnectionRequest:
+    @_tsrequest_wrapped
+    def update_db_connection(self, xml_request: ET.Element, connection_item: ConnectionItem) -> None:
+        connection_element = ET.SubElement(xml_request, "connection")
+        if connection_item.server_address is not None:
+            connection_element.attrib["serverAddress"] = connection_item.server_address
+        if connection_item.server_port is not None:
+            connection_element.attrib["serverPort"] = str(connection_item.server_port)
+        if connection_item.username is not None:
+            connection_element.attrib["userName"] = connection_item.username
+        if connection_item.password is not None:
+            connection_element.attrib["password"] = connection_item.password
+
 class RequestFactory(object):
     Auth = AuthRequest()
     Connection = Connection()
@@ -1372,5 +1385,6 @@ class RequestFactory(object):
     Tag = TagRequest()
     Task = TaskRequest()
     User = UserRequest()
+    VirtualConnection = VirtualConnectionRequest()
     Workbook = WorkbookRequest()
     Webhook = WebhookRequest()
