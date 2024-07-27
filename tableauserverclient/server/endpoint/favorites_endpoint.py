@@ -1,4 +1,4 @@
-from .endpoint import Endpoint, api
+from tableauserverclient.server.endpoint.endpoint import Endpoint, api
 from requests import Response
 from tableauserverclient.helpers.logging import logger
 from tableauserverclient.models import (

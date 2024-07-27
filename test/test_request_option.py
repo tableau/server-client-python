@@ -331,3 +331,30 @@ class RequestOptionTests(unittest.TestCase):
             self.assertIn("value2", query_params["name2$"])
             self.assertIn("type", query_params)
             self.assertIn("tabloid", query_params["type"])
+
+    def test_queryset_endpoint_pagesize_all(self) -> None:
+        for page_size in (1, 10, 100, 1000):
+            with self.subTest(page_size):
+                with requests_mock.mock() as m:
+                    m.get(f"{self.baseurl}/views?pageSize={page_size}", text=SLICING_QUERYSET_PAGE_1.read_text())
+                    queryset = self.server.views.all(page_size=page_size)
+                    assert queryset.request_options.pagesize == page_size
+                    _ = list(queryset)
+
+    def test_queryset_endpoint_pagesize_filter(self) -> None:
+        for page_size in (1, 10, 100, 1000):
+            with self.subTest(page_size):
+                with requests_mock.mock() as m:
+                    m.get(f"{self.baseurl}/views?pageSize={page_size}", text=SLICING_QUERYSET_PAGE_1.read_text())
+                    queryset = self.server.views.filter(page_size=page_size)
+                    assert queryset.request_options.pagesize == page_size
+                    _ = list(queryset)
+
+    def test_queryset_pagesize_filter(self) -> None:
+        for page_size in (1, 10, 100, 1000):
+            with self.subTest(page_size):
+                with requests_mock.mock() as m:
+                    m.get(f"{self.baseurl}/views?pageSize={page_size}", text=SLICING_QUERYSET_PAGE_1.read_text())
+                    queryset = self.server.views.all().filter(page_size=page_size)
+                    assert queryset.request_options.pagesize == page_size
+                    _ = list(queryset)

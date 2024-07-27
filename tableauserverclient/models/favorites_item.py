@@ -1,14 +1,14 @@
 import logging
 
 from defusedxml.ElementTree import fromstring
-from .tableau_types import TableauItem
+from tableauserverclient.models.tableau_types import TableauItem
 
-from .datasource_item import DatasourceItem
-from .flow_item import FlowItem
-from .project_item import ProjectItem
-from .metric_item import MetricItem
-from .view_item import ViewItem
-from .workbook_item import WorkbookItem
+from tableauserverclient.models.datasource_item import DatasourceItem
+from tableauserverclient.models.flow_item import FlowItem
+from tableauserverclient.models.project_item import ProjectItem
+from tableauserverclient.models.metric_item import MetricItem
+from tableauserverclient.models.view_item import ViewItem
+from tableauserverclient.models.workbook_item import WorkbookItem
 from typing import Dict, List
 
 from tableauserverclient.helpers.logging import logger

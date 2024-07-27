@@ -7,6 +7,8 @@ from defusedxml.ElementTree import fromstring
 from io import BytesIO
 from pathlib import Path
 
+import pytest
+
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
 from tableauserverclient.models import UserItem, GroupItem, PermissionsRule
@@ -22,6 +24,7 @@ GET_BY_ID_XML_PERSONAL = os.path.join(TEST_ASSET_DIR, "workbook_get_by_id_person
 GET_EMPTY_XML = os.path.join(TEST_ASSET_DIR, "workbook_get_empty.xml")
 GET_INVALID_DATE_XML = os.path.join(TEST_ASSET_DIR, "workbook_get_invalid_date.xml")
 GET_XML = os.path.join(TEST_ASSET_DIR, "workbook_get.xml")
+ODATA_XML = os.path.join(TEST_ASSET_DIR, "odata_connection.xml")
 POPULATE_CONNECTIONS_XML = os.path.join(TEST_ASSET_DIR, "workbook_populate_connections.xml")
 POPULATE_PDF = os.path.join(TEST_ASSET_DIR, "populate_pdf.pdf")
 POPULATE_POWERPOINT = os.path.join(TEST_ASSET_DIR, "populate_powerpoint.pptx")
@@ -621,31 +624,7 @@ class WorkbookTests(unittest.TestCase):
             self.assertTrue(re.search(rb"<views><view.*?hidden=\"true\".*?\/><\/views>", request_body))
             self.assertTrue(re.search(rb"<views><view.*?name=\"GDP per capita\".*?\/><\/views>", request_body))
 
-    # this tests the old method of including workbook views as a parameter for publishing
-    # should be removed when that functionality is removed
-    # see https://github.com/tableau/server-client-python/pull/617
-    def test_publish_with_hidden_view(self) -> None:
-        with open(PUBLISH_XML, "rb") as f:
-            response_xml = f.read().decode("utf-8")
-        with requests_mock.mock() as m:
-            m.post(self.baseurl, text=response_xml)
-
-            new_workbook = TSC.WorkbookItem(
-                name="Sample", show_tabs=False, project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760"
-            )
-
-            sample_workbook = os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")
-            publish_mode = self.server.PublishMode.CreateNew
-
-            new_workbook = self.server.workbooks.publish(
-                new_workbook, sample_workbook, publish_mode, hidden_views=["GDP per capita"]
-            )
-
-            request_body = m._adapter.request_history[0]._request.body
-            # order of attributes in xml is unspecified
-            self.assertTrue(re.search(rb"<views><view.*?hidden=\"true\".*?\/><\/views>", request_body))
-            self.assertTrue(re.search(rb"<views><view.*?name=\"GDP per capita\".*?\/><\/views>", request_body))
-
+    @pytest.mark.filterwarnings("ignore:'as_job' not available")
     def test_publish_with_query_params(self) -> None:
         with open(PUBLISH_ASYNC_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
@@ -775,63 +754,6 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual(connection_results[1].get("serverAddress", None), "pgsql.test.com")
         self.assertEqual(connection_results[1].find("connectionCredentials").get("password", None), "secret")  # type: ignore[union-attr]
 
-    def test_publish_single_connection(self) -> None:
-        new_workbook = TSC.WorkbookItem(
-            name="Sample", show_tabs=False, project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760"
-        )
-        connection_creds = TSC.ConnectionCredentials("test", "secret", True)
-
-        response = RequestFactory.Workbook._generate_xml(new_workbook, connection_credentials=connection_creds)
-        # Can't use ConnectionItem parser due to xml namespace problems
-        credentials = fromstring(response).findall(".//connectionCredentials")
-        self.assertEqual(len(credentials), 1)
-        self.assertEqual(credentials[0].get("name", None), "test")
-        self.assertEqual(credentials[0].get("password", None), "secret")
-        self.assertEqual(credentials[0].get("embed", None), "true")
-
-    def test_publish_single_connection_username_none(self) -> None:
-        new_workbook = TSC.WorkbookItem(
-            name="Sample", show_tabs=False, project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760"
-        )
-        connection_creds = TSC.ConnectionCredentials(None, "secret", True)
-
-        self.assertRaises(
-            ValueError,
-            RequestFactory.Workbook._generate_xml,
-            new_workbook,
-            connection_credentials=connection_creds,
-        )
-
-    def test_publish_single_connection_username_empty(self) -> None:
-        new_workbook = TSC.WorkbookItem(
-            name="Sample", show_tabs=False, project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760"
-        )
-        connection_creds = TSC.ConnectionCredentials("", "secret", True)
-
-        response = RequestFactory.Workbook._generate_xml(new_workbook, connection_credentials=connection_creds)
-        # Can't use ConnectionItem parser due to xml namespace problems
-        credentials = fromstring(response).findall(".//connectionCredentials")
-        self.assertEqual(len(credentials), 1)
-        self.assertEqual(credentials[0].get("name", None), "")
-        self.assertEqual(credentials[0].get("password", None), "secret")
-        self.assertEqual(credentials[0].get("embed", None), "true")
-
-    def test_credentials_and_multi_connect_raises_exception(self) -> None:
-        new_workbook = TSC.WorkbookItem(
-            name="Sample", show_tabs=False, project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760"
-        )
-
-        connection_creds = TSC.ConnectionCredentials("test", "secret", True)
-
-        connection1 = TSC.ConnectionItem()
-        connection1.server_address = "mysql.test.com"
-        connection1.connection_credentials = TSC.ConnectionCredentials("test", "secret", True)
-
-        with self.assertRaises(RuntimeError):
-            response = RequestFactory.Workbook._generate_xml(
-                new_workbook, connection_credentials=connection_creds, connections=[connection1]
-            )
-
     def test_synchronous_publish_timeout_error(self) -> None:
         with requests_mock.mock() as m:
             m.register_uri("POST", self.baseurl, status_code=504)
@@ -944,3 +866,31 @@ class WorkbookTests(unittest.TestCase):
             )
             file_path = self.server.workbooks.download("9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", td)
             self.assertTrue(os.path.exists(file_path))
+
+    def test_odata_connection(self) -> None:
+        self.baseurl = self.server.workbooks.baseurl
+        workbook = TSC.WorkbookItem("project", "test")
+        workbook._id = "06b944d2-959d-4604-9305-12323c95e70e"
+        connection = TSC.ConnectionItem()
+        url = "https://odata.website.com/TestODataEndpoint"
+        connection.server_address = url
+        connection._connection_type = "odata"
+        connection._id = "17376070-64d1-4d17-acb4-a56e4b5b1768"
+
+        creds = TSC.ConnectionCredentials("", "", True)
+        connection.connection_credentials = creds
+        with open(ODATA_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+
+        with requests_mock.mock() as m:
+            m.put(f"{self.baseurl}/{workbook.id}/connections/{connection.id}", text=response_xml)
+            self.server.workbooks.update_connection(workbook, connection)
+
+            history = m.request_history
+
+        request = history[0]
+        xml = fromstring(request.body)
+        xml_connection = xml.find(".//connection")
+
+        assert xml_connection is not None
+        self.assertEqual(xml_connection.get("serverAddress"), url)

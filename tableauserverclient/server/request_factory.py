@@ -418,19 +418,10 @@ class GroupRequest(object):
             import_element.attrib["siteRole"] = group_item.minimum_site_role
         return ET.tostring(xml_request)
 
-    def update_req(self, group_item: GroupItem, default_site_role: Optional[str] = None) -> bytes:
-        # (1/8/2021): Deprecated starting v0.15
-        if default_site_role is not None:
-            import warnings
-
-            warnings.simplefilter("always", DeprecationWarning)
-            warnings.warn(
-                'RequestFactory.Group.update_req(...default_site_role="") is deprecated, '
-                "please set the minimum_site_role field of GroupItem",
-                DeprecationWarning,
-            )
-            group_item.minimum_site_role = default_site_role
-
+    def update_req(
+        self,
+        group_item: GroupItem,
+    ) -> bytes:
         xml_request = ET.Element("tsRequest")
         group_element = ET.SubElement(xml_request, "group")
 
@@ -491,6 +482,9 @@ class ProjectRequest(object):
             project_element.attrib["contentPermissions"] = project_item.content_permissions
         if project_item.parent_id is not None:
             project_element.attrib["parentProjectId"] = project_item.parent_id
+        if (owner := project_item.owner_id) is not None:
+            owner_element = ET.SubElement(project_element, "owner")
+            owner_element.attrib["id"] = owner
         return ET.tostring(xml_request)
 
     def create_req(self, project_item: "ProjectItem") -> bytes:
@@ -893,9 +887,7 @@ class WorkbookRequest(object):
     def _generate_xml(
         self,
         workbook_item,
-        connection_credentials=None,
         connections=None,
-        hidden_views=None,
     ):
         xml_request = ET.Element("tsRequest")
         workbook_element = ET.SubElement(xml_request, "workbook")
@@ -905,12 +897,6 @@ class WorkbookRequest(object):
         project_element = ET.SubElement(workbook_element, "project")
         project_element.attrib["id"] = str(workbook_item.project_id)
 
-        if connection_credentials is not None and connections is not None:
-            raise RuntimeError("You cannot set both `connections` and `connection_credentials`")
-
-        if connection_credentials is not None and connection_credentials != False:
-            _add_credentials_element(workbook_element, connection_credentials)
-
         if connections is not None and connections != False and len(connections) > 0:
             connections_element = ET.SubElement(workbook_element, "connections")
             for connection in connections:
@@ -918,17 +904,6 @@ class WorkbookRequest(object):
 
         if workbook_item.description is not None:
             workbook_element.attrib["description"] = workbook_item.description
-
-        if hidden_views is not None:
-            import warnings
-
-            warnings.simplefilter("always", DeprecationWarning)
-            warnings.warn(
-                "the hidden_views parameter should now be set on the workbook directly",
-                DeprecationWarning,
-            )
-            if workbook_item.hidden_views is None:
-                workbook_item.hidden_views = hidden_views
 
         if workbook_item.hidden_views is not None:
             views_element = ET.SubElement(workbook_element, "views")
@@ -1012,15 +987,11 @@ class WorkbookRequest(object):
         workbook_item,
         filename,
         file_contents,
-        connection_credentials=None,
         connections=None,
-        hidden_views=None,
     ):
         xml_request = self._generate_xml(
             workbook_item,
-            connection_credentials=connection_credentials,
             connections=connections,
-            hidden_views=hidden_views,
         )
 
         parts = {
@@ -1032,15 +1003,11 @@ class WorkbookRequest(object):
     def publish_req_chunked(
         self,
         workbook_item,
-        connection_credentials=None,
         connections=None,
-        hidden_views=None,
     ):
         xml_request = self._generate_xml(
             workbook_item,
-            connection_credentials=connection_credentials,
             connections=connections,
-            hidden_views=hidden_views,
         )
 
         parts = {"request_payload": ("", xml_request, "text/xml")}
@@ -1061,8 +1028,13 @@ class Connection(object):
     @_tsrequest_wrapped
     def update_req(self, xml_request: ET.Element, connection_item: "ConnectionItem") -> None:
         connection_element = ET.SubElement(xml_request, "connection")
-        if connection_item.server_address is not None:
-            connection_element.attrib["serverAddress"] = connection_item.server_address.lower()
+        if (server_address := connection_item.server_address) is not None:
+            if (conn_type := connection_item.connection_type) is not None:
+                if conn_type.casefold() != "odata".casefold():
+                    server_address = server_address.lower()
+            else:
+                server_address = server_address.lower()
+            connection_element.attrib["serverAddress"] = server_address
         if connection_item.server_port is not None:
             connection_element.attrib["serverPort"] = str(connection_item.server_port)
         if connection_item.username is not None:

@@ -79,6 +79,7 @@ class ProjectTests(unittest.TestCase):
                 parent_id="9a8f2265-70f3-4494-96c5-e5949d7a1120",
             )
             single_project._id = "1d0304cd-3796-429f-b815-7258370b9b74"
+            single_project.owner_id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
             single_project = self.server.projects.update(single_project)
 
         self.assertEqual("1d0304cd-3796-429f-b815-7258370b9b74", single_project.id)
@@ -86,6 +87,7 @@ class ProjectTests(unittest.TestCase):
         self.assertEqual("Project created for testing", single_project.description)
         self.assertEqual("LockedToProject", single_project.content_permissions)
         self.assertEqual("9a8f2265-70f3-4494-96c5-e5949d7a1120", single_project.parent_id)
+        self.assertEqual("dd2239f6-ddf1-4107-981a-4cf94e415794", single_project.owner_id)
 
     def test_content_permission_locked_to_project_without_nested(self) -> None:
         with open(SET_CONTENT_PERMISSIONS_XML, "rb") as f:
@@ -185,7 +187,7 @@ class ProjectTests(unittest.TestCase):
                 self.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/default-permissions/workbooks", text=response_xml
             )
             single_project = TSC.ProjectItem("test", "1d0304cd-3796-429f-b815-7258370b9b74")
-            single_project._owner_id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
+            single_project.owner_id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
             single_project._id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
 
             self.server.projects.populate_workbook_default_permissions(single_project)
