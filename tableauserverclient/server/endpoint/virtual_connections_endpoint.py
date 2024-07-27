@@ -1,9 +1,10 @@
 from functools import partial
-from typing import List, Optional, TYPE_CHECKING, Tuple
+from typing import List, Optional, TYPE_CHECKING, Tuple, Union
 
 from tableauserverclient.models.connection_item import ConnectionItem
 from tableauserverclient.models.pagination_item import PaginationItem
 from tableauserverclient.models.virtual_connection_item import VirtualConnectionItem
+from tableauserverclient.server.request_factory import RequestFactory
 from tableauserverclient.server.request_options import RequestOptions
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
 from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
@@ -47,3 +48,13 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem]):
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
 
         return connections, pagination_item
+
+    @api(version="3.18")
+    def update_connection_db_connection(
+        self, virtual_connection: Union[str, VirtualConnectionItem], connection: ConnectionItem
+    ) -> ConnectionItem:
+        vconn_id = getattr(virtual_connection, "id", virtual_connection)
+        url = f"{self.baseurl}/{vconn_id}/connections/{connection.id}/modify"
+        xml_request = RequestFactory.VirtualConnection.update_db_connection(connection)
+        server_response = self.put_request(url, xml_request)
+        return ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]

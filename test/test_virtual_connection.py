@@ -1,8 +1,6 @@
-import datetime as dt
 from pathlib import Path
 import unittest
 
-from defusedxml.ElementTree import fromstring
 import requests_mock
 
 import tableauserverclient as TSC
@@ -13,6 +11,7 @@ ASSET_DIR = Path(__file__).parent / "assets"
 
 VIRTUAL_CONNECTION_GET_XML = ASSET_DIR / "virtual_connections_get.xml"
 VIRTUAL_CONNECTION_POPULATE_CONNECTIONS = ASSET_DIR / "virtual_connection_populate_connections.xml"
+VC_DB_CONN_UPDATE = ASSET_DIR / "virtual_connection_database_connection_update.xml"
 
 
 class TestVirtualConnections(unittest.TestCase):
@@ -66,3 +65,22 @@ class TestVirtualConnections(unittest.TestCase):
         assert connection.server_address == "localhost"
         assert connection.server_port == "5432"
         assert connection.username == "pgadmin"
+
+    def test_virtual_connection_update_connection_db_connection(self):
+        vconn = VirtualConnectionItem("vconn")
+        vconn.id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
+        connection = TSC.ConnectionItem()
+        connection._id = "37ca6ced-58d7-4dcf-99dc-f0a85223cbef"
+        connection.server_address = "localhost"
+        connection.server_port = "5432"
+        connection.username = "pgadmin"
+        connection.password = "password"
+        with requests_mock.mock() as m:
+            m.put(f"{self.baseurl}/{vconn.id}/connections/{connection.id}/modify", text=VC_DB_CONN_UPDATE.read_text())
+            updated_connection = self.server.virtual_connections.update_connection_db_connection(vconn, connection)
+
+        assert updated_connection.id == "37ca6ced-58d7-4dcf-99dc-f0a85223cbef"
+        assert updated_connection.server_address == "localhost"
+        assert updated_connection.server_port == "5432"
+        assert updated_connection.username == "pgadmin"
+        assert updated_connection.password is None
