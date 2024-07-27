@@ -43,6 +43,7 @@ from tableauserverclient.models import (
     TaskItem,
     UserItem,
     ViewItem,
+    VirtualConnectionItem,
     WebhookItem,
     WeeklyInterval,
     WorkbookItem,
@@ -124,4 +125,5 @@ __all__ = [
     "LinkedTaskItem",
     "LinkedTaskStepItem",
     "LinkedTaskFlowRunItem",
+    "VirtualConnectionItem",
 ]

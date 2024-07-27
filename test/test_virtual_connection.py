@@ -3,6 +3,7 @@ from pathlib import Path
 import unittest
 
 from defusedxml.ElementTree import fromstring
+import requests_mock
 
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import parse_datetime
@@ -16,6 +17,12 @@ VIRTUAL_CONNECTION_GET_XML = ASSET_DIR / "virtual_connections_get.xml"
 class TestVirtualConnections(unittest.TestCase):
     def setUp(self) -> None:
         self.server = TSC.Server("http://test")
+
+        self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"
+        self.server._auth_token = "j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM"
+        self.server.version = "3.18"
+
+        self.baseurl = f"{self.server.baseurl}/sites/{self.server.site_id}/virtualConnections"
         return super().setUp()
 
     def test_from_xml(self):
@@ -30,3 +37,12 @@ class TestVirtualConnections(unittest.TestCase):
         assert virtual_connection.name == "vconn"
         assert virtual_connection.updated_at == parse_datetime("2024-06-18T09:00:00Z")
         assert virtual_connection.webpage_url == "https://test/#/site/site-name/virtualconnections/3"
+
+    def test_virtual_connection_get(self):
+        with requests_mock.mock() as m:
+            m.get(self.baseurl, text=VIRTUAL_CONNECTION_GET_XML.read_text())
+            items, pagination_item = self.server.virtual_connections.get()
+
+        assert len(items) == 1
+        assert pagination_item.total_available == 1
+        assert items[0].name == "vconn"

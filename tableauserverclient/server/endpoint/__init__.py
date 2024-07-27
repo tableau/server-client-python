@@ -27,6 +27,7 @@ from tableauserverclient.server.endpoint.resource_tagger import Tags
 from tableauserverclient.server.endpoint.tasks_endpoint import Tasks
 from tableauserverclient.server.endpoint.users_endpoint import Users
 from tableauserverclient.server.endpoint.views_endpoint import Views
+from tableauserverclient.server.endpoint.virtual_connections_endpoint import VirtualConnections
 from tableauserverclient.server.endpoint.webhooks_endpoint import Webhooks
 from tableauserverclient.server.endpoint.workbooks_endpoint import Workbooks
 
@@ -62,6 +63,7 @@ __all__ = [
     "Tasks",
     "Users",
     "Views",
+    "VirtualConnections",
     "Webhooks",
     "Workbooks",
 ]

@@ -36,6 +36,7 @@ from tableauserverclient.server.endpoint import (
     LinkedTasks,
     GroupSets,
     Tags,
+    VirtualConnections,
 )
 from tableauserverclient.server.exceptions import (
     ServerInfoEndpointNotFoundError,
@@ -105,6 +106,7 @@ class Server(object):
         self.linked_tasks = LinkedTasks(self)
         self.group_sets = GroupSets(self)
         self.tags = Tags(self)
+        self.virtual_connections = VirtualConnections(self)
 
         self._session = self._session_factory()
         self._http_options = dict()  # must set this before making a server call
