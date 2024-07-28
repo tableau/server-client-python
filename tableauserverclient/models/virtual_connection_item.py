@@ -1,4 +1,5 @@
 import datetime as dt
+import json
 from typing import Callable, Dict, Iterable, List, Optional
 from xml.etree.ElementTree import Element
 
@@ -18,6 +19,9 @@ class VirtualConnectionItem:
         self.updated_at: Optional[dt.datetime] = None
         self.webpage_url: Optional[str] = None
         self._connections: Optional[Callable[[], Iterable[ConnectionItem]]] = None
+        self.project_id: Optional[str] = None
+        self.owner_id: Optional[str] = None
+        self.content: Optional[Dict[str, dict]] = None
 
     def __str__(self) -> str:
         return f"{self.__class__.__qualname__}(name={self.name})"
@@ -34,7 +38,7 @@ class VirtualConnectionItem:
     @classmethod
     def from_response(cls, response: bytes, ns: Dict[str, str]) -> List["VirtualConnectionItem"]:
         parsed_response = fromstring(response)
-        return [cls.from_xml(xml, ns) for xml in parsed_response.findall(".//t:virtualConnection[@id]", ns)]
+        return [cls.from_xml(xml, ns) for xml in parsed_response.findall(".//t:virtualConnection[@name]", ns)]
 
     @classmethod
     def from_xml(cls, xml: Element, ns: Dict[str, str]) -> "VirtualConnectionItem":
@@ -45,6 +49,9 @@ class VirtualConnectionItem:
         v_conn.updated_at = parse_datetime(xml.get("updatedAt", None))
         v_conn.is_certified = string_to_bool(s) if (s := xml.get("isCertified", None)) else None
         v_conn.has_extracts = string_to_bool(s) if (s := xml.get("hasExtracts", None)) else None
+        v_conn.project_id = p.get("id", None) if ((p := xml.find(".//t:project[@id]", ns)) is not None) else None
+        v_conn.owner_id = o.get("id", None) if ((o := xml.find(".//t:owner[@id]", ns)) is not None) else None
+        v_conn.content = json.loads(c.text or "{}") if ((c := xml.find(".//t:content", ns)) is not None) else None
         return v_conn
 
 

@@ -1,4 +1,5 @@
 from functools import partial
+import json
 from typing import List, Optional, TYPE_CHECKING, Tuple, Union
 
 from tableauserverclient.models.connection_item import ConnectionItem
@@ -58,3 +59,15 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem]):
         xml_request = RequestFactory.VirtualConnection.update_db_connection(connection)
         server_response = self.put_request(url, xml_request)
         return ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+
+    @api(version="3.23")
+    def get_by_id(self, virtual_connection: Union[str, VirtualConnectionItem]) -> VirtualConnectionItem:
+        vconn_id = getattr(virtual_connection, "id", virtual_connection)
+        url = f"{self.baseurl}/{vconn_id}"
+        server_response = self.get_request(url)
+        return VirtualConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+
+    @api(version="3.23")
+    def download(self, virtual_connection: Union[str, VirtualConnectionItem]) -> str:
+        v_conn = self.get_by_id(virtual_connection)
+        return json.dumps(v_conn.content)

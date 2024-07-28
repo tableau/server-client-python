@@ -12,6 +12,7 @@ ASSET_DIR = Path(__file__).parent / "assets"
 VIRTUAL_CONNECTION_GET_XML = ASSET_DIR / "virtual_connections_get.xml"
 VIRTUAL_CONNECTION_POPULATE_CONNECTIONS = ASSET_DIR / "virtual_connection_populate_connections.xml"
 VC_DB_CONN_UPDATE = ASSET_DIR / "virtual_connection_database_connection_update.xml"
+VIRTUAL_CONNECTION_DOWNLOAD = ASSET_DIR / "virtual_connections_download.xml"
 
 
 class TestVirtualConnections(unittest.TestCase):
@@ -20,7 +21,7 @@ class TestVirtualConnections(unittest.TestCase):
 
         self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"
         self.server._auth_token = "j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM"
-        self.server.version = "3.18"
+        self.server.version = "3.23"
 
         self.baseurl = f"{self.server.baseurl}/sites/{self.server.site_id}/virtualConnections"
         return super().setUp()
@@ -84,3 +85,16 @@ class TestVirtualConnections(unittest.TestCase):
         assert updated_connection.server_port == "5432"
         assert updated_connection.username == "pgadmin"
         assert updated_connection.password is None
+
+    def test_virtual_connection_get_by_id(self):
+        vconn = VirtualConnectionItem("vconn")
+        vconn.id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
+        with requests_mock.mock() as m:
+            m.get(f"{self.baseurl}/{vconn.id}", text=VIRTUAL_CONNECTION_DOWNLOAD.read_text())
+            vconn = self.server.virtual_connections.get_by_id(vconn)
+
+        assert vconn.content
+        assert vconn.created_at is None
+        assert vconn.id is None
+        assert "policyCollection" in vconn.content
+        assert "revision" in vconn.content
