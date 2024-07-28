@@ -16,7 +16,7 @@ To see sample code that works directly with the REST API (in Java, Python, or Po
 For more information on installing and using TSC, see the documentation:
 <https://tableau.github.io/server-client-python/docs/>
  
-
+To contribute, see our [Developer Guide](https://tableau.github.io/server-client-python/docs/dev-guide). A list of all our contributors to date is in [CONTRIBUTORS.md].
 
 ## License
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Ftableau%2Fserver-client-python.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Ftableau%2Fserver-client-python?ref=badge_large)
