@@ -71,3 +71,10 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem]):
     def download(self, virtual_connection: Union[str, VirtualConnectionItem]) -> str:
         v_conn = self.get_by_id(virtual_connection)
         return json.dumps(v_conn.content)
+
+    @api(version="3.23")
+    def update(self, virtual_connection: VirtualConnectionItem) -> VirtualConnectionItem:
+        url = f"{self.baseurl}/{virtual_connection.id}"
+        xml_request = RequestFactory.VirtualConnection.update(virtual_connection)
+        server_response = self.put_request(url, xml_request)
+        return VirtualConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]

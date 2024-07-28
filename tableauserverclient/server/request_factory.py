@@ -1348,7 +1348,7 @@ class GroupSetRequest:
 
 class VirtualConnectionRequest:
     @_tsrequest_wrapped
-    def update_db_connection(self, xml_request: ET.Element, connection_item: ConnectionItem) -> None:
+    def update_db_connection(self, xml_request: ET.Element, connection_item: ConnectionItem) -> bytes:
         connection_element = ET.SubElement(xml_request, "connection")
         if connection_item.server_address is not None:
             connection_element.attrib["serverAddress"] = connection_item.server_address
@@ -1358,6 +1358,27 @@ class VirtualConnectionRequest:
             connection_element.attrib["userName"] = connection_item.username
         if connection_item.password is not None:
             connection_element.attrib["password"] = connection_item.password
+
+        return ET.tostring(xml_request)
+
+    @_tsrequest_wrapped
+    def update(self, xml_request: ET.Element, virtual_connection: VirtualConnectionItem) -> bytes:
+        vc_element = ET.SubElement(xml_request, "virtualConnection")
+        if virtual_connection.name is not None:
+            vc_element.attrib["name"] = virtual_connection.name
+        if virtual_connection.is_certified is not None:
+            vc_element.attrib["isCertified"] = str(virtual_connection.is_certified).lower()
+        if virtual_connection.certification_note is not None:
+            vc_element.attrib["certificationNote"] = virtual_connection.certification_note
+        if virtual_connection.project_id is not None:
+            project_element = ET.SubElement(vc_element, "project")
+            project_element.attrib["id"] = virtual_connection.project_id
+        if virtual_connection.owner_id is not None:
+            owner_element = ET.SubElement(vc_element, "owner")
+            owner_element.attrib["id"] = virtual_connection.owner_id
+
+        return ET.tostring(xml_request)
+
 
 class RequestFactory(object):
     Auth = AuthRequest()

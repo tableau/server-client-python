@@ -22,6 +22,7 @@ class VirtualConnectionItem:
         self.project_id: Optional[str] = None
         self.owner_id: Optional[str] = None
         self.content: Optional[Dict[str, dict]] = None
+        self.certification_note: Optional[str] = None
 
     def __str__(self) -> str:
         return f"{self.__class__.__qualname__}(name={self.name})"
@@ -48,6 +49,7 @@ class VirtualConnectionItem:
         v_conn.created_at = parse_datetime(xml.get("createdAt", None))
         v_conn.updated_at = parse_datetime(xml.get("updatedAt", None))
         v_conn.is_certified = string_to_bool(s) if (s := xml.get("isCertified", None)) else None
+        v_conn.certification_note = xml.get("certificationNote", None)
         v_conn.has_extracts = string_to_bool(s) if (s := xml.get("hasExtracts", None)) else None
         v_conn.project_id = p.get("id", None) if ((p := xml.find(".//t:project[@id]", ns)) is not None) else None
         v_conn.owner_id = o.get("id", None) if ((o := xml.find(".//t:owner[@id]", ns)) is not None) else None

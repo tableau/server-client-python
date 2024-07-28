@@ -13,6 +13,7 @@ VIRTUAL_CONNECTION_GET_XML = ASSET_DIR / "virtual_connections_get.xml"
 VIRTUAL_CONNECTION_POPULATE_CONNECTIONS = ASSET_DIR / "virtual_connection_populate_connections.xml"
 VC_DB_CONN_UPDATE = ASSET_DIR / "virtual_connection_database_connection_update.xml"
 VIRTUAL_CONNECTION_DOWNLOAD = ASSET_DIR / "virtual_connections_download.xml"
+VIRTUAL_CONNECTION_UPDATE = ASSET_DIR / "virtual_connections_update.xml"
 
 
 class TestVirtualConnections(unittest.TestCase):
@@ -98,3 +99,22 @@ class TestVirtualConnections(unittest.TestCase):
         assert vconn.id is None
         assert "policyCollection" in vconn.content
         assert "revision" in vconn.content
+
+    def test_virtual_connection_update(self):
+        vconn = VirtualConnectionItem("vconn")
+        vconn.id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
+        vconn.is_certified = True
+        vconn.certification_note = "demo certification note"
+        vconn.project_id = "5286d663-8668-4ac2-8c8d-91af7d585f6b"
+        vconn.owner_id = "9324cf6b-ba72-4b8e-b895-ac3f28d2f0e0"
+        with requests_mock.mock() as m:
+            m.put(f"{self.baseurl}/{vconn.id}", text=VIRTUAL_CONNECTION_UPDATE.read_text())
+            vconn = self.server.virtual_connections.update(vconn)
+
+        assert not vconn.has_extracts
+        assert vconn.id is None
+        assert vconn.is_certified
+        assert vconn.name == "testv1"
+        assert vconn.certification_note == "demo certification note"
+        assert vconn.project_id == "5286d663-8668-4ac2-8c8d-91af7d585f6b"
+        assert vconn.owner_id == "9324cf6b-ba72-4b8e-b895-ac3f28d2f0e0"
