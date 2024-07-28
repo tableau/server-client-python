@@ -95,3 +95,8 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem]):
         server_response = self.get_request(url)
         virtual_connection = VirtualConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return json.dumps(virtual_connection.content)
+
+    @api(version="3.23")
+    def delete(self, virtual_connection: Union[VirtualConnectionItem, str]) -> None:
+        vconn_id = getattr(virtual_connection, "id", virtual_connection)
+        self.delete_request(f"{self.baseurl}/{vconn_id}")
