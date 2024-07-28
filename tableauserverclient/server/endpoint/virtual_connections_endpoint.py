@@ -88,3 +88,10 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem]):
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         revisions = RevisionItem.from_response(server_response.content, self.parent_srv.namespace, virtual_connection)
         return revisions, pagination_item
+
+    @api(version="3.23")
+    def download_revision(self, virtual_connection: VirtualConnectionItem, revision_number: int) -> str:
+        url = f"{self.baseurl}/{virtual_connection.id}/revisions/{revision_number}"
+        server_response = self.get_request(url)
+        virtual_connection = VirtualConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        return json.dumps(virtual_connection.content)

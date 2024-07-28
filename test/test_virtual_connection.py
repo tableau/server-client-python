@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 import unittest
 
@@ -151,3 +152,16 @@ class TestVirtualConnections(unittest.TestCase):
         assert not revisions[2].deleted
         assert revisions[2].user_name == "Cassie"
         assert revisions[2].user_id == "5de011f8-5aa9-4d5b-b991-f462c8dd6bb7"
+
+    def test_virtual_connection_download_revision(self):
+        vconn = VirtualConnectionItem("vconn")
+        vconn.id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
+        with requests_mock.mock() as m:
+            m.get(f"{self.baseurl}/{vconn.id}/revisions/1", text=VIRTUAL_CONNECTION_DOWNLOAD.read_text())
+            content = self.server.virtual_connections.download_revision(vconn, 1)
+
+        assert content
+        assert "policyCollection" in content
+        data = json.loads(content)
+        assert "policyCollection" in data
+        assert "revision" in data
