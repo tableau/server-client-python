@@ -4,6 +4,7 @@ from typing import List, Optional, TYPE_CHECKING, Tuple, Union
 
 from tableauserverclient.models.connection_item import ConnectionItem
 from tableauserverclient.models.pagination_item import PaginationItem
+from tableauserverclient.models.revision_item import RevisionItem
 from tableauserverclient.models.virtual_connection_item import VirtualConnectionItem
 from tableauserverclient.server.request_factory import RequestFactory
 from tableauserverclient.server.request_options import RequestOptions
@@ -78,3 +79,12 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem]):
         xml_request = RequestFactory.VirtualConnection.update(virtual_connection)
         server_response = self.put_request(url, xml_request)
         return VirtualConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+
+    @api(version="3.23")
+    def get_revisions(
+        self, virtual_connection: VirtualConnectionItem, req_options: Optional[RequestOptions] = None
+    ) -> Tuple[List[RevisionItem], PaginationItem]:
+        server_response = self.get_request(f"{self.baseurl}/{virtual_connection.id}/revisions", req_options)
+        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
+        revisions = RevisionItem.from_response(server_response.content, self.parent_srv.namespace, virtual_connection)
+        return revisions, pagination_item

@@ -14,6 +14,7 @@ VIRTUAL_CONNECTION_POPULATE_CONNECTIONS = ASSET_DIR / "virtual_connection_popula
 VC_DB_CONN_UPDATE = ASSET_DIR / "virtual_connection_database_connection_update.xml"
 VIRTUAL_CONNECTION_DOWNLOAD = ASSET_DIR / "virtual_connections_download.xml"
 VIRTUAL_CONNECTION_UPDATE = ASSET_DIR / "virtual_connections_update.xml"
+VIRTUAL_CONNECTION_REVISIONS = ASSET_DIR / "virtual_connections_revisions.xml"
 
 
 class TestVirtualConnections(unittest.TestCase):
@@ -118,3 +119,35 @@ class TestVirtualConnections(unittest.TestCase):
         assert vconn.certification_note == "demo certification note"
         assert vconn.project_id == "5286d663-8668-4ac2-8c8d-91af7d585f6b"
         assert vconn.owner_id == "9324cf6b-ba72-4b8e-b895-ac3f28d2f0e0"
+
+    def test_virtual_connection_get_revisions(self):
+        vconn = VirtualConnectionItem("vconn")
+        vconn.id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
+        with requests_mock.mock() as m:
+            m.get(f"{self.baseurl}/{vconn.id}/revisions", text=VIRTUAL_CONNECTION_REVISIONS.read_text())
+            revisions, pagination_item = self.server.virtual_connections.get_revisions(vconn)
+
+        assert len(revisions) == 3
+        assert pagination_item.total_available == 3
+        assert revisions[0].resource_id == vconn.id
+        assert revisions[0].resource_name == vconn.name
+        assert revisions[0].created_at == parse_datetime("2016-07-26T20:34:56Z")
+        assert revisions[0].revision_number == "1"
+        assert not revisions[0].current
+        assert not revisions[0].deleted
+        assert revisions[0].user_name == "Cassie"
+        assert revisions[0].user_id == "5de011f8-5aa9-4d5b-b991-f462c8dd6bb7"
+        assert revisions[1].resource_id == vconn.id
+        assert revisions[1].resource_name == vconn.name
+        assert revisions[1].created_at == parse_datetime("2016-07-27T20:34:56Z")
+        assert revisions[1].revision_number == "2"
+        assert not revisions[1].current
+        assert not revisions[1].deleted
+        assert revisions[2].resource_id == vconn.id
+        assert revisions[2].resource_name == vconn.name
+        assert revisions[2].created_at == parse_datetime("2016-07-28T20:34:56Z")
+        assert revisions[2].revision_number == "3"
+        assert revisions[2].current
+        assert not revisions[2].deleted
+        assert revisions[2].user_name == "Cassie"
+        assert revisions[2].user_id == "5de011f8-5aa9-4d5b-b991-f462c8dd6bb7"
