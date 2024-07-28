@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.5.xsd">
+        <virtualConnection name="testv1" isCertified="true" certificationNote="demo certification note">
+            <project id="5286d663-8668-4ac2-8c8d-91af7d585f6b"/>
+            <owner id="9324cf6b-ba72-4b8e-b895-ac3f28d2f0e0" />
+        </virtualConnection>
+</tsResponse>
