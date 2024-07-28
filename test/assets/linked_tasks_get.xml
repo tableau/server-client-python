@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.5.xsd">
+   <pagination pageNumber="1" pageSize="100" totalAvailable="5"/>
+   <linkedTasks>
+     <linkedTasks id="1b8211dc-51a8-45ce-a831-b5921708e03e"
+      numSteps="1">
+       <schedule id="be077332-d01d-481b-b2f3-917e463d4dca"
+        name="schedule-name"
+        state="Active"
+        priority="50"
+        createdAt="2024-07-24T00:27:55Z"
+        updatedAt="2024-07-24T01:42:15Z"
+        type="Flow"
+        frequency="daily"
+        nextRunAt="2024-07-24T03:30:00Z"/>
+       <linkedTaskSteps>
+         <linkedTaskSteps id="f554a4df-bb6f-4294-94ee-9a709ef9bda0"
+          stepNumber="1"
+          stopDownstreamTasksOnFailure="true">
+         <task>
+           <flowRun id="e3d1fc25-5644-4e32-af35-58dcbd1dbd73"
+            priority="1"
+            consecutiveFailedCount="3"
+            type="runFlow">
+                <flow id="ab1231eb-b8ca-461e-a131-83f3c2b6a673"
+                name="flow-name" />
+           </flowRun>
+         </task>
+       </linkedTaskSteps>
+     </linkedTaskSteps>
+    </linkedTasks>
+    </linkedTasks>
+</tsResponse>

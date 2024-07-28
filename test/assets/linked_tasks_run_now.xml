@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.5.xsd">
+<linkedTaskJob id="269a1e5a-1220-4a13-ac01-704982693dd8"
+    linkedTaskId="1b8211dc-51a8-45ce-a831-b5921708e03e"
+    status="InProgress"
+    createdAt="2022-02-15T00:22:22Z"/>
+  </tsResponse>
