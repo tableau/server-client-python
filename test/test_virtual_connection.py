@@ -165,3 +165,14 @@ class TestVirtualConnections(unittest.TestCase):
         data = json.loads(content)
         assert "policyCollection" in data
         assert "revision" in data
+
+    def test_virtual_connection_delete(self):
+        vconn = VirtualConnectionItem("vconn")
+        vconn.id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
+        with requests_mock.mock() as m:
+            m.delete(f"{self.baseurl}/{vconn.id}")
+            self.server.virtual_connections.delete(vconn)
+            self.server.virtual_connections.delete(vconn.id)
+
+        assert m.call_count == 2
+
