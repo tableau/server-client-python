@@ -16,6 +16,7 @@ VC_DB_CONN_UPDATE = ASSET_DIR / "virtual_connection_database_connection_update.x
 VIRTUAL_CONNECTION_DOWNLOAD = ASSET_DIR / "virtual_connections_download.xml"
 VIRTUAL_CONNECTION_UPDATE = ASSET_DIR / "virtual_connections_update.xml"
 VIRTUAL_CONNECTION_REVISIONS = ASSET_DIR / "virtual_connections_revisions.xml"
+VIRTUAL_CONNECTION_PUBLISH = ASSET_DIR / "virtual_connections_publish.xml"
 
 
 class TestVirtualConnections(unittest.TestCase):
@@ -176,3 +177,38 @@ class TestVirtualConnections(unittest.TestCase):
 
         assert m.call_count == 2
 
+    def test_virtual_connection_publish(self):
+        vconn = VirtualConnectionItem("vconn")
+        vconn.id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
+        vconn.project_id = "9836791c-9468-40f0-b7f3-d10b9562a046"
+        vconn.owner_id = "ee8bc9ca-77fe-4ae0-8093-cf77f0ee67a9"
+        with requests_mock.mock() as m:
+            m.post(f"{self.baseurl}?overwrite=false&publishAsDraft=false", text=VIRTUAL_CONNECTION_PUBLISH.read_text())
+            vconn = self.server.virtual_connections.publish(
+                vconn, '{"test": 0}', mode="CreateNew", publish_as_draft=False
+            )
+
+        assert vconn.name == "vconn_test"
+        assert vconn.owner_id == "ee8bc9ca-77fe-4ae0-8093-cf77f0ee67a9"
+        assert vconn.project_id == "9836791c-9468-40f0-b7f3-d10b9562a046"
+        assert vconn.content
+        assert "policyCollection" in vconn.content
+        assert "revision" in vconn.content
+
+    def test_virtual_connection_publish_draft_overwrite(self):
+        vconn = VirtualConnectionItem("vconn")
+        vconn.id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
+        vconn.project_id = "9836791c-9468-40f0-b7f3-d10b9562a046"
+        vconn.owner_id = "ee8bc9ca-77fe-4ae0-8093-cf77f0ee67a9"
+        with requests_mock.mock() as m:
+            m.post(f"{self.baseurl}?overwrite=true&publishAsDraft=true", text=VIRTUAL_CONNECTION_PUBLISH.read_text())
+            vconn = self.server.virtual_connections.publish(
+                vconn, '{"test": 0}', mode="Overwrite", publish_as_draft=True
+            )
+
+        assert vconn.name == "vconn_test"
+        assert vconn.owner_id == "ee8bc9ca-77fe-4ae0-8093-cf77f0ee67a9"
+        assert vconn.project_id == "9836791c-9468-40f0-b7f3-d10b9562a046"
+        assert vconn.content
+        assert "policyCollection" in vconn.content
+        assert "revision" in vconn.content

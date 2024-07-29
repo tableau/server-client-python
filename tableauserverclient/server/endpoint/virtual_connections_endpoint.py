@@ -1,11 +1,15 @@
 from functools import partial
+import io
 import json
+import os
+from pathlib import Path
 from typing import List, Optional, TYPE_CHECKING, Tuple, Union
 
 from tableauserverclient.models.connection_item import ConnectionItem
 from tableauserverclient.models.pagination_item import PaginationItem
 from tableauserverclient.models.revision_item import RevisionItem
 from tableauserverclient.models.virtual_connection_item import VirtualConnectionItem
+from tableauserverclient.server.endpoint.datasources_endpoint import PathOrFile
 from tableauserverclient.server.request_factory import RequestFactory
 from tableauserverclient.server.request_options import RequestOptions
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
@@ -100,3 +104,30 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem]):
     def delete(self, virtual_connection: Union[VirtualConnectionItem, str]) -> None:
         vconn_id = getattr(virtual_connection, "id", virtual_connection)
         self.delete_request(f"{self.baseurl}/{vconn_id}")
+
+    @api(version="3.23")
+    def publish(
+        self,
+        virtual_connection: VirtualConnectionItem,
+        virtual_connection_content: str,
+        mode: str = "CreateNew",
+        publish_as_draft: bool = False,
+    ) -> VirtualConnectionItem:
+        try:
+            json.loads(virtual_connection_content)
+        except json.JSONDecodeError:
+            file = Path(virtual_connection_content)
+            if not file.exists():
+                raise RuntimeError(f"{virtual_connection_content} is not valid json nor an existing file path")
+            content = file.read_text()
+        else:
+            content = virtual_connection_content
+
+        if mode not in ["CreateNew", "Overwrite"]:
+            raise ValueError(f"Invalid mode: {mode}")
+        overwrite = mode == "Overwrite"
+
+        url = f"{self.baseurl}?overwrite={str(overwrite).lower()}&publishAsDraft={str(publish_as_draft).lower()}"
+        xml_request = RequestFactory.VirtualConnection.publish(virtual_connection, content)
+        server_response = self.post_request(url, xml_request)
+        return VirtualConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
