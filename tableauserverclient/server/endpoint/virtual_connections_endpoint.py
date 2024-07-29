@@ -131,3 +131,15 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem]):
         xml_request = RequestFactory.VirtualConnection.publish(virtual_connection, content)
         server_response = self.post_request(url, xml_request)
         return VirtualConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+
+    @api(version="3.22")
+    def populate_permissions(self, item: VirtualConnectionItem) -> None:
+        self._permissions.populate(item)
+
+    @api(version="3.22")
+    def add_permissions(self, resource, rules):
+        return self._permissions.update(resource, rules)
+
+    @api(version="3.22")
+    def delete_permission(self, item, capability_item):
+        return self._permissions.delete(item, capability_item)

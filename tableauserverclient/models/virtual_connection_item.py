@@ -7,6 +7,8 @@ from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.datetime_helpers import parse_datetime
 from tableauserverclient.models.connection_item import ConnectionItem
+from tableauserverclient.models.exceptions import UnpopulatedPropertyError
+from tableauserverclient.models.permissions_item import PermissionsRule
 
 
 class VirtualConnectionItem:
@@ -29,6 +31,16 @@ class VirtualConnectionItem:
 
     def __repr__(self) -> str:
         return f"<{self!s}>"
+
+    def _set_permissions(self, permissions):
+        self._permissions = permissions
+
+    @property
+    def permissions(self) -> List[PermissionsRule]:
+        if self._permissions is None:
+            error = "Workbook item must be populated with permissions first."
+            raise UnpopulatedPropertyError(error)
+        return self._permissions()
 
     @property
     def connections(self) -> Iterable[ConnectionItem]:
