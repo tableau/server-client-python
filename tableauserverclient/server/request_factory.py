@@ -1379,6 +1379,31 @@ class VirtualConnectionRequest:
 
         return ET.tostring(xml_request)
 
+    @_tsrequest_wrapped
+    def publish(self, xml_request: ET.Element, virtual_connection: VirtualConnectionItem, content: str) -> bytes:
+        vc_element = ET.SubElement(xml_request, "virtualConnection")
+        if virtual_connection.name is not None:
+            vc_element.attrib["name"] = virtual_connection.name
+        else:
+            raise ValueError("Virtual Connection must have a name.")
+        if virtual_connection.project_id is not None:
+            project_element = ET.SubElement(vc_element, "project")
+            project_element.attrib["id"] = virtual_connection.project_id
+        else:
+            raise ValueError("Virtual Connection must have a project id.")
+        if virtual_connection.owner_id is not None:
+            owner_element = ET.SubElement(vc_element, "owner")
+            owner_element.attrib["id"] = virtual_connection.owner_id
+        else:
+            raise ValueError("Virtual Connection must have an owner id.")
+        if content is not None:
+            content_element = ET.SubElement(vc_element, "content")
+            content_element.text = content
+        else:
+            raise ValueError("Virtual Connection must have content.")
+
+        return ET.tostring(xml_request)
+
 
 class RequestFactory(object):
     Auth = AuthRequest()
