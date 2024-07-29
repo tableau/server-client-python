@@ -1,15 +1,12 @@
 from functools import partial
-import io
 import json
-import os
 from pathlib import Path
-from typing import List, Optional, TYPE_CHECKING, Tuple, Union
+from typing import Iterable, List, Optional, Set, TYPE_CHECKING, Tuple, Union
 
 from tableauserverclient.models.connection_item import ConnectionItem
 from tableauserverclient.models.pagination_item import PaginationItem
 from tableauserverclient.models.revision_item import RevisionItem
 from tableauserverclient.models.virtual_connection_item import VirtualConnectionItem
-from tableauserverclient.server.endpoint.datasources_endpoint import PathOrFile
 from tableauserverclient.server.request_factory import RequestFactory
 from tableauserverclient.server.request_options import RequestOptions
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
@@ -143,3 +140,36 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem]):
     @api(version="3.22")
     def delete_permission(self, item, capability_item):
         return self._permissions.delete(item, capability_item)
+
+    @api(version="3.23")
+    def add_tags(
+        self, virtual_connection: Union[VirtualConnectionItem, str], tags: Union[Iterable[str], str]
+    ) -> Set[str]:
+        virtual_connection = getattr(virtual_connection, "id", virtual_connection)
+
+        if not isinstance(virtual_connection, str):
+            raise ValueError("virtual_connection ID not found.")
+
+        if isinstance(tags, str):
+            tag_set = set([tags])
+        else:
+            tag_set = set(tags)
+
+        return self._resource_tagger._add_tags(self.baseurl, virtual_connection, tag_set)
+
+    @api(version="3.23")
+    def delete_tags(
+        self, virtual_connection: Union[VirtualConnectionItem, str], tags: Union[Iterable[str], str]
+    ) -> None:
+        virtual_connection = getattr(virtual_connection, "id", virtual_connection)
+
+        if not isinstance(virtual_connection, str):
+            raise ValueError("virtual_connection ID not found.")
+
+        if isinstance(tags, str):
+            tag_set = set([tags])
+        else:
+            tag_set = set(tags)
+
+        for tag in tag_set:
+            self._resource_tagger._delete_tag(self.baseurl, virtual_connection, tag)
