@@ -17,6 +17,7 @@ VIRTUAL_CONNECTION_DOWNLOAD = ASSET_DIR / "virtual_connections_download.xml"
 VIRTUAL_CONNECTION_UPDATE = ASSET_DIR / "virtual_connections_update.xml"
 VIRTUAL_CONNECTION_REVISIONS = ASSET_DIR / "virtual_connections_revisions.xml"
 VIRTUAL_CONNECTION_PUBLISH = ASSET_DIR / "virtual_connections_publish.xml"
+ADD_PERMISSIONS = ASSET_DIR / "virtual_connection_add_permissions.xml"
 
 
 class TestVirtualConnections(unittest.TestCase):
@@ -212,3 +213,30 @@ class TestVirtualConnections(unittest.TestCase):
         assert vconn.content
         assert "policyCollection" in vconn.content
         assert "revision" in vconn.content
+
+    def test_add_permissions(self) -> None:
+        with open(ADD_PERMISSIONS, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+
+        single_virtual_connection = TSC.VirtualConnectionItem("test")
+        single_virtual_connection.id = "21778de4-b7b9-44bc-a599-1506a2639ace"
+
+        bob = TSC.UserItem.as_reference("7c37ee24-c4b1-42b6-a154-eaeab7ee330a")
+        group_of_people = TSC.GroupItem.as_reference("5e5e1978-71fa-11e4-87dd-7382f5c437af")
+
+        new_permissions = [
+            TSC.PermissionsRule(bob, {"Write": "Allow"}),
+            TSC.PermissionsRule(group_of_people, {"Read": "Deny"}),
+        ]
+
+        with requests_mock.mock() as m:
+            m.put(self.baseurl + "/21778de4-b7b9-44bc-a599-1506a2639ace/permissions", text=response_xml)
+            permissions = self.server.virtual_connections.add_permissions(single_virtual_connection, new_permissions)
+
+        self.assertEqual(permissions[0].grantee.tag_name, "group")
+        self.assertEqual(permissions[0].grantee.id, "5e5e1978-71fa-11e4-87dd-7382f5c437af")
+        self.assertDictEqual(permissions[0].capabilities, {TSC.Permission.Capability.Read: TSC.Permission.Mode.Deny})
+
+        self.assertEqual(permissions[1].grantee.tag_name, "user")
+        self.assertEqual(permissions[1].grantee.id, "7c37ee24-c4b1-42b6-a154-eaeab7ee330a")
+        self.assertDictEqual(permissions[1].capabilities, {TSC.Permission.Capability.Write: TSC.Permission.Mode.Allow})
