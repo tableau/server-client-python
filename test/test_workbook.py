@@ -872,7 +872,7 @@ class WorkbookTests(unittest.TestCase):
         workbook = TSC.WorkbookItem("project", "test")
         workbook._id = "06b944d2-959d-4604-9305-12323c95e70e"
         connection = TSC.ConnectionItem()
-        url = "https://odata.website.com/TestODataEndpoint"
+        url = "https://odata.website.com/TestODataEndpoint".lower()
         connection.server_address = url
         connection._connection_type = "odata"
         connection._id = "17376070-64d1-4d17-acb4-a56e4b5b1768"

@@ -122,9 +122,9 @@ class UserItem:
     def password(self) -> Optional[str]:
         return self._password
 
-    @property
-    def password_setting(self) -> Optional[str]:
-        return self._password
+    @password.setter
+    def password(self, value) -> None:
+        self._password = value
 
     @property
     def auth_setting(self) -> Optional[str]:
@@ -412,7 +412,7 @@ class UserItem:
                     try:
                         UserItem.CSVImport._validate_import_line_or_throw(line, logger)
                         if not validate_only:
-                            user: UserItem = UserItem.CSVImport.create_user_model_from_line(line, logger)
+                            user: UserItem = UserItem.CSVImport.create_user_from_line(line, logger)
                             users.append(user)
                         valid.append(" ".join(line))
                     except Exception as e:
@@ -441,10 +441,12 @@ class UserItem:
                 raise AttributeError("Too many attributes in line")
             # sometimes usernames are case sensitive
             username = line[UserItem.CSVImport.ColumnType.USERNAME.value]
-            logger.debug(f"> details - {username}")
+            if logger:            
+                logger.debug(f"> details - {username}")
             UserItem.validate_username_or_throw(username)
             for i in range(1, len(line)):
-                logger.debug(f"column {UserItem.CSVImport.ColumnType(i).name}: {line[i]}")
+                if logger:
+                    logger.debug(f"column {UserItem.CSVImport.ColumnType(i).name}: {line[i]}")
                 UserItem.CSVImport._validate_attribute_value(
                     line[i], _valid_attributes[i], UserItem.CSVImport.ColumnType(i)
                 )

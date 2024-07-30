@@ -80,11 +80,11 @@ class UserDataTest(unittest.TestCase):
     def test_get_user_detail_empty_line(self):
         test_line = ""
         with self.assertRaises(AttributeError):
-            test_user = TSC.UserItem.CSVImport.create_user_model_from_line(test_line, UserDataTest.logger)
+            test_user = TSC.UserItem.CSVImport.create_user_from_line(test_line, UserDataTest.logger)
 
     def test_get_user_detail_standard(self):
         test_line = ["username", "pword", "fname", "unlicensed", "no", "no", "email"]
-        test_user: TSC.UserItem = TSC.UserItem.CSVImport.create_user_model_from_line(test_line, UserDataTest.logger)
+        test_user: TSC.UserItem = TSC.UserItem.CSVImport.create_user_from_line(test_line, UserDataTest.logger)
         assert test_user.name == "username", test_user.name
         assert test_user.fullname == "fname", test_user.fullname
         assert test_user.site_role == "Unlicensed", test_user.site_role
@@ -92,7 +92,7 @@ class UserDataTest(unittest.TestCase):
 
     def test_get_user_detail_variation(self):
         test_line = ["username", "pword", "fname", "creator", "site", "yes", "email"]
-        test_user: TSC.UserItem = TSC.UserItem.CSVImport.create_user_model_from_line(test_line, UserDataTest.logger)
+        test_user: TSC.UserItem = TSC.UserItem.CSVImport.create_user_from_line(test_line, UserDataTest.logger)
         assert test_user.name == "username", test_user.name
         assert test_user.fullname == "fname", test_user.fullname
         assert test_user.site_role == "SiteAdministratorCreator", test_user.site_role
@@ -101,29 +101,25 @@ class UserDataTest(unittest.TestCase):
     def test_create_user_invalid_license(self):
         test_line = ["username", "pword", "fname", "license", "site", "yes", "email"]
         with self.assertRaises(AttributeError):
-            test_user: TSC.UserItem = TSC.UserItem.CSVImport.create_user_model_from_line(test_line, UserDataTest.logger)
+            test_user: TSC.UserItem = TSC.UserItem.CSVImport.create_user_from_line(test_line, UserDataTest.logger)
 
     def test_create_user_invalid_role(self):
         test_line = ["username", "pword", "fname", "creator", "role", "yes", "email"]
         with self.assertRaises(AttributeError):
-            test_user: TSC.UserItem = TSC.UserItem.CSVImport.create_user_model_from_line(test_line, UserDataTest.logger)
-            assert test_user.name == "username", test_user.name
-            assert test_user.fullname == "fname", test_user.fullname
-            assert test_user.site_role == "license", test_user.site_role
-            assert test_user.email == "email", test_user.email
+            test_user: TSC.UserItem = TSC.UserItem.CSVImport.create_user_from_line(test_line, UserDataTest.logger)
 
     def test_get_user_details_only_username(self):
         test_line = ["username"]
-        test_user: TSC.UserItem = TSC.UserItem.CSVImport.create_user_model_from_line(test_line, UserDataTest.logger)
+        test_user: TSC.UserItem = TSC.UserItem.CSVImport.create_user_from_line(test_line, UserDataTest.logger)
 
     def test_populate_user_details_only_some(self):
         values = ["username", "", "", "creator", "site"]
-        user = TSC.UserItem.CSVImport.create_user_model_from_line(values, UserDataTest.logger)
+        user = TSC.UserItem.CSVImport.create_user_from_line(values, UserDataTest.logger)
         assert user.name == "username"
 
     def test_validate_user_detail_standard(self):
         test_line = ["username", "pword", "fname", "creator", "site", "1", "email"]
-        TSC.UserItem.CSVImport.create_user_model_from_line(test_line, UserDataTest.logger)
+        TSC.UserItem.CSVImport.create_user_from_line(test_line, UserDataTest.logger)
 
     def test_validate_import_file(self):
         users, valid, invalid = TSC.UserItem.CSVImport.process_file_for_import(

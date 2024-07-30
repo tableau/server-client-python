@@ -71,7 +71,7 @@ class UserCSVImport(object):
     # Take in a list of strings in expected order
     # and create a user item populated by the given attributes
     @staticmethod
-    def create_user_model_from_line(line_values: List[str]) -> "UserItem":
+    def create_user_from_line(line_values: List[str]) -> "UserItem":
         UserCSVImport._validate_import_line_or_throw(line_values)
         values: List[str] = list(map(lambda x: x.strip(), line_values))
         user = UserItem(values[UserCSVImport.ColumnType.USERNAME])
@@ -128,7 +128,7 @@ class UserCSVImport(object):
                 try:
                     UserCSVImport._validate_import_line_or_throw(line)
                     if not validate_only:
-                        user: UserItem = UserCSVImport.create_user_model_from_line(line)
+                        user: UserItem = UserCSVImport.create_user_from_line(line)
                         users.append(user)
                     valid.append(" ".join(line))
                 except Exception as e:

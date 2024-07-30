@@ -1,5 +1,6 @@
 from tableauserverclient._version import get_versions
 from tableauserverclient.namespace import NEW_NAMESPACE as DEFAULT_NAMESPACE
+from tableauserverclient.helpers import UserCSVImport, UserCSVObject
 from tableauserverclient.models import (
     BackgroundJobItem,
     ColumnItem,
@@ -127,10 +128,11 @@ __all__ = [
     "Target",
     "TaskItem",
     "UserItem",
+    "UserCSVImport",
+    "UserCSVObject",
     "ViewItem",
     "VirtualConnectionItem",
     "WebhookItem",
     "WeeklyInterval",
     "WorkbookItem",
 ]
-from .helpers import importer # for tests
