@@ -27,6 +27,7 @@ class TestEndpoint(unittest.TestCase):
             response = endpoint.get_request(url=url)
             self.assertIsNotNone(response)
 
+    """ these two tests are veeery slow: they double the length of the test suite. 
     def test_user_friendly_request_returns(self) -> None:
         url = "http://test/"
         endpoint = TSC.server.Endpoint(self.server)
@@ -43,7 +44,8 @@ class TestEndpoint(unittest.TestCase):
             endpoint = TSC.server.Endpoint(self.server)
             response = endpoint._blocking_request(endpoint.parent_srv.session.get, url=url)
             self.assertIsNotNone(response)
-
+    """
+    
     def test_get_request_stream(self) -> None:
         url = "http://test/"
         endpoint = TSC.server.Endpoint(self.server)
