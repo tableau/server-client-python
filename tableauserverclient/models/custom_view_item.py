@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from defusedxml import ElementTree
 from defusedxml.ElementTree import fromstring, tostring
 from typing import Callable, Optional
@@ -61,12 +60,36 @@ class CustomViewItem:
     def id(self) -> Optional[str]:
         return self._id
 
+    def _set_image(self, image):
+        self._image = image
+
+    def _set_pdf(self, pdf):
+        self._pdf = pdf
+
+    def _set_csv(self, csv):
+        self._csv = csv
+
     @property
     def image(self) -> bytes:
         if self._image is None:
             error = "Custom View item must be populated with its png image first."
             raise UnpopulatedPropertyError(error)
         return self._image()
+    
+    @property
+    def pdf(self) -> bytes:
+        if self._pdf is None:
+            error = "View item must be populated with its pdf first."
+            raise UnpopulatedPropertyError(error)
+        return self._pdf()
+
+    @property
+    def csv(self) -> Iterator[bytes]:
+        if self._csv is None:
+            error = "View item must be populated with its csv first."
+            raise UnpopulatedPropertyError(error)
+        return self._csv()
+    
 
     @property
     def pdf(self) -> bytes:

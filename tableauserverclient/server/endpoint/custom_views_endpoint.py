@@ -98,6 +98,7 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
         server_response = self.get_request(url, req_options)
         image = server_response.content
         return image
+        
 
     @api(version="3.23")
     def populate_pdf(self, custom_view_item: CustomViewItem, req_options: Optional["PDFRequestOptions"] = None) -> None:

@@ -157,3 +157,4 @@ docs/.jekyll-metadata
 docs/Gemfile.lock
 samples/credentials
 .venv/
+/schema

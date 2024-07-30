@@ -39,6 +39,7 @@ def main():
     parser.add_argument(
         "--powerpoint", "-ppt", metavar="FILENAME", help="filename (a .ppt file) to save the powerpoint deck"
     )
+    parser.add_argument("--id", help="specific workbook luid to use")
 
     args = parser.parse_args()
 
@@ -48,7 +49,7 @@ def main():
 
     # SIGN IN
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
-    server = TSC.Server(args.server, use_server_version=True)
+    server = TSC.Server(args.server, use_server_version=True, http_options={'verify': False})
     with server.auth.sign_in(tableau_auth):
         # Publish workbook if publish flag is set (-publish, -p)
         overwrite_true = TSC.Server.PublishMode.Overwrite
@@ -63,6 +64,7 @@ def main():
             else:
                 print("Publish failed. Could not find the default project.")
 
+
         # Gets all workbook items
         all_workbooks, pagination_item = server.workbooks.get()
         print(f"\nThere are {pagination_item.total_available} workbooks on site: ")
@@ -70,22 +72,33 @@ def main():
 
         if all_workbooks:
             # Pick one workbook from the list
-            sample_workbook = all_workbooks[0]
+            if args.id:
+                sample_workbook = server.workbooks.get_by_id(args.id)
+            else:
+                sample_workbook = all_workbooks[0]
+            """
             sample_workbook.name = "Name me something cooler"
             sample_workbook.description = "That doesn't work"
             updated: TSC.WorkbookItem = server.workbooks.update(sample_workbook)
             print(updated.name, updated.description)
-
+            """
+            
             # Populate views
             server.workbooks.populate_views(sample_workbook)
             print(f"\nName of views in {sample_workbook.name}: ")
             print([view.name for view in sample_workbook.views])
 
+            """_summary_
             # Populate connections
             server.workbooks.populate_connections(sample_workbook)
-            print(f"\nConnections for {sample_workbook.name}: ")
-            print([f"{connection.id}({connection.datasource_name})" for connection in sample_workbook.connections])
-
+            print("\nConnections for {}: ".format(sample_workbook.name))
+            print(
+                [
+                    "{0}({1})".format(connection.id, connection.datasource_name)
+                    for connection in sample_workbook.connections
+                ]
+            )
+            
             # Update tags and show_tabs flag
             original_tag_set = set(sample_workbook.tags)
             sample_workbook.tags.update("a", "b", "c", "d")
@@ -122,26 +135,52 @@ def main():
                 with open(args.preview_image, "wb") as f:
                     f.write(sample_workbook.preview_image)
                 print(f"\nDownloaded preview image of workbook to {os.path.abspath(args.preview_image)}")
-
+             """
             # get custom views
             cvs, _ = server.custom_views.get()
-            for c in cvs:
-                print(c)
 
-            # for the last custom view in the list
+            my_custom_view = None
+            if len(cvs) > 0:
+                print("Custom views:")
+                for c in cvs:
+                    print(c)
+                    
+                my_custom_view = c
+                print(my_custom_view.id)
 
-            # update the name
-            # note that this will fail if the name is already changed to this value
-            changed: TSC.CustomViewItem(id=c.id, name="I was updated by tsc")
-            verified_change = server.custom_views.update(changed)
-            print(verified_change)
+                # for the first custom view in the list
 
-            # export as image. Filters etc could be added here as usual
-            server.custom_views.populate_image(c)
-            filename = c.id + "-image-export.png"
-            with open(filename, "wb") as f:
-                f.write(c.image)
-            print("saved to " + filename)
+                # update the name
+                # note that this will fail if the name is already changed to this value
+                """_summary_
+                changed = TSC.CustomViewItem(id=my_custom_view.id, name="I was again changed by tsc")
+                verified_change = server.custom_views.update(changed)
+                print("Change name of the custom view:")
+                print(verified_change)
+                """
+    
+
+                # export as image. Filters etc could be added here as usual
+                server.custom_views.populate_image(my_custom_view)
+                filename = my_custom_view.id + "-image-export.png"
+                with open(filename, "wb") as f:
+                    f.write(my_custom_view.image)
+                print("png saved to " + filename)
+                
+                # export as data. Filters etc could be added here as usual
+                server.custom_views.populate_csv(my_custom_view)
+                filename = my_custom_view.id + "-image-export.csv"
+                with open(filename, "wb") as f:
+                    f.write(my_custom_view.csv)
+                print("csv saved to " + filename)
+                
+                # export as pdf. Filters etc could be added here as usual
+                server.custom_views.populate_pdf(my_custom_view)
+                filename = my_custom_view.id + "-image-export.pdf"
+                with open(filename, "wb") as f:
+                    f.write(my_custom_view.pdf)
+                print("pdf saved to " + filename)
+                
 
             if args.powerpoint:
                 # Populate workbook preview image
