@@ -111,17 +111,17 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem]):
         publish_as_draft: bool = False,
     ) -> VirtualConnectionItem:
         """
-        Publish a virtual connection to the server. 
+        Publish a virtual connection to the server.
 
         For the virtual_connection object, name, project_id, and owner_id are
         required.
 
         The virtual_connection_content can be a json string or a file path to a
-        json file. 
+        json file.
 
         The mode can be "CreateNew" or "Overwrite". If mode is
         "Overwrite" and the virtual connection already exists, it will be
-        overwritten. 
+        overwritten.
 
         If publish_as_draft is True, the virtual connection will be published
         as a draft, and the id of the draft will be on the response object.
