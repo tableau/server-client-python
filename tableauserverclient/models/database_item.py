@@ -44,6 +44,12 @@ class DatabaseItem(object):
 
         self._tables = None  # Not implemented yet
 
+    def __str__(self):
+        return "<Database {0} '{1}'>".format(self._id, self.name)
+
+    def __repr__(self):
+        return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"
+
     @property
     def dqws(self):
         if self._data_quality_warnings is None:
