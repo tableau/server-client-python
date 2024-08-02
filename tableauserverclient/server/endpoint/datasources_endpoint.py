@@ -19,7 +19,7 @@ from tableauserverclient.server.endpoint.dqw_endpoint import _DataQualityWarning
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api, parameter_added_in
 from tableauserverclient.server.endpoint.exceptions import InternalServerError, MissingRequiredFieldError
 from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
-from tableauserverclient.server.endpoint.resource_tagger import _ResourceTagger
+from tableauserverclient.server.endpoint.resource_tagger import _ResourceTagger, TaggingMixin
 
 from tableauserverclient.config import ALLOWED_FILE_EXTENSIONS, FILESIZE_LIMIT_MB, BYTES_PER_MB, CHUNK_SIZE_MB
 from tableauserverclient.filesys_helpers import (
@@ -54,7 +54,7 @@ PathOrFileR = Union[FilePath, FileObjectR]
 PathOrFileW = Union[FilePath, FileObjectW]
 
 
-class Datasources(QuerysetEndpoint[DatasourceItem]):
+class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin):
     def __init__(self, parent_srv: "Server") -> None:
         super(Datasources, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)
@@ -459,3 +459,8 @@ class Datasources(QuerysetEndpoint[DatasourceItem]):
         self, schedule_id: str, item: DatasourceItem
     ) -> List["AddResponse"]:  # actually should return a task
         return self.parent_srv.schedules.add_to_schedule(schedule_id, datasource=item)
+
+
+Datasources.add_tags = api(version="1.0")(Datasources.add_tags)  # type: ignore
+Datasources.delete_tags = api(version="1.0")(Datasources.delete_tags)  # type: ignore
+Datasources.update_tags = api(version="1.0")(Datasources.update_tags)  # type: ignore

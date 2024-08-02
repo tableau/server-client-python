@@ -40,11 +40,18 @@ def make_view() -> TSC.ViewItem:
     return view
 
 
+def make_datasource() -> TSC.DatasourceItem:
+    datasource = TSC.DatasourceItem("project", "test")
+    datasource._id = "06b944d2-959d-4604-9305-12323c95e70e"
+    return datasource
+
+
 @pytest.mark.parametrize(
     "endpoint_type, item",
     [
         ("workbooks", make_workbook()),
         ("views", make_view()),
+        ("datasources", make_datasource()),
     ],
 )
 @pytest.mark.parametrize(
@@ -77,6 +84,7 @@ def test_add_tags(get_server, endpoint_type, item, tags) -> None:
     [
         ("workbooks", make_workbook()),
         ("views", make_view()),
+        ("datasources", make_datasource()),
     ],
 )
 @pytest.mark.parametrize(
