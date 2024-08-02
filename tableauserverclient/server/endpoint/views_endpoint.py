@@ -152,7 +152,7 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin):
             yield from server_response.iter_content(1024)
 
     @api(version="3.2")
-    def populate_permissions(self, item: ViewItem) -> None: 
+    def populate_permissions(self, item: ViewItem) -> None:
         self._permissions.populate(item)
 
     @api(version="3.2")
@@ -173,6 +173,7 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin):
 
         # Returning view item to stay consistent with datasource/view update functions
         return view_item
+
 
 Views.add_tags = api(version="1.0")(Views.add_tags)  # type: ignore
 Views.delete_tags = api(version="1.0")(Views.delete_tags)  # type: ignore
