@@ -140,5 +140,5 @@ def test_delete_tags(get_server, endpoint_type, item, tags) -> None:
         history = m.request_history
 
     assert len(history) == len(tags)
-    urls = sorted([r.url.split("/")[-1] for r in history])
-    assert set(urls) == set(tags)
+    urls = {r.url.split("/")[-1] for r in history}
+    assert urls == set(tags)
