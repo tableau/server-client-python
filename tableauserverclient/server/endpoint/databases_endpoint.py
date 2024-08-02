@@ -1,17 +1,18 @@
 import logging
 
-from .default_permissions_endpoint import _DefaultPermissionsEndpoint
-from .dqw_endpoint import _DataQualityWarningEndpoint
-from .endpoint import api, Endpoint
-from .exceptions import MissingRequiredFieldError
-from .permissions_endpoint import _PermissionsEndpoint
+from tableauserverclient.server.endpoint.default_permissions_endpoint import _DefaultPermissionsEndpoint
+from tableauserverclient.server.endpoint.dqw_endpoint import _DataQualityWarningEndpoint
+from tableauserverclient.server.endpoint.endpoint import api, Endpoint
+from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
+from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
+from tableauserverclient.server.endpoint.resource_tagger import TaggingMixin
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import DatabaseItem, TableItem, PaginationItem, Resource
 
 from tableauserverclient.helpers.logging import logger
 
 
-class Databases(Endpoint):
+class Databases(Endpoint, TaggingMixin):
     def __init__(self, parent_srv):
         super(Databases, self).__init__(parent_srv)
 
@@ -123,3 +124,8 @@ class Databases(Endpoint):
     @api(version="3.5")
     def delete_dqw(self, item):
         self._data_quality_warnings.clear(item)
+
+
+Databases.add_tags = api(version="3.9")(Databases.add_tags)  # type: ignore
+Databases.delete_tags = api(version="3.9")(Databases.delete_tags)  # type: ignore
+Databases.update_tags = api(version="3.9")(Databases.update_tags)  # type: ignore

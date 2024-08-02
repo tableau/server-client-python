@@ -52,6 +52,12 @@ def make_table() -> TSC.TableItem:
     return table
 
 
+def make_database() -> TSC.DatabaseItem:
+    database = TSC.DatabaseItem("project", "test")
+    database._id = "06b944d2-959d-4604-9305-12323c95e70e"
+    return database
+
+
 @pytest.mark.parametrize(
     "endpoint_type, item",
     [
@@ -63,6 +69,8 @@ def make_table() -> TSC.TableItem:
         ("datasources", "some_id"),
         ("tables", make_table()),
         ("tables", "some_id"),
+        ("databases", make_database()),
+        ("databases", "some_id"),
     ],
 )
 @pytest.mark.parametrize(
@@ -101,6 +109,8 @@ def test_add_tags(get_server, endpoint_type, item, tags) -> None:
         ("datasources", "some_id"),
         ("tables", make_table()),
         ("tables", "some_id"),
+        ("databases", make_database()),
+        ("databases", "some_id"),
     ],
 )
 @pytest.mark.parametrize(
