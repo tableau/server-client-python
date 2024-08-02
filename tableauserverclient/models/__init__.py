@@ -14,6 +14,7 @@ from tableauserverclient.models.fileupload_item import FileuploadItem
 from tableauserverclient.models.flow_item import FlowItem
 from tableauserverclient.models.flow_run_item import FlowRunItem
 from tableauserverclient.models.group_item import GroupItem
+from tableauserverclient.models.groupset_item import GroupSetItem
 from tableauserverclient.models.interval_item import (
     IntervalItem,
     DailyInterval,
@@ -60,6 +61,7 @@ __all__ = [
     "FlowItem",
     "FlowRunItem",
     "GroupItem",
+    "GroupSetItem",
     "IntervalItem",
     "JobItem",
     "DailyInterval",

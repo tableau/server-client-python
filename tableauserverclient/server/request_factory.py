@@ -1268,6 +1268,22 @@ class CustomViewRequest(object):
             updating_element.attrib["name"] = custom_view_item.name
 
 
+class GroupSetRequest:
+    @_tsrequest_wrapped
+    def create_request(self, xml_request: ET.Element, group_set_item: "GroupSetItem") -> bytes:
+        group_set_element = ET.SubElement(xml_request, "groupSet")
+        if group_set_item.name is not None:
+            group_set_element.attrib["name"] = group_set_item.name
+        return ET.tostring(xml_request)
+
+    @_tsrequest_wrapped
+    def update_request(self, xml_request: ET.Element, group_set_item: "GroupSetItem") -> bytes:
+        group_set_element = ET.SubElement(xml_request, "groupSet")
+        if group_set_item.name is not None:
+            group_set_element.attrib["name"] = group_set_item.name
+        return ET.tostring(xml_request)
+
+
 class RequestFactory(object):
     Auth = AuthRequest()
     Connection = Connection()
@@ -1283,6 +1299,7 @@ class RequestFactory(object):
     Flow = FlowRequest()
     FlowTask = FlowTaskRequest()
     Group = GroupRequest()
+    GroupSet = GroupSetRequest()
     Metric = MetricRequest()
     Permission = PermissionRequest()
     Project = ProjectRequest()
