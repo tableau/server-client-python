@@ -5390,10 +5390,12 @@ tableau_auth = TSC.TableauAuth('username', 'password', site_id='site')
 server = TSC.Server('https://servername')
 
 with server.auth.sign_in(tableau_auth):
-   # create a workbook item
-   wb_item = TSC.WorkbookItem(name='Sample', project_id='1f2f3e4e-5d6d-7c8c-9b0b-1a2a3f4f5e6e')
-   # call the publish method with the workbook item
-   wb_item = server.workbooks.publish(wb_item, 'SampleWB.twbx', 'Overwrite')
+    # create a workbook item
+    wb_item = TSC.WorkbookItem(name='Sample', project_id='1f2f3e4e-5d6d-7c8c-9b0b-1a2a3f4f5e6e')
+    # set hidden views
+    wb_item.hidden_views = ['Sheet1', 'Sheet2']
+    # call the publish method with the workbook item
+    wb_item = server.workbooks.publish(wb_item, 'SampleWB.twbx', 'Overwrite')
 ```
 
 <br>
