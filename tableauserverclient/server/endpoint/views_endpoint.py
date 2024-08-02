@@ -1,10 +1,10 @@
 import logging
 from contextlib import closing
 
-from .endpoint import QuerysetEndpoint, api
-from .exceptions import MissingRequiredFieldError
-from .permissions_endpoint import _PermissionsEndpoint
-from .resource_tagger import _ResourceTagger
+from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
+from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
+from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
+from tableauserverclient.server.endpoint.resource_tagger import _ResourceTagger, TaggingMixin
 from tableauserverclient.models import ViewItem, PaginationItem
 
 from tableauserverclient.helpers.logging import logger
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     )
 
 
-class Views(QuerysetEndpoint[ViewItem]):
+class Views(QuerysetEndpoint[ViewItem], TaggingMixin):
     def __init__(self, parent_srv):
         super(Views, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)
@@ -152,7 +152,7 @@ class Views(QuerysetEndpoint[ViewItem]):
             yield from server_response.iter_content(1024)
 
     @api(version="3.2")
-    def populate_permissions(self, item: ViewItem) -> None:
+    def populate_permissions(self, item: ViewItem) -> None: 
         self._permissions.populate(item)
 
     @api(version="3.2")
@@ -173,3 +173,7 @@ class Views(QuerysetEndpoint[ViewItem]):
 
         # Returning view item to stay consistent with datasource/view update functions
         return view_item
+
+Views.add_tags = api(version="1.0")(Views.add_tags)  # type: ignore
+Views.delete_tags = api(version="1.0")(Views.delete_tags)  # type: ignore
+Views.update_tags = api(version="1.0")(Views.update_tags)  # type: ignore
