@@ -1,6 +1,6 @@
 import abc
 import copy
-from typing import Generic, Iterable, Set, TypeVar, Union
+from typing import Generic, Iterable, Optional, Protocol, Set, TypeVar, Union, runtime_checkable
 import urllib.parse
 
 from tableauserverclient.server.endpoint.endpoint import Endpoint
@@ -53,15 +53,15 @@ class _ResourceTagger(Endpoint):
         logger.info("Updated tags to {0}".format(resource_item.tags))
 
 
-T = TypeVar("T")
+@runtime_checkable
+class Taggable(Protocol):
+    _initial_tags: Set[str]
+    id: Optional[str] = None
+    tags: Set[str]
 
 
-class TaggingMixin(Generic[T]):
-    @abc.abstractmethod
-    def baseurl(self) -> str:
-        raise NotImplementedError("baseurl must be implemented.")
-
-    def add_tags(self, item: Union[T, str], tags: Union[Iterable[str], str]) -> Set[str]:
+class TaggingMixin:
+    def add_tags(self, item: Union[Taggable, str], tags: Union[Iterable[str], str]) -> Set[str]:
         item_id = getattr(item, "id", item)
 
         if not isinstance(item_id, str):
@@ -72,12 +72,12 @@ class TaggingMixin(Generic[T]):
         else:
             tag_set = set(tags)
 
-        url = f"{self.baseurl}/{item_id}/tags"
+        url = f"{self.baseurl}/{item_id}/tags"  # type: ignore
         add_req = RequestFactory.Tag.add_req(tag_set)
-        server_response = self.put_request(url, add_req)
-        return TagItem.from_response(server_response.content, self.parent_srv.namespace)
+        server_response = self.put_request(url, add_req)  # type: ignore
+        return TagItem.from_response(server_response.content, self.parent_srv.namespace)  # type: ignore
 
-    def delete_tags(self, item: Union[T, str], tags: Union[Iterable[str], str]) -> None:
+    def delete_tags(self, item: Union[Taggable, str], tags: Union[Iterable[str], str]) -> None:
         item_id = getattr(item, "id", item)
 
         if not isinstance(item_id, str):
@@ -90,10 +90,10 @@ class TaggingMixin(Generic[T]):
 
         for tag in tag_set:
             encoded_tag_name = urllib.parse.quote(tag)
-            url = f"{self.baseurl}/{item_id}/tags/{encoded_tag_name}"
-            self.delete_request(url)
+            url = f"{self.baseurl}/{item_id}/tags/{encoded_tag_name}"  # type: ignore
+            self.delete_request(url)  # type: ignore
 
-    def update_tags(self, item: T) -> None:
+    def update_tags(self, item: Taggable) -> None:
         if item.tags == item._initial_tags:
             return
 

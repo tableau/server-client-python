@@ -58,7 +58,7 @@ PathOrFileR = Union[FilePath, FileObjectR]
 PathOrFileW = Union[FilePath, FileObjectW]
 
 
-class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
+class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin):
     def __init__(self, parent_srv: "Server") -> None:
         super(Workbooks, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)
@@ -502,6 +502,6 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         return self.parent_srv.schedules.add_to_schedule(schedule_id, workbook=item)
 
 
-Workbooks.add_tags = api(version="1.0")(Workbooks.add_tags)
-Workbooks.delete_tags = api(version="1.0")(Workbooks.delete_tags)
-Workbooks.update_tags = api(version="1.0")(Workbooks.update_tags)
+Workbooks.add_tags = api(version="1.0")(Workbooks.add_tags)  # type: ignore
+Workbooks.delete_tags = api(version="1.0")(Workbooks.delete_tags)  # type: ignore
+Workbooks.update_tags = api(version="1.0")(Workbooks.update_tags)  # type: ignore
