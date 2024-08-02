@@ -50,8 +50,11 @@ def make_datasource() -> TSC.DatasourceItem:
     "endpoint_type, item",
     [
         ("workbooks", make_workbook()),
+        ("workbooks", "some_id"),
         ("views", make_view()),
+        ("views", "some_id"),
         ("datasources", make_datasource()),
+        ("datasources", "some_id"),
     ],
 )
 @pytest.mark.parametrize(
@@ -83,8 +86,11 @@ def test_add_tags(get_server, endpoint_type, item, tags) -> None:
     "endpoint_type, item",
     [
         ("workbooks", make_workbook()),
+        ("workbooks", "some_id"),
         ("views", make_view()),
+        ("views", "some_id"),
         ("datasources", make_datasource()),
+        ("datasources", "some_id"),
     ],
 )
 @pytest.mark.parametrize(
