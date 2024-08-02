@@ -1,9 +1,11 @@
+import abc
 import copy
+from typing import Generic, Iterable, Set, TypeVar, Union
 import urllib.parse
 
-from .endpoint import Endpoint
-from .exceptions import ServerResponseError
-from ..exceptions import EndpointUnavailableError
+from tableauserverclient.server.endpoint.endpoint import Endpoint
+from tableauserverclient.server.endpoint.exceptions import ServerResponseError
+from tableauserverclient.server.exceptions import EndpointUnavailableError
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import TagItem
 
@@ -49,3 +51,56 @@ class _ResourceTagger(Endpoint):
                 resource_item.tags = self._add_tags(baseurl, resource_item.id, add_set)
             resource_item._initial_tags = copy.copy(resource_item.tags)
         logger.info("Updated tags to {0}".format(resource_item.tags))
+
+
+T = TypeVar("T")
+
+
+class TaggingMixin(Generic[T]):
+    @abc.abstractmethod
+    def baseurl(self) -> str:
+        raise NotImplementedError("baseurl must be implemented.")
+
+    def add_tags(self, item: Union[T, str], tags: Union[Iterable[str], str]) -> Set[str]:
+        item_id = getattr(item, "id", item)
+
+        if not isinstance(item_id, str):
+            raise ValueError("ID not found.")
+
+        if isinstance(tags, str):
+            tag_set = set([tags])
+        else:
+            tag_set = set(tags)
+
+        url = f"{self.baseurl}/{item_id}/tags"
+        add_req = RequestFactory.Tag.add_req(tag_set)
+        server_response = self.put_request(url, add_req)
+        return TagItem.from_response(server_response.content, self.parent_srv.namespace)
+
+    def delete_tags(self, item: Union[T, str], tags: Union[Iterable[str], str]) -> None:
+        item_id = getattr(item, "id", item)
+
+        if not isinstance(item_id, str):
+            raise ValueError("ID not found.")
+
+        if isinstance(tags, str):
+            tag_set = set([tags])
+        else:
+            tag_set = set(tags)
+
+        for tag in tag_set:
+            encoded_tag_name = urllib.parse.quote(tag)
+            url = f"{self.baseurl}/{item_id}/tags/{encoded_tag_name}"
+            self.delete_request(url)
+
+    def update_tags(self, item: T) -> None:
+        if item.tags == item._initial_tags:
+            return
+
+        add_set = item.tags - item._initial_tags
+        remove_set = item._initial_tags - item.tags
+        self.delete_tags(item, remove_set)
+        if add_set:
+            item.tags = self.add_tags(item, add_set)
+        item._initial_tags = copy.copy(item.tags)
+        logger.info(f"Updated tags to {item.tags}")
