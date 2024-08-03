@@ -40,6 +40,7 @@ from tableauserverclient.models.target import Target
 from tableauserverclient.models.task_item import TaskItem
 from tableauserverclient.models.user_item import UserItem
 from tableauserverclient.models.view_item import ViewItem
+from tableauserverclient.models.virtual_connection_item import VirtualConnectionItem
 from tableauserverclient.models.webhook_item import WebhookItem
 from tableauserverclient.models.workbook_item import WorkbookItem
 
@@ -91,6 +92,7 @@ __all__ = [
     "TaskItem",
     "UserItem",
     "ViewItem",
+    "VirtualConnectionItem",
     "WebhookItem",
     "WorkbookItem",
 ]
