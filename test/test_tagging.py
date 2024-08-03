@@ -77,6 +77,12 @@ def make_database() -> TSC.DatabaseItem:
     return database
 
 
+def make_flow() -> TSC.FlowItem:
+    flow = TSC.FlowItem("project", "test")
+    flow._id = str(uuid.uuid4())
+    return flow
+
+
 sample_taggable_items = (
     [
         ("workbooks", make_workbook()),
@@ -89,6 +95,8 @@ sample_taggable_items = (
         ("tables", "some_id"),
         ("databases", make_database()),
         ("databases", "some_id"),
+        ("flows", make_flow()),
+        ("flows", "some_id"),
     ],
 )
 
