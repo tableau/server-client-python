@@ -1,4 +1,5 @@
 import logging
+from typing import Iterable, Set, Union
 
 from tableauserverclient.server.endpoint.dqw_endpoint import _DataQualityWarningEndpoint
 from tableauserverclient.server.endpoint.endpoint import api, Endpoint
@@ -126,7 +127,13 @@ class Tables(Endpoint, TaggingMixin):
     def delete_dqw(self, item):
         self._data_quality_warnings.clear(item)
 
+    @api(version="3.9")
+    def add_tags(self, item: Union[TableItem, str], tags: Union[Iterable[str], str]) -> Set[str]:
+        return super().add_tags(item, tags)
 
-Tables.add_tags = api(version="3.9")(Tables.add_tags)  # type: ignore
-Tables.delete_tags = api(version="3.9")(Tables.delete_tags)  # type: ignore
-Tables.update_tags = api(version="3.9")(Tables.update_tags)  # type: ignore
+    @api(version="3.9")
+    def delete_tags(self, item: Union[TableItem, str], tags: Union[Iterable[str], str]) -> None:
+        return super().delete_tags(item, tags)
+
+    def update_tags(self, item: TableItem) -> None:  # type: ignore
+        raise NotImplementedError("Update tags is not implemented for TableItem")

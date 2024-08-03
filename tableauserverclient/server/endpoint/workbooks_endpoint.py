@@ -24,9 +24,11 @@ from tableauserverclient.models import WorkbookItem, ConnectionItem, ViewItem, P
 from tableauserverclient.server import RequestFactory
 
 from typing import (
+    Iterable,
     List,
     Optional,
     Sequence,
+    Set,
     Tuple,
     TYPE_CHECKING,
     Union,
@@ -498,7 +500,14 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin):
     ) -> List["AddResponse"]:  # actually should return a task
         return self.parent_srv.schedules.add_to_schedule(schedule_id, workbook=item)
 
+    @api(version="1.0")
+    def add_tags(self, item: Union[WorkbookItem, str], tags: Union[Iterable[str], str]) -> Set[str]:
+        return super().add_tags(item, tags)
 
-Workbooks.add_tags = api(version="1.0")(Workbooks.add_tags)  # type: ignore
-Workbooks.delete_tags = api(version="1.0")(Workbooks.delete_tags)  # type: ignore
-Workbooks.update_tags = api(version="1.0")(Workbooks.update_tags)  # type: ignore
+    @api(version="1.0")
+    def delete_tags(self, item: Union[WorkbookItem, str], tags: Union[Iterable[str], str]) -> None:
+        return super().delete_tags(item, tags)
+
+    @api(version="1.0")
+    def update_tags(self, item: WorkbookItem) -> None:
+        return super().update_tags(item)

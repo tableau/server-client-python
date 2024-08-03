@@ -1,4 +1,5 @@
 import logging
+from typing import Union, Iterable, Set
 
 from tableauserverclient.server.endpoint.default_permissions_endpoint import _DefaultPermissionsEndpoint
 from tableauserverclient.server.endpoint.dqw_endpoint import _DataQualityWarningEndpoint
@@ -125,7 +126,14 @@ class Databases(Endpoint, TaggingMixin):
     def delete_dqw(self, item):
         self._data_quality_warnings.clear(item)
 
+    @api(version="3.9")
+    def add_tags(self, item: Union[DatabaseItem, str], tags: Iterable[str]) -> Set[str]:
+        return super().add_tags(item, tags)
 
-Databases.add_tags = api(version="3.9")(Databases.add_tags)  # type: ignore
-Databases.delete_tags = api(version="3.9")(Databases.delete_tags)  # type: ignore
-Databases.update_tags = api(version="3.9")(Databases.update_tags)  # type: ignore
+    @api(version="3.9")
+    def delete_tags(self, item: Union[DatabaseItem, str], tags: Iterable[str]) -> None:
+        super().delete_tags(item, tags)
+
+    @api(version="3.9")
+    def update_tags(self, item: DatabaseItem) -> None:
+        raise NotImplementedError("Update tags is not supported for databases.")

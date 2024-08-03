@@ -62,6 +62,12 @@ class _ResourceTagger(Endpoint):
         logger.info("Updated tags to {0}".format(resource_item.tags))
 
 
+class HasID(Protocol):
+    @property
+    def id(self) -> Optional[str]:
+        pass
+
+
 @runtime_checkable
 class Taggable(Protocol):
     _initial_tags: Set[str]
@@ -92,7 +98,7 @@ class TaggingMixin(abc.ABC):
     def delete_request(self, url) -> None:
         pass
 
-    def add_tags(self, item: Union[Taggable, str], tags: Union[Iterable[str], str]) -> Set[str]:
+    def add_tags(self, item: Union[HasID, Taggable, str], tags: Union[Iterable[str], str]) -> Set[str]:
         item_id = getattr(item, "id", item)
 
         if not isinstance(item_id, str):
@@ -108,7 +114,7 @@ class TaggingMixin(abc.ABC):
         server_response = self.put_request(url, add_req)
         return TagItem.from_response(server_response.content, self.parent_srv.namespace)
 
-    def delete_tags(self, item: Union[Taggable, str], tags: Union[Iterable[str], str]) -> None:
+    def delete_tags(self, item: Union[HasID, Taggable, str], tags: Union[Iterable[str], str]) -> None:
         item_id = getattr(item, "id", item)
 
         if not isinstance(item_id, str):

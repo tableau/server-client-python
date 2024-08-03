@@ -9,10 +9,10 @@ from tableauserverclient.models import ViewItem, PaginationItem
 
 from tableauserverclient.helpers.logging import logger
 
-from typing import Iterator, List, Optional, Tuple, TYPE_CHECKING
+from typing import Iterable, Iterator, List, Optional, Set, Tuple, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
-    from ..request_options import (
+    from tableauserverclient.server.request_options import (
         RequestOptions,
         CSVRequestOptions,
         PDFRequestOptions,
@@ -173,7 +173,14 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin):
         # Returning view item to stay consistent with datasource/view update functions
         return view_item
 
+    @api(version="1.0")
+    def add_tags(self, item: Union[ViewItem, str], tags: Union[Iterable[str], str]) -> Set[str]:
+        return super().add_tags(item, tags)
 
-Views.add_tags = api(version="1.0")(Views.add_tags)  # type: ignore
-Views.delete_tags = api(version="1.0")(Views.delete_tags)  # type: ignore
-Views.update_tags = api(version="1.0")(Views.update_tags)  # type: ignore
+    @api(version="1.0")
+    def delete_tags(self, item: Union[ViewItem, str], tags: Union[Iterable[str], str]) -> None:
+        return super().delete_tags(item, tags)
+
+    @api(version="1.0")
+    def update_tags(self, item: ViewItem) -> None:
+        return super().update_tags(item)

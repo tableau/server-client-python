@@ -6,7 +6,7 @@ import os
 
 from contextlib import closing
 from pathlib import Path
-from typing import List, Mapping, Optional, Sequence, Tuple, TYPE_CHECKING, Union
+from typing import Iterable, List, Mapping, Optional, Sequence, Set, Tuple, TYPE_CHECKING, Union
 
 from tableauserverclient.helpers.headers import fix_filename
 
@@ -459,7 +459,14 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin):
     ) -> List["AddResponse"]:  # actually should return a task
         return self.parent_srv.schedules.add_to_schedule(schedule_id, datasource=item)
 
+    @api(version="1.0")
+    def add_tags(self, item: Union[DatasourceItem, str], tags: Union[Iterable[str], str]) -> Set[str]:
+        return super().add_tags(item, tags)
 
-Datasources.add_tags = api(version="1.0")(Datasources.add_tags)  # type: ignore
-Datasources.delete_tags = api(version="1.0")(Datasources.delete_tags)  # type: ignore
-Datasources.update_tags = api(version="1.0")(Datasources.update_tags)  # type: ignore
+    @api(version="1.0")
+    def delete_tags(self, item: Union[DatasourceItem, str], tags: Union[Iterable[str], str]) -> None:
+        return super().delete_tags(item, tags)
+
+    @api(version="1.0")
+    def update_tags(self, item: DatasourceItem) -> None:
+        return super().update_tags(item)
