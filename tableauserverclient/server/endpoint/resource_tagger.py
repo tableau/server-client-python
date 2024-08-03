@@ -1,3 +1,4 @@
+import abc
 import copy
 from typing import Iterable, Optional, Protocol, Set, Union, TYPE_CHECKING, runtime_checkable
 import urllib.parse
@@ -68,7 +69,26 @@ class Taggable(Protocol):
     tags: Set[str]
 
 
-class TaggingMixin:
+class Response(Protocol):
+    content: bytes
+
+
+class TaggingMixin(abc.ABC):
+    parent_srv: "Server"
+
+    @property
+    @abc.abstractmethod
+    def baseurl(self) -> str:
+        pass
+
+    @abc.abstractmethod
+    def put_request(self, url, request) -> Response:
+        pass
+
+    @abc.abstractmethod
+    def delete_request(self, url) -> None:
+        pass
+
     def add_tags(self, item: Union[Taggable, str], tags: Union[Iterable[str], str]) -> Set[str]:
         item_id = getattr(item, "id", item)
 
@@ -80,10 +100,10 @@ class TaggingMixin:
         else:
             tag_set = set(tags)
 
-        url = f"{self.baseurl}/{item_id}/tags"  # type: ignore
+        url = f"{self.baseurl}/{item_id}/tags"
         add_req = RequestFactory.Tag.add_req(tag_set)
-        server_response = self.put_request(url, add_req)  # type: ignore
-        return TagItem.from_response(server_response.content, self.parent_srv.namespace)  # type: ignore
+        server_response = self.put_request(url, add_req)
+        return TagItem.from_response(server_response.content, self.parent_srv.namespace)
 
     def delete_tags(self, item: Union[Taggable, str], tags: Union[Iterable[str], str]) -> None:
         item_id = getattr(item, "id", item)
@@ -98,8 +118,8 @@ class TaggingMixin:
 
         for tag in tag_set:
             encoded_tag_name = urllib.parse.quote(tag)
-            url = f"{self.baseurl}/{item_id}/tags/{encoded_tag_name}"  # type: ignore
-            self.delete_request(url)  # type: ignore
+            url = f"{self.baseurl}/{item_id}/tags/{encoded_tag_name}"
+            self.delete_request(url)
 
     def update_tags(self, item: Taggable) -> None:
         if item.tags == item._initial_tags:
