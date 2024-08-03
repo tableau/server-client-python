@@ -16,7 +16,7 @@ class VirtualConnectionItem:
         self.name = name
         self.created_at: Optional[dt.datetime] = None
         self.has_extracts: Optional[bool] = None
-        self.id: Optional[str] = None
+        self._id: Optional[str] = None
         self.is_certified: Optional[bool] = None
         self.updated_at: Optional[dt.datetime] = None
         self.webpage_url: Optional[str] = None
@@ -34,6 +34,10 @@ class VirtualConnectionItem:
 
     def _set_permissions(self, permissions):
         self._permissions = permissions
+
+    @property
+    def id(self) -> Optional[str]:
+        return self._id
 
     @property
     def permissions(self) -> List[PermissionsRule]:
