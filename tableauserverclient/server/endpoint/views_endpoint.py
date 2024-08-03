@@ -4,7 +4,7 @@ from contextlib import closing
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
 from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
 from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
-from tableauserverclient.server.endpoint.resource_tagger import _ResourceTagger, TaggingMixin
+from tableauserverclient.server.endpoint.resource_tagger import TaggingMixin
 from tableauserverclient.models import ViewItem, PaginationItem
 
 from tableauserverclient.helpers.logging import logger
@@ -24,7 +24,6 @@ if TYPE_CHECKING:
 class Views(QuerysetEndpoint[ViewItem], TaggingMixin):
     def __init__(self, parent_srv):
         super(Views, self).__init__(parent_srv)
-        self._resource_tagger = _ResourceTagger(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
 
     # Used because populate_preview_image functionaliy requires workbook endpoint
@@ -169,7 +168,7 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin):
             error = "View item missing ID. View must be retrieved from server first."
             raise MissingRequiredFieldError(error)
 
-        self._resource_tagger.update_tags(self.baseurl, view_item)
+        self.update_tags(view_item)
 
         # Returning view item to stay consistent with datasource/view update functions
         return view_item

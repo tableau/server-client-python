@@ -11,7 +11,7 @@ from tableauserverclient.helpers.headers import fix_filename
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api, parameter_added_in
 from tableauserverclient.server.endpoint.exceptions import InternalServerError, MissingRequiredFieldError
 from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
-from tableauserverclient.server.endpoint.resource_tagger import _ResourceTagger, TaggingMixin
+from tableauserverclient.server.endpoint.resource_tagger import TaggingMixin
 
 from tableauserverclient.filesys_helpers import (
     to_filename,

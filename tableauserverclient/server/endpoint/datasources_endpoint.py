@@ -19,7 +19,7 @@ from tableauserverclient.server.endpoint.dqw_endpoint import _DataQualityWarning
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api, parameter_added_in
 from tableauserverclient.server.endpoint.exceptions import InternalServerError, MissingRequiredFieldError
 from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
-from tableauserverclient.server.endpoint.resource_tagger import _ResourceTagger, TaggingMixin
+from tableauserverclient.server.endpoint.resource_tagger import TaggingMixin
 
 from tableauserverclient.config import ALLOWED_FILE_EXTENSIONS, FILESIZE_LIMIT_MB, BYTES_PER_MB, CHUNK_SIZE_MB
 from tableauserverclient.filesys_helpers import (
@@ -57,7 +57,6 @@ PathOrFileW = Union[FilePath, FileObjectW]
 class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin):
     def __init__(self, parent_srv: "Server") -> None:
         super(Datasources, self).__init__(parent_srv)
-        self._resource_tagger = _ResourceTagger(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
         self._data_quality_warnings = _DataQualityWarningEndpoint(self.parent_srv, "datasource")
 
@@ -149,7 +148,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin):
                 )
                 raise MissingRequiredFieldError(error)
 
-        self._resource_tagger.update_tags(self.baseurl, datasource_item)
+        self.update_tags(datasource_item)
 
         # Update the datasource itself
         url = "{0}/{1}".format(self.baseurl, datasource_item.id)
