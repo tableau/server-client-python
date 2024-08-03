@@ -24,11 +24,9 @@ from tableauserverclient.models import WorkbookItem, ConnectionItem, ViewItem, P
 from tableauserverclient.server import RequestFactory
 
 from typing import (
-    Iterable,
     List,
     Optional,
     Sequence,
-    Set,
     Tuple,
     TYPE_CHECKING,
     Union,
@@ -37,8 +35,8 @@ from typing import (
 if TYPE_CHECKING:
     from tableauserverclient.server import Server
     from tableauserverclient.server.request_options import RequestOptions
-    from tableauserverclient.models import DatasourceItem, ConnectionCredentials
-    from .schedules_endpoint import AddResponse
+    from tableauserverclient.models import DatasourceItem
+    from tableauserverclient.server.endpoint.schedules_endpoint import AddResponse
 
 io_types_r = (io.BytesIO, io.BufferedReader)
 io_types_w = (io.BytesIO, io.BufferedWriter)
@@ -61,7 +59,6 @@ PathOrFileW = Union[FilePath, FileObjectW]
 class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin):
     def __init__(self, parent_srv: "Server") -> None:
         super(Workbooks, self).__init__(parent_srv)
-        self._resource_tagger = _ResourceTagger(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
 
         return None
@@ -149,7 +146,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin):
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
 
-        self._resource_tagger.update_tags(self.baseurl, workbook_item)
+        self.update_tags(workbook_item)
 
         # Update the workbook itself
         url = "{0}/{1}".format(self.baseurl, workbook_item.id)
