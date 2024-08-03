@@ -65,8 +65,11 @@ class _ResourceTagger(Endpoint):
 @runtime_checkable
 class Taggable(Protocol):
     _initial_tags: Set[str]
-    id: Optional[str] = None
     tags: Set[str]
+
+    @property
+    def id(self) -> Optional[str]:
+        pass
 
 
 class Response(Protocol):
