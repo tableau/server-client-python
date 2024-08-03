@@ -77,8 +77,7 @@ def make_database() -> TSC.DatabaseItem:
     return database
 
 
-@pytest.mark.parametrize(
-    "endpoint_type, item",
+sample_taggable_items = (
     [
         ("workbooks", make_workbook()),
         ("workbooks", "some_id"),
@@ -92,13 +91,16 @@ def make_database() -> TSC.DatabaseItem:
         ("databases", "some_id"),
     ],
 )
-@pytest.mark.parametrize(
-    "tags",
-    [
-        "a",
-        ["a", "b"],
-    ],
-)
+
+sample_tags = [
+    "a",
+    ["a", "b"],
+    ["a", "b", "c", "c"],
+]
+
+
+@pytest.mark.parametrize("endpoint_type, item", *sample_taggable_items)
+@pytest.mark.parametrize("tags", sample_tags)
 def test_add_tags(get_server, endpoint_type, item, tags) -> None:
     add_tags_xml = add_tag_xml_response_factory(tags)
     endpoint = getattr(get_server, endpoint_type)
@@ -117,28 +119,8 @@ def test_add_tags(get_server, endpoint_type, item, tags) -> None:
     assert set(tag_result) == set(tags)
 
 
-@pytest.mark.parametrize(
-    "endpoint_type, item",
-    [
-        ("workbooks", make_workbook()),
-        ("workbooks", "some_id"),
-        ("views", make_view()),
-        ("views", "some_id"),
-        ("datasources", make_datasource()),
-        ("datasources", "some_id"),
-        ("tables", make_table()),
-        ("tables", "some_id"),
-        ("databases", make_database()),
-        ("databases", "some_id"),
-    ],
-)
-@pytest.mark.parametrize(
-    "tags",
-    [
-        "a",
-        ["a", "b"],
-    ],
-)
+@pytest.mark.parametrize("endpoint_type, item", *sample_taggable_items)
+@pytest.mark.parametrize("tags", sample_tags)
 def test_delete_tags(get_server, endpoint_type, item, tags) -> None:
     add_tags_xml = add_tag_xml_response_factory(tags)
     endpoint = getattr(get_server, endpoint_type)
@@ -158,9 +140,10 @@ def test_delete_tags(get_server, endpoint_type, item, tags) -> None:
         endpoint.delete_tags(item, tags)
         history = m.request_history
 
-    assert len(history) == len(tags)
+    tag_set = set(tags)
+    assert len(history) == len(tag_set)
     urls = {r.url.split("/")[-1] for r in history}
-    assert urls == set(tags)
+    assert urls == tag_set
 
 
 def test_tags_batch_add(get_server) -> None:
