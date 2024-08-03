@@ -55,7 +55,7 @@ class TestVirtualConnections(unittest.TestCase):
 
     def test_virtual_connection_populate_connections(self):
         vconn = VirtualConnectionItem("vconn")
-        vconn.id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
+        vconn._id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
         with requests_mock.mock() as m:
             m.get(f"{self.baseurl}/{vconn.id}/connections", text=VIRTUAL_CONNECTION_POPULATE_CONNECTIONS.read_text())
             vc_out = self.server.virtual_connections.populate_connections(vconn)
@@ -74,7 +74,7 @@ class TestVirtualConnections(unittest.TestCase):
 
     def test_virtual_connection_update_connection_db_connection(self):
         vconn = VirtualConnectionItem("vconn")
-        vconn.id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
+        vconn._id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
         connection = TSC.ConnectionItem()
         connection._id = "37ca6ced-58d7-4dcf-99dc-f0a85223cbef"
         connection.server_address = "localhost"
@@ -93,7 +93,7 @@ class TestVirtualConnections(unittest.TestCase):
 
     def test_virtual_connection_get_by_id(self):
         vconn = VirtualConnectionItem("vconn")
-        vconn.id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
+        vconn._id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
         with requests_mock.mock() as m:
             m.get(f"{self.baseurl}/{vconn.id}", text=VIRTUAL_CONNECTION_DOWNLOAD.read_text())
             vconn = self.server.virtual_connections.get_by_id(vconn)
@@ -106,7 +106,7 @@ class TestVirtualConnections(unittest.TestCase):
 
     def test_virtual_connection_update(self):
         vconn = VirtualConnectionItem("vconn")
-        vconn.id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
+        vconn._id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
         vconn.is_certified = True
         vconn.certification_note = "demo certification note"
         vconn.project_id = "5286d663-8668-4ac2-8c8d-91af7d585f6b"
@@ -125,7 +125,7 @@ class TestVirtualConnections(unittest.TestCase):
 
     def test_virtual_connection_get_revisions(self):
         vconn = VirtualConnectionItem("vconn")
-        vconn.id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
+        vconn._id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
         with requests_mock.mock() as m:
             m.get(f"{self.baseurl}/{vconn.id}/revisions", text=VIRTUAL_CONNECTION_REVISIONS.read_text())
             revisions, pagination_item = self.server.virtual_connections.get_revisions(vconn)
@@ -157,7 +157,7 @@ class TestVirtualConnections(unittest.TestCase):
 
     def test_virtual_connection_download_revision(self):
         vconn = VirtualConnectionItem("vconn")
-        vconn.id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
+        vconn._id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
         with requests_mock.mock() as m:
             m.get(f"{self.baseurl}/{vconn.id}/revisions/1", text=VIRTUAL_CONNECTION_DOWNLOAD.read_text())
             content = self.server.virtual_connections.download_revision(vconn, 1)
@@ -170,7 +170,7 @@ class TestVirtualConnections(unittest.TestCase):
 
     def test_virtual_connection_delete(self):
         vconn = VirtualConnectionItem("vconn")
-        vconn.id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
+        vconn._id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
         with requests_mock.mock() as m:
             m.delete(f"{self.baseurl}/{vconn.id}")
             self.server.virtual_connections.delete(vconn)
@@ -180,7 +180,7 @@ class TestVirtualConnections(unittest.TestCase):
 
     def test_virtual_connection_publish(self):
         vconn = VirtualConnectionItem("vconn")
-        vconn.id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
+        vconn._id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
         vconn.project_id = "9836791c-9468-40f0-b7f3-d10b9562a046"
         vconn.owner_id = "ee8bc9ca-77fe-4ae0-8093-cf77f0ee67a9"
         with requests_mock.mock() as m:
@@ -198,7 +198,7 @@ class TestVirtualConnections(unittest.TestCase):
 
     def test_virtual_connection_publish_draft_overwrite(self):
         vconn = VirtualConnectionItem("vconn")
-        vconn.id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
+        vconn._id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
         vconn.project_id = "9836791c-9468-40f0-b7f3-d10b9562a046"
         vconn.owner_id = "ee8bc9ca-77fe-4ae0-8093-cf77f0ee67a9"
         with requests_mock.mock() as m:
@@ -219,7 +219,7 @@ class TestVirtualConnections(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
 
         single_virtual_connection = TSC.VirtualConnectionItem("test")
-        single_virtual_connection.id = "21778de4-b7b9-44bc-a599-1506a2639ace"
+        single_virtual_connection._id = "21778de4-b7b9-44bc-a599-1506a2639ace"
 
         bob = TSC.UserItem.as_reference("7c37ee24-c4b1-42b6-a154-eaeab7ee330a")
         group_of_people = TSC.GroupItem.as_reference("5e5e1978-71fa-11e4-87dd-7382f5c437af")
