@@ -22,6 +22,7 @@ from tableauserverclient.server.endpoint.server_info_endpoint import ServerInfo
 from tableauserverclient.server.endpoint.sites_endpoint import Sites
 from tableauserverclient.server.endpoint.subscriptions_endpoint import Subscriptions
 from tableauserverclient.server.endpoint.tables_endpoint import Tables
+from tableauserverclient.server.endpoint.resource_tagger import Tags
 from tableauserverclient.server.endpoint.tasks_endpoint import Tasks
 from tableauserverclient.server.endpoint.users_endpoint import Users
 from tableauserverclient.server.endpoint.views_endpoint import Views
@@ -55,6 +56,7 @@ __all__ = [
     "Sites",
     "Subscriptions",
     "Tables",
+    "Tags",
     "Tasks",
     "Users",
     "Views",

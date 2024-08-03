@@ -1,10 +1,12 @@
 import re
 from typing import Iterable
+import uuid
 from xml.etree import ElementTree as ET
 
 import pytest
 import requests_mock
 import tableauserverclient as TSC
+from tableauserverclient.server.endpoint.resource_tagger import content
 
 
 @pytest.fixture
@@ -18,7 +20,7 @@ def get_server() -> TSC.Server:
     return server
 
 
-def xml_response_factory(tags: Iterable[str]) -> str:
+def add_tag_xml_response_factory(tags: Iterable[str]) -> str:
     root = ET.Element("tsResponse")
     tags_element = ET.SubElement(root, "tags")
     for tag in tags:
@@ -28,33 +30,50 @@ def xml_response_factory(tags: Iterable[str]) -> str:
     return ET.tostring(root, encoding="utf-8").decode("utf-8")
 
 
+def batch_add_tags_xml_response_factory(tags, content):
+    root = ET.Element("tsResponse")
+    tag_batch = ET.SubElement(root, "tagBatch")
+    tags_element = ET.SubElement(tag_batch, "tags")
+    for tag in tags:
+        tag_element = ET.SubElement(tags_element, "tag")
+        tag_element.attrib["label"] = tag
+    contents_element = ET.SubElement(tag_batch, "contents")
+    for item in content:
+        content_elem = ET.SubElement(contents_element, "content")
+        content_elem.attrib["id"] = item.id or "some_id"
+        t = item.__class__.__name__.replace("Item", "") or ""
+        content_elem.attrib["contentType"] = t
+    root.attrib["xmlns"] = "http://tableau.com/api"
+    return ET.tostring(root, encoding="utf-8").decode("utf-8")
+
+
 def make_workbook() -> TSC.WorkbookItem:
     workbook = TSC.WorkbookItem("project", "test")
-    workbook._id = "06b944d2-959d-4604-9305-12323c95e70e"
+    workbook._id = str(uuid.uuid4())
     return workbook
 
 
 def make_view() -> TSC.ViewItem:
     view = TSC.ViewItem()
-    view._id = "06b944d2-959d-4604-9305-12323c95e70e"
+    view._id = str(uuid.uuid4())
     return view
 
 
 def make_datasource() -> TSC.DatasourceItem:
     datasource = TSC.DatasourceItem("project", "test")
-    datasource._id = "06b944d2-959d-4604-9305-12323c95e70e"
+    datasource._id = str(uuid.uuid4())
     return datasource
 
 
 def make_table() -> TSC.TableItem:
     table = TSC.TableItem("project", "test")
-    table._id = "06b944d2-959d-4604-9305-12323c95e70e"
+    table._id = str(uuid.uuid4())
     return table
 
 
 def make_database() -> TSC.DatabaseItem:
     database = TSC.DatabaseItem("project", "test")
-    database._id = "06b944d2-959d-4604-9305-12323c95e70e"
+    database._id = str(uuid.uuid4())
     return database
 
 
@@ -81,7 +100,7 @@ def make_database() -> TSC.DatabaseItem:
     ],
 )
 def test_add_tags(get_server, endpoint_type, item, tags) -> None:
-    add_tags_xml = xml_response_factory(tags)
+    add_tags_xml = add_tag_xml_response_factory(tags)
     endpoint = getattr(get_server, endpoint_type)
     id_ = getattr(item, "id", item)
 
@@ -121,7 +140,7 @@ def test_add_tags(get_server, endpoint_type, item, tags) -> None:
     ],
 )
 def test_delete_tags(get_server, endpoint_type, item, tags) -> None:
-    add_tags_xml = xml_response_factory(tags)
+    add_tags_xml = add_tag_xml_response_factory(tags)
     endpoint = getattr(get_server, endpoint_type)
     id_ = getattr(item, "id", item)
 
@@ -142,3 +161,35 @@ def test_delete_tags(get_server, endpoint_type, item, tags) -> None:
     assert len(history) == len(tags)
     urls = {r.url.split("/")[-1] for r in history}
     assert urls == set(tags)
+
+
+def test_tags_batch_add(get_server) -> None:
+    server = get_server
+    content = [make_workbook(), make_view(), make_datasource(), make_table(), make_database()]
+    tags = ["a", "b"]
+    add_tags_xml = batch_add_tags_xml_response_factory(tags, content)
+    with requests_mock.mock() as m:
+        m.put(
+            f"{server.tags.baseurl}:batchCreate",
+            status_code=200,
+            text=add_tags_xml,
+        )
+        tag_result = server.tags.batch_add(tags, content)
+
+    assert set(tag_result) == set(tags)
+
+
+def test_tags_batch_delete(get_server) -> None:
+    server = get_server
+    content = [make_workbook(), make_view(), make_datasource(), make_table(), make_database()]
+    tags = ["a", "b"]
+    add_tags_xml = batch_add_tags_xml_response_factory(tags, content)
+    with requests_mock.mock() as m:
+        m.put(
+            f"{server.tags.baseurl}:batchDelete",
+            status_code=200,
+            text=add_tags_xml,
+        )
+        tag_result = server.tags.batch_delete(tags, content)
+
+    assert set(tag_result) == set(tags)

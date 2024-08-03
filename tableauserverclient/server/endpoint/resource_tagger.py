@@ -1,14 +1,23 @@
 import copy
-from typing import Iterable, Optional, Protocol, Set, Union, runtime_checkable
+from typing import Iterable, Optional, Protocol, Set, Union, TYPE_CHECKING, runtime_checkable
 import urllib.parse
 
-from tableauserverclient.server.endpoint.endpoint import Endpoint
+from tableauserverclient.server.endpoint.endpoint import Endpoint, api
 from tableauserverclient.server.endpoint.exceptions import ServerResponseError
 from tableauserverclient.server.exceptions import EndpointUnavailableError
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import TagItem
 
 from tableauserverclient.helpers.logging import logger
+
+if TYPE_CHECKING:
+    from tableauserverclient.models.column_item import ColumnItem
+    from tableauserverclient.models.database_item import DatabaseItem
+    from tableauserverclient.models.datasource_item import DatasourceItem
+    from tableauserverclient.models.flow_item import FlowItem
+    from tableauserverclient.models.table_item import TableItem
+    from tableauserverclient.models.workbook_item import WorkbookItem
+    from tableauserverclient.server.server import Server
 
 
 class _ResourceTagger(Endpoint):
@@ -103,3 +112,40 @@ class TaggingMixin:
             item.tags = self.add_tags(item, add_set)
         item._initial_tags = copy.copy(item.tags)
         logger.info(f"Updated tags to {item.tags}")
+
+
+content = Iterable[Union["ColumnItem", "DatabaseItem", "DatasourceItem", "FlowItem", "TableItem", "WorkbookItem"]]
+
+
+class Tags(Endpoint):
+    def __init__(self, parent_srv: "Server"):
+        super().__init__(parent_srv)
+
+    @property
+    def baseurl(self):
+        return f"{self.parent_srv.baseurl}/tags"
+
+    @api(version="3.9")
+    def batch_add(self, tags: Union[Iterable[str], str], content: content) -> Set[str]:
+        if isinstance(tags, str):
+            tag_set = set([tags])
+        else:
+            tag_set = set(tags)
+
+        url = f"{self.baseurl}:batchCreate"
+        batch_create_req = RequestFactory.Tag.batch_create(tag_set, content)
+        server_response = self.put_request(url, batch_create_req)
+        return TagItem.from_response(server_response.content, self.parent_srv.namespace)
+
+    @api(version="3.9")
+    def batch_delete(self, tags: Union[Iterable[str], str], content: content) -> Set[str]:
+        if isinstance(tags, str):
+            tag_set = set([tags])
+        else:
+            tag_set = set(tags)
+
+        url = f"{self.baseurl}:batchDelete"
+        # The batch delete XML is the same as the batch create XML.
+        batch_delete_req = RequestFactory.Tag.batch_create(tag_set, content)
+        server_response = self.put_request(url, batch_delete_req)
+        return TagItem.from_response(server_response.content, self.parent_srv.namespace)

@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from typing import Any, Dict, Iterable, List, Optional, Tuple, TYPE_CHECKING, Union
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union, TYPE_CHECKING
 
 from requests.packages.urllib3.fields import RequestField
 from requests.packages.urllib3.filepost import encode_multipart_formdata
@@ -861,6 +861,9 @@ class TableRequest(object):
         return ET.tostring(xml_request)
 
 
+content_types = Iterable[Union["ColumnItem", "DatabaseItem", "DatasourceItem", "FlowItem", "TableItem", "WorkbookItem"]]
+
+
 class TagRequest(object):
     def add_req(self, tag_set):
         xml_request = ET.Element("tsRequest")
@@ -869,6 +872,22 @@ class TagRequest(object):
             tag_element = ET.SubElement(tags_element, "tag")
             tag_element.attrib["label"] = tag
         return ET.tostring(xml_request)
+
+    @_tsrequest_wrapped
+    def batch_create(self, element: ET.Element, tags: Set[str], content: content_types) -> bytes:
+        tag_batch = ET.SubElement(element, "tagBatch")
+        tags_element = ET.SubElement(tag_batch, "tags")
+        for tag in tags:
+            tag_element = ET.SubElement(tags_element, "tag")
+            tag_element.attrib["label"] = tag
+        contents_element = ET.SubElement(tag_batch, "contents")
+        for item in content:
+            content_element = ET.SubElement(contents_element, "content")
+            if item.id is None:
+                raise ValueError(f"Item {item} must have an ID to be tagged.")
+            content_element.attrib["id"] = item.id
+
+        return ET.tostring(element)
 
 
 class UserRequest(object):
