@@ -60,7 +60,7 @@ class VirtualConnectionItem:
     @classmethod
     def from_xml(cls, xml: Element, ns: Dict[str, str]) -> "VirtualConnectionItem":
         v_conn = cls(xml.get("name", ""))
-        v_conn.id = xml.get("id", None)
+        v_conn._id = xml.get("id", None)
         v_conn.webpage_url = xml.get("webpageUrl", None)
         v_conn.created_at = parse_datetime(xml.get("createdAt", None))
         v_conn.updated_at = parse_datetime(xml.get("updatedAt", None))
