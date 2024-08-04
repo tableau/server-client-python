@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+
 from typing import Any, Dict, Iterable, List, Optional, Tuple, TYPE_CHECKING, Union
 
 from requests.packages.urllib3.fields import RequestField
@@ -1266,6 +1267,49 @@ class CustomViewRequest(object):
             ET.SubElement(updating_element, "owner", {"id": custom_view_item.owner.id})
         if custom_view_item.name is not None:
             updating_element.attrib["name"] = custom_view_item.name
+
+    @_tsrequest_wrapped
+    def _publish_xml(self, xml_request: ET.Element, custom_view_item: CustomViewItem) -> bytes:
+        custom_view_element = ET.SubElement(xml_request, "customView")
+        if (name := custom_view_item.name) is not None:
+            custom_view_element.attrib["name"] = name
+        else:
+            raise ValueError(f"Custom View Item missing name: {custom_view_item}")
+        if (shared := custom_view_item.shared) is not None:
+            custom_view_element.attrib["shared"] = str(shared).lower()
+        else:
+            raise ValueError(f"Custom View Item missing shared: {custom_view_item}")
+        if (owner := custom_view_item.owner) is not None:
+            owner_element = ET.SubElement(custom_view_element, "owner")
+            if (owner_id := owner.id) is not None:
+                owner_element.attrib["id"] = owner_id
+            else:
+                raise ValueError(f"Custom View Item owner missing id: {owner}")
+        else:
+            raise ValueError(f"Custom View Item missing owner: {custom_view_item}")
+        if (workbook := custom_view_item.workbook) is not None:
+            workbook_element = ET.SubElement(custom_view_element, "workbook")
+            if (workbook_id := workbook.id) is not None:
+                workbook_element.attrib["id"] = workbook_id
+            else:
+                raise ValueError(f"Custom View Item workbook missing id: {workbook}")
+        else:
+            raise ValueError(f"Custom View Item missing workbook: {custom_view_item}")
+
+        return ET.tostring(xml_request)
+
+    def publish_req_chunked(self, custom_view_item: CustomViewItem):
+        xml_request = self._publish_xml(custom_view_item)
+        parts = {"request_payload": ("", xml_request, "text/xml")}
+        return _add_multipart(parts)
+
+    def publish_req(self, custom_view_item: CustomViewItem, filename: str, file_contents: bytes):
+        xml_request = self._publish_xml(custom_view_item)
+        parts = {
+            "request_payload": ("", xml_request, "text/xml"),
+            "tableau_customview": (filename, file_contents, "application/octet-stream"),
+        }
+        return _add_multipart(parts)
 
 
 class GroupSetRequest:
