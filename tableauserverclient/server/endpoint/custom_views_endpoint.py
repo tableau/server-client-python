@@ -1,8 +1,11 @@
 import io
 import logging
 import os
+from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
+from tableauserverclient.config import BYTES_PER_MB, FILESIZE_LIMIT_MB
+from tableauserverclient.filesys_helpers import get_file_object_size
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
 from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
 from tableauserverclient.models import CustomViewItem, PaginationItem
@@ -130,3 +133,33 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
             f.write(server_response.content)
 
         return file
+
+    @api(version="3.21")
+    def publish(self, view_item: CustomViewItem, file: PathOrFileR) -> Optional[CustomViewItem]:
+        url = self.expurl
+        if isinstance(file, io_types_r):
+            size = get_file_object_size(file)
+        elif isinstance(file, (str, Path)) and (p := Path(file)).is_file():
+            size = p.stat().st_size
+        else:
+            raise ValueError("File path or file object required for publishing custom view.")
+
+        if size >= FILESIZE_LIMIT_MB * BYTES_PER_MB:
+            upload_session_id = self.parent_srv.fileuploads.upload(file)
+            url = f"{url}?uploadSessionId={upload_session_id}"
+            xml_request, content_type = RequestFactory.CustomView.publish_req_chunked(view_item)
+        else:
+            if isinstance(file, io_types_r):
+                file.seek(0)
+                contents = file.read()
+                if view_item.name is None:
+                    raise MissingRequiredFieldError("Custom view item missing name.")
+                filename = view_item.name
+            elif isinstance(file, (str, Path)):
+                filename = Path(file).name
+                contents = Path(file).read_bytes()
+
+            xml_request, content_type = RequestFactory.CustomView.publish_req(view_item, filename, contents)
+
+        server_response = self.post_request(url, xml_request, content_type)
+        return CustomViewItem.from_response(server_response.content, self.parent_srv.namespace)
