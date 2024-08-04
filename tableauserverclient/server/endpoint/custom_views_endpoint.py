@@ -1,8 +1,10 @@
+import io
 import logging
-from typing import List, Optional, Tuple
+import os
+from typing import List, Optional, Tuple, Union
 
-from .endpoint import QuerysetEndpoint, api
-from .exceptions import MissingRequiredFieldError
+from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
+from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
 from tableauserverclient.models import CustomViewItem, PaginationItem
 from tableauserverclient.server import RequestFactory, RequestOptions, ImageRequestOptions
 
@@ -16,6 +18,15 @@ Delete a custom view
 update the name or owner of a custom view.
 """
 
+FilePath = Union[str, os.PathLike]
+FileObject = Union[io.BufferedReader, io.BytesIO]
+FileObjectR = Union[io.BufferedReader, io.BytesIO]
+FileObjectW = Union[io.BufferedWriter, io.BytesIO]
+PathOrFileR = Union[FilePath, FileObjectR]
+PathOrFileW = Union[FilePath, FileObjectW]
+io_types_r = (io.BufferedReader, io.BytesIO)
+io_types_w = (io.BufferedWriter, io.BytesIO)
+
 
 class CustomViews(QuerysetEndpoint[CustomViewItem]):
     def __init__(self, parent_srv):
@@ -24,6 +35,10 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
     @property
     def baseurl(self) -> str:
         return "{0}/sites/{1}/customviews".format(self.parent_srv.baseurl, self.parent_srv.site_id)
+
+    @property
+    def expurl(self) -> str:
+        return f"{self.parent_srv._server_address}/api/exp/sites/{self.parent_srv.site_id}/customviews"
 
     """
     If the request has no filter parameters: Administrators will see all custom views. 
@@ -102,3 +117,16 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
         url = "{0}/{1}".format(self.baseurl, view_id)
         self.delete_request(url)
         logger.info("Deleted single custom view (ID: {0})".format(view_id))
+
+    @api(version="3.21")
+    def download(self, view_item: CustomViewItem, file: PathOrFileW) -> PathOrFileW:
+        url = f"{self.expurl}/{view_item.id}/content"
+        server_response = self.get_request(url)
+        if isinstance(file, io_types_w):
+            file.write(server_response.content)
+            return file
+
+        with open(file, "wb") as f:
+            f.write(server_response.content)
+
+        return file

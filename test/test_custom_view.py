@@ -1,4 +1,6 @@
+import io
 import os
+from pathlib import Path
 import unittest
 
 import requests_mock
@@ -6,18 +8,19 @@ import requests_mock
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
 
-TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
+TEST_ASSET_DIR = Path(__file__).parent / "assets"
 
 GET_XML = os.path.join(TEST_ASSET_DIR, "custom_view_get.xml")
 GET_XML_ID = os.path.join(TEST_ASSET_DIR, "custom_view_get_id.xml")
 POPULATE_PREVIEW_IMAGE = os.path.join(TEST_ASSET_DIR, "Sample View Image.png")
 CUSTOM_VIEW_UPDATE_XML = os.path.join(TEST_ASSET_DIR, "custom_view_update.xml")
+CUSTOM_VIEW_DOWNLOAD = TEST_ASSET_DIR / "custom_view_download.json"
 
 
 class CustomViewTests(unittest.TestCase):
     def setUp(self):
         self.server = TSC.Server("http://test", False)
-        self.server.version = "3.19"  # custom views only introduced in 3.19
+        self.server.version = "3.21"  # custom views only introduced in 3.19
 
         # Fake sign in
         self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"
@@ -132,3 +135,14 @@ class CustomViewTests(unittest.TestCase):
     def test_update_missing_id(self) -> None:
         cv = TSC.CustomViewItem(name="test")
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.custom_views.update, cv)
+
+    def test_download(self) -> None:
+        cv = TSC.CustomViewItem(name="test")
+        cv._id = "1f951daf-4061-451a-9df1-69a8062664f2"
+        content = CUSTOM_VIEW_DOWNLOAD.read_bytes()
+        data = io.BytesIO()
+        with requests_mock.mock() as m:
+            m.get(f"{self.server.custom_views.expurl}/1f951daf-4061-451a-9df1-69a8062664f2/content", content=content)
+            self.server.custom_views.download(cv, data)
+
+        assert data.getvalue() == content
