@@ -38,6 +38,7 @@ class RequestOptions(RequestOptionsBase):
         LessThanOrEqual = "lte"
         In = "in"
         Has = "has"
+        CaseInsensitiveEquals = "cieq"
 
     class Field:
         Args = "args"
