@@ -130,4 +130,3 @@ class Jobs(QuerysetEndpoint[JobItem]):
         """
 
         return super().filter(*invalid, page_size=page_size, **kwargs)
-        

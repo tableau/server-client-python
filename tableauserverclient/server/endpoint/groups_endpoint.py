@@ -203,4 +203,3 @@ class Groups(QuerysetEndpoint[GroupItem]):
         """
 
         return super().filter(*invalid, page_size=page_size, **kwargs)
-        

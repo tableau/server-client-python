@@ -564,5 +564,5 @@ class Workbooks(QuerysetEndpoint[WorkbookItem]):
         updated_at__lt=...
         updated_at__lte=...
         """
-        
+
         return super().filter(*invalid, page_size=page_size, **kwargs)

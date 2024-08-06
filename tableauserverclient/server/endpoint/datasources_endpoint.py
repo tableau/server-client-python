@@ -544,4 +544,3 @@ class Datasources(QuerysetEndpoint[DatasourceItem]):
         """
 
         return super().filter(*invalid, page_size=page_size, **kwargs)
-        

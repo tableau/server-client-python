@@ -118,4 +118,3 @@ class FlowRuns(QuerysetEndpoint[FlowRunItem]):
         """
 
         return super().filter(*invalid, page_size=page_size, **kwargs)
-        

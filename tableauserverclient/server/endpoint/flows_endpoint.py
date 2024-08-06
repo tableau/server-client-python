@@ -332,4 +332,3 @@ class Flows(QuerysetEndpoint[FlowItem]):
         """
 
         return super().filter(*invalid, page_size=page_size, **kwargs)
-        

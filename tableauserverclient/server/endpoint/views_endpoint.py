@@ -247,4 +247,3 @@ class Views(QuerysetEndpoint[ViewItem]):
         """
 
         return super().filter(*invalid, page_size=page_size, **kwargs)
-        

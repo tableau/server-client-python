@@ -125,4 +125,3 @@ class GroupSets(QuerysetEndpoint[GroupSetItem]):
         """
 
         return super().filter(*invalid, page_size=page_size, **kwargs)
-        
