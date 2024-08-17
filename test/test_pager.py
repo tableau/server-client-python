@@ -1,9 +1,11 @@
+import contextlib
 import os
 import unittest
 
 import requests_mock
 
 import tableauserverclient as TSC
+from tableauserverclient.config import config
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
@@ -11,6 +13,15 @@ GET_XML_PAGE1 = os.path.join(TEST_ASSET_DIR, "workbook_get_page_1.xml")
 GET_XML_PAGE2 = os.path.join(TEST_ASSET_DIR, "workbook_get_page_2.xml")
 GET_XML_PAGE3 = os.path.join(TEST_ASSET_DIR, "workbook_get_page_3.xml")
 
+@contextlib.contextmanager
+def set_env(**environ):
+    old_environ = dict(os.environ)
+    os.environ.update(environ)
+    try:
+        yield
+    finally:
+        os.environ.clear()
+        os.environ.update(old_environ)
 
 class PagerTests(unittest.TestCase):
     def setUp(self):
@@ -88,3 +99,15 @@ class PagerTests(unittest.TestCase):
             # Should have the last workbook
             wb3 = workbooks.pop()
             self.assertEqual(wb3.name, "Page3Workbook")
+
+    def test_pager_with_env_var(self) -> None:
+        with set_env(TSC_PAGE_SIZE="1000"):
+            assert config.PAGE_SIZE == 1000
+            loop = TSC.Pager(self.server.workbooks)
+            assert loop._options.pagesize == 1000
+
+    def test_queryset_with_env_var(self) -> None:
+        with set_env(TSC_PAGE_SIZE="1000"):
+            assert config.PAGE_SIZE == 1000
+            loop = self.server.workbooks.all()
+            assert loop.request_options.pagesize == 1000
