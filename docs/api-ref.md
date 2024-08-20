@@ -1480,7 +1480,7 @@ Name | Description
 
 Returns the final `JobItem`.
 
-Usually, you can just discard the return value without checking the job status. In case the job wasn't succesful, `wait_for_job` would have already raised an exception. For advanced scenarios, he returned `JobItem` might still be interesting to access e.g. start and end time or `notes`.
+Usually, you can just discard the return value without checking the job status. In case the job wasn't succesful, `wait_for_job` would have already raised an exception. For advanced scenarios, the returned `JobItem` might still be interesting to access e.g. start and end time or `notes`.
 
 **Example**
 
