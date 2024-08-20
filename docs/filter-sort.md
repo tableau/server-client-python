@@ -104,6 +104,19 @@ for workbook in all_workbooks:
     print(workbook.owner_id)
 ```
 
+### Setting page size
+
+Starting with version 0.32, you can set the page size for the request by using
+the `page_size` keyword argument. The default page size is 100 if not provided.
+
+```py
+superstore_workbooks = server.workbooks.filter(name='Superstore', page_size=10)
+# or
+all_workbooks = server.workbooks.all(page_size=1000)
+```
+
+
+
 ### Direction criteria - Django style
 
 The field name can be input as normal for ascending or prefixed with `-` for descending.
