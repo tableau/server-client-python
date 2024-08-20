@@ -933,6 +933,56 @@ None.
 <br>
 <br>
 
+#### groups.add_users
+
+```py
+groups.add_users(group_item, user_id):
+```
+
+Adds multiple users to the specified group.
+
+
+REST API [Add User to Group](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#add_user_to_group)
+
+**Version**
+
+This endpoint is available with REST API version 3.21 and up. Method added in
+version v0.33
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`group_item`  | The `group_item` specifies the group to update.
+`users` | An Iterable of UserItems, or user ids.
+
+
+
+
+**Returns**
+
+list[UserItem]
+
+
+**Example**
+
+```py
+# Adding a user to a group
+#
+# get the group item
+  all_groups, pagination_item = server.groups.get()
+  mygroup = all_groups[1]
+
+# Add Viewers to the group
+  added_users = server.groups.add_users(
+      mygroup,
+      server.users.filter(site_role=TSC.UserItem.Roles.Viewer)
+  )
+```
+
+<br>
+<br>
+
 #### groups.create
 
 ```py
@@ -1239,6 +1289,56 @@ None. The user is removed from the group.
      # remove user '9f9e9d9c-8b8a-8f8e-7d7c-7b7a6f6d6e6d'
      server.groups.remove_user(mygroup, '9f9e9d9c-8b8a-8f8e-7d7c-7b7a6f6d6e6d')
 
+```
+
+<br>
+<br>
+
+#### groups.remove_users
+
+```py
+groups.remove_users(group_item, user_id):
+```
+
+Removes multiple users to the specified group.
+
+
+REST API [Remove User from Group](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#remove_user_to_group)
+
+**Version**
+
+This endpoint is available with REST API version 3.21 and up. Method removeed in
+version v0.33
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`group_item`  | The `group_item` specifies the group to update.
+`users` | An Iterable of UserItems, or user ids.
+
+
+
+
+**Returns**
+
+None
+
+
+**Example**
+
+```py
+# Removing a user to a group
+#
+# get the group item
+  all_groups, pagination_item = server.groups.get()
+  mygroup = all_groups[1]
+
+# remove Viewers from the group
+  server.groups.remove_users(
+      mygroup,
+      server.users.filter(site_role=TSC.UserItem.Roles.Viewer)
+  )
 ```
 
 <br>
