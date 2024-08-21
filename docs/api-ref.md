@@ -1300,14 +1300,14 @@ None. The user is removed from the group.
 groups.remove_users(group_item, user_id):
 ```
 
-Removes multiple users to the specified group.
+Removes multiple users from the specified group.
 
 
 REST API [Remove User from Group](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#remove_user_to_group)
 
 **Version**
 
-This endpoint is available with REST API version 3.21 and up. Method removeed in
+This endpoint is available with REST API version 3.21 and up. Method added in
 version v0.33
 
 **Parameters**
@@ -1328,13 +1328,13 @@ None
 **Example**
 
 ```py
-# Removing a user to a group
+# Removing a user from a group
 #
 # get the group item
   all_groups, pagination_item = server.groups.get()
   mygroup = all_groups[1]
 
-# remove Viewers from the group
+# Remove Viewers from the group
   server.groups.remove_users(
       mygroup,
       server.users.filter(site_role=TSC.UserItem.Roles.Viewer)
