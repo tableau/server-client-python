@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from typing import Any, Dict, Iterable, List, Optional, Tuple, TYPE_CHECKING
+from typing import Any, Dict, Iterable, List, Optional, Tuple, TYPE_CHECKING, Union
 
 from requests.packages.urllib3.fields import RequestField
 from requests.packages.urllib3.filepost import encode_multipart_formdata
@@ -385,6 +385,28 @@ class GroupRequest(object):
         xml_request = ET.Element("tsRequest")
         user_element = ET.SubElement(xml_request, "user")
         user_element.attrib["id"] = user_id
+        return ET.tostring(xml_request)
+
+    @_tsrequest_wrapped
+    def add_users_req(self, xml_request, users: Iterable[Union[str, UserItem]]) -> bytes:
+        users_element = ET.SubElement(xml_request, "users")
+        for user in users:
+            user_element = ET.SubElement(users_element, "user")
+            if not (user_id := user.id if isinstance(user, UserItem) else user):
+                raise ValueError("User ID must be populated")
+            user_element.attrib["id"] = user_id
+
+        return ET.tostring(xml_request)
+
+    @_tsrequest_wrapped
+    def remove_users_req(self, xml_request, users: Iterable[Union[str, UserItem]]) -> bytes:
+        users_element = ET.SubElement(xml_request, "users")
+        for user in users:
+            user_element = ET.SubElement(users_element, "user")
+            if not (user_id := user.id if isinstance(user, UserItem) else user):
+                raise ValueError("User ID must be populated")
+            user_element.attrib["id"] = user_id
+
         return ET.tostring(xml_request)
 
     def create_local_req(self, group_item: GroupItem) -> bytes:
@@ -1246,6 +1268,22 @@ class CustomViewRequest(object):
             updating_element.attrib["name"] = custom_view_item.name
 
 
+class GroupSetRequest:
+    @_tsrequest_wrapped
+    def create_request(self, xml_request: ET.Element, group_set_item: "GroupSetItem") -> bytes:
+        group_set_element = ET.SubElement(xml_request, "groupSet")
+        if group_set_item.name is not None:
+            group_set_element.attrib["name"] = group_set_item.name
+        return ET.tostring(xml_request)
+
+    @_tsrequest_wrapped
+    def update_request(self, xml_request: ET.Element, group_set_item: "GroupSetItem") -> bytes:
+        group_set_element = ET.SubElement(xml_request, "groupSet")
+        if group_set_item.name is not None:
+            group_set_element.attrib["name"] = group_set_item.name
+        return ET.tostring(xml_request)
+
+
 class RequestFactory(object):
     Auth = AuthRequest()
     Connection = Connection()
@@ -1261,6 +1299,7 @@ class RequestFactory(object):
     Flow = FlowRequest()
     FlowTask = FlowTaskRequest()
     Group = GroupRequest()
+    GroupSet = GroupSetRequest()
     Metric = MetricRequest()
     Permission = PermissionRequest()
     Project = ProjectRequest()
