@@ -1,8 +1,9 @@
 import xml.etree.ElementTree as ET
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union, TYPE_CHECKING
+from typing import Any, Callable, Dict, Iterable, List, Optional, ParamSpec, Set, Tuple, TypeVar, TYPE_CHECKING, Union
 
 from requests.packages.urllib3.fields import RequestField
 from requests.packages.urllib3.filepost import encode_multipart_formdata
+from typing_extensions import Concatenate
 
 from tableauserverclient.models import *
 
@@ -23,8 +24,12 @@ def _add_multipart(parts: Dict) -> Tuple[Any, str]:
     return xml_request, content_type
 
 
-def _tsrequest_wrapped(func):
-    def wrapper(self, *args, **kwargs) -> bytes:
+T = TypeVar("T")
+P = ParamSpec("P")
+
+
+def _tsrequest_wrapped(func: Callable[Concatenate[T, ET.Element, P], Any]) -> Callable[Concatenate[T, P], bytes]:
+    def wrapper(self: T, *args: P.args, **kwargs: P.kwargs) -> bytes:
         xml_request = ET.Element("tsRequest")
         func(self, xml_request, *args, **kwargs)
         return ET.tostring(xml_request)
@@ -388,7 +393,7 @@ class GroupRequest(object):
         return ET.tostring(xml_request)
 
     @_tsrequest_wrapped
-    def add_users_req(self, xml_request, users: Iterable[Union[str, UserItem]]) -> bytes:
+    def add_users_req(self, xml_request: ET.Element, users: Iterable[Union[str, UserItem]]) -> bytes:
         users_element = ET.SubElement(xml_request, "users")
         for user in users:
             user_element = ET.SubElement(users_element, "user")
@@ -399,7 +404,7 @@ class GroupRequest(object):
         return ET.tostring(xml_request)
 
     @_tsrequest_wrapped
-    def remove_users_req(self, xml_request, users: Iterable[Union[str, UserItem]]) -> bytes:
+    def remove_users_req(self, xml_request: ET.Element, users: Iterable[Union[str, UserItem]]) -> bytes:
         users_element = ET.SubElement(xml_request, "users")
         for user in users:
             user_element = ET.SubElement(users_element, "user")
@@ -1055,14 +1060,17 @@ class WorkbookRequest(object):
         return _add_multipart(parts)
 
     @_tsrequest_wrapped
-    def embedded_extract_req(self, xml_request, include_all=True, datasources=None):
+    def embedded_extract_req(
+        self, xml_request: ET.Element, include_all: bool = True, datasources: Optional[Iterable[DatasourceItem]] = None
+    ) -> None:
         list_element = ET.SubElement(xml_request, "datasources")
         if include_all:
             list_element.attrib["includeAll"] = "true"
         elif datasources:
             for datasource_item in datasources:
                 datasource_element = ET.SubElement(list_element, "datasource")
-                datasource_element.attrib["id"] = datasource_item.id
+                if (id_ := datasource_item.id) is not None:
+                    datasource_element.attrib["id"] = id_
 
 
 class Connection(object):
@@ -1090,7 +1098,7 @@ class Connection(object):
 
 class TaskRequest(object):
     @_tsrequest_wrapped
-    def run_req(self, xml_request, task_item):
+    def run_req(self, xml_request: ET.Element, task_item: Any) -> None:
         # Send an empty tsRequest
         pass
 
@@ -1227,7 +1235,7 @@ class SubscriptionRequest(object):
 
 class EmptyRequest(object):
     @_tsrequest_wrapped
-    def empty_req(self, xml_request):
+    def empty_req(self, xml_request: ET.Element) -> None:
         pass
 
 
