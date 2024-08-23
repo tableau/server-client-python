@@ -460,7 +460,6 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin):
     ) -> List["AddResponse"]:  # actually should return a task
         return self.parent_srv.schedules.add_to_schedule(schedule_id, datasource=item)
 
-      
     @api(version="1.0")
     def add_tags(self, item: Union[DatasourceItem, str], tags: Union[Iterable[str], str]) -> Set[str]:
         return super().add_tags(item, tags)
@@ -472,7 +471,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin):
     @api(version="1.0")
     def update_tags(self, item: DatasourceItem) -> None:
         return super().update_tags(item)
-      
+
     def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[DatasourceItem]:
         """
         Queries the Tableau Server for items using the specified filters. Page

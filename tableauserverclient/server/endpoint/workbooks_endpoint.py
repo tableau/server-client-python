@@ -512,7 +512,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin):
     @api(version="1.0")
     def update_tags(self, item: WorkbookItem) -> None:
         return super().update_tags(item)
-      
+
     def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[WorkbookItem]:
         """
         Queries the Tableau Server for items using the specified filters. Page
@@ -579,4 +579,3 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin):
         """
 
         return super().filter(*invalid, page_size=page_size, **kwargs)
-      

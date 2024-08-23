@@ -186,7 +186,7 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin):
     @api(version="1.0")
     def update_tags(self, item: ViewItem) -> None:
         return super().update_tags(item)
-      
+
     def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[ViewItem]:
         """
         Queries the Tableau Server for items using the specified filters. Page
@@ -258,4 +258,3 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin):
         """
 
         return super().filter(*invalid, page_size=page_size, **kwargs)
-      
