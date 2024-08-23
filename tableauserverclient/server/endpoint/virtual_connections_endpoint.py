@@ -11,18 +11,17 @@ from tableauserverclient.server.request_factory import RequestFactory
 from tableauserverclient.server.request_options import RequestOptions
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
 from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
-from tableauserverclient.server.endpoint.resource_tagger import _ResourceTagger
+from tableauserverclient.server.endpoint.resource_tagger import TaggingMixin
 from tableauserverclient.server.pager import Pager
 
 if TYPE_CHECKING:
     from tableauserverclient.server import Server
 
 
-class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem]):
+class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem], TaggingMixin):
     def __init__(self, parent_srv: "Server") -> None:
         super().__init__(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
-        self._resource_tagger = _ResourceTagger(parent_srv)
 
     @property
     def baseurl(self) -> str:
@@ -161,31 +160,14 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem]):
     def add_tags(
         self, virtual_connection: Union[VirtualConnectionItem, str], tags: Union[Iterable[str], str]
     ) -> Set[str]:
-        virtual_connection = getattr(virtual_connection, "id", virtual_connection)
-
-        if not isinstance(virtual_connection, str):
-            raise ValueError("virtual_connection ID not found.")
-
-        if isinstance(tags, str):
-            tag_set = set([tags])
-        else:
-            tag_set = set(tags)
-
-        return self._resource_tagger._add_tags(self.baseurl, virtual_connection, tag_set)
+        return super().add_tags(virtual_connection, tags)
 
     @api(version="3.23")
     def delete_tags(
         self, virtual_connection: Union[VirtualConnectionItem, str], tags: Union[Iterable[str], str]
     ) -> None:
-        virtual_connection = getattr(virtual_connection, "id", virtual_connection)
+        return super().delete_tags(virtual_connection, tags)
 
-        if not isinstance(virtual_connection, str):
-            raise ValueError("virtual_connection ID not found.")
-
-        if isinstance(tags, str):
-            tag_set = set([tags])
-        else:
-            tag_set = set(tags)
-
-        for tag in tag_set:
-            self._resource_tagger._delete_tag(self.baseurl, virtual_connection, tag)
+    @api(version="3.23")
+    def update_tags(self, virtual_connection: VirtualConnectionItem) -> None:
+        raise NotImplementedError("Update tags is not implemented for Virtual Connections")

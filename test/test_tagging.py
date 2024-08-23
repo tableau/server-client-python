@@ -6,7 +6,6 @@ from xml.etree import ElementTree as ET
 import pytest
 import requests_mock
 import tableauserverclient as TSC
-from tableauserverclient.server.endpoint.resource_tagger import content
 
 
 @pytest.fixture
@@ -83,6 +82,12 @@ def make_flow() -> TSC.FlowItem:
     return flow
 
 
+def make_vconn() -> TSC.VirtualConnectionItem:
+    vconn = TSC.VirtualConnectionItem("test")
+    vconn._id = str(uuid.uuid4())
+    return vconn
+
+
 sample_taggable_items = (
     [
         ("workbooks", make_workbook()),
@@ -97,6 +102,8 @@ sample_taggable_items = (
         ("databases", "some_id"),
         ("flows", make_flow()),
         ("flows", "some_id"),
+        ("virtual_connections", make_vconn()),
+        ("virtual_connections", "some_id"),
     ],
 )
 
