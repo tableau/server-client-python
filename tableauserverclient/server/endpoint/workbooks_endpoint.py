@@ -184,7 +184,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin):
         workbook_id: str,
         filepath: Optional[PathOrFileW] = None,
         include_extract: bool = True,
-    ) -> str:
+    ) -> PathOrFileW:
         return self.download_revision(
             workbook_id,
             None,

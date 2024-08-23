@@ -1,4 +1,5 @@
 import logging
+from typing_extensions import Self, overload
 
 from tableauserverclient.server.query import QuerySet
 
@@ -13,15 +14,25 @@ from tableauserverclient.helpers.logging import logger
 from typing import List, Optional, Tuple, Union
 
 
-class Jobs(QuerysetEndpoint[JobItem]):
+class Jobs(QuerysetEndpoint[BackgroundJobItem]):
     @property
     def baseurl(self):
         return "{0}/sites/{1}/jobs".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
+    @overload  # type: ignore[override]
+    def get(self: Self, job_id: str, req_options: Optional[RequestOptionsBase] = None) -> JobItem:  # type: ignore[override]
+        ...
+
+    @overload  # type: ignore[override]
+    def get(self: Self, job_id: RequestOptionsBase, req_options: None) -> Tuple[List[BackgroundJobItem], PaginationItem]:  # type: ignore[override]
+        ...
+
+    @overload  # type: ignore[override]
+    def get(self: Self, job_id: None, req_options: Optional[RequestOptionsBase]) -> Tuple[List[BackgroundJobItem], PaginationItem]:  # type: ignore[override]
+        ...
+
     @api(version="2.6")
-    def get(
-        self, job_id: Optional[str] = None, req_options: Optional[RequestOptionsBase] = None
-    ) -> Tuple[List[BackgroundJobItem], PaginationItem]:
+    def get(self, job_id=None, req_options=None):
         # Backwards Compatibility fix until we rev the major version
         if job_id is not None and isinstance(job_id, str):
             import warnings
@@ -77,7 +88,7 @@ class Jobs(QuerysetEndpoint[JobItem]):
         else:
             raise AssertionError("Unexpected finish_code in job", job)
 
-    def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[JobItem]:
+    def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[BackgroundJobItem]:
         """
         Queries the Tableau Server for items using the specified filters. Page
         size can be specified to limit the number of items returned in a single

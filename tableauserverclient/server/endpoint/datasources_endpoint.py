@@ -126,7 +126,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin):
         datasource_id: str,
         filepath: Optional[PathOrFileW] = None,
         include_extract: bool = True,
-    ) -> str:
+    ) -> PathOrFileW:
         return self.download_revision(
             datasource_id,
             None,
@@ -405,7 +405,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin):
     def download_revision(
         self,
         datasource_id: str,
-        revision_number: str,
+        revision_number: Optional[str],
         filepath: Optional[PathOrFileW] = None,
         include_extract: bool = True,
     ) -> PathOrFileW:
