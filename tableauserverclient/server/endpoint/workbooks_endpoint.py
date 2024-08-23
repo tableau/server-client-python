@@ -9,10 +9,10 @@ from pathlib import Path
 from tableauserverclient.helpers.headers import fix_filename
 from tableauserverclient.server.query import QuerySet
 
-from .endpoint import QuerysetEndpoint, api, parameter_added_in
-from .exceptions import InternalServerError, MissingRequiredFieldError
-from .permissions_endpoint import _PermissionsEndpoint
-from .resource_tagger import _ResourceTagger
+from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api, parameter_added_in
+from tableauserverclient.server.endpoint.exceptions import InternalServerError, MissingRequiredFieldError
+from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
+from tableauserverclient.server.endpoint.resource_tagger import TaggingMixin
 
 from tableauserverclient.filesys_helpers import (
     to_filename,
@@ -25,9 +25,11 @@ from tableauserverclient.models import WorkbookItem, ConnectionItem, ViewItem, P
 from tableauserverclient.server import RequestFactory
 
 from typing import (
+    Iterable,
     List,
     Optional,
     Sequence,
+    Set,
     Tuple,
     TYPE_CHECKING,
     Union,
@@ -36,8 +38,8 @@ from typing import (
 if TYPE_CHECKING:
     from tableauserverclient.server import Server
     from tableauserverclient.server.request_options import RequestOptions
-    from tableauserverclient.models import DatasourceItem, ConnectionCredentials
-    from .schedules_endpoint import AddResponse
+    from tableauserverclient.models import DatasourceItem
+    from tableauserverclient.server.endpoint.schedules_endpoint import AddResponse
 
 io_types_r = (io.BytesIO, io.BufferedReader)
 io_types_w = (io.BytesIO, io.BufferedWriter)
@@ -57,10 +59,9 @@ PathOrFileR = Union[FilePath, FileObjectR]
 PathOrFileW = Union[FilePath, FileObjectW]
 
 
-class Workbooks(QuerysetEndpoint[WorkbookItem]):
+class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin):
     def __init__(self, parent_srv: "Server") -> None:
         super(Workbooks, self).__init__(parent_srv)
-        self._resource_tagger = _ResourceTagger(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
 
         return None
@@ -148,7 +149,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem]):
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
 
-        self._resource_tagger.update_tags(self.baseurl, workbook_item)
+        self.update_tags(workbook_item)
 
         # Update the workbook itself
         url = "{0}/{1}".format(self.baseurl, workbook_item.id)
@@ -499,6 +500,18 @@ class Workbooks(QuerysetEndpoint[WorkbookItem]):
         self, schedule_id: str, item: WorkbookItem
     ) -> List["AddResponse"]:  # actually should return a task
         return self.parent_srv.schedules.add_to_schedule(schedule_id, workbook=item)
+
+    @api(version="1.0")
+    def add_tags(self, item: Union[WorkbookItem, str], tags: Union[Iterable[str], str]) -> Set[str]:
+        return super().add_tags(item, tags)
+
+    @api(version="1.0")
+    def delete_tags(self, item: Union[WorkbookItem, str], tags: Union[Iterable[str], str]) -> None:
+        return super().delete_tags(item, tags)
+
+    @api(version="1.0")
+    def update_tags(self, item: WorkbookItem) -> None:
+        return super().update_tags(item)
 
     def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[WorkbookItem]:
         """

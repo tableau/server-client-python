@@ -13,7 +13,7 @@ from tableauserverclient.server.endpoint.dqw_endpoint import _DataQualityWarning
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
 from tableauserverclient.server.endpoint.exceptions import InternalServerError, MissingRequiredFieldError
 from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
-from tableauserverclient.server.endpoint.resource_tagger import _ResourceTagger
+from tableauserverclient.server.endpoint.resource_tagger import _ResourceTagger, TaggingMixin
 from tableauserverclient.models import FlowItem, PaginationItem, ConnectionItem, JobItem
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.filesys_helpers import (
@@ -51,7 +51,7 @@ PathOrFileR = Union[FilePath, FileObjectR]
 PathOrFileW = Union[FilePath, FileObjectW]
 
 
-class Flows(QuerysetEndpoint[FlowItem]):
+class Flows(QuerysetEndpoint[FlowItem], TaggingMixin):
     def __init__(self, parent_srv):
         super(Flows, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)

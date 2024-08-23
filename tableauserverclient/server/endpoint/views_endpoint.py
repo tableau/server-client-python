@@ -1,20 +1,20 @@
 import logging
 from contextlib import closing
 
+from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
+from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
+from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
+from tableauserverclient.server.endpoint.resource_tagger import TaggingMixin
 from tableauserverclient.server.query import QuerySet
 
-from .endpoint import QuerysetEndpoint, api
-from .exceptions import MissingRequiredFieldError
-from .permissions_endpoint import _PermissionsEndpoint
-from .resource_tagger import _ResourceTagger
 from tableauserverclient.models import ViewItem, PaginationItem
 
 from tableauserverclient.helpers.logging import logger
 
-from typing import Iterator, List, Optional, Tuple, TYPE_CHECKING
+from typing import Iterable, Iterator, List, Optional, Set, Tuple, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
-    from ..request_options import (
+    from tableauserverclient.server.request_options import (
         RequestOptions,
         CSVRequestOptions,
         PDFRequestOptions,
@@ -23,10 +23,9 @@ if TYPE_CHECKING:
     )
 
 
-class Views(QuerysetEndpoint[ViewItem]):
+class Views(QuerysetEndpoint[ViewItem], TaggingMixin):
     def __init__(self, parent_srv):
         super(Views, self).__init__(parent_srv)
-        self._resource_tagger = _ResourceTagger(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
 
     # Used because populate_preview_image functionaliy requires workbook endpoint
@@ -171,10 +170,22 @@ class Views(QuerysetEndpoint[ViewItem]):
             error = "View item missing ID. View must be retrieved from server first."
             raise MissingRequiredFieldError(error)
 
-        self._resource_tagger.update_tags(self.baseurl, view_item)
+        self.update_tags(view_item)
 
         # Returning view item to stay consistent with datasource/view update functions
         return view_item
+
+    @api(version="1.0")
+    def add_tags(self, item: Union[ViewItem, str], tags: Union[Iterable[str], str]) -> Set[str]:
+        return super().add_tags(item, tags)
+
+    @api(version="1.0")
+    def delete_tags(self, item: Union[ViewItem, str], tags: Union[Iterable[str], str]) -> None:
+        return super().delete_tags(item, tags)
+
+    @api(version="1.0")
+    def update_tags(self, item: ViewItem) -> None:
+        return super().update_tags(item)
 
     def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[ViewItem]:
         """

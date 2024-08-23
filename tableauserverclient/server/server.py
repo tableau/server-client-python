@@ -34,6 +34,7 @@ from tableauserverclient.server.endpoint import (
     Endpoint,
     CustomViews,
     GroupSets,
+    Tags,
 )
 from tableauserverclient.server.exceptions import (
     ServerInfoEndpointNotFoundError,
@@ -101,6 +102,7 @@ class Server(object):
         self.metrics = Metrics(self)
         self.custom_views = CustomViews(self)
         self.group_sets = GroupSets(self)
+        self.tags = Tags(self)
 
         self._session = self._session_factory()
         self._http_options = dict()  # must set this before making a server call

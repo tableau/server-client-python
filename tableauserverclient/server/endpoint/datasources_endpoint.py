@@ -6,7 +6,7 @@ import os
 
 from contextlib import closing
 from pathlib import Path
-from typing import List, Mapping, Optional, Sequence, Tuple, TYPE_CHECKING, Union
+from typing import Iterable, List, Mapping, Optional, Sequence, Set, Tuple, TYPE_CHECKING, Union
 
 from tableauserverclient.helpers.headers import fix_filename
 from tableauserverclient.server.query import QuerySet
@@ -20,7 +20,7 @@ from tableauserverclient.server.endpoint.dqw_endpoint import _DataQualityWarning
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api, parameter_added_in
 from tableauserverclient.server.endpoint.exceptions import InternalServerError, MissingRequiredFieldError
 from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
-from tableauserverclient.server.endpoint.resource_tagger import _ResourceTagger
+from tableauserverclient.server.endpoint.resource_tagger import TaggingMixin
 
 from tableauserverclient.config import ALLOWED_FILE_EXTENSIONS, FILESIZE_LIMIT_MB, BYTES_PER_MB, CHUNK_SIZE_MB
 from tableauserverclient.filesys_helpers import (
@@ -55,10 +55,9 @@ PathOrFileR = Union[FilePath, FileObjectR]
 PathOrFileW = Union[FilePath, FileObjectW]
 
 
-class Datasources(QuerysetEndpoint[DatasourceItem]):
+class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin):
     def __init__(self, parent_srv: "Server") -> None:
         super(Datasources, self).__init__(parent_srv)
-        self._resource_tagger = _ResourceTagger(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
         self._data_quality_warnings = _DataQualityWarningEndpoint(self.parent_srv, "datasource")
 
@@ -150,7 +149,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem]):
                 )
                 raise MissingRequiredFieldError(error)
 
-        self._resource_tagger.update_tags(self.baseurl, datasource_item)
+        self.update_tags(datasource_item)
 
         # Update the datasource itself
         url = "{0}/{1}".format(self.baseurl, datasource_item.id)
@@ -460,6 +459,18 @@ class Datasources(QuerysetEndpoint[DatasourceItem]):
         self, schedule_id: str, item: DatasourceItem
     ) -> List["AddResponse"]:  # actually should return a task
         return self.parent_srv.schedules.add_to_schedule(schedule_id, datasource=item)
+
+    @api(version="1.0")
+    def add_tags(self, item: Union[DatasourceItem, str], tags: Union[Iterable[str], str]) -> Set[str]:
+        return super().add_tags(item, tags)
+
+    @api(version="1.0")
+    def delete_tags(self, item: Union[DatasourceItem, str], tags: Union[Iterable[str], str]) -> None:
+        return super().delete_tags(item, tags)
+
+    @api(version="1.0")
+    def update_tags(self, item: DatasourceItem) -> None:
+        return super().update_tags(item)
 
     def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[DatasourceItem]:
         """
