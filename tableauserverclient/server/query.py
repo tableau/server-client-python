@@ -1,6 +1,7 @@
 from collections.abc import Sized
 from itertools import count
 from typing import Iterable, Iterator, List, Optional, Protocol, Tuple, TYPE_CHECKING, TypeVar, overload
+from tableauserverclient.config import config
 from tableauserverclient.models.pagination_item import PaginationItem
 from tableauserverclient.server.filter import Filter
 from tableauserverclient.server.request_options import RequestOptions
@@ -35,7 +36,7 @@ see pagination_sample
 class QuerySet(Iterable[T], Sized):
     def __init__(self, model: "QuerysetEndpoint[T]", page_size: Optional[int] = None) -> None:
         self.model = model
-        self.request_options = RequestOptions(pagesize=page_size or 100)
+        self.request_options = RequestOptions(pagesize=page_size or config.PAGE_SIZE)
         self._result_cache: List[T] = []
         self._pagination_item = PaginationItem()
 

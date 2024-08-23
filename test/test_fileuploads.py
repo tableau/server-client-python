@@ -1,14 +1,28 @@
+import contextlib
+import io
 import os
 import unittest
 
 import requests_mock
 
+from tableauserverclient.config import BYTES_PER_MB, config
 from tableauserverclient.server import Server
 from ._utils import asset
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 FILEUPLOAD_INITIALIZE = os.path.join(TEST_ASSET_DIR, "fileupload_initialize.xml")
 FILEUPLOAD_APPEND = os.path.join(TEST_ASSET_DIR, "fileupload_append.xml")
+
+
+@contextlib.contextmanager
+def set_env(**environ):
+    old_environ = dict(os.environ)
+    os.environ.update(environ)
+    try:
+        yield
+    finally:
+        os.environ.clear()
+        os.environ.update(old_environ)
 
 
 class FileuploadsTests(unittest.TestCase):
@@ -62,3 +76,14 @@ class FileuploadsTests(unittest.TestCase):
                 actual = self.server.fileuploads.upload(file_content)
 
         self.assertEqual(upload_id, actual)
+
+    def test_upload_chunks_config(self):
+        data = io.BytesIO()
+        data.write(b"1" * (config.CHUNK_SIZE_MB * BYTES_PER_MB + 1))
+        data.seek(0)
+        with set_env(TSC_CHUNK_SIZE_MB="1"):
+            chunker = self.server.fileuploads._read_chunks(data)
+            chunk = next(chunker)
+            assert len(chunk) == config.CHUNK_SIZE_MB * BYTES_PER_MB
+            data.seek(0)
+            assert len(chunk) < len(data.read())

@@ -2,6 +2,7 @@ import sys
 
 from typing_extensions import Self
 
+from tableauserverclient.config import config
 from tableauserverclient.models.property_decorators import property_is_int
 import logging
 
@@ -116,9 +117,9 @@ class RequestOptions(RequestOptionsBase):
         Desc = "desc"
         Asc = "asc"
 
-    def __init__(self, pagenumber=1, pagesize=100):
+    def __init__(self, pagenumber=1, pagesize=None):
         self.pagenumber = pagenumber
-        self.pagesize = pagesize
+        self.pagesize = pagesize or config.PAGE_SIZE
         self.sort = set()
         self.filter = set()
 

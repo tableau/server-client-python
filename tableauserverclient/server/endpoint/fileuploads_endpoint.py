@@ -2,7 +2,7 @@ from .endpoint import Endpoint, api
 from tableauserverclient import datetime_helpers as datetime
 from tableauserverclient.helpers.logging import logger
 
-from tableauserverclient.config import BYTES_PER_MB, CHUNK_SIZE_MB
+from tableauserverclient.config import BYTES_PER_MB, config
 from tableauserverclient.models import FileuploadItem
 from tableauserverclient.server import RequestFactory
 
@@ -41,7 +41,7 @@ class Fileuploads(Endpoint):
 
         try:
             while True:
-                chunked_content = file_content.read(CHUNK_SIZE_MB * BYTES_PER_MB)
+                chunked_content = file_content.read(config.CHUNK_SIZE_MB * BYTES_PER_MB)
                 if not chunked_content:
                     break
                 yield chunked_content
