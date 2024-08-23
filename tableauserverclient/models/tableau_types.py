@@ -19,6 +19,7 @@ class Resource:
     Metric = "metric"
     Project = "project"
     View = "view"
+    VirtualConnection = "virtualConnection"
     Workbook = "workbook"
 
 
