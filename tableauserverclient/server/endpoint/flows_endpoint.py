@@ -5,7 +5,7 @@ import logging
 import os
 from contextlib import closing
 from pathlib import Path
-from typing import Iterable, List, Optional, TYPE_CHECKING, Tuple, Union
+from typing import Iterable, List, Optional, Set, TYPE_CHECKING, Tuple, Union
 
 from tableauserverclient.helpers.headers import fix_filename
 
@@ -296,6 +296,15 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin):
         self, schedule_id: str, item: FlowItem
     ) -> List["AddResponse"]:  # actually should return a task
         return self.parent_srv.schedules.add_to_schedule(schedule_id, flow=item)
+
+    def add_tags(self, item: Union[FlowItem, str], tags: Union[Iterable[str], str]) -> Set[str]:
+        return super().add_tags(item, tags)
+
+    def delete_tags(self, item: Union[FlowItem, str], tags: Union[Iterable[str], str]) -> None:
+        return super().delete_tags(item, tags)
+
+    def update_tags(self, item: FlowItem) -> None:
+        return super().update_tags(item)
 
     def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[FlowItem]:
         """
