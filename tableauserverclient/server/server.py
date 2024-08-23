@@ -33,6 +33,7 @@ from tableauserverclient.server.endpoint import (
     Metrics,
     Endpoint,
     CustomViews,
+    LinkedTasks,
     GroupSets,
     Tags,
 )
@@ -101,6 +102,7 @@ class Server(object):
         self.flow_runs = FlowRuns(self)
         self.metrics = Metrics(self)
         self.custom_views = CustomViews(self)
+        self.linked_tasks = LinkedTasks(self)
         self.group_sets = GroupSets(self)
         self.tags = Tags(self)
 
