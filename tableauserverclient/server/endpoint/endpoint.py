@@ -1,4 +1,4 @@
-from typing_extensions import Concatenate
+from typing_extensions import Concatenate, ParamSpec
 from tableauserverclient import datetime_helpers as datetime
 
 import abc
@@ -13,7 +13,6 @@ from typing import (
     List,
     Optional,
     TYPE_CHECKING,
-    ParamSpec,
     Tuple,
     TypeVar,
     Union,

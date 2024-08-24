@@ -153,6 +153,7 @@ def test_delete_tags(get_server, endpoint_type, item, tags) -> None:
     urls = {r.url.split("/")[-1] for r in history}
     assert urls == tag_set
 
+
 @pytest.mark.parametrize("endpoint_type, item", *sample_taggable_items)
 @pytest.mark.parametrize("tags", sample_tags)
 def test_update_tags(get_server, endpoint_type, item, tags) -> None:
@@ -163,7 +164,7 @@ def test_update_tags(get_server, endpoint_type, item, tags) -> None:
     tags = set([tags] if isinstance(tags, str) else tags)
     with ExitStack() as stack:
         if hasattr(item, "_initial_tags"):
-            initial_tags = set(['x','y','z'])
+            initial_tags = set(["x", "y", "z"])
             item._initial_tags = initial_tags
             add_tags_xml = add_tag_xml_response_factory(tags - initial_tags)
             delete_tags_xml = add_tag_xml_response_factory(initial_tags - tags)
@@ -186,7 +187,6 @@ def test_update_tags(get_server, endpoint_type, item, tags) -> None:
         else:
             stack.enter_context(pytest.raises(NotImplementedError))
 
-    
         endpoint.update_tags(item)
 
 

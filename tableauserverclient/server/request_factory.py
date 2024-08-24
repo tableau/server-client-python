@@ -1,5 +1,7 @@
 import xml.etree.ElementTree as ET
-from typing import Any, Callable, Dict, Iterable, List, Optional, ParamSpec, Set, Tuple, TypeVar, TYPE_CHECKING, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, TypeVar, TYPE_CHECKING, Union
+
+from typing_extensions import ParamSpec
 
 from requests.packages.urllib3.fields import RequestField
 from requests.packages.urllib3.filepost import encode_multipart_formdata
