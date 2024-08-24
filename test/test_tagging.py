@@ -157,13 +157,13 @@ def test_delete_tags(get_server, endpoint_type, item, tags) -> None:
 @pytest.mark.parametrize("endpoint_type, item", *sample_taggable_items)
 @pytest.mark.parametrize("tags", sample_tags)
 def test_update_tags(get_server, endpoint_type, item, tags) -> None:
-    if isinstance(item, str):
-        return
     endpoint = getattr(get_server, endpoint_type)
     id_ = getattr(item, "id", item)
     tags = set([tags] if isinstance(tags, str) else tags)
     with ExitStack() as stack:
-        if hasattr(item, "_initial_tags"):
+        if isinstance(item, str):
+            stack.enter_context(pytest.raises((ValueError, NotImplementedError)))
+        elif hasattr(item, "_initial_tags"):
             initial_tags = set(["x", "y", "z"])
             item._initial_tags = initial_tags
             add_tags_xml = add_tag_xml_response_factory(tags - initial_tags)
