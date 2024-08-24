@@ -59,7 +59,7 @@ PathOrFileR = Union[FilePath, FileObjectR]
 PathOrFileW = Union[FilePath, FileObjectW]
 
 
-class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin):
+class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
     def __init__(self, parent_srv: "Server") -> None:
         super(Workbooks, self).__init__(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
