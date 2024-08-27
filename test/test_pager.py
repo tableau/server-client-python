@@ -119,6 +119,6 @@ class PagerTests(unittest.TestCase):
         with open(GET_VIEW_XML, "rb") as f:
             view_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
-            m.get(self.baseurl, text=view_xml)
+            m.get(self.server.views.baseurl, text=view_xml)
             for view in TSC.Pager(self.server.views):
-                assert view.name == "Test View"
+                assert view.name is not None

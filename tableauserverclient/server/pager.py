@@ -1,7 +1,6 @@
-from collections.abc import Iterable, Iterator
 import copy
 from functools import partial
-from typing import List, Optional, Protocol, Tuple, TypeVar, Union, runtime_checkable
+from typing import Iterable, Iterator, List, Optional, Protocol, Tuple, TypeVar, Union, runtime_checkable
 
 from tableauserverclient.models.pagination_item import PaginationItem
 from tableauserverclient.server.request_options import RequestOptions
