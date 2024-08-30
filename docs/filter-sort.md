@@ -138,6 +138,21 @@ Sort can take multiple args, with desc direction added as a (-) prefix
 workbooks = workbooks.order_by("project_name", "-created_at")
 ```
 
+### Supported endpoints
+
+The following endpoints support the Django style filters and sorts:
+
+* Datasources
+* Flow Runs
+* Flows
+* Groups
+* Groupsets
+* Jobs
+* Projects
+* Users
+* Views
+* Workbooks
+
 ### More detailed examples
 
 ```py
@@ -146,6 +161,12 @@ workbooks = server.workbooks.all()
 
 # filters can be appended in new lines
 workbooks = workbooks.filter(project_name=project_name)
+
+# multiple filters can be added in a single line
+workbooks = workbooks.filter(project_name=project_name, owner_name=owner_name, size__gte=1000)
+
+# Find all views in a project, with a specific tag
+views = server.views.filter(project_name=project_name, tags="stale")
 
 # sort can take multiple args, with desc direction added as a (-) prefix 
 workbooks = workbooks.order_by("project_name", "-created_at")
