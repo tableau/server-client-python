@@ -1,30 +1,41 @@
+from typing_extensions import Concatenate, ParamSpec
 from tableauserverclient import datetime_helpers as datetime
 
 import abc
 from packaging.version import Version
 from functools import wraps
 from xml.etree.ElementTree import ParseError
-from typing import Any, Callable, Dict, Generic, List, Optional, TYPE_CHECKING, Tuple, TypeVar, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generic,
+    List,
+    Optional,
+    TYPE_CHECKING,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 from tableauserverclient.models.pagination_item import PaginationItem
 from tableauserverclient.server.request_options import RequestOptions
 
-from .exceptions import (
+from tableauserverclient.server.endpoint.exceptions import (
     ServerResponseError,
     InternalServerError,
     NonXMLResponseError,
     NotSignedInError,
 )
-from ..exceptions import EndpointUnavailableError
+from tableauserverclient.server.exceptions import EndpointUnavailableError
 
 from tableauserverclient.server.query import QuerySet
 from tableauserverclient import helpers, get_versions
 
 from tableauserverclient.helpers.logging import logger
-from tableauserverclient.config import DELAY_SLEEP_SECONDS
 
 if TYPE_CHECKING:
-    from ..server import Server
+    from tableauserverclient.server.server import Server
     from requests import Response
 
 
@@ -38,7 +49,7 @@ TABLEAU_AUTH_HEADER = "x-tableau-auth"
 USER_AGENT_HEADER = "User-Agent"
 
 
-class Endpoint(object):
+class Endpoint:
     def __init__(self, parent_srv: "Server"):
         self.parent_srv = parent_srv
 
@@ -232,7 +243,12 @@ class Endpoint(object):
         )
 
 
-def api(version):
+E = TypeVar("E", bound="Endpoint")
+P = ParamSpec("P")
+R = TypeVar("R")
+
+
+def api(version: str) -> Callable[[Callable[Concatenate[E, P], R]], Callable[Concatenate[E, P], R]]:
     """Annotate the minimum supported version for an endpoint.
 
     Checks the version on the server object and compares normalized versions.
@@ -251,9 +267,9 @@ def api(version):
     >>>     ...
     """
 
-    def _decorator(func):
+    def _decorator(func: Callable[Concatenate[E, P], R]) -> Callable[Concatenate[E, P], R]:
         @wraps(func)
-        def wrapper(self, *args, **kwargs):
+        def wrapper(self: E, *args: P.args, **kwargs: P.kwargs) -> R:
             self.parent_srv.assert_at_least_version(version, self.__class__.__name__)
             return func(self, *args, **kwargs)
 
@@ -262,7 +278,7 @@ def api(version):
     return _decorator
 
 
-def parameter_added_in(**params):
+def parameter_added_in(**params: str) -> Callable[[Callable[Concatenate[E, P], R]], Callable[Concatenate[E, P], R]]:
     """Annotate minimum versions for new parameters or request options on an endpoint.
 
     The api decorator documents when an endpoint was added, this decorator annotates
@@ -285,9 +301,9 @@ def parameter_added_in(**params):
     >>>     ...
     """
 
-    def _decorator(func):
+    def _decorator(func: Callable[Concatenate[E, P], R]) -> Callable[Concatenate[E, P], R]:
         @wraps(func)
-        def wrapper(self, *args, **kwargs):
+        def wrapper(self: E, *args: P.args, **kwargs: P.kwargs) -> R:
             import warnings
 
             server_ver = Version(self.parent_srv.version or "0.0")
@@ -335,5 +351,5 @@ class QuerysetEndpoint(Endpoint, Generic[T]):
         return queryset
 
     @abc.abstractmethod
-    def get(self, request_options: RequestOptions) -> Tuple[List[T], PaginationItem]:
+    def get(self, request_options: Optional[RequestOptions] = None) -> Tuple[List[T], PaginationItem]:
         raise NotImplementedError(f".get has not been implemented for {self.__class__.__qualname__}")

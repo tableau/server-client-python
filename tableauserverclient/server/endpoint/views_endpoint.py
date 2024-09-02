@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     )
 
 
-class Views(QuerysetEndpoint[ViewItem], TaggingMixin):
+class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
     def __init__(self, parent_srv):
         super(Views, self).__init__(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)

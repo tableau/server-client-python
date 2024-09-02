@@ -13,7 +13,7 @@ from tableauserverclient.server.pager import Pager
 from tableauserverclient.helpers.logging import logger
 
 
-class Tables(Endpoint, TaggingMixin):
+class Tables(Endpoint, TaggingMixin[TableItem]):
     def __init__(self, parent_srv):
         super(Tables, self).__init__(parent_srv)
 
