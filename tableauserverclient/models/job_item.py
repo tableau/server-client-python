@@ -4,7 +4,7 @@ from typing import List, Optional
 from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.datetime_helpers import parse_datetime
-from .flow_run_item import FlowRunItem
+from tableauserverclient.models.flow_run_item import FlowRunItem
 
 
 class JobItem(object):
@@ -222,7 +222,7 @@ class BackgroundJobItem(object):
         self._subtitle = subtitle
 
     def __str__(self):
-        return f"<{self.__class__.name} {self._id} {self._type}>"
+        return f"<{self.__class__.__qualname__} {self._id} {self._type}>"
 
     def __repr__(self):
         return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"
