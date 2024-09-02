@@ -7,7 +7,16 @@ from defusedxml.ElementTree import fromstring
 from tableauserverclient.datetime_helpers import parse_datetime
 
 
-class FlowRunItem:
+class FlowParameterSpec(object):
+    def __init__(self, id, value) -> None:
+        self.parameter_id: Optional[str] = id or ""
+        self.override_value: Optional[str] = value or None
+        
+class FlowOutputSpec(object):
+    def __init__(self, id) -> None:
+        self.id: Optional[str] = id or ""
+
+class FlowRunItem(object):
     def __init__(self) -> None:
         self._id: str = ""
         self._flow_id: Optional[str] = None
@@ -16,7 +25,8 @@ class FlowRunItem:
         self._completed_at: Optional[datetime] = None
         self._progress: Optional[str] = None
         self._background_job_id: Optional[str] = None
-
+        self._run_mode = None
+        
     @property
     def id(self) -> str:
         return self._id

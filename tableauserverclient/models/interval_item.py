@@ -15,7 +15,6 @@ class IntervalItem(object):
         Hours = "hours"
         WeekDay = "weekDay"
         MonthDay = "monthDay"
-        MonthWeek = "monthWeek" # e.g every 2nd Tuesday
 
     class Day(StrEnum):
         Sunday = "Sunday"
@@ -66,12 +65,18 @@ class BaseInterval:
     def interval(self):
         return self._interval
 
-    # must be implemented by each subclass
     @interval.setter
-    @abstractmethod
     def interval(self, intervals):
-        assert(False)
+        self.validate_interval(intervals)
+        self._interval = intervals
     
+    # must be implemented by each subclass
+    @abstractmethod
+    def validate_interval(self):
+        assert(False)
+        
+    def clear_schedule(self):
+        self._interval = None
 
 class HourlyInterval(BaseInterval):
 
@@ -140,7 +145,9 @@ class DailyInterval(BaseInterval):
         VALID_INTERVALS = {0.25, 0.5, 1, 2, 4, 6, 8, 12, 24}
         # must have exactly one defined hours attribute. If the value is <24, it must also have an endtime
         # can have any number of weekday attributes. 
-        # TODO: What happens if none? is it valid to repeat a weekday?
+        # TODO
+        # Daily schedules can have 0 intervals
+        # is it valid to repeat a weekday?
         
         for interval in intervals:
             # if an hourly interval is a string, then it is a weekDay interval
@@ -184,7 +191,7 @@ class WeeklyInterval(IntervalItem):
     def __init__(self, start_time, *interval_values):
         super.__init__(self, start_time)
         self._frequency = IntervalItem.Frequency.Weekly
-
+        self._interval = interval_values
         """
         Note: Updating a schedule without specifying days of the week will reset any existing weekly interval 
         to include all 7 days. If you need the job you are updating to remain scheduled on selected days, make 
@@ -196,6 +203,11 @@ class WeeklyInterval(IntervalItem):
 
     @interval.setter
     def interval(self, interval_values):
+        # A weekly schedule must have 1 to 7 intervals
+        # setting 0 intervals will wipe existing settings
+        if interval_values is None:
+            raise ValueError("Not including intervals will wipe existing values. If you intend to do this, use clear_schedule instead")
+
         if not all(hasattr(IntervalItem.Day, day) for day in interval_values):
             raise ValueError("Invalid week day defined " + str(interval_values))
 
@@ -212,38 +224,46 @@ class MonthlyInterval(IntervalItem):
 
         # interval should be a tuple, if it is not, assign as a tuple with single value
         if isinstance(interval_value, tuple):
-            self.interval = interval_value
+            self._interval = interval_value
         else:
-            self.interval = (interval_value,)
-
-    def interval(self, interval_values):
+            self._interval = (interval_value,)
             
-        error = "Invalid interval value for a monthly frequency: {}.".format(interval_values)
-        # There are two possible formats for this: (day_of_month) or (occurrence_of_weekday, weekday)
-        
-        # Which week of the month it should occur
-        VALID_OCCURRENCE = ["First", "Second", "Third", "Fourth", "Fifth", IntervalItem.LastDay]
-
+    def _day_of_month(day):
+        # 2. day_of_month
         # Valid values are the whole numbers 1 to 31 or LastDay.
         # This could be a str or int, but there's only 32 possible values so just manually check the whole set
         VALID_DAY_OF_MONTH = list(range(32)).append(IntervalItem.LastDay)        
+        if day not in VALID_DAY_OF_MONTH:
+            raise ValueError("`{}` is not a valid day for a monthly schedule. ".format(day))
         
+        return (day, ) 
+            
+        # If you use LastDay then only one instance of interval can be used in the schedule to specify the last day of the month.
+
+    def _occurrence_of_weekday(occurrence, weekday):
+        VALID_OCCURRENCE = ["First", "Second", "Third", "Fourth", "Fifth", IntervalItem.LastDay]
         VALID_WEEKDAY = list(IntervalItem.Day.__members__)
+        if occurrence not in VALID_OCCURRENCE:
+            raise ValueError("`{}` is not a valid schedule occurrence for a monthly schedule. ".format(occurrence))
+        if weekday not in VALID_WEEKDAY:
+            raise ValueError("`{}` is not a valid weekday for a monthly schedule. ".format(weekday))
         
-        # This is weird because the value could be a str or an int
-        # The only valid str is 'LastDay' so we check that first. If that's not it
-        # try to convert it to an int, if that fails because it's an incorrect string
-        # like 'badstring' we catch and re-raise. Otherwise we convert to int and check
-        # that it's in range 1-31
-        for interval_value in interval_values:
-            error = "Invalid interval value for a monthly frequency: {}.".format(interval_value)
+        return (occurrence, weekday)
+
+    def interval(self, interval_values):
+        
+        error = "Invalid interval value for a monthly frequency: {}.".format(interval_values)
+        # There are two possible formats for this: (day_of_month) or (occurrence_of_weekday, weekday)        
+        if isinstance(interval_values, tuple):
+            self._interval = MonthlyInterval._occurrence_of_weekday(interval_values)
+        else:
+            self._interval=  MonthlyInterval._day_of_month(interval_values)
 
         for interval_value in interval_values:
             if interval_value not in VALID_INTERVALS:
                 error = f"Invalid monthly interval: {interval_value}"
                 raise ValueError(error)
 
-        self._interval = interval_values
 
     def _interval_type_pairs(self):
         return [(IntervalItem.Occurrence.MonthDay, self.interval)]
