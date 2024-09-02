@@ -51,7 +51,7 @@ PathOrFileR = Union[FilePath, FileObjectR]
 PathOrFileW = Union[FilePath, FileObjectW]
 
 
-class Flows(QuerysetEndpoint[FlowItem], TaggingMixin):
+class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
     def __init__(self, parent_srv):
         super(Flows, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)

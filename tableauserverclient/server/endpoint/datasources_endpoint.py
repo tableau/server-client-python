@@ -55,7 +55,7 @@ PathOrFileR = Union[FilePath, FileObjectR]
 PathOrFileW = Union[FilePath, FileObjectW]
 
 
-class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin):
+class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]):
     def __init__(self, parent_srv: "Server") -> None:
         super(Datasources, self).__init__(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
@@ -126,7 +126,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin):
         datasource_id: str,
         filepath: Optional[PathOrFileW] = None,
         include_extract: bool = True,
-    ) -> str:
+    ) -> PathOrFileW:
         return self.download_revision(
             datasource_id,
             None,
@@ -405,7 +405,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin):
     def download_revision(
         self,
         datasource_id: str,
-        revision_number: str,
+        revision_number: Optional[str],
         filepath: Optional[PathOrFileW] = None,
         include_extract: bool = True,
     ) -> PathOrFileW:

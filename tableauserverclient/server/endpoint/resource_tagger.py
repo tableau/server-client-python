@@ -1,6 +1,6 @@
 import abc
 import copy
-from typing import Iterable, Optional, Protocol, Set, Union, TYPE_CHECKING, runtime_checkable
+from typing import Generic, Iterable, Optional, Protocol, Set, TypeVar, Union, TYPE_CHECKING, runtime_checkable
 import urllib.parse
 
 from tableauserverclient.server.endpoint.endpoint import Endpoint, api
@@ -62,27 +62,24 @@ class _ResourceTagger(Endpoint):
         logger.info("Updated tags to {0}".format(resource_item.tags))
 
 
-class HasID(Protocol):
-    @property
-    def id(self) -> Optional[str]:
-        pass
-
-
-@runtime_checkable
-class Taggable(Protocol):
-    _initial_tags: Set[str]
-    tags: Set[str]
-
-    @property
-    def id(self) -> Optional[str]:
-        pass
-
-
 class Response(Protocol):
     content: bytes
 
 
-class TaggingMixin(abc.ABC):
+@runtime_checkable
+class Taggable(Protocol):
+    tags: Set[str]
+    _initial_tags: Set[str]
+
+    @property
+    def id(self) -> Optional[str]:
+        pass
+
+
+T = TypeVar("T")
+
+
+class TaggingMixin(abc.ABC, Generic[T]):
     parent_srv: "Server"
 
     @property
@@ -98,7 +95,7 @@ class TaggingMixin(abc.ABC):
     def delete_request(self, url) -> None:
         pass
 
-    def add_tags(self, item: Union[HasID, Taggable, str], tags: Union[Iterable[str], str]) -> Set[str]:
+    def add_tags(self, item: Union[T, str], tags: Union[Iterable[str], str]) -> Set[str]:
         item_id = getattr(item, "id", item)
 
         if not isinstance(item_id, str):
@@ -114,7 +111,7 @@ class TaggingMixin(abc.ABC):
         server_response = self.put_request(url, add_req)
         return TagItem.from_response(server_response.content, self.parent_srv.namespace)
 
-    def delete_tags(self, item: Union[HasID, Taggable, str], tags: Union[Iterable[str], str]) -> None:
+    def delete_tags(self, item: Union[T, str], tags: Union[Iterable[str], str]) -> None:
         item_id = getattr(item, "id", item)
 
         if not isinstance(item_id, str):
@@ -130,17 +127,23 @@ class TaggingMixin(abc.ABC):
             url = f"{self.baseurl}/{item_id}/tags/{encoded_tag_name}"
             self.delete_request(url)
 
-    def update_tags(self, item: Taggable) -> None:
-        if item.tags == item._initial_tags:
+    def update_tags(self, item: T) -> None:
+        if (initial_tags := getattr(item, "_initial_tags", None)) is None:
+            raise ValueError(f"{item} does not have initial tags.")
+        if (tags := getattr(item, "tags", None)) is None:
+            raise ValueError(f"{item} does not have tags.")
+        if tags == initial_tags:
             return
 
-        add_set = item.tags - item._initial_tags
-        remove_set = item._initial_tags - item.tags
+        add_set = tags - initial_tags
+        remove_set = initial_tags - tags
         self.delete_tags(item, remove_set)
         if add_set:
-            item.tags = self.add_tags(item, add_set)
-        item._initial_tags = copy.copy(item.tags)
-        logger.info(f"Updated tags to {item.tags}")
+            tags = self.add_tags(item, add_set)
+            setattr(item, "tags", tags)
+
+        setattr(item, "_initial_tags", copy.copy(tags))
+        logger.info(f"Updated tags to {tags}")
 
 
 content = Iterable[Union["ColumnItem", "DatabaseItem", "DatasourceItem", "FlowItem", "TableItem", "WorkbookItem"]]
