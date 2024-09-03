@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ET
 from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.models.group_item import GroupItem
+from tableauserverclient.models.reference_item import ResourceReference
 
 
 class GroupSetItem:
@@ -46,3 +47,6 @@ class GroupSetItem:
         ]
 
         return group_set_item
+
+    def as_reference(self) -> ResourceReference:
+        return ResourceReference(self.id, self.tag_name)
