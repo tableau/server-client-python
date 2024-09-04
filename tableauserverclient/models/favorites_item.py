@@ -22,7 +22,7 @@ FavoriteType = Dict[
 
 class FavoriteItem:
     @classmethod
-    def from_response(cls, xml: str, namespace: Dict) -> FavoriteType:
+    def from_response(cls, xml: Union[str, bytes], namespace: Dict) -> FavoriteType:
         favorites: FavoriteType = {
             "datasources": [],
             "flows": [],

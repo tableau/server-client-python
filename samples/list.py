@@ -48,6 +48,9 @@ def main():
             "webhooks": server.webhooks,
             "workbook": server.workbooks,
         }.get(args.resource_type)
+        if endpoint is None:
+            print("Resource type not found.")
+            sys.exit(1)
 
         options = TSC.RequestOptions()
         options.sort.add(TSC.Sort(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Direction.Desc))

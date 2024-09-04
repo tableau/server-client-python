@@ -46,7 +46,7 @@ disable_error_code = [
     # tableauserverclient\server\endpoint\datasources_endpoint.py:48: error: Cannot assign multiple types to name "FilePath" without an explicit "Type[...]" annotation  [misc]
     'annotation-unchecked'  # can be removed when check_untyped_defs = true
 ]
-files = ["tableauserverclient", "test"]
+files = ["tableauserverclient", "test", "samples"]
 show_error_codes = true
 ignore_missing_imports = true  # defusedxml library has no types
 no_implicit_reexport = true
