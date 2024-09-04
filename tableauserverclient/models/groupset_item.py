@@ -48,5 +48,6 @@ class GroupSetItem:
 
         return group_set_item
 
-    def as_reference(self) -> ResourceReference:
-        return ResourceReference(self.id, self.tag_name)
+    @staticmethod
+    def as_reference(id_: str) -> ResourceReference:
+        return ResourceReference(id_, GroupSetItem.tag_name)
