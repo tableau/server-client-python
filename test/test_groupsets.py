@@ -5,6 +5,7 @@ from defusedxml.ElementTree import fromstring
 import requests_mock
 
 import tableauserverclient as TSC
+from tableauserverclient.models.reference_item import ResourceReference
 
 TEST_ASSET_DIR = Path(__file__).parent / "assets"
 GROUPSET_CREATE = TEST_ASSET_DIR / "groupsets_create.xml"
@@ -128,3 +129,11 @@ class TestGroupSets(unittest.TestCase):
         assert len(history) == 1
         assert history[0].method == "DELETE"
         assert history[0].url == f"{self.baseurl}/{groupset.id}/groups/{group._id}"
+
+    def test_as_reference(self) -> None:
+        groupset = TSC.GroupSetItem()
+        groupset.id = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+        ref = groupset.as_reference(groupset.id)
+        assert ref.id == groupset.id
+        assert ref.tag_name == groupset.tag_name
+        assert isinstance(ref, ResourceReference)

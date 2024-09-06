@@ -3,10 +3,11 @@ from typing import Dict, List, Optional
 
 from defusedxml.ElementTree import fromstring
 
-from .exceptions import UnknownGranteeTypeError, UnpopulatedPropertyError
-from .group_item import GroupItem
-from .reference_item import ResourceReference
-from .user_item import UserItem
+from tableauserverclient.models.exceptions import UnknownGranteeTypeError, UnpopulatedPropertyError
+from tableauserverclient.models.group_item import GroupItem
+from tableauserverclient.models.groupset_item import GroupSetItem
+from tableauserverclient.models.reference_item import ResourceReference
+from tableauserverclient.models.user_item import UserItem
 
 from tableauserverclient.helpers.logging import logger
 
@@ -142,6 +143,8 @@ class PermissionsRule:
             grantee = UserItem.as_reference(grantee_id)
         elif grantee_type == "group":
             grantee = GroupItem.as_reference(grantee_id)
+        elif grantee_type == "groupSet":
+            grantee = GroupSetItem.as_reference(grantee_id)
         else:
             raise UnknownGranteeTypeError("No support for grantee type of {}".format(grantee_type))
 
