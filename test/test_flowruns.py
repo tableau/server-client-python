@@ -1,3 +1,4 @@
+import sys
 import unittest
 import xml.etree.ElementTree as ET
 
@@ -121,4 +122,4 @@ class FlowRunTests(unittest.TestCase):
             m.get(f"{self.baseurl}?pageNumber=1", text=response_xml)
             m.get(f"{self.baseurl}?pageNumber=2", text=error_response)
             queryset = self.server.flow_runs.all()
-            assert len(queryset) == 0
+            assert len(queryset) == sys.maxsize

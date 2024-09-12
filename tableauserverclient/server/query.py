@@ -48,8 +48,9 @@ class QuerySet(Iterable[T], Sized):
     QuerySet is needed. The length of the QuerySet is the total number of items
     available in the QuerySet, not just the number of items that have been
     fetched. If the endpoint does not return a total count of items, the length
-    of the QuerySet will be None. If there is no total count, the QuerySet will
-    continue to fetch items until there are no more items to fetch.
+    of the QuerySet will be sys.maxsize. If there is no total count, the
+    QuerySet will continue to fetch items until there are no more items to
+    fetch.
 
     QuerySet is not re-entrant. It is not designed to be used in multiple places
     at the same time. If you need to use a QuerySet in multiple places, you
@@ -158,7 +159,7 @@ class QuerySet(Iterable[T], Sized):
                 self._pagination_item = PaginationItem()
 
     def __len__(self: Self) -> int:
-        return self.total_available or 0
+        return self.total_available or sys.maxsize
 
     @property
     def total_available(self: Self) -> int:
