@@ -1,4 +1,5 @@
 import unittest
+import xml.etree.ElementTree as ET
 
 import requests_mock
 
@@ -11,6 +12,19 @@ GET_XML = "flow_runs_get.xml"
 GET_BY_ID_XML = "flow_runs_get_by_id.xml"
 GET_BY_ID_FAILED_XML = "flow_runs_get_by_id_failed.xml"
 GET_BY_ID_INPROGRESS_XML = "flow_runs_get_by_id_inprogress.xml"
+
+
+def server_response_error_factory(code: str, summary: str, detail: str) -> str:
+    root = ET.Element("tsResponse")
+    error = ET.SubElement(root, "error")
+    error.attrib["code"] = code
+
+    summary_element = ET.SubElement(error, "summary")
+    summary_element.text = summary
+
+    detail_element = ET.SubElement(error, "detail")
+    detail_element.text = detail
+    return ET.tostring(root, encoding="utf-8").decode("utf-8")
 
 
 class FlowRunTests(unittest.TestCase):
@@ -28,9 +42,8 @@ class FlowRunTests(unittest.TestCase):
         response_xml = read_xml_asset(GET_XML)
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
-            all_flow_runs, pagination_item = self.server.flow_runs.get()
+            all_flow_runs = self.server.flow_runs.get()
 
-        self.assertEqual(2, pagination_item.total_available)
         self.assertEqual("cc2e652d-4a9b-4476-8c93-b238c45db968", all_flow_runs[0].id)
         self.assertEqual("2021-02-11T01:42:55Z", format_datetime(all_flow_runs[0].started_at))
         self.assertEqual("2021-02-11T01:57:38Z", format_datetime(all_flow_runs[0].completed_at))
@@ -98,3 +111,14 @@ class FlowRunTests(unittest.TestCase):
             m.get(f"{self.baseurl}/{flow_run_id}", text=response_xml)
             with self.assertRaises(TimeoutError):
                 self.server.flow_runs.wait_for_job(flow_run_id, timeout=30)
+
+    def test_queryset(self) -> None:
+        response_xml = read_xml_asset(GET_XML)
+        error_response = server_response_error_factory(
+            "400006", "Bad Request", "0xB4EAB088 : The start index '9900' is greater than or equal to the total count.)"
+        )
+        with requests_mock.mock() as m:
+            m.get(f"{self.baseurl}?pageNumber=1", text=response_xml)
+            m.get(f"{self.baseurl}?pageNumber=2", text=error_response)
+            queryset = self.server.flow_runs.all()
+            assert len(queryset) == 0

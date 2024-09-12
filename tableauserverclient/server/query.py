@@ -1,9 +1,10 @@
-from collections.abc import Sized
+from collections.abc import Iterable, Iterator, Sized
 from itertools import count
 from typing import Optional, Protocol, TYPE_CHECKING, TypeVar, overload
-from collections.abc import Iterable, Iterator
+import sys
 from tableauserverclient.config import config
 from tableauserverclient.models.pagination_item import PaginationItem
+from tableauserverclient.server.endpoint.exceptions import ServerResponseError
 from tableauserverclient.server.filter import Filter
 from tableauserverclient.server.request_options import RequestOptions
 from tableauserverclient.server.sort import Sort
@@ -35,6 +36,31 @@ see pagination_sample
 
 
 class QuerySet(Iterable[T], Sized):
+    """
+    QuerySet is a class that allows easy filtering, sorting, and iterating over
+    many endpoints in TableauServerClient. It is designed to be used in a similar
+    way to Django QuerySets, but with a more limited feature set.
+
+    QuerySet is an iterable, and can be used in for loops, list comprehensions,
+    and other places where iterables are expected.
+
+    QuerySet is also a Sized, and can be used in places where the length of the
+    QuerySet is needed. The length of the QuerySet is the total number of items
+    available in the QuerySet, not just the number of items that have been
+    fetched. If the endpoint does not return a total count of items, the length
+    of the QuerySet will be None. If there is no total count, the QuerySet will
+    continue to fetch items until there are no more items to fetch.
+
+    QuerySet is not re-entrant. It is not designed to be used in multiple places
+    at the same time. If you need to use a QuerySet in multiple places, you
+    should create a new QuerySet for each place you need to use it, convert it
+    to a list, or create a deep copy of the QuerySet.
+
+    QuerySet's are also indexable, and can be sliced. If you try to access an
+    item that has not been fetched, the QuerySet will fetch the page that
+    contains the item you are looking for.
+    """
+
     def __init__(self, model: "QuerysetEndpoint[T]", page_size: Optional[int] = None) -> None:
         self.model = model
         self.request_options = RequestOptions(pagesize=page_size or config.PAGE_SIZE)
@@ -50,10 +76,20 @@ class QuerySet(Iterable[T], Sized):
         for page in count(1):
             self.request_options.pagenumber = page
             self._result_cache = []
-            self._fetch_all()
+            try:
+                self._fetch_all()
+            except ServerResponseError as e:
+                if e.code == "400006":
+                    # If the endpoint does not support pagination, it will end
+                    # up overrunning the total number of pages. Catch the
+                    # error and break out of the loop.
+                    raise StopIteration
             yield from self._result_cache
-            # Set result_cache to empty so the fetch will populate
-            if (page * self.page_size) >= len(self):
+            # If the length of the QuerySet is unknown, continue fetching until
+            # the result cache is empty.
+            if (size := len(self)) == 0:
+                continue
+            if (page * self.page_size) >= size:
                 return
 
     @overload
@@ -114,10 +150,15 @@ class QuerySet(Iterable[T], Sized):
         Retrieve the data and store result and pagination item in cache
         """
         if not self._result_cache:
-            self._result_cache, self._pagination_item = self.model.get(self.request_options)
+            response = self.model.get(self.request_options)
+            if isinstance(response, tuple):
+                self._result_cache, self._pagination_item = response
+            else:
+                self._result_cache = response
+                self._pagination_item = PaginationItem()
 
     def __len__(self: Self) -> int:
-        return self.total_available
+        return self.total_available or 0
 
     @property
     def total_available(self: Self) -> int:
@@ -127,12 +168,16 @@ class QuerySet(Iterable[T], Sized):
     @property
     def page_number(self: Self) -> int:
         self._fetch_all()
-        return self._pagination_item.page_number
+        # If the PaginationItem is not returned from the endpoint, use the
+        # pagenumber from the RequestOptions.
+        return self._pagination_item.page_number or self.request_options.pagenumber
 
     @property
     def page_size(self: Self) -> int:
         self._fetch_all()
-        return self._pagination_item.page_size
+        # If the PaginationItem is not returned from the endpoint, use the
+        # pagesize from the RequestOptions.
+        return self._pagination_item.page_size or self.request_options.pagesize
 
     def filter(self: Self, *invalid, page_size: Optional[int] = None, **kwargs) -> Self:
         if invalid:
