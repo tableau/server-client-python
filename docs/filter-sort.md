@@ -138,6 +138,36 @@ Sort can take multiple args, with desc direction added as a (-) prefix
 workbooks = workbooks.order_by("project_name", "-created_at")
 ```
 
+### Indexing and slicing
+
+Querysets can be indexed and sliced like a list. The query is executed at when
+the queryset is indexed or sliced.
+```py
+# Get the first item in the queryset
+flow = server.flows.filter(owner_name="admin")[0]
+
+# Get the last item in the queryset
+flow = server.flows.filter(owner_name="admin")[-1]
+
+# Get the most recent 10 runs from a flow
+runs = server.flow_runs.filter(flow_id=flow.id, page_size=10).order_by("-created_at")[:10]
+```
+
+### Supported endpoints
+
+The following endpoints support the Django style filters and sorts:
+
+* Datasources
+* Flow Runs
+* Flows
+* Groups
+* Groupsets
+* Jobs
+* Projects
+* Users
+* Views
+* Workbooks
+
 ### More detailed examples
 
 ```py
@@ -147,13 +177,19 @@ workbooks = server.workbooks.all()
 # filters can be appended in new lines
 workbooks = workbooks.filter(project_name=project_name)
 
+# multiple filters can be added in a single line
+workbooks = workbooks.filter(project_name=project_name, owner_name=owner_name, size__gte=1000)
+
+# Multiple filters can be added through chaining.
+workbooks = workbooks.filter(project_name=project_name).filter(owner_name=owner_name).filter(size__gte=1000)
+
+# Find all views in a project, with a specific tag
+views = server.views.filter(project_name=project_name, tags="stale")
+
 # sort can take multiple args, with desc direction added as a (-) prefix 
 workbooks = workbooks.order_by("project_name", "-created_at")
 
-# pagination take these two keywords
-workbooks = workbooks.paginate(page_size=10, page_number=2) 
-
-# query is executed at time of access
+# query is executed at time of iteration
 for workbook in workbooks: 
     print(workbook)
 
@@ -165,6 +201,11 @@ all_workbooks = server.workbooks.filter(project_name=project_name).order_by("-pr
 
 # operators are implemented using dunderscore
 all_workbooks = server.workbooks.filter(project_name__in=["Project A", "Project B"])
+
+# How many items are in the queryset?
+flows = server.flows.filter(owner_name="admin")
+print(len(flows))
+
 ```
 
 ### Operators available
