@@ -6,7 +6,7 @@ from defusedxml.ElementTree import fromstring
 from tableauserverclient.datetime_helpers import parse_datetime
 
 
-class RevisionItem(object):
+class RevisionItem:
     def __init__(self):
         self._resource_id: Optional[str] = None
         self._resource_name: Optional[str] = None
@@ -56,7 +56,7 @@ class RevisionItem(object):
         )
 
     @classmethod
-    def from_response(cls, resp: bytes, ns, resource_item) -> List["RevisionItem"]:
+    def from_response(cls, resp: bytes, ns, resource_item) -> list["RevisionItem"]:
         all_revision_items = list()
         parsed_response = fromstring(resp)
         all_revision_xml = parsed_response.findall(".//t:revision", namespaces=ns)

@@ -27,7 +27,7 @@ class GroupSets(QuerysetEndpoint[GroupSetItem]):
         self,
         request_options: Optional[RequestOptions] = None,
         result_level: Optional[Literal["members", "local"]] = None,
-    ) -> Tuple[List[GroupSetItem], PaginationItem]:
+    ) -> tuple[list[GroupSetItem], PaginationItem]:
         logger.info("Querying all group sets on site")
         url = self.baseurl
         if result_level:

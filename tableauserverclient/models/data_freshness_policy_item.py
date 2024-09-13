@@ -50,11 +50,11 @@ class DataFreshnessPolicyItem:
             Week = "Week"
             Month = "Month"
 
-        def __init__(self, frequency: str, time: str, timezone, interval_item: Optional[List[str]] = None):
+        def __init__(self, frequency: str, time: str, timezone, interval_item: Optional[list[str]] = None):
             self.frequency = frequency
             self.time = time
             self.timezone = timezone
-            self.interval_item: Optional[List[str]] = interval_item
+            self.interval_item: Optional[list[str]] = interval_item
 
         def __repr__(self):
             return (
@@ -62,11 +62,11 @@ class DataFreshnessPolicyItem:
             ).format(**vars(self))
 
         @property
-        def interval_item(self) -> Optional[List[str]]:
+        def interval_item(self) -> Optional[list[str]]:
             return self._interval_item
 
         @interval_item.setter
-        def interval_item(self, value: List[str]):
+        def interval_item(self, value: list[str]):
             self._interval_item = value
 
         @property
@@ -186,7 +186,7 @@ def parse_week_intervals(interval_values):
 
 
 def parse_month_intervals(interval_values):
-    error = "Invalid interval value for a monthly frequency: {}.".format(interval_values)
+    error = f"Invalid interval value for a monthly frequency: {interval_values}."
 
     # Month interval can have value either only ['LastDay'] or list of dates e.g. ["1", 20", "30"]
     # First check if the list only have LastDay value. When using LastDay, there shouldn't be

@@ -9,12 +9,12 @@ import logging
 from tableauserverclient.helpers.logging import logger
 
 
-class RequestOptionsBase(object):
+class RequestOptionsBase:
     # This method is used if server api version is below 3.7 (2020.1)
     def apply_query_params(self, url):
         try:
             params = self.get_query_params()
-            params_list = ["{}={}".format(k, v) for (k, v) in params.items()]
+            params_list = [f"{k}={v}" for (k, v) in params.items()]
 
             logger.debug("Applying options to request: <%s(%s)>", self.__class__.__name__, ",".join(params_list))
 
@@ -22,7 +22,7 @@ class RequestOptionsBase(object):
                 url, existing_params = url.split("?")
                 params_list.append(existing_params)
 
-            return "{0}?{1}".format(url, "&".join(params_list))
+            return "{}?{}".format(url, "&".join(params_list))
         except NotImplementedError:
             raise
 
@@ -183,7 +183,7 @@ class _FilterOptionsBase(RequestOptionsBase):
 
 class CSVRequestOptions(_FilterOptionsBase):
     def __init__(self, maxage=-1):
-        super(CSVRequestOptions, self).__init__()
+        super().__init__()
         self.max_age = maxage
 
     @property
@@ -233,7 +233,7 @@ class ImageRequestOptions(_FilterOptionsBase):
         High = "high"
 
     def __init__(self, imageresolution=None, maxage=-1):
-        super(ImageRequestOptions, self).__init__()
+        super().__init__()
         self.image_resolution = imageresolution
         self.max_age = maxage
 
@@ -278,7 +278,7 @@ class PDFRequestOptions(_FilterOptionsBase):
         Landscape = "landscape"
 
     def __init__(self, page_type=None, orientation=None, maxage=-1, viz_height=None, viz_width=None):
-        super(PDFRequestOptions, self).__init__()
+        super().__init__()
         self.page_type = page_type
         self.orientation = orientation
         self.max_age = maxage

@@ -63,23 +63,23 @@ def main():
 
         if args.file:
             filepath = os.path.abspath(args.file)
-            print("Add users to site from file {}:".format(filepath))
-            added: List[TSC.UserItem]
-            failed: List[TSC.UserItem, TSC.ServerResponseError]
+            print(f"Add users to site from file {filepath}:")
+            added: list[TSC.UserItem]
+            failed: list[TSC.UserItem, TSC.ServerResponseError]
             added, failed = server.users.create_from_file(filepath)
             for user, error in failed:
                 print(user, error.code)
                 if error.code == "409017":
                     user = server.users.filter(name=user.name)[0]
                     added.append(user)
-            print("Adding users to group:{}".format(added))
+            print(f"Adding users to group:{added}")
             for user in added:
-                print("Adding user {}".format(user))
+                print(f"Adding user {user}")
                 try:
                     server.groups.add_user(group, user.id)
                 except ServerResponseError as serverError:
                     if serverError.code == "409011":
-                        print("user {} is already a member of group {}".format(user.name, group.name))
+                        print(f"user {user.name} is already a member of group {group.name}")
                     else:
                         raise rError
 

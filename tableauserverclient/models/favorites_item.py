@@ -14,15 +14,15 @@ from typing import Dict, List
 from tableauserverclient.helpers.logging import logger
 from typing import Dict, List, Union
 
-FavoriteType = Dict[
+FavoriteType = dict[
     str,
-    List[TableauItem],
+    list[TableauItem],
 ]
 
 
 class FavoriteItem:
     @classmethod
-    def from_response(cls, xml: str, namespace: Dict) -> FavoriteType:
+    def from_response(cls, xml: str, namespace: dict) -> FavoriteType:
         favorites: FavoriteType = {
             "datasources": [],
             "flows": [],

@@ -3,7 +3,7 @@ import unittest
 try:
     from unittest import mock
 except ImportError:
-    import mock  # type: ignore[no-redef]
+    from unittest import mock
 
 import tableauserverclient.server.request_factory as factory
 from tableauserverclient.helpers.strings import redact_xml

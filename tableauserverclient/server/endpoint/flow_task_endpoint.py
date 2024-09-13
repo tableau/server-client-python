@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class FlowTasks(Endpoint):
     @property
     def baseurl(self) -> str:
-        return "{0}/sites/{1}/tasks/flows".format(self.parent_srv.baseurl, self.parent_srv.site_id)
+        return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/tasks/flows"
 
     @api(version="3.22")
     def create(self, flow_item: TaskItem) -> TaskItem:

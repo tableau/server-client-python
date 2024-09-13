@@ -4,7 +4,8 @@ from .endpoint import Endpoint
 from .exceptions import MissingRequiredFieldError
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import DatabaseItem, PermissionsRule, ProjectItem, plural_type, Resource
-from typing import TYPE_CHECKING, Callable, List, Optional, Sequence, Union
+from typing import TYPE_CHECKING, Callable, List, Optional, Union
+from collections.abc import Sequence
 
 if TYPE_CHECKING:
     from ..server import Server
@@ -25,7 +26,7 @@ class _DefaultPermissionsEndpoint(Endpoint):
     """
 
     def __init__(self, parent_srv: "Server", owner_baseurl: Callable[[], str]) -> None:
-        super(_DefaultPermissionsEndpoint, self).__init__(parent_srv)
+        super().__init__(parent_srv)
 
         # owner_baseurl is the baseurl of the parent, a project or database.
         # It MUST be a lambda since we don't know the full site URL until we sign in.
@@ -33,18 +34,18 @@ class _DefaultPermissionsEndpoint(Endpoint):
         self.owner_baseurl = owner_baseurl
 
     def __str__(self):
-        return "<DefaultPermissionsEndpoint {} [Flow, Datasource, Workbook, Lens]>".format(self.owner_baseurl())
+        return f"<DefaultPermissionsEndpoint {self.owner_baseurl()} [Flow, Datasource, Workbook, Lens]>"
 
     __repr__ = __str__
 
     def update_default_permissions(
         self, resource: BaseItem, permissions: Sequence[PermissionsRule], content_type: Resource
-    ) -> List[PermissionsRule]:
-        url = "{0}/{1}/default-permissions/{2}".format(self.owner_baseurl(), resource.id, plural_type(content_type))
+    ) -> list[PermissionsRule]:
+        url = f"{self.owner_baseurl()}/{resource.id}/default-permissions/{plural_type(content_type)}"
         update_req = RequestFactory.Permission.add_req(permissions)
         response = self.put_request(url, update_req)
         permissions = PermissionsRule.from_response(response.content, self.parent_srv.namespace)
-        logger.info("Updated default {} permissions for resource {}".format(content_type, resource.id))
+        logger.info(f"Updated default {content_type} permissions for resource {resource.id}")
         logger.info(permissions)
 
         return permissions
@@ -65,12 +66,12 @@ class _DefaultPermissionsEndpoint(Endpoint):
                 )
             )
 
-            logger.debug("Removing {0} permission for capability {1}".format(mode, capability))
+            logger.debug(f"Removing {mode} permission for capability {capability}")
 
             self.delete_request(url)
 
         logger.info(
-            "Deleted permission for {0} {1} item {2}".format(rule.grantee.tag_name, rule.grantee.id, resource.id)
+            f"Deleted permission for {rule.grantee.tag_name} {rule.grantee.id} item {resource.id}"
         )
 
     def populate_default_permissions(self, item: BaseItem, content_type: Resource) -> None:
@@ -78,16 +79,16 @@ class _DefaultPermissionsEndpoint(Endpoint):
             error = "Server item is missing ID. Item must be retrieved from server first."
             raise MissingRequiredFieldError(error)
 
-        def permission_fetcher() -> List[PermissionsRule]:
+        def permission_fetcher() -> list[PermissionsRule]:
             return self._get_default_permissions(item, content_type)
 
         item._set_default_permissions(permission_fetcher, content_type)
-        logger.info("Populated default {0} permissions for item (ID: {1})".format(content_type, item.id))
+        logger.info(f"Populated default {content_type} permissions for item (ID: {item.id})")
 
     def _get_default_permissions(
         self, item: BaseItem, content_type: Resource, req_options: Optional["RequestOptions"] = None
-    ) -> List[PermissionsRule]:
-        url = "{0}/{1}/default-permissions/{2}".format(self.owner_baseurl(), item.id, plural_type(content_type))
+    ) -> list[PermissionsRule]:
+        url = f"{self.owner_baseurl()}/{item.id}/default-permissions/{plural_type(content_type)}"
         server_response = self.get_request(url, req_options)
         permissions = PermissionsRule.from_response(server_response.content, self.parent_srv.namespace)
         logger.info({"content_type": content_type, "permissions": permissions})

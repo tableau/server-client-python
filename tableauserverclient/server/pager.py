@@ -1,6 +1,7 @@
 import copy
 from functools import partial
-from typing import Iterable, Iterator, List, Optional, Protocol, Tuple, TypeVar, Union, runtime_checkable
+from typing import List, Optional, Protocol, Tuple, TypeVar, Union, runtime_checkable
+from collections.abc import Iterable, Iterator
 
 from tableauserverclient.models.pagination_item import PaginationItem
 from tableauserverclient.server.request_options import RequestOptions
@@ -11,13 +12,13 @@ T = TypeVar("T")
 
 @runtime_checkable
 class Endpoint(Protocol[T]):
-    def get(self, req_options: Optional[RequestOptions]) -> Tuple[List[T], PaginationItem]:
+    def get(self, req_options: Optional[RequestOptions]) -> tuple[list[T], PaginationItem]:
         ...
 
 
 @runtime_checkable
 class CallableEndpoint(Protocol[T]):
-    def __call__(self, __req_options: Optional[RequestOptions], **kwargs) -> Tuple[List[T], PaginationItem]:
+    def __call__(self, __req_options: Optional[RequestOptions], **kwargs) -> tuple[list[T], PaginationItem]:
         ...
 
 

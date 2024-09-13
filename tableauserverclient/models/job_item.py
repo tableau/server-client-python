@@ -7,7 +7,7 @@ from tableauserverclient.datetime_helpers import parse_datetime
 from tableauserverclient.models.flow_run_item import FlowRunItem
 
 
-class JobItem(object):
+class JobItem:
     class FinishCode:
         """
         Status codes as documented on
@@ -27,7 +27,7 @@ class JobItem(object):
         started_at: Optional[datetime.datetime] = None,
         completed_at: Optional[datetime.datetime] = None,
         finish_code: int = 0,
-        notes: Optional[List[str]] = None,
+        notes: Optional[list[str]] = None,
         mode: Optional[str] = None,
         workbook_id: Optional[str] = None,
         datasource_id: Optional[str] = None,
@@ -43,7 +43,7 @@ class JobItem(object):
         self._started_at = started_at
         self._completed_at = completed_at
         self._finish_code = finish_code
-        self._notes: List[str] = notes or []
+        self._notes: list[str] = notes or []
         self._mode = mode
         self._workbook_id = workbook_id
         self._datasource_id = datasource_id
@@ -81,7 +81,7 @@ class JobItem(object):
         return self._finish_code
 
     @property
-    def notes(self) -> List[str]:
+    def notes(self) -> list[str]:
         return self._notes
 
     @property
@@ -139,7 +139,7 @@ class JobItem(object):
         return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"
 
     @classmethod
-    def from_response(cls, xml, ns) -> List["JobItem"]:
+    def from_response(cls, xml, ns) -> list["JobItem"]:
         parsed_response = fromstring(xml)
         all_tasks_xml = parsed_response.findall(".//t:job", namespaces=ns)
 
@@ -191,7 +191,7 @@ class JobItem(object):
         )
 
 
-class BackgroundJobItem(object):
+class BackgroundJobItem:
     class Status:
         Pending: str = "Pending"
         InProgress: str = "InProgress"
@@ -270,7 +270,7 @@ class BackgroundJobItem(object):
         return self._priority
 
     @classmethod
-    def from_response(cls, xml, ns) -> List["BackgroundJobItem"]:
+    def from_response(cls, xml, ns) -> list["BackgroundJobItem"]:
         parsed_response = fromstring(xml)
         all_tasks_xml = parsed_response.findall(".//t:backgroundJob", namespaces=ns)
         return [cls._parse_element(x, ns) for x in all_tasks_xml]

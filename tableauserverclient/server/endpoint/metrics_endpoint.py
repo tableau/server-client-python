@@ -20,18 +20,18 @@ from tableauserverclient.helpers.logging import logger
 
 class Metrics(QuerysetEndpoint[MetricItem]):
     def __init__(self, parent_srv: "Server") -> None:
-        super(Metrics, self).__init__(parent_srv)
+        super().__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
         self._data_quality_warnings = _DataQualityWarningEndpoint(self.parent_srv, "metric")
 
     @property
     def baseurl(self) -> str:
-        return "{0}/sites/{1}/metrics".format(self.parent_srv.baseurl, self.parent_srv.site_id)
+        return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/metrics"
 
     # Get all metrics
     @api(version="3.9")
-    def get(self, req_options: Optional["RequestOptions"] = None) -> Tuple[List[MetricItem], PaginationItem]:
+    def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[MetricItem], PaginationItem]:
         logger.info("Querying all metrics on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -45,8 +45,8 @@ class Metrics(QuerysetEndpoint[MetricItem]):
         if not metric_id:
             error = "Metric ID undefined."
             raise ValueError(error)
-        logger.info("Querying single metric (ID: {0})".format(metric_id))
-        url = "{0}/{1}".format(self.baseurl, metric_id)
+        logger.info(f"Querying single metric (ID: {metric_id})")
+        url = f"{self.baseurl}/{metric_id}"
         server_response = self.get_request(url)
         return MetricItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
@@ -56,9 +56,9 @@ class Metrics(QuerysetEndpoint[MetricItem]):
         if not metric_id:
             error = "Metric ID undefined."
             raise ValueError(error)
-        url = "{0}/{1}".format(self.baseurl, metric_id)
+        url = f"{self.baseurl}/{metric_id}"
         self.delete_request(url)
-        logger.info("Deleted single metric (ID: {0})".format(metric_id))
+        logger.info(f"Deleted single metric (ID: {metric_id})")
 
     # Update metric
     @api(version="3.9")
@@ -70,8 +70,8 @@ class Metrics(QuerysetEndpoint[MetricItem]):
         self._resource_tagger.update_tags(self.baseurl, metric_item)
 
         # Update the metric itself
-        url = "{0}/{1}".format(self.baseurl, metric_item.id)
+        url = f"{self.baseurl}/{metric_item.id}"
         update_req = RequestFactory.Metric.update_req(metric_item)
         server_response = self.put_request(url, update_req)
-        logger.info("Updated metric item (ID: {0})".format(metric_item.id))
+        logger.info(f"Updated metric item (ID: {metric_item.id})")
         return MetricItem.from_response(server_response.content, self.parent_srv.namespace)[0]

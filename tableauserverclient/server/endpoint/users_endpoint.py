@@ -16,11 +16,11 @@ from tableauserverclient.helpers.logging import logger
 class Users(QuerysetEndpoint[UserItem]):
     @property
     def baseurl(self) -> str:
-        return "{0}/sites/{1}/users".format(self.parent_srv.baseurl, self.parent_srv.site_id)
+        return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/users"
 
     # Gets all users
     @api(version="2.0")
-    def get(self, req_options: Optional[RequestOptions] = None) -> Tuple[List[UserItem], PaginationItem]:
+    def get(self, req_options: Optional[RequestOptions] = None) -> tuple[list[UserItem], PaginationItem]:
         logger.info("Querying all users on site")
 
         if req_options is None:
@@ -39,8 +39,8 @@ class Users(QuerysetEndpoint[UserItem]):
         if not user_id:
             error = "User ID undefined."
             raise ValueError(error)
-        logger.info("Querying single user (ID: {0})".format(user_id))
-        url = "{0}/{1}".format(self.baseurl, user_id)
+        logger.info(f"Querying single user (ID: {user_id})")
+        url = f"{self.baseurl}/{user_id}"
         server_response = self.get_request(url)
         return UserItem.from_response(server_response.content, self.parent_srv.namespace).pop()
 
@@ -51,10 +51,10 @@ class Users(QuerysetEndpoint[UserItem]):
             error = "User item missing ID."
             raise MissingRequiredFieldError(error)
 
-        url = "{0}/{1}".format(self.baseurl, user_item.id)
+        url = f"{self.baseurl}/{user_item.id}"
         update_req = RequestFactory.User.update_req(user_item, password)
         server_response = self.put_request(url, update_req)
-        logger.info("Updated user item (ID: {0})".format(user_item.id))
+        logger.info(f"Updated user item (ID: {user_item.id})")
         updated_item = copy.copy(user_item)
         return updated_item._parse_common_tags(server_response.content, self.parent_srv.namespace)
 
@@ -64,27 +64,27 @@ class Users(QuerysetEndpoint[UserItem]):
         if not user_id:
             error = "User ID undefined."
             raise ValueError(error)
-        url = "{0}/{1}".format(self.baseurl, user_id)
+        url = f"{self.baseurl}/{user_id}"
         if map_assets_to is not None:
             url += f"?mapAssetsTo={map_assets_to}"
         self.delete_request(url)
-        logger.info("Removed single user (ID: {0})".format(user_id))
+        logger.info(f"Removed single user (ID: {user_id})")
 
     # Add new user to site
     @api(version="2.0")
     def add(self, user_item: UserItem) -> UserItem:
         url = self.baseurl
-        logger.info("Add user {}".format(user_item.name))
+        logger.info(f"Add user {user_item.name}")
         add_req = RequestFactory.User.add_req(user_item)
         server_response = self.post_request(url, add_req)
         logger.info(server_response)
         new_user = UserItem.from_response(server_response.content, self.parent_srv.namespace).pop()
-        logger.info("Added new user (ID: {0})".format(new_user.id))
+        logger.info(f"Added new user (ID: {new_user.id})")
         return new_user
 
     # Add new users to site. This does not actually perform a bulk action, it's syntactic sugar
     @api(version="2.0")
-    def add_all(self, users: List[UserItem]):
+    def add_all(self, users: list[UserItem]):
         created = []
         failed = []
         for user in users:
@@ -98,7 +98,7 @@ class Users(QuerysetEndpoint[UserItem]):
     # helping the user by parsing a file they could have used to add users through the UI
     # line format: Username [required], password, display name, license, admin, publish
     @api(version="2.0")
-    def create_from_file(self, filepath: str) -> Tuple[List[UserItem], List[Tuple[UserItem, ServerResponseError]]]:
+    def create_from_file(self, filepath: str) -> tuple[list[UserItem], list[tuple[UserItem, ServerResponseError]]]:
         created = []
         failed = []
         if not filepath.find("csv"):
@@ -133,10 +133,10 @@ class Users(QuerysetEndpoint[UserItem]):
 
     def _get_wbs_for_user(
         self, user_item: UserItem, req_options: Optional[RequestOptions] = None
-    ) -> Tuple[List[WorkbookItem], PaginationItem]:
-        url = "{0}/{1}/workbooks".format(self.baseurl, user_item.id)
+    ) -> tuple[list[WorkbookItem], PaginationItem]:
+        url = f"{self.baseurl}/{user_item.id}/workbooks"
         server_response = self.get_request(url, req_options)
-        logger.info("Populated workbooks for user (ID: {0})".format(user_item.id))
+        logger.info(f"Populated workbooks for user (ID: {user_item.id})")
         workbook_item = WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         return workbook_item, pagination_item
@@ -161,10 +161,10 @@ class Users(QuerysetEndpoint[UserItem]):
 
     def _get_groups_for_user(
         self, user_item: UserItem, req_options: Optional[RequestOptions] = None
-    ) -> Tuple[List[GroupItem], PaginationItem]:
-        url = "{0}/{1}/groups".format(self.baseurl, user_item.id)
+    ) -> tuple[list[GroupItem], PaginationItem]:
+        url = f"{self.baseurl}/{user_item.id}/groups"
         server_response = self.get_request(url, req_options)
-        logger.info("Populated groups for user (ID: {0})".format(user_item.id))
+        logger.info(f"Populated groups for user (ID: {user_item.id})")
         group_item = GroupItem.from_response(server_response.content, self.parent_srv.namespace)
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         return group_item, pagination_item

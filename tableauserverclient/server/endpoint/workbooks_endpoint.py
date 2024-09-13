@@ -25,15 +25,14 @@ from tableauserverclient.models import WorkbookItem, ConnectionItem, ViewItem, P
 from tableauserverclient.server import RequestFactory
 
 from typing import (
-    Iterable,
     List,
     Optional,
-    Sequence,
     Set,
     Tuple,
     TYPE_CHECKING,
     Union,
 )
+from collections.abc import Iterable, Sequence
 
 if TYPE_CHECKING:
     from tableauserverclient.server import Server
@@ -61,18 +60,18 @@ PathOrFileW = Union[FilePath, FileObjectW]
 
 class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
     def __init__(self, parent_srv: "Server") -> None:
-        super(Workbooks, self).__init__(parent_srv)
+        super().__init__(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
 
         return None
 
     @property
     def baseurl(self) -> str:
-        return "{0}/sites/{1}/workbooks".format(self.parent_srv.baseurl, self.parent_srv.site_id)
+        return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/workbooks"
 
     # Get all workbooks on site
     @api(version="2.0")
-    def get(self, req_options: Optional["RequestOptions"] = None) -> Tuple[List[WorkbookItem], PaginationItem]:
+    def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[WorkbookItem], PaginationItem]:
         logger.info("Querying all workbooks on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -86,15 +85,15 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         if not workbook_id:
             error = "Workbook ID undefined."
             raise ValueError(error)
-        logger.info("Querying single workbook (ID: {0})".format(workbook_id))
-        url = "{0}/{1}".format(self.baseurl, workbook_id)
+        logger.info(f"Querying single workbook (ID: {workbook_id})")
+        url = f"{self.baseurl}/{workbook_id}"
         server_response = self.get_request(url)
         return WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     @api(version="2.8")
     def refresh(self, workbook_item: Union[WorkbookItem, str]) -> JobItem:
         id_ = getattr(workbook_item, "id", workbook_item)
-        url = "{0}/{1}/refresh".format(self.baseurl, id_)
+        url = f"{self.baseurl}/{id_}/refresh"
         empty_req = RequestFactory.Empty.empty_req()
         server_response = self.post_request(url, empty_req)
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
@@ -107,10 +106,10 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         workbook_item: WorkbookItem,
         encrypt: bool = False,
         includeAll: bool = True,
-        datasources: Optional[List["DatasourceItem"]] = None,
+        datasources: Optional[list["DatasourceItem"]] = None,
     ) -> JobItem:
         id_ = getattr(workbook_item, "id", workbook_item)
-        url = "{0}/{1}/createExtract?encrypt={2}".format(self.baseurl, id_, encrypt)
+        url = f"{self.baseurl}/{id_}/createExtract?encrypt={encrypt}"
 
         datasource_req = RequestFactory.Workbook.embedded_extract_req(includeAll, datasources)
         server_response = self.post_request(url, datasource_req)
@@ -121,7 +120,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
     @api(version="3.3")
     def delete_extract(self, workbook_item: WorkbookItem, includeAll: bool = True, datasources=None) -> JobItem:
         id_ = getattr(workbook_item, "id", workbook_item)
-        url = "{0}/{1}/deleteExtract".format(self.baseurl, id_)
+        url = f"{self.baseurl}/{id_}/deleteExtract"
         datasource_req = RequestFactory.Workbook.embedded_extract_req(includeAll, datasources)
         server_response = self.post_request(url, datasource_req)
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
@@ -133,9 +132,9 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         if not workbook_id:
             error = "Workbook ID undefined."
             raise ValueError(error)
-        url = "{0}/{1}".format(self.baseurl, workbook_id)
+        url = f"{self.baseurl}/{workbook_id}"
         self.delete_request(url)
-        logger.info("Deleted single workbook (ID: {0})".format(workbook_id))
+        logger.info(f"Deleted single workbook (ID: {workbook_id})")
 
     # Update workbook
     @api(version="2.0")
@@ -152,26 +151,26 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         self.update_tags(workbook_item)
 
         # Update the workbook itself
-        url = "{0}/{1}".format(self.baseurl, workbook_item.id)
+        url = f"{self.baseurl}/{workbook_item.id}"
         if include_view_acceleration_status:
             url += "?includeViewAccelerationStatus=True"
 
         update_req = RequestFactory.Workbook.update_req(workbook_item)
         server_response = self.put_request(url, update_req)
-        logger.info("Updated workbook item (ID: {0})".format(workbook_item.id))
+        logger.info(f"Updated workbook item (ID: {workbook_item.id})")
         updated_workbook = copy.copy(workbook_item)
         return updated_workbook._parse_common_tags(server_response.content, self.parent_srv.namespace)
 
     # Update workbook_connection
     @api(version="2.3")
     def update_connection(self, workbook_item: WorkbookItem, connection_item: ConnectionItem) -> ConnectionItem:
-        url = "{0}/{1}/connections/{2}".format(self.baseurl, workbook_item.id, connection_item.id)
+        url = f"{self.baseurl}/{workbook_item.id}/connections/{connection_item.id}"
         update_req = RequestFactory.Connection.update_req(connection_item)
         server_response = self.put_request(url, update_req)
         connection = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
         logger.info(
-            "Updated workbook item (ID: {0} & connection item {1})".format(workbook_item.id, connection_item.id)
+            f"Updated workbook item (ID: {workbook_item.id} & connection item {connection_item.id})"
         )
         return connection
 
@@ -199,14 +198,14 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
 
-        def view_fetcher() -> List[ViewItem]:
+        def view_fetcher() -> list[ViewItem]:
             return self._get_views_for_workbook(workbook_item, usage)
 
         workbook_item._set_views(view_fetcher)
-        logger.info("Populated views for workbook (ID: {0})".format(workbook_item.id))
+        logger.info(f"Populated views for workbook (ID: {workbook_item.id})")
 
-    def _get_views_for_workbook(self, workbook_item: WorkbookItem, usage: bool) -> List[ViewItem]:
-        url = "{0}/{1}/views".format(self.baseurl, workbook_item.id)
+    def _get_views_for_workbook(self, workbook_item: WorkbookItem, usage: bool) -> list[ViewItem]:
+        url = f"{self.baseurl}/{workbook_item.id}/views"
         if usage:
             url += "?includeUsageStatistics=true"
         server_response = self.get_request(url)
@@ -228,12 +227,12 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
             return self._get_workbook_connections(workbook_item)
 
         workbook_item._set_connections(connection_fetcher)
-        logger.info("Populated connections for workbook (ID: {0})".format(workbook_item.id))
+        logger.info(f"Populated connections for workbook (ID: {workbook_item.id})")
 
     def _get_workbook_connections(
         self, workbook_item: WorkbookItem, req_options: Optional["RequestOptions"] = None
-    ) -> List[ConnectionItem]:
-        url = "{0}/{1}/connections".format(self.baseurl, workbook_item.id)
+    ) -> list[ConnectionItem]:
+        url = f"{self.baseurl}/{workbook_item.id}/connections"
         server_response = self.get_request(url, req_options)
         connections = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
         return connections
@@ -249,10 +248,10 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
             return self._get_wb_pdf(workbook_item, req_options)
 
         workbook_item._set_pdf(pdf_fetcher)
-        logger.info("Populated pdf for workbook (ID: {0})".format(workbook_item.id))
+        logger.info(f"Populated pdf for workbook (ID: {workbook_item.id})")
 
     def _get_wb_pdf(self, workbook_item: WorkbookItem, req_options: Optional["RequestOptions"]) -> bytes:
-        url = "{0}/{1}/pdf".format(self.baseurl, workbook_item.id)
+        url = f"{self.baseurl}/{workbook_item.id}/pdf"
         server_response = self.get_request(url, req_options)
         pdf = server_response.content
         return pdf
@@ -267,10 +266,10 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
             return self._get_wb_pptx(workbook_item, req_options)
 
         workbook_item._set_powerpoint(pptx_fetcher)
-        logger.info("Populated powerpoint for workbook (ID: {0})".format(workbook_item.id))
+        logger.info(f"Populated powerpoint for workbook (ID: {workbook_item.id})")
 
     def _get_wb_pptx(self, workbook_item: WorkbookItem, req_options: Optional["RequestOptions"]) -> bytes:
-        url = "{0}/{1}/powerpoint".format(self.baseurl, workbook_item.id)
+        url = f"{self.baseurl}/{workbook_item.id}/powerpoint"
         server_response = self.get_request(url, req_options)
         pptx = server_response.content
         return pptx
@@ -286,10 +285,10 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
             return self._get_wb_preview_image(workbook_item)
 
         workbook_item._set_preview_image(image_fetcher)
-        logger.info("Populated preview image for workbook (ID: {0})".format(workbook_item.id))
+        logger.info(f"Populated preview image for workbook (ID: {workbook_item.id})")
 
     def _get_wb_preview_image(self, workbook_item: WorkbookItem) -> bytes:
-        url = "{0}/{1}/previewImage".format(self.baseurl, workbook_item.id)
+        url = f"{self.baseurl}/{workbook_item.id}/previewImage"
         server_response = self.get_request(url)
         preview_image = server_response.content
         return preview_image
@@ -322,7 +321,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         if isinstance(file, (str, os.PathLike)):
             if not os.path.isfile(file):
                 error = "File path does not lead to an existing file."
-                raise IOError(error)
+                raise OSError(error)
 
             filename = os.path.basename(file)
             file_extension = os.path.splitext(filename)[1][1:]
@@ -346,12 +345,12 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
             elif file_type == "xml":
                 file_extension = "twb"
             else:
-                error = "Unsupported file type {}!".format(file_type)
+                error = f"Unsupported file type {file_type}!"
                 raise ValueError(error)
 
             # Generate filename for file object.
             # This is needed when publishing the workbook in a single request
-            filename = "{}.{}".format(workbook_item.name, file_extension)
+            filename = f"{workbook_item.name}.{file_extension}"
             file_size = get_file_object_size(file)
 
         else:
@@ -362,30 +361,30 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
             raise ValueError(error)
 
         # Construct the url with the defined mode
-        url = "{0}?workbookType={1}".format(self.baseurl, file_extension)
+        url = f"{self.baseurl}?workbookType={file_extension}"
         if mode == self.parent_srv.PublishMode.Overwrite:
-            url += "&{0}=true".format(mode.lower())
+            url += f"&{mode.lower()}=true"
         elif mode == self.parent_srv.PublishMode.Append:
             error = "Workbooks cannot be appended."
             raise ValueError(error)
 
         if as_job:
-            url += "&{0}=true".format("asJob")
+            url += "&{}=true".format("asJob")
 
         if skip_connection_check:
-            url += "&{0}=true".format("skipConnectionCheck")
+            url += "&{}=true".format("skipConnectionCheck")
 
         # Determine if chunking is required (64MB is the limit for single upload method)
         if file_size >= FILESIZE_LIMIT:
-            logger.info("Publishing {0} to server with chunking method (workbook over 64MB)".format(workbook_item.name))
+            logger.info(f"Publishing {workbook_item.name} to server with chunking method (workbook over 64MB)")
             upload_session_id = self.parent_srv.fileuploads.upload(file)
-            url = "{0}&uploadSessionId={1}".format(url, upload_session_id)
+            url = f"{url}&uploadSessionId={upload_session_id}"
             xml_request, content_type = RequestFactory.Workbook.publish_req_chunked(
                 workbook_item,
                 connections=connections,
             )
         else:
-            logger.info("Publishing {0} to server".format(filename))
+            logger.info(f"Publishing {filename} to server")
 
             if isinstance(file, (str, Path)):
                 with open(file, "rb") as f:
@@ -403,7 +402,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
                 file_contents,
                 connections=connections,
             )
-        logger.debug("Request xml: {0} ".format(redact_xml(xml_request[:1000])))
+        logger.debug(f"Request xml: {redact_xml(xml_request[:1000])} ")
 
         # Send the publishing request to server
         try:
@@ -415,11 +414,11 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
 
         if as_job:
             new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
-            logger.info("Published {0} (JOB_ID: {1}".format(workbook_item.name, new_job.id))
+            logger.info(f"Published {workbook_item.name} (JOB_ID: {new_job.id}")
             return new_job
         else:
             new_workbook = WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
-            logger.info("Published {0} (ID: {1})".format(workbook_item.name, new_workbook.id))
+            logger.info(f"Published {workbook_item.name} (ID: {new_workbook.id})")
             return new_workbook
 
     # Populate workbook item's revisions
@@ -433,12 +432,12 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
             return self._get_workbook_revisions(workbook_item)
 
         workbook_item._set_revisions(revisions_fetcher)
-        logger.info("Populated revisions for workbook (ID: {0})".format(workbook_item.id))
+        logger.info(f"Populated revisions for workbook (ID: {workbook_item.id})")
 
     def _get_workbook_revisions(
         self, workbook_item: WorkbookItem, req_options: Optional["RequestOptions"] = None
-    ) -> List[RevisionItem]:
-        url = "{0}/{1}/revisions".format(self.baseurl, workbook_item.id)
+    ) -> list[RevisionItem]:
+        url = f"{self.baseurl}/{workbook_item.id}/revisions"
         server_response = self.get_request(url, req_options)
         revisions = RevisionItem.from_response(server_response.content, self.parent_srv.namespace, workbook_item)
         return revisions
@@ -456,9 +455,9 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
             error = "Workbook ID undefined."
             raise ValueError(error)
         if revision_number is None:
-            url = "{0}/{1}/content".format(self.baseurl, workbook_id)
+            url = f"{self.baseurl}/{workbook_id}/content"
         else:
-            url = "{0}/{1}/revisions/{2}/content".format(self.baseurl, workbook_id, revision_number)
+            url = f"{self.baseurl}/{workbook_id}/revisions/{revision_number}/content"
 
         if not include_extract:
             url += "?includeExtract=False"
@@ -481,7 +480,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
                 return_path = os.path.abspath(download_path)
 
         logger.info(
-            "Downloaded workbook revision {0} to {1} (ID: {2})".format(revision_number, return_path, workbook_id)
+            f"Downloaded workbook revision {revision_number} to {return_path} (ID: {workbook_id})"
         )
         return return_path
 
@@ -492,17 +491,17 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         url = "/".join([self.baseurl, workbook_id, "revisions", revision_number])
 
         self.delete_request(url)
-        logger.info("Deleted single workbook revision (ID: {0}) (Revision: {1})".format(workbook_id, revision_number))
+        logger.info(f"Deleted single workbook revision (ID: {workbook_id}) (Revision: {revision_number})")
 
     # a convenience method
     @api(version="2.8")
     def schedule_extract_refresh(
         self, schedule_id: str, item: WorkbookItem
-    ) -> List["AddResponse"]:  # actually should return a task
+    ) -> list["AddResponse"]:  # actually should return a task
         return self.parent_srv.schedules.add_to_schedule(schedule_id, workbook=item)
 
     @api(version="1.0")
-    def add_tags(self, item: Union[WorkbookItem, str], tags: Union[Iterable[str], str]) -> Set[str]:
+    def add_tags(self, item: Union[WorkbookItem, str], tags: Union[Iterable[str], str]) -> set[str]:
         return super().add_tags(item, tags)
 
     @api(version="1.0")

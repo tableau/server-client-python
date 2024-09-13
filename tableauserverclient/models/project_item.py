@@ -8,14 +8,14 @@ from tableauserverclient.models.exceptions import UnpopulatedPropertyError
 from tableauserverclient.models.property_decorators import property_is_enum, property_not_empty
 
 
-class ProjectItem(object):
+class ProjectItem:
     class ContentPermissions:
         LockedToProject: str = "LockedToProject"
         ManagedByOwner: str = "ManagedByOwner"
         LockedToProjectWithoutNested: str = "LockedToProjectWithoutNested"
 
     def __repr__(self):
-        return "<Project {0} {1} parent={2} permissions={3}>".format(
+        return "<Project {} {} parent={} permissions={}>".format(
             self._id, self.name, self.parent_id or "None (Top level)", self.content_permissions or "Not Set"
         )
 
@@ -158,7 +158,7 @@ class ProjectItem(object):
         self._permissions = permissions
 
     def _set_default_permissions(self, permissions, content_type):
-        attr = "_default_{content}_permissions".format(content=content_type)
+        attr = f"_default_{content_type}_permissions"
         setattr(
             self,
             attr,
@@ -166,7 +166,7 @@ class ProjectItem(object):
         )
 
     @classmethod
-    def from_response(cls, resp, ns) -> List["ProjectItem"]:
+    def from_response(cls, resp, ns) -> list["ProjectItem"]:
         all_project_items = list()
         parsed_response = fromstring(resp)
         all_project_xml = parsed_response.findall(".//t:project", namespaces=ns)

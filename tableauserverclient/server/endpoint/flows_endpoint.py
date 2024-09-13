@@ -5,7 +5,8 @@ import logging
 import os
 from contextlib import closing
 from pathlib import Path
-from typing import Iterable, List, Optional, TYPE_CHECKING, Tuple, Union
+from typing import List, Optional, TYPE_CHECKING, Tuple, Union
+from collections.abc import Iterable
 
 from tableauserverclient.helpers.headers import fix_filename
 
@@ -53,18 +54,18 @@ PathOrFileW = Union[FilePath, FileObjectW]
 
 class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
     def __init__(self, parent_srv):
-        super(Flows, self).__init__(parent_srv)
+        super().__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
         self._data_quality_warnings = _DataQualityWarningEndpoint(self.parent_srv, "flow")
 
     @property
     def baseurl(self) -> str:
-        return "{0}/sites/{1}/flows".format(self.parent_srv.baseurl, self.parent_srv.site_id)
+        return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/flows"
 
     # Get all flows
     @api(version="3.3")
-    def get(self, req_options: Optional["RequestOptions"] = None) -> Tuple[List[FlowItem], PaginationItem]:
+    def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[FlowItem], PaginationItem]:
         logger.info("Querying all flows on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -78,8 +79,8 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
         if not flow_id:
             error = "Flow ID undefined."
             raise ValueError(error)
-        logger.info("Querying single flow (ID: {0})".format(flow_id))
-        url = "{0}/{1}".format(self.baseurl, flow_id)
+        logger.info(f"Querying single flow (ID: {flow_id})")
+        url = f"{self.baseurl}/{flow_id}"
         server_response = self.get_request(url)
         return FlowItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
@@ -94,10 +95,10 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
             return self._get_flow_connections(flow_item)
 
         flow_item._set_connections(connections_fetcher)
-        logger.info("Populated connections for flow (ID: {0})".format(flow_item.id))
+        logger.info(f"Populated connections for flow (ID: {flow_item.id})")
 
-    def _get_flow_connections(self, flow_item, req_options: Optional["RequestOptions"] = None) -> List[ConnectionItem]:
-        url = "{0}/{1}/connections".format(self.baseurl, flow_item.id)
+    def _get_flow_connections(self, flow_item, req_options: Optional["RequestOptions"] = None) -> list[ConnectionItem]:
+        url = f"{self.baseurl}/{flow_item.id}/connections"
         server_response = self.get_request(url, req_options)
         connections = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
         return connections
@@ -108,9 +109,9 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
         if not flow_id:
             error = "Flow ID undefined."
             raise ValueError(error)
-        url = "{0}/{1}".format(self.baseurl, flow_id)
+        url = f"{self.baseurl}/{flow_id}"
         self.delete_request(url)
-        logger.info("Deleted single flow (ID: {0})".format(flow_id))
+        logger.info(f"Deleted single flow (ID: {flow_id})")
 
     # Download 1 flow by id
     @api(version="3.3")
@@ -118,7 +119,7 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
         if not flow_id:
             error = "Flow ID undefined."
             raise ValueError(error)
-        url = "{0}/{1}/content".format(self.baseurl, flow_id)
+        url = f"{self.baseurl}/{flow_id}/content"
 
         with closing(self.get_request(url, parameters={"stream": True})) as server_response:
             m = Message()
@@ -137,7 +138,7 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
                         f.write(chunk)
                 return_path = os.path.abspath(download_path)
 
-        logger.info("Downloaded flow to {0} (ID: {1})".format(return_path, flow_id))
+        logger.info(f"Downloaded flow to {return_path} (ID: {flow_id})")
         return return_path
 
     # Update flow
@@ -150,28 +151,28 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
         self._resource_tagger.update_tags(self.baseurl, flow_item)
 
         # Update the flow itself
-        url = "{0}/{1}".format(self.baseurl, flow_item.id)
+        url = f"{self.baseurl}/{flow_item.id}"
         update_req = RequestFactory.Flow.update_req(flow_item)
         server_response = self.put_request(url, update_req)
-        logger.info("Updated flow item (ID: {0})".format(flow_item.id))
+        logger.info(f"Updated flow item (ID: {flow_item.id})")
         updated_flow = copy.copy(flow_item)
         return updated_flow._parse_common_elements(server_response.content, self.parent_srv.namespace)
 
     # Update flow connections
     @api(version="3.3")
     def update_connection(self, flow_item: FlowItem, connection_item: ConnectionItem) -> ConnectionItem:
-        url = "{0}/{1}/connections/{2}".format(self.baseurl, flow_item.id, connection_item.id)
+        url = f"{self.baseurl}/{flow_item.id}/connections/{connection_item.id}"
 
         update_req = RequestFactory.Connection.update_req(connection_item)
         server_response = self.put_request(url, update_req)
         connection = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
-        logger.info("Updated flow item (ID: {0} & connection item {1}".format(flow_item.id, connection_item.id))
+        logger.info(f"Updated flow item (ID: {flow_item.id} & connection item {connection_item.id}")
         return connection
 
     @api(version="3.3")
     def refresh(self, flow_item: FlowItem) -> JobItem:
-        url = "{0}/{1}/run".format(self.baseurl, flow_item.id)
+        url = f"{self.baseurl}/{flow_item.id}/run"
         empty_req = RequestFactory.Empty.empty_req()
         server_response = self.post_request(url, empty_req)
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
@@ -180,7 +181,7 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
     # Publish flow
     @api(version="3.3")
     def publish(
-        self, flow_item: FlowItem, file: PathOrFileR, mode: str, connections: Optional[List[ConnectionItem]] = None
+        self, flow_item: FlowItem, file: PathOrFileR, mode: str, connections: Optional[list[ConnectionItem]] = None
     ) -> FlowItem:
         if not mode or not hasattr(self.parent_srv.PublishMode, mode):
             error = "Invalid mode defined."
@@ -189,7 +190,7 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
         if isinstance(file, (str, os.PathLike)):
             if not os.path.isfile(file):
                 error = "File path does not lead to an existing file."
-                raise IOError(error)
+                raise OSError(error)
 
             filename = os.path.basename(file)
             file_extension = os.path.splitext(filename)[1][1:]
@@ -213,30 +214,30 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
             elif file_type == "xml":
                 file_extension = "tfl"
             else:
-                error = "Unsupported file type {}!".format(file_type)
+                error = f"Unsupported file type {file_type}!"
                 raise ValueError(error)
 
             # Generate filename for file object.
             # This is needed when publishing the flow in a single request
-            filename = "{}.{}".format(flow_item.name, file_extension)
+            filename = f"{flow_item.name}.{file_extension}"
             file_size = get_file_object_size(file)
 
         else:
             raise TypeError("file should be a filepath or file object.")
 
         # Construct the url with the defined mode
-        url = "{0}?flowType={1}".format(self.baseurl, file_extension)
+        url = f"{self.baseurl}?flowType={file_extension}"
         if mode == self.parent_srv.PublishMode.Overwrite or mode == self.parent_srv.PublishMode.Append:
-            url += "&{0}=true".format(mode.lower())
+            url += f"&{mode.lower()}=true"
 
         # Determine if chunking is required (64MB is the limit for single upload method)
         if file_size >= FILESIZE_LIMIT:
-            logger.info("Publishing {0} to server with chunking method (flow over 64MB)".format(filename))
+            logger.info(f"Publishing {filename} to server with chunking method (flow over 64MB)")
             upload_session_id = self.parent_srv.fileuploads.upload(file)
-            url = "{0}&uploadSessionId={1}".format(url, upload_session_id)
+            url = f"{url}&uploadSessionId={upload_session_id}"
             xml_request, content_type = RequestFactory.Flow.publish_req_chunked(flow_item, connections)
         else:
-            logger.info("Publishing {0} to server".format(filename))
+            logger.info(f"Publishing {filename} to server")
 
             if isinstance(file, (str, Path)):
                 with open(file, "rb") as f:
@@ -259,7 +260,7 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
             raise err
         else:
             new_flow = FlowItem.from_response(server_response.content, self.parent_srv.namespace)[0]
-            logger.info("Published {0} (ID: {1})".format(filename, new_flow.id))
+            logger.info(f"Published {filename} (ID: {new_flow.id})")
             return new_flow
 
     @api(version="3.3")
@@ -294,7 +295,7 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
     @api(version="3.3")
     def schedule_flow_run(
         self, schedule_id: str, item: FlowItem
-    ) -> List["AddResponse"]:  # actually should return a task
+    ) -> list["AddResponse"]:  # actually should return a task
         return self.parent_srv.schedules.add_to_schedule(schedule_id, flow=item)
 
     def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[FlowItem]:

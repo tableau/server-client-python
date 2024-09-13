@@ -17,18 +17,18 @@ from typing import List, Optional, Tuple, Union
 class Jobs(QuerysetEndpoint[BackgroundJobItem]):
     @property
     def baseurl(self):
-        return "{0}/sites/{1}/jobs".format(self.parent_srv.baseurl, self.parent_srv.site_id)
+        return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/jobs"
 
     @overload  # type: ignore[override]
     def get(self: Self, job_id: str, req_options: Optional[RequestOptionsBase] = None) -> JobItem:  # type: ignore[override]
         ...
 
     @overload  # type: ignore[override]
-    def get(self: Self, job_id: RequestOptionsBase, req_options: None) -> Tuple[List[BackgroundJobItem], PaginationItem]:  # type: ignore[override]
+    def get(self: Self, job_id: RequestOptionsBase, req_options: None) -> tuple[list[BackgroundJobItem], PaginationItem]:  # type: ignore[override]
         ...
 
     @overload  # type: ignore[override]
-    def get(self: Self, job_id: None, req_options: Optional[RequestOptionsBase]) -> Tuple[List[BackgroundJobItem], PaginationItem]:  # type: ignore[override]
+    def get(self: Self, job_id: None, req_options: Optional[RequestOptionsBase]) -> tuple[list[BackgroundJobItem], PaginationItem]:  # type: ignore[override]
         ...
 
     @api(version="2.6")
@@ -53,13 +53,13 @@ class Jobs(QuerysetEndpoint[BackgroundJobItem]):
         if isinstance(job_id, JobItem):
             job_id = job_id.id
         assert isinstance(job_id, str)
-        url = "{0}/{1}".format(self.baseurl, job_id)
+        url = f"{self.baseurl}/{job_id}"
         return self.put_request(url)
 
     @api(version="2.6")
     def get_by_id(self, job_id: str) -> JobItem:
         logger.info("Query for information about job " + job_id)
-        url = "{0}/{1}".format(self.baseurl, job_id)
+        url = f"{self.baseurl}/{job_id}"
         server_response = self.get_request(url)
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return new_job
@@ -77,7 +77,7 @@ class Jobs(QuerysetEndpoint[BackgroundJobItem]):
             job = self.get_by_id(job_id)
             logger.debug(f"\tJob {job_id} progress={job.progress}")
 
-        logger.info("Job {} Completed: Finish Code: {} - Notes:{}".format(job_id, job.finish_code, job.notes))
+        logger.info(f"Job {job_id} Completed: Finish Code: {job.finish_code} - Notes:{job.notes}")
 
         if job.finish_code == JobItem.FinishCode.Success:
             return job

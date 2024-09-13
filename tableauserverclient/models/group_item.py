@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from tableauserverclient.server import Pager
 
 
-class GroupItem(object):
+class GroupItem:
     tag_name: str = "group"
 
     class LicenseMode:
@@ -27,7 +27,7 @@ class GroupItem(object):
         self.domain_name: Optional[str] = domain_name
 
     def __repr__(self):
-        return "{}({!r})".format(self.__class__.__name__, self.__dict__)
+        return f"{self.__class__.__name__}({self.__dict__!r})"
 
     @property
     def domain_name(self) -> Optional[str]:
@@ -79,7 +79,7 @@ class GroupItem(object):
         self._users = users
 
     @classmethod
-    def from_response(cls, resp, ns) -> List["GroupItem"]:
+    def from_response(cls, resp, ns) -> list["GroupItem"]:
         all_group_items = list()
         parsed_response = fromstring(resp)
         all_group_xml = parsed_response.findall(".//t:group", namespaces=ns)

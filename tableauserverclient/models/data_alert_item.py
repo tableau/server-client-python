@@ -10,7 +10,7 @@ from .property_decorators import (
 )
 
 
-class DataAlertItem(object):
+class DataAlertItem:
     class Frequency:
         Once = "Once"
         Frequently = "Frequently"
@@ -34,7 +34,7 @@ class DataAlertItem(object):
         self._workbook_name: Optional[str] = None
         self._project_id: Optional[str] = None
         self._project_name: Optional[str] = None
-        self._recipients: Optional[List[str]] = None
+        self._recipients: Optional[list[str]] = None
 
     def __repr__(self) -> str:
         return "<Data Alert {_id} subject={_subject} frequency={_frequency} \
@@ -78,7 +78,7 @@ class DataAlertItem(object):
         return self._creatorId
 
     @property
-    def recipients(self) -> List[str]:
+    def recipients(self) -> list[str]:
         return self._recipients or list()
 
     @property
@@ -174,7 +174,7 @@ class DataAlertItem(object):
             self._recipients = recipients
 
     @classmethod
-    def from_response(cls, resp, ns) -> List["DataAlertItem"]:
+    def from_response(cls, resp, ns) -> list["DataAlertItem"]:
         all_alert_items = list()
         parsed_response = fromstring(resp)
         all_alert_xml = parsed_response.findall(".//t:dataAlert", namespaces=ns)
