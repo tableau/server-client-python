@@ -144,7 +144,9 @@ class Endpoint:
 
         loggable_response = self.log_response_safely(server_response)
         logger.debug("Server response from {0}".format(url))
-        # logger.debug("\n\t{1}".format(loggable_response))
+        # uncomment the following to log full responses in debug mode
+        # BE CAREFUL WHEN SHARING THESE RESULTS - MAY CONTAIN YOUR SENSITIVE DATA
+        # logger.debug(loggable_response)
 
         if content_type == "application/xml":
             self.parent_srv._namespace.detect(server_response.content)
