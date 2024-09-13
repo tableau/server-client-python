@@ -57,9 +57,7 @@ def main():
         permissions = resource.permissions
 
         # Print result
-        print(
-            f"\n{len(permissions)} permission rule(s) found for {args.resource_type} {args.resource_id}."
-        )
+        print(f"\n{len(permissions)} permission rule(s) found for {args.resource_type} {args.resource_id}.")
 
         for permission in permissions:
             grantee = permission.grantee

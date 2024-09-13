@@ -70,9 +70,7 @@ class _DefaultPermissionsEndpoint(Endpoint):
 
             self.delete_request(url)
 
-        logger.info(
-            f"Deleted permission for {rule.grantee.tag_name} {rule.grantee.id} item {resource.id}"
-        )
+        logger.info(f"Deleted permission for {rule.grantee.tag_name} {rule.grantee.id} item {resource.id}")
 
     def populate_default_permissions(self, item: BaseItem, content_type: Resource) -> None:
         if not item.id:

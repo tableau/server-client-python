@@ -70,9 +70,7 @@ def main():
         )
 
     server.favorites.delete_favorite_workbook(user, my_workbook)
-    print(
-        f"Workbook deleted from favorites. Workbook Name: {my_workbook.name}, Workbook ID: {my_workbook.id}"
-    )
+    print(f"Workbook deleted from favorites. Workbook Name: {my_workbook.name}, Workbook ID: {my_workbook.id}")
 
     server.favorites.delete_favorite_view(user, my_view)
     print(f"View deleted from favorites. View Name: {my_view.name}, View ID: {my_view.id}")

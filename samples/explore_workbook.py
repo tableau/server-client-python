@@ -84,12 +84,7 @@ def main():
             # Populate connections
             server.workbooks.populate_connections(sample_workbook)
             print(f"\nConnections for {sample_workbook.name}: ")
-            print(
-                [
-                    f"{connection.id}({connection.datasource_name})"
-                    for connection in sample_workbook.connections
-                ]
-            )
+            print([f"{connection.id}({connection.datasource_name})" for connection in sample_workbook.connections])
 
             # Update tags and show_tabs flag
             original_tag_set = set(sample_workbook.tags)

@@ -70,12 +70,7 @@ def main():
             # Populate connections
             server.datasources.populate_connections(sample_datasource)
             print(f"\nConnections for {sample_datasource.name}: ")
-            print(
-                [
-                    f"{connection.id}({connection.datasource_name})"
-                    for connection in sample_datasource.connections
-                ]
-            )
+            print([f"{connection.id}({connection.datasource_name})" for connection in sample_datasource.connections])
 
             # Add some tags to the datasource
             original_tag_set = set(sample_datasource.tags)

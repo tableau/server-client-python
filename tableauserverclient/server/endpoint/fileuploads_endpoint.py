@@ -56,8 +56,6 @@ class Fileuploads(Endpoint):
             request, content_type = RequestFactory.Fileupload.chunk_req(chunk)
             logger.debug(f"{datetime.timestamp()} created chunk request")
             fileupload_item = self.append(upload_id, request, content_type)
-            logger.info(
-                f"\t{datetime.timestamp()} Published {(fileupload_item.file_size / BYTES_PER_MB)}MB"
-            )
+            logger.info(f"\t{datetime.timestamp()} Published {(fileupload_item.file_size / BYTES_PER_MB)}MB")
         logger.info(f"File upload finished (ID: {upload_id})")
         return upload_id

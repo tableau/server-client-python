@@ -178,9 +178,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
             logger.debug(f"Multiple connections returned ({len(connections)})")
         connection = list(filter(lambda x: x.id == connection_item.id, connections))[0]
 
-        logger.info(
-            f"Updated datasource item (ID: {datasource_item.id} & connection item {connection_item.id}"
-        )
+        logger.info(f"Updated datasource item (ID: {datasource_item.id} & connection item {connection_item.id}")
         return connection
 
     @api(version="2.8")
@@ -438,9 +436,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
                         f.write(chunk)
                 return_path = os.path.abspath(download_path)
 
-        logger.info(
-            f"Downloaded datasource revision {revision_number} to {return_path} (ID: {datasource_id})"
-        )
+        logger.info(f"Downloaded datasource revision {revision_number} to {return_path} (ID: {datasource_id})")
         return return_path
 
     @api(version="2.3")
@@ -450,9 +446,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         url = "/".join([self.baseurl, datasource_id, "revisions", revision_number])
 
         self.delete_request(url)
-        logger.info(
-            f"Deleted single datasource revision (ID: {datasource_id}) (Revision: {revision_number})"
-        )
+        logger.info(f"Deleted single datasource revision (ID: {datasource_id}) (Revision: {revision_number})")
 
     # a convenience method
     @api(version="2.8")

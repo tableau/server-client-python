@@ -169,9 +169,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         server_response = self.put_request(url, update_req)
         connection = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
-        logger.info(
-            f"Updated workbook item (ID: {workbook_item.id} & connection item {connection_item.id})"
-        )
+        logger.info(f"Updated workbook item (ID: {workbook_item.id} & connection item {connection_item.id})")
         return connection
 
     # Download workbook contents with option of passing in filepath
@@ -479,9 +477,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
                         f.write(chunk)
                 return_path = os.path.abspath(download_path)
 
-        logger.info(
-            f"Downloaded workbook revision {revision_number} to {return_path} (ID: {workbook_id})"
-        )
+        logger.info(f"Downloaded workbook revision {revision_number} to {return_path} (ID: {workbook_id})")
         return return_path
 
     @api(version="2.3")
