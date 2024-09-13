@@ -5,7 +5,7 @@ import logging
 import os
 from contextlib import closing
 from pathlib import Path
-from typing import List, Optional, TYPE_CHECKING, Tuple, Union
+from typing import Optional, TYPE_CHECKING, Union
 from collections.abc import Iterable
 
 from tableauserverclient.helpers.headers import fix_filename

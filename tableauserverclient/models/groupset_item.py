@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Optional
 import xml.etree.ElementTree as ET
 
 from defusedxml.ElementTree import fromstring

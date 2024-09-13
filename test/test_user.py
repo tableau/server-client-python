@@ -1,8 +1,5 @@
-import io
 import os
 import unittest
-from typing import List
-from unittest.mock import MagicMock
 
 import requests_mock
 

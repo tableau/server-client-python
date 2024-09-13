@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Union
 
 from tableauserverclient.helpers.logging import logger
 from tableauserverclient.models.linked_tasks_item import LinkedTaskItem, LinkedTaskJobItem

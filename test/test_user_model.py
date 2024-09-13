@@ -1,7 +1,6 @@
 import logging
 import unittest
 from unittest.mock import *
-from typing import List
 import io
 
 import pytest

@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 
-from typing import Optional, Union, List
+from typing import Optional
 from tableauserverclient.models.property_decorators import property_is_enum, property_not_nullable
 from .interval_item import IntervalItem
 

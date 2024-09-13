@@ -1,6 +1,6 @@
 import copy
 from functools import partial
-from typing import List, Optional, Protocol, Tuple, TypeVar, Union, runtime_checkable
+from typing import Optional, Protocol, TypeVar, Union, runtime_checkable
 from collections.abc import Iterable, Iterator
 
 from tableauserverclient.models.pagination_item import PaginationItem
@@ -26,7 +26,7 @@ class Pager(Iterable[T]):
     Supports all `RequestOptions` including starting on any page. Also used by models to load sub-models
     (users in a group, views in a workbook, etc) by passing a different endpoint.
 
-    Will loop over anything that returns (List[ModelItem], PaginationItem).
+    Will loop over anything that returns (list[ModelItem], PaginationItem).
     """
 
     def __init__(

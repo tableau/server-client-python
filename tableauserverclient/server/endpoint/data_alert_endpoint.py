@@ -7,7 +7,7 @@ from tableauserverclient.models import DataAlertItem, PaginationItem, UserItem
 
 from tableauserverclient.helpers.logging import logger
 
-from typing import List, Optional, TYPE_CHECKING, Tuple, Union
+from typing import Optional, TYPE_CHECKING, Union
 
 
 if TYPE_CHECKING:

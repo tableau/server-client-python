@@ -11,7 +11,7 @@ from tableauserverclient.exponential_backoff import ExponentialBackoffTimer
 
 from tableauserverclient.helpers.logging import logger
 
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Union
 
 
 class Jobs(QuerysetEndpoint[BackgroundJobItem]):

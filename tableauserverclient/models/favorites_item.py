@@ -9,10 +9,8 @@ from tableauserverclient.models.project_item import ProjectItem
 from tableauserverclient.models.metric_item import MetricItem
 from tableauserverclient.models.view_item import ViewItem
 from tableauserverclient.models.workbook_item import WorkbookItem
-from typing import Dict, List
 
 from tableauserverclient.helpers.logging import logger
-from typing import Dict, List, Union
 
 FavoriteType = dict[
     str,

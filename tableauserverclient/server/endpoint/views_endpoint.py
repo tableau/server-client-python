@@ -11,7 +11,7 @@ from tableauserverclient.models import ViewItem, PaginationItem
 
 from tableauserverclient.helpers.logging import logger
 
-from typing import List, Optional, Set, Tuple, TYPE_CHECKING, Union
+from typing import Optional, TYPE_CHECKING, Union
 from collections.abc import Iterable, Iterator
 
 if TYPE_CHECKING:

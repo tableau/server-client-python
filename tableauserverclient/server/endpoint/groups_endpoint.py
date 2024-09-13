@@ -8,7 +8,7 @@ from tableauserverclient.server.pager import Pager
 
 from tableauserverclient.helpers.logging import logger
 
-from typing import List, Optional, TYPE_CHECKING, Tuple, Union
+from typing import Optional, TYPE_CHECKING, Union
 from collections.abc import Iterable
 
 from tableauserverclient.server.query import QuerySet

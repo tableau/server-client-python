@@ -2,7 +2,7 @@ import io
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from enum import IntEnum
-from typing import Dict, List, Optional, TYPE_CHECKING, Tuple
+from typing import Optional, TYPE_CHECKING
 
 from defusedxml.ElementTree import fromstring
 

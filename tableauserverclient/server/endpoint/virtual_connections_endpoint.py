@@ -1,7 +1,7 @@
 from functools import partial
 import json
 from pathlib import Path
-from typing import List, Optional, Set, TYPE_CHECKING, Tuple, Union
+from typing import Optional, TYPE_CHECKING, Union
 from collections.abc import Iterable
 
 from tableauserverclient.models.connection_item import ConnectionItem

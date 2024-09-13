@@ -1,5 +1,5 @@
 import datetime as dt
-from typing import List, Optional
+from typing import Optional
 
 from defusedxml.ElementTree import fromstring
 

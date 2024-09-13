@@ -7,7 +7,7 @@ from tableauserverclient.server.endpoint.permissions_endpoint import _Permission
 from tableauserverclient.server import RequestFactory, RequestOptions
 from tableauserverclient.models import ProjectItem, PaginationItem, Resource
 
-from typing import List, Optional, Tuple, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 from tableauserverclient.server.query import QuerySet
 

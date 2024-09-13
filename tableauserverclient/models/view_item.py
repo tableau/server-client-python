@@ -1,7 +1,7 @@
 import copy
 from datetime import datetime
 from requests import Response
-from typing import Callable, List, Optional, Set
+from typing import Callable, Optional
 from collections.abc import Iterator
 
 from defusedxml.ElementTree import fromstring

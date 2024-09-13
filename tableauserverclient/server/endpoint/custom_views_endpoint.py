@@ -2,7 +2,7 @@ import io
 import logging
 import os
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Union
 
 from tableauserverclient.config import BYTES_PER_MB, FILESIZE_LIMIT_MB
 from tableauserverclient.filesys_helpers import get_file_object_size

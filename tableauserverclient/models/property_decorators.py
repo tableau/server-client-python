@@ -1,7 +1,7 @@
 import datetime
 import re
 from functools import wraps
-from typing import Any, Optional, Tuple
+from typing import Any, Optional
 from collections.abc import Container
 
 from tableauserverclient.datetime_helpers import parse_datetime

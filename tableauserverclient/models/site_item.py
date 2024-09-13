@@ -14,7 +14,7 @@ from .property_decorators import (
 
 VALID_CONTENT_URL_RE = r"^[a-zA-Z0-9_\-]*$"
 
-from typing import List, Optional, Union, TYPE_CHECKING
+from typing import Optional, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from tableauserverclient.server import Server

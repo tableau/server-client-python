@@ -25,10 +25,7 @@ from tableauserverclient.models import WorkbookItem, ConnectionItem, ViewItem, P
 from tableauserverclient.server import RequestFactory
 
 from typing import (
-    List,
     Optional,
-    Set,
-    Tuple,
     TYPE_CHECKING,
     Union,
 )

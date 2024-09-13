@@ -1,6 +1,6 @@
 import re
 import xml.etree.ElementTree as ET
-from typing import List, Optional, Tuple, Type
+from typing import Optional
 
 from defusedxml.ElementTree import fromstring
 

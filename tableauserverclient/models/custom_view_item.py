@@ -2,7 +2,7 @@ from datetime import datetime
 
 from defusedxml import ElementTree
 from defusedxml.ElementTree import fromstring, tostring
-from typing import Callable, List, Optional
+from typing import Callable, Optional
 
 from .exceptions import UnpopulatedPropertyError
 from .user_item import UserItem

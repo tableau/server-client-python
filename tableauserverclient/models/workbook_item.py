@@ -2,7 +2,7 @@ import copy
 import datetime
 import uuid
 import xml.etree.ElementTree as ET
-from typing import Callable, Dict, List, Optional, Set
+from typing import Callable, Optional
 
 from defusedxml.ElementTree import fromstring
 

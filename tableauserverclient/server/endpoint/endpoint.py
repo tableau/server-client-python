@@ -8,12 +8,9 @@ from xml.etree.ElementTree import ParseError
 from typing import (
     Any,
     Callable,
-    Dict,
     Generic,
-    List,
     Optional,
     TYPE_CHECKING,
-    Tuple,
     TypeVar,
     Union,
 )

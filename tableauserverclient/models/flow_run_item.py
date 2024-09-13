@@ -1,6 +1,6 @@
 import itertools
 from datetime import datetime
-from typing import Dict, List, Optional, Type
+from typing import Optional
 
 from defusedxml.ElementTree import fromstring
 

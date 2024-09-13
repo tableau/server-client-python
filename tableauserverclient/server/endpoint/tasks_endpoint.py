@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional, Tuple, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 from tableauserverclient.server.endpoint.endpoint import Endpoint, api
 from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError

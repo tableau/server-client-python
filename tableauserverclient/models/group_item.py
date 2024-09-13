@@ -1,4 +1,4 @@
-from typing import Callable, List, Optional, TYPE_CHECKING
+from typing import Callable, Optional, TYPE_CHECKING
 
 from defusedxml.ElementTree import fromstring
 

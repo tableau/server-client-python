@@ -1,5 +1,5 @@
 import logging
-from typing import Union, Set
+from typing import Union
 from collections.abc import Iterable
 
 from tableauserverclient.server.endpoint.default_permissions_endpoint import _DefaultPermissionsEndpoint

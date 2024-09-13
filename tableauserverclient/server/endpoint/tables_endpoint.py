@@ -1,5 +1,5 @@
 import logging
-from typing import Set, Union
+from typing import Union
 from collections.abc import Iterable
 
 from tableauserverclient.server.endpoint.dqw_endpoint import _DataQualityWarningEndpoint

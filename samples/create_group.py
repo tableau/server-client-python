@@ -11,7 +11,6 @@ import logging
 import os
 
 from datetime import time
-from typing import List
 
 import tableauserverclient as TSC
 from tableauserverclient import ServerResponseError

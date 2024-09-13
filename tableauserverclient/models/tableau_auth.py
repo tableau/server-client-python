@@ -1,5 +1,5 @@
 import abc
-from typing import Dict, Optional
+from typing import Optional
 
 
 class Credentials(abc.ABC):

@@ -1,6 +1,6 @@
 import copy
 import logging
-from typing import List, Optional, Tuple
+from typing import Optional
 
 from tableauserverclient.server.query import QuerySet
 

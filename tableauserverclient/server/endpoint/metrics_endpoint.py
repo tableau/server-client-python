@@ -8,7 +8,7 @@ from tableauserverclient.models import MetricItem, PaginationItem
 
 import logging
 
-from typing import List, Optional, TYPE_CHECKING, Tuple
+from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..request_options import RequestOptions

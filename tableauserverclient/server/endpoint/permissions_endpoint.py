@@ -6,7 +6,7 @@ from tableauserverclient.models import TableauItem, PermissionsRule
 from .endpoint import Endpoint
 from .exceptions import MissingRequiredFieldError
 
-from typing import Callable, TYPE_CHECKING, List, Optional, Union
+from typing import Callable, TYPE_CHECKING, Optional, Union
 
 from tableauserverclient.helpers.logging import logger
 

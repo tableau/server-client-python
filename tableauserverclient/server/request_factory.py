@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, TypeVar, TYPE_CHECKING, Union
+from typing import Any, Callable, Optional, TypeVar, TYPE_CHECKING, Union
 from collections.abc import Iterable
 
 from typing_extensions import ParamSpec

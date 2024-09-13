@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 from datetime import datetime
-from typing import List, Optional, Set
+from typing import Optional
 
 from tableauserverclient.datetime_helpers import parse_datetime
 from .property_decorators import property_is_boolean, property_is_datetime

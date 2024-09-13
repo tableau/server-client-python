@@ -1,7 +1,7 @@
 import copy
 import datetime
 import xml.etree.ElementTree as ET
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Optional
 
 from defusedxml.ElementTree import fromstring
 

@@ -6,7 +6,7 @@ import os
 
 from contextlib import closing
 from pathlib import Path
-from typing import List, Optional, Set, Tuple, TYPE_CHECKING, Union
+from typing import Optional, TYPE_CHECKING, Union
 from collections.abc import Iterable, Mapping, Sequence
 
 from tableauserverclient.helpers.headers import fix_filename

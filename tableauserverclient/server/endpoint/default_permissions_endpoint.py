@@ -4,7 +4,7 @@ from .endpoint import Endpoint
 from .exceptions import MissingRequiredFieldError
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import DatabaseItem, PermissionsRule, ProjectItem, plural_type, Resource
-from typing import TYPE_CHECKING, Callable, List, Optional, Union
+from typing import TYPE_CHECKING, Callable, Optional, Union
 from collections.abc import Sequence
 
 if TYPE_CHECKING:

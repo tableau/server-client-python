@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional, Tuple, TYPE_CHECKING, Union
+from typing import Literal, Optional, TYPE_CHECKING, Union
 
 from tableauserverclient.helpers.logging import logger
 from tableauserverclient.models.group_item import GroupItem
