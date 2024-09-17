@@ -1,8 +1,11 @@
 import xml.etree.ElementTree as ET
-from typing import Any, Dict, Iterable, List, Optional, Tuple, TYPE_CHECKING
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, TypeVar, TYPE_CHECKING, Union
+
+from typing_extensions import ParamSpec
 
 from requests.packages.urllib3.fields import RequestField
 from requests.packages.urllib3.filepost import encode_multipart_formdata
+from typing_extensions import Concatenate
 
 from tableauserverclient.models import *
 
@@ -23,8 +26,12 @@ def _add_multipart(parts: Dict) -> Tuple[Any, str]:
     return xml_request, content_type
 
 
-def _tsrequest_wrapped(func):
-    def wrapper(self, *args, **kwargs) -> bytes:
+T = TypeVar("T")
+P = ParamSpec("P")
+
+
+def _tsrequest_wrapped(func: Callable[Concatenate[T, ET.Element, P], Any]) -> Callable[Concatenate[T, P], bytes]:
+    def wrapper(self: T, *args: P.args, **kwargs: P.kwargs) -> bytes:
         xml_request = ET.Element("tsRequest")
         func(self, xml_request, *args, **kwargs)
         return ET.tostring(xml_request)
@@ -385,6 +392,28 @@ class GroupRequest(object):
         xml_request = ET.Element("tsRequest")
         user_element = ET.SubElement(xml_request, "user")
         user_element.attrib["id"] = user_id
+        return ET.tostring(xml_request)
+
+    @_tsrequest_wrapped
+    def add_users_req(self, xml_request: ET.Element, users: Iterable[Union[str, UserItem]]) -> bytes:
+        users_element = ET.SubElement(xml_request, "users")
+        for user in users:
+            user_element = ET.SubElement(users_element, "user")
+            if not (user_id := user.id if isinstance(user, UserItem) else user):
+                raise ValueError("User ID must be populated")
+            user_element.attrib["id"] = user_id
+
+        return ET.tostring(xml_request)
+
+    @_tsrequest_wrapped
+    def remove_users_req(self, xml_request: ET.Element, users: Iterable[Union[str, UserItem]]) -> bytes:
+        users_element = ET.SubElement(xml_request, "users")
+        for user in users:
+            user_element = ET.SubElement(users_element, "user")
+            if not (user_id := user.id if isinstance(user, UserItem) else user):
+                raise ValueError("User ID must be populated")
+            user_element.attrib["id"] = user_id
+
         return ET.tostring(xml_request)
 
     def create_local_req(self, group_item: GroupItem) -> bytes:
@@ -839,6 +868,9 @@ class TableRequest(object):
         return ET.tostring(xml_request)
 
 
+content_types = Iterable[Union["ColumnItem", "DatabaseItem", "DatasourceItem", "FlowItem", "TableItem", "WorkbookItem"]]
+
+
 class TagRequest(object):
     def add_req(self, tag_set):
         xml_request = ET.Element("tsRequest")
@@ -847,6 +879,22 @@ class TagRequest(object):
             tag_element = ET.SubElement(tags_element, "tag")
             tag_element.attrib["label"] = tag
         return ET.tostring(xml_request)
+
+    @_tsrequest_wrapped
+    def batch_create(self, element: ET.Element, tags: Set[str], content: content_types) -> bytes:
+        tag_batch = ET.SubElement(element, "tagBatch")
+        tags_element = ET.SubElement(tag_batch, "tags")
+        for tag in tags:
+            tag_element = ET.SubElement(tags_element, "tag")
+            tag_element.attrib["label"] = tag
+        contents_element = ET.SubElement(tag_batch, "contents")
+        for item in content:
+            content_element = ET.SubElement(contents_element, "content")
+            if item.id is None:
+                raise ValueError(f"Item {item} must have an ID to be tagged.")
+            content_element.attrib["id"] = item.id
+
+        return ET.tostring(element)
 
 
 class UserRequest(object):
@@ -1014,14 +1062,17 @@ class WorkbookRequest(object):
         return _add_multipart(parts)
 
     @_tsrequest_wrapped
-    def embedded_extract_req(self, xml_request, include_all=True, datasources=None):
+    def embedded_extract_req(
+        self, xml_request: ET.Element, include_all: bool = True, datasources: Optional[Iterable[DatasourceItem]] = None
+    ) -> None:
         list_element = ET.SubElement(xml_request, "datasources")
         if include_all:
             list_element.attrib["includeAll"] = "true"
         elif datasources:
             for datasource_item in datasources:
                 datasource_element = ET.SubElement(list_element, "datasource")
-                datasource_element.attrib["id"] = datasource_item.id
+                if (id_ := datasource_item.id) is not None:
+                    datasource_element.attrib["id"] = id_
 
 
 class Connection(object):
@@ -1049,7 +1100,7 @@ class Connection(object):
 
 class TaskRequest(object):
     @_tsrequest_wrapped
-    def run_req(self, xml_request, task_item):
+    def run_req(self, xml_request: ET.Element, task_item: Any) -> None:
         # Send an empty tsRequest
         pass
 
@@ -1186,7 +1237,7 @@ class SubscriptionRequest(object):
 
 class EmptyRequest(object):
     @_tsrequest_wrapped
-    def empty_req(self, xml_request):
+    def empty_req(self, xml_request: ET.Element) -> None:
         pass
 
 
@@ -1245,6 +1296,124 @@ class CustomViewRequest(object):
         if custom_view_item.name is not None:
             updating_element.attrib["name"] = custom_view_item.name
 
+    @_tsrequest_wrapped
+    def _publish_xml(self, xml_request: ET.Element, custom_view_item: CustomViewItem) -> bytes:
+        custom_view_element = ET.SubElement(xml_request, "customView")
+        if (name := custom_view_item.name) is not None:
+            custom_view_element.attrib["name"] = name
+        else:
+            raise ValueError(f"Custom View Item missing name: {custom_view_item}")
+        if (shared := custom_view_item.shared) is not None:
+            custom_view_element.attrib["shared"] = str(shared).lower()
+        else:
+            raise ValueError(f"Custom View Item missing shared: {custom_view_item}")
+        if (owner := custom_view_item.owner) is not None:
+            owner_element = ET.SubElement(custom_view_element, "owner")
+            if (owner_id := owner.id) is not None:
+                owner_element.attrib["id"] = owner_id
+            else:
+                raise ValueError(f"Custom View Item owner missing id: {owner}")
+        else:
+            raise ValueError(f"Custom View Item missing owner: {custom_view_item}")
+        if (workbook := custom_view_item.workbook) is not None:
+            workbook_element = ET.SubElement(custom_view_element, "workbook")
+            if (workbook_id := workbook.id) is not None:
+                workbook_element.attrib["id"] = workbook_id
+            else:
+                raise ValueError(f"Custom View Item workbook missing id: {workbook}")
+        else:
+            raise ValueError(f"Custom View Item missing workbook: {custom_view_item}")
+
+        return ET.tostring(xml_request)
+
+    def publish_req_chunked(self, custom_view_item: CustomViewItem):
+        xml_request = self._publish_xml(custom_view_item)
+        parts = {"request_payload": ("", xml_request, "text/xml")}
+        return _add_multipart(parts)
+
+    def publish_req(self, custom_view_item: CustomViewItem, filename: str, file_contents: bytes):
+        xml_request = self._publish_xml(custom_view_item)
+        parts = {
+            "request_payload": ("", xml_request, "text/xml"),
+            "tableau_customview": (filename, file_contents, "application/octet-stream"),
+        }
+        return _add_multipart(parts)
+
+
+class GroupSetRequest:
+    @_tsrequest_wrapped
+    def create_request(self, xml_request: ET.Element, group_set_item: "GroupSetItem") -> bytes:
+        group_set_element = ET.SubElement(xml_request, "groupSet")
+        if group_set_item.name is not None:
+            group_set_element.attrib["name"] = group_set_item.name
+        return ET.tostring(xml_request)
+
+    @_tsrequest_wrapped
+    def update_request(self, xml_request: ET.Element, group_set_item: "GroupSetItem") -> bytes:
+        group_set_element = ET.SubElement(xml_request, "groupSet")
+        if group_set_item.name is not None:
+            group_set_element.attrib["name"] = group_set_item.name
+        return ET.tostring(xml_request)
+
+
+class VirtualConnectionRequest:
+    @_tsrequest_wrapped
+    def update_db_connection(self, xml_request: ET.Element, connection_item: ConnectionItem) -> bytes:
+        connection_element = ET.SubElement(xml_request, "connection")
+        if connection_item.server_address is not None:
+            connection_element.attrib["serverAddress"] = connection_item.server_address
+        if connection_item.server_port is not None:
+            connection_element.attrib["serverPort"] = str(connection_item.server_port)
+        if connection_item.username is not None:
+            connection_element.attrib["userName"] = connection_item.username
+        if connection_item.password is not None:
+            connection_element.attrib["password"] = connection_item.password
+
+        return ET.tostring(xml_request)
+
+    @_tsrequest_wrapped
+    def update(self, xml_request: ET.Element, virtual_connection: VirtualConnectionItem) -> bytes:
+        vc_element = ET.SubElement(xml_request, "virtualConnection")
+        if virtual_connection.name is not None:
+            vc_element.attrib["name"] = virtual_connection.name
+        if virtual_connection.is_certified is not None:
+            vc_element.attrib["isCertified"] = str(virtual_connection.is_certified).lower()
+        if virtual_connection.certification_note is not None:
+            vc_element.attrib["certificationNote"] = virtual_connection.certification_note
+        if virtual_connection.project_id is not None:
+            project_element = ET.SubElement(vc_element, "project")
+            project_element.attrib["id"] = virtual_connection.project_id
+        if virtual_connection.owner_id is not None:
+            owner_element = ET.SubElement(vc_element, "owner")
+            owner_element.attrib["id"] = virtual_connection.owner_id
+
+        return ET.tostring(xml_request)
+
+    @_tsrequest_wrapped
+    def publish(self, xml_request: ET.Element, virtual_connection: VirtualConnectionItem, content: str) -> bytes:
+        vc_element = ET.SubElement(xml_request, "virtualConnection")
+        if virtual_connection.name is not None:
+            vc_element.attrib["name"] = virtual_connection.name
+        else:
+            raise ValueError("Virtual Connection must have a name.")
+        if virtual_connection.project_id is not None:
+            project_element = ET.SubElement(vc_element, "project")
+            project_element.attrib["id"] = virtual_connection.project_id
+        else:
+            raise ValueError("Virtual Connection must have a project id.")
+        if virtual_connection.owner_id is not None:
+            owner_element = ET.SubElement(vc_element, "owner")
+            owner_element.attrib["id"] = virtual_connection.owner_id
+        else:
+            raise ValueError("Virtual Connection must have an owner id.")
+        if content is not None:
+            content_element = ET.SubElement(vc_element, "content")
+            content_element.text = content
+        else:
+            raise ValueError("Virtual Connection must have content.")
+
+        return ET.tostring(xml_request)
+
 
 class RequestFactory(object):
     Auth = AuthRequest()
@@ -1261,6 +1430,7 @@ class RequestFactory(object):
     Flow = FlowRequest()
     FlowTask = FlowTaskRequest()
     Group = GroupRequest()
+    GroupSet = GroupSetRequest()
     Metric = MetricRequest()
     Permission = PermissionRequest()
     Project = ProjectRequest()
@@ -1271,5 +1441,6 @@ class RequestFactory(object):
     Tag = TagRequest()
     Task = TaskRequest()
     User = UserRequest()
+    VirtualConnection = VirtualConnectionRequest()
     Workbook = WorkbookRequest()
     Webhook = WebhookRequest()

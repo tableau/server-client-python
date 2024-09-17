@@ -142,6 +142,16 @@ class FlowTests(unittest.TestCase):
                 },
             )
 
+            self.assertEqual(permissions[1].grantee.tag_name, "groupSet")
+            self.assertEqual(permissions[1].grantee.id, "7ea95a1b-6872-44d6-a969-68598a7df4a0")
+            self.assertDictEqual(
+                permissions[1].capabilities,
+                {
+                    TSC.Permission.Capability.Write: TSC.Permission.Mode.Allow,
+                    TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow,
+                },
+            )
+
     def test_publish(self) -> None:
         with open(PUBLISH_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")

@@ -14,6 +14,7 @@ from tableauserverclient.models.fileupload_item import FileuploadItem
 from tableauserverclient.models.flow_item import FlowItem
 from tableauserverclient.models.flow_run_item import FlowRunItem
 from tableauserverclient.models.group_item import GroupItem
+from tableauserverclient.models.groupset_item import GroupSetItem
 from tableauserverclient.models.interval_item import (
     IntervalItem,
     DailyInterval,
@@ -22,6 +23,11 @@ from tableauserverclient.models.interval_item import (
     HourlyInterval,
 )
 from tableauserverclient.models.job_item import JobItem, BackgroundJobItem
+from tableauserverclient.models.linked_tasks_item import (
+    LinkedTaskItem,
+    LinkedTaskStepItem,
+    LinkedTaskFlowRunItem,
+)
 from tableauserverclient.models.metric_item import MetricItem
 from tableauserverclient.models.pagination_item import PaginationItem
 from tableauserverclient.models.permissions_item import PermissionsRule, Permission
@@ -39,6 +45,7 @@ from tableauserverclient.models.target import Target
 from tableauserverclient.models.task_item import TaskItem
 from tableauserverclient.models.user_item import UserItem
 from tableauserverclient.models.view_item import ViewItem
+from tableauserverclient.models.virtual_connection_item import VirtualConnectionItem
 from tableauserverclient.models.webhook_item import WebhookItem
 from tableauserverclient.models.workbook_item import WorkbookItem
 
@@ -60,6 +67,7 @@ __all__ = [
     "FlowItem",
     "FlowRunItem",
     "GroupItem",
+    "GroupSetItem",
     "IntervalItem",
     "JobItem",
     "DailyInterval",
@@ -89,6 +97,10 @@ __all__ = [
     "TaskItem",
     "UserItem",
     "ViewItem",
+    "VirtualConnectionItem",
     "WebhookItem",
     "WorkbookItem",
+    "LinkedTaskItem",
+    "LinkedTaskStepItem",
+    "LinkedTaskFlowRunItem",
 ]

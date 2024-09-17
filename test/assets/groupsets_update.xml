@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+  <pagination pageNumber="1" pageSize="100" totalAvailable="3"/>
+  <groupSet id="1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d" name="All Users" groupCount="1">
+      <group id="gs-1" name="group-one"/>
+      <group id="gs21" name="group-two"/>
+      <group id="gs-3" name="group-three"/>
+  </groupSet>
+</tsResponse>

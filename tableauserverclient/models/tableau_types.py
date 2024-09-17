@@ -1,11 +1,12 @@
 from typing import Union
 
-from .datasource_item import DatasourceItem
-from .flow_item import FlowItem
-from .project_item import ProjectItem
-from .view_item import ViewItem
-from .workbook_item import WorkbookItem
-from .metric_item import MetricItem
+from tableauserverclient.models.datasource_item import DatasourceItem
+from tableauserverclient.models.flow_item import FlowItem
+from tableauserverclient.models.project_item import ProjectItem
+from tableauserverclient.models.view_item import ViewItem
+from tableauserverclient.models.workbook_item import WorkbookItem
+from tableauserverclient.models.metric_item import MetricItem
+from tableauserverclient.models.virtual_connection_item import VirtualConnectionItem
 
 
 class Resource:
@@ -18,12 +19,13 @@ class Resource:
     Metric = "metric"
     Project = "project"
     View = "view"
+    VirtualConnection = "virtualConnection"
     Workbook = "workbook"
 
 
 # resource types that have permissions, can be renamed, etc
 # todo: refactoring: should actually define TableauItem as an interface and let all these implement it
-TableauItem = Union[DatasourceItem, FlowItem, MetricItem, ProjectItem, ViewItem, WorkbookItem]
+TableauItem = Union[DatasourceItem, FlowItem, MetricItem, ProjectItem, ViewItem, WorkbookItem, VirtualConnectionItem]
 
 
 def plural_type(content_type: Resource) -> str:

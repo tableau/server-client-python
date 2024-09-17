@@ -1,16 +1,17 @@
 import logging
 from typing import List, Optional, Tuple, TYPE_CHECKING
 
-from .endpoint import QuerysetEndpoint, api
-from .exceptions import FlowRunFailedException, FlowRunCancelledException
+from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
+from tableauserverclient.server.endpoint.exceptions import FlowRunFailedException, FlowRunCancelledException
 from tableauserverclient.models import FlowRunItem, PaginationItem
 from tableauserverclient.exponential_backoff import ExponentialBackoffTimer
 
 from tableauserverclient.helpers.logging import logger
+from tableauserverclient.server.query import QuerySet
 
 if TYPE_CHECKING:
-    from ..server import Server
-    from ..request_options import RequestOptions
+    from tableauserverclient.server.server import Server
+    from tableauserverclient.server.request_options import RequestOptions
 
 
 class FlowRuns(QuerysetEndpoint[FlowRunItem]):
@@ -78,3 +79,42 @@ class FlowRuns(QuerysetEndpoint[FlowRunItem]):
             raise FlowRunCancelledException(flow_run)
         else:
             raise AssertionError("Unexpected status in flow_run", flow_run)
+
+    def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[FlowRunItem]:
+        """
+        Queries the Tableau Server for items using the specified filters. Page
+        size can be specified to limit the number of items returned in a single
+        request. If not specified, the default page size is 100. Page size can
+        be an integer between 1 and 1000.
+
+        No positional arguments are allowed. All filters must be specified as
+        keyword arguments. If you use the equality operator, you can specify it
+        through <field_name>=<value>. If you want to use a different operator,
+        you can specify it through <field_name>__<operator>=<value>. Field
+        names can either be in snake_case or camelCase.
+
+        This endpoint supports the following fields and operators:
+
+
+        complete_at=...
+        complete_at__gt=...
+        complete_at__gte=...
+        complete_at__lt=...
+        complete_at__lte=...
+        flow_id=...
+        flow_id__in=...
+        progress=...
+        progress__gt=...
+        progress__gte=...
+        progress__lt=...
+        progress__lte=...
+        started_at=...
+        started_at__gt=...
+        started_at__gte=...
+        started_at__lt=...
+        started_at__lte=...
+        user_id=...
+        user_id__in=...
+        """
+
+        return super().filter(*invalid, page_size=page_size, **kwargs)

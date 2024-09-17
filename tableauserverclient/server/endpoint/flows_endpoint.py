@@ -9,11 +9,11 @@ from typing import Iterable, List, Optional, TYPE_CHECKING, Tuple, Union
 
 from tableauserverclient.helpers.headers import fix_filename
 
-from .dqw_endpoint import _DataQualityWarningEndpoint
-from .endpoint import QuerysetEndpoint, api
-from .exceptions import InternalServerError, MissingRequiredFieldError
-from .permissions_endpoint import _PermissionsEndpoint
-from .resource_tagger import _ResourceTagger
+from tableauserverclient.server.endpoint.dqw_endpoint import _DataQualityWarningEndpoint
+from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
+from tableauserverclient.server.endpoint.exceptions import InternalServerError, MissingRequiredFieldError
+from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
+from tableauserverclient.server.endpoint.resource_tagger import _ResourceTagger, TaggingMixin
 from tableauserverclient.models import FlowItem, PaginationItem, ConnectionItem, JobItem
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.filesys_helpers import (
@@ -22,6 +22,7 @@ from tableauserverclient.filesys_helpers import (
     get_file_type,
     get_file_object_size,
 )
+from tableauserverclient.server.query import QuerySet
 
 io_types_r = (io.BytesIO, io.BufferedReader)
 io_types_w = (io.BytesIO, io.BufferedWriter)
@@ -50,7 +51,7 @@ PathOrFileR = Union[FilePath, FileObjectR]
 PathOrFileW = Union[FilePath, FileObjectW]
 
 
-class Flows(QuerysetEndpoint[FlowItem]):
+class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
     def __init__(self, parent_srv):
         super(Flows, self).__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)
@@ -295,3 +296,39 @@ class Flows(QuerysetEndpoint[FlowItem]):
         self, schedule_id: str, item: FlowItem
     ) -> List["AddResponse"]:  # actually should return a task
         return self.parent_srv.schedules.add_to_schedule(schedule_id, flow=item)
+
+    def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[FlowItem]:
+        """
+        Queries the Tableau Server for items using the specified filters. Page
+        size can be specified to limit the number of items returned in a single
+        request. If not specified, the default page size is 100. Page size can
+        be an integer between 1 and 1000.
+
+        No positional arguments are allowed. All filters must be specified as
+        keyword arguments. If you use the equality operator, you can specify it
+        through <field_name>=<value>. If you want to use a different operator,
+        you can specify it through <field_name>__<operator>=<value>. Field
+        names can either be in snake_case or camelCase.
+
+        This endpoint supports the following fields and operators:
+
+
+        created_at=...
+        created_at__gt=...
+        created_at__gte=...
+        created_at__lt=...
+        created_at__lte=...
+        name=...
+        name__in=...
+        owner_name=...
+        project_id=...
+        project_name=...
+        project_name__in=...
+        updated=...
+        updated__gt=...
+        updated__gte=...
+        updated__lt=...
+        updated__lte=...
+        """
+
+        return super().filter(*invalid, page_size=page_size, **kwargs)

@@ -246,21 +246,34 @@ class MonthlyInterval(object):
 
     @interval.setter
     def interval(self, interval_values):
-        # This is weird because the value could be a str or an int
-        # The only valid str is 'LastDay' so we check that first. If that's not it
-        # try to convert it to an int, if that fails because it's an incorrect string
-        # like 'badstring' we catch and re-raise. Otherwise we convert to int and check
-        # that it's in range 1-31
-        for interval_value in interval_values:
-            error = "Invalid interval value for a monthly frequency: {}.".format(interval_value)
+        # Valid monthly intervals strings can contain any of the following
+        #   day numbers (1-31) (integer or string)
+        #   relative day within the month (First, Second, ... Last)
+        #   week days (Sunday, Monday, ... LastDay)
+        VALID_INTERVALS = [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "LastDay",
+            "First",
+            "Second",
+            "Third",
+            "Fourth",
+            "Fifth",
+            "Last",
+        ]
+        for value in range(1, 32):
+            VALID_INTERVALS.append(str(value))
+            VALID_INTERVALS.append(value)
 
-            if interval_value != "LastDay":
-                try:
-                    if not (1 <= int(interval_value) <= 31):
-                        raise ValueError(error)
-                except ValueError:
-                    if interval_value != "LastDay":
-                        raise ValueError(error)
+        for interval_value in interval_values:
+            if interval_value not in VALID_INTERVALS:
+                error = f"Invalid monthly interval: {interval_value}"
+                raise ValueError(error)
 
         self._interval = interval_values
 

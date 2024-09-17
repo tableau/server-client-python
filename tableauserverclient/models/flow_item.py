@@ -6,12 +6,12 @@ from typing import List, Optional, Set
 from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.datetime_helpers import parse_datetime
-from .connection_item import ConnectionItem
-from .dqw_item import DQWItem
-from .exceptions import UnpopulatedPropertyError
-from .permissions_item import Permission
-from .property_decorators import property_not_nullable
-from .tag_item import TagItem
+from tableauserverclient.models.connection_item import ConnectionItem
+from tableauserverclient.models.dqw_item import DQWItem
+from tableauserverclient.models.exceptions import UnpopulatedPropertyError
+from tableauserverclient.models.permissions_item import Permission
+from tableauserverclient.models.property_decorators import property_not_nullable
+from tableauserverclient.models.tag_item import TagItem
 
 
 class FlowItem(object):

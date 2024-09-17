@@ -1,24 +1,23 @@
 import copy
 from functools import partial
-from typing import Generic, Iterable, Iterator, List, Optional, Protocol, Tuple, TypeVar, Union, runtime_checkable
+from typing import Iterable, Iterator, List, Optional, Protocol, Tuple, TypeVar, Union, runtime_checkable
 
 from tableauserverclient.models.pagination_item import PaginationItem
 from tableauserverclient.server.request_options import RequestOptions
 
 
 T = TypeVar("T")
-ReturnType = Tuple[List[T], PaginationItem]
 
 
 @runtime_checkable
-class Endpoint(Protocol):
-    def get(self, req_options: Optional[RequestOptions], **kwargs) -> ReturnType:
+class Endpoint(Protocol[T]):
+    def get(self, req_options: Optional[RequestOptions]) -> Tuple[List[T], PaginationItem]:
         ...
 
 
 @runtime_checkable
-class CallableEndpoint(Protocol):
-    def __call__(self, __req_options: Optional[RequestOptions], **kwargs) -> ReturnType:
+class CallableEndpoint(Protocol[T]):
+    def __call__(self, __req_options: Optional[RequestOptions], **kwargs) -> Tuple[List[T], PaginationItem]:
         ...
 
 
@@ -33,7 +32,7 @@ class Pager(Iterable[T]):
 
     def __init__(
         self,
-        endpoint: Union[CallableEndpoint, Endpoint],
+        endpoint: Union[CallableEndpoint[T], Endpoint[T]],
         request_opts: Optional[RequestOptions] = None,
         **kwargs,
     ) -> None:
