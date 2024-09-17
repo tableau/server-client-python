@@ -1017,9 +1017,9 @@ class WorkbookRequest:
                             # if intervals is not None or frequency != DataFreshnessPolicyItem.FreshAt.Frequency.Day:
                             intervals_element = ET.SubElement(fresh_at_element, "intervals")
                             for interval in intervals:
-                                expression = IntervalItem.Occurrence.WeekDay
+                                expression = IntervalItem.Interval_Type.WeekDay
                                 if frequency == DataFreshnessPolicyItem.FreshAt.Frequency.Month:
-                                    expression = IntervalItem.Occurrence.MonthDay
+                                    expression = IntervalItem.Interval_Type.MonthDay
                                 single_interval_element = ET.SubElement(intervals_element, "interval")
                                 single_interval_element.attrib[expression] = interval
                         else:

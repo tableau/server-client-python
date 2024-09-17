@@ -10,11 +10,19 @@ class IntervalItem(object):
         Weekly = "Weekly"
         Monthly = "Monthly"
 
-    class Occurrence(StrEnum):
+    class Interval_Type(StrEnum):
         Minutes = "minutes"
         Hours = "hours"
         WeekDay = "weekDay"
         MonthDay = "monthDay"
+        
+    class OccurrenceInMonth(StrEnum):
+        First = "First"
+        Second = "Second"
+        Third = "Third"
+        Fourth = "Fourth"
+        Fifth = "Fifth"
+        LastDay = "LastDay"
 
     class Day(StrEnum):
         Sunday = "Sunday"
@@ -28,15 +36,18 @@ class IntervalItem(object):
     
     
 class BaseInterval:
-    def __init__(self, start_time, end_time, interval_value):
+    def __init__(self, start_time, interval_value):
         self.start_time = start_time
-        if end_time:
-            self.end_time = end_time
-        self._interval = interval_value
+
+        # interval should be a tuple, if it is not, assign as a tuple with single value
+        # this bypasses the setter and will not call validate_interval
+        if isinstance(interval_value, tuple):
+            self._interval = interval_value
+        else:
+            self._interval = (interval_value,)            
 
     def __repr__(self):
-        end = f" end={self.end_time}" if end else ""
-        return f"<{self.__class__.__name__} start={self.start_time}{end} interval={self.interval}>"
+        return f"<{self.__class__.__name__} start={self.start_time} interval={self.interval}>"
 
     @property
     def _frequency(self):
@@ -51,16 +62,7 @@ class BaseInterval:
     @property_not_nullable
     def start_time(self, value):
         self._start_time = value
-
-    @property
-    def end_time(self):
-        return self._end_time
-
-    @end_time.setter
-    @property_is_valid_time
-    def end_time(self, value):
-        self._end_time = value
-
+        
     @property
     def interval(self):
         return self._interval
@@ -70,42 +72,54 @@ class BaseInterval:
         self.validate_interval(intervals)
         self._interval = intervals
     
+    def clear_schedule(self):
+        self._interval = None
+        
     # must be implemented by each subclass
     @abstractmethod
     def validate_interval(self):
         assert(False)
         
-    def clear_schedule(self):
-        self._interval = None
 
-class HourlyInterval(BaseInterval):
+class Ending_Interval(BaseInterval):
 
-    # requires exactly one of an hours or minutes attribute
-    # can have any number of weekday attributes (TODO: what happens if there is none? is it valid to repeat a weekday?)
+    def __init__(self, start_time, end_time, interval_value):
+        self.end_time = end_time
+        self.super(start_time, interval_value)
+        
+    def __repr__(self):
+        return f"<{self.__class__.__name__} start={self.start_time} end={self.end_time} interval={self.interval}>"
+            
+    @property
+    def end_time(self):
+        return self._end_time
 
+    @end_time.setter
+    @property_is_valid_time
+    def end_time(self, value):
+        self._end_time = value
+
+
+class HourlyInterval(Ending_Interval):
     @classmethod
     def __init__(self, start_time, end_time, interval_value):
         self._frequency = IntervalItem.Frequency.Hourly
-        # interval should be a tuple, if it is not, assign as a tuple with single value
-        if isinstance(interval_value, tuple):
-            self.interval = interval_value
-        else:
-            self.interval = (interval_value,)
-        super.__init__(self, start_time, end_time, self.interval)
+        super.__init__(self, start_time, end_time, interval_value)
             
     HOUR_VALUE = 1
     MINUTE_VALUE = 60
-
-    def interval(self, intervals):
-        
+    # requires exactly one of an hours or minutes attribute
+    # can have any number of weekday attributes (TODO: what happens if there is none? is it valid to repeat a weekday?)
+    def validate_interval(self):
+        interval_values = self._interval
         count_hours = 0
-        for interval in intervals:
+        for interval in interval_values:
             # if an hourly interval is a string, then it is a weekDay interval
             if isinstance(interval, str) and not interval.isnumeric():
                 if not hasattr(IntervalItem.Day, interval):
                     error = "Invalid weekDay interval {}".format(interval)
                     raise ValueError(error)
-                interval_type = IntervalItem.Occurrence.WeekDay
+                interval_type = IntervalItem.Interval_Type.WeekDay
                 interval_value = interval
 
             # if an hourly interval is a number, it is an hours or minutes interval
@@ -114,10 +128,10 @@ class HourlyInterval(BaseInterval):
                     raise ValueError("The schedule must have exactly one value for hours/minutes between runs.")
                 count_hours = count_hours + 1
                 if interval == self.HOUR_VALUE:
-                    interval_type = IntervalItem.Occurrence.Hours
+                    interval_type = IntervalItem.Interval_Type.Hours
                     interval_value = interval
                 elif interval == self.MINUTE_VALUE:
-                    interval_type = IntervalItem.Occurrence.Minutes
+                    interval_type = IntervalItem.Interval_Type.Minutes
                     interval_value = self.to_minutes(interval)
                 else:
                     error = "Invalid interval {} not in {}".format(interval, list(self.HOUR_VALUE, self.MINUTE_VALUE))
@@ -127,29 +141,23 @@ class HourlyInterval(BaseInterval):
                 raise ValueError(error)
                 
             self._interval_type_pairs.append((interval_type, str(interval_value)))
-        self._interval = intervals
 
 
 
-class DailyInterval(BaseInterval):
+class DailyInterval(Ending_Interval):
+    @classmethod
     def __init__(self, start_time, end_time, *interval_values):
+        self._frequency = IntervalItem.Interval_Type.WeekDay
         super.__init__(self, start_time, end_time, *interval_values)
-        self._frequency = IntervalItem.Occurrence.WeekDay
 
-    @property
-    def interval(self):
-        return self._interval
-
-    @interval.setter
-    def interval(self, intervals):
+    def validate_interval(self):
+        interval_values = self._interval
         VALID_INTERVALS = {0.25, 0.5, 1, 2, 4, 6, 8, 12, 24}
         # must have exactly one defined hours attribute. If the value is <24, it must also have an endtime
         # can have any number of weekday attributes. 
-        # TODO
-        # Daily schedules can have 0 intervals
         # is it valid to repeat a weekday?
         
-        for interval in intervals:
+        for interval in interval_values:
             # if an hourly interval is a string, then it is a weekDay interval
             if isinstance(interval, str) and not interval.isnumeric() and not hasattr(IntervalItem.Day, interval):
                 error = f"Invalid weekDay interval {interval}"
@@ -160,7 +168,7 @@ class DailyInterval(BaseInterval):
                 error = f"Invalid interval {interval} not in {str(VALID_INTERVALS)}"
                 raise ValueError(error)
 
-        self._interval = intervals
+        self._interval = interval_values
 
     def _interval_type_pairs(self):
         interval_type_pairs = []
@@ -169,40 +177,32 @@ class DailyInterval(BaseInterval):
             # Need to convert to minutes from hours here
             if interval in {0.25, 0.5}:
                 calculated_interval = int(interval * 60)
-                interval_type = IntervalItem.Occurrence.Minutes
+                interval_type = IntervalItem.Interval_Type.Minutes
 
                 interval_type_pairs.append((interval_type, str(calculated_interval)))
             else:
                 # if the interval is a non-numeric string, it will always be a weekDay
                 if isinstance(interval, str) and not interval.isnumeric():
-                    interval_type = IntervalItem.Occurrence.WeekDay
+                    interval_type = IntervalItem.Interval_Type.WeekDay
 
                     interval_type_pairs.append((interval_type, str(interval)))
                 # otherwise the interval is hours
                 else:
-                    interval_type = IntervalItem.Occurrence.Hours
+                    interval_type = IntervalItem.Interval_Type.Hours
 
                     interval_type_pairs.append((interval_type, str(interval)))
 
         return interval_type_pairs
 
 
-class WeeklyInterval(IntervalItem):
+class WeeklyInterval(BaseInterval):
+    @classmethod
     def __init__(self, start_time, *interval_values):
-        super.__init__(self, start_time)
         self._frequency = IntervalItem.Frequency.Weekly
-        self._interval = interval_values
-        """
-        Note: Updating a schedule without specifying days of the week will reset any existing weekly interval 
-        to include all 7 days. If you need the job you are updating to remain scheduled on selected days, make 
-        sure to include that information in your update request. 
-        """
-    @property
-    def interval(self):
-        return self._interval
+        super.__init__(self, start_time, interval_values)
 
-    @interval.setter
-    def interval(self, interval_values):
+    def validate_interval(self):
+        interval_values = self._interval
         # A weekly schedule must have 1 to 7 intervals
         # setting 0 intervals will wipe existing settings
         if interval_values is None:
@@ -214,19 +214,14 @@ class WeeklyInterval(IntervalItem):
         self._interval = interval_values
 
     def _interval_type_pairs(self):
-        return [(IntervalItem.Occurrence.WeekDay, day) for day in self.interval]
+        return [(IntervalItem.Interval_Type.WeekDay, day) for day in self.interval]
 
 
-class MonthlyInterval(IntervalItem):
+class MonthlyInterval(BaseInterval):
+    @classmethod
     def __init__(self, start_time, interval_value):
-        super.__init__(self, start_time)
         self._frequency = IntervalItem.Frequency.Monthly
-
-        # interval should be a tuple, if it is not, assign as a tuple with single value
-        if isinstance(interval_value, tuple):
-            self._interval = interval_value
-        else:
-            self._interval = (interval_value,)
+        super.__init__(self, start_time, interval_value)
             
     def _day_of_month(day):
         # 2. day_of_month
@@ -235,13 +230,12 @@ class MonthlyInterval(IntervalItem):
         VALID_DAY_OF_MONTH = list(range(32)).append(IntervalItem.LastDay)        
         if day not in VALID_DAY_OF_MONTH:
             raise ValueError("`{}` is not a valid day for a monthly schedule. ".format(day))
-        
         return (day, ) 
             
         # If you use LastDay then only one instance of interval can be used in the schedule to specify the last day of the month.
 
     def _occurrence_of_weekday(occurrence, weekday):
-        VALID_OCCURRENCE = ["First", "Second", "Third", "Fourth", "Fifth", IntervalItem.LastDay]
+        VALID_OCCURRENCE = list(IntervalItem.OccurrenceInMonth.__members__)
         VALID_WEEKDAY = list(IntervalItem.Day.__members__)
         if occurrence not in VALID_OCCURRENCE:
             raise ValueError("`{}` is not a valid schedule occurrence for a monthly schedule. ".format(occurrence))
@@ -250,8 +244,8 @@ class MonthlyInterval(IntervalItem):
         
         return (occurrence, weekday)
 
-    def interval(self, interval_values):
-        
+    def validate_interval(self):
+        interval_values = self._interval
         error = "Invalid interval value for a monthly frequency: {}.".format(interval_values)
         # There are two possible formats for this: (day_of_month) or (occurrence_of_weekday, weekday)        
         if isinstance(interval_values, tuple):
@@ -266,5 +260,5 @@ class MonthlyInterval(IntervalItem):
 
 
     def _interval_type_pairs(self):
-        return [(IntervalItem.Occurrence.MonthDay, self.interval)]
+        return [(IntervalItem.Interval_Type.MonthDay, self.interval)]
     

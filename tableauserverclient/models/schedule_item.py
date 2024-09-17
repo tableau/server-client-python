@@ -260,9 +260,9 @@ class ScheduleItem:
             for i in interval:
                 # We use fractional hours for the two minute-based intervals.
                 # Need to convert to hours from minutes here
-                if i[0] == IntervalItem.Occurrence.Minutes:
+                if i[0] == IntervalItem.Interval_Type.Minutes:
                     converted_intervals.append(float(i[1]) / 60)
-                elif i[0] == IntervalItem.Occurrence.Hours:
+                elif i[0] == IntervalItem.Interval_Type.Hours:
                     converted_intervals.append(float(i[1]))
                 else:
                     converted_intervals.append(i[1])
@@ -275,9 +275,9 @@ class ScheduleItem:
             for i in interval:
                 # We use fractional hours for the two minute-based intervals.
                 # Need to convert to hours from minutes here
-                if i[0] == IntervalItem.Occurrence.Minutes:
+                if i[0] == IntervalItem.Interval_Type.Minutes:
                     converted_intervals.append(float(i[1]) / 60)
-                elif i[0] == IntervalItem.Occurrence.Hours:
+                elif i[0] == IntervalItem.Interval_Type.Hours:
                     converted_intervals.append(i[1])
                 else:
                     converted_intervals.append(i[1])
