@@ -109,6 +109,10 @@ class Projects(QuerysetEndpoint[ProjectItem]):
     def populate_lens_default_permissions(self, item):
         self._default_permissions.populate_default_permissions(item, Resource.Lens)
 
+    @api(version="3.23")
+    def populate_virtualconnection_default_permissions(self, item):
+        self._default_permissions.populate_default_permissions(item, Resource.VirtualConnection)
+
     @api(version="2.1")
     def update_workbook_default_permissions(self, item, rules):
         return self._default_permissions.update_default_permissions(item, rules, Resource.Workbook)
@@ -133,6 +137,10 @@ class Projects(QuerysetEndpoint[ProjectItem]):
     def update_lens_default_permissions(self, item, rules):
         return self._default_permissions.update_default_permissions(item, rules, Resource.Lens)
 
+    @api(version="3.23")
+    def update_virtualconnection_default_permissions(self, item, rules):
+        return self._default_permissions.update_default_permissions(item, rules, Resource.VirtualConnection)
+
     @api(version="2.1")
     def delete_workbook_default_permissions(self, item, rule):
         self._default_permissions.delete_default_permission(item, rule, Resource.Workbook)
@@ -156,6 +164,10 @@ class Projects(QuerysetEndpoint[ProjectItem]):
     @api(version="3.4")
     def delete_lens_default_permissions(self, item, rule):
         self._default_permissions.delete_default_permission(item, rule, Resource.Lens)
+
+    @api(version="3.23")
+    def delete_virtualconnection_default_permissions(self, item, rule):
+        self._default_permissions.delete_default_permission(item, rule, Resource.VirtualConnection)
 
     def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[ProjectItem]:
         """

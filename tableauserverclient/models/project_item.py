@@ -43,6 +43,7 @@ class ProjectItem(object):
         self._default_lens_permissions = None
         self._default_datarole_permissions = None
         self._default_metric_permissions = None
+        self._default_virtualconnection_permissions = None
 
     @property
     def content_permissions(self):
@@ -101,6 +102,13 @@ class ProjectItem(object):
             error = "Project item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
         return self._default_metric_permissions()
+
+    @property
+    def default_virtualconnection_permissions(self):
+        if self._default_virtualconnection_permissions is None:
+            error = "Project item must be populated with permissions first."
+            raise UnpopulatedPropertyError(error)
+        return self._default_virtualconnection_permissions()
 
     @property
     def id(self) -> Optional[str]:
