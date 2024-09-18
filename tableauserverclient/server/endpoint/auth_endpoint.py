@@ -42,7 +42,7 @@ class Auth(Endpoint):
 
         Creates a context manager that will sign out of the server upon exit.
         """
-        url = "{}/{}".format(self.baseurl, "signin")
+        url = f"{self.baseurl}/signin"
         signin_req = RequestFactory.Auth.signin_req(auth_req)
         server_response = self.parent_srv.session.post(
             url, data=signin_req, **self.parent_srv.http_options, allow_redirects=False
@@ -78,7 +78,7 @@ class Auth(Endpoint):
 
     @api(version="2.0")
     def sign_out(self) -> None:
-        url = "{}/{}".format(self.baseurl, "signout")
+        url = f"{self.baseurl}/signout"
         # If there are no auth tokens you're already signed out. No-op
         if not self.parent_srv.is_signed_in():
             return
@@ -88,7 +88,7 @@ class Auth(Endpoint):
 
     @api(version="2.6")
     def switch_site(self, site_item: "SiteItem") -> contextmgr:
-        url = "{}/{}".format(self.baseurl, "switchSite")
+        url = f"{self.baseurl}/switchSite"
         switch_req = RequestFactory.Auth.switch_req(site_item.content_url)
         try:
             server_response = self.post_request(url, switch_req)
@@ -109,6 +109,6 @@ class Auth(Endpoint):
 
     @api(version="3.10")
     def revoke_all_server_admin_tokens(self) -> None:
-        url = "{}/{}".format(self.baseurl, "revokeAllServerAdminTokens")
+        url = f"{self.baseurl}/revokeAllServerAdminTokens"
         self.post_request(url, "")
         logger.info("Revoked all tokens for all server admins")

@@ -1,9 +1,5 @@
 import unittest
-
-try:
-    from unittest import mock
-except ImportError:
-    from unittest import mock
+from unittest import mock
 
 import tableauserverclient.server.request_factory as factory
 from tableauserverclient.helpers.strings import redact_xml
