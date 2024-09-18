@@ -22,7 +22,7 @@ from tableauserverclient.server.endpoint.exceptions import InternalServerError, 
 from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
 from tableauserverclient.server.endpoint.resource_tagger import TaggingMixin
 
-from tableauserverclient.config import ALLOWED_FILE_EXTENSIONS, FILESIZE_LIMIT_MB, BYTES_PER_MB, config
+from tableauserverclient.config import ALLOWED_FILE_EXTENSIONS, BYTES_PER_MB, config
 from tableauserverclient.filesys_helpers import (
     make_download_path,
     get_file_type,
@@ -269,10 +269,10 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
             url += "&{0}=true".format("asJob")
 
         # Determine if chunking is required (64MB is the limit for single upload method)
-        if file_size >= FILESIZE_LIMIT_MB * BYTES_PER_MB:
+        if file_size >= config.FILESIZE_LIMIT_MB * BYTES_PER_MB:
             logger.info(
                 "Publishing {} to server with chunking method (datasource over {}MB, chunk size {}MB)".format(
-                    filename, FILESIZE_LIMIT_MB, config.CHUNK_SIZE_MB
+                    filename, config.FILESIZE_LIMIT_MB, config.CHUNK_SIZE_MB
                 )
             )
             upload_session_id = self.parent_srv.fileuploads.upload(file)
