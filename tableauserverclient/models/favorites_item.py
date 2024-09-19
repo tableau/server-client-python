@@ -1,6 +1,6 @@
 import logging
 
-from typing import Union
+from typing import dict, Union
 from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.models.tableau_types import TableauItem
@@ -21,7 +21,7 @@ FavoriteType = dict[
 
 class FavoriteItem:
     @classmethod
-    def from_response(cls, xml: Union[str, bytes], namespace: Dict) -> FavoriteType:
+    def from_response(cls, xml: Union[str, bytes], namespace: dict) -> FavoriteType:
         favorites: FavoriteType = {
             "datasources": [],
             "flows": [],
