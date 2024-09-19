@@ -50,11 +50,11 @@ def get_page_info(result):
 class Metadata(Endpoint):
     @property
     def baseurl(self):
-        return "{0}/api/metadata/graphql".format(self.parent_srv.server_address)
+        return f"{self.parent_srv.server_address}/api/metadata/graphql"
 
     @property
     def control_baseurl(self):
-        return "{0}/api/metadata/v1/control".format(self.parent_srv.server_address)
+        return f"{self.parent_srv.server_address}/api/metadata/v1/control"
 
     @api("3.5")
     def query(self, query, variables=None, abort_on_error=False, parameters=None):

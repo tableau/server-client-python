@@ -19,7 +19,7 @@ from .property_decorators import (
 Interval = Union[HourlyInterval, DailyInterval, WeeklyInterval, MonthlyInterval]
 
 
-class ScheduleItem(object):
+class ScheduleItem:
     class Type:
         Extract = "Extract"
         Flow = "Flow"
@@ -336,7 +336,7 @@ class ScheduleItem(object):
         all_task_xml = parsed_response.findall(".//t:task", namespaces=ns)
 
         error = (
-            "Status {}: {}".format(response.status_code, response.reason)
+            f"Status {response.status_code}: {response.reason}"
             if response.status_code < 200 or response.status_code >= 300
             else None
         )

@@ -62,7 +62,7 @@ def main():
             print(resource.name[:18], " ")  # , resource._connections())
             if count > 100:
                 break
-        print("Total: {}".format(count))
+        print(f"Total: {count}")
 
 
 if __name__ == "__main__":

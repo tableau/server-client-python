@@ -9,7 +9,7 @@ Use the Tableau Server Client (TSC) library to increase your productivity as you
 * Create users and groups.
 * Query projects, sites, and more.
 
-This repository contains Python source code for the library and sample files showing how to use it. As of May 2022, Python versions 3.7 and up are supported.
+This repository contains Python source code for the library and sample files showing how to use it. As of September 2024, support for Python 3.7 and 3.8 will be dropped - support for older versions of Python aims to match https://devguide.python.org/versions/
 
 To see sample code that works directly with the REST API (in Java, Python, or Postman), visit the [REST API Samples](https://github.com/tableau/rest-api-samples) repo.
 

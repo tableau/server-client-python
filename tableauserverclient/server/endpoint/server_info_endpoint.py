@@ -21,11 +21,11 @@ class ServerInfo(Endpoint):
         return self._info
 
     def __repr__(self):
-        return "<Endpoint {}>".format(self.serverInfo)
+        return f"<Endpoint {self.serverInfo}>"
 
     @property
     def baseurl(self):
-        return "{0}/serverInfo".format(self.parent_srv.baseurl)
+        return f"{self.parent_srv.baseurl}/serverInfo"
 
     @api(version="2.4")
     def get(self):
