@@ -1,8 +1,9 @@
 import logging
 
+from typing import Union
 from defusedxml.ElementTree import fromstring
-from tableauserverclient.models.tableau_types import TableauItem
 
+from tableauserverclient.models.tableau_types import TableauItem
 from tableauserverclient.models.datasource_item import DatasourceItem
 from tableauserverclient.models.flow_item import FlowItem
 from tableauserverclient.models.project_item import ProjectItem
