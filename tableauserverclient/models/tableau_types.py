@@ -32,4 +32,4 @@ def plural_type(content_type: Resource) -> str:
     if content_type == Resource.Lens:
         return "lenses"
     else:
-        return "{}s".format(content_type)
+        return f"{content_type}s"

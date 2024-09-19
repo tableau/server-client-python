@@ -4,7 +4,7 @@ from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_not_empty, property_is_boolean
 
 
-class TableItem(object):
+class TableItem:
     def __init__(self, name, description=None):
         self._id = None
         self.description = description

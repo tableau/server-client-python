@@ -111,14 +111,14 @@ def main():
             new_job = server.datasources.publish(
                 new_datasource, args.file, publish_mode, connection_credentials=new_conn_creds, as_job=True
             )
-            print("Datasource published asynchronously. Job ID: {0}".format(new_job.id))
+            print(f"Datasource published asynchronously. Job ID: {new_job.id}")
         else:
             # Normal publishing, returns a datasource_item
             new_datasource = server.datasources.publish(
                 new_datasource, args.file, publish_mode, connection_credentials=new_conn_creds
             )
             print(
-                "{0}Datasource published. Datasource ID: {1}".format(
+                "{}Datasource published. Datasource ID: {}".format(
                     new_datasource.id, tableauserverclient.datetime_helpers.timestamp()
                 )
             )

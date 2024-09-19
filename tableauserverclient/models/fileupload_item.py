@@ -1,7 +1,7 @@
 from defusedxml.ElementTree import fromstring
 
 
-class FileuploadItem(object):
+class FileuploadItem:
     def __init__(self):
         self._file_size = None
         self._upload_session_id = None

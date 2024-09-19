@@ -8,7 +8,8 @@ from tableauserverclient.server.pager import Pager
 
 from tableauserverclient.helpers.logging import logger
 
-from typing import Iterable, List, Optional, TYPE_CHECKING, Tuple, Union
+from typing import Optional, TYPE_CHECKING, Union
+from collections.abc import Iterable
 
 from tableauserverclient.server.query import QuerySet
 
@@ -19,10 +20,10 @@ if TYPE_CHECKING:
 class Groups(QuerysetEndpoint[GroupItem]):
     @property
     def baseurl(self) -> str:
-        return "{0}/sites/{1}/groups".format(self.parent_srv.baseurl, self.parent_srv.site_id)
+        return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/groups"
 
     @api(version="2.0")
-    def get(self, req_options: Optional["RequestOptions"] = None) -> Tuple[List[GroupItem], PaginationItem]:
+    def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[GroupItem], PaginationItem]:
         """Gets all groups"""
         logger.info("Querying all groups on site")
         url = self.baseurl
@@ -50,12 +51,12 @@ class Groups(QuerysetEndpoint[GroupItem]):
 
     def _get_users_for_group(
         self, group_item: GroupItem, req_options: Optional["RequestOptions"] = None
-    ) -> Tuple[List[UserItem], PaginationItem]:
-        url = "{0}/{1}/users".format(self.baseurl, group_item.id)
+    ) -> tuple[list[UserItem], PaginationItem]:
+        url = f"{self.baseurl}/{group_item.id}/users"
         server_response = self.get_request(url, req_options)
         user_item = UserItem.from_response(server_response.content, self.parent_srv.namespace)
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
-        logger.info("Populated users for group (ID: {0})".format(group_item.id))
+        logger.info(f"Populated users for group (ID: {group_item.id})")
         return user_item, pagination_item
 
     @api(version="2.0")
@@ -64,13 +65,13 @@ class Groups(QuerysetEndpoint[GroupItem]):
         if not group_id:
             error = "Group ID undefined."
             raise ValueError(error)
-        url = "{0}/{1}".format(self.baseurl, group_id)
+        url = f"{self.baseurl}/{group_id}"
         self.delete_request(url)
-        logger.info("Deleted single group (ID: {0})".format(group_id))
+        logger.info(f"Deleted single group (ID: {group_id})")
 
     @api(version="2.0")
     def update(self, group_item: GroupItem, as_job: bool = False) -> Union[GroupItem, JobItem]:
-        url = "{0}/{1}".format(self.baseurl, group_item.id)
+        url = f"{self.baseurl}/{group_item.id}"
 
         if not group_item.id:
             error = "Group item missing ID."
@@ -83,7 +84,7 @@ class Groups(QuerysetEndpoint[GroupItem]):
 
         update_req = RequestFactory.Group.update_req(group_item)
         server_response = self.put_request(url, update_req)
-        logger.info("Updated group item (ID: {0})".format(group_item.id))
+        logger.info(f"Updated group item (ID: {group_item.id})")
         if as_job:
             return JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         else:
@@ -118,9 +119,9 @@ class Groups(QuerysetEndpoint[GroupItem]):
         if not user_id:
             error = "User ID undefined."
             raise ValueError(error)
-        url = "{0}/{1}/users/{2}".format(self.baseurl, group_item.id, user_id)
+        url = f"{self.baseurl}/{group_item.id}/users/{user_id}"
         self.delete_request(url)
-        logger.info("Removed user (id: {0}) from group (ID: {1})".format(user_id, group_item.id))
+        logger.info(f"Removed user (id: {user_id}) from group (ID: {group_item.id})")
 
     @api(version="3.21")
     def remove_users(self, group_item: GroupItem, users: Iterable[Union[str, UserItem]]) -> None:
@@ -132,7 +133,7 @@ class Groups(QuerysetEndpoint[GroupItem]):
         url = f"{self.baseurl}/{group_id}/users/remove"
         add_req = RequestFactory.Group.remove_users_req(users)
         _ = self.put_request(url, add_req)
-        logger.info("Removed users to group (ID: {0})".format(group_item.id))
+        logger.info(f"Removed users to group (ID: {group_item.id})")
         return None
 
     @api(version="2.0")
@@ -144,15 +145,15 @@ class Groups(QuerysetEndpoint[GroupItem]):
         if not user_id:
             error = "User ID undefined."
             raise ValueError(error)
-        url = "{0}/{1}/users".format(self.baseurl, group_item.id)
+        url = f"{self.baseurl}/{group_item.id}/users"
         add_req = RequestFactory.Group.add_user_req(user_id)
         server_response = self.post_request(url, add_req)
         user = UserItem.from_response(server_response.content, self.parent_srv.namespace).pop()
-        logger.info("Added user (id: {0}) to group (ID: {1})".format(user_id, group_item.id))
+        logger.info(f"Added user (id: {user_id}) to group (ID: {group_item.id})")
         return user
 
     @api(version="3.21")
-    def add_users(self, group_item: GroupItem, users: Iterable[Union[str, UserItem]]) -> List[UserItem]:
+    def add_users(self, group_item: GroupItem, users: Iterable[Union[str, UserItem]]) -> list[UserItem]:
         """Adds multiple users to 1 group"""
         group_id = group_item.id if hasattr(group_item, "id") else group_item
         if not isinstance(group_id, str):
@@ -162,7 +163,7 @@ class Groups(QuerysetEndpoint[GroupItem]):
         add_req = RequestFactory.Group.add_users_req(users)
         server_response = self.post_request(url, add_req)
         users = UserItem.from_response(server_response.content, self.parent_srv.namespace)
-        logger.info("Added users to group (ID: {0})".format(group_item.id))
+        logger.info(f"Added users to group (ID: {group_item.id})")
         return users
 
     def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[GroupItem]:

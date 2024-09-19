@@ -241,9 +241,9 @@ class ProjectTests(unittest.TestCase):
 
             rules = TSC.PermissionsRule(grantee=GroupItem.as_reference(single_group._id), capabilities=capabilities)
 
-            endpoint = "{}/permissions/groups/{}".format(single_project._id, single_group._id)
-            m.delete("{}/{}/Read/Allow".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/Write/Allow".format(self.baseurl, endpoint), status_code=204)
+            endpoint = f"{single_project._id}/permissions/groups/{single_group._id}"
+            m.delete(f"{self.baseurl}/{endpoint}/Read/Allow", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/Write/Allow", status_code=204)
             self.server.projects.delete_permission(item=single_project, rules=rules)
 
     def test_delete_workbook_default_permission(self) -> None:
@@ -287,19 +287,19 @@ class ProjectTests(unittest.TestCase):
 
             rules = TSC.PermissionsRule(grantee=GroupItem.as_reference(single_group._id), capabilities=capabilities)
 
-            endpoint = "{}/default-permissions/workbooks/groups/{}".format(single_project._id, single_group._id)
-            m.delete("{}/{}/Read/Allow".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/ExportImage/Allow".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/ExportData/Allow".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/ViewComments/Allow".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/AddComment/Allow".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/Filter/Allow".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/ViewUnderlyingData/Deny".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/ShareView/Allow".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/WebAuthoring/Allow".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/Write/Allow".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/ExportXml/Allow".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/ChangeHierarchy/Allow".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/Delete/Deny".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/ChangePermissions/Allow".format(self.baseurl, endpoint), status_code=204)
+            endpoint = f"{single_project._id}/default-permissions/workbooks/groups/{single_group._id}"
+            m.delete(f"{self.baseurl}/{endpoint}/Read/Allow", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/ExportImage/Allow", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/ExportData/Allow", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/ViewComments/Allow", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/AddComment/Allow", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/Filter/Allow", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/ViewUnderlyingData/Deny", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/ShareView/Allow", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/WebAuthoring/Allow", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/Write/Allow", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/ExportXml/Allow", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/ChangeHierarchy/Allow", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/Delete/Deny", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/ChangePermissions/Allow", status_code=204)
             self.server.projects.delete_workbook_default_permissions(item=single_project, rule=rules)

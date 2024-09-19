@@ -1,6 +1,7 @@
 from collections.abc import Sized
 from itertools import count
-from typing import Iterable, Iterator, List, Optional, Protocol, Tuple, TYPE_CHECKING, TypeVar, overload
+from typing import Optional, Protocol, TYPE_CHECKING, TypeVar, overload
+from collections.abc import Iterable, Iterator
 from tableauserverclient.config import config
 from tableauserverclient.models.pagination_item import PaginationItem
 from tableauserverclient.server.filter import Filter
@@ -37,7 +38,7 @@ class QuerySet(Iterable[T], Sized):
     def __init__(self, model: "QuerysetEndpoint[T]", page_size: Optional[int] = None) -> None:
         self.model = model
         self.request_options = RequestOptions(pagesize=page_size or config.PAGE_SIZE)
-        self._result_cache: List[T] = []
+        self._result_cache: list[T] = []
         self._pagination_item = PaginationItem()
 
     def __iter__(self: Self) -> Iterator[T]:
@@ -56,12 +57,10 @@ class QuerySet(Iterable[T], Sized):
                 return
 
     @overload
-    def __getitem__(self: Self, k: Slice) -> List[T]:
-        ...
+    def __getitem__(self: Self, k: Slice) -> list[T]: ...
 
     @overload
-    def __getitem__(self: Self, k: int) -> T:
-        ...
+    def __getitem__(self: Self, k: int) -> T: ...
 
     def __getitem__(self, k):
         page = self.page_number
@@ -160,22 +159,22 @@ class QuerySet(Iterable[T], Sized):
         return self
 
     @staticmethod
-    def _parse_shorthand_filter(key: str) -> Tuple[str, str]:
+    def _parse_shorthand_filter(key: str) -> tuple[str, str]:
         tokens = key.split("__", 1)
         if len(tokens) == 1:
             operator = RequestOptions.Operator.Equals
         else:
             operator = tokens[1]
             if operator not in RequestOptions.Operator.__dict__.values():
-                raise ValueError("Operator `{}` is not valid.".format(operator))
+                raise ValueError(f"Operator `{operator}` is not valid.")
 
         field = to_camel_case(tokens[0])
         if field not in RequestOptions.Field.__dict__.values():
-            raise ValueError("Field name `{}` is not valid.".format(field))
+            raise ValueError(f"Field name `{field}` is not valid.")
         return (field, operator)
 
     @staticmethod
-    def _parse_shorthand_sort(key: str) -> Tuple[str, str]:
+    def _parse_shorthand_sort(key: str) -> tuple[str, str]:
         direction = RequestOptions.Direction.Asc
         if key.startswith("-"):
             direction = RequestOptions.Direction.Desc

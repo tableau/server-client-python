@@ -31,7 +31,7 @@ class RequestOptionTests(unittest.TestCase):
         self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"
         self.server._auth_token = "j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM"
 
-        self.baseurl = "{0}/{1}".format(self.server.sites.baseurl, self.server._site_id)
+        self.baseurl = f"{self.server.sites.baseurl}/{self.server._site_id}"
 
     def test_pagination(self) -> None:
         with open(PAGINATION_XML, "rb") as f:
@@ -112,9 +112,9 @@ class RequestOptionTests(unittest.TestCase):
             matching_workbooks, pagination_item = self.server.workbooks.get(req_option)
 
         self.assertEqual(3, pagination_item.total_available)
-        self.assertEqual(set(["weather"]), matching_workbooks[0].tags)
-        self.assertEqual(set(["safari"]), matching_workbooks[1].tags)
-        self.assertEqual(set(["sample"]), matching_workbooks[2].tags)
+        self.assertEqual({"weather"}, matching_workbooks[0].tags)
+        self.assertEqual({"safari"}, matching_workbooks[1].tags)
+        self.assertEqual({"sample"}, matching_workbooks[2].tags)
 
     # check if filtered projects with spaces & special characters
     # get correctly returned
@@ -148,9 +148,9 @@ class RequestOptionTests(unittest.TestCase):
             matching_workbooks = self.server.workbooks.filter(tags__in=["sample", "safari", "weather"])
 
             self.assertEqual(3, matching_workbooks.total_available)
-            self.assertEqual(set(["weather"]), matching_workbooks[0].tags)
-            self.assertEqual(set(["safari"]), matching_workbooks[1].tags)
-            self.assertEqual(set(["sample"]), matching_workbooks[2].tags)
+            self.assertEqual({"weather"}, matching_workbooks[0].tags)
+            self.assertEqual({"safari"}, matching_workbooks[1].tags)
+            self.assertEqual({"sample"}, matching_workbooks[2].tags)
 
     def test_invalid_shorthand_option(self) -> None:
         with self.assertRaises(ValueError):

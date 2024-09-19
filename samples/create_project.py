@@ -84,7 +84,7 @@ def main():
         server.projects.populate_datasource_default_permissions(changed_project),
         server.projects.populate_permissions(changed_project)
         # Projects have default permissions set for the object types they contain
-        print("Permissions from project {}:".format(changed_project.id))
+        print(f"Permissions from project {changed_project.id}:")
         print(changed_project.permissions)
         print(
             changed_project.default_workbook_permissions,

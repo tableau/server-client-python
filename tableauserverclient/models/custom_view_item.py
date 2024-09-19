@@ -2,7 +2,7 @@ from datetime import datetime
 
 from defusedxml import ElementTree
 from defusedxml.ElementTree import fromstring, tostring
-from typing import Callable, List, Optional
+from typing import Callable, Optional
 
 from .exceptions import UnpopulatedPropertyError
 from .user_item import UserItem
@@ -11,7 +11,7 @@ from .workbook_item import WorkbookItem
 from ..datetime_helpers import parse_datetime
 
 
-class CustomViewItem(object):
+class CustomViewItem:
     def __init__(self, id: Optional[str] = None, name: Optional[str] = None) -> None:
         self._content_url: Optional[str] = None  # ?
         self._created_at: Optional["datetime"] = None
@@ -35,7 +35,7 @@ class CustomViewItem(object):
         owner_info = ""
         if self._owner:
             owner_info = " owner='{}'".format(self._owner.name or self._owner.id or "unknown")
-        return "<CustomViewItem id={} name=`{}`{}{}{}>".format(self.id, self.name, view_info, wb_info, owner_info)
+        return f"<CustomViewItem id={self.id} name=`{self.name}`{view_info}{wb_info}{owner_info}>"
 
     def _set_image(self, image):
         self._image = image
@@ -104,7 +104,7 @@ class CustomViewItem(object):
             return item[0]
 
     @classmethod
-    def list_from_response(cls, resp, ns, workbook_id="") -> List["CustomViewItem"]:
+    def list_from_response(cls, resp, ns, workbook_id="") -> list["CustomViewItem"]:
         return cls.from_xml_element(fromstring(resp), ns, workbook_id)
 
     """
@@ -121,7 +121,7 @@ class CustomViewItem(object):
     """
 
     @classmethod
-    def from_xml_element(cls, parsed_response, ns, workbook_id="") -> List["CustomViewItem"]:
+    def from_xml_element(cls, parsed_response, ns, workbook_id="") -> list["CustomViewItem"]:
         all_view_items = list()
         all_view_xml = parsed_response.findall(".//t:customView", namespaces=ns)
         for custom_view_xml in all_view_xml:

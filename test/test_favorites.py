@@ -28,7 +28,7 @@ class FavoritesTests(unittest.TestCase):
     def test_get(self) -> None:
         response_xml = read_xml_asset(GET_FAVORITES_XML)
         with requests_mock.mock() as m:
-            m.get("{0}/{1}".format(self.baseurl, self.user.id), text=response_xml)
+            m.get(f"{self.baseurl}/{self.user.id}", text=response_xml)
             self.server.favorites.get(self.user)
         self.assertIsNotNone(self.user._favorites)
         self.assertEqual(len(self.user.favorites["workbooks"]), 1)
@@ -54,7 +54,7 @@ class FavoritesTests(unittest.TestCase):
         workbook._id = "6d13b0ca-043d-4d42-8c9d-3f3313ea3a00"
         workbook.name = "Superstore"
         with requests_mock.mock() as m:
-            m.put("{0}/{1}".format(self.baseurl, self.user.id), text=response_xml)
+            m.put(f"{self.baseurl}/{self.user.id}", text=response_xml)
             self.server.favorites.add_favorite_workbook(self.user, workbook)
 
     def test_add_favorite_view(self) -> None:
@@ -63,7 +63,7 @@ class FavoritesTests(unittest.TestCase):
         view._id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
         view._name = "ENDANGERED SAFARI"
         with requests_mock.mock() as m:
-            m.put("{0}/{1}".format(self.baseurl, self.user.id), text=response_xml)
+            m.put(f"{self.baseurl}/{self.user.id}", text=response_xml)
             self.server.favorites.add_favorite_view(self.user, view)
 
     def test_add_favorite_datasource(self) -> None:
@@ -72,7 +72,7 @@ class FavoritesTests(unittest.TestCase):
         datasource._id = "e76a1461-3b1d-4588-bf1b-17551a879ad9"
         datasource.name = "SampleDS"
         with requests_mock.mock() as m:
-            m.put("{0}/{1}".format(self.baseurl, self.user.id), text=response_xml)
+            m.put(f"{self.baseurl}/{self.user.id}", text=response_xml)
             self.server.favorites.add_favorite_datasource(self.user, datasource)
 
     def test_add_favorite_project(self) -> None:
@@ -82,7 +82,7 @@ class FavoritesTests(unittest.TestCase):
         project = TSC.ProjectItem("Tableau")
         project._id = "1d0304cd-3796-429f-b815-7258370b9b74"
         with requests_mock.mock() as m:
-            m.put("{0}/{1}".format(baseurl, self.user.id), text=response_xml)
+            m.put(f"{baseurl}/{self.user.id}", text=response_xml)
             self.server.favorites.add_favorite_project(self.user, project)
 
     def test_delete_favorite_workbook(self) -> None:
@@ -90,7 +90,7 @@ class FavoritesTests(unittest.TestCase):
         workbook._id = "6d13b0ca-043d-4d42-8c9d-3f3313ea3a00"
         workbook.name = "Superstore"
         with requests_mock.mock() as m:
-            m.delete("{0}/{1}/workbooks/{2}".format(self.baseurl, self.user.id, workbook.id))
+            m.delete(f"{self.baseurl}/{self.user.id}/workbooks/{workbook.id}")
             self.server.favorites.delete_favorite_workbook(self.user, workbook)
 
     def test_delete_favorite_view(self) -> None:
@@ -98,7 +98,7 @@ class FavoritesTests(unittest.TestCase):
         view._id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
         view._name = "ENDANGERED SAFARI"
         with requests_mock.mock() as m:
-            m.delete("{0}/{1}/views/{2}".format(self.baseurl, self.user.id, view.id))
+            m.delete(f"{self.baseurl}/{self.user.id}/views/{view.id}")
             self.server.favorites.delete_favorite_view(self.user, view)
 
     def test_delete_favorite_datasource(self) -> None:
@@ -106,7 +106,7 @@ class FavoritesTests(unittest.TestCase):
         datasource._id = "e76a1461-3b1d-4588-bf1b-17551a879ad9"
         datasource.name = "SampleDS"
         with requests_mock.mock() as m:
-            m.delete("{0}/{1}/datasources/{2}".format(self.baseurl, self.user.id, datasource.id))
+            m.delete(f"{self.baseurl}/{self.user.id}/datasources/{datasource.id}")
             self.server.favorites.delete_favorite_datasource(self.user, datasource)
 
     def test_delete_favorite_project(self) -> None:
@@ -115,5 +115,5 @@ class FavoritesTests(unittest.TestCase):
         project = TSC.ProjectItem("Tableau")
         project._id = "1d0304cd-3796-429f-b815-7258370b9b74"
         with requests_mock.mock() as m:
-            m.delete("{0}/{1}/projects/{2}".format(baseurl, self.user.id, project.id))
+            m.delete(f"{baseurl}/{self.user.id}/projects/{project.id}")
             self.server.favorites.delete_favorite_project(self.user, project)

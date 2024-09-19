@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 
 class Auth(Endpoint):
-    class contextmgr(object):
+    class contextmgr:
         def __init__(self, callback):
             self._callback = callback
 
@@ -28,7 +28,7 @@ class Auth(Endpoint):
 
     @property
     def baseurl(self) -> str:
-        return "{0}/auth".format(self.parent_srv.baseurl)
+        return f"{self.parent_srv.baseurl}/auth"
 
     @api(version="2.0")
     def sign_in(self, auth_req: "Credentials") -> contextmgr:
@@ -42,7 +42,7 @@ class Auth(Endpoint):
 
         Creates a context manager that will sign out of the server upon exit.
         """
-        url = "{0}/{1}".format(self.baseurl, "signin")
+        url = f"{self.baseurl}/signin"
         signin_req = RequestFactory.Auth.signin_req(auth_req)
         server_response = self.parent_srv.session.post(
             url, data=signin_req, **self.parent_srv.http_options, allow_redirects=False
@@ -63,7 +63,7 @@ class Auth(Endpoint):
         user_id = parsed_response.find(".//t:user", namespaces=self.parent_srv.namespace).get("id", None)
         auth_token = parsed_response.find("t:credentials", namespaces=self.parent_srv.namespace).get("token", None)
         self.parent_srv._set_auth(site_id, user_id, auth_token)
-        logger.info("Signed into {0} as user with id {1}".format(self.parent_srv.server_address, user_id))
+        logger.info(f"Signed into {self.parent_srv.server_address} as user with id {user_id}")
         return Auth.contextmgr(self.sign_out)
 
     # We use the same request that username/password login uses for all auth types.
@@ -78,7 +78,7 @@ class Auth(Endpoint):
 
     @api(version="2.0")
     def sign_out(self) -> None:
-        url = "{0}/{1}".format(self.baseurl, "signout")
+        url = f"{self.baseurl}/signout"
         # If there are no auth tokens you're already signed out. No-op
         if not self.parent_srv.is_signed_in():
             return
@@ -88,7 +88,7 @@ class Auth(Endpoint):
 
     @api(version="2.6")
     def switch_site(self, site_item: "SiteItem") -> contextmgr:
-        url = "{0}/{1}".format(self.baseurl, "switchSite")
+        url = f"{self.baseurl}/switchSite"
         switch_req = RequestFactory.Auth.switch_req(site_item.content_url)
         try:
             server_response = self.post_request(url, switch_req)
@@ -104,11 +104,11 @@ class Auth(Endpoint):
         user_id = parsed_response.find(".//t:user", namespaces=self.parent_srv.namespace).get("id", None)
         auth_token = parsed_response.find("t:credentials", namespaces=self.parent_srv.namespace).get("token", None)
         self.parent_srv._set_auth(site_id, user_id, auth_token)
-        logger.info("Signed into {0} as user with id {1}".format(self.parent_srv.server_address, user_id))
+        logger.info(f"Signed into {self.parent_srv.server_address} as user with id {user_id}")
         return Auth.contextmgr(self.sign_out)
 
     @api(version="3.10")
     def revoke_all_server_admin_tokens(self) -> None:
-        url = "{0}/{1}".format(self.baseurl, "revokeAllServerAdminTokens")
+        url = f"{self.baseurl}/revokeAllServerAdminTokens"
         self.post_request(url, "")
         logger.info("Revoked all tokens for all server admins")

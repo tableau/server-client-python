@@ -75,7 +75,7 @@ class FlowRunTests(unittest.TestCase):
         response_xml = read_xml_asset(GET_BY_ID_XML)
         flow_run_id = "cc2e652d-4a9b-4476-8c93-b238c45db968"
         with mocked_time(), requests_mock.mock() as m:
-            m.get("{0}/{1}".format(self.baseurl, flow_run_id), text=response_xml)
+            m.get(f"{self.baseurl}/{flow_run_id}", text=response_xml)
             flow_run = self.server.flow_runs.wait_for_job(flow_run_id)
 
             self.assertEqual(flow_run_id, flow_run.id)
@@ -86,7 +86,7 @@ class FlowRunTests(unittest.TestCase):
         response_xml = read_xml_asset(GET_BY_ID_FAILED_XML)
         flow_run_id = "c2b35d5a-e130-471a-aec8-7bc5435fe0e7"
         with mocked_time(), requests_mock.mock() as m:
-            m.get("{0}/{1}".format(self.baseurl, flow_run_id), text=response_xml)
+            m.get(f"{self.baseurl}/{flow_run_id}", text=response_xml)
             with self.assertRaises(FlowRunFailedException):
                 self.server.flow_runs.wait_for_job(flow_run_id)
 
@@ -95,6 +95,6 @@ class FlowRunTests(unittest.TestCase):
         response_xml = read_xml_asset(GET_BY_ID_INPROGRESS_XML)
         flow_run_id = "71afc22c-9c06-40be-8d0f-4c4166d29e6c"
         with mocked_time(), requests_mock.mock() as m:
-            m.get("{0}/{1}".format(self.baseurl, flow_run_id), text=response_xml)
+            m.get(f"{self.baseurl}/{flow_run_id}", text=response_xml)
             with self.assertRaises(TimeoutError):
                 self.server.flow_runs.wait_for_job(flow_run_id, timeout=30)
