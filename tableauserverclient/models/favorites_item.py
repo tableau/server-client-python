@@ -1,6 +1,6 @@
 import logging
 
-from typing import dict, Union
+from typing import Union
 from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.models.tableau_types import TableauItem
