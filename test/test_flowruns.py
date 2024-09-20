@@ -1,31 +1,18 @@
 import sys
 import unittest
-import xml.etree.ElementTree as ET
 
 import requests_mock
 
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
 from tableauserverclient.server.endpoint.exceptions import FlowRunFailedException
-from ._utils import read_xml_asset, mocked_time
+from ._utils import read_xml_asset, mocked_time, server_response_error_factory
 
 GET_XML = "flow_runs_get.xml"
 GET_BY_ID_XML = "flow_runs_get_by_id.xml"
 GET_BY_ID_FAILED_XML = "flow_runs_get_by_id_failed.xml"
 GET_BY_ID_INPROGRESS_XML = "flow_runs_get_by_id_inprogress.xml"
 
-
-def server_response_error_factory(code: str, summary: str, detail: str) -> str:
-    root = ET.Element("tsResponse")
-    error = ET.SubElement(root, "error")
-    error.attrib["code"] = code
-
-    summary_element = ET.SubElement(error, "summary")
-    summary_element.text = summary
-
-    detail_element = ET.SubElement(error, "detail")
-    detail_element.text = detail
-    return ET.tostring(root, encoding="utf-8").decode("utf-8")
 
 
 class FlowRunTests(unittest.TestCase):
