@@ -1,9 +1,9 @@
 import logging
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, Union
 
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
 from tableauserverclient.server.endpoint.exceptions import FlowRunFailedException, FlowRunCancelledException
-from tableauserverclient.models import FlowRunItem, PaginationItem
+from tableauserverclient.models import FlowRunItem
 from tableauserverclient.exponential_backoff import ExponentialBackoffTimer
 
 from tableauserverclient.helpers.logging import logger
@@ -25,13 +25,15 @@ class FlowRuns(QuerysetEndpoint[FlowRunItem]):
 
     # Get all flows
     @api(version="3.10")
-    def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[FlowRunItem], PaginationItem]:
+    # QuerysetEndpoint expects a PaginationItem to be returned, but FlowRuns
+    # does not return a PaginationItem. Suppressing the mypy error because the
+    # changes to the QuerySet class should permit this to function regardless.
+    def get(self, req_options: Optional["RequestOptions"] = None) -> list[FlowRunItem]:  # type: ignore[override]
         logger.info("Querying all flow runs on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
-        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         all_flow_run_items = FlowRunItem.from_response(server_response.content, self.parent_srv.namespace)
-        return all_flow_run_items, pagination_item
+        return all_flow_run_items
 
     # Get 1 flow by id
     @api(version="3.10")
@@ -46,7 +48,7 @@ class FlowRuns(QuerysetEndpoint[FlowRunItem]):
 
     # Cancel 1 flow run by id
     @api(version="3.10")
-    def cancel(self, flow_run_id: str) -> None:
+    def cancel(self, flow_run_id: Union[str, FlowRunItem]) -> None:
         if not flow_run_id:
             error = "Flow ID undefined."
             raise ValueError(error)

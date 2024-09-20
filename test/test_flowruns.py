@@ -1,3 +1,4 @@
+import sys
 import unittest
 
 import requests_mock
@@ -5,7 +6,7 @@ import requests_mock
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
 from tableauserverclient.server.endpoint.exceptions import FlowRunFailedException
-from ._utils import read_xml_asset, mocked_time
+from ._utils import read_xml_asset, mocked_time, server_response_error_factory
 
 GET_XML = "flow_runs_get.xml"
 GET_BY_ID_XML = "flow_runs_get_by_id.xml"
@@ -28,9 +29,8 @@ class FlowRunTests(unittest.TestCase):
         response_xml = read_xml_asset(GET_XML)
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
-            all_flow_runs, pagination_item = self.server.flow_runs.get()
+            all_flow_runs = self.server.flow_runs.get()
 
-        self.assertEqual(2, pagination_item.total_available)
         self.assertEqual("cc2e652d-4a9b-4476-8c93-b238c45db968", all_flow_runs[0].id)
         self.assertEqual("2021-02-11T01:42:55Z", format_datetime(all_flow_runs[0].started_at))
         self.assertEqual("2021-02-11T01:57:38Z", format_datetime(all_flow_runs[0].completed_at))
@@ -98,3 +98,14 @@ class FlowRunTests(unittest.TestCase):
             m.get(f"{self.baseurl}/{flow_run_id}", text=response_xml)
             with self.assertRaises(TimeoutError):
                 self.server.flow_runs.wait_for_job(flow_run_id, timeout=30)
+
+    def test_queryset(self) -> None:
+        response_xml = read_xml_asset(GET_XML)
+        error_response = server_response_error_factory(
+            "400006", "Bad Request", "0xB4EAB088 : The start index '9900' is greater than or equal to the total count.)"
+        )
+        with requests_mock.mock() as m:
+            m.get(f"{self.baseurl}?pageNumber=1", text=response_xml)
+            m.get(f"{self.baseurl}?pageNumber=2", text=error_response)
+            queryset = self.server.flow_runs.all()
+            assert len(queryset) == sys.maxsize
