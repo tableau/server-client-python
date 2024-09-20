@@ -14,7 +14,6 @@ GET_BY_ID_FAILED_XML = "flow_runs_get_by_id_failed.xml"
 GET_BY_ID_INPROGRESS_XML = "flow_runs_get_by_id_inprogress.xml"
 
 
-
 class FlowRunTests(unittest.TestCase):
     def setUp(self) -> None:
         self.server = TSC.Server("http://test", False)
