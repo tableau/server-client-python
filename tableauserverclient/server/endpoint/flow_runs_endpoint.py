@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, Union
 
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
 from tableauserverclient.server.endpoint.exceptions import FlowRunFailedException, FlowRunCancelledException
@@ -48,7 +48,7 @@ class FlowRuns(QuerysetEndpoint[FlowRunItem]):
 
     # Cancel 1 flow run by id
     @api(version="3.10")
-    def cancel(self, flow_run_id: str) -> None:
+    def cancel(self, flow_run_id: Union[str, FlowRunItem]) -> None:
         if not flow_run_id:
             error = "Flow ID undefined."
             raise ValueError(error)
