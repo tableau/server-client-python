@@ -12,7 +12,7 @@ class Config:
     @property
     def FILESIZE_LIMIT_MB(self):
         return min(int(os.getenv("TSC_FILESIZE_LIMIT_MB", 64)), 64)
-    
+
     # For when a datasource is over 64MB, break it into 5MB(standard chunk size) chunks
     @property
     def CHUNK_SIZE_MB(self):
