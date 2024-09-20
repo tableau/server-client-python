@@ -44,7 +44,7 @@ class QuerySet(Iterable[T], Sized):
     QuerySet is an iterable, and can be used in for loops, list comprehensions,
     and other places where iterables are expected.
 
-    QuerySet is also a Sized, and can be used in places where the length of the
+    QuerySet is also Sized, and can be used in places where the length of the
     QuerySet is needed. The length of the QuerySet is the total number of items
     available in the QuerySet, not just the number of items that have been
     fetched. If the endpoint does not return a total count of items, the length
@@ -57,8 +57,8 @@ class QuerySet(Iterable[T], Sized):
     should create a new QuerySet for each place you need to use it, convert it
     to a list, or create a deep copy of the QuerySet.
 
-    QuerySet's are also indexable, and can be sliced. If you try to access an
-    item that has not been fetched, the QuerySet will fetch the page that
+    QuerySets are also indexable, and can be sliced. If you try to access an
+    index that has not been fetched, the QuerySet will fetch the page that
     contains the item you are looking for.
     """
 
