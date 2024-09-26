@@ -5291,6 +5291,7 @@ Name  |  Description
 `connections` |  The list of data connections (`ConnectionItem`) for the data sources used by the workbook. You must first call the [workbooks.populate_connections](#workbooks.populate_connections) method to access this data. See the [ConnectionItem class](#connectionitem-class).
 `content_url` |  The name of the data source as it would appear in a URL.
 `created_at` |  The date and time when the data source was created.
+`description` | The user-defined description of the workbook
 `id` |  The identifier for the workbook. You need this value to query a specific workbook or to delete a workbook with the `get_by_id` and `delete` methods.
 `name` | The name of the workbook.
 `owner_id` | The ID of the owner.
