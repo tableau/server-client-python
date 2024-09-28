@@ -38,7 +38,7 @@ def usage(args):
 
 def make_filter(**kwargs):
     options = TSC.RequestOptions()
-    for item, value in kwargs.items():
+    for item, value in list(kwargs.items()):
         name = getattr(TSC.RequestOptions.Field, item)
         options.filter.add(TSC.Filter(name, TSC.RequestOptions.Operator.Equals, value))
     return options
