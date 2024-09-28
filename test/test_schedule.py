@@ -165,7 +165,7 @@ class ScheduleTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             schedule_id = "8c5caf33-6223-4724-83c3-ccdc1e730a07"
-            baseurl = "{}/schedules/{}".format(self.server.baseurl, schedule_id)
+            baseurl = f"{self.server.baseurl}/schedules/{schedule_id}"
             m.get(baseurl, text=response_xml)
             schedule = self.server.schedules.get_by_id(schedule_id)
             self.assertIsNotNone(schedule)

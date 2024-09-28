@@ -140,7 +140,7 @@ class Endpoint:
         self._check_status(server_response, url)
 
         loggable_response = self.log_response_safely(server_response)
-        logger.debug("Server response from {0}".format(url))
+        logger.debug(f"Server response from {url}")
         # uncomment the following to log full responses in debug mode
         # BE CAREFUL WHEN SHARING THESE RESULTS - MAY CONTAIN YOUR SENSITIVE DATA
         # logger.debug(loggable_response)
