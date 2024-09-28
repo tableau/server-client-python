@@ -1,13 +1,7 @@
 ####
-# This script demonstrates how to use the Tableau Server Client
-# to interact with workbooks. It explores the different
-# functions that the Server API supports on workbooks.
-#
-# With no flags set, this sample will query all workbooks,
-# pick one workbook and populate its connections/views, and update
-# the workbook. Adding flags will demonstrate the specific feature
-# on top of the general operations.
-####
+# This script demonstrates how to use the Tableau Server Client to interact with extracts.
+# It explores the different functions that the REST API supports on extracts.
+#####
 
 import argparse
 import logging
