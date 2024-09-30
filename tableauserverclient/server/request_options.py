@@ -164,7 +164,6 @@ These options can be used by methods that are fetching data exported from a spec
 
 
 class _DataExportOptions(RequestOptionsBase):
-
     def __init__(self, maxage: int = -1):
         super().__init__()
         self.view_filters: list[tuple[str, str]] = []
