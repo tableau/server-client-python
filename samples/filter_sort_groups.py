@@ -71,7 +71,7 @@ def main():
             group_name = filtered_groups.pop().name
             print(group_name)
         else:
-            error = "No project named '{}' found".format(filter_group_name)
+            error = f"No project named '{filter_group_name}' found"
             print(error)
 
         # Or, try the above with the django style filtering

@@ -2,7 +2,7 @@ import copy
 import datetime
 import uuid
 import xml.etree.ElementTree as ET
-from typing import Callable, Dict, List, Optional, Set
+from typing import Callable, Optional
 
 from defusedxml.ElementTree import fromstring
 
@@ -20,7 +20,7 @@ from .view_item import ViewItem
 from .data_freshness_policy_item import DataFreshnessPolicyItem
 
 
-class WorkbookItem(object):
+class WorkbookItem:
     def __init__(self, project_id: Optional[str] = None, name: Optional[str] = None, show_tabs: bool = False) -> None:
         self._connections = None
         self._content_url = None
@@ -35,15 +35,15 @@ class WorkbookItem(object):
         self._revisions = None
         self._size = None
         self._updated_at = None
-        self._views: Optional[Callable[[], List[ViewItem]]] = None
+        self._views: Optional[Callable[[], list[ViewItem]]] = None
         self.name = name
         self._description = None
         self.owner_id: Optional[str] = None
         # workaround for Personal Space workbooks without a project
         self.project_id: Optional[str] = project_id or uuid.uuid4().__str__()
         self.show_tabs = show_tabs
-        self.hidden_views: Optional[List[str]] = None
-        self.tags: Set[str] = set()
+        self.hidden_views: Optional[list[str]] = None
+        self.tags: set[str] = set()
         self.data_acceleration_config = {
             "acceleration_enabled": None,
             "accelerate_now": None,
@@ -56,7 +56,7 @@ class WorkbookItem(object):
         return None
 
     def __str__(self):
-        return "<WorkbookItem {0} '{1}' contentUrl='{2}' project={3}>".format(
+        return "<WorkbookItem {} '{}' contentUrl='{}' project={}>".format(
             self._id, self.name, self.content_url, self.project_id
         )
 
@@ -64,14 +64,14 @@ class WorkbookItem(object):
         return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"
 
     @property
-    def connections(self) -> List[ConnectionItem]:
+    def connections(self) -> list[ConnectionItem]:
         if self._connections is None:
             error = "Workbook item must be populated with connections first."
             raise UnpopulatedPropertyError(error)
         return self._connections()
 
     @property
-    def permissions(self) -> List[PermissionsRule]:
+    def permissions(self) -> list[PermissionsRule]:
         if self._permissions is None:
             error = "Workbook item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
@@ -152,7 +152,7 @@ class WorkbookItem(object):
         return self._updated_at
 
     @property
-    def views(self) -> List[ViewItem]:
+    def views(self) -> list[ViewItem]:
         # Views can be set in an initial workbook response OR by a call
         # to Server. Without getting too fancy, I think we can rely on
         # returning a list from the response, until they call
@@ -191,7 +191,7 @@ class WorkbookItem(object):
         self._data_freshness_policy = value
 
     @property
-    def revisions(self) -> List[RevisionItem]:
+    def revisions(self) -> list[RevisionItem]:
         if self._revisions is None:
             error = "Workbook item must be populated with revisions first."
             raise UnpopulatedPropertyError(error)
@@ -203,7 +203,7 @@ class WorkbookItem(object):
     def _set_permissions(self, permissions):
         self._permissions = permissions
 
-    def _set_views(self, views: Callable[[], List[ViewItem]]) -> None:
+    def _set_views(self, views: Callable[[], list[ViewItem]]) -> None:
         self._views = views
 
     def _set_pdf(self, pdf: Callable[[], bytes]) -> None:
@@ -316,7 +316,7 @@ class WorkbookItem(object):
             self.data_freshness_policy = data_freshness_policy
 
     @classmethod
-    def from_response(cls, resp: str, ns: Dict[str, str]) -> List["WorkbookItem"]:
+    def from_response(cls, resp: str, ns: dict[str, str]) -> list["WorkbookItem"]:
         all_workbook_items = list()
         parsed_response = fromstring(resp)
         all_workbook_xml = parsed_response.findall(".//t:workbook", namespaces=ns)

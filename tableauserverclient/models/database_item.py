@@ -10,7 +10,7 @@ from .property_decorators import (
 )
 
 
-class DatabaseItem(object):
+class DatabaseItem:
     class ContentPermissions:
         LockedToProject = "LockedToDatabase"
         ManagedByOwner = "ManagedByOwner"
@@ -45,7 +45,7 @@ class DatabaseItem(object):
         self._tables = None  # Not implemented yet
 
     def __str__(self):
-        return "<Database {0} '{1}'>".format(self._id, self.name)
+        return f"<Database {self._id} '{self.name}'>"
 
     def __repr__(self):
         return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"
@@ -250,7 +250,7 @@ class DatabaseItem(object):
         self._tables = tables
 
     def _set_default_permissions(self, permissions, content_type):
-        attr = "_default_{content}_permissions".format(content=content_type)
+        attr = f"_default_{content_type}_permissions"
         setattr(
             self,
             attr,

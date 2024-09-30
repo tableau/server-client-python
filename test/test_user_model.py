@@ -1,7 +1,6 @@
 import logging
 import unittest
 from unittest.mock import *
-from typing import List
 import io
 
 import pytest
@@ -107,7 +106,7 @@ class UserDataTest(unittest.TestCase):
         TSC.UserItem.CSVImport.create_user_from_line(test_line)
 
     # for file handling
-    def _mock_file_content(self, content: List[str]) -> io.TextIOWrapper:
+    def _mock_file_content(self, content: list[str]) -> io.TextIOWrapper:
         # the empty string represents EOF
         # the tests run through the file twice, first to validate then to fetch
         mock = MagicMock(io.TextIOWrapper)
@@ -119,10 +118,10 @@ class UserDataTest(unittest.TestCase):
     def test_validate_import_file(self):
         test_data = self._mock_file_content(UserDataTest.valid_import_content)
         valid, invalid = TSC.UserItem.CSVImport.validate_file_for_import(test_data, UserDataTest.logger)
-        assert valid == 2, "Expected two lines to be parsed, got {}".format(valid)
-        assert invalid == [], "Expected no failures, got {}".format(invalid)
+        assert valid == 2, f"Expected two lines to be parsed, got {valid}"
+        assert invalid == [], f"Expected no failures, got {invalid}"
 
     def test_validate_usernames_file(self):
         test_data = self._mock_file_content(UserDataTest.usernames)
         valid, invalid = TSC.UserItem.CSVImport.validate_file_for_import(test_data, UserDataTest.logger)
-        assert valid == 5, "Exactly 5 of the lines were valid, counted {}".format(valid + invalid)
+        assert valid == 5, f"Exactly 5 of the lines were valid, counted {valid + invalid}"

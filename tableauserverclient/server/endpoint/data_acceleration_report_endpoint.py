@@ -10,14 +10,14 @@ from tableauserverclient.helpers.logging import logger
 
 class DataAccelerationReport(Endpoint):
     def __init__(self, parent_srv):
-        super(DataAccelerationReport, self).__init__(parent_srv)
+        super().__init__(parent_srv)
 
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
         self._default_permissions = _DefaultPermissionsEndpoint(parent_srv, lambda: self.baseurl)
 
     @property
     def baseurl(self):
-        return "{0}/sites/{1}/dataAccelerationReport".format(self.parent_srv.baseurl, self.parent_srv.site_id)
+        return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/dataAccelerationReport"
 
     @api(version="3.8")
     def get(self, req_options=None):

@@ -47,7 +47,7 @@ def main():
     with server.auth.sign_in(tableau_auth):
         # Gets all workbook items
         all_workbooks, pagination_item = server.workbooks.get()
-        print("\nThere are {} workbooks on site: ".format(pagination_item.total_available))
+        print(f"\nThere are {pagination_item.total_available} workbooks on site: ")
         print([workbook.name for workbook in all_workbooks])
 
         if all_workbooks:

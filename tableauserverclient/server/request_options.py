@@ -10,13 +10,12 @@ import logging
 from tableauserverclient.helpers.logging import logger
 
 
-# This is the basic code for adding query parameters to a url
-class RequestOptionsBase(object):
+class RequestOptionsBase:
     # This method is used if server api version is below 3.7 (2020.1)
     def apply_query_params(self, url):
         try:
             params = self.get_query_params()
-            params_list = ["{}={}".format(k, v) for (k, v) in params.items()]
+            params_list = [f"{k}={v}" for (k, v) in params.items()]
 
             logger.debug("Applying options to request: <%s(%s)>", self.__class__.__name__, ",".join(params_list))
 
@@ -24,7 +23,7 @@ class RequestOptionsBase(object):
                 url, existing_params = url.split("?")
                 params_list.append(existing_params)
 
-            return "{0}?{1}".format(url, "&".join(params_list))
+            return "{}?{}".format(url, "&".join(params_list))
         except NotImplementedError:
             raise
 
@@ -200,13 +199,14 @@ class _DataExportOptions(RequestOptionsBase):
         return params
 
     def vf(self, name: str, value: str) -> Self:
-        """Apply a filter to the view for a filter that is a normal column
-        within the view."""
+        """Apply a filter based on a column within the view.
+        Note that when filtering on a boolean type field, the only valid values are 'true' and 'false'"""
         self.view_filters.append((name, value))
         return self
 
     def parameter(self, name: str, value: str) -> Self:
-        """Apply a filter based on a parameter within the workbook."""
+        """Apply a filter based on a parameter within the workbook.
+        Note that when filtering on a boolean type field, the only valid values are 'true' and 'false'"""
         self.view_parameters.append((name, value))
         return self
 
