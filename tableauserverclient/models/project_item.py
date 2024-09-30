@@ -9,6 +9,8 @@ from tableauserverclient.models.property_decorators import property_is_enum, pro
 
 
 class ProjectItem:
+    ERROR_MSG = "Project item must be populated with permissions first."
+
     class ContentPermissions:
         LockedToProject: str = "LockedToProject"
         ManagedByOwner: str = "ManagedByOwner"
@@ -43,6 +45,9 @@ class ProjectItem:
         self._default_lens_permissions = None
         self._default_datarole_permissions = None
         self._default_metric_permissions = None
+        self._default_virtualconnection_permissions = None
+        self._default_database_permissions = None
+        self._default_table_permissions = None
 
     @property
     def content_permissions(self):
@@ -56,51 +61,62 @@ class ProjectItem:
     @property
     def permissions(self):
         if self._permissions is None:
-            error = "Project item must be populated with permissions first."
-            raise UnpopulatedPropertyError(error)
+            raise UnpopulatedPropertyError(self.ERROR_MSG)
         return self._permissions()
 
     @property
     def default_datasource_permissions(self):
         if self._default_datasource_permissions is None:
-            error = "Project item must be populated with permissions first."
-            raise UnpopulatedPropertyError(error)
+            raise UnpopulatedPropertyError(self.ERROR_MSG)
         return self._default_datasource_permissions()
 
     @property
     def default_workbook_permissions(self):
         if self._default_workbook_permissions is None:
-            error = "Project item must be populated with permissions first."
-            raise UnpopulatedPropertyError(error)
+            raise UnpopulatedPropertyError(self.ERROR_MSG)
         return self._default_workbook_permissions()
 
     @property
     def default_flow_permissions(self):
         if self._default_flow_permissions is None:
-            error = "Project item must be populated with permissions first."
-            raise UnpopulatedPropertyError(error)
+            raise UnpopulatedPropertyError(self.ERROR_MSG)
         return self._default_flow_permissions()
 
     @property
     def default_lens_permissions(self):
         if self._default_lens_permissions is None:
-            error = "Project item must be populated with permissions first."
-            raise UnpopulatedPropertyError(error)
+            raise UnpopulatedPropertyError(self.ERROR_MSG)
         return self._default_lens_permissions()
 
     @property
     def default_datarole_permissions(self):
         if self._default_datarole_permissions is None:
-            error = "Project item must be populated with permissions first."
-            raise UnpopulatedPropertyError(error)
+            raise UnpopulatedPropertyError(self.ERROR_MSG)
         return self._default_datarole_permissions()
 
     @property
     def default_metric_permissions(self):
         if self._default_metric_permissions is None:
-            error = "Project item must be populated with permissions first."
-            raise UnpopulatedPropertyError(error)
+            raise UnpopulatedPropertyError(self.ERROR_MSG)
         return self._default_metric_permissions()
+
+    @property
+    def default_virtualconnection_permissions(self):
+        if self._default_virtualconnection_permissions is None:
+            raise UnpopulatedPropertyError(self.ERROR_MSG)
+        return self._default_virtualconnection_permissions()
+
+    @property
+    def default_database_permissions(self):
+        if self._default_database_permissions is None:
+            raise UnpopulatedPropertyError(self.ERROR_MSG)
+        return self._default_database_permissions()
+
+    @property
+    def default_table_permissions(self):
+        if self._default_table_permissions is None:
+            raise UnpopulatedPropertyError(self.ERROR_MSG)
+        return self._default_table_permissions()
 
     @property
     def id(self) -> Optional[str]:
