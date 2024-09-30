@@ -995,9 +995,9 @@ class WorkbookRequest(object):
             if data_freshness_policy_config.option == "FreshEvery":
                 if data_freshness_policy_config.fresh_every_schedule is not None:
                     fresh_every_element = ET.SubElement(data_freshness_policy_element, "freshEverySchedule")
-                    fresh_every_element.attrib[
-                        "frequency"
-                    ] = data_freshness_policy_config.fresh_every_schedule.frequency
+                    fresh_every_element.attrib["frequency"] = (
+                        data_freshness_policy_config.fresh_every_schedule.frequency
+                    )
                     fresh_every_element.attrib["value"] = str(data_freshness_policy_config.fresh_every_schedule.value)
                 else:
                     raise ValueError(f"data_freshness_policy_config.fresh_every_schedule must be populated.")

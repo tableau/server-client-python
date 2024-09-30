@@ -1,4 +1,5 @@
 import sys
+from typing import Optional
 
 from typing_extensions import Self
 
@@ -9,6 +10,7 @@ import logging
 from tableauserverclient.helpers.logging import logger
 
 
+# This is the basic code for adding query parameters to a url
 class RequestOptionsBase(object):
     # This method is used if server api version is below 3.7 (2020.1)
     def apply_query_params(self, url):
@@ -26,11 +28,48 @@ class RequestOptionsBase(object):
         except NotImplementedError:
             raise
 
-    def get_query_params(self):
-        raise NotImplementedError()
+
+# If it wasn't a breaking change, I'd rename it to QueryOptions
+"""
+This class manages options can be used when querying content on the server
+"""
 
 
 class RequestOptions(RequestOptionsBase):
+    def __init__(self, pagenumber=1, pagesize=None):
+        self.pagenumber = pagenumber
+        self.pagesize = pagesize or config.PAGE_SIZE
+        self.sort = set()
+        self.filter = set()
+        # This is private until we expand all of our parsers to handle the extra fields
+        self._all_fields = False
+
+    def get_query_params(self) -> dict:
+        params = {}
+        if self.sort and len(self.sort) > 0:
+            sort_options = (str(sort_item) for sort_item in self.sort)
+            ordered_sort_options = sorted(sort_options)
+            params["sort"] = ",".join(ordered_sort_options)
+        if len(self.filter) > 0:
+            filter_options = (str(filter_item) for filter_item in self.filter)
+            ordered_filter_options = sorted(filter_options)
+            params["filter"] = ",".join(ordered_filter_options)
+        if self._all_fields:
+            params["fields"] = "_all_"
+        if self.pagenumber:
+            params["pageNumber"] = self.pagenumber
+        if self.pagesize:
+            params["pageSize"] = self.pagesize
+        return params
+
+    def page_size(self, page_size):
+        self.pagesize = page_size
+        return self
+
+    def page_number(self, page_number):
+        self.pagenumber = page_number
+        return self
+
     class Operator:
         Equals = "eq"
         GreaterThan = "gt"
@@ -41,6 +80,7 @@ class RequestOptions(RequestOptionsBase):
         Has = "has"
         CaseInsensitiveEquals = "cieq"
 
+    # These are fields in the REST API
     class Field:
         Args = "args"
         AuthenticationType = "authenticationType"
@@ -117,51 +157,48 @@ class RequestOptions(RequestOptionsBase):
         Desc = "desc"
         Asc = "asc"
 
-    def __init__(self, pagenumber=1, pagesize=None):
-        self.pagenumber = pagenumber
-        self.pagesize = pagesize or config.PAGE_SIZE
-        self.sort = set()
-        self.filter = set()
 
-        # This is private until we expand all of our parsers to handle the extra fields
-        self._all_fields = False
+"""
+These options can be used by methods that are fetching data exported from a specific content item
+"""
 
-    def page_size(self, page_size):
-        self.pagesize = page_size
-        return self
 
-    def page_number(self, page_number):
-        self.pagenumber = page_number
-        return self
+class _DataExportOptions(RequestOptionsBase):
+
+    def __init__(self, maxage: int = -1):
+        super().__init__()
+        self.view_filters: list[tuple[str, str]] = []
+        self.view_parameters: list[tuple[str, str]] = []
+        self.max_age: Optional[int] = maxage
+        self._language: Optional[str] = None
+
+    """
+    This setting will affect the contents of the workbook as they are exported.
+    Valid language values are tableau-supported languages like de, es, en
+    If no locale is specified, the default locale for that language will be used
+    """
+
+    def language(self, value):
+        self._language = value
+
+    @property
+    def max_age(self):
+        return self._max_age
+
+    @max_age.setter
+    @property_is_int(range=(0, 240), allowed=[-1])
+    def max_age(self, value):
+        self._max_age = value
 
     def get_query_params(self):
         params = {}
-        if self.pagenumber:
-            params["pageNumber"] = self.pagenumber
-        if self.pagesize:
-            params["pageSize"] = self.pagesize
-        if len(self.sort) > 0:
-            sort_options = (str(sort_item) for sort_item in self.sort)
-            ordered_sort_options = sorted(sort_options)
-            params["sort"] = ",".join(ordered_sort_options)
-        if len(self.filter) > 0:
-            filter_options = (str(filter_item) for filter_item in self.filter)
-            ordered_filter_options = sorted(filter_options)
-            params["filter"] = ",".join(ordered_filter_options)
-        if self._all_fields:
-            params["fields"] = "_all_"
+        if self.max_age != -1:
+            params["maxAge"] = self.max_age
+        if self.language:
+            params["language"] = self.language
+
+        self._append_view_filters(params)
         return params
-
-
-class _FilterOptionsBase(RequestOptionsBase):
-    """Provide a basic implementation of adding view filters to the url"""
-
-    def __init__(self):
-        self.view_filters = []
-        self.view_parameters = []
-
-    def get_query_params(self):
-        raise NotImplementedError()
 
     def vf(self, name: str, value: str) -> Self:
         """Apply a filter to the view for a filter that is a normal column
@@ -181,82 +218,33 @@ class _FilterOptionsBase(RequestOptionsBase):
             params[name] = value
 
 
-class CSVRequestOptions(_FilterOptionsBase):
-    def __init__(self, maxage=-1):
-        super(CSVRequestOptions, self).__init__()
-        self.max_age = maxage
-
-    @property
-    def max_age(self):
-        return self._max_age
-
-    @max_age.setter
-    @property_is_int(range=(0, 240), allowed=[-1])
-    def max_age(self, value):
-        self._max_age = value
-
-    def get_query_params(self):
-        params = {}
-        if self.max_age != -1:
-            params["maxAge"] = self.max_age
-
-        self._append_view_filters(params)
-        return params
+class CSVRequestOptions(_DataExportOptions):
+    extension = "csv"
 
 
-class ExcelRequestOptions(_FilterOptionsBase):
-    def __init__(self, maxage: int = -1) -> None:
-        super().__init__()
-        self.max_age = maxage
-
-    @property
-    def max_age(self) -> int:
-        return self._max_age
-
-    @max_age.setter
-    @property_is_int(range=(0, 240), allowed=[-1])
-    def max_age(self, value: int) -> None:
-        self._max_age = value
-
-    def get_query_params(self):
-        params = {}
-        if self.max_age != -1:
-            params["maxAge"] = self.max_age
-
-        self._append_view_filters(params)
-        return params
+class ExcelRequestOptions(_DataExportOptions):
+    extension = "xlsx"
 
 
-class ImageRequestOptions(_FilterOptionsBase):
+class ImageRequestOptions(_DataExportOptions):
+    extension = "png"
+
     # if 'high' isn't specified, the REST API endpoint returns an image with standard resolution
     class Resolution:
         High = "high"
 
     def __init__(self, imageresolution=None, maxage=-1):
-        super(ImageRequestOptions, self).__init__()
+        super().__init__(maxage=maxage)
         self.image_resolution = imageresolution
-        self.max_age = maxage
-
-    @property
-    def max_age(self):
-        return self._max_age
-
-    @max_age.setter
-    @property_is_int(range=(0, 240), allowed=[-1])
-    def max_age(self, value):
-        self._max_age = value
 
     def get_query_params(self):
-        params = {}
+        params = super().get_query_params()
         if self.image_resolution:
             params["resolution"] = self.image_resolution
-        if self.max_age != -1:
-            params["maxAge"] = self.max_age
-        self._append_view_filters(params)
         return params
 
 
-class PDFRequestOptions(_FilterOptionsBase):
+class PDFRequestOptions(_DataExportOptions):
     class PageType:
         A3 = "a3"
         A4 = "a4"
@@ -278,21 +266,11 @@ class PDFRequestOptions(_FilterOptionsBase):
         Landscape = "landscape"
 
     def __init__(self, page_type=None, orientation=None, maxage=-1, viz_height=None, viz_width=None):
-        super(PDFRequestOptions, self).__init__()
+        super().__init__(maxage=maxage)
         self.page_type = page_type
         self.orientation = orientation
-        self.max_age = maxage
         self.viz_height = viz_height
         self.viz_width = viz_width
-
-    @property
-    def max_age(self):
-        return self._max_age
-
-    @max_age.setter
-    @property_is_int(range=(0, 240), allowed=[-1])
-    def max_age(self, value):
-        self._max_age = value
 
     @property
     def viz_height(self):
@@ -312,16 +290,13 @@ class PDFRequestOptions(_FilterOptionsBase):
     def viz_width(self, value):
         self._viz_width = value
 
-    def get_query_params(self):
-        params = {}
+    def get_query_params(self) -> dict:
+        params = super().get_query_params()
         if self.page_type:
             params["type"] = self.page_type
 
         if self.orientation:
             params["orientation"] = self.orientation
-
-        if self.max_age != -1:
-            params["maxAge"] = self.max_age
 
         # XOR. Either both are None or both are not None.
         if (self.viz_height is None) ^ (self.viz_width is None):
@@ -332,7 +307,5 @@ class PDFRequestOptions(_FilterOptionsBase):
 
         if self.viz_width is not None:
             params["vizWidth"] = self.viz_width
-
-        self._append_view_filters(params)
 
         return params

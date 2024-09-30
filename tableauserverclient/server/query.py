@@ -56,12 +56,10 @@ class QuerySet(Iterable[T], Sized):
                 return
 
     @overload
-    def __getitem__(self: Self, k: Slice) -> List[T]:
-        ...
+    def __getitem__(self: Self, k: Slice) -> List[T]: ...
 
     @overload
-    def __getitem__(self: Self, k: int) -> T:
-        ...
+    def __getitem__(self: Self, k: int) -> T: ...
 
     def __getitem__(self, k):
         page = self.page_number
