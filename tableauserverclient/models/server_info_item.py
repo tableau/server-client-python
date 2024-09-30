@@ -6,7 +6,7 @@ from defusedxml.ElementTree import fromstring
 from tableauserverclient.helpers.logging import logger
 
 
-class ServerInfoItem(object):
+class ServerInfoItem:
     def __init__(self, product_version, build_number, rest_api_version):
         self._product_version = product_version
         self._build_number = build_number
@@ -40,11 +40,11 @@ class ServerInfoItem(object):
         try:
             parsed_response = fromstring(resp)
         except xml.etree.ElementTree.ParseError as error:
-            logger.info("Unexpected response for ServerInfo: {}".format(resp))
+            logger.info(f"Unexpected response for ServerInfo: {resp}")
             logger.info(error)
             return cls("Unknown", "Unknown", "Unknown")
         except Exception as error:
-            logger.info("Unexpected response for ServerInfo: {}".format(resp))
+            logger.info(f"Unexpected response for ServerInfo: {resp}")
             logger.info(error)
             return cls("Unknown", "Unknown", "Unknown")
 

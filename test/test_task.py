@@ -119,7 +119,7 @@ class TaskTests(unittest.TestCase):
         with open(GET_XML_DATAACCELERATION_TASK, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
-            m.get("{}/{}".format(self.server.tasks.baseurl, TaskItem.Type.DataAcceleration), text=response_xml)
+            m.get(f"{self.server.tasks.baseurl}/{TaskItem.Type.DataAcceleration}", text=response_xml)
             all_tasks, pagination_item = self.server.tasks.get(task_type=TaskItem.Type.DataAcceleration)
 
         task = all_tasks[0]
@@ -145,7 +145,7 @@ class TaskTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         task_id = "f84901ac-72ad-4f9b-a87e-7a3500402ad6"
         with requests_mock.mock() as m:
-            m.get("{}/{}".format(self.baseurl, task_id), text=response_xml)
+            m.get(f"{self.baseurl}/{task_id}", text=response_xml)
             task = self.server.tasks.get_by_id(task_id)
 
         self.assertEqual("c7a9327e-1cda-4504-b026-ddb43b976d1d", task.target.id)
@@ -159,7 +159,7 @@ class TaskTests(unittest.TestCase):
         with open(GET_XML_RUN_NOW_RESPONSE, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
-            m.post("{}/{}/runNow".format(self.baseurl, task_id), text=response_xml)
+            m.post(f"{self.baseurl}/{task_id}/runNow", text=response_xml)
             job_response_content = self.server.tasks.run(task).decode("utf-8")
 
         self.assertTrue("7b6b59a8-ac3c-4d1d-2e9e-0b5b4ba8a7b6" in job_response_content)
@@ -181,7 +181,7 @@ class TaskTests(unittest.TestCase):
         with open(GET_XML_CREATE_TASK_RESPONSE, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
-            m.post("{}".format(self.baseurl), text=response_xml)
+            m.post(f"{self.baseurl}", text=response_xml)
             create_response_content = self.server.tasks.create(task).decode("utf-8")
 
         self.assertTrue("task_id" in create_response_content)

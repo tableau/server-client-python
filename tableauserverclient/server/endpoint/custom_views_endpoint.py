@@ -2,7 +2,7 @@ import io
 import logging
 import os
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Union
 
 from tableauserverclient.config import BYTES_PER_MB, config
 from tableauserverclient.filesys_helpers import get_file_object_size
@@ -33,11 +33,11 @@ io_types_w = (io.BufferedWriter, io.BytesIO)
 
 class CustomViews(QuerysetEndpoint[CustomViewItem]):
     def __init__(self, parent_srv):
-        super(CustomViews, self).__init__(parent_srv)
+        super().__init__(parent_srv)
 
     @property
     def baseurl(self) -> str:
-        return "{0}/sites/{1}/customviews".format(self.parent_srv.baseurl, self.parent_srv.site_id)
+        return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/customviews"
 
     @property
     def expurl(self) -> str:
@@ -55,7 +55,7 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
     """
 
     @api(version="3.18")
-    def get(self, req_options: Optional["RequestOptions"] = None) -> Tuple[List[CustomViewItem], PaginationItem]:
+    def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[CustomViewItem], PaginationItem]:
         logger.info("Querying all custom views on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -68,8 +68,8 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
         if not view_id:
             error = "Custom view item missing ID."
             raise MissingRequiredFieldError(error)
-        logger.info("Querying custom view (ID: {0})".format(view_id))
-        url = "{0}/{1}".format(self.baseurl, view_id)
+        logger.info(f"Querying custom view (ID: {view_id})")
+        url = f"{self.baseurl}/{view_id}"
         server_response = self.get_request(url)
         return CustomViewItem.from_response(server_response.content, self.parent_srv.namespace)
 
@@ -83,10 +83,10 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
             return self._get_view_image(view_item, req_options)
 
         view_item._set_image(image_fetcher)
-        logger.info("Populated image for custom view (ID: {0})".format(view_item.id))
+        logger.info(f"Populated image for custom view (ID: {view_item.id})")
 
     def _get_view_image(self, view_item: CustomViewItem, req_options: Optional["ImageRequestOptions"]) -> bytes:
-        url = "{0}/{1}/image".format(self.baseurl, view_item.id)
+        url = f"{self.baseurl}/{view_item.id}/image"
         server_response = self.get_request(url, req_options)
         image = server_response.content
         return image
@@ -105,10 +105,10 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
             return view_item
 
         # Update the custom view owner or name
-        url = "{0}/{1}".format(self.baseurl, view_item.id)
+        url = f"{self.baseurl}/{view_item.id}"
         update_req = RequestFactory.CustomView.update_req(view_item)
         server_response = self.put_request(url, update_req)
-        logger.info("Updated custom view (ID: {0})".format(view_item.id))
+        logger.info(f"Updated custom view (ID: {view_item.id})")
         return CustomViewItem.from_response(server_response.content, self.parent_srv.namespace)
 
     # Delete 1 view by id
@@ -117,9 +117,9 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
         if not view_id:
             error = "Custom View ID undefined."
             raise ValueError(error)
-        url = "{0}/{1}".format(self.baseurl, view_id)
+        url = f"{self.baseurl}/{view_id}"
         self.delete_request(url)
-        logger.info("Deleted single custom view (ID: {0})".format(view_id))
+        logger.info(f"Deleted single custom view (ID: {view_id})")
 
     @api(version="3.21")
     def download(self, view_item: CustomViewItem, file: PathOrFileW) -> PathOrFileW:

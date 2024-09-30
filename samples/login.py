@@ -59,7 +59,7 @@ def sample_connect_to_server(args):
         password = args.password or getpass.getpass("Password: ")
 
         tableau_auth = TSC.TableauAuth(args.username, password, site_id=args.site)
-        print("\nSigning in...\nServer: {}\nSite: {}\nUsername: {}".format(args.server, args.site, args.username))
+        print(f"\nSigning in...\nServer: {args.server}\nSite: {args.site}\nUsername: {args.username}")
 
     else:
         # Trying to authenticate using personal access tokens.
@@ -68,7 +68,7 @@ def sample_connect_to_server(args):
         tableau_auth = TSC.PersonalAccessTokenAuth(
             token_name=args.token_name, personal_access_token=token, site_id=args.site
         )
-        print("\nSigning in...\nServer: {}\nSite: {}\nToken name: {}".format(args.server, args.site, args.token_name))
+        print(f"\nSigning in...\nServer: {args.server}\nSite: {args.site}\nToken name: {args.token_name}")
 
     if not tableau_auth:
         raise TabError("Did not create authentication object. Check arguments.")

@@ -58,7 +58,7 @@ minimum_supported_server_version = "2.3"
 default_server_version = "2.4"  # first version that dropped the legacy auth endpoint
 
 
-class Server(object):
+class Server:
     class PublishMode:
         Append = "Append"
         Overwrite = "Overwrite"
@@ -130,7 +130,7 @@ class Server(object):
             raise ValueError("Server connection settings not valid", req_ex)
 
     def __repr__(self):
-        return "<TableauServerClient [Connection: {}, {}]>".format(self.baseurl, self.server_info.serverInfo)
+        return f"<TableauServerClient [Connection: {self.baseurl}, {self.server_info.serverInfo}]>"
 
     def add_http_options(self, options_dict: dict):
         try:
@@ -142,7 +142,7 @@ class Server(object):
             # expected errors on invalid input:
             # 'set' object has no attribute 'keys', 'list' object has no attribute 'keys'
             # TypeError: cannot convert dictionary update sequence element #0 to a sequence (input is a tuple)
-            raise ValueError("Invalid http options given: {}".format(options_dict))
+            raise ValueError(f"Invalid http options given: {options_dict}")
 
     def clear_http_options(self):
         self._http_options = dict()
@@ -176,15 +176,15 @@ class Server(object):
             old_version = self.version
             version = self.server_info.get().rest_api_version
         except ServerInfoEndpointNotFoundError as e:
-            logger.info("Could not get version info from server: {}{}".format(e.__class__, e))
+            logger.info(f"Could not get version info from server: {e.__class__}{e}")
             version = self._get_legacy_version()
         except EndpointUnavailableError as e:
-            logger.info("Could not get version info from server: {}{}".format(e.__class__, e))
+            logger.info(f"Could not get version info from server: {e.__class__}{e}")
             version = self._get_legacy_version()
         except Exception as e:
-            logger.info("Could not get version info from server: {}{}".format(e.__class__, e))
+            logger.info(f"Could not get version info from server: {e.__class__}{e}")
             version = None
-        logger.info("versions: {}, {}".format(version, old_version))
+        logger.info(f"versions: {version}, {old_version}")
         return version or old_version
 
     def use_server_version(self):
@@ -201,12 +201,12 @@ class Server(object):
 
     def assert_at_least_version(self, comparison: str, reason: str):
         if not self.check_at_least_version(comparison):
-            error = "{} is not available in API version {}. Requires {}".format(reason, self.version, comparison)
+            error = f"{reason} is not available in API version {self.version}. Requires {comparison}"
             raise EndpointUnavailableError(error)
 
     @property
     def baseurl(self):
-        return "{0}/api/{1}".format(self._server_address, str(self.version))
+        return f"{self._server_address}/api/{str(self.version)}"
 
     @property
     def namespace(self):

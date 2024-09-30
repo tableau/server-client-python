@@ -12,10 +12,10 @@ class ServerResponseError(TableauError):
         self.summary = summary
         self.detail = detail
         self.url = url
-        super(ServerResponseError, self).__init__(str(self))
+        super().__init__(str(self))
 
     def __str__(self):
-        return "\n\n\t{0}: {1}\n\t\t{2}".format(self.code, self.summary, self.detail)
+        return f"\n\n\t{self.code}: {self.summary}\n\t\t{self.detail}"
 
     @classmethod
     def from_response(cls, resp, ns, url=None):
@@ -40,7 +40,7 @@ class InternalServerError(TableauError):
         self.url = request_url or "server"
 
     def __str__(self):
-        return "\n\nInternal error {0} at {1}\n{2}".format(self.code, self.url, self.content)
+        return f"\n\nInternal error {self.code} at {self.url}\n{self.content}"
 
 
 class MissingRequiredFieldError(TableauError):
