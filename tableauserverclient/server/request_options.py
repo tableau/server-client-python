@@ -193,7 +193,7 @@ class _DataExportOptions(RequestOptionsBase):
         if self.max_age != -1:
             params["maxAge"] = self.max_age
         if self.language:
-            params["language"] = self.language
+            params["language"] = self._language
 
         self._append_view_filters(params)
         return params
