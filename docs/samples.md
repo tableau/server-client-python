@@ -71,7 +71,6 @@ The following list describes the samples available in the repository:
 * `smoke_test.py` Verifies that TSC is installed correctly and is able to run.
 * `update_connection.py` Updates and embeds connection credentials of a datasource.
 * `update_datasource_data.py` Updates the data within a published live-to-Hyper datasource.
-* `update_workbook_data_acceleration.py` Updates workbook data acceleration settings.
 * `update_workbook_data_freshness_policy.py` Updates workbook data freshness policy settings.
 
 **Note**: For all of the samples, ensure that your Tableau Server user account has permission to access the resources. Also keep in mind that some example operations (like create group) are not allowed on Tableau Cloud.
