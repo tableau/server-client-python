@@ -82,7 +82,6 @@ def main():
             sample_datasource.description = "Description updated by TSC"
             server.datasources.update(sample_datasource)
 
-            """
             # Add some tags to the datasource
             original_tag_set = set(sample_datasource.tags)
             sample_datasource.tags.update("a", "b", "c", "d")
@@ -93,8 +92,6 @@ def main():
             # Delete all tags that were added by setting tags to original
             sample_datasource.tags = original_tag_set
             server.datasources.update(sample_datasource)
-            """
-
 
 if __name__ == "__main__":
     main()
