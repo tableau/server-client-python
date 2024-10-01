@@ -2429,17 +2429,17 @@ Name  |  Description
    TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow
  }
 
- rules = TSC.PermissionsRule(
+ rule = TSC.PermissionsRule(
   grantee=project_item,
   capabilities=capabilities
  )
  
- server.projects.update_flow_default_permissions(project_item, [rules])
+ server.projects.update_flow_default_permissions(project_item, [rule])
 ``` 
 
 #### projects.delete_workbook_default_permissions
 ```py
-projects.delete_workbook_default_permissions(item, rules)
+projects.delete_workbook_default_permissions(item, rule)
 ```
 
 Delete default workbook permissions.
@@ -2451,7 +2451,7 @@ REST API: [Delete Default Workbook Permissions](https://help.tableau.com/current
 Name  |  Description  
 :--- | :---  
 `item`   | A project object.
-`rules`   | A list of PermissionsRule objects.
+`rule`   | A PermissionsRule object.
 
 **Example**  
  
@@ -2467,17 +2467,17 @@ Name  |  Description
    TSC.Permission.Capability.ViewComments: TSC.Permission.Mode.Allow
  }
 
- rules = TSC.PermissionsRule(
+ rule = TSC.PermissionsRule(
   grantee=project_item,
   capabilities=capabilities
  )
  
- server.projects.delete_workbook_default_permissions(project_item, [rules])
+ server.projects.delete_workbook_default_permissions(project_item, rule)
 ``` 
 
 #### projects.delete_datasource_default_permissions
 ```py
-projects.delete_datasource_default_permissions(item, rules)
+projects.delete_datasource_default_permissions(item, rule)
 ```
 
 Delete default datasource permissions.
@@ -2489,7 +2489,7 @@ REST API: [Delete Default Datasource Permissions](https://help.tableau.com/curre
 Name  |  Description  
 :--- | :---  
 `item`   | A project object.
-`rules`   | A list of PermissionsRule objects.
+`rule`   | A PermissionsRule object.
 
 **Example**  
  
@@ -2505,17 +2505,17 @@ Name  |  Description
    TSC.Permission.Capability.ExportXml: TSC.Permission.Mode.Allow
  }
 
- rules = TSC.PermissionsRule(
+ rule = TSC.PermissionsRule(
   grantee=project_item,
   capabilities=capabilities
  )
  
- server.projects.delete_datasource_default_permissions(project_item, [rules])
+ server.projects.delete_datasource_default_permissions(project_item, rule)
 ``` 
 
 #### projects.delete_flow_default_permissions
 ```py
-projects.delete_flow_default_permissions(item, rules)
+projects.delete_flow_default_permissions(item, rule)
 ```
 
 Delete default flow permissions.
@@ -2527,7 +2527,7 @@ REST API: [Delete Default Flow Permissions](https://help.tableau.com/current/api
 Name  |  Description  
 :--- | :---  
 `item`   | A project object.
-`rules`   | A list of PermissionsRule objects.
+`rule`   | A PermissionsRule object.
 
 **Example**  
  
@@ -2543,12 +2543,12 @@ Name  |  Description
    TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow
  }
 
- rules = TSC.PermissionsRule(
+ rule = TSC.PermissionsRule(
   grantee=project_item,
   capabilities=capabilities
  )
  
- server.projects.delete_flow_default_permissions(project_item, [rules])
+ server.projects.delete_flow_default_permissions(project_item, rule)
 ``` 
 
 <br>
