@@ -5,6 +5,7 @@ import io
 import itertools
 import logging
 from typing import Optional
+import warnings
 
 from tableauserverclient.server.query import QuerySet
 
@@ -349,6 +350,7 @@ class Users(QuerysetEndpoint[UserItem]):
     # Add new users to site. This does not actually perform a bulk action, it's syntactic sugar
     @api(version="2.0")
     def add_all(self, users: list[UserItem]):
+        warnings.warn("This method is deprecated, use bulk_add instead", DeprecationWarning)
         created = []
         failed = []
         for user in users:
@@ -405,8 +407,6 @@ class Users(QuerysetEndpoint[UserItem]):
 
     @api(version="2.0")
     def create_from_file(self, filepath: str) -> tuple[list[UserItem], list[tuple[UserItem, ServerResponseError]]]:
-        import warnings
-
         warnings.warn("This method is deprecated, use bulk_add instead", DeprecationWarning)
         created = []
         failed = []
