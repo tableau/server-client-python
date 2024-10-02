@@ -41,6 +41,30 @@ class Auth(Endpoint):
         optionally a user_id to impersonate.
 
         Creates a context manager that will sign out of the server upon exit.
+
+        Parameters
+        ----------
+        auth_req : Credentials
+            The credentials object to use for signing in. Can be a TableauAuth,
+            PersonalAccessTokenAuth, or JWTAuth object.
+
+        Returns
+        -------
+        contextmgr
+            A context manager that will sign out of the server upon exit.
+
+        Examples
+        --------
+        >>> import tableauserverclient as TSC
+
+        >>> # create an auth object
+        >>> tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
+
+        >>> # create an instance for your server
+        >>> server = TSC.Server('https://SERVER_URL')
+
+        >>> # call the sign-in method with the auth object
+        >>> server.auth.sign_in(tableau_auth)
         """
         url = f"{self.baseurl}/signin"
         signin_req = RequestFactory.Auth.signin_req(auth_req)
@@ -95,6 +119,28 @@ class Auth(Endpoint):
         Switch to a different site on the server. This will sign out of the
         current site and sign in to the new site. If used as a context manager,
         will sign out of the new site upon exit.
+
+        Parameters
+        ----------
+        site_item : SiteItem
+            The site to switch to.
+
+        Returns
+        -------
+        contextmgr
+            A context manager that will sign out of the new site upon exit.
+
+        Examples
+        --------
+        >>> import tableauserverclient as TSC
+
+        >>> # Find the site you want to switch to
+        >>> new_site = server.sites.get_by_id("9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d")
+        >>> # switch to the new site
+        >>> with server.auth.switch_site(new_site):
+        >>>     # do something on the new site
+        >>>     pass
+
         """
         url = f"{self.baseurl}/switchSite"
         switch_req = RequestFactory.Auth.switch_req(site_item.content_url)
