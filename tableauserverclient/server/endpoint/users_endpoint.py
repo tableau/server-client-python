@@ -349,8 +349,34 @@ class Users(QuerysetEndpoint[UserItem]):
 
     # Add new users to site. This does not actually perform a bulk action, it's syntactic sugar
     @api(version="2.0")
-    def add_all(self, users: list[UserItem]):
-        warnings.warn("This method is deprecated, use bulk_add instead", DeprecationWarning)
+    def add_all(self, users: list[UserItem]) -> tuple[list[UserItem], list[UserItem]]:
+        """
+        Syntactic sugar for calling users.add multiple times. This method has
+        been deprecated in favor of using the bulk_add which accomplishes the
+        same task in one API call.
+
+        .. deprecated:: v0.34.0
+            `add_all` will be removed as its functionality is replicated via
+            the `bulk_add` method.
+
+        Parameters
+        ----------
+        users: list[UserItem]
+           A list of UserItem objects to add to the site. Each UserItem object
+           will be passed to the `add` method individually.
+
+        Returns
+        -------
+        tuple[list[UserItem], list[UserItem]]
+            The first element of the tuple is a list of UserItem objects that
+            were successfully added to the site. The second element is a list
+            of UserItem objects that failed to be added to the site.
+
+        Warnings
+        --------
+        This method is deprecated. Use the `bulk_add` method instead.
+        """
+        warnings.warn("This method is deprecated, use bulk_add method instead.", DeprecationWarning)
         created = []
         failed = []
         for user in users:
@@ -387,6 +413,17 @@ class Users(QuerysetEndpoint[UserItem]):
 
         Details about administrator level and publishing capability are
         inferred from the site_role.
+
+        Parameters
+        ----------
+        users: Iterable[UserItem]
+            An iterable of UserItem objects to add to the site. See above for
+            what fields are required and optional.
+
+        Returns
+        -------
+        JobItem
+            The job that is started for adding the users in bulk.
         """
         url = f"{self.baseurl}/import"
         # Allow for iterators to be passed into the function
@@ -399,6 +436,22 @@ class Users(QuerysetEndpoint[UserItem]):
 
     @api(version="3.15")
     def bulk_remove(self, users: Iterable[UserItem]) -> None:
+        """
+        Remove multiple users from the site. The users are identified by their
+        domain and name. The users are removed in bulk, so the server will not
+        return a job item to track the progress of the operation nor a response
+        for each user that was removed.
+
+        Parameters
+        ----------
+        users: Iterable[UserItem]
+            An iterable of UserItem objects to remove from the site. Each
+            UserItem object should have the domain and name attributes set.
+
+        Returns
+        -------
+        None
+        """
         url = f"{self.baseurl}/delete"
         csv_content = remove_users_csv(users)
         request, content_type = RequestFactory.User.delete_csv_req(csv_content)
@@ -407,6 +460,35 @@ class Users(QuerysetEndpoint[UserItem]):
 
     @api(version="2.0")
     def create_from_file(self, filepath: str) -> tuple[list[UserItem], list[tuple[UserItem, ServerResponseError]]]:
+        """
+        Syntactic sugar for calling users.add multiple times. This method has
+        been deprecated in favor of using the bulk_add which accomplishes the
+        same task in one API call.
+
+        .. deprecated:: v0.34.0
+            `add_all` will be removed as its functionality is replicated via
+            the `bulk_add` method.
+
+        Parameters
+        ----------
+        filepath: str
+            The path to the CSV file containing the users to add to the site.
+            The file is read in line by line and each line is passed to the
+            `add` method.
+
+        Returns
+        -------
+        tuple[list[UserItem], list[tuple[UserItem, ServerResponseError]]]
+            The first element of the tuple is a list of UserItem objects that
+            were successfully added to the site. The second element is a list
+            of tuples where the first element is the UserItem object that failed
+            to be added to the site and the second element is the ServerResponseError
+            that was raised when attempting to add the user.
+
+        Warnings
+        --------
+        This method is deprecated. Use the `bulk_add` method instead.
+        """
         warnings.warn("This method is deprecated, use bulk_add instead", DeprecationWarning)
         created = []
         failed = []
@@ -632,6 +714,21 @@ def create_users_csv(users: Iterable[UserItem], identity_pool=None) -> bytes:
     - Admin Level
     - Publish capability
     - Email
+
+    Parameters
+    ----------
+    users: Iterable[UserItem]
+        An iterable of UserItem objects to create the CSV from.
+
+    identity_pool: Optional[str]
+        The identity pool to use when adding the users. This parameter is not
+        yet supported in this version of the Tableau Server Client, and should
+        be left as None.
+
+    Returns
+    -------
+    bytes
+        A byte string containing the CSV data.
     """
     if identity_pool is not None:
         raise NotImplementedError("Identity pool is not supported in this version")
@@ -671,6 +768,35 @@ def create_users_csv(users: Iterable[UserItem], identity_pool=None) -> bytes:
 
 
 def remove_users_csv(users: Iterable[UserItem]) -> bytes:
+    """
+    Create a CSV byte string from an Iterable of UserItem objects. This function
+    only consumes the domain and name attributes of the UserItem objects. The
+    CSV will have space for the following columns, though only the first column
+    will be populated, and no header row:
+
+    - Username
+    - Password
+    - Display Name
+    - License
+    - Admin Level
+    - Publish capability
+    - Email
+
+    Parameters
+    ----------
+    users: Iterable[UserItem]
+        An iterable of UserItem objects to create the CSV from.
+
+    identity_pool: Optional[str]
+        The identity pool to use when adding the users. This parameter is not
+        yet supported in this version of the Tableau Server Client, and should
+        be left as None.
+
+    Returns
+    -------
+    bytes
+        A byte string containing the CSV data.
+    """
     with io.StringIO() as output:
         writer = csv.writer(output, quoting=csv.QUOTE_MINIMAL)
         for user in users:
