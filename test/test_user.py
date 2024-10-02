@@ -3,6 +3,7 @@ import io
 import os
 from pathlib import Path
 import unittest
+from unittest.mock import patch
 
 from defusedxml import ElementTree as ET
 import pytest
@@ -489,3 +490,18 @@ class UserTests(unittest.TestCase):
                 with self.subTest(user=user):
                     name, *_ = row.split(",")
                     assert name == f"{user.domain_name}\\{user.name}" if user.domain_name else user.name
+
+    def test_add_all(self) -> None:
+        self.server.version = "2.0"
+        users = [
+            make_user("Alice", "Viewer"),
+            make_user("Bob", "Explorer"),
+            make_user("Charlie", "Creator", "SAML"),
+            make_user("Dave"),
+        ]
+
+        with patch("tableauserverclient.server.endpoint.users_endpoint.Users.add", autospec=True) as mock_add:
+            with pytest.warns(DeprecationWarning):
+                self.server.users.add_all(users)
+
+        assert mock_add.call_count == len(users)
