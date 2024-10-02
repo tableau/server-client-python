@@ -70,14 +70,17 @@ class Auth(Endpoint):
     # The distinct methods are mostly useful for explicitly showing api version support for each auth type
     @api(version="3.6")
     def sign_in_with_personal_access_token(self, auth_req: "Credentials") -> contextmgr:
+        """Passthrough to sign_in method"""
         return self.sign_in(auth_req)
 
     @api(version="3.17")
     def sign_in_with_json_web_token(self, auth_req: "Credentials") -> contextmgr:
+        """Passthrough to sign_in method"""
         return self.sign_in(auth_req)
 
     @api(version="2.0")
     def sign_out(self) -> None:
+        """Sign out of current session."""
         url = f"{self.baseurl}/signout"
         # If there are no auth tokens you're already signed out. No-op
         if not self.parent_srv.is_signed_in():
@@ -88,6 +91,11 @@ class Auth(Endpoint):
 
     @api(version="2.6")
     def switch_site(self, site_item: "SiteItem") -> contextmgr:
+        """
+        Switch to a different site on the server. This will sign out of the
+        current site and sign in to the new site. If used as a context manager,
+        will sign out of the new site upon exit.
+        """
         url = f"{self.baseurl}/switchSite"
         switch_req = RequestFactory.Auth.switch_req(site_item.content_url)
         try:
@@ -109,6 +117,9 @@ class Auth(Endpoint):
 
     @api(version="3.10")
     def revoke_all_server_admin_tokens(self) -> None:
+        """
+        Revokes all personal access tokens for all server admins on the server.
+        """
         url = f"{self.baseurl}/revokeAllServerAdminTokens"
         self.post_request(url, "")
         logger.info("Revoked all tokens for all server admins")
