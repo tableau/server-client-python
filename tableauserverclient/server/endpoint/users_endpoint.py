@@ -424,6 +424,27 @@ class Users(QuerysetEndpoint[UserItem]):
         -------
         JobItem
             The job that is started for adding the users in bulk.
+
+        Examples
+        --------
+        >>> import tableauserverclient as TSC
+        >>> server = TSC.Server('http://localhost')
+        >>> # Login to the server
+
+        >>> # Create a list of UserItem objects to add to the site
+        >>> users = [
+        >>>    TSC.UserItem(name="user1", site_role="Unlicensed"),
+        >>>    TSC.UserItem(name="user2", site_role="Explorer"),
+        >>>    TSC.UserItem(name="user3", site_role="Creator"),
+        >>> ]
+
+        >>> # Set the domain name for the users
+        >>> for user in users:
+        >>>     user.domain_name = "example.com"
+
+        >>> # Add the users to the site
+        >>> job = server.users.bulk_add(users)
+
         """
         url = f"{self.baseurl}/import"
         # Allow for iterators to be passed into the function
@@ -451,6 +472,16 @@ class Users(QuerysetEndpoint[UserItem]):
         Returns
         -------
         None
+
+        Examples
+        --------
+        >>> import tableauserverclient as TSC
+        >>> server = TSC.Server('http://localhost')
+        >>> # Login to the server
+
+        >>> # Find the users to remove
+        >>> example_users = server.users.filter(domain_name="example.com")
+        >>> server.users.bulk_remove(example_users)
         """
         url = f"{self.baseurl}/delete"
         csv_content = remove_users_csv(users)
