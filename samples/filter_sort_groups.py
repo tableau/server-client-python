@@ -47,7 +47,7 @@ def main():
     logging.basicConfig(level=logging_level)
 
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
-    server = TSC.Server(args.server, use_server_version=True,  http_options={"verify":False})
+    server = TSC.Server(args.server, use_server_version=True, http_options={"verify": False})
     with server.auth.sign_in(tableau_auth):
         group_name = "SALES NORTHWEST"
         # Try to create a group named "SALES NORTHWEST"
@@ -59,10 +59,7 @@ def main():
 
         # we no longer need to encode the space
         options = TSC.RequestOptions()
-        options.filter.add(
-            TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, group_name
-            )
-        )
+        options.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, group_name))
 
         filtered_groups, _ = server.groups.get(req_options=options)
         # Result can either be a matching group or an empty list
@@ -74,14 +71,14 @@ def main():
             print(error)
 
         print("---")
-        
+
         # Or, try the above with the django style filtering
         try:
             group = server.groups.filter(name=group_name)[0]
             print(group)
         except IndexError:
             print(f"No group named '{group_name}' found")
-        
+
         print("====")
 
         options = TSC.RequestOptions()
@@ -109,7 +106,7 @@ def main():
         for group in server.groups.filter(name__in=groups).order_by("-name"):
             print(group.name)
         """
-        
+
 
 if __name__ == "__main__":
     main()
