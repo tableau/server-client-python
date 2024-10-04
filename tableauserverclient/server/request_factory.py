@@ -996,9 +996,9 @@ class WorkbookRequest:
             if data_freshness_policy_config.option == "FreshEvery":
                 if data_freshness_policy_config.fresh_every_schedule is not None:
                     fresh_every_element = ET.SubElement(data_freshness_policy_element, "freshEverySchedule")
-                    fresh_every_element.attrib["frequency"] = (
-                        data_freshness_policy_config.fresh_every_schedule.frequency
-                    )
+                    fresh_every_element.attrib[
+                        "frequency"
+                    ] = data_freshness_policy_config.fresh_every_schedule.frequency
                     fresh_every_element.attrib["value"] = str(data_freshness_policy_config.fresh_every_schedule.value)
                 else:
                     raise ValueError(f"data_freshness_policy_config.fresh_every_schedule must be populated.")
@@ -1199,11 +1199,13 @@ class SubscriptionRequest:
 
         # Schedule element
         schedule_element = ET.SubElement(subscription_element, "schedule")
-        schedule_element.attrib["id"] = subscription_item.schedule_id
+        if subscription_item.schedule_id is not None:
+            schedule_element.attrib["id"] = subscription_item.schedule_id
 
         # User element
         user_element = ET.SubElement(subscription_element, "user")
-        user_element.attrib["id"] = subscription_item.user_id
+        if subscription_item.user_id is not None:
+            user_element.attrib["id"] = subscription_item.user_id
         return ET.tostring(xml_request)
 
     @_tsrequest_wrapped
