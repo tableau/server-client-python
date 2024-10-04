@@ -43,6 +43,35 @@ class Users(QuerysetEndpoint[UserItem]):
         tuple[list[UserItem], PaginationItem]
             Returns a tuple with a list of UserItem objects and a PaginationItem object.
 
+        Raises
+        ------
+        ServerResponseError
+            code: 400006
+            summary: Invalid page number
+            detail: The page number is not an integer, is less than one, or is
+                greater than the final page number for users at the requested
+                page size.
+
+        ServerResponseError
+            code: 400007
+            summary: Invalid page size
+            detail: The page size parameter is not an integer, is less than one.
+
+        ServerResponseError
+            code: 403014
+            summary: Page size limit exceeded
+            detail: The specified page size is larger than the maximum page size
+
+        ServerResponseError
+            code: 404000
+            summary: Site not found
+            detail: The site ID in the URI doesn't correspond to an existing site.
+
+        ServerResponseError
+            code: 405000
+            summary: Invalid request method
+            detail: Request type was not GET.
+
         Examples
         --------
         >>> import tableauserverclient as TSC
@@ -81,6 +110,32 @@ class Users(QuerysetEndpoint[UserItem]):
         -------
         UserItem
             The user item that was queried.
+
+        Raises
+        ------
+        ValueError
+            If the user ID is not specified.
+
+        ServerResponseError
+            code: 404000
+            summary: Site not found
+            detail: The site ID in the URI doesn't correspond to an existing site.
+
+        ServerResponseError
+            code: 403133
+            summary: Query user permissions forbidden
+            detail: The user does not have permissions to query user information
+                for other users
+
+        ServerResponseError
+            code: 404002
+            summary: User not found
+            detail: The user ID in the URI doesn't correspond to an existing user.
+
+        ServerResponseError
+            code: 405000
+            summary: Invalid request method
+            detail: Request type was not GET.
 
         Examples
         --------
@@ -211,6 +266,62 @@ class Users(QuerysetEndpoint[UserItem]):
         UserItem
             The user item that was added to the site with attributes from the
             site populated.
+
+        Raises
+        ------
+        ValueError
+            If the user item is missing a name
+
+        ValueError
+            If the user item is missing a site role
+
+        ServerResponseError
+            code: 400000
+            summary: Bad Request
+            detail: The content of the request body is missing or incomplete, or
+                contains malformed XML.
+
+        ServerResponseError
+            code: 400003
+            summary: Bad Request
+            detail: The user authentication setting ServerDefault is not
+                supported for you site. Try again using TableauIDWithMFA instead.
+
+        ServerResponseError
+            code: 400013
+            summary: Invalid site role
+            detail: The value of the siteRole attribute must be Explorer,
+                ExplorerCanPublish, SiteAdministratorCreator,
+                SiteAdministratorExplorer, Unlicensed, or Viewer.
+
+        ServerResponseError
+            code: 404000
+            summary: Site not found
+            detail: The site ID in the URI doesn't correspond to an existing site.
+
+        ServerResponseError
+            code: 404002
+            summary: User not found
+            detail: The server is configured to use Active Directory for
+                authentication, and the username specified in the request body
+                doesn't match an existing user in Active Directory.
+
+        ServerResponseError
+            code: 405000
+            summary: Invalid request method
+            detail: Request type was not POST.
+
+        ServerResponseError
+            code: 409000
+            summary: User conflict
+            detail: The specified user already exists on the site.
+
+        ServerResponseError
+            code: 409005
+            summary: Guest user conflict
+            detail: The Tableau Server API doesn't allow adding a user with the
+                guest role to a site.
+
 
         Examples
         --------
