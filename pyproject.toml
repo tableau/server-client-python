@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68.0", "versioneer>=0.29", "wheel"]
+requires = ["setuptools>=75.0", "versioneer[toml]==0.29", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -12,11 +12,11 @@ license = {file = "LICENSE"}
 readme = "README.md"
 
 dependencies = [
-    'defusedxml>=0.7.1',  # latest as at 7/31/23
+    'defusedxml>=0.8.0.dev0',  # dropped support for python 2
     'packaging>=23.1',   # latest as at 7/31/23
     'requests>=2.32',  # latest as at 7/31/23
     'urllib3>=2.2.2,<3',
-    'typing_extensions>=4.0.1',
+    'typing_extensions>=4.0',
 ]
 requires-python = ">=3.9"
 classifiers = [
@@ -54,3 +54,10 @@ implicit_optional = true
 [tool.pytest.ini_options]
 testpaths = ["test"]
 addopts = "--junitxml=./test.junit.xml"
+
+[tool.versioneer]
+VCS = "git"
+style = "pep440-pre"
+versionfile_source = "tableauserverclient/_version.py"
+versionfile_build = "tableauserverclient/_version.py"
+tag_prefix = "v"
