@@ -164,13 +164,14 @@ class _FilterOptionsBase(RequestOptionsBase):
         raise NotImplementedError()
 
     def vf(self, name: str, value: str) -> Self:
-        """Apply a filter to the view for a filter that is a normal column
-        within the view."""
+        """Apply a filter based on a column within the view.
+        Note that when filtering on a boolean type field, the only valid values are 'true' and 'false'"""
         self.view_filters.append((name, value))
         return self
 
     def parameter(self, name: str, value: str) -> Self:
-        """Apply a filter based on a parameter within the workbook."""
+        """Apply a filter based on a parameter within the workbook.
+        Note that when filtering on a boolean type field, the only valid values are 'true' and 'false'"""
         self.view_parameters.append((name, value))
         return self
 
