@@ -175,12 +175,17 @@ class _DataExportOptions(RequestOptionsBase):
     Valid language values are tableau-supported languages like de, es, en
     If no locale is specified, the default locale for that language will be used
     """
+    @property
+    def language(self)  -> str | None:
+        return self._language
 
-    def language(self, value):
+    
+    @language.setter
+    def language(self, value) -> None:
         self._language = value
 
     @property
-    def max_age(self):
+    def max_age(self) -> int:
         return self._max_age
 
     @max_age.setter
