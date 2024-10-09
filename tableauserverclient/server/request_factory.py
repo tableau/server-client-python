@@ -1118,6 +1118,13 @@ class TaskRequest:
         pass
 
     @_tsrequest_wrapped
+    def refresh_req(self, xml_request: ET.Element, incremental: bool = False) -> bytes:
+        task_element = ET.SubElement(xml_request, 'extractRefresh')
+        if incremental:
+            task_element.attrib['incremental'] = "true"
+        return ET.tostring(xml_request)
+
+    @_tsrequest_wrapped
     def create_extract_req(self, xml_request: ET.Element, extract_item: "TaskItem") -> bytes:
         extract_element = ET.SubElement(xml_request, "extractRefresh")
 

@@ -25,8 +25,11 @@ def main():
         help="desired logging level (set to error by default)",
     )
     # Options specific to this sample
-    parser.add_argument("--delete")
-    parser.add_argument("--create")
+    parser.add_argument("--create",  action="store_true")
+    parser.add_argument("--delete", action="store_true")
+    parser.add_argument("--refresh",  action="store_true")
+    parser.add_argument("--workbook", required=False)
+    parser.add_argument("--datasource", required=False)
     args = parser.parse_args()
 
     # Set logging level based on user input, or error by default
@@ -39,19 +42,45 @@ def main():
     server.add_http_options({"verify": False})
     server.use_server_version()
     with server.auth.sign_in(tableau_auth):
-        # Gets all workbook items
-        all_workbooks, pagination_item = server.workbooks.get()
-        print(f"\nThere are {pagination_item.total_available} workbooks on site: ")
-        print([workbook.name for workbook in all_workbooks])
 
-        if all_workbooks:
-            # Pick one workbook from the list
-            wb = all_workbooks[3]
+        wb = None        
+        ds = None
+        if args.workbook:
+            wb = server.workbooks.get_by_id(args.workbook)
+            if wb is None:
+                raise ValueError(f"Workbook not found for id {args.workbook}")
+        elif args.datasource:
+            ds = server.datasources.get_by_id(args.datasource)
+            if ds is None:
+                raise ValueError(f"Datasource not found for id {args.datasource}")
+        else:   
+            # Gets all workbook items
+            all_workbooks, pagination_item = server.workbooks.get()
+            print(f"\nThere are {pagination_item.total_available} workbooks on site: ")
+            print([workbook.name for workbook in all_workbooks])
+
+            if all_workbooks:
+                # Pick one workbook from the list
+                wb = all_workbooks[3]
 
         if args.create:
             print("create extract on wb ", wb.name)
             extract_job = server.workbooks.create_extract(wb, includeAll=True)
             print(extract_job)
+            
+        if args.refresh:
+            extract_job = None
+            if ds is not None: 
+                print(f"refresh extract on datasource {ds.name}")
+                extract_job = server.datasources.refresh(ds, includeAll=True, incremental=True)
+            elif wb is not None:
+                print(f"refresh extract on workbook {wb.name}")
+                extract_job = server.workbooks.refresh(wb)
+            else: 
+                print("no content item selected to refresh")
+                
+            print(extract_job)
+            
 
         if args.delete:
             print("delete extract on wb ", wb.name)
