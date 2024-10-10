@@ -59,7 +59,7 @@ def main():
 
         # Step 3: Download workbook to a temp directory
         if len(all_workbooks) == 0:
-            print("No workbook named {} found.".format(args.workbook_name))
+            print(f"No workbook named {args.workbook_name} found.")
         else:
             tmpdir = tempfile.mkdtemp()
             try:
@@ -68,10 +68,10 @@ def main():
                 # Step 4: Check if destination site exists, then sign in to the site
                 all_sites, pagination_info = source_server.sites.get()
                 found_destination_site = any(
-                    (True for site in all_sites if args.destination_site.lower() == site.content_url.lower())
+                    True for site in all_sites if args.destination_site.lower() == site.content_url.lower()
                 )
                 if not found_destination_site:
-                    error = "No site named {} found.".format(args.destination_site)
+                    error = f"No site named {args.destination_site} found."
                     raise LookupError(error)
 
                 tableau_auth.site_id = args.destination_site
@@ -85,7 +85,7 @@ def main():
                     new_workbook = dest_server.workbooks.publish(
                         new_workbook, workbook_path, mode=TSC.Server.PublishMode.Overwrite
                     )
-                    print("Successfully moved {0} ({1})".format(new_workbook.name, new_workbook.id))
+                    print(f"Successfully moved {new_workbook.name} ({new_workbook.id})")
 
                 # Step 6: Delete workbook from source site and delete temp directory
                 source_server.workbooks.delete(all_workbooks[0].id)

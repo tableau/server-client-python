@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from typing import Dict, List, Optional
+from typing import Optional
 
 from defusedxml.ElementTree import fromstring
 
@@ -48,12 +48,12 @@ class Permission:
 
 
 class PermissionsRule:
-    def __init__(self, grantee: ResourceReference, capabilities: Dict[str, str]) -> None:
+    def __init__(self, grantee: ResourceReference, capabilities: dict[str, str]) -> None:
         self.grantee = grantee
         self.capabilities = capabilities
 
     def __repr__(self):
-        return "<PermissionsRule grantee={}, capabilities={}>".format(self.grantee, self.capabilities)
+        return f"<PermissionsRule grantee={self.grantee}, capabilities={self.capabilities}>"
 
     def __eq__(self, other: object) -> bool:
         if not hasattr(other, "grantee") or not hasattr(other, "capabilities"):
@@ -67,7 +67,7 @@ class PermissionsRule:
         if self.capabilities == other.capabilities:
             return self
 
-        capabilities = set((*self.capabilities.keys(), *other.capabilities.keys()))
+        capabilities = {*self.capabilities.keys(), *other.capabilities.keys()}
         new_capabilities = {}
         for capability in capabilities:
             if (self.capabilities.get(capability), other.capabilities.get(capability)) == (
@@ -87,7 +87,7 @@ class PermissionsRule:
         if self.capabilities == other.capabilities:
             return self
 
-        capabilities = set((*self.capabilities.keys(), *other.capabilities.keys()))
+        capabilities = {*self.capabilities.keys(), *other.capabilities.keys()}
         new_capabilities = {}
         for capability in capabilities:
             if Permission.Mode.Allow in (self.capabilities.get(capability), other.capabilities.get(capability)):
@@ -101,14 +101,14 @@ class PermissionsRule:
         return PermissionsRule(self.grantee, new_capabilities)
 
     @classmethod
-    def from_response(cls, resp, ns=None) -> List["PermissionsRule"]:
+    def from_response(cls, resp, ns=None) -> list["PermissionsRule"]:
         parsed_response = fromstring(resp)
 
         rules = []
         permissions_rules_list_xml = parsed_response.findall(".//t:granteeCapabilities", namespaces=ns)
 
         for grantee_capability_xml in permissions_rules_list_xml:
-            capability_dict: Dict[str, str] = {}
+            capability_dict: dict[str, str] = {}
 
             grantee = PermissionsRule._parse_grantee_element(grantee_capability_xml, ns)
 
@@ -117,7 +117,7 @@ class PermissionsRule:
                 mode = capability_xml.get("mode")
 
                 if name is None or mode is None:
-                    logger.error("Capability was not valid: {}".format(capability_xml))
+                    logger.error(f"Capability was not valid: {capability_xml}")
                     raise UnpopulatedPropertyError()
                 else:
                     capability_dict[name] = mode
@@ -128,7 +128,7 @@ class PermissionsRule:
         return rules
 
     @staticmethod
-    def _parse_grantee_element(grantee_capability_xml: ET.Element, ns: Optional[Dict[str, str]]) -> ResourceReference:
+    def _parse_grantee_element(grantee_capability_xml: ET.Element, ns: Optional[dict[str, str]]) -> ResourceReference:
         """Use Xpath magic and some string splitting to get the right object type from the xml"""
 
         # Get the first element in the tree with an 'id' attribute
@@ -147,6 +147,6 @@ class PermissionsRule:
         elif grantee_type == "groupSet":
             grantee = GroupSetItem.as_reference(grantee_id)
         else:
-            raise UnknownGranteeTypeError("No support for grantee type of {}".format(grantee_type))
+            raise UnknownGranteeTypeError(f"No support for grantee type of {grantee_type}")
 
         return grantee

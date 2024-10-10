@@ -51,7 +51,7 @@ def main():
 
         # Create the site if it doesn't exist
         if existing_site is None:
-            print("Site not found: {0} Creating it...".format(args.site_id))
+            print(f"Site not found: {args.site_id} Creating it...")
             new_site = TSC.SiteItem(
                 name=args.site_id,
                 content_url=args.site_id.replace(" ", ""),
@@ -59,7 +59,7 @@ def main():
             )
             server.sites.create(new_site)
         else:
-            print("Site {0} exists. Moving on...".format(args.site_id))
+            print(f"Site {args.site_id} exists. Moving on...")
 
     ################################################################################
     # Step 3: Sign-in to our target site
@@ -81,7 +81,7 @@ def main():
 
         # Create our project if it doesn't exist
         if project is None:
-            print("Project not found: {0} Creating it...".format(args.project))
+            print(f"Project not found: {args.project} Creating it...")
             new_project = TSC.ProjectItem(name=args.project)
             project = server_upload.projects.create(new_project)
 
@@ -100,7 +100,7 @@ def publish_datasources_to_site(server_object, project, folder):
     for fname in glob.glob(path):
         new_ds = TSC.DatasourceItem(project.id)
         new_ds = server_object.datasources.publish(new_ds, fname, server_object.PublishMode.Overwrite)
-        print("Datasource published. ID: {0}".format(new_ds.id))
+        print(f"Datasource published. ID: {new_ds.id}")
 
 
 def publish_workbooks_to_site(server_object, project, folder):
@@ -110,7 +110,7 @@ def publish_workbooks_to_site(server_object, project, folder):
         new_workbook = TSC.WorkbookItem(project.id)
         new_workbook.show_tabs = True
         new_workbook = server_object.workbooks.publish(new_workbook, fname, server_object.PublishMode.Overwrite)
-        print("Workbook published. ID: {0}".format(new_workbook.id))
+        print(f"Workbook published. ID: {new_workbook.id}")
 
 
 if __name__ == "__main__":

@@ -60,10 +60,10 @@ def main():
             item = server.views.get_by_id(args.resource_id)
 
         if not item:
-            print("No item found for id {}".format(args.resource_id))
+            print(f"No item found for id {args.resource_id}")
             exit(1)
 
-        print("Item found: {}".format(item.name))
+        print(f"Item found: {item.name}")
         # We have a number of different types and functions for each different export type.
         # We encode that information above in the const=(...) parameter to the add_argument function to make
         # the code automatically adapt for the type of export the user is doing.
@@ -83,7 +83,7 @@ def main():
         if args.file:
             filename = args.file
         else:
-            filename = "out.{}".format(extension)
+            filename = f"out.{extension}"
 
         populate(item, options)
         with open(filename, "wb") as f:
