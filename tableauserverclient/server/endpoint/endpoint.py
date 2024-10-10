@@ -19,6 +19,7 @@ from tableauserverclient.models.pagination_item import PaginationItem
 from tableauserverclient.server.request_options import RequestOptions
 
 from tableauserverclient.server.endpoint.exceptions import (
+    FailedSignInError,
     ServerResponseError,
     InternalServerError,
     NonXMLResponseError,
@@ -160,7 +161,7 @@ class Endpoint:
             try:
                 if server_response.status_code == 401:
                     # TODO: catch this in server.py and attempt to sign in again, in case it's a session expiry
-                    raise NotSignedInError(server_response.content, url)
+                    raise FailedSignInError.from_response(server_response.content, self.parent_srv.namespace, url)
 
                 raise ServerResponseError.from_response(server_response.content, self.parent_srv.namespace, url)
             except ParseError:
