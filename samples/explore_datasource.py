@@ -51,6 +51,7 @@ def main():
         if args.publish:
             if default_project is not None:
                 new_datasource = TSC.DatasourceItem(default_project.id)
+                new_datasource.description = "Published with a description"
                 new_datasource = server.datasources.publish(
                     new_datasource, args.publish, TSC.Server.PublishMode.Overwrite
                 )
@@ -71,6 +72,10 @@ def main():
             server.datasources.populate_connections(sample_datasource)
             print(f"\nConnections for {sample_datasource.name}: ")
             print([f"{connection.id}({connection.datasource_name})" for connection in sample_datasource.connections])
+
+            # Demonstrate that description is editable
+            sample_datasource.description = "Description updated by TSC"
+            server.datasources.update(sample_datasource)
 
             # Add some tags to the datasource
             original_tag_set = set(sample_datasource.tags)
