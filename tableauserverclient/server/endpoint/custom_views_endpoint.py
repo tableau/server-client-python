@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from typing import Optional, Union
 
-from tableauserverclient.config import BYTES_PER_MB, FILESIZE_LIMIT_MB
+from tableauserverclient.config import BYTES_PER_MB, config
 from tableauserverclient.filesys_helpers import get_file_object_size
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
 from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
@@ -144,7 +144,7 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
         else:
             raise ValueError("File path or file object required for publishing custom view.")
 
-        if size >= FILESIZE_LIMIT_MB * BYTES_PER_MB:
+        if size >= config.FILESIZE_LIMIT_MB * BYTES_PER_MB:
             upload_session_id = self.parent_srv.fileuploads.upload(file)
             url = f"{url}?uploadSessionId={upload_session_id}"
             xml_request, content_type = RequestFactory.CustomView.publish_req_chunked(view_item)

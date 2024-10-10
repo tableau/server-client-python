@@ -40,13 +40,11 @@ class ServerInfoItem:
         try:
             parsed_response = fromstring(resp)
         except xml.etree.ElementTree.ParseError as error:
-            logger.info(f"Unexpected response for ServerInfo: {resp}")
-            logger.info(error)
+            logger.exception(f"Unexpected response for ServerInfo: {resp}")
             return cls("Unknown", "Unknown", "Unknown")
         except Exception as error:
-            logger.info(f"Unexpected response for ServerInfo: {resp}")
-            logger.info(error)
-            return cls("Unknown", "Unknown", "Unknown")
+            logger.exception(f"Unexpected response for ServerInfo: {resp}")
+            raise error
 
         product_version_tag = parsed_response.find(".//t:productVersion", namespaces=ns)
         rest_api_version_tag = parsed_response.find(".//t:restApiVersion", namespaces=ns)
