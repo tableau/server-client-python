@@ -1,13 +1,20 @@
 from defusedxml.ElementTree import fromstring
-from typing import Optional
+from typing import Mapping, Optional, TypeVar
+
+
+def split_pascal_case(s: str) -> str:
+    return "".join([f" {c}" if c.isupper() else c for c in s]).strip()
 
 
 class TableauError(Exception):
     pass
 
 
-class ServerResponseError(TableauError):
-    def __init__(self, code, summary, detail, url=None):
+T = TypeVar("T")
+
+
+class XMLError(TableauError):
+    def __init__(self, code: str, summary: str, detail: str, url: Optional[str] = None) -> None:
         self.code = code
         self.summary = summary
         self.detail = detail
@@ -18,7 +25,7 @@ class ServerResponseError(TableauError):
         return f"\n\n\t{self.code}: {self.summary}\n\t\t{self.detail}"
 
     @classmethod
-    def from_response(cls, resp, ns, url=None):
+    def from_response(cls, resp, ns, url):
         # Check elements exist before .text
         parsed_response = fromstring(resp)
         try:
@@ -31,6 +38,10 @@ class ServerResponseError(TableauError):
         except Exception as e:
             raise NonXMLResponseError(resp)
         return error_response
+
+
+class ServerResponseError(XMLError):
+    pass
 
 
 class InternalServerError(TableauError):
@@ -49,6 +60,11 @@ class MissingRequiredFieldError(TableauError):
 
 class NotSignedInError(TableauError):
     pass
+
+
+class FailedSignInError(XMLError, NotSignedInError):
+    def __str__(self):
+        return f"{split_pascal_case(self.__class__.__name__)}: {super().__str__()}"
 
 
 class ItemTypeNotAllowed(TableauError):
