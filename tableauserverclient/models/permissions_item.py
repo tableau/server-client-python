@@ -41,6 +41,7 @@ class Permission:
         RunExplainData = "RunExplainData"
         CreateRefreshMetrics = "CreateRefreshMetrics"
         SaveAs = "SaveAs"
+        PulseMetricDefine = "PulseMetricDefine"
 
         def __repr__(self):
             return "<Enum Capability: AddComment | ChangeHierarchy | ChangePermission ... (17 more) >"
