@@ -168,21 +168,12 @@ class _DataExportOptions(RequestOptionsBase):
         self.view_filters: list[tuple[str, str]] = []
         self.view_parameters: list[tuple[str, str]] = []
         self.max_age: Optional[int] = maxage
-        self._language: Optional[str] = None
-
-    """
-    This setting will affect the contents of the workbook as they are exported.
-    Valid language values are tableau-supported languages like de, es, en
-    If no locale is specified, the default locale for that language will be used
-    """
-    @property
-    def language(self)  -> str | None:
-        return self._language
-
-    
-    @language.setter
-    def language(self, value) -> None:
-        self._language = value
+        """
+        This setting will affect the contents of the workbook as they are exported.
+        Valid language values are tableau-supported languages like de, es, en
+        If no locale is specified, the default locale for that language will be used
+        """
+        self.language: Optional[str] = None
 
     @property
     def max_age(self) -> int:
@@ -198,7 +189,7 @@ class _DataExportOptions(RequestOptionsBase):
         if self.max_age != -1:
             params["maxAge"] = self.max_age
         if self.language:
-            params["language"] = self._language
+            params["language"] = self.language
 
         self._append_view_filters(params)
         return params

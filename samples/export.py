@@ -79,6 +79,9 @@ def main():
         if args.filter:
             options = options.vf(*args.filter.split(":"))
 
+        if args.language:
+            options.language = args.language
+
         if args.file:
             filename = args.file
         else:
