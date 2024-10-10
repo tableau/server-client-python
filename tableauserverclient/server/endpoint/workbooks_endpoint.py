@@ -75,10 +75,11 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
 
         Parameters
         ----------
-        (Optional) You can pass the method a request object that contains
-        additional parameters to filter the request. For example, if you were
-        searching for a specific workbook, you could specify the name of the
-        workbook or the name of the owner.
+        req_options : RequestOptions, optional
+             (Optional) You can pass the method a request object that contains
+             additional parameters to filter the request. For example, if you
+             were searching for a specific workbook, you could specify the name
+             of the workbook or the name of the owner.
 
         Returns
         -------
