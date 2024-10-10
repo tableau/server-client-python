@@ -91,7 +91,7 @@ ENV/
 # Rope project settings
 .ropeproject
 
-
+.vscode/
 
 # macOS.gitignore from https://github.com/github/gitignore
 *.DS_Store

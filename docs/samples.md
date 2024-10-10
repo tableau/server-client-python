@@ -41,15 +41,17 @@ You will see that you need to enter a file path for the workbook that you want t
 The following list describes the samples available in the repository:
 
 * `add_default_permission.py` Adds workbook default permissions for a given project.
+* `create_extract_task.py` Creates extract tasks.
 * `create_group.py` Creates a user group.
 * `create_project.py` Creates a project in a site.
 * `create_schedules.py` Creates schedules for extract refreshes and subscriptions.
-* `download_view_image.py` Downloads an image of a specified view.
 * `explore_datasource.py` Queries datasources, selects a datasource, populates connections for the datasource, then updates the datasource.
+* `explore_favorites.py` Queries favorites and optionally add or delete favorites.
+* `explore_site.py` Interacts with sites (create, delete, and so on).
 * `explore_webhooks.py` Explores webhook functions supported by the Server API.
 * `explore_workbook.py` Queries workbooks, selects a workbook, populates the connections and views for a workbook, then updates the workbook.
 * `export.py` Exports a view as an image, PDF, or CSV.
-* `export_wb.py` Exports a PDF containing all views in a workbook.
+* `extracts.py` Interacts with extracts, including querying, deleting or creating.
 * `filter_sort_groups.py` Demonstrates filtering and sorting user groups.
 * `filter_sort_projects.py` Demonstrates filtering and sorting projects.
 * `initialize_server.py` Sets up an existing server instance with site, workbooks and datasources.
@@ -65,9 +67,10 @@ The following list describes the samples available in the repository:
 * `query_permissions.py` Queries permissions of a given resource.
 * `refresh.py` Refreshes a datasource or workbook.
 * `refresh_tasks.py` Lists and runs configured tasks on a server.
-* `set_http_options.py` Demonstrates HTTP options for the server and specifically for downloading workbooks.
 * `set_refresh_schedule.py` Sets the schedule to refresh a workbook or datasource.
+* `smoke_test.py` Verifies that TSC is installed correctly and is able to run.
 * `update_connection.py` Updates and embeds connection credentials of a datasource.
 * `update_datasource_data.py` Updates the data within a published live-to-Hyper datasource.
+* `update_workbook_data_freshness_policy.py` Updates workbook data freshness policy settings.
 
 **Note**: For all of the samples, ensure that your Tableau Server user account has permission to access the resources. Also keep in mind that some example operations (like create group) are not allowed on Tableau Cloud.
