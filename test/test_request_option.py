@@ -364,7 +364,7 @@ class RequestOptionTests(unittest.TestCase):
             m.get(requests_mock.ANY)
             url = self.baseurl + "/views/456/data"
             opts = TSC.PDFRequestOptions()
-            opts.language ="en-US"
+            opts.language = "en-US"
 
             resp = self.server.users.get_request(url, request_object=opts)
             self.assertTrue(re.search("language=en-us", resp.request.query))

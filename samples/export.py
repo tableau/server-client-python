@@ -37,7 +37,9 @@ def main():
         "--csv", dest="type", action="store_const", const=("populate_csv", "CSVRequestOptions", "csv", "csv")
     )
     # other options shown in explore_workbooks: workbook.download, workbook.preview_image
-    parser.add_argument("--language", help="Text such as 'Average' will appear in this language. Use values like fr, de, es, en")
+    parser.add_argument(
+        "--language", help="Text such as 'Average' will appear in this language. Use values like fr, de, es, en"
+    )
     parser.add_argument("--workbook", action="store_true")
 
     parser.add_argument("--file", "-f", help="filename to store the exported data")
