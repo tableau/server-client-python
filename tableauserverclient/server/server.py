@@ -59,7 +59,63 @@ default_server_version = "2.4"  # first version that dropped the legacy auth end
 
 
 class Server:
+    """
+    In the Tableau REST API, the server (https://MY-SERVER/) is the base or core
+    of the URI that makes up the various endpoints or methods for accessing
+    resources on the server (views, workbooks, sites, users, data sources, etc.)
+    The TSC library provides a Server class that represents the server. You
+    create a server instance to sign in to the server and to call the various
+    methods for accessing resources.
+
+    The Server class contains the attributes that represent the server on
+    Tableau Server. After you create an instance of the Server class, you can
+    sign in to the server and call methods to access all of the resources on the
+    server.
+
+    Parameters
+    ----------
+    server_address : str
+        Specifies the address of the Tableau Server or Tableau Cloud (for
+        example, https://MY-SERVER/).
+
+    use_server_version : bool
+        Specifies the version of the REST API to use (for example, '2.5'). When
+        you use the TSC library to call methods that access Tableau Server, the
+        version is passed to the endpoint as part of the URI
+        (https://MY-SERVER/api/2.5/). Each release of Tableau Server supports
+        specific versions of the REST API. New versions of the REST API are
+        released with Tableau Server. By default, the value of version is set to
+        '2.3', which corresponds to Tableau Server 10.0. You can view or set
+        this value. You might need to set this to a different value, for
+        example, if you want to access features that are supported by the server
+        and a later version of the REST API. For more information, see REST API
+        Versions.
+
+    Examples
+    --------
+    >>> import tableauserverclient as TSC
+
+    >>> # create a instance of server
+    >>> server = TSC.Server('https://MY-SERVER')
+
+    >>> # sign in, etc.
+
+    >>> # change the REST API version to match the server
+    >>> server.use_server_version()
+
+    >>> # or change the REST API version to match a specific version
+    >>> # for example, 2.8
+    >>> # server.version = '2.8'
+
+    """
+
     class PublishMode:
+        """
+        Enumerates the options that specify what happens when you publish a
+        workbook or data source. The options are Overwrite, Append, or
+        CreateNew.
+        """
+
         Append = "Append"
         Overwrite = "Overwrite"
         CreateNew = "CreateNew"
