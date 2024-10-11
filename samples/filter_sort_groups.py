@@ -99,13 +99,18 @@ def main():
 
         print("----")
         # or, try the above with the django style filtering.
-        """
-        bug: hangs getting the version for this request? Also should be order_by, not sort
-        groups = ["SALES NORTHWEST", "SALES ROMANIA", "this_group"]
-        groups = [urllib.parse.quote_plus(group) for group in groups]
-        for group in server.groups.filter(name__in=groups).order_by("-name"):
-            print(group.name)
-        """
+        all_g = server.groups.all()
+        print(f"Searching locally among {all_g.total_available} groups")
+        for a in all_g:
+            print(a)
+        groups = [urllib.parse.quote_plus(group) for group in ["SALES NORTHWEST", "SALES ROMANIA", "this_group"]]
+        print(groups)
+        
+        # BUG: this loop seems to continue making requests long after we've seen all groups
+        #for group in server.groups.filter(name__in=groups).order_by("-name"):
+        #    print(group.name)
+        
+        print("done")
 
 
 if __name__ == "__main__":
