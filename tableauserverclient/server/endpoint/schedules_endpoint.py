@@ -115,8 +115,7 @@ class Schedules(Endpoint):
             )  # type:ignore[arg-type]
 
         results = (self._add_to(*x) for x in items)
-        # list() is needed for python 3.x compatibility
-        return list(filter(lambda x: not x.result, results))  # type:ignore[arg-type]
+        return [x for x in results if not x.result]
 
     def _add_to(
         self,
