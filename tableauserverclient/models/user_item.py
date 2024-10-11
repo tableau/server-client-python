@@ -19,9 +19,34 @@ if TYPE_CHECKING:
 
 
 class UserItem:
+    """
+    The UserItem class contains the members or attributes for the view
+    resources on Tableau Server. The UserItem class defines the information you
+    can request or query from Tableau Server. The class attributes correspond
+    to the attributes of a server request or response payload.
+
+
+    Parameters
+    ----------
+    name: str
+        The name of the user.
+
+    site_role: str
+        The role of the user on the site.
+
+    auth_setting: str
+        Required attribute for Tableau Cloud. How the user autenticates to the
+        server.
+    """
+
     tag_name: str = "user"
 
     class Roles:
+        """
+        The Roles class contains the possible roles for a user on Tableau
+        Server.
+        """
+
         Interactor = "Interactor"
         Publisher = "Publisher"
         ServerAdministrator = "ServerAdministrator"
@@ -43,6 +68,11 @@ class UserItem:
         SupportUser = "SupportUser"
 
     class Auth:
+        """
+        The Auth class contains the possible authentication settings for a user
+        on Tableau Cloud.
+        """
+
         OpenID = "OpenID"
         SAML = "SAML"
         TableauIDWithMFA = "TableauIDWithMFA"
