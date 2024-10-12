@@ -35,6 +35,44 @@ This class manages options can be used when querying content on the server
 
 
 class RequestOptions(RequestOptionsBase):
+    """
+    This class is used to manage the options that can be used when querying content on the server.
+    Optionally initialize with a page number and page size to control the number of items returned.
+
+    Additionally, you can add sorting and filtering options to the request.
+
+    The `sort` and `filter` options are set-like objects, so you can only add a field once. If you add the same field
+    multiple times, only the last one will be used.
+
+    The list of fields that can be sorted on or filtered by can be found in the `Field`
+    class contained within this class.
+
+    Parameters
+    ----------
+    pagenumber: int, optional
+        The page number to start the query on. Default is 1.
+
+    pagesize: int, optional
+        The number of items to return per page. Default is 100. Can also read
+        from the environment variable `TSC_PAGE_SIZE`
+
+    Examples
+    --------
+    >>> # Get the first 50 workbooks on the site
+    >>> request_options = TSC.RequestOptions(pagesize=50)
+
+    >>> # Get the next 50 workbooks on the site
+    >>> request_options.page_number(2)
+
+    >>> # Get the first 50 workbooks on the site, sorted by name
+    >>> request_options = TSC.RequestOptions(pagesize=50)
+    >>> request_options.sort.add(TSC.Sort(TSC.RequestOptions.Field.Name, TSC.Sort.Direction.Asc))
+
+    >>> # Get the first 50 workbooks on the site, filtered by a tag
+    >>> request_options = TSC.RequestOptions(pagesize=50)
+    >>> request_options.filter.add(TSC.Filter(TSC.RequestOptions.Field.Tags, TSC.Filter.Operator.Equals, "important"))
+
+    """
     def __init__(self, pagenumber=1, pagesize=None):
         self.pagenumber = pagenumber
         self.pagesize = pagesize or config.PAGE_SIZE
@@ -196,13 +234,43 @@ class _DataExportOptions(RequestOptionsBase):
 
     def vf(self, name: str, value: str) -> Self:
         """Apply a filter based on a column within the view.
-        Note that when filtering on a boolean type field, the only valid values are 'true' and 'false'"""
+        Note that when filtering on a boolean type field, the only valid values are 'true' and 'false'
+
+        For more detail see: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_filtering_and_sorting.htm#Filter-query-views
+
+        Parameters
+        ----------
+        name: str
+            The name of the column to filter on
+
+        value: str
+            The value to filter on
+
+        Returns
+        -------
+        Self
+            The current object
+        """
         self.view_filters.append((name, value))
         return self
 
     def parameter(self, name: str, value: str) -> Self:
         """Apply a filter based on a parameter within the workbook.
-        Note that when filtering on a boolean type field, the only valid values are 'true' and 'false'"""
+        Note that when filtering on a boolean type field, the only valid values are 'true' and 'false'
+
+        Parameters
+        ----------
+        name: str
+            The name of the parameter to filter on
+
+        value: str
+            The value to filter on
+
+        Returns
+        -------
+        Self
+            The current object
+        """
         self.view_parameters.append((name, value))
         return self
 
@@ -254,14 +322,57 @@ class _ImagePDFCommonExportOptions(_DataExportOptions):
 
 
 class CSVRequestOptions(_DataExportOptions):
+    """
+    Options that can be used when exporting a view to CSV. Set the maxage to control the age of the data exported.
+    Filters to the underlying data can be applied using the `vf` and `parameter` methods.
+    
+    Parameters
+    ----------
+    maxage: int, optional
+        The maximum age of the data to export. Shortest possible duration is 1
+        minute. No upper limit. Default is -1, which means no limit.
+    """
     extension = "csv"
 
 
 class ExcelRequestOptions(_DataExportOptions):
+    """
+    Options that can be used when exporting a view to Excel. Set the maxage to control the age of the data exported.
+    Filters to the underlying data can be applied using the `vf` and `parameter` methods.
+    
+    Parameters
+    ----------
+    maxage: int, optional
+        The maximum age of the data to export. Shortest possible duration is 1
+        minute. No upper limit. Default is -1, which means no limit.
+    """
     extension = "xlsx"
 
 
 class ImageRequestOptions(_ImagePDFCommonExportOptions):
+    """
+    Options that can be used when exporting a view to an image. Set the maxage to control the age of the data exported.
+    Filters to the underlying data can be applied using the `vf` and `parameter` methods.
+    
+    Parameters
+    ----------
+    imageresolution: str, optional
+        The resolution of the image to export. Valid values are "high" or None. Default is None.
+        Image width and actual pixel density are determined by the display context
+        of the image. Aspect ratio is always preserved. Set the value to "high" to
+        ensure maximum pixel density.
+    
+    maxage: int, optional
+        The maximum age of the data to export. Shortest possible duration is 1
+        minute. No upper limit. Default is -1, which means no limit.
+    
+    viz_height: int, optional
+        The height of the viz in pixels. If specified, viz_width must also be specified.
+    
+    viz_width: int, optional
+        The width of the viz in pixels. If specified, viz_height must also be specified.
+    
+    """
     extension = "png"
 
     # if 'high' isn't specified, the REST API endpoint returns an image with standard resolution
@@ -280,6 +391,28 @@ class ImageRequestOptions(_ImagePDFCommonExportOptions):
 
 
 class PDFRequestOptions(_ImagePDFCommonExportOptions):
+    """
+    Options that can be used when exporting a view to PDF. Set the maxage to control the age of the data exported.
+    Filters to the underlying data can be applied using the `vf` and `parameter` methods.
+    
+    Parameters
+    ----------
+    page_type: str, optional
+        The page type of the PDF to export. Valid values are accessible via the `PageType` class.
+    
+    orientation: str, optional
+        The orientation of the PDF to export. Valid values are accessible via the `Orientation` class.
+    
+    maxage: int, optional
+        The maximum age of the data to export. Shortest possible duration is 1
+        minute. No upper limit. Default is -1, which means no limit.
+    
+    viz_height: int, optional
+        The height of the viz in pixels. If specified, viz_width must also be specified.
+    
+    viz_width: int, optional
+        The width of the viz in pixels. If specified, viz_height must also be specified.
+    """
     class PageType:
         A3 = "a3"
         A4 = "a4"
