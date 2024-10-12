@@ -73,6 +73,7 @@ class RequestOptions(RequestOptionsBase):
     >>> request_options.filter.add(TSC.Filter(TSC.RequestOptions.Field.Tags, TSC.Filter.Operator.Equals, "important"))
 
     """
+
     def __init__(self, pagenumber=1, pagesize=None):
         self.pagenumber = pagenumber
         self.pagesize = pagesize or config.PAGE_SIZE
@@ -325,13 +326,14 @@ class CSVRequestOptions(_DataExportOptions):
     """
     Options that can be used when exporting a view to CSV. Set the maxage to control the age of the data exported.
     Filters to the underlying data can be applied using the `vf` and `parameter` methods.
-    
+
     Parameters
     ----------
     maxage: int, optional
         The maximum age of the data to export. Shortest possible duration is 1
         minute. No upper limit. Default is -1, which means no limit.
     """
+
     extension = "csv"
 
 
@@ -339,13 +341,14 @@ class ExcelRequestOptions(_DataExportOptions):
     """
     Options that can be used when exporting a view to Excel. Set the maxage to control the age of the data exported.
     Filters to the underlying data can be applied using the `vf` and `parameter` methods.
-    
+
     Parameters
     ----------
     maxage: int, optional
         The maximum age of the data to export. Shortest possible duration is 1
         minute. No upper limit. Default is -1, which means no limit.
     """
+
     extension = "xlsx"
 
 
@@ -353,7 +356,7 @@ class ImageRequestOptions(_ImagePDFCommonExportOptions):
     """
     Options that can be used when exporting a view to an image. Set the maxage to control the age of the data exported.
     Filters to the underlying data can be applied using the `vf` and `parameter` methods.
-    
+
     Parameters
     ----------
     imageresolution: str, optional
@@ -361,18 +364,19 @@ class ImageRequestOptions(_ImagePDFCommonExportOptions):
         Image width and actual pixel density are determined by the display context
         of the image. Aspect ratio is always preserved. Set the value to "high" to
         ensure maximum pixel density.
-    
+
     maxage: int, optional
         The maximum age of the data to export. Shortest possible duration is 1
         minute. No upper limit. Default is -1, which means no limit.
-    
+
     viz_height: int, optional
         The height of the viz in pixels. If specified, viz_width must also be specified.
-    
+
     viz_width: int, optional
         The width of the viz in pixels. If specified, viz_height must also be specified.
-    
+
     """
+
     extension = "png"
 
     # if 'high' isn't specified, the REST API endpoint returns an image with standard resolution
@@ -394,25 +398,26 @@ class PDFRequestOptions(_ImagePDFCommonExportOptions):
     """
     Options that can be used when exporting a view to PDF. Set the maxage to control the age of the data exported.
     Filters to the underlying data can be applied using the `vf` and `parameter` methods.
-    
+
     Parameters
     ----------
     page_type: str, optional
         The page type of the PDF to export. Valid values are accessible via the `PageType` class.
-    
+
     orientation: str, optional
         The orientation of the PDF to export. Valid values are accessible via the `Orientation` class.
-    
+
     maxage: int, optional
         The maximum age of the data to export. Shortest possible duration is 1
         minute. No upper limit. Default is -1, which means no limit.
-    
+
     viz_height: int, optional
         The height of the viz in pixels. If specified, viz_width must also be specified.
-    
+
     viz_width: int, optional
         The width of the viz in pixels. If specified, viz_height must also be specified.
     """
+
     class PageType:
         A3 = "a3"
         A4 = "a4"

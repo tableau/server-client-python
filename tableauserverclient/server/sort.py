@@ -14,7 +14,7 @@ class Sort:
 
     Examples
     --------
-    
+
     >>> # create a new instance of a request option object
     >>> req_option = TSC.RequestOptions()
 
@@ -26,6 +26,7 @@ class Sort:
     >>> for wb in matching_workbooks:
     >>>     print(wb.name)
     """
+
     def __init__(self, field, direction):
         self.field = field
         self.direction = direction
