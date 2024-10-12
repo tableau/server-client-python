@@ -1,11 +1,11 @@
 name: Python tests
 
-on: [push, pull_request]
-  # pull_request: {}
-  # push:
-  #   branches:
-      # - development
-      # - master
+on:
+  pull_request: {}
+  push:
+    branches:
+      - development
+      - master
 
 jobs:
   build:
