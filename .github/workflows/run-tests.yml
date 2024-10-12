@@ -1,11 +1,11 @@
 name: Python tests
 
-on:
-  pull_request: {}
-  push:
-    branches:
-      - development
-      - master
+on: [push, pull_request]
+  # pull_request: {}
+  # push:
+  #   branches:
+      # - development
+      # - master
 
 jobs:
   build:
@@ -18,6 +18,20 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+    - name: Get pip cache dir
+      id: pip-cache
+      shell: bash
+      run: |
+        echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
+
+    - name: cache
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.pip-cache.outputs.dir }}
+        key: ${{ runner.os }}-${{ matrix.python-version }}-pip-${{ hashFiles('pyproject.toml') }}
+        restore-keys: |
+          ${{ runner.os }}-${{ matrix.python-version }}-pip-
+
     - uses: actions/checkout@v4
 
     - name: Set up Python ${{ matrix.python-version }} on ${{ matrix.os }}
