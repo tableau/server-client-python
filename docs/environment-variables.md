@@ -15,6 +15,7 @@ Name | Description | Version | Default | Limit
 :--- | :--- | :--- | :--- | :---
 `TSC_CHUNK_SIZE_MB` | The size of chunks when uploading files. Limit is 64 MB. | 0.33 | 50 | 64
 `TSC_PAGE_SIZE` | The number of items to return in a single page of results. | 0.33 | 100 | 1000
+`TSC_FILESIZE_LIMIT_MB` | The maximum file size that can be uploaded. | 0.34 | 64 | 64
 
 ## Setting environment variables
 
