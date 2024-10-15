@@ -3,6 +3,7 @@
 import argparse
 import logging
 import tableauserverclient as TSC
+from tableauserverclient.models import Resource
 
 
 def main():
@@ -38,15 +39,16 @@ def main():
         # get all favorites on site for the logged on user
         user: TSC.UserItem = TSC.UserItem()
         user.id = server.user_id
-        print("Favorites for user: {}".format(user.id))
+        print(f"Favorites for user: {user.id}")
         server.favorites.get(user)
         print(user.favorites)
 
         # get list of workbooks
         all_workbook_items, pagination_item = server.workbooks.get()
         if all_workbook_items is not None and len(all_workbook_items) > 0:
-            my_workbook: TSC.WorkbookItem = all_workbook_items[0]
-            server.favorites.add_favorite(server, user, TSC.Resource.Workbook.name(), all_workbook_items[0])
+
+            my_workbook = all_workbook_items[0]
+            server.favorites.add_favorite(user, Resource.Workbook, all_workbook_items[0])
             print(
                 "Workbook added to favorites. Workbook Name: {}, Workbook ID: {}".format(
                     my_workbook.name, my_workbook.id
@@ -56,7 +58,7 @@ def main():
             if views is not None and len(views) > 0:
                 my_view = views[0]
                 server.favorites.add_favorite_view(user, my_view)
-                print("View added to favorites. View Name: {}, View ID: {}".format(my_view.name, my_view.id))
+                print(f"View added to favorites. View Name: {my_view.name}, View ID: {my_view.id}")
 
         all_datasource_items, pagination_item = server.datasources.get()
         if all_datasource_items:
@@ -69,12 +71,10 @@ def main():
         )
 
     server.favorites.delete_favorite_workbook(user, my_workbook)
-    print(
-        "Workbook deleted from favorites. Workbook Name: {}, Workbook ID: {}".format(my_workbook.name, my_workbook.id)
-    )
+    print(f"Workbook deleted from favorites. Workbook Name: {my_workbook.name}, Workbook ID: {my_workbook.id}")
 
     server.favorites.delete_favorite_view(user, my_view)
-    print("View deleted from favorites. View Name: {}, View ID: {}".format(my_view.name, my_view.id))
+    print(f"View deleted from favorites. View Name: {my_view.name}, View ID: {my_view.id}")
 
     server.favorites.delete_favorite_datasource(user, my_datasource)
     print(

@@ -49,7 +49,7 @@ def main():
 
         if args.delete:
             print("You can only delete the site you are currently in")
-            print("Delete site `{}`?".format(current_site.name))
+            print(f"Delete site `{current_site.name}`?")
             # server.sites.delete(server.site_id)
 
         elif args.create:

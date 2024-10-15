@@ -7,6 +7,7 @@ from contextlib import closing
 from pathlib import Path
 
 from tableauserverclient.helpers.headers import fix_filename
+from tableauserverclient.models.permissions_item import PermissionsRule
 from tableauserverclient.server.query import QuerySet
 
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api, parameter_added_in
@@ -25,15 +26,11 @@ from tableauserverclient.models import WorkbookItem, ConnectionItem, ViewItem, P
 from tableauserverclient.server import RequestFactory
 
 from typing import (
-    Iterable,
-    List,
     Optional,
-    Sequence,
-    Set,
-    Tuple,
     TYPE_CHECKING,
     Union,
 )
+from collections.abc import Iterable, Sequence
 
 if TYPE_CHECKING:
     from tableauserverclient.server import Server
@@ -61,18 +58,34 @@ PathOrFileW = Union[FilePath, FileObjectW]
 
 class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
     def __init__(self, parent_srv: "Server") -> None:
-        super(Workbooks, self).__init__(parent_srv)
+        super().__init__(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
 
         return None
 
     @property
     def baseurl(self) -> str:
-        return "{0}/sites/{1}/workbooks".format(self.parent_srv.baseurl, self.parent_srv.site_id)
+        return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/workbooks"
 
     # Get all workbooks on site
     @api(version="2.0")
-    def get(self, req_options: Optional["RequestOptions"] = None) -> Tuple[List[WorkbookItem], PaginationItem]:
+    def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[WorkbookItem], PaginationItem]:
+        """
+        Queries the server and returns information about the workbooks the site.
+
+        Parameters
+        ----------
+        req_options : RequestOptions, optional
+             (Optional) You can pass the method a request object that contains
+             additional parameters to filter the request. For example, if you
+             were searching for a specific workbook, you could specify the name
+             of the workbook or the name of the owner.
+
+        Returns
+        -------
+        Tuple containing one page's worth of workbook items and pagination
+        information.
+        """
         logger.info("Querying all workbooks on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -83,18 +96,44 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
     # Get 1 workbook
     @api(version="2.0")
     def get_by_id(self, workbook_id: str) -> WorkbookItem:
+        """
+        Returns information about the specified workbook on the site.
+
+        Parameters
+        ----------
+        workbook_id : str
+            The workbook ID.
+
+        Returns
+        -------
+        WorkbookItem
+            The workbook item.
+        """
         if not workbook_id:
             error = "Workbook ID undefined."
             raise ValueError(error)
-        logger.info("Querying single workbook (ID: {0})".format(workbook_id))
-        url = "{0}/{1}".format(self.baseurl, workbook_id)
+        logger.info(f"Querying single workbook (ID: {workbook_id})")
+        url = f"{self.baseurl}/{workbook_id}"
         server_response = self.get_request(url)
         return WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     @api(version="2.8")
     def refresh(self, workbook_item: Union[WorkbookItem, str]) -> JobItem:
+        """
+        Refreshes the extract of an existing workbook.
+
+        Parameters
+        ----------
+        workbook_item : WorkbookItem | str
+            The workbook item or workbook ID.
+
+        Returns
+        -------
+        JobItem
+            The job item.
+        """
         id_ = getattr(workbook_item, "id", workbook_item)
-        url = "{0}/{1}/refresh".format(self.baseurl, id_)
+        url = f"{self.baseurl}/{id_}/refresh"
         empty_req = RequestFactory.Empty.empty_req()
         server_response = self.post_request(url, empty_req)
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
@@ -107,10 +146,37 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         workbook_item: WorkbookItem,
         encrypt: bool = False,
         includeAll: bool = True,
-        datasources: Optional[List["DatasourceItem"]] = None,
+        datasources: Optional[list["DatasourceItem"]] = None,
     ) -> JobItem:
+        """
+        Create one or more extracts on 1 workbook, optionally encrypted.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#create_extracts_for_workbook
+
+        Parameters
+        ----------
+        workbook_item : WorkbookItem
+            The workbook item to create extracts for.
+
+        encrypt : bool, default False
+            Set to True to encrypt the extracts.
+
+        includeAll : bool, default True
+            If True, all data sources in the workbook will have an extract
+            created for them. If False, then a data source must be supplied in
+            the request.
+
+        datasources : list[DatasourceItem] | None
+            List of DatasourceItem objects for the data sources to create
+            extracts for. Only required if includeAll is False.
+
+        Returns
+        -------
+        JobItem
+            The job item for the extract creation.
+        """
         id_ = getattr(workbook_item, "id", workbook_item)
-        url = "{0}/{1}/createExtract?encrypt={2}".format(self.baseurl, id_, encrypt)
+        url = f"{self.baseurl}/{id_}/createExtract?encrypt={encrypt}"
 
         datasource_req = RequestFactory.Workbook.embedded_extract_req(includeAll, datasources)
         server_response = self.post_request(url, datasource_req)
@@ -120,8 +186,31 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
     # delete all the extracts on 1 workbook
     @api(version="3.3")
     def delete_extract(self, workbook_item: WorkbookItem, includeAll: bool = True, datasources=None) -> JobItem:
+        """
+        Delete all extracts of embedded datasources on 1 workbook.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#delete_extracts_from_workbook
+
+        Parameters
+        ----------
+        workbook_item : WorkbookItem
+            The workbook item to delete extracts from.
+
+        includeAll : bool, default True
+            If True, all data sources in the workbook will have their extracts
+            deleted. If False, then a data source must be supplied in the
+            request.
+
+        datasources : list[DatasourceItem] | None
+            List of DatasourceItem objects for the data sources to delete
+            extracts from. Only required if includeAll is False.
+
+        Returns
+        -------
+        JobItem
+        """
         id_ = getattr(workbook_item, "id", workbook_item)
-        url = "{0}/{1}/deleteExtract".format(self.baseurl, id_)
+        url = f"{self.baseurl}/{id_}/deleteExtract"
         datasource_req = RequestFactory.Workbook.embedded_extract_req(includeAll, datasources)
         server_response = self.post_request(url, datasource_req)
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
@@ -130,12 +219,24 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
     # Delete 1 workbook by id
     @api(version="2.0")
     def delete(self, workbook_id: str) -> None:
+        """
+        Deletes a workbook with the specified ID.
+
+        Parameters
+        ----------
+        workbook_id : str
+            The workbook ID.
+
+        Returns
+        -------
+        None
+        """
         if not workbook_id:
             error = "Workbook ID undefined."
             raise ValueError(error)
-        url = "{0}/{1}".format(self.baseurl, workbook_id)
+        url = f"{self.baseurl}/{workbook_id}"
         self.delete_request(url)
-        logger.info("Deleted single workbook (ID: {0})".format(workbook_id))
+        logger.info(f"Deleted single workbook (ID: {workbook_id})")
 
     # Update workbook
     @api(version="2.0")
@@ -145,6 +246,29 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         workbook_item: WorkbookItem,
         include_view_acceleration_status: bool = False,
     ) -> WorkbookItem:
+        """
+        Modifies an existing workbook. Use this method to change the owner or
+        the project that the workbook belongs to, or to change whether the
+        workbook shows views in tabs. The workbook item must include the
+        workbook ID and overrides the existing settings.
+
+        See https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#update_workbook
+        for a list of fields that can be updated.
+
+        Parameters
+        ----------
+        workbook_item : WorkbookItem
+            The workbook item to update. ID is required. Other fields are
+            optional. Any fields that are not specified will not be changed.
+
+        include_view_acceleration_status : bool, default False
+            Set to True to include the view acceleration status in the response.
+
+        Returns
+        -------
+        WorkbookItem
+            The updated workbook item.
+        """
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -152,27 +276,47 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         self.update_tags(workbook_item)
 
         # Update the workbook itself
-        url = "{0}/{1}".format(self.baseurl, workbook_item.id)
+        url = f"{self.baseurl}/{workbook_item.id}"
         if include_view_acceleration_status:
             url += "?includeViewAccelerationStatus=True"
 
         update_req = RequestFactory.Workbook.update_req(workbook_item)
         server_response = self.put_request(url, update_req)
-        logger.info("Updated workbook item (ID: {0})".format(workbook_item.id))
+        logger.info(f"Updated workbook item (ID: {workbook_item.id})")
         updated_workbook = copy.copy(workbook_item)
         return updated_workbook._parse_common_tags(server_response.content, self.parent_srv.namespace)
 
     # Update workbook_connection
     @api(version="2.3")
     def update_connection(self, workbook_item: WorkbookItem, connection_item: ConnectionItem) -> ConnectionItem:
-        url = "{0}/{1}/connections/{2}".format(self.baseurl, workbook_item.id, connection_item.id)
+        """
+        Updates a workbook connection information (server addres, server port,
+        user name, and password).
+
+        The workbook connections must be populated before the strings can be
+        updated.
+
+        Rest API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_workbook_connection
+
+        Parameters
+        ----------
+        workbook_item : WorkbookItem
+            The workbook item to update.
+
+        connection_item : ConnectionItem
+            The connection item to update.
+
+        Returns
+        -------
+        ConnectionItem
+            The updated connection item.
+        """
+        url = f"{self.baseurl}/{workbook_item.id}/connections/{connection_item.id}"
         update_req = RequestFactory.Connection.update_req(connection_item)
         server_response = self.put_request(url, update_req)
         connection = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
-        logger.info(
-            "Updated workbook item (ID: {0} & connection item {1})".format(workbook_item.id, connection_item.id)
-        )
+        logger.info(f"Updated workbook item (ID: {workbook_item.id} & connection item {connection_item.id})")
         return connection
 
     # Download workbook contents with option of passing in filepath
@@ -185,6 +329,34 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         filepath: Optional[PathOrFileW] = None,
         include_extract: bool = True,
     ) -> PathOrFileW:
+        """
+        Downloads a workbook to the specified directory (optional).
+
+        Parameters
+        ----------
+        workbook_id : str
+            The workbook ID.
+
+        filepath : Path or File object, optional
+            Downloads the file to the location you specify. If no location is
+            specified, the file is downloaded to the current working directory.
+            The default is Filepath=None.
+
+        include_extract : bool, default True
+            Set to False to exclude the extract from the download. The default
+            is True.
+
+        Returns
+        -------
+        Path or File object
+            The path to the downloaded workbook or the file object.
+
+        Raises
+        ------
+        ValueError
+            If the workbook ID is not defined.
+        """
+
         return self.download_revision(
             workbook_id,
             None,
@@ -195,18 +367,48 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
     # Get all views of workbook
     @api(version="2.0")
     def populate_views(self, workbook_item: WorkbookItem, usage: bool = False) -> None:
+        """
+        Populates (or gets) a list of views for a workbook.
+
+        You must first call this method to populate views before you can iterate
+        through the views.
+
+        This method retrieves the view information for the specified workbook.
+        The REST API is designed to return only the information you ask for
+        explicitly. When you query for all the workbooks, the view information
+        is not included. Use this method to retrieve the views. The method adds
+        the list of views to the workbook item (workbook_item.views). This is a
+        list of ViewItem.
+
+        Parameters
+        ----------
+        workbook_item : WorkbookItem
+            The workbook item to populate views for.
+
+        usage : bool, default False
+            Set to True to include usage statistics for each view.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        MissingRequiredFieldError
+            If the workbook item is missing an ID.
+        """
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
 
-        def view_fetcher() -> List[ViewItem]:
+        def view_fetcher() -> list[ViewItem]:
             return self._get_views_for_workbook(workbook_item, usage)
 
         workbook_item._set_views(view_fetcher)
-        logger.info("Populated views for workbook (ID: {0})".format(workbook_item.id))
+        logger.info(f"Populated views for workbook (ID: {workbook_item.id})")
 
-    def _get_views_for_workbook(self, workbook_item: WorkbookItem, usage: bool) -> List[ViewItem]:
-        url = "{0}/{1}/views".format(self.baseurl, workbook_item.id)
+    def _get_views_for_workbook(self, workbook_item: WorkbookItem, usage: bool) -> list[ViewItem]:
+        url = f"{self.baseurl}/{workbook_item.id}/views"
         if usage:
             url += "?includeUsageStatistics=true"
         server_response = self.get_request(url)
@@ -220,6 +422,36 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
     # Get all connections of workbook
     @api(version="2.0")
     def populate_connections(self, workbook_item: WorkbookItem) -> None:
+        """
+        Populates a list of data source connections for the specified workbook.
+
+        You must populate connections before you can iterate through the
+        connections.
+
+        This method retrieves the data source connection information for the
+        specified workbook. The REST API is designed to return only the
+        information you ask for explicitly. When you query all the workbooks,
+        the data source connection information is not included. Use this method
+        to retrieve the connection information for any data sources used by the
+        workbook. The method adds the list of data connections to the workbook
+        item (workbook_item.connections). This is a list of ConnectionItem.
+
+        REST API docs: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_workbook_connections
+
+        Parameters
+        ----------
+        workbook_item : WorkbookItem
+            The workbook item to populate connections for.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        MissingRequiredFieldError
+            If the workbook item is missing an ID.
+        """
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -228,12 +460,12 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
             return self._get_workbook_connections(workbook_item)
 
         workbook_item._set_connections(connection_fetcher)
-        logger.info("Populated connections for workbook (ID: {0})".format(workbook_item.id))
+        logger.info(f"Populated connections for workbook (ID: {workbook_item.id})")
 
     def _get_workbook_connections(
         self, workbook_item: WorkbookItem, req_options: Optional["RequestOptions"] = None
-    ) -> List[ConnectionItem]:
-        url = "{0}/{1}/connections".format(self.baseurl, workbook_item.id)
+    ) -> list[ConnectionItem]:
+        url = f"{self.baseurl}/{workbook_item.id}/connections"
         server_response = self.get_request(url, req_options)
         connections = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
         return connections
@@ -241,6 +473,34 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
     # Get the pdf of the entire workbook if its tabs are enabled, pdf of the default view if its tabs are disabled
     @api(version="3.4")
     def populate_pdf(self, workbook_item: WorkbookItem, req_options: Optional["RequestOptions"] = None) -> None:
+        """
+        Populates the PDF for the specified workbook item.
+
+        This method populates a PDF with image(s) of the workbook view(s) you
+        specify.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#download_workbook_pdf
+
+        Parameters
+        ----------
+        workbook_item : WorkbookItem
+            The workbook item to populate the PDF for.
+
+        req_options : RequestOptions, optional
+            (Optional) You can pass in request options to specify the page type
+            and orientation of the PDF content, as well as the maximum age of
+            the PDF rendered on the server. See PDFRequestOptions class for more
+            details.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        MissingRequiredFieldError
+            If the workbook item is missing an ID.
+        """
         if not workbook_item.id:
             error = "Workbook item missing ID."
             raise MissingRequiredFieldError(error)
@@ -249,16 +509,46 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
             return self._get_wb_pdf(workbook_item, req_options)
 
         workbook_item._set_pdf(pdf_fetcher)
-        logger.info("Populated pdf for workbook (ID: {0})".format(workbook_item.id))
+        logger.info(f"Populated pdf for workbook (ID: {workbook_item.id})")
 
     def _get_wb_pdf(self, workbook_item: WorkbookItem, req_options: Optional["RequestOptions"]) -> bytes:
-        url = "{0}/{1}/pdf".format(self.baseurl, workbook_item.id)
+        url = f"{self.baseurl}/{workbook_item.id}/pdf"
         server_response = self.get_request(url, req_options)
         pdf = server_response.content
         return pdf
 
     @api(version="3.8")
     def populate_powerpoint(self, workbook_item: WorkbookItem, req_options: Optional["RequestOptions"] = None) -> None:
+        """
+        Populates the PowerPoint for the specified workbook item.
+
+        This method populates a PowerPoint with image(s) of the workbook view(s) you
+        specify.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#download_workbook_powerpoint
+
+        Parameters
+        ----------
+        workbook_item : WorkbookItem
+            The workbook item to populate the PDF for.
+
+        req_options : RequestOptions, optional
+            (Optional) You can pass in request options to specify the maximum
+            number of minutes a workbook .pptx will be cached before being
+            refreshed. To prevent multiple .pptx requests from overloading the
+            server, the shortest interval you can set is one minute. There is no
+            maximum value, but the server job enacting the caching action may
+            expire before a long cache period is reached.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        MissingRequiredFieldError
+            If the workbook item is missing an ID.
+        """
         if not workbook_item.id:
             error = "Workbook item missing ID."
             raise MissingRequiredFieldError(error)
@@ -267,10 +557,10 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
             return self._get_wb_pptx(workbook_item, req_options)
 
         workbook_item._set_powerpoint(pptx_fetcher)
-        logger.info("Populated powerpoint for workbook (ID: {0})".format(workbook_item.id))
+        logger.info(f"Populated powerpoint for workbook (ID: {workbook_item.id})")
 
     def _get_wb_pptx(self, workbook_item: WorkbookItem, req_options: Optional["RequestOptions"]) -> bytes:
-        url = "{0}/{1}/powerpoint".format(self.baseurl, workbook_item.id)
+        url = f"{self.baseurl}/{workbook_item.id}/powerpoint"
         server_response = self.get_request(url, req_options)
         pptx = server_response.content
         return pptx
@@ -278,6 +568,26 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
     # Get preview image of workbook
     @api(version="2.0")
     def populate_preview_image(self, workbook_item: WorkbookItem) -> None:
+        """
+        This method gets the preview image (thumbnail) for the specified workbook item.
+
+        This method uses the workbook's ID to get the preview image. The method
+        adds the preview image to the workbook item (workbook_item.preview_image).
+
+        Parameters
+        ----------
+        workbook_item : WorkbookItem
+            The workbook item to populate the preview image for.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        MissingRequiredFieldError
+            If the workbook item is missing an ID.
+        """
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -286,24 +596,75 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
             return self._get_wb_preview_image(workbook_item)
 
         workbook_item._set_preview_image(image_fetcher)
-        logger.info("Populated preview image for workbook (ID: {0})".format(workbook_item.id))
+        logger.info(f"Populated preview image for workbook (ID: {workbook_item.id})")
 
     def _get_wb_preview_image(self, workbook_item: WorkbookItem) -> bytes:
-        url = "{0}/{1}/previewImage".format(self.baseurl, workbook_item.id)
+        url = f"{self.baseurl}/{workbook_item.id}/previewImage"
         server_response = self.get_request(url)
         preview_image = server_response.content
         return preview_image
 
     @api(version="2.0")
     def populate_permissions(self, item: WorkbookItem) -> None:
+        """
+        Populates the permissions for the specified workbook item.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_workbook_permissions
+
+        Parameters
+        ----------
+        item : WorkbookItem
+            The workbook item to populate permissions for.
+
+        Returns
+        -------
+        None
+        """
         self._permissions.populate(item)
 
     @api(version="2.0")
-    def update_permissions(self, resource, rules):
+    def update_permissions(self, resource: WorkbookItem, rules: list[PermissionsRule]) -> list[PermissionsRule]:
+        """
+        Updates the permissions for the specified workbook item. The method
+        replaces the existing permissions with the new permissions. Any missing
+        permissions are removed.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#replace_permissions_for_content
+
+        Parameters
+        ----------
+        resource : WorkbookItem
+            The workbook item to update permissions for.
+
+        rules : list[PermissionsRule]
+            A list of permissions rules to apply to the workbook item.
+
+        Returns
+        -------
+        list[PermissionsRule]
+            The updated permissions rules.
+        """
         return self._permissions.update(resource, rules)
 
     @api(version="2.0")
-    def delete_permission(self, item, capability_item):
+    def delete_permission(self, item: WorkbookItem, capability_item: PermissionsRule) -> None:
+        """
+        Deletes a single permission rule from the specified workbook item.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_workbook_permission
+
+        Parameters
+        ----------
+        item : WorkbookItem
+            The workbook item to delete the permission from.
+
+        capability_item : PermissionsRule
+            The permission rule to delete.
+
+        Returns
+        -------
+        None
+        """
         return self._permissions.delete(item, capability_item)
 
     @api(version="2.0")
@@ -319,10 +680,87 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         skip_connection_check: bool = False,
         parameters=None,
     ):
+        """
+        Publish a workbook to the specified site.
+
+        Note: The REST API cannot automatically include extracts or other
+        resources that the workbook uses. Therefore, a .twb file that uses data
+        from an Excel or csv file on a local computer cannot be published,
+        unless you package the data and workbook in a .twbx file, or publish the
+        data source separately.
+
+        For workbooks that are larger than 64 MB, the publish method
+        automatically takes care of chunking the file in parts for uploading.
+        Using this method is considerably more convenient than calling the
+        publish REST APIs directly.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#publish_workbook
+
+        Parameters
+        ----------
+        workbook_item : WorkbookItem
+            The workbook_item specifies the workbook you are publishing. When
+            you are adding a workbook, you need to first create a new instance
+            of a workbook_item that includes a project_id of an existing
+            project. The name of the workbook will be the name of the file,
+            unless you also specify a name for the new workbook when you create
+            the instance.
+
+        file : Path or File object
+            The file path or file object of the workbook to publish. When
+            providing a file object, you must also specifiy the name of the
+            workbook in your instance of the workbook_itemworkbook_item , as
+            the name cannot be derived from the file name.
+
+        mode : str
+            Specifies whether you are publishing a new workbook (CreateNew) or
+            overwriting an existing workbook (Overwrite). You cannot appending
+            workbooks. You can also use the publish mode attributes, for
+            example: TSC.Server.PublishMode.Overwrite.
+
+        connections : list[ConnectionItem] | None
+            List of ConnectionItems objects for the connections created within
+            the workbook.
+
+        as_job : bool, default False
+            Set to True to run the upload as a job (asynchronous upload). If set
+            to True a job will start to perform the publishing process and a Job
+            object is returned. Defaults to False.
+
+        skip_connection_check : bool, default False
+            Set to True to skip connection check at time of upload. Publishing
+            will succeed but unchecked connection issues may result in a
+            non-functioning workbook. Defaults to False.
+
+        Raises
+        ------
+        OSError
+            If the file path does not lead to an existing file.
+
+        ServerResponseError
+            If the server response is not successful.
+
+        TypeError
+            If the file is not a file path or file object.
+
+        ValueError
+            If the file extension is not supported
+
+        ValueError
+            If the mode is invalid.
+
+        ValueError
+            Workbooks cannot be appended.
+
+        Returns
+        -------
+        WorkbookItem | JobItem
+            The workbook item or job item that was published.
+        """
         if isinstance(file, (str, os.PathLike)):
             if not os.path.isfile(file):
                 error = "File path does not lead to an existing file."
-                raise IOError(error)
+                raise OSError(error)
 
             filename = os.path.basename(file)
             file_extension = os.path.splitext(filename)[1][1:]
@@ -346,12 +784,12 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
             elif file_type == "xml":
                 file_extension = "twb"
             else:
-                error = "Unsupported file type {}!".format(file_type)
+                error = f"Unsupported file type {file_type}!"
                 raise ValueError(error)
 
             # Generate filename for file object.
             # This is needed when publishing the workbook in a single request
-            filename = "{}.{}".format(workbook_item.name, file_extension)
+            filename = f"{workbook_item.name}.{file_extension}"
             file_size = get_file_object_size(file)
 
         else:
@@ -362,30 +800,30 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
             raise ValueError(error)
 
         # Construct the url with the defined mode
-        url = "{0}?workbookType={1}".format(self.baseurl, file_extension)
+        url = f"{self.baseurl}?workbookType={file_extension}"
         if mode == self.parent_srv.PublishMode.Overwrite:
-            url += "&{0}=true".format(mode.lower())
+            url += f"&{mode.lower()}=true"
         elif mode == self.parent_srv.PublishMode.Append:
             error = "Workbooks cannot be appended."
             raise ValueError(error)
 
         if as_job:
-            url += "&{0}=true".format("asJob")
+            url += "&{}=true".format("asJob")
 
         if skip_connection_check:
-            url += "&{0}=true".format("skipConnectionCheck")
+            url += "&{}=true".format("skipConnectionCheck")
 
         # Determine if chunking is required (64MB is the limit for single upload method)
         if file_size >= FILESIZE_LIMIT:
-            logger.info("Publishing {0} to server with chunking method (workbook over 64MB)".format(workbook_item.name))
+            logger.info(f"Publishing {workbook_item.name} to server with chunking method (workbook over 64MB)")
             upload_session_id = self.parent_srv.fileuploads.upload(file)
-            url = "{0}&uploadSessionId={1}".format(url, upload_session_id)
+            url = f"{url}&uploadSessionId={upload_session_id}"
             xml_request, content_type = RequestFactory.Workbook.publish_req_chunked(
                 workbook_item,
                 connections=connections,
             )
         else:
-            logger.info("Publishing {0} to server".format(filename))
+            logger.info(f"Publishing {filename} to server")
 
             if isinstance(file, (str, Path)):
                 with open(file, "rb") as f:
@@ -403,7 +841,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
                 file_contents,
                 connections=connections,
             )
-        logger.debug("Request xml: {0} ".format(redact_xml(xml_request[:1000])))
+        logger.debug(f"Request xml: {redact_xml(xml_request[:1000])} ")
 
         # Send the publishing request to server
         try:
@@ -415,16 +853,38 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
 
         if as_job:
             new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
-            logger.info("Published {0} (JOB_ID: {1}".format(workbook_item.name, new_job.id))
+            logger.info(f"Published {workbook_item.name} (JOB_ID: {new_job.id}")
             return new_job
         else:
             new_workbook = WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
-            logger.info("Published {0} (ID: {1})".format(workbook_item.name, new_workbook.id))
+            logger.info(f"Published {workbook_item.name} (ID: {new_workbook.id})")
             return new_workbook
 
     # Populate workbook item's revisions
     @api(version="2.3")
     def populate_revisions(self, workbook_item: WorkbookItem) -> None:
+        """
+        Populates (or gets) a list of revisions for a workbook.
+
+        You must first call this method to populate revisions before you can
+        iterate through the revisions.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#get_workbook_revisions
+
+        Parameters
+        ----------
+        workbook_item : WorkbookItem
+            The workbook item to populate revisions for.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        MissingRequiredFieldError
+            If the workbook item is missing an ID.
+        """
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -433,12 +893,12 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
             return self._get_workbook_revisions(workbook_item)
 
         workbook_item._set_revisions(revisions_fetcher)
-        logger.info("Populated revisions for workbook (ID: {0})".format(workbook_item.id))
+        logger.info(f"Populated revisions for workbook (ID: {workbook_item.id})")
 
     def _get_workbook_revisions(
         self, workbook_item: WorkbookItem, req_options: Optional["RequestOptions"] = None
-    ) -> List[RevisionItem]:
-        url = "{0}/{1}/revisions".format(self.baseurl, workbook_item.id)
+    ) -> list[RevisionItem]:
+        url = f"{self.baseurl}/{workbook_item.id}/revisions"
         server_response = self.get_request(url, req_options)
         revisions = RevisionItem.from_response(server_response.content, self.parent_srv.namespace, workbook_item)
         return revisions
@@ -452,13 +912,47 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         filepath: Optional[PathOrFileW] = None,
         include_extract: bool = True,
     ) -> PathOrFileW:
+        """
+        Downloads a workbook revision to the specified directory (optional).
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#download_workbook_revision
+
+        Parameters
+        ----------
+        workbook_id : str
+            The workbook ID.
+
+        revision_number : str | None
+            The revision number of the workbook. If None, the latest revision is
+            downloaded.
+
+        filepath : Path or File object, optional
+            Downloads the file to the location you specify. If no location is
+            specified, the file is downloaded to the current working directory.
+            The default is Filepath=None.
+
+        include_extract : bool, default True
+            Set to False to exclude the extract from the download. The default
+            is True.
+
+        Returns
+        -------
+        Path or File object
+            The path to the downloaded workbook or the file object.
+
+        Raises
+        ------
+        ValueError
+            If the workbook ID is not defined.
+        """
+
         if not workbook_id:
             error = "Workbook ID undefined."
             raise ValueError(error)
         if revision_number is None:
-            url = "{0}/{1}/content".format(self.baseurl, workbook_id)
+            url = f"{self.baseurl}/{workbook_id}/content"
         else:
-            url = "{0}/{1}/revisions/{2}/content".format(self.baseurl, workbook_id, revision_number)
+            url = f"{self.baseurl}/{workbook_id}/revisions/{revision_number}/content"
 
         if not include_extract:
             url += "?includeExtract=False"
@@ -480,37 +974,129 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
                         f.write(chunk)
                 return_path = os.path.abspath(download_path)
 
-        logger.info(
-            "Downloaded workbook revision {0} to {1} (ID: {2})".format(revision_number, return_path, workbook_id)
-        )
+        logger.info(f"Downloaded workbook revision {revision_number} to {return_path} (ID: {workbook_id})")
         return return_path
 
     @api(version="2.3")
     def delete_revision(self, workbook_id: str, revision_number: str) -> None:
+        """
+        Deletes a specific revision from a workbook on Tableau Server.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_revisions.htm#remove_workbook_revision
+
+        Parameters
+        ----------
+        workbook_id : str
+            The workbook ID.
+
+        revision_number : str
+            The revision number of the workbook to delete.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        ValueError
+            If the workbook ID or revision number is not defined.
+        """
         if workbook_id is None or revision_number is None:
             raise ValueError
         url = "/".join([self.baseurl, workbook_id, "revisions", revision_number])
 
         self.delete_request(url)
-        logger.info("Deleted single workbook revision (ID: {0}) (Revision: {1})".format(workbook_id, revision_number))
+        logger.info(f"Deleted single workbook revision (ID: {workbook_id}) (Revision: {revision_number})")
 
     # a convenience method
     @api(version="2.8")
     def schedule_extract_refresh(
         self, schedule_id: str, item: WorkbookItem
-    ) -> List["AddResponse"]:  # actually should return a task
+    ) -> list["AddResponse"]:  # actually should return a task
+        """
+        Adds a workbook to a schedule for extract refresh.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#add_workbook_to_schedule
+
+        Parameters
+        ----------
+        schedule_id : str
+            The schedule ID.
+
+        item : WorkbookItem
+            The workbook item to add to the schedule.
+
+        Returns
+        -------
+        list[AddResponse]
+            The response from the server.
+        """
         return self.parent_srv.schedules.add_to_schedule(schedule_id, workbook=item)
 
     @api(version="1.0")
-    def add_tags(self, item: Union[WorkbookItem, str], tags: Union[Iterable[str], str]) -> Set[str]:
+    def add_tags(self, item: Union[WorkbookItem, str], tags: Union[Iterable[str], str]) -> set[str]:
+        """
+        Adds tags to a workbook. One or more tags may be added at a time. If a
+        tag already exists on the workbook, it will not be duplicated.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#add_tags_to_workbook
+
+        Parameters
+        ----------
+        item : WorkbookItem | str
+            The workbook item or workbook ID to add tags to.
+
+        tags : Iterable[str] | str
+            The tag or tags to add to the workbook. Tags can be a single tag or
+            a list of tags.
+
+        Returns
+        -------
+        set[str]
+            The set of tags added to the workbook.
+        """
         return super().add_tags(item, tags)
 
     @api(version="1.0")
     def delete_tags(self, item: Union[WorkbookItem, str], tags: Union[Iterable[str], str]) -> None:
+        """
+        Deletes tags from a workbook. One or more tags may be deleted at a time.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#delete_tag_from_workbook
+
+        Parameters
+        ----------
+        item : WorkbookItem | str
+            The workbook item or workbook ID to delete tags from.
+
+        tags : Iterable[str] | str
+            The tag or tags to delete from the workbook. Tags can be a single
+            tag or a list of tags.
+
+        Returns
+        -------
+        None
+        """
         return super().delete_tags(item, tags)
 
     @api(version="1.0")
     def update_tags(self, item: WorkbookItem) -> None:
+        """
+        Updates the tags on a workbook. This method is used to update the tags
+        on the server to match the tags on the workbook item. This method is a
+        convenience method that calls add_tags and delete_tags to update the
+        tags on the server.
+
+        Parameters
+        ----------
+        item : WorkbookItem
+            The workbook item to update the tags for. The tags on the workbook
+            item will be used to update the tags on the server.
+
+        Returns
+        -------
+        None
+        """
         return super().update_tags(item)
 
     def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[WorkbookItem]:

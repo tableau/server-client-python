@@ -37,7 +37,9 @@ def main():
         "--csv", dest="type", action="store_const", const=("populate_csv", "CSVRequestOptions", "csv", "csv")
     )
     # other options shown in explore_workbooks: workbook.download, workbook.preview_image
-
+    parser.add_argument(
+        "--language", help="Text such as 'Average' will appear in this language. Use values like fr, de, es, en"
+    )
     parser.add_argument("--workbook", action="store_true")
 
     parser.add_argument("--file", "-f", help="filename to store the exported data")
@@ -60,10 +62,10 @@ def main():
             item = server.views.get_by_id(args.resource_id)
 
         if not item:
-            print("No item found for id {}".format(args.resource_id))
+            print(f"No item found for id {args.resource_id}")
             exit(1)
 
-        print("Item found: {}".format(item.name))
+        print(f"Item found: {item.name}")
         # We have a number of different types and functions for each different export type.
         # We encode that information above in the const=(...) parameter to the add_argument function to make
         # the code automatically adapt for the type of export the user is doing.
@@ -74,16 +76,18 @@ def main():
             populate = getattr(server.workbooks, populate_func_name)
 
         option_factory = getattr(TSC, option_factory_name)
+        options: TSC.PDFRequestOptions = option_factory()
 
         if args.filter:
-            options = option_factory().vf(*args.filter.split(":"))
-        else:
-            options = None
+            options = options.vf(*args.filter.split(":"))
+
+        if args.language:
+            options.language = args.language
 
         if args.file:
             filename = args.file
         else:
-            filename = "out.{}".format(extension)
+            filename = f"out-{options.language}.{extension}"
 
         populate(item, options)
         with open(filename, "wb") as f:

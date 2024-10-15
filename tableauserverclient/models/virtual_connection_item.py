@@ -1,6 +1,7 @@
 import datetime as dt
 import json
-from typing import Callable, Dict, Iterable, List, Optional
+from typing import Callable, Optional
+from collections.abc import Iterable
 from xml.etree.ElementTree import Element
 
 from defusedxml.ElementTree import fromstring
@@ -23,7 +24,7 @@ class VirtualConnectionItem:
         self._connections: Optional[Callable[[], Iterable[ConnectionItem]]] = None
         self.project_id: Optional[str] = None
         self.owner_id: Optional[str] = None
-        self.content: Optional[Dict[str, dict]] = None
+        self.content: Optional[dict[str, dict]] = None
         self.certification_note: Optional[str] = None
 
     def __str__(self) -> str:
@@ -40,7 +41,7 @@ class VirtualConnectionItem:
         return self._id
 
     @property
-    def permissions(self) -> List[PermissionsRule]:
+    def permissions(self) -> list[PermissionsRule]:
         if self._permissions is None:
             error = "Workbook item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
@@ -53,12 +54,12 @@ class VirtualConnectionItem:
         return self._connections()
 
     @classmethod
-    def from_response(cls, response: bytes, ns: Dict[str, str]) -> List["VirtualConnectionItem"]:
+    def from_response(cls, response: bytes, ns: dict[str, str]) -> list["VirtualConnectionItem"]:
         parsed_response = fromstring(response)
         return [cls.from_xml(xml, ns) for xml in parsed_response.findall(".//t:virtualConnection[@name]", ns)]
 
     @classmethod
-    def from_xml(cls, xml: Element, ns: Dict[str, str]) -> "VirtualConnectionItem":
+    def from_xml(cls, xml: Element, ns: dict[str, str]) -> "VirtualConnectionItem":
         v_conn = cls(xml.get("name", ""))
         v_conn._id = xml.get("id", None)
         v_conn.webpage_url = xml.get("webpageUrl", None)

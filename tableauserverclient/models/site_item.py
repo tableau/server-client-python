@@ -14,13 +14,13 @@ from .property_decorators import (
 
 VALID_CONTENT_URL_RE = r"^[a-zA-Z0-9_\-]*$"
 
-from typing import List, Optional, Union, TYPE_CHECKING
+from typing import Optional, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from tableauserverclient.server import Server
 
 
-class SiteItem(object):
+class SiteItem:
     _user_quota: Optional[int] = None
     _tier_creator_capacity: Optional[int] = None
     _tier_explorer_capacity: Optional[int] = None
@@ -873,7 +873,7 @@ class SiteItem(object):
             self.auto_suspend_refresh_inactivity_window = auto_suspend_refresh_inactivity_window
 
     @classmethod
-    def from_response(cls, resp, ns) -> List["SiteItem"]:
+    def from_response(cls, resp, ns) -> list["SiteItem"]:
         all_site_items = list()
         parsed_response = fromstring(resp)
         all_site_xml = parsed_response.findall(".//t:site", namespaces=ns)
