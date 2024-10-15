@@ -85,6 +85,8 @@ class QuerySet(Iterable[T], Sized):
                     # up overrunning the total number of pages. Catch the
                     # error and break out of the loop.
                     raise StopIteration
+            if len(self._result_cache) == 0:
+                return
             yield from self._result_cache
             # If the length of the QuerySet is unknown, continue fetching until
             # the result cache is empty.
@@ -150,7 +152,7 @@ class QuerySet(Iterable[T], Sized):
         """
         Retrieve the data and store result and pagination item in cache
         """
-        if not self._result_cache:
+        if not self._result_cache and self._pagination_item._page_number is None:
             response = self.model.get(self.request_options)
             if isinstance(response, tuple):
                 self._result_cache, self._pagination_item = response
@@ -159,7 +161,7 @@ class QuerySet(Iterable[T], Sized):
                 self._pagination_item = PaginationItem()
 
     def __len__(self: Self) -> int:
-        return self.total_available or sys.maxsize
+        return sys.maxsize if self.total_available is None else self.total_available
 
     @property
     def total_available(self: Self) -> int:
