@@ -28,7 +28,7 @@ class Resource:
 TableauItem = Union[DatasourceItem, FlowItem, MetricItem, ProjectItem, ViewItem, WorkbookItem, VirtualConnectionItem]
 
 
-def plural_type(content_type: Resource) -> str:
+def plural_type(content_type: Union[Resource, str]) -> str:
     if content_type == Resource.Lens:
         return "lenses"
     else:
