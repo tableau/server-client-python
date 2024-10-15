@@ -85,17 +85,6 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         -------
         Tuple containing one page's worth of workbook items and pagination
         information.
-
-        Examples
-        --------
-        >>> import tableauserverclient as TSC
-        >>> tableau_auth = TSC.TableauAuth('username', 'password', site_id='site')
-        >>> server = TSC.Server('https://servername')
-
-        >>> with server.auth.sign_in(tableau_auth):
-        >>>     all_workbooks_items, pagination_item = server.workbooks.get()
-        >>>     # print names of first 100 workbooks
-        >>>     print([workbook.name for workbook in all_workbooks_items])
         """
         logger.info("Querying all workbooks on site")
         url = self.baseurl
@@ -119,11 +108,6 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         -------
         WorkbookItem
             The workbook item.
-
-        Examples
-        --------
-        >>> workbook = server.workbooks.get_by_id('1a1b1c1d-2e2f-2a2b-3c3d-3e3f4a4b4c4d')
-        >>> print(workbook.name)
         """
         if not workbook_id:
             error = "Workbook ID undefined."
@@ -147,21 +131,6 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         -------
         JobItem
             The job item.
-
-        Examples
-        --------
-        >>> import tableauserverclient as TSC
-        >>> tableau_auth = TSC.TableauAuth('username', 'password', site_id='site')
-        >>> server = TSC.Server('https://servername')
-
-        >>> with server.auth.sign_in(tableau_auth):
-
-        >>>     # get the workbook item from the site
-        >>>     workbook = server.workbooks.get_by_id('1a1b1c1d-2e2f-2a2b-3c3d-3e3f4a4b4c4d')
-
-        >>>     # call the update method
-        >>>     workbook = server.workbooks.refresh(workbook)
-        >>>     print("\nThe data of workbook {0} is refreshed.".format(workbook.name))
         """
         id_ = getattr(workbook_item, "id", workbook_item)
         url = f"{self.baseurl}/{id_}/refresh"
@@ -205,10 +174,6 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         -------
         JobItem
             The job item for the extract creation.
-
-        Examples
-        --------
-
         """
         id_ = getattr(workbook_item, "id", workbook_item)
         url = f"{self.baseurl}/{id_}/createExtract?encrypt={encrypt}"
@@ -243,10 +208,6 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         Returns
         -------
         JobItem
-
-        Examples
-        --------
-
         """
         id_ = getattr(workbook_item, "id", workbook_item)
         url = f"{self.baseurl}/{id_}/deleteExtract"
@@ -269,10 +230,6 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> server.workbooks.delete('1a1b1c1d-2e2f-2a2b-3c3d-3e3f4a4b4c4d')
         """
         if not workbook_id:
             error = "Workbook ID undefined."
@@ -311,26 +268,6 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         -------
         WorkbookItem
             The updated workbook item.
-
-        Examples
-        --------
-
-        >>> import tableauserverclient as TSC
-        >>> tableau_auth = TSC.TableauAuth('username', 'password', site_id='site')
-        >>> server = TSC.Server('https://servername')
-
-        >>> with server.auth.sign_in(tableau_auth):
-
-        >>>     # get the workbook item from the site
-        >>>     workbook = server.workbooks.get_by_id('1a1b1c1d-2e2f-2a2b-3c3d-3e3f4a4b4c4d')
-        >>>     print("\nUpdate {0} workbook. Project was {1}".format(workbook.name, workbook.project_name))
-
-        >>>     # make an change, for example a new project ID
-        >>>     workbook.project_id = '1f2f3e4e-5d6d-7c8c-9b0b-1a2a3f4f5e6e'
-
-        >>>     # call the update method
-        >>>     workbook = server.workbooks.update(workbook)
-        >>>     print("\nUpdated {0} workbook. Project is now {1}".format(workbook.name, workbook.project_name))
         """
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
@@ -373,20 +310,6 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         -------
         ConnectionItem
             The updated connection item.
-
-        Examples
-        --------
-        >>> # query for workbook connections
-        >>> server.workbooks.populate_connections(workbook)
-
-        >>> # update the connection
-        >>> connection = workbook.connections[0]
-        >>> connection.username = 'new_username'
-        >>> connection.password = 'new_password'
-
-        >>> # call the update method
-        >>> connection = server.workbooks.update_connection(workbook, connection)
-
         """
         url = f"{self.baseurl}/{workbook_item.id}/connections/{connection_item.id}"
         update_req = RequestFactory.Connection.update_req(connection_item)
@@ -432,10 +355,6 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         ------
         ValueError
             If the workbook ID is not defined.
-
-        Examples
-        --------
-        >>> filepath = server.workbooks.download('1a1b1c1d-2e2f-2a2b-3c3d-3e3f4a4b4c4d')
         """
 
         return self.download_revision(
@@ -477,24 +396,6 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         ------
         MissingRequiredFieldError
             If the workbook item is missing an ID.
-
-        Examples
-        --------
-        >>> # import tableauserverclient as TSC
-
-        >>> # server = TSC.Server('https://SERVERURL')
-        >>> #  ...
-
-        >>> # get the workbook item
-        >>> workbook = server.workbooks.get_by_id('1a1b1c1d-2e2f-2a2b-3c3d-3e3f4a4b4c4d')
-
-
-        >>> # get the view information
-        >>> server.workbooks.populate_views(workbook)
-
-        >>> # print information about the views for the work item
-        >>> print("\nThe views for {0}: ".format(workbook.name))
-        >>> print([view.name for view in workbook.views])
         """
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
@@ -550,24 +451,6 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         ------
         MissingRequiredFieldError
             If the workbook item is missing an ID.
-
-        Examples
-        --------
-        >>> # import tableauserverclient as TSC
-
-        >>> # server = TSC.Server('https://SERVERURL')
-        >>> # ...
-
-        >>> # get the workbook item
-        >>> workbook = server.workbooks.get_by_id('1a1b1c1d-2e2f-2a2b-3c3d-3e3f4a4b4c4d')
-
-
-        >>> # get the connection information
-        >>> server.workbooks.populate_connections(workbook)
-
-        >>> # print information about the data connections for the workbook item
-        >>> print("\nThe connections for {0}: ".format(workbook.name))
-        >>> print([connection.id for connection in workbook.connections])
         """
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
@@ -617,12 +500,6 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         ------
         MissingRequiredFieldError
             If the workbook item is missing an ID.
-
-        Examples
-        --------
-        >>> server.workbooks.populate_pdf(workbook)
-        >>> with open("workbook.pdf", "wb") as f:
-        >>>     f.write(workbook.pdf)
         """
         if not workbook_item.id:
             error = "Workbook item missing ID."
@@ -671,12 +548,6 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         ------
         MissingRequiredFieldError
             If the workbook item is missing an ID.
-
-        Examples
-        --------
-        >>> server.workbooks.populate_powerpoint(workbook)
-        >>> with open("workbook.pptx", "wb") as f:
-        >>>     f.write(workbook.pptx)
         """
         if not workbook_item.id:
             error = "Workbook item missing ID."
@@ -716,18 +587,6 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         ------
         MissingRequiredFieldError
             If the workbook item is missing an ID.
-
-        Examples
-        --------
-        >>> # import tableauserverclient as TSC
-        >>> # server = TSC.Server('https://SERVERURL')
-        >>> # ...
-
-        >>> # get the workbook item
-        >>> workbook = server.workbooks.get_by_id('1a1b1c1d-2e2f-2a2b-3c3d-3e3f4a4b4c4d')
-
-        >>> # get the preview image
-        >>> server.workbooks.populate_preview_image(workbook)
         """
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
@@ -760,11 +619,6 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> workbook = server.workbooks.get_by_id('1a1b1c1d-2e2f-2a2b-3c3d-3e3f4a4b4c4d')
-        >>> server.workbooks.populate_permissions(workbook)
         """
         self._permissions.populate(item)
 
@@ -789,14 +643,6 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         -------
         list[PermissionsRule]
             The updated permissions rules.
-
-        Examples
-        --------
-        >>> workbook = server.workbooks.get_by_id('1a1b1c1d-2e2f-2a2b-3c3d-3e3f4a4b4c4d')
-        >>> server.workbooks.populate_permissions(workbook)
-        >>> rules = workbook.permissions
-        >>> rules[0].capabilities |= {TSC.PermissionRule.Capability.Read: TSC.PermissionRule.Mode.Allow}
-        >>> server.workbooks.update_permissions(workbook, rules)
         """
         return self._permissions.update(resource, rules)
 
@@ -818,13 +664,6 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> workbook = server.workbooks.get_by_id('1a1b1c1d-2e2f-2a2b-3c3d-3e3f4a4b4c4d')
-        >>> server.workbooks.populate_permissions(workbook)
-        >>> rule = workbook.permissions[0]
-        >>> server.workbooks.delete_permission(workbook, rule)
         """
         return self._permissions.delete(item, capability_item)
 
@@ -917,20 +756,6 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         -------
         WorkbookItem | JobItem
             The workbook item or job item that was published.
-
-        Examples
-        --------
-        >>> import tableauserverclient as TSC
-        >>> tableau_auth = TSC.TableauAuth('username', 'password', site_id='site')
-        >>> server = TSC.Server('https://servername')
-
-        >>> with server.auth.sign_in(tableau_auth):
-        >>>     # create a workbook item
-        >>>     wb_item = TSC.WorkbookItem(name='Sample', project_id='1f2f3e4e-5d6d-7c8c-9b0b-1a2a3f4f5e6e')
-        >>>     # set hidden views
-        >>>     wb_item.hidden_views = ['Sheet1', 'Sheet2']
-        >>>     # call the publish method with the workbook item
-        >>>     wb_item = server.workbooks.publish(wb_item, 'SampleWB.twbx', 'Overwrite')
         """
         if isinstance(file, (str, os.PathLike)):
             if not os.path.isfile(file):
@@ -1059,13 +884,6 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         ------
         MissingRequiredFieldError
             If the workbook item is missing an ID.
-
-        Examples
-        --------
-        >>> workbook = server.workbooks.get_by_id('1a1b1c1d-2e2f-2a2b-3c3d-3e3f4a4b4c4d')
-        >>> server.workbooks.populate_revisions(workbook)
-        >>> print([revision.revision_number for revision in workbook.revisions])
-
         """
         if not workbook_item.id:
             error = "Workbook item missing ID. Workbook must be retrieved from server first."
@@ -1126,10 +944,6 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         ------
         ValueError
             If the workbook ID is not defined.
-
-        Examples
-        --------
-        >>> filepath = server.workbooks.download('1a1b1c1d-2e2f-2a2b-3c3d-3e3f4a4b4c4d', '5')
         """
 
         if not workbook_id:
@@ -1186,10 +1000,6 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         ------
         ValueError
             If the workbook ID or revision number is not defined.
-
-        Examples
-        --------
-        >>> server.workbooks.delete_revision('1a1b1c1d-2e2f-2a2b-3c3d-3e3f4a4b4c4d', '5')
         """
         if workbook_id is None or revision_number is None:
             raise ValueError
@@ -1220,10 +1030,6 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         -------
         list[AddResponse]
             The response from the server.
-
-        Examples
-        --------
-        >>> server.workbooks.schedule_extract_refresh('1a1b1c1d-2e2f-2a2b-3c3d-3e3f4a4b4c4d', workbook)
         """
         return self.parent_srv.schedules.add_to_schedule(schedule_id, workbook=item)
 
@@ -1248,11 +1054,6 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         -------
         set[str]
             The set of tags added to the workbook.
-
-        Examples
-        --------
-        >>> server.workbooks.add_tags(workbook, 'tag1')
-        >>> server.workbooks.add_tags(workbook, ['tag1', 'tag2'])
         """
         return super().add_tags(item, tags)
 
@@ -1275,11 +1076,6 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> server.workbooks.delete_tags(workbook, 'tag1')
-        >>> server.workbooks.delete_tags(workbook, ['tag1', 'tag2'])
         """
         return super().delete_tags(item, tags)
 
