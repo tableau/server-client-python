@@ -77,6 +77,7 @@ class QuerySet(Iterable[T], Sized):
         for page in count(1):
             self.request_options.pagenumber = page
             self._result_cache = []
+            self._pagination_item._page_number = None
             try:
                 self._fetch_all()
             except ServerResponseError as e:
@@ -141,6 +142,7 @@ class QuerySet(Iterable[T], Sized):
         elif k in range(self.total_available):
             # Otherwise, check if k is even sensible to return
             self._result_cache = []
+            self._pagination_item._page_number = None
             # Add one to k, otherwise it gets stuck at page boundaries, e.g. 100
             self.request_options.pagenumber = max(1, math.ceil((k + 1) / size))
             return self[k]
