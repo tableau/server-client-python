@@ -21,6 +21,84 @@ from .data_freshness_policy_item import DataFreshnessPolicyItem
 
 
 class WorkbookItem:
+    """
+    The workbook resources for Tableau are defined in the WorkbookItem class.
+    The class corresponds to the workbook resources you can access using the
+    Tableau REST API. Some workbook methods take an instance of the WorkbookItem
+    class as arguments. The workbook item specifies the project.
+
+    Parameters
+    ----------
+    project_id : Optional[str], optional
+        The project ID for the workbook, by default None.
+
+    name : Optional[str], optional
+        The name of the workbook, by default None.
+
+    show_tabs : bool, optional
+        Determines whether the workbook shows tabs for the view.
+
+    Attributes
+    ----------
+    connections : list[ConnectionItem]
+        The list of data connections (ConnectionItem) for the data sources used
+        by the workbook. You must first call the workbooks.populate_connections
+        method to access this data. See the ConnectionItem class.
+
+    content_url : Optional[str]
+        The name of the workbook as it appears in the URL.
+
+    created_at : Optional[datetime.datetime]
+        The date and time the workbook was created.
+
+    description : Optional[str]
+        User-defined description of the workbook.
+
+    id : Optional[str]
+       The identifier for the workbook. You need this value to query a specific
+       workbook or to delete a workbook with the get_by_id and delete methods.
+
+    owner_id : Optional[str]
+        The identifier for the owner (UserItem) of the workbook.
+
+    preview_image : bytes
+        The thumbnail image for the view. You must first call the
+        workbooks.populate_preview_image method to access this data.
+
+    project_name : Optional[str]
+        The name of the project that contains the workbook.
+
+    size: int
+        The size of the workbook in megabytes.
+
+    hidden_views: Optional[list[str]]
+        List of string names of views that need to be hidden when the workbook
+        is published.
+
+    tags: set[str]
+        The set of tags associated with the workbook.
+
+    updated_at : Optional[datetime.datetime]
+        The date and time the workbook was last updated.
+
+    views : list[ViewItem]
+        The list of views (ViewItem) for the workbook. You must first call the
+        workbooks.populate_views method to access this data. See the ViewItem
+        class.
+
+    web_page_url : Optional[str]
+        The full URL for the workbook.
+
+    Examples
+    --------
+    # creating a new instance of a WorkbookItem
+    >>> import tableauserverclient as TSC
+
+    >>> # Create new workbook_item with project id '3a8b6148-493c-11e6-a621-6f3499394a39'
+
+    >>> new_workbook = TSC.WorkbookItem('3a8b6148-493c-11e6-a621-6f3499394a39')
+    """
+
     def __init__(self, project_id: Optional[str] = None, name: Optional[str] = None, show_tabs: bool = False) -> None:
         self._connections = None
         self._content_url = None
