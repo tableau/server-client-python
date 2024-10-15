@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import List, Type, TYPE_CHECKING, Optional
 
 from defusedxml.ElementTree import fromstring
 
@@ -11,20 +11,21 @@ if TYPE_CHECKING:
 
 
 class SubscriptionItem:
-    def __init__(self, subject: str, schedule_id: str, user_id: str, target: "Target") -> None:
+    def __init__(self, subject: str, schedule_id: str | None, user_id: str | None, target: "Target") -> None:
         self._id = None
-        self.attach_image = True
-        self.attach_pdf = False
-        self.message = None
-        self.page_orientation = None
-        self.page_size_option = None
-        self.schedule_id = schedule_id
-        self.send_if_view_empty = True
-        self.subject = subject
-        self.suspended = False
-        self.target = target
-        self.user_id = user_id
-        self.schedule = None
+
+        self.attach_image: bool = True  # chosen as default value
+        self.attach_pdf: bool = False
+        self.message: Optional[str] = None
+        self.page_orientation: Optional[str] = None
+        self.page_size_option: Optional[str] = None
+        self.schedule_id: Optional[str] = schedule_id
+        self.send_if_view_empty: bool = True
+        self.subject: str = subject
+        self.suspended: bool = False
+        self.target: Target = target
+        self.user_id: Optional[str] = user_id
+        self.schedule: Optional[ScheduleItem] = None
 
     def __repr__(self) -> str:
         if self.id is not None:
