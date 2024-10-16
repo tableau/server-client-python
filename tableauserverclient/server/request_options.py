@@ -55,23 +55,6 @@ class RequestOptions(RequestOptionsBase):
     pagesize: int, optional
         The number of items to return per page. Default is 100. Can also read
         from the environment variable `TSC_PAGE_SIZE`
-
-    Examples
-    --------
-    >>> # Get the first 50 workbooks on the site
-    >>> request_options = TSC.RequestOptions(pagesize=50)
-
-    >>> # Get the next 50 workbooks on the site
-    >>> request_options.page_number(2)
-
-    >>> # Get the first 50 workbooks on the site, sorted by name
-    >>> request_options = TSC.RequestOptions(pagesize=50)
-    >>> request_options.sort.add(TSC.Sort(TSC.RequestOptions.Field.Name, TSC.Sort.Direction.Asc))
-
-    >>> # Get the first 50 workbooks on the site, filtered by a tag
-    >>> request_options = TSC.RequestOptions(pagesize=50)
-    >>> request_options.filter.add(TSC.Filter(TSC.RequestOptions.Field.Tags, TSC.Filter.Operator.Equals, "important"))
-
     """
 
     def __init__(self, pagenumber=1, pagesize=None):

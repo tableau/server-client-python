@@ -51,24 +51,6 @@ class Pager(Iterable[T]):
     ------
     ValueError
         If the endpoint is not a callable or an Endpoint object.
-
-    Examples
-    --------
-    >>> # Loop over all workbooks on the site
-    >>> for workbook in TSC.Pager(server.workbooks):
-    >>>     print(workbook.name)
-
-    >>> # Setting page size
-    >>> request_options = TSC.RequestOptions(pagesize=1000)
-    >>> all_workbooks = list(TSC.Pager(server.workbooks, request_options))
-
-    >>> # Starting on page 2
-    >>> request_options = TSC.RequestOptions(pagenumber=2)
-    >>> for workbook in TSC.Pager(server.workbooks, request_options):
-    >>>     print(workbook.name)
-
-    >>> # Using in a list comprehension
-    >>> views = [view for view in TSC.Pager(workbook.views) if "sales" in view.name.lower()]
     """
 
     def __init__(
