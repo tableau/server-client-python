@@ -105,11 +105,11 @@ def main():
             print(a)
         groups = [urllib.parse.quote_plus(group) for group in ["SALES NORTHWEST", "SALES ROMANIA", "this_group"]]
         print(groups)
-        
+
         # BUG: this loop seems to continue making requests long after we've seen all groups
-        #for group in server.groups.filter(name__in=groups).order_by("-name"):
+        # for group in server.groups.filter(name__in=groups).order_by("-name"):
         #    print(group.name)
-        
+
         print("done")
 
 
