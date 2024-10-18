@@ -36,6 +36,7 @@ class Permission:
         ShareView = "ShareView"
         ViewComments = "ViewComments"
         ViewUnderlyingData = "ViewUnderlyingData"
+        VizqlDataApiAccess = "VizqlDataApiAccess"
         WebAuthoring = "WebAuthoring"
         Write = "Write"
         RunExplainData = "RunExplainData"
