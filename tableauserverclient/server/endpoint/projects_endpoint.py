@@ -41,6 +41,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         Retrieves all projects on the site. The endpoint is paginated and can
         be filtered using the req_options parameter.
 
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_projects.htm#query_projects
+
         Parameters
         ----------
         req_options : RequestOptions | None, default None
@@ -63,6 +65,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
     def delete(self, project_id: str) -> None:
         """
         Deletes a single project on the site.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_projects.htm#delete_project
 
         Parameters
         ----------
@@ -94,6 +98,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         description, or the project permissions. To specify the site, create a
         TableauAuth instance using the content URL for the site (site_id), and
         sign in to that site.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_projects.htm#update_project
 
         Parameters
         ----------
@@ -137,6 +143,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         project, create a TableauAuth instance using the content URL for the
         site (site_id), and sign in to that site.
 
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_projects.htm#create_project
+
         Parameters
         ----------
         project_item : ProjectItem
@@ -168,6 +176,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         """
         Queries the project permissions, parses and stores the returned the permissions.
 
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_project_permissions
+
         Parameters
         ----------
         item : ProjectItem
@@ -185,6 +195,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         Updates the permissions for the specified project item. The rules
         provided are expected to be a complete list of the permissions for the
         project.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#replace_permissions_for_content
 
         Parameters
         ----------
@@ -207,6 +219,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         """
         Deletes the specified permissions from the project item.
 
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_project_permission
+
         Parameters
         ----------
         item : ProjectItem
@@ -227,6 +241,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         Queries the default workbook permissions, parses and stores the
         returned the permissions.
 
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_default_permissions
+
         Parameters
         ----------
         item : ProjectItem
@@ -243,6 +259,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         """
         Queries the default datasource permissions, parses and stores the
         returned the permissions.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_default_permissions
 
         Parameters
         ----------
@@ -261,6 +279,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         Queries the default metric permissions, parses and stores the
         returned the permissions.
 
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_default_permissions
+
         Parameters
         ----------
         item : ProjectItem
@@ -277,6 +297,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         """
         Queries the default datarole permissions, parses and stores the
         returned the permissions.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_default_permissions
 
         Parameters
         ----------
@@ -295,6 +317,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         Queries the default flow permissions, parses and stores the
         returned the permissions.
 
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_default_permissions
+
         Parameters
         ----------
         item : ProjectItem
@@ -312,6 +336,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         Queries the default lens permissions, parses and stores the
         returned the permissions.
 
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_default_permissions
+
         Parameters
         ----------
         item : ProjectItem
@@ -328,6 +354,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         """
         Queries the default virtualconnections permissions, parses and stores
         the returned the permissions.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_default_permissions
 
         Parameters
         ----------
@@ -347,6 +375,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         Queries the default database permissions, parses and stores the
         returned the permissions.
 
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_default_permissions
+
         Parameters
         ----------
         item : ProjectItem
@@ -363,6 +393,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         """
         Queries the default table permissions, parses and stores the
         returned the permissions.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_default_permissions
 
         Parameters
         ----------
@@ -381,6 +413,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
     ) -> list[PermissionsRule]:
         """
         Add or updates the default workbook permissions for the specified.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#replace_default_permissions_for_content
 
         Parameters
         ----------
@@ -404,6 +438,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         """
         Add or updates the default datasource permissions for the specified.
 
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#replace_default_permissions_for_content
+
         Parameters
         ----------
         item : ProjectItem
@@ -425,6 +461,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
     ) -> list[PermissionsRule]:
         """
         Add or updates the default metric permissions for the specified.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#replace_default_permissions_for_content
 
         Parameters
         ----------
@@ -448,6 +486,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         """
         Add or updates the default datarole permissions for the specified.
 
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#replace_default_permissions_for_content
+
         Parameters
         ----------
         item : ProjectItem
@@ -468,6 +508,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         """
         Add or updates the default flow permissions for the specified.
 
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#replace_default_permissions_for_content
+
         Parameters
         ----------
         item : ProjectItem
@@ -487,6 +529,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
     def update_lens_default_permissions(self, item: ProjectItem, rules: list[PermissionsRule]) -> list[PermissionsRule]:
         """
         Add or updates the default lens permissions for the specified.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#replace_default_permissions_for_content
 
         Parameters
         ----------
@@ -510,6 +554,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         """
         Add or updates the default virtualconnection permissions for the specified.
 
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#replace_default_permissions_for_content
+
         Parameters
         ----------
         item : ProjectItem
@@ -531,6 +577,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
     ) -> list[PermissionsRule]:
         """
         Add or updates the default database permissions for the specified.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#replace_default_permissions_for_content
 
         Parameters
         ----------
@@ -554,6 +602,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         """
         Add or updates the default table permissions for the specified.
 
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#replace_default_permissions_for_content
+
         Parameters
         ----------
         item : ProjectItem
@@ -574,6 +624,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         """
         Deletes the specified default permission rule from the project.
 
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission
+
         Parameters
         ----------
         item : ProjectItem
@@ -592,6 +644,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
     def delete_datasource_default_permissions(self, item: ProjectItem, rule: PermissionsRule) -> None:
         """
         Deletes the specified default permission rule from the project.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission
 
         Parameters
         ----------
@@ -612,6 +666,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         """
         Deletes the specified default permission rule from the project.
 
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission
+
         Parameters
         ----------
         item : ProjectItem
@@ -630,6 +686,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
     def delete_datarole_default_permissions(self, item: ProjectItem, rule: PermissionsRule) -> None:
         """
         Deletes the specified default permission rule from the project.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission
 
         Parameters
         ----------
@@ -650,6 +708,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         """
         Deletes the specified default permission rule from the project.
 
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission
+
         Parameters
         ----------
         item : ProjectItem
@@ -668,6 +728,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
     def delete_lens_default_permissions(self, item: ProjectItem, rule: PermissionsRule) -> None:
         """
         Deletes the specified default permission rule from the project.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission
 
         Parameters
         ----------
@@ -688,6 +750,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         """
         Deletes the specified default permission rule from the project.
 
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission
+
         Parameters
         ----------
         item : ProjectItem
@@ -707,6 +771,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         """
         Deletes the specified default permission rule from the project.
 
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission
+
         Parameters
         ----------
         item : ProjectItem
@@ -725,6 +791,8 @@ class Projects(QuerysetEndpoint[ProjectItem]):
     def delete_table_default_permissions(self, item: ProjectItem, rule: PermissionsRule) -> None:
         """
         Deletes the specified default permission rule from the project.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission
 
         Parameters
         ----------
