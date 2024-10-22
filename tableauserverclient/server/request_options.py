@@ -213,57 +213,9 @@ class _DataExportOptions(RequestOptionsBase):
             params[name] = value
 
 
-class CSVRequestOptions(_DataExportOptions):
-    extension = "csv"
-
-
-class ExcelRequestOptions(_DataExportOptions):
-    extension = "xlsx"
-
-
-class ImageRequestOptions(_DataExportOptions):
-    extension = "png"
-
-    # if 'high' isn't specified, the REST API endpoint returns an image with standard resolution
-    class Resolution:
-        High = "high"
-
-    def __init__(self, imageresolution=None, maxage=-1):
+class _ImagePDFCommonExportOptions(_DataExportOptions):
+    def __init__(self, maxage=-1, viz_height=None, viz_width=None):
         super().__init__(maxage=maxage)
-        self.image_resolution = imageresolution
-
-    def get_query_params(self):
-        params = super().get_query_params()
-        if self.image_resolution:
-            params["resolution"] = self.image_resolution
-        return params
-
-
-class PDFRequestOptions(_DataExportOptions):
-    class PageType:
-        A3 = "a3"
-        A4 = "a4"
-        A5 = "a5"
-        B4 = "b4"
-        B5 = "b5"
-        Executive = "executive"
-        Folio = "folio"
-        Ledger = "ledger"
-        Legal = "legal"
-        Letter = "letter"
-        Note = "note"
-        Quarto = "quarto"
-        Tabloid = "tabloid"
-        Unspecified = "unspecified"
-
-    class Orientation:
-        Portrait = "portrait"
-        Landscape = "landscape"
-
-    def __init__(self, page_type=None, orientation=None, maxage=-1, viz_height=None, viz_width=None):
-        super().__init__(maxage=maxage)
-        self.page_type = page_type
-        self.orientation = orientation
         self.viz_height = viz_height
         self.viz_width = viz_width
 
@@ -287,11 +239,6 @@ class PDFRequestOptions(_DataExportOptions):
 
     def get_query_params(self) -> dict:
         params = super().get_query_params()
-        if self.page_type:
-            params["type"] = self.page_type
-
-        if self.orientation:
-            params["orientation"] = self.orientation
 
         # XOR. Either both are None or both are not None.
         if (self.viz_height is None) ^ (self.viz_width is None):
@@ -302,5 +249,68 @@ class PDFRequestOptions(_DataExportOptions):
 
         if self.viz_width is not None:
             params["vizWidth"] = self.viz_width
+
+        return params
+
+
+class CSVRequestOptions(_DataExportOptions):
+    extension = "csv"
+
+
+class ExcelRequestOptions(_DataExportOptions):
+    extension = "xlsx"
+
+
+class ImageRequestOptions(_ImagePDFCommonExportOptions):
+    extension = "png"
+
+    # if 'high' isn't specified, the REST API endpoint returns an image with standard resolution
+    class Resolution:
+        High = "high"
+
+    def __init__(self, imageresolution=None, maxage=-1, viz_height=None, viz_width=None):
+        super().__init__(maxage=maxage, viz_height=viz_height, viz_width=viz_width)
+        self.image_resolution = imageresolution
+
+    def get_query_params(self):
+        params = super().get_query_params()
+        if self.image_resolution:
+            params["resolution"] = self.image_resolution
+        return params
+
+
+class PDFRequestOptions(_ImagePDFCommonExportOptions):
+    class PageType:
+        A3 = "a3"
+        A4 = "a4"
+        A5 = "a5"
+        B4 = "b4"
+        B5 = "b5"
+        Executive = "executive"
+        Folio = "folio"
+        Ledger = "ledger"
+        Legal = "legal"
+        Letter = "letter"
+        Note = "note"
+        Quarto = "quarto"
+        Tabloid = "tabloid"
+        Unspecified = "unspecified"
+
+    class Orientation:
+        Portrait = "portrait"
+        Landscape = "landscape"
+
+    def __init__(self, page_type=None, orientation=None, maxage=-1, viz_height=None, viz_width=None):
+        super().__init__(maxage=maxage, viz_height=viz_height, viz_width=viz_width)
+        self.page_type = page_type
+        self.orientation = orientation
+
+    def get_query_params(self) -> dict:
+        params = super().get_query_params()
+        if self.page_type:
+            params["type"] = self.page_type
+
+        if self.orientation:
+            params["orientation"] = self.orientation
 
         return params
