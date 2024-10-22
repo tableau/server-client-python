@@ -41,6 +41,7 @@ def main():
         "--language", help="Text such as 'Average' will appear in this language. Use values like fr, de, es, en"
     )
     parser.add_argument("--workbook", action="store_true")
+    parser.add_argument("--custom_view", action="store_true")
 
     parser.add_argument("--file", "-f", help="filename to store the exported data")
     parser.add_argument("--filter", "-vf", metavar="COLUMN:VALUE", help="View filter to apply to the view")
@@ -58,6 +59,8 @@ def main():
         print("Connected")
         if args.workbook:
             item = server.workbooks.get_by_id(args.resource_id)
+        elif args.custom_view:
+            item = server.custom_views.get_by_id(args.resource_id)
         else:
             item = server.views.get_by_id(args.resource_id)
 
@@ -74,6 +77,8 @@ def main():
         populate = getattr(server.views, populate_func_name)
         if args.workbook:
             populate = getattr(server.workbooks, populate_func_name)
+        elif args.custom_view:
+            populate = getattr(server.custom_views, populate_func_name)
 
         option_factory = getattr(TSC, option_factory_name)
         options: TSC.PDFRequestOptions = option_factory()
