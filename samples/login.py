@@ -85,10 +85,7 @@ def sample_connect_to_server(args):
     # Make sure we use an updated version of the rest apis, and pass in our cert handling choice
     server = TSC.Server(args.server, use_server_version=True, http_options={"verify": check_ssl_certificate})
     server.auth.sign_in(tableau_auth)
-    server.version = "2.6"
-    new_site: TSC.SiteItem = TSC.SiteItem("cdnear", content_url=args.site)
-    server.auth.switch_site(new_site)
-    print("Logged in successfully")
+    server.version = "3.19"
 
     return server
 
