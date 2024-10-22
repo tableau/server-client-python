@@ -21,10 +21,15 @@
 import argparse
 import logging
 
+import os
 import tableauserverclient as TSC
-
-import env
 import tableauserverclient.datetime_helpers
+
+
+def get_env(key):
+    if key in os.environ:
+        return os.environ[key]
+    return None
 
 
 def main():
@@ -52,13 +57,13 @@ def main():
 
     args = parser.parse_args()
     if not args.server:
-        args.server = env.server
+        args.server = get_env("SERVER")
     if not args.site:
-        args.site = env.site
+        args.site = get_env("SITE")
     if not args.token_name:
-        args.token_name = env.token_name
+        args.token_name = get_env("TOKEN_NAME")
     if not args.token_value:
-        args.token_value = env.token_value
+        args.token_value = get_env("TOKEN_VALUE")
     args.logging = "debug"
     args.file = "C:/dev/tab-samples/5M.tdsx"
     args.async_ = True
@@ -118,8 +123,10 @@ def main():
                 new_datasource, args.file, publish_mode, connection_credentials=new_conn_creds
             )
             print(
-                "{}Datasource published. Datasource ID: {}".format(
-                    new_datasource.id, tableauserverclient.datetime_helpers.timestamp()
+                (
+                    "{}Datasource published. Datasource ID: {}".format(
+                        new_datasource.id, tableauserverclient.datetime_helpers.timestamp()
+                    )
                 )
             )
             print("\t\tClosing connection")
