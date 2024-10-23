@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Optional
 import xml.etree.ElementTree as ET
 
 from defusedxml.ElementTree import fromstring
@@ -13,7 +13,7 @@ class GroupSetItem:
     def __init__(self, name: Optional[str] = None) -> None:
         self.name = name
         self.id: Optional[str] = None
-        self.groups: List["GroupItem"] = []
+        self.groups: list["GroupItem"] = []
         self.group_count: int = 0
 
     def __str__(self) -> str:
@@ -25,13 +25,13 @@ class GroupSetItem:
         return self.__str__()
 
     @classmethod
-    def from_response(cls, response: bytes, ns: Dict[str, str]) -> List["GroupSetItem"]:
+    def from_response(cls, response: bytes, ns: dict[str, str]) -> list["GroupSetItem"]:
         parsed_response = fromstring(response)
         all_groupset_xml = parsed_response.findall(".//t:groupSet", namespaces=ns)
         return [cls.from_xml(xml, ns) for xml in all_groupset_xml]
 
     @classmethod
-    def from_xml(cls, groupset_xml: ET.Element, ns: Dict[str, str]) -> "GroupSetItem":
+    def from_xml(cls, groupset_xml: ET.Element, ns: dict[str, str]) -> "GroupSetItem":
         def get_group(group_xml: ET.Element) -> GroupItem:
             group_item = GroupItem()
             group_item._id = group_xml.get("id")

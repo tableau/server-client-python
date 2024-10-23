@@ -63,7 +63,7 @@ class AuthTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.post(self.baseurl + "/signin", text=response_xml, status_code=401)
             tableau_auth = TSC.TableauAuth("testuser", "wrongpassword")
-            self.assertRaises(TSC.NotSignedInError, self.server.auth.sign_in, tableau_auth)
+            self.assertRaises(TSC.FailedSignInError, self.server.auth.sign_in, tableau_auth)
 
     def test_sign_in_invalid_token(self):
         with open(SIGN_IN_ERROR_XML, "rb") as f:
@@ -71,7 +71,7 @@ class AuthTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.post(self.baseurl + "/signin", text=response_xml, status_code=401)
             tableau_auth = TSC.PersonalAccessTokenAuth(token_name="mytoken", personal_access_token="invalid")
-            self.assertRaises(TSC.NotSignedInError, self.server.auth.sign_in, tableau_auth)
+            self.assertRaises(TSC.FailedSignInError, self.server.auth.sign_in, tableau_auth)
 
     def test_sign_in_without_auth(self):
         with open(SIGN_IN_ERROR_XML, "rb") as f:
@@ -79,7 +79,7 @@ class AuthTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.post(self.baseurl + "/signin", text=response_xml, status_code=401)
             tableau_auth = TSC.TableauAuth("", "")
-            self.assertRaises(TSC.NotSignedInError, self.server.auth.sign_in, tableau_auth)
+            self.assertRaises(TSC.FailedSignInError, self.server.auth.sign_in, tableau_auth)
 
     def test_sign_out(self):
         with open(SIGN_IN_XML, "rb") as f:

@@ -75,7 +75,7 @@ class DatasourceTests(unittest.TestCase):
         self.assertEqual("Sample datasource", all_datasources[1].name)
         self.assertEqual("ee8c6e70-43b6-11e6-af4f-f7b0d8e20760", all_datasources[1].project_id)
         self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", all_datasources[1].owner_id)
-        self.assertEqual(set(["world", "indicators", "sample"]), all_datasources[1].tags)
+        self.assertEqual({"world", "indicators", "sample"}, all_datasources[1].tags)
         self.assertEqual("https://page.com", all_datasources[1].webpage_url)
         self.assertTrue(all_datasources[1].encrypt_extracts)
         self.assertFalse(all_datasources[1].has_extracts)
@@ -110,7 +110,7 @@ class DatasourceTests(unittest.TestCase):
         self.assertEqual("Sample datasource", single_datasource.name)
         self.assertEqual("ee8c6e70-43b6-11e6-af4f-f7b0d8e20760", single_datasource.project_id)
         self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", single_datasource.owner_id)
-        self.assertEqual(set(["world", "indicators", "sample"]), single_datasource.tags)
+        self.assertEqual({"world", "indicators", "sample"}, single_datasource.tags)
         self.assertEqual(TSC.DatasourceItem.AskDataEnablement.SiteDefault, single_datasource.ask_data_enablement)
 
     def test_update(self) -> None:
@@ -488,7 +488,7 @@ class DatasourceTests(unittest.TestCase):
 
     def test_download_sanitizes_name(self) -> None:
         filename = "Name,With,Commas.tds"
-        disposition = 'name="tableau_workbook"; filename="{}"'.format(filename)
+        disposition = f'name="tableau_workbook"; filename="{filename}"'
         with requests_mock.mock() as m:
             m.get(
                 self.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/content",
@@ -659,7 +659,7 @@ class DatasourceTests(unittest.TestCase):
 
         response_xml = read_xml_asset(REVISION_XML)
         with requests_mock.mock() as m:
-            m.get("{0}/{1}/revisions".format(self.baseurl, datasource.id), text=response_xml)
+            m.get(f"{self.baseurl}/{datasource.id}/revisions", text=response_xml)
             self.server.datasources.populate_revisions(datasource)
             revisions = datasource.revisions
 
@@ -687,7 +687,7 @@ class DatasourceTests(unittest.TestCase):
         datasource._id = "06b944d2-959d-4604-9305-12323c95e70e"
 
         with requests_mock.mock() as m:
-            m.delete("{0}/{1}/revisions/3".format(self.baseurl, datasource.id))
+            m.delete(f"{self.baseurl}/{datasource.id}/revisions/3")
             self.server.datasources.delete_revision(datasource.id, "3")
 
     def test_download_revision(self) -> None:

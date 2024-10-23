@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 from datetime import datetime
-from typing import List, Optional, Set
+from typing import Optional
 
 from tableauserverclient.datetime_helpers import parse_datetime
 from .property_decorators import property_is_boolean, property_is_datetime
@@ -8,7 +8,7 @@ from .tag_item import TagItem
 from .permissions_item import Permission
 
 
-class MetricItem(object):
+class MetricItem:
     def __init__(self, name: Optional[str] = None):
         self._id: Optional[str] = None
         self._name: Optional[str] = name
@@ -21,8 +21,8 @@ class MetricItem(object):
         self._project_name: Optional[str] = None
         self._owner_id: Optional[str] = None
         self._view_id: Optional[str] = None
-        self._initial_tags: Set[str] = set()
-        self.tags: Set[str] = set()
+        self._initial_tags: set[str] = set()
+        self.tags: set[str] = set()
         self._permissions: Optional[Permission] = None
 
     @property
@@ -126,7 +126,7 @@ class MetricItem(object):
         cls,
         resp: bytes,
         ns,
-    ) -> List["MetricItem"]:
+    ) -> list["MetricItem"]:
         all_metric_items = list()
         parsed_response = ET.fromstring(resp)
         all_metric_xml = parsed_response.findall(".//t:metric", namespaces=ns)

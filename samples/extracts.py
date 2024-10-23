@@ -1,13 +1,7 @@
 ####
-# This script demonstrates how to use the Tableau Server Client
-# to interact with workbooks. It explores the different
-# functions that the Server API supports on workbooks.
-#
-# With no flags set, this sample will query all workbooks,
-# pick one workbook and populate its connections/views, and update
-# the workbook. Adding flags will demonstrate the specific feature
-# on top of the general operations.
-####
+# This script demonstrates how to use the Tableau Server Client to interact with extracts.
+# It explores the different functions that the REST API supports on extracts.
+#####
 
 import argparse
 import logging
@@ -47,7 +41,7 @@ def main():
     with server.auth.sign_in(tableau_auth):
         # Gets all workbook items
         all_workbooks, pagination_item = server.workbooks.get()
-        print("\nThere are {} workbooks on site: ".format(pagination_item.total_available))
+        print(f"\nThere are {pagination_item.total_available} workbooks on site: ")
         print([workbook.name for workbook in all_workbooks])
 
         if all_workbooks:

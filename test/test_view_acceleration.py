@@ -42,7 +42,7 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual("ee8c6e70-43b6-11e6-af4f-f7b0d8e20760", single_workbook.project_id)
         self.assertEqual("default", single_workbook.project_name)
         self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", single_workbook.owner_id)
-        self.assertEqual(set(["Safari", "Sample"]), single_workbook.tags)
+        self.assertEqual({"Safari", "Sample"}, single_workbook.tags)
         self.assertEqual("d79634e1-6063-4ec9-95ff-50acbf609ff5", single_workbook.views[0].id)
         self.assertEqual("ENDANGERED SAFARI", single_workbook.views[0].name)
         self.assertEqual("SafariSample/sheets/ENDANGEREDSAFARI", single_workbook.views[0].content_url)
