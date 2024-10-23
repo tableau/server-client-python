@@ -27,12 +27,20 @@ def main():
     # Options specific to this sample
     parser.add_argument("resource_type", choices=["workbook", "datasource"])
     parser.add_argument("resource_id")
+    parser.add_argument("--incremental", default=False)
 
     args = parser.parse_args()
 
     # Set logging level based on user input, or error by default
     logging_level = getattr(logging, args.logging_level.upper())
     logging.basicConfig(level=logging_level)
+
+    refresh_type = "FullRefresh"
+    incremental = False
+    if args.incremental:
+        refresh_type = "Incremental"
+        incremental = True
+
 
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
     server = TSC.Server(args.server, use_server_version=True)
@@ -42,7 +50,7 @@ def main():
             resource = server.workbooks.get_by_id(args.resource_id)
 
             # trigger the refresh, you'll get a job id back which can be used to poll for when the refresh is done
-            job = server.workbooks.refresh(args.resource_id)
+            job = server.workbooks.refresh(args.resource_id, incremental=incremental)
         else:
             # Get the datasource by its Id to make sure it exists
             resource = server.datasources.get_by_id(args.resource_id)
