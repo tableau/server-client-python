@@ -7,9 +7,15 @@
 import argparse
 import getpass
 import logging
+import os
 
 import tableauserverclient as TSC
-import env
+
+
+def get_env(key):
+    if key in os.environ:
+        return os.environ[key]
+    return None
 
 
 # If a sample has additional arguments, then it should copy this code and insert them after the call to
@@ -20,13 +26,13 @@ def set_up_and_log_in():
     sample_define_common_options(parser)
     args = parser.parse_args()
     if not args.server:
-        args.server = env.server
+        args.server = get_env("SERVER")
     if not args.site:
-        args.site = env.site
+        args.site = get_env("SITE")
     if not args.token_name:
-        args.token_name = env.token_name
+        args.token_name = get_env("TOKEN_NAME")
     if not args.token_value:
-        args.token_value = env.token_value
+        args.token_value = get_env("TOKEN_VALUE")
     args.logging_level = "debug"
 
     server = sample_connect_to_server(args)
@@ -79,10 +85,7 @@ def sample_connect_to_server(args):
     # Make sure we use an updated version of the rest apis, and pass in our cert handling choice
     server = TSC.Server(args.server, use_server_version=True, http_options={"verify": check_ssl_certificate})
     server.auth.sign_in(tableau_auth)
-    server.version = "2.6"
-    new_site: TSC.SiteItem = TSC.SiteItem("cdnear", content_url=env.site)
-    server.auth.switch_site(new_site)
-    print("Logged in successfully")
+    server.version = "3.19"
 
     return server
 
