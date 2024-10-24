@@ -12,6 +12,46 @@ if TYPE_CHECKING:
 
 
 class GroupItem:
+    """
+    The GroupItem class contains the attributes for the group resources on
+    Tableau Server. The GroupItem class defines the information you can request
+    or query from Tableau Server. The class members correspond to the attributes
+    of a server request or response payload.
+
+    Parameters
+    ----------
+    name: str
+        The name of the group.
+
+    domain_name: str
+        The name of the Active Directory domain ("local" if local authentication is used).
+
+    Properties
+    ----------
+    users: Pager[UserItem]
+        The users in the group. Must be populated with a call to `populate_users()`.
+
+    id: str
+        The unique identifier for the group.
+
+    minimum_site_role: str
+        The minimum site role for users in the group. Use the `UserItem.Roles` enum.
+        Users in the group cannot have their site role set lower than this value.
+
+    license_mode: str
+        The mode defining when to apply licenses for group members. When the
+        mode is onLogin, a license is granted for each group member when they
+        login to a site. When the mode is onSync, a license is granted for group
+        members each time the domain is synced.
+
+    Examples
+    --------
+    >>> # Create a new group item
+    >>>  newgroup = TSC.GroupItem('My Group')
+
+
+    """
+
     tag_name: str = "group"
 
     class LicenseMode:
