@@ -1,7 +1,7 @@
 import copy
 import datetime
 import xml.etree.ElementTree as ET
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Optional
 
 from defusedxml.ElementTree import fromstring
 
@@ -18,14 +18,14 @@ from tableauserverclient.models.revision_item import RevisionItem
 from tableauserverclient.models.tag_item import TagItem
 
 
-class DatasourceItem(object):
+class DatasourceItem:
     class AskDataEnablement:
         Enabled = "Enabled"
         Disabled = "Disabled"
         SiteDefault = "SiteDefault"
 
     def __repr__(self):
-        return "<Datasource {0} '{1}' ({2} parent={3} >".format(
+        return "<Datasource {} '{}' ({} parent={} >".format(
             self._id,
             self.name,
             self.description or "No Description",
@@ -44,7 +44,7 @@ class DatasourceItem(object):
         self._encrypt_extracts = None
         self._has_extracts = None
         self._id: Optional[str] = None
-        self._initial_tags: Set = set()
+        self._initial_tags: set = set()
         self._project_name: Optional[str] = None
         self._revisions = None
         self._size: Optional[int] = None
@@ -55,7 +55,7 @@ class DatasourceItem(object):
         self.name = name
         self.owner_id: Optional[str] = None
         self.project_id = project_id
-        self.tags: Set[str] = set()
+        self.tags: set[str] = set()
 
         self._permissions = None
         self._data_quality_warnings = None
@@ -72,14 +72,14 @@ class DatasourceItem(object):
         self._ask_data_enablement = value
 
     @property
-    def connections(self) -> Optional[List[ConnectionItem]]:
+    def connections(self) -> Optional[list[ConnectionItem]]:
         if self._connections is None:
             error = "Datasource item must be populated with connections first."
             raise UnpopulatedPropertyError(error)
         return self._connections()
 
     @property
-    def permissions(self) -> Optional[List[PermissionsRule]]:
+    def permissions(self) -> Optional[list[PermissionsRule]]:
         if self._permissions is None:
             error = "Project item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
@@ -177,7 +177,7 @@ class DatasourceItem(object):
         return self._webpage_url
 
     @property
-    def revisions(self) -> List[RevisionItem]:
+    def revisions(self) -> list[RevisionItem]:
         if self._revisions is None:
             error = "Datasource item must be populated with revisions first."
             raise UnpopulatedPropertyError(error)
@@ -309,7 +309,7 @@ class DatasourceItem(object):
             self._size = int(size)
 
     @classmethod
-    def from_response(cls, resp: str, ns: Dict) -> List["DatasourceItem"]:
+    def from_response(cls, resp: str, ns: dict) -> list["DatasourceItem"]:
         all_datasource_items = list()
         parsed_response = fromstring(resp)
         all_datasource_xml = parsed_response.findall(".//t:datasource", namespaces=ns)
@@ -326,7 +326,7 @@ class DatasourceItem(object):
         return datasource_item
 
     @staticmethod
-    def _parse_element(datasource_xml: ET.Element, ns: Dict) -> Tuple:
+    def _parse_element(datasource_xml: ET.Element, ns: dict) -> tuple:
         id_ = datasource_xml.get("id", None)
         name = datasource_xml.get("name", None)
         datasource_type = datasource_xml.get("type", None)
