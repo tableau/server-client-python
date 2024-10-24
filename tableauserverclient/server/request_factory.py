@@ -1,6 +1,5 @@
 import xml.etree.ElementTree as ET
-from typing import Any, Callable, Optional, TypeVar, TYPE_CHECKING, Union
-from collections.abc import Iterable
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, TypeVar, TYPE_CHECKING, Union
 
 from typing_extensions import ParamSpec
 
@@ -16,7 +15,7 @@ if TYPE_CHECKING:
 # this file could be largely replaced if we were willing to import the huge file from generateDS
 
 
-def _add_multipart(parts: dict) -> tuple[Any, str]:
+def _add_multipart(parts: Dict) -> Tuple[Any, str]:
     mime_multipart_parts = list()
     for name, (filename, data, content_type) in parts.items():
         multipart_part = RequestField(name=name, data=data, filename=filename)
@@ -81,7 +80,7 @@ def _add_credentials_element(parent_element, connection_credentials):
         credentials_element.attrib["oAuth"] = "true"
 
 
-class AuthRequest:
+class AuthRequest(object):
     def signin_req(self, auth_item):
         xml_request = ET.Element("tsRequest")
 
@@ -105,7 +104,7 @@ class AuthRequest:
         return ET.tostring(xml_request)
 
 
-class ColumnRequest:
+class ColumnRequest(object):
     def update_req(self, column_item):
         xml_request = ET.Element("tsRequest")
         column_element = ET.SubElement(xml_request, "column")
@@ -116,7 +115,7 @@ class ColumnRequest:
         return ET.tostring(xml_request)
 
 
-class DataAlertRequest:
+class DataAlertRequest(object):
     def add_user_to_alert(self, alert_item: "DataAlertItem", user_id: str) -> bytes:
         xml_request = ET.Element("tsRequest")
         user_element = ET.SubElement(xml_request, "user")
@@ -141,7 +140,7 @@ class DataAlertRequest:
         return ET.tostring(xml_request)
 
 
-class DatabaseRequest:
+class DatabaseRequest(object):
     def update_req(self, database_item):
         xml_request = ET.Element("tsRequest")
         database_element = ET.SubElement(xml_request, "database")
@@ -160,7 +159,7 @@ class DatabaseRequest:
         return ET.tostring(xml_request)
 
 
-class DatasourceRequest:
+class DatasourceRequest(object):
     def _generate_xml(self, datasource_item: DatasourceItem, connection_credentials=None, connections=None):
         xml_request = ET.Element("tsRequest")
         datasource_element = ET.SubElement(xml_request, "datasource")
@@ -245,7 +244,7 @@ class DatasourceRequest:
         return _add_multipart(parts)
 
 
-class DQWRequest:
+class DQWRequest(object):
     def add_req(self, dqw_item):
         xml_request = ET.Element("tsRequest")
         dqw_element = ET.SubElement(xml_request, "dataQualityWarning")
@@ -275,7 +274,7 @@ class DQWRequest:
         return ET.tostring(xml_request)
 
 
-class FavoriteRequest:
+class FavoriteRequest(object):
     def add_request(self, id_: Optional[str], target_type: str, label: Optional[str]) -> bytes:
         """
         <favorite label="...">
@@ -330,7 +329,7 @@ class FavoriteRequest:
         return self.add_request(id_, Resource.Workbook, name)
 
 
-class FileuploadRequest:
+class FileuploadRequest(object):
     def chunk_req(self, chunk):
         parts = {
             "request_payload": ("", "", "text/xml"),
@@ -339,8 +338,8 @@ class FileuploadRequest:
         return _add_multipart(parts)
 
 
-class FlowRequest:
-    def _generate_xml(self, flow_item: "FlowItem", connections: Optional[list["ConnectionItem"]] = None) -> bytes:
+class FlowRequest(object):
+    def _generate_xml(self, flow_item: "FlowItem", connections: Optional[List["ConnectionItem"]] = None) -> bytes:
         xml_request = ET.Element("tsRequest")
         flow_element = ET.SubElement(xml_request, "flow")
         if flow_item.name is not None:
@@ -371,8 +370,8 @@ class FlowRequest:
         flow_item: "FlowItem",
         filename: str,
         file_contents: bytes,
-        connections: Optional[list["ConnectionItem"]] = None,
-    ) -> tuple[Any, str]:
+        connections: Optional[List["ConnectionItem"]] = None,
+    ) -> Tuple[Any, str]:
         xml_request = self._generate_xml(flow_item, connections)
 
         parts = {
@@ -381,14 +380,14 @@ class FlowRequest:
         }
         return _add_multipart(parts)
 
-    def publish_req_chunked(self, flow_item, connections=None) -> tuple[Any, str]:
+    def publish_req_chunked(self, flow_item, connections=None) -> Tuple[Any, str]:
         xml_request = self._generate_xml(flow_item, connections)
 
         parts = {"request_payload": ("", xml_request, "text/xml")}
         return _add_multipart(parts)
 
 
-class GroupRequest:
+class GroupRequest(object):
     def add_user_req(self, user_id: str) -> bytes:
         xml_request = ET.Element("tsRequest")
         user_element = ET.SubElement(xml_request, "user")
@@ -478,7 +477,7 @@ class GroupRequest:
         return ET.tostring(xml_request)
 
 
-class PermissionRequest:
+class PermissionRequest(object):
     def add_req(self, rules: Iterable[PermissionsRule]) -> bytes:
         xml_request = ET.Element("tsRequest")
         permissions_element = ET.SubElement(xml_request, "permissions")
@@ -500,7 +499,7 @@ class PermissionRequest:
             capability_element.attrib["mode"] = mode
 
 
-class ProjectRequest:
+class ProjectRequest(object):
     def update_req(self, project_item: "ProjectItem") -> bytes:
         xml_request = ET.Element("tsRequest")
         project_element = ET.SubElement(xml_request, "project")
@@ -531,7 +530,7 @@ class ProjectRequest:
         return ET.tostring(xml_request)
 
 
-class ScheduleRequest:
+class ScheduleRequest(object):
     def create_req(self, schedule_item):
         xml_request = ET.Element("tsRequest")
         schedule_element = ET.SubElement(xml_request, "schedule")
@@ -610,7 +609,7 @@ class ScheduleRequest:
         return self._add_to_req(id_, "flow", task_type)
 
 
-class SiteRequest:
+class SiteRequest(object):
     def update_req(self, site_item: "SiteItem", parent_srv: Optional["Server"] = None):
         xml_request = ET.Element("tsRequest")
         site_element = ET.SubElement(xml_request, "site")
@@ -849,7 +848,7 @@ class SiteRequest:
                 warnings.warn("In version 3.10 and earlier there is only one option: FlowsEnabled")
 
 
-class TableRequest:
+class TableRequest(object):
     def update_req(self, table_item):
         xml_request = ET.Element("tsRequest")
         table_element = ET.SubElement(xml_request, "table")
@@ -872,7 +871,7 @@ class TableRequest:
 content_types = Iterable[Union["ColumnItem", "DatabaseItem", "DatasourceItem", "FlowItem", "TableItem", "WorkbookItem"]]
 
 
-class TagRequest:
+class TagRequest(object):
     def add_req(self, tag_set):
         xml_request = ET.Element("tsRequest")
         tags_element = ET.SubElement(xml_request, "tags")
@@ -882,7 +881,7 @@ class TagRequest:
         return ET.tostring(xml_request)
 
     @_tsrequest_wrapped
-    def batch_create(self, element: ET.Element, tags: set[str], content: content_types) -> bytes:
+    def batch_create(self, element: ET.Element, tags: Set[str], content: content_types) -> bytes:
         tag_batch = ET.SubElement(element, "tagBatch")
         tags_element = ET.SubElement(tag_batch, "tags")
         for tag in tags:
@@ -898,7 +897,7 @@ class TagRequest:
         return ET.tostring(element)
 
 
-class UserRequest:
+class UserRequest(object):
     def update_req(self, user_item: UserItem, password: Optional[str]) -> bytes:
         xml_request = ET.Element("tsRequest")
         user_element = ET.SubElement(xml_request, "user")
@@ -932,7 +931,7 @@ class UserRequest:
         return ET.tostring(xml_request)
 
 
-class WorkbookRequest:
+class WorkbookRequest(object):
     def _generate_xml(
         self,
         workbook_item,
@@ -996,9 +995,9 @@ class WorkbookRequest:
             if data_freshness_policy_config.option == "FreshEvery":
                 if data_freshness_policy_config.fresh_every_schedule is not None:
                     fresh_every_element = ET.SubElement(data_freshness_policy_element, "freshEverySchedule")
-                    fresh_every_element.attrib["frequency"] = (
-                        data_freshness_policy_config.fresh_every_schedule.frequency
-                    )
+                    fresh_every_element.attrib[
+                        "frequency"
+                    ] = data_freshness_policy_config.fresh_every_schedule.frequency
                     fresh_every_element.attrib["value"] = str(data_freshness_policy_config.fresh_every_schedule.value)
                 else:
                     raise ValueError(f"data_freshness_policy_config.fresh_every_schedule must be populated.")
@@ -1076,7 +1075,7 @@ class WorkbookRequest:
                     datasource_element.attrib["id"] = id_
 
 
-class Connection:
+class Connection(object):
     @_tsrequest_wrapped
     def update_req(self, xml_request: ET.Element, connection_item: "ConnectionItem") -> None:
         connection_element = ET.SubElement(xml_request, "connection")
@@ -1099,7 +1098,7 @@ class Connection:
             connection_element.attrib["queryTaggingEnabled"] = str(connection_item.query_tagging).lower()
 
 
-class TaskRequest:
+class TaskRequest(object):
     @_tsrequest_wrapped
     def run_req(self, xml_request: ET.Element, task_item: Any) -> None:
         # Send an empty tsRequest
@@ -1138,7 +1137,7 @@ class TaskRequest:
         return ET.tostring(xml_request)
 
 
-class FlowTaskRequest:
+class FlowTaskRequest(object):
     @_tsrequest_wrapped
     def create_flow_task_req(self, xml_request: ET.Element, flow_item: "TaskItem") -> bytes:
         flow_element = ET.SubElement(xml_request, "runFlow")
@@ -1172,7 +1171,7 @@ class FlowTaskRequest:
         return ET.tostring(xml_request)
 
 
-class SubscriptionRequest:
+class SubscriptionRequest(object):
     @_tsrequest_wrapped
     def create_req(self, xml_request: ET.Element, subscription_item: "SubscriptionItem") -> bytes:
         subscription_element = ET.SubElement(xml_request, "subscription")
@@ -1236,13 +1235,13 @@ class SubscriptionRequest:
         return ET.tostring(xml_request)
 
 
-class EmptyRequest:
+class EmptyRequest(object):
     @_tsrequest_wrapped
     def empty_req(self, xml_request: ET.Element) -> None:
         pass
 
 
-class WebhookRequest:
+class WebhookRequest(object):
     @_tsrequest_wrapped
     def create_req(self, xml_request: ET.Element, webhook_item: "WebhookItem") -> bytes:
         webhook = ET.SubElement(xml_request, "webhook")
@@ -1288,7 +1287,7 @@ class MetricRequest:
         return ET.tostring(xml_request)
 
 
-class CustomViewRequest:
+class CustomViewRequest(object):
     @_tsrequest_wrapped
     def update_req(self, xml_request: ET.Element, custom_view_item: CustomViewItem):
         updating_element = ET.SubElement(xml_request, "customView")
@@ -1416,7 +1415,7 @@ class VirtualConnectionRequest:
         return ET.tostring(xml_request)
 
 
-class RequestFactory:
+class RequestFactory(object):
     Auth = AuthRequest()
     Connection = Connection()
     Column = ColumnRequest()

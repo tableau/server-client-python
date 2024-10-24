@@ -2,8 +2,7 @@ from datetime import datetime
 
 from defusedxml import ElementTree
 from defusedxml.ElementTree import fromstring, tostring
-from typing import Callable, Optional
-from collections.abc import Iterator
+from typing import Callable, List, Optional
 
 from .exceptions import UnpopulatedPropertyError
 from .user_item import UserItem
@@ -12,14 +11,12 @@ from .workbook_item import WorkbookItem
 from ..datetime_helpers import parse_datetime
 
 
-class CustomViewItem:
+class CustomViewItem(object):
     def __init__(self, id: Optional[str] = None, name: Optional[str] = None) -> None:
         self._content_url: Optional[str] = None  # ?
         self._created_at: Optional["datetime"] = None
         self._id: Optional[str] = id
         self._image: Optional[Callable[[], bytes]] = None
-        self._pdf: Optional[Callable[[], bytes]] = None
-        self._csv: Optional[Callable[[], Iterator[bytes]]] = None
         self._name: Optional[str] = name
         self._shared: Optional[bool] = False
         self._updated_at: Optional["datetime"] = None
@@ -38,16 +35,10 @@ class CustomViewItem:
         owner_info = ""
         if self._owner:
             owner_info = " owner='{}'".format(self._owner.name or self._owner.id or "unknown")
-        return f"<CustomViewItem id={self.id} name=`{self.name}`{view_info}{wb_info}{owner_info}>"
+        return "<CustomViewItem id={} name=`{}`{}{}{}>".format(self.id, self.name, view_info, wb_info, owner_info)
 
     def _set_image(self, image):
         self._image = image
-
-    def _set_pdf(self, pdf):
-        self._pdf = pdf
-
-    def _set_csv(self, csv):
-        self._csv = csv
 
     @property
     def content_url(self) -> Optional[str]:
@@ -64,23 +55,9 @@ class CustomViewItem:
     @property
     def image(self) -> bytes:
         if self._image is None:
-            error = "Custom View item must be populated with its png image first."
+            error = "View item must be populated with its png image first."
             raise UnpopulatedPropertyError(error)
         return self._image()
-
-    @property
-    def pdf(self) -> bytes:
-        if self._pdf is None:
-            error = "Custom View item must be populated with its pdf first."
-            raise UnpopulatedPropertyError(error)
-        return self._pdf()
-
-    @property
-    def csv(self) -> Iterator[bytes]:
-        if self._csv is None:
-            error = "Custom View item must be populated with its csv first."
-            raise UnpopulatedPropertyError(error)
-        return self._csv()
 
     @property
     def name(self) -> Optional[str]:
@@ -127,7 +104,7 @@ class CustomViewItem:
             return item[0]
 
     @classmethod
-    def list_from_response(cls, resp, ns, workbook_id="") -> list["CustomViewItem"]:
+    def list_from_response(cls, resp, ns, workbook_id="") -> List["CustomViewItem"]:
         return cls.from_xml_element(fromstring(resp), ns, workbook_id)
 
     """
@@ -144,7 +121,7 @@ class CustomViewItem:
     """
 
     @classmethod
-    def from_xml_element(cls, parsed_response, ns, workbook_id="") -> list["CustomViewItem"]:
+    def from_xml_element(cls, parsed_response, ns, workbook_id="") -> List["CustomViewItem"]:
         all_view_items = list()
         all_view_xml = parsed_response.findall(".//t:customView", namespaces=ns)
         for custom_view_xml in all_view_xml:

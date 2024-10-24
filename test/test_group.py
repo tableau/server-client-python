@@ -1,3 +1,4 @@
+# encoding=utf-8
 from pathlib import Path
 import unittest
 import os

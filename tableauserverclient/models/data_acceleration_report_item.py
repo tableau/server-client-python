@@ -1,8 +1,8 @@
 from defusedxml.ElementTree import fromstring
 
 
-class DataAccelerationReportItem:
-    class ComparisonRecord:
+class DataAccelerationReportItem(object):
+    class ComparisonRecord(object):
         def __init__(
             self,
             site,

@@ -3,7 +3,7 @@ from defusedxml.ElementTree import fromstring
 from .property_decorators import property_not_empty
 
 
-class ColumnItem:
+class ColumnItem(object):
     def __init__(self, name, description=None):
         self._id = None
         self.description = description

@@ -7,15 +7,9 @@
 import argparse
 import getpass
 import logging
-import os
 
 import tableauserverclient as TSC
-
-
-def get_env(key):
-    if key in os.environ:
-        return os.environ[key]
-    return None
+import env
 
 
 # If a sample has additional arguments, then it should copy this code and insert them after the call to
@@ -26,13 +20,13 @@ def set_up_and_log_in():
     sample_define_common_options(parser)
     args = parser.parse_args()
     if not args.server:
-        args.server = get_env("SERVER")
+        args.server = env.server
     if not args.site:
-        args.site = get_env("SITE")
+        args.site = env.site
     if not args.token_name:
-        args.token_name = get_env("TOKEN_NAME")
+        args.token_name = env.token_name
     if not args.token_value:
-        args.token_value = get_env("TOKEN_VALUE")
+        args.token_value = env.token_value
     args.logging_level = "debug"
 
     server = sample_connect_to_server(args)
@@ -65,7 +59,7 @@ def sample_connect_to_server(args):
         password = args.password or getpass.getpass("Password: ")
 
         tableau_auth = TSC.TableauAuth(args.username, password, site_id=args.site)
-        print(f"\nSigning in...\nServer: {args.server}\nSite: {args.site}\nUsername: {args.username}")
+        print("\nSigning in...\nServer: {}\nSite: {}\nUsername: {}".format(args.server, args.site, args.username))
 
     else:
         # Trying to authenticate using personal access tokens.
@@ -74,7 +68,7 @@ def sample_connect_to_server(args):
         tableau_auth = TSC.PersonalAccessTokenAuth(
             token_name=args.token_name, personal_access_token=token, site_id=args.site
         )
-        print(f"\nSigning in...\nServer: {args.server}\nSite: {args.site}\nToken name: {args.token_name}")
+        print("\nSigning in...\nServer: {}\nSite: {}\nToken name: {}".format(args.server, args.site, args.token_name))
 
     if not tableau_auth:
         raise TabError("Did not create authentication object. Check arguments.")
@@ -85,7 +79,10 @@ def sample_connect_to_server(args):
     # Make sure we use an updated version of the rest apis, and pass in our cert handling choice
     server = TSC.Server(args.server, use_server_version=True, http_options={"verify": check_ssl_certificate})
     server.auth.sign_in(tableau_auth)
-    server.version = "3.19"
+    server.version = "2.6"
+    new_site: TSC.SiteItem = TSC.SiteItem("cdnear", content_url=env.site)
+    server.auth.switch_site(new_site)
+    print("Logged in successfully")
 
     return server
 

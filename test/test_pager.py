@@ -1,7 +1,6 @@
 import contextlib
 import os
 import unittest
-import xml.etree.ElementTree as ET
 
 import requests_mock
 
@@ -123,14 +122,3 @@ class PagerTests(unittest.TestCase):
             m.get(self.server.views.baseurl, text=view_xml)
             for view in TSC.Pager(self.server.views):
                 assert view.name is not None
-
-    def test_queryset_no_matches(self) -> None:
-        elem = ET.Element("tsResponse", xmlns="http://tableau.com/api")
-        ET.SubElement(elem, "pagination", totalAvailable="0")
-        ET.SubElement(elem, "groups")
-        xml = ET.tostring(elem).decode("utf-8")
-        with requests_mock.mock() as m:
-            m.get(self.server.groups.baseurl, text=xml)
-            all_groups = self.server.groups.all()
-            groups = list(all_groups)
-        assert len(groups) == 0

@@ -2,7 +2,7 @@ import copy
 import datetime
 import uuid
 import xml.etree.ElementTree as ET
-from typing import Callable, Optional
+from typing import Callable, Dict, List, Optional, Set
 
 from defusedxml.ElementTree import fromstring
 
@@ -20,85 +20,7 @@ from .view_item import ViewItem
 from .data_freshness_policy_item import DataFreshnessPolicyItem
 
 
-class WorkbookItem:
-    """
-    The workbook resources for Tableau are defined in the WorkbookItem class.
-    The class corresponds to the workbook resources you can access using the
-    Tableau REST API. Some workbook methods take an instance of the WorkbookItem
-    class as arguments. The workbook item specifies the project.
-
-    Parameters
-    ----------
-    project_id : Optional[str], optional
-        The project ID for the workbook, by default None.
-
-    name : Optional[str], optional
-        The name of the workbook, by default None.
-
-    show_tabs : bool, optional
-        Determines whether the workbook shows tabs for the view.
-
-    Attributes
-    ----------
-    connections : list[ConnectionItem]
-        The list of data connections (ConnectionItem) for the data sources used
-        by the workbook. You must first call the workbooks.populate_connections
-        method to access this data. See the ConnectionItem class.
-
-    content_url : Optional[str]
-        The name of the workbook as it appears in the URL.
-
-    created_at : Optional[datetime.datetime]
-        The date and time the workbook was created.
-
-    description : Optional[str]
-        User-defined description of the workbook.
-
-    id : Optional[str]
-       The identifier for the workbook. You need this value to query a specific
-       workbook or to delete a workbook with the get_by_id and delete methods.
-
-    owner_id : Optional[str]
-        The identifier for the owner (UserItem) of the workbook.
-
-    preview_image : bytes
-        The thumbnail image for the view. You must first call the
-        workbooks.populate_preview_image method to access this data.
-
-    project_name : Optional[str]
-        The name of the project that contains the workbook.
-
-    size: int
-        The size of the workbook in megabytes.
-
-    hidden_views: Optional[list[str]]
-        List of string names of views that need to be hidden when the workbook
-        is published.
-
-    tags: set[str]
-        The set of tags associated with the workbook.
-
-    updated_at : Optional[datetime.datetime]
-        The date and time the workbook was last updated.
-
-    views : list[ViewItem]
-        The list of views (ViewItem) for the workbook. You must first call the
-        workbooks.populate_views method to access this data. See the ViewItem
-        class.
-
-    web_page_url : Optional[str]
-        The full URL for the workbook.
-
-    Examples
-    --------
-    # creating a new instance of a WorkbookItem
-    >>> import tableauserverclient as TSC
-
-    >>> # Create new workbook_item with project id '3a8b6148-493c-11e6-a621-6f3499394a39'
-
-    >>> new_workbook = TSC.WorkbookItem('3a8b6148-493c-11e6-a621-6f3499394a39')
-    """
-
+class WorkbookItem(object):
     def __init__(self, project_id: Optional[str] = None, name: Optional[str] = None, show_tabs: bool = False) -> None:
         self._connections = None
         self._content_url = None
@@ -113,15 +35,15 @@ class WorkbookItem:
         self._revisions = None
         self._size = None
         self._updated_at = None
-        self._views: Optional[Callable[[], list[ViewItem]]] = None
+        self._views: Optional[Callable[[], List[ViewItem]]] = None
         self.name = name
         self._description = None
         self.owner_id: Optional[str] = None
         # workaround for Personal Space workbooks without a project
         self.project_id: Optional[str] = project_id or uuid.uuid4().__str__()
         self.show_tabs = show_tabs
-        self.hidden_views: Optional[list[str]] = None
-        self.tags: set[str] = set()
+        self.hidden_views: Optional[List[str]] = None
+        self.tags: Set[str] = set()
         self.data_acceleration_config = {
             "acceleration_enabled": None,
             "accelerate_now": None,
@@ -134,7 +56,7 @@ class WorkbookItem:
         return None
 
     def __str__(self):
-        return "<WorkbookItem {} '{}' contentUrl='{}' project={}>".format(
+        return "<WorkbookItem {0} '{1}' contentUrl='{2}' project={3}>".format(
             self._id, self.name, self.content_url, self.project_id
         )
 
@@ -142,14 +64,14 @@ class WorkbookItem:
         return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"
 
     @property
-    def connections(self) -> list[ConnectionItem]:
+    def connections(self) -> List[ConnectionItem]:
         if self._connections is None:
             error = "Workbook item must be populated with connections first."
             raise UnpopulatedPropertyError(error)
         return self._connections()
 
     @property
-    def permissions(self) -> list[PermissionsRule]:
+    def permissions(self) -> List[PermissionsRule]:
         if self._permissions is None:
             error = "Workbook item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
@@ -230,7 +152,7 @@ class WorkbookItem:
         return self._updated_at
 
     @property
-    def views(self) -> list[ViewItem]:
+    def views(self) -> List[ViewItem]:
         # Views can be set in an initial workbook response OR by a call
         # to Server. Without getting too fancy, I think we can rely on
         # returning a list from the response, until they call
@@ -269,7 +191,7 @@ class WorkbookItem:
         self._data_freshness_policy = value
 
     @property
-    def revisions(self) -> list[RevisionItem]:
+    def revisions(self) -> List[RevisionItem]:
         if self._revisions is None:
             error = "Workbook item must be populated with revisions first."
             raise UnpopulatedPropertyError(error)
@@ -281,7 +203,7 @@ class WorkbookItem:
     def _set_permissions(self, permissions):
         self._permissions = permissions
 
-    def _set_views(self, views: Callable[[], list[ViewItem]]) -> None:
+    def _set_views(self, views: Callable[[], List[ViewItem]]) -> None:
         self._views = views
 
     def _set_pdf(self, pdf: Callable[[], bytes]) -> None:
@@ -394,7 +316,7 @@ class WorkbookItem:
             self.data_freshness_policy = data_freshness_policy
 
     @classmethod
-    def from_response(cls, resp: str, ns: dict[str, str]) -> list["WorkbookItem"]:
+    def from_response(cls, resp: str, ns: Dict[str, str]) -> List["WorkbookItem"]:
         all_workbook_items = list()
         parsed_response = fromstring(resp)
         all_workbook_xml = parsed_response.findall(".//t:workbook", namespaces=ns)

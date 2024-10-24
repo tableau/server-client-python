@@ -1,13 +1,13 @@
 import itertools
 from datetime import datetime
-from typing import Optional
+from typing import Dict, List, Optional, Type
 
 from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.datetime_helpers import parse_datetime
 
 
-class FlowRunItem:
+class FlowRunItem(object):
     def __init__(self) -> None:
         self._id: str = ""
         self._flow_id: Optional[str] = None
@@ -71,7 +71,7 @@ class FlowRunItem:
             self._background_job_id = background_job_id
 
     @classmethod
-    def from_response(cls: type["FlowRunItem"], resp: bytes, ns: Optional[dict]) -> list["FlowRunItem"]:
+    def from_response(cls: Type["FlowRunItem"], resp: bytes, ns: Optional[Dict]) -> List["FlowRunItem"]:
         all_flowrun_items = list()
         parsed_response = fromstring(resp)
         all_flowrun_xml = itertools.chain(

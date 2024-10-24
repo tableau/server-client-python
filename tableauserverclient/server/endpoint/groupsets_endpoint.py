@@ -1,4 +1,4 @@
-from typing import Literal, Optional, TYPE_CHECKING, Union
+from typing import List, Literal, Optional, Tuple, TYPE_CHECKING, Union
 
 from tableauserverclient.helpers.logging import logger
 from tableauserverclient.models.group_item import GroupItem
@@ -27,7 +27,7 @@ class GroupSets(QuerysetEndpoint[GroupSetItem]):
         self,
         request_options: Optional[RequestOptions] = None,
         result_level: Optional[Literal["members", "local"]] = None,
-    ) -> tuple[list[GroupSetItem], PaginationItem]:
+    ) -> Tuple[List[GroupSetItem], PaginationItem]:
         logger.info("Querying all group sets on site")
         url = self.baseurl
         if result_level:

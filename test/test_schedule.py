@@ -106,7 +106,7 @@ class ScheduleTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             schedule_id = "c9cff7f9-309c-4361-99ff-d4ba8c9f5467"
-            baseurl = f"{self.server.baseurl}/schedules/{schedule_id}"
+            baseurl = "{}/schedules/{}".format(self.server.baseurl, schedule_id)
             m.get(baseurl, text=response_xml)
             schedule = self.server.schedules.get_by_id(schedule_id)
             self.assertIsNotNone(schedule)
@@ -120,7 +120,7 @@ class ScheduleTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             schedule_id = "c9cff7f9-309c-4361-99ff-d4ba8c9f5467"
-            baseurl = f"{self.server.baseurl}/schedules/{schedule_id}"
+            baseurl = "{}/schedules/{}".format(self.server.baseurl, schedule_id)
             m.get(baseurl, text=response_xml)
             schedule = self.server.schedules.get_by_id(schedule_id)
             self.assertIsNotNone(schedule)
@@ -135,7 +135,7 @@ class ScheduleTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             schedule_id = "c9cff7f9-309c-4361-99ff-d4ba8c9f5467"
-            baseurl = f"{self.server.baseurl}/schedules/{schedule_id}"
+            baseurl = "{}/schedules/{}".format(self.server.baseurl, schedule_id)
             m.get(baseurl, text=response_xml)
             schedule = self.server.schedules.get_by_id(schedule_id)
             self.assertIsNotNone(schedule)
@@ -150,7 +150,7 @@ class ScheduleTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             schedule_id = "c9cff7f9-309c-4361-99ff-d4ba8c9f5467"
-            baseurl = f"{self.server.baseurl}/schedules/{schedule_id}"
+            baseurl = "{}/schedules/{}".format(self.server.baseurl, schedule_id)
             m.get(baseurl, text=response_xml)
             schedule = self.server.schedules.get_by_id(schedule_id)
             self.assertIsNotNone(schedule)
@@ -165,7 +165,7 @@ class ScheduleTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             schedule_id = "8c5caf33-6223-4724-83c3-ccdc1e730a07"
-            baseurl = f"{self.server.baseurl}/schedules/{schedule_id}"
+            baseurl = "{}/schedules/{}".format(self.server.baseurl, schedule_id)
             m.get(baseurl, text=response_xml)
             schedule = self.server.schedules.get_by_id(schedule_id)
             self.assertIsNotNone(schedule)
@@ -347,7 +347,7 @@ class ScheduleTests(unittest.TestCase):
 
     def test_add_workbook(self) -> None:
         self.server.version = "2.8"
-        baseurl = f"{self.server.baseurl}/sites/{self.server.site_id}/schedules"
+        baseurl = "{}/sites/{}/schedules".format(self.server.baseurl, self.server.site_id)
 
         with open(WORKBOOK_GET_BY_ID_XML, "rb") as f:
             workbook_response = f.read().decode("utf-8")
@@ -362,7 +362,7 @@ class ScheduleTests(unittest.TestCase):
 
     def test_add_workbook_with_warnings(self) -> None:
         self.server.version = "2.8"
-        baseurl = f"{self.server.baseurl}/sites/{self.server.site_id}/schedules"
+        baseurl = "{}/sites/{}/schedules".format(self.server.baseurl, self.server.site_id)
 
         with open(WORKBOOK_GET_BY_ID_XML, "rb") as f:
             workbook_response = f.read().decode("utf-8")
@@ -378,7 +378,7 @@ class ScheduleTests(unittest.TestCase):
 
     def test_add_datasource(self) -> None:
         self.server.version = "2.8"
-        baseurl = f"{self.server.baseurl}/sites/{self.server.site_id}/schedules"
+        baseurl = "{}/sites/{}/schedules".format(self.server.baseurl, self.server.site_id)
 
         with open(DATASOURCE_GET_BY_ID_XML, "rb") as f:
             datasource_response = f.read().decode("utf-8")
@@ -393,7 +393,7 @@ class ScheduleTests(unittest.TestCase):
 
     def test_add_flow(self) -> None:
         self.server.version = "3.3"
-        baseurl = f"{self.server.baseurl}/sites/{self.server.site_id}/schedules"
+        baseurl = "{}/sites/{}/schedules".format(self.server.baseurl, self.server.site_id)
 
         with open(FLOW_GET_BY_ID_XML, "rb") as f:
             flow_response = f.read().decode("utf-8")

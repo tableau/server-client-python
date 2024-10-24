@@ -63,10 +63,10 @@ def main():
             for permission in new_default_permissions:
                 grantee = permission.grantee
                 capabilities = permission.capabilities
-                print(f"\nCapabilities for {grantee.tag_name} {grantee.id}:")
+                print("\nCapabilities for {0} {1}:".format(grantee.tag_name, grantee.id))
 
                 for capability in capabilities:
-                    print(f"\t{capability} - {capabilities[capability]}")
+                    print("\t{0} - {1}".format(capability, capabilities[capability]))
 
         # Uncomment lines below to DELETE the new capability and the new project
         # rules_to_delete = TSC.PermissionsRule(

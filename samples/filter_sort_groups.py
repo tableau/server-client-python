@@ -47,7 +47,7 @@ def main():
     logging.basicConfig(level=logging_level)
 
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
-    server = TSC.Server(args.server, use_server_version=True, http_options={"verify": False})
+    server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
         group_name = "SALES NORTHWEST"
         # Try to create a group named "SALES NORTHWEST"
@@ -57,36 +57,37 @@ def main():
         # Try to create a group named "SALES ROMANIA"
         create_example_group(group_name, server)
 
-        # we no longer need to encode the space
+        # URL Encode the name of the group that we want to filter on
+        # i.e. turn spaces into plus signs
+        filter_group_name = urllib.parse.quote_plus(group_name)
         options = TSC.RequestOptions()
-        options.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, group_name))
+        options.filter.add(
+            TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, filter_group_name)
+        )
 
         filtered_groups, _ = server.groups.get(req_options=options)
         # Result can either be a matching group or an empty list
         if filtered_groups:
-            group = filtered_groups.pop()
-            print(group)
+            group_name = filtered_groups.pop().name
+            print(group_name)
         else:
-            error = f"No group named '{group_name}' found"
+            error = "No project named '{}' found".format(filter_group_name)
             print(error)
-
-        print("---")
 
         # Or, try the above with the django style filtering
         try:
-            group = server.groups.filter(name=group_name)[0]
-            print(group)
+            group = server.groups.filter(name=filter_group_name)[0]
         except IndexError:
-            print(f"No group named '{group_name}' found")
-
-        print("====")
+            print(f"No project named '{filter_group_name}' found")
+        else:
+            print(group.name)
 
         options = TSC.RequestOptions()
         options.filter.add(
             TSC.Filter(
                 TSC.RequestOptions.Field.Name,
                 TSC.RequestOptions.Operator.In,
-                ["SALES NORTHWEST", "SALES ROMANIA", "this_group"],
+                ["SALES+NORTHWEST", "SALES+ROMANIA", "this_group"],
             )
         )
 
@@ -97,19 +98,12 @@ def main():
         for group in matching_groups:
             print(group.name)
 
-        print("----")
         # or, try the above with the django style filtering.
-        all_g = server.groups.all()
-        print(f"Searching locally among {all_g.total_available} groups")
-        for a in all_g:
-            print(a)
-        groups = [urllib.parse.quote_plus(group) for group in ["SALES NORTHWEST", "SALES ROMANIA", "this_group"]]
-        print(groups)
 
-        for group in server.groups.filter(name__in=groups).order_by("-name"):
+        groups = ["SALES NORTHWEST", "SALES ROMANIA", "this_group"]
+        groups = [urllib.parse.quote_plus(group) for group in groups]
+        for group in server.groups.filter(name__in=groups).sort("-name"):
             print(group.name)
-
-        print("done")
 
 
 if __name__ == "__main__":

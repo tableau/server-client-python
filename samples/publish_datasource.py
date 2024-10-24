@@ -21,15 +21,10 @@
 import argparse
 import logging
 
-import os
 import tableauserverclient as TSC
+
+import env
 import tableauserverclient.datetime_helpers
-
-
-def get_env(key):
-    if key in os.environ:
-        return os.environ[key]
-    return None
 
 
 def main():
@@ -57,13 +52,13 @@ def main():
 
     args = parser.parse_args()
     if not args.server:
-        args.server = get_env("SERVER")
+        args.server = env.server
     if not args.site:
-        args.site = get_env("SITE")
+        args.site = env.site
     if not args.token_name:
-        args.token_name = get_env("TOKEN_NAME")
+        args.token_name = env.token_name
     if not args.token_value:
-        args.token_value = get_env("TOKEN_VALUE")
+        args.token_value = env.token_value
     args.logging = "debug"
     args.file = "C:/dev/tab-samples/5M.tdsx"
     args.async_ = True
@@ -116,17 +111,15 @@ def main():
             new_job = server.datasources.publish(
                 new_datasource, args.file, publish_mode, connection_credentials=new_conn_creds, as_job=True
             )
-            print(f"Datasource published asynchronously. Job ID: {new_job.id}")
+            print("Datasource published asynchronously. Job ID: {0}".format(new_job.id))
         else:
             # Normal publishing, returns a datasource_item
             new_datasource = server.datasources.publish(
                 new_datasource, args.file, publish_mode, connection_credentials=new_conn_creds
             )
             print(
-                (
-                    "{}Datasource published. Datasource ID: {}".format(
-                        new_datasource.id, tableauserverclient.datetime_helpers.timestamp()
-                    )
+                "{0}Datasource published. Datasource ID: {1}".format(
+                    new_datasource.id, tableauserverclient.datetime_helpers.timestamp()
                 )
             )
             print("\t\tClosing connection")

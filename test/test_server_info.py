@@ -4,7 +4,6 @@ import unittest
 import requests_mock
 
 import tableauserverclient as TSC
-from tableauserverclient.server.endpoint.exceptions import NonXMLResponseError
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
@@ -12,7 +11,6 @@ SERVER_INFO_GET_XML = os.path.join(TEST_ASSET_DIR, "server_info_get.xml")
 SERVER_INFO_25_XML = os.path.join(TEST_ASSET_DIR, "server_info_25.xml")
 SERVER_INFO_404 = os.path.join(TEST_ASSET_DIR, "server_info_404.xml")
 SERVER_INFO_AUTH_INFO_XML = os.path.join(TEST_ASSET_DIR, "server_info_auth_info.xml")
-SERVER_INFO_WRONG_SITE = os.path.join(TEST_ASSET_DIR, "server_info_wrong_site.html")
 
 
 class ServerInfoTests(unittest.TestCase):
@@ -65,11 +63,3 @@ class ServerInfoTests(unittest.TestCase):
             m.get("http://test/api/2.4/serverInfo", text=si_response_xml)
             server = TSC.Server("http://test", use_server_version=True)
             self.assertEqual(server.version, "2.5")
-
-    def test_server_wrong_site(self):
-        with open(SERVER_INFO_WRONG_SITE, "rb") as f:
-            response = f.read().decode("utf-8")
-        with requests_mock.mock() as m:
-            m.get(self.server.server_info.baseurl, text=response, status_code=404)
-            with self.assertRaises(NonXMLResponseError):
-                self.server.server_info.get()

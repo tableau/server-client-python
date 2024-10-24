@@ -1,6 +1,6 @@
 import re
 import xml.etree.ElementTree as ET
-from typing import Optional
+from typing import List, Optional, Tuple, Type
 
 from defusedxml.ElementTree import fromstring
 
@@ -13,7 +13,7 @@ def _parse_event(events):
     return NAMESPACE_RE.sub("", event.tag)
 
 
-class WebhookItem:
+class WebhookItem(object):
     def __init__(self):
         self._id: Optional[str] = None
         self.name: Optional[str] = None
@@ -45,10 +45,10 @@ class WebhookItem:
 
     @event.setter
     def event(self, value: str) -> None:
-        self._event = f"webhook-source-event-{value}"
+        self._event = "webhook-source-event-{}".format(value)
 
     @classmethod
-    def from_response(cls: type["WebhookItem"], resp: bytes, ns) -> list["WebhookItem"]:
+    def from_response(cls: Type["WebhookItem"], resp: bytes, ns) -> List["WebhookItem"]:
         all_webhooks_items = list()
         parsed_response = fromstring(resp)
         all_webhooks_xml = parsed_response.findall(".//t:webhook", namespaces=ns)
@@ -61,7 +61,7 @@ class WebhookItem:
         return all_webhooks_items
 
     @staticmethod
-    def _parse_element(webhook_xml: ET.Element, ns) -> tuple:
+    def _parse_element(webhook_xml: ET.Element, ns) -> Tuple:
         id = webhook_xml.get("id", None)
         name = webhook_xml.get("name", None)
 
@@ -82,4 +82,4 @@ class WebhookItem:
         return id, name, url, event, owner_id
 
     def __repr__(self) -> str:
-        return f"<Webhook id={self.id} name={self.name} url={self.url} event={self.event}>"
+        return "<Webhook id={} name={} url={} event={}>".format(self.id, self.name, self.url, self.event)

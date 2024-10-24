@@ -1,10 +1,10 @@
-class ResourceReference:
+class ResourceReference(object):
     def __init__(self, id_, tag_name):
         self.id = id_
         self.tag_name = tag_name
 
     def __str__(self):
-        return f"<ResourceReference id={self._id} tag={self._tag_name}>"
+        return "<ResourceReference id={} tag={}>".format(self._id, self._tag_name)
 
     __repr__ = __str__
 

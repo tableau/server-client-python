@@ -1,7 +1,7 @@
 from .request_options import RequestOptions
 
 
-class Filter:
+class Filter(object):
     def __init__(self, field, operator, value):
         self.field = field
         self.operator = operator
@@ -16,7 +16,7 @@ class Filter:
             # to [<string1>,<string2>]
             # so effectively, remove any spaces between "," and "'" and then remove all "'"
             value_string = value_string.replace(", '", ",'").replace("'", "")
-        return f"{self.field}:{self.operator}:{value_string}"
+        return "{0}:{1}:{2}".format(self.field, self.operator, value_string)
 
     @property
     def value(self):

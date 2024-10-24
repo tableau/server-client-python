@@ -1,4 +1,4 @@
-from typing import Callable, Optional, TYPE_CHECKING
+from typing import Callable, List, Optional, TYPE_CHECKING
 
 from defusedxml.ElementTree import fromstring
 
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from tableauserverclient.server import Pager
 
 
-class GroupItem:
+class GroupItem(object):
     tag_name: str = "group"
 
     class LicenseMode:
@@ -27,7 +27,7 @@ class GroupItem:
         self.domain_name: Optional[str] = domain_name
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.__dict__!r})"
+        return "{}({!r})".format(self.__class__.__name__, self.__dict__)
 
     @property
     def domain_name(self) -> Optional[str]:
@@ -79,7 +79,7 @@ class GroupItem:
         self._users = users
 
     @classmethod
-    def from_response(cls, resp, ns) -> list["GroupItem"]:
+    def from_response(cls, resp, ns) -> List["GroupItem"]:
         all_group_items = list()
         parsed_response = fromstring(resp)
         all_group_xml = parsed_response.findall(".//t:group", namespaces=ns)

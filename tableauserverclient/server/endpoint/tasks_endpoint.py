@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, TYPE_CHECKING
+from typing import List, Optional, Tuple, TYPE_CHECKING
 
 from tableauserverclient.server.endpoint.endpoint import Endpoint, api
 from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class Tasks(Endpoint):
     @property
     def baseurl(self) -> str:
-        return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/tasks"
+        return "{0}/sites/{1}/tasks".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     def __normalize_task_type(self, task_type: str) -> str:
         """
@@ -23,20 +23,20 @@ class Tasks(Endpoint):
         It is different than the tag "extractRefresh" used in the request body.
         """
         if task_type == TaskItem.Type.ExtractRefresh:
-            return f"{task_type}es"
+            return "{}es".format(task_type)
         else:
             return task_type
 
     @api(version="2.6")
     def get(
         self, req_options: Optional["RequestOptions"] = None, task_type: str = TaskItem.Type.ExtractRefresh
-    ) -> tuple[list[TaskItem], PaginationItem]:
+    ) -> Tuple[List[TaskItem], PaginationItem]:
         if task_type == TaskItem.Type.DataAcceleration:
             self.parent_srv.assert_at_least_version("3.8", "Data Acceleration Tasks")
 
         logger.info("Querying all %s tasks for the site", task_type)
 
-        url = f"{self.baseurl}/{self.__normalize_task_type(task_type)}"
+        url = "{0}/{1}".format(self.baseurl, self.__normalize_task_type(task_type))
         server_response = self.get_request(url, req_options)
 
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
@@ -63,7 +63,7 @@ class Tasks(Endpoint):
             error = "No extract refresh provided"
             raise ValueError(error)
         logger.info("Creating an extract refresh %s", extract_item)
-        url = f"{self.baseurl}/{self.__normalize_task_type(TaskItem.Type.ExtractRefresh)}"
+        url = "{0}/{1}".format(self.baseurl, self.__normalize_task_type(TaskItem.Type.ExtractRefresh))
         create_req = RequestFactory.Task.create_extract_req(extract_item)
         server_response = self.post_request(url, create_req)
         return server_response.content
@@ -74,7 +74,7 @@ class Tasks(Endpoint):
             error = "Task item missing ID."
             raise MissingRequiredFieldError(error)
 
-        url = "{}/{}/{}/runNow".format(
+        url = "{0}/{1}/{2}/runNow".format(
             self.baseurl,
             self.__normalize_task_type(TaskItem.Type.ExtractRefresh),
             task_item.id,
@@ -92,6 +92,6 @@ class Tasks(Endpoint):
         if not task_id:
             error = "No Task ID provided"
             raise ValueError(error)
-        url = f"{self.baseurl}/{self.__normalize_task_type(task_type)}/{task_id}"
+        url = "{0}/{1}/{2}".format(self.baseurl, self.__normalize_task_type(task_type), task_id)
         self.delete_request(url)
         logger.info("Deleted single task (ID: %s)", task_id)

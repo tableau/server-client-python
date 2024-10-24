@@ -19,7 +19,7 @@ def main():
     use_ssl = True
 
     server = TSC.Server(server_url, use_server_version=True, http_options={"verify": use_ssl})
-    print(f"Connected to {server.server_info.baseurl}")
+    print("Connected to {}".format(server.server_info.baseurl))
 
     # 3 - replace with your site name exactly as it looks in the url
     # e.g https://my-server/#/site/this-is-your-site-url-name/not-this-part
@@ -39,7 +39,7 @@ def main():
     with server.auth.sign_in(tableau_auth):
         projects, pagination = server.projects.get()
         if projects:
-            print(f"{pagination.total_available} projects")
+            print("{} projects".format(pagination.total_available))
             project = projects[0]
             print(project.name)
 

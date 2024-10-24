@@ -48,9 +48,6 @@ def main():
             "webhooks": server.webhooks,
             "workbook": server.workbooks,
         }.get(args.resource_type)
-        if endpoint is None:
-            print("Resource type not found.")
-            sys.exit(1)
 
         options = TSC.RequestOptions()
         options.sort.add(TSC.Sort(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Direction.Desc))
@@ -62,7 +59,7 @@ def main():
             print(resource.name[:18], " ")  # , resource._connections())
             if count > 100:
                 break
-        print(f"Total: {count}")
+        print("Total: {}".format(count))
 
 
 if __name__ == "__main__":

@@ -28,8 +28,8 @@ class Resource:
 TableauItem = Union[DatasourceItem, FlowItem, MetricItem, ProjectItem, ViewItem, WorkbookItem, VirtualConnectionItem]
 
 
-def plural_type(content_type: Union[Resource, str]) -> str:
+def plural_type(content_type: Resource) -> str:
     if content_type == Resource.Lens:
         return "lenses"
     else:
-        return f"{content_type}s"
+        return "{}s".format(content_type)

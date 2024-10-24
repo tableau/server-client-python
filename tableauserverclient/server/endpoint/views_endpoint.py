@@ -11,8 +11,7 @@ from tableauserverclient.models import ViewItem, PaginationItem
 
 from tableauserverclient.helpers.logging import logger
 
-from typing import Optional, TYPE_CHECKING, Union
-from collections.abc import Iterable, Iterator
+from typing import Iterable, Iterator, List, Optional, Set, Tuple, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from tableauserverclient.server.request_options import (
@@ -26,22 +25,22 @@ if TYPE_CHECKING:
 
 class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
     def __init__(self, parent_srv):
-        super().__init__(parent_srv)
+        super(Views, self).__init__(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
 
     # Used because populate_preview_image functionaliy requires workbook endpoint
     @property
     def siteurl(self) -> str:
-        return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}"
+        return "{0}/sites/{1}".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     @property
     def baseurl(self) -> str:
-        return f"{self.siteurl}/views"
+        return "{0}/views".format(self.siteurl)
 
     @api(version="2.2")
     def get(
         self, req_options: Optional["RequestOptions"] = None, usage: bool = False
-    ) -> tuple[list[ViewItem], PaginationItem]:
+    ) -> Tuple[List[ViewItem], PaginationItem]:
         logger.info("Querying all views on site")
         url = self.baseurl
         if usage:
@@ -56,8 +55,8 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
         if not view_id:
             error = "View item missing ID."
             raise MissingRequiredFieldError(error)
-        logger.info(f"Querying single view (ID: {view_id})")
-        url = f"{self.baseurl}/{view_id}"
+        logger.info("Querying single view (ID: {0})".format(view_id))
+        url = "{0}/{1}".format(self.baseurl, view_id)
         if usage:
             url += "?includeUsageStatistics=true"
         server_response = self.get_request(url)
@@ -73,10 +72,10 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
             return self._get_preview_for_view(view_item)
 
         view_item._set_preview_image(image_fetcher)
-        logger.info(f"Populated preview image for view (ID: {view_item.id})")
+        logger.info("Populated preview image for view (ID: {0})".format(view_item.id))
 
     def _get_preview_for_view(self, view_item: ViewItem) -> bytes:
-        url = f"{self.siteurl}/workbooks/{view_item.workbook_id}/views/{view_item.id}/previewImage"
+        url = "{0}/workbooks/{1}/views/{2}/previewImage".format(self.siteurl, view_item.workbook_id, view_item.id)
         server_response = self.get_request(url)
         image = server_response.content
         return image
@@ -91,10 +90,10 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
             return self._get_view_image(view_item, req_options)
 
         view_item._set_image(image_fetcher)
-        logger.info(f"Populated image for view (ID: {view_item.id})")
+        logger.info("Populated image for view (ID: {0})".format(view_item.id))
 
     def _get_view_image(self, view_item: ViewItem, req_options: Optional["ImageRequestOptions"]) -> bytes:
-        url = f"{self.baseurl}/{view_item.id}/image"
+        url = "{0}/{1}/image".format(self.baseurl, view_item.id)
         server_response = self.get_request(url, req_options)
         image = server_response.content
         return image
@@ -109,10 +108,10 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
             return self._get_view_pdf(view_item, req_options)
 
         view_item._set_pdf(pdf_fetcher)
-        logger.info(f"Populated pdf for view (ID: {view_item.id})")
+        logger.info("Populated pdf for view (ID: {0})".format(view_item.id))
 
     def _get_view_pdf(self, view_item: ViewItem, req_options: Optional["PDFRequestOptions"]) -> bytes:
-        url = f"{self.baseurl}/{view_item.id}/pdf"
+        url = "{0}/{1}/pdf".format(self.baseurl, view_item.id)
         server_response = self.get_request(url, req_options)
         pdf = server_response.content
         return pdf
@@ -127,10 +126,10 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
             return self._get_view_csv(view_item, req_options)
 
         view_item._set_csv(csv_fetcher)
-        logger.info(f"Populated csv for view (ID: {view_item.id})")
+        logger.info("Populated csv for view (ID: {0})".format(view_item.id))
 
     def _get_view_csv(self, view_item: ViewItem, req_options: Optional["CSVRequestOptions"]) -> Iterator[bytes]:
-        url = f"{self.baseurl}/{view_item.id}/data"
+        url = "{0}/{1}/data".format(self.baseurl, view_item.id)
 
         with closing(self.get_request(url, request_object=req_options, parameters={"stream": True})) as server_response:
             yield from server_response.iter_content(1024)
@@ -145,10 +144,10 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
             return self._get_view_excel(view_item, req_options)
 
         view_item._set_excel(excel_fetcher)
-        logger.info(f"Populated excel for view (ID: {view_item.id})")
+        logger.info("Populated excel for view (ID: {0})".format(view_item.id))
 
     def _get_view_excel(self, view_item: ViewItem, req_options: Optional["ExcelRequestOptions"]) -> Iterator[bytes]:
-        url = f"{self.baseurl}/{view_item.id}/crosstab/excel"
+        url = "{0}/{1}/crosstab/excel".format(self.baseurl, view_item.id)
 
         with closing(self.get_request(url, request_object=req_options, parameters={"stream": True})) as server_response:
             yield from server_response.iter_content(1024)
@@ -177,7 +176,7 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
         return view_item
 
     @api(version="1.0")
-    def add_tags(self, item: Union[ViewItem, str], tags: Union[Iterable[str], str]) -> set[str]:
+    def add_tags(self, item: Union[ViewItem, str], tags: Union[Iterable[str], str]) -> Set[str]:
         return super().add_tags(item, tags)
 
     @api(version="1.0")
