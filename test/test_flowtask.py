@@ -40,7 +40,7 @@ class TaskTests(unittest.TestCase):
         with open(GET_XML_CREATE_FLOW_TASK_RESPONSE, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
-            m.post(f"{self.baseurl}", text=response_xml)
+            m.post("{}".format(self.baseurl), text=response_xml)
             create_response_content = self.server.flow_tasks.create(task).decode("utf-8")
 
         self.assertTrue("schedule_id" in create_response_content)

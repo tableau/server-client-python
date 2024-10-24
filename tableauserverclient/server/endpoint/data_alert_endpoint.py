@@ -7,7 +7,7 @@ from tableauserverclient.models import DataAlertItem, PaginationItem, UserItem
 
 from tableauserverclient.helpers.logging import logger
 
-from typing import Optional, TYPE_CHECKING, Union
+from typing import List, Optional, TYPE_CHECKING, Tuple, Union
 
 
 if TYPE_CHECKING:
@@ -17,14 +17,14 @@ if TYPE_CHECKING:
 
 class DataAlerts(Endpoint):
     def __init__(self, parent_srv: "Server") -> None:
-        super().__init__(parent_srv)
+        super(DataAlerts, self).__init__(parent_srv)
 
     @property
     def baseurl(self) -> str:
-        return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/dataAlerts"
+        return "{0}/sites/{1}/dataAlerts".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     @api(version="3.2")
-    def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[DataAlertItem], PaginationItem]:
+    def get(self, req_options: Optional["RequestOptions"] = None) -> Tuple[List[DataAlertItem], PaginationItem]:
         logger.info("Querying all dataAlerts on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -38,8 +38,8 @@ class DataAlerts(Endpoint):
         if not dataAlert_id:
             error = "dataAlert ID undefined."
             raise ValueError(error)
-        logger.info(f"Querying single dataAlert (ID: {dataAlert_id})")
-        url = f"{self.baseurl}/{dataAlert_id}"
+        logger.info("Querying single dataAlert (ID: {0})".format(dataAlert_id))
+        url = "{0}/{1}".format(self.baseurl, dataAlert_id)
         server_response = self.get_request(url)
         return DataAlertItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
@@ -55,9 +55,9 @@ class DataAlerts(Endpoint):
             error = "Dataalert ID undefined."
             raise ValueError(error)
         # DELETE /api/api-version/sites/site-id/dataAlerts/data-alert-id/users/user-id
-        url = f"{self.baseurl}/{dataAlert_id}"
+        url = "{0}/{1}".format(self.baseurl, dataAlert_id)
         self.delete_request(url)
-        logger.info(f"Deleted single dataAlert (ID: {dataAlert_id})")
+        logger.info("Deleted single dataAlert (ID: {0})".format(dataAlert_id))
 
     @api(version="3.2")
     def delete_user_from_alert(self, dataAlert: Union[DataAlertItem, str], user: Union[UserItem, str]) -> None:
@@ -80,9 +80,9 @@ class DataAlerts(Endpoint):
             error = "User ID undefined."
             raise ValueError(error)
         # DELETE /api/api-version/sites/site-id/dataAlerts/data-alert-id/users/user-id
-        url = f"{self.baseurl}/{dataAlert_id}/users/{user_id}"
+        url = "{0}/{1}/users/{2}".format(self.baseurl, dataAlert_id, user_id)
         self.delete_request(url)
-        logger.info(f"Deleted User (ID {user_id}) from dataAlert (ID: {dataAlert_id})")
+        logger.info("Deleted User (ID {0}) from dataAlert (ID: {1})".format(user_id, dataAlert_id))
 
     @api(version="3.2")
     def add_user_to_alert(self, dataAlert_item: DataAlertItem, user: Union[UserItem, str]) -> UserItem:
@@ -98,10 +98,10 @@ class DataAlerts(Endpoint):
         if not user_id:
             error = "User ID undefined."
             raise ValueError(error)
-        url = f"{self.baseurl}/{dataAlert_item.id}/users"
+        url = "{0}/{1}/users".format(self.baseurl, dataAlert_item.id)
         update_req = RequestFactory.DataAlert.add_user_to_alert(dataAlert_item, user_id)
         server_response = self.post_request(url, update_req)
-        logger.info(f"Added user (ID {user_id}) to dataAlert item (ID: {dataAlert_item.id})")
+        logger.info("Added user (ID {0}) to dataAlert item (ID: {1})".format(user_id, dataAlert_item.id))
         added_user = UserItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return added_user
 
@@ -111,9 +111,9 @@ class DataAlerts(Endpoint):
             error = "Dataalert item missing ID."
             raise MissingRequiredFieldError(error)
 
-        url = f"{self.baseurl}/{dataAlert_item.id}"
+        url = "{0}/{1}".format(self.baseurl, dataAlert_item.id)
         update_req = RequestFactory.DataAlert.update_req(dataAlert_item)
         server_response = self.put_request(url, update_req)
-        logger.info(f"Updated dataAlert item (ID: {dataAlert_item.id})")
+        logger.info("Updated dataAlert item (ID: {0})".format(dataAlert_item.id))
         updated_dataAlert = DataAlertItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return updated_dataAlert

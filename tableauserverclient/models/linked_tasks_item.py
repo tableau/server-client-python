@@ -1,5 +1,5 @@
 import datetime as dt
-from typing import Optional
+from typing import List, Optional
 
 from defusedxml.ElementTree import fromstring
 
@@ -14,7 +14,7 @@ class LinkedTaskItem:
         self.schedule: Optional[ScheduleItem] = None
 
     @classmethod
-    def from_response(cls, resp: bytes, namespace) -> list["LinkedTaskItem"]:
+    def from_response(cls, resp: bytes, namespace) -> List["LinkedTaskItem"]:
         parsed_response = fromstring(resp)
         return [
             cls._parse_element(x, namespace)
@@ -35,10 +35,10 @@ class LinkedTaskStepItem:
         self.id: Optional[str] = None
         self.step_number: Optional[int] = None
         self.stop_downstream_on_failure: Optional[bool] = None
-        self.task_details: list[LinkedTaskFlowRunItem] = []
+        self.task_details: List[LinkedTaskFlowRunItem] = []
 
     @classmethod
-    def from_task_xml(cls, xml, namespace) -> list["LinkedTaskStepItem"]:
+    def from_task_xml(cls, xml, namespace) -> List["LinkedTaskStepItem"]:
         return [cls._parse_element(x, namespace) for x in xml.findall(".//t:linkedTaskSteps[@id]", namespace)]
 
     @classmethod
@@ -61,7 +61,7 @@ class LinkedTaskFlowRunItem:
         self.flow_name: Optional[str] = None
 
     @classmethod
-    def _parse_element(cls, xml, namespace) -> list["LinkedTaskFlowRunItem"]:
+    def _parse_element(cls, xml, namespace) -> List["LinkedTaskFlowRunItem"]:
         all_tasks = []
         for flow_run in xml.findall(".//t:flowRun[@id]", namespace):
             task = cls()

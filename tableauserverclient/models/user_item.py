@@ -2,7 +2,7 @@ import io
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from enum import IntEnum
-from typing import Optional, TYPE_CHECKING
+from typing import Dict, List, Optional, TYPE_CHECKING, Tuple
 
 from defusedxml.ElementTree import fromstring
 
@@ -18,35 +18,10 @@ if TYPE_CHECKING:
     from tableauserverclient.server import Pager
 
 
-class UserItem:
-    """
-    The UserItem class contains the members or attributes for the view
-    resources on Tableau Server. The UserItem class defines the information you
-    can request or query from Tableau Server. The class attributes correspond
-    to the attributes of a server request or response payload.
-
-
-    Parameters
-    ----------
-    name: str
-        The name of the user.
-
-    site_role: str
-        The role of the user on the site.
-
-    auth_setting: str
-        Required attribute for Tableau Cloud. How the user autenticates to the
-        server.
-    """
-
+class UserItem(object):
     tag_name: str = "user"
 
     class Roles:
-        """
-        The Roles class contains the possible roles for a user on Tableau
-        Server.
-        """
-
         Interactor = "Interactor"
         Publisher = "Publisher"
         ServerAdministrator = "ServerAdministrator"
@@ -68,11 +43,6 @@ class UserItem:
         SupportUser = "SupportUser"
 
     class Auth:
-        """
-        The Auth class contains the possible authentication settings for a user
-        on Tableau Cloud.
-        """
-
         OpenID = "OpenID"
         SAML = "SAML"
         TableauIDWithMFA = "TableauIDWithMFA"
@@ -87,7 +57,7 @@ class UserItem:
         self._id: Optional[str] = None
         self._last_login: Optional[datetime] = None
         self._workbooks = None
-        self._favorites: Optional[dict[str, list]] = None
+        self._favorites: Optional[Dict[str, List]] = None
         self._groups = None
         self.email: Optional[str] = None
         self.fullname: Optional[str] = None
@@ -99,7 +69,7 @@ class UserItem:
 
     def __str__(self) -> str:
         str_site_role = self.site_role or "None"
-        return f"<User {self.id} name={self.name} role={str_site_role}>"
+        return "<User {} name={} role={}>".format(self.id, self.name, str_site_role)
 
     def __repr__(self):
         return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"
@@ -171,7 +141,7 @@ class UserItem:
         return self._workbooks()
 
     @property
-    def favorites(self) -> dict[str, list]:
+    def favorites(self) -> Dict[str, List]:
         if self._favorites is None:
             error = "User item must be populated with favorites first."
             raise UnpopulatedPropertyError(error)
@@ -240,12 +210,12 @@ class UserItem:
             self._domain_name = domain_name
 
     @classmethod
-    def from_response(cls, resp, ns) -> list["UserItem"]:
+    def from_response(cls, resp, ns) -> List["UserItem"]:
         element_name = ".//t:user"
         return cls._parse_xml(element_name, resp, ns)
 
     @classmethod
-    def from_response_as_owner(cls, resp, ns) -> list["UserItem"]:
+    def from_response_as_owner(cls, resp, ns) -> List["UserItem"]:
         element_name = ".//t:owner"
         return cls._parse_xml(element_name, resp, ns)
 
@@ -313,7 +283,7 @@ class UserItem:
             domain_name,
         )
 
-    class CSVImport:
+    class CSVImport(object):
         """
         This class includes hardcoded options and logic for the CSV file format defined for user import
         https://help.tableau.com/current/server/en-us/users_import.htm
@@ -338,7 +308,7 @@ class UserItem:
             if line is None or line is False or line == "\n" or line == "":
                 return None
             line = line.strip().lower()
-            values: list[str] = list(map(str.strip, line.split(",")))
+            values: List[str] = list(map(str.strip, line.split(",")))
             user = UserItem(values[UserItem.CSVImport.ColumnType.USERNAME])
             if len(values) > 1:
                 if len(values) > UserItem.CSVImport.ColumnType.MAX:
@@ -367,7 +337,7 @@ class UserItem:
         # Read through an entire CSV file meant for user import
         # Return the number of valid lines and a list of all the invalid lines
         @staticmethod
-        def validate_file_for_import(csv_file: io.TextIOWrapper, logger) -> tuple[int, list[str]]:
+        def validate_file_for_import(csv_file: io.TextIOWrapper, logger) -> Tuple[int, List[str]]:
             num_valid_lines = 0
             invalid_lines = []
             csv_file.seek(0)  # set to start of file in case it has been read earlier
@@ -375,11 +345,11 @@ class UserItem:
             while line and line != "":
                 try:
                     # do not print passwords
-                    logger.info(f"Reading user {line[:4]}")
+                    logger.info("Reading user {}".format(line[:4]))
                     UserItem.CSVImport._validate_import_line_or_throw(line, logger)
                     num_valid_lines += 1
                 except Exception as exc:
-                    logger.info(f"Error parsing {line[:4]}: {exc}")
+                    logger.info("Error parsing {}: {}".format(line[:4], exc))
                     invalid_lines.append(line)
                 line = csv_file.readline()
             return num_valid_lines, invalid_lines
@@ -388,7 +358,7 @@ class UserItem:
         # Iterate through each field and validate the given value against hardcoded constraints
         @staticmethod
         def _validate_import_line_or_throw(incoming, logger) -> None:
-            _valid_attributes: list[list[str]] = [
+            _valid_attributes: List[List[str]] = [
                 [],
                 [],
                 [],
@@ -403,23 +373,23 @@ class UserItem:
             if len(line) > UserItem.CSVImport.ColumnType.MAX:
                 raise AttributeError("Too many attributes in line")
             username = line[UserItem.CSVImport.ColumnType.USERNAME.value]
-            logger.debug(f"> details - {username}")
+            logger.debug("> details - {}".format(username))
             UserItem.validate_username_or_throw(username)
             for i in range(1, len(line)):
-                logger.debug(f"column {UserItem.CSVImport.ColumnType(i).name}: {line[i]}")
+                logger.debug("column {}: {}".format(UserItem.CSVImport.ColumnType(i).name, line[i]))
                 UserItem.CSVImport._validate_attribute_value(
                     line[i], _valid_attributes[i], UserItem.CSVImport.ColumnType(i)
                 )
 
         # Given a restricted set of possible values, confirm the item is in that set
         @staticmethod
-        def _validate_attribute_value(item: str, possible_values: list[str], column_type) -> None:
+        def _validate_attribute_value(item: str, possible_values: List[str], column_type) -> None:
             if item is None or item == "":
                 # value can be empty for any column except user, which is checked elsewhere
                 return
             if item in possible_values or possible_values == []:
                 return
-            raise AttributeError(f"Invalid value {item} for {column_type}")
+            raise AttributeError("Invalid value {} for {}".format(item, column_type))
 
         # https://help.tableau.com/current/server/en-us/csvguidelines.htm#settings_and_site_roles
         # This logic is hardcoded to match the existing rules for import csv files

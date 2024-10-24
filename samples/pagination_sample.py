@@ -57,7 +57,7 @@ def main():
         for wb in TSC.Pager(server.workbooks, page_options):
             print(wb.name)
             count = count + 1
-        print(f"Total: {count}\n")
+        print("Total: {}\n".format(count))
 
         count = 0
         page_options = TSC.RequestOptions(2, 3)
@@ -65,7 +65,7 @@ def main():
         for wb in TSC.Pager(server.workbooks, page_options):
             print(wb.name)
             count = count + 1
-        print(f"Truncated Total: {count}\n")
+        print("Truncated Total: {}\n".format(count))
 
         print("Your id: ", you.name, you.id, "\n")
         count = 0
@@ -76,7 +76,7 @@ def main():
         for wb in TSC.Pager(server.workbooks, filtered_page_options):
             print(wb.name, " -- ", wb.owner_id)
             count = count + 1
-        print(f"Filtered Total: {count}\n")
+        print("Filtered Total: {}\n".format(count))
 
         # 2. QuerySet offers a fluent interface on top of the RequestOptions object
         print("Fetching workbooks again - this time filtered with QuerySet")
@@ -90,7 +90,7 @@ def main():
                 count = count + 1
             more = queryset.total_available > count
             page = page + 1
-        print(f"QuerySet Total: {count}")
+        print("QuerySet Total: {}".format(count))
 
         # 3. QuerySet also allows you to iterate over all objects without explicitly paging.
         print("Fetching again - this time without manually paging")

@@ -6,7 +6,7 @@ from tableauserverclient.models import TableauItem, PermissionsRule
 from .endpoint import Endpoint
 from .exceptions import MissingRequiredFieldError
 
-from typing import Callable, TYPE_CHECKING, Optional, Union
+from typing import Callable, TYPE_CHECKING, List, Optional, Union
 
 from tableauserverclient.helpers.logging import logger
 
@@ -25,7 +25,7 @@ class _PermissionsEndpoint(Endpoint):
     """
 
     def __init__(self, parent_srv: "Server", owner_baseurl: Callable[[], str]) -> None:
-        super().__init__(parent_srv)
+        super(_PermissionsEndpoint, self).__init__(parent_srv)
 
         # owner_baseurl is the baseurl of the parent.  The MUST be a lambda
         # since we don't know the full site URL until we sign in.  If
@@ -33,18 +33,18 @@ class _PermissionsEndpoint(Endpoint):
         self.owner_baseurl = owner_baseurl
 
     def __str__(self):
-        return f"<PermissionsEndpoint baseurl={self.owner_baseurl}>"
+        return "<PermissionsEndpoint baseurl={}>".format(self.owner_baseurl)
 
-    def update(self, resource: TableauItem, permissions: list[PermissionsRule]) -> list[PermissionsRule]:
-        url = f"{self.owner_baseurl()}/{resource.id}/permissions"
+    def update(self, resource: TableauItem, permissions: List[PermissionsRule]) -> List[PermissionsRule]:
+        url = "{0}/{1}/permissions".format(self.owner_baseurl(), resource.id)
         update_req = RequestFactory.Permission.add_req(permissions)
         response = self.put_request(url, update_req)
         permissions = PermissionsRule.from_response(response.content, self.parent_srv.namespace)
-        logger.info(f"Updated permissions for resource {resource.id}: {permissions}")
+        logger.info("Updated permissions for resource {0}: {1}".format(resource.id, permissions))
 
         return permissions
 
-    def delete(self, resource: TableauItem, rules: Union[PermissionsRule, list[PermissionsRule]]):
+    def delete(self, resource: TableauItem, rules: Union[PermissionsRule, List[PermissionsRule]]):
         # Delete is the only endpoint that doesn't take a list of rules
         # so let's fake it to keep it consistent
         # TODO that means we need error handling around the call
@@ -54,7 +54,7 @@ class _PermissionsEndpoint(Endpoint):
         for rule in rules:
             for capability, mode in rule.capabilities.items():
                 "/permissions/groups/group-id/capability-name/capability-mode"
-                url = "{}/{}/permissions/{}/{}/{}/{}".format(
+                url = "{0}/{1}/permissions/{2}/{3}/{4}/{5}".format(
                     self.owner_baseurl(),
                     resource.id,
                     rule.grantee.tag_name + "s",
@@ -63,11 +63,13 @@ class _PermissionsEndpoint(Endpoint):
                     mode,
                 )
 
-                logger.debug(f"Removing {mode} permission for capability {capability}")
+                logger.debug("Removing {0} permission for capability {1}".format(mode, capability))
 
                 self.delete_request(url)
 
-            logger.info(f"Deleted permission for {rule.grantee.tag_name} {rule.grantee.id} item {resource.id}")
+            logger.info(
+                "Deleted permission for {0} {1} item {2}".format(rule.grantee.tag_name, rule.grantee.id, resource.id)
+            )
 
     def populate(self, item: TableauItem):
         if not item.id:
@@ -78,12 +80,12 @@ class _PermissionsEndpoint(Endpoint):
             return self._get_permissions(item)
 
         item._set_permissions(permission_fetcher)
-        logger.info(f"Populated permissions for item (ID: {item.id})")
+        logger.info("Populated permissions for item (ID: {0})".format(item.id))
 
     def _get_permissions(self, item: TableauItem, req_options: Optional["RequestOptions"] = None):
-        url = f"{self.owner_baseurl()}/{item.id}/permissions"
+        url = "{0}/{1}/permissions".format(self.owner_baseurl(), item.id)
         server_response = self.get_request(url, req_options)
         permissions = PermissionsRule.from_response(server_response.content, self.parent_srv.namespace)
-        logger.info(f"Permissions for resource {item.id}: {permissions}")
+        logger.info("Permissions for resource {0}: {1}".format(item.id, permissions))
 
         return permissions

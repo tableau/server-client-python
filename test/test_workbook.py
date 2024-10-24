@@ -83,7 +83,7 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual("ee8c6e70-43b6-11e6-af4f-f7b0d8e20760", all_workbooks[1].project_id)
         self.assertEqual("default", all_workbooks[1].project_name)
         self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", all_workbooks[1].owner_id)
-        self.assertEqual({"Safari", "Sample"}, all_workbooks[1].tags)
+        self.assertEqual(set(["Safari", "Sample"]), all_workbooks[1].tags)
 
     def test_get_ignore_invalid_date(self) -> None:
         with open(GET_INVALID_DATE_XML, "rb") as f:
@@ -127,7 +127,7 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual("ee8c6e70-43b6-11e6-af4f-f7b0d8e20760", single_workbook.project_id)
         self.assertEqual("default", single_workbook.project_name)
         self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", single_workbook.owner_id)
-        self.assertEqual({"Safari", "Sample"}, single_workbook.tags)
+        self.assertEqual(set(["Safari", "Sample"]), single_workbook.tags)
         self.assertEqual("d79634e1-6063-4ec9-95ff-50acbf609ff5", single_workbook.views[0].id)
         self.assertEqual("ENDANGERED SAFARI", single_workbook.views[0].name)
         self.assertEqual("SafariSample/sheets/ENDANGEREDSAFARI", single_workbook.views[0].content_url)
@@ -152,7 +152,7 @@ class WorkbookTests(unittest.TestCase):
         self.assertTrue(single_workbook.project_id)
         self.assertIsNone(single_workbook.project_name)
         self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", single_workbook.owner_id)
-        self.assertEqual({"Safari", "Sample"}, single_workbook.tags)
+        self.assertEqual(set(["Safari", "Sample"]), single_workbook.tags)
         self.assertEqual("d79634e1-6063-4ec9-95ff-50acbf609ff5", single_workbook.views[0].id)
         self.assertEqual("ENDANGERED SAFARI", single_workbook.views[0].name)
         self.assertEqual("SafariSample/sheets/ENDANGEREDSAFARI", single_workbook.views[0].content_url)
@@ -277,7 +277,7 @@ class WorkbookTests(unittest.TestCase):
 
     def test_download_sanitizes_name(self) -> None:
         filename = "Name,With,Commas.twbx"
-        disposition = f'name="tableau_workbook"; filename="{filename}"'
+        disposition = 'name="tableau_workbook"; filename="{}"'.format(filename)
         with requests_mock.mock() as m:
             m.get(
                 self.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/content",
@@ -817,7 +817,7 @@ class WorkbookTests(unittest.TestCase):
         with open(REVISION_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
-            m.get(f"{self.baseurl}/{workbook.id}/revisions", text=response_xml)
+            m.get("{0}/{1}/revisions".format(self.baseurl, workbook.id), text=response_xml)
             self.server.workbooks.populate_revisions(workbook)
             revisions = workbook.revisions
 
@@ -846,7 +846,7 @@ class WorkbookTests(unittest.TestCase):
         workbook._id = "06b944d2-959d-4604-9305-12323c95e70e"
 
         with requests_mock.mock() as m:
-            m.delete(f"{self.baseurl}/{workbook.id}/revisions/3")
+            m.delete("{0}/{1}/revisions/3".format(self.baseurl, workbook.id))
             self.server.workbooks.delete_revision(workbook.id, "3")
 
     def test_download_revision(self) -> None:

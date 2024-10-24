@@ -17,7 +17,7 @@ def main():
     use_ssl = True
     server = TSC.Server(server_url, use_server_version=True, http_options={"verify": use_ssl})
 
-    print(f"Connected to {server.server_info.baseurl}")
+    print("Connected to {}".format(server.server_info.baseurl))
 
     # 3 - replace with your site name exactly as it looks in a url
     # e.g https://my-server/#/this-is-your-site-url-name/
@@ -36,55 +36,55 @@ def main():
     with server.auth.sign_in(tableau_auth):
         projects, pagination = server.projects.get()
         if projects:
-            print(f"{pagination.total_available} projects")
+            print("{} projects".format(pagination.total_available))
             for project in projects:
                 print(project.name)
 
         workbooks, pagination = server.datasources.get()
         if workbooks:
-            print(f"{pagination.total_available} workbooks")
+            print("{} workbooks".format(pagination.total_available))
             print(workbooks[0])
 
         views, pagination = server.views.get()
         if views:
-            print(f"{pagination.total_available} views")
+            print("{} views".format(pagination.total_available))
             print(views[0])
 
         datasources, pagination = server.datasources.get()
         if datasources:
-            print(f"{pagination.total_available} datasources")
+            print("{} datasources".format(pagination.total_available))
             print(datasources[0])
 
         # I think all these other content types can go to a hello_universe script
         # data alert, dqw, flow, ... do any of these require any add-ons?
         jobs, pagination = server.jobs.get()
         if jobs:
-            print(f"{pagination.total_available} jobs")
+            print("{} jobs".format(pagination.total_available))
             print(jobs[0])
 
         schedules, pagination = server.schedules.get()
         if schedules:
-            print(f"{pagination.total_available} schedules")
+            print("{} schedules".format(pagination.total_available))
             print(schedules[0])
 
         tasks, pagination = server.tasks.get()
         if tasks:
-            print(f"{pagination.total_available} tasks")
+            print("{} tasks".format(pagination.total_available))
             print(tasks[0])
 
         webhooks, pagination = server.webhooks.get()
         if webhooks:
-            print(f"{pagination.total_available} webhooks")
+            print("{} webhooks".format(pagination.total_available))
             print(webhooks[0])
 
         users, pagination = server.users.get()
         if users:
-            print(f"{pagination.total_available} users")
+            print("{} users".format(pagination.total_available))
             print(users[0])
 
         groups, pagination = server.groups.get()
         if groups:
-            print(f"{pagination.total_available} groups")
+            print("{} groups".format(pagination.total_available))
             print(groups[0])
 
 

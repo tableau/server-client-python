@@ -52,11 +52,11 @@ def main():
             new_webhook.event = "datasource-created"
             print(new_webhook)
             new_webhook = server.webhooks.create(new_webhook)
-            print(f"Webhook created. ID: {new_webhook.id}")
+            print("Webhook created. ID: {}".format(new_webhook.id))
 
         # Gets all webhook items
         all_webhooks, pagination_item = server.webhooks.get()
-        print(f"\nThere are {pagination_item.total_available} webhooks on site: ")
+        print("\nThere are {} webhooks on site: ".format(pagination_item.total_available))
         print([webhook.name for webhook in all_webhooks])
 
         if all_webhooks:

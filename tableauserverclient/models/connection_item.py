@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import List, Optional
 
 from defusedxml.ElementTree import fromstring
 
@@ -8,7 +8,7 @@ from .property_decorators import property_is_boolean
 from tableauserverclient.helpers.logging import logger
 
 
-class ConnectionItem:
+class ConnectionItem(object):
     def __init__(self):
         self._datasource_id: Optional[str] = None
         self._datasource_name: Optional[str] = None
@@ -48,7 +48,7 @@ class ConnectionItem:
         # if connection type = hyper, Snowflake, or Teradata, we can't change this value: it is always true
         if self._connection_type in ["hyper", "snowflake", "teradata"]:
             logger.debug(
-                f"Cannot update value: Query tagging is always enabled for {self._connection_type} connections"
+                "Cannot update value: Query tagging is always enabled for {} connections".format(self._connection_type)
             )
             return
         self._query_tagging = value
@@ -59,7 +59,7 @@ class ConnectionItem:
         )
 
     @classmethod
-    def from_response(cls, resp, ns) -> list["ConnectionItem"]:
+    def from_response(cls, resp, ns) -> List["ConnectionItem"]:
         all_connection_items = list()
         parsed_response = fromstring(resp)
         all_connection_xml = parsed_response.findall(".//t:connection", namespaces=ns)
@@ -82,7 +82,7 @@ class ConnectionItem:
         return all_connection_items
 
     @classmethod
-    def from_xml_element(cls, parsed_response, ns) -> list["ConnectionItem"]:
+    def from_xml_element(cls, parsed_response, ns) -> List["ConnectionItem"]:
         """
         <connections>
             <connection serverAddress="mysql.test.com">
@@ -93,7 +93,7 @@ class ConnectionItem:
                 </connection>
         </connections>
         """
-        all_connection_items: list["ConnectionItem"] = list()
+        all_connection_items: List["ConnectionItem"] = list()
         all_connection_xml = parsed_response.findall(".//t:connection", namespaces=ns)
 
         for connection_xml in all_connection_xml:

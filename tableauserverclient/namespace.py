@@ -11,7 +11,7 @@ class UnknownNamespaceError(Exception):
     pass
 
 
-class Namespace:
+class Namespace(object):
     def __init__(self):
         self._namespace = {"t": NEW_NAMESPACE}
         self._detected = False

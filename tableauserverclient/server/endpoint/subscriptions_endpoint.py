@@ -7,7 +7,7 @@ from tableauserverclient.models import SubscriptionItem, PaginationItem
 
 from tableauserverclient.helpers.logging import logger
 
-from typing import Optional, TYPE_CHECKING
+from typing import List, Optional, TYPE_CHECKING, Tuple
 
 if TYPE_CHECKING:
     from ..request_options import RequestOptions
@@ -16,10 +16,10 @@ if TYPE_CHECKING:
 class Subscriptions(Endpoint):
     @property
     def baseurl(self) -> str:
-        return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/subscriptions"
+        return "{0}/sites/{1}/subscriptions".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     @api(version="2.3")
-    def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[SubscriptionItem], PaginationItem]:
+    def get(self, req_options: Optional["RequestOptions"] = None) -> Tuple[List[SubscriptionItem], PaginationItem]:
         logger.info("Querying all subscriptions for the site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -33,8 +33,8 @@ class Subscriptions(Endpoint):
         if not subscription_id:
             error = "No Subscription ID provided"
             raise ValueError(error)
-        logger.info(f"Querying a single subscription by id ({subscription_id})")
-        url = f"{self.baseurl}/{subscription_id}"
+        logger.info("Querying a single subscription by id ({})".format(subscription_id))
+        url = "{}/{}".format(self.baseurl, subscription_id)
         server_response = self.get_request(url)
         return SubscriptionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
@@ -43,7 +43,7 @@ class Subscriptions(Endpoint):
         if not subscription_item:
             error = "No Susbcription provided"
             raise ValueError(error)
-        logger.info(f"Creating a subscription ({subscription_item})")
+        logger.info("Creating a subscription ({})".format(subscription_item))
         url = self.baseurl
         create_req = RequestFactory.Subscription.create_req(subscription_item)
         server_response = self.post_request(url, create_req)
@@ -54,17 +54,17 @@ class Subscriptions(Endpoint):
         if not subscription_id:
             error = "Subscription ID undefined."
             raise ValueError(error)
-        url = f"{self.baseurl}/{subscription_id}"
+        url = "{0}/{1}".format(self.baseurl, subscription_id)
         self.delete_request(url)
-        logger.info(f"Deleted subscription (ID: {subscription_id})")
+        logger.info("Deleted subscription (ID: {0})".format(subscription_id))
 
     @api(version="2.3")
     def update(self, subscription_item: SubscriptionItem) -> SubscriptionItem:
         if not subscription_item.id:
             error = "Subscription item missing ID. Subscription must be retrieved from server first."
             raise MissingRequiredFieldError(error)
-        url = f"{self.baseurl}/{subscription_item.id}"
+        url = "{0}/{1}".format(self.baseurl, subscription_item.id)
         update_req = RequestFactory.Subscription.update_req(subscription_item)
         server_response = self.put_request(url, update_req)
-        logger.info(f"Updated subscription item (ID: {subscription_item.id})")
+        logger.info("Updated subscription item (ID: {0})".format(subscription_item.id))
         return SubscriptionItem.from_response(server_response.content, self.parent_srv.namespace)[0]

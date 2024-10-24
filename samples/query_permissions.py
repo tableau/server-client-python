@@ -57,15 +57,17 @@ def main():
         permissions = resource.permissions
 
         # Print result
-        print(f"\n{len(permissions)} permission rule(s) found for {args.resource_type} {args.resource_id}.")
+        print(
+            "\n{0} permission rule(s) found for {1} {2}.".format(len(permissions), args.resource_type, args.resource_id)
+        )
 
         for permission in permissions:
             grantee = permission.grantee
             capabilities = permission.capabilities
-            print(f"\nCapabilities for {grantee.tag_name} {grantee.id}:")
+            print("\nCapabilities for {0} {1}:".format(grantee.tag_name, grantee.id))
 
             for capability in capabilities:
-                print(f"\t{capability} - {capabilities[capability]}")
+                print("\t{0} - {1}".format(capability, capabilities[capability]))
 
 
 if __name__ == "__main__":

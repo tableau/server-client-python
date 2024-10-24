@@ -1,7 +1,7 @@
 import copy
 import datetime
 import xml.etree.ElementTree as ET
-from typing import Optional
+from typing import List, Optional, Set
 
 from defusedxml.ElementTree import fromstring
 
@@ -14,9 +14,9 @@ from tableauserverclient.models.property_decorators import property_not_nullable
 from tableauserverclient.models.tag_item import TagItem
 
 
-class FlowItem:
+class FlowItem(object):
     def __repr__(self):
-        return "<Flow {} '{}' ({}) Project={} createdAt={}".format(
+        return "<Flow {0} '{1}' ({2}) Project={3} createdAt={4}".format(
             self._id, self.name, self.description, self.project_id, self.created_at
         )
 
@@ -24,13 +24,13 @@ class FlowItem:
         self._webpage_url: Optional[str] = None
         self._created_at: Optional[datetime.datetime] = None
         self._id: Optional[str] = None
-        self._initial_tags: set[str] = set()
+        self._initial_tags: Set[str] = set()
         self._project_name: Optional[str] = None
         self._updated_at: Optional[datetime.datetime] = None
         self.name: Optional[str] = name
         self.owner_id: Optional[str] = None
         self.project_id: str = project_id
-        self.tags: set[str] = set()
+        self.tags: Set[str] = set()
         self.description: Optional[str] = None
 
         self._connections: Optional[ConnectionItem] = None
@@ -170,7 +170,7 @@ class FlowItem:
             self.owner_id = owner_id
 
     @classmethod
-    def from_response(cls, resp, ns) -> list["FlowItem"]:
+    def from_response(cls, resp, ns) -> List["FlowItem"]:
         all_flow_items = list()
         parsed_response = fromstring(resp)
         all_flow_xml = parsed_response.findall(".//t:flow", namespaces=ns)

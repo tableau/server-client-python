@@ -37,7 +37,7 @@ class FilesysTests(unittest.TestCase):
         with BytesIO() as file_object:
             with ZipFile(file_object, "w") as zf:
                 with BytesIO() as stream:
-                    stream.write(b"This is a zip file")
+                    stream.write("This is a zip file".encode())
                     zf.writestr("dummy_file", stream.getbuffer())
                     file_object.seek(0)
                     file_type = get_file_type(file_object)

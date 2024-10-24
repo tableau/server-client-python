@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING
+from typing import List, Optional, Tuple, TYPE_CHECKING
 
 from tableauserverclient.server.endpoint.endpoint import Endpoint, api
 from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class FlowTasks(Endpoint):
     @property
     def baseurl(self) -> str:
-        return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/tasks/flows"
+        return "{0}/sites/{1}/tasks/flows".format(self.parent_srv.baseurl, self.parent_srv.site_id)
 
     @api(version="3.22")
     def create(self, flow_item: TaskItem) -> TaskItem:

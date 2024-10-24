@@ -12,8 +12,8 @@ def main():
     # This is the domain for Tableau's Developer Program
     server_url = "https://10ax.online.tableau.com"
     server = TSC.Server(server_url)
-    print(f"Connected to {server.server_info.baseurl}")
-    print(f"Server information: {server.server_info}")
+    print("Connected to {}".format(server.server_info.baseurl))
+    print("Server information: {}".format(server.server_info))
     print("Sign up for a test site at https://www.tableau.com/developer")
 
 

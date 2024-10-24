@@ -45,7 +45,7 @@ def main():
         update_function = endpoint.update_connection
         resource = endpoint.get_by_id(args.resource_id)
         endpoint.populate_connections(resource)
-        connections = list([x for x in resource.connections if x.id == args.connection_id])
+        connections = list(filter(lambda x: x.id == args.connection_id, resource.connections))
         assert len(connections) == 1
         connection = connections[0]
         connection.username = args.datasource_username

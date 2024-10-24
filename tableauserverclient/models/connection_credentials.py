@@ -1,7 +1,7 @@
 from .property_decorators import property_is_boolean
 
 
-class ConnectionCredentials:
+class ConnectionCredentials(object):
     """Connection Credentials for Workbooks and Datasources publish request.
 
     Consider removing this object and other variables holding secrets

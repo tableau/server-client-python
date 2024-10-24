@@ -1,6 +1,6 @@
 from contextlib import ExitStack
 import re
-from collections.abc import Iterable
+from typing import Iterable
 import uuid
 from xml.etree import ElementTree as ET
 
@@ -172,7 +172,7 @@ def test_update_tags(get_server, endpoint_type, item, tags) -> None:
         if isinstance(item, str):
             stack.enter_context(pytest.raises((ValueError, NotImplementedError)))
         elif hasattr(item, "_initial_tags"):
-            initial_tags = {"x", "y", "z"}
+            initial_tags = set(["x", "y", "z"])
             item._initial_tags = initial_tags
             add_tags_xml = add_tag_xml_response_factory(tags - initial_tags)
             delete_tags_xml = add_tag_xml_response_factory(initial_tags - tags)

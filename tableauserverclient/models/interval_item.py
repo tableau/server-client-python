@@ -1,7 +1,7 @@
 from .property_decorators import property_is_valid_time, property_not_nullable
 
 
-class IntervalItem:
+class IntervalItem(object):
     class Frequency:
         Hourly = "Hourly"
         Daily = "Daily"
@@ -25,7 +25,7 @@ class IntervalItem:
         LastDay = "LastDay"
 
 
-class HourlyInterval:
+class HourlyInterval(object):
     def __init__(self, start_time, end_time, interval_value):
         self.start_time = start_time
         self.end_time = end_time
@@ -73,12 +73,12 @@ class HourlyInterval:
         for interval in intervals:
             # if an hourly interval is a string, then it is a weekDay interval
             if isinstance(interval, str) and not interval.isnumeric() and not hasattr(IntervalItem.Day, interval):
-                error = f"Invalid weekDay interval {interval}"
+                error = "Invalid weekDay interval {}".format(interval)
                 raise ValueError(error)
 
             # if an hourly interval is a number, it is an hours or minutes interval
             if isinstance(interval, (int, float)) and float(interval) not in VALID_INTERVALS:
-                error = f"Invalid interval {interval} not in {str(VALID_INTERVALS)}"
+                error = "Invalid interval {} not in {}".format(interval, str(VALID_INTERVALS))
                 raise ValueError(error)
 
         self._interval = intervals
@@ -108,7 +108,7 @@ class HourlyInterval:
         return interval_type_pairs
 
 
-class DailyInterval:
+class DailyInterval(object):
     def __init__(self, start_time, *interval_values):
         self.start_time = start_time
         self.interval = interval_values
@@ -141,12 +141,12 @@ class DailyInterval:
         for interval in intervals:
             # if an hourly interval is a string, then it is a weekDay interval
             if isinstance(interval, str) and not interval.isnumeric() and not hasattr(IntervalItem.Day, interval):
-                error = f"Invalid weekDay interval {interval}"
+                error = "Invalid weekDay interval {}".format(interval)
                 raise ValueError(error)
 
             # if an hourly interval is a number, it is an hours or minutes interval
             if isinstance(interval, (int, float)) and float(interval) not in VALID_INTERVALS:
-                error = f"Invalid interval {interval} not in {str(VALID_INTERVALS)}"
+                error = "Invalid interval {} not in {}".format(interval, str(VALID_INTERVALS))
                 raise ValueError(error)
 
         self._interval = intervals
@@ -176,7 +176,7 @@ class DailyInterval:
         return interval_type_pairs
 
 
-class WeeklyInterval:
+class WeeklyInterval(object):
     def __init__(self, start_time, *interval_values):
         self.start_time = start_time
         self.interval = interval_values
@@ -213,7 +213,7 @@ class WeeklyInterval:
         return [(IntervalItem.Occurrence.WeekDay, day) for day in self.interval]
 
 
-class MonthlyInterval:
+class MonthlyInterval(object):
     def __init__(self, start_time, interval_value):
         self.start_time = start_time
 

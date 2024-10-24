@@ -1,31 +1,24 @@
 from defusedxml.ElementTree import fromstring
-from typing import Mapping, Optional, TypeVar
-
-
-def split_pascal_case(s: str) -> str:
-    return "".join([f" {c}" if c.isupper() else c for c in s]).strip()
+from typing import Optional
 
 
 class TableauError(Exception):
     pass
 
 
-T = TypeVar("T")
-
-
-class XMLError(TableauError):
-    def __init__(self, code: str, summary: str, detail: str, url: Optional[str] = None) -> None:
+class ServerResponseError(TableauError):
+    def __init__(self, code, summary, detail, url=None):
         self.code = code
         self.summary = summary
         self.detail = detail
         self.url = url
-        super().__init__(str(self))
+        super(ServerResponseError, self).__init__(str(self))
 
     def __str__(self):
-        return f"\n\n\t{self.code}: {self.summary}\n\t\t{self.detail}"
+        return "\n\n\t{0}: {1}\n\t\t{2}".format(self.code, self.summary, self.detail)
 
     @classmethod
-    def from_response(cls, resp, ns, url):
+    def from_response(cls, resp, ns, url=None):
         # Check elements exist before .text
         parsed_response = fromstring(resp)
         try:
@@ -40,10 +33,6 @@ class XMLError(TableauError):
         return error_response
 
 
-class ServerResponseError(XMLError):
-    pass
-
-
 class InternalServerError(TableauError):
     def __init__(self, server_response, request_url: Optional[str] = None):
         self.code = server_response.status_code
@@ -51,7 +40,7 @@ class InternalServerError(TableauError):
         self.url = request_url or "server"
 
     def __str__(self):
-        return f"\n\nInternal error {self.code} at {self.url}\n{self.content}"
+        return "\n\nInternal error {0} at {1}\n{2}".format(self.code, self.url, self.content)
 
 
 class MissingRequiredFieldError(TableauError):
@@ -60,11 +49,6 @@ class MissingRequiredFieldError(TableauError):
 
 class NotSignedInError(TableauError):
     pass
-
-
-class FailedSignInError(XMLError, NotSignedInError):
-    def __str__(self):
-        return f"{split_pascal_case(self.__class__.__name__)}: {super().__str__()}"
 
 
 class ItemTypeNotAllowed(TableauError):

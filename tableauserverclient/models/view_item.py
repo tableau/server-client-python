@@ -1,8 +1,7 @@
 import copy
 from datetime import datetime
 from requests import Response
-from typing import Callable, Optional
-from collections.abc import Iterator
+from typing import Callable, Iterator, List, Optional, Set
 
 from defusedxml.ElementTree import fromstring
 
@@ -12,13 +11,13 @@ from .permissions_item import PermissionsRule
 from .tag_item import TagItem
 
 
-class ViewItem:
+class ViewItem(object):
     def __init__(self) -> None:
         self._content_url: Optional[str] = None
         self._created_at: Optional[datetime] = None
         self._id: Optional[str] = None
         self._image: Optional[Callable[[], bytes]] = None
-        self._initial_tags: set[str] = set()
+        self._initial_tags: Set[str] = set()
         self._name: Optional[str] = None
         self._owner_id: Optional[str] = None
         self._preview_image: Optional[Callable[[], bytes]] = None
@@ -30,15 +29,15 @@ class ViewItem:
         self._sheet_type: Optional[str] = None
         self._updated_at: Optional[datetime] = None
         self._workbook_id: Optional[str] = None
-        self._permissions: Optional[Callable[[], list[PermissionsRule]]] = None
-        self.tags: set[str] = set()
+        self._permissions: Optional[Callable[[], List[PermissionsRule]]] = None
+        self.tags: Set[str] = set()
         self._data_acceleration_config = {
             "acceleration_enabled": None,
             "acceleration_status": None,
         }
 
     def __str__(self):
-        return "<ViewItem {} '{}' contentUrl='{}' project={}>".format(
+        return "<ViewItem {0} '{1}' contentUrl='{2}' project={3}>".format(
             self._id, self.name, self.content_url, self.project_id
         )
 
@@ -147,21 +146,21 @@ class ViewItem:
         self._data_acceleration_config = value
 
     @property
-    def permissions(self) -> list[PermissionsRule]:
+    def permissions(self) -> List[PermissionsRule]:
         if self._permissions is None:
             error = "View item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
         return self._permissions()
 
-    def _set_permissions(self, permissions: Callable[[], list[PermissionsRule]]) -> None:
+    def _set_permissions(self, permissions: Callable[[], List[PermissionsRule]]) -> None:
         self._permissions = permissions
 
     @classmethod
-    def from_response(cls, resp: "Response", ns, workbook_id="") -> list["ViewItem"]:
+    def from_response(cls, resp: "Response", ns, workbook_id="") -> List["ViewItem"]:
         return cls.from_xml_element(fromstring(resp), ns, workbook_id)
 
     @classmethod
-    def from_xml_element(cls, parsed_response, ns, workbook_id="") -> list["ViewItem"]:
+    def from_xml_element(cls, parsed_response, ns, workbook_id="") -> List["ViewItem"]:
         all_view_items = list()
         all_view_xml = parsed_response.findall(".//t:view", namespaces=ns)
         for view_xml in all_view_xml:

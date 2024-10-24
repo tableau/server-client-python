@@ -19,12 +19,12 @@ def handle_run(server, args):
 def handle_list(server, _):
     tasks, pagination = server.tasks.get()
     for task in tasks:
-        print(f"{task}")
+        print("{}".format(task))
 
 
 def handle_info(server, args):
     task = server.tasks.get_by_id(args.id)
-    print(f"{task}")
+    print("{}".format(task))
 
 
 def main():

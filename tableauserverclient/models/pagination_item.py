@@ -1,7 +1,7 @@
 from defusedxml.ElementTree import fromstring
 
 
-class PaginationItem:
+class PaginationItem(object):
     def __init__(self):
         self._page_number = None
         self._page_size = None
