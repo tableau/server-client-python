@@ -960,7 +960,7 @@ class WorkbookRequest:
                 _add_hiddenview_element(views_element, view_name)
         return ET.tostring(xml_request)
 
-    def update_req(self, workbook_item):
+    def update_req(self, workbook_item, parent_srv: Optional["Server"] = None):
         xml_request = ET.Element("tsRequest")
         workbook_element = ET.SubElement(xml_request, "workbook")
         if workbook_item.name:
@@ -973,6 +973,8 @@ class WorkbookRequest:
         if workbook_item.owner_id:
             owner_element = ET.SubElement(workbook_element, "owner")
             owner_element.attrib["id"] = workbook_item.owner_id
+        if workbook_item.description is not None and parent_srv is not None and parent_srv.check_at_least_version("3.21"):
+            workbook_element.attrib["description"] = workbook_item.description
         if workbook_item._views is not None:
             views_element = ET.SubElement(workbook_element, "views")
             for view in workbook_item.views:

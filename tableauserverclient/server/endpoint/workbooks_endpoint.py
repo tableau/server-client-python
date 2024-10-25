@@ -280,7 +280,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         if include_view_acceleration_status:
             url += "?includeViewAccelerationStatus=True"
 
-        update_req = RequestFactory.Workbook.update_req(workbook_item)
+        update_req = RequestFactory.Workbook.update_req(workbook_item, self.parent_srv)
         server_response = self.put_request(url, update_req)
         logger.info(f"Updated workbook item (ID: {workbook_item.id})")
         updated_workbook = copy.copy(workbook_item)
