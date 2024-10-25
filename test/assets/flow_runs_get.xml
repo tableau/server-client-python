@@ -1,5 +1,4 @@
 <tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.10.xsd">
-    <pagination pageNumber="1" pageSize="100" totalAvailable="2"/>
     <flowRuns>
         <flowRuns id="cc2e652d-4a9b-4476-8c93-b238c45db968"
          flowId="587daa37-b84d-4400-a9a2-aa90e0be7837"

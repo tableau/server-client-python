@@ -68,7 +68,7 @@ def main():
             project_name = filtered_projects.pop().name
             print(project_name)
         else:
-            error = "No project named '{}' found".format(filter_project_name)
+            error = f"No project named '{filter_project_name}' found"
             print(error)
 
         create_example_project(name="Example 1", server=server)

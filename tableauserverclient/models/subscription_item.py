@@ -1,4 +1,4 @@
-from typing import List, Type, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from defusedxml.ElementTree import fromstring
 
@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from .target import Target
 
 
-class SubscriptionItem(object):
+class SubscriptionItem:
     def __init__(self, subject: str, schedule_id: str, user_id: str, target: "Target") -> None:
         self._id = None
         self.attach_image = True
@@ -79,7 +79,7 @@ class SubscriptionItem(object):
         self._suspended = value
 
     @classmethod
-    def from_response(cls: Type, xml: bytes, ns) -> List["SubscriptionItem"]:
+    def from_response(cls: type, xml: bytes, ns) -> list["SubscriptionItem"]:
         parsed_response = fromstring(xml)
         all_subscriptions_xml = parsed_response.findall(".//t:subscription", namespaces=ns)
 

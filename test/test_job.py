@@ -51,7 +51,7 @@ class JobTests(unittest.TestCase):
         response_xml = read_xml_asset(GET_BY_ID_XML)
         job_id = "2eef4225-aa0c-41c4-8662-a76d89ed7336"
         with requests_mock.mock() as m:
-            m.get("{0}/{1}".format(self.baseurl, job_id), text=response_xml)
+            m.get(f"{self.baseurl}/{job_id}", text=response_xml)
             job = self.server.jobs.get_by_id(job_id)
             updated_at = datetime(2020, 5, 13, 20, 25, 18, tzinfo=utc)
 
@@ -81,7 +81,7 @@ class JobTests(unittest.TestCase):
         response_xml = read_xml_asset(GET_BY_ID_XML)
         job_id = "2eef4225-aa0c-41c4-8662-a76d89ed7336"
         with mocked_time(), requests_mock.mock() as m:
-            m.get("{0}/{1}".format(self.baseurl, job_id), text=response_xml)
+            m.get(f"{self.baseurl}/{job_id}", text=response_xml)
             job = self.server.jobs.wait_for_job(job_id)
 
             self.assertEqual(job_id, job.id)
@@ -92,7 +92,7 @@ class JobTests(unittest.TestCase):
         response_xml = read_xml_asset(GET_BY_ID_FAILED_XML)
         job_id = "77d5e57a-2517-479f-9a3c-a32025f2b64d"
         with mocked_time(), requests_mock.mock() as m:
-            m.get("{0}/{1}".format(self.baseurl, job_id), text=response_xml)
+            m.get(f"{self.baseurl}/{job_id}", text=response_xml)
             with self.assertRaises(JobFailedException):
                 self.server.jobs.wait_for_job(job_id)
 
@@ -101,7 +101,7 @@ class JobTests(unittest.TestCase):
         response_xml = read_xml_asset(GET_BY_ID_INPROGRESS_XML)
         job_id = "77d5e57a-2517-479f-9a3c-a32025f2b64d"
         with mocked_time(), requests_mock.mock() as m:
-            m.get("{0}/{1}".format(self.baseurl, job_id), text=response_xml)
+            m.get(f"{self.baseurl}/{job_id}", text=response_xml)
             with self.assertRaises(TimeoutError):
                 self.server.jobs.wait_for_job(job_id, timeout=30)
 

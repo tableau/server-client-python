@@ -18,6 +18,8 @@ GET_XML = os.path.join(TEST_ASSET_DIR, "custom_view_get.xml")
 GET_XML_ID = os.path.join(TEST_ASSET_DIR, "custom_view_get_id.xml")
 POPULATE_PREVIEW_IMAGE = os.path.join(TEST_ASSET_DIR, "Sample View Image.png")
 CUSTOM_VIEW_UPDATE_XML = os.path.join(TEST_ASSET_DIR, "custom_view_update.xml")
+CUSTOM_VIEW_POPULATE_PDF = os.path.join(TEST_ASSET_DIR, "populate_pdf.pdf")
+CUSTOM_VIEW_POPULATE_CSV = os.path.join(TEST_ASSET_DIR, "populate_csv.csv")
 CUSTOM_VIEW_DOWNLOAD = TEST_ASSET_DIR / "custom_view_download.json"
 FILE_UPLOAD_INIT = TEST_ASSET_DIR / "fileupload_initialize.xml"
 FILE_UPLOAD_APPEND = TEST_ASSET_DIR / "fileupload_append.xml"
@@ -246,3 +248,73 @@ class CustomViewTests(unittest.TestCase):
         assert isinstance(view, TSC.CustomViewItem)
         assert view.id is not None
         assert view.name is not None
+
+    def test_populate_pdf(self) -> None:
+        self.server.version = "3.23"
+        self.baseurl = self.server.custom_views.baseurl
+        with open(CUSTOM_VIEW_POPULATE_PDF, "rb") as f:
+            response = f.read()
+        with requests_mock.mock() as m:
+            m.get(
+                self.baseurl + "/d79634e1-6063-4ec9-95ff-50acbf609ff5/pdf?type=letter&orientation=portrait&maxAge=5",
+                content=response,
+            )
+            custom_view = TSC.CustomViewItem()
+            custom_view._id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
+
+            size = TSC.PDFRequestOptions.PageType.Letter
+            orientation = TSC.PDFRequestOptions.Orientation.Portrait
+            req_option = TSC.PDFRequestOptions(size, orientation, 5)
+
+            self.server.custom_views.populate_pdf(custom_view, req_option)
+            self.assertEqual(response, custom_view.pdf)
+
+    def test_populate_csv(self) -> None:
+        self.server.version = "3.23"
+        self.baseurl = self.server.custom_views.baseurl
+        with open(CUSTOM_VIEW_POPULATE_CSV, "rb") as f:
+            response = f.read()
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + "/d79634e1-6063-4ec9-95ff-50acbf609ff5/data?maxAge=1", content=response)
+            custom_view = TSC.CustomViewItem()
+            custom_view._id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
+            request_option = TSC.CSVRequestOptions(maxage=1)
+            self.server.custom_views.populate_csv(custom_view, request_option)
+
+            csv_file = b"".join(custom_view.csv)
+            self.assertEqual(response, csv_file)
+
+    def test_populate_csv_default_maxage(self) -> None:
+        self.server.version = "3.23"
+        self.baseurl = self.server.custom_views.baseurl
+        with open(CUSTOM_VIEW_POPULATE_CSV, "rb") as f:
+            response = f.read()
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + "/d79634e1-6063-4ec9-95ff-50acbf609ff5/data", content=response)
+            custom_view = TSC.CustomViewItem()
+            custom_view._id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
+            self.server.custom_views.populate_csv(custom_view)
+
+            csv_file = b"".join(custom_view.csv)
+            self.assertEqual(response, csv_file)
+
+    def test_pdf_height(self) -> None:
+        self.server.version = "3.23"
+        self.baseurl = self.server.custom_views.baseurl
+        with open(CUSTOM_VIEW_POPULATE_PDF, "rb") as f:
+            response = f.read()
+        with requests_mock.mock() as m:
+            m.get(
+                self.baseurl + "/d79634e1-6063-4ec9-95ff-50acbf609ff5/pdf?vizHeight=1080&vizWidth=1920",
+                content=response,
+            )
+            custom_view = TSC.CustomViewItem()
+            custom_view._id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
+
+            req_option = TSC.PDFRequestOptions(
+                viz_height=1080,
+                viz_width=1920,
+            )
+
+            self.server.custom_views.populate_pdf(custom_view, req_option)
+            self.assertEqual(response, custom_view.pdf)

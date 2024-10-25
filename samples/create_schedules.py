@@ -55,7 +55,7 @@ def main():
         )
         try:
             hourly_schedule = server.schedules.create(hourly_schedule)
-            print("Hourly schedule created (ID: {}).".format(hourly_schedule.id))
+            print(f"Hourly schedule created (ID: {hourly_schedule.id}).")
         except Exception as e:
             print(e)
 
@@ -71,7 +71,7 @@ def main():
         )
         try:
             daily_schedule = server.schedules.create(daily_schedule)
-            print("Daily schedule created (ID: {}).".format(daily_schedule.id))
+            print(f"Daily schedule created (ID: {daily_schedule.id}).")
         except Exception as e:
             print(e)
 
@@ -89,7 +89,7 @@ def main():
         )
         try:
             weekly_schedule = server.schedules.create(weekly_schedule)
-            print("Weekly schedule created (ID: {}).".format(weekly_schedule.id))
+            print(f"Weekly schedule created (ID: {weekly_schedule.id}).")
         except Exception as e:
             print(e)
             options = TSC.RequestOptions()
@@ -112,7 +112,7 @@ def main():
         )
         try:
             monthly_schedule = server.schedules.create(monthly_schedule)
-            print("Monthly schedule created (ID: {}).".format(monthly_schedule.id))
+            print(f"Monthly schedule created (ID: {monthly_schedule.id}).")
         except Exception as e:
             print(e)
 

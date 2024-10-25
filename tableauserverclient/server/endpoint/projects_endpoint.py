@@ -5,9 +5,10 @@ from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api, 
 from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
 from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
 from tableauserverclient.server import RequestFactory, RequestOptions
+from tableauserverclient.models.permissions_item import PermissionsRule
 from tableauserverclient.models import ProjectItem, PaginationItem, Resource
 
-from typing import List, Optional, Tuple, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 from tableauserverclient.server.query import QuerySet
 
@@ -20,17 +21,17 @@ from tableauserverclient.helpers.logging import logger
 
 class Projects(QuerysetEndpoint[ProjectItem]):
     def __init__(self, parent_srv: "Server") -> None:
-        super(Projects, self).__init__(parent_srv)
+        super().__init__(parent_srv)
 
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
         self._default_permissions = _DefaultPermissionsEndpoint(parent_srv, lambda: self.baseurl)
 
     @property
     def baseurl(self) -> str:
-        return "{0}/sites/{1}/projects".format(self.parent_srv.baseurl, self.parent_srv.site_id)
+        return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/projects"
 
     @api(version="2.0")
-    def get(self, req_options: Optional["RequestOptions"] = None) -> Tuple[List[ProjectItem], PaginationItem]:
+    def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[ProjectItem], PaginationItem]:
         logger.info("Querying all projects on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -43,9 +44,9 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         if not project_id:
             error = "Project ID undefined."
             raise ValueError(error)
-        url = "{0}/{1}".format(self.baseurl, project_id)
+        url = f"{self.baseurl}/{project_id}"
         self.delete_request(url)
-        logger.info("Deleted single project (ID: {0})".format(project_id))
+        logger.info(f"Deleted single project (ID: {project_id})")
 
     @api(version="2.0")
     def update(self, project_item: ProjectItem, samples: bool = False) -> ProjectItem:
@@ -54,10 +55,10 @@ class Projects(QuerysetEndpoint[ProjectItem]):
             raise MissingRequiredFieldError(error)
 
         params = {"params": {RequestOptions.Field.PublishSamples: samples}}
-        url = "{0}/{1}".format(self.baseurl, project_item.id)
+        url = f"{self.baseurl}/{project_item.id}"
         update_req = RequestFactory.Project.update_req(project_item)
         server_response = self.put_request(url, update_req, XML_CONTENT_TYPE, params)
-        logger.info("Updated project item (ID: {0})".format(project_item.id))
+        logger.info(f"Updated project item (ID: {project_item.id})")
         updated_project = ProjectItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return updated_project
 
@@ -66,11 +67,11 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         params = {"params": {RequestOptions.Field.PublishSamples: samples}}
         url = self.baseurl
         if project_item._samples:
-            url = "{0}?publishSamples={1}".format(self.baseurl, project_item._samples)
+            url = f"{self.baseurl}?publishSamples={project_item._samples}"
         create_req = RequestFactory.Project.create_req(project_item)
         server_response = self.post_request(url, create_req, XML_CONTENT_TYPE, params)
         new_project = ProjectItem.from_response(server_response.content, self.parent_srv.namespace)[0]
-        logger.info("Created new project (ID: {0})".format(new_project.id))
+        logger.info(f"Created new project (ID: {new_project.id})")
         return new_project
 
     @api(version="2.0")
@@ -78,84 +79,134 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         self._permissions.populate(item)
 
     @api(version="2.0")
-    def update_permissions(self, item, rules):
+    def update_permissions(self, item: ProjectItem, rules: list[PermissionsRule]) -> list[PermissionsRule]:
         return self._permissions.update(item, rules)
 
     @api(version="2.0")
-    def delete_permission(self, item, rules):
+    def delete_permission(self, item: ProjectItem, rules: list[PermissionsRule]) -> None:
         self._permissions.delete(item, rules)
 
     @api(version="2.1")
-    def populate_workbook_default_permissions(self, item):
+    def populate_workbook_default_permissions(self, item: ProjectItem) -> None:
         self._default_permissions.populate_default_permissions(item, Resource.Workbook)
 
     @api(version="2.1")
-    def populate_datasource_default_permissions(self, item):
+    def populate_datasource_default_permissions(self, item: ProjectItem) -> None:
         self._default_permissions.populate_default_permissions(item, Resource.Datasource)
 
     @api(version="3.2")
-    def populate_metric_default_permissions(self, item):
+    def populate_metric_default_permissions(self, item: ProjectItem) -> None:
         self._default_permissions.populate_default_permissions(item, Resource.Metric)
 
     @api(version="3.4")
-    def populate_datarole_default_permissions(self, item):
+    def populate_datarole_default_permissions(self, item: ProjectItem) -> None:
         self._default_permissions.populate_default_permissions(item, Resource.Datarole)
 
     @api(version="3.4")
-    def populate_flow_default_permissions(self, item):
+    def populate_flow_default_permissions(self, item: ProjectItem) -> None:
         self._default_permissions.populate_default_permissions(item, Resource.Flow)
 
     @api(version="3.4")
-    def populate_lens_default_permissions(self, item):
+    def populate_lens_default_permissions(self, item: ProjectItem) -> None:
         self._default_permissions.populate_default_permissions(item, Resource.Lens)
 
+    @api(version="3.23")
+    def populate_virtualconnection_default_permissions(self, item: ProjectItem) -> None:
+        self._default_permissions.populate_default_permissions(item, Resource.VirtualConnection)
+
+    @api(version="3.23")
+    def populate_database_default_permissions(self, item: ProjectItem) -> None:
+        self._default_permissions.populate_default_permissions(item, Resource.Database)
+
+    @api(version="3.23")
+    def populate_table_default_permissions(self, item: ProjectItem) -> None:
+        self._default_permissions.populate_default_permissions(item, Resource.Table)
+
     @api(version="2.1")
-    def update_workbook_default_permissions(self, item, rules):
+    def update_workbook_default_permissions(
+        self, item: ProjectItem, rules: list[PermissionsRule]
+    ) -> list[PermissionsRule]:
         return self._default_permissions.update_default_permissions(item, rules, Resource.Workbook)
 
     @api(version="2.1")
-    def update_datasource_default_permissions(self, item, rules):
+    def update_datasource_default_permissions(
+        self, item: ProjectItem, rules: list[PermissionsRule]
+    ) -> list[PermissionsRule]:
         return self._default_permissions.update_default_permissions(item, rules, Resource.Datasource)
 
     @api(version="3.2")
-    def update_metric_default_permissions(self, item, rules):
+    def update_metric_default_permissions(
+        self, item: ProjectItem, rules: list[PermissionsRule]
+    ) -> list[PermissionsRule]:
         return self._default_permissions.update_default_permissions(item, rules, Resource.Metric)
 
     @api(version="3.4")
-    def update_datarole_default_permissions(self, item, rules):
+    def update_datarole_default_permissions(
+        self, item: ProjectItem, rules: list[PermissionsRule]
+    ) -> list[PermissionsRule]:
         return self._default_permissions.update_default_permissions(item, rules, Resource.Datarole)
 
     @api(version="3.4")
-    def update_flow_default_permissions(self, item, rules):
+    def update_flow_default_permissions(self, item: ProjectItem, rules: list[PermissionsRule]) -> list[PermissionsRule]:
         return self._default_permissions.update_default_permissions(item, rules, Resource.Flow)
 
     @api(version="3.4")
-    def update_lens_default_permissions(self, item, rules):
+    def update_lens_default_permissions(self, item: ProjectItem, rules: list[PermissionsRule]) -> list[PermissionsRule]:
         return self._default_permissions.update_default_permissions(item, rules, Resource.Lens)
 
+    @api(version="3.23")
+    def update_virtualconnection_default_permissions(
+        self, item: ProjectItem, rules: list[PermissionsRule]
+    ) -> list[PermissionsRule]:
+        return self._default_permissions.update_default_permissions(item, rules, Resource.VirtualConnection)
+
+    @api(version="3.23")
+    def update_database_default_permissions(
+        self, item: ProjectItem, rules: list[PermissionsRule]
+    ) -> list[PermissionsRule]:
+        return self._default_permissions.update_default_permissions(item, rules, Resource.Database)
+
+    @api(version="3.23")
+    def update_table_default_permissions(
+        self, item: ProjectItem, rules: list[PermissionsRule]
+    ) -> list[PermissionsRule]:
+        return self._default_permissions.update_default_permissions(item, rules, Resource.Table)
+
     @api(version="2.1")
-    def delete_workbook_default_permissions(self, item, rule):
+    def delete_workbook_default_permissions(self, item: ProjectItem, rule: PermissionsRule) -> None:
         self._default_permissions.delete_default_permission(item, rule, Resource.Workbook)
 
     @api(version="2.1")
-    def delete_datasource_default_permissions(self, item, rule):
+    def delete_datasource_default_permissions(self, item: ProjectItem, rule: PermissionsRule) -> None:
         self._default_permissions.delete_default_permission(item, rule, Resource.Datasource)
 
     @api(version="3.2")
-    def delete_metric_default_permissions(self, item, rule):
+    def delete_metric_default_permissions(self, item: ProjectItem, rule: PermissionsRule) -> None:
         self._default_permissions.delete_default_permission(item, rule, Resource.Metric)
 
     @api(version="3.4")
-    def delete_datarole_default_permissions(self, item, rule):
+    def delete_datarole_default_permissions(self, item: ProjectItem, rule: PermissionsRule) -> None:
         self._default_permissions.delete_default_permission(item, rule, Resource.Datarole)
 
     @api(version="3.4")
-    def delete_flow_default_permissions(self, item, rule):
+    def delete_flow_default_permissions(self, item: ProjectItem, rule: PermissionsRule) -> None:
         self._default_permissions.delete_default_permission(item, rule, Resource.Flow)
 
     @api(version="3.4")
-    def delete_lens_default_permissions(self, item, rule):
+    def delete_lens_default_permissions(self, item: ProjectItem, rule: PermissionsRule) -> None:
         self._default_permissions.delete_default_permission(item, rule, Resource.Lens)
+
+    @api(version="3.23")
+    def delete_virtualconnection_default_permissions(self, item: ProjectItem, rule: PermissionsRule) -> None:
+        self._default_permissions.delete_default_permission(item, rule, Resource.VirtualConnection)
+
+    @api(version="3.23")
+    def delete_database_default_permissions(self, item: ProjectItem, rule: PermissionsRule) -> None:
+        self._default_permissions.delete_default_permission(item, rule, Resource.Database)
+
+    @api(version="3.23")
+    def delete_table_default_permissions(self, item: ProjectItem, rule: PermissionsRule) -> None:
+        self._default_permissions.delete_default_permission(item, rule, Resource.Table)
 
     def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[ProjectItem]:
         """

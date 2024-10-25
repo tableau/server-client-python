@@ -51,16 +51,17 @@ def main():
         if args.publish:
             if default_project is not None:
                 new_datasource = TSC.DatasourceItem(default_project.id)
+                new_datasource.description = "Published with a description"
                 new_datasource = server.datasources.publish(
                     new_datasource, args.publish, TSC.Server.PublishMode.Overwrite
                 )
-                print("Datasource published. ID: {}".format(new_datasource.id))
+                print(f"Datasource published. ID: {new_datasource.id}")
             else:
                 print("Publish failed. Could not find the default project.")
 
         # Gets all datasource items
         all_datasources, pagination_item = server.datasources.get()
-        print("\nThere are {} datasources on site: ".format(pagination_item.total_available))
+        print(f"\nThere are {pagination_item.total_available} datasources on site: ")
         print([datasource.name for datasource in all_datasources])
 
         if all_datasources:
@@ -69,20 +70,19 @@ def main():
 
             # Populate connections
             server.datasources.populate_connections(sample_datasource)
-            print("\nConnections for {}: ".format(sample_datasource.name))
-            print(
-                [
-                    "{0}({1})".format(connection.id, connection.datasource_name)
-                    for connection in sample_datasource.connections
-                ]
-            )
+            print(f"\nConnections for {sample_datasource.name}: ")
+            print([f"{connection.id}({connection.datasource_name})" for connection in sample_datasource.connections])
+
+            # Demonstrate that description is editable
+            sample_datasource.description = "Description updated by TSC"
+            server.datasources.update(sample_datasource)
 
             # Add some tags to the datasource
             original_tag_set = set(sample_datasource.tags)
             sample_datasource.tags.update("a", "b", "c", "d")
             server.datasources.update(sample_datasource)
-            print("\nOld tag set: {}".format(original_tag_set))
-            print("New tag set: {}".format(sample_datasource.tags))
+            print(f"\nOld tag set: {original_tag_set}")
+            print(f"New tag set: {sample_datasource.tags}")
 
             # Delete all tags that were added by setting tags to original
             sample_datasource.tags = original_tag_set
