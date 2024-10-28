@@ -973,7 +973,11 @@ class WorkbookRequest:
         if workbook_item.owner_id:
             owner_element = ET.SubElement(workbook_element, "owner")
             owner_element.attrib["id"] = workbook_item.owner_id
-        if workbook_item.description is not None and parent_srv is not None and parent_srv.check_at_least_version("3.21"):
+        if (
+            workbook_item.description is not None
+            and parent_srv is not None
+            and parent_srv.check_at_least_version("3.21")
+        ):
             workbook_element.attrib["description"] = workbook_item.description
         if workbook_item._views is not None:
             views_element = ET.SubElement(workbook_element, "views")
@@ -998,9 +1002,9 @@ class WorkbookRequest:
             if data_freshness_policy_config.option == "FreshEvery":
                 if data_freshness_policy_config.fresh_every_schedule is not None:
                     fresh_every_element = ET.SubElement(data_freshness_policy_element, "freshEverySchedule")
-                    fresh_every_element.attrib["frequency"] = (
-                        data_freshness_policy_config.fresh_every_schedule.frequency
-                    )
+                    fresh_every_element.attrib[
+                        "frequency"
+                    ] = data_freshness_policy_config.fresh_every_schedule.frequency
                     fresh_every_element.attrib["value"] = str(data_freshness_policy_config.fresh_every_schedule.value)
                 else:
                     raise ValueError(f"data_freshness_policy_config.fresh_every_schedule must be populated.")
