@@ -1,13 +1,13 @@
 import datetime
-from typing import List, Optional
+from typing import Optional
 
 from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.datetime_helpers import parse_datetime
-from .flow_run_item import FlowRunItem
+from tableauserverclient.models.flow_run_item import FlowRunItem
 
 
-class JobItem(object):
+class JobItem:
     class FinishCode:
         """
         Status codes as documented on
@@ -27,12 +27,14 @@ class JobItem(object):
         started_at: Optional[datetime.datetime] = None,
         completed_at: Optional[datetime.datetime] = None,
         finish_code: int = 0,
-        notes: Optional[List[str]] = None,
+        notes: Optional[list[str]] = None,
         mode: Optional[str] = None,
         workbook_id: Optional[str] = None,
         datasource_id: Optional[str] = None,
         flow_run: Optional[FlowRunItem] = None,
         updated_at: Optional[datetime.datetime] = None,
+        workbook_name: Optional[str] = None,
+        datasource_name: Optional[str] = None,
     ):
         self._id = id_
         self._type = job_type
@@ -41,12 +43,14 @@ class JobItem(object):
         self._started_at = started_at
         self._completed_at = completed_at
         self._finish_code = finish_code
-        self._notes: List[str] = notes or []
+        self._notes: list[str] = notes or []
         self._mode = mode
         self._workbook_id = workbook_id
         self._datasource_id = datasource_id
         self._flow_run = flow_run
         self._updated_at = updated_at
+        self._workbook_name = workbook_name
+        self._datasource_name = datasource_name
 
     @property
     def id(self) -> str:
@@ -77,7 +81,7 @@ class JobItem(object):
         return self._finish_code
 
     @property
-    def notes(self) -> List[str]:
+    def notes(self) -> list[str]:
         return self._notes
 
     @property
@@ -117,6 +121,14 @@ class JobItem(object):
     def updated_at(self) -> Optional[datetime.datetime]:
         return self._updated_at
 
+    @property
+    def workbook_name(self) -> Optional[str]:
+        return self._workbook_name
+
+    @property
+    def datasource_name(self) -> Optional[str]:
+        return self._datasource_name
+
     def __str__(self):
         return (
             "<Job#{_id} {_type} created_at({_created_at}) started_at({_started_at}) updated_at({_updated_at}) completed_at({_completed_at})"
@@ -127,7 +139,7 @@ class JobItem(object):
         return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"
 
     @classmethod
-    def from_response(cls, xml, ns) -> List["JobItem"]:
+    def from_response(cls, xml, ns) -> list["JobItem"]:
         parsed_response = fromstring(xml)
         all_tasks_xml = parsed_response.findall(".//t:job", namespaces=ns)
 
@@ -148,8 +160,10 @@ class JobItem(object):
         mode = element.get("mode", None)
         workbook = element.find(".//t:workbook[@id]", namespaces=ns)
         workbook_id = workbook.get("id") if workbook is not None else None
+        workbook_name = workbook.get("name") if workbook is not None else None
         datasource = element.find(".//t:datasource[@id]", namespaces=ns)
         datasource_id = datasource.get("id") if datasource is not None else None
+        datasource_name = datasource.get("name") if datasource is not None else None
         flow_run = None
         updated_at = parse_datetime(element.get("updatedAt", None))
         for flow_job in element.findall(".//t:runFlowJobType", namespaces=ns):
@@ -172,10 +186,12 @@ class JobItem(object):
             datasource_id,
             flow_run,
             updated_at,
+            workbook_name,
+            datasource_name,
         )
 
 
-class BackgroundJobItem(object):
+class BackgroundJobItem:
     class Status:
         Pending: str = "Pending"
         InProgress: str = "InProgress"
@@ -206,7 +222,7 @@ class BackgroundJobItem(object):
         self._subtitle = subtitle
 
     def __str__(self):
-        return f"<{self.__class__.name} {self._id} {self._type}>"
+        return f"<{self.__class__.__qualname__} {self._id} {self._type}>"
 
     def __repr__(self):
         return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"
@@ -254,7 +270,7 @@ class BackgroundJobItem(object):
         return self._priority
 
     @classmethod
-    def from_response(cls, xml, ns) -> List["BackgroundJobItem"]:
+    def from_response(cls, xml, ns) -> list["BackgroundJobItem"]:
         parsed_response = fromstring(xml)
         all_tasks_xml = parsed_response.findall(".//t:backgroundJob", namespaces=ns)
         return [cls._parse_element(x, ns) for x in all_tasks_xml]

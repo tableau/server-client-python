@@ -79,6 +79,7 @@ class ProjectTests(unittest.TestCase):
                 parent_id="9a8f2265-70f3-4494-96c5-e5949d7a1120",
             )
             single_project._id = "1d0304cd-3796-429f-b815-7258370b9b74"
+            single_project.owner_id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
             single_project = self.server.projects.update(single_project)
 
         self.assertEqual("1d0304cd-3796-429f-b815-7258370b9b74", single_project.id)
@@ -86,6 +87,7 @@ class ProjectTests(unittest.TestCase):
         self.assertEqual("Project created for testing", single_project.description)
         self.assertEqual("LockedToProject", single_project.content_permissions)
         self.assertEqual("9a8f2265-70f3-4494-96c5-e5949d7a1120", single_project.parent_id)
+        self.assertEqual("dd2239f6-ddf1-4107-981a-4cf94e415794", single_project.owner_id)
 
     def test_content_permission_locked_to_project_without_nested(self) -> None:
         with open(SET_CONTENT_PERMISSIONS_XML, "rb") as f:
@@ -185,7 +187,7 @@ class ProjectTests(unittest.TestCase):
                 self.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/default-permissions/workbooks", text=response_xml
             )
             single_project = TSC.ProjectItem("test", "1d0304cd-3796-429f-b815-7258370b9b74")
-            single_project._owner_id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
+            single_project.owner_id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
             single_project._id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
 
             self.server.projects.populate_workbook_default_permissions(single_project)
@@ -239,9 +241,9 @@ class ProjectTests(unittest.TestCase):
 
             rules = TSC.PermissionsRule(grantee=GroupItem.as_reference(single_group._id), capabilities=capabilities)
 
-            endpoint = "{}/permissions/groups/{}".format(single_project._id, single_group._id)
-            m.delete("{}/{}/Read/Allow".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/Write/Allow".format(self.baseurl, endpoint), status_code=204)
+            endpoint = f"{single_project._id}/permissions/groups/{single_group._id}"
+            m.delete(f"{self.baseurl}/{endpoint}/Read/Allow", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/Write/Allow", status_code=204)
             self.server.projects.delete_permission(item=single_project, rules=rules)
 
     def test_delete_workbook_default_permission(self) -> None:
@@ -285,19 +287,19 @@ class ProjectTests(unittest.TestCase):
 
             rules = TSC.PermissionsRule(grantee=GroupItem.as_reference(single_group._id), capabilities=capabilities)
 
-            endpoint = "{}/default-permissions/workbooks/groups/{}".format(single_project._id, single_group._id)
-            m.delete("{}/{}/Read/Allow".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/ExportImage/Allow".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/ExportData/Allow".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/ViewComments/Allow".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/AddComment/Allow".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/Filter/Allow".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/ViewUnderlyingData/Deny".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/ShareView/Allow".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/WebAuthoring/Allow".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/Write/Allow".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/ExportXml/Allow".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/ChangeHierarchy/Allow".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/Delete/Deny".format(self.baseurl, endpoint), status_code=204)
-            m.delete("{}/{}/ChangePermissions/Allow".format(self.baseurl, endpoint), status_code=204)
+            endpoint = f"{single_project._id}/default-permissions/workbooks/groups/{single_group._id}"
+            m.delete(f"{self.baseurl}/{endpoint}/Read/Allow", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/ExportImage/Allow", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/ExportData/Allow", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/ViewComments/Allow", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/AddComment/Allow", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/Filter/Allow", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/ViewUnderlyingData/Deny", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/ShareView/Allow", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/WebAuthoring/Allow", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/Write/Allow", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/ExportXml/Allow", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/ChangeHierarchy/Allow", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/Delete/Deny", status_code=204)
+            m.delete(f"{self.baseurl}/{endpoint}/ChangePermissions/Allow", status_code=204)
             self.server.projects.delete_workbook_default_permissions(item=single_project, rule=rules)

@@ -1,8 +1,5 @@
-import io
 import os
 import unittest
-from typing import List
-from unittest.mock import MagicMock
 
 import requests_mock
 
@@ -163,7 +160,7 @@ class UserTests(unittest.TestCase):
             self.assertEqual("ee8c6e70-43b6-11e6-af4f-f7b0d8e20760", workbook_list[0].project_id)
             self.assertEqual("default", workbook_list[0].project_name)
             self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", workbook_list[0].owner_id)
-            self.assertEqual(set(["Safari", "Sample"]), workbook_list[0].tags)
+            self.assertEqual({"Safari", "Sample"}, workbook_list[0].tags)
 
     def test_populate_workbooks_missing_id(self) -> None:
         single_user = TSC.UserItem("test", "Interactor")
@@ -176,7 +173,7 @@ class UserTests(unittest.TestCase):
         with open(GET_FAVORITES_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
-            m.get("{0}/{1}".format(baseurl, single_user.id), text=response_xml)
+            m.get(f"{baseurl}/{single_user.id}", text=response_xml)
             self.server.users.populate_favorites(single_user)
         self.assertIsNotNone(single_user._favorites)
         self.assertEqual(len(single_user.favorites["workbooks"]), 1)

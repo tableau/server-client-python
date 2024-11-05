@@ -14,13 +14,79 @@ from .property_decorators import (
 
 VALID_CONTENT_URL_RE = r"^[a-zA-Z0-9_\-]*$"
 
-from typing import List, Optional, Union, TYPE_CHECKING
+from typing import Optional, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from tableauserverclient.server import Server
 
 
-class SiteItem(object):
+class SiteItem:
+    """
+    The SiteItem class contains the members or attributes for the site resources
+    on Tableau Server or Tableau Cloud. The SiteItem class defines the
+    information you can request or query from Tableau Server or Tableau Cloud.
+    The class members correspond to the attributes of a server request or
+    response payload.
+
+    Attributes
+    ----------
+    name: str
+        The name of the site. The name of the default site is "".
+
+    content_url: str
+        The path to the site.
+
+    admin_mode: str
+        (Optional) For Tableau Server only. Specify ContentAndUsers to allow
+        site administrators to use the server interface and tabcmd commands to
+        add and remove users. (Specifying this option does not give site
+        administrators permissions to manage users using the REST API.) Specify
+        ContentOnly to prevent site administrators from adding or removing
+        users. (Server administrators can always add or remove users.)
+
+    user_quota: int
+        (Optional) Specifies the total number of users for the site. The number
+        can't exceed the number of licenses activated for the site; and if
+        tiered capacity attributes are set, then user_quota will equal the sum
+        of the tiered capacity values, and attempting to set user_quota will
+        cause an error.
+
+    tier_explorer_capacity: int
+    tier_creator_capacity: int
+    tier_viewer_capacity: int
+        (Optional) The maximum number of licenses for users with the Creator,
+        Explorer, or Viewer role, respectively, allowed on a site.
+
+    storage_quota: int
+        (Optional) Specifies the maximum amount of space for the new site, in
+        megabytes. If you set a quota and the site exceeds it, publishers will
+        be prevented from uploading new content until the site is under the
+        limit again.
+
+    disable_subscriptions: bool
+        (Optional) Specify true to prevent users from being able to subscribe
+        to workbooks on the specified site. The default is False.
+
+    subscribe_others_enabled: bool
+        (Optional) Specify false to prevent server administrators, site
+        administrators, and project or content owners from being able to
+        subscribe other users to workbooks on the specified site. The default
+        is True.
+
+    revision_history_enabled: bool
+        (Optional) Specify true to enable revision history for content resources
+        (workbooks and datasources). The default is False.
+
+    revision_limit: int
+        (Optional) Specifies the number of revisions of a content source
+        (workbook or data source) to allow. On Tableau Server, the default is
+        25.
+
+    state: str
+        Shows the current state of the site (Active or Suspended).
+
+    """
+
     _user_quota: Optional[int] = None
     _tier_creator_capacity: Optional[int] = None
     _tier_explorer_capacity: Optional[int] = None
@@ -873,7 +939,7 @@ class SiteItem(object):
             self.auto_suspend_refresh_inactivity_window = auto_suspend_refresh_inactivity_window
 
     @classmethod
-    def from_response(cls, resp, ns) -> List["SiteItem"]:
+    def from_response(cls, resp, ns) -> list["SiteItem"]:
         all_site_items = list()
         parsed_response = fromstring(resp)
         all_site_xml = parsed_response.findall(".//t:site", namespaces=ns)

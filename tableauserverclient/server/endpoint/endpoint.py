@@ -1,26 +1,39 @@
+from typing_extensions import Concatenate, ParamSpec
 from tableauserverclient import datetime_helpers as datetime
 
+import abc
 from packaging.version import Version
 from functools import wraps
 from xml.etree.ElementTree import ParseError
-from typing import Any, Callable, Dict, Optional, TYPE_CHECKING, Union
+from typing import (
+    Any,
+    Callable,
+    Generic,
+    Optional,
+    TYPE_CHECKING,
+    TypeVar,
+    Union,
+)
 
-from .exceptions import (
+from tableauserverclient.models.pagination_item import PaginationItem
+from tableauserverclient.server.request_options import RequestOptions
+
+from tableauserverclient.server.endpoint.exceptions import (
+    FailedSignInError,
     ServerResponseError,
     InternalServerError,
     NonXMLResponseError,
     NotSignedInError,
 )
-from ..exceptions import EndpointUnavailableError
+from tableauserverclient.server.exceptions import EndpointUnavailableError
 
 from tableauserverclient.server.query import QuerySet
 from tableauserverclient import helpers, get_versions
 
 from tableauserverclient.helpers.logging import logger
-from tableauserverclient.config import DELAY_SLEEP_SECONDS
 
 if TYPE_CHECKING:
-    from ..server import Server
+    from tableauserverclient.server.server import Server
     from requests import Response
 
 
@@ -34,14 +47,14 @@ TABLEAU_AUTH_HEADER = "x-tableau-auth"
 USER_AGENT_HEADER = "User-Agent"
 
 
-class Endpoint(object):
+class Endpoint:
     def __init__(self, parent_srv: "Server"):
         self.parent_srv = parent_srv
 
     async_response = None
 
     @staticmethod
-    def set_parameters(http_options, auth_token, content, content_type, parameters) -> Dict[str, Any]:
+    def set_parameters(http_options, auth_token, content, content_type, parameters) -> dict[str, Any]:
         parameters = parameters or {}
         parameters.update(http_options)
         if "headers" not in parameters:
@@ -67,7 +80,7 @@ class Endpoint(object):
             else:
                 # only set the TSC user agent if not already populated
                 _client_version: Optional[str] = get_versions()["version"]
-                parameters["headers"][USER_AGENT_HEADER] = "Tableau Server Client/{}".format(_client_version)
+                parameters["headers"][USER_AGENT_HEADER] = f"Tableau Server Client/{_client_version}"
 
         # result: parameters["headers"]["User-Agent"] is set
         # return explicitly for testing only
@@ -75,12 +88,12 @@ class Endpoint(object):
 
     def _blocking_request(self, method, url, parameters={}) -> Optional[Union["Response", Exception]]:
         response = None
-        logger.debug("[{}] Begin blocking request to {}".format(datetime.timestamp(), url))
+        logger.debug(f"[{datetime.timestamp()}] Begin blocking request to {url}")
         try:
             response = method(url, **parameters)
-            logger.debug("[{}] Call finished".format(datetime.timestamp()))
+            logger.debug(f"[{datetime.timestamp()}] Call finished")
         except Exception as e:
-            logger.debug("Error making request to server: {}".format(e))
+            logger.debug(f"Error making request to server: {e}")
             raise e
         return response
 
@@ -96,13 +109,13 @@ class Endpoint(object):
         content: Optional[bytes] = None,
         auth_token: Optional[str] = None,
         content_type: Optional[str] = None,
-        parameters: Optional[Dict[str, Any]] = None,
+        parameters: Optional[dict[str, Any]] = None,
     ) -> "Response":
         parameters = Endpoint.set_parameters(
             self.parent_srv.http_options, auth_token, content, content_type, parameters
         )
 
-        logger.debug("request method {}, url: {}".format(method.__name__, url))
+        logger.debug(f"request method {method.__name__}, url: {url}")
         if content:
             redacted = helpers.strings.redact_xml(content[:200])
             # this needs to be under a trace or something, it's a LOT
@@ -114,22 +127,24 @@ class Endpoint(object):
         server_response: Optional[Union["Response", Exception]] = self.send_request_while_show_progress_threaded(
             method, url, parameters, request_timeout
         )
-        logger.debug("[{}] Async request returned: received {}".format(datetime.timestamp(), server_response))
+        logger.debug(f"[{datetime.timestamp()}] Async request returned: received {server_response}")
         # is this blocking retry really necessary? I guess if it was just the threading messing it up?
         if server_response is None:
             logger.debug(server_response)
-            logger.debug("[{}] Async request failed: retrying".format(datetime.timestamp()))
+            logger.debug(f"[{datetime.timestamp()}] Async request failed: retrying")
             server_response = self._blocking_request(method, url, parameters)
         if server_response is None:
-            logger.debug("[{}] Request failed".format(datetime.timestamp()))
+            logger.debug(f"[{datetime.timestamp()}] Request failed")
             raise RuntimeError
         if isinstance(server_response, Exception):
             raise server_response
         self._check_status(server_response, url)
 
         loggable_response = self.log_response_safely(server_response)
-        logger.debug("Server response from {0}".format(url))
-        # logger.debug("\n\t{1}".format(loggable_response))
+        logger.debug(f"Server response from {url}")
+        # uncomment the following to log full responses in debug mode
+        # BE CAREFUL WHEN SHARING THESE RESULTS - MAY CONTAIN YOUR SENSITIVE DATA
+        # logger.debug(loggable_response)
 
         if content_type == "application/xml":
             self.parent_srv._namespace.detect(server_response.content)
@@ -137,16 +152,16 @@ class Endpoint(object):
         return server_response
 
     def _check_status(self, server_response: "Response", url: Optional[str] = None):
-        logger.debug("Response status: {}".format(server_response))
+        logger.debug(f"Response status: {server_response}")
         if not hasattr(server_response, "status_code"):
-            raise EnvironmentError("Response is not a http response?")
+            raise OSError("Response is not a http response?")
         if server_response.status_code >= 500:
             raise InternalServerError(server_response, url)
         elif server_response.status_code not in Success_codes:
             try:
                 if server_response.status_code == 401:
                     # TODO: catch this in server.py and attempt to sign in again, in case it's a session expiry
-                    raise NotSignedInError(server_response.content, url)
+                    raise FailedSignInError.from_response(server_response.content, self.parent_srv.namespace, url)
 
                 raise ServerResponseError.from_response(server_response.content, self.parent_srv.namespace, url)
             except ParseError:
@@ -166,9 +181,9 @@ class Endpoint(object):
         # content-type is an octet-stream accomplishes the same goal without eagerly loading content.
         # This check is to determine if the response is a text response (xml or otherwise)
         # so that we do not attempt to log bytes and other binary data.
-        loggable_response = "Content type `{}`".format(content_type)
+        loggable_response = f"Content type `{content_type}`"
         if content_type == "application/octet-stream":
-            loggable_response = "A stream of type {} [Truncated File Contents]".format(content_type)
+            loggable_response = f"A stream of type {content_type} [Truncated File Contents]"
         elif server_response.encoding and len(server_response.content) > 0:
             loggable_response = helpers.strings.redact_xml(server_response.content.decode(server_response.encoding))
         return loggable_response
@@ -228,7 +243,12 @@ class Endpoint(object):
         )
 
 
-def api(version):
+E = TypeVar("E", bound="Endpoint")
+P = ParamSpec("P")
+R = TypeVar("R")
+
+
+def api(version: str) -> Callable[[Callable[Concatenate[E, P], R]], Callable[Concatenate[E, P], R]]:
     """Annotate the minimum supported version for an endpoint.
 
     Checks the version on the server object and compares normalized versions.
@@ -247,9 +267,9 @@ def api(version):
     >>>     ...
     """
 
-    def _decorator(func):
+    def _decorator(func: Callable[Concatenate[E, P], R]) -> Callable[Concatenate[E, P], R]:
         @wraps(func)
-        def wrapper(self, *args, **kwargs):
+        def wrapper(self: E, *args: P.args, **kwargs: P.kwargs) -> R:
             self.parent_srv.assert_at_least_version(version, self.__class__.__name__)
             return func(self, *args, **kwargs)
 
@@ -258,7 +278,7 @@ def api(version):
     return _decorator
 
 
-def parameter_added_in(**params):
+def parameter_added_in(**params: str) -> Callable[[Callable[Concatenate[E, P], R]], Callable[Concatenate[E, P], R]]:
     """Annotate minimum versions for new parameters or request options on an endpoint.
 
     The api decorator documents when an endpoint was added, this decorator annotates
@@ -281,9 +301,9 @@ def parameter_added_in(**params):
     >>>     ...
     """
 
-    def _decorator(func):
+    def _decorator(func: Callable[Concatenate[E, P], R]) -> Callable[Concatenate[E, P], R]:
         @wraps(func)
-        def wrapper(self, *args, **kwargs):
+        def wrapper(self: E, *args: P.args, **kwargs: P.kwargs) -> R:
             import warnings
 
             server_ver = Version(self.parent_srv.version or "0.0")
@@ -291,7 +311,7 @@ def parameter_added_in(**params):
             for p in params_to_check:
                 min_ver = Version(str(params[p]))
                 if server_ver < min_ver:
-                    error = "{!r} not available in {}, it will be ignored. Added in {}".format(p, server_ver, min_ver)
+                    error = f"{p!r} not available in {server_ver}, it will be ignored. Added in {min_ver}"
                     warnings.warn(error)
             return func(self, *args, **kwargs)
 
@@ -300,25 +320,36 @@ def parameter_added_in(**params):
     return _decorator
 
 
-class QuerysetEndpoint(Endpoint):
+T = TypeVar("T")
+
+
+class QuerysetEndpoint(Endpoint, Generic[T]):
     @api(version="2.0")
-    def all(self, *args, **kwargs):
-        queryset = QuerySet(self)
+    def all(self, *args, page_size: Optional[int] = None, **kwargs) -> QuerySet[T]:
+        if args or kwargs:
+            raise ValueError(".all method takes no arguments.")
+        queryset = QuerySet(self, page_size=page_size)
         return queryset
 
     @api(version="2.0")
-    def filter(self, *_, **kwargs) -> QuerySet:
+    def filter(self, *_, page_size: Optional[int] = None, **kwargs) -> QuerySet[T]:
         if _:
             raise RuntimeError("Only keyword arguments accepted.")
-        queryset = QuerySet(self).filter(**kwargs)
+        queryset = QuerySet(self, page_size=page_size).filter(**kwargs)
         return queryset
 
     @api(version="2.0")
-    def order_by(self, *args, **kwargs):
+    def order_by(self, *args, **kwargs) -> QuerySet[T]:
+        if kwargs:
+            raise ValueError(".order_by does not accept keyword arguments.")
         queryset = QuerySet(self).order_by(*args)
         return queryset
 
     @api(version="2.0")
-    def paginate(self, **kwargs):
+    def paginate(self, **kwargs) -> QuerySet[T]:
         queryset = QuerySet(self).paginate(**kwargs)
         return queryset
+
+    @abc.abstractmethod
+    def get(self, request_options: Optional[RequestOptions] = None) -> tuple[list[T], PaginationItem]:
+        raise NotImplementedError(f".get has not been implemented for {self.__class__.__qualname__}")

@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse
+    xmlns="http://tableau.com/api"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api https://help.tableau.com/samples/en-us/rest_api/ts-api_3_25.xsd">
+    <schedule id="8c5caf33-6223-4724-83c3-ccdc1e730a07" name="Monthly First Monday!" state="Active" priority="50" createdAt="2024-09-12T01:22:07Z" updatedAt="2024-09-12T01:22:48Z" type="Extract" frequency="Monthly" nextRunAt="2024-10-07T08:00:00Z" executionOrder="Parallel">
+        <frequencyDetails start="08:00:00">
+            <intervals>
+                <interval weekDay="Monday" monthDay="First" />
+            </intervals>
+        </frequencyDetails>
+    </schedule>
+</tsResponse>

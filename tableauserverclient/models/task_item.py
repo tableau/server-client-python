@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
 from defusedxml.ElementTree import fromstring
 
@@ -8,7 +8,7 @@ from tableauserverclient.models.schedule_item import ScheduleItem
 from tableauserverclient.models.target import Target
 
 
-class TaskItem(object):
+class TaskItem:
     class Type:
         ExtractRefresh = "extractRefresh"
         DataAcceleration = "dataAcceleration"
@@ -18,6 +18,7 @@ class TaskItem(object):
     _TASK_TYPE_MAPPING = {
         "RefreshExtractTask": Type.ExtractRefresh,
         "MaterializeViewsTask": Type.DataAcceleration,
+        "RunFlowTask": Type.RunFlow,
     }
 
     def __init__(
@@ -47,9 +48,9 @@ class TaskItem(object):
         )
 
     @classmethod
-    def from_response(cls, xml, ns, task_type=Type.ExtractRefresh) -> List["TaskItem"]:
+    def from_response(cls, xml, ns, task_type=Type.ExtractRefresh) -> list["TaskItem"]:
         parsed_response = fromstring(xml)
-        all_tasks_xml = parsed_response.findall(".//t:task/t:{}".format(task_type), namespaces=ns)
+        all_tasks_xml = parsed_response.findall(f".//t:task/t:{task_type}", namespaces=ns)
 
         all_tasks = (TaskItem._parse_element(x, ns) for x in all_tasks_xml)
 

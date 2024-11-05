@@ -3,7 +3,7 @@ from defusedxml.ElementTree import fromstring
 from tableauserverclient.datetime_helpers import parse_datetime
 
 
-class DQWItem(object):
+class DQWItem:
     class WarningType:
         WARNING = "WARNING"
         DEPRECATED = "DEPRECATED"

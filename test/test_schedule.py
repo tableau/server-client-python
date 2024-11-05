@@ -14,6 +14,7 @@ GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_by_id.xml")
 GET_HOURLY_ID_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_hourly_id.xml")
 GET_DAILY_ID_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_daily_id.xml")
 GET_MONTHLY_ID_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_monthly_id.xml")
+GET_MONTHLY_ID_2_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_monthly_id_2.xml")
 GET_EMPTY_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_empty.xml")
 CREATE_HOURLY_XML = os.path.join(TEST_ASSET_DIR, "schedule_create_hourly.xml")
 CREATE_DAILY_XML = os.path.join(TEST_ASSET_DIR, "schedule_create_daily.xml")
@@ -50,6 +51,7 @@ class ScheduleTests(unittest.TestCase):
         extract = all_schedules[0]
         subscription = all_schedules[1]
         flow = all_schedules[2]
+        system = all_schedules[3]
 
         self.assertEqual(2, pagination_item.total_available)
         self.assertEqual("c9cff7f9-309c-4361-99ff-d4ba8c9f5467", extract.id)
@@ -79,6 +81,15 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual("Flow", flow.schedule_type)
         self.assertEqual("2019-03-01T09:00:00Z", format_datetime(flow.next_run_at))
 
+        self.assertEqual("3cfa4713-ce7c-4fa7-aa2e-f752bfc8dd04", system.id)
+        self.assertEqual("First of the month 2:00AM", system.name)
+        self.assertEqual("Active", system.state)
+        self.assertEqual(30, system.priority)
+        self.assertEqual("2019-02-19T18:52:19Z", format_datetime(system.created_at))
+        self.assertEqual("2019-02-19T18:55:51Z", format_datetime(system.updated_at))
+        self.assertEqual("System", system.schedule_type)
+        self.assertEqual("2019-03-01T09:00:00Z", format_datetime(system.next_run_at))
+
     def test_get_empty(self) -> None:
         with open(GET_EMPTY_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
@@ -95,7 +106,7 @@ class ScheduleTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             schedule_id = "c9cff7f9-309c-4361-99ff-d4ba8c9f5467"
-            baseurl = "{}/schedules/{}".format(self.server.baseurl, schedule_id)
+            baseurl = f"{self.server.baseurl}/schedules/{schedule_id}"
             m.get(baseurl, text=response_xml)
             schedule = self.server.schedules.get_by_id(schedule_id)
             self.assertIsNotNone(schedule)
@@ -109,7 +120,7 @@ class ScheduleTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             schedule_id = "c9cff7f9-309c-4361-99ff-d4ba8c9f5467"
-            baseurl = "{}/schedules/{}".format(self.server.baseurl, schedule_id)
+            baseurl = f"{self.server.baseurl}/schedules/{schedule_id}"
             m.get(baseurl, text=response_xml)
             schedule = self.server.schedules.get_by_id(schedule_id)
             self.assertIsNotNone(schedule)
@@ -124,7 +135,7 @@ class ScheduleTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             schedule_id = "c9cff7f9-309c-4361-99ff-d4ba8c9f5467"
-            baseurl = "{}/schedules/{}".format(self.server.baseurl, schedule_id)
+            baseurl = f"{self.server.baseurl}/schedules/{schedule_id}"
             m.get(baseurl, text=response_xml)
             schedule = self.server.schedules.get_by_id(schedule_id)
             self.assertIsNotNone(schedule)
@@ -139,7 +150,7 @@ class ScheduleTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             schedule_id = "c9cff7f9-309c-4361-99ff-d4ba8c9f5467"
-            baseurl = "{}/schedules/{}".format(self.server.baseurl, schedule_id)
+            baseurl = f"{self.server.baseurl}/schedules/{schedule_id}"
             m.get(baseurl, text=response_xml)
             schedule = self.server.schedules.get_by_id(schedule_id)
             self.assertIsNotNone(schedule)
@@ -147,6 +158,21 @@ class ScheduleTests(unittest.TestCase):
             self.assertEqual("Monthly multiple days", schedule.name)
             self.assertEqual("Active", schedule.state)
             self.assertEqual(("1", "2"), schedule.interval_item.interval)
+
+    def test_get_monthly_by_id_2(self) -> None:
+        self.server.version = "3.15"
+        with open(GET_MONTHLY_ID_2_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            schedule_id = "8c5caf33-6223-4724-83c3-ccdc1e730a07"
+            baseurl = f"{self.server.baseurl}/schedules/{schedule_id}"
+            m.get(baseurl, text=response_xml)
+            schedule = self.server.schedules.get_by_id(schedule_id)
+            self.assertIsNotNone(schedule)
+            self.assertEqual(schedule_id, schedule.id)
+            self.assertEqual("Monthly First Monday!", schedule.name)
+            self.assertEqual("Active", schedule.state)
+            self.assertEqual(("Monday", "First"), schedule.interval_item.interval)
 
     def test_delete(self) -> None:
         with requests_mock.mock() as m:
@@ -321,7 +347,7 @@ class ScheduleTests(unittest.TestCase):
 
     def test_add_workbook(self) -> None:
         self.server.version = "2.8"
-        baseurl = "{}/sites/{}/schedules".format(self.server.baseurl, self.server.site_id)
+        baseurl = f"{self.server.baseurl}/sites/{self.server.site_id}/schedules"
 
         with open(WORKBOOK_GET_BY_ID_XML, "rb") as f:
             workbook_response = f.read().decode("utf-8")
@@ -336,7 +362,7 @@ class ScheduleTests(unittest.TestCase):
 
     def test_add_workbook_with_warnings(self) -> None:
         self.server.version = "2.8"
-        baseurl = "{}/sites/{}/schedules".format(self.server.baseurl, self.server.site_id)
+        baseurl = f"{self.server.baseurl}/sites/{self.server.site_id}/schedules"
 
         with open(WORKBOOK_GET_BY_ID_XML, "rb") as f:
             workbook_response = f.read().decode("utf-8")
@@ -352,7 +378,7 @@ class ScheduleTests(unittest.TestCase):
 
     def test_add_datasource(self) -> None:
         self.server.version = "2.8"
-        baseurl = "{}/sites/{}/schedules".format(self.server.baseurl, self.server.site_id)
+        baseurl = f"{self.server.baseurl}/sites/{self.server.site_id}/schedules"
 
         with open(DATASOURCE_GET_BY_ID_XML, "rb") as f:
             datasource_response = f.read().decode("utf-8")
@@ -367,7 +393,7 @@ class ScheduleTests(unittest.TestCase):
 
     def test_add_flow(self) -> None:
         self.server.version = "3.3"
-        baseurl = "{}/sites/{}/schedules".format(self.server.baseurl, self.server.site_id)
+        baseurl = f"{self.server.baseurl}/sites/{self.server.site_id}/schedules"
 
         with open(FLOW_GET_BY_ID_XML, "rb") as f:
             flow_response = f.read().decode("utf-8")

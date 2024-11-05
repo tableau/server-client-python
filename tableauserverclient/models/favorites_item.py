@@ -1,28 +1,27 @@
 import logging
 
+from typing import Union
 from defusedxml.ElementTree import fromstring
-from .tableau_types import TableauItem
 
-from .datasource_item import DatasourceItem
-from .flow_item import FlowItem
-from .project_item import ProjectItem
-from .metric_item import MetricItem
-from .view_item import ViewItem
-from .workbook_item import WorkbookItem
-from typing import Dict, List
+from tableauserverclient.models.tableau_types import TableauItem
+from tableauserverclient.models.datasource_item import DatasourceItem
+from tableauserverclient.models.flow_item import FlowItem
+from tableauserverclient.models.project_item import ProjectItem
+from tableauserverclient.models.metric_item import MetricItem
+from tableauserverclient.models.view_item import ViewItem
+from tableauserverclient.models.workbook_item import WorkbookItem
 
 from tableauserverclient.helpers.logging import logger
-from typing import Dict, List, Union
 
-FavoriteType = Dict[
+FavoriteType = dict[
     str,
-    List[TableauItem],
+    list[TableauItem],
 ]
 
 
 class FavoriteItem:
     @classmethod
-    def from_response(cls, xml: str, namespace: Dict) -> FavoriteType:
+    def from_response(cls, xml: Union[str, bytes], namespace: dict) -> FavoriteType:
         favorites: FavoriteType = {
             "datasources": [],
             "flows": [],

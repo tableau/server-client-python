@@ -80,7 +80,7 @@ def main():
                     as_job=args.as_job,
                     skip_connection_check=args.skip_connection_check,
                 )
-                print("Workbook published. JOB ID: {0}".format(new_job.id))
+                print(f"Workbook published. JOB ID: {new_job.id}")
             else:
                 new_workbook = server.workbooks.publish(
                     new_workbook,
@@ -90,7 +90,7 @@ def main():
                     as_job=args.as_job,
                     skip_connection_check=args.skip_connection_check,
                 )
-                print("Workbook published. ID: {0}".format(new_workbook.id))
+                print(f"Workbook published. ID: {new_workbook.id}")
         else:
             error = "The default project could not be found."
             raise LookupError(error)

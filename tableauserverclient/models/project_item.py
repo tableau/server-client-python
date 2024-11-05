@@ -1,21 +1,23 @@
 import logging
 import xml.etree.ElementTree as ET
-from typing import List, Optional
+from typing import Optional
 
 from defusedxml.ElementTree import fromstring
 
-from .exceptions import UnpopulatedPropertyError
-from .property_decorators import property_is_enum, property_not_empty
+from tableauserverclient.models.exceptions import UnpopulatedPropertyError
+from tableauserverclient.models.property_decorators import property_is_enum, property_not_empty
 
 
-class ProjectItem(object):
+class ProjectItem:
+    ERROR_MSG = "Project item must be populated with permissions first."
+
     class ContentPermissions:
         LockedToProject: str = "LockedToProject"
         ManagedByOwner: str = "ManagedByOwner"
         LockedToProjectWithoutNested: str = "LockedToProjectWithoutNested"
 
     def __repr__(self):
-        return "<Project {0} {1} parent={2} permissions={3}>".format(
+        return "<Project {} {} parent={} permissions={}>".format(
             self._id, self.name, self.parent_id or "None (Top level)", self.content_permissions or "Not Set"
         )
 
@@ -34,6 +36,7 @@ class ProjectItem(object):
         self.content_permissions: Optional[str] = content_permissions
         self.parent_id: Optional[str] = parent_id
         self._samples: Optional[bool] = samples
+        self._owner_id: Optional[str] = None
 
         self._permissions = None
         self._default_workbook_permissions = None
@@ -42,6 +45,9 @@ class ProjectItem(object):
         self._default_lens_permissions = None
         self._default_datarole_permissions = None
         self._default_metric_permissions = None
+        self._default_virtualconnection_permissions = None
+        self._default_database_permissions = None
+        self._default_table_permissions = None
 
     @property
     def content_permissions(self):
@@ -55,51 +61,62 @@ class ProjectItem(object):
     @property
     def permissions(self):
         if self._permissions is None:
-            error = "Project item must be populated with permissions first."
-            raise UnpopulatedPropertyError(error)
+            raise UnpopulatedPropertyError(self.ERROR_MSG)
         return self._permissions()
 
     @property
     def default_datasource_permissions(self):
         if self._default_datasource_permissions is None:
-            error = "Project item must be populated with permissions first."
-            raise UnpopulatedPropertyError(error)
+            raise UnpopulatedPropertyError(self.ERROR_MSG)
         return self._default_datasource_permissions()
 
     @property
     def default_workbook_permissions(self):
         if self._default_workbook_permissions is None:
-            error = "Project item must be populated with permissions first."
-            raise UnpopulatedPropertyError(error)
+            raise UnpopulatedPropertyError(self.ERROR_MSG)
         return self._default_workbook_permissions()
 
     @property
     def default_flow_permissions(self):
         if self._default_flow_permissions is None:
-            error = "Project item must be populated with permissions first."
-            raise UnpopulatedPropertyError(error)
+            raise UnpopulatedPropertyError(self.ERROR_MSG)
         return self._default_flow_permissions()
 
     @property
     def default_lens_permissions(self):
         if self._default_lens_permissions is None:
-            error = "Project item must be populated with permissions first."
-            raise UnpopulatedPropertyError(error)
+            raise UnpopulatedPropertyError(self.ERROR_MSG)
         return self._default_lens_permissions()
 
     @property
     def default_datarole_permissions(self):
         if self._default_datarole_permissions is None:
-            error = "Project item must be populated with permissions first."
-            raise UnpopulatedPropertyError(error)
+            raise UnpopulatedPropertyError(self.ERROR_MSG)
         return self._default_datarole_permissions()
 
     @property
     def default_metric_permissions(self):
         if self._default_metric_permissions is None:
-            error = "Project item must be populated with permissions first."
-            raise UnpopulatedPropertyError(error)
+            raise UnpopulatedPropertyError(self.ERROR_MSG)
         return self._default_metric_permissions()
+
+    @property
+    def default_virtualconnection_permissions(self):
+        if self._default_virtualconnection_permissions is None:
+            raise UnpopulatedPropertyError(self.ERROR_MSG)
+        return self._default_virtualconnection_permissions()
+
+    @property
+    def default_database_permissions(self):
+        if self._default_database_permissions is None:
+            raise UnpopulatedPropertyError(self.ERROR_MSG)
+        return self._default_database_permissions()
+
+    @property
+    def default_table_permissions(self):
+        if self._default_table_permissions is None:
+            raise UnpopulatedPropertyError(self.ERROR_MSG)
+        return self._default_table_permissions()
 
     @property
     def id(self) -> Optional[str]:
@@ -119,7 +136,7 @@ class ProjectItem(object):
 
     @owner_id.setter
     def owner_id(self, value: str) -> None:
-        raise NotImplementedError("REST API does not currently support updating project owner.")
+        self._owner_id = value
 
     def is_default(self):
         return self.name.lower() == "default"
@@ -157,7 +174,7 @@ class ProjectItem(object):
         self._permissions = permissions
 
     def _set_default_permissions(self, permissions, content_type):
-        attr = "_default_{content}_permissions".format(content=content_type)
+        attr = f"_default_{content_type}_permissions"
         setattr(
             self,
             attr,
@@ -165,7 +182,7 @@ class ProjectItem(object):
         )
 
     @classmethod
-    def from_response(cls, resp, ns) -> List["ProjectItem"]:
+    def from_response(cls, resp, ns) -> list["ProjectItem"]:
         all_project_items = list()
         parsed_response = fromstring(resp)
         all_project_xml = parsed_response.findall(".//t:project", namespaces=ns)

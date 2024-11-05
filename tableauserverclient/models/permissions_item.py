@@ -1,12 +1,13 @@
 import xml.etree.ElementTree as ET
-from typing import Dict, List, Optional
+from typing import Optional
 
 from defusedxml.ElementTree import fromstring
 
-from .exceptions import UnknownGranteeTypeError, UnpopulatedPropertyError
-from .group_item import GroupItem
-from .reference_item import ResourceReference
-from .user_item import UserItem
+from tableauserverclient.models.exceptions import UnknownGranteeTypeError, UnpopulatedPropertyError
+from tableauserverclient.models.group_item import GroupItem
+from tableauserverclient.models.groupset_item import GroupSetItem
+from tableauserverclient.models.reference_item import ResourceReference
+from tableauserverclient.models.user_item import UserItem
 
 from tableauserverclient.helpers.logging import logger
 
@@ -35,33 +36,80 @@ class Permission:
         ShareView = "ShareView"
         ViewComments = "ViewComments"
         ViewUnderlyingData = "ViewUnderlyingData"
+        VizqlDataApiAccess = "VizqlDataApiAccess"
         WebAuthoring = "WebAuthoring"
         Write = "Write"
         RunExplainData = "RunExplainData"
         CreateRefreshMetrics = "CreateRefreshMetrics"
         SaveAs = "SaveAs"
+        PulseMetricDefine = "PulseMetricDefine"
 
         def __repr__(self):
             return "<Enum Capability: AddComment | ChangeHierarchy | ChangePermission ... (17 more) >"
 
 
-class PermissionsRule(object):
-    def __init__(self, grantee: ResourceReference, capabilities: Dict[str, str]) -> None:
+class PermissionsRule:
+    def __init__(self, grantee: ResourceReference, capabilities: dict[str, str]) -> None:
         self.grantee = grantee
         self.capabilities = capabilities
 
     def __repr__(self):
-        return "<PermissionsRule grantee={}, capabilities={}>".format(self.grantee, self.capabilities)
+        return f"<PermissionsRule grantee={self.grantee}, capabilities={self.capabilities}>"
+
+    def __eq__(self, other: object) -> bool:
+        if not hasattr(other, "grantee") or not hasattr(other, "capabilities"):
+            return False
+        return self.grantee == other.grantee and self.capabilities == other.capabilities
+
+    def __and__(self, other: "PermissionsRule") -> "PermissionsRule":
+        if self.grantee != other.grantee:
+            raise ValueError("Cannot AND two permissions rules with different grantees")
+
+        if self.capabilities == other.capabilities:
+            return self
+
+        capabilities = {*self.capabilities.keys(), *other.capabilities.keys()}
+        new_capabilities = {}
+        for capability in capabilities:
+            if (self.capabilities.get(capability), other.capabilities.get(capability)) == (
+                Permission.Mode.Allow,
+                Permission.Mode.Allow,
+            ):
+                new_capabilities[capability] = Permission.Mode.Allow
+            elif Permission.Mode.Deny in (self.capabilities.get(capability), other.capabilities.get(capability)):
+                new_capabilities[capability] = Permission.Mode.Deny
+
+        return PermissionsRule(self.grantee, new_capabilities)
+
+    def __or__(self, other: "PermissionsRule") -> "PermissionsRule":
+        if self.grantee != other.grantee:
+            raise ValueError("Cannot OR two permissions rules with different grantees")
+
+        if self.capabilities == other.capabilities:
+            return self
+
+        capabilities = {*self.capabilities.keys(), *other.capabilities.keys()}
+        new_capabilities = {}
+        for capability in capabilities:
+            if Permission.Mode.Allow in (self.capabilities.get(capability), other.capabilities.get(capability)):
+                new_capabilities[capability] = Permission.Mode.Allow
+            elif (self.capabilities.get(capability), other.capabilities.get(capability)) == (
+                Permission.Mode.Deny,
+                Permission.Mode.Deny,
+            ):
+                new_capabilities[capability] = Permission.Mode.Deny
+
+        return PermissionsRule(self.grantee, new_capabilities)
 
     @classmethod
-    def from_response(cls, resp, ns=None) -> List["PermissionsRule"]:
+    def from_response(cls, resp, ns=None) -> list["PermissionsRule"]:
         parsed_response = fromstring(resp)
 
         rules = []
         permissions_rules_list_xml = parsed_response.findall(".//t:granteeCapabilities", namespaces=ns)
 
         for grantee_capability_xml in permissions_rules_list_xml:
-            capability_dict: Dict[str, str] = {}
+            capability_dict: dict[str, str] = {}
 
             grantee = PermissionsRule._parse_grantee_element(grantee_capability_xml, ns)
 
@@ -70,7 +118,7 @@ class PermissionsRule(object):
                 mode = capability_xml.get("mode")
 
                 if name is None or mode is None:
-                    logger.error("Capability was not valid: {}".format(capability_xml))
+                    logger.error(f"Capability was not valid: {capability_xml}")
                     raise UnpopulatedPropertyError()
                 else:
                     capability_dict[name] = mode
@@ -81,7 +129,7 @@ class PermissionsRule(object):
         return rules
 
     @staticmethod
-    def _parse_grantee_element(grantee_capability_xml: ET.Element, ns: Optional[Dict[str, str]]) -> ResourceReference:
+    def _parse_grantee_element(grantee_capability_xml: ET.Element, ns: Optional[dict[str, str]]) -> ResourceReference:
         """Use Xpath magic and some string splitting to get the right object type from the xml"""
 
         # Get the first element in the tree with an 'id' attribute
@@ -97,7 +145,9 @@ class PermissionsRule(object):
             grantee = UserItem.as_reference(grantee_id)
         elif grantee_type == "group":
             grantee = GroupItem.as_reference(grantee_id)
+        elif grantee_type == "groupSet":
+            grantee = GroupSetItem.as_reference(grantee_id)
         else:
-            raise UnknownGranteeTypeError("No support for grantee type of {}".format(grantee_type))
+            raise UnknownGranteeTypeError(f"No support for grantee type of {grantee_type}")
 
         return grantee

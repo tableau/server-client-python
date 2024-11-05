@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 import re
 import unittest
+from urllib.parse import parse_qs
 
 import requests_mock
 
@@ -30,7 +31,7 @@ class RequestOptionTests(unittest.TestCase):
         self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"
         self.server._auth_token = "j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM"
 
-        self.baseurl = "{0}/{1}".format(self.server.sites.baseurl, self.server._site_id)
+        self.baseurl = f"{self.server.sites.baseurl}/{self.server._site_id}"
 
     def test_pagination(self) -> None:
         with open(PAGINATION_XML, "rb") as f:
@@ -111,9 +112,9 @@ class RequestOptionTests(unittest.TestCase):
             matching_workbooks, pagination_item = self.server.workbooks.get(req_option)
 
         self.assertEqual(3, pagination_item.total_available)
-        self.assertEqual(set(["weather"]), matching_workbooks[0].tags)
-        self.assertEqual(set(["safari"]), matching_workbooks[1].tags)
-        self.assertEqual(set(["sample"]), matching_workbooks[2].tags)
+        self.assertEqual({"weather"}, matching_workbooks[0].tags)
+        self.assertEqual({"safari"}, matching_workbooks[1].tags)
+        self.assertEqual({"sample"}, matching_workbooks[2].tags)
 
     # check if filtered projects with spaces & special characters
     # get correctly returned
@@ -147,9 +148,9 @@ class RequestOptionTests(unittest.TestCase):
             matching_workbooks = self.server.workbooks.filter(tags__in=["sample", "safari", "weather"])
 
             self.assertEqual(3, matching_workbooks.total_available)
-            self.assertEqual(set(["weather"]), matching_workbooks[0].tags)
-            self.assertEqual(set(["safari"]), matching_workbooks[1].tags)
-            self.assertEqual(set(["sample"]), matching_workbooks[2].tags)
+            self.assertEqual({"weather"}, matching_workbooks[0].tags)
+            self.assertEqual({"safari"}, matching_workbooks[1].tags)
+            self.assertEqual({"sample"}, matching_workbooks[2].tags)
 
     def test_invalid_shorthand_option(self) -> None:
         with self.assertRaises(ValueError):
@@ -311,3 +312,59 @@ class RequestOptionTests(unittest.TestCase):
     def test_queryset_filter_args_error(self) -> None:
         with self.assertRaises(RuntimeError):
             workbooks = self.server.workbooks.filter("argument")
+
+    def test_filtering_parameters(self) -> None:
+        self.server.version = "3.6"
+        with requests_mock.mock() as m:
+            m.get(requests_mock.ANY)
+            url = self.baseurl + "/views/456/data"
+            opts = TSC.PDFRequestOptions()
+            opts.parameter("name1@", "value1")
+            opts.parameter("name2$", "value2")
+            opts.page_type = TSC.PDFRequestOptions.PageType.Tabloid
+
+            resp = self.server.workbooks.get_request(url, request_object=opts)
+            query_params = parse_qs(resp.request.query)
+            self.assertIn("name1@", query_params)
+            self.assertIn("value1", query_params["name1@"])
+            self.assertIn("name2$", query_params)
+            self.assertIn("value2", query_params["name2$"])
+            self.assertIn("type", query_params)
+            self.assertIn("tabloid", query_params["type"])
+
+    def test_queryset_endpoint_pagesize_all(self) -> None:
+        for page_size in (1, 10, 100, 1000):
+            with self.subTest(page_size):
+                with requests_mock.mock() as m:
+                    m.get(f"{self.baseurl}/views?pageSize={page_size}", text=SLICING_QUERYSET_PAGE_1.read_text())
+                    queryset = self.server.views.all(page_size=page_size)
+                    assert queryset.request_options.pagesize == page_size
+                    _ = list(queryset)
+
+    def test_queryset_endpoint_pagesize_filter(self) -> None:
+        for page_size in (1, 10, 100, 1000):
+            with self.subTest(page_size):
+                with requests_mock.mock() as m:
+                    m.get(f"{self.baseurl}/views?pageSize={page_size}", text=SLICING_QUERYSET_PAGE_1.read_text())
+                    queryset = self.server.views.filter(page_size=page_size)
+                    assert queryset.request_options.pagesize == page_size
+                    _ = list(queryset)
+
+    def test_queryset_pagesize_filter(self) -> None:
+        for page_size in (1, 10, 100, 1000):
+            with self.subTest(page_size):
+                with requests_mock.mock() as m:
+                    m.get(f"{self.baseurl}/views?pageSize={page_size}", text=SLICING_QUERYSET_PAGE_1.read_text())
+                    queryset = self.server.views.all().filter(page_size=page_size)
+                    assert queryset.request_options.pagesize == page_size
+                    _ = list(queryset)
+
+    def test_language_export(self) -> None:
+        with requests_mock.mock() as m:
+            m.get(requests_mock.ANY)
+            url = self.baseurl + "/views/456/data"
+            opts = TSC.PDFRequestOptions()
+            opts.language = "en-US"
+
+            resp = self.server.users.get_request(url, request_object=opts)
+            self.assertTrue(re.search("language=en-us", resp.request.query))

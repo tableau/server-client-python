@@ -1,0 +1,7 @@
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api https://help.tableau.com/samples/en-us/rest_api/ts-api_3_23.xsd">
+  <virtualConnection name="vconn_test">
+    <project id="9836791c-9468-40f0-b7f3-d10b9562a046"/>
+    <owner id="ee8bc9ca-77fe-4ae0-8093-cf77f0ee67a9"/>
+    <content>{"policyCollection":{"luid":"34ae5eb9-ceac-4158-86f1-a5d8163d5261","policies":[]},"revision":{"luid":"1b2e2aae-b904-4f5a-aa4d-9f114b8e5f57","revisableProperties":{}}}</content>
+  </virtualConnection>
+</tsResponse>

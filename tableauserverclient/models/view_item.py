@@ -1,7 +1,8 @@
 import copy
 from datetime import datetime
 from requests import Response
-from typing import Callable, Iterator, List, Optional, Set
+from typing import Callable, Optional
+from collections.abc import Iterator
 
 from defusedxml.ElementTree import fromstring
 
@@ -11,13 +12,13 @@ from .permissions_item import PermissionsRule
 from .tag_item import TagItem
 
 
-class ViewItem(object):
+class ViewItem:
     def __init__(self) -> None:
         self._content_url: Optional[str] = None
         self._created_at: Optional[datetime] = None
         self._id: Optional[str] = None
         self._image: Optional[Callable[[], bytes]] = None
-        self._initial_tags: Set[str] = set()
+        self._initial_tags: set[str] = set()
         self._name: Optional[str] = None
         self._owner_id: Optional[str] = None
         self._preview_image: Optional[Callable[[], bytes]] = None
@@ -29,11 +30,15 @@ class ViewItem(object):
         self._sheet_type: Optional[str] = None
         self._updated_at: Optional[datetime] = None
         self._workbook_id: Optional[str] = None
-        self._permissions: Optional[Callable[[], List[PermissionsRule]]] = None
-        self.tags: Set[str] = set()
+        self._permissions: Optional[Callable[[], list[PermissionsRule]]] = None
+        self.tags: set[str] = set()
+        self._data_acceleration_config = {
+            "acceleration_enabled": None,
+            "acceleration_status": None,
+        }
 
     def __str__(self):
-        return "<ViewItem {0} '{1}' contentUrl='{2}' project={3}>".format(
+        return "<ViewItem {} '{}' contentUrl='{}' project={}>".format(
             self._id, self.name, self.content_url, self.project_id
         )
 
@@ -134,21 +139,29 @@ class ViewItem(object):
         return self._workbook_id
 
     @property
-    def permissions(self) -> List[PermissionsRule]:
+    def data_acceleration_config(self):
+        return self._data_acceleration_config
+
+    @data_acceleration_config.setter
+    def data_acceleration_config(self, value):
+        self._data_acceleration_config = value
+
+    @property
+    def permissions(self) -> list[PermissionsRule]:
         if self._permissions is None:
             error = "View item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
         return self._permissions()
 
-    def _set_permissions(self, permissions: Callable[[], List[PermissionsRule]]) -> None:
+    def _set_permissions(self, permissions: Callable[[], list[PermissionsRule]]) -> None:
         self._permissions = permissions
 
     @classmethod
-    def from_response(cls, resp: "Response", ns, workbook_id="") -> List["ViewItem"]:
+    def from_response(cls, resp: "Response", ns, workbook_id="") -> list["ViewItem"]:
         return cls.from_xml_element(fromstring(resp), ns, workbook_id)
 
     @classmethod
-    def from_xml_element(cls, parsed_response, ns, workbook_id="") -> List["ViewItem"]:
+    def from_xml_element(cls, parsed_response, ns, workbook_id="") -> list["ViewItem"]:
         all_view_items = list()
         all_view_xml = parsed_response.findall(".//t:view", namespaces=ns)
         for view_xml in all_view_xml:
@@ -164,6 +177,7 @@ class ViewItem(object):
         owner_elem = view_xml.find(".//t:owner", namespaces=ns)
         project_elem = view_xml.find(".//t:project", namespaces=ns)
         tags_elem = view_xml.find(".//t:tags", namespaces=ns)
+        data_acceleration_config_elem = view_xml.find(".//t:dataAccelerationConfig", namespaces=ns)
         view_item._created_at = parse_datetime(view_xml.get("createdAt", None))
         view_item._updated_at = parse_datetime(view_xml.get("updatedAt", None))
         view_item._id = view_xml.get("id", None)
@@ -186,4 +200,25 @@ class ViewItem(object):
             tags = TagItem.from_xml_element(tags_elem, ns)
             view_item.tags = tags
             view_item._initial_tags = copy.copy(tags)
+        if data_acceleration_config_elem is not None:
+            data_acceleration_config = parse_data_acceleration_config(data_acceleration_config_elem)
+            view_item.data_acceleration_config = data_acceleration_config
         return view_item
+
+
+def parse_data_acceleration_config(data_acceleration_elem):
+    data_acceleration_config = dict()
+
+    acceleration_enabled = data_acceleration_elem.get("accelerationEnabled", None)
+    if acceleration_enabled is not None:
+        acceleration_enabled = string_to_bool(acceleration_enabled)
+
+    acceleration_status = data_acceleration_elem.get("accelerationStatus", None)
+
+    data_acceleration_config["acceleration_enabled"] = acceleration_enabled
+    data_acceleration_config["acceleration_status"] = acceleration_status
+    return data_acceleration_config
+
+
+def string_to_bool(s: str) -> bool:
+    return s.lower() == "true"

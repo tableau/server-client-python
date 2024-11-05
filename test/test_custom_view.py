@@ -1,23 +1,34 @@
+from contextlib import ExitStack
+import io
 import os
+from pathlib import Path
+from tempfile import TemporaryDirectory
 import unittest
 
 import requests_mock
 
 import tableauserverclient as TSC
+from tableauserverclient.config import BYTES_PER_MB
 from tableauserverclient.datetime_helpers import format_datetime
+from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
 
-TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
+TEST_ASSET_DIR = Path(__file__).parent / "assets"
 
 GET_XML = os.path.join(TEST_ASSET_DIR, "custom_view_get.xml")
 GET_XML_ID = os.path.join(TEST_ASSET_DIR, "custom_view_get_id.xml")
 POPULATE_PREVIEW_IMAGE = os.path.join(TEST_ASSET_DIR, "Sample View Image.png")
 CUSTOM_VIEW_UPDATE_XML = os.path.join(TEST_ASSET_DIR, "custom_view_update.xml")
+CUSTOM_VIEW_POPULATE_PDF = os.path.join(TEST_ASSET_DIR, "populate_pdf.pdf")
+CUSTOM_VIEW_POPULATE_CSV = os.path.join(TEST_ASSET_DIR, "populate_csv.csv")
+CUSTOM_VIEW_DOWNLOAD = TEST_ASSET_DIR / "custom_view_download.json"
+FILE_UPLOAD_INIT = TEST_ASSET_DIR / "fileupload_initialize.xml"
+FILE_UPLOAD_APPEND = TEST_ASSET_DIR / "fileupload_append.xml"
 
 
 class CustomViewTests(unittest.TestCase):
     def setUp(self):
         self.server = TSC.Server("http://test", False)
-        self.server.version = "3.19"  # custom views only introduced in 3.19
+        self.server.version = "3.21"  # custom views only introduced in 3.19
 
         # Fake sign in
         self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"
@@ -132,3 +143,178 @@ class CustomViewTests(unittest.TestCase):
     def test_update_missing_id(self) -> None:
         cv = TSC.CustomViewItem(name="test")
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.custom_views.update, cv)
+
+    def test_download(self) -> None:
+        cv = TSC.CustomViewItem(name="test")
+        cv._id = "1f951daf-4061-451a-9df1-69a8062664f2"
+        content = CUSTOM_VIEW_DOWNLOAD.read_bytes()
+        data = io.BytesIO()
+        with requests_mock.mock() as m:
+            m.get(f"{self.server.custom_views.expurl}/1f951daf-4061-451a-9df1-69a8062664f2/content", content=content)
+            self.server.custom_views.download(cv, data)
+
+        assert data.getvalue() == content
+
+    def test_publish_filepath(self) -> None:
+        cv = TSC.CustomViewItem(name="test")
+        cv._owner = TSC.UserItem()
+        cv._owner._id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
+        cv._workbook = TSC.WorkbookItem()
+        cv._workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
+        with requests_mock.mock() as m:
+            m.post(self.server.custom_views.expurl, status_code=201, text=Path(GET_XML).read_text())
+            view = self.server.custom_views.publish(cv, CUSTOM_VIEW_DOWNLOAD)
+
+        assert view is not None
+        assert isinstance(view, TSC.CustomViewItem)
+        assert view.id is not None
+        assert view.name is not None
+
+    def test_publish_file_str(self) -> None:
+        cv = TSC.CustomViewItem(name="test")
+        cv._owner = TSC.UserItem()
+        cv._owner._id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
+        cv._workbook = TSC.WorkbookItem()
+        cv._workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
+        with requests_mock.mock() as m:
+            m.post(self.server.custom_views.expurl, status_code=201, text=Path(GET_XML).read_text())
+            view = self.server.custom_views.publish(cv, str(CUSTOM_VIEW_DOWNLOAD))
+
+        assert view is not None
+        assert isinstance(view, TSC.CustomViewItem)
+        assert view.id is not None
+        assert view.name is not None
+
+    def test_publish_file_io(self) -> None:
+        cv = TSC.CustomViewItem(name="test")
+        cv._owner = TSC.UserItem()
+        cv._owner._id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
+        cv._workbook = TSC.WorkbookItem()
+        cv._workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
+        data = io.BytesIO(CUSTOM_VIEW_DOWNLOAD.read_bytes())
+        with requests_mock.mock() as m:
+            m.post(self.server.custom_views.expurl, status_code=201, text=Path(GET_XML).read_text())
+            view = self.server.custom_views.publish(cv, data)
+
+        assert view is not None
+        assert isinstance(view, TSC.CustomViewItem)
+        assert view.id is not None
+        assert view.name is not None
+
+    def test_publish_missing_owner_id(self) -> None:
+        cv = TSC.CustomViewItem(name="test")
+        cv._owner = TSC.UserItem()
+        cv._workbook = TSC.WorkbookItem()
+        cv._workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
+        with requests_mock.mock() as m:
+            m.post(self.server.custom_views.expurl, status_code=201, text=Path(GET_XML).read_text())
+            with self.assertRaises(ValueError):
+                self.server.custom_views.publish(cv, CUSTOM_VIEW_DOWNLOAD)
+
+    def test_publish_missing_wb_id(self) -> None:
+        cv = TSC.CustomViewItem(name="test")
+        cv._owner = TSC.UserItem()
+        cv._owner._id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
+        cv._workbook = TSC.WorkbookItem()
+        with requests_mock.mock() as m:
+            m.post(self.server.custom_views.expurl, status_code=201, text=Path(GET_XML).read_text())
+            with self.assertRaises(ValueError):
+                self.server.custom_views.publish(cv, CUSTOM_VIEW_DOWNLOAD)
+
+    def test_large_publish(self):
+        cv = TSC.CustomViewItem(name="test")
+        cv._owner = TSC.UserItem()
+        cv._owner._id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
+        cv._workbook = TSC.WorkbookItem()
+        cv._workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
+        with ExitStack() as stack:
+            temp_dir = stack.enter_context(TemporaryDirectory())
+            file_path = Path(temp_dir) / "test_file"
+            file_path.write_bytes(os.urandom(65 * BYTES_PER_MB))
+            mock = stack.enter_context(requests_mock.mock())
+            # Mock initializing upload
+            mock.post(self.server.fileuploads.baseurl, status_code=201, text=FILE_UPLOAD_INIT.read_text())
+            # Mock the upload
+            mock.put(
+                f"{self.server.fileuploads.baseurl}/7720:170fe6b1c1c7422dadff20f944d58a52-1:0",
+                text=FILE_UPLOAD_APPEND.read_text(),
+            )
+            # Mock the publish
+            mock.post(self.server.custom_views.expurl, status_code=201, text=Path(GET_XML).read_text())
+
+            view = self.server.custom_views.publish(cv, file_path)
+
+        assert view is not None
+        assert isinstance(view, TSC.CustomViewItem)
+        assert view.id is not None
+        assert view.name is not None
+
+    def test_populate_pdf(self) -> None:
+        self.server.version = "3.23"
+        self.baseurl = self.server.custom_views.baseurl
+        with open(CUSTOM_VIEW_POPULATE_PDF, "rb") as f:
+            response = f.read()
+        with requests_mock.mock() as m:
+            m.get(
+                self.baseurl + "/d79634e1-6063-4ec9-95ff-50acbf609ff5/pdf?type=letter&orientation=portrait&maxAge=5",
+                content=response,
+            )
+            custom_view = TSC.CustomViewItem()
+            custom_view._id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
+
+            size = TSC.PDFRequestOptions.PageType.Letter
+            orientation = TSC.PDFRequestOptions.Orientation.Portrait
+            req_option = TSC.PDFRequestOptions(size, orientation, 5)
+
+            self.server.custom_views.populate_pdf(custom_view, req_option)
+            self.assertEqual(response, custom_view.pdf)
+
+    def test_populate_csv(self) -> None:
+        self.server.version = "3.23"
+        self.baseurl = self.server.custom_views.baseurl
+        with open(CUSTOM_VIEW_POPULATE_CSV, "rb") as f:
+            response = f.read()
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + "/d79634e1-6063-4ec9-95ff-50acbf609ff5/data?maxAge=1", content=response)
+            custom_view = TSC.CustomViewItem()
+            custom_view._id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
+            request_option = TSC.CSVRequestOptions(maxage=1)
+            self.server.custom_views.populate_csv(custom_view, request_option)
+
+            csv_file = b"".join(custom_view.csv)
+            self.assertEqual(response, csv_file)
+
+    def test_populate_csv_default_maxage(self) -> None:
+        self.server.version = "3.23"
+        self.baseurl = self.server.custom_views.baseurl
+        with open(CUSTOM_VIEW_POPULATE_CSV, "rb") as f:
+            response = f.read()
+        with requests_mock.mock() as m:
+            m.get(self.baseurl + "/d79634e1-6063-4ec9-95ff-50acbf609ff5/data", content=response)
+            custom_view = TSC.CustomViewItem()
+            custom_view._id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
+            self.server.custom_views.populate_csv(custom_view)
+
+            csv_file = b"".join(custom_view.csv)
+            self.assertEqual(response, csv_file)
+
+    def test_pdf_height(self) -> None:
+        self.server.version = "3.23"
+        self.baseurl = self.server.custom_views.baseurl
+        with open(CUSTOM_VIEW_POPULATE_PDF, "rb") as f:
+            response = f.read()
+        with requests_mock.mock() as m:
+            m.get(
+                self.baseurl + "/d79634e1-6063-4ec9-95ff-50acbf609ff5/pdf?vizHeight=1080&vizWidth=1920",
+                content=response,
+            )
+            custom_view = TSC.CustomViewItem()
+            custom_view._id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
+
+            req_option = TSC.PDFRequestOptions(
+                viz_height=1080,
+                viz_width=1920,
+            )
+
+            self.server.custom_views.populate_pdf(custom_view, req_option)
+            self.assertEqual(response, custom_view.pdf)
