@@ -7,12 +7,64 @@ from collections.abc import Iterator
 from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.datetime_helpers import parse_datetime
-from .exceptions import UnpopulatedPropertyError
-from .permissions_item import PermissionsRule
-from .tag_item import TagItem
+from tableauserverclient.models.exceptions import UnpopulatedPropertyError
+from tableauserverclient.models.permissions_item import PermissionsRule
+from tableauserverclient.models.tag_item import TagItem
 
 
 class ViewItem:
+    """
+    Contains the members or attributes for the view resources on Tableau Server.
+    The ViewItem class defines the information you can request or query from
+    Tableau Server. The class members correspond to the attributes of a server
+    request or response payload.
+
+    Parameters
+    ----------
+    content_url: Optional[str], default None
+        The name of the view as it would appear in a URL.
+
+    created_at: Optional[datetime], default None
+        The date and time when the view was created.
+
+    id: Optional[str], default None
+        The unique identifier for the view.
+
+    image: Optional[Callable[[], bytes]], default None
+        The image of the view. You must first call the `views.populate_image`
+        method to access the image.
+
+    name: Optional[str], default None
+        The name of the view.
+
+    owner_id: Optional[str], default None
+        The ID for the owner of the view.
+
+    pdf: Optional[Callable[[], bytes]], default None
+        The PDF of the view. You must first call the `views.populate_pdf`
+        method to access the PDF.
+
+    preview_image: Optional[Callable[[], bytes]], default None
+        The preview image of the view. You must first call the
+        `views.populate_preview_image` method to access the preview image.
+
+    project_id: Optional[str], default None
+        The ID for the project that contains the view.
+
+    tags: set[str], default set()
+        The tags associated with the view.
+
+    total_views: Optional[int], default None
+        The total number of views for the view.
+
+    updated_at: Optional[datetime], default None
+        The date and time when the view was last updated.
+
+    workbook_id: Optional[str], default None
+        The ID for the workbook that contains the view.
+
+    """
+
     def __init__(self) -> None:
         self._content_url: Optional[str] = None
         self._created_at: Optional[datetime] = None
