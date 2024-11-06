@@ -84,9 +84,10 @@ class Auth(Endpoint):
         self._check_status(server_response, url)
         parsed_response = fromstring(server_response.content)
         site_id = parsed_response.find(".//t:site", namespaces=self.parent_srv.namespace).get("id", None)
+        site_url = parsed_response.find(".//t:site", namespaces=self.parent_srv.namespace).get("contentUrl", None)
         user_id = parsed_response.find(".//t:user", namespaces=self.parent_srv.namespace).get("id", None)
         auth_token = parsed_response.find("t:credentials", namespaces=self.parent_srv.namespace).get("token", None)
-        self.parent_srv._set_auth(site_id, user_id, auth_token)
+        self.parent_srv._set_auth(site_id, user_id, auth_token, site_url)
         logger.info(f"Signed into {self.parent_srv.server_address} as user with id {user_id}")
         return Auth.contextmgr(self.sign_out)
 
@@ -155,9 +156,10 @@ class Auth(Endpoint):
         self._check_status(server_response, url)
         parsed_response = fromstring(server_response.content)
         site_id = parsed_response.find(".//t:site", namespaces=self.parent_srv.namespace).get("id", None)
+        site_url = parsed_response.find(".//t:site", namespaces=self.parent_srv.namespace).get("contentUrl", None)
         user_id = parsed_response.find(".//t:user", namespaces=self.parent_srv.namespace).get("id", None)
         auth_token = parsed_response.find("t:credentials", namespaces=self.parent_srv.namespace).get("token", None)
-        self.parent_srv._set_auth(site_id, user_id, auth_token)
+        self.parent_srv._set_auth(site_id, user_id, auth_token, site_url)
         logger.info(f"Signed into {self.parent_srv.server_address} as user with id {user_id}")
         return Auth.contextmgr(self.sign_out)
 
