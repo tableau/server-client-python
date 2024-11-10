@@ -1,6 +1,7 @@
 import logging
 from contextlib import closing
 
+from tableauserverclient.models.permissions_item import PermissionsRule
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
 from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
 from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
@@ -25,6 +26,12 @@ if TYPE_CHECKING:
 
 
 class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
+    """
+    The Tableau Server Client provides methods for interacting with view
+    resources, or endpoints. These methods correspond to the endpoints for views
+    in the Tableau Server REST API.
+    """
+
     def __init__(self, parent_srv):
         super().__init__(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
@@ -42,6 +49,24 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
     def get(
         self, req_options: Optional["RequestOptions"] = None, usage: bool = False
     ) -> tuple[list[ViewItem], PaginationItem]:
+        """
+        Returns the list of views on the site. Paginated endpoint.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#query_views_for_site
+
+        Parameters
+        ----------
+        req_options: Optional[RequestOptions], default None
+            The request options for the request. These options can include
+            parameters such as page size and sorting.
+
+        usage: bool, default False
+            If True, includes usage statistics in the response.
+
+        Returns
+        -------
+        views: tuple[list[ViewItem], PaginationItem]
+        """
         logger.info("Querying all views on site")
         url = self.baseurl
         if usage:
@@ -53,6 +78,23 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
 
     @api(version="3.1")
     def get_by_id(self, view_id: str, usage: bool = False) -> ViewItem:
+        """
+        Returns the details of a specific view.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#get_view
+
+        Parameters
+        ----------
+        view_id: str
+            The view ID.
+
+        usage: bool, default False
+            If True, includes usage statistics in the response.
+
+        Returns
+        -------
+        view_item: ViewItem
+        """
         if not view_id:
             error = "View item missing ID."
             raise MissingRequiredFieldError(error)
@@ -65,6 +107,24 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
 
     @api(version="2.0")
     def populate_preview_image(self, view_item: ViewItem) -> None:
+        """
+        Populates a preview image for the specified view.
+
+        This method gets the preview image (thumbnail) for the specified view
+        item. The method uses the id and workbook_id fields to query the preview
+        image. The method populates the preview_image for the view.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#query_view_with_preview
+
+        Parameters
+        ----------
+        view_item: ViewItem
+            The view item for which to populate the preview image.
+
+        Returns
+        -------
+        None
+        """
         if not view_item.id or not view_item.workbook_id:
             error = "View item missing ID or workbook ID."
             raise MissingRequiredFieldError(error)
@@ -83,6 +143,27 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
 
     @api(version="2.5")
     def populate_image(self, view_item: ViewItem, req_options: Optional["ImageRequestOptions"] = None) -> None:
+        """
+        Populates the image of the specified view.
+
+        This method uses the id field to query the image, and populates the
+        image content as the image field.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#query_view_image
+
+        Parameters
+        ----------
+        view_item: ViewItem
+            The view item for which to populate the image.
+
+        req_options: Optional[ImageRequestOptions], default None
+            Optional request options for the request. These options can include
+            parameters such as image resolution and max age.
+
+        Returns
+        -------
+        None
+        """
         if not view_item.id:
             error = "View item missing ID."
             raise MissingRequiredFieldError(error)
@@ -101,6 +182,26 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
 
     @api(version="2.7")
     def populate_pdf(self, view_item: ViewItem, req_options: Optional["PDFRequestOptions"] = None) -> None:
+        """
+        Populates the PDF content of the specified view.
+
+        This method populates a PDF with image(s) of the view you specify.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#query_view_pdf
+
+        Parameters
+        ----------
+        view_item: ViewItem
+            The view item for which to populate the PDF.
+
+        req_options: Optional[PDFRequestOptions], default None
+            Optional request options for the request. These options can include
+            parameters such as orientation and paper size.
+
+        Returns
+        -------
+        None
+        """
         if not view_item.id:
             error = "View item missing ID."
             raise MissingRequiredFieldError(error)
@@ -119,6 +220,27 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
 
     @api(version="2.7")
     def populate_csv(self, view_item: ViewItem, req_options: Optional["CSVRequestOptions"] = None) -> None:
+        """
+        Populates the CSV data of the specified view.
+
+        This method uses the id field to query the CSV data, and populates the
+        data as the csv field.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#query_view_data
+
+        Parameters
+        ----------
+        view_item: ViewItem
+            The view item for which to populate the CSV data.
+
+        req_options: Optional[CSVRequestOptions], default None
+            Optional request options for the request. These options can include
+            parameters such as view filters and max age.
+
+        Returns
+        -------
+        None
+        """
         if not view_item.id:
             error = "View item missing ID."
             raise MissingRequiredFieldError(error)
@@ -137,6 +259,27 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
 
     @api(version="3.8")
     def populate_excel(self, view_item: ViewItem, req_options: Optional["ExcelRequestOptions"] = None) -> None:
+        """
+        Populates the Excel data of the specified view.
+
+        This method uses the id field to query the Excel data, and populates the
+        data as the Excel field.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#download_view_excel
+
+        Parameters
+        ----------
+        view_item: ViewItem
+            The view item for which to populate the Excel data.
+
+        req_options: Optional[ExcelRequestOptions], default None
+            Optional request options for the request. These options can include
+            parameters such as view filters and max age.
+
+        Returns
+        -------
+        None
+        """
         if not view_item.id:
             error = "View item missing ID."
             raise MissingRequiredFieldError(error)
@@ -155,18 +298,66 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
 
     @api(version="3.2")
     def populate_permissions(self, item: ViewItem) -> None:
+        """
+        Returns a list of permissions for the specific view.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_view_permissions
+
+        Parameters
+        ----------
+        item: ViewItem
+            The view item for which to populate the permissions.
+
+        Returns
+        -------
+        None
+        """
         self._permissions.populate(item)
 
     @api(version="3.2")
-    def update_permissions(self, resource, rules):
+    def update_permissions(self, resource: ViewItem, rules: list[PermissionsRule]) -> list[PermissionsRule]:
+        """ """
         return self._permissions.update(resource, rules)
 
     @api(version="3.2")
-    def delete_permission(self, item, capability_item):
+    def delete_permission(self, item: ViewItem, capability_item: PermissionsRule) -> None:
+        """
+        Deletes permission to the specified view (also known as a sheet) for a
+        Tableau Server user or group.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_view_permission
+
+        Parameters
+        ----------
+        item: ViewItem
+            The view item for which to delete the permission.
+
+        capability_item: PermissionsRule
+            The permission rule to delete.
+
+        Returns
+        -------
+        None
+        """
         return self._permissions.delete(item, capability_item)
 
     # Update view. Currently only tags can be updated
     def update(self, view_item: ViewItem) -> ViewItem:
+        """
+        Updates the tags for the specified view. All other fields are managed
+        through the WorkbookItem object.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#add_tags_to_view
+
+        Parameters
+        ----------
+        view_item: ViewItem
+            The view item for which to update tags.
+
+        Returns
+        -------
+        ViewItem
+        """
         if not view_item.id:
             error = "View item missing ID. View must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -178,14 +369,64 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
 
     @api(version="1.0")
     def add_tags(self, item: Union[ViewItem, str], tags: Union[Iterable[str], str]) -> set[str]:
+        """
+        Adds tags to the specified view.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#add_tags_to_view
+
+        Parameters
+        ----------
+        item: Union[ViewItem, str]
+            The view item or view ID to which to add tags.
+
+        tags: Union[Iterable[str], str]
+            The tags to add to the view.
+
+        Returns
+        -------
+        set[str]
+
+        """
         return super().add_tags(item, tags)
 
     @api(version="1.0")
     def delete_tags(self, item: Union[ViewItem, str], tags: Union[Iterable[str], str]) -> None:
+        """
+        Deletes tags from the specified view.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#delete_tags_from_view
+
+        Parameters
+        ----------
+        item: Union[ViewItem, str]
+            The view item or view ID from which to delete tags.
+
+        tags: Union[Iterable[str], str]
+            The tags to delete from the view.
+
+        Returns
+        -------
+        None
+        """
         return super().delete_tags(item, tags)
 
     @api(version="1.0")
     def update_tags(self, item: ViewItem) -> None:
+        """
+        Updates the tags for the specified view. Any changes to the tags must
+        be made by editing the tags attribute of the view item.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#add_tags_to_view
+
+        Parameters
+        ----------
+        item: ViewItem
+            The view item for which to update tags.
+
+        Returns
+        -------
+        None
+        """
         return super().update_tags(item)
 
     def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[ViewItem]:
