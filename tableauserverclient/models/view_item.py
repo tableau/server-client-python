@@ -19,7 +19,7 @@ class ViewItem:
     Tableau Server. The class members correspond to the attributes of a server
     request or response payload.
 
-    Parameters
+    Attributes
     ----------
     content_url: Optional[str], default None
         The name of the view as it would appear in a URL.
