@@ -9,6 +9,36 @@ from tableauserverclient.models.target import Target
 
 
 class TaskItem:
+    """
+    Represents a task item in Tableau Server. To create new tasks, see Schedules.
+
+    Parameters
+    ----------
+    id_ : str
+        The ID of the task.
+
+    task_type : str
+        Type of task. See TaskItem.Type for possible values.
+
+    priority : int
+        The priority of the task on the server.
+
+    consecutive_failed_count : int
+        The number of consecutive times the task has failed.
+
+    schedule_id : str, optional
+        The ID of the schedule that the task is associated with.
+
+    schedule_item : ScheduleItem, optional
+        The schedule item that the task is associated with.
+
+    last_run_at : datetime, optional
+        The last time the task was run.
+
+    target : Target, optional
+        The target of the task. This can be a workbook or a datasource.
+    """
+
     class Type:
         ExtractRefresh = "extractRefresh"
         DataAcceleration = "dataAcceleration"
