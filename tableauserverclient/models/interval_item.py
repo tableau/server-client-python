@@ -2,6 +2,13 @@ from .property_decorators import property_is_valid_time, property_not_nullable
 
 
 class IntervalItem:
+    """
+    This class sets the frequency and start time of the scheduled item. This
+    class contains the classes for the hourly, daily, weekly, and monthly
+    intervals. This class mirrors the options you can set using the REST API and
+    the Tableau Server interface.
+    """
+
     class Frequency:
         Hourly = "Hourly"
         Daily = "Daily"
@@ -26,6 +33,19 @@ class IntervalItem:
 
 
 class HourlyInterval:
+    """
+    Runs scheduled item hourly. To set the hourly interval, you create an
+    instance of the HourlyInterval class and assign the following values:
+    start_time, end_time, and interval_value. To set the start_time and
+    end_time, assign the time value using this syntax: start_time=time(hour, minute)
+    and end_time=time(hour, minute). The hour is specified in 24 hour time.
+    The interval_value specifies how often the to run the task within the
+    start and end time. The options are expressed in hours. For example,
+    interval_value=.25 is every 15 minutes. The values are .25, .5, 1, 2, 4, 6,
+    8, 12. Hourly schedules that run more frequently than every 60 minutes must
+    have start and end times that are on the hour.
+    """
+
     def __init__(self, start_time, end_time, interval_value):
         self.start_time = start_time
         self.end_time = end_time
@@ -109,6 +129,12 @@ class HourlyInterval:
 
 
 class DailyInterval:
+    """
+    Runs the scheduled item daily. To set the daily interval, you create an
+    instance of the DailyInterval and assign the start_time. The start time uses
+    the syntax start_time=time(hour, minute).
+    """
+
     def __init__(self, start_time, *interval_values):
         self.start_time = start_time
         self.interval = interval_values
@@ -177,6 +203,15 @@ class DailyInterval:
 
 
 class WeeklyInterval:
+    """
+    Runs the scheduled item once a week. To set the weekly interval, you create
+    an instance of the WeeklyInterval and assign the start time and multiple
+    instances for the interval_value (days of week and start time). The start
+    time uses the syntax time(hour, minute). The interval_value is the day of
+    the week, expressed as a IntervalItem. For example
+    TSC.IntervalItem.Day.Monday for Monday.
+    """
+
     def __init__(self, start_time, *interval_values):
         self.start_time = start_time
         self.interval = interval_values
@@ -214,6 +249,11 @@ class WeeklyInterval:
 
 
 class MonthlyInterval:
+    """
+    Runs the scheduled item once a month. To set the monthly interval, you
+    create an instance of the MonthlyInterval and assign the start time and day.
+    """
+
     def __init__(self, start_time, interval_value):
         self.start_time = start_time
 

@@ -20,6 +20,63 @@ Interval = Union[HourlyInterval, DailyInterval, WeeklyInterval, MonthlyInterval]
 
 
 class ScheduleItem:
+    """
+    Using the TSC library, you can schedule extract refresh or subscription
+    tasks on Tableau Server. You can also get and update information about the
+    scheduled tasks, or delete scheduled tasks.
+
+    If you have the identifier of the job, you can use the TSC library to find
+    out the status of the asynchronous job.
+
+    The schedule properties are defined in the ScheduleItem class. The class
+    corresponds to the properties for schedules you can access in Tableau
+    Server or by using the Tableau Server REST API. The Schedule methods are
+    based upon the endpoints for jobs in the REST API and operate on the JobItem
+    class.
+
+    Parameters
+    ----------
+    name : str
+        The name of the schedule.
+
+    priority : int
+        The priority of the schedule. Lower values represent higher priority,
+        with 0 indicating the highest priority.
+
+    schedule_type : str
+        The type of task schedule. See ScheduleItem.Type for the possible values.
+
+    execution_order : str
+        Specifies how the scheduled tasks should run. The choices are Parallel
+        which uses all avaiable background processes for a scheduled task, or
+        Serial, which limits the schedule to one background process.
+
+    interval_item : Interval
+        Specifies the frequency that the scheduled task should run. The
+        interval_item is an instance of the IntervalItem class. The
+        interval_item has properties for frequency (hourly, daily, weekly,
+        monthly), and what time and date the scheduled item runs. You set this
+        value by declaring an IntervalItem object that is one of the following:
+        HourlyInterval, DailyInterval, WeeklyInterval, or MonthlyInterval.
+
+    Attributes
+    ----------
+    created_at : datetime
+        The date and time the schedule was created.
+
+    end_schedule_at : datetime
+        The date and time the schedule ends.
+
+    id : str
+        The unique identifier for the schedule.
+
+    next_run_at : datetime
+        The date and time the schedule is next run.
+
+    state : str
+        The state of the schedule. See ScheduleItem.State for the possible values.
+    """
+
     class Type:
         Extract = "Extract"
         Flow = "Flow"
