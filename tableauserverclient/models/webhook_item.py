@@ -14,6 +14,39 @@ def _parse_event(events):
 
 
 class WebhookItem:
+    """
+    The WebhookItem represents the webhook resources on Tableau Server or
+    Tableau Cloud. This is the information that can be sent or returned in
+    response to a REST API request for webhooks.
+
+    Attributes
+    ----------
+    id : Optional[str]
+        The identifier (luid) for the webhook. You need this value to query a
+        specific webhook with the get_by_id method or to delete a webhook with
+        the delete method.
+
+    name : Optional[str]
+        The name of the webhook. You must specify this when you create an
+        instance of the WebhookItem.
+
+    url : Optional[str]
+        The destination URL for the webhook. The webhook destination URL must
+        be https and have a valid certificate. You must specify this when you
+        create an instance of the WebhookItem.
+
+    event : Optional[str]
+        The name of the Tableau event that triggers your webhook.This is either
+        api-event-name or webhook-source-api-event-name: one of these is
+        required to create an instance of the WebhookItem. We recommend using
+        the api-event-name. The event name must be one of the supported events
+        listed in the Trigger Events table.
+        https://help.tableau.com/current/developer/webhooks/en-us/docs/webhooks-events-payload.html
+
+    owner_id : Optional[str]
+        The identifier (luid) of the user who owns the webhook.
+    """
+
     def __init__(self):
         self._id: Optional[str] = None
         self.name: Optional[str] = None
