@@ -66,6 +66,25 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
     # Get all flows
     @api(version="3.3")
     def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[FlowItem], PaginationItem]:
+        """
+        Get all flows on site. Returns a tuple of all flow items and pagination item.
+        This method is paginated, and returns one page of items per call. The
+        request options can be used to specify the page number, page size, as
+        well as sorting and filtering options.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#query_flows_for_site
+
+        Parameters
+        ----------
+        req_options: Optional[RequestOptions]
+            An optional Request Options object that can be used to specify
+            sorting, filtering, and pagination options.
+
+        Returns
+        -------
+        tuple[list[FlowItem], PaginationItem]
+            A tuple of a list of flow items and a pagination item.
+        """
         logger.info("Querying all flows on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -76,6 +95,21 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
     # Get 1 flow by id
     @api(version="3.3")
     def get_by_id(self, flow_id: str) -> FlowItem:
+        """
+        Get a single flow by id.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#query_flow
+
+        Parameters
+        ----------
+        flow_id: str
+            The id of the flow to retrieve.
+
+        Returns
+        -------
+        FlowItem
+            The flow item that was retrieved.
+        """
         if not flow_id:
             error = "Flow ID undefined."
             raise ValueError(error)
@@ -87,6 +121,27 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
     # Populate flow item's connections
     @api(version="3.3")
     def populate_connections(self, flow_item: FlowItem) -> None:
+        """
+        Populate the connections for a flow item. This method will make a
+        request to the Tableau Server to get the connections associated with
+        the flow item and populate the connections property of the flow item.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#query_flow_connections
+
+        Parameters
+        ----------
+        flow_item: FlowItem
+            The flow item to populate connections for.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        MissingRequiredFieldError
+            If the flow item does not have an ID.
+        """
         if not flow_item.id:
             error = "Flow item missing ID. Flow must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -106,6 +161,25 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
     # Delete 1 flow by id
     @api(version="3.3")
     def delete(self, flow_id: str) -> None:
+        """
+        Delete a single flow by id.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#delete_flow
+
+        Parameters
+        ----------
+        flow_id: str
+            The id of the flow to delete.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        ValueError
+            If the flow_id is not defined.
+        """
         if not flow_id:
             error = "Flow ID undefined."
             raise ValueError(error)
@@ -116,6 +190,35 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
     # Download 1 flow by id
     @api(version="3.3")
     def download(self, flow_id: str, filepath: Optional[PathOrFileW] = None) -> PathOrFileW:
+        """
+        Download a single flow by id. The flow will be downloaded to the
+        specified file path. If no file path is specified, the flow will be
+        downloaded to the current working directory.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#download_flow
+
+        Parameters
+        ----------
+        flow_id: str
+            The id of the flow to download.
+
+        filepath: Optional[PathOrFileW]
+            The file path to download the flow to. This can be a file path or
+            a file object. If a file object is passed, the flow will be written
+            to the file object. If a file path is passed, the flow will be
+            written to the file path. If no file path is specified, the flow
+            will be downloaded to the current working directory.
+
+        Returns
+        -------
+        PathOrFileW
+            The file path or file object that the flow was downloaded to.
+
+        Raises
+        ------
+        ValueError
+            If the flow_id is not defined.
+        """
         if not flow_id:
             error = "Flow ID undefined."
             raise ValueError(error)
@@ -144,6 +247,21 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
     # Update flow
     @api(version="3.3")
     def update(self, flow_item: FlowItem) -> FlowItem:
+        """
+        Updates the flow owner, project, description, and/or tags.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#update_flow
+
+        Parameters
+        ----------
+        flow_item: FlowItem
+            The flow item to update.
+
+        Returns
+        -------
+        FlowItem
+            The updated flow item.
+        """
         if not flow_item.id:
             error = "Flow item missing ID. Flow must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -161,6 +279,25 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
     # Update flow connections
     @api(version="3.3")
     def update_connection(self, flow_item: FlowItem, connection_item: ConnectionItem) -> ConnectionItem:
+        """
+        Update a connection item for a flow item. This method will update the
+        connection details for the connection item associated with the flow.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#update_flow_connection
+
+        Parameters
+        ----------
+        flow_item: FlowItem
+            The flow item that the connection is associated with.
+
+        connection_item: ConnectionItem
+            The connection item to update.
+
+        Returns
+        -------
+        ConnectionItem
+            The updated connection item.
+        """
         url = f"{self.baseurl}/{flow_item.id}/connections/{connection_item.id}"
 
         update_req = RequestFactory.Connection.update_req(connection_item)
@@ -172,6 +309,21 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
 
     @api(version="3.3")
     def refresh(self, flow_item: FlowItem) -> JobItem:
+        """
+        Runs the flow to refresh the data.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#run_flow_now
+
+        Parameters
+        ----------
+        flow_item: FlowItem
+            The flow item to refresh.
+
+        Returns
+        -------
+        JobItem
+            The job item that was created to refresh the flow.
+        """
         url = f"{self.baseurl}/{flow_item.id}/run"
         empty_req = RequestFactory.Empty.empty_req()
         server_response = self.post_request(url, empty_req)
@@ -183,6 +335,35 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
     def publish(
         self, flow_item: FlowItem, file: PathOrFileR, mode: str, connections: Optional[list[ConnectionItem]] = None
     ) -> FlowItem:
+        """
+        Publishes a flow to the Tableau Server.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#publish_flow
+
+        Parameters
+        ----------
+        flow_item: FlowItem
+            The flow item to publish. This item must have a project_id and name
+            defined.
+
+        file: PathOrFileR
+            The file path or file object to publish. This can be a .tfl or .tflx
+
+        mode: str
+            The publish mode. This can be "Overwrite" or "CreatNew". If the
+            mode is "Overwrite", the flow will be overwritten if it already
+            exists. If the mode is "CreateNew", a new flow will be created with
+            the same name as the flow item.
+
+        connections: Optional[list[ConnectionItem]]
+            A list of connection items to publish with the flow. If the flow
+            contains connections, they must be included in this list.
+
+        Returns
+        -------
+        FlowItem
+            The flow item that was published.
+        """
         if not mode or not hasattr(self.parent_srv.PublishMode, mode):
             error = "Invalid mode defined."
             raise ValueError(error)
@@ -265,30 +446,145 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
 
     @api(version="3.3")
     def populate_permissions(self, item: FlowItem) -> None:
+        """
+        Populate the permissions for a flow item. This method will make a
+        request to the Tableau Server to get the permissions associated with
+        the flow item and populate the permissions property of the flow item.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#query_flow_permissions
+
+        Parameters
+        ----------
+        item: FlowItem
+            The flow item to populate permissions for.
+
+        Returns
+        -------
+        None
+        """
         self._permissions.populate(item)
 
     @api(version="3.3")
     def update_permissions(self, item: FlowItem, permission_item: Iterable["PermissionsRule"]) -> None:
+        """
+        Update the permissions for a flow item. This method will update the
+        permissions for the flow item. The permissions must be a list of
+        permissions rules. Will overwrite all existing permissions.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#replace_permissions_for_content
+
+        Parameters
+        ----------
+        item: FlowItem
+            The flow item to update permissions for.
+
+        permission_item: Iterable[PermissionsRule]
+            The permissions rules to update.
+
+        Returns
+        -------
+        None
+        """
         self._permissions.update(item, permission_item)
 
     @api(version="3.3")
     def delete_permission(self, item: FlowItem, capability_item: "PermissionsRule") -> None:
+        """
+        Delete a permission for a flow item. This method will delete only the
+        specified permission for the flow item.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#delete_flow_permission
+
+        Parameters
+        ----------
+        item: FlowItem
+            The flow item to delete the permission from.
+
+        capability_item: PermissionsRule
+            The permission to delete.
+
+        Returns
+        -------
+        None
+        """
         self._permissions.delete(item, capability_item)
 
     @api(version="3.5")
     def populate_dqw(self, item: FlowItem) -> None:
+        """
+        Get information about Data Quality Warnings for a flow item.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#query_dqws
+
+        Parameters
+        ----------
+        item: FlowItem
+            The flow item to populate data quality warnings for.
+
+        Returns
+        -------
+        None
+        """
         self._data_quality_warnings.populate(item)
 
     @api(version="3.5")
     def update_dqw(self, item: FlowItem, warning: "DQWItem") -> None:
+        """
+        Update the warning type, status, and message of a data quality warning
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#update_dqw
+
+        Parameters
+        ----------
+        item: FlowItem
+            The flow item to update data quality warnings for.
+
+        warning: DQWItem
+            The data quality warning to update.
+
+        Returns
+        -------
+        None
+        """
         return self._data_quality_warnings.update(item, warning)
 
     @api(version="3.5")
     def add_dqw(self, item: FlowItem, warning: "DQWItem") -> None:
+        """
+        Add a data quality warning to a flow.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#add_dqw
+
+        Parameters
+        ----------
+        item: FlowItem
+            The flow item to add data quality warnings to.
+
+        warning: DQWItem
+            The data quality warning to add.
+
+        Returns
+        -------
+        None
+        """
         return self._data_quality_warnings.add(item, warning)
 
     @api(version="3.5")
     def delete_dqw(self, item: FlowItem) -> None:
+        """
+        Delete all data quality warnings for a flow.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#delete_dqws
+
+        Parameters
+        ----------
+        item: FlowItem
+            The flow item to delete data quality warnings from.
+
+        Returns
+        -------
+        None
+        """
         self._data_quality_warnings.clear(item)
 
     # a convenience method
@@ -296,6 +592,24 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
     def schedule_flow_run(
         self, schedule_id: str, item: FlowItem
     ) -> list["AddResponse"]:  # actually should return a task
+        """
+        Schedule a flow to run on an existing schedule.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#add_flow_task_to_schedule
+
+        Parameters
+        ----------
+        schedule_id: str
+            The id of the schedule to add the flow to.
+
+        item: FlowItem
+            The flow item to add to the schedule.
+
+        Returns
+        -------
+        list[AddResponse]
+            The response from the server.
+        """
         return self.parent_srv.schedules.add_to_schedule(schedule_id, flow=item)
 
     def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[FlowItem]:
