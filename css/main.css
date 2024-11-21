@@ -278,3 +278,40 @@ html {
     word-spacing:  8px;
     padding-right: 8px;
 }
+
+.copyRight {
+    font-size: 12px;
+  }
+  
+  .footer-links {
+    display: flex;
+    justify-content: center; 
+    list-style: none;
+    padding: 0; 
+    flex-wrap: wrap;
+  }
+  
+  .footer-links li {
+    margin: 0 15px; 
+  }
+  
+  .footer-links a {
+    text-decoration: none;
+    transition: color 0.3s;
+    font-size: 12px;
+  }
+  
+  .footer-links a:hover {
+    text-decoration: underline;
+  }
+  
+  /* One Trust Cookie Manager
+  -------------------- */
+  #ot-pc-content, .ot-title-cntr, .ot-pc-footer {
+    font-size: 1.6rem;
+  }
+  
+  #ot-pc-footer {
+    font-size: 1.4rem;
+  }
+  
