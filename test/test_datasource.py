@@ -174,17 +174,22 @@ class DatasourceTests(unittest.TestCase):
             connections: Optional[list[ConnectionItem]] = single_datasource.connections
 
         self.assertIsNotNone(connections)
+        assert connections is not None
         ds1, ds2 = connections
         self.assertEqual("be786ae0-d2bf-4a4b-9b34-e2de8d2d4488", ds1.id)
         self.assertEqual("textscan", ds1.connection_type)
         self.assertEqual("forty-two.net", ds1.server_address)
         self.assertEqual("duo", ds1.username)
         self.assertEqual(True, ds1.embed_password)
+        self.assertEqual(ds1.datasource_id, single_datasource.id)
+        self.assertEqual(single_datasource.name, ds1.datasource_name)
         self.assertEqual("970e24bc-e200-4841-a3e9-66e7d122d77e", ds2.id)
         self.assertEqual("sqlserver", ds2.connection_type)
         self.assertEqual("database.com", ds2.server_address)
         self.assertEqual("heero", ds2.username)
         self.assertEqual(False, ds2.embed_password)
+        self.assertEqual(ds2.datasource_id, single_datasource.id)
+        self.assertEqual(single_datasource.name, ds2.datasource_name)
 
     def test_update_connection(self) -> None:
         populate_xml, response_xml = read_xml_assets(POPULATE_CONNECTIONS_XML, UPDATE_CONNECTION_XML)
