@@ -5,14 +5,58 @@ from defusedxml.ElementTree import fromstring, tostring
 from typing import Callable, Optional
 from collections.abc import Iterator
 
-from .exceptions import UnpopulatedPropertyError
-from .user_item import UserItem
-from .view_item import ViewItem
-from .workbook_item import WorkbookItem
-from ..datetime_helpers import parse_datetime
+from tableauserverclient.models.exceptions import UnpopulatedPropertyError
+from tableauserverclient.models.user_item import UserItem
+from tableauserverclient.models.view_item import ViewItem
+from tableauserverclient.models.workbook_item import WorkbookItem
+from tableauserverclient.datetime_helpers import parse_datetime
 
 
 class CustomViewItem:
+    """
+    Represents a Custom View item on Tableau Server.
+
+    Parameters
+    ----------
+    id : Optional[str]
+        The ID of the Custom View item.
+
+    name : Optional[str]
+        The name of the Custom View item.
+
+    Attributes
+    ----------
+    content_url : Optional[str]
+        The content URL of the Custom View item.
+
+    created_at : Optional[datetime]
+        The date and time the Custom View item was created.
+
+    image: bytes
+        The image of the Custom View item. Must be populated first.
+
+    pdf: bytes
+        The PDF of the Custom View item. Must be populated first.
+
+    csv: Iterator[bytes]
+        The CSV of the Custom View item. Must be populated first.
+
+    shared : Optional[bool]
+        Whether the Custom View item is shared.
+
+    updated_at : Optional[datetime]
+        The date and time the Custom View item was last updated.
+
+    owner : Optional[UserItem]
+        The id of the owner of the Custom View item.
+
+    workbook : Optional[WorkbookItem]
+        The id of the workbook the Custom View item belongs to.
+
+    view : Optional[ViewItem]
+        The id of the view the Custom View item belongs to.
+    """
+
     def __init__(self, id: Optional[str] = None, name: Optional[str] = None) -> None:
         self._content_url: Optional[str] = None  # ?
         self._created_at: Optional["datetime"] = None
