@@ -102,10 +102,15 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         datasource_item._set_connections(connections_fetcher)
         logger.info(f"Populated connections for datasource (ID: {datasource_item.id})")
 
-    def _get_datasource_connections(self, datasource_item, req_options=None):
+    def _get_datasource_connections(
+        self, datasource_item: DatasourceItem, req_options: Optional[RequestOptions] = None
+    ) -> list[ConnectionItem]:
         url = f"{self.baseurl}/{datasource_item.id}/connections"
         server_response = self.get_request(url, req_options)
         connections = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
+        for connection in connections:
+            connection._datasource_id = datasource_item.id
+            connection._datasource_name = datasource_item.name
         return connections
 
     # Delete 1 datasource by id
