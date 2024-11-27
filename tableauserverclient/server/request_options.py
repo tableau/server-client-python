@@ -122,6 +122,7 @@ class RequestOptions(RequestOptionsBase):
         NotificationType = "notificationType"
         OwnerDomain = "ownerDomain"
         OwnerEmail = "ownerEmail"
+        OwnerId = "ownerId"
         OwnerName = "ownerName"
         ParentProjectId = "parentProjectId"
         Priority = "priority"
@@ -148,8 +149,10 @@ class RequestOptions(RequestOptionsBase):
         UpdatedAt = "updatedAt"
         UserCount = "userCount"
         UserId = "userId"
+        ViewId = "viewId"
         ViewUrlName = "viewUrlName"
         WorkbookDescription = "workbookDescription"
+        WorkbookId = "workbookId"
         WorkbookName = "workbookName"
 
     class Direction:
