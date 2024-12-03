@@ -1,0 +1,43 @@
+---
+layout: search
+---
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    {% include head.html %}
+	<script type="text/javascript">
+        var search_blob = {
+		{% for page in site.pages %}
+            {% if page.indexed_by_search != false %}
+                "{{ site.baseurl }}{{ page.url }}": {
+                    "title": {{ page.title | escape | jsonify }},
+                    "content": {{ page.content | remove_first: '* TOC' | replace_first:':toc',':class="blank"' | markdownify | strip_html | normalize_whitespace | jsonify }}
+                }{% unless forloop.last %},{% endunless %}
+            {% endif %}
+		{% endfor %}
+		};
+	</script>
+
+    <script src="{{ site.baseurl }}/js/lunr.min.js"></script>
+    <script src="{{ site.baseurl }}/js/search.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        {% include header.html %}
+        {% include docs_menu.html %}
+
+        <div class="content .col-xs-12 .col-sm-8 .col-md-9">
+            <h1 id="searchHeading"></h1>
+            <br />
+            <div id="searchResultsContainer">
+                <p>Loading search results...</p>
+            </div>
+
+            {% include footer.html %}
+        </div>
+    </div>
+</body>
+</html>
