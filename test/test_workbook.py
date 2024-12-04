@@ -624,6 +624,45 @@ class WorkbookTests(unittest.TestCase):
             self.assertTrue(re.search(rb"<views><view.*?hidden=\"true\".*?\/><\/views>", request_body))
             self.assertTrue(re.search(rb"<views><view.*?name=\"GDP per capita\".*?\/><\/views>", request_body))
 
+    def test_publish_with_thumbnails_user_id(self) -> None:
+        with open(PUBLISH_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            m.post(self.baseurl, text=response_xml)
+
+            new_workbook = TSC.WorkbookItem(
+                name="Sample",
+                show_tabs=False,
+                project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760",
+                thumbnails_user_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20761",
+            )
+
+            sample_workbook = os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")
+            publish_mode = self.server.PublishMode.CreateNew
+            new_workbook = self.server.workbooks.publish(new_workbook, sample_workbook, publish_mode)
+            request_body = m._adapter.request_history[0]._request.body
+            # order of attributes in xml is unspecified
+            self.assertTrue(re.search(rb"thumbnailsUserId=\"ee8c6e70-43b6-11e6-af4f-f7b0d8e20761\"", request_body))
+
+    def test_publish_with_thumbnails_group_id(self) -> None:
+        with open(PUBLISH_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            m.post(self.baseurl, text=response_xml)
+
+            new_workbook = TSC.WorkbookItem(
+                name="Sample",
+                show_tabs=False,
+                project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760",
+                thumbnails_group_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20762",
+            )
+
+            sample_workbook = os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")
+            publish_mode = self.server.PublishMode.CreateNew
+            new_workbook = self.server.workbooks.publish(new_workbook, sample_workbook, publish_mode)
+            request_body = m._adapter.request_history[0]._request.body
+            self.assertTrue(re.search(rb"thumbnailsGroupId=\"ee8c6e70-43b6-11e6-af4f-f7b0d8e20762\"", request_body))
+
     @pytest.mark.filterwarnings("ignore:'as_job' not available")
     def test_publish_with_query_params(self) -> None:
         with open(PUBLISH_ASYNC_XML, "rb") as f:

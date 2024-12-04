@@ -36,9 +36,16 @@ def main():
         help="desired logging level (set to error by default)",
     )
     # Options specific to this sample
+    group = parser.add_mutually_exclusive_group(required=False)
+    group.add_argument("--thumbnails-user-id", "-u", help="User ID to use for thumbnails")
+    group.add_argument("--thumbnails-group-id", "-g", help="Group ID to use for thumbnails")
+
+    parser.add_argument("--workbook-name", "-n", help="Name with which to publish the workbook")
     parser.add_argument("--file", "-f", help="local filepath of the workbook to publish")
     parser.add_argument("--as-job", "-a", help="Publishing asynchronously", action="store_true")
     parser.add_argument("--skip-connection-check", "-c", help="Skip live connection check", action="store_true")
+    parser.add_argument("--project", help="Project within which to publish the workbook")
+    parser.add_argument("--show-tabs", help="Publish workbooks with tabs displayed", action="store_true")
 
     args = parser.parse_args()
 
@@ -50,9 +57,20 @@ def main():
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
     server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
-        # Step 2: Get all the projects on server, then look for the default one.
-        all_projects, pagination_item = server.projects.get()
-        default_project = next((project for project in all_projects if project.is_default()), None)
+        # Step2: Retrieve the project id, if a project name was passed
+        if args.project is not None:
+            req_options = TSC.RequestOptions()
+            req_options.filter.add(
+                TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, args.project)
+            )
+            projects = list(TSC.Pager(server.projects, req_options))
+            if len(projects) > 1:
+                raise ValueError("The project name is not unique")
+            project_id = projects[0].id
+        else:
+            # Get all the projects on server, then look for the default one.
+            all_projects, pagination_item = server.projects.get()
+            project_id = next((project for project in all_projects if project.is_default()), None).id
 
         connection1 = ConnectionItem()
         connection1.server_address = "mssql.test.com"
@@ -67,10 +85,16 @@ def main():
         all_connections.append(connection1)
         all_connections.append(connection2)
 
-        # Step 3: If default project is found, form a new workbook item and publish.
+        # Step 3: Form a new workbook item and publish.
         overwrite_true = TSC.Server.PublishMode.Overwrite
-        if default_project is not None:
-            new_workbook = TSC.WorkbookItem(default_project.id)
+        if project_id is not None:
+            new_workbook = TSC.WorkbookItem(
+                project_id=project_id,
+                name=args.workbook_name,
+                show_tabs=args.show_tabs,
+                thumbnails_user_id=args.thumbnails_user_id,
+                thumbnails_group_id=args.thumbnails_group_id,
+            )
             if args.as_job:
                 new_job = server.workbooks.publish(
                     new_workbook,
@@ -92,7 +116,7 @@ def main():
                 )
                 print(f"Workbook published. ID: {new_workbook.id}")
         else:
-            error = "The default project could not be found."
+            error = "The destination project could not be found."
             raise LookupError(error)
 
 

@@ -958,6 +958,12 @@ class WorkbookRequest:
             views_element = ET.SubElement(workbook_element, "views")
             for view_name in workbook_item.hidden_views:
                 _add_hiddenview_element(views_element, view_name)
+
+        if workbook_item.thumbnails_user_id is not None:
+            workbook_element.attrib["thumbnailsUserId"] = workbook_item.thumbnails_user_id
+        elif workbook_item.thumbnails_group_id is not None:
+            workbook_element.attrib["thumbnailsGroupId"] = workbook_item.thumbnails_group_id
+
         return ET.tostring(xml_request)
 
     def update_req(self, workbook_item, parent_srv: Optional["Server"] = None):
