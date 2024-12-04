@@ -44,7 +44,7 @@ def main():
     parser.add_argument("--file", "-f", help="local filepath of the workbook to publish")
     parser.add_argument("--as-job", "-a", help="Publishing asynchronously", action="store_true")
     parser.add_argument("--skip-connection-check", "-c", help="Skip live connection check", action="store_true")
-    parser.add_argument("--project", help="Project within which to publish the datasource")
+    parser.add_argument("--project", help="Project within which to publish the workbook")
     parser.add_argument("--show-tabs", help="Publish workbooks with tabs displayed", action="store_true")
 
     args = parser.parse_args()

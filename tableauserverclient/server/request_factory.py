@@ -961,8 +961,7 @@ class WorkbookRequest:
 
         if workbook_item.thumbnails_user_id is not None:
             workbook_element.attrib["thumbnailsUserId"] = workbook_item.thumbnails_user_id
-
-        if workbook_item.thumbnails_group_id is not None:
+        elif workbook_item.thumbnails_group_id is not None:
             workbook_element.attrib["thumbnailsGroupId"] = workbook_item.thumbnails_group_id
 
         return ET.tostring(xml_request)
