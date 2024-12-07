@@ -16,6 +16,8 @@ CREATE_XML = asset("project_create.xml")
 POPULATE_PERMISSIONS_XML = "project_populate_permissions.xml"
 POPULATE_WORKBOOK_DEFAULT_PERMISSIONS_XML = "project_populate_workbook_default_permissions.xml"
 UPDATE_DATASOURCE_DEFAULT_PERMISSIONS_XML = "project_update_datasource_default_permissions.xml"
+POPULATE_VIRTUALCONNECTION_DEFAULT_PERMISSIONS_XML = "project_populate_virtualconnection_default_permissions.xml"
+UPDATE_VIRTUALCONNECTION_DEFAULT_PERMISSIONS_XML = "project_update_virtualconnection_default_permissions.xml"
 
 
 class ProjectTests(unittest.TestCase):
@@ -303,3 +305,108 @@ class ProjectTests(unittest.TestCase):
             m.delete(f"{self.baseurl}/{endpoint}/Delete/Deny", status_code=204)
             m.delete(f"{self.baseurl}/{endpoint}/ChangePermissions/Allow", status_code=204)
             self.server.projects.delete_workbook_default_permissions(item=single_project, rule=rules)
+
+    def test_populate_virtualconnection_default_permissions(self):
+        response_xml = read_xml_asset(POPULATE_VIRTUALCONNECTION_DEFAULT_PERMISSIONS_XML)
+
+        self.server.version = "3.23"
+        base_url = self.server.projects.baseurl
+
+        with requests_mock.mock() as m:
+            m.get(
+                base_url + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/default-permissions/virtualConnections",
+                text=response_xml,
+            )
+            project = TSC.ProjectItem("test", "1d0304cd-3796-429f-b815-7258370b9b74")
+            project._id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
+
+            self.server.projects.populate_virtualconnection_default_permissions(project)
+            permissions = project.default_virtualconnection_permissions
+
+        rule = permissions.pop()
+
+        self.assertEqual("c8f2773a-c83a-11e8-8c8f-33e6d787b506", rule.grantee.id)
+        self.assertEqual("group", rule.grantee.tag_name)
+        self.assertDictEqual(
+            rule.capabilities,
+            {
+                TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.Connect: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.ChangeHierarchy: TSC.Permission.Mode.Deny,
+                TSC.Permission.Capability.Delete: TSC.Permission.Mode.Deny,
+                TSC.Permission.Capability.ChangePermissions: TSC.Permission.Mode.Deny,
+            },
+        )
+
+    def test_update_virtualconnection_default_permissions(self):
+        response_xml = read_xml_asset(UPDATE_VIRTUALCONNECTION_DEFAULT_PERMISSIONS_XML)
+
+        self.server.version = "3.23"
+        base_url = self.server.projects.baseurl
+
+        with requests_mock.mock() as m:
+            m.put(
+                base_url + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/default-permissions/virtualConnections",
+                text=response_xml,
+            )
+            project = TSC.ProjectItem("test", "1d0304cd-3796-429f-b815-7258370b9b74")
+            project._id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
+
+            group = TSC.GroupItem("test-group")
+            group._id = "c8f2773a-c83a-11e8-8c8f-33e6d787b506"
+
+            capabilities = {
+                TSC.Permission.Capability.ChangeHierarchy: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.Delete: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.Read: TSC.Permission.Mode.Deny,
+            }
+
+            rules = [TSC.PermissionsRule(GroupItem.as_reference(group.id), capabilities)]
+            new_rules = self.server.projects.update_virtualconnection_default_permissions(project, rules)
+
+        rule = new_rules.pop()
+
+        self.assertEqual(group.id, rule.grantee.id)
+        self.assertEqual("group", rule.grantee.tag_name)
+        self.assertDictEqual(
+            rule.capabilities,
+            {
+                TSC.Permission.Capability.ChangeHierarchy: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.Delete: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.Read: TSC.Permission.Mode.Deny,
+            },
+        )
+
+    def test_delete_virtualconnection_default_permimssions(self):
+        response_xml = read_xml_asset(POPULATE_VIRTUALCONNECTION_DEFAULT_PERMISSIONS_XML)
+
+        self.server.version = "3.23"
+        base_url = self.server.projects.baseurl
+
+        with requests_mock.mock() as m:
+            m.get(
+                base_url + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/default-permissions/virtualConnections",
+                text=response_xml,
+            )
+
+            project = TSC.ProjectItem("test", "1d0304cd-3796-429f-b815-7258370b9b74")
+            project._id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
+
+            group = TSC.GroupItem("test-group")
+            group._id = "c8f2773a-c83a-11e8-8c8f-33e6d787b506"
+
+            self.server.projects.populate_virtualconnection_default_permissions(project)
+            permissions = project.default_virtualconnection_permissions
+
+            del_caps = {
+                TSC.Permission.Capability.ChangeHierarchy: TSC.Permission.Mode.Deny,
+                TSC.Permission.Capability.Connect: TSC.Permission.Mode.Allow,
+            }
+
+            rule = TSC.PermissionsRule(GroupItem.as_reference(group.id), del_caps)
+
+            endpoint = f"{project.id}/default-permissions/virtualConnections/groups/{group.id}"
+            m.delete(f"{base_url}/{endpoint}/ChangeHierarchy/Deny", status_code=204)
+            m.delete(f"{base_url}/{endpoint}/Connect/Allow", status_code=204)
+
+            self.server.projects.delete_virtualconnection_default_permissions(project, rule)

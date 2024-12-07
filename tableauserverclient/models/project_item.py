@@ -174,7 +174,7 @@ class ProjectItem:
         self._permissions = permissions
 
     def _set_default_permissions(self, permissions, content_type):
-        attr = f"_default_{content_type}_permissions"
+        attr = f"_default_{content_type}_permissions".lower()
         setattr(
             self,
             attr,
