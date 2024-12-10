@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    {% include head.html %}
+</head>
+
+<body>
+    <div class="container">
+        {% include header.html %}
+        <ul class="blogul">
+            {% for post in site.posts %}
+            <div class="row">
+                <h1>{{ post.title }}</h1>
+                <hr>
+                <p><span class="glyphicon glyphicon-time"></span> Posted on {{ post.date | date: "%-d %B %Y" }}</p>
+                <hr>
+                <p class="lead">
+                    {{ post.abstract }}
+                </p>
+                {% if post.photoname %}
+                <img class="img-responsive" src="{{ site.baseurl }}/assets/{{ post.photoname}}" alt=""> {% endif %}
+                <hr>
+                <div class="blog-content">
+                    {{ post.content }}
+                </div>
+            </div>
+            {% endfor %}
+        </ul>
+        {% include footer.html %}
+    </div>
+</body>
+
+</html>
