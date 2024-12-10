@@ -34,6 +34,7 @@ POPULATE_VIEWS_XML = os.path.join(TEST_ASSET_DIR, "workbook_populate_views.xml")
 POPULATE_VIEWS_USAGE_XML = os.path.join(TEST_ASSET_DIR, "workbook_populate_views_usage.xml")
 PUBLISH_XML = os.path.join(TEST_ASSET_DIR, "workbook_publish.xml")
 PUBLISH_ASYNC_XML = os.path.join(TEST_ASSET_DIR, "workbook_publish_async.xml")
+PUBLISH_REPLACE_XML = os.path.join(TEST_ASSET_DIR, "workbook_publish_replace.xml")
 REFRESH_XML = os.path.join(TEST_ASSET_DIR, "workbook_refresh.xml")
 REVISION_XML = os.path.join(TEST_ASSET_DIR, "workbook_revision.xml")
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, "workbook_update.xml")
@@ -701,6 +702,29 @@ class WorkbookTests(unittest.TestCase):
 
             sample_workbook = os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")
             publish_mode = self.server.PublishMode.CreateNew
+
+            new_job = self.server.workbooks.publish(new_workbook, sample_workbook, publish_mode, as_job=True)
+
+        self.assertEqual("7c3d599e-949f-44c3-94a1-f30ba85757e4", new_job.id)
+        self.assertEqual("PublishWorkbook", new_job.type)
+        self.assertEqual("0", new_job.progress)
+        self.assertEqual("2018-06-29T23:22:32Z", format_datetime(new_job.created_at))
+        self.assertEqual(1, new_job.finish_code)
+
+    def test_publish_replace(self) -> None:
+        self.server.version = "3.25"
+        baseurl = self.server.workbooks.baseurl
+        with open(PUBLISH_REPLACE_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            m.post(baseurl, text=response_xml)
+
+            new_workbook = TSC.WorkbookItem(
+                name="Sample", show_tabs=False, project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760"
+            )
+
+            sample_workbook = os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")
+            publish_mode = self.server.PublishMode.Replace
 
             new_job = self.server.workbooks.publish(new_workbook, sample_workbook, publish_mode, as_job=True)
 
