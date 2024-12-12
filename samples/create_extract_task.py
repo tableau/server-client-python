@@ -29,7 +29,6 @@ def main():
         help="desired logging level (set to error by default)",
     )
     # Options specific to this sample:
-    # Options specific to this sample
     parser.add_argument("resource_type", choices=["workbook", "datasource"])
     parser.add_argument("resource_id")
     parser.add_argument("--incremental", default=False)
