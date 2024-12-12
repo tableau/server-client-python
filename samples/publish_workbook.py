@@ -55,7 +55,7 @@ def main():
 
     # Step 1: Sign in to server.
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
-    server = TSC.Server(args.server, use_server_version=True, http_options={'verify': False})
+    server = TSC.Server(args.server, use_server_version=True, http_options={"verify": False})
     with server.auth.sign_in(tableau_auth):
         # Step2: Retrieve the project id, if a project name was passed
         if args.project is not None:

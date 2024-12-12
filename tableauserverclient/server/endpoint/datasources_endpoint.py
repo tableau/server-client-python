@@ -187,7 +187,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         return connection
 
     @api(version="2.8")
-    def refresh(self, datasource_item: DatasourceItem, incremental: bool=False) -> JobItem:
+    def refresh(self, datasource_item: DatasourceItem, incremental: bool = False) -> JobItem:
         id_ = getattr(datasource_item, "id", datasource_item)
         url = f"{self.baseurl}/{id_}/refresh"
         refresh_req = RequestFactory.Task.refresh_req(incremental)

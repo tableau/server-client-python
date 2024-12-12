@@ -42,9 +42,8 @@ def main():
         refresh_type = "Incremental"
         incremental = True
 
-
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
-    server = TSC.Server(args.server, use_server_version=True, http_options={'verify': False})
+    server = TSC.Server(args.server, use_server_version=True, http_options={"verify": False})
     with server.auth.sign_in(tableau_auth):
         if args.resource_type == "workbook":
             # Get the workbook by its Id to make sure it exists
@@ -61,7 +60,7 @@ def main():
             # server.datasources.create_extract(resource)
 
             # trigger the refresh, you'll get a job id back which can be used to poll for when the refresh is done
-            job = server.datasources.refresh(resource, incremental=incremental) # by default runs as a sync task, 
+            job = server.datasources.refresh(resource, incremental=incremental)  # by default runs as a sync task,
 
             print(f"{refresh_type} job posted (ID: {job.id})")
         if args.synchronous:
