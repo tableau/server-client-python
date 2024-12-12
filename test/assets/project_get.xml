@@ -2,11 +2,12 @@
 <tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.4.xsd">
     <pagination pageNumber="1" pageSize="100" totalAvailable="2"/>
     <projects>
-        <project id="bdd975c6-4042-11e9-a712-975dc31937aa" name="Default" description="The default project that was automatically created by Tableau." topLevelProject="true" createdAt="2019-03-06T19:04:57Z" updatedAt="2019-03-06T19:04:58Z" contentPermissions="ManagedByOwner">
-            <owner id="f9e32d4b-ca36-43bb-bc58-29ad45b10be5" name="_system" siteRole="Unlicensed"/>
+        <project id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760" name="default" description="The default project that was automatically created by Tableau." contentPermissions="ManagedByOwner"><owner id="dd2239f6-ddf1-4107-981a-4cf94e415794" />
+          <owner id="f9e32d4b-ca36-43bb-bc58-29ad45b10be5" name="_system" siteRole="Unlicensed"/>
         </project>
-        <project id="7e593a18-c6e2-469c-9aca-4b2782693777" name="update" description="upd" topLevelProject="false" parentProjectId="bdd975c6-4042-11e9-a712-975dc31937aa" createdAt="2019-03-13T22:18:18Z" updatedAt="2019-03-14T17:13:40Z" contentPermissions="ManagedByOwner">
-            <owner id="344356bd-a847-4d6c-8370-8b2821498cdb" name="testadmin" fullName="testadmin" siteRole="ServerAdministrator" lastLogin="2019-03-14T17:12:50Z"/>
+        <project id="1d0304cd-3796-429f-b815-7258370b9b74" name="Tableau" description="" contentPermissions="ManagedByOwner"><owner id="2a47bbf8-8900-4ebb-b0a4-2723bd7c46c3" /></project>
+        <project id="4cc52973-5e3a-4d1f-a4fb-5b5f73796edf" name="Tableau > Child 1" description="" contentPermissions="ManagedByOwner" parentProjectId="1d0304cd-3796-429f-b815-7258370b9b74"><owner id="dd2239f6-ddf1-4107-981a-4cf94e415794" />            
+          <owner id="344356bd-a847-4d6c-8370-8b2821498cdb" name="testadmin" fullName="testadmin" siteRole="ServerAdministrator" lastLogin="2019-03-14T17:12:50Z"/>
         </project>
     </projects>
 </tsResponse>

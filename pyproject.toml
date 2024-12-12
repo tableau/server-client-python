@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=68.0", "versioneer>=0.29", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name="tableauserverclient"
+
+dynamic = ["version"]
+description='A Python module for working with the Tableau Server REST API.'
+authors = [{name="Tableau", email="github@tableau.com"}]
+license = {file = "LICENSE"}
+readme = "README.md"
+
+dependencies = [
+    'defusedxml>=0.7.1',  # latest as at 7/31/23
+    'packaging>=23.1',   # latest as at 7/31/23
+    'requests>=2.32',  # latest as at 7/31/23
+    'urllib3>=2.2.2,<3',
+    'typing_extensions>=4.0.1',
+]
+requires-python = ">=3.9"
+classifiers = [
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13"
+]
+[project.urls]
+repository = "https://github.com/tableau/server-client-python"
+
+[project.optional-dependencies]
+test = ["black==24.8", "build", "mypy==1.4", "pytest>=7.0", "pytest-cov", "pytest-subtests",
+    "requests-mock>=1.0,<2.0"]
+
+[tool.black]
+line-length = 120
+target-version = ['py39', 'py310', 'py311', 'py312', 'py313']
+
+[tool.mypy]
+check_untyped_defs = false
+disable_error_code = [
+    'misc',
+    'annotation-unchecked'  # can be removed when check_untyped_defs = true
+]
+files = ["tableauserverclient", "test", "samples"]
+show_error_codes = true
+ignore_missing_imports = true  # defusedxml library has no types
+no_implicit_reexport = true
+implicit_optional = true
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+addopts = "--junitxml=./test.junit.xml"

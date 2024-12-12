@@ -24,6 +24,7 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+pip-wheel-metadata/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -76,15 +77,20 @@ target/
 # pyenv
 .python-version
 
+# poetry
+poetry.lock
+
 # celery beat schedule file
 celerybeat-schedule
 
 # dotenv
 .env
+env.py
 
 # virtualenv
 venv/
 ENV/
+.venv/
 
 # Spyder project settings
 .spyderproject
@@ -92,7 +98,8 @@ ENV/
 # Rope project settings
 .ropeproject
 
-
+# VSCode project settings
+.vscode/
 
 # macOS.gitignore from https://github.com/github/gitignore
 *.DS_Store
@@ -148,3 +155,5 @@ $RECYCLE.BIN/
 docs/_site/
 docs/.jekyll-metadata
 docs/Gemfile.lock
+samples/credentials
+.venv/

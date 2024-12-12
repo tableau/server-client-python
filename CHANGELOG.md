@@ -1,3 +1,157 @@
+
+## 0.18.0 (6 April 2022)    
+* Switched to using defused_xml for xml attack protection
+* added linting and type hints
+* improve experience with self-signed certificates/invalid ssl
+* updated samples
+* new item types: metrics, revisions for datasources and workbooks
+* features: support adding flows to schedules, exporting workbooks to powerpoint
+* fixes: delete extracts
+
+## 0.17.0 (20 October 2021)
+* Added support for accepting parameters for post request of the metadata api (#850)
+* Fixed jobs.get_by_id(job_id) example & reference docs (#867, #868) 
+* Fixed handling for workbooks in personal spaces which do not have projectID or Name  (#875) 
+* Updated links to Data Source Methods page in REST API docs (#879)
+* Unified arguments of sample scripts (#889)
+* Updated docs for - links to Datasource API (#879) ,  sample scripts (#892) & metadata query (#896)
+* Added support for scheduling DataUpdate Jobs (#891)
+* Exposed the fileuploads API endpoint (#894)
+* Added a new sample & documentation for metadata API (#895, #896)
+* Added support to the package for getting flow run status, as well as the ability to cancel flow runs. (#884)
+* Added jobs.wait_for_job method (#903)
+* Added description support for datasources item (#912) 
+* Dropped support for Python 3.5 (#911)
+
+## 0.16.0 (15 July 2021)
+* Documentation updates (#800, #818, #839, #842)
+* Fixed data alert repr in subscription item (#821)
+* Added support for Data Quality Warning (#836)
+* Added support for renaming datasources (#843)
+* Improved Datasource tests (#843)
+* Updated catalog obfuscation field (#844)
+* Fixed revision limit field in site_item.py file (#847)
+* Added the Missing content permission field- LockedToProjectWithoutNested (#856)
+
+## 0.15.0 (16 Feb 2021)
+* Added support for python version 3.9 (#744)
+* Added support for 'Get View by ID' (#750)
+* Added docs and test data to MANIFEST.in file (#780)
+* Added owner_id property to ProjectItem (#784)
+* Added support for skipping connection check while publishing workbook (#791)
+* Added support for 'Update Subscription' (#794)
+* Added support for 'Get Groups for a User' (#799)
+* Improved debug logging by including put/post request contents (#743)
+* Improved local and active-directory group creation (#770)
+* Improved 'Update Group' to match server requests/responses (#772)
+* Improved SiteItem with new properties and functions (#777)
+* Improved SubscriptionItem with new properties (#794)
+* Improved the 'type' property of TaskItem to convert server response to enum (#796)
+* Improved repository to use Github Actions for running tests/linter (#798)
+* Fixed data_acceleration field causing error in workbook update payload (#741)
+
+## 0.14.1 (9 Dec 2020)
+* Fixed filter query issue for server version below 2020.1 (#745)
+* Fixed large workbook/datasource publish issue (#757)
+
+## 0.14.0 (6 Nov 2020)
+* Added django-style filtering and sorting (#615)
+* Added encoding tag-name before deleting (#687)
+* Added 'Execute' Capability to permissions (#700)
+* Added support for publishing workbook using file objects (#704)
+* Added new fields to datasource_item (#705)
+* Added all fields for users.get to get email and fullname (#713)
+* Added support publishing datasource using file objects (#714)
+* Improved request options by removing manual query param generation (#686)
+* Improved publish_workbook sample to take in site (#694)
+* Improved schedules.update() by removing constraint that required an interval (#711)
+* Fixed site update/create not checking booleans properly (#723)
+
+## 0.13 (1 Sept 2020)
+* Added notes field to JobItem (#571)
+* Added webpage_url field to WorkbookItem (#661)
+* Added support for switching between sites (#655)
+* Added support for querying favorites for a user (#656)
+* Added support for Python 3.8 (#659)
+* Added support for Data Alerts (#667)
+* Added support for basic Extract operations - Create, Delete, en/re/decrypt for site (#672)
+* Added support for creating and querying Active Directory groups (#674)
+* Added support for asynchronously updating a group (#674)
+* Improved handling of invalid dates (#529)
+* Improved consistency of update_permission endpoints (#668)
+* Documentation updates (#658, #669, #670, #673, #683)
+
+## 0.12.1 (22 July 2020)
+
+* Fixed login.py sample to properly handle sitename (#652)
+
+## 0.12 (10 July 2020)
+
+* Added hidden_views parameter to workbook publish method (#614)
+* Added simple paging endpoint for GraphQL/Metadata API (#623)
+* Added endpoints to Metadata API for retrieving backfill/eventing status (#626)
+* Added maxage parameter to CSV and PDF export options (#635)
+* Added support for querying, adding, and deleting favorites (#638)
+* Added a sample for publishing datasources (#644)
+
+## 0.11 (1 May 2020)
+
+* Added more fields to Data Acceleration config (#588)
+* Added OpenID as an auth setting enum (#610)
+* Added support for Data Acceleration Reports (#596)
+* Added support for view permissions (#526)
+* Materialized views changed to Data Acceleration (#576)
+* Improved consistency across workbook/datasource endpoints (#570)
+* Fixed print error in update_connection.py (#602)
+* Fixed log error in add user endpoint (#608)
+
+## 0.10 (21 Feb 2020)
+
+* Added a way to handle non-xml errors (#515)
+* Added Webhooks endpoints for create, delete, get, list, and test (#523, #532)
+* Added delete method in the tasks endpoint (#524)
+* Added description attribute to WorkbookItem (#533)
+* Added support for materializeViews as schedule and task types (#542)
+* Added warnings to schedules (#550, #551)
+* Added ability to update parent_id attribute of projects (#560, #567)
+* Improved filename behavior for download endpoints (#517)
+* Improved logging (#508)
+* Fixed runtime error in permissions endpoint (#513)
+* Fixed move_workbook_sites sample (#503)
+* Fixed project permissions endpoints (#527)
+* Fixed login.py sample to accept site name (#549)
+
+## 0.9 (4 Oct 2019)
+
+* Added Metadata API endpoints (#431)
+* Added site settings for Data Catalog and Prep Conductor (#434)
+* Added new fields to ViewItem (#331)
+* Added support and samples for Tableau Server Personal Access Tokens (#465)
+* Added Permissions endpoints (#429)
+* Added tags to ViewItem (#470)
+* Added Databases and Tables endpoints (#445)
+* Added Flow endpoints (#494)
+* Added ability to filter projects by topLevelProject attribute (#497)
+* Improved server_info endpoint error handling (#439)
+* Improved Pager to take in keyword arguments (#451)
+* Fixed UUID serialization error while publishing workbook (#449)
+* Fixed materalized views in request body for update_workbook (#461)
+
+## 0.8.1 (17 July 2019)
+
+* Fixed update_workbook endpoint (#454)
+
+## 0.8 (8 Apr 2019)
+
+* Added Max Age to download view image request (#360)
+* Added Materialized Views (#378, #394, #396)
+* Added PDF export of Workbook (#376)
+* Added Support User Role (#392)
+* Added Flows (#403)
+* Updated Pager to handle un-paged results (#322)
+* Fixed checked upload (#309, #319, #326, #329)
+* Fixed embed_password field on publish (#416)
+
 ## 0.7 (2 Jul 2018)
 
 * Added cancel job (#299)

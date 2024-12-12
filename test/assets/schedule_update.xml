@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
-    <schedule id="7bea1766-1543-4052-9753-9d224bc069b5" name="weekly-schedule-1" state="Active" priority="90" createdAt="2016-09-15T23:49:53Z" updatedAt="2016-09-15T23:50:02Z" type="Extract" frequency="Weekly" nextRunAt="2016-09-16T14:00:00Z" executionOrder="Parallel">
+    <schedule id="7bea1766-1543-4052-9753-9d224bc069b5" name="weekly-schedule-1" state="Suspended" priority="90" createdAt="2016-09-15T23:49:53Z" updatedAt="2016-09-15T23:50:02Z" type="Extract" frequency="Weekly" nextRunAt="2016-09-16T14:00:00Z" executionOrder="Parallel">
         <frequencyDetails start="07:00:00">
             <intervals>
                 <interval weekDay="Monday" />

@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.5.xsd">
+    <table id="10224773-ecee-42ac-b822-d786b0b8e4d9" name="dim_Product" isEmbedded="false" isCertified="true" certificationNote="Test" schema="dbo">
+        <site id="ae2624bd-c20b-4e82-86fa-605ebba881f9"/>
+        <contact id="8e1a8235-c9ee-4d61-ae82-2ffacceed8e0" name="sally"/>
+    </table>
+</tsResponse>

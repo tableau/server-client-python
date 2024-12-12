@@ -1,6 +1,5 @@
-# coding=utf-8
-
 import unittest
+
 import tableauserverclient as TSC
 
 
@@ -21,7 +20,6 @@ class SiteModelTests(unittest.TestCase):
             site.admin_mode = "Hello"
 
     def test_invalid_content_url(self):
-
         with self.assertRaises(ValueError):
             site = TSC.SiteItem(name="蚵仔煎", content_url="蚵仔煎")
 

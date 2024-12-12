@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+    <pagination pageNumber="2" pageSize="10" totalAvailable="20" />
+    <views>
+        <view id="47ffcb8e-3f7a-4ecf-8ab3-605da9febe20" name="Population" contentUrl="WorldIndicators/sheets/Population">
+            <workbook id="307d59be-f0c3-4b78-bd30-d62e1185e756" />
+            <owner id="4235b5a6-3594-4f20-aa93-91faa4899046" />
+        </view>
+        <view id="6757fea8-0aa9-4160-a87c-9be27b1d1c8c" name="HealthIndicators" contentUrl="WorldIndicators/sheets/HealthIndicators">
+            <workbook id="307d59be-f0c3-4b78-bd30-d62e1185e756" />
+            <owner id="4235b5a6-3594-4f20-aa93-91faa4899046" />
+        </view>
+        <view id="6c90df57-8852-4470-b237-836354fe4f6a" name="Care Spend" contentUrl="WorldIndicators/sheets/CareSpend">
+            <workbook id="307d59be-f0c3-4b78-bd30-d62e1185e756" />
+            <owner id="4235b5a6-3594-4f20-aa93-91faa4899046" />
+        </view>
+        <view id="d8405103-be40-48f1-a522-cc2c7c26d952" name="Technology" contentUrl="WorldIndicators/sheets/Technology">
+            <workbook id="307d59be-f0c3-4b78-bd30-d62e1185e756" />
+            <owner id="4235b5a6-3594-4f20-aa93-91faa4899046" />
+        </view>
+        <view id="b5ab383e-26d3-4a63-b89d-c69bf5a3f9e8" name="Economy" contentUrl="WorldIndicators/sheets/Economy">
+            <workbook id="307d59be-f0c3-4b78-bd30-d62e1185e756" />
+            <owner id="4235b5a6-3594-4f20-aa93-91faa4899046" />
+        </view>
+        <view id="8d600fae-371f-4a80-a41c-c9b7d5c8effd" name="Tourism" contentUrl="WorldIndicators/sheets/Tourism">
+            <workbook id="307d59be-f0c3-4b78-bd30-d62e1185e756" />
+            <owner id="4235b5a6-3594-4f20-aa93-91faa4899046" />
+        </view>
+        <view id="9570a9e9-e7f8-421d-a49e-401df4231336" name="Business" contentUrl="WorldIndicators/sheets/Business">
+            <workbook id="307d59be-f0c3-4b78-bd30-d62e1185e756" />
+            <owner id="4235b5a6-3594-4f20-aa93-91faa4899046" />
+        </view>
+        <view id="b037d23f-2242-4483-be2d-e61b39747fd0" name="Tourism Over Time" contentUrl="WorldIndicators/sheets/TourismOverTime">
+            <workbook id="307d59be-f0c3-4b78-bd30-d62e1185e756" />
+            <owner id="4235b5a6-3594-4f20-aa93-91faa4899046" />
+        </view>
+        <view id="a5633b2b-91a7-4fb7-8f44-083c504d15ff" name="Tourism by Country" contentUrl="WorldIndicators/sheets/TourismByCountry">
+            <workbook id="307d59be-f0c3-4b78-bd30-d62e1185e756" />
+            <owner id="4235b5a6-3594-4f20-aa93-91faa4899046" />
+        </view>
+        <view id="06e51d57-fc33-412e-a4bd-8bab12d2adff" name="Biz Tax Rate" contentUrl="WorldIndicators/sheets/BizTaxRate">
+            <workbook id="307d59be-f0c3-4b78-bd30-d62e1185e756" />
+            <owner id="4235b5a6-3594-4f20-aa93-91faa4899046" />
+        </view>
+    </views>
+</tsResponse>

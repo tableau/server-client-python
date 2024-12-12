@@ -5,25 +5,31 @@
 ####
 
 import argparse
-import getpass
 import glob
 import logging
 import tableauserverclient as TSC
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Initialize a server with content.')
-    parser.add_argument('--server', '-s', required=True, help='server address')
-    parser.add_argument('--datasources-folder', '-df', required=True, help='folder containing datasources')
-    parser.add_argument('--workbooks-folder', '-wf', required=True, help='folder containing workbooks')
-    parser.add_argument('--site-id', '-sid', required=False, default='', help='site id of the site to use')
-    parser.add_argument('--project', '-p', required=False, default='Default', help='project to use')
-    parser.add_argument('--username', '-u', required=True, help='username to sign into server')
-    parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
-                        help='desired logging level (set to error by default)')
-    args = parser.parse_args()
+    parser = argparse.ArgumentParser(description="Initialize a server with content.")
+    # Common options; please keep those in sync across all samples
+    parser.add_argument("--server", "-s", help="server address")
+    parser.add_argument("--site", "-S", help="site name")
+    parser.add_argument("--token-name", "-p", help="name of the personal access token used to sign into the server")
+    parser.add_argument("--token-value", "-v", help="value of the personal access token used to sign into the server")
+    parser.add_argument(
+        "--logging-level",
+        "-l",
+        choices=["debug", "info", "error"],
+        default="error",
+        help="desired logging level (set to error by default)",
+    )
+    # Options specific to this sample
+    parser.add_argument("--datasources-folder", "-df", help="folder containing datasources")
+    parser.add_argument("--workbooks-folder", "-wf", help="folder containing workbooks")
+    parser.add_argument("--project", required=False, default="Default", help="project to use")
 
-    password = getpass.getpass("Password: ")
+    args = parser.parse_args()
 
     # Set logging level based on user input, or error by default
     logging_level = getattr(logging, args.logging_level.upper())
@@ -32,11 +38,9 @@ def main():
     ################################################################################
     # Step 1: Sign in to server.
     ################################################################################
-    tableau_auth = TSC.TableauAuth(args.username, password)
-    server = TSC.Server(args.server)
-
+    tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
+    server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
-
         ################################################################################
         # Step 2: Create the site we need only if it doesn't exist
         ################################################################################
@@ -47,12 +51,15 @@ def main():
 
         # Create the site if it doesn't exist
         if existing_site is None:
-            print("Site not found: {0} Creating it...").format(args.site_id)
-            new_site = TSC.SiteItem(name=args.site_id, content_url=args.site_id.replace(" ", ""),
-                                    admin_mode=TSC.SiteItem.AdminMode.ContentAndUsers)
+            print(f"Site not found: {args.site_id} Creating it...")
+            new_site = TSC.SiteItem(
+                name=args.site_id,
+                content_url=args.site_id.replace(" ", ""),
+                admin_mode=TSC.SiteItem.AdminMode.ContentAndUsers,
+            )
             server.sites.create(new_site)
         else:
-            print("Site {0} exists. Moving on...").format(args.site_id)
+            print(f"Site {args.site_id} exists. Moving on...")
 
     ################################################################################
     # Step 3: Sign-in to our target site
@@ -63,18 +70,18 @@ def main():
     tableau_auth.site_id = args.site_id
 
     with server_upload.auth.sign_in(tableau_auth):
-
         ################################################################################
         # Step 4: Create the project we need only if it doesn't exist
         ################################################################################
         import time
+
         time.sleep(2)  # sad panda...something about eventually consistent model
         all_projects = TSC.Pager(server_upload.projects)
         project = next((p for p in all_projects if p.name.lower() == args.project.lower()), None)
 
         # Create our project if it doesn't exist
         if project is None:
-            print("Project not found: {0} Creating it...").format(args.project)
+            print(f"Project not found: {args.project} Creating it...")
             new_project = TSC.ProjectItem(name=args.project)
             project = server_upload.projects.create(new_project)
 
@@ -88,22 +95,22 @@ def main():
 
 
 def publish_datasources_to_site(server_object, project, folder):
-    path = folder + '/*.tds*'
+    path = folder + "/*.tds*"
 
     for fname in glob.glob(path):
         new_ds = TSC.DatasourceItem(project.id)
         new_ds = server_object.datasources.publish(new_ds, fname, server_object.PublishMode.Overwrite)
-        print("Datasource published. ID: {0}".format(new_ds.id))
+        print(f"Datasource published. ID: {new_ds.id}")
 
 
 def publish_workbooks_to_site(server_object, project, folder):
-    path = folder + '/*.twb*'
+    path = folder + "/*.twb*"
 
     for fname in glob.glob(path):
         new_workbook = TSC.WorkbookItem(project.id)
         new_workbook.show_tabs = True
         new_workbook = server_object.workbooks.publish(new_workbook, fname, server_object.PublishMode.Overwrite)
-        print("Workbook published. ID: {0}".format(new_workbook.id))
+        print(f"Workbook published. ID: {new_workbook.id}")
 
 
 if __name__ == "__main__":

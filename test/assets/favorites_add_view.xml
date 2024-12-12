@@ -1,0 +1,14 @@
+<tsResponse>
+  <favorites>
+    <favorite label="favorite-labe1">
+	  <view id="d79634e1-6063-4ec9-95ff-50acbf609ff5"
+	        name="ENDANGERED SAFARI" 
+          contentUrl="SafariSample/sheets/ENDANGEREDSAFARI"
+          createdAt="2016-08-03T20:34:04Z" 
+          updatedAt="2016-08-04T17:56:41Z"
+          viewUrlName="view-url-name">
+		  <workbook id="3cc6cd06-89ce-4fdc-b935-5294135d6d42"/>
+		  <project id="5241e88d-d384-4fd7-9c2f-648b5247efc5"/>
+		  <tags />
+	  </view>
+</tsResponse>

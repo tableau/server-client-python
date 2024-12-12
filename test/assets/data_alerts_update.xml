@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.5.xsd">
+  <pagination pageNumber="1" pageSize="100" totalAvailable="1"/>
+  <dataAlerts>
+    <dataAlert id="5ea59b45-e497-5673-8809-bfe213236f75" subject="Data Alert test" creatorId="5de011f8-5aa9-4d5b-b991-f462c8dd6bb7" createdAt="2020-08-10T23:17:06Z" updatedAt="2020-08-10T23:17:06Z" frequency="Daily" public="true">
+      <owner id="5de011f8-5aa9-4d5b-b991-f462c8dd6bb7" name="Bob"/>
+      <view id="d79634e1-6063-4ec9-95ff-50acbf609ff5" name="ENDANGERED SAFARI">
+        <workbook id="6d13b0ca-043d-4d42-8c9d-3f3313ea3a00" name="Safari stats"/>
+        <project id="5241e88d-d384-4fd7-9c2f-648b5247efc5" name="Default"/>
+      </view>
+    </dataAlert>
+  </dataAlerts>
+</tsResponse>

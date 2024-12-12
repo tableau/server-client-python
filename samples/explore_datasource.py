@@ -10,34 +10,38 @@
 ####
 
 import argparse
-import getpass
 import logging
 
 import tableauserverclient as TSC
 
 
 def main():
-
-    parser = argparse.ArgumentParser(description='Explore datasource functions supported by the Server API.')
-    parser.add_argument('--server', '-s', required=True, help='server address')
-    parser.add_argument('--username', '-u', required=True, help='username to sign into server')
-    parser.add_argument('--publish', '-p', metavar='FILEPATH', help='path to datasource to publish')
-    parser.add_argument('--download', '-d', metavar='FILEPATH', help='path to save downloaded datasource')
-    parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
-                        help='desired logging level (set to error by default)')
+    parser = argparse.ArgumentParser(description="Explore datasource functions supported by the Server API.")
+    # Common options; please keep those in sync across all samples
+    parser.add_argument("--server", "-s", help="server address")
+    parser.add_argument("--site", "-S", help="site name")
+    parser.add_argument("--token-name", "-p", help="name of the personal access token used to sign into the server")
+    parser.add_argument("--token-value", "-v", help="value of the personal access token used to sign into the server")
+    parser.add_argument(
+        "--logging-level",
+        "-l",
+        choices=["debug", "info", "error"],
+        default="error",
+        help="desired logging level (set to error by default)",
+    )
+    # Options specific to this sample
+    parser.add_argument("--publish", metavar="FILEPATH", help="path to datasource to publish")
+    parser.add_argument("--download", metavar="FILEPATH", help="path to save downloaded datasource")
 
     args = parser.parse_args()
-
-    password = getpass.getpass("Password: ")
 
     # Set logging level based on user input, or error by default
     logging_level = getattr(logging, args.logging_level.upper())
     logging.basicConfig(level=logging_level)
 
     # SIGN IN
-    tableau_auth = TSC.TableauAuth(args.username, password)
-    server = TSC.Server(args.server)
-    server.use_highest_version()
+    tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
+    server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
         # Query projects for use when demonstrating publishing and updating
         all_projects, pagination_item = server.projects.get()
@@ -47,15 +51,17 @@ def main():
         if args.publish:
             if default_project is not None:
                 new_datasource = TSC.DatasourceItem(default_project.id)
+                new_datasource.description = "Published with a description"
                 new_datasource = server.datasources.publish(
-                    new_datasource, args.publish, TSC.Server.PublishMode.Overwrite)
-                print("Datasource published. ID: {}".format(new_datasource.id))
+                    new_datasource, args.publish, TSC.Server.PublishMode.Overwrite
+                )
+                print(f"Datasource published. ID: {new_datasource.id}")
             else:
                 print("Publish failed. Could not find the default project.")
 
         # Gets all datasource items
         all_datasources, pagination_item = server.datasources.get()
-        print("\nThere are {} datasources on site: ".format(pagination_item.total_available))
+        print(f"\nThere are {pagination_item.total_available} datasources on site: ")
         print([datasource.name for datasource in all_datasources])
 
         if all_datasources:
@@ -64,21 +70,24 @@ def main():
 
             # Populate connections
             server.datasources.populate_connections(sample_datasource)
-            print("\nConnections for {}: ".format(sample_datasource.name))
-            print(["{0}({1})".format(connection.id, connection.datasource_name)
-                   for connection in sample_datasource.connections])
+            print(f"\nConnections for {sample_datasource.name}: ")
+            print([f"{connection.id}({connection.datasource_name})" for connection in sample_datasource.connections])
+
+            # Demonstrate that description is editable
+            sample_datasource.description = "Description updated by TSC"
+            server.datasources.update(sample_datasource)
 
             # Add some tags to the datasource
             original_tag_set = set(sample_datasource.tags)
-            sample_datasource.tags.update('a', 'b', 'c', 'd')
+            sample_datasource.tags.update("a", "b", "c", "d")
             server.datasources.update(sample_datasource)
-            print("\nOld tag set: {}".format(original_tag_set))
-            print("New tag set: {}".format(sample_datasource.tags))
+            print(f"\nOld tag set: {original_tag_set}")
+            print(f"New tag set: {sample_datasource.tags}")
 
             # Delete all tags that were added by setting tags to original
             sample_datasource.tags = original_tag_set
             server.datasources.update(sample_datasource)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

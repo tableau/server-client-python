@@ -1,0 +1,20 @@
+name: 💬 Send Message to Slack 🚀
+
+on: [push, pull_request, issues]
+
+jobs:
+  slack-notifications:
+    continue-on-error: true
+    runs-on: ubuntu-20.04
+    name: Sends a message to Slack when a push, a pull request or an issue is made
+    steps:
+      - name: Send message to Slack API
+        continue-on-error: true
+        uses: archive/github-actions-slack@v2.8.0
+        id: notify
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
+          slack-channel: C019HCX84L9
+          slack-text: Hello! Event "${{ github.event_name }}" in "${{ github.repository }}" 🤓
+      - name: Result from "Send Message"
+        run: echo "The result was ${{ steps.notify.outputs.slack-result }}"

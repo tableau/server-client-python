@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+  <favorites>
+	<favorite label="favorite-label">
+	  <view id="d79634e1-6063-4ec9-95ff-50acbf609ff5" 
+            name="ENDANGERED SAFARI" 
+            contentUrl="SafariSample/sheets/ENDANGEREDSAFARI">
+        <workbook id="3cc6cd06-89ce-4fdc-b935-5294135d6d42" />
+        <owner id="5de011f8-5aa9-4d5b-b991-f462c8dd6bb7" />
+        <project id="5241e88d-d384-4fd7-9c2f-648b5247efc5" />
+		<tags />
+	  </view>
+	</favorite>
+	<favorite>
+      <workbook id="6d13b0ca-043d-4d42-8c9d-3f3313ea3a00" 
+                name="Superstore" 
+                description="description for Superstore" 
+                contentUrl="Superstore" 
+                showTabs="false" 
+                size="1" 
+                createdAt="2016-08-03T20:34:04Z" 
+                updatedAt="2016-08-04T17:56:41Z">
+        <project id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760" name="default" />
+        <owner id="5de011f8-5aa9-4d5b-b991-f462c8dd6bb7" />
+        <tags />
+      </workbook>
+    </favorite>
+    <favorite>
+      <project id="1d0304cd-3796-429f-b815-7258370b9b74" 
+               name="Tableau" 
+               description="" 
+               contentPermissions="ManagedByOwner" />
+    </favorite>
+    <favorite>
+      <datasource id="e76a1461-3b1d-4588-bf1b-17551a879ad9" 
+                  name="SampleDS" 
+                  contentUrl="SampleDS" 
+                  type="dataengine" 
+                  createdAt="2016-08-11T21:22:40Z" 
+                  updatedAt="2016-08-11T21:34:17Z">
+        <project id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760" name="default" />
+        <owner id="5de011f8-5aa9-4d5b-b991-f462c8dd6bb7" />
+        <tags />
+      </datasource>
+    </favorite>
+  </favorites>
+</tsResponse>

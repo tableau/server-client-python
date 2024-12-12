@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.8.xsd">
+    <tasks>
+        <task>
+            <dataAcceleration id="2b217acb-194a-4291-ae90-7d5ec360395d" consecutiveFailedCount="0" type="MaterializeViewsTask">
+                <schedule id="b22190b4-6ac2-4eed-9563-4afc03444413" name="Hourly4-Schedule" state="Active" priority="75" createdAt="2019-12-06T03:27:35Z" updatedAt="2019-12-09T20:30:59Z" type="DataAcceleration" frequency="Hourly" nextRunAt="2019-12-09T22:30:00Z">
+                    <frequencyDetails start="02:30:00" end="23:00:00">
+                        <intervals>
+                            <interval hours="2"/>
+                        </intervals>
+                    </frequencyDetails>
+                </schedule>
+                <workbook id="a462c148-fc40-4670-a8e4-39b7f0c58c7f"/>
+                <lastRunAt>2019-12-09T20:45:04Z</lastRunAt>
+            </dataAcceleration>
+        </task>
+    </tasks>
+</tsResponse>

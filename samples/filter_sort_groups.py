@@ -1,92 +1,116 @@
 ####
-# This script demonstrates how to filter groups using the Tableau
+# This script demonstrates how to filter and sort groups using the Tableau
 # Server Client.
 #
-# To run the script, you must have installed Python 2.7.9 or later.
+# To run the script, you must have installed Python 3.7 or later.
 ####
 
 
 import argparse
-import getpass
 import logging
+import urllib.parse
 
 import tableauserverclient as TSC
 
 
-def create_example_group(group_name='Example Group', server=None):
+def create_example_group(group_name="Example Group", server=None):
     new_group = TSC.GroupItem(group_name)
     try:
         new_group = server.groups.create(new_group)
-        print('Created a new project called: \'%s\'' % group_name)
+        print("Created a new project called: '%s'" % group_name)
         print(new_group)
     except TSC.ServerResponseError:
-        print('Group \'%s\' already existed' % group_name)
+        print("Group '%s' already existed" % group_name)
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Filter on groups')
-    parser.add_argument('--server', '-s', required=True, help='server address')
-    parser.add_argument('--username', '-u', required=True, help='username to sign into server')
-    parser.add_argument('--logging-level', '-l', choices=['debug', 'info', 'error'], default='error',
-                        help='desired logging level (set to error by default)')
-    parser.add_argument('-p', default=None)
-    args = parser.parse_args()
+    parser = argparse.ArgumentParser(description="Filter and sort groups.")
+    # Common options; please keep those in sync across all samples
+    parser.add_argument("--server", "-s", help="server address")
+    parser.add_argument("--site", "-S", help="site name")
+    parser.add_argument("--token-name", "-p", help="name of the personal access token used to sign into the server")
+    parser.add_argument("--token-value", "-v", help="value of the personal access token used to sign into the server")
+    parser.add_argument(
+        "--logging-level",
+        "-l",
+        choices=["debug", "info", "error"],
+        default="error",
+        help="desired logging level (set to error by default)",
+    )
+    # Options specific to this sample
+    # This sample has no additional options, yet. If you add some, please add them here
 
-    if args.p is None:
-        password = getpass.getpass("Password: ")
-    else:
-        password = args.p
+    args = parser.parse_args()
 
     # Set logging level based on user input, or error by default
     logging_level = getattr(logging, args.logging_level.upper())
     logging.basicConfig(level=logging_level)
 
-    tableau_auth = TSC.TableauAuth(args.username, password)
-    server = TSC.Server(args.server)
-
+    tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
+    server = TSC.Server(args.server, use_server_version=True, http_options={"verify": False})
     with server.auth.sign_in(tableau_auth):
-
-        # Determine and use the highest api version for the server
-        server.use_server_version()
-
-        group_name = 'SALES NORTHWEST'
+        group_name = "SALES NORTHWEST"
         # Try to create a group named "SALES NORTHWEST"
         create_example_group(group_name, server)
 
-        group_name = 'SALES ROMANIA'
+        group_name = "SALES ROMANIA"
         # Try to create a group named "SALES ROMANIA"
         create_example_group(group_name, server)
 
-        # URL Encode the name of the group that we want to filter on
-        # i.e. turn spaces into plus signs
-        filter_group_name = 'SALES+ROMANIA'
+        # we no longer need to encode the space
         options = TSC.RequestOptions()
-        options.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name,
-                                      TSC.RequestOptions.Operator.Equals,
-                                      filter_group_name))
+        options.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, group_name))
 
         filtered_groups, _ = server.groups.get(req_options=options)
         # Result can either be a matching group or an empty list
         if filtered_groups:
-            group_name = filtered_groups.pop().name
-            print(group_name)
+            group = filtered_groups.pop()
+            print(group)
         else:
-            error = "No project named '{}' found".format(filter_group_name)
+            error = f"No group named '{group_name}' found"
             print(error)
 
-        options = TSC.RequestOptions()
-        options.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name,
-                                      TSC.RequestOptions.Operator.In,
-                                      ['SALES+NORTHWEST', 'SALES+ROMANIA', 'this_group']))
+        print("---")
 
-        options.sort.add(TSC.Sort(TSC.RequestOptions.Field.Name,
-                                  TSC.RequestOptions.Direction.Desc))
+        # Or, try the above with the django style filtering
+        try:
+            group = server.groups.filter(name=group_name)[0]
+            print(group)
+        except IndexError:
+            print(f"No group named '{group_name}' found")
+
+        print("====")
+
+        options = TSC.RequestOptions()
+        options.filter.add(
+            TSC.Filter(
+                TSC.RequestOptions.Field.Name,
+                TSC.RequestOptions.Operator.In,
+                ["SALES NORTHWEST", "SALES ROMANIA", "this_group"],
+            )
+        )
+
+        options.sort.add(TSC.Sort(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Direction.Desc))
 
         matching_groups, pagination_item = server.groups.get(req_options=options)
-        print('Filtered groups are:')
+        print("Filtered groups are:")
         for group in matching_groups:
             print(group.name)
 
+        print("----")
+        # or, try the above with the django style filtering.
+        all_g = server.groups.all()
+        print(f"Searching locally among {all_g.total_available} groups")
+        for a in all_g:
+            print(a)
+        groups = [urllib.parse.quote_plus(group) for group in ["SALES NORTHWEST", "SALES ROMANIA", "this_group"]]
+        print(groups)
 
-if __name__ == '__main__':
+        for group in server.groups.filter(name__in=groups).order_by("-name"):
+            print(group.name)
+
+        print("done")
+
+
+if __name__ == "__main__":
     main()
