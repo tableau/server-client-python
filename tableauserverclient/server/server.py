@@ -119,6 +119,7 @@ class Server:
         Append = "Append"
         Overwrite = "Overwrite"
         CreateNew = "CreateNew"
+        Replace = "Replace"
 
     def __init__(self, server_address, use_server_version=False, http_options=None, session_factory=None):
         self._auth_token = None
