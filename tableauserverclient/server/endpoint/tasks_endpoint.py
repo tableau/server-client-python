@@ -31,6 +31,24 @@ class Tasks(Endpoint):
     def get(
         self, req_options: Optional["RequestOptions"] = None, task_type: str = TaskItem.Type.ExtractRefresh
     ) -> tuple[list[TaskItem], PaginationItem]:
+        """
+        Returns information about tasks on the specified site.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#list_extract_refresh_tasks
+
+        Parameters
+        ----------
+        req_options : RequestOptions, optional
+            Options for the request, such as filtering, sorting, and pagination.
+
+        task_type : str, optional
+            The type of task to query. See TaskItem.Type for possible values.
+
+        Returns
+        -------
+        tuple[list[TaskItem], PaginationItem]
+
+        """
         if task_type == TaskItem.Type.DataAcceleration:
             self.parent_srv.assert_at_least_version("3.8", "Data Acceleration Tasks")
 
@@ -45,6 +63,20 @@ class Tasks(Endpoint):
 
     @api(version="2.6")
     def get_by_id(self, task_id: str) -> TaskItem:
+        """
+        Returns information about the specified task.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#get_extract_refresh_task
+
+        Parameters
+        ----------
+        task_id : str
+            The ID of the task to query.
+
+        Returns
+        -------
+        TaskItem
+        """
         if not task_id:
             error = "No Task ID provided"
             raise ValueError(error)
@@ -59,6 +91,21 @@ class Tasks(Endpoint):
 
     @api(version="3.19")
     def create(self, extract_item: TaskItem) -> TaskItem:
+        """
+        Creates a custom schedule for an extract refresh on Tableau Cloud. For
+        Tableau Server, use the Schedules endpoint to create a schedule.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#create_cloud_extract_refresh_task
+
+        Parameters
+        ----------
+        extract_item : TaskItem
+            The extract refresh task to create.
+
+        Returns
+        -------
+        TaskItem
+        """
         if not extract_item:
             error = "No extract refresh provided"
             raise ValueError(error)
@@ -70,6 +117,20 @@ class Tasks(Endpoint):
 
     @api(version="2.6")
     def run(self, task_item: TaskItem) -> bytes:
+        """
+        Runs the specified extract refresh task.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#run_extract_refresh_task
+
+        Parameters
+        ----------
+        task_item : TaskItem
+            The task to run.
+
+        Returns
+        -------
+        bytes
+        """
         if not task_item.id:
             error = "Task item missing ID."
             raise MissingRequiredFieldError(error)
@@ -86,6 +147,23 @@ class Tasks(Endpoint):
     # Delete 1 task by id
     @api(version="3.6")
     def delete(self, task_id: str, task_type: str = TaskItem.Type.ExtractRefresh) -> None:
+        """
+        Deletes the specified extract refresh task on Tableau Server or Tableau Cloud.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#delete_extract_refresh_task
+
+        Parameters
+        ----------
+        task_id : str
+            The ID of the task to delete.
+
+        task_type : str, default TaskItem.Type.ExtractRefresh
+            The type of task to query. See TaskItem.Type for possible values.
+
+        Returns
+        -------
+        None
+        """
         if task_type == TaskItem.Type.DataAcceleration:
             self.parent_srv.assert_at_least_version("3.8", "Data Acceleration Tasks")
 
