@@ -4,6 +4,7 @@ import unittest
 import requests_mock
 
 import tableauserverclient as TSC
+from tableauserverclient.datetime_helpers import format_datetime
 from tableauserverclient import GroupItem
 from ._utils import read_xml_asset, asset
 
@@ -44,6 +45,8 @@ class ProjectTests(unittest.TestCase):
         self.assertEqual("ManagedByOwner", all_projects[0].content_permissions)
         self.assertEqual(None, all_projects[0].parent_id)
         self.assertEqual("dd2239f6-ddf1-4107-981a-4cf94e415794", all_projects[0].owner_id)
+                self.assertEqual('f9e32d4b-ca36-43bb-bc58-29ad45b10be5', all_projects[0].owner_id)
+        self.assertEqual('_system', all_projects[0].owner_name)
 
         self.assertEqual("1d0304cd-3796-429f-b815-7258370b9b74", all_projects[1].id)
         self.assertEqual("Tableau", all_projects[1].name)
@@ -56,6 +59,7 @@ class ProjectTests(unittest.TestCase):
         self.assertEqual("ManagedByOwner", all_projects[2].content_permissions)
         self.assertEqual("1d0304cd-3796-429f-b815-7258370b9b74", all_projects[2].parent_id)
         self.assertEqual("dd2239f6-ddf1-4107-981a-4cf94e415794", all_projects[2].owner_id)
+        self.assertEqual('testadmin', all_projects[2].owner_name)
 
     def test_get_before_signin(self) -> None:
         self.server._auth_token = None
