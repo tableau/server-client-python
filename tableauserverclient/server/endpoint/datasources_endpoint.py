@@ -260,13 +260,12 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         else:
             raise TypeError("file should be a filepath or file object.")
 
-        if not mode or not hasattr(self.parent_srv.PublishMode, mode):
-            error = "Invalid mode defined."
-            raise ValueError(error)
-
         # Construct the url with the defined mode
         url = f"{self.baseurl}?datasourceType={file_extension}"
-        if mode == self.parent_srv.PublishMode.Overwrite or mode == self.parent_srv.PublishMode.Append:
+        if not mode or not hasattr(self.parent_srv.PublishMode, mode):
+            error = f"Invalid mode defined: {mode}"
+            raise ValueError(error)
+        else:
             url += f"&{mode.lower()}=true"
 
         if as_job:
