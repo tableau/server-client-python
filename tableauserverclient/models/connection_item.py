@@ -9,6 +9,44 @@ from tableauserverclient.helpers.logging import logger
 
 
 class ConnectionItem:
+    """
+    Corresponds to workbook and data source connections.
+
+    Attributes
+    ----------
+    datasource_id: str
+        The identifier of the data source.
+
+    datasource_name: str
+        The name of the data source.
+
+    id: str
+        The identifier of the connection.
+
+    connection_type: str
+        The type of connection.
+
+    username: str
+        The username for the connection. (see ConnectionCredentials)
+
+    password: str
+        The password used for the connection. (see ConnectionCredentials)
+
+    embed_password: bool
+        Determines whether to embed the password (True) for the workbook or data source connection or not (False). (see ConnectionCredentials)
+
+    server_address: str
+        The server address for the connection.
+
+    server_port: str
+        The port used for the connection.
+
+    connection_credentials: ConnectionCredentials
+        The Connection Credentials object containing authentication details for
+        the connection. Replaces username/password/embed_password when
+        publishing a flow, document or workbook file in the request body.
+    """
+
     def __init__(self):
         self._datasource_id: Optional[str] = None
         self._datasource_name: Optional[str] = None
