@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68.0", "versioneer>=0.29", "wheel"]
+requires = ["setuptools>=75.0", "versioneer[toml]==0.29", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -16,7 +16,7 @@ dependencies = [
     'packaging>=23.1',   # latest as at 7/31/23
     'requests>=2.32',  # latest as at 7/31/23
     'urllib3>=2.2.2,<3',
-    'typing_extensions>=4.0.1',
+    'typing_extensions>=4.0',
 ]
 requires-python = ">=3.9"
 classifiers = [
@@ -38,6 +38,7 @@ test = ["black==24.8", "build", "mypy==1.4", "pytest>=7.0", "pytest-cov", "pytes
 [tool.black]
 line-length = 120
 target-version = ['py39', 'py310', 'py311', 'py312', 'py313']
+force-exclude = "tableauserverclient/bin/*"
 
 [tool.mypy]
 check_untyped_defs = false
@@ -50,7 +51,15 @@ show_error_codes = true
 ignore_missing_imports = true  # defusedxml library has no types
 no_implicit_reexport = true
 implicit_optional = true
+exclude = ['/bin/']
 
 [tool.pytest.ini_options]
 testpaths = ["test"]
 addopts = "--junitxml=./test.junit.xml"
+
+[tool.versioneer]
+VCS = "git"
+style = "pep440-pre"
+versionfile_source = "tableauserverclient/bin/_version.py"
+versionfile_build = "tableauserverclient/bin/_version.py"
+tag_prefix = "v"
