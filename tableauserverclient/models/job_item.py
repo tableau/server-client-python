@@ -8,6 +8,71 @@ from tableauserverclient.models.flow_run_item import FlowRunItem
 
 
 class JobItem:
+    """
+    Using the TSC library, you can get information about an asynchronous process
+    (or job) on the server. These jobs can be created when Tableau runs certain
+    tasks that could be long running, such as importing or synchronizing users
+    from Active Directory, or running an extract refresh. For example, the REST
+    API methods to create or update groups, to run an extract refresh task, or
+    to publish workbooks can take an asJob parameter (asJob-true) that creates a
+    background process (the job) to complete the call. Information about the
+    asynchronous job is returned from the method.
+
+    If you have the identifier of the job, you can use the TSC library to find
+    out the status of the asynchronous job.
+
+    The job properties are defined in the JobItem class. The class corresponds
+    to the properties for jobs you can access using the Tableau Server REST API.
+    The job methods are based upon the endpoints for jobs in the REST API and
+    operate on the JobItem class.
+
+    Parameters
+    ----------
+    id_ : str
+        The identifier of the job.
+
+    job_type : str
+        The type of job.
+
+    progress : str
+        The progress of the job.
+
+    created_at : datetime.datetime
+        The date and time the job was created.
+
+    started_at : Optional[datetime.datetime]
+        The date and time the job was started.
+
+    completed_at : Optional[datetime.datetime]
+        The date and time the job was completed.
+
+    finish_code : int
+        The finish code of the job. 0 for success, 1 for failure, 2 for cancelled.
+
+    notes : Optional[list[str]]
+        Contains detailed notes about the job.
+
+    mode : Optional[str]
+
+    workbook_id : Optional[str]
+        The identifier of the workbook associated with the job.
+
+    datasource_id : Optional[str]
+        The identifier of the datasource associated with the job.
+
+    flow_run : Optional[FlowRunItem]
+        The flow run associated with the job.
+
+    updated_at : Optional[datetime.datetime]
+        The date and time the job was last updated.
+
+    workbook_name : Optional[str]
+        The name of the workbook associated with the job.
+
+    datasource_name : Optional[str]
+        The name of the datasource associated with the job.
+    """
+
     class FinishCode:
         """
         Status codes as documented on
