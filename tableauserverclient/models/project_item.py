@@ -9,6 +9,44 @@ from tableauserverclient.models.property_decorators import property_is_enum, pro
 
 
 class ProjectItem:
+    """
+    The project resources for Tableau are defined in the ProjectItem class. The
+    class corresponds to the project resources you can access using the Tableau
+    Server REST API.
+
+    Parameters
+    ----------
+    name : str
+        Name of the project.
+
+    description : str
+        Description of the project.
+
+    content_permissions : str
+        Sets or shows the permissions for the content in the project. The
+        options are either LockedToProject, ManagedByOwner or
+        LockedToProjectWithoutNested.
+
+    parent_id : str
+        The id of the parent project. Use this option to create project
+        hierarchies. For information about managing projects, project
+        hierarchies, and permissions, see
+        https://help.tableau.com/current/server/en-us/projects.htm
+
+    samples : bool
+        Set to True to include sample workbooks and data sources in the
+        project. The default is False.
+
+    Attributes
+    ----------
+    id : str
+        The unique identifier for the project.
+
+    owner_id : str
+        The unique identifier for the UserItem owner of the project.
+
+    """
+
     ERROR_MSG = "Project item must be populated with permissions first."
 
     class ContentPermissions:
