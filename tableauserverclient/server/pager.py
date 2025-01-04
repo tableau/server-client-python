@@ -27,6 +27,30 @@ class Pager(Iterable[T]):
     (users in a group, views in a workbook, etc) by passing a different endpoint.
 
     Will loop over anything that returns (list[ModelItem], PaginationItem).
+
+    Will make a copy of the `RequestOptions` object passed in so it can be reused.
+
+    Makes a call to the Server for each page of items, then yields each item in the list.
+
+    Parameters
+    ----------
+    endpoint: CallableEndpoint[T] or Endpoint[T]
+        The endpoint to call to get the items. Can be a callable or an Endpoint object.
+        Expects a tuple of (list[T], PaginationItem) to be returned.
+
+    request_opts: RequestOptions, optional
+        The request options to pass to the endpoint. If not provided, will use default RequestOptions.
+        Filters, sorts, page size, starting page number, etc can be set here.
+
+    Yields
+    ------
+    T
+        The items returned from the endpoint.
+
+    Raises
+    ------
+    ValueError
+        If the endpoint is not a callable or an Endpoint object.
     """
 
     def __init__(

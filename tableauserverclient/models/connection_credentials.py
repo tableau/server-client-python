@@ -2,10 +2,26 @@ from .property_decorators import property_is_boolean
 
 
 class ConnectionCredentials:
-    """Connection Credentials for Workbooks and Datasources publish request.
+    """
+    Connection Credentials for Workbooks and Datasources publish request.
 
     Consider removing this object and other variables holding secrets
     as soon as possible after use to avoid them hanging around in memory.
+
+    Parameters
+    ----------
+    name: str
+        The username for the connection.
+
+    password: str
+        The password used for the connection.
+
+    embed: bool, default True
+        Determines whether to embed the password (True) for the workbook or data source connection or not (False).
+
+    oauth: bool, default False
+        Determines whether to use OAuth for the connection (True) or not (False).
+        For more information see: https://help.tableau.com/current/server/en-us/protected_auth.htm
 
     """
 

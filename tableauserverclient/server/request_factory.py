@@ -958,9 +958,15 @@ class WorkbookRequest:
             views_element = ET.SubElement(workbook_element, "views")
             for view_name in workbook_item.hidden_views:
                 _add_hiddenview_element(views_element, view_name)
+
+        if workbook_item.thumbnails_user_id is not None:
+            workbook_element.attrib["thumbnailsUserId"] = workbook_item.thumbnails_user_id
+        elif workbook_item.thumbnails_group_id is not None:
+            workbook_element.attrib["thumbnailsGroupId"] = workbook_item.thumbnails_group_id
+
         return ET.tostring(xml_request)
 
-    def update_req(self, workbook_item):
+    def update_req(self, workbook_item, parent_srv: Optional["Server"] = None):
         xml_request = ET.Element("tsRequest")
         workbook_element = ET.SubElement(xml_request, "workbook")
         if workbook_item.name:
@@ -973,6 +979,12 @@ class WorkbookRequest:
         if workbook_item.owner_id:
             owner_element = ET.SubElement(workbook_element, "owner")
             owner_element.attrib["id"] = workbook_item.owner_id
+        if (
+            workbook_item.description is not None
+            and parent_srv is not None
+            and parent_srv.check_at_least_version("3.21")
+        ):
+            workbook_element.attrib["description"] = workbook_item.description
         if workbook_item._views is not None:
             views_element = ET.SubElement(workbook_element, "views")
             for view in workbook_item.views:
@@ -1104,6 +1116,13 @@ class TaskRequest:
     def run_req(self, xml_request: ET.Element, task_item: Any) -> None:
         # Send an empty tsRequest
         pass
+
+    @_tsrequest_wrapped
+    def refresh_req(self, xml_request: ET.Element, incremental: bool = False) -> bytes:
+        task_element = ET.SubElement(xml_request, "extractRefresh")
+        if incremental:
+            task_element.attrib["incremental"] = "true"
+        return ET.tostring(xml_request)
 
     @_tsrequest_wrapped
     def create_extract_req(self, xml_request: ET.Element, extract_item: "TaskItem") -> bytes:

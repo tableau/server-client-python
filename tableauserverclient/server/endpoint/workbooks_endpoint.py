@@ -118,7 +118,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         return WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     @api(version="2.8")
-    def refresh(self, workbook_item: Union[WorkbookItem, str]) -> JobItem:
+    def refresh(self, workbook_item: Union[WorkbookItem, str], incremental: bool = False) -> JobItem:
         """
         Refreshes the extract of an existing workbook.
 
@@ -126,6 +126,8 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         ----------
         workbook_item : WorkbookItem | str
             The workbook item or workbook ID.
+        incremental: bool
+            Whether to do a full refresh or incremental refresh of the extract data
 
         Returns
         -------
@@ -134,8 +136,8 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         """
         id_ = getattr(workbook_item, "id", workbook_item)
         url = f"{self.baseurl}/{id_}/refresh"
-        empty_req = RequestFactory.Empty.empty_req()
-        server_response = self.post_request(url, empty_req)
+        refresh_req = RequestFactory.Task.refresh_req(incremental)
+        server_response = self.post_request(url, refresh_req)
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return new_job
 
@@ -280,7 +282,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         if include_view_acceleration_status:
             url += "?includeViewAccelerationStatus=True"
 
-        update_req = RequestFactory.Workbook.update_req(workbook_item)
+        update_req = RequestFactory.Workbook.update_req(workbook_item, self.parent_srv)
         server_response = self.put_request(url, update_req)
         logger.info(f"Updated workbook item (ID: {workbook_item.id})")
         updated_workbook = copy.copy(workbook_item)

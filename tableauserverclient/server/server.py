@@ -119,6 +119,7 @@ class Server:
         Append = "Append"
         Overwrite = "Overwrite"
         CreateNew = "CreateNew"
+        Replace = "Replace"
 
     def __init__(self, server_address, use_server_version=False, http_options=None, session_factory=None):
         self._auth_token = None
@@ -207,12 +208,14 @@ class Server:
         self._site_id = None
         self._user_id = None
         self._auth_token = None
+        self._site_url = None
         self._session = self._session_factory()
 
-    def _set_auth(self, site_id, user_id, auth_token):
+    def _set_auth(self, site_id, user_id, auth_token, site_url=None):
         self._site_id = site_id
         self._user_id = user_id
         self._auth_token = auth_token
+        self._site_url = site_url
 
     def _get_legacy_version(self):
         # the serverInfo call was introduced in 2.4, earlier than that we have this different call
@@ -281,6 +284,13 @@ class Server:
             error = "Missing site ID. You must sign in first."
             raise NotSignedInError(error)
         return self._site_id
+
+    @property
+    def site_url(self):
+        if self._site_url is None:
+            error = "Missing site URL. You must sign in first."
+            raise NotSignedInError(error)
+        return self._site_url
 
     @property
     def user_id(self):

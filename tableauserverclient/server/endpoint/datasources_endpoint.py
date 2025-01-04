@@ -102,10 +102,15 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         datasource_item._set_connections(connections_fetcher)
         logger.info(f"Populated connections for datasource (ID: {datasource_item.id})")
 
-    def _get_datasource_connections(self, datasource_item, req_options=None):
+    def _get_datasource_connections(
+        self, datasource_item: DatasourceItem, req_options: Optional[RequestOptions] = None
+    ) -> list[ConnectionItem]:
         url = f"{self.baseurl}/{datasource_item.id}/connections"
         server_response = self.get_request(url, req_options)
         connections = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
+        for connection in connections:
+            connection._datasource_id = datasource_item.id
+            connection._datasource_name = datasource_item.name
         return connections
 
     # Delete 1 datasource by id
@@ -182,11 +187,11 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         return connection
 
     @api(version="2.8")
-    def refresh(self, datasource_item: DatasourceItem) -> JobItem:
+    def refresh(self, datasource_item: DatasourceItem, incremental: bool = False) -> JobItem:
         id_ = getattr(datasource_item, "id", datasource_item)
         url = f"{self.baseurl}/{id_}/refresh"
-        empty_req = RequestFactory.Empty.empty_req()
-        server_response = self.post_request(url, empty_req)
+        refresh_req = RequestFactory.Task.refresh_req(incremental)
+        server_response = self.post_request(url, refresh_req)
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return new_job
 
@@ -255,13 +260,12 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         else:
             raise TypeError("file should be a filepath or file object.")
 
-        if not mode or not hasattr(self.parent_srv.PublishMode, mode):
-            error = "Invalid mode defined."
-            raise ValueError(error)
-
         # Construct the url with the defined mode
         url = f"{self.baseurl}?datasourceType={file_extension}"
-        if mode == self.parent_srv.PublishMode.Overwrite or mode == self.parent_srv.PublishMode.Append:
+        if not mode or not hasattr(self.parent_srv.PublishMode, mode):
+            error = f"Invalid mode defined: {mode}"
+            raise ValueError(error)
+        else:
             url += f"&{mode.lower()}=true"
 
         if as_job:
