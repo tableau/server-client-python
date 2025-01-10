@@ -1,5 +1,7 @@
 import logging
 import xml.etree.ElementTree as ET
+from .property_decorators import property_is_enum, property_not_empty, property_not_nullable
+from ..datetime_helpers import parse_datetime
 from typing import Optional
 
 from defusedxml.ElementTree import fromstring
@@ -75,7 +77,12 @@ class ProjectItem:
         self.parent_id: Optional[str] = parent_id
         self._samples: Optional[bool] = samples
         self._owner_id: Optional[str] = None
-
+          
+        self._created_at = None
+        self._owner_name: Optional[str] = None
+        self._top_level_project = None
+        self._updated_at = None
+        
         self._permissions = None
         self._default_workbook_permissions = None
         self._default_datasource_permissions = None
@@ -161,12 +168,44 @@ class ProjectItem:
         return self._id
 
     @property
+    def created_at(self):
+        return self._created_at
+
+    @property
+    def description(self):
+        return self._description
+
+    @description.setter
+    def description(self, value):
+        self._description = value
+
+    @property
     def name(self) -> Optional[str]:
         return self._name
 
     @name.setter
     def name(self, value: str) -> None:
         self._name = value
+
+    @property
+    def owner_name(self):
+        return self._owner_name
+
+    @property
+    def parent_id(self):
+        return self._parent_id
+
+    @parent_id.setter
+    def parent_id(self, value):
+        self._parent_id = value
+
+    @property
+    def top_level_project(self):
+        return self._top_level_project
+
+    @property
+    def updated_at(self):
+        return self._updated_at
 
     @property
     def owner_id(self) -> Optional[str]:
@@ -193,20 +232,33 @@ class ProjectItem:
             ) = self._parse_element(project_xml)
             self._set_values(None, name, description, content_permissions, parent_id)
         return self
-
-    def _set_values(self, project_id, name, description, content_permissions, parent_id, owner_id):
-        if project_id is not None:
-            self._id = project_id
-        if name:
-            self._name = name
-        if description:
-            self.description = description
-        if content_permissions:
-            self._content_permissions = content_permissions
-        if parent_id:
-            self.parent_id = parent_id
-        if owner_id:
-            self._owner_id = owner_id
+            
+     def _set_values(self, project_fields):
+        if 'contentPermissions' in project_fields:
+            self._content_permissions = project_fields['contentPermissions']
+        if 'createdAt' in project_fields:
+            self._created_at = parse_datetime(project_fields['createdAt'])
+        if 'description' in project_fields:
+            self._description = project_fields['description']
+        if 'id' in project_fields:
+            self._id = project_fields['id']
+        if 'name' in project_fields:
+            self._name = project_fields['name']
+        if 'parentProjectId' in project_fields:
+            self._parent_id = project_fields['parentProjectId']
+        if 'topLevelProject' in project_fields:
+            self._top_level_project = string_to_bool(project_fields['topLevelProject'])
+        if 'updatedAt' in project_fields:
+            self._updated_at = parse_datetime(project_fields['updatedAt'])
+        if 'owner' in project_fields:
+            owner_fields = project_fields['owner']
+            if 'id' in owner_fields:
+                self._owner_id = owner_fields['id']
+            if 'name' in owner_fields:
+                self._owner_name = owner_fields['name']
+        if self.parent_id is not None:
+            self._top_level_project = False
+            
 
     def _set_permissions(self, permissions):
         self._permissions = permissions
@@ -237,14 +289,22 @@ class ProjectItem:
         return project_item
 
     @staticmethod
-    def _parse_element(project_xml):
+    def _parse_element(project_xml, ns):
         id = project_xml.get("id", None)
         name = project_xml.get("name", None)
         description = project_xml.get("description", None)
         content_permissions = project_xml.get("contentPermissions", None)
         parent_id = project_xml.get("parentProjectId", None)
-        owner_id = None
-        for owner in project_xml:
-            owner_id = owner.get("id", None)
+        project_fields = project_xml.attrib
+        owner_elem = project_xml.find('.//t:owner', namespaces=ns)
+        if owner_elem is not None:
+            owner_fields = owner_elem.attrib
+            project_fields['owner'] = owner_fields
+            owner_id = owner_elem.get("id", None)
 
-        return id, name, description, content_permissions, parent_id, owner_id
+        return project_fields
+
+
+# Used to convert string represented boolean to a boolean type
+def string_to_bool(s):
+    return s.lower() == 'true'
