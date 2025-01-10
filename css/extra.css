@@ -1,0 +1,14 @@
+pre code {
+  white-space: pre;
+  word-wrap: normal;
+  display: block;
+  padding: 12px;
+  font-size: 14px;
+}
+
+code {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    padding: 2px 5px;
+    font-size: 16px;
+}
