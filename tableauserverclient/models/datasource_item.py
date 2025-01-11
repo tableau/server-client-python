@@ -19,6 +19,93 @@ from tableauserverclient.models.tag_item import TagItem
 
 
 class DatasourceItem:
+    """
+    Represents a Tableau datasource item.
+
+    Parameters
+    ----------
+    project_id : Optional[str]
+        The project ID that the datasource belongs to.
+
+    name : Optional[str]
+        The name of the datasource.
+
+    Attributes
+    ----------
+    ask_data_enablement : Optional[str]
+        Determines if a data source allows use of Ask Data. The value can be
+        TSC.DatasourceItem.AskDataEnablement.Enabled,
+        TSC.DatasourceItem.AskDataEnablement.Disabled, or
+        TSC.DatasourceItem.AskDataEnablement.SiteDefault. If no setting is
+        specified, it will default to SiteDefault. See REST API Publish
+        Datasource for more information about ask_data_enablement.
+
+    connections : list[ConnectionItem]
+        The list of data connections (ConnectionItem) for the specified data
+        source. You must first call the populate_connections method to access
+        this data. See the ConnectionItem class.
+
+    content_url : Optional[str]
+        The name of the data source as it would appear in a URL.
+
+    created_at : Optional[datetime.datetime]
+        The time the data source was created.
+
+    certified : Optional[bool]
+        A Boolean value that indicates whether the data source is certified.
+
+    certification_note : Optional[str]
+        The optional note that describes the certified data source.
+
+    datasource_type : Optional[str]
+        The type of data source, for example, sqlserver or excel-direct.
+
+    description : Optional[str]
+        The description for the data source.
+
+    encrypt_extracts : Optional[bool]
+        A Boolean value to determine if a datasource should be encrypted or not.
+        See Extract and Encryption Methods for more information.
+
+    has_extracts : Optional[bool]
+        A Boolean value that indicates whether the datasource has extracts.
+
+    id : Optional[str]
+        The identifier for the data source. You need this value to query a
+        specific data source or to delete a data source with the get_by_id and
+        delete methods.
+
+    name : Optional[str]
+        The name of the data source. If not specified, the name of the published
+        data source file is used.
+
+    owner_id : Optional[str]
+        The identifier of the owner of the data source.
+
+    project_id : Optional[str]
+        The identifier of the project associated with the data source. You must
+        provide this identifier when you create an instance of a DatasourceItem.
+
+    project_name : Optional[str]
+        The name of the project associated with the data source.
+
+    tags : Optional[set[str]]
+        The tags (list of strings) that have been added to the data source.
+
+    updated_at : Optional[datetime.datetime]
+        The date and time when the data source was last updated.
+
+    use_remote_query_agent : Optional[bool]
+        A Boolean value that indicates whether to allow or disallow your Tableau
+        Cloud site to use Tableau Bridge clients. Bridge allows you to maintain
+        data sources with live connections to supported on-premises data
+        sources. See Configure and Manage the Bridge Client Pool for more
+        information.
+
+    webpage_url : Optional[str]
+        The url of the datasource as displayed in browsers.
+    """
+
     class AskDataEnablement:
         Enabled = "Enabled"
         Disabled = "Disabled"
@@ -33,28 +120,28 @@ class DatasourceItem:
         )
 
     def __init__(self, project_id: Optional[str] = None, name: Optional[str] = None) -> None:
-        self._ask_data_enablement = None
-        self._certified = None
-        self._certification_note = None
-        self._connections = None
+        self._ask_data_enablement: Optional[str] = None
+        self._certified: Optional[bool] = None
+        self._certification_note: Optional[str] = None
+        self._connections: Optional[list[ConnectionItem]] = None
         self._content_url: Optional[str] = None
-        self._created_at = None
-        self._datasource_type = None
-        self._description = None
-        self._encrypt_extracts = None
-        self._has_extracts = None
+        self._created_at: Optional[datetime.datetime] = None
+        self._datasource_type: Optional[str] = None
+        self._description: Optional[str] = None
+        self._encrypt_extracts: Optional[bool] = None
+        self._has_extracts: Optional[bool] = None
         self._id: Optional[str] = None
         self._initial_tags: set = set()
         self._project_name: Optional[str] = None
         self._revisions = None
         self._size: Optional[int] = None
-        self._updated_at = None
-        self._use_remote_query_agent = None
-        self._webpage_url = None
-        self.description = None
-        self.name = name
+        self._updated_at: Optional[datetime.datetime] = None
+        self._use_remote_query_agent: Optional[bool] = None
+        self._webpage_url: Optional[str] = None
+        self.description: Optional[str] = None
+        self.name: Optional[str] = name
         self.owner_id: Optional[str] = None
-        self.project_id = project_id
+        self.project_id: Optional[str] = project_id
         self.tags: set[str] = set()
 
         self._permissions = None
@@ -63,16 +150,16 @@ class DatasourceItem:
         return None
 
     @property
-    def ask_data_enablement(self) -> Optional[AskDataEnablement]:
+    def ask_data_enablement(self) -> Optional[str]:
         return self._ask_data_enablement
 
     @ask_data_enablement.setter
     @property_is_enum(AskDataEnablement)
-    def ask_data_enablement(self, value: Optional[AskDataEnablement]):
+    def ask_data_enablement(self, value: Optional[str]):
         self._ask_data_enablement = value
 
     @property
-    def connections(self) -> Optional[list[ConnectionItem]]:
+    def connections(self):
         if self._connections is None:
             error = "Datasource item must be populated with connections first."
             raise UnpopulatedPropertyError(error)
@@ -112,7 +199,7 @@ class DatasourceItem:
         self._certification_note = value
 
     @property
-    def encrypt_extracts(self):
+    def encrypt_extracts(self) -> Optional[bool]:
         return self._encrypt_extracts
 
     @encrypt_extracts.setter
@@ -156,7 +243,7 @@ class DatasourceItem:
         return self._description
 
     @description.setter
-    def description(self, value: str):
+    def description(self, value: Optional[str]):
         self._description = value
 
     @property
@@ -187,7 +274,7 @@ class DatasourceItem:
     def size(self) -> Optional[int]:
         return self._size
 
-    def _set_connections(self, connections):
+    def _set_connections(self, connections) -> None:
         self._connections = connections
 
     def _set_permissions(self, permissions):
