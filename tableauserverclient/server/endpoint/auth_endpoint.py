@@ -23,8 +23,8 @@ class Auth(Endpoint):
         def __enter__(self):
             return self
 
-        def __exit__(self, exc_type, exc_val, exc_tb):
-            self._callback()
+        # def __exit__(self, exc_type, exc_val, exc_tb):
+        #     self._callback()
 
     @property
     def baseurl(self) -> str:
@@ -106,13 +106,13 @@ class Auth(Endpoint):
     @api(version="2.0")
     def sign_out(self) -> None:
         """Sign out of current session."""
-        url = f"{self.baseurl}/signout"
-        # If there are no auth tokens you're already signed out. No-op
-        if not self.parent_srv.is_signed_in():
-            return
-        self.post_request(url, "")
-        self.parent_srv._clear_auth()
-        logger.info("Signed out")
+        # url = f"{self.baseurl}/signout"
+        # # If there are no auth tokens you're already signed out. No-op
+        # if not self.parent_srv.is_signed_in():
+        #     return
+        # self.post_request(url, "")
+        # self.parent_srv._clear_auth()
+        # logger.info("Signed out")
 
     @api(version="2.6")
     def switch_site(self, site_item: "SiteItem") -> contextmgr:
