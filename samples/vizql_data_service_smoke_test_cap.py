@@ -8,6 +8,8 @@
 
 import argparse
 import logging
+import requests
+import json
 
 import tableauserverclient as TSC
 
@@ -28,14 +30,6 @@ def main():
     )
     parser.add_argument("resource_id")
 
-    args = parser.parse_args()
-    # Convert Namespace to dictionary
-    args_dict = vars(args)
-
-    # Format the dictionary as a string
-    args_str = ', '.join(f'{key}={value}' for key, value in args_dict.items())
-
-    print(args_str)
     # Set logging level based on user input, or error by default
     logging_level = getattr(logging, args.logging_level.upper())
     logging.basicConfig(level=logging_level)
@@ -43,26 +37,27 @@ def main():
     # Sign in
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
     server = TSC.Server(args.server, use_server_version=True)
+
     with server.auth.sign_in(tableau_auth):
         endpoint = server.datasources
 
         # Get the resource by its ID
         resource = endpoint.get_by_id(args.resource_id)
+        print(server)
 
-        # Populate permissions for the resource
-        endpoint.populate_permissions(resource)
-        permissions = resource.permissions
 
-        # Print result
-        print(f"\n{len(permissions)} permission rule(s) found for workbook {args.resource_id}.")
+        url = "https://" + args.server + "/api/v1/vizql-data-service/read-metadata"
 
-        for permission in permissions:
-            grantee = permission.grantee
-            capabilities = permission.capabilities
-            print(f"\nCapabilities for {grantee.tag_name} {grantee.id}:")
+        payload = "{\n  \"datasource\": {\n    \"datasourceLuid\": \"" + args.resource_id + "\"\n  },\n  \"options\": {\n    \"debug\": true\n  }\n}"
+        headers = {
+        'X-Tableau-Auth': server.auth_token,
+        'Content-Type': 'application/json',
+        }
 
-            for capability in capabilities:
-                print(f"\t{capability} - {capabilities[capability]}")
+        response = requests.request("POST", url, headers=headers, data=payload)
+
+        print(response.text)
+
 
 
 if __name__ == "__main__":
