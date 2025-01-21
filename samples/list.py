@@ -58,8 +58,8 @@ def main():
         count = 0
         for resource in TSC.Pager(endpoint.get, options):
             count = count + 1
-            endpoint.populate_connections(resource)
-            print(resource.name[:18], " ")  , resource._connections())
+            # endpoint.populate_connections(resource)
+            print(resource.name[:18], " ")  # , resource._connections())
             if count > 100:
                 break
         print(f"Total: {count}")
