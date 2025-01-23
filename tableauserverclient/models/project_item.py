@@ -195,7 +195,7 @@ class ProjectItem:
             self._set_values(None, name, description, content_permissions, parent_id)
         return self
             
-     def _set_values(self, project_fields):
+    def _set_values(self, project_fields):
         if 'contentPermissions' in project_fields:
             self._content_permissions = project_fields['contentPermissions']
         if 'createdAt' in project_fields:
