@@ -6,10 +6,11 @@ import os
 
 from contextlib import closing
 from pathlib import Path
-from typing import Optional, TYPE_CHECKING, Union
+from typing import Literal, Optional, TYPE_CHECKING, Union, overload
 from collections.abc import Iterable, Mapping, Sequence
 
 from tableauserverclient.helpers.headers import fix_filename
+from tableauserverclient.models.dqw_item import DQWItem
 from tableauserverclient.server.query import QuerySet
 
 if TYPE_CHECKING:
@@ -71,6 +72,28 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
     # Get all datasources
     @api(version="2.0")
     def get(self, req_options: Optional[RequestOptions] = None) -> tuple[list[DatasourceItem], PaginationItem]:
+        """
+        Returns a list of published data sources on the specified site, with
+        optional parameters for specifying the paging of large results. To get
+        a list of data sources embedded in a workbook, use the Query Workbook
+        Connections method.
+
+        Endpoint is paginated, and will return one page per call.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#query_data_sources
+
+        Parameters
+        ----------
+        req_options : Optional[RequestOptions]
+            Optional parameters for the request, such as filters, sorting, page
+            size, and page number.
+
+        Returns
+        -------
+        tuple[list[DatasourceItem], PaginationItem]
+            A tuple containing the list of datasource items and pagination
+            information.
+        """
         logger.info("Querying all datasources on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -81,6 +104,21 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
     # Get 1 datasource by id
     @api(version="2.0")
     def get_by_id(self, datasource_id: str) -> DatasourceItem:
+        """
+        Returns information about a specific data source.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#query_data_source
+
+        Parameters
+        ----------
+        datasource_id : str
+            The unique ID of the datasource to retrieve.
+
+        Returns
+        -------
+        DatasourceItem
+            An object containing information about the datasource.
+        """
         if not datasource_id:
             error = "Datasource ID undefined."
             raise ValueError(error)
@@ -92,6 +130,20 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
     # Populate datasource item's connections
     @api(version="2.0")
     def populate_connections(self, datasource_item: DatasourceItem) -> None:
+        """
+        Retrieve connection information for the specificed datasource item.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#query_data_source_connections
+
+        Parameters
+        ----------
+        datasource_item : DatasourceItem
+            The datasource item to retrieve connections for.
+
+        Returns
+        -------
+        None
+        """
         if not datasource_item.id:
             error = "Datasource item missing ID. Datasource must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -116,6 +168,22 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
     # Delete 1 datasource by id
     @api(version="2.0")
     def delete(self, datasource_id: str) -> None:
+        """
+        Deletes the specified data source from a site. When a data source is
+        deleted, its associated data connection is also deleted. Workbooks that
+        use the data source are not deleted, but they will no longer work
+        properly.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#delete_data_source
+
+        Parameters
+        ----------
+        datasource_id : str
+
+        Returns
+        -------
+        None
+        """
         if not datasource_id:
             error = "Datasource ID undefined."
             raise ValueError(error)
@@ -133,6 +201,29 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         filepath: Optional[PathOrFileW] = None,
         include_extract: bool = True,
     ) -> PathOrFileW:
+        """
+        Downloads the specified data source from a site. The data source is
+        downloaded as a .tdsx file.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#download_data_source
+
+        Parameters
+        ----------
+        datasource_id : str
+            The unique ID of the datasource to download.
+
+        filepath : Optional[PathOrFileW]
+            The file path to save the downloaded datasource to. If not
+            specified, the file will be saved to the current working directory.
+
+        include_extract : bool, default True
+            If True, the extract is included in the download. If False, the
+            extract is not included.
+
+        Returns
+        -------
+        filepath : PathOrFileW
+        """
         return self.download_revision(
             datasource_id,
             None,
@@ -143,6 +234,28 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
     # Update datasource
     @api(version="2.0")
     def update(self, datasource_item: DatasourceItem) -> DatasourceItem:
+        """
+        Updates the owner, project or certification status of the specified
+        data source.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#update_data_source
+
+        Parameters
+        ----------
+        datasource_item : DatasourceItem
+            The datasource item to update.
+
+        Returns
+        -------
+        DatasourceItem
+            An object containing information about the updated datasource.
+
+        Raises
+        ------
+        MissingRequiredFieldError
+            If the datasource item is missing an ID.
+        """
+
         if not datasource_item.id:
             error = "Datasource item missing ID. Datasource must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -171,6 +284,26 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
     def update_connection(
         self, datasource_item: DatasourceItem, connection_item: ConnectionItem
     ) -> Optional[ConnectionItem]:
+        """
+        Updates the server address, port, username, or password for the
+        specified data source connection.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#update_data_source_connection
+
+        Parameters
+        ----------
+        datasource_item : DatasourceItem
+            The datasource item to update.
+
+        connection_item : ConnectionItem
+            The connection item to update.
+
+        Returns
+        -------
+        Optional[ConnectionItem]
+            An object containing information about the updated connection.
+        """
+
         url = f"{self.baseurl}/{datasource_item.id}/connections/{connection_item.id}"
 
         update_req = RequestFactory.Connection.update_req(connection_item)
@@ -188,6 +321,23 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
 
     @api(version="2.8")
     def refresh(self, datasource_item: DatasourceItem, incremental: bool = False) -> JobItem:
+        """
+        Refreshes the extract of an existing workbook.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#run_extract_refresh_task
+
+        Parameters
+        ----------
+        workbook_item : WorkbookItem | str
+            The workbook item or workbook ID.
+        incremental: bool
+            Whether to do a full refresh or incremental refresh of the extract data
+
+        Returns
+        -------
+        JobItem
+            The job item.
+        """
         id_ = getattr(datasource_item, "id", datasource_item)
         url = f"{self.baseurl}/{id_}/refresh"
         # refresh_req = RequestFactory.Task.refresh_req(incremental)
@@ -198,6 +348,25 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
 
     @api(version="3.5")
     def create_extract(self, datasource_item: DatasourceItem, encrypt: bool = False) -> JobItem:
+        """
+        Create an extract for a data source in a site. Optionally, encrypt the
+        extract if the site and workbooks using it are configured to allow it.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_extract_and_encryption.htm#create_extract_for_datasource
+
+        Parameters
+        ----------
+        datasource_item : DatasourceItem | str
+            The datasource item or datasource ID.
+
+        encrypt : bool, default False
+            Whether to encrypt the extract.
+
+        Returns
+        -------
+        JobItem
+            The job item.
+        """
         id_ = getattr(datasource_item, "id", datasource_item)
         url = f"{self.baseurl}/{id_}/createExtract?encrypt={encrypt}"
         empty_req = RequestFactory.Empty.empty_req()
@@ -207,10 +376,48 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
 
     @api(version="3.5")
     def delete_extract(self, datasource_item: DatasourceItem) -> None:
+        """
+        Delete the extract of a data source in a site.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_extract_and_encryption.htm#delete_extract_from_datasource
+
+        Parameters
+        ----------
+        datasource_item : DatasourceItem | str
+            The datasource item or datasource ID.
+
+        Returns
+        -------
+        None
+        """
         id_ = getattr(datasource_item, "id", datasource_item)
         url = f"{self.baseurl}/{id_}/deleteExtract"
         empty_req = RequestFactory.Empty.empty_req()
         self.post_request(url, empty_req)
+
+    @overload
+    def publish(
+        self,
+        datasource_item: DatasourceItem,
+        file: PathOrFileR,
+        mode: str,
+        connection_credentials: Optional[ConnectionCredentials] = None,
+        connections: Optional[Sequence[ConnectionItem]] = None,
+        as_job: Literal[False] = False,
+    ) -> DatasourceItem:
+        pass
+
+    @overload
+    def publish(
+        self,
+        datasource_item: DatasourceItem,
+        file: PathOrFileR,
+        mode: str,
+        connection_credentials: Optional[ConnectionCredentials] = None,
+        connections: Optional[Sequence[ConnectionItem]] = None,
+        as_job: Literal[True] = True,
+    ) -> JobItem:
+        pass
 
     # Publish datasource
     @api(version="2.0")
@@ -225,6 +432,50 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         connections: Optional[Sequence[ConnectionItem]] = None,
         as_job: bool = False,
     ) -> Union[DatasourceItem, JobItem]:
+        """
+        Publishes a data source to a server, or appends data to an existing
+        data source.
+
+        This method checks the size of the data source and automatically
+        determines whether the publish the data source in multiple parts or in
+        one operation.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#publish_data_source
+
+        Parameters
+        ----------
+        datasource_item : DatasourceItem
+            The datasource item to publish. The fields for name and project_id
+            are required.
+
+        file : PathOrFileR
+            The file path or file object to publish.
+
+        mode : str
+            Specifies whether you are publishing a new datasource (CreateNew),
+            overwriting an existing datasource (Overwrite), or add to an
+            existing datasource (Append). You can also use the publish mode
+            attributes, for example: TSC.Server.PublishMode.Overwrite.
+
+        connection_credentials : Optional[ConnectionCredentials]
+            The connection credentials to use when publishing the datasource.
+            Mutually exclusive with the connections parameter.
+
+        connections : Optional[Sequence[ConnectionItem]]
+            The connections to use when publishing the datasource. Mutually
+            exclusive with the connection_credentials parameter.
+
+        as_job : bool, default False
+            If True, the publish operation is asynchronous and returns a job
+            item. If False, the publish operation is synchronous and returns a
+            datasource item.
+
+        Returns
+        -------
+        Union[DatasourceItem, JobItem]
+            The datasource item or job item.
+
+        """
         if isinstance(file, (os.PathLike, str)):
             if not os.path.isfile(file):
                 error = "File path does not lead to an existing file."
@@ -329,6 +580,51 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         actions: Sequence[Mapping],
         payload: Optional[FilePath] = None,
     ) -> JobItem:
+        """
+        Incrementally updates data (insert, update, upsert, replace and delete)
+        in a published data source from a live-to-Hyper connection, where the
+        data source has multiple connections.
+
+        A live-to-Hyper connection has a Hyper or Parquet formatted
+        file/database as the origin of its data.
+
+        For all connections to Parquet files, and for any data sources with a
+        single connection generally, you can use the Update Data in Hyper Data
+        Source method without specifying the connection-id.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#update_data_in_hyper_connection
+
+        Parameters
+        ----------
+        datasource_or_connection_item : Union[DatasourceItem, ConnectionItem, str]
+            The datasource item, connection item, or datasource ID. Either a
+            DataSourceItem or a ConnectionItem. If the datasource only contains
+            a single connection, the DataSourceItem is sufficient to identify
+            which data should be updated. Otherwise, for datasources with
+            multiple connections, a ConnectionItem must be provided.
+
+        request_id : str
+            User supplied arbitrary string to identify the request. A request
+            identified with the same key will only be executed once, even if
+            additional requests using the key are made, for instance, due to
+            retries when facing network issues.
+
+        actions : Sequence[Mapping]
+            A list of actions (insert, update, delete, ...) specifying how to
+            modify the data within the published datasource. For more
+            information on the actions, see: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_how_to_update_data_to_hyper.htm#action-batch-descriptions
+
+        payload : Optional[FilePath]
+            A Hyper file containing tuples to be inserted/deleted/updated or
+            other payload data used by the actions. Hyper files can be created
+            using the Tableau Hyper API or pantab.
+
+        Returns
+        -------
+        JobItem
+            The job running on the server.
+
+        """
         if isinstance(datasource_or_connection_item, DatasourceItem):
             datasource_id = datasource_or_connection_item.id
             url = f"{self.baseurl}/{datasource_id}/data"
@@ -357,35 +653,179 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
 
     @api(version="2.0")
     def populate_permissions(self, item: DatasourceItem) -> None:
+        """
+        Populates the permissions on the specified datasource item.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_data_source_permissions
+
+        Parameters
+        ----------
+        item : DatasourceItem
+            The datasource item to populate permissions for.
+
+        Returns
+        -------
+        None
+        """
         self._permissions.populate(item)
 
     @api(version="2.0")
     def update_permissions(self, item: DatasourceItem, permission_item: list["PermissionsRule"]) -> None:
+        """
+        Updates the permissions on the specified datasource item. This method
+        overwrites all existing permissions. Any permissions not included in
+        the list will be removed.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#replace_permissions_for_content
+
+        Parameters
+        ----------
+        item : DatasourceItem
+            The datasource item to update permissions for.
+
+        permission_item : list[PermissionsRule]
+            The permissions to apply to the datasource item.
+
+        Returns
+        -------
+        None
+        """
         self._permissions.update(item, permission_item)
 
     @api(version="2.0")
     def delete_permission(self, item: DatasourceItem, capability_item: "PermissionsRule") -> None:
+        """
+        Deletes a single permission rule from the specified datasource item.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_data_source_permissionDatasourceItem
+
+        Parameters
+        ----------
+        item : DatasourceItem
+            The datasource item to delete permissions from.
+
+        capability_item : PermissionsRule
+            The permission rule to delete.
+
+        Returns
+        -------
+        None
+        """
         self._permissions.delete(item, capability_item)
 
     @api(version="3.5")
-    def populate_dqw(self, item):
+    def populate_dqw(self, item) -> None:
+        """
+        Get information about the data quality warning for the database, table,
+        column, published data source, flow, virtual connection, or virtual
+        connection table.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#query_dqws
+
+        Parameters
+        ----------
+        item : DatasourceItem
+            The datasource item to populate data quality warnings for.
+
+        Returns
+        -------
+        None
+        """
         self._data_quality_warnings.populate(item)
 
     @api(version="3.5")
     def update_dqw(self, item, warning):
+        """
+        Update the warning type, status, and message of a data quality warning.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#update_dqw
+
+        Parameters
+        ----------
+        item : DatasourceItem
+            The datasource item to update data quality warnings for.
+
+        warning : DQWItem
+            The data quality warning to update.
+
+        Returns
+        -------
+        DQWItem
+            The updated data quality warning.
+        """
         return self._data_quality_warnings.update(item, warning)
 
     @api(version="3.5")
     def add_dqw(self, item, warning):
+        """
+        Add a data quality warning to a datasource.
+
+        The Add Data Quality Warning method adds a data quality warning to an
+        asset. (An automatically-generated monitoring warning does not count
+        towards this limit.) In Tableau Cloud February 2024 and Tableau Server
+        2024.2 and earlier, adding a data quality warning to an asset that
+        already has one causes an error.
+
+        This method is available if your Tableau Cloud site or Tableau Server is licensed with Data Management.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#add_dqw
+
+        Parameters
+        ----------
+        item: DatasourceItem
+            The datasource item to add data quality warnings to.
+
+        warning: DQWItem
+            The data quality warning to add.
+
+        Returns
+        -------
+        DQWItem
+            The added data quality warning.
+
+        """
         return self._data_quality_warnings.add(item, warning)
 
     @api(version="3.5")
     def delete_dqw(self, item):
+        """
+        Delete a data quality warnings from an asset.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#delete_dqws
+
+        Parameters
+        ----------
+        item: DatasourceItem
+            The datasource item to delete data quality warnings from.
+
+        Returns
+        -------
+        None
+        """
         self._data_quality_warnings.clear(item)
 
     # Populate datasource item's revisions
     @api(version="2.3")
     def populate_revisions(self, datasource_item: DatasourceItem) -> None:
+        """
+        Retrieve revision information for the specified datasource item.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#get_data_source_revisions
+
+        Parameters
+        ----------
+        datasource_item : DatasourceItem
+            The datasource item to retrieve revisions for.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        MissingRequiredFieldError
+            If the datasource item is missing an ID.
+        """
         if not datasource_item.id:
             error = "Datasource item missing ID. Datasource must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -413,6 +853,35 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         filepath: Optional[PathOrFileW] = None,
         include_extract: bool = True,
     ) -> PathOrFileW:
+        """
+        Downloads a specific version of a data source prior to the current one
+        in .tdsx format. To download the current version of a data source set
+        the revision number to None.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#download_data_source_revision
+
+        Parameters
+        ----------
+        datasource_id : str
+            The unique ID of the datasource to download.
+
+        revision_number : Optional[str]
+            The revision number of the data source to download. To determine
+            what versions are available, call the `populate_revisions` method.
+            Pass None to download the current version.
+
+        filepath : Optional[PathOrFileW]
+            The file path to save the downloaded datasource to. If not
+            specified, the file will be saved to the current working directory.
+
+        include_extract : bool, default True
+            If True, the extract is included in the download. If False, the
+            extract is not included.
+
+        Returns
+        -------
+        filepath : PathOrFileW
+        """
         if not datasource_id:
             error = "Datasource ID undefined."
             raise ValueError(error)
@@ -446,6 +915,28 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
 
     @api(version="2.3")
     def delete_revision(self, datasource_id: str, revision_number: str) -> None:
+        """
+        Removes a specific version of a data source from the specified site.
+
+        The content is removed, and the specified revision can no longer be
+        downloaded using Download Data Source Revision. If you call Get Data
+        Source Revisions, the revision that's been removed is listed with the
+        attribute is_deleted=True.
+
+        REST API:https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#remove_data_source_revision
+
+        Parameters
+        ----------
+        datasource_id : str
+            The unique ID of the datasource to delete.
+
+        revision_number : str
+            The revision number of the data source to delete.
+
+        Returns
+        -------
+        None
+        """
         if datasource_id is None or revision_number is None:
             raise ValueError
         url = "/".join([self.baseurl, datasource_id, "revisions", revision_number])
@@ -458,18 +949,83 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
     def schedule_extract_refresh(
         self, schedule_id: str, item: DatasourceItem
     ) -> list["AddResponse"]:  # actually should return a task
+        """
+        Adds a task to refresh a data source to an existing server schedule on
+        Tableau Server.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#add_data_source_to_schedule
+
+        Parameters
+        ----------
+        schedule_id : str
+            The unique ID of the schedule to add the task to.
+
+        item : DatasourceItem
+            The datasource item to add to the schedule.
+
+        Returns
+        -------
+        list[AddResponse]
+        """
         return self.parent_srv.schedules.add_to_schedule(schedule_id, datasource=item)
 
     @api(version="1.0")
     def add_tags(self, item: Union[DatasourceItem, str], tags: Union[Iterable[str], str]) -> set[str]:
+        """
+        Adds one or more tags to the specified datasource item.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#add_tags_to_data_source
+
+        Parameters
+        ----------
+        item : Union[DatasourceItem, str]
+            The datasource item or ID to add tags to.
+
+        tags : Union[Iterable[str], str]
+            The tag or tags to add to the datasource item.
+
+        Returns
+        -------
+        set[str]
+            The updated set of tags on the datasource item.
+        """
         return super().add_tags(item, tags)
 
     @api(version="1.0")
     def delete_tags(self, item: Union[DatasourceItem, str], tags: Union[Iterable[str], str]) -> None:
+        """
+        Deletes one or more tags from the specified datasource item.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#delete_tag_from_data_source
+
+        Parameters
+        ----------
+        item : Union[DatasourceItem, str]
+            The datasource item or ID to delete tags from.
+
+        tags : Union[Iterable[str], str]
+            The tag or tags to delete from the datasource item.
+
+        Returns
+        -------
+        None
+        """
         return super().delete_tags(item, tags)
 
     @api(version="1.0")
     def update_tags(self, item: DatasourceItem) -> None:
+        """
+        Updates the tags on the server to match the specified datasource item.
+
+        Parameters
+        ----------
+        item : DatasourceItem
+            The datasource item to update tags for.
+
+        Returns
+        -------
+        None
+        """
         return super().update_tags(item)
 
     def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[DatasourceItem]:
