@@ -1,4 +1,3 @@
-
 from .endpoint import Endpoint, api, parameter_added_in
 from .exceptions import MissingRequiredFieldError
 
@@ -36,7 +35,7 @@ class Projects(QuerysetEndpoint[ProjectItem]):
     @api(version="2.0")
     def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[ProjectItem], PaginationItem]:
         logger.info("Querying all projects on site")
-        url = self.baseurl + '?fields=_all_'
+        url = self.baseurl + "?fields=_all_"
         server_response = self.get_request(url, req_options)
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         all_project_items = ProjectItem.from_response(server_response.content, self.parent_srv.namespace)
