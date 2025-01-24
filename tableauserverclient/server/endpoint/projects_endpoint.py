@@ -1,7 +1,6 @@
 
 from .endpoint import Endpoint, api, parameter_added_in
 from .exceptions import MissingRequiredFieldError
-from .. import RequestFactory, ProjectItem, PaginationItem
 
 import logging
 
@@ -10,8 +9,7 @@ from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api, 
 from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
 from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
 from tableauserverclient.server import RequestFactory, RequestOptions
-from tableauserverclient.models.permissions_item import PermissionsRule
-from tableauserverclient.models import ProjectItem, PaginationItem, Resource
+from tableauserverclient.models import PaginationItem, PermissionsRule, ProjectItem, Resource
 
 from typing import Optional, TYPE_CHECKING
 
