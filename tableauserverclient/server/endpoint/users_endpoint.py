@@ -355,7 +355,7 @@ class Users(QuerysetEndpoint[UserItem]):
         been deprecated in favor of using the bulk_add which accomplishes the
         same task in one API call.
 
-        .. deprecated:: v0.34.0
+        .. deprecated:: v0.37.0
             `add_all` will be removed as its functionality is replicated via
             the `bulk_add` method.
 
@@ -496,7 +496,7 @@ class Users(QuerysetEndpoint[UserItem]):
         been deprecated in favor of using the bulk_add which accomplishes the
         same task in one API call.
 
-        .. deprecated:: v0.34.0
+        .. deprecated:: v0.37.0
             `add_all` will be removed as its functionality is replicated via
             the `bulk_add` method.
 
