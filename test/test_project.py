@@ -10,6 +10,7 @@ from ._utils import read_xml_asset, asset
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
 GET_XML = asset("project_get.xml")
+GET_XML_ALL_FIELDS = asset("project_get_all_fields.xml")
 UPDATE_XML = asset("project_update.xml")
 SET_CONTENT_PERMISSIONS_XML = asset("project_content_permission.xml")
 CREATE_XML = asset("project_create.xml")
@@ -410,3 +411,28 @@ class ProjectTests(unittest.TestCase):
             m.delete(f"{base_url}/{endpoint}/Connect/Allow", status_code=204)
 
             self.server.projects.delete_virtualconnection_default_permissions(project, rule)
+
+    def test_get_all_fields(self) -> None:
+        self.server.version = "3.23"
+        base_url = self.server.projects.baseurl
+        with open(GET_XML_ALL_FIELDS, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+
+        ro = TSC.RequestOptions()
+        ro.all_fields = True
+
+        with requests_mock.mock() as m:
+            m.get(f"{base_url}?fields=_all_", text=response_xml)
+            all_projects, pagination_item = self.server.projects.get(req_options=ro)
+
+        assert pagination_item.total_available == 3
+        assert len(all_projects) == 1
+        project: TSC.ProjectItem = all_projects[0]
+        assert isinstance(project, TSC.ProjectItem)
+        assert project.id == "ee8c6e70-43b6-11e6-af4f-f7b0d8e20760"
+        assert project.name == "Samples"
+        assert project.description == "This project includes automatically uploaded samples."
+        assert project.top_level_project is True
+        assert project.content_permissions == "ManagedByOwner"
+        assert project.parent_id is None
+        assert project.writeable is True

@@ -87,7 +87,7 @@ class Users(QuerysetEndpoint[UserItem]):
 
         if req_options is None:
             req_options = RequestOptions()
-        req_options._all_fields = True
+        req_options.all_fields = True
 
         url = self.baseurl
         server_response = self.get_request(url, req_options)

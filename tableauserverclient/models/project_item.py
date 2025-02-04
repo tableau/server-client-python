@@ -1,11 +1,10 @@
-import logging
 import xml.etree.ElementTree as ET
-from typing import Optional
+from typing import Optional, overload
 
 from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.models.exceptions import UnpopulatedPropertyError
-from tableauserverclient.models.property_decorators import property_is_enum, property_not_empty
+from tableauserverclient.models.property_decorators import property_is_enum
 
 
 class ProjectItem:
@@ -75,6 +74,8 @@ class ProjectItem:
         self.parent_id: Optional[str] = parent_id
         self._samples: Optional[bool] = samples
         self._owner_id: Optional[str] = None
+        self._top_level_project: Optional[bool] = None
+        self._writeable: Optional[bool] = None
 
         self._permissions = None
         self._default_workbook_permissions = None
@@ -86,6 +87,11 @@ class ProjectItem:
         self._default_virtualconnection_permissions = None
         self._default_database_permissions = None
         self._default_table_permissions = None
+
+        self._project_count: Optional[int] = None
+        self._workbok_count: Optional[int] = None
+        self._view_count: Optional[int] = None
+        self._datasource_count: Optional[int] = None
 
     @property
     def content_permissions(self):
@@ -176,25 +182,48 @@ class ProjectItem:
     def owner_id(self, value: str) -> None:
         self._owner_id = value
 
+    @property
+    def top_level_project(self) -> Optional[bool]:
+        return self._top_level_project
+
+    @property
+    def writeable(self) -> Optional[bool]:
+        return self._writeable
+
+    @property
+    def project_count(self) -> Optional[int]:
+        return self._project_count
+
+    @property
+    def workbok_count(self) -> Optional[int]:
+        return self._workbok_count
+
+    @property
+    def view_count(self) -> Optional[int]:
+        return self._view_count
+
+    @property
+    def datasource_count(self) -> Optional[int]:
+        return self._datasource_count
+
     def is_default(self):
         return self.name.lower() == "default"
 
-    def _parse_common_tags(self, project_xml, ns):
-        if not isinstance(project_xml, ET.Element):
-            project_xml = fromstring(project_xml).find(".//t:project", namespaces=ns)
-
-        if project_xml is not None:
-            (
-                _,
-                name,
-                description,
-                content_permissions,
-                parent_id,
-            ) = self._parse_element(project_xml)
-            self._set_values(None, name, description, content_permissions, parent_id)
-        return self
-
-    def _set_values(self, project_id, name, description, content_permissions, parent_id, owner_id):
+    def _set_values(
+        self,
+        project_id,
+        name,
+        description,
+        content_permissions,
+        parent_id,
+        owner_id,
+        top_level_project,
+        writeable,
+        project_count,
+        workbok_count,
+        view_count,
+        datasource_count,
+    ):
         if project_id is not None:
             self._id = project_id
         if name:
@@ -207,6 +236,18 @@ class ProjectItem:
             self.parent_id = parent_id
         if owner_id:
             self._owner_id = owner_id
+        if project_count is not None:
+            self._project_count = project_count
+        if workbok_count is not None:
+            self._workbok_count = workbok_count
+        if view_count is not None:
+            self._view_count = view_count
+        if datasource_count is not None:
+            self._datasource_count = datasource_count
+        if top_level_project is not None:
+            self._top_level_project = top_level_project
+        if writeable is not None:
+            self._writeable = writeable
 
     def _set_permissions(self, permissions):
         self._permissions = permissions
@@ -220,31 +261,68 @@ class ProjectItem:
         )
 
     @classmethod
-    def from_response(cls, resp, ns) -> list["ProjectItem"]:
+    def from_response(cls, resp: bytes, ns: Optional[dict]) -> list["ProjectItem"]:
         all_project_items = list()
         parsed_response = fromstring(resp)
         all_project_xml = parsed_response.findall(".//t:project", namespaces=ns)
 
         for project_xml in all_project_xml:
-            project_item = cls.from_xml(project_xml)
+            project_item = cls.from_xml(project_xml, namespace=ns)
             all_project_items.append(project_item)
         return all_project_items
 
     @classmethod
-    def from_xml(cls, project_xml, namespace=None) -> "ProjectItem":
+    def from_xml(cls, project_xml: ET.Element, namespace: Optional[dict] = None) -> "ProjectItem":
         project_item = cls()
-        project_item._set_values(*cls._parse_element(project_xml))
+        project_item._set_values(*cls._parse_element(project_xml, namespace))
         return project_item
 
     @staticmethod
-    def _parse_element(project_xml):
+    def _parse_element(project_xml: ET.Element, namespace: Optional[dict]) -> tuple:
         id = project_xml.get("id", None)
         name = project_xml.get("name", None)
         description = project_xml.get("description", None)
         content_permissions = project_xml.get("contentPermissions", None)
         parent_id = project_xml.get("parentProjectId", None)
+        top_level_project = str_to_bool(project_xml.get("topLevelProject", None))
+        writeable = str_to_bool(project_xml.get("writeable", None))
         owner_id = None
-        for owner in project_xml:
-            owner_id = owner.get("id", None)
+        if (owner_elem := project_xml.find(".//t:owner", namespaces=namespace)) is not None:
+            owner_id = owner_elem.get("id", None)
 
-        return id, name, description, content_permissions, parent_id, owner_id
+        project_count = None
+        workbok_count = None
+        view_count = None
+        datasource_count = None
+        if (count_elem := project_xml.find(".//t:contentsCounts", namespaces=namespace)) is not None:
+            project_count = int(count_elem.get("projectCount", 0))
+            workbok_count = int(count_elem.get("workbookCount", 0))
+            view_count = int(count_elem.get("viewCount", 0))
+            datasource_count = int(count_elem.get("dataSourceCount", 0))
+
+        return (
+            id,
+            name,
+            description,
+            content_permissions,
+            parent_id,
+            owner_id,
+            top_level_project,
+            writeable,
+            project_count,
+            workbok_count,
+            view_count,
+            datasource_count,
+        )
+
+
+@overload
+def str_to_bool(value: str) -> bool: ...
+
+
+@overload
+def str_to_bool(value: None) -> None: ...
+
+
+def str_to_bool(value):
+    return value.lower() == "true" if value is not None else None

@@ -251,7 +251,7 @@ class RequestOptionTests(unittest.TestCase):
             m.get(requests_mock.ANY)
             url = self.baseurl + "/views/456/data"
             opts = TSC.RequestOptions()
-            opts._all_fields = True
+            opts.all_fields = True
 
             resp = self.server.users.get_request(url, request_object=opts)
             self.assertTrue(re.search("fields=_all_", resp.request.query))
