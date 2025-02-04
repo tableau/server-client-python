@@ -28,6 +28,7 @@ from tableauserverclient.models.linked_tasks_item import (
     LinkedTaskStepItem,
     LinkedTaskFlowRunItem,
 )
+from tableauserverclient.models.location_item import LocationItem
 from tableauserverclient.models.metric_item import MetricItem
 from tableauserverclient.models.pagination_item import PaginationItem
 from tableauserverclient.models.permissions_item import PermissionsRule, Permission
@@ -75,6 +76,7 @@ __all__ = [
     "MonthlyInterval",
     "HourlyInterval",
     "BackgroundJobItem",
+    "LocationItem",
     "MetricItem",
     "PaginationItem",
     "Permission",

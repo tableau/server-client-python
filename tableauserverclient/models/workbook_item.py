@@ -2,7 +2,7 @@ import copy
 import datetime
 import uuid
 import xml.etree.ElementTree as ET
-from typing import Callable, Optional
+from typing import Callable, Optional, overload
 
 from defusedxml.ElementTree import fromstring
 
@@ -139,6 +139,8 @@ class WorkbookItem:
         self._permissions = None
         self.thumbnails_user_id = thumbnails_user_id
         self.thumbnails_group_id = thumbnails_group_id
+        self._sheet_count: Optional[int] = None
+        self._has_extracts: Optional[bool] = None
 
         return None
 
@@ -233,6 +235,14 @@ class WorkbookItem:
     @property
     def size(self):
         return self._size
+
+    @property
+    def sheet_count(self) -> Optional[int]:
+        return self._sheet_count
+
+    @property
+    def has_extracts(self) -> Optional[bool]:
+        return self._has_extracts
 
     @property
     def updated_at(self) -> Optional[datetime.datetime]:
@@ -342,6 +352,8 @@ class WorkbookItem:
                 views,
                 data_acceleration_config,
                 data_freshness_policy,
+                sheet_count,
+                has_extracts,
             ) = self._parse_element(workbook_xml, ns)
 
             self._set_values(
@@ -361,6 +373,8 @@ class WorkbookItem:
                 views,
                 data_acceleration_config,
                 data_freshness_policy,
+                sheet_count,
+                has_extracts,
             )
 
         return self
@@ -383,6 +397,8 @@ class WorkbookItem:
         views,
         data_acceleration_config,
         data_freshness_policy,
+        sheet_count,
+        has_extracts,
     ):
         if id is not None:
             self._id = id
@@ -417,6 +433,10 @@ class WorkbookItem:
             self.data_acceleration_config = data_acceleration_config
         if data_freshness_policy is not None:
             self.data_freshness_policy = data_freshness_policy
+        if sheet_count is not None:
+            self._sheet_count = sheet_count
+        if has_extracts is not None:
+            self._has_extracts = has_extracts
 
     @classmethod
     def from_response(cls, resp: str, ns: dict[str, str]) -> list["WorkbookItem"]:
@@ -443,6 +463,8 @@ class WorkbookItem:
         created_at = parse_datetime(workbook_xml.get("createdAt", None))
         description = workbook_xml.get("description", None)
         updated_at = parse_datetime(workbook_xml.get("updatedAt", None))
+        sheet_count = string_to_int(workbook_xml.get("sheetCount", None))
+        has_extracts = string_to_bool(workbook_xml.get("hasExtracts", ""))
 
         size = workbook_xml.get("size", None)
         if size:
@@ -505,6 +527,8 @@ class WorkbookItem:
             views,
             data_acceleration_config,
             data_freshness_policy,
+            sheet_count,
+            has_extracts,
         )
 
 
@@ -535,3 +559,15 @@ def parse_data_acceleration_config(data_acceleration_elem):
 # Used to convert string represented boolean to a boolean type
 def string_to_bool(s: str) -> bool:
     return s.lower() == "true"
+
+
+@overload
+def string_to_int(s: None) -> None: ...
+
+
+@overload
+def string_to_int(s: str) -> int: ...
+
+
+def string_to_int(s):
+    return int(s) if s is not None else None

@@ -250,6 +250,12 @@ class UserItem:
         return cls._parse_xml(element_name, resp, ns)
 
     @classmethod
+    def from_xml(cls, xml: ET.Element, ns: Optional[dict] = None) -> "UserItem":
+        item = cls()
+        item._set_values(*cls._parse_element(xml, ns))
+        return item
+
+    @classmethod
     def _parse_xml(cls, element_name, resp, ns):
         all_user_items = []
         parsed_response = fromstring(resp)

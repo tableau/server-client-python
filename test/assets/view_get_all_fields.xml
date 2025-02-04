@@ -1,0 +1,35 @@
+<ns0:tsResponse xmlns:ns0="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api https://help.tableau.com/samples/en-us/rest_api/ts-api_3_25.xsd">
+  <ns0:pagination pageNumber="1" pageSize="100" totalAvailable="40" />
+  <ns0:views>
+    <ns0:view id="2bdcd787-dcc6-4a5d-bc61-2846f1ef4534" name="Overview" contentUrl="Superstore/sheets/Overview" createdAt="2024-02-14T04:42:09Z" updatedAt="2024-02-14T04:42:09Z" sheetType="dashboard" favoritesTotal="0" viewUrlName="Overview">
+      <ns0:workbook id="9df3e2d1-070e-497a-9578-8cc557ced9df" name="Superstore" contentUrl="Superstore" showTabs="true" size="2" createdAt="2024-02-14T04:42:09Z" updatedAt="2024-02-14T04:42:10Z" sheetCount="9" hasExtracts="false">
+        <ns0:tags />
+      </ns0:workbook>
+      <ns0:owner email="bob@example.com" fullName="Bob" id="ee8bc9ca-77fe-4ae0-8093-cf77f0ee67a9" lastLogin="2025-02-04T06:39:20Z" name="bob@example.com" siteRole="SiteAdministratorCreator" />
+      <ns0:project id="669ca36b-492e-4ccf-bca1-3614fe6a9d7a" name="Samples" description="This project includes automatically uploaded samples." />
+      <ns0:tags />
+      <ns0:usage totalViewCount="0" />
+      <ns0:location id="669ca36b-492e-4ccf-bca1-3614fe6a9d7a" type="Project" />
+    </ns0:view>
+    <ns0:view id="2a3fd19d-9129-413d-9ff7-9dfc36bf7f7e" name="Product" contentUrl="Superstore/sheets/Product" createdAt="2024-02-14T04:42:09Z" updatedAt="2024-02-14T04:42:09Z" sheetType="dashboard" favoritesTotal="0" viewUrlName="Product">
+      <ns0:workbook id="9df3e2d1-070e-497a-9578-8cc557ced9df" name="Superstore" contentUrl="Superstore" showTabs="true" size="2" createdAt="2024-02-14T04:42:09Z" updatedAt="2024-02-14T04:42:10Z" sheetCount="9" hasExtracts="false">
+        <ns0:tags />
+      </ns0:workbook>
+      <ns0:owner email="bob@example.com" fullName="Bob" id="ee8bc9ca-77fe-4ae0-8093-cf77f0ee67a9" lastLogin="2025-02-04T06:39:20Z" name="bob@example.com" siteRole="SiteAdministratorCreator" />
+      <ns0:project id="669ca36b-492e-4ccf-bca1-3614fe6a9d7a" name="Samples" description="This project includes automatically uploaded samples." />
+      <ns0:tags />
+      <ns0:usage totalViewCount="0" />
+      <ns0:location id="669ca36b-492e-4ccf-bca1-3614fe6a9d7a" type="Project" />
+    </ns0:view>
+    <ns0:view id="459eda9a-85e4-46bf-a2f2-62936bd2e99a" name="Customers" contentUrl="Superstore/sheets/Customers" createdAt="2024-02-14T04:42:09Z" updatedAt="2024-02-14T04:42:09Z" sheetType="dashboard" favoritesTotal="0" viewUrlName="Customers">
+      <ns0:workbook id="9df3e2d1-070e-497a-9578-8cc557ced9df" name="Superstore" contentUrl="Superstore" showTabs="true" size="2" createdAt="2024-02-14T04:42:09Z" updatedAt="2024-02-14T04:42:10Z" sheetCount="9" hasExtracts="false">
+        <ns0:tags />
+      </ns0:workbook>
+      <ns0:owner email="bob@example.com" fullName="Bob" id="ee8bc9ca-77fe-4ae0-8093-cf77f0ee67a9" lastLogin="2025-02-04T06:39:20Z" name="bob@example.com" siteRole="SiteAdministratorCreator" />
+      <ns0:project id="669ca36b-492e-4ccf-bca1-3614fe6a9d7a" name="Samples" description="This project includes automatically uploaded samples." />
+      <ns0:tags />
+      <ns0:usage totalViewCount="0" />
+      <ns0:location id="669ca36b-492e-4ccf-bca1-3614fe6a9d7a" type="Project" />
+    </ns0:view>
+  </ns0:views>
+</ns0:tsResponse>
