@@ -7,6 +7,9 @@ from typing import Callable, Optional, overload
 from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.datetime_helpers import parse_datetime
+from tableauserverclient.models.location_item import LocationItem
+from tableauserverclient.models.project_item import ProjectItem
+from tableauserverclient.models.user_item import UserItem
 from .connection_item import ConnectionItem
 from .exceptions import UnpopulatedPropertyError
 from .permissions_item import PermissionsRule
@@ -141,6 +144,13 @@ class WorkbookItem:
         self.thumbnails_group_id = thumbnails_group_id
         self._sheet_count: Optional[int] = None
         self._has_extracts: Optional[bool] = None
+        self._project: Optional[ProjectItem] = None
+        self._owner: Optional[UserItem] = None
+        self._location: Optional[LocationItem] = None
+        self._encrypt_extracts: Optional[bool] = None
+        self._default_view_id: Optional[str] = None
+        self._share_description: Optional[str] = None
+        self._last_published_at: Optional[datetime.datetime] = None
 
         return None
 
@@ -310,6 +320,34 @@ class WorkbookItem:
     def thumbnails_group_id(self, value: str):
         self._thumbnails_group_id = value
 
+    @property
+    def project(self) -> Optional[ProjectItem]:
+        return self._project
+
+    @property
+    def owner(self) -> Optional[UserItem]:
+        return self._owner
+
+    @property
+    def location(self) -> Optional[LocationItem]:
+        return self._location
+
+    @property
+    def encrypt_extracts(self) -> Optional[bool]:
+        return self._encrypt_extracts
+
+    @property
+    def default_view_id(self) -> Optional[str]:
+        return self._default_view_id
+
+    @property
+    def share_description(self) -> Optional[str]:
+        return self._share_description
+
+    @property
+    def last_published_at(self) -> Optional[datetime.datetime]:
+        return self._last_published_at
+
     def _set_connections(self, connections):
         self._connections = connections
 
@@ -354,6 +392,13 @@ class WorkbookItem:
                 data_freshness_policy,
                 sheet_count,
                 has_extracts,
+                project,
+                owner,
+                location,
+                encrypt_extracts,
+                default_view_id,
+                share_description,
+                last_published_at,
             ) = self._parse_element(workbook_xml, ns)
 
             self._set_values(
@@ -375,6 +420,13 @@ class WorkbookItem:
                 data_freshness_policy,
                 sheet_count,
                 has_extracts,
+                project,
+                owner,
+                location,
+                encrypt_extracts,
+                default_view_id,
+                share_description,
+                last_published_at,
             )
 
         return self
@@ -399,6 +451,13 @@ class WorkbookItem:
         data_freshness_policy,
         sheet_count,
         has_extracts,
+        project,
+        owner,
+        location,
+        encrypt_extracts,
+        default_view_id,
+        share_description,
+        last_published_at,
     ):
         if id is not None:
             self._id = id
@@ -437,6 +496,20 @@ class WorkbookItem:
             self._sheet_count = sheet_count
         if has_extracts is not None:
             self._has_extracts = has_extracts
+        if project:
+            self._project = project
+        if owner:
+            self._owner = owner
+        if location:
+            self._location = location
+        if encrypt_extracts is not None:
+            self._encrypt_extracts = encrypt_extracts
+        if default_view_id is not None:
+            self._default_view_id = default_view_id
+        if share_description is not None:
+            self._share_description = share_description
+        if last_published_at is not None:
+            self._last_published_at = last_published_at
 
     @classmethod
     def from_response(cls, resp: str, ns: dict[str, str]) -> list["WorkbookItem"]:
@@ -465,6 +538,10 @@ class WorkbookItem:
         updated_at = parse_datetime(workbook_xml.get("updatedAt", None))
         sheet_count = string_to_int(workbook_xml.get("sheetCount", None))
         has_extracts = string_to_bool(workbook_xml.get("hasExtracts", ""))
+        encrypt_extracts = string_to_bool(e) if (e := workbook_xml.get("encryptExtracts", None)) is not None else None
+        default_view_id = workbook_xml.get("defaultViewId", None)
+        share_description = workbook_xml.get("shareDescription", None)
+        last_published_at = parse_datetime(workbook_xml.get("lastPublishedAt", None))
 
         size = workbook_xml.get("size", None)
         if size:
@@ -474,14 +551,18 @@ class WorkbookItem:
 
         project_id = None
         project_name = None
+        project = None
         project_tag = workbook_xml.find(".//t:project", namespaces=ns)
         if project_tag is not None:
+            project = ProjectItem.from_xml(project_tag, ns)
             project_id = project_tag.get("id", None)
             project_name = project_tag.get("name", None)
 
         owner_id = None
+        owner = None
         owner_tag = workbook_xml.find(".//t:owner", namespaces=ns)
         if owner_tag is not None:
+            owner = UserItem.from_xml(owner_tag, ns)
             owner_id = owner_tag.get("id", None)
 
         tags = None
@@ -494,6 +575,11 @@ class WorkbookItem:
         views_elem = workbook_xml.find(".//t:views", namespaces=ns)
         if views_elem is not None:
             views = ViewItem.from_xml_element(views_elem, ns)
+
+        location = None
+        location_elem = workbook_xml.find(".//t:location", namespaces=ns)
+        if location_elem is not None:
+            location = LocationItem.from_xml(location_elem, ns)
 
         data_acceleration_config = {
             "acceleration_enabled": None,
@@ -529,6 +615,13 @@ class WorkbookItem:
             data_freshness_policy,
             sheet_count,
             has_extracts,
+            project,
+            owner,
+            location,
+            encrypt_extracts,
+            default_view_id,
+            share_description,
+            last_published_at,
         )
 
 
