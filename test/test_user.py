@@ -4,11 +4,12 @@ import unittest
 import requests_mock
 
 import tableauserverclient as TSC
-from tableauserverclient.datetime_helpers import format_datetime
+from tableauserverclient.datetime_helpers import format_datetime, parse_datetime
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
 GET_XML = os.path.join(TEST_ASSET_DIR, "user_get.xml")
+GET_XML_ALL_FIELDS = os.path.join(TEST_ASSET_DIR, "user_get_all_fields.xml")
 GET_EMPTY_XML = os.path.join(TEST_ASSET_DIR, "user_get_empty.xml")
 GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, "user_get_by_id.xml")
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, "user_update.xml")
@@ -249,3 +250,37 @@ class UserTests(unittest.TestCase):
             users, failures = self.server.users.create_from_file(USERS)
         assert users[0].name == "Cassie", users
         assert failures == []
+
+    def test_get_users_all_fields(self) -> None:
+        self.server.version = "3.7"
+        baseurl = self.server.users.baseurl
+        with open(GET_XML_ALL_FIELDS) as f:
+            response_xml = f.read()
+
+        with requests_mock.mock() as m:
+            m.get(f"{baseurl}?fields=_all_", text=response_xml)
+            all_users, _ = self.server.users.get()
+
+        assert all_users[0].auth_setting == "TableauIDWithMFA"
+        assert all_users[0].email == "bob@example.com"
+        assert all_users[0].external_auth_user_id == "38c870c3ac5e84ec66e6ced9fb23681835b07e56d5660371ac1f705cc65bd610"
+        assert all_users[0].fullname == "Bob Smith"
+        assert all_users[0].id == "ee8bc9ca-77fe-4ae0-8093-cf77f0ee67a9"
+        assert all_users[0].last_login == parse_datetime("2025-02-04T06:39:20Z")
+        assert all_users[0].name == "bob@example.com"
+        assert all_users[0].site_role == "SiteAdministratorCreator"
+        assert all_users[0].locale is None
+        assert all_users[0].language == "en"
+        assert all_users[0].idp_configuration_id == "22222222-2222-2222-2222-222222222222"
+        assert all_users[0].domain_name == "TABID_WITH_MFA"
+        assert all_users[1].auth_setting == "TableauIDWithMFA"
+        assert all_users[1].email == "alice@example.com"
+        assert all_users[1].external_auth_user_id == "96f66b893b22669cdfa632275d354cd1d92cea0266f3be7702151b9b8c52be29"
+        assert all_users[1].fullname == "Alice Jones"
+        assert all_users[1].id == "f6d72445-285b-48e5-8380-f90b519ce682"
+        assert all_users[1].name == "alice@example.com"
+        assert all_users[1].site_role == "ExplorerCanPublish"
+        assert all_users[1].locale is None
+        assert all_users[1].language == "en"
+        assert all_users[1].idp_configuration_id == "22222222-2222-2222-2222-222222222222"
+        assert all_users[1].domain_name == "TABID_WITH_MFA"
