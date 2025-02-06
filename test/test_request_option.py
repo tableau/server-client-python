@@ -368,3 +368,13 @@ class RequestOptionTests(unittest.TestCase):
 
             resp = self.server.users.get_request(url, request_object=opts)
             self.assertTrue(re.search("language=en-us", resp.request.query))
+
+    def test_queryset_fields(self) -> None:
+        loop = self.server.users.fields("id")
+        assert "id" in loop.request_options.fields
+        assert "_default_" in loop.request_options.fields
+
+    def test_queryset_only_fields(self) -> None:
+        loop = self.server.users.only_fields("id")
+        assert "id" in loop.request_options.fields
+        assert "_default_" not in loop.request_options.fields
