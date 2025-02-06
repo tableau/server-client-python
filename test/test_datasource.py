@@ -10,7 +10,7 @@ from defusedxml.ElementTree import fromstring
 
 import tableauserverclient as TSC
 from tableauserverclient import ConnectionItem
-from tableauserverclient.datetime_helpers import format_datetime
+from tableauserverclient.datetime_helpers import format_datetime, parse_datetime
 from tableauserverclient.server.endpoint.exceptions import InternalServerError
 from tableauserverclient.server.endpoint.fileuploads_endpoint import Fileuploads
 from tableauserverclient.server.request_factory import RequestFactory
@@ -20,6 +20,7 @@ ADD_TAGS_XML = "datasource_add_tags.xml"
 GET_XML = "datasource_get.xml"
 GET_EMPTY_XML = "datasource_get_empty.xml"
 GET_BY_ID_XML = "datasource_get_by_id.xml"
+GET_XML_ALL_FIELDS = "datasource_get_all_fields.xml"
 POPULATE_CONNECTIONS_XML = "datasource_populate_connections.xml"
 POPULATE_PERMISSIONS_XML = "datasource_populate_permissions.xml"
 PUBLISH_XML = "datasource_publish.xml"
@@ -733,3 +734,39 @@ class DatasourceTests(unittest.TestCase):
             )
             file_path = self.server.datasources.download("9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", td)
             self.assertTrue(os.path.exists(file_path))
+
+    def test_get_datasource_all_fields(self) -> None:
+        ro = TSC.RequestOptions()
+        ro.all_fields = True
+        with requests_mock.mock() as m:
+            m.get(f"{self.baseurl}?fields=_all_", text=read_xml_asset(GET_XML_ALL_FIELDS))
+            datasources, _ = self.server.datasources.get(req_options=ro)
+
+        assert datasources[0].connected_workbooks_count == 0
+        assert datasources[0].content_url == "SuperstoreDatasource"
+        assert datasources[0].created_at == parse_datetime("2024-02-14T04:42:13Z")
+        assert not datasources[0].encrypt_extracts
+        assert datasources[0].favorites_total == 0
+        assert not datasources[0].has_alert
+        assert not datasources[0].has_extracts
+        assert datasources[0].id == "a71cdd15-3a23-4ec1-b3ce-9956f5e00bb7"
+        assert not datasources[0].certified
+        assert datasources[0].is_published
+        assert datasources[0].name == "Superstore Datasource"
+        assert datasources[0].size == 1
+        assert datasources[0].datasource_type == "excel-direct"
+        assert datasources[0].updated_at == parse_datetime("2024-02-14T04:42:14Z")
+        assert not datasources[0].use_remote_query_agent
+        assert datasources[0].server_name == "localhost"
+        assert datasources[0].webpage_url == "https://10ax.online.tableau.com/#/site/example/datasources/3566752"
+        assert isinstance(datasources[0].project, TSC.ProjectItem)
+        assert datasources[0].project.id == "669ca36b-492e-4ccf-bca1-3614fe6a9d7a"
+        assert datasources[0].project.name == "Samples"
+        assert datasources[0].project.description == "This project includes automatically uploaded samples."
+        assert datasources[0].owner.email == "bob@example.com"
+        assert isinstance(datasources[0].owner, TSC.UserItem)
+        assert datasources[0].owner.fullname == "Bob Smith"
+        assert datasources[0].owner.id == "ee8bc9ca-77fe-4ae0-8093-cf77f0ee67a9"
+        assert datasources[0].owner.last_login == parse_datetime("2025-02-04T06:39:20Z")
+        assert datasources[0].owner.name == "bob@example.com"
+        assert datasources[0].owner.site_role == "SiteAdministratorCreator"

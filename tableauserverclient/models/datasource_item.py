@@ -1,7 +1,7 @@
 import copy
 import datetime
 import xml.etree.ElementTree as ET
-from typing import Optional
+from typing import Optional, overload
 
 from defusedxml.ElementTree import fromstring
 
@@ -9,6 +9,7 @@ from tableauserverclient.datetime_helpers import parse_datetime
 from tableauserverclient.models.connection_item import ConnectionItem
 from tableauserverclient.models.exceptions import UnpopulatedPropertyError
 from tableauserverclient.models.permissions_item import PermissionsRule
+from tableauserverclient.models.project_item import ProjectItem
 from tableauserverclient.models.property_decorators import (
     property_not_nullable,
     property_is_boolean,
@@ -16,6 +17,7 @@ from tableauserverclient.models.property_decorators import (
 )
 from tableauserverclient.models.revision_item import RevisionItem
 from tableauserverclient.models.tag_item import TagItem
+from tableauserverclient.models.user_item import UserItem
 
 
 class DatasourceItem:
@@ -143,6 +145,13 @@ class DatasourceItem:
         self.owner_id: Optional[str] = None
         self.project_id: Optional[str] = project_id
         self.tags: set[str] = set()
+        self._connected_workbooks_count: Optional[int] = None
+        self._favorites_total: Optional[int] = None
+        self._has_alert: Optional[bool] = None
+        self._is_published: Optional[bool] = None
+        self._server_name: Optional[str] = None
+        self._project: Optional[ProjectItem] = None
+        self._owner: Optional[UserItem] = None
 
         self._permissions = None
         self._data_quality_warnings = None
@@ -274,6 +283,34 @@ class DatasourceItem:
     def size(self) -> Optional[int]:
         return self._size
 
+    @property
+    def connected_workbooks_count(self) -> Optional[int]:
+        return self._connected_workbooks_count
+
+    @property
+    def favorites_total(self) -> Optional[int]:
+        return self._favorites_total
+
+    @property
+    def has_alert(self) -> Optional[bool]:
+        return self._has_alert
+
+    @property
+    def is_published(self) -> Optional[bool]:
+        return self._is_published
+
+    @property
+    def server_name(self) -> Optional[str]:
+        return self._server_name
+
+    @property
+    def project(self) -> Optional[ProjectItem]:
+        return self._project
+
+    @property
+    def owner(self) -> Optional[UserItem]:
+        return self._owner
+
     def _set_connections(self, connections) -> None:
         self._connections = connections
 
@@ -310,6 +347,13 @@ class DatasourceItem:
                 use_remote_query_agent,
                 webpage_url,
                 size,
+                connected_workbooks_count,
+                favorites_total,
+                has_alert,
+                is_published,
+                server_name,
+                project,
+                owner,
             ) = self._parse_element(datasource_xml, ns)
             self._set_values(
                 ask_data_enablement,
@@ -331,6 +375,13 @@ class DatasourceItem:
                 use_remote_query_agent,
                 webpage_url,
                 size,
+                connected_workbooks_count,
+                favorites_total,
+                has_alert,
+                is_published,
+                server_name,
+                project,
+                owner,
             )
         return self
 
@@ -355,6 +406,13 @@ class DatasourceItem:
         use_remote_query_agent,
         webpage_url,
         size,
+        connected_workbooks_count,
+        favorites_total,
+        has_alert,
+        is_published,
+        server_name,
+        project,
+        owner,
     ):
         if ask_data_enablement is not None:
             self._ask_data_enablement = ask_data_enablement
@@ -394,6 +452,20 @@ class DatasourceItem:
             self._webpage_url = webpage_url
         if size is not None:
             self._size = int(size)
+        if connected_workbooks_count is not None:
+            self._connected_workbooks_count = connected_workbooks_count
+        if favorites_total is not None:
+            self._favorites_total = favorites_total
+        if has_alert is not None:
+            self._has_alert = has_alert
+        if is_published is not None:
+            self._is_published = is_published
+        if server_name is not None:
+            self._server_name = server_name
+        if project is not None:
+            self._project = project
+        if owner is not None:
+            self._owner = owner
 
     @classmethod
     def from_response(cls, resp: str, ns: dict) -> list["DatasourceItem"]:
@@ -428,6 +500,11 @@ class DatasourceItem:
         use_remote_query_agent = datasource_xml.get("useRemoteQueryAgent", None)
         webpage_url = datasource_xml.get("webpageUrl", None)
         size = datasource_xml.get("size", None)
+        connected_workbooks_count = nullable_str_to_int(datasource_xml.get("connectedWorkbooksCount", None))
+        favorites_total = nullable_str_to_int(datasource_xml.get("favoritesTotal", None))
+        has_alert = nullable_str_to_bool(datasource_xml.get("hasAlert", None))
+        is_published = nullable_str_to_bool(datasource_xml.get("isPublished", None))
+        server_name = datasource_xml.get("serverName", None)
 
         tags = None
         tags_elem = datasource_xml.find(".//t:tags", namespaces=ns)
@@ -438,12 +515,14 @@ class DatasourceItem:
         project_name = None
         project_elem = datasource_xml.find(".//t:project", namespaces=ns)
         if project_elem is not None:
+            project = ProjectItem.from_xml(project_elem, ns)
             project_id = project_elem.get("id", None)
             project_name = project_elem.get("name", None)
 
         owner_id = None
         owner_elem = datasource_xml.find(".//t:owner", namespaces=ns)
         if owner_elem is not None:
+            owner = UserItem.from_xml(owner_elem, ns)
             owner_id = owner_elem.get("id", None)
 
         ask_data_enablement = None
@@ -471,4 +550,35 @@ class DatasourceItem:
             use_remote_query_agent,
             webpage_url,
             size,
+            connected_workbooks_count,
+            favorites_total,
+            has_alert,
+            is_published,
+            server_name,
+            project,
+            owner,
         )
+
+
+@overload
+def nullable_str_to_int(value: None) -> None: ...
+
+
+@overload
+def nullable_str_to_int(value: str) -> int: ...
+
+
+def nullable_str_to_int(value):
+    return int(value) if value is not None else None
+
+
+@overload
+def nullable_str_to_bool(value: None) -> None: ...
+
+
+@overload
+def nullable_str_to_bool(value: str) -> bool: ...
+
+
+def nullable_str_to_bool(value):
+    return str(value).lower() == "true" if value is not None else None
