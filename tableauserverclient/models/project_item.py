@@ -38,12 +38,29 @@ class ProjectItem:
 
     Attributes
     ----------
+    datasource_count : int
+        The number of data sources in the project.
+
     id : str
         The unique identifier for the project.
 
     owner_id : str
         The unique identifier for the UserItem owner of the project.
 
+    project_count : int
+        The number of projects in the project.
+
+    top_level_project : bool
+        True if the project is a top-level project.
+
+    view_count : int
+        The number of views in the project.
+
+    workbok_count : int
+        The number of workbooks in the project.
+
+    writeable : bool
+        True if the project is writeable.
     """
 
     ERROR_MSG = "Project item must be populated with permissions first."

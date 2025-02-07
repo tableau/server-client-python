@@ -37,6 +37,49 @@ class UserItem:
     auth_setting: str
         Required attribute for Tableau Cloud. How the user autenticates to the
         server.
+
+    Attributes
+    ----------
+    domain_name: Optional[str]
+        The name of the Active Directory domain ("local" if local authentication
+        is used).
+
+    email: Optional[str]
+        The email address of the user.
+
+    external_auth_user_id: Optional[str]
+        The unique identifier for the user in the external authentication system.
+
+    id: Optional[str]
+        The unique identifier for the user.
+
+    favorites: dict[str, list]
+        The favorites of the user. Must be populated with a call to
+        `populate_favorites()`.
+
+    fullname: Optional[str]
+        The full name of the user.
+
+    groups: Pager
+        The groups the user belongs to. Must be populated with a call to
+        `populate_groups()`.
+
+    last_login: Optional[datetime]
+        The last time the user logged in.
+
+    locale: Optional[str]
+        The locale of the user.
+
+    language: Optional[str]
+        Language setting for the user.
+
+    idp_configuration_id: Optional[str]
+        The ID of the identity provider configuration.
+
+    workbooks: Pager
+        The workbooks owned by the user. Must be populated with a call to
+        `populate_workbooks()`.
+
     """
 
     tag_name: str = "user"

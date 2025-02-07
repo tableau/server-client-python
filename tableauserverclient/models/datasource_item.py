@@ -42,6 +42,9 @@ class DatasourceItem:
         specified, it will default to SiteDefault. See REST API Publish
         Datasource for more information about ask_data_enablement.
 
+    connected_workbooks_count : Optional[int]
+        The number of workbooks connected to the datasource.
+
     connections : list[ConnectionItem]
         The list of data connections (ConnectionItem) for the specified data
         source. You must first call the populate_connections method to access
@@ -69,6 +72,12 @@ class DatasourceItem:
         A Boolean value to determine if a datasource should be encrypted or not.
         See Extract and Encryption Methods for more information.
 
+    favorites_total : Optional[int]
+        The number of users who have marked the data source as a favorite.
+
+    has_alert : Optional[bool]
+        A Boolean value that indicates whether the data source has an alert.
+
     has_extracts : Optional[bool]
         A Boolean value that indicates whether the datasource has extracts.
 
@@ -77,12 +86,21 @@ class DatasourceItem:
         specific data source or to delete a data source with the get_by_id and
         delete methods.
 
+    is_published : Optional[bool]
+        A Boolean value that indicates whether the data source is published.
+
     name : Optional[str]
         The name of the data source. If not specified, the name of the published
         data source file is used.
 
+    owner: Optional[UserItem]
+        The owner of the data source.
+
     owner_id : Optional[str]
         The identifier of the owner of the data source.
+
+    project : Optional[ProjectItem]
+        The project that the data source belongs to.
 
     project_id : Optional[str]
         The identifier of the project associated with the data source. You must
@@ -90,6 +108,9 @@ class DatasourceItem:
 
     project_name : Optional[str]
         The name of the project associated with the data source.
+
+    server_name : Optional[str]
+        The name of the server where the data source is published.
 
     tags : Optional[set[str]]
         The tags (list of strings) that have been added to the data source.

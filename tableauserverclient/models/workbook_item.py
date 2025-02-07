@@ -54,12 +54,30 @@ class WorkbookItem:
     created_at : Optional[datetime.datetime]
         The date and time the workbook was created.
 
+    default_view_id : Optional[str]
+        The identifier for the default view of the workbook.
+
     description : Optional[str]
         User-defined description of the workbook.
+
+    encrypt_extracts : Optional[bool]
+        Indicates whether extracts are encrypted.
+
+    has_extracts : Optional[bool]
+        Indicates whether the workbook has extracts.
 
     id : Optional[str]
        The identifier for the workbook. You need this value to query a specific
        workbook or to delete a workbook with the get_by_id and delete methods.
+
+    last_published_at : Optional[datetime.datetime]
+        The date and time the workbook was last published.
+
+    location : Optional[LocationItem]
+        The location of the workbook, such as a personal space or project.
+
+    owner : Optional[UserItem]
+        The owner of the workbook.
 
     owner_id : Optional[str]
         The identifier for the owner (UserItem) of the workbook.
@@ -67,6 +85,9 @@ class WorkbookItem:
     preview_image : bytes
         The thumbnail image for the view. You must first call the
         workbooks.populate_preview_image method to access this data.
+
+    project: Optional[ProjectItem]
+        The project that contains the workbook.
 
     project_name : Optional[str]
         The name of the project that contains the workbook.

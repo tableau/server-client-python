@@ -44,6 +44,11 @@ class GroupItem:
         login to a site. When the mode is onSync, a license is granted for group
         members each time the domain is synced.
 
+    Attributes
+    ----------
+    user_count: Optional[int]
+        The number of users in the group.
+
     Examples
     --------
     >>> # Create a new group item

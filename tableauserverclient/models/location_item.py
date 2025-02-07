@@ -3,6 +3,21 @@ import xml.etree.ElementTree as ET
 
 
 class LocationItem:
+    """
+    Details of where an item is located, such as a personal space or project.
+
+    Attributes
+    ----------
+    id : str | None
+        The ID of the location.
+
+    type : str | None
+        The type of location, such as PersonalSpace or Project.
+
+    name : str | None
+        The name of the location.
+    """
+
     class Type:
         PersonalSpace = "PersonalSpace"
         Project = "Project"

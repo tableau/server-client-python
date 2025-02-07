@@ -40,8 +40,15 @@ class ViewItem:
         The image of the view. You must first call the `views.populate_image`
         method to access the image.
 
+    location: Optional[LocationItem], default None
+        The location of the view. The location can be a personal space or a
+        project.
+
     name: Optional[str], default None
         The name of the view.
+
+    owner: Optional[UserItem], default None
+        The owner of the view.
 
     owner_id: Optional[str], default None
         The ID for the owner of the view.
@@ -53,6 +60,9 @@ class ViewItem:
     preview_image: Optional[Callable[[], bytes]], default None
         The preview image of the view. You must first call the
         `views.populate_preview_image` method to access the preview image.
+
+    project: Optional[ProjectItem], default None
+        The project that contains the view.
 
     project_id: Optional[str], default None
         The ID for the project that contains the view.
@@ -66,9 +76,11 @@ class ViewItem:
     updated_at: Optional[datetime], default None
         The date and time when the view was last updated.
 
+    workbook: Optional[WorkbookItem], default None
+        The workbook that contains the view.
+
     workbook_id: Optional[str], default None
         The ID for the workbook that contains the view.
-
     """
 
     def __init__(self) -> None:
