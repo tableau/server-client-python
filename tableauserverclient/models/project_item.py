@@ -317,6 +317,7 @@ class ProjectItem:
         top_level_project = str_to_bool(project_xml.get("topLevelProject", None))
         writeable = str_to_bool(project_xml.get("writeable", None))
         owner_id = None
+        owner = None
         if (owner_elem := project_xml.find(".//t:owner", namespaces=namespace)) is not None:
             owner = UserItem.from_xml(owner_elem, namespace)
             owner_id = owner_elem.get("id", None)
