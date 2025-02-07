@@ -5,6 +5,7 @@ from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.models.exceptions import UnpopulatedPropertyError
 from tableauserverclient.models.property_decorators import property_is_enum
+from tableauserverclient.models.user_item import UserItem
 
 
 class ProjectItem:
@@ -43,6 +44,9 @@ class ProjectItem:
 
     id : str
         The unique identifier for the project.
+
+    owner: Optional[UserItem]
+        The UserItem owner of the project.
 
     owner_id : str
         The unique identifier for the UserItem owner of the project.
@@ -109,6 +113,8 @@ class ProjectItem:
         self._workbok_count: Optional[int] = None
         self._view_count: Optional[int] = None
         self._datasource_count: Optional[int] = None
+
+        self._owner: Optional[UserItem] = None
 
     @property
     def content_permissions(self):
@@ -223,6 +229,10 @@ class ProjectItem:
     def datasource_count(self) -> Optional[int]:
         return self._datasource_count
 
+    @property
+    def owner(self) -> Optional[UserItem]:
+        return self._owner
+
     def is_default(self):
         return self.name.lower() == "default"
 
@@ -240,6 +250,7 @@ class ProjectItem:
         workbok_count,
         view_count,
         datasource_count,
+        owner,
     ):
         if project_id is not None:
             self._id = project_id
@@ -265,6 +276,8 @@ class ProjectItem:
             self._top_level_project = top_level_project
         if writeable is not None:
             self._writeable = writeable
+        if owner is not None:
+            self._owner = owner
 
     def _set_permissions(self, permissions):
         self._permissions = permissions
@@ -305,6 +318,7 @@ class ProjectItem:
         writeable = str_to_bool(project_xml.get("writeable", None))
         owner_id = None
         if (owner_elem := project_xml.find(".//t:owner", namespaces=namespace)) is not None:
+            owner = UserItem.from_xml(owner_elem, namespace)
             owner_id = owner_elem.get("id", None)
 
         project_count = None
@@ -330,6 +344,7 @@ class ProjectItem:
             workbok_count,
             view_count,
             datasource_count,
+            owner,
         )
 
 
