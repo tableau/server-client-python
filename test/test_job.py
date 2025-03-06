@@ -11,6 +11,7 @@ from ._utils import read_xml_asset, mocked_time
 
 GET_XML = "job_get.xml"
 GET_BY_ID_XML = "job_get_by_id.xml"
+GET_BY_ID_COMPLETED_XML = "job_get_by_id_completed.xml"
 GET_BY_ID_FAILED_XML = "job_get_by_id_failed.xml"
 GET_BY_ID_CANCELLED_XML = "job_get_by_id_cancelled.xml"
 GET_BY_ID_INPROGRESS_XML = "job_get_by_id_inprogress.xml"
@@ -86,6 +87,18 @@ class JobTests(unittest.TestCase):
 
             self.assertEqual(job_id, job.id)
             self.assertListEqual(job.notes, ["Job detail notes"])
+
+    def test_wait_for_job_completed(self) -> None:
+        # Waiting for a bridge (cloud) job completion
+        response_xml = read_xml_asset(GET_BY_ID_COMPLETED_XML)
+        job_id = "2eef4225-aa0c-41c4-8662-a76d89ed7336"
+        with mocked_time(), requests_mock.mock() as m:
+            m.get(f"{self.baseurl}/{job_id}", text=response_xml)
+            job = self.server.jobs.wait_for_job(job_id)
+
+            self.assertEqual(job_id, job.id)
+            self.assertListEqual(job.notes, ["Job detail notes"])
+
 
     def test_wait_for_job_failed(self) -> None:
         # Waiting for a failed job raises an exception
