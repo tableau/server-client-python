@@ -5,6 +5,7 @@ from tableauserverclient.server.request_options import (
     ExcelRequestOptions,
     ImageRequestOptions,
     PDFRequestOptions,
+    PPTXRequestOptions,
     RequestOptions,
 )
 from tableauserverclient.server.filter import Filter
@@ -52,6 +53,7 @@ __all__ = [
     "ExcelRequestOptions",
     "ImageRequestOptions",
     "PDFRequestOptions",
+    "PPTXRequestOptions",
     "RequestOptions",
     "Filter",
     "Sort",
