@@ -2812,7 +2812,7 @@ Use this class to specify the format of the PDF that is returned for the view. O
 
 Name  |  Description
 :--- | :---
-`page_type` | The type of page returned in PDF format for the view. The page_type is set using the `PageType` class: <br> `PageType.A3`<br> `PageType.A4`<br> `PageType.A5`<br> `PageType.B5`<br> `PageType.Executive`<br> `PageType.Folio`<br>  `PageType.Ledger`<br> `PageType.Legal`<br> `PageType.Letter`<br> `PageType.Note`<br> `PageType.Quarto`<br> `PageType.Tabloid`
+`page_type` | The type of page returned in PDF format for the view. The page_type is set using the `PageType` class: <br> `PageType.A3`<br> `PageType.A4`<br> `PageType.A5`<br> `PageType.B5`<br> `PageType.Executive`<br> `PageType.Folio`<br>  `PageType.Ledger`<br> `PageType.Legal`<br> `PageType.Letter`<br> `PageType.Note`<br> `PageType.Quarto`<br> `PageType.Tabloid`<br> `PageType.Unspecified`
 `orientation` | The orientation of the page. The options are portrait and landscape. The options are set using the `Orientation` class: <br>`Orientation.Portrait`<br> `Orientation.Landscape`
 `maxage` | Optional. The maximum number of minutes the rendered PDF will be cached on the server before being refreshed. The value must be an integer between `1` and `240` minutes. `0` will be interpreted as 1 minute on server, as that is the shortest interval allowed. By default, `maxage` is set to `-1`, indicating the default behavior configured in server settings.
 `viz_height` | Optional. The height of the output PDF in pixels. If specified, viz_width must also be specified.
