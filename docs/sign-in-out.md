@@ -200,6 +200,7 @@ The following example will switch the authenticated user to the NEW_SITENAME sit
 
 ```py
 # assume we already have an authenticated server object
-
-server.auth.switch_site('NEW_SITENAME')
+new_site = server.sites.get_by_name('NEW_SITENAME')
+# switch_site expects a SiteItem object
+server.auth.switch_site(new_site)
 ```
