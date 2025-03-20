@@ -12,7 +12,7 @@ import pytest
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
 from tableauserverclient.models import UserItem, GroupItem, PermissionsRule
-from tableauserverclient.server.endpoint.exceptions import InternalServerError
+from tableauserverclient.server.endpoint.exceptions import InternalServerError, UnsupportedAttributeError
 from tableauserverclient.server.request_factory import RequestFactory
 from ._utils import asset
 
@@ -450,6 +450,49 @@ class WorkbookTests(unittest.TestCase):
             self.server.workbooks.populate_pdf(single_workbook, req_option)
             self.assertEqual(response, single_workbook.pdf)
 
+    def test_populate_pdf_unsupported(self) -> None:
+        self.server.version = "3.4"
+        self.baseurl = self.server.workbooks.baseurl
+        with requests_mock.mock() as m:
+            m.get(
+                self.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/pdf?type=a5&orientation=landscape",
+                content=b"",
+            )
+            single_workbook = TSC.WorkbookItem("test")
+            single_workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
+
+            type = TSC.PDFRequestOptions.PageType.A5
+            orientation = TSC.PDFRequestOptions.Orientation.Landscape
+            req_option = TSC.PDFRequestOptions(type, orientation)
+            req_option.vf("Region", "West")
+
+            with self.assertRaises(UnsupportedAttributeError):
+                self.server.workbooks.populate_pdf(single_workbook, req_option)
+
+    def test_populate_pdf_vf_dims(self) -> None:
+        self.server.version = "3.23"
+        self.baseurl = self.server.workbooks.baseurl
+        with open(POPULATE_PDF, "rb") as f:
+            response = f.read()
+        with requests_mock.mock() as m:
+            m.get(
+                self.baseurl
+                + "/1f951daf-4061-451a-9df1-69a8062664f2/pdf?type=a5&orientation=landscape&vf_Region=West&vizWidth=1920&vizHeight=1080",
+                content=response,
+            )
+            single_workbook = TSC.WorkbookItem("test")
+            single_workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
+
+            type = TSC.PDFRequestOptions.PageType.A5
+            orientation = TSC.PDFRequestOptions.Orientation.Landscape
+            req_option = TSC.PDFRequestOptions(type, orientation)
+            req_option.vf("Region", "West")
+            req_option.viz_width = 1920
+            req_option.viz_height = 1080
+
+            self.server.workbooks.populate_pdf(single_workbook, req_option)
+            self.assertEqual(response, single_workbook.pdf)
+
     def test_populate_powerpoint(self) -> None:
         self.server.version = "3.8"
         self.baseurl = self.server.workbooks.baseurl
@@ -457,13 +500,15 @@ class WorkbookTests(unittest.TestCase):
             response = f.read()
         with requests_mock.mock() as m:
             m.get(
-                self.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/powerpoint",
+                self.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/powerpoint?maxAge=1",
                 content=response,
             )
             single_workbook = TSC.WorkbookItem("test")
             single_workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
 
-            self.server.workbooks.populate_powerpoint(single_workbook)
+            ro = TSC.PPTXRequestOptions(maxage=1)
+
+            self.server.workbooks.populate_powerpoint(single_workbook, ro)
             self.assertEqual(response, single_workbook.powerpoint)
 
     def test_populate_preview_image(self) -> None:

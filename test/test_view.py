@@ -6,6 +6,7 @@ import requests_mock
 import tableauserverclient as TSC
 from tableauserverclient import UserItem, GroupItem, PermissionsRule
 from tableauserverclient.datetime_helpers import format_datetime
+from tableauserverclient.server.endpoint.exceptions import UnsupportedAttributeError
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
@@ -176,6 +177,43 @@ class ViewTests(unittest.TestCase):
             single_view._id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
             self.server.views.populate_image(single_view)
             self.assertEqual(response, single_view.image)
+
+    def test_populate_image_unsupported(self) -> None:
+        self.server.version = "3.8"
+        with open(POPULATE_PREVIEW_IMAGE, "rb") as f:
+            response = f.read()
+        with requests_mock.mock() as m:
+            m.get(
+                self.baseurl + "/d79634e1-6063-4ec9-95ff-50acbf609ff5/image?vizWidth=1920&vizHeight=1080",
+                content=response,
+            )
+            single_view = TSC.ViewItem()
+            single_view._id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
+
+            req_option = TSC.ImageRequestOptions(viz_width=1920, viz_height=1080)
+
+            with self.assertRaises(UnsupportedAttributeError):
+                self.server.views.populate_image(single_view, req_option)
+
+    def test_populate_image_viz_dimensions(self) -> None:
+        self.server.version = "3.23"
+        self.baseurl = self.server.views.baseurl
+        with open(POPULATE_PREVIEW_IMAGE, "rb") as f:
+            response = f.read()
+        with requests_mock.mock() as m:
+            m.get(
+                self.baseurl + "/d79634e1-6063-4ec9-95ff-50acbf609ff5/image?vizWidth=1920&vizHeight=1080",
+                content=response,
+            )
+            single_view = TSC.ViewItem()
+            single_view._id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
+
+            req_option = TSC.ImageRequestOptions(viz_width=1920, viz_height=1080)
+
+            self.server.views.populate_image(single_view, req_option)
+            self.assertEqual(response, single_view.image)
+
+            history = m.request_history
 
     def test_populate_image_with_options(self) -> None:
         with open(POPULATE_PREVIEW_IMAGE, "rb") as f:
