@@ -5,7 +5,7 @@ import requests_mock
 
 import tableauserverclient as TSC
 from tableauserverclient import UserItem, GroupItem, PermissionsRule
-from tableauserverclient.datetime_helpers import format_datetime
+from tableauserverclient.datetime_helpers import format_datetime, parse_datetime
 from tableauserverclient.server.endpoint.exceptions import UnsupportedAttributeError
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
