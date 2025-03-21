@@ -1,5 +1,6 @@
 import sys
 from typing import Optional
+import warnings
 
 from typing_extensions import Self
 
@@ -65,6 +66,19 @@ class RequestOptions(RequestOptionsBase):
         self.fields = set()
         # This is private until we expand all of our parsers to handle the extra fields
         self.all_fields = False
+
+    @property
+    def _all_fields(self) -> bool:
+        return self.all_fields
+
+    @_all_fields.setter
+    def _all_fields(self, value):
+        warnings.warn(
+            "Directly setting _all_fields is deprecated, please use the all_fields property instead.",
+            DeprecationWarning,
+        )
+        self.all_fields = value
+
 
     def get_query_params(self) -> dict:
         params = {}
