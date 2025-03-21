@@ -1118,11 +1118,14 @@ class TaskRequest:
         pass
 
     @_tsrequest_wrapped
-    def refresh_req(self, xml_request: ET.Element, incremental: bool = False) -> bytes:
-        task_element = ET.SubElement(xml_request, "extractRefresh")
-        if incremental:
-            task_element.attrib["incremental"] = "true"
-        return ET.tostring(xml_request)
+    def refresh_req(self, xml_request: ET.Element, incremental: bool = False, parent_srv: Optional["Server"] = None) -> bytes:
+        if parent_srv is not None and parent_srv.check_at_least_version("3.25"):
+            task_element = ET.SubElement(xml_request, "extractRefresh")
+            if incremental:
+                task_element.attrib["incremental"] = "true"
+            return ET.tostring(xml_request)
+        elif incremental:
+            raise ValueError("Incremental refresh is only supported in 3.25+")
 
     @_tsrequest_wrapped
     def create_extract_req(self, xml_request: ET.Element, extract_item: "TaskItem") -> bytes:
