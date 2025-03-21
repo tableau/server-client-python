@@ -1,6 +1,6 @@
 from defusedxml.ElementTree import fromstring, tostring
 from functools import singledispatch
-from typing import TypeVar
+from typing import TypeVar, overload
 
 
 # the redact method can handle either strings or bytes, but it can't mix them.
@@ -41,3 +41,27 @@ def _(xml: str) -> str:
 @redact_xml.register  # type: ignore[no-redef]
 def _(xml: bytes) -> bytes:
     return _redact_any_type(bytearray(xml), b"password", b"..[redacted]")
+
+
+@overload
+def nullable_str_to_int(value: None) -> None: ...
+
+
+@overload
+def nullable_str_to_int(value: str) -> int: ...
+
+
+def nullable_str_to_int(value):
+    return int(value) if value is not None else None
+
+
+@overload
+def nullable_str_to_bool(value: None) -> None: ...
+
+
+@overload
+def nullable_str_to_bool(value: str) -> bool: ...
+
+
+def nullable_str_to_bool(value):
+    return str(value).lower() == "true" if value is not None else None

@@ -1,11 +1,12 @@
 import copy
 import datetime
 import xml.etree.ElementTree as ET
-from typing import Optional, overload
+from typing import Optional
 
 from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.datetime_helpers import parse_datetime
+from tableauserverclient.helpers.strings import nullable_str_to_bool, nullable_str_to_int
 from tableauserverclient.models.connection_item import ConnectionItem
 from tableauserverclient.models.exceptions import UnpopulatedPropertyError
 from tableauserverclient.models.permissions_item import PermissionsRule
@@ -580,26 +581,3 @@ class DatasourceItem:
             owner,
         )
 
-
-@overload
-def nullable_str_to_int(value: None) -> None: ...
-
-
-@overload
-def nullable_str_to_int(value: str) -> int: ...
-
-
-def nullable_str_to_int(value):
-    return int(value) if value is not None else None
-
-
-@overload
-def nullable_str_to_bool(value: None) -> None: ...
-
-
-@overload
-def nullable_str_to_bool(value: str) -> bool: ...
-
-
-def nullable_str_to_bool(value):
-    return str(value).lower() == "true" if value is not None else None
