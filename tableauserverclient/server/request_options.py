@@ -79,7 +79,6 @@ class RequestOptions(RequestOptionsBase):
         )
         self.all_fields = value
 
-
     def get_query_params(self) -> dict:
         params = {}
         if self.sort and len(self.sort) > 0:
