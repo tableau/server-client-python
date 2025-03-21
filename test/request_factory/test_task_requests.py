@@ -3,6 +3,7 @@ import xml.etree.ElementTree as ET
 from unittest.mock import Mock
 from tableauserverclient.server.request_factory import TaskRequest
 
+
 class TestTaskRequest(unittest.TestCase):
 
     def setUp(self):
