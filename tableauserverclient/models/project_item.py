@@ -60,7 +60,7 @@ class ProjectItem:
     view_count : int
         The number of views in the project.
 
-    workbok_count : int
+    workbook_count : int
         The number of workbooks in the project.
 
     writeable : bool
@@ -110,7 +110,7 @@ class ProjectItem:
         self._default_table_permissions = None
 
         self._project_count: Optional[int] = None
-        self._workbok_count: Optional[int] = None
+        self._workbook_count: Optional[int] = None
         self._view_count: Optional[int] = None
         self._datasource_count: Optional[int] = None
 
@@ -218,8 +218,8 @@ class ProjectItem:
         return self._project_count
 
     @property
-    def workbok_count(self) -> Optional[int]:
-        return self._workbok_count
+    def workbook_count(self) -> Optional[int]:
+        return self._workbook_count
 
     @property
     def view_count(self) -> Optional[int]:
@@ -247,7 +247,7 @@ class ProjectItem:
         top_level_project,
         writeable,
         project_count,
-        workbok_count,
+        workbook_count,
         view_count,
         datasource_count,
         owner,
@@ -266,8 +266,8 @@ class ProjectItem:
             self._owner_id = owner_id
         if project_count is not None:
             self._project_count = project_count
-        if workbok_count is not None:
-            self._workbok_count = workbok_count
+        if workbook_count is not None:
+            self._workbook_count = workbook_count
         if view_count is not None:
             self._view_count = view_count
         if datasource_count is not None:
@@ -323,12 +323,12 @@ class ProjectItem:
             owner_id = owner_elem.get("id", None)
 
         project_count = None
-        workbok_count = None
+        workbook_count = None
         view_count = None
         datasource_count = None
         if (count_elem := project_xml.find(".//t:contentsCounts", namespaces=namespace)) is not None:
             project_count = int(count_elem.get("projectCount", 0))
-            workbok_count = int(count_elem.get("workbookCount", 0))
+            workbook_count = int(count_elem.get("workbookCount", 0))
             view_count = int(count_elem.get("viewCount", 0))
             datasource_count = int(count_elem.get("dataSourceCount", 0))
 
@@ -342,7 +342,7 @@ class ProjectItem:
             top_level_project,
             writeable,
             project_count,
-            workbok_count,
+            workbook_count,
             view_count,
             datasource_count,
             owner,
