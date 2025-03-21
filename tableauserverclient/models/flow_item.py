@@ -1,7 +1,7 @@
 import copy
 import datetime
 import xml.etree.ElementTree as ET
-from typing import Optional
+from typing import Iterable, Optional
 
 from defusedxml.ElementTree import fromstring
 
@@ -15,6 +15,51 @@ from tableauserverclient.models.tag_item import TagItem
 
 
 class FlowItem:
+    """
+    Represents a Tableau Flow item.
+
+    Parameters
+    ----------
+    project_id: str
+        The ID of the project that the flow belongs to.
+
+    name: Optional[str]
+        The name of the flow.
+
+    Attributes
+    ----------
+    connections: Iterable[ConnectionItem]
+        The connections associated with the flow. This property is not populated
+        by default and must be populated by calling the `populate_connections`
+        method.
+
+    created_at: Optional[datetime.datetime]
+        The date and time when the flow was created.
+
+    description: Optional[str]
+        The description of the flow.
+
+    dqws: Iterable[DQWItem]
+        The data quality warnings associated with the flow. This property is not
+        populated by default and must be populated by calling the `populate_dqws`
+        method.
+
+    id: Optional[str]
+        The ID of the flow.
+
+    name: Optional[str]
+        The name of the flow.
+
+    owner_id: Optional[str]
+        The ID of the user who owns the flow.
+
+    project_name: Optional[str]
+        The name of the project that the flow belongs to.
+
+    tags: set[str]
+        The tags associated with the flow.
+    """
+
     def __repr__(self):
         return "<Flow {} '{}' ({}) Project={} createdAt={}".format(
             self._id, self.name, self.description, self.project_id, self.created_at
@@ -33,9 +78,9 @@ class FlowItem:
         self.tags: set[str] = set()
         self.description: Optional[str] = None
 
-        self._connections: Optional[ConnectionItem] = None
-        self._permissions: Optional[Permission] = None
-        self._data_quality_warnings: Optional[DQWItem] = None
+        self._connections: Optional[Iterable[ConnectionItem]] = None
+        self._permissions: Optional[Iterable[Permission]] = None
+        self._data_quality_warnings: Optional[Iterable[DQWItem]] = None
 
     @property
     def connections(self):

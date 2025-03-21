@@ -29,7 +29,9 @@ def main():
         help="desired logging level (set to error by default)",
     )
     # Options specific to this sample:
-    # This sample has no additional options, yet. If you add some, please add them here
+    parser.add_argument("resource_type", choices=["workbook", "datasource"])
+    parser.add_argument("resource_id")
+    parser.add_argument("--incremental", default=False)
 
     args = parser.parse_args()
 
@@ -45,6 +47,7 @@ def main():
         # Monthly Schedule
         # This schedule will run on the 15th of every month at 11:30PM
         monthly_interval = TSC.MonthlyInterval(start_time=time(23, 30), interval_value=15)
+        print(monthly_interval)
         monthly_schedule = TSC.ScheduleItem(
             None,
             None,
@@ -53,18 +56,20 @@ def main():
             monthly_interval,
         )
 
-        # Default to using first workbook found in server
-        all_workbook_items, pagination_item = server.workbooks.get()
-        my_workbook: TSC.WorkbookItem = all_workbook_items[0]
+        my_workbook: TSC.WorkbookItem = server.workbooks.get_by_id(args.resource_id)
 
         target_item = TSC.Target(
             my_workbook.id,  # the id of the workbook or datasource
             "workbook",  # alternatively can be "datasource"
         )
 
-        extract_item = TSC.TaskItem(
+        refresh_type = "FullRefresh"
+        if args.incremental:
+            refresh_type = "Incremental"
+
+        scheduled_extract_item = TSC.TaskItem(
             None,
-            "FullRefresh",
+            refresh_type,
             None,
             None,
             None,
@@ -74,7 +79,7 @@ def main():
         )
 
         try:
-            response = server.tasks.create(extract_item)
+            response = server.tasks.create(scheduled_extract_item)
             print(response)
         except Exception as e:
             print(e)

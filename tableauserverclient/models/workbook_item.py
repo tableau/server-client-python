@@ -99,7 +99,14 @@ class WorkbookItem:
     >>> new_workbook = TSC.WorkbookItem('3a8b6148-493c-11e6-a621-6f3499394a39')
     """
 
-    def __init__(self, project_id: Optional[str] = None, name: Optional[str] = None, show_tabs: bool = False) -> None:
+    def __init__(
+        self,
+        project_id: Optional[str] = None,
+        name: Optional[str] = None,
+        show_tabs: bool = False,
+        thumbnails_user_id: Optional[str] = None,
+        thumbnails_group_id: Optional[str] = None,
+    ) -> None:
         self._connections = None
         self._content_url = None
         self._webpage_url = None
@@ -130,6 +137,8 @@ class WorkbookItem:
         }
         self.data_freshness_policy = None
         self._permissions = None
+        self.thumbnails_user_id = thumbnails_user_id
+        self.thumbnails_group_id = thumbnails_group_id
 
         return None
 
@@ -274,6 +283,22 @@ class WorkbookItem:
             error = "Workbook item must be populated with revisions first."
             raise UnpopulatedPropertyError(error)
         return self._revisions()
+
+    @property
+    def thumbnails_user_id(self) -> Optional[str]:
+        return self._thumbnails_user_id
+
+    @thumbnails_user_id.setter
+    def thumbnails_user_id(self, value: str):
+        self._thumbnails_user_id = value
+
+    @property
+    def thumbnails_group_id(self) -> Optional[str]:
+        return self._thumbnails_group_id
+
+    @thumbnails_group_id.setter
+    def thumbnails_group_id(self, value: str):
+        self._thumbnails_group_id = value
 
     def _set_connections(self, connections):
         self._connections = connections

@@ -174,17 +174,22 @@ class DatasourceTests(unittest.TestCase):
             connections: Optional[list[ConnectionItem]] = single_datasource.connections
 
         self.assertIsNotNone(connections)
+        assert connections is not None
         ds1, ds2 = connections
         self.assertEqual("be786ae0-d2bf-4a4b-9b34-e2de8d2d4488", ds1.id)
         self.assertEqual("textscan", ds1.connection_type)
         self.assertEqual("forty-two.net", ds1.server_address)
         self.assertEqual("duo", ds1.username)
         self.assertEqual(True, ds1.embed_password)
+        self.assertEqual(ds1.datasource_id, single_datasource.id)
+        self.assertEqual(single_datasource.name, ds1.datasource_name)
         self.assertEqual("970e24bc-e200-4841-a3e9-66e7d122d77e", ds2.id)
         self.assertEqual("sqlserver", ds2.connection_type)
         self.assertEqual("database.com", ds2.server_address)
         self.assertEqual("heero", ds2.username)
         self.assertEqual(False, ds2.embed_password)
+        self.assertEqual(ds2.datasource_id, single_datasource.id)
+        self.assertEqual(single_datasource.name, ds2.datasource_name)
 
     def test_update_connection(self) -> None:
         populate_xml, response_xml = read_xml_assets(POPULATE_CONNECTIONS_XML, UPDATE_CONNECTION_XML)
@@ -360,6 +365,25 @@ class DatasourceTests(unittest.TestCase):
 
         # We only check the `id`; remaining fields are already tested in `test_refresh_id`
         self.assertEqual("7c3d599e-949f-44c3-94a1-f30ba85757e4", new_job.id)
+
+    def test_datasource_refresh_request_empty(self) -> None:
+        self.server.version = "2.8"
+        self.baseurl = self.server.datasources.baseurl
+        item = TSC.DatasourceItem("")
+        item._id = "1234"
+        text = read_xml_asset(REFRESH_XML)
+
+        def match_request_body(request):
+            try:
+                root = fromstring(request.body)
+                assert root.tag == "tsRequest"
+                assert len(root) == 0
+                return True
+            except Exception:
+                return False
+
+        with requests_mock.mock() as m:
+            m.post(f"{self.baseurl}/1234/refresh", text=text, additional_matcher=match_request_body)
 
     def test_update_hyper_data_datasource_object(self) -> None:
         """Calling `update_hyper_data` with a `DatasourceItem` should update that datasource"""

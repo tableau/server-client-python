@@ -12,7 +12,7 @@ import pytest
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
 from tableauserverclient.models import UserItem, GroupItem, PermissionsRule
-from tableauserverclient.server.endpoint.exceptions import InternalServerError
+from tableauserverclient.server.endpoint.exceptions import InternalServerError, UnsupportedAttributeError
 from tableauserverclient.server.request_factory import RequestFactory
 from ._utils import asset
 
@@ -450,6 +450,49 @@ class WorkbookTests(unittest.TestCase):
             self.server.workbooks.populate_pdf(single_workbook, req_option)
             self.assertEqual(response, single_workbook.pdf)
 
+    def test_populate_pdf_unsupported(self) -> None:
+        self.server.version = "3.4"
+        self.baseurl = self.server.workbooks.baseurl
+        with requests_mock.mock() as m:
+            m.get(
+                self.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/pdf?type=a5&orientation=landscape",
+                content=b"",
+            )
+            single_workbook = TSC.WorkbookItem("test")
+            single_workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
+
+            type = TSC.PDFRequestOptions.PageType.A5
+            orientation = TSC.PDFRequestOptions.Orientation.Landscape
+            req_option = TSC.PDFRequestOptions(type, orientation)
+            req_option.vf("Region", "West")
+
+            with self.assertRaises(UnsupportedAttributeError):
+                self.server.workbooks.populate_pdf(single_workbook, req_option)
+
+    def test_populate_pdf_vf_dims(self) -> None:
+        self.server.version = "3.23"
+        self.baseurl = self.server.workbooks.baseurl
+        with open(POPULATE_PDF, "rb") as f:
+            response = f.read()
+        with requests_mock.mock() as m:
+            m.get(
+                self.baseurl
+                + "/1f951daf-4061-451a-9df1-69a8062664f2/pdf?type=a5&orientation=landscape&vf_Region=West&vizWidth=1920&vizHeight=1080",
+                content=response,
+            )
+            single_workbook = TSC.WorkbookItem("test")
+            single_workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
+
+            type = TSC.PDFRequestOptions.PageType.A5
+            orientation = TSC.PDFRequestOptions.Orientation.Landscape
+            req_option = TSC.PDFRequestOptions(type, orientation)
+            req_option.vf("Region", "West")
+            req_option.viz_width = 1920
+            req_option.viz_height = 1080
+
+            self.server.workbooks.populate_pdf(single_workbook, req_option)
+            self.assertEqual(response, single_workbook.pdf)
+
     def test_populate_powerpoint(self) -> None:
         self.server.version = "3.8"
         self.baseurl = self.server.workbooks.baseurl
@@ -457,13 +500,15 @@ class WorkbookTests(unittest.TestCase):
             response = f.read()
         with requests_mock.mock() as m:
             m.get(
-                self.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/powerpoint",
+                self.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/powerpoint?maxAge=1",
                 content=response,
             )
             single_workbook = TSC.WorkbookItem("test")
             single_workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
 
-            self.server.workbooks.populate_powerpoint(single_workbook)
+            ro = TSC.PPTXRequestOptions(maxage=1)
+
+            self.server.workbooks.populate_powerpoint(single_workbook, ro)
             self.assertEqual(response, single_workbook.powerpoint)
 
     def test_populate_preview_image(self) -> None:
@@ -623,6 +668,45 @@ class WorkbookTests(unittest.TestCase):
             # order of attributes in xml is unspecified
             self.assertTrue(re.search(rb"<views><view.*?hidden=\"true\".*?\/><\/views>", request_body))
             self.assertTrue(re.search(rb"<views><view.*?name=\"GDP per capita\".*?\/><\/views>", request_body))
+
+    def test_publish_with_thumbnails_user_id(self) -> None:
+        with open(PUBLISH_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            m.post(self.baseurl, text=response_xml)
+
+            new_workbook = TSC.WorkbookItem(
+                name="Sample",
+                show_tabs=False,
+                project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760",
+                thumbnails_user_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20761",
+            )
+
+            sample_workbook = os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")
+            publish_mode = self.server.PublishMode.CreateNew
+            new_workbook = self.server.workbooks.publish(new_workbook, sample_workbook, publish_mode)
+            request_body = m._adapter.request_history[0]._request.body
+            # order of attributes in xml is unspecified
+            self.assertTrue(re.search(rb"thumbnailsUserId=\"ee8c6e70-43b6-11e6-af4f-f7b0d8e20761\"", request_body))
+
+    def test_publish_with_thumbnails_group_id(self) -> None:
+        with open(PUBLISH_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            m.post(self.baseurl, text=response_xml)
+
+            new_workbook = TSC.WorkbookItem(
+                name="Sample",
+                show_tabs=False,
+                project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760",
+                thumbnails_group_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20762",
+            )
+
+            sample_workbook = os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")
+            publish_mode = self.server.PublishMode.CreateNew
+            new_workbook = self.server.workbooks.publish(new_workbook, sample_workbook, publish_mode)
+            request_body = m._adapter.request_history[0]._request.body
+            self.assertTrue(re.search(rb"thumbnailsGroupId=\"ee8c6e70-43b6-11e6-af4f-f7b0d8e20762\"", request_body))
 
     @pytest.mark.filterwarnings("ignore:'as_job' not available")
     def test_publish_with_query_params(self) -> None:

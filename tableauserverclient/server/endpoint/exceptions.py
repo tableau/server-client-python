@@ -113,3 +113,7 @@ class FlowRunFailedException(TableauError):
 
 class FlowRunCancelledException(FlowRunFailedException):
     pass
+
+
+class UnsupportedAttributeError(TableauError):
+    pass

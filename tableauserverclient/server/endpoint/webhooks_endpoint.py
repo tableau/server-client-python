@@ -23,6 +23,21 @@ class Webhooks(Endpoint):
 
     @api(version="3.6")
     def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[WebhookItem], PaginationItem]:
+        """
+        Returns a list of all webhooks on the site.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#list_webhooks_for_site
+
+        Parameters
+        ----------
+        req_options : Optional[RequestOptions]
+            Filter and sorting options for the request.
+
+        Returns
+        -------
+        tuple[list[WebhookItem], PaginationItem]
+            A tuple of the list of webhooks and pagination item
+        """
         logger.info("Querying all Webhooks on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -32,6 +47,21 @@ class Webhooks(Endpoint):
 
     @api(version="3.6")
     def get_by_id(self, webhook_id: str) -> WebhookItem:
+        """
+        Returns information about a specified Webhook.
+
+        Rest API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#get_webhook
+
+        Parameters
+        ----------
+        webhook_id : str
+            The ID of the webhook to query.
+
+        Returns
+        -------
+        WebhookItem
+            An object containing information about the webhook.
+        """
         if not webhook_id:
             error = "Webhook ID undefined."
             raise ValueError(error)
@@ -42,6 +72,20 @@ class Webhooks(Endpoint):
 
     @api(version="3.6")
     def delete(self, webhook_id: str) -> None:
+        """
+        Deletes a specified webhook.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#delete_webhook
+
+        Parameters
+        ----------
+        webhook_id : str
+            The ID of the webhook to delete.
+
+        Returns
+        -------
+        None
+        """
         if not webhook_id:
             error = "Webhook ID undefined."
             raise ValueError(error)
@@ -51,6 +95,21 @@ class Webhooks(Endpoint):
 
     @api(version="3.6")
     def create(self, webhook_item: WebhookItem) -> WebhookItem:
+        """
+        Creates a new webhook on the site.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#create_webhook
+
+        Parameters
+        ----------
+        webhook_item : WebhookItem
+            The webhook item to create.
+
+        Returns
+        -------
+        WebhookItem
+            An object containing information about the created webhook
+        """
         url = self.baseurl
         create_req = RequestFactory.Webhook.create_req(webhook_item)
         server_response = self.post_request(url, create_req)
@@ -61,6 +120,24 @@ class Webhooks(Endpoint):
 
     @api(version="3.6")
     def test(self, webhook_id: str):
+        """
+        Tests the specified webhook. Sends an empty payload to the configured
+        destination URL of the webhook and returns the response from the server.
+        This is useful for testing, to ensure that things are being sent from
+        Tableau and received back as expected.
+
+        Rest API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#test_webhook
+
+        Parameters
+        ----------
+        webhook_id : str
+            The ID of the webhook to test.
+
+        Returns
+        -------
+        XML Response
+
+        """
         if not webhook_id:
             error = "Webhook ID undefined."
             raise ValueError(error)

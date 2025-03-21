@@ -1,4 +1,4 @@
-from tableauserverclient._version import get_versions
+from tableauserverclient.bin._version import get_versions
 from tableauserverclient.namespace import NEW_NAMESPACE as DEFAULT_NAMESPACE
 from tableauserverclient.models import (
     BackgroundJobItem,
@@ -56,6 +56,7 @@ from tableauserverclient.server import (
     ExcelRequestOptions,
     ImageRequestOptions,
     PDFRequestOptions,
+    PPTXRequestOptions,
     RequestOptions,
     MissingRequiredFieldError,
     FailedSignInError,
@@ -107,6 +108,7 @@ __all__ = [
     "Pager",
     "PaginationItem",
     "PDFRequestOptions",
+    "PPTXRequestOptions",
     "Permission",
     "PermissionsRule",
     "PersonalAccessTokenAuth",
@@ -133,3 +135,7 @@ __all__ = [
     "WeeklyInterval",
     "WorkbookItem",
 ]
+
+from .bin import _version
+
+__version__ = _version.get_versions()["version"]
