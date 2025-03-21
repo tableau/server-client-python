@@ -340,8 +340,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         """
         id_ = getattr(datasource_item, "id", datasource_item)
         url = f"{self.baseurl}/{id_}/refresh"
-        # refresh_req = RequestFactory.Task.refresh_req(incremental)
-        refresh_req = RequestFactory.Empty.empty_req()
+        refresh_req = RequestFactory.Task.refresh_req(incremental, self.parent_srv)
         server_response = self.post_request(url, refresh_req)
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return new_job

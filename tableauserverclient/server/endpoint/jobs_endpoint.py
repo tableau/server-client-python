@@ -188,7 +188,7 @@ class Jobs(QuerysetEndpoint[BackgroundJobItem]):
 
         logger.info(f"Job {job_id} Completed: Finish Code: {job.finish_code} - Notes:{job.notes}")
 
-        if job.finish_code == JobItem.FinishCode.Success:
+        if job.finish_code in [JobItem.FinishCode.Success, JobItem.FinishCode.Completed]:
             return job
         elif job.finish_code == JobItem.FinishCode.Failed:
             raise JobFailedException(job)
