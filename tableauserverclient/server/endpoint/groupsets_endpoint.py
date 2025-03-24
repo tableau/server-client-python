@@ -25,14 +25,14 @@ class GroupSets(QuerysetEndpoint[GroupSetItem]):
     @api(version="3.22")
     def get(
         self,
-        request_options: Optional[RequestOptions] = None,
+        req_options: Optional[RequestOptions] = None,
         result_level: Optional[Literal["members", "local"]] = None,
     ) -> tuple[list[GroupSetItem], PaginationItem]:
         logger.info("Querying all group sets on site")
         url = self.baseurl
         if result_level:
             url += f"?resultlevel={result_level}"
-        server_response = self.get_request(url, request_options)
+        server_response = self.get_request(url, req_options)
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         all_group_set_items = GroupSetItem.from_response(server_response.content, self.parent_srv.namespace)
         return all_group_set_items, pagination_item

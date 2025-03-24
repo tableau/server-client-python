@@ -11,7 +11,11 @@ from tableauserverclient.models.permissions_item import PermissionsRule
 from tableauserverclient.server.query import QuerySet
 
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api, parameter_added_in
-from tableauserverclient.server.endpoint.exceptions import InternalServerError, MissingRequiredFieldError
+from tableauserverclient.server.endpoint.exceptions import (
+    InternalServerError,
+    MissingRequiredFieldError,
+    UnsupportedAttributeError,
+)
 from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
 from tableauserverclient.server.endpoint.resource_tagger import TaggingMixin
 
@@ -34,7 +38,7 @@ from collections.abc import Iterable, Sequence
 
 if TYPE_CHECKING:
     from tableauserverclient.server import Server
-    from tableauserverclient.server.request_options import RequestOptions
+    from tableauserverclient.server.request_options import RequestOptions, PDFRequestOptions, PPTXRequestOptions
     from tableauserverclient.models import DatasourceItem
     from tableauserverclient.server.endpoint.schedules_endpoint import AddResponse
 
@@ -136,7 +140,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         """
         id_ = getattr(workbook_item, "id", workbook_item)
         url = f"{self.baseurl}/{id_}/refresh"
-        refresh_req = RequestFactory.Task.refresh_req(incremental)
+        refresh_req = RequestFactory.Task.refresh_req(incremental, self.parent_srv)
         server_response = self.post_request(url, refresh_req)
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return new_job
@@ -472,11 +476,12 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         connections = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
         return connections
 
-    # Get the pdf of the entire workbook if its tabs are enabled, pdf of the default view if its tabs are disabled
     @api(version="3.4")
-    def populate_pdf(self, workbook_item: WorkbookItem, req_options: Optional["RequestOptions"] = None) -> None:
+    def populate_pdf(self, workbook_item: WorkbookItem, req_options: Optional["PDFRequestOptions"] = None) -> None:
         """
-        Populates the PDF for the specified workbook item.
+        Populates the PDF for the specified workbook item. Get the pdf of the
+        entire workbook if its tabs are enabled, pdf of the default view if its
+        tabs are disabled.
 
         This method populates a PDF with image(s) of the workbook view(s) you
         specify.
@@ -488,7 +493,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         workbook_item : WorkbookItem
             The workbook item to populate the PDF for.
 
-        req_options : RequestOptions, optional
+        req_options : PDFRequestOptions, optional
             (Optional) You can pass in request options to specify the page type
             and orientation of the PDF content, as well as the maximum age of
             the PDF rendered on the server. See PDFRequestOptions class for more
@@ -510,17 +515,26 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         def pdf_fetcher() -> bytes:
             return self._get_wb_pdf(workbook_item, req_options)
 
+        if not self.parent_srv.check_at_least_version("3.23") and req_options is not None:
+            if req_options.view_filters or req_options.view_parameters:
+                raise UnsupportedAttributeError("view_filters and view_parameters are only supported in 3.23+")
+
+            if req_options.viz_height or req_options.viz_width:
+                raise UnsupportedAttributeError("viz_height and viz_width are only supported in 3.23+")
+
         workbook_item._set_pdf(pdf_fetcher)
         logger.info(f"Populated pdf for workbook (ID: {workbook_item.id})")
 
-    def _get_wb_pdf(self, workbook_item: WorkbookItem, req_options: Optional["RequestOptions"]) -> bytes:
+    def _get_wb_pdf(self, workbook_item: WorkbookItem, req_options: Optional["PDFRequestOptions"]) -> bytes:
         url = f"{self.baseurl}/{workbook_item.id}/pdf"
         server_response = self.get_request(url, req_options)
         pdf = server_response.content
         return pdf
 
     @api(version="3.8")
-    def populate_powerpoint(self, workbook_item: WorkbookItem, req_options: Optional["RequestOptions"] = None) -> None:
+    def populate_powerpoint(
+        self, workbook_item: WorkbookItem, req_options: Optional["PPTXRequestOptions"] = None
+    ) -> None:
         """
         Populates the PowerPoint for the specified workbook item.
 
@@ -561,7 +575,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         workbook_item._set_powerpoint(pptx_fetcher)
         logger.info(f"Populated powerpoint for workbook (ID: {workbook_item.id})")
 
-    def _get_wb_pptx(self, workbook_item: WorkbookItem, req_options: Optional["RequestOptions"]) -> bytes:
+    def _get_wb_pptx(self, workbook_item: WorkbookItem, req_options: Optional["PPTXRequestOptions"]) -> bytes:
         url = f"{self.baseurl}/{workbook_item.id}/powerpoint"
         server_response = self.get_request(url, req_options)
         pptx = server_response.content

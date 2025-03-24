@@ -82,6 +82,7 @@ class JobItem:
         Success: int = 0
         Failed: int = 1
         Cancelled: int = 2
+        Completed: int = 3
 
     def __init__(
         self,
