@@ -3,7 +3,7 @@ from contextlib import closing
 
 from tableauserverclient.models.permissions_item import PermissionsRule
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
-from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
+from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError, UnsupportedAttributeError
 from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
 from tableauserverclient.server.endpoint.resource_tagger import TaggingMixin
 from tableauserverclient.server.query import QuerySet
@@ -170,6 +170,10 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
 
         def image_fetcher():
             return self._get_view_image(view_item, req_options)
+
+        if not self.parent_srv.check_at_least_version("3.23") and req_options is not None:
+            if req_options.viz_height or req_options.viz_width:
+                raise UnsupportedAttributeError("viz_height and viz_width are only supported in 3.23+")
 
         view_item._set_image(image_fetcher)
         logger.info(f"Populated image for view (ID: {view_item.id})")

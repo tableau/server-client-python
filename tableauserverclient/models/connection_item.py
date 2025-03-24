@@ -103,11 +103,11 @@ class ConnectionItem:
         all_connection_xml = parsed_response.findall(".//t:connection", namespaces=ns)
         for connection_xml in all_connection_xml:
             connection_item = cls()
-            connection_item._id = connection_xml.get("id", None)
+            connection_item._id = connection_xml.get("id", connection_xml.get("connectionId", None))
             connection_item._connection_type = connection_xml.get("type", connection_xml.get("dbClass", None))
             connection_item.embed_password = string_to_bool(connection_xml.get("embedPassword", ""))
-            connection_item.server_address = connection_xml.get("serverAddress", None)
-            connection_item.server_port = connection_xml.get("serverPort", None)
+            connection_item.server_address = connection_xml.get("serverAddress", connection_xml.get("server", None))
+            connection_item.server_port = connection_xml.get("serverPort", connection_xml.get("port", None))
             connection_item.username = connection_xml.get("userName", None)
             connection_item._query_tagging = (
                 string_to_bool(s) if (s := connection_xml.get("queryTagging", None)) else None

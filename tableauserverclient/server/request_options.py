@@ -385,6 +385,8 @@ class PDFRequestOptions(_ImagePDFCommonExportOptions):
     Options that can be used when exporting a view to PDF. Set the maxage to control the age of the data exported.
     Filters to the underlying data can be applied using the `vf` and `parameter` methods.
 
+    vf and parameter filters are only supported in API version 3.23 and later.
+
     Parameters
     ----------
     page_type: str, optional
@@ -436,5 +438,37 @@ class PDFRequestOptions(_ImagePDFCommonExportOptions):
 
         if self.orientation:
             params["orientation"] = self.orientation
+
+        return params
+
+
+class PPTXRequestOptions(RequestOptionsBase):
+    """
+    Options that can be used when exporting a view to PPTX. Set the maxage to control the age of the data exported.
+
+    Parameters
+    ----------
+    maxage: int, optional
+        The maximum age of the data to export. Shortest possible duration is 1
+        minute. No upper limit. Default is -1, which means no limit.
+    """
+
+    def __init__(self, maxage=-1):
+        super().__init__()
+        self.max_age = maxage
+
+    @property
+    def max_age(self) -> int:
+        return self._max_age
+
+    @max_age.setter
+    @property_is_int(range=(0, 240), allowed=[-1])
+    def max_age(self, value):
+        self._max_age = value
+
+    def get_query_params(self):
+        params = {}
+        if self.max_age != -1:
+            params["maxAge"] = self.max_age
 
         return params
