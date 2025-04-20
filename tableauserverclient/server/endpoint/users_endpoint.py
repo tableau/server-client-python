@@ -431,8 +431,8 @@ class Users(QuerysetEndpoint[UserItem]):
             error = "User item missing ID."
             raise MissingRequiredFieldError(error)
 
-        def wb_pager() -> Pager[WorkbookItem]:
-            def func(req_options: Optional[RequestOptions]) -> tuple[list[WorkbookItem], PaginationItem]:
+        def wb_pager():
+            def func(req_options):
                 return self._get_wbs_for_user(user_item, req_options, owned_only=owned_only)
 
             return Pager(func, req_options)
