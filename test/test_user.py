@@ -178,7 +178,6 @@ class UserTests(unittest.TestCase):
         assert "ownedBy" in request_history.qs, "ownedBy not in request history"
         assert "true" in request_history.qs["ownedBy"], "ownedBy not set to true in request history"
 
-
     def test_populate_workbooks_missing_id(self) -> None:
         single_user = TSC.UserItem("test", "Interactor")
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.users.populate_workbooks, single_user)
