@@ -280,8 +280,8 @@ class DatasourceItem:
     def _set_permissions(self, permissions):
         self._permissions = permissions
 
-    def _set_data_quality_warnings(self, dqws):
-        self._data_quality_warnings = dqws
+    def _set_data_quality_warnings(self, dqw):
+        self._data_quality_warnings = dqw
 
     def _set_revisions(self, revisions):
         self._revisions = revisions
