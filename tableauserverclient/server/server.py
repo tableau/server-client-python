@@ -335,7 +335,7 @@ class Server:
 
     def configure_ssl(self, *, allow_weak_dh=False):
         """Configure SSL/TLS settings for the server connection.
-        
+
         Parameters
         ----------
         allow_weak_dh : bool, optional
@@ -343,13 +343,15 @@ class Server:
             WARNING: This reduces security and should only be used as a temporary workaround.
         """
         if allow_weak_dh:
-            logger.warning("WARNING: Allowing weak Diffie-Hellman keys. This reduces security and should only be used temporarily.")
+            logger.warning(
+                "WARNING: Allowing weak Diffie-Hellman keys. This reduces security and should only be used temporarily."
+            )
             self._ssl_context = ssl.create_default_context()
             # Allow weak DH keys by setting minimum key size to 512 bits (default is 1024 in Python 3.12+)
             self._ssl_context.set_dh_parameters(min_key_bits=512)
-            self.add_http_options({'verify': self._ssl_context})
+            self.add_http_options({"verify": self._ssl_context})
         else:
             self._ssl_context = None
             # Remove any custom SSL context if we're reverting to default settings
-            if 'verify' in self._http_options:
-                del self._http_options['verify']
+            if "verify" in self._http_options:
+                del self._http_options["verify"]
