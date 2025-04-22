@@ -162,6 +162,22 @@ class UserTests(unittest.TestCase):
             self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", workbook_list[0].owner_id)
             self.assertEqual({"Safari", "Sample"}, workbook_list[0].tags)
 
+    def test_populate_owned_workbooks(self) -> None:
+        with open(POPULATE_WORKBOOKS_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        # Query parameter ownedBy is case sensitive.
+        with requests_mock.mock(case_sensitive=True) as m:
+            m.get(self.baseurl + "/dd2239f6-ddf1-4107-981a-4cf94e415794/workbooks?ownedBy=true", text=response_xml)
+            single_user = TSC.UserItem("test", "Interactor")
+            single_user._id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
+            self.server.users.populate_workbooks(single_user, owned_only=True)
+            list(single_user.workbooks)
+
+            request_history = m.request_history[0]
+
+        assert "ownedBy" in request_history.qs, "ownedBy not in request history"
+        assert "true" in request_history.qs["ownedBy"], "ownedBy not set to true in request history"
+
     def test_populate_workbooks_missing_id(self) -> None:
         single_user = TSC.UserItem("test", "Interactor")
         self.assertRaises(TSC.MissingRequiredFieldError, self.server.users.populate_workbooks, single_user)
