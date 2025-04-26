@@ -35,7 +35,7 @@ from tableauserverclient.models.project_item import ProjectItem
 from tableauserverclient.models.revision_item import RevisionItem
 from tableauserverclient.models.schedule_item import ScheduleItem
 from tableauserverclient.models.server_info_item import ServerInfoItem
-from tableauserverclient.models.site_item import SiteItem
+from tableauserverclient.models.site_item import SiteItem, SiteAuthConfiguration
 from tableauserverclient.models.subscription_item import SubscriptionItem
 from tableauserverclient.models.table_item import TableItem
 from tableauserverclient.models.tableau_auth import Credentials, TableauAuth, PersonalAccessTokenAuth, JWTAuth
@@ -83,6 +83,7 @@ __all__ = [
     "RevisionItem",
     "ScheduleItem",
     "ServerInfoItem",
+    "SiteAuthConfiguration",
     "SiteItem",
     "SubscriptionItem",
     "TableItem",
