@@ -276,14 +276,13 @@ class SiteTests(unittest.TestCase):
 
         assert len(configs) == 2, "Expected 2 auth configurations"
 
-        assert configs[0].auth_setting =="OIDC"
+        assert configs[0].auth_setting == "OIDC"
         assert configs[0].enabled
         assert configs[0].idp_configuration_id == "00000000-0000-0000-0000-000000000000"
         assert configs[0].idp_configuration_name == "Initial Salesforce"
         assert configs[0].known_provider_alias == "Salesforce"
-        assert configs[1].auth_setting =="SAML"
+        assert configs[1].auth_setting == "SAML"
         assert configs[1].enabled
         assert configs[1].idp_configuration_id == "11111111-1111-1111-1111-111111111111"
         assert configs[1].idp_configuration_name == "Initial SAML"
         assert configs[1].known_provider_alias is None
-
