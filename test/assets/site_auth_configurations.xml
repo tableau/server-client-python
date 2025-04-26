@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+  <siteAuthConfigurations>
+    <siteAuthConfiguration
+      authSetting="OIDC"
+      enabled="true"
+      idpConfigurationId="00000000-0000-0000-0000-000000000000"
+      idpConfigurationName="Initial Salesforce"
+      knownProviderAlias="Salesforce"
+    />
+    <siteAuthConfiguration
+      authSetting="SAML"
+      enabled="true"
+      idpConfigurationId="11111111-1111-1111-1111-111111111111"
+      idpConfigurationName="Initial SAML"
+    />
+  </siteAuthConfigurations>
+</tsResponse>
