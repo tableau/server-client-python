@@ -251,7 +251,7 @@ class UserTests(unittest.TestCase):
         assert users[0].name == "Cassie", users
         assert failures == []
 
-    def test_add_user_idp_configuration(self):
+    def test_add_user_idp_configuration(self) -> None:
         with open(ADD_XML) as f:
             response_xml = f.read()
         user = TSC.UserItem(name="Cassie", site_role="Viewer", auth_setting="ServerDefault")
@@ -268,7 +268,7 @@ class UserTests(unittest.TestCase):
         assert user_elem is not None
         assert user_elem.attrib["idpConfigurationId"] == "012345"
 
-    def test_update_user_idp_configuration(self):
+    def test_update_user_idp_configuration(self) -> None:
         with open(ADD_XML) as f:
             response_xml = f.read()
         user = TSC.UserItem(name="Cassie", site_role="Viewer", auth_setting="ServerDefault")
