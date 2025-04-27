@@ -267,3 +267,21 @@ class UserTests(unittest.TestCase):
         user_elem = tree.find(".//user")
         assert user_elem is not None
         assert user_elem.attrib["idpConfigurationId"] == "012345"
+
+    def test_update_user_idp_configuration(self):
+        with open(ADD_XML) as f:
+            response_xml = f.read()
+        user = TSC.UserItem(name="Cassie", site_role="Viewer", auth_setting="ServerDefault")
+        user._id = "0123456789"
+        user.idp_configuration_id = "012345"
+
+        with requests_mock.mock() as m:
+            m.put(f"{self.server.users.baseurl}/{user.id}", text=response_xml)
+            user = self.server.users.update(user)
+
+            history = m.request_history[0]
+
+        tree = ET.fromstring(history.text)
+        user_elem = tree.find(".//user")
+        assert user_elem is not None
+        assert user_elem.attrib["idpConfigurationId"] == "012345"
