@@ -20,6 +20,7 @@ from tableauserverclient.server.endpoint import (
     Subscriptions,
     Jobs,
     Metadata,
+    VizQL,
     Databases,
     Tables,
     Flows,
@@ -150,6 +151,7 @@ class Server:
         self.tasks = Tasks(self)
         self.subscriptions = Subscriptions(self)
         self.metadata = Metadata(self)
+        self.vizql = VizQL(self)
         self.databases = Databases(self)
         self.tables = Tables(self)
         self.webhooks = Webhooks(self)

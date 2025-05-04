@@ -66,7 +66,7 @@ class Endpoint:
             parameters["headers"][CONTENT_TYPE_HEADER] = content_type
 
         Endpoint.set_user_agent(parameters)
-        if content is not None:
+        if content is not None and content_type != JSON_CONTENT_TYPE:
             parameters["data"] = content
         return parameters or {}
 
@@ -86,21 +86,20 @@ class Endpoint:
         # return explicitly for testing only
         return parameters
 
-    def _blocking_request(self, method, url, parameters={}) -> Optional[Union["Response", Exception]]:
+    def _blocking_request(self, method, url, parameters={}, content=None, content_type=None) -> Optional[Union["Response", Exception]]:
         response = None
         logger.debug(f"[{datetime.timestamp()}] Begin blocking request to {url}")
         try:
-            response = method(url, **parameters)
+            if content and content_type == JSON_CONTENT_TYPE:
+                response = method(url, json=content, **parameters)
+            else:
+                response = method(url, **parameters)
             logger.debug(f"[{datetime.timestamp()}] Call finished")
         except Exception as e:
             logger.debug(f"Error making request to server: {e}")
             raise e
         return response
 
-    def send_request_while_show_progress_threaded(
-        self, method, url, parameters={}, request_timeout=None
-    ) -> Optional[Union["Response", Exception]]:
-        return self._blocking_request(method, url, parameters)
 
     def _make_request(
         self,
@@ -116,17 +115,19 @@ class Endpoint:
         )
 
         logger.debug(f"request method {method.__name__}, url: {url}")
-        if content:
-            redacted = helpers.strings.redact_xml(content[:200])
-            # this needs to be under a trace or something, it's a LOT
-            # logger.debug("request content: {}".format(redacted))
 
         # a request can, for stuff like publishing, spin for ages waiting for a response.
         # we need some user-facing activity so they know it's not dead.
-        request_timeout = self.parent_srv.http_options.get("timeout") or 0
-        server_response: Optional[Union["Response", Exception]] = self.send_request_while_show_progress_threaded(
-            method, url, parameters, request_timeout
-        )
+        
+        if content and content_type == JSON_CONTENT_TYPE:
+            server_response: Optional[Union["Response", Exception]] = self._blocking_request(
+                method, url, parameters, content, content_type
+             )
+        else:
+            server_response: Optional[Union["Response", Exception]] = self._blocking_request(
+                method, url, parameters
+             )
+         
         logger.debug(f"[{datetime.timestamp()}] Async request returned: received {server_response}")
         # is this blocking retry really necessary? I guess if it was just the threading messing it up?
         if server_response is None:
