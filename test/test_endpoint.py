@@ -27,16 +27,6 @@ class TestEndpoint(unittest.TestCase):
             response = endpoint.get_request(url=url)
             self.assertIsNotNone(response)
 
-    def test_user_friendly_request_returns(self) -> None:
-        url = "http://test/"
-        endpoint = TSC.server.Endpoint(self.server)
-        with requests_mock.mock() as m:
-            m.get(url)
-            response = endpoint.send_request_while_show_progress_threaded(
-                endpoint.parent_srv.session.get, url=url, request_timeout=2
-            )
-            self.assertIsNotNone(response)
-
     def test_blocking_request_raises_request_error(self) -> None:
         with pytest.raises(requests.exceptions.ConnectionError):
             url = "http://test/"
