@@ -30,7 +30,7 @@ from tableauserverclient.server.endpoint.views_endpoint import Views
 from tableauserverclient.server.endpoint.virtual_connections_endpoint import VirtualConnections
 from tableauserverclient.server.endpoint.webhooks_endpoint import Webhooks
 from tableauserverclient.server.endpoint.workbooks_endpoint import Workbooks
-
+from tableauserverclient.server.endpoint.vizql_endpoint import VizQL
 __all__ = [
     "Auth",
     "CustomViews",
@@ -66,4 +66,5 @@ __all__ = [
     "VirtualConnections",
     "Webhooks",
     "Workbooks",
+    "VizQL",
 ]

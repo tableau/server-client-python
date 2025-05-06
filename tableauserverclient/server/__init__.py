@@ -45,6 +45,7 @@ from tableauserverclient.server.endpoint import (
     Views,
     Webhooks,
     Workbooks,
+    VizQL,
 )
 
 __all__ = [
@@ -91,4 +92,5 @@ __all__ = [
     "Views",
     "Webhooks",
     "Workbooks",
+    "VizQL",
 ]
