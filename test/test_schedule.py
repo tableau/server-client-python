@@ -409,7 +409,6 @@ class ScheduleTests(unittest.TestCase):
 
     def test_get_extract_refresh_tasks(self) -> None:
         self.server.version = "2.3"
-        
 
         with open(GET_EXTRACT_TASKS_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
@@ -420,7 +419,7 @@ class ScheduleTests(unittest.TestCase):
             # Fix the URL construction to match the endpoint pattern
             # url = f"{self.baseurl}/{schedule_id}/extracts"
             m.get(baseurl, text=response_xml)
-            
+
             extracts = self.server.schedules.get_extract_refresh_tasks(schedule_id)
 
             self.assertIsNotNone(extracts)

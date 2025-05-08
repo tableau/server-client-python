@@ -151,17 +151,19 @@ class Schedules(Endpoint):
             return OK
 
     @api(version="2.3")
-    def get_extract_refresh_tasks(self, schedule_id: str, req_options: Optional["RequestOptions"] = None) -> tuple[list["ExtractItem"], "PaginationItem"]:
+    def get_extract_refresh_tasks(
+        self, schedule_id: str, req_options: Optional["RequestOptions"] = None
+    ) -> tuple[list["ExtractItem"], "PaginationItem"]:
         """Get all extract refresh tasks for the specified schedule."""
         if not schedule_id:
             error = "Schedule ID undefined"
             raise ValueError(error)
-        
+
         logger.info(f"Querying extract refresh tasks for schedule (ID: {schedule_id})")
         url = f"{self.siteurl}/{schedule_id}/extracts"
         server_response = self.get_request(url, req_options)
-        
+
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         extract_items = ExtractItem.from_response(server_response.content, self.parent_srv.namespace)
-        
+
         return extract_items, pagination_item
