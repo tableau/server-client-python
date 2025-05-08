@@ -65,7 +65,7 @@ class ExtractItem:
         for extract_xml in all_extract_xml:
             extract_id = extract_xml.get("id", None)
             priority = int(extract_xml.get("priority", 0))
-            refresh_type = extract_xml.get("type", None)
+            refresh_type = extract_xml.get("type", "")
 
             # Check for workbook or datasource
             workbook_elem = extract_xml.find(".//t:workbook", namespaces=ns)
