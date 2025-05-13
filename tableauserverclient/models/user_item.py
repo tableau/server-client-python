@@ -7,6 +7,7 @@ from typing import Optional, TYPE_CHECKING
 from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.datetime_helpers import parse_datetime
+from tableauserverclient.models.site_item import SiteAuthConfiguration
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import (
     property_is_enum,
@@ -240,7 +241,15 @@ class UserItem:
 
     @property
     def idp_configuration_id(self) -> Optional[str]:
+        """
+        IDP configuration id for the user. This is only available on Tableau
+        Cloud, 3.24 or later
+        """
         return self._idp_configuration_id
+
+    @idp_configuration_id.setter
+    def idp_configuration_id(self, value: str) -> None:
+        self._idp_configuration_id = value
 
     def _set_workbooks(self, workbooks) -> None:
         self._workbooks = workbooks
