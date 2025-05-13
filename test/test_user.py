@@ -132,13 +132,16 @@ class UserTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             m.post(self.baseurl + "", text=response_xml)
-            new_user = TSC.UserItem(name="Cassie", site_role="Viewer", auth_setting="ServerDefault")
+            new_user = TSC.UserItem(
+                name="Cassie", site_role="Viewer", auth_setting="ServerDefault", idp_configuration_id="test-idp-id"
+            )
             new_user = self.server.users.add(new_user)
 
         self.assertEqual("4cc4c17f-898a-4de4-abed-a1681c673ced", new_user.id)
         self.assertEqual("Cassie", new_user.name)
         self.assertEqual("Viewer", new_user.site_role)
         self.assertEqual("ServerDefault", new_user.auth_setting)
+        self.assertEqual("test-idp-id", new_user.idp_configuration_id)
 
     def test_populate_workbooks(self) -> None:
         with open(POPULATE_WORKBOOKS_XML, "rb") as f:

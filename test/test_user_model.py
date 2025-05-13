@@ -19,6 +19,11 @@ class UserModelTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             user.site_role = "Hello"
 
+    def test_idp_configuration_id(self):
+        idp_id = "idp123"
+        user = TSC.UserItem("test", "Viewer", auth_setting="SAML", idp_configuration_id=idp_id)
+        self.assertEqual(idp_id, user.idp_configuration_id)
+
 
 class UserDataTest(unittest.TestCase):
     logger = logging.getLogger("UserDataTest")

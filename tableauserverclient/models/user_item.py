@@ -79,7 +79,11 @@ class UserItem:
         ServerDefault = "ServerDefault"
 
     def __init__(
-        self, name: Optional[str] = None, site_role: Optional[str] = None, auth_setting: Optional[str] = None
+        self,
+        name: Optional[str] = None,
+        site_role: Optional[str] = None,
+        auth_setting: Optional[str] = None,
+        idp_configuration_id: Optional[str] = None,
     ) -> None:
         self._auth_setting: Optional[str] = None
         self._domain_name: Optional[str] = None
@@ -89,11 +93,13 @@ class UserItem:
         self._workbooks = None
         self._favorites: Optional[dict[str, list]] = None
         self._groups = None
+        self._idp_configuration_id: Optional[str] = None
         self.email: Optional[str] = None
         self.fullname: Optional[str] = None
         self.name: Optional[str] = name
         self.site_role: Optional[str] = site_role
         self.auth_setting: Optional[str] = auth_setting
+        self._idp_configuration_id = idp_configuration_id
 
         return None
 
@@ -128,6 +134,10 @@ class UserItem:
     @id.setter
     def id(self, value: str) -> None:
         self._id = value
+
+    @property
+    def idp_configuration_id(self) -> Optional[str]:
+        return self._idp_configuration_id
 
     @property
     def last_login(self) -> Optional[datetime]:
@@ -204,8 +214,11 @@ class UserItem:
                 email,
                 auth_setting,
                 _,
+                idp_configuration_id,
             ) = self._parse_element(user_xml, ns)
-            self._set_values(None, None, site_role, None, None, fullname, email, auth_setting, None)
+            self._set_values(
+                None, None, site_role, None, None, fullname, email, auth_setting, None, idp_configuration_id
+            )
         return self
 
     def _set_values(
@@ -219,6 +232,7 @@ class UserItem:
         email,
         auth_setting,
         domain_name,
+        idp_configuration_id=None,
     ):
         if id is not None:
             self._id = id
@@ -238,6 +252,8 @@ class UserItem:
             self._auth_setting = auth_setting
         if domain_name:
             self._domain_name = domain_name
+        if idp_configuration_id:
+            self._idp_configuration_id = idp_configuration_id
 
     @classmethod
     def from_response(cls, resp, ns) -> list["UserItem"]:
@@ -265,6 +281,7 @@ class UserItem:
                 email,
                 auth_setting,
                 domain_name,
+                idp_configuration_id,
             ) = cls._parse_element(user_xml, ns)
             user_item = cls(name, site_role)
             user_item._set_values(
@@ -277,6 +294,7 @@ class UserItem:
                 email,
                 auth_setting,
                 domain_name,
+                idp_configuration_id,
             )
             all_user_items.append(user_item)
         return all_user_items
@@ -295,6 +313,7 @@ class UserItem:
         fullname = user_xml.get("fullName", None)
         email = user_xml.get("email", None)
         auth_setting = user_xml.get("authSetting", None)
+        idp_configuration_id = user_xml.get("idpConfigurationId", None)
 
         domain_name = None
         domain_elem = user_xml.find(".//t:domain", namespaces=ns)
@@ -311,6 +330,7 @@ class UserItem:
             email,
             auth_setting,
             domain_name,
+            idp_configuration_id,
         )
 
     class CSVImport:

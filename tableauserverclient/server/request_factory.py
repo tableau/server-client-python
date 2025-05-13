@@ -911,6 +911,8 @@ class UserRequest:
                 user_element.attrib["siteRole"] = user_item.site_role
         if user_item.auth_setting:
             user_element.attrib["authSetting"] = user_item.auth_setting
+        if user_item.idp_configuration_id:
+            user_element.attrib["idpConfigurationId"] = user_item.idp_configuration_id
         if password:
             user_element.attrib["password"] = password
         return ET.tostring(xml_request)
@@ -929,6 +931,8 @@ class UserRequest:
 
         if user_item.auth_setting:
             user_element.attrib["authSetting"] = user_item.auth_setting
+        if user_item.idp_configuration_id:
+            user_element.attrib["idpConfigurationId"] = user_item.idp_configuration_id
         return ET.tostring(xml_request)
 
 
