@@ -254,7 +254,7 @@ class UserTests(unittest.TestCase):
     def test_add_user_idp_configuration(self) -> None:
         with open(ADD_XML) as f:
             response_xml = f.read()
-        user = TSC.UserItem(name="Cassie", site_role="Viewer", auth_setting="ServerDefault")
+        user = TSC.UserItem(name="Cassie", site_role="Viewer")
         user.idp_configuration_id = "012345"
 
         with requests_mock.mock() as m:
@@ -271,7 +271,7 @@ class UserTests(unittest.TestCase):
     def test_update_user_idp_configuration(self) -> None:
         with open(ADD_XML) as f:
             response_xml = f.read()
-        user = TSC.UserItem(name="Cassie", site_role="Viewer", auth_setting="ServerDefault")
+        user = TSC.UserItem(name="Cassie", site_role="Viewer")
         user._id = "0123456789"
         user.idp_configuration_id = "012345"
 
