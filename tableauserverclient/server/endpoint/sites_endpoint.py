@@ -4,7 +4,7 @@ import logging
 from .endpoint import Endpoint, api
 from .exceptions import MissingRequiredFieldError
 from tableauserverclient.server import RequestFactory
-from tableauserverclient.models import SiteItem, PaginationItem
+from tableauserverclient.models import SiteAuthConfiguration, SiteItem, PaginationItem
 
 from tableauserverclient.helpers.logging import logger
 
@@ -418,3 +418,20 @@ class Sites(Endpoint):
 
         empty_req = RequestFactory.Empty.empty_req()
         self.post_request(url, empty_req)
+
+    @api(version="3.24")
+    def list_auth_configurations(self) -> list[SiteAuthConfiguration]:
+        """
+        Lists all authentication configurations on the current site.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_site.htm#list_authentication_configurations_site
+
+        Returns
+        -------
+        list[SiteAuthConfiguration]
+            A list of authentication configurations on the current site.
+        """
+        url = f"{self.baseurl}/{self.parent_srv.site_id}/site-auth-configurations"
+        server_response = self.get_request(url)
+        auth_configurations = SiteAuthConfiguration.from_response(server_response.content, self.parent_srv.namespace)
+        return auth_configurations
