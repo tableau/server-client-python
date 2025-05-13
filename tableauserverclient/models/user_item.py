@@ -255,7 +255,7 @@ class UserItem:
         if domain_name:
             self._domain_name = domain_name
         if idp_configuration_id:
-            self._domain_name = idp_configuration_id
+            self._idp_configuration_id = idp_configuration_id
 
     @classmethod
     def from_response(cls, resp, ns) -> list["UserItem"]:
