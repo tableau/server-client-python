@@ -22,14 +22,19 @@ In most cases this is the preferred method because it improves security by avoid
 
 To sign in to Tableau Server or Tableau Cloud with a personal access token, you'll need the following values:
 
+**Tableau Server**
 Name | Description
 :--- | :---
 TOKEN_NAME | The personal access token name (from the My Account settings page)
 TOKEN_VALUE | The personal access token value (from the My Account settings page)
-**Tableau Server** |
 SITENAME | The Tableau Server site you are authenticating with. For example in the site URL http://MyServer/#/site/MarketingTeam/projects, the site name is MarketingTeam. In the REST API documentation, this field is also referred to as contentUrl. This value can be omitted to connect with the Default site on the server.
 SERVER_URL | The Tableau Server you are authenticating with. If your server has SSL enabled, this should be an HTTPS link.
-**Tableau Cloud** |
+
+**Tableau Cloud**
+Name | Description
+:--- | :---
+TOKEN_NAME | The personal access token name (from the My Account settings page)
+TOKEN_VALUE | The personal access token value (from the My Account settings page)
 SITENAME | The Tableau Cloud site you are authenticating with. For example in the site URL https://10ay.online.tableau.com/#/site/umbrellacorp816664/workbooks, the site name is umbrellacorp816664. In the REST API documentation, this field is also referred to as contentUrl. This value is always required when connecting to Tableau Cloud.
 SERVER_URL | The Tableau Cloud instance you are authenticating with. In the example above the server URL would be https://10ay.online.tableau.com. This will always be an an HTTPS link.
 
