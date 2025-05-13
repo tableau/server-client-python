@@ -1,5 +1,6 @@
 import os
 import unittest
+import uuid
 
 import requests_mock
 
@@ -132,8 +133,10 @@ class UserTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             m.post(self.baseurl + "", text=response_xml)
+            # Use a fixed UUID for testing so it matches the XML response
+            test_idp_id = "b47f41b1-2c47-41a3-8b17-a38ebe8b340c"
             new_user = TSC.UserItem(
-                name="Cassie", site_role="Viewer", auth_setting="ServerDefault", idp_configuration_id="test-idp-id"
+                name="Cassie", site_role="Viewer", auth_setting="ServerDefault", idp_configuration_id=test_idp_id
             )
             new_user = self.server.users.add(new_user)
 
@@ -141,7 +144,7 @@ class UserTests(unittest.TestCase):
         self.assertEqual("Cassie", new_user.name)
         self.assertEqual("Viewer", new_user.site_role)
         self.assertEqual("ServerDefault", new_user.auth_setting)
-        self.assertEqual("test-idp-id", new_user.idp_configuration_id)
+        self.assertEqual(test_idp_id, new_user.idp_configuration_id)
 
     def test_populate_workbooks(self) -> None:
         with open(POPULATE_WORKBOOKS_XML, "rb") as f:

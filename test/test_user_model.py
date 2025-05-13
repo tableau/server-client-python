@@ -2,6 +2,7 @@ import logging
 import unittest
 from unittest.mock import *
 import io
+import uuid
 
 import pytest
 
@@ -20,7 +21,7 @@ class UserModelTests(unittest.TestCase):
             user.site_role = "Hello"
 
     def test_idp_configuration_id(self):
-        idp_id = "idp123"
+        idp_id = str(uuid.uuid4())
         user = TSC.UserItem("test", "Viewer", auth_setting="SAML", idp_configuration_id=idp_id)
         self.assertEqual(idp_id, user.idp_configuration_id)
 
