@@ -2,11 +2,14 @@ import copy
 import datetime
 import uuid
 import xml.etree.ElementTree as ET
-from typing import Callable, Optional
+from typing import Callable, Optional, overload
 
 from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.datetime_helpers import parse_datetime
+from tableauserverclient.models.location_item import LocationItem
+from tableauserverclient.models.project_item import ProjectItem
+from tableauserverclient.models.user_item import UserItem
 from .connection_item import ConnectionItem
 from .exceptions import UnpopulatedPropertyError
 from .permissions_item import PermissionsRule
@@ -51,12 +54,30 @@ class WorkbookItem:
     created_at : Optional[datetime.datetime]
         The date and time the workbook was created.
 
+    default_view_id : Optional[str]
+        The identifier for the default view of the workbook.
+
     description : Optional[str]
         User-defined description of the workbook.
+
+    encrypt_extracts : Optional[bool]
+        Indicates whether extracts are encrypted.
+
+    has_extracts : Optional[bool]
+        Indicates whether the workbook has extracts.
 
     id : Optional[str]
        The identifier for the workbook. You need this value to query a specific
        workbook or to delete a workbook with the get_by_id and delete methods.
+
+    last_published_at : Optional[datetime.datetime]
+        The date and time the workbook was last published.
+
+    location : Optional[LocationItem]
+        The location of the workbook, such as a personal space or project.
+
+    owner : Optional[UserItem]
+        The owner of the workbook.
 
     owner_id : Optional[str]
         The identifier for the owner (UserItem) of the workbook.
@@ -64,6 +85,9 @@ class WorkbookItem:
     preview_image : bytes
         The thumbnail image for the view. You must first call the
         workbooks.populate_preview_image method to access this data.
+
+    project: Optional[ProjectItem]
+        The project that contains the workbook.
 
     project_name : Optional[str]
         The name of the project that contains the workbook.
@@ -139,6 +163,15 @@ class WorkbookItem:
         self._permissions = None
         self.thumbnails_user_id = thumbnails_user_id
         self.thumbnails_group_id = thumbnails_group_id
+        self._sheet_count: Optional[int] = None
+        self._has_extracts: Optional[bool] = None
+        self._project: Optional[ProjectItem] = None
+        self._owner: Optional[UserItem] = None
+        self._location: Optional[LocationItem] = None
+        self._encrypt_extracts: Optional[bool] = None
+        self._default_view_id: Optional[str] = None
+        self._share_description: Optional[str] = None
+        self._last_published_at: Optional[datetime.datetime] = None
 
         return None
 
@@ -235,6 +268,14 @@ class WorkbookItem:
         return self._size
 
     @property
+    def sheet_count(self) -> Optional[int]:
+        return self._sheet_count
+
+    @property
+    def has_extracts(self) -> Optional[bool]:
+        return self._has_extracts
+
+    @property
     def updated_at(self) -> Optional[datetime.datetime]:
         return self._updated_at
 
@@ -300,6 +341,34 @@ class WorkbookItem:
     def thumbnails_group_id(self, value: str):
         self._thumbnails_group_id = value
 
+    @property
+    def project(self) -> Optional[ProjectItem]:
+        return self._project
+
+    @property
+    def owner(self) -> Optional[UserItem]:
+        return self._owner
+
+    @property
+    def location(self) -> Optional[LocationItem]:
+        return self._location
+
+    @property
+    def encrypt_extracts(self) -> Optional[bool]:
+        return self._encrypt_extracts
+
+    @property
+    def default_view_id(self) -> Optional[str]:
+        return self._default_view_id
+
+    @property
+    def share_description(self) -> Optional[str]:
+        return self._share_description
+
+    @property
+    def last_published_at(self) -> Optional[datetime.datetime]:
+        return self._last_published_at
+
     def _set_connections(self, connections):
         self._connections = connections
 
@@ -342,6 +411,15 @@ class WorkbookItem:
                 views,
                 data_acceleration_config,
                 data_freshness_policy,
+                sheet_count,
+                has_extracts,
+                project,
+                owner,
+                location,
+                encrypt_extracts,
+                default_view_id,
+                share_description,
+                last_published_at,
             ) = self._parse_element(workbook_xml, ns)
 
             self._set_values(
@@ -361,6 +439,15 @@ class WorkbookItem:
                 views,
                 data_acceleration_config,
                 data_freshness_policy,
+                sheet_count,
+                has_extracts,
+                project,
+                owner,
+                location,
+                encrypt_extracts,
+                default_view_id,
+                share_description,
+                last_published_at,
             )
 
         return self
@@ -383,6 +470,15 @@ class WorkbookItem:
         views,
         data_acceleration_config,
         data_freshness_policy,
+        sheet_count,
+        has_extracts,
+        project,
+        owner,
+        location,
+        encrypt_extracts,
+        default_view_id,
+        share_description,
+        last_published_at,
     ):
         if id is not None:
             self._id = id
@@ -417,6 +513,24 @@ class WorkbookItem:
             self.data_acceleration_config = data_acceleration_config
         if data_freshness_policy is not None:
             self.data_freshness_policy = data_freshness_policy
+        if sheet_count is not None:
+            self._sheet_count = sheet_count
+        if has_extracts is not None:
+            self._has_extracts = has_extracts
+        if project:
+            self._project = project
+        if owner:
+            self._owner = owner
+        if location:
+            self._location = location
+        if encrypt_extracts is not None:
+            self._encrypt_extracts = encrypt_extracts
+        if default_view_id is not None:
+            self._default_view_id = default_view_id
+        if share_description is not None:
+            self._share_description = share_description
+        if last_published_at is not None:
+            self._last_published_at = last_published_at
 
     @classmethod
     def from_response(cls, resp: str, ns: dict[str, str]) -> list["WorkbookItem"]:
@@ -443,6 +557,12 @@ class WorkbookItem:
         created_at = parse_datetime(workbook_xml.get("createdAt", None))
         description = workbook_xml.get("description", None)
         updated_at = parse_datetime(workbook_xml.get("updatedAt", None))
+        sheet_count = string_to_int(workbook_xml.get("sheetCount", None))
+        has_extracts = string_to_bool(workbook_xml.get("hasExtracts", ""))
+        encrypt_extracts = string_to_bool(e) if (e := workbook_xml.get("encryptExtracts", None)) is not None else None
+        default_view_id = workbook_xml.get("defaultViewId", None)
+        share_description = workbook_xml.get("shareDescription", None)
+        last_published_at = parse_datetime(workbook_xml.get("lastPublishedAt", None))
 
         size = workbook_xml.get("size", None)
         if size:
@@ -452,14 +572,18 @@ class WorkbookItem:
 
         project_id = None
         project_name = None
+        project = None
         project_tag = workbook_xml.find(".//t:project", namespaces=ns)
         if project_tag is not None:
+            project = ProjectItem.from_xml(project_tag, ns)
             project_id = project_tag.get("id", None)
             project_name = project_tag.get("name", None)
 
         owner_id = None
+        owner = None
         owner_tag = workbook_xml.find(".//t:owner", namespaces=ns)
         if owner_tag is not None:
+            owner = UserItem.from_xml(owner_tag, ns)
             owner_id = owner_tag.get("id", None)
 
         tags = None
@@ -472,6 +596,11 @@ class WorkbookItem:
         views_elem = workbook_xml.find(".//t:views", namespaces=ns)
         if views_elem is not None:
             views = ViewItem.from_xml_element(views_elem, ns)
+
+        location = None
+        location_elem = workbook_xml.find(".//t:location", namespaces=ns)
+        if location_elem is not None:
+            location = LocationItem.from_xml(location_elem, ns)
 
         data_acceleration_config = {
             "acceleration_enabled": None,
@@ -505,6 +634,15 @@ class WorkbookItem:
             views,
             data_acceleration_config,
             data_freshness_policy,
+            sheet_count,
+            has_extracts,
+            project,
+            owner,
+            location,
+            encrypt_extracts,
+            default_view_id,
+            share_description,
+            last_published_at,
         )
 
 
@@ -535,3 +673,15 @@ def parse_data_acceleration_config(data_acceleration_elem):
 # Used to convert string represented boolean to a boolean type
 def string_to_bool(s: str) -> bool:
     return s.lower() == "true"
+
+
+@overload
+def string_to_int(s: None) -> None: ...
+
+
+@overload
+def string_to_int(s: str) -> int: ...
+
+
+def string_to_int(s):
+    return int(s) if s is not None else None

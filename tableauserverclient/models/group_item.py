@@ -44,6 +44,11 @@ class GroupItem:
         login to a site. When the mode is onSync, a license is granted for group
         members each time the domain is synced.
 
+    Attributes
+    ----------
+    user_count: Optional[int]
+        The number of users in the group.
+
     Examples
     --------
     >>> # Create a new group item
@@ -65,6 +70,7 @@ class GroupItem:
         self._users: Optional[Callable[..., "Pager"]] = None
         self.name: Optional[str] = name
         self.domain_name: Optional[str] = domain_name
+        self._user_count: Optional[int] = None
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.__dict__!r})"
@@ -118,6 +124,10 @@ class GroupItem:
     def _set_users(self, users: Callable[..., "Pager"]) -> None:
         self._users = users
 
+    @property
+    def user_count(self) -> Optional[int]:
+        return self._user_count
+
     @classmethod
     def from_response(cls, resp, ns) -> list["GroupItem"]:
         all_group_items = list()
@@ -127,6 +137,7 @@ class GroupItem:
             name = group_xml.get("name", None)
             group_item = cls(name)
             group_item._id = group_xml.get("id", None)
+            group_item._user_count = int(count) if (count := group_xml.get("userCount", None)) else None
 
             # Domain name is returned in a domain element for some calls
             domain_elem = group_xml.find(".//t:domain", namespaces=ns)

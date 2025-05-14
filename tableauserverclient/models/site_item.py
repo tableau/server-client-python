@@ -1188,6 +1188,34 @@ class SiteItem:
         )
 
 
+class SiteAuthConfiguration:
+    """
+    Authentication configuration for a site.
+    """
+
+    def __init__(self):
+        self.auth_setting: Optional[str] = None
+        self.enabled: Optional[bool] = None
+        self.idp_configuration_id: Optional[str] = None
+        self.idp_configuration_name: Optional[str] = None
+        self.known_provider_alias: Optional[str] = None
+
+    @classmethod
+    def from_response(cls, resp: bytes, ns: dict) -> list["SiteAuthConfiguration"]:
+        all_auth_configs = list()
+        parsed_response = fromstring(resp)
+        all_auth_xml = parsed_response.findall(".//t:siteAuthConfiguration", namespaces=ns)
+        for auth_xml in all_auth_xml:
+            auth_config = cls()
+            auth_config.auth_setting = auth_xml.get("authSetting", None)
+            auth_config.enabled = string_to_bool(auth_xml.get("enabled", ""))
+            auth_config.idp_configuration_id = auth_xml.get("idpConfigurationId", None)
+            auth_config.idp_configuration_name = auth_xml.get("idpConfigurationName", None)
+            auth_config.known_provider_alias = auth_xml.get("knownProviderAlias", None)
+            all_auth_configs.append(auth_config)
+        return all_auth_configs
+
+
 # Used to convert string represented boolean to a boolean type
 def string_to_bool(s: str) -> bool:
     return s.lower() == "true"

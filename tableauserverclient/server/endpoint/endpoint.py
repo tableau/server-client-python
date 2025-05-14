@@ -14,6 +14,7 @@ from typing import (
     TypeVar,
     Union,
 )
+from typing_extensions import Self
 
 from tableauserverclient.models.pagination_item import PaginationItem
 from tableauserverclient.server.request_options import RequestOptions
@@ -353,3 +354,41 @@ class QuerysetEndpoint(Endpoint, Generic[T]):
     @abc.abstractmethod
     def get(self, request_options: Optional[RequestOptions] = None) -> tuple[list[T], PaginationItem]:
         raise NotImplementedError(f".get has not been implemented for {self.__class__.__qualname__}")
+
+    def fields(self: Self, *fields: str) -> QuerySet:
+        """
+        Add fields to the request options. If no fields are provided, the
+        default fields will be used. If fields are provided, the default fields
+        will be used in addition to the provided fields.
+
+        Parameters
+        ----------
+        fields : str
+            The fields to include in the request options.
+
+        Returns
+        -------
+        QuerySet
+        """
+        queryset = QuerySet(self)
+        queryset.request_options.fields |= set(fields) | set(("_default_",))
+        return queryset
+
+    def only_fields(self: Self, *fields: str) -> QuerySet:
+        """
+        Add fields to the request options. If no fields are provided, the
+        default fields will be used. If fields are provided, the default fields
+        will be replaced by the provided fields.
+
+        Parameters
+        ----------
+        fields : str
+            The fields to include in the request options.
+
+        Returns
+        -------
+        QuerySet
+        """
+        queryset = QuerySet(self)
+        queryset.request_options.fields |= set(fields)
+        return queryset

@@ -28,6 +28,7 @@ from tableauserverclient.models.linked_tasks_item import (
     LinkedTaskStepItem,
     LinkedTaskFlowRunItem,
 )
+from tableauserverclient.models.location_item import LocationItem
 from tableauserverclient.models.metric_item import MetricItem
 from tableauserverclient.models.pagination_item import PaginationItem
 from tableauserverclient.models.permissions_item import PermissionsRule, Permission
@@ -35,7 +36,7 @@ from tableauserverclient.models.project_item import ProjectItem
 from tableauserverclient.models.revision_item import RevisionItem
 from tableauserverclient.models.schedule_item import ScheduleItem
 from tableauserverclient.models.server_info_item import ServerInfoItem
-from tableauserverclient.models.site_item import SiteItem
+from tableauserverclient.models.site_item import SiteItem, SiteAuthConfiguration
 from tableauserverclient.models.subscription_item import SubscriptionItem
 from tableauserverclient.models.table_item import TableItem
 from tableauserverclient.models.tableau_auth import Credentials, TableauAuth, PersonalAccessTokenAuth, JWTAuth
@@ -76,6 +77,7 @@ __all__ = [
     "MonthlyInterval",
     "HourlyInterval",
     "BackgroundJobItem",
+    "LocationItem",
     "MetricItem",
     "PaginationItem",
     "Permission",
@@ -84,6 +86,7 @@ __all__ = [
     "RevisionItem",
     "ScheduleItem",
     "ServerInfoItem",
+    "SiteAuthConfiguration",
     "SiteItem",
     "SubscriptionItem",
     "TableItem",
