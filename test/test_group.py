@@ -10,6 +10,7 @@ TEST_ASSET_DIR = Path(__file__).absolute().parent / "assets"
 # TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
 GET_XML = os.path.join(TEST_ASSET_DIR, "group_get.xml")
+GET_XML_ALL_FIELDS = TEST_ASSET_DIR / "group_get_all_fields.xml"
 POPULATE_USERS = os.path.join(TEST_ASSET_DIR, "group_populate_users.xml")
 POPULATE_USERS_EMPTY = os.path.join(TEST_ASSET_DIR, "group_populate_users_empty.xml")
 ADD_USER = os.path.join(TEST_ASSET_DIR, "group_add_user.xml")
@@ -310,3 +311,25 @@ class GroupTests(unittest.TestCase):
         self.assertEqual(job.id, "c2566efc-0767-4f15-89cb-56acb4349c1b")
         self.assertEqual(job.mode, "Asynchronous")
         self.assertEqual(job.type, "GroupSync")
+
+    def test_get_all_fields(self) -> None:
+        ro = TSC.RequestOptions()
+        ro.all_fields = True
+        self.server.version = "3.21"
+        self.baseurl = self.server.groups.baseurl
+        with requests_mock.mock() as m:
+            m.get(f"{self.baseurl}?fields=_all_", text=GET_XML_ALL_FIELDS.read_text())
+            groups, pages = self.server.groups.get(req_options=ro)
+
+        assert pages.total_available == 3
+        assert len(groups) == 3
+        assert groups[0].id == "28c5b855-16df-482f-ad0b-428c1df58859"
+        assert groups[0].name == "All Users"
+        assert groups[0].user_count == 2
+        assert groups[0].domain_name == "local"
+        assert groups[1].id == "ace1ee2d-e7dd-4d7a-9504-a1ccaa5212ea"
+        assert groups[1].name == "group1"
+        assert groups[1].user_count == 1
+        assert groups[2].id == "baf0ed9d-c25d-4114-97ed-5232b8a732fd"
+        assert groups[2].name == "test"
+        assert groups[2].user_count == 0

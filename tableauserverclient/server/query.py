@@ -208,6 +208,42 @@ class QuerySet(Iterable[T], Sized):
             self.request_options.pagesize = kwargs["page_size"]
         return self
 
+    def fields(self: Self, *fields: str) -> Self:
+        """
+        Add fields to the request options. If no fields are provided, the
+        default fields will be used. If fields are provided, the default fields
+        will be used in addition to the provided fields.
+
+        Parameters
+        ----------
+        fields : str
+            The fields to include in the request options.
+
+        Returns
+        -------
+        QuerySet
+        """
+        self.request_options.fields |= set(fields) | set(("_default_"))
+        return self
+
+    def only_fields(self: Self, *fields: str) -> Self:
+        """
+        Add fields to the request options. If no fields are provided, the
+        default fields will be used. If fields are provided, the default fields
+        will be replaced by the provided fields.
+
+        Parameters
+        ----------
+        fields : str
+            The fields to include in the request options.
+
+        Returns
+        -------
+        QuerySet
+        """
+        self.request_options.fields |= set(fields)
+        return self
+
     @staticmethod
     def _parse_shorthand_filter(key: str) -> tuple[str, str]:
         tokens = key.split("__", 1)

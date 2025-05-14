@@ -1,15 +1,21 @@
 import copy
 from datetime import datetime
 from requests import Response
-from typing import Callable, Optional
+from typing import TYPE_CHECKING, Callable, Optional, overload
 from collections.abc import Iterator
 
 from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.datetime_helpers import parse_datetime
 from tableauserverclient.models.exceptions import UnpopulatedPropertyError
+from tableauserverclient.models.location_item import LocationItem
 from tableauserverclient.models.permissions_item import PermissionsRule
+from tableauserverclient.models.project_item import ProjectItem
 from tableauserverclient.models.tag_item import TagItem
+from tableauserverclient.models.user_item import UserItem
+
+if TYPE_CHECKING:
+    from tableauserverclient.models.workbook_item import WorkbookItem
 
 
 class ViewItem:
@@ -34,8 +40,15 @@ class ViewItem:
         The image of the view. You must first call the `views.populate_image`
         method to access the image.
 
+    location: Optional[LocationItem], default None
+        The location of the view. The location can be a personal space or a
+        project.
+
     name: Optional[str], default None
         The name of the view.
+
+    owner: Optional[UserItem], default None
+        The owner of the view.
 
     owner_id: Optional[str], default None
         The ID for the owner of the view.
@@ -47,6 +60,9 @@ class ViewItem:
     preview_image: Optional[Callable[[], bytes]], default None
         The preview image of the view. You must first call the
         `views.populate_preview_image` method to access the preview image.
+
+    project: Optional[ProjectItem], default None
+        The project that contains the view.
 
     project_id: Optional[str], default None
         The ID for the project that contains the view.
@@ -60,9 +76,11 @@ class ViewItem:
     updated_at: Optional[datetime], default None
         The date and time when the view was last updated.
 
+    workbook: Optional[WorkbookItem], default None
+        The workbook that contains the view.
+
     workbook_id: Optional[str], default None
         The ID for the workbook that contains the view.
-
     """
 
     def __init__(self) -> None:
@@ -84,10 +102,17 @@ class ViewItem:
         self._workbook_id: Optional[str] = None
         self._permissions: Optional[Callable[[], list[PermissionsRule]]] = None
         self.tags: set[str] = set()
+        self._favorites_total: Optional[int] = None
+        self._view_url_name: Optional[str] = None
         self._data_acceleration_config = {
             "acceleration_enabled": None,
             "acceleration_status": None,
         }
+
+        self._owner: Optional[UserItem] = None
+        self._project: Optional[ProjectItem] = None
+        self._workbook: Optional["WorkbookItem"] = None
+        self._location: Optional[LocationItem] = None
 
     def __str__(self):
         return "<ViewItem {} '{}' contentUrl='{}' project={}>".format(
@@ -191,12 +216,36 @@ class ViewItem:
         return self._workbook_id
 
     @property
+    def view_url_name(self) -> Optional[str]:
+        return self._view_url_name
+
+    @property
+    def favorites_total(self) -> Optional[int]:
+        return self._favorites_total
+
+    @property
     def data_acceleration_config(self):
         return self._data_acceleration_config
 
     @data_acceleration_config.setter
     def data_acceleration_config(self, value):
         self._data_acceleration_config = value
+
+    @property
+    def project(self) -> Optional["ProjectItem"]:
+        return self._project
+
+    @property
+    def workbook(self) -> Optional["WorkbookItem"]:
+        return self._workbook
+
+    @property
+    def owner(self) -> Optional[UserItem]:
+        return self._owner
+
+    @property
+    def location(self) -> Optional[LocationItem]:
+        return self._location
 
     @property
     def permissions(self) -> list[PermissionsRule]:
@@ -228,7 +277,7 @@ class ViewItem:
         workbook_elem = view_xml.find(".//t:workbook", namespaces=ns)
         owner_elem = view_xml.find(".//t:owner", namespaces=ns)
         project_elem = view_xml.find(".//t:project", namespaces=ns)
-        tags_elem = view_xml.find(".//t:tags", namespaces=ns)
+        tags_elem = view_xml.find("./t:tags", namespaces=ns)
         data_acceleration_config_elem = view_xml.find(".//t:dataAccelerationConfig", namespaces=ns)
         view_item._created_at = parse_datetime(view_xml.get("createdAt", None))
         view_item._updated_at = parse_datetime(view_xml.get("updatedAt", None))
@@ -236,22 +285,35 @@ class ViewItem:
         view_item._name = view_xml.get("name", None)
         view_item._content_url = view_xml.get("contentUrl", None)
         view_item._sheet_type = view_xml.get("sheetType", None)
+        view_item._favorites_total = string_to_int(view_xml.get("favoritesTotal", None))
+        view_item._view_url_name = view_xml.get("viewUrlName", None)
         if usage_elem is not None:
             total_view = usage_elem.get("totalViewCount", None)
             if total_view:
                 view_item._total_views = int(total_view)
         if owner_elem is not None:
+            user = UserItem.from_xml(owner_elem, ns)
+            view_item._owner = user
             view_item._owner_id = owner_elem.get("id", None)
         if project_elem is not None:
-            view_item._project_id = project_elem.get("id", None)
+            project_item = ProjectItem.from_xml(project_elem, ns)
+            view_item._project = project_item
+            view_item._project_id = project_item.id
         if workbook_id:
             view_item._workbook_id = workbook_id
         elif workbook_elem is not None:
-            view_item._workbook_id = workbook_elem.get("id", None)
+            from tableauserverclient.models.workbook_item import WorkbookItem
+
+            workbook_item = WorkbookItem.from_xml(workbook_elem, ns)
+            view_item._workbook = workbook_item
+            view_item._workbook_id = workbook_item.id
         if tags_elem is not None:
             tags = TagItem.from_xml_element(tags_elem, ns)
             view_item.tags = tags
             view_item._initial_tags = copy.copy(tags)
+        if (location_elem := view_xml.find(".//t:location", namespaces=ns)) is not None:
+            location = LocationItem.from_xml(location_elem, ns)
+            view_item._location = location
         if data_acceleration_config_elem is not None:
             data_acceleration_config = parse_data_acceleration_config(data_acceleration_config_elem)
             view_item.data_acceleration_config = data_acceleration_config
@@ -274,3 +336,15 @@ def parse_data_acceleration_config(data_acceleration_elem):
 
 def string_to_bool(s: str) -> bool:
     return s.lower() == "true"
+
+
+@overload
+def string_to_int(s: None) -> None: ...
+
+
+@overload
+def string_to_int(s: str) -> int: ...
+
+
+def string_to_int(s):
+    return int(s) if s is not None else None

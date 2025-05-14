@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 
 import tableauserverclient as TSC
-from tableauserverclient.datetime_helpers import format_datetime
+from tableauserverclient.datetime_helpers import format_datetime, parse_datetime
 from tableauserverclient.models import UserItem, GroupItem, PermissionsRule
 from tableauserverclient.server.endpoint.exceptions import InternalServerError, UnsupportedAttributeError
 from tableauserverclient.server.request_factory import RequestFactory
@@ -24,6 +24,7 @@ GET_BY_ID_XML_PERSONAL = os.path.join(TEST_ASSET_DIR, "workbook_get_by_id_person
 GET_EMPTY_XML = os.path.join(TEST_ASSET_DIR, "workbook_get_empty.xml")
 GET_INVALID_DATE_XML = os.path.join(TEST_ASSET_DIR, "workbook_get_invalid_date.xml")
 GET_XML = os.path.join(TEST_ASSET_DIR, "workbook_get.xml")
+GET_XML_ALL_FIELDS = os.path.join(TEST_ASSET_DIR, "workbook_get_all_fields.xml")
 ODATA_XML = os.path.join(TEST_ASSET_DIR, "odata_connection.xml")
 POPULATE_CONNECTIONS_XML = os.path.join(TEST_ASSET_DIR, "workbook_populate_connections.xml")
 POPULATE_PDF = os.path.join(TEST_ASSET_DIR, "populate_pdf.pdf")
@@ -978,3 +979,106 @@ class WorkbookTests(unittest.TestCase):
 
         assert xml_connection is not None
         self.assertEqual(xml_connection.get("serverAddress"), url)
+
+    def test_get_workbook_all_fields(self) -> None:
+        self.server.version = "3.21"
+        baseurl = self.server.workbooks.baseurl
+
+        with open(GET_XML_ALL_FIELDS) as f:
+            response = f.read()
+
+        ro = TSC.RequestOptions()
+        ro.all_fields = True
+
+        with requests_mock.mock() as m:
+            m.get(f"{baseurl}?fields=_all_", text=response)
+            workbooks, _ = self.server.workbooks.get(req_options=ro)
+
+        assert workbooks[0].id == "9df3e2d1-070e-497a-9578-8cc557ced9df"
+        assert workbooks[0].name == "Superstore"
+        assert workbooks[0].content_url == "Superstore"
+        assert workbooks[0].webpage_url == "https://10ax.online.tableau.com/#/site/exampledev/workbooks/265605"
+        assert workbooks[0].show_tabs
+        assert workbooks[0].size == 2
+        assert workbooks[0].created_at == parse_datetime("2024-02-14T04:42:09Z")
+        assert workbooks[0].updated_at == parse_datetime("2024-02-14T04:42:10Z")
+        assert workbooks[0].sheet_count == 9
+        assert not workbooks[0].has_extracts
+        assert not workbooks[0].encrypt_extracts
+        assert workbooks[0].default_view_id == "2bdcd787-dcc6-4a5d-bc61-2846f1ef4534"
+        assert workbooks[0].share_description == "Superstore"
+        assert workbooks[0].last_published_at == parse_datetime("2024-02-14T04:42:09Z")
+        assert isinstance(workbooks[0].project, TSC.ProjectItem)
+        assert workbooks[0].project.id == "669ca36b-492e-4ccf-bca1-3614fe6a9d7a"
+        assert workbooks[0].project.name == "Samples"
+        assert workbooks[0].project.description == "This project includes automatically uploaded samples."
+        assert isinstance(workbooks[0].location, TSC.LocationItem)
+        assert workbooks[0].location.id == "669ca36b-492e-4ccf-bca1-3614fe6a9d7a"
+        assert workbooks[0].location.type == "Project"
+        assert workbooks[0].location.name == "Samples"
+        assert isinstance(workbooks[0].owner, TSC.UserItem)
+        assert workbooks[0].owner.email == "bob@example.com"
+        assert workbooks[0].owner.fullname == "Bob Smith"
+        assert workbooks[0].owner.id == "ee8bc9ca-77fe-4ae0-8093-cf77f0ee67a9"
+        assert workbooks[0].owner.last_login == parse_datetime("2025-02-04T06:39:20Z")
+        assert workbooks[0].owner.name == "bob@example.com"
+        assert workbooks[0].owner.site_role == "SiteAdministratorCreator"
+        assert workbooks[1].id == "6693cb26-9507-4174-ad3e-9de81a18c971"
+        assert workbooks[1].name == "World Indicators"
+        assert workbooks[1].content_url == "WorldIndicators"
+        assert workbooks[1].webpage_url == "https://10ax.online.tableau.com/#/site/exampledev/workbooks/265606"
+        assert workbooks[1].show_tabs
+        assert workbooks[1].size == 1
+        assert workbooks[1].created_at == parse_datetime("2024-02-14T04:42:11Z")
+        assert workbooks[1].updated_at == parse_datetime("2024-02-14T04:42:12Z")
+        assert workbooks[1].sheet_count == 8
+        assert not workbooks[1].has_extracts
+        assert not workbooks[1].encrypt_extracts
+        assert workbooks[1].default_view_id == "3d10dbcf-a206-47c7-91ba-ebab3ab33d7c"
+        assert workbooks[1].share_description == "World Indicators"
+        assert workbooks[1].last_published_at == parse_datetime("2024-02-14T04:42:11Z")
+        assert isinstance(workbooks[1].project, TSC.ProjectItem)
+        assert workbooks[1].project.id == "669ca36b-492e-4ccf-bca1-3614fe6a9d7a"
+        assert workbooks[1].project.name == "Samples"
+        assert workbooks[1].project.description == "This project includes automatically uploaded samples."
+        assert isinstance(workbooks[1].location, TSC.LocationItem)
+        assert workbooks[1].location.id == "669ca36b-492e-4ccf-bca1-3614fe6a9d7a"
+        assert workbooks[1].location.type == "Project"
+        assert workbooks[1].location.name == "Samples"
+        assert isinstance(workbooks[1].owner, TSC.UserItem)
+        assert workbooks[1].owner.email == "bob@example.com"
+        assert workbooks[1].owner.fullname == "Bob Smith"
+        assert workbooks[1].owner.id == "ee8bc9ca-77fe-4ae0-8093-cf77f0ee67a9"
+        assert workbooks[1].owner.last_login == parse_datetime("2025-02-04T06:39:20Z")
+        assert workbooks[1].owner.name == "bob@example.com"
+        assert workbooks[1].owner.site_role == "SiteAdministratorCreator"
+        assert workbooks[2].id == "dbc0f162-909f-4edf-8392-0d12a80af955"
+        assert workbooks[2].name == "Superstore"
+        assert workbooks[2].description == "This is a superstore workbook"
+        assert workbooks[2].content_url == "Superstore_17078880698360"
+        assert workbooks[2].webpage_url == "https://10ax.online.tableau.com/#/site/exampledev/workbooks/265621"
+        assert not workbooks[2].show_tabs
+        assert workbooks[2].size == 1
+        assert workbooks[2].created_at == parse_datetime("2024-02-14T05:21:09Z")
+        assert workbooks[2].updated_at == parse_datetime("2024-07-02T02:19:59Z")
+        assert workbooks[2].sheet_count == 7
+        assert workbooks[2].has_extracts
+        assert not workbooks[2].encrypt_extracts
+        assert workbooks[2].default_view_id == "8c4b1d3e-3f31-4d2a-8b9f-492b92f27987"
+        assert workbooks[2].share_description == "Superstore"
+        assert workbooks[2].last_published_at == parse_datetime("2024-07-02T02:19:58Z")
+        assert isinstance(workbooks[2].project, TSC.ProjectItem)
+        assert workbooks[2].project.id == "9836791c-9468-40f0-b7f3-d10b9562a046"
+        assert workbooks[2].project.name == "default"
+        assert workbooks[2].project.description == "The default project that was automatically created by Tableau."
+        assert isinstance(workbooks[2].location, TSC.LocationItem)
+        assert workbooks[2].location.id == "9836791c-9468-40f0-b7f3-d10b9562a046"
+        assert workbooks[2].location.type == "Project"
+        assert workbooks[2].location.name == "default"
+        assert isinstance(workbooks[2].owner, TSC.UserItem)
+        assert workbooks[2].owner.email == "bob@example.com"
+        assert workbooks[2].owner.fullname == "Bob Smith"
+        assert workbooks[2].owner.id == "ee8bc9ca-77fe-4ae0-8093-cf77f0ee67a9"
+        assert workbooks[2].owner.last_login == parse_datetime("2025-02-04T06:39:20Z")
+        assert workbooks[2].owner.name == "bob@example.com"
+        assert workbooks[2].owner.site_role == "SiteAdministratorCreator"
