@@ -3,12 +3,12 @@
   <extracts>
     <extract id="task1"
       priority="1"
-      type="incremental-or-full" >
+      type="IncrementalRefresh" >
         <workbook id="workbook-id" />
     </extract>
     <extract id="task2"
       priority="2"
-      type="incremental-or-full" >
+      type="IncrementalRefresh" >
         <datasource id="datasource-id" />
     </extract>
   </extracts>

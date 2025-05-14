@@ -173,12 +173,10 @@ class Groups(QuerysetEndpoint[GroupItem]):
         logger.info(f"Deleted single group (ID: {group_id})")
 
     @overload
-    def update(self, group_item: GroupItem, as_job: Literal[False]) -> GroupItem:
-        ...
+    def update(self, group_item: GroupItem, as_job: Literal[False]) -> GroupItem: ...
 
     @overload
-    def update(self, group_item: GroupItem, as_job: Literal[True]) -> JobItem:
-        ...
+    def update(self, group_item: GroupItem, as_job: Literal[True]) -> JobItem: ...
 
     @api(version="2.0")
     def update(self, group_item, as_job=False):
@@ -260,12 +258,10 @@ class Groups(QuerysetEndpoint[GroupItem]):
         return GroupItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     @overload
-    def create_AD_group(self, group_item: GroupItem, asJob: Literal[False]) -> GroupItem:
-        ...
+    def create_AD_group(self, group_item: GroupItem, asJob: Literal[False]) -> GroupItem: ...
 
     @overload
-    def create_AD_group(self, group_item: GroupItem, asJob: Literal[True]) -> JobItem:
-        ...
+    def create_AD_group(self, group_item: GroupItem, asJob: Literal[True]) -> JobItem: ...
 
     @api(version="2.0")
     def create_AD_group(self, group_item, asJob=False):

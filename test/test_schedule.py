@@ -414,10 +414,7 @@ class ScheduleTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             schedule_id = "c9cff7f9-309c-4361-99ff-d4ba8c9f5467"
-            # baseurl = f"{self.baseurl}/schedules/{schedule_id}/extracts"
             baseurl = f"{self.server.baseurl}/sites/{self.server.site_id}/schedules/{schedule_id}/extracts"
-            # Fix the URL construction to match the endpoint pattern
-            # url = f"{self.baseurl}/{schedule_id}/extracts"
             m.get(baseurl, text=response_xml)
 
             extracts = self.server.schedules.get_extract_refresh_tasks(schedule_id)

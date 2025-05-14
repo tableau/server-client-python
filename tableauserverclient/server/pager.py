@@ -12,14 +12,12 @@ T = TypeVar("T")
 
 @runtime_checkable
 class Endpoint(Protocol[T]):
-    def get(self, req_options: Optional[RequestOptions]) -> tuple[list[T], PaginationItem]:
-        ...
+    def get(self, req_options: Optional[RequestOptions]) -> tuple[list[T], PaginationItem]: ...
 
 
 @runtime_checkable
 class CallableEndpoint(Protocol[T]):
-    def __call__(self, __req_options: Optional[RequestOptions], **kwargs) -> tuple[list[T], PaginationItem]:
-        ...
+    def __call__(self, __req_options: Optional[RequestOptions], **kwargs) -> tuple[list[T], PaginationItem]: ...
 
 
 class Pager(Iterable[T]):
