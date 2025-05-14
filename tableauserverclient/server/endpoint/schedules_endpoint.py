@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Callable, Optional, Union
 from .endpoint import Endpoint, api, parameter_added_in
 from .exceptions import MissingRequiredFieldError
 from tableauserverclient.server import RequestFactory
-from tableauserverclient.models import PaginationItem, ScheduleItem, TaskItem
+from tableauserverclient.models import PaginationItem, ScheduleItem, TaskItem, ExtractItem
 
 from tableauserverclient.helpers.logging import logger
 
@@ -261,3 +261,21 @@ class Schedules(Endpoint):
             )
         else:
             return OK
+
+    @api(version="2.3")
+    def get_extract_refresh_tasks(
+        self, schedule_id: str, req_options: Optional["RequestOptions"] = None
+    ) -> tuple[list["ExtractItem"], "PaginationItem"]:
+        """Get all extract refresh tasks for the specified schedule."""
+        if not schedule_id:
+            error = "Schedule ID undefined"
+            raise ValueError(error)
+
+        logger.info(f"Querying extract refresh tasks for schedule (ID: {schedule_id})")
+        url = f"{self.siteurl}/{schedule_id}/extracts"
+        server_response = self.get_request(url, req_options)
+
+        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
+        extract_items = ExtractItem.from_response(server_response.content, self.parent_srv.namespace)
+
+        return extract_items, pagination_item

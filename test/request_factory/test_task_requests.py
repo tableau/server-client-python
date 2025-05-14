@@ -5,7 +5,6 @@ from tableauserverclient.server.request_factory import TaskRequest
 
 
 class TestTaskRequest(unittest.TestCase):
-
     def setUp(self):
         self.task_request = TaskRequest()
         self.xml_request = ET.Element("tsRequest")

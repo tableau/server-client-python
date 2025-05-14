@@ -25,6 +25,7 @@ ADD_WORKBOOK_TO_SCHEDULE = os.path.join(TEST_ASSET_DIR, "schedule_add_workbook.x
 ADD_WORKBOOK_TO_SCHEDULE_WITH_WARNINGS = os.path.join(TEST_ASSET_DIR, "schedule_add_workbook_with_warnings.xml")
 ADD_DATASOURCE_TO_SCHEDULE = os.path.join(TEST_ASSET_DIR, "schedule_add_datasource.xml")
 ADD_FLOW_TO_SCHEDULE = os.path.join(TEST_ASSET_DIR, "schedule_add_flow.xml")
+GET_EXTRACT_TASKS_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_extract_refresh_tasks.xml")
 
 WORKBOOK_GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, "workbook_get_by_id.xml")
 DATASOURCE_GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, "datasource_get_by_id.xml")
@@ -405,3 +406,20 @@ class ScheduleTests(unittest.TestCase):
             flow = self.server.flows.get_by_id("bar")
             result = self.server.schedules.add_to_schedule("foo", flow=flow)
         self.assertEqual(0, len(result), "Added properly")
+
+    def test_get_extract_refresh_tasks(self) -> None:
+        self.server.version = "2.3"
+
+        with open(GET_EXTRACT_TASKS_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            schedule_id = "c9cff7f9-309c-4361-99ff-d4ba8c9f5467"
+            baseurl = f"{self.server.baseurl}/sites/{self.server.site_id}/schedules/{schedule_id}/extracts"
+            m.get(baseurl, text=response_xml)
+
+            extracts = self.server.schedules.get_extract_refresh_tasks(schedule_id)
+
+            self.assertIsNotNone(extracts)
+            self.assertIsInstance(extracts[0], list)
+            self.assertEqual(2, len(extracts[0]))
+            self.assertEqual("task1", extracts[0][0].id)

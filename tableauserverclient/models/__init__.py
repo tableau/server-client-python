@@ -49,6 +49,7 @@ from tableauserverclient.models.view_item import ViewItem
 from tableauserverclient.models.virtual_connection_item import VirtualConnectionItem
 from tableauserverclient.models.webhook_item import WebhookItem
 from tableauserverclient.models.workbook_item import WorkbookItem
+from tableauserverclient.models.extract_item import ExtractItem
 
 __all__ = [
     "ColumnItem",
@@ -106,4 +107,5 @@ __all__ = [
     "LinkedTaskItem",
     "LinkedTaskStepItem",
     "LinkedTaskFlowRunItem",
+    "ExtractItem",
 ]
