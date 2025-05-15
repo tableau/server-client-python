@@ -1420,6 +1420,7 @@ The job properties are defined in the `JobItem` class. The class corresponds to 
 JobItem(id, type, created_at, started_at=None, completed_at=None, finish_code=0)
 
 ```
+
 The `JobItem` class contains information about the specified job running on Tableau Server. The `JobItem` class defines the information you can query from Tableau Server. The class members correspond to the attributes of a server response payload.
 
 Source file: models/job_item.py
