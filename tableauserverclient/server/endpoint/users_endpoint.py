@@ -756,11 +756,6 @@ def create_users_csv(users: Iterable[UserItem]) -> bytes:
     users: Iterable[UserItem]
         An iterable of UserItem objects to create the CSV from.
 
-    identity_pool: Optional[str]
-        The identity pool to use when adding the users. This parameter is not
-        yet supported in this version of the Tableau Server Client, and should
-        be left as None.
-
     Returns
     -------
     bytes
@@ -820,11 +815,6 @@ def remove_users_csv(users: Iterable[UserItem]) -> bytes:
     ----------
     users: Iterable[UserItem]
         An iterable of UserItem objects to create the CSV from.
-
-    identity_pool: Optional[str]
-        The identity pool to use when adding the users. This parameter is not
-        yet supported in this version of the Tableau Server Client, and should
-        be left as None.
 
     Returns
     -------
