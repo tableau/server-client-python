@@ -7,6 +7,7 @@ from typing import Optional, TYPE_CHECKING
 from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.datetime_helpers import parse_datetime
+from tableauserverclient.models.site_item import SiteAuthConfiguration
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import (
     property_is_enum,
@@ -37,6 +38,49 @@ class UserItem:
     auth_setting: str
         Required attribute for Tableau Cloud. How the user autenticates to the
         server.
+
+    Attributes
+    ----------
+    domain_name: Optional[str]
+        The name of the Active Directory domain ("local" if local authentication
+        is used).
+
+    email: Optional[str]
+        The email address of the user.
+
+    external_auth_user_id: Optional[str]
+        The unique identifier for the user in the external authentication system.
+
+    id: Optional[str]
+        The unique identifier for the user.
+
+    favorites: dict[str, list]
+        The favorites of the user. Must be populated with a call to
+        `populate_favorites()`.
+
+    fullname: Optional[str]
+        The full name of the user.
+
+    groups: Pager
+        The groups the user belongs to. Must be populated with a call to
+        `populate_groups()`.
+
+    last_login: Optional[datetime]
+        The last time the user logged in.
+
+    locale: Optional[str]
+        The locale of the user.
+
+    language: Optional[str]
+        Language setting for the user.
+
+    idp_configuration_id: Optional[str]
+        The ID of the identity provider configuration.
+
+    workbooks: Pager
+        The workbooks owned by the user. Must be populated with a call to
+        `populate_workbooks()`.
+
     """
 
     tag_name: str = "user"
@@ -94,6 +138,9 @@ class UserItem:
         self.name: Optional[str] = name
         self.site_role: Optional[str] = site_role
         self.auth_setting: Optional[str] = auth_setting
+        self._locale: Optional[str] = None
+        self._language: Optional[str] = None
+        self._idp_configuration_id: Optional[str] = None
 
         return None
 
@@ -184,6 +231,26 @@ class UserItem:
             raise UnpopulatedPropertyError(error)
         return self._groups()
 
+    @property
+    def locale(self) -> Optional[str]:
+        return self._locale
+
+    @property
+    def language(self) -> Optional[str]:
+        return self._language
+
+    @property
+    def idp_configuration_id(self) -> Optional[str]:
+        """
+        IDP configuration id for the user. This is only available on Tableau
+        Cloud, 3.24 or later
+        """
+        return self._idp_configuration_id
+
+    @idp_configuration_id.setter
+    def idp_configuration_id(self, value: str) -> None:
+        self._idp_configuration_id = value
+
     def _set_workbooks(self, workbooks) -> None:
         self._workbooks = workbooks
 
@@ -204,8 +271,11 @@ class UserItem:
                 email,
                 auth_setting,
                 _,
+                _,
+                _,
+                _,
             ) = self._parse_element(user_xml, ns)
-            self._set_values(None, None, site_role, None, None, fullname, email, auth_setting, None)
+            self._set_values(None, None, site_role, None, None, fullname, email, auth_setting, None, None, None, None)
         return self
 
     def _set_values(
@@ -219,6 +289,9 @@ class UserItem:
         email,
         auth_setting,
         domain_name,
+        locale,
+        language,
+        idp_configuration_id,
     ):
         if id is not None:
             self._id = id
@@ -238,6 +311,12 @@ class UserItem:
             self._auth_setting = auth_setting
         if domain_name:
             self._domain_name = domain_name
+        if locale:
+            self._locale = locale
+        if language:
+            self._language = language
+        if idp_configuration_id:
+            self._idp_configuration_id = idp_configuration_id
 
     @classmethod
     def from_response(cls, resp, ns) -> list["UserItem"]:
@@ -248,6 +327,12 @@ class UserItem:
     def from_response_as_owner(cls, resp, ns) -> list["UserItem"]:
         element_name = ".//t:owner"
         return cls._parse_xml(element_name, resp, ns)
+
+    @classmethod
+    def from_xml(cls, xml: ET.Element, ns: Optional[dict] = None) -> "UserItem":
+        item = cls()
+        item._set_values(*cls._parse_element(xml, ns))
+        return item
 
     @classmethod
     def _parse_xml(cls, element_name, resp, ns):
@@ -265,6 +350,9 @@ class UserItem:
                 email,
                 auth_setting,
                 domain_name,
+                locale,
+                language,
+                idp_configuration_id,
             ) = cls._parse_element(user_xml, ns)
             user_item = cls(name, site_role)
             user_item._set_values(
@@ -277,6 +365,9 @@ class UserItem:
                 email,
                 auth_setting,
                 domain_name,
+                locale,
+                language,
+                idp_configuration_id,
             )
             all_user_items.append(user_item)
         return all_user_items
@@ -295,6 +386,9 @@ class UserItem:
         fullname = user_xml.get("fullName", None)
         email = user_xml.get("email", None)
         auth_setting = user_xml.get("authSetting", None)
+        locale = user_xml.get("locale", None)
+        language = user_xml.get("language", None)
+        idp_configuration_id = user_xml.get("idpConfigurationId", None)
 
         domain_name = None
         domain_elem = user_xml.find(".//t:domain", namespaces=ns)
@@ -311,6 +405,9 @@ class UserItem:
             email,
             auth_setting,
             domain_name,
+            locale,
+            language,
+            idp_configuration_id,
         )
 
     class CSVImport:
@@ -360,6 +457,9 @@ class UserItem:
                     values[UserItem.CSVImport.ColumnType.DISPLAY_NAME],
                     values[UserItem.CSVImport.ColumnType.EMAIL],
                     values[UserItem.CSVImport.ColumnType.AUTH],
+                    None,
+                    None,
+                    None,
                     None,
                 )
             return user

@@ -1,0 +1,10 @@
+<ns0:tsResponse xmlns:ns0="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api https://help.tableau.com/samples/en-us/rest_api/ts-api_3_25.xsd">
+  <ns0:pagination pageNumber="1" pageSize="100" totalAvailable="1" />
+  <ns0:datasources>
+    <ns0:datasource connectedWorkbooksCount="0" contentUrl="SuperstoreDatasource" createdAt="2024-02-14T04:42:13Z" encryptExtracts="false" favoritesTotal="0" hasAlert="false" hasExtracts="false" id="a71cdd15-3a23-4ec1-b3ce-9956f5e00bb7" isCertified="false" isPublished="true" name="Superstore Datasource" size="1" type="excel-direct" updatedAt="2024-02-14T04:42:14Z" useRemoteQueryAgent="false" serverName="localhost" webpageUrl="https://10ax.online.tableau.com/#/site/example/datasources/3566752">
+      <ns0:project id="669ca36b-492e-4ccf-bca1-3614fe6a9d7a" name="Samples" description="This project includes automatically uploaded samples." />
+      <ns0:owner email="bob@example.com" fullName="Bob Smith" id="ee8bc9ca-77fe-4ae0-8093-cf77f0ee67a9" lastLogin="2025-02-04T06:39:20Z" name="bob@example.com" siteRole="SiteAdministratorCreator" />
+      <ns0:tags />
+    </ns0:datasource>
+  </ns0:datasources>
+</ns0:tsResponse>

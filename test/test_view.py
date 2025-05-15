@@ -5,13 +5,14 @@ import requests_mock
 
 import tableauserverclient as TSC
 from tableauserverclient import UserItem, GroupItem, PermissionsRule
-from tableauserverclient.datetime_helpers import format_datetime
+from tableauserverclient.datetime_helpers import format_datetime, parse_datetime
 from tableauserverclient.server.endpoint.exceptions import UnsupportedAttributeError
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
 ADD_TAGS_XML = os.path.join(TEST_ASSET_DIR, "view_add_tags.xml")
 GET_XML = os.path.join(TEST_ASSET_DIR, "view_get.xml")
+GET_XML_ALL_FIELDS = os.path.join(TEST_ASSET_DIR, "view_get_all_fields.xml")
 GET_XML_ID = os.path.join(TEST_ASSET_DIR, "view_get_id.xml")
 GET_XML_USAGE = os.path.join(TEST_ASSET_DIR, "view_get_usage.xml")
 GET_XML_ID_USAGE = os.path.join(TEST_ASSET_DIR, "view_get_id_usage.xml")
@@ -402,3 +403,116 @@ class ViewTests(unittest.TestCase):
         req_option = TSC.PDFRequestOptions(viz_width=1920)
         with self.assertRaises(ValueError):
             req_option.get_query_params()
+
+    def test_view_get_all_fields(self) -> None:
+        self.server.version = "3.21"
+        self.baseurl = self.server.views.baseurl
+        with open(GET_XML_ALL_FIELDS) as f:
+            response_xml = f.read()
+
+        ro = TSC.RequestOptions()
+        ro.all_fields = True
+
+        with requests_mock.mock() as m:
+            m.get(f"{self.baseurl}?fields=_all_", text=response_xml)
+            views, _ = self.server.views.get(req_options=ro)
+
+        assert views[0].id == "2bdcd787-dcc6-4a5d-bc61-2846f1ef4534"
+        assert views[0].name == "Overview"
+        assert views[0].content_url == "Superstore/sheets/Overview"
+        assert views[0].created_at == parse_datetime("2024-02-14T04:42:09Z")
+        assert views[0].updated_at == parse_datetime("2024-02-14T04:42:09Z")
+        assert views[0].sheet_type == "dashboard"
+        assert views[0].favorites_total == 0
+        assert views[0].view_url_name == "Overview"
+        assert isinstance(views[0].workbook, TSC.WorkbookItem)
+        assert views[0].workbook.id == "9df3e2d1-070e-497a-9578-8cc557ced9df"
+        assert views[0].workbook.name == "Superstore"
+        assert views[0].workbook.content_url == "Superstore"
+        assert views[0].workbook.show_tabs
+        assert views[0].workbook.size == 2
+        assert views[0].workbook.created_at == parse_datetime("2024-02-14T04:42:09Z")
+        assert views[0].workbook.updated_at == parse_datetime("2024-02-14T04:42:10Z")
+        assert views[0].workbook.sheet_count == 9
+        assert not views[0].workbook.has_extracts
+        assert isinstance(views[0].owner, TSC.UserItem)
+        assert views[0].owner.email == "bob@example.com"
+        assert views[0].owner.fullname == "Bob"
+        assert views[0].owner.id == "ee8bc9ca-77fe-4ae0-8093-cf77f0ee67a9"
+        assert views[0].owner.last_login == parse_datetime("2025-02-04T06:39:20Z")
+        assert views[0].owner.name == "bob@example.com"
+        assert views[0].owner.site_role == "SiteAdministratorCreator"
+        assert isinstance(views[0].project, TSC.ProjectItem)
+        assert views[0].project.id == "669ca36b-492e-4ccf-bca1-3614fe6a9d7a"
+        assert views[0].project.name == "Samples"
+        assert views[0].project.description == "This project includes automatically uploaded samples."
+        assert views[0].total_views == 0
+        assert isinstance(views[0].location, TSC.LocationItem)
+        assert views[0].location.id == "669ca36b-492e-4ccf-bca1-3614fe6a9d7a"
+        assert views[0].location.type == "Project"
+        assert views[1].id == "2a3fd19d-9129-413d-9ff7-9dfc36bf7f7e"
+        assert views[1].name == "Product"
+        assert views[1].content_url == "Superstore/sheets/Product"
+        assert views[1].created_at == parse_datetime("2024-02-14T04:42:09Z")
+        assert views[1].updated_at == parse_datetime("2024-02-14T04:42:09Z")
+        assert views[1].sheet_type == "dashboard"
+        assert views[1].favorites_total == 0
+        assert views[1].view_url_name == "Product"
+        assert isinstance(views[1].workbook, TSC.WorkbookItem)
+        assert views[1].workbook.id == "9df3e2d1-070e-497a-9578-8cc557ced9df"
+        assert views[1].workbook.name == "Superstore"
+        assert views[1].workbook.content_url == "Superstore"
+        assert views[1].workbook.show_tabs
+        assert views[1].workbook.size == 2
+        assert views[1].workbook.created_at == parse_datetime("2024-02-14T04:42:09Z")
+        assert views[1].workbook.updated_at == parse_datetime("2024-02-14T04:42:10Z")
+        assert views[1].workbook.sheet_count == 9
+        assert not views[1].workbook.has_extracts
+        assert isinstance(views[1].owner, TSC.UserItem)
+        assert views[1].owner.email == "bob@example.com"
+        assert views[1].owner.fullname == "Bob"
+        assert views[1].owner.id == "ee8bc9ca-77fe-4ae0-8093-cf77f0ee67a9"
+        assert views[1].owner.last_login == parse_datetime("2025-02-04T06:39:20Z")
+        assert views[1].owner.name == "bob@example.com"
+        assert views[1].owner.site_role == "SiteAdministratorCreator"
+        assert isinstance(views[1].project, TSC.ProjectItem)
+        assert views[1].project.id == "669ca36b-492e-4ccf-bca1-3614fe6a9d7a"
+        assert views[1].project.name == "Samples"
+        assert views[1].project.description == "This project includes automatically uploaded samples."
+        assert views[1].total_views == 0
+        assert isinstance(views[1].location, TSC.LocationItem)
+        assert views[1].location.id == "669ca36b-492e-4ccf-bca1-3614fe6a9d7a"
+        assert views[1].location.type == "Project"
+        assert views[2].id == "459eda9a-85e4-46bf-a2f2-62936bd2e99a"
+        assert views[2].name == "Customers"
+        assert views[2].content_url == "Superstore/sheets/Customers"
+        assert views[2].created_at == parse_datetime("2024-02-14T04:42:09Z")
+        assert views[2].updated_at == parse_datetime("2024-02-14T04:42:09Z")
+        assert views[2].sheet_type == "dashboard"
+        assert views[2].favorites_total == 0
+        assert views[2].view_url_name == "Customers"
+        assert isinstance(views[2].workbook, TSC.WorkbookItem)
+        assert views[2].workbook.id == "9df3e2d1-070e-497a-9578-8cc557ced9df"
+        assert views[2].workbook.name == "Superstore"
+        assert views[2].workbook.content_url == "Superstore"
+        assert views[2].workbook.show_tabs
+        assert views[2].workbook.size == 2
+        assert views[2].workbook.created_at == parse_datetime("2024-02-14T04:42:09Z")
+        assert views[2].workbook.updated_at == parse_datetime("2024-02-14T04:42:10Z")
+        assert views[2].workbook.sheet_count == 9
+        assert not views[2].workbook.has_extracts
+        assert isinstance(views[2].owner, TSC.UserItem)
+        assert views[2].owner.email == "bob@example.com"
+        assert views[2].owner.fullname == "Bob"
+        assert views[2].owner.id == "ee8bc9ca-77fe-4ae0-8093-cf77f0ee67a9"
+        assert views[2].owner.last_login == parse_datetime("2025-02-04T06:39:20Z")
+        assert views[2].owner.name == "bob@example.com"
+        assert views[2].owner.site_role == "SiteAdministratorCreator"
+        assert isinstance(views[2].project, TSC.ProjectItem)
+        assert views[2].project.id == "669ca36b-492e-4ccf-bca1-3614fe6a9d7a"
+        assert views[2].project.name == "Samples"
+        assert views[2].project.description == "This project includes automatically uploaded samples."
+        assert views[2].total_views == 0
+        assert isinstance(views[2].location, TSC.LocationItem)
+        assert views[2].location.id == "669ca36b-492e-4ccf-bca1-3614fe6a9d7a"
+        assert views[2].location.type == "Project"
