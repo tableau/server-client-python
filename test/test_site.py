@@ -13,6 +13,7 @@ GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, "site_get_by_id.xml")
 GET_BY_NAME_XML = os.path.join(TEST_ASSET_DIR, "site_get_by_name.xml")
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, "site_update.xml")
 CREATE_XML = os.path.join(TEST_ASSET_DIR, "site_create.xml")
+SITE_AUTH_CONFIG_XML = os.path.join(TEST_ASSET_DIR, "site_auth_configurations.xml")
 
 
 class SiteTests(unittest.TestCase):
@@ -260,3 +261,28 @@ class SiteTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.post(self.baseurl + "/0626857c-1def-4503-a7d8-7907c3ff9d9f/decrypt-extracts", status_code=200)
             self.server.sites.decrypt_extracts("0626857c-1def-4503-a7d8-7907c3ff9d9f")
+
+    def test_list_auth_configurations(self) -> None:
+        self.server.version = "3.24"
+        self.baseurl = self.server.sites.baseurl
+        with open(SITE_AUTH_CONFIG_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+
+        assert self.baseurl == self.server.sites.baseurl
+
+        with requests_mock.mock() as m:
+            m.get(f"{self.baseurl}/{self.server.site_id}/site-auth-configurations", status_code=200, text=response_xml)
+            configs = self.server.sites.list_auth_configurations()
+
+        assert len(configs) == 2, "Expected 2 auth configurations"
+
+        assert configs[0].auth_setting == "OIDC"
+        assert configs[0].enabled
+        assert configs[0].idp_configuration_id == "00000000-0000-0000-0000-000000000000"
+        assert configs[0].idp_configuration_name == "Initial Salesforce"
+        assert configs[0].known_provider_alias == "Salesforce"
+        assert configs[1].auth_setting == "SAML"
+        assert configs[1].enabled
+        assert configs[1].idp_configuration_id == "11111111-1111-1111-1111-111111111111"
+        assert configs[1].idp_configuration_name == "Initial SAML"
+        assert configs[1].known_provider_alias is None

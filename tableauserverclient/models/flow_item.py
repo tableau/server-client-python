@@ -146,8 +146,8 @@ class FlowItem:
     def _set_permissions(self, permissions):
         self._permissions = permissions
 
-    def _set_data_quality_warnings(self, dqws):
-        self._data_quality_warnings = dqws
+    def _set_data_quality_warnings(self, dqw):
+        self._data_quality_warnings = dqw
 
     def _parse_common_elements(self, flow_xml, ns):
         if not isinstance(flow_xml, ET.Element):

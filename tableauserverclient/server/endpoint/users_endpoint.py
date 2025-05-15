@@ -87,7 +87,7 @@ class Users(QuerysetEndpoint[UserItem]):
 
         if req_options is None:
             req_options = RequestOptions()
-        req_options._all_fields = True
+        req_options.all_fields = True
 
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -381,10 +381,15 @@ class Users(QuerysetEndpoint[UserItem]):
 
     # Get workbooks for user
     @api(version="2.0")
-    def populate_workbooks(self, user_item: UserItem, req_options: Optional[RequestOptions] = None) -> None:
+    def populate_workbooks(
+        self, user_item: UserItem, req_options: Optional[RequestOptions] = None, owned_only: bool = False
+    ) -> None:
         """
         Returns information about the workbooks that the specified user owns
-        and has Read (view) permissions for.
+        or has Read (view) permissions for. If owned_only is set to True,
+        only the workbooks that the user owns are returned. If owned_only is
+        set to False, all workbooks that the user has Read (view) permissions
+        for are returned.
 
         This method retrieves the workbook information for the specified user.
         The REST API is designed to return only the information you ask for
@@ -401,6 +406,10 @@ class Users(QuerysetEndpoint[UserItem]):
 
         req_options : Optional[RequestOptions]
             Optional request options to filter and sort the results.
+
+        owned_only : bool, default=False
+            If True, only the workbooks that the user owns are returned.
+            If False, all workbooks that the user has Read (view) permissions
 
         Returns
         -------
@@ -423,14 +432,22 @@ class Users(QuerysetEndpoint[UserItem]):
             raise MissingRequiredFieldError(error)
 
         def wb_pager():
-            return Pager(lambda options: self._get_wbs_for_user(user_item, options), req_options)
+            def func(req_options):
+                return self._get_wbs_for_user(user_item, req_options, owned_only=owned_only)
+
+            return Pager(func, req_options)
 
         user_item._set_workbooks(wb_pager)
 
     def _get_wbs_for_user(
-        self, user_item: UserItem, req_options: Optional[RequestOptions] = None
+        self,
+        user_item: UserItem,
+        req_options: Optional[RequestOptions] = None,
+        owned_only: bool = False,
     ) -> tuple[list[WorkbookItem], PaginationItem]:
         url = f"{self.baseurl}/{user_item.id}/workbooks"
+        if owned_only:
+            url += "?ownedBy=true"
         server_response = self.get_request(url, req_options)
         logger.info(f"Populated workbooks for user (ID: {user_item.id})")
         workbook_item = WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)

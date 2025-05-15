@@ -1,0 +1,14 @@
+<ns0:tsResponse xmlns:ns0="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api https://help.tableau.com/samples/en-us/rest_api/ts-api_3_25.xsd">
+  <ns0:pagination pageNumber="1" pageSize="100" totalAvailable="3" />
+  <ns0:groups>
+    <ns0:group id="28c5b855-16df-482f-ad0b-428c1df58859" name="All Users" userCount="2">
+      <ns0:domain name="local" />
+    </ns0:group>
+    <ns0:group id="ace1ee2d-e7dd-4d7a-9504-a1ccaa5212ea" name="group1" userCount="1">
+      <ns0:domain name="local" />
+    </ns0:group>
+    <ns0:group id="baf0ed9d-c25d-4114-97ed-5232b8a732fd" name="test" userCount="0">
+      <ns0:domain name="local" />
+    </ns0:group>
+  </ns0:groups>
+</ns0:tsResponse>

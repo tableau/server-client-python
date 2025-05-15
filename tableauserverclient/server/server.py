@@ -2,6 +2,7 @@ from tableauserverclient.helpers.logging import logger
 
 import requests
 import urllib3
+import ssl
 
 from defusedxml.ElementTree import fromstring, ParseError
 from packaging.version import Version
@@ -91,6 +92,13 @@ class Server:
         and a later version of the REST API. For more information, see REST API
         Versions.
 
+    http_options : dict, optional
+        Additional options to pass to the requests library when making HTTP requests.
+
+    session_factory : callable, optional
+        A factory function that returns a requests.Session object. If not provided,
+        requests.session is used.
+
     Examples
     --------
     >>> import tableauserverclient as TSC
@@ -107,6 +115,16 @@ class Server:
     >>> # for example, 2.8
     >>> # server.version = '2.8'
 
+    >>> # if connecting to an older Tableau Server with weak DH keys (Python 3.12+ only)
+    >>> server.configure_ssl(allow_weak_dh=True)  # Note: reduces security
+
+    Notes
+    -----
+    When using Python 3.12 or later with older versions of Tableau Server, you may encounter
+    SSL errors related to weak Diffie-Hellman keys. This is because newer Python versions
+    enforce stronger security requirements. You can temporarily work around this using
+    configure_ssl(allow_weak_dh=True), but this reduces security and should only be used
+    as a temporary measure until the server can be upgraded.
     """
 
     class PublishMode:
@@ -125,6 +143,7 @@ class Server:
         self._auth_token = None
         self._site_id = None
         self._user_id = None
+        self._ssl_context = None
 
         # TODO: this needs to change to default to https, but without breaking existing code
         if not server_address.startswith("http://") and not server_address.startswith("https://"):
@@ -313,3 +332,26 @@ class Server:
 
     def is_signed_in(self):
         return self._auth_token is not None
+
+    def configure_ssl(self, *, allow_weak_dh=False):
+        """Configure SSL/TLS settings for the server connection.
+
+        Parameters
+        ----------
+        allow_weak_dh : bool, optional
+            If True, allows connections to servers with DH keys that are considered too small by modern Python versions.
+            WARNING: This reduces security and should only be used as a temporary workaround.
+        """
+        if allow_weak_dh:
+            logger.warning(
+                "WARNING: Allowing weak Diffie-Hellman keys. This reduces security and should only be used temporarily."
+            )
+            self._ssl_context = ssl.create_default_context()
+            # Allow weak DH keys by setting minimum key size to 512 bits (default is 1024 in Python 3.12+)
+            self._ssl_context.set_dh_parameters(min_key_bits=512)
+            self.add_http_options({"verify": self._ssl_context})
+        else:
+            self._ssl_context = None
+            # Remove any custom SSL context if we're reverting to default settings
+            if "verify" in self._http_options:
+                del self._http_options["verify"]

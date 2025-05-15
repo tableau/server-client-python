@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Callable, Optional, Union
 from .endpoint import Endpoint, api, parameter_added_in
 from .exceptions import MissingRequiredFieldError
 from tableauserverclient.server import RequestFactory
-from tableauserverclient.models import PaginationItem, ScheduleItem, TaskItem
+from tableauserverclient.models import PaginationItem, ScheduleItem, TaskItem, ExtractItem
 
 from tableauserverclient.helpers.logging import logger
 
@@ -30,6 +30,23 @@ class Schedules(Endpoint):
 
     @api(version="2.3")
     def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[ScheduleItem], PaginationItem]:
+        """
+        Returns a list of flows, extract, and subscription server schedules on
+        Tableau Server. For each schedule, the API returns name, frequency,
+        priority, and other information.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#query_schedules
+
+        Parameters
+        ----------
+        req_options : Optional[RequestOptions]
+            Filtering and paginating options for request.
+
+        Returns
+        -------
+        Tuple[List[ScheduleItem], PaginationItem]
+            A tuple of list of ScheduleItem and PaginationItem
+        """
         logger.info("Querying all schedules")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -38,7 +55,22 @@ class Schedules(Endpoint):
         return all_schedule_items, pagination_item
 
     @api(version="3.8")
-    def get_by_id(self, schedule_id):
+    def get_by_id(self, schedule_id: str) -> ScheduleItem:
+        """
+        Returns detailed information about the specified server schedule.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#get-schedule
+
+        Parameters
+        ----------
+        schedule_id : str
+            The ID of the schedule to get information for.
+
+        Returns
+        -------
+        ScheduleItem
+            The schedule item that corresponds to the given ID.
+        """
         if not schedule_id:
             error = "No Schedule ID provided"
             raise ValueError(error)
@@ -49,6 +81,20 @@ class Schedules(Endpoint):
 
     @api(version="2.3")
     def delete(self, schedule_id: str) -> None:
+        """
+        Deletes the specified schedule from the server.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#delete_schedule
+
+        Parameters
+        ----------
+        schedule_id : str
+            The ID of the schedule to delete.
+
+        Returns
+        -------
+        None
+        """
         if not schedule_id:
             error = "Schedule ID undefined"
             raise ValueError(error)
@@ -58,6 +104,23 @@ class Schedules(Endpoint):
 
     @api(version="2.3")
     def update(self, schedule_item: ScheduleItem) -> ScheduleItem:
+        """
+        Modifies settings for the specified server schedule, including the name,
+        priority, and frequency details on Tableau Server. For Tableau Cloud,
+        see the tasks and subscritpions API.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#update_schedule
+
+        Parameters
+        ----------
+        schedule_item : ScheduleItem
+            The schedule item to update.
+
+        Returns
+        -------
+        ScheduleItem
+            The updated schedule item.
+        """
         if not schedule_item.id:
             error = "Schedule item missing ID."
             raise MissingRequiredFieldError(error)
@@ -71,6 +134,20 @@ class Schedules(Endpoint):
 
     @api(version="2.3")
     def create(self, schedule_item: ScheduleItem) -> ScheduleItem:
+        """
+        Creates a new server schedule on Tableau Server. For Tableau Cloud, use
+        the tasks and subscriptions API.
+
+        Parameters
+        ----------
+        schedule_item : ScheduleItem
+            The schedule item to create.
+
+        Returns
+        -------
+        ScheduleItem
+            The newly created schedule.
+        """
         if schedule_item.interval_item is None:
             error = "Interval item must be defined."
             raise MissingRequiredFieldError(error)
@@ -92,6 +169,41 @@ class Schedules(Endpoint):
         flow: Optional["FlowItem"] = None,
         task_type: Optional[str] = None,
     ) -> list[AddResponse]:
+        """
+        Adds a workbook, datasource, or flow to a schedule on Tableau Server.
+        Only one of workbook, datasource, or flow can be passed in at a time.
+
+        The task type is optional and will default to ExtractRefresh if a
+        workbook or datasource is passed in, and RunFlow if a flow is passed in.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#add_workbook_to_schedule
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#add_data_source_to_schedule
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#add_flow_task_to_schedule
+
+        Parameters
+        ----------
+        schedule_id : str
+            The ID of the schedule to add the item to.
+
+        workbook : Optional[WorkbookItem]
+            The workbook to add to the schedule.
+
+        datasource : Optional[DatasourceItem]
+            The datasource to add to the schedule.
+
+        flow : Optional[FlowItem]
+            The flow to add to the schedule.
+
+        task_type : Optional[str]
+            The type of task to add to the schedule. If not provided, it will
+            default to ExtractRefresh if a workbook or datasource is passed in,
+            and RunFlow if a flow is passed in.
+
+        Returns
+        -------
+        list[AddResponse]
+            A list of responses for each item added to the schedule.
+        """
         # There doesn't seem to be a good reason to allow one item of each type?
         if workbook and datasource:
             warnings.warn("Passing in multiple items for add_to_schedule will be deprecated", PendingDeprecationWarning)
@@ -149,3 +261,21 @@ class Schedules(Endpoint):
             )
         else:
             return OK
+
+    @api(version="2.3")
+    def get_extract_refresh_tasks(
+        self, schedule_id: str, req_options: Optional["RequestOptions"] = None
+    ) -> tuple[list["ExtractItem"], "PaginationItem"]:
+        """Get all extract refresh tasks for the specified schedule."""
+        if not schedule_id:
+            error = "Schedule ID undefined"
+            raise ValueError(error)
+
+        logger.info(f"Querying extract refresh tasks for schedule (ID: {schedule_id})")
+        url = f"{self.siteurl}/{schedule_id}/extracts"
+        server_response = self.get_request(url, req_options)
+
+        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
+        extract_items = ExtractItem.from_response(server_response.content, self.parent_srv.namespace)
+
+        return extract_items, pagination_item

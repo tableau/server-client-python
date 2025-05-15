@@ -1,5 +1,6 @@
 import sys
 from typing import Optional
+import warnings
 
 from typing_extensions import Self
 
@@ -62,8 +63,21 @@ class RequestOptions(RequestOptionsBase):
         self.pagesize = pagesize or config.PAGE_SIZE
         self.sort = set()
         self.filter = set()
+        self.fields = set()
         # This is private until we expand all of our parsers to handle the extra fields
-        self._all_fields = False
+        self.all_fields = False
+
+    @property
+    def _all_fields(self) -> bool:
+        return self.all_fields
+
+    @_all_fields.setter
+    def _all_fields(self, value):
+        warnings.warn(
+            "Directly setting _all_fields is deprecated, please use the all_fields property instead.",
+            DeprecationWarning,
+        )
+        self.all_fields = value
 
     def get_query_params(self) -> dict:
         params = {}
@@ -75,12 +89,14 @@ class RequestOptions(RequestOptionsBase):
             filter_options = (str(filter_item) for filter_item in self.filter)
             ordered_filter_options = sorted(filter_options)
             params["filter"] = ",".join(ordered_filter_options)
-        if self._all_fields:
+        if self.all_fields:
             params["fields"] = "_all_"
         if self.pagenumber:
             params["pageNumber"] = self.pagenumber
         if self.pagesize:
             params["pageSize"] = self.pagesize
+        if self.fields:
+            params["fields"] = ",".join(self.fields)
         return params
 
     def page_size(self, page_size):
@@ -180,6 +196,116 @@ class RequestOptions(RequestOptionsBase):
     class Direction:
         Desc = "desc"
         Asc = "asc"
+
+    class SelectFields:
+        class Common:
+            All = "_all_"
+            Default = "_default_"
+
+        class ContentsCounts:
+            ProjectCount = "contentsCounts.projectCount"
+            ViewCount = "contentsCounts.viewCount"
+            DatasourceCount = "contentsCounts.datasourceCount"
+            WorkbookCount = "contentsCounts.workbookCount"
+
+        class Datasource:
+            ContentUrl = "datasource.contentUrl"
+            ID = "datasource.id"
+            Name = "datasource.name"
+            Type = "datasource.type"
+            Description = "datasource.description"
+            CreatedAt = "datasource.createdAt"
+            UpdatedAt = "datasource.updatedAt"
+            EncryptExtracts = "datasource.encryptExtracts"
+            IsCertified = "datasource.isCertified"
+            UseRemoteQueryAgent = "datasource.useRemoteQueryAgent"
+            WebPageURL = "datasource.webpageUrl"
+            Size = "datasource.size"
+            Tag = "datasource.tag"
+            FavoritesTotal = "datasource.favoritesTotal"
+            DatabaseName = "datasource.databaseName"
+            ConnectedWorkbooksCount = "datasource.connectedWorkbooksCount"
+            HasAlert = "datasource.hasAlert"
+            HasExtracts = "datasource.hasExtracts"
+            IsPublished = "datasource.isPublished"
+            ServerName = "datasource.serverName"
+
+        class Favorite:
+            Label = "favorite.label"
+            ParentProjectName = "favorite.parentProjectName"
+            TargetOwnerName = "favorite.targetOwnerName"
+
+        class Group:
+            ID = "group.id"
+            Name = "group.name"
+            DomainName = "group.domainName"
+            UserCount = "group.userCount"
+            MinimumSiteRole = "group.minimumSiteRole"
+
+        class Job:
+            ID = "job.id"
+            Status = "job.status"
+            CreatedAt = "job.createdAt"
+            StartedAt = "job.startedAt"
+            EndedAt = "job.endedAt"
+            Priority = "job.priority"
+            JobType = "job.jobType"
+            Title = "job.title"
+            Subtitle = "job.subtitle"
+
+        class Owner:
+            ID = "owner.id"
+            Name = "owner.name"
+            FullName = "owner.fullName"
+            SiteRole = "owner.siteRole"
+            LastLogin = "owner.lastLogin"
+            Email = "owner.email"
+
+        class Project:
+            ID = "project.id"
+            Name = "project.name"
+            Description = "project.description"
+            CreatedAt = "project.createdAt"
+            UpdatedAt = "project.updatedAt"
+            ContentPermissions = "project.contentPermissions"
+            ParentProjectID = "project.parentProjectId"
+            TopLevelProject = "project.topLevelProject"
+            Writeable = "project.writeable"
+
+        class User:
+            ExternalAuthUserId = "user.externalAuthUserId"
+            ID = "user.id"
+            Name = "user.name"
+            SiteRole = "user.siteRole"
+            LastLogin = "user.lastLogin"
+            FullName = "user.fullName"
+            Email = "user.email"
+            AuthSetting = "user.authSetting"
+
+        class View:
+            ID = "view.id"
+            Name = "view.name"
+            ContentUrl = "view.contentUrl"
+            CreatedAt = "view.createdAt"
+            UpdatedAt = "view.updatedAt"
+            Tags = "view.tags"
+            SheetType = "view.sheetType"
+            Usage = "view.usage"
+
+        class Workbook:
+            ID = "workbook.id"
+            Description = "workbook.description"
+            Name = "workbook.name"
+            ContentUrl = "workbook.contentUrl"
+            ShowTabs = "workbook.showTabs"
+            Size = "workbook.size"
+            CreatedAt = "workbook.createdAt"
+            UpdatedAt = "workbook.updatedAt"
+            SheetCount = "workbook.sheetCount"
+            HasExtracts = "workbook.hasExtracts"
+            Tags = "workbook.tags"
+            WebpageUrl = "workbook.webpageUrl"
+            DefaultViewId = "workbook.defaultViewId"
 
 
 """
