@@ -982,7 +982,12 @@ class UserRequest:
                 raise ValueError("User name must be populated.")
             user_element = ET.SubElement(xml_request, "user")
             user_element.attrib["name"] = user.name
-            user_element.attrib["authSetting"] = user.auth_setting or "ServerDefault"
+            if user.auth_setting is not None and user.idp_configuration_id is not None:
+                raise ValueError("User cannot have both authSetting and idpConfigurationId.")
+            elif user.idp_configuration_id is not None:
+                user_element.attrib["idpConfigurationId"] = user.idp_configuration_id
+            else:
+                user_element.attrib["authSetting"] = user.auth_setting or "ServerDefault"
 
         parts = {
             "tableau_user_import": ("tsc_users_file.csv", csv_content, "file"),

@@ -403,7 +403,8 @@ class Users(QuerysetEndpoint[UserItem]):
 
         Email is optional, but if provided, it must be a valid email address.
 
-        If auth_setting is not provided, the default is ServerDefault.
+        If auth_setting is not provided, and idp_configuration_id is None, then
+        default is ServerDefault.
 
         If site_role is not provided, the default is Unlicensed.
 
@@ -413,6 +414,10 @@ class Users(QuerysetEndpoint[UserItem]):
 
         Details about administrator level and publishing capability are
         inferred from the site_role.
+
+        If the user belongs to a different IDP configuration, the UserItem's
+        idp_configuration_id attribute must be set to the IDP configuration ID
+        that the user belongs to.
 
         Parameters
         ----------
@@ -733,7 +738,7 @@ class Users(QuerysetEndpoint[UserItem]):
         return super().filter(*invalid, page_size=page_size, **kwargs)
 
 
-def create_users_csv(users: Iterable[UserItem], identity_pool=None) -> bytes:
+def create_users_csv(users: Iterable[UserItem]) -> bytes:
     """
     Create a CSV byte string from an Iterable of UserItem objects. The CSV will
     have the following columns, and no header row:
@@ -761,8 +766,6 @@ def create_users_csv(users: Iterable[UserItem], identity_pool=None) -> bytes:
     bytes
         A byte string containing the CSV data.
     """
-    if identity_pool is not None:
-        raise NotImplementedError("Identity pool is not supported in this version")
     with io.StringIO() as output:
         writer = csv.writer(output, quoting=csv.QUOTE_MINIMAL)
         for user in users:
