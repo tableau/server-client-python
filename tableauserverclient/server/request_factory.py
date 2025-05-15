@@ -913,8 +913,6 @@ class UserRequest:
             user_element.attrib["authSetting"] = user_item.auth_setting
         if password:
             user_element.attrib["password"] = password
-        if user_item.idp_configuration_id is not None:
-            user_element.attrib["idpConfigurationId"] = user_item.idp_configuration_id
         return ET.tostring(xml_request)
 
     def add_req(self, user_item: UserItem) -> bytes:
@@ -931,9 +929,6 @@ class UserRequest:
 
         if user_item.auth_setting:
             user_element.attrib["authSetting"] = user_item.auth_setting
-
-        if user_item.idp_configuration_id is not None:
-            user_element.attrib["idpConfigurationId"] = user_item.idp_configuration_id
         return ET.tostring(xml_request)
 
 

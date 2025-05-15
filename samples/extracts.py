@@ -42,6 +42,7 @@ def main():
     server.add_http_options({"verify": False})
     server.use_server_version()
     with server.auth.sign_in(tableau_auth):
+
         wb = None
         ds = None
         if args.workbook:

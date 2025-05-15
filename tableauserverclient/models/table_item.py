@@ -1,11 +1,7 @@
-from typing import Callable, Optional, TYPE_CHECKING
 from defusedxml.ElementTree import fromstring
 
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_not_empty, property_is_boolean
-
-if TYPE_CHECKING:
-    from tableauserverclient.models import DQWItem
 
 
 class TableItem:
@@ -44,7 +40,7 @@ class TableItem:
         return self._data_quality_warnings()
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self):
         return self._id
 
     @property
@@ -104,8 +100,8 @@ class TableItem:
     def _set_columns(self, columns):
         self._columns = columns
 
-    def _set_data_quality_warnings(self, dqw: Callable[[], list["DQWItem"]]) -> None:
-        self._data_quality_warnings = dqw
+    def _set_data_quality_warnings(self, dqws):
+        self._data_quality_warnings = dqws
 
     def _set_values(self, table_values):
         if "id" in table_values:

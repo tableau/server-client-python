@@ -733,7 +733,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         self._data_quality_warnings.populate(item)
 
     @api(version="3.5")
-    def update_dqw(self, item: DatasourceItem, warning: "DQWItem") -> list["DQWItem"]:
+    def update_dqw(self, item, warning):
         """
         Update the warning type, status, and message of a data quality warning.
 
@@ -755,7 +755,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         return self._data_quality_warnings.update(item, warning)
 
     @api(version="3.5")
-    def add_dqw(self, item: DatasourceItem, warning: "DQWItem") -> list["DQWItem"]:
+    def add_dqw(self, item, warning):
         """
         Add a data quality warning to a datasource.
 
@@ -786,7 +786,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         return self._data_quality_warnings.add(item, warning)
 
     @api(version="3.5")
-    def delete_dqw(self, item: DatasourceItem) -> None:
+    def delete_dqw(self, item):
         """
         Delete a data quality warnings from an asset.
 
