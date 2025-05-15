@@ -37,6 +37,7 @@ def make_user(
     domain: str = "",
     fullname: str = "",
     email: str = "",
+    idp_id: str = "",
 ) -> TSC.UserItem:
     user = TSC.UserItem(name, site_role or None)
     if auth_setting:
@@ -47,6 +48,8 @@ def make_user(
         user.fullname = fullname
     if email:
         user.email = email
+    if idp_id:
+        user.idp_configuration_id = idp_id
     return user
 
 
@@ -415,6 +418,7 @@ class UserTests(unittest.TestCase):
             make_user("Frank", "SiteAdministratorExplorer", "TableauIDWithMFA", email="Frank@example.com"),
             make_user("Grace", "SiteAdministratorCreator", "SAML", "example.com", "Grace Example", "gex@example.com"),
             make_user("Hank", "Unlicensed"),
+            make_user("Ivy", "Unlicensed", idp_id="0123456789"),
         ]
         with requests_mock.mock() as m:
             m.post(f"{self.server.users.baseurl}/import", text=BULK_ADD_XML.read_text())
@@ -446,7 +450,11 @@ class UserTests(unittest.TestCase):
 
             for user, xml_user in zip(users, xml_users):
                 assert user.name == xml_user.get("name")
-                assert xml_user.get("authSetting") == (user.auth_setting or "ServerDefault")
+                if user.idp_configuration_id is None:
+                    assert xml_user.get("authSetting") == (user.auth_setting or "ServerDefault")
+                else:
+                    assert xml_user.get("idpConfigurationId") == user.idp_configuration_id
+                    assert xml_user.get("authSetting") is None
 
             csv_data = create_users_csv(users).replace(b"\r\n", b"\n")
             assert csv_data.strip() == segments[0].split(b"\n\n")[1].strip()
@@ -505,3 +513,10 @@ class UserTests(unittest.TestCase):
                 self.server.users.add_all(users)
 
         assert mock_add.call_count == len(users)
+
+    def test_add_idp_and_auth_error(self) -> None:
+        self.server.version = "3.24"
+        users = [make_user("Alice", "Viewer", auth_setting="SAML", idp_id="01234")]
+
+        with pytest.raises(ValueError, match="User cannot have both authSetting and idpConfigurationId."):
+            self.server.users.bulk_add(users)
