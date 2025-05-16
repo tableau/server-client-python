@@ -7,11 +7,10 @@ import requests_mock
 
 from tableauserverclient.config import BYTES_PER_MB, config
 from tableauserverclient.server import Server
-from ._utils import asset
+from test._utils import xml_asset_path, data_asset_path
 
-TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
-FILEUPLOAD_INITIALIZE = os.path.join(TEST_ASSET_DIR, "fileupload_initialize.xml")
-FILEUPLOAD_APPEND = os.path.join(TEST_ASSET_DIR, "fileupload_append.xml")
+FILEUPLOAD_INITIALIZE = xml_asset_path("fileupload_initialize.xml")
+FILEUPLOAD_APPEND = xml_asset_path("fileupload_append.xml")
 
 
 @contextlib.contextmanager
@@ -36,19 +35,19 @@ class FileuploadsTests(unittest.TestCase):
         self.baseurl = f"{self.server.baseurl}/sites/{self.server.site_id}/fileUploads"
 
     def test_read_chunks_file_path(self):
-        file_path = asset("SampleWB.twbx")
+        file_path = data_asset_path("SampleWB.twbx")
         chunks = self.server.fileuploads._read_chunks(file_path)
         for chunk in chunks:
             self.assertIsNotNone(chunk)
 
     def test_read_chunks_file_object(self):
-        with open(asset("SampleWB.twbx"), "rb") as f:
+        with open(data_asset_path("SampleWB.twbx"), "rb") as f:
             chunks = self.server.fileuploads._read_chunks(f)
             for chunk in chunks:
                 self.assertIsNotNone(chunk)
 
     def test_upload_chunks_file_path(self):
-        file_path = asset("SampleWB.twbx")
+        file_path = data_asset_path("SampleWB.twbx")
         upload_id = "7720:170fe6b1c1c7422dadff20f944d58a52-1:0"
 
         with open(FILEUPLOAD_INITIALIZE, "rb") as f:
@@ -65,7 +64,7 @@ class FileuploadsTests(unittest.TestCase):
     def test_upload_chunks_file_object(self):
         upload_id = "7720:170fe6b1c1c7422dadff20f944d58a52-1:0"
 
-        with open(asset("SampleWB.twbx"), "rb") as file_content:
+        with open(data_asset_path("SampleWB.twbx"), "rb") as file_content:
             with open(FILEUPLOAD_INITIALIZE, "rb") as f:
                 initialize_response_xml = f.read().decode("utf-8")
             with open(FILEUPLOAD_APPEND, "rb") as f:

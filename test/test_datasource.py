@@ -14,7 +14,7 @@ from tableauserverclient.datetime_helpers import format_datetime, parse_datetime
 from tableauserverclient.server.endpoint.exceptions import InternalServerError
 from tableauserverclient.server.endpoint.fileuploads_endpoint import Fileuploads
 from tableauserverclient.server.request_factory import RequestFactory
-from ._utils import read_xml_asset, read_xml_assets, asset
+from ._utils import data_asset_path, read_xml_asset, read_xml_assets, xml_asset_path
 
 ADD_TAGS_XML = "datasource_add_tags.xml"
 GET_XML = "datasource_get.xml"
@@ -135,7 +135,7 @@ class DatasourceTests(unittest.TestCase):
         self.assertEqual(updated_datasource.certification_note, single_datasource.certification_note)
 
     def test_update_copy_fields(self) -> None:
-        with open(asset(UPDATE_XML), "rb") as f:
+        with open(xml_asset_path(UPDATE_XML), "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             m.put(self.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", text=response_xml)
@@ -218,7 +218,7 @@ class DatasourceTests(unittest.TestCase):
             self.assertEqual("foo", new_connection.username)
 
     def test_populate_permissions(self) -> None:
-        with open(asset(POPULATE_PERMISSIONS_XML), "rb") as f:
+        with open(xml_asset_path(POPULATE_PERMISSIONS_XML), "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             m.get(self.baseurl + "/0448d2ed-590d-4fa0-b272-a2a8a24555b5/permissions", text=response_xml)
@@ -256,7 +256,9 @@ class DatasourceTests(unittest.TestCase):
             new_datasource = TSC.DatasourceItem("ee8c6e70-43b6-11e6-af4f-f7b0d8e20760", "SampleDS")
             publish_mode = self.server.PublishMode.CreateNew
 
-            new_datasource = self.server.datasources.publish(new_datasource, asset("SampleDS.tds"), mode=publish_mode)
+            new_datasource = self.server.datasources.publish(
+                new_datasource, data_asset_path("SampleDS.tds"), mode=publish_mode
+            )
 
         self.assertEqual("e76a1461-3b1d-4588-bf1b-17551a879ad9", new_datasource.id)
         self.assertEqual("SampleDS", new_datasource.name)
@@ -275,7 +277,7 @@ class DatasourceTests(unittest.TestCase):
             new_datasource = TSC.DatasourceItem("ee8c6e70-43b6-11e6-af4f-f7b0d8e20760", "SampleDS")
             publish_mode = self.server.PublishMode.CreateNew
 
-            with open(asset("SampleDS.tds"), "rb") as file_object:
+            with open(data_asset_path("SampleDS.tds"), "rb") as file_object:
                 new_datasource = self.server.datasources.publish(new_datasource, file_object, mode=publish_mode)
 
         self.assertEqual("e76a1461-3b1d-4588-bf1b-17551a879ad9", new_datasource.id)
@@ -298,7 +300,7 @@ class DatasourceTests(unittest.TestCase):
             # Create a dummy tdsx file in memory
             with BytesIO() as zip_archive:
                 with ZipFile(zip_archive, "w") as zf:
-                    zf.write(asset("SampleDS.tds"))
+                    zf.write(data_asset_path("SampleDS.tds"))
 
                 zip_archive.seek(0)
 
@@ -324,7 +326,7 @@ class DatasourceTests(unittest.TestCase):
             publish_mode = self.server.PublishMode.CreateNew
 
             new_job = self.server.datasources.publish(
-                new_datasource, asset("SampleDS.tds"), mode=publish_mode, as_job=True
+                new_datasource, data_asset_path("SampleDS.tds"), mode=publish_mode, as_job=True
             )
 
         self.assertEqual("9a373058-af5f-4f83-8662-98b3e0228a73", new_job.id)
@@ -337,7 +339,7 @@ class DatasourceTests(unittest.TestCase):
         new_datasource = TSC.DatasourceItem("test")
         publish_mode = self.server.PublishMode.CreateNew
 
-        with open(asset("SampleDS.tds"), "rb") as file_object:
+        with open(data_asset_path("SampleDS.tds"), "rb") as file_object:
             self.assertRaises(ValueError, self.server.datasources.publish, new_datasource, file_object, publish_mode)
 
     def test_refresh_id(self) -> None:
@@ -466,7 +468,7 @@ class DatasourceTests(unittest.TestCase):
                 text=response_xml,
             )
             new_job = self.server.datasources.update_hyper_data(
-                datasource_id, request_id="test_id", actions=[], payload=asset("World Indicators.hyper")
+                datasource_id, request_id="test_id", actions=[], payload=data_asset_path("World Indicators.hyper")
             )
 
         # We only check the `id`; remaining fields are already tested in `test_update_hyper_data_datasource_object`
@@ -551,7 +553,9 @@ class DatasourceTests(unittest.TestCase):
 
     def test_publish_missing_mode(self) -> None:
         new_datasource = TSC.DatasourceItem("ee8c6e70-43b6-11e6-af4f-f7b0d8e20760", "test")
-        self.assertRaises(ValueError, self.server.datasources.publish, new_datasource, asset("SampleDS.tds"), None)
+        self.assertRaises(
+            ValueError, self.server.datasources.publish, new_datasource, data_asset_path("SampleDS.tds"), None
+        )
 
     def test_publish_invalid_file_type(self) -> None:
         new_datasource = TSC.DatasourceItem("ee8c6e70-43b6-11e6-af4f-f7b0d8e20760", "test")
@@ -559,20 +563,20 @@ class DatasourceTests(unittest.TestCase):
             ValueError,
             self.server.datasources.publish,
             new_datasource,
-            asset("SampleWB.twbx"),
+            data_asset_path("SampleWB.twbx"),
             self.server.PublishMode.Append,
         )
 
     def test_publish_hyper_file_object_raises_exception(self) -> None:
         new_datasource = TSC.DatasourceItem("ee8c6e70-43b6-11e6-af4f-f7b0d8e20760", "test")
-        with open(asset("World Indicators.hyper"), "rb") as file_object:
+        with open(data_asset_path("World Indicators.hyper"), "rb") as file_object:
             self.assertRaises(
                 ValueError, self.server.datasources.publish, new_datasource, file_object, self.server.PublishMode.Append
             )
 
     def test_publish_tde_file_object_raises_exception(self) -> None:
         new_datasource = TSC.DatasourceItem("ee8c6e70-43b6-11e6-af4f-f7b0d8e20760", "test")
-        tds_asset = asset(os.path.join("Data", "Tableau Samples", "World Indicators.tde"))
+        tds_asset = data_asset_path("World Indicators.tde")
         with open(tds_asset, "rb") as file_object:
             self.assertRaises(
                 ValueError, self.server.datasources.publish, new_datasource, file_object, self.server.PublishMode.Append
@@ -645,7 +649,7 @@ class DatasourceTests(unittest.TestCase):
                 "Please use asynchronous publishing to avoid timeouts.",
                 self.server.datasources.publish,
                 new_datasource,
-                asset("SampleDS.tds"),
+                data_asset_path("SampleDS.tds"),
                 publish_mode,
             )
 

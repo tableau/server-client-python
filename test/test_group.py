@@ -1,26 +1,22 @@
-from pathlib import Path
 import unittest
-import os
 import requests_mock
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
 
-TEST_ASSET_DIR = Path(__file__).absolute().parent / "assets"
+from test._utils import data_asset_path, read_xml_asset, xml_asset_path
 
-# TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
-
-GET_XML = os.path.join(TEST_ASSET_DIR, "group_get.xml")
-GET_XML_ALL_FIELDS = TEST_ASSET_DIR / "group_get_all_fields.xml"
-POPULATE_USERS = os.path.join(TEST_ASSET_DIR, "group_populate_users.xml")
-POPULATE_USERS_EMPTY = os.path.join(TEST_ASSET_DIR, "group_populate_users_empty.xml")
-ADD_USER = os.path.join(TEST_ASSET_DIR, "group_add_user.xml")
-ADD_USERS = TEST_ASSET_DIR / "group_add_users.xml"
-ADD_USER_POPULATE = os.path.join(TEST_ASSET_DIR, "group_users_added.xml")
-CREATE_GROUP = os.path.join(TEST_ASSET_DIR, "group_create.xml")
-CREATE_GROUP_AD = os.path.join(TEST_ASSET_DIR, "group_create_ad.xml")
-CREATE_GROUP_ASYNC = os.path.join(TEST_ASSET_DIR, "group_create_async.xml")
-UPDATE_XML = os.path.join(TEST_ASSET_DIR, "group_update.xml")
-UPDATE_ASYNC_XML = TEST_ASSET_DIR / "group_update_async.xml"
+GET_XML = xml_asset_path("group_get.xml")
+GET_XML_ALL_FIELDS = data_asset_path("group_get_all_fields.xml")
+POPULATE_USERS = xml_asset_path("group_populate_users.xml")
+POPULATE_USERS_EMPTY = xml_asset_path("group_populate_users_empty.xml")
+ADD_USER = xml_asset_path("group_add_user.xml")
+ADD_USERS = data_asset_path("group_add_users.xml")
+ADD_USER_POPULATE = xml_asset_path("group_users_added.xml")
+CREATE_GROUP = xml_asset_path("group_create.xml")
+CREATE_GROUP_AD = xml_asset_path("group_create_ad.xml")
+CREATE_GROUP_ASYNC = xml_asset_path("group_create_async.xml")
+UPDATE_XML = xml_asset_path("group_update.xml")
+UPDATE_ASYNC_XML = data_asset_path("group_update_async.xml")
 
 
 class GroupTests(unittest.TestCase):

@@ -6,11 +6,11 @@ from pathlib import Path
 import requests_mock
 
 import tableauserverclient as TSC
-from tableauserverclient.datetime_helpers import parse_datetime
 from tableauserverclient.models.task_item import TaskItem
 
-TEST_ASSET_DIR = Path(__file__).parent / "assets"
-GET_XML_CREATE_FLOW_TASK_RESPONSE = os.path.join(TEST_ASSET_DIR, "tasks_create_flow_task.xml")
+from test._utils import xml_asset_path, read_xml_asset
+
+GET_XML_CREATE_FLOW_TASK_RESPONSE = xml_asset_path("tasks_create_flow_task.xml")
 
 
 class TaskTests(unittest.TestCase):
@@ -37,11 +37,10 @@ class TaskTests(unittest.TestCase):
 
         task = TaskItem(None, "RunFlow", None, schedule_item=monthly_schedule, target=target_item)
 
-        with open(GET_XML_CREATE_FLOW_TASK_RESPONSE, "rb") as f:
-            response_xml = f.read().decode("utf-8")
-        with requests_mock.mock() as m:
-            m.post(f"{self.baseurl}", text=response_xml)
-            create_response_content = self.server.flow_tasks.create(task).decode("utf-8")
+        with read_xml_asset(GET_XML_CREATE_FLOW_TASK_RESPONSE) as response_xml:
+            with requests_mock.mock() as m:
+                m.post(f"{self.baseurl}", text=response_xml)
+                create_response_content = self.server.flow_tasks.create(task).decode("utf-8")
 
         self.assertTrue("schedule_id" in create_response_content)
         self.assertTrue("flow_id" in create_response_content)

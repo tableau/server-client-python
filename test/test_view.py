@@ -7,22 +7,21 @@ import tableauserverclient as TSC
 from tableauserverclient import UserItem, GroupItem, PermissionsRule
 from tableauserverclient.datetime_helpers import format_datetime, parse_datetime
 from tableauserverclient.server.endpoint.exceptions import UnsupportedAttributeError
+from test._utils import data_asset_path, xml_asset_path
 
-TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
-
-ADD_TAGS_XML = os.path.join(TEST_ASSET_DIR, "view_add_tags.xml")
-GET_XML = os.path.join(TEST_ASSET_DIR, "view_get.xml")
-GET_XML_ALL_FIELDS = os.path.join(TEST_ASSET_DIR, "view_get_all_fields.xml")
-GET_XML_ID = os.path.join(TEST_ASSET_DIR, "view_get_id.xml")
-GET_XML_USAGE = os.path.join(TEST_ASSET_DIR, "view_get_usage.xml")
-GET_XML_ID_USAGE = os.path.join(TEST_ASSET_DIR, "view_get_id_usage.xml")
-POPULATE_PREVIEW_IMAGE = os.path.join(TEST_ASSET_DIR, "Sample View Image.png")
-POPULATE_PDF = os.path.join(TEST_ASSET_DIR, "populate_pdf.pdf")
-POPULATE_CSV = os.path.join(TEST_ASSET_DIR, "populate_csv.csv")
-POPULATE_EXCEL = os.path.join(TEST_ASSET_DIR, "populate_excel.xlsx")
-POPULATE_PERMISSIONS_XML = os.path.join(TEST_ASSET_DIR, "view_populate_permissions.xml")
-UPDATE_PERMISSIONS = os.path.join(TEST_ASSET_DIR, "view_update_permissions.xml")
-UPDATE_XML = os.path.join(TEST_ASSET_DIR, "workbook_update.xml")
+ADD_TAGS_XML = xml_asset_path("view_add_tags.xml")
+GET_XML = xml_asset_path("view_get.xml")
+GET_XML_ALL_FIELDS = xml_asset_path("view_get_all_fields.xml")
+GET_XML_ID = xml_asset_path("view_get_id.xml")
+GET_XML_USAGE = xml_asset_path("view_get_usage.xml")
+GET_XML_ID_USAGE = xml_asset_path("view_get_id_usage.xml")
+POPULATE_PREVIEW_IMAGE = data_asset_path("Sample View Image.png")
+POPULATE_PDF = data_asset_path("populate_pdf.pdf")
+POPULATE_CSV = data_asset_path("populate_csv.csv")
+POPULATE_EXCEL = data_asset_path("populate_excel.xlsx")
+POPULATE_PERMISSIONS_XML = xml_asset_path("view_populate_permissions.xml")
+UPDATE_PERMISSIONS = xml_asset_path("view_update_permissions.xml")
+UPDATE_XML = xml_asset_path("workbook_update.xml")
 
 
 class ViewTests(unittest.TestCase):

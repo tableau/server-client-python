@@ -7,13 +7,12 @@ import requests_mock
 
 import tableauserverclient as TSC
 from tableauserverclient.config import config
+from test._utils import xml_asset_path
 
-TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
-
-GET_VIEW_XML = os.path.join(TEST_ASSET_DIR, "view_get.xml")
-GET_XML_PAGE1 = os.path.join(TEST_ASSET_DIR, "workbook_get_page_1.xml")
-GET_XML_PAGE2 = os.path.join(TEST_ASSET_DIR, "workbook_get_page_2.xml")
-GET_XML_PAGE3 = os.path.join(TEST_ASSET_DIR, "workbook_get_page_3.xml")
+GET_VIEW_XML = xml_asset_path("view_get.xml")
+GET_XML_PAGE1 = xml_asset_path("workbook_get_page_1.xml")
+GET_XML_PAGE2 = xml_asset_path("workbook_get_page_2.xml")
+GET_XML_PAGE3 = xml_asset_path("workbook_get_page_3.xml")
 
 
 @contextlib.contextmanager

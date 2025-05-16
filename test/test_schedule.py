@@ -6,30 +6,29 @@ import requests_mock
 
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
+from test._utils import xml_asset_path
 
-TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
+GET_XML = xml_asset_path("schedule_get.xml")
+GET_BY_ID_XML = xml_asset_path("schedule_get_by_id.xml")
+GET_HOURLY_ID_XML = xml_asset_path("schedule_get_hourly_id.xml")
+GET_DAILY_ID_XML = xml_asset_path("schedule_get_daily_id.xml")
+GET_MONTHLY_ID_XML = xml_asset_path("schedule_get_monthly_id.xml")
+GET_MONTHLY_ID_2_XML = xml_asset_path("schedule_get_monthly_id_2.xml")
+GET_EMPTY_XML = xml_asset_path("schedule_get_empty.xml")
+CREATE_HOURLY_XML = xml_asset_path("schedule_create_hourly.xml")
+CREATE_DAILY_XML = xml_asset_path("schedule_create_daily.xml")
+CREATE_WEEKLY_XML = xml_asset_path("schedule_create_weekly.xml")
+CREATE_MONTHLY_XML = xml_asset_path("schedule_create_monthly.xml")
+UPDATE_XML = xml_asset_path("schedule_update.xml")
+ADD_WORKBOOK_TO_SCHEDULE = xml_asset_path("schedule_add_workbook.xml")
+ADD_WORKBOOK_TO_SCHEDULE_WITH_WARNINGS = xml_asset_path("schedule_add_workbook_with_warnings.xml")
+ADD_DATASOURCE_TO_SCHEDULE = xml_asset_path("schedule_add_datasource.xml")
+ADD_FLOW_TO_SCHEDULE = xml_asset_path("schedule_add_flow.xml")
+GET_EXTRACT_TASKS_XML = xml_asset_path("schedule_get_extract_refresh_tasks.xml")
 
-GET_XML = os.path.join(TEST_ASSET_DIR, "schedule_get.xml")
-GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_by_id.xml")
-GET_HOURLY_ID_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_hourly_id.xml")
-GET_DAILY_ID_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_daily_id.xml")
-GET_MONTHLY_ID_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_monthly_id.xml")
-GET_MONTHLY_ID_2_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_monthly_id_2.xml")
-GET_EMPTY_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_empty.xml")
-CREATE_HOURLY_XML = os.path.join(TEST_ASSET_DIR, "schedule_create_hourly.xml")
-CREATE_DAILY_XML = os.path.join(TEST_ASSET_DIR, "schedule_create_daily.xml")
-CREATE_WEEKLY_XML = os.path.join(TEST_ASSET_DIR, "schedule_create_weekly.xml")
-CREATE_MONTHLY_XML = os.path.join(TEST_ASSET_DIR, "schedule_create_monthly.xml")
-UPDATE_XML = os.path.join(TEST_ASSET_DIR, "schedule_update.xml")
-ADD_WORKBOOK_TO_SCHEDULE = os.path.join(TEST_ASSET_DIR, "schedule_add_workbook.xml")
-ADD_WORKBOOK_TO_SCHEDULE_WITH_WARNINGS = os.path.join(TEST_ASSET_DIR, "schedule_add_workbook_with_warnings.xml")
-ADD_DATASOURCE_TO_SCHEDULE = os.path.join(TEST_ASSET_DIR, "schedule_add_datasource.xml")
-ADD_FLOW_TO_SCHEDULE = os.path.join(TEST_ASSET_DIR, "schedule_add_flow.xml")
-GET_EXTRACT_TASKS_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_extract_refresh_tasks.xml")
-
-WORKBOOK_GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, "workbook_get_by_id.xml")
-DATASOURCE_GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, "datasource_get_by_id.xml")
-FLOW_GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, "flow_get_by_id.xml")
+WORKBOOK_GET_BY_ID_XML = xml_asset_path("workbook_get_by_id.xml")
+DATASOURCE_GET_BY_ID_XML = xml_asset_path("datasource_get_by_id.xml")
+FLOW_GET_BY_ID_XML = xml_asset_path("flow_get_by_id.xml")
 
 
 class ScheduleTests(unittest.TestCase):

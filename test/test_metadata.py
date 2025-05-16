@@ -1,21 +1,19 @@
 import json
-import os.path
 import unittest
 
 import requests_mock
 
 import tableauserverclient as TSC
 from tableauserverclient.server.endpoint.exceptions import GraphQLError
+from test._utils import data_asset_path, xml_asset_path
 
-TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
+METADATA_QUERY_SUCCESS = xml_asset_path("metadata_query_success.json")
+METADATA_QUERY_ERROR = xml_asset_path("metadata_query_error.json")
+EXPECTED_PAGED_DICT = data_asset_path("metadata_query_expected_dict.dict")
 
-METADATA_QUERY_SUCCESS = os.path.join(TEST_ASSET_DIR, "metadata_query_success.json")
-METADATA_QUERY_ERROR = os.path.join(TEST_ASSET_DIR, "metadata_query_error.json")
-EXPECTED_PAGED_DICT = os.path.join(TEST_ASSET_DIR, "metadata_query_expected_dict.dict")
-
-METADATA_PAGE_1 = os.path.join(TEST_ASSET_DIR, "metadata_paged_1.json")
-METADATA_PAGE_2 = os.path.join(TEST_ASSET_DIR, "metadata_paged_2.json")
-METADATA_PAGE_3 = os.path.join(TEST_ASSET_DIR, "metadata_paged_3.json")
+METADATA_PAGE_1 = xml_asset_path("metadata_paged_1.json")
+METADATA_PAGE_2 = xml_asset_path("metadata_paged_2.json")
+METADATA_PAGE_3 = xml_asset_path("metadata_paged_3.json")
 
 EXPECTED_DICT = {
     "publishedDatasources": [

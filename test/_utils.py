@@ -6,12 +6,16 @@ from contextlib import contextmanager
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
 
-def asset(filename):
-    return os.path.join(TEST_ASSET_DIR, filename)
+def xml_asset_path(filename):
+    return os.path.join(TEST_ASSET_DIR, "responses", filename)
+
+
+def data_asset_path(filename):
+    return os.path.join(TEST_ASSET_DIR, "data", filename)
 
 
 def read_xml_asset(filename):
-    with open(asset(filename), "rb") as f:
+    with open(xml_asset_path(filename), "rb") as f:
         return f.read().decode("utf-8")
 
 

@@ -1,19 +1,17 @@
-import os.path
 import unittest
 
 import pytest
 import requests_mock
 
 import tableauserverclient as TSC
+from test._utils import xml_asset_path
 
-TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
-
-GET_XML = os.path.join(TEST_ASSET_DIR, "site_get.xml")
-GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, "site_get_by_id.xml")
-GET_BY_NAME_XML = os.path.join(TEST_ASSET_DIR, "site_get_by_name.xml")
-UPDATE_XML = os.path.join(TEST_ASSET_DIR, "site_update.xml")
-CREATE_XML = os.path.join(TEST_ASSET_DIR, "site_create.xml")
-SITE_AUTH_CONFIG_XML = os.path.join(TEST_ASSET_DIR, "site_auth_configurations.xml")
+GET_XML = xml_asset_path("site_get.xml")
+GET_BY_ID_XML = xml_asset_path("site_get_by_id.xml")
+GET_BY_NAME_XML = xml_asset_path("site_get_by_name.xml")
+UPDATE_XML = xml_asset_path("site_update.xml")
+CREATE_XML = xml_asset_path("site_create.xml")
+SITE_AUTH_CONFIG_XML = xml_asset_path("site_auth_configurations.xml")
 
 
 class SiteTests(unittest.TestCase):

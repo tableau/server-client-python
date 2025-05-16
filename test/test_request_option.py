@@ -7,19 +7,18 @@ from urllib.parse import parse_qs
 import requests_mock
 
 import tableauserverclient as TSC
+from test._utils import xml_asset_path
 
-TEST_ASSET_DIR = Path(__file__).parent / "assets"
-
-PAGINATION_XML = os.path.join(TEST_ASSET_DIR, "request_option_pagination.xml")
-PAGE_NUMBER_XML = os.path.join(TEST_ASSET_DIR, "request_option_page_number.xml")
-PAGE_SIZE_XML = os.path.join(TEST_ASSET_DIR, "request_option_page_size.xml")
-FILTER_EQUALS = os.path.join(TEST_ASSET_DIR, "request_option_filter_equals.xml")
-FILTER_NAME_IN = os.path.join(TEST_ASSET_DIR, "request_option_filter_name_in.xml")
-FILTER_TAGS_IN = os.path.join(TEST_ASSET_DIR, "request_option_filter_tags_in.xml")
-FILTER_MULTIPLE = os.path.join(TEST_ASSET_DIR, "request_option_filter_tags_in.xml")
-SLICING_QUERYSET = os.path.join(TEST_ASSET_DIR, "request_option_slicing_queryset.xml")
-SLICING_QUERYSET_PAGE_1 = TEST_ASSET_DIR / "queryset_slicing_page_1.xml"
-SLICING_QUERYSET_PAGE_2 = TEST_ASSET_DIR / "queryset_slicing_page_2.xml"
+PAGINATION_XML = xml_asset_path("request_option_pagination.xml")
+PAGE_NUMBER_XML = xml_asset_path("request_option_page_number.xml")
+PAGE_SIZE_XML = xml_asset_path("request_option_page_size.xml")
+FILTER_EQUALS = xml_asset_path("request_option_filter_equals.xml")
+FILTER_NAME_IN = xml_asset_path("request_option_filter_name_in.xml")
+FILTER_TAGS_IN = xml_asset_path("request_option_filter_tags_in.xml")
+FILTER_MULTIPLE = xml_asset_path("request_option_filter_tags_in.xml")
+SLICING_QUERYSET = xml_asset_path("request_option_slicing_queryset.xml")
+SLICING_QUERYSET_PAGE_1 = xml_asset_path("queryset_slicing_page_1.xml")
+SLICING_QUERYSET_PAGE_2 = xml_asset_path("queryset_slicing_page_2.xml")
 
 
 class RequestOptionTests(unittest.TestCase):
