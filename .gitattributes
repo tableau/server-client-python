@@ -1,1 +1,2 @@
 tableauserverclient/_version.py export-subst
+tableauserverclient/bin/_version.py export-subst
