@@ -1,0 +1,406 @@
+<?xml version='1.0' encoding='utf-8' ?>
+
+<!-- build 20203.20.0801.1333                               -->
+<datasource formatted-name='World Indicators new' inline='true' source-platform='mac' version='18.1' xmlns:user='http://www.tableausoftware.com/xml/user'>
+  <document-format-change-manifest>
+    <_.fcp.ObjectModelEncapsulateLegacy.true...ObjectModelEncapsulateLegacy />
+    <_.fcp.ObjectModelTableType.true...ObjectModelTableType />
+    <_.fcp.SchemaViewerObjectModel.true...SchemaViewerObjectModel />
+    <SortTagCleanup />
+  </document-format-change-manifest>
+  <connection class='federated'>
+    <named-connections>
+      <named-connection caption='World Indicators' name='World Indicators newleaf'>
+        <connection authentication='auth-none' author-locale='en_US' class='hyper' db-format='dataengine' dbname='/Users/nnev/Documents/fredman/server-client-python/test/assets/World Indicators.tds Files/Data/Tableau Samples/World Indicators.tde' default-settings='yes' sslmode='' username='tableau_internal_user'>
+          <calculations>
+            <calculation column='[Number of Records]' formula='1' />
+          </calculations>
+        </connection>
+      </named-connection>
+    </named-connections>
+    <_.fcp.ObjectModelEncapsulateLegacy.false...relation connection='World Indicators newleaf' name='Extract' table='[Extract].[Extract]' type='table' />
+    <_.fcp.ObjectModelEncapsulateLegacy.true...relation connection='World Indicators newleaf' name='Extract' table='[Extract].[Extract]' type='table' />
+    <metadata-records>
+      <metadata-record class='column'>
+        <remote-name>Country / Region</remote-name>
+        <remote-type>129</remote-type>
+        <local-name>[Country / Region]</local-name>
+        <parent-name>[Extract]</parent-name>
+        <remote-alias>Country / Region</remote-alias>
+        <ordinal>0</ordinal>
+        <family>DATA$</family>
+        <local-type>string</local-type>
+        <aggregation>Count</aggregation>
+        <approx-count>209</approx-count>
+        <contains-null>false</contains-null>
+        <collation flag='1' name='LEN_RUS_S2' />
+        <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Migrated Data]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+      </metadata-record>
+      <metadata-record class='column'>
+        <remote-name>Date</remote-name>
+        <remote-type>135</remote-type>
+        <local-name>[Date]</local-name>
+        <parent-name>[Extract]</parent-name>
+        <remote-alias>Date</remote-alias>
+        <ordinal>1</ordinal>
+        <family>DATA$</family>
+        <local-type>datetime</local-type>
+        <aggregation>Year</aggregation>
+        <approx-count>11</approx-count>
+        <contains-null>false</contains-null>
+        <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Migrated Data]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+      </metadata-record>
+      <metadata-record class='column'>
+        <remote-name>F: Deposit interest rate (%)</remote-name>
+        <remote-type>5</remote-type>
+        <local-name>[F: Deposit interest rate (%)]</local-name>
+        <parent-name>[Extract]</parent-name>
+        <remote-alias>F: Deposit interest rate (%)</remote-alias>
+        <ordinal>2</ordinal>
+        <family>DATA$</family>
+        <local-type>real</local-type>
+        <aggregation>Sum</aggregation>
+        <approx-count>50</approx-count>
+        <contains-null>true</contains-null>
+        <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Migrated Data]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+      </metadata-record>
+      <metadata-record class='column'>
+        <remote-name>F: GDP (curr $)</remote-name>
+        <remote-type>5</remote-type>
+        <local-name>[F: GDP (curr $)]</local-name>
+        <parent-name>[Extract]</parent-name>
+        <remote-alias>F: GDP (curr $)</remote-alias>
+        <ordinal>3</ordinal>
+        <family>DATA$</family>
+        <local-type>real</local-type>
+        <aggregation>Sum</aggregation>
+        <approx-count>2120</approx-count>
+        <contains-null>true</contains-null>
+        <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Migrated Data]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+      </metadata-record>
+      <metadata-record class='column'>
+        <remote-name>F: GDP per capita (curr $)</remote-name>
+        <remote-type>5</remote-type>
+        <local-name>[F: GDP per capita (curr $)]</local-name>
+        <parent-name>[Extract]</parent-name>
+        <remote-alias>F: GDP per capita (curr $)</remote-alias>
+        <ordinal>4</ordinal>
+        <family>DATA$</family>
+        <local-type>real</local-type>
+        <aggregation>Sum</aggregation>
+        <approx-count>1877</approx-count>
+        <contains-null>true</contains-null>
+        <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Migrated Data]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+      </metadata-record>
+      <metadata-record class='column'>
+        <remote-name>F: Lending interest rate (%)</remote-name>
+        <remote-type>5</remote-type>
+        <local-name>[F: Lending interest rate (%)]</local-name>
+        <parent-name>[Extract]</parent-name>
+        <remote-alias>F: Lending interest rate (%)</remote-alias>
+        <ordinal>5</ordinal>
+        <family>DATA$</family>
+        <local-type>real</local-type>
+        <aggregation>Sum</aggregation>
+        <approx-count>72</approx-count>
+        <contains-null>true</contains-null>
+        <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Migrated Data]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+      </metadata-record>
+      <metadata-record class='column'>
+        <remote-name>H: Health exp (% GDP)</remote-name>
+        <remote-type>5</remote-type>
+        <local-name>[H: Health exp (% GDP)]</local-name>
+        <parent-name>[Extract]</parent-name>
+        <remote-alias>H: Health exp (% GDP)</remote-alias>
+        <ordinal>6</ordinal>
+        <family>DATA$</family>
+        <local-type>real</local-type>
+        <aggregation>Sum</aggregation>
+        <approx-count>22</approx-count>
+        <contains-null>true</contains-null>
+        <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Migrated Data]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+      </metadata-record>
+      <metadata-record class='column'>
+        <remote-name>H: Health exp/cap (curr $)</remote-name>
+        <remote-type>5</remote-type>
+        <local-name>[H: Health exp/cap (curr $)]</local-name>
+        <parent-name>[Extract]</parent-name>
+        <remote-alias>H: Health exp/cap (curr $)</remote-alias>
+        <ordinal>7</ordinal>
+        <family>DATA$</family>
+        <local-type>real</local-type>
+        <aggregation>Sum</aggregation>
+        <approx-count>936</approx-count>
+        <contains-null>true</contains-null>
+        <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Migrated Data]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+      </metadata-record>
+      <metadata-record class='column'>
+        <remote-name>H: Life exp (years)</remote-name>
+        <remote-type>5</remote-type>
+        <local-name>[H: Life exp (years)]</local-name>
+        <parent-name>[Extract]</parent-name>
+        <remote-alias>H: Life exp (years)</remote-alias>
+        <ordinal>8</ordinal>
+        <family>DATA$</family>
+        <local-type>real</local-type>
+        <aggregation>Sum</aggregation>
+        <approx-count>45</approx-count>
+        <contains-null>true</contains-null>
+        <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Migrated Data]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+      </metadata-record>
+      <metadata-record class='column'>
+        <remote-name>Number of Records</remote-name>
+        <remote-type>2</remote-type>
+        <local-name>[Number of Records]</local-name>
+        <parent-name>[Extract]</parent-name>
+        <remote-alias>Number of Records</remote-alias>
+        <ordinal>9</ordinal>
+        <local-type>integer</local-type>
+        <aggregation>Sum</aggregation>
+        <approx-count>1</approx-count>
+        <contains-null>false</contains-null>
+        <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Migrated Data]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+      </metadata-record>
+      <metadata-record class='column'>
+        <remote-name>P: Population (count)</remote-name>
+        <remote-type>5</remote-type>
+        <local-name>[P: Population (count)]</local-name>
+        <parent-name>[Extract]</parent-name>
+        <remote-alias>P: Population (count)</remote-alias>
+        <ordinal>10</ordinal>
+        <family>DATA$</family>
+        <local-type>real</local-type>
+        <aggregation>Sum</aggregation>
+        <approx-count>2295</approx-count>
+        <contains-null>false</contains-null>
+        <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Migrated Data]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+      </metadata-record>
+      <metadata-record class='column'>
+        <remote-name>Region</remote-name>
+        <remote-type>129</remote-type>
+        <local-name>[Region]</local-name>
+        <parent-name>[Extract]</parent-name>
+        <remote-alias>Region</remote-alias>
+        <ordinal>11</ordinal>
+        <family>DATA$</family>
+        <local-type>string</local-type>
+        <aggregation>Count</aggregation>
+        <approx-count>6</approx-count>
+        <contains-null>false</contains-null>
+        <collation flag='1' name='LEN_RUS_S2' />
+        <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Migrated Data]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+      </metadata-record>
+      <metadata-record class='column'>
+        <remote-name>Subregion</remote-name>
+        <remote-type>129</remote-type>
+        <local-name>[Subregion]</local-name>
+        <parent-name>[Extract]</parent-name>
+        <remote-alias>Subregion</remote-alias>
+        <ordinal>12</ordinal>
+        <family>DATA$</family>
+        <local-type>string</local-type>
+        <aggregation>Count</aggregation>
+        <approx-count>12</approx-count>
+        <contains-null>true</contains-null>
+        <collation flag='1' name='LEN_RUS_S2' />
+        <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Migrated Data]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+      </metadata-record>
+    </metadata-records>
+  </connection>
+  <aliases enabled='yes' />
+  <column datatype='string' name='[:Measure Names]' role='dimension' type='nominal'>
+    <aliases>
+      <alias key='&quot;[World Indicators new].[avg:H: Life exp (years):qk]&quot;' value='Life Expectancy' />
+      <alias key='&quot;[World Indicators new].[rank:avg:H: Life exp (years):qk]&quot;' value='Rank of Life Expectancy' />
+      <alias key='&quot;[World Indicators new].[rank:sum:F: GDP (curr $):qk]&quot;' value='Rank GDP (curr $)' />
+      <alias key='&quot;[World Indicators new].[rank:sum:F: GDP per capita (curr $):qk]&quot;' value='Rank of GDP per capita' />
+      <alias key='&quot;[World Indicators new].[rank:sum:P: Population (count):qk]&quot;' value='Rank of Population' />
+      <alias key='&quot;[World Indicators new].[sum:F: GDP (curr $):qk]&quot;' value='GDP (US $&apos;s)' />
+      <alias key='&quot;[World Indicators new].[sum:F: GDP per capita (curr $):qk]&quot;' value='GDP per Capita' />
+      <alias key='&quot;[World Indicators new].[sum:P: Population (count):qk]&quot;' value='Population' />
+    </aliases>
+  </column>
+  <column caption='GDP % of Total' datatype='real' default-format='p0%' name='[Calculation1]' role='measure' type='quantitative'>
+    <calculation class='tableau' formula='AVG([F: GDP per capita (curr $)]) / TOTAL(AVG([F: GDP per capita (curr $)]))' scope-isolation='false'>
+      <table-calc ordering-type='Rows' />
+    </calculation>
+  </column>
+  <column caption='GDP per capita (weighted)' datatype='real' default-format='c&quot;$&quot;#,##0,.0K;(&quot;$&quot;#,##0,.0K)' name='[Calculation_1590906174513693]' role='measure' type='quantitative'>
+    <calculation class='tableau' formula='SUM([F: GDP (curr $)])&#13;&#10;/&#13;&#10;SUM([P: Population (count)])' scope-isolation='false' />
+  </column>
+  <column caption='Rate spread (difference)' datatype='real' name='[Calculation_8570907072742130]' role='measure' type='quantitative'>
+    <calculation class='tableau' formula='AVG([F: Lending interest rate (%)])-AVG([F: Deposit interest rate (%)])' scope-isolation='false' />
+  </column>
+  <column datatype='string' name='[Country / Region]' role='dimension' semantic-role='[Country].[Name]' type='nominal' />
+  <column caption='Date (year)' datatype='datetime' name='[Date]' role='dimension' type='ordinal' />
+  <column aggregation='Avg' caption='Deposit interest rate (%)' datatype='real' name='[F: Deposit interest rate (%)]' role='measure' type='quantitative' />
+  <column aggregation='Avg' caption='GDP (curr $)' datatype='real' default-format='c&quot;$&quot;#,##0,,,.00B;(&quot;$&quot;#,##0,,,.00B)' name='[F: GDP (curr $)]' role='measure' type='quantitative'>
+    <desc>
+      <formatted-text>
+        <run bold='true'>Gross Domestic Product</run>
+        <run> in current US Dollars</run>
+      </formatted-text>
+    </desc>
+  </column>
+  <column caption='GDP per capita (curr $)' datatype='real' default-format='c&quot;$&quot;#,##0,.0K;(&quot;$&quot;#,##0,.0K)' name='[F: GDP per capita (curr $)]' role='measure' type='quantitative'>
+    <desc>
+      <formatted-text>
+        <run bold='true'>Gross Domestic Product</run>
+        <run> per capita</run>
+      </formatted-text>
+    </desc>
+  </column>
+  <column aggregation='Avg' caption='Lending interest rate (%)' datatype='real' name='[F: Lending interest rate (%)]' role='measure' type='quantitative' />
+  <column caption='Health exp (% GDP)' datatype='real' datatype-customized='true' name='[H: Health exp (% GDP)]' role='measure' type='quantitative' />
+  <column caption='Health exp/cap (curr $)' datatype='real' datatype-customized='true' default-format='c&quot;$&quot;#,##0,,,.0B;(&quot;$&quot;#,##0,,,.0B)' name='[H: Health exp/cap (curr $)]' role='measure' type='quantitative' />
+  <column aggregation='Avg' caption='Life exp (years)' datatype='real' default-format='n#,##0;-#,##0' name='[H: Life exp (years)]' role='measure' type='quantitative' />
+  <column datatype='integer' name='[Number of Records]' role='measure' type='quantitative' user:auto-column='numrec'>
+    <calculation class='tableau' formula='1' />
+  </column>
+  <column caption='Population (count)' datatype='real' name='[P: Population (count)]' role='measure' type='quantitative' />
+  <column datatype='string' name='[Region]' role='dimension' type='nominal' />
+  <column datatype='string' name='[Subregion]' role='dimension' type='nominal'>
+    <aliases>
+      <alias key='%null%' value=' ' />
+    </aliases>
+  </column>
+  <_.fcp.ObjectModelTableType.true...column caption='Migrated Data' datatype='table' name='[__tableau_internal_object_id__].[Migrated Data]' role='measure' type='quantitative' />
+  <column-instance column='[H: Life exp (years)]' derivation='Avg' name='[avg:H: Life exp (years):qk]' pivot='key' type='quantitative' />
+  <column-instance column='[Country / Region]' derivation='None' name='[none:Country / Region:nk]' pivot='key' type='nominal' />
+  <column-instance column='[Region]' derivation='None' name='[none:Region:nk]' pivot='key' type='nominal' />
+  <column-instance column='[H: Life exp (years)]' derivation='Avg' name='[rank:avg:H: Life exp (years):qk]' pivot='key' type='quantitative'>
+    <table-calc ordering-type='Columns' rank-options='Competition,Descending' type='Rank' />
+  </column-instance>
+  <column-instance column='[F: GDP (curr $)]' derivation='Sum' name='[rank:sum:F: GDP (curr $):qk]' pivot='key' type='quantitative'>
+    <table-calc ordering-type='Columns' rank-options='Competition,Descending' type='Rank' />
+  </column-instance>
+  <column-instance column='[F: GDP per capita (curr $)]' derivation='Sum' name='[rank:sum:F: GDP per capita (curr $):qk]' pivot='key' type='quantitative'>
+    <table-calc ordering-type='Columns' rank-options='Competition,Descending' type='Rank' />
+  </column-instance>
+  <column-instance column='[P: Population (count)]' derivation='Sum' name='[rank:sum:P: Population (count):qk]' pivot='key' type='quantitative'>
+    <table-calc ordering-type='Columns' rank-options='Competition,Descending' type='Rank' />
+  </column-instance>
+  <column-instance column='[F: GDP (curr $)]' derivation='Sum' name='[sum:F: GDP (curr $):qk]' pivot='key' type='quantitative' />
+  <column-instance column='[F: GDP per capita (curr $)]' derivation='Sum' name='[sum:F: GDP per capita (curr $):qk]' pivot='key' type='quantitative' />
+  <column-instance column='[P: Population (count)]' derivation='Sum' name='[sum:P: Population (count):qk]' pivot='key' type='quantitative' />
+  <column-instance column='[Date]' derivation='Year-Trunc' name='[tyr:Date:qk]' pivot='key' type='quantitative' />
+  <column-instance column='[Date]' derivation='Year' name='[yr:Date:ok]' pivot='key' type='ordinal' />
+  <group hidden='true' name='[Action (Country Name)]' name-style='unqualified' user:auto-column='sheet_link'>
+    <groupfilter function='crossjoin'>
+      <groupfilter function='level-members' level='[Country / Region]' />
+    </groupfilter>
+  </group>
+  <group hidden='true' name='[Action (Date (year))]' name-style='unqualified' user:auto-column='sheet_link'>
+    <groupfilter function='crossjoin'>
+      <groupfilter function='level-members' level='[Date]' />
+    </groupfilter>
+  </group>
+  <group hidden='true' name='[Action (Region)]' name-style='unqualified' user:auto-column='sheet_link'>
+    <groupfilter function='crossjoin'>
+      <groupfilter function='level-members' level='[Region]' />
+    </groupfilter>
+  </group>
+  <group hidden='true' name='[Action (YEAR(Date (year)))]' name-style='unqualified' user:auto-column='sheet_link'>
+    <groupfilter function='crossjoin'>
+      <groupfilter function='level-members' level='[yr:Date:ok]' />
+    </groupfilter>
+  </group>
+  <group hidden='true' name='[[Exclusions (Country Name,YEAR(Date (year)))]]]' name-style='unqualified' user:auto-column='exclude'>
+    <groupfilter function='crossjoin'>
+      <groupfilter function='level-members' level='[none:Country / Region:nk]' />
+      <groupfilter function='level-members' level='[tyr:Date:qk]' />
+    </groupfilter>
+  </group>
+  <drill-paths>
+    <drill-path name='Location'>
+      <field>[Region]</field>
+      <field>[Subregion]</field>
+      <field>[Country / Region]</field>
+    </drill-path>
+  </drill-paths>
+  <_.fcp.SchemaViewerObjectModel.false...folder name='Financial' role='measures'>
+    <folder-item name='[Calculation1]' type='field' />
+    <folder-item name='[Calculation_1590906174513693]' type='field' />
+    <folder-item name='[Calculation_8570907072742130]' type='field' />
+    <folder-item name='[F: Deposit interest rate (%)]' type='field' />
+    <folder-item name='[F: GDP (curr $)]' type='field' />
+    <folder-item name='[F: GDP per capita (curr $)]' type='field' />
+    <folder-item name='[F: Lending interest rate (%)]' type='field' />
+  </_.fcp.SchemaViewerObjectModel.false...folder>
+  <_.fcp.SchemaViewerObjectModel.false...folder name='Health' role='measures'>
+    <folder-item name='[H: Health exp (% GDP)]' type='field' />
+    <folder-item name='[H: Health exp/cap (curr $)]' type='field' />
+    <folder-item name='[H: Life exp (years)]' type='field' />
+  </_.fcp.SchemaViewerObjectModel.false...folder>
+  <_.fcp.SchemaViewerObjectModel.false...folder name='Population' role='measures'>
+    <folder-item name='[P: Population (count)]' type='field' />
+  </_.fcp.SchemaViewerObjectModel.false...folder>
+  <_.fcp.SchemaViewerObjectModel.true...folders-common>
+    <folder name='Financial'>
+      <folder-item name='[Calculation1]' type='field' />
+      <folder-item name='[Calculation_1590906174513693]' type='field' />
+      <folder-item name='[Calculation_8570907072742130]' type='field' />
+      <folder-item name='[F: Deposit interest rate (%)]' type='field' />
+      <folder-item name='[F: GDP (curr $)]' type='field' />
+      <folder-item name='[F: GDP per capita (curr $)]' type='field' />
+      <folder-item name='[F: Lending interest rate (%)]' type='field' />
+    </folder>
+    <folder name='Health'>
+      <folder-item name='[H: Health exp (% GDP)]' type='field' />
+      <folder-item name='[H: Health exp/cap (curr $)]' type='field' />
+      <folder-item name='[H: Life exp (years)]' type='field' />
+    </folder>
+    <folder name='Population'>
+      <folder-item name='[P: Population (count)]' type='field' />
+    </folder>
+  </_.fcp.SchemaViewerObjectModel.true...folders-common>
+  <layout _.fcp.SchemaViewerObjectModel.false...dim-percentage='0.5' _.fcp.SchemaViewerObjectModel.false...measure-percentage='0.4' dim-ordering='alphabetic' measure-ordering='alphabetic' show-structure='true' />
+  <style>
+    <style-rule element='mark'>
+      <encoding attr='color' field='[none:Region:nk]' palette='tableau-10' type='palette'>
+        <map to='#67bf5c'>
+          <bucket>&quot;Europe&quot;</bucket>
+        </map>
+        <map to='#729ece'>
+          <bucket>&quot;The Americas&quot;</bucket>
+        </map>
+        <map to='#a8786e'>
+          <bucket>&quot;Africa&quot;</bucket>
+        </map>
+        <map to='#ad8bc9'>
+          <bucket>&quot;Oceania&quot;</bucket>
+        </map>
+        <map to='#ed665d'>
+          <bucket>&quot;Middle East&quot;</bucket>
+        </map>
+        <map to='#ff9e4a'>
+          <bucket>&quot;Asia&quot;</bucket>
+        </map>
+      </encoding>
+    </style-rule>
+  </style>
+  <semantic-values>
+    <semantic-value key='[Country].[Name]' value='&quot;United States&quot;' />
+  </semantic-values>
+  <default-sorts>
+    <manual-sort column='[none:Region:nk]' direction='ASC'>
+      <dictionary>
+        <bucket>&quot;Europe&quot;</bucket>
+        <bucket>&quot;Middle East&quot;</bucket>
+        <bucket>&quot;The Americas&quot;</bucket>
+        <bucket>&quot;Oceania&quot;</bucket>
+        <bucket>&quot;Asia&quot;</bucket>
+        <bucket>&quot;Africa&quot;</bucket>
+      </dictionary>
+    </manual-sort>
+  </default-sorts>
+  <_.fcp.ObjectModelEncapsulateLegacy.true...object-graph>
+    <objects>
+      <object caption='Migrated Data' id='Migrated Data'>
+        <properties context=''>
+          <relation connection='World Indicators newleaf' name='Extract' table='[Extract].[Extract]' type='table' />
+        </properties>
+      </object>
+    </objects>
+  </_.fcp.ObjectModelEncapsulateLegacy.true...object-graph>
+</datasource>
