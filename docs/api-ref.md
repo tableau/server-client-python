@@ -15,7 +15,7 @@ The Tableau Server Client (TSC) is a Python library for the Tableau Server REST 
 The TSC API reference is organized by resource. The TSC library is modeled after the REST API. The methods, for example, `workbooks.get()`, correspond to the endpoints for resources, such as [workbooks](#workbooks), [users](#users), [views](#views), and [data sources](#data-sources). The model classes (for example, the [WorkbookItem class](#workbookitem-class) have attributes that represent the fields (`name`, `id`, `owner_id`) that are in the REST API request and response packages, or payloads.
 
 |:---  |
-| **Note:**  Some methods and features provided in the REST API might not be currently available in the TSC library (and in some cases, the opposite is true).  In addition, the same limitations apply to the TSC library that apply to the REST API with respect to resources on Tableau Server and Tableau Clous. For more information, see the [Tableau Server REST API Reference](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm).|
+| **Note:**  Some methods and features provided in the REST API might not be currently available in the TSC library (and in some cases, the opposite is true).  In addition, the same limitations apply to the TSC library that apply to the REST API with respect to resources on Tableau Server and Tableau Cloud. For more information, see the [Tableau Server REST API Reference](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm).|
 
 
 
