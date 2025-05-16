@@ -7,7 +7,7 @@ TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
 
 def xml_asset_path(filename):
-    return os.path.join(TEST_ASSET_DIR, "responses", filename)
+    return os.path.join(TEST_ASSET_DIR, filename)
 
 
 def data_asset_path(filename):
