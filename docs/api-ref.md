@@ -3437,6 +3437,42 @@ Source file: models/site_item.py
 <br>
 
 
+### SiteAuthConfiguration class
+
+The `SiteAuthConfiguration` class contains the attributes for the authentication configuration on Tableau Cloud. This class represents the authentication configuration information returned when using the `sites.list_authentication_configurations` method.
+
+**Attributes**
+
+Attribute | Description
+:--- | :---
+`auth_setting` | The authentication type (e.g., SAML, OpenID, TableauIDWithMFA).
+`enabled` | Boolean value indicating whether the authentication configuration is enabled.
+`idp_configuration_id` | The unique identifier for the authentication configuration.
+`idp_configuration_name` | The name of the authentication configuration.
+`known_provider_alias` | The provider name for the authentication method in case of OpenID configuration.
+
+**Example**
+
+```py
+# import tableauserverclient as TSC
+# server = TSC.Server('https://MY-SERVER')
+# sign in, etc.
+
+# Get authentication configurations for the current site
+auth_configs = server.sites.list_authentication_configurations()
+
+# Display configuration details
+for config in auth_configs:
+    print(f"ID: {config.idp_configuration_id}")
+    print(f"Name: {config.idp_configuration_name}")
+    print(f"Type: {config.auth_setting}")
+    print(f"Enabled: {config.enabled}")
+    print(f"Provider: {config.known_provider_alias}")
+```
+
+<br>
+<br>
+
 ### Site methods
 
 The TSC library provides methods that operate on sites for Tableau Server and Tableau Cloud. These methods correspond to endpoints or methods for sites in the Tableau REST API.
@@ -3725,6 +3761,38 @@ Error  |  Description
 
 server.sites.delete('9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d')
 
+```
+
+<br>
+<br>
+
+#### sites.list_authentication_configurations
+
+```py
+sites.list_authentication_configurations()
+```
+
+Lists the authentication configurations for the current site.
+
+REST API: [List Authentication Configurations for the current Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_site.htm#list_authentication_configurations_site)
+
+**Returns**
+
+Returns a list of authentication configurations for the current site.
+
+**Example**
+
+```py
+# import tableauserverclient as TSC
+# server = TSC.Server('https://MY-SERVER')
+# sign in, etc.
+
+auth_configs = server.sites.list_authentication_configurations()
+for config in auth_configs:
+    print(f"IDP Configuration ID: {config.idp_configuration_id}")
+    print(f"Name: {config.idp_configuration_name}")
+    print(f"Type: {config.auth_setting}")
+    print(f"Enabled: {config.enabled}")
 ```
 
 <br>
@@ -4297,6 +4365,8 @@ Name | Description
 `name` |   The name of the user. This attribute is required when you are creating a `UserItem` instance.
 `site_role` |  The role the user has on the site. This attribute is required if you are creating a `UserItem` instance. See *User Roles* below for details.
 `groups` | The groups that the user belongs to. You must run the populate_groups method to add the groups to the `UserItem`.
+`idp_configuration_id` | Tableau Cloud only. The authentication method for the user. To find the idp_configuration_id value, use sites.list_authentication_configurations method. **Important: Use idp_configuration_id or auth_setting, but not both.**
+
 
 **User Auth**
 
