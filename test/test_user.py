@@ -2,6 +2,7 @@ import csv
 import io
 import os
 from pathlib import Path
+import re
 import unittest
 from unittest.mock import patch
 
@@ -520,3 +521,34 @@ class UserTests(unittest.TestCase):
 
         with pytest.raises(ValueError, match="User cannot have both authSetting and idpConfigurationId."):
             self.server.users.bulk_add(users)
+
+    def test_remove_users_csv(self) -> None:
+        self.server.version = "3.15"
+        users = [
+            make_user("Alice", "Viewer"),
+            make_user("Bob", "Explorer"),
+            make_user("Charlie", "Creator", "SAML"),
+            make_user("Dave"),
+            make_user("Eve", "ServerAdministrator", "OpenID", "example.com", "Eve Example", "Eve@example.com"),
+            make_user("Frank", "SiteAdministratorExplorer", "TableauIDWithMFA", email="Frank@example.com"),
+            make_user("Grace", "SiteAdministratorCreator", "SAML", "example.com", "Grace Example", "gex@example.com"),
+            make_user("Hank", "Unlicensed"),
+            make_user("Ivy", "Unlicensed", idp_id="0123456789"),
+        ]
+
+        data = remove_users_csv(users)
+        assert isinstance(data, bytes), "remove_users_csv should return bytes"
+        csv_data = data.decode("utf-8")
+        records = re.split(r"\r?\n", csv_data.strip())
+        assert len(records) == len(users), "Number of records in csv does not match number of users"
+
+        for user, record in zip(users, records):
+            name, *rest = record.strip().split(",")
+            assert len(rest) == 6, "Number of fields in csv does not match expected number"
+            assert all([f == "" for f in rest]), "All fields except name should be empty"
+            if user.domain_name is None:
+                assert name == user.name, f"Name in csv does not match expected name: {user.name}"
+            else:
+                assert (
+                    name == f"{user.domain_name}\\{user.name}"
+                ), f"Name in csv does not match expected name: {user.domain_name}\\{user.name}"
