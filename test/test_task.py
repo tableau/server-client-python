@@ -1,7 +1,5 @@
-import os
 import unittest
 from datetime import time
-from pathlib import Path
 
 import requests_mock
 
@@ -9,17 +7,17 @@ import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import parse_datetime
 from tableauserverclient.models.task_item import TaskItem
 
-TEST_ASSET_DIR = Path(__file__).parent / "assets"
+from test._utils import xml_asset_path
 
-GET_XML_NO_WORKBOOK = os.path.join(TEST_ASSET_DIR, "tasks_no_workbook_or_datasource.xml")
-GET_XML_WITH_WORKBOOK = os.path.join(TEST_ASSET_DIR, "tasks_with_workbook.xml")
-GET_XML_WITH_DATASOURCE = os.path.join(TEST_ASSET_DIR, "tasks_with_datasource.xml")
-GET_XML_WITH_WORKBOOK_AND_DATASOURCE = os.path.join(TEST_ASSET_DIR, "tasks_with_workbook_and_datasource.xml")
-GET_XML_DATAACCELERATION_TASK = os.path.join(TEST_ASSET_DIR, "tasks_with_dataacceleration_task.xml")
-GET_XML_RUN_NOW_RESPONSE = os.path.join(TEST_ASSET_DIR, "tasks_run_now_response.xml")
-GET_XML_CREATE_TASK_RESPONSE = os.path.join(TEST_ASSET_DIR, "tasks_create_extract_task.xml")
-GET_XML_WITHOUT_SCHEDULE = TEST_ASSET_DIR / "tasks_without_schedule.xml"
-GET_XML_WITH_INTERVAL = TEST_ASSET_DIR / "tasks_with_interval.xml"
+GET_XML_NO_WORKBOOK = xml_asset_path("tasks_no_workbook_or_datasource.xml")
+GET_XML_WITH_WORKBOOK = xml_asset_path("tasks_with_workbook.xml")
+GET_XML_WITH_DATASOURCE = xml_asset_path("tasks_with_datasource.xml")
+GET_XML_WITH_WORKBOOK_AND_DATASOURCE = xml_asset_path("tasks_with_workbook_and_datasource.xml")
+GET_XML_DATAACCELERATION_TASK = xml_asset_path("tasks_with_dataacceleration_task.xml")
+GET_XML_RUN_NOW_RESPONSE = xml_asset_path("tasks_run_now_response.xml")
+GET_XML_CREATE_TASK_RESPONSE = xml_asset_path("tasks_create_extract_task.xml")
+GET_XML_WITHOUT_SCHEDULE = xml_asset_path("tasks_without_schedule.xml")
+GET_XML_WITH_INTERVAL = xml_asset_path("tasks_with_interval.xml")
 
 
 class TaskTests(unittest.TestCase):

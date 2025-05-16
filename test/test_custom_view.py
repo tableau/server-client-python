@@ -12,17 +12,17 @@ from tableauserverclient.config import BYTES_PER_MB
 from tableauserverclient.datetime_helpers import format_datetime
 from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
 
-TEST_ASSET_DIR = Path(__file__).parent / "assets"
+from test._utils import data_asset_path, xml_asset_path
 
-GET_XML = os.path.join(TEST_ASSET_DIR, "custom_view_get.xml")
-GET_XML_ID = os.path.join(TEST_ASSET_DIR, "custom_view_get_id.xml")
-POPULATE_PREVIEW_IMAGE = os.path.join(TEST_ASSET_DIR, "Sample View Image.png")
-CUSTOM_VIEW_UPDATE_XML = os.path.join(TEST_ASSET_DIR, "custom_view_update.xml")
-CUSTOM_VIEW_POPULATE_PDF = os.path.join(TEST_ASSET_DIR, "populate_pdf.pdf")
-CUSTOM_VIEW_POPULATE_CSV = os.path.join(TEST_ASSET_DIR, "populate_csv.csv")
-CUSTOM_VIEW_DOWNLOAD = TEST_ASSET_DIR / "custom_view_download.json"
-FILE_UPLOAD_INIT = TEST_ASSET_DIR / "fileupload_initialize.xml"
-FILE_UPLOAD_APPEND = TEST_ASSET_DIR / "fileupload_append.xml"
+GET_XML = xml_asset_path("custom_view_get.xml")
+GET_XML_ID = xml_asset_path("custom_view_get_id.xml")
+POPULATE_PREVIEW_IMAGE = data_asset_path("Sample View Image.png")
+CUSTOM_VIEW_UPDATE_XML = xml_asset_path("custom_view_update.xml")
+CUSTOM_VIEW_POPULATE_PDF = data_asset_path("populate_pdf.pdf")
+CUSTOM_VIEW_POPULATE_CSV = data_asset_path("populate_csv.csv")
+CUSTOM_VIEW_DOWNLOAD = xml_asset_path("custom_view_download.json")
+FILE_UPLOAD_INIT = xml_asset_path("fileupload_initialize.xml")
+FILE_UPLOAD_APPEND = xml_asset_path("fileupload_append.xml")
 
 
 class CustomViewTests(unittest.TestCase):

@@ -3,7 +3,7 @@ import unittest
 import requests_mock
 
 import tableauserverclient as TSC
-from ._utils import read_xml_asset, asset
+from ._utils import read_xml_asset
 
 GET_XML = "database_get.xml"
 POPULATE_PERMISSIONS_XML = "database_populate_permissions.xml"
@@ -85,8 +85,7 @@ class DatabaseTests(unittest.TestCase):
             )
 
     def test_populate_data_quality_warning(self):
-        with open(asset(GET_DQW_BY_CONTENT), "rb") as f:
-            response_xml = f.read().decode("utf-8")
+        response_xml = read_xml_asset(GET_DQW_BY_CONTENT)
         with requests_mock.mock() as m:
             m.get(
                 self.server.databases._data_quality_warnings.baseurl + "/94441d26-9a52-4a42-b0fb-3f94792d1aac",

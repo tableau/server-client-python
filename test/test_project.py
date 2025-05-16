@@ -5,15 +5,13 @@ import requests_mock
 
 import tableauserverclient as TSC
 from tableauserverclient import GroupItem
-from ._utils import read_xml_asset, asset
+from ._utils import read_xml_asset, xml_asset_path
 
-TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
-
-GET_XML = asset("project_get.xml")
-GET_XML_ALL_FIELDS = asset("project_get_all_fields.xml")
-UPDATE_XML = asset("project_update.xml")
-SET_CONTENT_PERMISSIONS_XML = asset("project_content_permission.xml")
-CREATE_XML = asset("project_create.xml")
+GET_XML = xml_asset_path("project_get.xml")
+GET_XML_ALL_FIELDS = xml_asset_path("project_get_all_fields.xml")
+UPDATE_XML = xml_asset_path("project_update.xml")
+SET_CONTENT_PERMISSIONS_XML = xml_asset_path("project_content_permission.xml")
+CREATE_XML = xml_asset_path("project_create.xml")
 POPULATE_PERMISSIONS_XML = "project_populate_permissions.xml"
 POPULATE_WORKBOOK_DEFAULT_PERMISSIONS_XML = "project_populate_workbook_default_permissions.xml"
 UPDATE_DATASOURCE_DEFAULT_PERMISSIONS_XML = "project_update_datasource_default_permissions.xml"
@@ -163,7 +161,7 @@ class ProjectTests(unittest.TestCase):
         TSC.ProjectItem()
 
     def test_populate_permissions(self) -> None:
-        with open(asset(POPULATE_PERMISSIONS_XML), "rb") as f:
+        with open(POPULATE_PERMISSIONS_XML, "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             m.get(self.baseurl + "/0448d2ed-590d-4fa0-b272-a2a8a24555b5/permissions", text=response_xml)
@@ -221,7 +219,7 @@ class ProjectTests(unittest.TestCase):
         )
 
     def test_delete_permission(self) -> None:
-        with open(asset(POPULATE_PERMISSIONS_XML), "rb") as f:
+        with open(xml_asset_path(POPULATE_PERMISSIONS_XML), "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             m.get(self.baseurl + "/0448d2ed-590d-4fa0-b272-a2a8a24555b5/permissions", text=response_xml)
@@ -250,7 +248,7 @@ class ProjectTests(unittest.TestCase):
             self.server.projects.delete_permission(item=single_project, rules=rules)
 
     def test_delete_workbook_default_permission(self) -> None:
-        with open(asset(POPULATE_WORKBOOK_DEFAULT_PERMISSIONS_XML), "rb") as f:
+        with open(xml_asset_path(POPULATE_WORKBOOK_DEFAULT_PERMISSIONS_XML), "rb") as f:
             response_xml = f.read().decode("utf-8")
 
         with requests_mock.mock() as m:

@@ -1,18 +1,16 @@
-import os.path
 import unittest
 
 import requests_mock
 
 import tableauserverclient as TSC
 from tableauserverclient.server.endpoint.exceptions import NonXMLResponseError
+from test._utils import xml_asset_path
 
-TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
-
-SERVER_INFO_GET_XML = os.path.join(TEST_ASSET_DIR, "server_info_get.xml")
-SERVER_INFO_25_XML = os.path.join(TEST_ASSET_DIR, "server_info_25.xml")
-SERVER_INFO_404 = os.path.join(TEST_ASSET_DIR, "server_info_404.xml")
-SERVER_INFO_AUTH_INFO_XML = os.path.join(TEST_ASSET_DIR, "server_info_auth_info.xml")
-SERVER_INFO_WRONG_SITE = os.path.join(TEST_ASSET_DIR, "server_info_wrong_site.html")
+SERVER_INFO_GET_XML = xml_asset_path("server_info_get.xml")
+SERVER_INFO_25_XML = xml_asset_path("server_info_25.xml")
+SERVER_INFO_404 = xml_asset_path("server_info_404.xml")
+SERVER_INFO_AUTH_INFO_XML = xml_asset_path("server_info_auth_info.xml")
+SERVER_INFO_WRONG_SITE = xml_asset_path("server_info_wrong_site.html")
 
 
 class ServerInfoTests(unittest.TestCase):

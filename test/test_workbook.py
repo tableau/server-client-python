@@ -14,31 +14,29 @@ from tableauserverclient.datetime_helpers import format_datetime, parse_datetime
 from tableauserverclient.models import UserItem, GroupItem, PermissionsRule
 from tableauserverclient.server.endpoint.exceptions import InternalServerError, UnsupportedAttributeError
 from tableauserverclient.server.request_factory import RequestFactory
-from ._utils import asset
+from test._utils import data_asset_path, xml_asset_path, read_xml_asset
 
-TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
-
-ADD_TAGS_XML = os.path.join(TEST_ASSET_DIR, "workbook_add_tags.xml")
-GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, "workbook_get_by_id.xml")
-GET_BY_ID_XML_PERSONAL = os.path.join(TEST_ASSET_DIR, "workbook_get_by_id_personal.xml")
-GET_EMPTY_XML = os.path.join(TEST_ASSET_DIR, "workbook_get_empty.xml")
-GET_INVALID_DATE_XML = os.path.join(TEST_ASSET_DIR, "workbook_get_invalid_date.xml")
-GET_XML = os.path.join(TEST_ASSET_DIR, "workbook_get.xml")
-GET_XML_ALL_FIELDS = os.path.join(TEST_ASSET_DIR, "workbook_get_all_fields.xml")
-ODATA_XML = os.path.join(TEST_ASSET_DIR, "odata_connection.xml")
-POPULATE_CONNECTIONS_XML = os.path.join(TEST_ASSET_DIR, "workbook_populate_connections.xml")
-POPULATE_PDF = os.path.join(TEST_ASSET_DIR, "populate_pdf.pdf")
-POPULATE_POWERPOINT = os.path.join(TEST_ASSET_DIR, "populate_powerpoint.pptx")
-POPULATE_PERMISSIONS_XML = os.path.join(TEST_ASSET_DIR, "workbook_populate_permissions.xml")
-POPULATE_PREVIEW_IMAGE = os.path.join(TEST_ASSET_DIR, "RESTAPISample Image.png")
-POPULATE_VIEWS_XML = os.path.join(TEST_ASSET_DIR, "workbook_populate_views.xml")
-POPULATE_VIEWS_USAGE_XML = os.path.join(TEST_ASSET_DIR, "workbook_populate_views_usage.xml")
-PUBLISH_XML = os.path.join(TEST_ASSET_DIR, "workbook_publish.xml")
-PUBLISH_ASYNC_XML = os.path.join(TEST_ASSET_DIR, "workbook_publish_async.xml")
-REFRESH_XML = os.path.join(TEST_ASSET_DIR, "workbook_refresh.xml")
-REVISION_XML = os.path.join(TEST_ASSET_DIR, "workbook_revision.xml")
-UPDATE_XML = os.path.join(TEST_ASSET_DIR, "workbook_update.xml")
-UPDATE_PERMISSIONS = os.path.join(TEST_ASSET_DIR, "workbook_update_permissions.xml")
+ADD_TAGS_XML = xml_asset_path("workbook_add_tags.xml")
+GET_BY_ID_XML = xml_asset_path("workbook_get_by_id.xml")
+GET_BY_ID_XML_PERSONAL = xml_asset_path("workbook_get_by_id_personal.xml")
+GET_EMPTY_XML = xml_asset_path("workbook_get_empty.xml")
+GET_INVALID_DATE_XML = xml_asset_path("workbook_get_invalid_date.xml")
+GET_XML = xml_asset_path("workbook_get.xml")
+GET_XML_ALL_FIELDS = xml_asset_path("workbook_get_all_fields.xml")
+ODATA_XML = xml_asset_path("odata_connection.xml")
+POPULATE_CONNECTIONS_XML = xml_asset_path("workbook_populate_connections.xml")
+POPULATE_PDF = xml_asset_path("populate_pdf.pdf")
+POPULATE_POWERPOINT = xml_asset_path("populate_powerpoint.pptx")
+POPULATE_PERMISSIONS_XML = xml_asset_path("workbook_populate_permissions.xml")
+POPULATE_PREVIEW_IMAGE = xml_asset_path("RESTAPISample Image.png")
+POPULATE_VIEWS_XML = xml_asset_path("workbook_populate_views.xml")
+POPULATE_VIEWS_USAGE_XML = xml_asset_path("workbook_populate_views_usage.xml")
+PUBLISH_XML = xml_asset_path("workbook_publish.xml")
+PUBLISH_ASYNC_XML = xml_asset_path("workbook_publish_async.xml")
+REFRESH_XML = xml_asset_path("workbook_refresh.xml")
+REVISION_XML = xml_asset_path("workbook_revision.xml")
+UPDATE_XML = xml_asset_path("workbook_update.xml")
+UPDATE_PERMISSIONS = xml_asset_path("workbook_update_permissions.xml")
 
 
 class WorkbookTests(unittest.TestCase):
@@ -539,7 +537,7 @@ class WorkbookTests(unittest.TestCase):
 
             new_workbook.description = "REST API Testing"
 
-            sample_workbook = os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")
+            sample_workbook = data_asset_path("SampleWB.twbx")
             publish_mode = self.server.PublishMode.CreateNew
 
             new_workbook = self.server.workbooks.publish(new_workbook, sample_workbook, publish_mode)
@@ -569,7 +567,7 @@ class WorkbookTests(unittest.TestCase):
                 name="Sample", show_tabs=False, project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760"
             )
 
-            sample_workbook = os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")
+            sample_workbook = data_asset_path("SampleWB.twbx")
 
             with open(sample_workbook, "rb") as fp:
                 publish_mode = self.server.PublishMode.CreateNew
@@ -600,7 +598,7 @@ class WorkbookTests(unittest.TestCase):
                 name="Sample", show_tabs=False, project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760"
             )
 
-            sample_workbook = os.path.join(TEST_ASSET_DIR, "RESTAPISample.twb")
+            sample_workbook = data_asset_path("RESTAPISample.twb")
 
             with open(sample_workbook, "rb") as fp:
                 publish_mode = self.server.PublishMode.CreateNew
@@ -631,7 +629,7 @@ class WorkbookTests(unittest.TestCase):
                 name="Sample", show_tabs=False, project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760"
             )
 
-            sample_workbook = Path(TEST_ASSET_DIR) / "SampleWB.twbx"
+            sample_workbook = data_asset_path("SampleWB.twbx")
             publish_mode = self.server.PublishMode.CreateNew
 
             new_workbook = self.server.workbooks.publish(new_workbook, sample_workbook, publish_mode)
@@ -660,7 +658,7 @@ class WorkbookTests(unittest.TestCase):
                 name="Sample", show_tabs=False, project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760"
             )
 
-            sample_workbook = os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")
+            sample_workbook = data_asset_path("SampleWB.twbx")
             publish_mode = self.server.PublishMode.CreateNew
 
             new_workbook.hidden_views = ["GDP per capita"]
@@ -683,7 +681,7 @@ class WorkbookTests(unittest.TestCase):
                 thumbnails_user_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20761",
             )
 
-            sample_workbook = os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")
+            sample_workbook = data_asset_path("SampleWB.twbx")
             publish_mode = self.server.PublishMode.CreateNew
             new_workbook = self.server.workbooks.publish(new_workbook, sample_workbook, publish_mode)
             request_body = m._adapter.request_history[0]._request.body
@@ -703,7 +701,7 @@ class WorkbookTests(unittest.TestCase):
                 thumbnails_group_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20762",
             )
 
-            sample_workbook = os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")
+            sample_workbook = data_asset_path("SampleWB.twbx")
             publish_mode = self.server.PublishMode.CreateNew
             new_workbook = self.server.workbooks.publish(new_workbook, sample_workbook, publish_mode)
             request_body = m._adapter.request_history[0]._request.body
@@ -720,7 +718,7 @@ class WorkbookTests(unittest.TestCase):
                 name="Sample", show_tabs=False, project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760"
             )
 
-            sample_workbook = os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")
+            sample_workbook = data_asset_path("SampleWB.twbx")
             publish_mode = self.server.PublishMode.CreateNew
 
             self.server.workbooks.publish(
@@ -745,7 +743,7 @@ class WorkbookTests(unittest.TestCase):
                 name="Sample", show_tabs=False, project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760"
             )
 
-            sample_workbook = os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")
+            sample_workbook = data_asset_path("SampleWB.twbx")
             publish_mode = self.server.PublishMode.CreateNew
 
             new_job = self.server.workbooks.publish(new_workbook, sample_workbook, publish_mode, as_job=True)
@@ -766,14 +764,14 @@ class WorkbookTests(unittest.TestCase):
             ValueError,
             self.server.workbooks.publish,
             new_workbook,
-            os.path.join(TEST_ASSET_DIR, "SampleDS.tds"),
+            data_asset_path("SampleDS.tds"),
             self.server.PublishMode.CreateNew,
         )
 
     def test_publish_unnamed_file_object(self) -> None:
         new_workbook = TSC.WorkbookItem("test")
 
-        with open(os.path.join(TEST_ASSET_DIR, "SampleWB.twbx"), "rb") as f:
+        with open(data_asset_path("SampleWB.twbx"), "rb") as f:
             self.assertRaises(
                 ValueError, self.server.workbooks.publish, new_workbook, f, self.server.PublishMode.CreateNew
             )
@@ -781,7 +779,7 @@ class WorkbookTests(unittest.TestCase):
     def test_publish_non_bytes_file_object(self) -> None:
         new_workbook = TSC.WorkbookItem("test")
 
-        with open(os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")) as f:
+        with open(data_asset_path("SampleWB.twbx")) as f:
             self.assertRaises(
                 TypeError, self.server.workbooks.publish, new_workbook, f, self.server.PublishMode.CreateNew
             )
@@ -851,7 +849,7 @@ class WorkbookTests(unittest.TestCase):
                 "Please use asynchronous publishing to avoid timeouts",
                 self.server.workbooks.publish,
                 new_workbook,
-                asset("SampleWB.twbx"),
+                data_asset_path("SampleWB.twbx"),
                 publish_mode,
             )
 

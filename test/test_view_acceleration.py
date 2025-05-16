@@ -1,16 +1,14 @@
-import os
 import requests_mock
 import unittest
 
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
+from test._utils import xml_asset_path
 
-TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
-
-GET_BY_ID_ACCELERATION_STATUS_XML = os.path.join(TEST_ASSET_DIR, "workbook_get_by_id_acceleration_status.xml")
-POPULATE_VIEWS_XML = os.path.join(TEST_ASSET_DIR, "workbook_populate_views.xml")
-UPDATE_VIEWS_ACCELERATION_STATUS_XML = os.path.join(TEST_ASSET_DIR, "workbook_update_views_acceleration_status.xml")
-UPDATE_WORKBOOK_ACCELERATION_STATUS_XML = os.path.join(TEST_ASSET_DIR, "workbook_update_acceleration_status.xml")
+GET_BY_ID_ACCELERATION_STATUS_XML = xml_asset_path("workbook_get_by_id_acceleration_status.xml")
+POPULATE_VIEWS_XML = xml_asset_path("workbook_populate_views.xml")
+UPDATE_VIEWS_ACCELERATION_STATUS_XML = xml_asset_path("workbook_update_views_acceleration_status.xml")
+UPDATE_WORKBOOK_ACCELERATION_STATUS_XML = xml_asset_path("workbook_update_acceleration_status.xml")
 
 
 class WorkbookTests(unittest.TestCase):
