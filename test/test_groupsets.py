@@ -1,5 +1,5 @@
 import unittest
-
+from pathlib import Path
 from defusedxml.ElementTree import fromstring
 import requests_mock
 
@@ -8,10 +8,10 @@ from tableauserverclient.models.reference_item import ResourceReference
 
 from test._utils import xml_asset_path
 
-GROUPSET_CREATE = xml_asset_path("groupsets_create.xml")
-GROUPSETS_GET = xml_asset_path("groupsets_get.xml")
-GROUPSET_GET_BY_ID = xml_asset_path("groupsets_get_by_id.xml")
-GROUPSET_UPDATE = xml_asset_path("groupsets_get_by_id.xml")
+GROUPSET_CREATE = Path(xml_asset_path("groupsets_create.xml"))
+GROUPSETS_GET = Path(xml_asset_path("groupsets_get.xml"))
+GROUPSET_GET_BY_ID = Path(xml_asset_path("groupsets_get_by_id.xml"))
+GROUPSET_UPDATE = Path(xml_asset_path("groupsets_get_by_id.xml"))
 
 
 class TestGroupSets(unittest.TestCase):

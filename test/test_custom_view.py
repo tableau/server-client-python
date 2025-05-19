@@ -20,9 +20,9 @@ POPULATE_PREVIEW_IMAGE = data_asset_path("Sample View Image.png")
 CUSTOM_VIEW_UPDATE_XML = xml_asset_path("custom_view_update.xml")
 CUSTOM_VIEW_POPULATE_PDF = data_asset_path("populate_pdf.pdf")
 CUSTOM_VIEW_POPULATE_CSV = data_asset_path("populate_csv.csv")
-CUSTOM_VIEW_DOWNLOAD = xml_asset_path("custom_view_download.json")
-FILE_UPLOAD_INIT = xml_asset_path("fileupload_initialize.xml")
-FILE_UPLOAD_APPEND = xml_asset_path("fileupload_append.xml")
+CUSTOM_VIEW_DOWNLOAD = Path(xml_asset_path("custom_view_download.json"))
+FILE_UPLOAD_INIT = Path(xml_asset_path("fileupload_initialize.xml"))
+FILE_UPLOAD_APPEND = Path(xml_asset_path("fileupload_append.xml"))
 
 
 class CustomViewTests(unittest.TestCase):

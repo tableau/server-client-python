@@ -17,8 +17,8 @@ FILTER_NAME_IN = xml_asset_path("request_option_filter_name_in.xml")
 FILTER_TAGS_IN = xml_asset_path("request_option_filter_tags_in.xml")
 FILTER_MULTIPLE = xml_asset_path("request_option_filter_tags_in.xml")
 SLICING_QUERYSET = xml_asset_path("request_option_slicing_queryset.xml")
-SLICING_QUERYSET_PAGE_1 = xml_asset_path("queryset_slicing_page_1.xml")
-SLICING_QUERYSET_PAGE_2 = xml_asset_path("queryset_slicing_page_2.xml")
+SLICING_QUERYSET_PAGE_1 = Path(xml_asset_path("queryset_slicing_page_1.xml"))
+SLICING_QUERYSET_PAGE_2 = Path(xml_asset_path("queryset_slicing_page_2.xml"))
 
 
 class RequestOptionTests(unittest.TestCase):

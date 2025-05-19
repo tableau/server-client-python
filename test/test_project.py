@@ -12,11 +12,11 @@ GET_XML_ALL_FIELDS = xml_asset_path("project_get_all_fields.xml")
 UPDATE_XML = xml_asset_path("project_update.xml")
 SET_CONTENT_PERMISSIONS_XML = xml_asset_path("project_content_permission.xml")
 CREATE_XML = xml_asset_path("project_create.xml")
-POPULATE_PERMISSIONS_XML = "project_populate_permissions.xml"
-POPULATE_WORKBOOK_DEFAULT_PERMISSIONS_XML = "project_populate_workbook_default_permissions.xml"
-UPDATE_DATASOURCE_DEFAULT_PERMISSIONS_XML = "project_update_datasource_default_permissions.xml"
-POPULATE_VIRTUALCONNECTION_DEFAULT_PERMISSIONS_XML = "project_populate_virtualconnection_default_permissions.xml"
-UPDATE_VIRTUALCONNECTION_DEFAULT_PERMISSIONS_XML = "project_update_virtualconnection_default_permissions.xml"
+POPULATE_PERMISSIONS_XML = xml_asset_path("project_populate_permissions.xml")
+POPULATE_WORKBOOK_DEFAULT_PERMISSIONS_XML = xml_asset_path("project_populate_workbook_default_permissions.xml")
+UPDATE_DATASOURCE_DEFAULT_PERMISSIONS_XML = xml_asset_path("project_update_datasource_default_permissions.xml")
+POPULATE_VIRTUALCONNECTION_DEFAULT_PERMISSIONS_XML = xml_asset_path("project_populate_virtualconnection_default_permissions.xml")
+UPDATE_VIRTUALCONNECTION_DEFAULT_PERMISSIONS_XML = xml_asset_path("project_update_virtualconnection_default_permissions.xml")
 
 
 class ProjectTests(unittest.TestCase):

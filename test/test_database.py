@@ -55,8 +55,7 @@ class DatabaseTests(unittest.TestCase):
         self.assertEqual("Test", single_database.certification_note)
 
     def test_populate_permissions(self):
-        with open(asset(POPULATE_PERMISSIONS_XML), "rb") as f:
-            response_xml = f.read().decode("utf-8")
+        response_xml = read_xml_asset(POPULATE_PERMISSIONS_XML)
         with requests_mock.mock() as m:
             m.get(self.baseurl + "/0448d2ed-590d-4fa0-b272-a2a8a24555b5/permissions", text=response_xml)
             single_database = TSC.DatabaseItem("test")

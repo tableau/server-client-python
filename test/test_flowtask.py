@@ -37,10 +37,10 @@ class TaskTests(unittest.TestCase):
 
         task = TaskItem(None, "RunFlow", None, schedule_item=monthly_schedule, target=target_item)
 
-        with read_xml_asset(GET_XML_CREATE_FLOW_TASK_RESPONSE) as response_xml:
-            with requests_mock.mock() as m:
-                m.post(f"{self.baseurl}", text=response_xml)
-                create_response_content = self.server.flow_tasks.create(task).decode("utf-8")
+        response_xml = read_xml_asset(GET_XML_CREATE_FLOW_TASK_RESPONSE)
+        with requests_mock.mock() as m:
+            m.post(f"{self.baseurl}", text=response_xml)
+            create_response_content = self.server.flow_tasks.create(task).decode("utf-8")
 
         self.assertTrue("schedule_id" in create_response_content)
         self.assertTrue("flow_id" in create_response_content)

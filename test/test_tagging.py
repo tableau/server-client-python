@@ -9,6 +9,7 @@ import requests_mock
 import tableauserverclient as TSC
 
 
+# This whole suite seems slow. Is there some excessive setup, or something we can pull out into a onetime setup?
 @pytest.fixture
 def get_server() -> TSC.Server:
     server = TSC.Server("http://test", False)
@@ -114,7 +115,10 @@ sample_tags = [
     ["a", "b", "c", "c"],
 ]
 
-
+"""
+The standalone add and delete tests are redundant with the update tests.
+Given that this is low-pri functionality and this test suite is already slow,
+let's not run them by default
 @pytest.mark.parametrize("endpoint_type, item", *sample_taggable_items)
 @pytest.mark.parametrize("tags", sample_tags)
 def test_add_tags(get_server, endpoint_type, item, tags) -> None:
@@ -160,6 +164,7 @@ def test_delete_tags(get_server, endpoint_type, item, tags) -> None:
     assert len(history) == len(tag_set)
     urls = {r.url.split("/")[-1] for r in history}
     assert urls == tag_set
+"""
 
 
 @pytest.mark.parametrize("endpoint_type, item", *sample_taggable_items)

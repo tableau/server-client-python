@@ -9,7 +9,7 @@ from test._utils import data_asset_path, xml_asset_path
 
 METADATA_QUERY_SUCCESS = xml_asset_path("metadata_query_success.json")
 METADATA_QUERY_ERROR = xml_asset_path("metadata_query_error.json")
-EXPECTED_PAGED_DICT = data_asset_path("metadata_query_expected_dict.dict")
+EXPECTED_PAGED_DICT = xml_asset_path("metadata_query_expected_dict.dict")
 
 METADATA_PAGE_1 = xml_asset_path("metadata_paged_1.json")
 METADATA_PAGE_2 = xml_asset_path("metadata_paged_2.json")
