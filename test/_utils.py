@@ -6,12 +6,13 @@ from contextlib import contextmanager
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
 
+# should rename this because json files are also in the responses directory
 def xml_asset_path(filename):
     return os.path.join(TEST_ASSET_DIR, filename)
 
 
 def data_asset_path(filename):
-    return os.path.join(TEST_ASSET_DIR, "data", filename)
+    return os.path.join(TEST_ASSET_DIR, "Data", filename)
 
 
 def read_xml_asset(filename):
