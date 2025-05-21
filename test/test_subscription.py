@@ -4,12 +4,11 @@ import unittest
 import requests_mock
 
 import tableauserverclient as TSC
+from test._utils import xml_asset_path
 
-TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
-
-CREATE_XML = os.path.join(TEST_ASSET_DIR, "subscription_create.xml")
-GET_XML = os.path.join(TEST_ASSET_DIR, "subscription_get.xml")
-GET_XML_BY_ID = os.path.join(TEST_ASSET_DIR, "subscription_get_by_id.xml")
+CREATE_XML = xml_asset_path("subscription_create.xml")
+GET_XML = xml_asset_path("subscription_get.xml")
+GET_XML_BY_ID = xml_asset_path("subscription_get_by_id.xml")
 
 
 class SubscriptionTests(unittest.TestCase):

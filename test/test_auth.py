@@ -1,15 +1,14 @@
-import os.path
 import unittest
 
 import requests_mock
 
 import tableauserverclient as TSC
 
-TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
+from test._utils import xml_asset_path
 
-SIGN_IN_XML = os.path.join(TEST_ASSET_DIR, "auth_sign_in.xml")
-SIGN_IN_IMPERSONATE_XML = os.path.join(TEST_ASSET_DIR, "auth_sign_in_impersonate.xml")
-SIGN_IN_ERROR_XML = os.path.join(TEST_ASSET_DIR, "auth_sign_in_error.xml")
+SIGN_IN_XML = xml_asset_path("auth_sign_in.xml")
+SIGN_IN_IMPERSONATE_XML = xml_asset_path("auth_sign_in_impersonate.xml")
+SIGN_IN_ERROR_XML = xml_asset_path("auth_sign_in_error.xml")
 
 
 class AuthTests(unittest.TestCase):

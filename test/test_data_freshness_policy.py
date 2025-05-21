@@ -3,15 +3,14 @@ import requests_mock
 import unittest
 
 import tableauserverclient as TSC
+from test._utils import xml_asset_path
 
-TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
-
-UPDATE_DFP_ALWAYS_LIVE_XML = os.path.join(TEST_ASSET_DIR, "workbook_update_data_freshness_policy.xml")
-UPDATE_DFP_SITE_DEFAULT_XML = os.path.join(TEST_ASSET_DIR, "workbook_update_data_freshness_policy2.xml")
-UPDATE_DFP_FRESH_EVERY_XML = os.path.join(TEST_ASSET_DIR, "workbook_update_data_freshness_policy3.xml")
-UPDATE_DFP_FRESH_AT_DAILY_XML = os.path.join(TEST_ASSET_DIR, "workbook_update_data_freshness_policy4.xml")
-UPDATE_DFP_FRESH_AT_WEEKLY_XML = os.path.join(TEST_ASSET_DIR, "workbook_update_data_freshness_policy5.xml")
-UPDATE_DFP_FRESH_AT_MONTHLY_XML = os.path.join(TEST_ASSET_DIR, "workbook_update_data_freshness_policy6.xml")
+UPDATE_DFP_ALWAYS_LIVE_XML = xml_asset_path("workbook_update_data_freshness_policy.xml")
+UPDATE_DFP_SITE_DEFAULT_XML = xml_asset_path("workbook_update_data_freshness_policy2.xml")
+UPDATE_DFP_FRESH_EVERY_XML = xml_asset_path("workbook_update_data_freshness_policy3.xml")
+UPDATE_DFP_FRESH_AT_DAILY_XML = xml_asset_path("workbook_update_data_freshness_policy4.xml")
+UPDATE_DFP_FRESH_AT_WEEKLY_XML = xml_asset_path("workbook_update_data_freshness_policy5.xml")
+UPDATE_DFP_FRESH_AT_MONTHLY_XML = xml_asset_path("workbook_update_data_freshness_policy6.xml")
 
 
 class WorkbookTests(unittest.TestCase):

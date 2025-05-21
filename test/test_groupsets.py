@@ -1,17 +1,17 @@
-from pathlib import Path
 import unittest
-
+from pathlib import Path
 from defusedxml.ElementTree import fromstring
 import requests_mock
 
 import tableauserverclient as TSC
 from tableauserverclient.models.reference_item import ResourceReference
 
-TEST_ASSET_DIR = Path(__file__).parent / "assets"
-GROUPSET_CREATE = TEST_ASSET_DIR / "groupsets_create.xml"
-GROUPSETS_GET = TEST_ASSET_DIR / "groupsets_get.xml"
-GROUPSET_GET_BY_ID = TEST_ASSET_DIR / "groupsets_get_by_id.xml"
-GROUPSET_UPDATE = TEST_ASSET_DIR / "groupsets_get_by_id.xml"
+from test._utils import xml_asset_path
+
+GROUPSET_CREATE = Path(xml_asset_path("groupsets_create.xml"))
+GROUPSETS_GET = Path(xml_asset_path("groupsets_get.xml"))
+GROUPSET_GET_BY_ID = Path(xml_asset_path("groupsets_get_by_id.xml"))
+GROUPSET_UPDATE = Path(xml_asset_path("groupsets_get_by_id.xml"))
 
 
 class TestGroupSets(unittest.TestCase):

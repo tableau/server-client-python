@@ -5,7 +5,7 @@ from xml.etree import ElementTree as ET
 from zipfile import ZipFile
 
 from tableauserverclient.filesys_helpers import get_file_object_size, get_file_type
-from ._utils import asset, TEST_ASSET_DIR
+from test._utils import data_asset_path
 
 
 class FilesysTests(unittest.TestCase):
@@ -26,7 +26,7 @@ class FilesysTests(unittest.TestCase):
         self.assertEqual(file_size, 0)
 
     def test_get_file_size_coincides_with_built_in_method(self):
-        asset_path = asset("SampleWB.twbx")
+        asset_path = data_asset_path("SampleWB.twbx")
         target_size = os.path.getsize(asset_path)
         with open(asset_path, "rb") as f:
             file_size = get_file_object_size(f)
@@ -45,12 +45,12 @@ class FilesysTests(unittest.TestCase):
         self.assertEqual(file_type, "zip")
 
     def test_get_file_type_identifies_tdsx_as_zip_file(self):
-        with open(asset("World Indicators.tdsx"), "rb") as file_object:
+        with open(data_asset_path("World Indicators.tdsx"), "rb") as file_object:
             file_type = get_file_type(file_object)
         self.assertEqual(file_type, "zip")
 
     def test_get_file_type_identifies_twbx_as_zip_file(self):
-        with open(asset("SampleWB.twbx"), "rb") as file_object:
+        with open(data_asset_path("SampleWB.twbx"), "rb") as file_object:
             file_type = get_file_type(file_object)
         self.assertEqual(file_type, "zip")
 
@@ -69,23 +69,22 @@ class FilesysTests(unittest.TestCase):
         self.assertEqual(file_type, "xml")
 
     def test_get_file_type_identifies_tds_as_xml_file(self):
-        with open(asset("World Indicators.tds"), "rb") as file_object:
+        with open(data_asset_path("World Indicators.tds"), "rb") as file_object:
             file_type = get_file_type(file_object)
         self.assertEqual(file_type, "xml")
 
     def test_get_file_type_identifies_twb_as_xml_file(self):
-        with open(asset("RESTAPISample.twb"), "rb") as file_object:
+        with open(data_asset_path("RESTAPISample.twb"), "rb") as file_object:
             file_type = get_file_type(file_object)
         self.assertEqual(file_type, "xml")
 
     def test_get_file_type_identifies_hyper_file(self):
-        with open(asset("World Indicators.hyper"), "rb") as file_object:
+        with open(data_asset_path("World Indicators.hyper"), "rb") as file_object:
             file_type = get_file_type(file_object)
         self.assertEqual(file_type, "hyper")
 
     def test_get_file_type_identifies_tde_file(self):
-        asset_path = os.path.join(TEST_ASSET_DIR, "Data", "Tableau Samples", "World Indicators.tde")
-        with open(asset_path, "rb") as file_object:
+        with open(data_asset_path("World Indicators.tde"), "rb") as file_object:
             file_type = get_file_type(file_object)
         self.assertEqual(file_type, "tde")
 
