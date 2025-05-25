@@ -17,6 +17,7 @@ from tableauserverclient.server.endpoint.jobs_endpoint import Jobs
 from tableauserverclient.server.endpoint.linked_tasks_endpoint import LinkedTasks
 from tableauserverclient.server.endpoint.metadata_endpoint import Metadata
 from tableauserverclient.server.endpoint.metrics_endpoint import Metrics
+from tableauserverclient.server.endpoint.oidc_endpoint import OIDC
 from tableauserverclient.server.endpoint.projects_endpoint import Projects
 from tableauserverclient.server.endpoint.schedules_endpoint import Schedules
 from tableauserverclient.server.endpoint.server_info_endpoint import ServerInfo
@@ -52,6 +53,7 @@ __all__ = [
     "LinkedTasks",
     "Metadata",
     "Metrics",
+    "OIDC",
     "Projects",
     "Schedules",
     "ServerInfo",
