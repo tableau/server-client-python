@@ -87,7 +87,7 @@ class TableauAuth(Credentials):
             uid = f", user_id_to_impersonate=f{self.user_id_to_impersonate}"
         else:
             uid = ""
-        return f"<Credentials username={self.username} password=redacted (site={self.site_id}{uid})>"
+        return f"<{self.__class__.__qualname__} username={self.username} password=redacted (site={self.site_id}{uid})>"
 
 
 # A Tableau-generated Personal Access Token
@@ -155,8 +155,8 @@ class PersonalAccessTokenAuth(Credentials):
         else:
             uid = ""
         return (
-            f"<PersonalAccessToken name={self.token_name} token={self.personal_access_token[:2]}..."
-            f"(site={self.site_id}{uid} >"
+            f"<{self.__class__.__qualname__}(name={self.token_name} token={self.personal_access_token[:2]}..."
+            f"site={self.site_id}{uid}) >"
         )
 
 
