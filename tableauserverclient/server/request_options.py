@@ -96,7 +96,10 @@ class RequestOptions(RequestOptionsBase):
         if self.pagesize:
             params["pageSize"] = self.pagesize
         if self.fields:
-            params["fields"] = ",".join(self.fields)
+            if "_all_" in self.fields:
+                params["fields"] = "_all_"
+            else:
+                params["fields"] = ",".join(sorted(self.fields))
         return params
 
     def page_size(self, page_size):
