@@ -145,6 +145,7 @@ class Server:
         self._site_id = None
         self._user_id = None
         self._ssl_context = None
+        self._product = "TableauServer"  # default product type
 
         # TODO: this needs to change to default to https, but without breaking existing code
         if not server_address.startswith("http://") and not server_address.startswith("https://"):
@@ -269,6 +270,7 @@ class Server:
 
     def use_server_version(self):
         self.version = self._determine_highest_version()
+        self._product = self.server_info._get_product_info()
 
     def use_highest_version(self):
         self.use_server_version()

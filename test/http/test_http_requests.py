@@ -27,6 +27,19 @@ def mocked_requests_get(*args, **kwargs):
     return MockResponse(200)
 
 
+# This method will be used by the mock to replace requests.get
+def mocked_requests_post(*args, **kwargs):
+    class MockResponse:
+        def __init__(self, status_code):
+            self.headers = {}
+            self.encoding = None
+            self.content = '{"result": {"product": "TableauOnline"}}'
+            self.status_code = status_code
+            self.ok = True
+
+    return MockResponse(200)
+
+
 class ServerTests(unittest.TestCase):
     def test_init_server_model_empty_throws(self):
         with self.assertRaises(TypeError):
@@ -46,7 +59,8 @@ class ServerTests(unittest.TestCase):
         server = TSC.Server("fake-url", use_server_version=False)
 
     @mock.patch("requests.sessions.Session.get", side_effect=mocked_requests_get)
-    def test_init_server_model_bad_server_name_do_version_check(self, mock_get):
+    @mock.patch("requests.sessions.Session.post", side_effect=mocked_requests_post)
+    def test_init_server_model_bad_server_name_do_version_check(self, mock_get, mock_post):
         server = TSC.Server("fake-url", use_server_version=True)
 
     def test_init_server_model_bad_server_name_not_version_check_random_options(self):
@@ -114,4 +128,5 @@ class SessionTests(unittest.TestCase):
         test_request_bin = "http://capture-this-with-mock.com"
         with requests_mock.mock() as m:
             m.get(url="http://capture-this-with-mock.com/api/2.4/serverInfo", request_headers=SessionTests.test_header)
+            m.post(f"{test_request_bin}/vizportal/api/web/v1/getServerSettingsUnauthenticated", json={})
             server = TSC.Server(test_request_bin, use_server_version=True, session_factory=SessionTests.session_factory)

@@ -189,8 +189,8 @@ class Endpoint:
             loggable_response = helpers.strings.redact_xml(server_response.content.decode(server_response.encoding))
         return loggable_response
 
-    def get_unauthenticated_request(self, url):
-        return self._make_request(self.parent_srv.session.get, url)
+    def get_unauthenticated_request(self, url, parameters=None):
+        return self._make_request(self.parent_srv.session.get, url, parameters=parameters)
 
     def get_request(self, url, request_object=None, parameters=None):
         if request_object is not None:
