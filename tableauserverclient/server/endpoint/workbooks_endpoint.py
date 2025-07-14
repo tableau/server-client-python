@@ -326,15 +326,8 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         return connection
 
     # Update workbook_connections
-     @api(version="3.26")
-     def update_connections(
-         self,
-         workbook_item: WorkbookItem,
-         connection_luids: list[str],
-         authentication_type: str,
-         username: Optional[str] = None,
-         password: Optional[str] = None,
-         embed_password: Optional[bool] = None
+    @api(version="3.26")
+    def update_connections(self, workbook_item: WorkbookItem, connection_luids: list[str], authentication_type: str, username: Optional[str] = None, password: Optional[str] = None, embed_password: Optional[bool] = None
      ) -> list[str]:
          """
          Bulk updates one or more workbook connections by LUID, including authenticationType, username, password, and embedPassword.

@@ -321,13 +321,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
 
     @api(version="3.26")
     def update_connections(
-        self,
-        datasource_item: DatasourceItem,
-        connection_luids: list[str],
-        authentication_type: str,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        embed_password: Optional[bool] = None
+        self, datasource_item: DatasourceItem, connection_luids: list[str], authentication_type: str, username: Optional[str] = None, password: Optional[str] = None, embed_password: Optional[bool] = None
     ) -> list[str]:
         """
         Bulk updates one or more datasource connections by LUID.
