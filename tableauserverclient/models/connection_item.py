@@ -41,6 +41,9 @@ class ConnectionItem:
     server_port: str
         The port used for the connection.
 
+    auth_type: str
+        Specifies the type of authentication used by the connection.
+
     connection_credentials: ConnectionCredentials
         The Connection Credentials object containing authentication details for
         the connection. Replaces username/password/embed_password when
@@ -59,6 +62,7 @@ class ConnectionItem:
         self.username: Optional[str] = None
         self.connection_credentials: Optional[ConnectionCredentials] = None
         self._query_tagging: Optional[bool] = None
+        self._auth_type: Optional[str] = None
 
     @property
     def datasource_id(self) -> Optional[str]:
@@ -80,6 +84,10 @@ class ConnectionItem:
     def query_tagging(self) -> Optional[bool]:
         return self._query_tagging
 
+    @property
+    def auth_type(self) -> Optional[str]:
+        return self._auth_type
+
     @query_tagging.setter
     @property_is_boolean
     def query_tagging(self, value: Optional[bool]):
@@ -92,7 +100,7 @@ class ConnectionItem:
         self._query_tagging = value
 
     def __repr__(self):
-        return "<ConnectionItem#{_id} embed={embed_password} type={_connection_type} username={username}>".format(
+        return "<ConnectionItem#{_id} embed={embed_password} type={_connection_type} auth={_auth_type} username={username}>".format(
             **self.__dict__
         )
 
@@ -112,6 +120,7 @@ class ConnectionItem:
             connection_item._query_tagging = (
                 string_to_bool(s) if (s := connection_xml.get("queryTagging", None)) else None
             )
+            connection_item._auth_type = connection_xml.get("authenticationType", None)
             datasource_elem = connection_xml.find(".//t:datasource", namespaces=ns)
             if datasource_elem is not None:
                 connection_item._datasource_id = datasource_elem.get("id", None)
@@ -139,6 +148,7 @@ class ConnectionItem:
 
             connection_item.server_address = connection_xml.get("serverAddress", None)
             connection_item.server_port = connection_xml.get("serverPort", None)
+            connection_item._auth_type = connection_xml.get("authenticationType", None)
 
             connection_credentials = connection_xml.find(".//t:connectionCredentials", namespaces=ns)
 

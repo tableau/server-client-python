@@ -319,6 +319,77 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         logger.info(f"Updated datasource item (ID: {datasource_item.id} & connection item {connection_item.id}")
         return connection
 
+    @api(version="3.26")
+    def update_connections(
+        self,
+        datasource_item: DatasourceItem,
+        connection_luids: list[str],
+        authentication_type: str,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        embed_password: Optional[bool] = None
+    ) -> list[str]:
+        """
+        Bulk updates one or more datasource connections by LUID.
+
+        Parameters
+        ----------
+        datasource_item : DatasourceItem
+            The datasource item containing the connections.
+
+        connection_luids : list of str
+            The connection LUIDs to update.
+
+        authentication_type : str
+            The authentication type to use (e.g., 'auth-keypair').
+
+        username : str, optional
+            The username to set.
+
+        password : str, optional
+            The password or secret to set.
+
+        embed_password : bool, optional
+            Whether to embed the password.
+
+        Returns
+        -------
+        list of str
+            The connection LUIDs that were updated.
+        """
+        from xml.etree.ElementTree import Element, SubElement, tostring
+
+        url = f"{self.baseurl}/{datasource_item.id}/connections"
+
+        ts_request = Element("tsRequest")
+
+        # <connectionLuids>
+        conn_luids_elem = SubElement(ts_request, "connectionLuids")
+        for luid in connection_luids:
+            SubElement(conn_luids_elem, "connectionLuid").text = luid
+
+        # <connection>
+        connection_elem = SubElement(ts_request, "connection")
+        connection_elem.set("authenticationType", authentication_type)
+
+        if username:
+            connection_elem.set("userName", username)
+
+        if password:
+            connection_elem.set("password", password)
+
+        if embed_password is not None:
+            connection_elem.set("embedPassword", str(embed_password).lower())
+
+        request_body = tostring(ts_request)
+
+        response = self.put_request(url, request_body)
+
+        logger.info(
+            f"Updated connections for datasource {datasource_item.id}: {', '.join(connection_luids)}"
+        )
+        return connection_luids
+
     @api(version="2.8")
     def refresh(self, datasource_item: DatasourceItem, incremental: bool = False) -> JobItem:
         """
