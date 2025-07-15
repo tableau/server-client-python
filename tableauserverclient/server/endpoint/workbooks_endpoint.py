@@ -330,79 +330,69 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
 
     # Update workbook_connections
     @api(version="3.26")
-    def update_connections(
-        self,
-        workbook_item: WorkbookItem,
-        connection_luids: Iterable[str],
-        authentication_type: str,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        embed_password: Optional[bool] = None,
-    ) -> list[ConnectionItem]:
-        """
-        Bulk updates one or more workbook connections by LUID, including authenticationType, username, password, and embedPassword.
+    def update_connections(self, workbook_item: WorkbookItem, connection_luids: list[str], authentication_type: str, username: Optional[str] = None, password: Optional[str] = None, embed_password: Optional[bool] = None
+     ) -> list[str]:
+         """
+         Bulk updates one or more workbook connections by LUID, including authenticationType, username, password, and embedPassword.
 
-        Parameters
-        ----------
-        workbook_item : WorkbookItem
-            The workbook item containing the connections.
+         Parameters
+         ----------
+         workbook_item : WorkbookItem
+             The workbook item containing the connections.
 
-        connection_luids : Iterable of str
-            The connection LUIDs to update.
+         connection_luids : list of str
+             The connection LUIDs to update.
 
-        authentication_type : str
-            The authentication type to use (e.g., 'AD Service Principal').
+         authentication_type : str
+             The authentication type to use (e.g., 'AD Service Principal').
 
-        username : str, optional
-            The username to set (e.g., client ID for keypair auth).
+         username : str, optional
+             The username to set (e.g., client ID for keypair auth).
 
-        password : str, optional
-            The password or secret to set.
+         password : str, optional
+             The password or secret to set.
 
-        embed_password : bool, optional
-            Whether to embed the password.
+         embed_password : bool, optional
+             Whether to embed the password.
 
-        Returns
-        -------
-        Iterable of str
-            The connection LUIDs that were updated.
-        """
+         Returns
+         -------
+         list of str
+             The connection LUIDs that were updated.
+         """
+         from xml.etree.ElementTree import Element, SubElement, tostring
 
-        url = f"{self.baseurl}/{workbook_item.id}/connections"
+         url = f"{self.baseurl}/{workbook_item.id}/connections"
 
-        request_body = RequestFactory.Workbook.update_connections_req(
-            connection_luids,
-            authentication_type,
-            username=username,
-            password=password,
-            embed_password=embed_password,
-        )
+         ts_request = Element("tsRequest")
 
-        # Send request
-        server_response = self.put_request(url, request_body)
-        connection_items = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
-        updated_ids: list[str] = [conn.id for conn in connection_items]
+         # <connectionLuids>
+         conn_luids_elem = SubElement(ts_request, "connectionLuids")
+         for luid in connection_luids:
+             SubElement(conn_luids_elem, "connectionLuid").text = luid
 
-        logger.info(f"Updated connections for workbook {workbook_item.id}: {', '.join(updated_ids)}")
-        return connection_items
+         # <connection>
+         connection_elem = SubElement(ts_request, "connection")
+         connection_elem.set("authenticationType", authentication_type)
 
-    T = TypeVar("T", bound=FileObjectW)
+         if username:
+             connection_elem.set("userName", username)
 
-    @overload
-    def download(
-        self,
-        workbook_id: str,
-        filepath: T,
-        include_extract: bool = True,
-    ) -> T: ...
+         if password:
+             connection_elem.set("password", password)
 
-    @overload
-    def download(
-        self,
-        workbook_id: str,
-        filepath: Optional[FilePath] = None,
-        include_extract: bool = True,
-    ) -> str: ...
+         if embed_password is not None:
+             connection_elem.set("embedPassword", str(embed_password).lower())
+
+         request_body = tostring(ts_request)
+
+         # Send request
+         response = self.put_request(url, request_body)
+
+         logger.info(
+             f"Updated connections for workbook {workbook_item.id}: {', '.join(connection_luids)}"
+         )
+         return connection_luids
 
     # Download workbook contents with option of passing in filepath
     @api(version="2.0")

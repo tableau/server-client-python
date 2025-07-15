@@ -376,14 +376,8 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
 
     @api(version="3.26")
     def update_connections(
-        self,
-        datasource_item: DatasourceItem,
-        connection_luids: Iterable[str],
-        authentication_type: str,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        embed_password: Optional[bool] = None,
-    ) -> list[ConnectionItem]:
+        self, datasource_item: DatasourceItem, connection_luids: list[str], authentication_type: str, username: Optional[str] = None, password: Optional[str] = None, embed_password: Optional[bool] = None
+    ) -> list[str]:
         """
         Bulk updates one or more datasource connections by LUID.
 
@@ -392,7 +386,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         datasource_item : DatasourceItem
             The datasource item containing the connections.
 
-        connection_luids : Iterable of str
+        connection_luids : list of str
             The connection LUIDs to update.
 
         authentication_type : str
@@ -409,25 +403,42 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
 
         Returns
         -------
-        Iterable of str
+        list of str
             The connection LUIDs that were updated.
         """
+        from xml.etree.ElementTree import Element, SubElement, tostring
 
         url = f"{self.baseurl}/{datasource_item.id}/connections"
+        print("Method URL:", url)
 
-        request_body = RequestFactory.Datasource.update_connections_req(
-            connection_luids=connection_luids,
-            authentication_type=authentication_type,
-            username=username,
-            password=password,
-            embed_password=embed_password,
+        ts_request = Element("tsRequest")
+
+        # <connectionLuids>
+        conn_luids_elem = SubElement(ts_request, "connectionLuids")
+        for luid in connection_luids:
+            SubElement(conn_luids_elem, "connectionLuid").text = luid
+
+        # <connection>
+        connection_elem = SubElement(ts_request, "connection")
+        connection_elem.set("authenticationType", authentication_type)
+
+        if username:
+            connection_elem.set("userName", username)
+
+        if password:
+            connection_elem.set("password", password)
+
+        if embed_password is not None:
+            connection_elem.set("embedPassword", str(embed_password).lower())
+
+        request_body = tostring(ts_request)
+
+        response = self.put_request(url, request_body)
+
+        logger.info(
+            f"Updated connections for datasource {datasource_item.id}: {', '.join(connection_luids)}"
         )
-        server_response = self.put_request(url, request_body)
-        connection_items = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
-        updated_ids: list[str] = [conn.id for conn in connection_items]
-
-        logger.info(f"Updated connections for datasource {datasource_item.id}: {', '.join(updated_ids)}")
-        return connection_items
+        return connection_luids
 
     @api(version="2.8")
     def refresh(self, datasource_item: Union[DatasourceItem, str], incremental: bool = False) -> JobItem:
