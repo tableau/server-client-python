@@ -25,7 +25,9 @@ def main():
     parser.add_argument("datasource_username")
     parser.add_argument("authentication_type")
     parser.add_argument("--datasource_password", default=None, help="Datasource password (optional)")
-    parser.add_argument("--embed_password", default="true", choices=["true", "false"], help="Embed password (default: true)")
+    parser.add_argument(
+        "--embed_password", default="true", choices=["true", "false"], help="Embed password (default: true)"
+    )
 
     args = parser.parse_args()
 
@@ -37,10 +39,7 @@ def main():
     server = TSC.Server(args.server, use_server_version=True)
 
     with server.auth.sign_in(tableau_auth):
-        endpoint = {
-            "workbook": server.workbooks,
-            "datasource": server.datasources
-        }.get(args.resource_type)
+        endpoint = {"workbook": server.workbooks, "datasource": server.datasources}.get(args.resource_type)
 
         resource = endpoint.get_by_id(args.resource_id)
         endpoint.populate_connections(resource)
@@ -55,7 +54,7 @@ def main():
             authentication_type=args.authentication_type,
             username=args.datasource_username,
             password=args.datasource_password,
-            embed_password=embed_password
+            embed_password=embed_password,
         )
 
         print(f"Updated connections on {args.resource_type} {args.resource_id}: {updated_ids}")
