@@ -4,7 +4,9 @@ import tableauserverclient as TSC
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Update a single connection on a datasource or workbook to embed credentials")
+    parser = argparse.ArgumentParser(
+        description="Update a single connection on a datasource or workbook to embed credentials"
+    )
 
     # Common options
     parser.add_argument("--server", "-s", help="Server address", required=True)
@@ -12,7 +14,8 @@ def main():
     parser.add_argument("--token-name", "-p", help="Personal access token name", required=True)
     parser.add_argument("--token-value", "-v", help="Personal access token value", required=True)
     parser.add_argument(
-        "--logging-level", "-l",
+        "--logging-level",
+        "-l",
         choices=["debug", "info", "error"],
         default="error",
         help="Logging level (default: error)",
@@ -36,10 +39,7 @@ def main():
     server = TSC.Server(args.server, use_server_version=True)
 
     with server.auth.sign_in(tableau_auth):
-        endpoint = {
-            "workbook": server.workbooks,
-            "datasource": server.datasources
-        }.get(args.resource_type)
+        endpoint = {"workbook": server.workbooks, "datasource": server.datasources}.get(args.resource_type)
 
         update_function = endpoint.update_connection
         resource = endpoint.get_by_id(args.resource_id)
