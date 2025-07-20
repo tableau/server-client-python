@@ -982,26 +982,24 @@ class WorkbookTests(unittest.TestCase):
         self.assertEqual(xml_connection.get("serverAddress"), url)
 
     def test_update_workbook_connections(self) -> None:
-        populate_xml, response_xml = read_xml_assets(
-                    POPULATE_CONNECTIONS_XML,
-                    UPDATE_CONNECTIONS_XML
-                )
-
+        populate_xml, response_xml = read_xml_assets(POPULATE_CONNECTIONS_XML, UPDATE_CONNECTIONS_XML)
 
         with requests_mock.Mocker() as m:
             workbook_id = "1a2b3c4d-5e6f-7a8b-9c0d-112233445566"
-            connection_luids = [
-                "abc12345-def6-7890-gh12-ijklmnopqrst",
-                "1234abcd-5678-efgh-ijkl-0987654321mn"
-            ]
+            connection_luids = ["abc12345-def6-7890-gh12-ijklmnopqrst", "1234abcd-5678-efgh-ijkl-0987654321mn"]
 
             workbook = TSC.WorkbookItem(workbook_id)
             workbook._id = workbook_id
             self.server.version = "3.26"
             url = f"{self.server.baseurl}/{workbook_id}/connections"
-            m.get("http://test/api/3.26/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks/1a2b3c4d-5e6f-7a8b-9c0d-112233445566/connections", text=populate_xml)
-            m.put("http://test/api/3.26/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks/1a2b3c4d-5e6f-7a8b-9c0d-112233445566/connections", text=response_xml)
-
+            m.get(
+                "http://test/api/3.26/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks/1a2b3c4d-5e6f-7a8b-9c0d-112233445566/connections",
+                text=populate_xml,
+            )
+            m.put(
+                "http://test/api/3.26/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks/1a2b3c4d-5e6f-7a8b-9c0d-112233445566/connections",
+                text=response_xml,
+            )
 
             updated_luids = self.server.workbooks.update_connections(
                 workbook_item=workbook,
@@ -1009,7 +1007,7 @@ class WorkbookTests(unittest.TestCase):
                 authentication_type="AD Service Principal",
                 username="svc-client",
                 password="secret-token",
-                embed_password=True
+                embed_password=True,
             )
 
             self.assertEqual(updated_luids, connection_luids)

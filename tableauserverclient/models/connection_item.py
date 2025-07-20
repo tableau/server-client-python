@@ -84,10 +84,6 @@ class ConnectionItem:
     def query_tagging(self) -> Optional[bool]:
         return self._query_tagging
 
-    @property
-    def auth_type(self) -> Optional[str]:
-        return self._auth_type
-
     @query_tagging.setter
     @property_is_boolean
     def query_tagging(self, value: Optional[bool]):
@@ -98,6 +94,14 @@ class ConnectionItem:
             )
             return
         self._query_tagging = value
+
+    @property
+    def auth_type(self) -> Optional[str]:
+        return self._auth_type
+
+    @auth_type.setter
+    def auth_type(self, value: Optional[str]):
+        self._auth_type = value
 
     def __repr__(self):
         return "<ConnectionItem#{_id} embed={embed_password} type={_connection_type} auth={_auth_type} username={username}>".format(
