@@ -84,10 +84,6 @@ class ConnectionItem:
     def query_tagging(self) -> Optional[bool]:
         return self._query_tagging
 
-    @property
-    def auth_type(self) -> Optional[str]:
-        return self._auth_type
-
     @query_tagging.setter
     @property_is_boolean
     def query_tagging(self, value: Optional[bool]):
