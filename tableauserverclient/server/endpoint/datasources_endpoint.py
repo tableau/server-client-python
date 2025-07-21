@@ -359,7 +359,6 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         """
 
         url = f"{self.baseurl}/{datasource_item.id}/connections"
-        print("Method URL:", url)
 
         request_body = RequestFactory.Datasource.update_connections_req(
             connection_luids=connection_luids,
