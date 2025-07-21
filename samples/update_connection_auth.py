@@ -51,7 +51,7 @@ def main():
         connection = connections[0]
         connection.username = args.datasource_username
         connection.password = args.datasource_password
-        connection.auth_type = args.authentication_type
+        connection.authentication_type = args.authentication_type
         connection.embed_password = True
 
         updated_connection = update_function(resource, connection)

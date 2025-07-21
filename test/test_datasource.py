@@ -195,6 +195,44 @@ def test_update_copy_fields(server) -> None:
 
             self.assertEqual(updated_ids, connection_luids)
 
+    def test_update_connections(self) -> None:
+        populate_xml, response_xml = read_xml_assets(POPULATE_CONNECTIONS_XML, UPDATE_CONNECTIONS_XML)
+
+        with requests_mock.Mocker() as m:
+
+            datasource_id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
+            connection_luids = ["be786ae0-d2bf-4a4b-9b34-e2de8d2d4488", "a1b2c3d4-e5f6-7a8b-9c0d-123456789abc"]
+
+            datasource = TSC.DatasourceItem(datasource_id)
+            datasource._id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
+            datasource.owner_id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
+            self.server.version = "3.26"
+
+            url = f"{self.server.baseurl}/{datasource.id}/connections"
+            m.get(
+                "http://test/api/3.26/sites/dad65087-b08b-4603-af4e-2887b8aafc67/datasources/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/connections",
+                text=populate_xml,
+            )
+            m.put(
+                "http://test/api/3.26/sites/dad65087-b08b-4603-af4e-2887b8aafc67/datasources/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/connections",
+                text=response_xml,
+            )
+
+            print("BASEURL:", self.server.baseurl)
+            print("Calling PUT on:", f"{self.server.baseurl}/{datasource.id}/connections")
+
+            connection_items = self.server.datasources.update_connections(
+                datasource_item=datasource,
+                connection_luids=connection_luids,
+                authentication_type="auth-keypair",
+                username="testuser",
+                password="testpass",
+                embed_password=True,
+            )
+            updated_ids = [conn.id for conn in connection_items]
+
+            self.assertEqual(updated_ids, connection_luids)
+
     def test_populate_permissions(self) -> None:
         with open(asset(POPULATE_PERMISSIONS_XML), "rb") as f:
             response_xml = f.read().decode("utf-8")
