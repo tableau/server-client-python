@@ -328,7 +328,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         username: Optional[str] = None,
         password: Optional[str] = None,
         embed_password: Optional[bool] = None,
-    ) -> Iterable[str]:
+    ) -> list[ConnectionItem]:
         """
         Bulk updates one or more datasource connections by LUID.
 
@@ -368,8 +368,8 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
             embed_password=embed_password,
         )
         server_response = self.put_request(url, request_body)
-        connection_items = list(ConnectionItem.from_response(server_response.content, self.parent_srv.namespace))
-        updated_ids = [conn.id for conn in connection_items]
+        connection_items = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
+        updated_ids: list[str] = [conn.id for conn in connection_items]
 
         logger.info(f"Updated connections for datasource {datasource_item.id}: {', '.join(updated_ids)}")
         return connection_items
