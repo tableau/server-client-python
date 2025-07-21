@@ -422,10 +422,12 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
             password=password,
             embed_password=embed_password,
         )
-        response = self.put_request(url, request_body)
+        server_response = self.put_request(url, request_body)
+        connection_items = list(ConnectionItem.from_response(server_response.content, self.parent_srv.namespace))
+        updated_ids = [conn.id for conn in connection_items]
 
-        logger.info(f"Updated connections for datasource {datasource_item.id}: {', '.join(connection_luids)}")
-        return connection_luids
+        logger.info(f"Updated connections for datasource {datasource_item.id}: {', '.join(updated_ids)}")
+        return connection_items
 
     @api(version="2.8")
     def refresh(self, datasource_item: Union[DatasourceItem, str], incremental: bool = False) -> JobItem:
