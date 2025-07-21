@@ -183,7 +183,7 @@ def test_update_copy_fields(server) -> None:
             print("BASEURL:", self.server.baseurl)
             print("Calling PUT on:", f"{self.server.baseurl}/{datasource.id}/connections")
 
-            updated_luids = self.server.datasources.update_connections(
+            connection_items = self.server.datasources.update_connections(
                 datasource_item=datasource,
                 connection_luids=connection_luids,
                 authentication_type="auth-keypair",
@@ -191,8 +191,9 @@ def test_update_copy_fields(server) -> None:
                 password="testpass",
                 embed_password=True,
             )
+            updated_ids = [conn.id for conn in connection_items]
 
-            self.assertEqual(updated_luids, connection_luids)
+            self.assertEqual(updated_ids, connection_luids)
 
     def test_populate_permissions(self) -> None:
         with open(asset(POPULATE_PERMISSIONS_XML), "rb") as f:

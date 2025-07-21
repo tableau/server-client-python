@@ -48,7 +48,7 @@ def main():
         embed_password = args.embed_password.lower() == "true"
 
         # Call unified update_connections method
-        updated_ids = endpoint.update_connections(
+        connection_items = endpoint.update_connections(
             resource,
             connection_luids=connection_luids,
             authentication_type=args.authentication_type,
@@ -57,7 +57,7 @@ def main():
             embed_password=embed_password,
         )
 
-        print(f"Updated connections on {args.resource_type} {args.resource_id}: {updated_ids}")
+        print(f"Updated connections on {args.resource_type} {args.resource_id}: {connection_items}")
 
 
 if __name__ == "__main__":
