@@ -1001,7 +1001,7 @@ class WorkbookTests(unittest.TestCase):
                 text=response_xml,
             )
 
-            updated_luids = self.server.workbooks.update_connections(
+            connection_items = self.server.workbooks.update_connections(
                 workbook_item=workbook,
                 connection_luids=connection_luids,
                 authentication_type="AD Service Principal",
@@ -1009,8 +1009,9 @@ class WorkbookTests(unittest.TestCase):
                 password="secret-token",
                 embed_password=True,
             )
+            updated_ids = [conn.id for conn in connection_items]
 
-            self.assertEqual(updated_luids, connection_luids)
+            self.assertEqual(updated_ids, connection_luids)
 
     def test_get_workbook_all_fields(self) -> None:
         self.server.version = "3.21"

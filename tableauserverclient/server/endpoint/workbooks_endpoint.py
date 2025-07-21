@@ -376,10 +376,12 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         )
 
         # Send request
-        response = self.put_request(url, request_body)
+        server_response = self.put_request(url, request_body)
+        connection_items = list(ConnectionItem.from_response(server_response.content, self.parent_srv.namespace))
+        updated_ids = [conn.id for conn in connection_items]
 
-        logger.info(f"Updated connections for workbook {workbook_item.id}: {', '.join(connection_luids)}")
-        return connection_luids
+        logger.info(f"Updated connections for workbook {workbook_item.id}: {', '.join(updated_ids)}")
+        return connection_items
 
     # Download workbook contents with option of passing in filepath
     @api(version="2.0")
