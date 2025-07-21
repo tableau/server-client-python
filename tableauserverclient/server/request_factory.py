@@ -244,6 +244,32 @@ class DatasourceRequest:
         parts = {"request_payload": ("", xml_request, "text/xml")}
         return _add_multipart(parts)
 
+    @_tsrequest_wrapped
+    def update_connections_req(
+        self,
+        element: ET.Element,
+        connection_luids: Iterable[str],
+        authentication_type: str,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        embed_password: Optional[bool] = None,
+    ):
+        conn_luids_elem = ET.SubElement(element, "connectionLUIDs")
+        for luid in connection_luids:
+            ET.SubElement(conn_luids_elem, "connectionLUID").text = luid
+
+        connection_elem = ET.SubElement(element, "connection")
+        connection_elem.set("authenticationType", authentication_type)
+
+        if username is not None:
+            connection_elem.set("userName", username)
+
+        if password is not None:
+            connection_elem.set("password", password)
+
+        if embed_password is not None:
+            connection_elem.set("embedPassword", str(embed_password).lower())
+
 
 class DQWRequest:
     def add_req(self, dqw_item):
@@ -1091,6 +1117,32 @@ class WorkbookRequest:
                 datasource_element = ET.SubElement(list_element, "datasource")
                 if (id_ := datasource_item.id) is not None:
                     datasource_element.attrib["id"] = id_
+
+    @_tsrequest_wrapped
+    def update_connections_req(
+        self,
+        element: ET.Element,
+        connection_luids: Iterable[str],
+        authentication_type: str,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        embed_password: Optional[bool] = None,
+    ):
+        conn_luids_elem = ET.SubElement(element, "connectionLUIDs")
+        for luid in connection_luids:
+            ET.SubElement(conn_luids_elem, "connectionLUID").text = luid
+
+        connection_elem = ET.SubElement(element, "connection")
+        connection_elem.set("authenticationType", authentication_type)
+
+        if username is not None:
+            connection_elem.set("userName", username)
+
+        if password is not None:
+            connection_elem.set("password", password)
+
+        if embed_password is not None:
+            connection_elem.set("embedPassword", str(embed_password).lower())
 
 
 class Connection:

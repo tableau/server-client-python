@@ -325,6 +325,64 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         logger.info(f"Updated workbook item (ID: {workbook_item.id} & connection item {connection_item.id})")
         return connection
 
+    # Update workbook_connections
+    @api(version="3.26")
+    def update_connections(
+        self,
+        workbook_item: WorkbookItem,
+        connection_luids: Iterable[str],
+        authentication_type: str,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        embed_password: Optional[bool] = None,
+    ) -> list[ConnectionItem]:
+        """
+        Bulk updates one or more workbook connections by LUID, including authenticationType, username, password, and embedPassword.
+
+        Parameters
+        ----------
+        workbook_item : WorkbookItem
+            The workbook item containing the connections.
+
+        connection_luids : Iterable of str
+            The connection LUIDs to update.
+
+        authentication_type : str
+            The authentication type to use (e.g., 'AD Service Principal').
+
+        username : str, optional
+            The username to set (e.g., client ID for keypair auth).
+
+        password : str, optional
+            The password or secret to set.
+
+        embed_password : bool, optional
+            Whether to embed the password.
+
+        Returns
+        -------
+        Iterable of str
+            The connection LUIDs that were updated.
+        """
+
+        url = f"{self.baseurl}/{workbook_item.id}/connections"
+
+        request_body = RequestFactory.Workbook.update_connections_req(
+            connection_luids,
+            authentication_type,
+            username=username,
+            password=password,
+            embed_password=embed_password,
+        )
+
+        # Send request
+        server_response = self.put_request(url, request_body)
+        connection_items = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
+        updated_ids: list[str] = [conn.id for conn in connection_items]
+
+        logger.info(f"Updated connections for workbook {workbook_item.id}: {', '.join(updated_ids)}")
+        return connection_items
+
     # Download workbook contents with option of passing in filepath
     @api(version="2.0")
     @parameter_added_in(no_extract="2.5")

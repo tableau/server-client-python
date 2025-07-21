@@ -14,7 +14,7 @@ from tableauserverclient.datetime_helpers import format_datetime, parse_datetime
 from tableauserverclient.models import UserItem, GroupItem, PermissionsRule
 from tableauserverclient.server.endpoint.exceptions import InternalServerError, UnsupportedAttributeError
 from tableauserverclient.server.request_factory import RequestFactory
-from ._utils import asset
+from ._utils import read_xml_asset, read_xml_assets, asset
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
@@ -39,6 +39,7 @@ REFRESH_XML = os.path.join(TEST_ASSET_DIR, "workbook_refresh.xml")
 REVISION_XML = os.path.join(TEST_ASSET_DIR, "workbook_revision.xml")
 UPDATE_XML = os.path.join(TEST_ASSET_DIR, "workbook_update.xml")
 UPDATE_PERMISSIONS = os.path.join(TEST_ASSET_DIR, "workbook_update_permissions.xml")
+UPDATE_CONNECTIONS_XML = os.path.join(TEST_ASSET_DIR, "workbook_update_connections.xml")
 
 
 class WorkbookTests(unittest.TestCase):
@@ -979,6 +980,38 @@ class WorkbookTests(unittest.TestCase):
 
         assert xml_connection is not None
         self.assertEqual(xml_connection.get("serverAddress"), url)
+
+    def test_update_workbook_connections(self) -> None:
+        populate_xml, response_xml = read_xml_assets(POPULATE_CONNECTIONS_XML, UPDATE_CONNECTIONS_XML)
+
+        with requests_mock.Mocker() as m:
+            workbook_id = "1a2b3c4d-5e6f-7a8b-9c0d-112233445566"
+            connection_luids = ["abc12345-def6-7890-gh12-ijklmnopqrst", "1234abcd-5678-efgh-ijkl-0987654321mn"]
+
+            workbook = TSC.WorkbookItem(workbook_id)
+            workbook._id = workbook_id
+            self.server.version = "3.26"
+            url = f"{self.server.baseurl}/{workbook_id}/connections"
+            m.get(
+                "http://test/api/3.26/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks/1a2b3c4d-5e6f-7a8b-9c0d-112233445566/connections",
+                text=populate_xml,
+            )
+            m.put(
+                "http://test/api/3.26/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks/1a2b3c4d-5e6f-7a8b-9c0d-112233445566/connections",
+                text=response_xml,
+            )
+
+            connection_items = self.server.workbooks.update_connections(
+                workbook_item=workbook,
+                connection_luids=connection_luids,
+                authentication_type="AD Service Principal",
+                username="svc-client",
+                password="secret-token",
+                embed_password=True,
+            )
+            updated_ids = [conn.id for conn in connection_items]
+
+            self.assertEqual(updated_ids, connection_luids)
 
     def test_get_workbook_all_fields(self) -> None:
         self.server.version = "3.21"
