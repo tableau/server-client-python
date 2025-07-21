@@ -9,8 +9,8 @@ def main():
     # Common options
     parser.add_argument("--server", "-s", help="Server address", required=True)
     parser.add_argument("--site", "-S", help="Site name", required=True)
-    parser.add_argument("--username", "-p", help="Personal access token name", required=True)
-    parser.add_argument("--password", "-v", help="Personal access token value", required=True)
+    parser.add_argument("--token-name", "-p", help="Personal access token name", required=True)
+    parser.add_argument("--token-value", "-v", help="Personal access token value", required=True)
     parser.add_argument(
         "--logging-level",
         "-l",
@@ -35,7 +35,7 @@ def main():
     logging_level = getattr(logging, args.logging_level.upper())
     logging.basicConfig(level=logging_level)
 
-    tableau_auth = TSC.TableauAuth(args.username, args.password, site_id=args.site)
+    tableau_auth = TSC.TableauAuth(args.token_name, args.token_value, site_id=args.site)
     server = TSC.Server(args.server, use_server_version=True)
 
     with server.auth.sign_in(tableau_auth):
