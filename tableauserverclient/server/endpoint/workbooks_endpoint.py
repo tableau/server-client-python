@@ -338,7 +338,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         username: Optional[str] = None,
         password: Optional[str] = None,
         embed_password: Optional[bool] = None,
-    ) -> Iterable[str]:
+    ) -> list[ConnectionItem]:
         """
         Bulk updates one or more workbook connections by LUID, including authenticationType, username, password, and embedPassword.
 
@@ -380,8 +380,8 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
 
         # Send request
         server_response = self.put_request(url, request_body)
-        connection_items = list(ConnectionItem.from_response(server_response.content, self.parent_srv.namespace))
-        updated_ids = [conn.id for conn in connection_items]
+        connection_items = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
+        updated_ids: list[str] = [conn.id for conn in connection_items]
 
         logger.info(f"Updated connections for workbook {workbook_item.id}: {', '.join(updated_ids)}")
         return connection_items
