@@ -1162,6 +1162,8 @@ class Connection:
             connection_element.attrib["userName"] = connection_item.username
         if connection_item.password is not None:
             connection_element.attrib["password"] = connection_item.password
+        if connection_item.auth_type is not None:
+            connection_element.attrib["authenticationType"] = connection_item.auth_type
         if connection_item.embed_password is not None:
             connection_element.attrib["embedPassword"] = str(connection_item.embed_password).lower()
         if connection_item.query_tagging is not None:
