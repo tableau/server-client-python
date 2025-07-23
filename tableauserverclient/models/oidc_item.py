@@ -28,6 +28,18 @@ class SiteOIDCConfiguration:
         self.client_authentication: Optional[str] = None
         self.voluntary_acr_values: Optional[str] = None
 
+    def __str__(self) -> str:
+        return (
+            f"{self.__class__.__qualname__}(enabled={self.enabled}, "
+            f"test_login_url={self.test_login_url}, "
+            f"idp_configuration_name={self.idp_configuration_name}, "
+            f"idp_configuration_id={self.idp_configuration_id}, "
+            f"client_id={self.client_id})"
+        )
+
+    def __repr__(self) -> str:
+        return f"<{str(self)}>"
+
     @classmethod
     def from_response(cls, raw_xml: bytes, ns) -> "SiteOIDCConfiguration":
         """
