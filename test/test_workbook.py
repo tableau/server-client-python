@@ -771,6 +771,7 @@ def test_publish_with_thumbnails_user_id(server: TSC.Server) -> None:
             updated_ids = [conn.id for conn in connection_items]
 
             self.assertEqual(updated_ids, connection_luids)
+            self.assertEqual("AD Service Principal", connection_items[0].auth_type)
 
     def test_get_workbook_all_fields(self) -> None:
         self.server.version = "3.21"
