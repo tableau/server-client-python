@@ -232,6 +232,7 @@ def test_update_copy_fields(server) -> None:
             updated_ids = [conn.id for conn in connection_items]
 
             self.assertEqual(updated_ids, connection_luids)
+            self.assertEqual("auth-keypair",connection_items[0].auth_type)
 
     def test_populate_permissions(self) -> None:
         with open(asset(POPULATE_PERMISSIONS_XML), "rb") as f:
