@@ -1224,7 +1224,8 @@ class SiteAuthConfiguration:
         )
 
     def __repr__(self):
-        return f"<{str(self)}>" 
+        return f"<{str(self)}>"
+
 
 # Used to convert string represented boolean to a boolean type
 def string_to_bool(s: str) -> bool:
