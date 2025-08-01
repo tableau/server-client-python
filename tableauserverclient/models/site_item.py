@@ -1230,6 +1230,17 @@ class SiteAuthConfiguration:
             all_auth_configs.append(auth_config)
         return all_auth_configs
 
+    def __str__(self):
+        return (
+            f"{self.__class__.__qualname__}(auth_setting={self.auth_setting}, "
+            f"enabled={self.enabled}, "
+            f"idp_configuration_id={self.idp_configuration_id}, "
+            f"idp_configuration_name={self.idp_configuration_name})"
+        )
+
+    def __repr__(self):
+        return f"<{str(self)}>"
+
 
 # Used to convert string represented boolean to a boolean type
 def string_to_bool(s: str) -> bool:
