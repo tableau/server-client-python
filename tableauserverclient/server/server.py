@@ -39,7 +39,6 @@ from tableauserverclient.server.endpoint import (
     Tags,
     VirtualConnections,
     OIDC,
-    Extensions,
 )
 from tableauserverclient.server.exceptions import (
     ServerInfoEndpointNotFoundError,
@@ -186,7 +185,6 @@ class Server:
         self.tags = Tags(self)
         self.virtual_connections = VirtualConnections(self)
         self.oidc = OIDC(self)
-        self.extensions = Extensions(self)
 
         self._session = self._session_factory()
         self._http_options = dict()  # must set this before making a server call
