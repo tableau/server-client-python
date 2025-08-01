@@ -378,3 +378,27 @@ class RequestOptionTests(unittest.TestCase):
         loop = self.server.users.only_fields("id")
         assert "id" in loop.request_options.fields
         assert "_default_" not in loop.request_options.fields
+
+    def test_queryset_field_order(self) -> None:
+        with requests_mock.mock() as m:
+            m.get(self.server.views.baseurl, text=SLICING_QUERYSET_PAGE_1.read_text())
+            loop = self.server.views.fields("id", "name")
+            list(loop)
+            history = m.request_history[0]
+
+        fields = history.qs.get("fields", [""])[0].split(",")
+
+        assert fields[0] == "_default_"
+        assert "id" in fields
+        assert "name" in fields
+
+    def test_queryset_field_all(self) -> None:
+        with requests_mock.mock() as m:
+            m.get(self.server.views.baseurl, text=SLICING_QUERYSET_PAGE_1.read_text())
+            loop = self.server.views.fields("id", "name", "_all_")
+            list(loop)
+            history = m.request_history[0]
+
+        fields = history.qs.get("fields", [""])[0]
+
+        assert fields == "_all_"
