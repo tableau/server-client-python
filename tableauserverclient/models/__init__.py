@@ -30,6 +30,7 @@ from tableauserverclient.models.linked_tasks_item import (
 )
 from tableauserverclient.models.location_item import LocationItem
 from tableauserverclient.models.metric_item import MetricItem
+from tableauserverclient.models.oidc_item import SiteOIDCConfiguration
 from tableauserverclient.models.pagination_item import PaginationItem
 from tableauserverclient.models.permissions_item import PermissionsRule, Permission
 from tableauserverclient.models.project_item import ProjectItem
@@ -79,6 +80,7 @@ __all__ = [
     "BackgroundJobItem",
     "LocationItem",
     "MetricItem",
+    "SiteOIDCConfiguration",
     "PaginationItem",
     "Permission",
     "PermissionsRule",
@@ -88,6 +90,7 @@ __all__ = [
     "ServerInfoItem",
     "SiteAuthConfiguration",
     "SiteItem",
+    "SiteOIDCConfiguration",
     "SubscriptionItem",
     "TableItem",
     "TableauAuth",

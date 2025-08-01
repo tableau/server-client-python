@@ -35,7 +35,7 @@ def main():
     logging_level = getattr(logging, args.logging_level.upper())
     logging.basicConfig(level=logging_level)
 
-    tableau_auth = TSC.TableauAuth(args.token_name, args.token_value, site_id=args.site)
+    tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
     server = TSC.Server(args.server, use_server_version=True)
 
     with server.auth.sign_in(tableau_auth):
