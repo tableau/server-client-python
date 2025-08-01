@@ -431,13 +431,31 @@ def test_queryset_field_order(server: TSC.Server) -> None:
     assert "name" in fields
 
 
-def test_queryset_field_all(server: TSC.Server) -> None:
-    with requests_mock.mock() as m:
-        m.get(server.views.baseurl, text=SLICING_QUERYSET_PAGE_1.read_text())
-        loop = server.views.fields("id", "name", "_all_")
-        list(loop)
-        history = m.request_history[0]
+    def test_queryset_only_fields(self) -> None:
+        loop = self.server.users.only_fields("id")
+        assert "id" in loop.request_options.fields
+        assert "_default_" not in loop.request_options.fields
 
-    fields = history.qs.get("fields", [""])[0]
+    def test_queryset_field_order(self) -> None:
+        with requests_mock.mock() as m:
+            m.get(self.server.views.baseurl, text=SLICING_QUERYSET_PAGE_1.read_text())
+            loop = self.server.views.fields("id", "name")
+            list(loop)
+            history = m.request_history[0]
 
-    assert fields == "_all_"
+        fields = history.qs.get("fields", [""])[0].split(",")
+
+        assert fields[0] == "_default_"
+        assert "id" in fields
+        assert "name" in fields
+
+    def test_queryset_field_all(self) -> None:
+        with requests_mock.mock() as m:
+            m.get(self.server.views.baseurl, text=SLICING_QUERYSET_PAGE_1.read_text())
+            loop = self.server.views.fields("id", "name", "_all_")
+            list(loop)
+            history = m.request_history[0]
+
+        fields = history.qs.get("fields", [""])[0]
+
+        assert fields == "_all_"
