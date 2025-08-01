@@ -1504,6 +1504,122 @@ class VirtualConnectionRequest:
         return ET.tostring(xml_request)
 
 
+class OIDCRequest:
+    @_tsrequest_wrapped
+    def create_req(self, xml_request: ET.Element, oidc_item: SiteOIDCConfiguration) -> bytes:
+        oidc_element = ET.SubElement(xml_request, "siteOIDCConfiguration")
+
+        # Check required attributes first
+
+        if oidc_item.idp_configuration_name is None:
+            raise ValueError(f"OIDC Item missing idp_configuration_name: {oidc_item}")
+        if oidc_item.client_id is None:
+            raise ValueError(f"OIDC Item missing client_id: {oidc_item}")
+        if oidc_item.client_secret is None:
+            raise ValueError(f"OIDC Item missing client_secret: {oidc_item}")
+        if oidc_item.authorization_endpoint is None:
+            raise ValueError(f"OIDC Item missing authorization_endpoint: {oidc_item}")
+        if oidc_item.token_endpoint is None:
+            raise ValueError(f"OIDC Item missing token_endpoint: {oidc_item}")
+        if oidc_item.userinfo_endpoint is None:
+            raise ValueError(f"OIDC Item missing userinfo_endpoint: {oidc_item}")
+        if not isinstance(oidc_item.enabled, bool):
+            raise ValueError(f"OIDC Item missing enabled: {oidc_item}")
+        if oidc_item.jwks_uri is None:
+            raise ValueError(f"OIDC Item missing jwks_uri: {oidc_item}")
+
+        oidc_element.attrib["name"] = oidc_item.idp_configuration_name
+        oidc_element.attrib["clientId"] = oidc_item.client_id
+        oidc_element.attrib["clientSecret"] = oidc_item.client_secret
+        oidc_element.attrib["authorizationEndpoint"] = oidc_item.authorization_endpoint
+        oidc_element.attrib["tokenEndpoint"] = oidc_item.token_endpoint
+        oidc_element.attrib["userInfoEndpoint"] = oidc_item.userinfo_endpoint
+        oidc_element.attrib["enabled"] = str(oidc_item.enabled).lower()
+        oidc_element.attrib["jwksUri"] = oidc_item.jwks_uri
+
+        if oidc_item.allow_embedded_authentication is not None:
+            oidc_element.attrib["allowEmbeddedAuthentication"] = str(oidc_item.allow_embedded_authentication).lower()
+        if oidc_item.custom_scope is not None:
+            oidc_element.attrib["customScope"] = oidc_item.custom_scope
+        if oidc_item.prompt is not None:
+            oidc_element.attrib["prompt"] = oidc_item.prompt
+        if oidc_item.client_authentication is not None:
+            oidc_element.attrib["clientAuthentication"] = oidc_item.client_authentication
+        if oidc_item.essential_acr_values is not None:
+            oidc_element.attrib["essentialAcrValues"] = oidc_item.essential_acr_values
+        if oidc_item.voluntary_acr_values is not None:
+            oidc_element.attrib["voluntaryAcrValues"] = oidc_item.voluntary_acr_values
+        if oidc_item.email_mapping is not None:
+            oidc_element.attrib["emailMapping"] = oidc_item.email_mapping
+        if oidc_item.first_name_mapping is not None:
+            oidc_element.attrib["firstNameMapping"] = oidc_item.first_name_mapping
+        if oidc_item.last_name_mapping is not None:
+            oidc_element.attrib["lastNameMapping"] = oidc_item.last_name_mapping
+        if oidc_item.full_name_mapping is not None:
+            oidc_element.attrib["fullNameMapping"] = oidc_item.full_name_mapping
+        if oidc_item.use_full_name is not None:
+            oidc_element.attrib["useFullName"] = str(oidc_item.use_full_name).lower()
+
+        return ET.tostring(xml_request)
+
+    @_tsrequest_wrapped
+    def update_req(self, xml_request: ET.Element, oidc_item: SiteOIDCConfiguration) -> bytes:
+        oidc_element = ET.SubElement(xml_request, "siteOIDCConfiguration")
+
+        # Check required attributes first
+
+        if oidc_item.idp_configuration_name is None:
+            raise ValueError(f"OIDC Item missing idp_configuration_name: {oidc_item}")
+        if oidc_item.client_id is None:
+            raise ValueError(f"OIDC Item missing client_id: {oidc_item}")
+        if oidc_item.client_secret is None:
+            raise ValueError(f"OIDC Item missing client_secret: {oidc_item}")
+        if oidc_item.authorization_endpoint is None:
+            raise ValueError(f"OIDC Item missing authorization_endpoint: {oidc_item}")
+        if oidc_item.token_endpoint is None:
+            raise ValueError(f"OIDC Item missing token_endpoint: {oidc_item}")
+        if oidc_item.userinfo_endpoint is None:
+            raise ValueError(f"OIDC Item missing userinfo_endpoint: {oidc_item}")
+        if not isinstance(oidc_item.enabled, bool):
+            raise ValueError(f"OIDC Item missing enabled: {oidc_item}")
+        if oidc_item.jwks_uri is None:
+            raise ValueError(f"OIDC Item missing jwks_uri: {oidc_item}")
+
+        oidc_element.attrib["name"] = oidc_item.idp_configuration_name
+        oidc_element.attrib["clientId"] = oidc_item.client_id
+        oidc_element.attrib["clientSecret"] = oidc_item.client_secret
+        oidc_element.attrib["authorizationEndpoint"] = oidc_item.authorization_endpoint
+        oidc_element.attrib["tokenEndpoint"] = oidc_item.token_endpoint
+        oidc_element.attrib["userInfoEndpoint"] = oidc_item.userinfo_endpoint
+        oidc_element.attrib["enabled"] = str(oidc_item.enabled).lower()
+        oidc_element.attrib["jwksUri"] = oidc_item.jwks_uri
+
+        if oidc_item.allow_embedded_authentication is not None:
+            oidc_element.attrib["allowEmbeddedAuthentication"] = str(oidc_item.allow_embedded_authentication).lower()
+        if oidc_item.custom_scope is not None:
+            oidc_element.attrib["customScope"] = oidc_item.custom_scope
+        if oidc_item.prompt is not None:
+            oidc_element.attrib["prompt"] = oidc_item.prompt
+        if oidc_item.client_authentication is not None:
+            oidc_element.attrib["clientAuthentication"] = oidc_item.client_authentication
+        if oidc_item.essential_acr_values is not None:
+            oidc_element.attrib["essentialAcrValues"] = oidc_item.essential_acr_values
+        if oidc_item.voluntary_acr_values is not None:
+            oidc_element.attrib["voluntaryAcrValues"] = oidc_item.voluntary_acr_values
+        if oidc_item.email_mapping is not None:
+            oidc_element.attrib["emailMapping"] = oidc_item.email_mapping
+        if oidc_item.first_name_mapping is not None:
+            oidc_element.attrib["firstNameMapping"] = oidc_item.first_name_mapping
+        if oidc_item.last_name_mapping is not None:
+            oidc_element.attrib["lastNameMapping"] = oidc_item.last_name_mapping
+        if oidc_item.full_name_mapping is not None:
+            oidc_element.attrib["fullNameMapping"] = oidc_item.full_name_mapping
+        if oidc_item.use_full_name is not None:
+            oidc_element.attrib["useFullName"] = str(oidc_item.use_full_name).lower()
+
+        return ET.tostring(xml_request)
+
+
 class RequestFactory:
     Auth = AuthRequest()
     Connection = Connection()
@@ -1521,6 +1637,7 @@ class RequestFactory:
     Group = GroupRequest()
     GroupSet = GroupSetRequest()
     Metric = MetricRequest()
+    OIDC = OIDCRequest()
     Permission = PermissionRequest()
     Project = ProjectRequest()
     Schedule = ScheduleRequest()
