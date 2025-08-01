@@ -1,10 +1,15 @@
+from itertools import product
 import os.path
 import unittest
 
+from defusedxml import ElementTree as ET
 import pytest
 import requests_mock
 
 import tableauserverclient as TSC
+from tableauserverclient.server.request_factory import RequestFactory
+
+from . import _utils
 
 TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
@@ -286,3 +291,36 @@ class SiteTests(unittest.TestCase):
         assert configs[1].idp_configuration_id == "11111111-1111-1111-1111-111111111111"
         assert configs[1].idp_configuration_name == "Initial SAML"
         assert configs[1].known_provider_alias is None
+
+
+@pytest.mark.parametrize("capture", [True, False, None])
+def test_parsing_attr_capture(capture):
+    server = TSC.Server("http://test", False)
+    server.version = "3.10"
+    attrs = {"contentUrl": "test", "name": "test"}
+    if capture is not None:
+        attrs |= {"attributeCaptureEnabled": str(capture).lower()}
+    xml = _utils.server_response_factory("site", **attrs)
+    site = TSC.SiteItem.from_response(xml, server.namespace)[0]
+
+    assert site.attribute_capture_enabled is capture, "Attribute capture not captured correctly"
+
+
+@pytest.mark.filterwarnings("ignore:FlowsEnabled has been removed")
+@pytest.mark.parametrize("req, capture", product(["create_req", "update_req"], [True, False, None]))
+def test_encoding_attr_capture(req, capture):
+    site = TSC.SiteItem(
+        content_url="test",
+        name="test",
+        attribute_capture_enabled=capture,
+    )
+    xml = getattr(RequestFactory.Site, req)(site)
+    site_elem = ET.fromstring(xml).find(".//site")
+    assert site_elem is not None, "Site element missing from XML body."
+
+    if capture is not None:
+        assert (
+            site_elem.attrib["attributeCaptureEnabled"] == str(capture).lower()
+        ), "Attribute capture not encoded correctly"
+    else:
+        assert "attributeCaptureEnabled" not in site_elem.attrib, "Attribute capture should not be encoded when None"
