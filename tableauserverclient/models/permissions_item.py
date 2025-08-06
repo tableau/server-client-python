@@ -43,6 +43,7 @@ class Permission:
         CreateRefreshMetrics = "CreateRefreshMetrics"
         SaveAs = "SaveAs"
         PulseMetricDefine = "PulseMetricDefine"
+        WebAuthoringForFlows = "WebAuthoringForFlows"
 
         def __repr__(self):
             return "<Enum Capability: AddComment | ChangeHierarchy | ChangePermission ... (17 more) >"
