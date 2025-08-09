@@ -924,6 +924,7 @@ class TagRequest:
             if item.id is None:
                 raise ValueError(f"Item {item} must have an ID to be tagged.")
             content_element.attrib["id"] = item.id
+            content_element.attrib["contentType"] = item.__class__.__name__.replace("Item", "")
 
         return ET.tostring(element)
 
