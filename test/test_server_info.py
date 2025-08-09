@@ -1,3 +1,4 @@
+import json
 import os.path
 import unittest
 
@@ -13,6 +14,7 @@ SERVER_INFO_25_XML = os.path.join(TEST_ASSET_DIR, "server_info_25.xml")
 SERVER_INFO_404 = os.path.join(TEST_ASSET_DIR, "server_info_404.xml")
 SERVER_INFO_AUTH_INFO_XML = os.path.join(TEST_ASSET_DIR, "server_info_auth_info.xml")
 SERVER_INFO_WRONG_SITE = os.path.join(TEST_ASSET_DIR, "server_info_wrong_site.html")
+SERVER_PRODUCT_INFO = os.path.join(TEST_ASSET_DIR, "getServerSettingsUnauthenticated.json")
 
 
 class ServerInfoTests(unittest.TestCase):
@@ -26,6 +28,7 @@ class ServerInfoTests(unittest.TestCase):
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             m.get(self.server.server_info.baseurl, text=response_xml)
+            m.post(f"{self.server.server_address}/vizportal/api/web/v1/getServerSettingsUnauthenticated", json={})
             actual = self.server.server_info.get()
 
             self.assertEqual("10.1.0", actual.product_version)
@@ -43,6 +46,8 @@ class ServerInfoTests(unittest.TestCase):
             # Return a 404 for serverInfo so we can pretend this is an old Server
             m.get(self.server.server_address + "/api/2.4/serverInfo", text=si_response_xml, status_code=404)
             m.get(self.server.server_address + "/auth?format=xml", text=auth_response_xml)
+            m.post(f"{self.server.server_address}/vizportal/api/web/v1/getServerSettingsUnauthenticated", json={})
+
             self.server.use_server_version()
             # does server-version[9.2] lookup in PRODUCT_TO_REST_VERSION
             self.assertEqual(self.server.version, "2.2")
@@ -52,6 +57,7 @@ class ServerInfoTests(unittest.TestCase):
             si_response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             m.get(self.server.server_address + "/api/2.8/serverInfo", text=si_response_xml)
+            m.post(f"{self.server.server_address}/vizportal/api/web/v1/getServerSettingsUnauthenticated", json={})
             # Pretend we're old
             self.server.version = "2.8"
             self.server.use_server_version()
@@ -63,6 +69,7 @@ class ServerInfoTests(unittest.TestCase):
             si_response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
             m.get("http://test/api/2.4/serverInfo", text=si_response_xml)
+            m.post(f"{self.server.server_address}/vizportal/api/web/v1/getServerSettingsUnauthenticated", json={})
             server = TSC.Server("http://test", use_server_version=True)
             self.assertEqual(server.version, "2.5")
 
@@ -73,3 +80,21 @@ class ServerInfoTests(unittest.TestCase):
             m.get(self.server.server_info.baseurl, text=response, status_code=404)
             with self.assertRaises(NonXMLResponseError):
                 self.server.server_info.get()
+
+    def test_server_info_product(self):
+        with open(SERVER_PRODUCT_INFO) as f:
+            product_info_json = json.load(f)
+
+        with requests_mock.mock() as m:
+            m.post(
+                f"{self.server.server_address}/vizportal/api/web/v1/getServerSettingsUnauthenticated",
+                json=product_info_json,
+            )
+            self.server.use_server_version()
+            assert self.server._product == "TableauOnline"
+
+    def test_server_info_product_no_response(self):
+        with requests_mock.mock() as m:
+            m.post(f"{self.server.server_address}/vizportal/api/web/v1/getServerSettingsUnauthenticated", json={})
+            self.server.use_server_version()
+            assert self.server._product == "TableauServer"

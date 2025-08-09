@@ -1,5 +1,5 @@
 import logging
-from typing import Union
+from typing import Literal, Union, TYPE_CHECKING
 
 from .endpoint import Endpoint, api
 from .exceptions import ServerResponseError
@@ -9,10 +9,15 @@ from ..exceptions import (
 )
 from tableauserverclient.models import ServerInfoItem
 
+if TYPE_CHECKING:
+    from tableauserverclient.server import Server
+
+Products = Literal["TableauServer", "TableauOnline"]
+
 
 class ServerInfo(Endpoint):
     def __init__(self, server):
-        self.parent_srv = server
+        self.parent_srv: "Server" = server
         self._info = None
 
     @property
@@ -80,3 +85,25 @@ class ServerInfo(Endpoint):
             logging.getLogger(self.__class__.__name__).debug(e)
             logging.getLogger(self.__class__.__name__).debug(server_response.content)
         return self._info
+
+    def _get_product_info(self) -> Products:
+        """
+        Retrieve the server product information to determine if the server is
+        Tableau Server or Tableau Online.
+        """
+        method = "getServerSettingsUnauthenticated"
+        response = self.parent_srv.session.post(
+            f"{self.parent_srv.server_address}/vizportal/api/web/v1/{method}",
+            headers={"Content-Type": "application/json"},
+            verify=self.parent_srv.http_options.get("verify", True),
+            json={"method": method, "params": {}},
+        )
+        if not response.ok:
+            return "TableauServer"
+        else:
+            try:
+                return response.json().get("result", {}).get("product", "TableauServer")
+            except Exception as e:
+                logging.getLogger(self.__class__.__name__).debug(e)
+                logging.getLogger(self.__class__.__name__).debug("Failed to parse product info response.")
+                return "TableauServer"
