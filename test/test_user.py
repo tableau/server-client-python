@@ -6,21 +6,20 @@ import requests_mock
 
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime, parse_datetime
+from test._utils import data_asset_path, xml_asset_path
 
-TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
+GET_XML = xml_asset_path("user_get.xml")
+GET_XML_ALL_FIELDS = xml_asset_path("user_get_all_fields.xml")
+GET_EMPTY_XML = xml_asset_path("user_get_empty.xml")
+GET_BY_ID_XML = xml_asset_path("user_get_by_id.xml")
+UPDATE_XML = xml_asset_path("user_update.xml")
+ADD_XML = xml_asset_path("user_add.xml")
+POPULATE_WORKBOOKS_XML = xml_asset_path("user_populate_workbooks.xml")
+GET_FAVORITES_XML = xml_asset_path("favorites_get.xml")
+POPULATE_GROUPS_XML = xml_asset_path("user_populate_groups.xml")
 
-GET_XML = os.path.join(TEST_ASSET_DIR, "user_get.xml")
-GET_XML_ALL_FIELDS = os.path.join(TEST_ASSET_DIR, "user_get_all_fields.xml")
-GET_EMPTY_XML = os.path.join(TEST_ASSET_DIR, "user_get_empty.xml")
-GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, "user_get_by_id.xml")
-UPDATE_XML = os.path.join(TEST_ASSET_DIR, "user_update.xml")
-ADD_XML = os.path.join(TEST_ASSET_DIR, "user_add.xml")
-POPULATE_WORKBOOKS_XML = os.path.join(TEST_ASSET_DIR, "user_populate_workbooks.xml")
-GET_FAVORITES_XML = os.path.join(TEST_ASSET_DIR, "favorites_get.xml")
-POPULATE_GROUPS_XML = os.path.join(TEST_ASSET_DIR, "user_populate_groups.xml")
-
-USERNAMES = os.path.join(TEST_ASSET_DIR, "Data", "usernames.csv")
-USERS = os.path.join(TEST_ASSET_DIR, "Data", "user_details.csv")
+USERNAMES = data_asset_path("usernames.csv")
+USERS = data_asset_path("user_details.csv")
 
 
 class UserTests(unittest.TestCase):

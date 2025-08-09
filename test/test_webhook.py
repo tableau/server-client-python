@@ -6,13 +6,11 @@ import requests_mock
 import tableauserverclient as TSC
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import WebhookItem
-from ._utils import asset
+from test._utils import xml_asset_path
 
-TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
-
-GET_XML = asset("webhook_get.xml")
-CREATE_XML = asset("webhook_create.xml")
-CREATE_REQUEST_XML = asset("webhook_create_request.xml")
+GET_XML = xml_asset_path("webhook_get.xml")
+CREATE_XML = xml_asset_path("webhook_create.xml")
+CREATE_REQUEST_XML = xml_asset_path("webhook_create_request.xml")
 
 
 class WebhookTests(unittest.TestCase):

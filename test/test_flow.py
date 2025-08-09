@@ -7,16 +7,14 @@ from io import BytesIO
 
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime
-from ._utils import read_xml_asset, asset
+from test._utils import data_asset_path, read_xml_asset, xml_asset_path
 
-TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
-
-GET_XML = os.path.join(TEST_ASSET_DIR, "flow_get.xml")
-POPULATE_CONNECTIONS_XML = os.path.join(TEST_ASSET_DIR, "flow_populate_connections.xml")
-POPULATE_PERMISSIONS_XML = os.path.join(TEST_ASSET_DIR, "flow_populate_permissions.xml")
-PUBLISH_XML = os.path.join(TEST_ASSET_DIR, "flow_publish.xml")
-UPDATE_XML = os.path.join(TEST_ASSET_DIR, "flow_update.xml")
-REFRESH_XML = os.path.join(TEST_ASSET_DIR, "flow_refresh.xml")
+GET_XML = xml_asset_path("flow_get.xml")
+POPULATE_CONNECTIONS_XML = xml_asset_path("flow_populate_connections.xml")
+POPULATE_PERMISSIONS_XML = xml_asset_path("flow_populate_permissions.xml")
+PUBLISH_XML = xml_asset_path("flow_publish.xml")
+UPDATE_XML = xml_asset_path("flow_update.xml")
+REFRESH_XML = xml_asset_path("flow_refresh.xml")
 
 
 class FlowTests(unittest.TestCase):
@@ -122,8 +120,7 @@ class FlowTests(unittest.TestCase):
         self.assertEqual(True, conn3.embed_password)
 
     def test_populate_permissions(self) -> None:
-        with open(asset(POPULATE_PERMISSIONS_XML), "rb") as f:
-            response_xml = f.read().decode("utf-8")
+        response_xml = read_xml_asset(POPULATE_PERMISSIONS_XML)
         with requests_mock.mock() as m:
             m.get(self.baseurl + "/0448d2ed-590d-4fa0-b272-a2a8a24555b5/permissions", text=response_xml)
             single_datasource = TSC.FlowItem("test")
@@ -153,14 +150,13 @@ class FlowTests(unittest.TestCase):
             )
 
     def test_publish(self) -> None:
-        with open(PUBLISH_XML, "rb") as f:
-            response_xml = f.read().decode("utf-8")
+        response_xml = read_xml_asset(PUBLISH_XML)
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
 
             new_flow = TSC.FlowItem(name="SampleFlow", project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760")
 
-            sample_flow = os.path.join(TEST_ASSET_DIR, "SampleFlow.tfl")
+            sample_flow = data_asset_path("SampleFlow.tfl")
             publish_mode = self.server.PublishMode.CreateNew
 
             new_flow = self.server.flows.publish(new_flow, sample_flow, publish_mode)
@@ -174,14 +170,13 @@ class FlowTests(unittest.TestCase):
         self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", new_flow.owner_id)
 
     def test_publish_file_object(self) -> None:
-        with open(PUBLISH_XML, "rb") as f:
-            response_xml = f.read().decode("utf-8")
+        response_xml = read_xml_asset(PUBLISH_XML)
         with requests_mock.mock() as m:
             m.post(self.baseurl, text=response_xml)
 
             new_flow = TSC.FlowItem(name="SampleFlow", project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760")
 
-            sample_flow = os.path.join(TEST_ASSET_DIR, "SampleFlow.tfl")
+            sample_flow = data_asset_path("SampleFlow.tfl")
             publish_mode = self.server.PublishMode.CreateNew
 
             with open(sample_flow, "rb") as fp:
@@ -198,8 +193,7 @@ class FlowTests(unittest.TestCase):
         self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", new_flow.owner_id)
 
     def test_refresh(self):
-        with open(asset(REFRESH_XML), "rb") as f:
-            response_xml = f.read().decode("utf-8")
+        response_xml = read_xml_asset(REFRESH_XML)
         with requests_mock.mock() as m:
             m.post(self.baseurl + "/92967d2d-c7e2-46d0-8847-4802df58f484/run", text=response_xml)
             flow_item = TSC.FlowItem("test")
