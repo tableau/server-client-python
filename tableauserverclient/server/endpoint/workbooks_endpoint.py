@@ -30,9 +30,12 @@ from tableauserverclient.models import WorkbookItem, ConnectionItem, ViewItem, P
 from tableauserverclient.server import RequestFactory
 
 from typing import (
+    Literal,
     Optional,
     TYPE_CHECKING,
+    TypeVar,
     Union,
+    overload,
 )
 from collections.abc import Iterable, Sequence
 
@@ -383,16 +386,33 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         logger.info(f"Updated connections for workbook {workbook_item.id}: {', '.join(updated_ids)}")
         return connection_items
 
+    T = TypeVar("T", bound=FileObjectW)
+    @overload
+    def download(
+        self,
+        workbook_id: str,
+        filepath: T,
+        include_extract: bool = True,
+    ) -> T: ...
+
+    @overload
+    def download(
+        self,
+        workbook_id: str,
+        filepath: Optional[FilePath] = None,
+        include_extract: bool = True,
+    ) -> str: ...
+
     # Download workbook contents with option of passing in filepath
     @api(version="2.0")
     @parameter_added_in(no_extract="2.5")
     @parameter_added_in(include_extract="2.5")
     def download(
         self,
-        workbook_id: str,
-        filepath: Optional[PathOrFileW] = None,
-        include_extract: bool = True,
-    ) -> PathOrFileW:
+        workbook_id,
+        filepath=None,
+        include_extract=True,
+    ):
         """
         Downloads a workbook to the specified directory (optional).
 
@@ -741,6 +761,28 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         """
         return self._permissions.delete(item, capability_item)
 
+    @overload
+    def publish(self,
+        workbook_item: WorkbookItem,
+        file: PathOrFileR,
+        mode: str,
+        connections: Optional[Sequence[ConnectionItem]],
+        as_job: Literal[False],
+        skip_connection_check: bool,
+        parameters=None,
+                ) -> WorkbookItem: ...
+
+    @overload
+    def publish(self,
+        workbook_item: WorkbookItem,
+        file: PathOrFileR,
+        mode: str,
+        connections: Optional[Sequence[ConnectionItem]],
+        as_job: Literal[True],
+        skip_connection_check: bool,
+        parameters=None,
+                ) -> JobItem: ...
+
     @api(version="2.0")
     @parameter_added_in(as_job="3.0")
     @parameter_added_in(connections="2.8")
@@ -977,15 +1019,25 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         revisions = RevisionItem.from_response(server_response.content, self.parent_srv.namespace, workbook_item)
         return revisions
 
+    @overload
+    def download_revision(
+        self, workbook_id: str, revision_number: Optional[str], filepath: FileObjectW, include_extract: bool
+    ) -> FileObjectW: ...
+
+    @overload
+    def download_revision(
+        self, workbook_id: str, revision_number: Optional[str], filepath: Optional[FilePath], include_extract: bool
+    ) -> str: ...
+
     # Download 1 workbook revision by revision number
     @api(version="2.3")
     def download_revision(
         self,
-        workbook_id: str,
-        revision_number: Optional[str],
-        filepath: Optional[PathOrFileW] = None,
-        include_extract: bool = True,
-    ) -> PathOrFileW:
+        workbook_id,
+        revision_number,
+        filepath,
+        include_extract=True,
+    ):
         """
         Downloads a workbook revision to the specified directory (optional).
 

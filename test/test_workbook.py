@@ -59,33 +59,33 @@ class WorkbookTests(unittest.TestCase):
             m.get(self.baseurl, text=response_xml)
             all_workbooks, pagination_item = self.server.workbooks.get()
 
-        self.assertEqual(2, pagination_item.total_available)
-        self.assertEqual("6d13b0ca-043d-4d42-8c9d-3f3313ea3a00", all_workbooks[0].id)
-        self.assertEqual("Superstore", all_workbooks[0].name)
-        self.assertEqual("Superstore", all_workbooks[0].content_url)
-        self.assertEqual(False, all_workbooks[0].show_tabs)
-        self.assertEqual("http://tableauserver/#/workbooks/1/views", all_workbooks[0].webpage_url)
-        self.assertEqual(1, all_workbooks[0].size)
-        self.assertEqual("2016-08-03T20:34:04Z", format_datetime(all_workbooks[0].created_at))
-        self.assertEqual("description for Superstore", all_workbooks[0].description)
-        self.assertEqual("2016-08-04T17:56:41Z", format_datetime(all_workbooks[0].updated_at))
-        self.assertEqual("ee8c6e70-43b6-11e6-af4f-f7b0d8e20760", all_workbooks[0].project_id)
-        self.assertEqual("default", all_workbooks[0].project_name)
-        self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", all_workbooks[0].owner_id)
+        assert 2 == pagination_item.total_available
+        assert "6d13b0ca-043d-4d42-8c9d-3f3313ea3a00" == all_workbooks[0].id
+        assert "Superstore" == all_workbooks[0].name
+        assert "Superstore" == all_workbooks[0].content_url
+        assert not all_workbooks[0].show_tabs
+        assert "http://tableauserver/#/workbooks/1/views" == all_workbooks[0].webpage_url
+        assert 1 == all_workbooks[0].size
+        assert "2016-08-03T20:34:04Z" == format_datetime(all_workbooks[0].created_at)
+        assert "description for Superstore" == all_workbooks[0].description
+        assert "2016-08-04T17:56:41Z" == format_datetime(all_workbooks[0].updated_at)
+        assert "ee8c6e70-43b6-11e6-af4f-f7b0d8e20760" == all_workbooks[0].project_id
+        assert "default" == all_workbooks[0].project_name
+        assert "5de011f8-5aa9-4d5b-b991-f462c8dd6bb7" == all_workbooks[0].owner_id
 
-        self.assertEqual("3cc6cd06-89ce-4fdc-b935-5294135d6d42", all_workbooks[1].id)
-        self.assertEqual("SafariSample", all_workbooks[1].name)
-        self.assertEqual("SafariSample", all_workbooks[1].content_url)
-        self.assertEqual("http://tableauserver/#/workbooks/2/views", all_workbooks[1].webpage_url)
-        self.assertEqual(False, all_workbooks[1].show_tabs)
-        self.assertEqual(26, all_workbooks[1].size)
-        self.assertEqual("2016-07-26T20:34:56Z", format_datetime(all_workbooks[1].created_at))
-        self.assertEqual("description for SafariSample", all_workbooks[1].description)
-        self.assertEqual("2016-07-26T20:35:05Z", format_datetime(all_workbooks[1].updated_at))
-        self.assertEqual("ee8c6e70-43b6-11e6-af4f-f7b0d8e20760", all_workbooks[1].project_id)
-        self.assertEqual("default", all_workbooks[1].project_name)
-        self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", all_workbooks[1].owner_id)
-        self.assertEqual({"Safari", "Sample"}, all_workbooks[1].tags)
+        assert "3cc6cd06-89ce-4fdc-b935-5294135d6d42" == all_workbooks[1].id
+        assert "SafariSample" == all_workbooks[1].name
+        assert "SafariSample" == all_workbooks[1].content_url
+        assert "http://tableauserver/#/workbooks/2/views" == all_workbooks[1].webpage_url
+        assert not all_workbooks[1].show_tabs
+        assert 26 == all_workbooks[1].size
+        assert "2016-07-26T20:34:56Z" == format_datetime(all_workbooks[1].created_at)
+        assert "description for SafariSample" == all_workbooks[1].description
+        assert "2016-07-26T20:35:05Z" == format_datetime(all_workbooks[1].updated_at)
+        assert "ee8c6e70-43b6-11e6-af4f-f7b0d8e20760" == all_workbooks[1].project_id
+        assert "default" == all_workbooks[1].project_name
+        assert "5de011f8-5aa9-4d5b-b991-f462c8dd6bb7" == all_workbooks[1].owner_id
+        assert {"Safari", "Sample"} == all_workbooks[1].tags
 
     def test_get_ignore_invalid_date(self) -> None:
         with open(GET_INVALID_DATE_XML, "rb") as f:
@@ -93,12 +93,13 @@ class WorkbookTests(unittest.TestCase):
         with requests_mock.mock() as m:
             m.get(self.baseurl, text=response_xml)
             all_workbooks, pagination_item = self.server.workbooks.get()
-        self.assertEqual(None, format_datetime(all_workbooks[0].created_at))
-        self.assertEqual("2016-08-04T17:56:41Z", format_datetime(all_workbooks[0].updated_at))
+        assert format_datetime(all_workbooks[0].created_at) is None
+        assert "2016-08-04T17:56:41Z" == format_datetime(all_workbooks[0].updated_at)
 
     def test_get_before_signin(self) -> None:
         self.server._auth_token = None
-        self.assertRaises(TSC.NotSignedInError, self.server.workbooks.get)
+        with pytest.raises(TSC.NotSignedInError):
+            self.server.workbooks.get()
 
     def test_get_empty(self) -> None:
         with open(GET_EMPTY_XML, "rb") as f:
@@ -107,8 +108,8 @@ class WorkbookTests(unittest.TestCase):
             m.get(self.baseurl, text=response_xml)
             all_workbooks, pagination_item = self.server.workbooks.get()
 
-        self.assertEqual(0, pagination_item.total_available)
-        self.assertEqual([], all_workbooks)
+        assert 0 == pagination_item.total_available
+        assert [] == all_workbooks
 
     def test_get_by_id(self) -> None:
         with open(GET_BY_ID_XML, "rb") as f:
@@ -117,22 +118,22 @@ class WorkbookTests(unittest.TestCase):
             m.get(self.baseurl + "/3cc6cd06-89ce-4fdc-b935-5294135d6d42", text=response_xml)
             single_workbook = self.server.workbooks.get_by_id("3cc6cd06-89ce-4fdc-b935-5294135d6d42")
 
-        self.assertEqual("3cc6cd06-89ce-4fdc-b935-5294135d6d42", single_workbook.id)
-        self.assertEqual("SafariSample", single_workbook.name)
-        self.assertEqual("SafariSample", single_workbook.content_url)
-        self.assertEqual("http://tableauserver/#/workbooks/2/views", single_workbook.webpage_url)
-        self.assertEqual(False, single_workbook.show_tabs)
-        self.assertEqual(26, single_workbook.size)
-        self.assertEqual("2016-07-26T20:34:56Z", format_datetime(single_workbook.created_at))
-        self.assertEqual("description for SafariSample", single_workbook.description)
-        self.assertEqual("2016-07-26T20:35:05Z", format_datetime(single_workbook.updated_at))
-        self.assertEqual("ee8c6e70-43b6-11e6-af4f-f7b0d8e20760", single_workbook.project_id)
-        self.assertEqual("default", single_workbook.project_name)
-        self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", single_workbook.owner_id)
-        self.assertEqual({"Safari", "Sample"}, single_workbook.tags)
-        self.assertEqual("d79634e1-6063-4ec9-95ff-50acbf609ff5", single_workbook.views[0].id)
-        self.assertEqual("ENDANGERED SAFARI", single_workbook.views[0].name)
-        self.assertEqual("SafariSample/sheets/ENDANGEREDSAFARI", single_workbook.views[0].content_url)
+        assert "3cc6cd06-89ce-4fdc-b935-5294135d6d42" == single_workbook.id
+        assert "SafariSample" == single_workbook.name
+        assert "SafariSample" == single_workbook.content_url
+        assert "http://tableauserver/#/workbooks/2/views" == single_workbook.webpage_url
+        assert not single_workbook.show_tabs
+        assert 26 == single_workbook.size
+        assert "2016-07-26T20:34:56Z" == format_datetime(single_workbook.created_at)
+        assert "description for SafariSample" == single_workbook.description
+        assert "2016-07-26T20:35:05Z" == format_datetime(single_workbook.updated_at)
+        assert "ee8c6e70-43b6-11e6-af4f-f7b0d8e20760" == single_workbook.project_id
+        assert "default" == single_workbook.project_name
+        assert "5de011f8-5aa9-4d5b-b991-f462c8dd6bb7" == single_workbook.owner_id
+        assert {"Safari", "Sample"} == single_workbook.tags
+        assert "d79634e1-6063-4ec9-95ff-50acbf609ff5" == single_workbook.views[0].id
+        assert "ENDANGERED SAFARI" == single_workbook.views[0].name
+        assert "SafariSample/sheets/ENDANGEREDSAFARI" == single_workbook.views[0].content_url
 
     def test_get_by_id_personal(self) -> None:
         # workbooks in personal space don't have project_id or project_name
@@ -142,25 +143,26 @@ class WorkbookTests(unittest.TestCase):
             m.get(self.baseurl + "/3cc6cd06-89ce-4fdc-b935-5294135d6d43", text=response_xml)
             single_workbook = self.server.workbooks.get_by_id("3cc6cd06-89ce-4fdc-b935-5294135d6d43")
 
-        self.assertEqual("3cc6cd06-89ce-4fdc-b935-5294135d6d43", single_workbook.id)
-        self.assertEqual("SafariSample", single_workbook.name)
-        self.assertEqual("SafariSample", single_workbook.content_url)
-        self.assertEqual("http://tableauserver/#/workbooks/2/views", single_workbook.webpage_url)
-        self.assertEqual(False, single_workbook.show_tabs)
-        self.assertEqual(26, single_workbook.size)
-        self.assertEqual("2016-07-26T20:34:56Z", format_datetime(single_workbook.created_at))
-        self.assertEqual("description for SafariSample", single_workbook.description)
-        self.assertEqual("2016-07-26T20:35:05Z", format_datetime(single_workbook.updated_at))
-        self.assertTrue(single_workbook.project_id)
-        self.assertIsNone(single_workbook.project_name)
-        self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", single_workbook.owner_id)
-        self.assertEqual({"Safari", "Sample"}, single_workbook.tags)
-        self.assertEqual("d79634e1-6063-4ec9-95ff-50acbf609ff5", single_workbook.views[0].id)
-        self.assertEqual("ENDANGERED SAFARI", single_workbook.views[0].name)
-        self.assertEqual("SafariSample/sheets/ENDANGEREDSAFARI", single_workbook.views[0].content_url)
+        assert "3cc6cd06-89ce-4fdc-b935-5294135d6d43" == single_workbook.id
+        assert "SafariSample" == single_workbook.name
+        assert "SafariSample" == single_workbook.content_url
+        assert "http://tableauserver/#/workbooks/2/views" == single_workbook.webpage_url
+        assert not single_workbook.show_tabs
+        assert 26 == single_workbook.size
+        assert "2016-07-26T20:34:56Z" == format_datetime(single_workbook.created_at)
+        assert "description for SafariSample" == single_workbook.description
+        assert "2016-07-26T20:35:05Z" == format_datetime(single_workbook.updated_at)
+        assert single_workbook.project_id
+        assert single_workbook.project_name is None
+        assert "5de011f8-5aa9-4d5b-b991-f462c8dd6bb7" == single_workbook.owner_id
+        assert {"Safari", "Sample"} == single_workbook.tags
+        assert "d79634e1-6063-4ec9-95ff-50acbf609ff5" == single_workbook.views[0].id
+        assert "ENDANGERED SAFARI" == single_workbook.views[0].name
+        assert "SafariSample/sheets/ENDANGEREDSAFARI" == single_workbook.views[0].content_url
 
     def test_get_by_id_missing_id(self) -> None:
-        self.assertRaises(ValueError, self.server.workbooks.get_by_id, "")
+        with pytest.raises(ValueError):
+            self.server.workbooks.get_by_id("")
 
     def test_refresh_id(self) -> None:
         self.server.version = "2.8"
@@ -188,7 +190,8 @@ class WorkbookTests(unittest.TestCase):
             self.server.workbooks.delete("3cc6cd06-89ce-4fdc-b935-5294135d6d42")
 
     def test_delete_missing_id(self) -> None:
-        self.assertRaises(ValueError, self.server.workbooks.delete, "")
+        with pytest.raises(ValueError):
+            self.server.workbooks.delete("")
 
     def test_update(self) -> None:
         with open(UPDATE_XML, "rb") as f:
@@ -207,17 +210,18 @@ class WorkbookTests(unittest.TestCase):
             }
             single_workbook = self.server.workbooks.update(single_workbook)
 
-        self.assertEqual("1f951daf-4061-451a-9df1-69a8062664f2", single_workbook.id)
-        self.assertEqual(True, single_workbook.show_tabs)
-        self.assertEqual("1d0304cd-3796-429f-b815-7258370b9b74", single_workbook.project_id)
-        self.assertEqual("dd2239f6-ddf1-4107-981a-4cf94e415794", single_workbook.owner_id)
-        self.assertEqual("renamedWorkbook", single_workbook.name)
-        self.assertEqual(True, single_workbook.data_acceleration_config["acceleration_enabled"])
-        self.assertEqual(False, single_workbook.data_acceleration_config["accelerate_now"])
+        assert "1f951daf-4061-451a-9df1-69a8062664f2" == single_workbook.id
+        assert single_workbook.show_tabs
+        assert "1d0304cd-3796-429f-b815-7258370b9b74" == single_workbook.project_id
+        assert "dd2239f6-ddf1-4107-981a-4cf94e415794" == single_workbook.owner_id
+        assert "renamedWorkbook" == single_workbook.name
+        assert single_workbook.data_acceleration_config["acceleration_enabled"]
+        assert not single_workbook.data_acceleration_config["accelerate_now"]
 
     def test_update_missing_id(self) -> None:
         single_workbook = TSC.WorkbookItem("test")
-        self.assertRaises(TSC.MissingRequiredFieldError, self.server.workbooks.update, single_workbook)
+        with pytest.raises(TSC.MissingRequiredFieldError):
+            self.server.workbooks.update(single_workbook)
 
     def test_update_copy_fields(self) -> None:
         with open(POPULATE_CONNECTIONS_XML, "rb") as f:
@@ -232,11 +236,11 @@ class WorkbookTests(unittest.TestCase):
             self.server.workbooks.populate_connections(single_workbook)
             updated_workbook = self.server.workbooks.update(single_workbook)
 
-        self.assertEqual(single_workbook._connections, updated_workbook._connections)
-        self.assertEqual(single_workbook._views, updated_workbook._views)
-        self.assertEqual(single_workbook.tags, updated_workbook.tags)
-        self.assertEqual(single_workbook._initial_tags, updated_workbook._initial_tags)
-        self.assertEqual(single_workbook._preview_image, updated_workbook._preview_image)
+        assert single_workbook._connections == updated_workbook._connections
+        assert single_workbook._views == updated_workbook._views
+        assert single_workbook.tags == updated_workbook.tags
+        assert single_workbook._initial_tags == updated_workbook._initial_tags
+        assert single_workbook._preview_image == updated_workbook._preview_image
 
     def test_update_tags(self) -> None:
         with open(ADD_TAGS_XML, "rb") as f:
@@ -254,8 +258,8 @@ class WorkbookTests(unittest.TestCase):
             single_workbook.tags.update(["a", "c", "e"])
             updated_workbook = self.server.workbooks.update(single_workbook)
 
-        self.assertEqual(single_workbook.tags, updated_workbook.tags)
-        self.assertEqual(single_workbook._initial_tags, updated_workbook._initial_tags)
+        assert single_workbook.tags == updated_workbook.tags
+        assert single_workbook._initial_tags == updated_workbook._initial_tags
 
     def test_download(self) -> None:
         with requests_mock.mock() as m:
@@ -264,7 +268,7 @@ class WorkbookTests(unittest.TestCase):
                 headers={"Content-Disposition": 'name="tableau_workbook"; filename="RESTAPISample.twbx"'},
             )
             file_path = self.server.workbooks.download("1f951daf-4061-451a-9df1-69a8062664f2")
-            self.assertTrue(os.path.exists(file_path))
+            assert os.path.exists(file_path)
         os.remove(file_path)
 
     def test_download_object(self) -> None:
@@ -275,7 +279,7 @@ class WorkbookTests(unittest.TestCase):
                     headers={"Content-Disposition": 'name="tableau_workbook"; filename="RESTAPISample.twbx"'},
                 )
                 file_path = self.server.workbooks.download("1f951daf-4061-451a-9df1-69a8062664f2", filepath=file_object)
-                self.assertTrue(isinstance(file_path, BytesIO))
+                assert isinstance(file_path, BytesIO)
 
     def test_download_sanitizes_name(self) -> None:
         filename = "Name,With,Commas.twbx"
@@ -286,8 +290,8 @@ class WorkbookTests(unittest.TestCase):
                 headers={"Content-Disposition": disposition},
             )
             file_path = self.server.workbooks.download("1f951daf-4061-451a-9df1-69a8062664f2")
-            self.assertEqual(os.path.basename(file_path), "NameWithCommas.twbx")
-            self.assertTrue(os.path.exists(file_path))
+            assert os.path.basename(file_path) == "NameWithCommas.twbx"
+            assert os.path.exists(file_path)
         os.remove(file_path)
 
     def test_download_extract_only(self) -> None:
@@ -303,11 +307,12 @@ class WorkbookTests(unittest.TestCase):
             )
             # Technically this shouldn't download a twbx, but we are interested in the qs, not the file
             file_path = self.server.workbooks.download("1f951daf-4061-451a-9df1-69a8062664f2", include_extract=False)
-            self.assertTrue(os.path.exists(file_path))
+            assert os.path.exists(file_path)
         os.remove(file_path)
 
     def test_download_missing_id(self) -> None:
-        self.assertRaises(ValueError, self.server.workbooks.download, "")
+        with pytest.raises(ValueError):
+            self.server.workbooks.download("")
 
     def test_populate_views(self) -> None:
         with open(POPULATE_VIEWS_XML, "rb") as f:
@@ -319,17 +324,17 @@ class WorkbookTests(unittest.TestCase):
             self.server.workbooks.populate_views(single_workbook)
 
             views_list = single_workbook.views
-            self.assertEqual("097dbe13-de89-445f-b2c3-02f28bd010c1", views_list[0].id)
-            self.assertEqual("GDP per capita", views_list[0].name)
-            self.assertEqual("RESTAPISample/sheets/GDPpercapita", views_list[0].content_url)
+            assert "097dbe13-de89-445f-b2c3-02f28bd010c1" == views_list[0].id
+            assert "GDP per capita" == views_list[0].name
+            assert "RESTAPISample/sheets/GDPpercapita" == views_list[0].content_url
 
-            self.assertEqual("2c1ab9d7-8d64-4cc6-b495-52e40c60c330", views_list[1].id)
-            self.assertEqual("Country ranks", views_list[1].name)
-            self.assertEqual("RESTAPISample/sheets/Countryranks", views_list[1].content_url)
+            assert "2c1ab9d7-8d64-4cc6-b495-52e40c60c330" == views_list[1].id
+            assert "Country ranks" == views_list[1].name
+            assert "RESTAPISample/sheets/Countryranks" == views_list[1].content_url
 
-            self.assertEqual("0599c28c-6d82-457e-a453-e52c1bdb00f5", views_list[2].id)
-            self.assertEqual("Interest rates", views_list[2].name)
-            self.assertEqual("RESTAPISample/sheets/Interestrates", views_list[2].content_url)
+            assert "0599c28c-6d82-457e-a453-e52c1bdb00f5" == views_list[2].id
+            assert "Interest rates" == views_list[2].name
+            assert "RESTAPISample/sheets/Interestrates" == views_list[2].content_url
 
     def test_populate_views_with_usage(self) -> None:
         with open(POPULATE_VIEWS_USAGE_XML, "rb") as f:
@@ -344,16 +349,17 @@ class WorkbookTests(unittest.TestCase):
             self.server.workbooks.populate_views(single_workbook, usage=True)
 
             views_list = single_workbook.views
-            self.assertEqual("097dbe13-de89-445f-b2c3-02f28bd010c1", views_list[0].id)
-            self.assertEqual(2, views_list[0].total_views)
-            self.assertEqual("2c1ab9d7-8d64-4cc6-b495-52e40c60c330", views_list[1].id)
-            self.assertEqual(37, views_list[1].total_views)
-            self.assertEqual("0599c28c-6d82-457e-a453-e52c1bdb00f5", views_list[2].id)
-            self.assertEqual(0, views_list[2].total_views)
+            assert "097dbe13-de89-445f-b2c3-02f28bd010c1" == views_list[0].id
+            assert 2 == views_list[0].total_views
+            assert "2c1ab9d7-8d64-4cc6-b495-52e40c60c330" == views_list[1].id
+            assert 37 == views_list[1].total_views
+            assert "0599c28c-6d82-457e-a453-e52c1bdb00f5" == views_list[2].id
+            assert 0 == views_list[2].total_views
 
     def test_populate_views_missing_id(self) -> None:
         single_workbook = TSC.WorkbookItem("test")
-        self.assertRaises(TSC.MissingRequiredFieldError, self.server.workbooks.populate_views, single_workbook)
+        with pytest.raises(TSC.MissingRequiredFieldError):
+            self.server.workbooks.populate_views(single_workbook)
 
     def test_populate_connections(self) -> None:
         with open(POPULATE_CONNECTIONS_XML, "rb") as f:
@@ -364,10 +370,10 @@ class WorkbookTests(unittest.TestCase):
             single_workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
             self.server.workbooks.populate_connections(single_workbook)
 
-            self.assertEqual("37ca6ced-58d7-4dcf-99dc-f0a85223cbef", single_workbook.connections[0].id)
-            self.assertEqual("dataengine", single_workbook.connections[0].connection_type)
-            self.assertEqual("4506225a-0d32-4ab1-82d3-c24e85f7afba", single_workbook.connections[0].datasource_id)
-            self.assertEqual("World Indicators", single_workbook.connections[0].datasource_name)
+            assert "37ca6ced-58d7-4dcf-99dc-f0a85223cbef" == single_workbook.connections[0].id
+            assert "dataengine" == single_workbook.connections[0].connection_type
+            assert "4506225a-0d32-4ab1-82d3-c24e85f7afba" == single_workbook.connections[0].datasource_id
+            assert "World Indicators" == single_workbook.connections[0].datasource_name
 
     def test_populate_permissions(self) -> None:
         with open(POPULATE_PERMISSIONS_XML, "rb") as f:
@@ -380,29 +386,24 @@ class WorkbookTests(unittest.TestCase):
             self.server.workbooks.populate_permissions(single_workbook)
             permissions = single_workbook.permissions
 
-            self.assertEqual(permissions[0].grantee.tag_name, "group")
-            self.assertEqual(permissions[0].grantee.id, "5e5e1978-71fa-11e4-87dd-7382f5c437af")
-            self.assertDictEqual(
-                permissions[0].capabilities,
-                {
-                    TSC.Permission.Capability.WebAuthoring: TSC.Permission.Mode.Allow,
-                    TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow,
-                    TSC.Permission.Capability.Filter: TSC.Permission.Mode.Allow,
-                    TSC.Permission.Capability.AddComment: TSC.Permission.Mode.Allow,
-                },
-            )
 
-            self.assertEqual(permissions[1].grantee.tag_name, "user")
-            self.assertEqual(permissions[1].grantee.id, "7c37ee24-c4b1-42b6-a154-eaeab7ee330a")
-            self.assertDictEqual(
-                permissions[1].capabilities,
-                {
-                    TSC.Permission.Capability.ExportImage: TSC.Permission.Mode.Allow,
-                    TSC.Permission.Capability.ShareView: TSC.Permission.Mode.Allow,
-                    TSC.Permission.Capability.ExportData: TSC.Permission.Mode.Deny,
-                    TSC.Permission.Capability.ViewComments: TSC.Permission.Mode.Deny,
-                },
-            )
+            assert permissions[0].grantee.tag_name == "group"
+            assert permissions[0].grantee.id == "5e5e1978-71fa-11e4-87dd-7382f5c437af"
+            assert permissions[0].capabilities == {
+                TSC.Permission.Capability.WebAuthoring: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.Filter: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.AddComment: TSC.Permission.Mode.Allow,
+            }
+
+            assert permissions[1].grantee.tag_name == "user"
+            assert permissions[1].grantee.id == "7c37ee24-c4b1-42b6-a154-eaeab7ee330a"
+            assert permissions[1].capabilities == {
+                TSC.Permission.Capability.ExportImage: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.ShareView: TSC.Permission.Mode.Allow,
+                TSC.Permission.Capability.ExportData: TSC.Permission.Mode.Deny,
+                TSC.Permission.Capability.ViewComments: TSC.Permission.Mode.Deny,
+            }
 
     def test_add_permissions(self) -> None:
         with open(UPDATE_PERMISSIONS, "rb") as f:
@@ -420,17 +421,18 @@ class WorkbookTests(unittest.TestCase):
             m.put(self.baseurl + "/21778de4-b7b9-44bc-a599-1506a2639ace/permissions", text=response_xml)
             permissions = self.server.workbooks.update_permissions(single_workbook, new_permissions)
 
-        self.assertEqual(permissions[0].grantee.tag_name, "group")
-        self.assertEqual(permissions[0].grantee.id, "5e5e1978-71fa-11e4-87dd-7382f5c437af")
-        self.assertDictEqual(permissions[0].capabilities, {TSC.Permission.Capability.Read: TSC.Permission.Mode.Deny})
 
-        self.assertEqual(permissions[1].grantee.tag_name, "user")
-        self.assertEqual(permissions[1].grantee.id, "7c37ee24-c4b1-42b6-a154-eaeab7ee330a")
-        self.assertDictEqual(permissions[1].capabilities, {TSC.Permission.Capability.Write: TSC.Permission.Mode.Allow})
+        assert permissions[0].grantee.tag_name == "group"
+        assert permissions[0].grantee.id == "5e5e1978-71fa-11e4-87dd-7382f5c437af"
+        assert permissions[0].capabilities == {TSC.Permission.Capability.Read: TSC.Permission.Mode.Deny}
+        assert permissions[1].grantee.tag_name == "user"
+        assert permissions[1].grantee.id == "7c37ee24-c4b1-42b6-a154-eaeab7ee330a"
+        assert permissions[1].capabilities == {TSC.Permission.Capability.Write: TSC.Permission.Mode.Allow}
 
     def test_populate_connections_missing_id(self) -> None:
         single_workbook = TSC.WorkbookItem("test")
-        self.assertRaises(TSC.MissingRequiredFieldError, self.server.workbooks.populate_connections, single_workbook)
+        with pytest.raises(TSC.MissingRequiredFieldError):
+            self.server.workbooks.populate_connections(single_workbook)
 
     def test_populate_pdf(self) -> None:
         self.server.version = "3.4"
@@ -450,16 +452,13 @@ class WorkbookTests(unittest.TestCase):
             req_option = TSC.PDFRequestOptions(type, orientation)
 
             self.server.workbooks.populate_pdf(single_workbook, req_option)
-            self.assertEqual(response, single_workbook.pdf)
+            assert response == single_workbook.pdf
 
     def test_populate_pdf_unsupported(self) -> None:
         self.server.version = "3.4"
         self.baseurl = self.server.workbooks.baseurl
         with requests_mock.mock() as m:
-            m.get(
-                self.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/pdf?type=a5&orientation=landscape",
-                content=b"",
-            )
+            m.get(self.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/pdf?type=a5&orientation=landscape", content=b"")
             single_workbook = TSC.WorkbookItem("test")
             single_workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
 
@@ -468,7 +467,7 @@ class WorkbookTests(unittest.TestCase):
             req_option = TSC.PDFRequestOptions(type, orientation)
             req_option.vf("Region", "West")
 
-            with self.assertRaises(UnsupportedAttributeError):
+            with pytest.raises(UnsupportedAttributeError):
                 self.server.workbooks.populate_pdf(single_workbook, req_option)
 
     def test_populate_pdf_vf_dims(self) -> None:
@@ -493,7 +492,7 @@ class WorkbookTests(unittest.TestCase):
             req_option.viz_height = 1080
 
             self.server.workbooks.populate_pdf(single_workbook, req_option)
-            self.assertEqual(response, single_workbook.pdf)
+            assert response == single_workbook.pdf
 
     def test_populate_powerpoint(self) -> None:
         self.server.version = "3.8"
@@ -501,17 +500,14 @@ class WorkbookTests(unittest.TestCase):
         with open(POPULATE_POWERPOINT, "rb") as f:
             response = f.read()
         with requests_mock.mock() as m:
-            m.get(
-                self.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/powerpoint?maxAge=1",
-                content=response,
-            )
+            m.get(self.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/powerpoint?maxAge=1", content=response)
             single_workbook = TSC.WorkbookItem("test")
             single_workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
 
             ro = TSC.PPTXRequestOptions(maxage=1)
 
             self.server.workbooks.populate_powerpoint(single_workbook, ro)
-            self.assertEqual(response, single_workbook.powerpoint)
+            assert response == single_workbook.powerpoint
 
     def test_populate_preview_image(self) -> None:
         with open(POPULATE_PREVIEW_IMAGE, "rb") as f:
@@ -522,11 +518,12 @@ class WorkbookTests(unittest.TestCase):
             single_workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
             self.server.workbooks.populate_preview_image(single_workbook)
 
-            self.assertEqual(response, single_workbook.preview_image)
+            assert response == single_workbook.preview_image
 
     def test_populate_preview_image_missing_id(self) -> None:
         single_workbook = TSC.WorkbookItem("test")
-        self.assertRaises(TSC.MissingRequiredFieldError, self.server.workbooks.populate_preview_image, single_workbook)
+        with pytest.raises(TSC.MissingRequiredFieldError):
+            self.server.workbooks.populate_preview_image(single_workbook)
 
     def test_publish(self) -> None:
         with open(PUBLISH_XML, "rb") as f:
@@ -544,21 +541,20 @@ class WorkbookTests(unittest.TestCase):
             publish_mode = self.server.PublishMode.CreateNew
 
             new_workbook = self.server.workbooks.publish(new_workbook, sample_workbook, publish_mode)
-
-        self.assertEqual("a8076ca1-e9d8-495e-bae6-c684dbb55836", new_workbook.id)
-        self.assertEqual("RESTAPISample", new_workbook.name)
-        self.assertEqual("RESTAPISample_0", new_workbook.content_url)
-        self.assertEqual(False, new_workbook.show_tabs)
-        self.assertEqual(1, new_workbook.size)
-        self.assertEqual("2016-08-18T18:33:24Z", format_datetime(new_workbook.created_at))
-        self.assertEqual("2016-08-18T20:31:34Z", format_datetime(new_workbook.updated_at))
-        self.assertEqual("ee8c6e70-43b6-11e6-af4f-f7b0d8e20760", new_workbook.project_id)
-        self.assertEqual("default", new_workbook.project_name)
-        self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", new_workbook.owner_id)
-        self.assertEqual("fe0b4e89-73f4-435e-952d-3a263fbfa56c", new_workbook.views[0].id)
-        self.assertEqual("GDP per capita", new_workbook.views[0].name)
-        self.assertEqual("RESTAPISample_0/sheets/GDPpercapita", new_workbook.views[0].content_url)
-        self.assertEqual("REST API Testing", new_workbook.description)
+        assert "a8076ca1-e9d8-495e-bae6-c684dbb55836" == new_workbook.id
+        assert "RESTAPISample" == new_workbook.name
+        assert "RESTAPISample_0" == new_workbook.content_url
+        assert not new_workbook.show_tabs
+        assert 1 == new_workbook.size
+        assert "2016-08-18T18:33:24Z" == format_datetime(new_workbook.created_at)
+        assert "2016-08-18T20:31:34Z" == format_datetime(new_workbook.updated_at)
+        assert "ee8c6e70-43b6-11e6-af4f-f7b0d8e20760" == new_workbook.project_id
+        assert "default" == new_workbook.project_name
+        assert "5de011f8-5aa9-4d5b-b991-f462c8dd6bb7" == new_workbook.owner_id
+        assert "fe0b4e89-73f4-435e-952d-3a263fbfa56c" == new_workbook.views[0].id
+        assert "GDP per capita" == new_workbook.views[0].name
+        assert "RESTAPISample_0/sheets/GDPpercapita" == new_workbook.views[0].content_url
+        assert "REST API Testing" == new_workbook.description
 
     def test_publish_a_packaged_file_object(self) -> None:
         with open(PUBLISH_XML, "rb") as f:
@@ -577,19 +573,19 @@ class WorkbookTests(unittest.TestCase):
 
                 new_workbook = self.server.workbooks.publish(new_workbook, fp, publish_mode)
 
-        self.assertEqual("a8076ca1-e9d8-495e-bae6-c684dbb55836", new_workbook.id)
-        self.assertEqual("RESTAPISample", new_workbook.name)
-        self.assertEqual("RESTAPISample_0", new_workbook.content_url)
-        self.assertEqual(False, new_workbook.show_tabs)
-        self.assertEqual(1, new_workbook.size)
-        self.assertEqual("2016-08-18T18:33:24Z", format_datetime(new_workbook.created_at))
-        self.assertEqual("2016-08-18T20:31:34Z", format_datetime(new_workbook.updated_at))
-        self.assertEqual("ee8c6e70-43b6-11e6-af4f-f7b0d8e20760", new_workbook.project_id)
-        self.assertEqual("default", new_workbook.project_name)
-        self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", new_workbook.owner_id)
-        self.assertEqual("fe0b4e89-73f4-435e-952d-3a263fbfa56c", new_workbook.views[0].id)
-        self.assertEqual("GDP per capita", new_workbook.views[0].name)
-        self.assertEqual("RESTAPISample_0/sheets/GDPpercapita", new_workbook.views[0].content_url)
+        assert "a8076ca1-e9d8-495e-bae6-c684dbb55836" == new_workbook.id
+        assert "RESTAPISample" == new_workbook.name
+        assert "RESTAPISample_0" == new_workbook.content_url
+        assert not new_workbook.show_tabs
+        assert 1 == new_workbook.size
+        assert "2016-08-18T18:33:24Z" == format_datetime(new_workbook.created_at)
+        assert "2016-08-18T20:31:34Z" == format_datetime(new_workbook.updated_at)
+        assert "ee8c6e70-43b6-11e6-af4f-f7b0d8e20760" == new_workbook.project_id
+        assert "default" == new_workbook.project_name
+        assert "5de011f8-5aa9-4d5b-b991-f462c8dd6bb7" == new_workbook.owner_id
+        assert "fe0b4e89-73f4-435e-952d-3a263fbfa56c" == new_workbook.views[0].id
+        assert "GDP per capita" == new_workbook.views[0].name
+        assert "RESTAPISample_0/sheets/GDPpercapita" == new_workbook.views[0].content_url
 
     def test_publish_non_packeged_file_object(self) -> None:
         with open(PUBLISH_XML, "rb") as f:
@@ -608,19 +604,19 @@ class WorkbookTests(unittest.TestCase):
 
                 new_workbook = self.server.workbooks.publish(new_workbook, fp, publish_mode)
 
-        self.assertEqual("a8076ca1-e9d8-495e-bae6-c684dbb55836", new_workbook.id)
-        self.assertEqual("RESTAPISample", new_workbook.name)
-        self.assertEqual("RESTAPISample_0", new_workbook.content_url)
-        self.assertEqual(False, new_workbook.show_tabs)
-        self.assertEqual(1, new_workbook.size)
-        self.assertEqual("2016-08-18T18:33:24Z", format_datetime(new_workbook.created_at))
-        self.assertEqual("2016-08-18T20:31:34Z", format_datetime(new_workbook.updated_at))
-        self.assertEqual("ee8c6e70-43b6-11e6-af4f-f7b0d8e20760", new_workbook.project_id)
-        self.assertEqual("default", new_workbook.project_name)
-        self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", new_workbook.owner_id)
-        self.assertEqual("fe0b4e89-73f4-435e-952d-3a263fbfa56c", new_workbook.views[0].id)
-        self.assertEqual("GDP per capita", new_workbook.views[0].name)
-        self.assertEqual("RESTAPISample_0/sheets/GDPpercapita", new_workbook.views[0].content_url)
+        assert "a8076ca1-e9d8-495e-bae6-c684dbb55836" == new_workbook.id
+        assert "RESTAPISample" == new_workbook.name
+        assert "RESTAPISample_0" == new_workbook.content_url
+        assert not new_workbook.show_tabs
+        assert 1 == new_workbook.size
+        assert "2016-08-18T18:33:24Z" == format_datetime(new_workbook.created_at)
+        assert "2016-08-18T20:31:34Z" == format_datetime(new_workbook.updated_at)
+        assert "ee8c6e70-43b6-11e6-af4f-f7b0d8e20760" == new_workbook.project_id
+        assert "default" == new_workbook.project_name
+        assert "5de011f8-5aa9-4d5b-b991-f462c8dd6bb7" == new_workbook.owner_id
+        assert "fe0b4e89-73f4-435e-952d-3a263fbfa56c" == new_workbook.views[0].id
+        assert "GDP per capita" == new_workbook.views[0].name
+        assert "RESTAPISample_0/sheets/GDPpercapita" == new_workbook.views[0].content_url
 
     def test_publish_path_object(self) -> None:
         with open(PUBLISH_XML, "rb") as f:
@@ -637,19 +633,19 @@ class WorkbookTests(unittest.TestCase):
 
             new_workbook = self.server.workbooks.publish(new_workbook, sample_workbook, publish_mode)
 
-        self.assertEqual("a8076ca1-e9d8-495e-bae6-c684dbb55836", new_workbook.id)
-        self.assertEqual("RESTAPISample", new_workbook.name)
-        self.assertEqual("RESTAPISample_0", new_workbook.content_url)
-        self.assertEqual(False, new_workbook.show_tabs)
-        self.assertEqual(1, new_workbook.size)
-        self.assertEqual("2016-08-18T18:33:24Z", format_datetime(new_workbook.created_at))
-        self.assertEqual("2016-08-18T20:31:34Z", format_datetime(new_workbook.updated_at))
-        self.assertEqual("ee8c6e70-43b6-11e6-af4f-f7b0d8e20760", new_workbook.project_id)
-        self.assertEqual("default", new_workbook.project_name)
-        self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", new_workbook.owner_id)
-        self.assertEqual("fe0b4e89-73f4-435e-952d-3a263fbfa56c", new_workbook.views[0].id)
-        self.assertEqual("GDP per capita", new_workbook.views[0].name)
-        self.assertEqual("RESTAPISample_0/sheets/GDPpercapita", new_workbook.views[0].content_url)
+        assert "a8076ca1-e9d8-495e-bae6-c684dbb55836" == new_workbook.id
+        assert "RESTAPISample" == new_workbook.name
+        assert "RESTAPISample_0" == new_workbook.content_url
+        assert not new_workbook.show_tabs
+        assert 1 == new_workbook.size
+        assert "2016-08-18T18:33:24Z" == format_datetime(new_workbook.created_at)
+        assert "2016-08-18T20:31:34Z" == format_datetime(new_workbook.updated_at)
+        assert "ee8c6e70-43b6-11e6-af4f-f7b0d8e20760" == new_workbook.project_id
+        assert "default" == new_workbook.project_name
+        assert "5de011f8-5aa9-4d5b-b991-f462c8dd6bb7" == new_workbook.owner_id
+        assert "fe0b4e89-73f4-435e-952d-3a263fbfa56c" == new_workbook.views[0].id
+        assert "GDP per capita" == new_workbook.views[0].name
+        assert "RESTAPISample_0/sheets/GDPpercapita" == new_workbook.views[0].content_url
 
     def test_publish_with_hidden_views_on_workbook(self) -> None:
         with open(PUBLISH_XML, "rb") as f:
@@ -668,8 +664,8 @@ class WorkbookTests(unittest.TestCase):
             new_workbook = self.server.workbooks.publish(new_workbook, sample_workbook, publish_mode)
             request_body = m._adapter.request_history[0]._request.body
             # order of attributes in xml is unspecified
-            self.assertTrue(re.search(rb"<views><view.*?hidden=\"true\".*?\/><\/views>", request_body))
-            self.assertTrue(re.search(rb"<views><view.*?name=\"GDP per capita\".*?\/><\/views>", request_body))
+            assert re.search(b'<views><view.*?hidden=\\"true\\".*?\\/><\\/views>', request_body)
+            assert re.search(b'<views><view.*?name=\\"GDP per capita\\".*?\\/><\\/views>', request_body)
 
     def test_publish_with_thumbnails_user_id(self) -> None:
         with open(PUBLISH_XML, "rb") as f:
@@ -689,7 +685,7 @@ class WorkbookTests(unittest.TestCase):
             new_workbook = self.server.workbooks.publish(new_workbook, sample_workbook, publish_mode)
             request_body = m._adapter.request_history[0]._request.body
             # order of attributes in xml is unspecified
-            self.assertTrue(re.search(rb"thumbnailsUserId=\"ee8c6e70-43b6-11e6-af4f-f7b0d8e20761\"", request_body))
+            assert re.search(b'thumbnailsUserId=\\"ee8c6e70-43b6-11e6-af4f-f7b0d8e20761\\"', request_body)
 
     def test_publish_with_thumbnails_group_id(self) -> None:
         with open(PUBLISH_XML, "rb") as f:
@@ -708,7 +704,7 @@ class WorkbookTests(unittest.TestCase):
             publish_mode = self.server.PublishMode.CreateNew
             new_workbook = self.server.workbooks.publish(new_workbook, sample_workbook, publish_mode)
             request_body = m._adapter.request_history[0]._request.body
-            self.assertTrue(re.search(rb"thumbnailsGroupId=\"ee8c6e70-43b6-11e6-af4f-f7b0d8e20762\"", request_body))
+            assert re.search(b'thumbnailsGroupId=\\"ee8c6e70-43b6-11e6-af4f-f7b0d8e20762\\"', request_body)
 
     @pytest.mark.filterwarnings("ignore:'as_job' not available")
     def test_publish_with_query_params(self) -> None:
@@ -729,10 +725,10 @@ class WorkbookTests(unittest.TestCase):
             )
 
             request_query_params = m._adapter.request_history[0].qs
-            self.assertTrue("asjob" in request_query_params)
-            self.assertTrue(request_query_params["asjob"])
-            self.assertTrue("skipconnectioncheck" in request_query_params)
-            self.assertTrue(request_query_params["skipconnectioncheck"])
+            assert "asjob" in request_query_params
+            assert request_query_params["asjob"]
+            assert "skipconnectioncheck" in request_query_params
+            assert request_query_params["skipconnectioncheck"]
 
     def test_publish_async(self) -> None:
         self.server.version = "3.0"
@@ -751,50 +747,45 @@ class WorkbookTests(unittest.TestCase):
 
             new_job = self.server.workbooks.publish(new_workbook, sample_workbook, publish_mode, as_job=True)
 
-        self.assertEqual("7c3d599e-949f-44c3-94a1-f30ba85757e4", new_job.id)
-        self.assertEqual("PublishWorkbook", new_job.type)
-        self.assertEqual("0", new_job.progress)
-        self.assertEqual("2018-06-29T23:22:32Z", format_datetime(new_job.created_at))
-        self.assertEqual(1, new_job.finish_code)
+        assert "7c3d599e-949f-44c3-94a1-f30ba85757e4" == new_job.id
+        assert "PublishWorkbook" == new_job.type
+        assert "0" == new_job.progress
+        assert "2018-06-29T23:22:32Z" == format_datetime(new_job.created_at)
+        assert 1 == new_job.finish_code
 
     def test_publish_invalid_file(self) -> None:
         new_workbook = TSC.WorkbookItem("test", "ee8c6e70-43b6-11e6-af4f-f7b0d8e20760")
-        self.assertRaises(IOError, self.server.workbooks.publish, new_workbook, ".", self.server.PublishMode.CreateNew)
+        with pytest.raises(IOError):
+            self.server.workbooks.publish(new_workbook, ".", self.server.PublishMode.CreateNew)
 
     def test_publish_invalid_file_type(self) -> None:
         new_workbook = TSC.WorkbookItem("test", "ee8c6e70-43b6-11e6-af4f-f7b0d8e20760")
-        self.assertRaises(
-            ValueError,
-            self.server.workbooks.publish,
-            new_workbook,
-            os.path.join(TEST_ASSET_DIR, "SampleDS.tds"),
-            self.server.PublishMode.CreateNew,
-        )
+        with pytest.raises(ValueError):
+            self.server.workbooks.publish(
+                new_workbook, os.path.join(TEST_ASSET_DIR, "SampleDS.tds"), self.server.PublishMode.CreateNew
+            )
 
     def test_publish_unnamed_file_object(self) -> None:
         new_workbook = TSC.WorkbookItem("test")
 
         with open(os.path.join(TEST_ASSET_DIR, "SampleWB.twbx"), "rb") as f:
-            self.assertRaises(
-                ValueError, self.server.workbooks.publish, new_workbook, f, self.server.PublishMode.CreateNew
-            )
+            with pytest.raises(ValueError):
+                self.server.workbooks.publish(new_workbook, f, self.server.PublishMode.CreateNew)
 
     def test_publish_non_bytes_file_object(self) -> None:
         new_workbook = TSC.WorkbookItem("test")
 
         with open(os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")) as f:
-            self.assertRaises(
-                TypeError, self.server.workbooks.publish, new_workbook, f, self.server.PublishMode.CreateNew
-            )
+            with pytest.raises(TypeError):
+                self.server.workbooks.publish(new_workbook, f, self.server.PublishMode.CreateNew)
 
     def test_publish_file_object_of_unknown_type_raises_exception(self) -> None:
         new_workbook = TSC.WorkbookItem("test")
         with BytesIO() as file_object:
             file_object.write(bytes.fromhex("89504E470D0A1A0A"))
             file_object.seek(0)
-            self.assertRaises(
-                ValueError, self.server.workbooks.publish, new_workbook, file_object, self.server.PublishMode.CreateNew
-            )
+            with pytest.raises(ValueError):
+                self.server.workbooks.publish(new_workbook, file_object, self.server.PublishMode.CreateNew)
 
     def test_publish_multi_connection(self) -> None:
         new_workbook = TSC.WorkbookItem(
@@ -811,10 +802,10 @@ class WorkbookTests(unittest.TestCase):
         # Can't use ConnectionItem parser due to xml namespace problems
         connection_results = fromstring(response).findall(".//connection")
 
-        self.assertEqual(connection_results[0].get("serverAddress", None), "mysql.test.com")
-        self.assertEqual(connection_results[0].find("connectionCredentials").get("name", None), "test")  # type: ignore[union-attr]
-        self.assertEqual(connection_results[1].get("serverAddress", None), "pgsql.test.com")
-        self.assertEqual(connection_results[1].find("connectionCredentials").get("password", None), "secret")  # type: ignore[union-attr]
+        assert connection_results[0].get("serverAddress", None) == "mysql.test.com"
+        assert connection_results[0].find("connectionCredentials").get("name", None) == "test"
+        assert connection_results[1].get("serverAddress", None) == "pgsql.test.com"
+        assert connection_results[1].find("connectionCredentials").get("password", None) == "secret"
 
     def test_publish_multi_connection_flat(self) -> None:
         new_workbook = TSC.WorkbookItem(
@@ -835,10 +826,10 @@ class WorkbookTests(unittest.TestCase):
         # Can't use ConnectionItem parser due to xml namespace problems
         connection_results = fromstring(response).findall(".//connection")
 
-        self.assertEqual(connection_results[0].get("serverAddress", None), "mysql.test.com")
-        self.assertEqual(connection_results[0].find("connectionCredentials").get("name", None), "test")  # type: ignore[union-attr]
-        self.assertEqual(connection_results[1].get("serverAddress", None), "pgsql.test.com")
-        self.assertEqual(connection_results[1].find("connectionCredentials").get("password", None), "secret")  # type: ignore[union-attr]
+        assert connection_results[0].get("serverAddress", None) == "mysql.test.com"
+        assert connection_results[0].find("connectionCredentials").get("name", None) == "test"
+        assert connection_results[1].get("serverAddress", None) == "pgsql.test.com"
+        assert connection_results[1].find("connectionCredentials").get("password", None) == "secret"
 
     def test_synchronous_publish_timeout_error(self) -> None:
         with requests_mock.mock() as m:
@@ -847,14 +838,8 @@ class WorkbookTests(unittest.TestCase):
             new_workbook = TSC.WorkbookItem(project_id="")
             publish_mode = self.server.PublishMode.CreateNew
 
-            self.assertRaisesRegex(
-                InternalServerError,
-                "Please use asynchronous publishing to avoid timeouts",
-                self.server.workbooks.publish,
-                new_workbook,
-                asset("SampleWB.twbx"),
-                publish_mode,
-            )
+            with pytest.raises(InternalServerError, match="Please use asynchronous publishing to avoid timeouts"):
+                self.server.workbooks.publish(new_workbook, asset("SampleWB.twbx"), publish_mode)
 
     def test_delete_extracts_all(self) -> None:
         self.server.version = "3.10"
@@ -907,24 +892,26 @@ class WorkbookTests(unittest.TestCase):
             self.server.workbooks.populate_revisions(workbook)
             revisions = workbook.revisions
 
-        self.assertEqual(len(revisions), 3)
-        self.assertEqual("2016-07-26T20:34:56Z", format_datetime(revisions[0].created_at))
-        self.assertEqual("2016-07-27T20:34:56Z", format_datetime(revisions[1].created_at))
-        self.assertEqual("2016-07-28T20:34:56Z", format_datetime(revisions[2].created_at))
 
-        self.assertEqual(False, revisions[0].deleted)
-        self.assertEqual(False, revisions[0].current)
-        self.assertEqual(False, revisions[1].deleted)
-        self.assertEqual(False, revisions[1].current)
-        self.assertEqual(False, revisions[2].deleted)
-        self.assertEqual(True, revisions[2].current)
 
-        self.assertEqual("Cassie", revisions[0].user_name)
-        self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", revisions[0].user_id)
-        self.assertIsNone(revisions[1].user_name)
-        self.assertIsNone(revisions[1].user_id)
-        self.assertEqual("Cassie", revisions[2].user_name)
-        self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", revisions[2].user_id)
+        assert len(revisions) == 3
+        assert "2016-07-26T20:34:56Z" == format_datetime(revisions[0].created_at)
+        assert "2016-07-27T20:34:56Z" == format_datetime(revisions[1].created_at)
+        assert "2016-07-28T20:34:56Z" == format_datetime(revisions[2].created_at)
+
+        assert not revisions[0].deleted
+        assert not revisions[0].current
+        assert not revisions[1].deleted
+        assert not revisions[1].current
+        assert not revisions[2].deleted
+        assert revisions[2].current
+
+        assert "Cassie" == revisions[0].user_name
+        assert "5de011f8-5aa9-4d5b-b991-f462c8dd6bb7" == revisions[0].user_id
+        assert revisions[1].user_name is None
+        assert revisions[1].user_id is None
+        assert "Cassie" == revisions[2].user_name
+        assert "5de011f8-5aa9-4d5b-b991-f462c8dd6bb7" == revisions[2].user_id
 
     def test_delete_revision(self) -> None:
         self.baseurl = self.server.workbooks.baseurl
@@ -942,7 +929,7 @@ class WorkbookTests(unittest.TestCase):
                 headers={"Content-Disposition": 'name="tableau_datasource"; filename="Sample datasource.tds"'},
             )
             file_path = self.server.workbooks.download_revision("9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", "3", td)
-            self.assertTrue(os.path.exists(file_path))
+            assert os.path.exists(file_path)
 
     def test_bad_download_response(self) -> None:
         with requests_mock.mock() as m, tempfile.TemporaryDirectory() as td:
@@ -951,7 +938,7 @@ class WorkbookTests(unittest.TestCase):
                 headers={"Content-Disposition": '''name="tableau_workbook"; filename*=UTF-8''"Sample workbook.twb"'''},
             )
             file_path = self.server.workbooks.download("9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", td)
-            self.assertTrue(os.path.exists(file_path))
+            assert os.path.exists(file_path)
 
     def test_odata_connection(self) -> None:
         self.baseurl = self.server.workbooks.baseurl
@@ -979,7 +966,7 @@ class WorkbookTests(unittest.TestCase):
         xml_connection = xml.find(".//connection")
 
         assert xml_connection is not None
-        self.assertEqual(xml_connection.get("serverAddress"), url)
+        assert xml_connection.get("serverAddress") == url
 
     def test_update_workbook_connections(self) -> None:
         populate_xml, response_xml = read_xml_assets(POPULATE_CONNECTIONS_XML, UPDATE_CONNECTIONS_XML)
@@ -1011,8 +998,8 @@ class WorkbookTests(unittest.TestCase):
             )
             updated_ids = [conn.id for conn in connection_items]
 
-            self.assertEqual(updated_ids, connection_luids)
-            self.assertEqual("AD Service Principal", connection_items[0].auth_type)
+            assert updated_ids == connection_luids
+            assert "AD Service Principal" == connection_items[0].auth_type
 
     def test_get_workbook_all_fields(self) -> None:
         self.server.version = "3.21"
