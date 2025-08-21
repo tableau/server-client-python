@@ -387,6 +387,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         return connection_items
 
     T = TypeVar("T", bound=FileObjectW)
+
     @overload
     def download(
         self,
@@ -762,7 +763,8 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         return self._permissions.delete(item, capability_item)
 
     @overload
-    def publish(self,
+    def publish(
+        self,
         workbook_item: WorkbookItem,
         file: PathOrFileR,
         mode: str,
@@ -770,10 +772,11 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         as_job: Literal[False],
         skip_connection_check: bool,
         parameters=None,
-                ) -> WorkbookItem: ...
+    ) -> WorkbookItem: ...
 
     @overload
-    def publish(self,
+    def publish(
+        self,
         workbook_item: WorkbookItem,
         file: PathOrFileR,
         mode: str,
@@ -781,7 +784,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         as_job: Literal[True],
         skip_connection_check: bool,
         parameters=None,
-                ) -> JobItem: ...
+    ) -> JobItem: ...
 
     @api(version="2.0")
     @parameter_added_in(as_job="3.0")
