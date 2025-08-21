@@ -1,8 +1,9 @@
 from datetime import datetime
-from typing import Optional, Self
+from typing import Optional
 from xml.etree.ElementTree import Element
 
 from defusedxml.ElementTree import fromstring
+from typing_extensions import Self
 
 from tableauserverclient.datetime_helpers import parse_datetime
 from tableauserverclient.models.user_item import UserItem
