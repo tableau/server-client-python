@@ -1,9 +1,9 @@
-import datetime as dt
 import unittest
 
 import requests_mock
 
 import tableauserverclient as TSC
+from tableauserverclient.datetime_helpers import parse_datetime
 from ._utils import read_xml_asset
 
 GET_FAVORITES_XML = "favorites_get.xml"
@@ -57,8 +57,8 @@ class FavoritesTests(unittest.TestCase):
         assert collection.total_item_count == 3
         assert collection.permissioned_item_count == 2
         assert collection.visibility == "Private"
-        assert collection.created_at == dt.datetime.fromisoformat("2016-08-11T21:22:40Z")
-        assert collection.updated_at == dt.datetime.fromisoformat("2016-08-11T21:34:17Z")
+        assert collection.created_at == parse_datetime("2016-08-11T21:22:40Z")
+        assert collection.updated_at == parse_datetime("2016-08-11T21:34:17Z")
 
     def test_add_favorite_workbook(self) -> None:
         response_xml = read_xml_asset(ADD_FAVORITE_WORKBOOK_XML)
