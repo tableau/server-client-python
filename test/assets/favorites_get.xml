@@ -43,5 +43,17 @@
         <tags />
       </datasource>
     </favorite>
+    <favorite>
+      <collection id="8c57cb8a-d65f-4a32-813e-5a3f86e8f94e" 
+                  name="sample collection" 
+                  description="description for sample collection"
+                  totalItemCount="3"
+                  permissionedItemCount="2"
+                  visibility="Private"
+                  createdAt="2016-08-11T21:22:40Z" 
+                  updatedAt="2016-08-11T21:34:17Z">
+        <owner id="5de011f8-5aa9-4d5b-b991-f462c8dd6bb7" />
+      </collection>
+    </favorite>
   </favorites>
 </tsResponse>
