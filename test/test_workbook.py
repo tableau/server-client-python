@@ -13,7 +13,6 @@ from tableauserverclient.datetime_helpers import format_datetime, parse_datetime
 from tableauserverclient.models import UserItem, GroupItem, PermissionsRule
 from tableauserverclient.server.endpoint.exceptions import InternalServerError, UnsupportedAttributeError
 from tableauserverclient.server.request_factory import RequestFactory
-from ._utils import read_xml_assets, asset
 
 TEST_ASSET_DIR = Path(__file__).parent / "assets"
 
@@ -53,7 +52,7 @@ def server():
 
 
 def test_get(server) -> None:
-    response_xml = GET_XML.read_text(encoding="utf-8")
+    response_xml = GET_XML.read_text()
     with requests_mock.mock() as m:
         m.get(server.workbooks.baseurl, text=response_xml)
         all_workbooks, pagination_item = server.workbooks.get()
@@ -88,7 +87,7 @@ def test_get(server) -> None:
 
 
 def test_get_ignore_invalid_date(server) -> None:
-    response_xml = GET_INVALID_DATE_XML.read_text(encoding="utf-8")
+    response_xml = GET_INVALID_DATE_XML.read_text()
     with requests_mock.mock() as m:
         m.get(server.workbooks.baseurl, text=response_xml)
         all_workbooks, pagination_item = server.workbooks.get()
@@ -103,7 +102,7 @@ def test_get_before_signin(server) -> None:
 
 
 def test_get_empty(server) -> None:
-    response_xml = GET_EMPTY_XML.read_text(encoding="utf-8")
+    response_xml = GET_EMPTY_XML.read_text()
     with requests_mock.mock() as m:
         m.get(server.workbooks.baseurl, text=response_xml)
         all_workbooks, pagination_item = server.workbooks.get()
@@ -113,7 +112,7 @@ def test_get_empty(server) -> None:
 
 
 def test_get_by_id(server) -> None:
-    response_xml = GET_BY_ID_XML.read_text(encoding="utf-8")
+    response_xml = GET_BY_ID_XML.read_text()
     with requests_mock.mock() as m:
         m.get(server.workbooks.baseurl + "/3cc6cd06-89ce-4fdc-b935-5294135d6d42", text=response_xml)
         single_workbook = server.workbooks.get_by_id("3cc6cd06-89ce-4fdc-b935-5294135d6d42")
@@ -138,7 +137,7 @@ def test_get_by_id(server) -> None:
 
 def test_get_by_id_personal(server) -> None:
     # workbooks in personal space don't have project_id or project_name
-    response_xml = GET_BY_ID_XML_PERSONAL.read_text(encoding="utf-8")
+    response_xml = GET_BY_ID_XML_PERSONAL.read_text()
     with requests_mock.mock() as m:
         m.get(server.workbooks.baseurl + "/3cc6cd06-89ce-4fdc-b935-5294135d6d43", text=response_xml)
         single_workbook = server.workbooks.get_by_id("3cc6cd06-89ce-4fdc-b935-5294135d6d43")
@@ -169,7 +168,7 @@ def test_get_by_id_missing_id(server) -> None:
 def test_refresh_id(server) -> None:
     server.version = "2.8"
     server.workbooks.baseurl
-    response_xml = REFRESH_XML.read_text(encoding="utf-8")
+    response_xml = REFRESH_XML.read_text()
     with requests_mock.mock() as m:
         m.post(
             server.workbooks.baseurl + "/3cc6cd06-89ce-4fdc-b935-5294135d6d42/refresh",
@@ -184,7 +183,7 @@ def test_refresh_object(server) -> None:
     server.workbooks.baseurl
     workbook = TSC.WorkbookItem("")
     workbook._id = "3cc6cd06-89ce-4fdc-b935-5294135d6d42"
-    response_xml = REFRESH_XML.read_text(encoding="utf-8")
+    response_xml = REFRESH_XML.read_text()
     with requests_mock.mock() as m:
         m.post(
             server.workbooks.baseurl + "/3cc6cd06-89ce-4fdc-b935-5294135d6d42/refresh",
@@ -206,7 +205,7 @@ def test_delete_missing_id(server) -> None:
 
 
 def test_update(server) -> None:
-    response_xml = UPDATE_XML.read_text(encoding="utf-8")
+    response_xml = UPDATE_XML.read_text()
     with requests_mock.mock() as m:
         m.put(server.workbooks.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2", text=response_xml)
         single_workbook = TSC.WorkbookItem("1d0304cd-3796-429f-b815-7258370b9b74", show_tabs=True)
@@ -237,8 +236,8 @@ def test_update_missing_id(server) -> None:
 
 
 def test_update_copy_fields(server) -> None:
-    connection_xml = POPULATE_CONNECTIONS_XML.read_text(encoding="utf-8")
-    update_xml = UPDATE_XML.read_text(encoding="utf-8")
+    connection_xml = POPULATE_CONNECTIONS_XML.read_text()
+    update_xml = UPDATE_XML.read_text()
     with requests_mock.mock() as m:
         m.get(server.workbooks.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/connections", text=connection_xml)
         m.put(server.workbooks.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2", text=update_xml)
@@ -255,8 +254,8 @@ def test_update_copy_fields(server) -> None:
 
 
 def test_update_tags(server) -> None:
-    add_tags_xml = ADD_TAGS_XML.read_text(encoding="utf-8")
-    update_xml = UPDATE_XML.read_text(encoding="utf-8")
+    add_tags_xml = ADD_TAGS_XML.read_text()
+    update_xml = UPDATE_XML.read_text()
     with requests_mock.mock() as m:
         m.put(server.workbooks.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/tags", text=add_tags_xml)
         m.delete(server.workbooks.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/tags/b", status_code=204)
@@ -331,7 +330,7 @@ def test_download_missing_id(server) -> None:
 
 
 def test_populate_views(server) -> None:
-    response_xml = POPULATE_VIEWS_XML.read_text(encoding="utf-8")
+    response_xml = POPULATE_VIEWS_XML.read_text()
     with requests_mock.mock() as m:
         m.get(server.workbooks.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/views", text=response_xml)
         single_workbook = TSC.WorkbookItem("test")
@@ -353,7 +352,7 @@ def test_populate_views(server) -> None:
 
 
 def test_populate_views_with_usage(server) -> None:
-    response_xml = POPULATE_VIEWS_USAGE_XML.read_text(encoding="utf-8")
+    response_xml = POPULATE_VIEWS_USAGE_XML.read_text()
     with requests_mock.mock() as m:
         m.get(
             server.workbooks.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/views?includeUsageStatistics=true",
@@ -379,7 +378,7 @@ def test_populate_views_missing_id(server) -> None:
 
 
 def test_populate_connections(server) -> None:
-    response_xml = POPULATE_CONNECTIONS_XML.read_text(encoding="utf-8")
+    response_xml = POPULATE_CONNECTIONS_XML.read_text()
     with requests_mock.mock() as m:
         m.get(server.workbooks.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/connections", text=response_xml)
         single_workbook = TSC.WorkbookItem("test")
@@ -393,7 +392,7 @@ def test_populate_connections(server) -> None:
 
 
 def test_populate_permissions(server) -> None:
-    response_xml = POPULATE_PERMISSIONS_XML.read_text(encoding="utf-8")
+    response_xml = POPULATE_PERMISSIONS_XML.read_text()
     with requests_mock.mock() as m:
         m.get(server.workbooks.baseurl + "/21778de4-b7b9-44bc-a599-1506a2639ace/permissions", text=response_xml)
         single_workbook = TSC.WorkbookItem("test")
@@ -422,7 +421,7 @@ def test_populate_permissions(server) -> None:
 
 
 def test_add_permissions(server) -> None:
-    response_xml = UPDATE_PERMISSIONS.read_text(encoding="utf-8")
+    response_xml = UPDATE_PERMISSIONS.read_text()
 
     single_workbook = TSC.WorkbookItem("test")
     single_workbook._id = "21778de4-b7b9-44bc-a599-1506a2639ace"
@@ -547,7 +546,7 @@ def test_populate_preview_image_missing_id(server) -> None:
 
 
 def test_publish(server) -> None:
-    response_xml = PUBLISH_XML.read_text(encoding="utf-8")
+    response_xml = PUBLISH_XML.read_text()
     with requests_mock.mock() as m:
         m.post(server.workbooks.baseurl, text=response_xml)
 
@@ -578,7 +577,7 @@ def test_publish(server) -> None:
 
 
 def test_publish_a_packaged_file_object(server) -> None:
-    response_xml = PUBLISH_XML.read_text(encoding="utf-8")
+    response_xml = PUBLISH_XML.read_text()
     with requests_mock.mock() as m:
         m.post(server.workbooks.baseurl, text=response_xml)
 
@@ -609,7 +608,7 @@ def test_publish_a_packaged_file_object(server) -> None:
 
 
 def test_publish_non_packeged_file_object(server) -> None:
-    response_xml = PUBLISH_XML.read_text(encoding="utf-8")
+    response_xml = PUBLISH_XML.read_text()
     with requests_mock.mock() as m:
         m.post(server.workbooks.baseurl, text=response_xml)
 
@@ -640,7 +639,7 @@ def test_publish_non_packeged_file_object(server) -> None:
 
 
 def test_publish_path_object(server) -> None:
-    response_xml = PUBLISH_XML.read_text(encoding="utf-8")
+    response_xml = PUBLISH_XML.read_text()
     with requests_mock.mock() as m:
         m.post(server.workbooks.baseurl, text=response_xml)
 
@@ -669,7 +668,7 @@ def test_publish_path_object(server) -> None:
 
 
 def test_publish_with_hidden_views_on_workbook(server) -> None:
-    response_xml = PUBLISH_XML.read_text(encoding="utf-8")
+    response_xml = PUBLISH_XML.read_text()
     with requests_mock.mock() as m:
         m.post(server.workbooks.baseurl, text=response_xml)
 
@@ -689,7 +688,7 @@ def test_publish_with_hidden_views_on_workbook(server) -> None:
 
 
 def test_publish_with_thumbnails_user_id(server) -> None:
-    response_xml = PUBLISH_XML.read_text(encoding="utf-8")
+    response_xml = PUBLISH_XML.read_text()
     with requests_mock.mock() as m:
         m.post(server.workbooks.baseurl, text=response_xml)
 
@@ -709,7 +708,7 @@ def test_publish_with_thumbnails_user_id(server) -> None:
 
 
 def test_publish_with_thumbnails_group_id(server) -> None:
-    response_xml = PUBLISH_XML.read_text(encoding="utf-8")
+    response_xml = PUBLISH_XML.read_text()
     with requests_mock.mock() as m:
         m.post(server.workbooks.baseurl, text=response_xml)
 
@@ -729,7 +728,7 @@ def test_publish_with_thumbnails_group_id(server) -> None:
 
 @pytest.mark.filterwarnings("ignore:'as_job' not available")
 def test_publish_with_query_params(server) -> None:
-    response_xml = PUBLISH_ASYNC_XML.read_text(encoding="utf-8")
+    response_xml = PUBLISH_ASYNC_XML.read_text()
     with requests_mock.mock() as m:
         m.post(server.workbooks.baseurl, text=response_xml)
 
@@ -752,7 +751,7 @@ def test_publish_with_query_params(server) -> None:
 def test_publish_async(server) -> None:
     server.version = "3.0"
     baseurl = server.workbooks.baseurl
-    response_xml = PUBLISH_ASYNC_XML.read_text(encoding="utf-8")
+    response_xml = PUBLISH_ASYNC_XML.read_text()
     with requests_mock.mock() as m:
         m.post(baseurl, text=response_xml)
 
@@ -861,14 +860,14 @@ def test_synchronous_publish_timeout_error(server) -> None:
         publish_mode = server.PublishMode.CreateNew
 
         with pytest.raises(InternalServerError, match="Please use asynchronous publishing to avoid timeouts"):
-            server.workbooks.publish(new_workbook, asset("SampleWB.twbx"), publish_mode)
+            server.workbooks.publish(new_workbook, TEST_ASSET_DIR / "SampleWB.twbx", publish_mode)
 
 
 def test_delete_extracts_all(server) -> None:
     server.version = "3.10"
     server.workbooks.baseurl
 
-    response_xml = PUBLISH_ASYNC_XML.read_text(encoding="utf-8")
+    response_xml = PUBLISH_ASYNC_XML.read_text()
     with requests_mock.mock() as m:
         m.post(
             server.workbooks.baseurl + "/3cc6cd06-89ce-4fdc-b935-5294135d6d42/deleteExtract",
@@ -882,7 +881,7 @@ def test_create_extracts_all(server) -> None:
     server.version = "3.10"
     server.workbooks.baseurl
 
-    response_xml = PUBLISH_ASYNC_XML.read_text(encoding="utf-8")
+    response_xml = PUBLISH_ASYNC_XML.read_text()
     with requests_mock.mock() as m:
         m.post(
             server.workbooks.baseurl + "/3cc6cd06-89ce-4fdc-b935-5294135d6d42/createExtract",
@@ -899,7 +898,7 @@ def test_create_extracts_one(server) -> None:
     datasource = TSC.DatasourceItem("test")
     datasource._id = "1f951daf-4061-451a-9df1-69a8062664f2"
 
-    response_xml = PUBLISH_ASYNC_XML.read_text(encoding="utf-8")
+    response_xml = PUBLISH_ASYNC_XML.read_text()
     with requests_mock.mock() as m:
         m.post(
             server.workbooks.baseurl + "/3cc6cd06-89ce-4fdc-b935-5294135d6d42/createExtract",
@@ -914,7 +913,7 @@ def test_revisions(server) -> None:
     workbook = TSC.WorkbookItem("project", "test")
     workbook._id = "06b944d2-959d-4604-9305-12323c95e70e"
 
-    response_xml = REVISION_XML.read_text(encoding="utf-8")
+    response_xml = REVISION_XML.read_text()
     with requests_mock.mock() as m:
         m.get(f"{server.workbooks.baseurl}/{workbook.id}/revisions", text=response_xml)
         server.workbooks.populate_revisions(workbook)
@@ -982,7 +981,7 @@ def test_odata_connection(server) -> None:
 
     creds = TSC.ConnectionCredentials("", "", True)
     connection.connection_credentials = creds
-    response_xml = ODATA_XML.read_text(encoding="utf-8")
+    response_xml = ODATA_XML.read_text()
 
     with requests_mock.mock() as m:
         m.put(f"{server.workbooks.baseurl}/{workbook.id}/connections/{connection.id}", text=response_xml)
@@ -999,7 +998,8 @@ def test_odata_connection(server) -> None:
 
 
 def test_update_workbook_connections(server) -> None:
-    populate_xml, response_xml = read_xml_assets(POPULATE_CONNECTIONS_XML, UPDATE_CONNECTIONS_XML)
+    populate_xml = POPULATE_CONNECTIONS_XML.read_text()
+    response_xml = UPDATE_CONNECTIONS_XML.read_text()
 
     with requests_mock.Mocker() as m:
         workbook_id = "1a2b3c4d-5e6f-7a8b-9c0d-112233445566"
@@ -1036,7 +1036,7 @@ def test_get_workbook_all_fields(server) -> None:
     server.version = "3.21"
     baseurl = server.workbooks.baseurl
 
-    response = GET_XML_ALL_FIELDS.read_text(encoding="utf-8")
+    response = GET_XML_ALL_FIELDS.read_text()
 
     ro = TSC.RequestOptions()
     ro.all_fields = True
