@@ -1022,10 +1022,12 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         revisions = RevisionItem.from_response(server_response.content, self.parent_srv.namespace, workbook_item)
         return revisions
 
+    T = TypeVar("T", bound=FileObjectW)
+
     @overload
     def download_revision(
-        self, workbook_id: str, revision_number: Optional[str], filepath: FileObjectW, include_extract: bool
-    ) -> FileObjectW: ...
+        self, workbook_id: str, revision_number: Optional[str], filepath: T, include_extract: bool
+    ) -> T: ...
 
     @overload
     def download_revision(
