@@ -215,7 +215,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
     def download(
         self,
         datasource_id,
-        filepath,
+        filepath=None,
         include_extract=True,
     ):
         """
@@ -941,8 +941,8 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         self,
         datasource_id,
         revision_number,
-        filepath,
-        include_extract,
+        filepath=None,
+        include_extract=True,
     ):
         """
         Downloads a specific version of a data source prior to the current one
