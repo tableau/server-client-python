@@ -6,7 +6,7 @@ import os
 
 from contextlib import closing
 from pathlib import Path
-from typing import Literal, Optional, TYPE_CHECKING, Union, overload
+from typing import Literal, Optional, TYPE_CHECKING, TypeVar, Union, overload
 from collections.abc import Iterable, Mapping, Sequence
 
 from tableauserverclient.helpers.headers import fix_filename
@@ -50,7 +50,6 @@ FilePath = Union[str, os.PathLike]
 FileObject = Union[io.BufferedReader, io.BytesIO]
 PathOrFile = Union[FilePath, FileObject]
 
-FilePath = Union[str, os.PathLike]
 FileObjectR = Union[io.BufferedReader, io.BytesIO]
 FileObjectW = Union[io.BufferedWriter, io.BytesIO]
 PathOrFileR = Union[FilePath, FileObjectR]
@@ -191,16 +190,34 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         self.delete_request(url)
         logger.info(f"Deleted single datasource (ID: {datasource_id})")
 
+    T = TypeVar("T", bound=FileObjectW)
+
+    @overload
+    def download(
+        self,
+        datasource_id: str,
+        filepath: T,
+        include_extract: bool = True,
+    ) -> T: ...
+
+    @overload
+    def download(
+        self,
+        datasource_id: str,
+        filepath: Optional[FilePath] = None,
+        include_extract: bool = True,
+    ) -> str: ...
+
     # Download 1 datasource by id
     @api(version="2.0")
     @parameter_added_in(no_extract="2.5")
     @parameter_added_in(include_extract="2.5")
     def download(
         self,
-        datasource_id: str,
-        filepath: Optional[PathOrFileW] = None,
-        include_extract: bool = True,
-    ) -> PathOrFileW:
+        datasource_id,
+        filepath,
+        include_extract=True,
+    ):
         """
         Downloads the specified data source from a site. The data source is
         downloaded as a .tdsx file.
@@ -479,13 +496,13 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
     @parameter_added_in(as_job="3.0")
     def publish(
         self,
-        datasource_item: DatasourceItem,
-        file: PathOrFileR,
-        mode: str,
-        connection_credentials: Optional[ConnectionCredentials] = None,
-        connections: Optional[Sequence[ConnectionItem]] = None,
-        as_job: bool = False,
-    ) -> Union[DatasourceItem, JobItem]:
+        datasource_item,
+        file,
+        mode,
+        connection_credentials=None,
+        connections=None,
+        as_job=False,
+    ):
         """
         Publishes a data source to a server, or appends data to an existing
         data source.
@@ -898,15 +915,35 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         revisions = RevisionItem.from_response(server_response.content, self.parent_srv.namespace, datasource_item)
         return revisions
 
-    # Download 1 datasource revision by revision number
-    @api(version="2.3")
+    T = TypeVar("T", bound=FileObjectW)
+
+    @overload
     def download_revision(
         self,
         datasource_id: str,
         revision_number: Optional[str],
-        filepath: Optional[PathOrFileW] = None,
+        filepath: T,
         include_extract: bool = True,
-    ) -> PathOrFileW:
+    ) -> T: ...
+
+    @overload
+    def download_revision(
+        self,
+        datasource_id: str,
+        revision_number: Optional[str],
+        filepath: Optional[FilePath] = None,
+        include_extract: bool = True,
+    ) -> str: ...
+
+    # Download 1 datasource revision by revision number
+    @api(version="2.3")
+    def download_revision(
+        self,
+        datasource_id,
+        revision_number,
+        filepath,
+        include_extract,
+    ):
         """
         Downloads a specific version of a data source prior to the current one
         in .tdsx format. To download the current version of a data source set
