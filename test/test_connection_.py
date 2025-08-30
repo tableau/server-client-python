@@ -17,22 +17,9 @@ def test_set_query_tag_normal_conn():
     assert conn.query_tagging
 
 
-def test_ignore_query_tag_for_hyper():
+@pytest.mark.parametrize("conn_type", ["hyper", "teradata", "snowflake"])
+def test_ignore_query_tag(conn_type):
     conn = TSC.ConnectionItem()
-    conn._connection_type = "hyper"
-    conn.query_tagging = True
-    assert conn.query_tagging is None
-
-
-def test_ignore_query_tag_for_teradata():
-    conn = TSC.ConnectionItem()
-    conn._connection_type = "teradata"
-    conn.query_tagging = True
-    assert conn.query_tagging is None
-
-
-def test_ignore_query_tag_for_snowflake():
-    conn = TSC.ConnectionItem()
-    conn._connection_type = "snowflake"
+    conn._connection_type = conn_type
     conn.query_tagging = True
     assert conn.query_tagging is None
