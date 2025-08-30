@@ -13,13 +13,13 @@ SIGN_IN_ERROR_XML = TEST_ASSET_DIR / "auth_sign_in_error.xml"
 
 
 @pytest.fixture(scope="function")
-def server():
+def server() -> TSC.Server:
     """Fixture to create a Tableau Server instance for testing."""
     server_instance = TSC.Server("http://test", False)
     return server_instance
 
 
-def test_sign_in(server):
+def test_sign_in(server: TSC.Server) -> None:
     with open(SIGN_IN_XML, "rb") as f:
         response_xml = f.read().decode("utf-8")
     with requests_mock.mock() as m:
@@ -33,7 +33,7 @@ def test_sign_in(server):
     assert "1a96d216-e9b8-497b-a82a-0b899a965e01" == server.user_id
 
 
-def test_sign_in_with_personal_access_tokens(server):
+def test_sign_in_with_personal_access_tokens(server: TSC.Server) -> None:
     with open(SIGN_IN_XML, "rb") as f:
         response_xml = f.read().decode("utf-8")
     with requests_mock.mock() as m:
@@ -49,7 +49,7 @@ def test_sign_in_with_personal_access_tokens(server):
     assert "1a96d216-e9b8-497b-a82a-0b899a965e01" == server.user_id
 
 
-def test_sign_in_impersonate(server):
+def test_sign_in_impersonate(server: TSC.Server) -> None:
     with open(SIGN_IN_IMPERSONATE_XML, "rb") as f:
         response_xml = f.read().decode("utf-8")
     with requests_mock.mock() as m:
@@ -64,7 +64,7 @@ def test_sign_in_impersonate(server):
     assert "dd2239f6-ddf1-4107-981a-4cf94e415794" == server.user_id
 
 
-def test_sign_in_error(server):
+def test_sign_in_error(server: TSC.Server) -> None:
     with open(SIGN_IN_ERROR_XML, "rb") as f:
         response_xml = f.read().decode("utf-8")
     with requests_mock.mock() as m:
@@ -74,7 +74,7 @@ def test_sign_in_error(server):
             server.auth.sign_in(tableau_auth)
 
 
-def test_sign_in_invalid_token(server):
+def test_sign_in_invalid_token(server: TSC.Server) -> None:
     with open(SIGN_IN_ERROR_XML, "rb") as f:
         response_xml = f.read().decode("utf-8")
     with requests_mock.mock() as m:
@@ -84,7 +84,7 @@ def test_sign_in_invalid_token(server):
             server.auth.sign_in(tableau_auth)
 
 
-def test_sign_in_without_auth(server):
+def test_sign_in_without_auth(server: TSC.Server) -> None:
     with open(SIGN_IN_ERROR_XML, "rb") as f:
         response_xml = f.read().decode("utf-8")
     with requests_mock.mock() as m:
@@ -94,7 +94,7 @@ def test_sign_in_without_auth(server):
             server.auth.sign_in(tableau_auth)
 
 
-def test_sign_out(server):
+def test_sign_out(server: TSC.Server) -> None:
     with open(SIGN_IN_XML, "rb") as f:
         response_xml = f.read().decode("utf-8")
     with requests_mock.mock() as m:
@@ -110,7 +110,7 @@ def test_sign_out(server):
     assert server._user_id is None
 
 
-def test_switch_site(server):
+def test_switch_site(server: TSC.Server) -> None:
     server.version = "2.6"
     baseurl = server.auth.baseurl
     site_id, user_id, auth_token = list("123")
@@ -128,7 +128,7 @@ def test_switch_site(server):
     assert "1a96d216-e9b8-497b-a82a-0b899a965e01" == server.user_id
 
 
-def test_revoke_all_server_admin_tokens(server):
+def test_revoke_all_server_admin_tokens(server: TSC.Server) -> None:
     server.version = "3.10"
     baseurl = server.auth.baseurl
     with open(SIGN_IN_XML, "rb") as f:
