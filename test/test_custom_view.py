@@ -10,7 +10,6 @@ import requests_mock
 import tableauserverclient as TSC
 from tableauserverclient.config import BYTES_PER_MB
 from tableauserverclient.datetime_helpers import format_datetime
-from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
 
 TEST_ASSET_DIR = Path(__file__).parent / "assets"
 
