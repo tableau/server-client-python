@@ -36,7 +36,7 @@ def server() -> TSC.Server:
     return server
 
 
-def test_get(server) -> None:
+def test_get(server: TSC.Server) -> None:
     response_xml = GET_XML.read_text()
     print(response_xml)
     with requests_mock.mock() as m:
@@ -62,7 +62,7 @@ def test_get(server) -> None:
     assert all_views[1].shared
 
 
-def test_get_by_id(server) -> None:
+def test_get_by_id(server: TSC.Server) -> None:
     response_xml = GET_XML_ID.read_text()
     with requests_mock.mock() as m:
         m.get(server.custom_views.baseurl + "/d79634e1-6063-4ec9-95ff-50acbf609ff5", text=response_xml)
@@ -81,18 +81,18 @@ def test_get_by_id(server) -> None:
     assert "2002-06-05T08:00:59Z" == format_datetime(view.updated_at)
 
 
-def test_get_by_id_missing_id(server) -> None:
+def test_get_by_id_missing_id(server: TSC.Server) -> None:
     with pytest.raises(TSC.MissingRequiredFieldError):
         server.custom_views.get_by_id(None)
 
 
-def test_get_before_signin(server) -> None:
+def test_get_before_signin(server: TSC.Server) -> None:
     server._auth_token = None
     with pytest.raises(TSC.NotSignedInError):
         server.custom_views.get()
 
 
-def test_populate_image(server) -> None:
+def test_populate_image(server: TSC.Server) -> None:
     response = POPULATE_PREVIEW_IMAGE.read_bytes()
     with requests_mock.mock() as m:
         m.get(server.custom_views.baseurl + "/d79634e1-6063-4ec9-95ff-50acbf609ff5/image", content=response)
@@ -102,7 +102,7 @@ def test_populate_image(server) -> None:
         assert response == single_view.image
 
 
-def test_populate_image_with_options(server) -> None:
+def test_populate_image_with_options(server: TSC.Server) -> None:
     response = POPULATE_PREVIEW_IMAGE.read_bytes()
     with requests_mock.mock() as m:
         m.get(
@@ -116,25 +116,25 @@ def test_populate_image_with_options(server) -> None:
         assert response == single_view.image
 
 
-def test_populate_image_missing_id(server) -> None:
+def test_populate_image_missing_id(server: TSC.Server) -> None:
     single_view = TSC.CustomViewItem()
     single_view._id = None
     with pytest.raises(TSC.MissingRequiredFieldError):
         server.custom_views.populate_image(single_view)
 
 
-def test_delete(server) -> None:
+def test_delete(server: TSC.Server) -> None:
     with requests_mock.mock() as m:
         m.delete(server.custom_views.baseurl + "/3cc6cd06-89ce-4fdc-b935-5294135d6d42", status_code=204)
         server.custom_views.delete("3cc6cd06-89ce-4fdc-b935-5294135d6d42")
 
 
-def test_delete_missing_id(server) -> None:
+def test_delete_missing_id(server: TSC.Server) -> None:
     with pytest.raises(ValueError):
         server.custom_views.delete("")
 
 
-def test_update(server) -> None:
+def test_update(server: TSC.Server) -> None:
     response_xml = CUSTOM_VIEW_UPDATE_XML.read_text()
     with requests_mock.mock() as m:
         m.put(server.custom_views.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2", text=response_xml)
@@ -150,13 +150,13 @@ def test_update(server) -> None:
     assert "Best test ever" == the_custom_view.name
 
 
-def test_update_missing_id(server) -> None:
+def test_update_missing_id(server: TSC.Server) -> None:
     cv = TSC.CustomViewItem(name="test")
     with pytest.raises(TSC.MissingRequiredFieldError):
         server.custom_views.update(cv)
 
 
-def test_download(server) -> None:
+def test_download(server: TSC.Server) -> None:
     cv = TSC.CustomViewItem(name="test")
     cv._id = "1f951daf-4061-451a-9df1-69a8062664f2"
     content = CUSTOM_VIEW_DOWNLOAD.read_bytes()
@@ -168,7 +168,7 @@ def test_download(server) -> None:
     assert data.getvalue() == content
 
 
-def test_publish_filepath(server) -> None:
+def test_publish_filepath(server: TSC.Server) -> None:
     cv = TSC.CustomViewItem(name="test")
     cv._owner = TSC.UserItem()
     cv._owner._id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
@@ -184,7 +184,7 @@ def test_publish_filepath(server) -> None:
     assert view.name is not None
 
 
-def test_publish_file_str(server) -> None:
+def test_publish_file_str(server: TSC.Server) -> None:
     cv = TSC.CustomViewItem(name="test")
     cv._owner = TSC.UserItem()
     cv._owner._id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
@@ -200,7 +200,7 @@ def test_publish_file_str(server) -> None:
     assert view.name is not None
 
 
-def test_publish_file_io(server) -> None:
+def test_publish_file_io(server: TSC.Server) -> None:
     cv = TSC.CustomViewItem(name="test")
     cv._owner = TSC.UserItem()
     cv._owner._id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
@@ -217,7 +217,7 @@ def test_publish_file_io(server) -> None:
     assert view.name is not None
 
 
-def test_publish_missing_owner_id(server) -> None:
+def test_publish_missing_owner_id(server: TSC.Server) -> None:
     cv = TSC.CustomViewItem(name="test")
     cv._owner = TSC.UserItem()
     cv._workbook = TSC.WorkbookItem()
@@ -228,7 +228,7 @@ def test_publish_missing_owner_id(server) -> None:
             server.custom_views.publish(cv, CUSTOM_VIEW_DOWNLOAD)
 
 
-def test_publish_missing_wb_id(server) -> None:
+def test_publish_missing_wb_id(server: TSC.Server) -> None:
     cv = TSC.CustomViewItem(name="test")
     cv._owner = TSC.UserItem()
     cv._owner._id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
@@ -239,7 +239,7 @@ def test_publish_missing_wb_id(server) -> None:
             server.custom_views.publish(cv, CUSTOM_VIEW_DOWNLOAD)
 
 
-def test_large_publish(server):
+def test_large_publish(server: TSC.Server):
     cv = TSC.CustomViewItem(name="test")
     cv._owner = TSC.UserItem()
     cv._owner._id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
@@ -268,7 +268,7 @@ def test_large_publish(server):
     assert view.name is not None
 
 
-def test_populate_pdf(server) -> None:
+def test_populate_pdf(server: TSC.Server) -> None:
     server.version = "3.23"
     response = CUSTOM_VIEW_POPULATE_PDF.read_bytes()
     with requests_mock.mock() as m:
@@ -288,7 +288,7 @@ def test_populate_pdf(server) -> None:
         assert response == custom_view.pdf
 
 
-def test_populate_csv(server) -> None:
+def test_populate_csv(server: TSC.Server) -> None:
     server.version = "3.23"
     response = CUSTOM_VIEW_POPULATE_CSV.read_bytes()
     with requests_mock.mock() as m:
@@ -302,7 +302,7 @@ def test_populate_csv(server) -> None:
         assert response == csv_file
 
 
-def test_populate_csv_default_maxage(server) -> None:
+def test_populate_csv_default_maxage(server: TSC.Server) -> None:
     server.version = "3.23"
     response = CUSTOM_VIEW_POPULATE_CSV.read_bytes()
     with requests_mock.mock() as m:
@@ -315,7 +315,7 @@ def test_populate_csv_default_maxage(server) -> None:
         assert response == csv_file
 
 
-def test_pdf_height(server) -> None:
+def test_pdf_height(server: TSC.Server) -> None:
     server.version = "3.23"
     response = CUSTOM_VIEW_POPULATE_PDF.read_bytes()
     with requests_mock.mock() as m:
