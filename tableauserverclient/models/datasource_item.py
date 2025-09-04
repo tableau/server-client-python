@@ -490,7 +490,7 @@ class DatasourceItem:
             self._owner = owner
 
     @classmethod
-    def from_response(cls, resp: str, ns: dict) -> list["DatasourceItem"]:
+    def from_response(cls, resp: bytes, ns: dict) -> list["DatasourceItem"]:
         all_datasource_items = list()
         parsed_response = fromstring(resp)
         all_datasource_xml = parsed_response.findall(".//t:datasource", namespaces=ns)
