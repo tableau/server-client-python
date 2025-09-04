@@ -6,8 +6,8 @@ import os
 
 from contextlib import closing
 from pathlib import Path
-from typing import Literal, Optional, TYPE_CHECKING, TypeVar, Union, overload
-from collections.abc import Iterable, Mapping, Sequence
+from typing import Literal, Optional, TYPE_CHECKING, TypedDict, TypeVar, Union, overload
+from collections.abc import Iterable, Sequence
 
 from tableauserverclient.helpers.headers import fix_filename
 from tableauserverclient.models.dqw_item import DQWItem
@@ -54,6 +54,44 @@ FileObjectR = Union[io.BufferedReader, io.BytesIO]
 FileObjectW = Union[io.BufferedWriter, io.BytesIO]
 PathOrFileR = Union[FilePath, FileObjectR]
 PathOrFileW = Union[FilePath, FileObjectW]
+
+
+HyperActionCondition = TypedDict(
+    "HyperActionCondition",
+    {
+        "op": str,
+        "target-col": str,
+        "source-col": str,
+    },
+)
+
+HyperActionRow = TypedDict(
+    "HyperActionRow",
+    {
+        "action": Literal[
+            "update",
+            "upsert",
+            "delete",
+        ],
+        "source-table": str,
+        "target-table": str,
+        "condition": HyperActionCondition,
+    },
+)
+
+HyperActionTable = TypedDict(
+    "HyperActionTable",
+    {
+        "action": Literal[
+            "insert",
+            "replace",
+        ],
+        "source-table": str,
+        "target-table": str,
+    },
+)
+
+HyperAction = Union[HyperActionTable, HyperActionRow]
 
 
 class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]):
@@ -648,7 +686,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         datasource_or_connection_item: Union[DatasourceItem, ConnectionItem, str],
         *,
         request_id: str,
-        actions: Sequence[Mapping],
+        actions: Sequence[HyperAction],
         payload: Optional[FilePath] = None,
     ) -> JobItem:
         """
