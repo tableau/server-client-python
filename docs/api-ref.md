@@ -230,7 +230,7 @@ Name   |  Description
 `username`     | The username for the connection. (see ConnectionCredentials)
 `password`  |  The password used for the connection. (see ConnectionCredentials)
 `embed_password`  |  (Boolean) Determines whether to embed the password (`True`) for the workbook or data source connection or not (`False`). (see ConnectionCredentials)
-`server_address`   |  The server address for the connection.
+`server_address`   |  The server address for the connection (domain name or host name for the Tableau Server).
 `server_port`   |  The port used for the connection.
 `connection_credentials` | The Connection Credentials object containing authentication details for the connection. Replaces username/password/embed_password when publishing a flow, document or workbook file in the request body.
 
