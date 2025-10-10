@@ -13,14 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.10', '3.11', '3.12', '3.13']
-        include: # Adding prereleases explicitly
-        - os: ubuntu-latest
-          python-version: '3.14'
-          allow-prereleases: true
-        - os: macos-latest
-          python-version: '3.14t'
-          allow-prereleases: true
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14', '3.14t']
 
     runs-on: ${{ matrix.os }}
 
