@@ -430,7 +430,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         return connection_items
 
     @api(version="2.8")
-    def refresh(self, datasource_item: DatasourceItem, incremental: bool = False) -> JobItem:
+    def refresh(self, datasource_item: Union[DatasourceItem, str], incremental: bool = False) -> JobItem:
         """
         Refreshes the extract of an existing workbook.
 
@@ -438,8 +438,8 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
 
         Parameters
         ----------
-        workbook_item : WorkbookItem | str
-            The workbook item or workbook ID.
+        workbook_item : DatasourceItem | str
+            The datasource item or datasource ID.
         incremental: bool
             Whether to do a full refresh or incremental refresh of the extract data
 
