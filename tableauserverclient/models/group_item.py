@@ -1,6 +1,7 @@
-from typing import Callable, Optional, Self, TYPE_CHECKING
+from typing import Callable, Optional, TYPE_CHECKING
 
 from defusedxml.ElementTree import fromstring
+from typing_extensions import Self
 
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_not_empty, property_is_enum

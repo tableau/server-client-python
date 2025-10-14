@@ -2,9 +2,10 @@ import io
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from enum import IntEnum
-from typing import Optional, TYPE_CHECKING, Self
+from typing import Optional, TYPE_CHECKING
 
 from defusedxml.ElementTree import fromstring
+from typing_extensions import Self
 
 from tableauserverclient.datetime_helpers import parse_datetime
 from tableauserverclient.models.site_item import SiteAuthConfiguration
