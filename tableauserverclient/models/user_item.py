@@ -2,7 +2,7 @@ import io
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from enum import IntEnum
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, Self
 
 from defusedxml.ElementTree import fromstring
 
@@ -376,6 +376,11 @@ class UserItem:
     @staticmethod
     def as_reference(id_) -> ResourceReference:
         return ResourceReference(id_, UserItem.tag_name)
+
+    def to_reference(self: Self) -> ResourceReference:
+        if self.id is None:
+            raise ValueError("UserItem must have id to be converted to reference")
+        return ResourceReference(self.id, self.tag_name)
 
     @staticmethod
     def _parse_element(user_xml, ns):

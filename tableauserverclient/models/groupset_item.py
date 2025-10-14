@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Self
 import xml.etree.ElementTree as ET
 
 from defusedxml.ElementTree import fromstring
@@ -51,3 +51,8 @@ class GroupSetItem:
     @staticmethod
     def as_reference(id_: str) -> ResourceReference:
         return ResourceReference(id_, GroupSetItem.tag_name)
+
+    def to_reference(self: Self) -> ResourceReference:
+        if self.id is None:
+            raise ValueError("UserItem must have id to be converted to reference")
+        return ResourceReference(self.id, self.tag_name)

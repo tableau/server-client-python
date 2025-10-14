@@ -1,4 +1,4 @@
-from typing import Callable, Optional, TYPE_CHECKING
+from typing import Callable, Optional, Self, TYPE_CHECKING
 
 from defusedxml.ElementTree import fromstring
 
@@ -157,3 +157,8 @@ class GroupItem:
     @staticmethod
     def as_reference(id_: str) -> ResourceReference:
         return ResourceReference(id_, GroupItem.tag_name)
+
+    def to_reference(self: Self) -> ResourceReference:
+        if self.id is None:
+            raise ValueError("UserItem must have id to be converted to reference")
+        return ResourceReference(self.id, self.tag_name)
