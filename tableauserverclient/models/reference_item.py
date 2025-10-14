@@ -21,7 +21,7 @@ class ResourceReference:
         return hash((self.id, self.tag_name))
 
     @property
-    def id(self) -> Optional[str] :
+    def id(self) -> Optional[str]:
         return self._id
 
     @id.setter
