@@ -13,32 +13,31 @@ from tableauserverclient.datetime_helpers import format_datetime, parse_datetime
 from tableauserverclient.models import UserItem, GroupItem, PermissionsRule
 from tableauserverclient.server.endpoint.exceptions import InternalServerError, UnsupportedAttributeError
 from tableauserverclient.server.request_factory import RequestFactory
-from ._utils import read_xml_asset, read_xml_assets, asset
 
 TEST_ASSET_DIR = Path(__file__).parent / "assets"
 
-ADD_TAGS_XML = os.path.join(TEST_ASSET_DIR, "workbook_add_tags.xml")
-GET_BY_ID_XML = os.path.join(TEST_ASSET_DIR, "workbook_get_by_id.xml")
-GET_BY_ID_XML_PERSONAL = os.path.join(TEST_ASSET_DIR, "workbook_get_by_id_personal.xml")
-GET_EMPTY_XML = os.path.join(TEST_ASSET_DIR, "workbook_get_empty.xml")
-GET_INVALID_DATE_XML = os.path.join(TEST_ASSET_DIR, "workbook_get_invalid_date.xml")
-GET_XML = os.path.join(TEST_ASSET_DIR, "workbook_get.xml")
-GET_XML_ALL_FIELDS = os.path.join(TEST_ASSET_DIR, "workbook_get_all_fields.xml")
-ODATA_XML = os.path.join(TEST_ASSET_DIR, "odata_connection.xml")
-POPULATE_CONNECTIONS_XML = os.path.join(TEST_ASSET_DIR, "workbook_populate_connections.xml")
-POPULATE_PDF = os.path.join(TEST_ASSET_DIR, "populate_pdf.pdf")
-POPULATE_POWERPOINT = os.path.join(TEST_ASSET_DIR, "populate_powerpoint.pptx")
-POPULATE_PERMISSIONS_XML = os.path.join(TEST_ASSET_DIR, "workbook_populate_permissions.xml")
-POPULATE_PREVIEW_IMAGE = os.path.join(TEST_ASSET_DIR, "RESTAPISample Image.png")
-POPULATE_VIEWS_XML = os.path.join(TEST_ASSET_DIR, "workbook_populate_views.xml")
-POPULATE_VIEWS_USAGE_XML = os.path.join(TEST_ASSET_DIR, "workbook_populate_views_usage.xml")
-PUBLISH_XML = os.path.join(TEST_ASSET_DIR, "workbook_publish.xml")
-PUBLISH_ASYNC_XML = os.path.join(TEST_ASSET_DIR, "workbook_publish_async.xml")
-REFRESH_XML = os.path.join(TEST_ASSET_DIR, "workbook_refresh.xml")
-REVISION_XML = os.path.join(TEST_ASSET_DIR, "workbook_revision.xml")
-UPDATE_XML = os.path.join(TEST_ASSET_DIR, "workbook_update.xml")
-UPDATE_PERMISSIONS = os.path.join(TEST_ASSET_DIR, "workbook_update_permissions.xml")
-UPDATE_CONNECTIONS_XML = os.path.join(TEST_ASSET_DIR, "workbook_update_connections.xml")
+ADD_TAGS_XML = TEST_ASSET_DIR / "workbook_add_tags.xml"
+GET_BY_ID_XML = TEST_ASSET_DIR / "workbook_get_by_id.xml"
+GET_BY_ID_XML_PERSONAL = TEST_ASSET_DIR / "workbook_get_by_id_personal.xml"
+GET_EMPTY_XML = TEST_ASSET_DIR / "workbook_get_empty.xml"
+GET_INVALID_DATE_XML = TEST_ASSET_DIR / "workbook_get_invalid_date.xml"
+GET_XML = TEST_ASSET_DIR / "workbook_get.xml"
+GET_XML_ALL_FIELDS = TEST_ASSET_DIR / "workbook_get_all_fields.xml"
+ODATA_XML = TEST_ASSET_DIR / "odata_connection.xml"
+POPULATE_CONNECTIONS_XML = TEST_ASSET_DIR / "workbook_populate_connections.xml"
+POPULATE_PDF = TEST_ASSET_DIR / "populate_pdf.pdf"
+POPULATE_POWERPOINT = TEST_ASSET_DIR / "populate_powerpoint.pptx"
+POPULATE_PERMISSIONS_XML = TEST_ASSET_DIR / "workbook_populate_permissions.xml"
+POPULATE_PREVIEW_IMAGE = TEST_ASSET_DIR / "RESTAPISample Image.png"
+POPULATE_VIEWS_XML = TEST_ASSET_DIR / "workbook_populate_views.xml"
+POPULATE_VIEWS_USAGE_XML = TEST_ASSET_DIR / "workbook_populate_views_usage.xml"
+PUBLISH_XML = TEST_ASSET_DIR / "workbook_publish.xml"
+PUBLISH_ASYNC_XML = TEST_ASSET_DIR / "workbook_publish_async.xml"
+REFRESH_XML = TEST_ASSET_DIR / "workbook_refresh.xml"
+REVISION_XML = TEST_ASSET_DIR / "workbook_revision.xml"
+UPDATE_XML = TEST_ASSET_DIR / "workbook_update.xml"
+UPDATE_PERMISSIONS = TEST_ASSET_DIR / "workbook_update_permissions.xml"
+UPDATE_CONNECTIONS_XML = TEST_ASSET_DIR / "workbook_update_connections.xml"
 
 
 @pytest.fixture(scope="function")
@@ -708,74 +707,10 @@ def test_publish_with_thumbnails_user_id(server: TSC.Server) -> None:
         assert re.search(b'thumbnailsUserId=\\"ee8c6e70-43b6-11e6-af4f-f7b0d8e20761\\"', request_body)
 
 
-    def test_update_workbook_connections(self) -> None:
-        populate_xml, response_xml = read_xml_assets(POPULATE_CONNECTIONS_XML, UPDATE_CONNECTIONS_XML)
-
-        with requests_mock.Mocker() as m:
-            workbook_id = "1a2b3c4d-5e6f-7a8b-9c0d-112233445566"
-            connection_luids = ["abc12345-def6-7890-gh12-ijklmnopqrst", "1234abcd-5678-efgh-ijkl-0987654321mn"]
-
-            workbook = TSC.WorkbookItem(workbook_id)
-            workbook._id = workbook_id
-            self.server.version = "3.26"
-            url = f"{self.server.baseurl}/{workbook_id}/connections"
-            m.get(
-                "http://test/api/3.26/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks/1a2b3c4d-5e6f-7a8b-9c0d-112233445566/connections",
-                text=populate_xml,
-            )
-            m.put(
-                "http://test/api/3.26/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks/1a2b3c4d-5e6f-7a8b-9c0d-112233445566/connections",
-                text=response_xml,
-            )
-
-            connection_items = self.server.workbooks.update_connections(
-                workbook_item=workbook,
-                connection_luids=connection_luids,
-                authentication_type="AD Service Principal",
-                username="svc-client",
-                password="secret-token",
-                embed_password=True,
-            )
-            updated_ids = [conn.id for conn in connection_items]
-
-            self.assertEqual(updated_ids, connection_luids)
-
-    def test_update_workbook_connections(self) -> None:
-        populate_xml, response_xml = read_xml_assets(POPULATE_CONNECTIONS_XML, UPDATE_CONNECTIONS_XML)
-
-        with requests_mock.Mocker() as m:
-            workbook_id = "1a2b3c4d-5e6f-7a8b-9c0d-112233445566"
-            connection_luids = ["abc12345-def6-7890-gh12-ijklmnopqrst", "1234abcd-5678-efgh-ijkl-0987654321mn"]
-
-            workbook = TSC.WorkbookItem(workbook_id)
-            workbook._id = workbook_id
-            self.server.version = "3.26"
-            url = f"{self.server.baseurl}/{workbook_id}/connections"
-            m.get(
-                "http://test/api/3.26/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks/1a2b3c4d-5e6f-7a8b-9c0d-112233445566/connections",
-                text=populate_xml,
-            )
-            m.put(
-                "http://test/api/3.26/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks/1a2b3c4d-5e6f-7a8b-9c0d-112233445566/connections",
-                text=response_xml,
-            )
-
-            connection_items = self.server.workbooks.update_connections(
-                workbook_item=workbook,
-                connection_luids=connection_luids,
-                authentication_type="AD Service Principal",
-                username="svc-client",
-                password="secret-token",
-                embed_password=True,
-            )
-            updated_ids = [conn.id for conn in connection_items]
-
-            self.assertEqual(updated_ids, connection_luids)
-            self.assertEqual("AD Service Principal", connection_items[0].auth_type)
-
-    def test_get_workbook_all_fields(self) -> None:
-        self.server.version = "3.21"
-        baseurl = self.server.workbooks.baseurl
+def test_publish_with_thumbnails_group_id(server: TSC.Server) -> None:
+    response_xml = PUBLISH_XML.read_text()
+    with requests_mock.mock() as m:
+        m.post(server.workbooks.baseurl, text=response_xml)
 
         new_workbook = TSC.WorkbookItem(
             name="Sample",

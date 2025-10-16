@@ -386,6 +386,24 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         logger.info(f"Updated connections for workbook {workbook_item.id}: {', '.join(updated_ids)}")
         return connection_items
 
+    T = TypeVar("T", bound=FileObjectW)
+
+    @overload
+    def download(
+        self,
+        workbook_id: str,
+        filepath: T,
+        include_extract: bool = True,
+    ) -> T: ...
+
+    @overload
+    def download(
+        self,
+        workbook_id: str,
+        filepath: Optional[FilePath] = None,
+        include_extract: bool = True,
+    ) -> str: ...
+
     # Download workbook contents with option of passing in filepath
     @api(version="2.0")
     @parameter_added_in(no_extract="2.5")
