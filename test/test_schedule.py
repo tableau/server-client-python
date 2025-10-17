@@ -15,6 +15,7 @@ GET_HOURLY_ID_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_hourly_id.xml")
 GET_DAILY_ID_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_daily_id.xml")
 GET_MONTHLY_ID_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_monthly_id.xml")
 GET_MONTHLY_ID_2_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_monthly_id_2.xml")
+GET_CUSTOMIZED_MONTHLY_ID_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_customized_monthly_id.xml")
 GET_EMPTY_XML = os.path.join(TEST_ASSET_DIR, "schedule_get_empty.xml")
 CREATE_HOURLY_XML = os.path.join(TEST_ASSET_DIR, "schedule_create_hourly.xml")
 CREATE_DAILY_XML = os.path.join(TEST_ASSET_DIR, "schedule_create_daily.xml")
@@ -174,6 +175,21 @@ class ScheduleTests(unittest.TestCase):
             self.assertEqual("Monthly First Monday!", schedule.name)
             self.assertEqual("Active", schedule.state)
             self.assertEqual(("Monday", "First"), schedule.interval_item.interval)
+
+    def test_get_customized_monthly_by_id(self) -> None:
+        self.server.version = "3.15"
+        with open(GET_CUSTOMIZED_MONTHLY_ID_XML, "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            schedule_id = "f048d794-90dc-40b0-bfad-2ca78e437369"
+            baseurl = f"{self.server.baseurl}/schedules/{schedule_id}"
+            m.get(baseurl, text=response_xml)
+            schedule = self.server.schedules.get_by_id(schedule_id)
+            self.assertIsNotNone(schedule)
+            self.assertEqual(schedule_id, schedule.id)
+            self.assertEqual("Monthly customized", schedule.name)
+            self.assertEqual("Active", schedule.state)
+            self.assertEqual(("Customized Monthly"), schedule.interval_item.interval)
 
     def test_delete(self) -> None:
         with requests_mock.mock() as m:
