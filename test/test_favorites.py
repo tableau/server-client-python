@@ -5,6 +5,7 @@ import requests_mock
 
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import parse_datetime
+from ._utils import read_xml_asset
 
 TEST_ASSET_DIR = Path(__file__).parent / "assets"
 
@@ -44,12 +45,25 @@ def test_get(server: TSC.Server, user: TSC.UserItem) -> None:
     assert len(user.favorites["projects"]) == 1
     assert len(user.favorites["datasources"]) == 1
 
-    workbook = user.favorites["workbooks"][0]
-    print("favorited: ")
-    print(workbook)
-    view = user.favorites["views"][0]
-    datasource = user.favorites["datasources"][0]
-    project = user.favorites["projects"][0]
+        collection = self.user.favorites["collections"][0]
+
+        assert collection.id == "8c57cb8a-d65f-4a32-813e-5a3f86e8f94e"
+        assert collection.name == "sample collection"
+        assert collection.description == "description for sample collection"
+        assert collection.total_item_count == 3
+        assert collection.permissioned_item_count == 2
+        assert collection.visibility == "Private"
+        assert collection.created_at == parse_datetime("2016-08-11T21:22:40Z")
+        assert collection.updated_at == parse_datetime("2016-08-11T21:34:17Z")
+
+    def test_add_favorite_workbook(self) -> None:
+        response_xml = read_xml_asset(ADD_FAVORITE_WORKBOOK_XML)
+        workbook = TSC.WorkbookItem("")
+        workbook._id = "6d13b0ca-043d-4d42-8c9d-3f3313ea3a00"
+        workbook.name = "Superstore"
+        with requests_mock.mock() as m:
+            m.put(f"{self.baseurl}/{self.user.id}", text=response_xml)
+            self.server.favorites.add_favorite_workbook(self.user, workbook)
 
     assert workbook.id == "6d13b0ca-043d-4d42-8c9d-3f3313ea3a00"
     assert view.id == "d79634e1-6063-4ec9-95ff-50acbf609ff5"
