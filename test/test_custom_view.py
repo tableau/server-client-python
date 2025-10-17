@@ -141,11 +141,9 @@ def test_update(server: TSC.Server) -> None:
         the_custom_view = TSC.CustomViewItem("1d0304cd-3796-429f-b815-7258370b9b74", name="Best test ever")
         the_custom_view._id = "1f951daf-4061-451a-9df1-69a8062664f2"
         the_custom_view.owner = TSC.UserItem()
-        assert the_custom_view.owner is not None  # for mypy
         the_custom_view.owner.id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
         the_custom_view = server.custom_views.update(the_custom_view)
 
-    assert isinstance(the_custom_view, TSC.CustomViewItem)
     assert "1f951daf-4061-451a-9df1-69a8062664f2" == the_custom_view.id
     if the_custom_view.owner:
         assert "dd2239f6-ddf1-4107-981a-4cf94e415794" == the_custom_view.owner.id
@@ -174,9 +172,8 @@ def test_publish_filepath(server: TSC.Server) -> None:
     cv = TSC.CustomViewItem(name="test")
     cv._owner = TSC.UserItem()
     cv._owner._id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
-    cv.workbook = TSC.WorkbookItem()
-    assert cv.workbook is not None
-    cv.workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
+    cv._workbook = TSC.WorkbookItem()
+    cv._workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
     with requests_mock.mock() as m:
         m.post(server.custom_views.expurl, status_code=201, text=GET_XML.read_text())
         view = server.custom_views.publish(cv, CUSTOM_VIEW_DOWNLOAD)
@@ -191,9 +188,8 @@ def test_publish_file_str(server: TSC.Server) -> None:
     cv = TSC.CustomViewItem(name="test")
     cv._owner = TSC.UserItem()
     cv._owner._id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
-    cv.workbook = TSC.WorkbookItem()
-    assert cv.workbook is not None
-    cv.workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
+    cv._workbook = TSC.WorkbookItem()
+    cv._workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
     with requests_mock.mock() as m:
         m.post(server.custom_views.expurl, status_code=201, text=GET_XML.read_text())
         view = server.custom_views.publish(cv, str(CUSTOM_VIEW_DOWNLOAD))
@@ -208,9 +204,8 @@ def test_publish_file_io(server: TSC.Server) -> None:
     cv = TSC.CustomViewItem(name="test")
     cv._owner = TSC.UserItem()
     cv._owner._id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
-    cv.workbook = TSC.WorkbookItem()
-    assert cv.workbook is not None
-    cv.workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
+    cv._workbook = TSC.WorkbookItem()
+    cv._workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
     data = io.BytesIO(CUSTOM_VIEW_DOWNLOAD.read_bytes())
     with requests_mock.mock() as m:
         m.post(server.custom_views.expurl, status_code=201, text=GET_XML.read_text())
@@ -225,9 +220,8 @@ def test_publish_file_io(server: TSC.Server) -> None:
 def test_publish_missing_owner_id(server: TSC.Server) -> None:
     cv = TSC.CustomViewItem(name="test")
     cv._owner = TSC.UserItem()
-    cv.workbook = TSC.WorkbookItem()
-    assert cv.workbook is not None
-    cv.workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
+    cv._workbook = TSC.WorkbookItem()
+    cv._workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
     with requests_mock.mock() as m:
         m.post(server.custom_views.expurl, status_code=201, text=GET_XML.read_text())
         with pytest.raises(ValueError):
@@ -238,7 +232,7 @@ def test_publish_missing_wb_id(server: TSC.Server) -> None:
     cv = TSC.CustomViewItem(name="test")
     cv._owner = TSC.UserItem()
     cv._owner._id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
-    cv.workbook = TSC.WorkbookItem()
+    cv._workbook = TSC.WorkbookItem()
     with requests_mock.mock() as m:
         m.post(server.custom_views.expurl, status_code=201, text=GET_XML.read_text())
         with pytest.raises(ValueError):
@@ -249,9 +243,8 @@ def test_large_publish(server: TSC.Server):
     cv = TSC.CustomViewItem(name="test")
     cv._owner = TSC.UserItem()
     cv._owner._id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
-    cv.workbook = TSC.WorkbookItem()
-    assert cv.workbook is not None
-    cv.workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
+    cv._workbook = TSC.WorkbookItem()
+    cv._workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
     with ExitStack() as stack:
         temp_dir = stack.enter_context(TemporaryDirectory())
         file_path = Path(temp_dir) / "test_file"
