@@ -189,7 +189,7 @@ class ScheduleTests(unittest.TestCase):
             self.assertEqual(schedule_id, schedule.id)
             self.assertEqual("Monthly customized", schedule.name)
             self.assertEqual("Active", schedule.state)
-            self.assertEqual(("Customized Monthly"), schedule.interval_item.interval)
+            self.assertEqual(("Customized Monthly",), schedule.interval_item.interval)
 
     def test_delete(self) -> None:
         with requests_mock.mock() as m:
