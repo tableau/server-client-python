@@ -43,7 +43,6 @@ class Permission:
         CreateRefreshMetrics = "CreateRefreshMetrics"
         SaveAs = "SaveAs"
         PulseMetricDefine = "PulseMetricDefine"
-        ExtractRefresh = "ExtractRefresh"
         WebAuthoringForFlows = "WebAuthoringForFlows"
 
         def __repr__(self):
