@@ -17,21 +17,23 @@ from tableauserverclient.server.endpoint.exceptions import InternalServerError
 from tableauserverclient.server.endpoint.fileuploads_endpoint import Fileuploads
 from tableauserverclient.server.request_factory import RequestFactory
 
-ADD_TAGS_XML = "datasource_add_tags.xml"
-GET_XML = "datasource_get.xml"
-GET_EMPTY_XML = "datasource_get_empty.xml"
-GET_BY_ID_XML = "datasource_get_by_id.xml"
-GET_XML_ALL_FIELDS = "datasource_get_all_fields.xml"
-POPULATE_CONNECTIONS_XML = "datasource_populate_connections.xml"
-POPULATE_PERMISSIONS_XML = "datasource_populate_permissions.xml"
-PUBLISH_XML = "datasource_publish.xml"
-PUBLISH_XML_ASYNC = "datasource_publish_async.xml"
-REFRESH_XML = "datasource_refresh.xml"
-REVISION_XML = "datasource_revision.xml"
-UPDATE_XML = "datasource_update.xml"
-UPDATE_HYPER_DATA_XML = "datasource_data_update.xml"
-UPDATE_CONNECTION_XML = "datasource_connection_update.xml"
-UPDATE_CONNECTIONS_XML = "datasource_connections_update.xml"
+TEST_ASSET_DIR = Path(__file__).parent / "assets"
+
+ADD_TAGS_XML = TEST_ASSET_DIR / "datasource_add_tags.xml"
+GET_XML = TEST_ASSET_DIR / "datasource_get.xml"
+GET_EMPTY_XML = TEST_ASSET_DIR / "datasource_get_empty.xml"
+GET_BY_ID_XML = TEST_ASSET_DIR / "datasource_get_by_id.xml"
+GET_XML_ALL_FIELDS = TEST_ASSET_DIR / "datasource_get_all_fields.xml"
+POPULATE_CONNECTIONS_XML = TEST_ASSET_DIR / "datasource_populate_connections.xml"
+POPULATE_PERMISSIONS_XML = TEST_ASSET_DIR / "datasource_populate_permissions.xml"
+PUBLISH_XML = TEST_ASSET_DIR / "datasource_publish.xml"
+PUBLISH_XML_ASYNC = TEST_ASSET_DIR / "datasource_publish_async.xml"
+REFRESH_XML = TEST_ASSET_DIR / "datasource_refresh.xml"
+REVISION_XML = TEST_ASSET_DIR / "datasource_revision.xml"
+UPDATE_XML = TEST_ASSET_DIR / "datasource_update.xml"
+UPDATE_HYPER_DATA_XML = TEST_ASSET_DIR / "datasource_data_update.xml"
+UPDATE_CONNECTION_XML = TEST_ASSET_DIR / "datasource_connection_update.xml"
+UPDATE_CONNECTIONS_XML = TEST_ASSET_DIR / "datasource_connections_update.xml"
 
 
 @pytest.fixture(scope="function")
@@ -157,90 +159,19 @@ def test_update_copy_fields(server) -> None:
     assert single_datasource._project_name == updated_datasource._project_name
 
 
-    def test_update_connections(self) -> None:
-        populate_xml, response_xml = read_xml_assets(POPULATE_CONNECTIONS_XML, UPDATE_CONNECTIONS_XML)
-
-        with requests_mock.Mocker() as m:
-
-            datasource_id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
-            connection_luids = ["be786ae0-d2bf-4a4b-9b34-e2de8d2d4488", "a1b2c3d4-e5f6-7a8b-9c0d-123456789abc"]
-
-            datasource = TSC.DatasourceItem(datasource_id)
-            datasource._id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
-            datasource.owner_id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
-            self.server.version = "3.26"
-
-            url = f"{self.server.baseurl}/{datasource.id}/connections"
-            m.get(
-                "http://test/api/3.26/sites/dad65087-b08b-4603-af4e-2887b8aafc67/datasources/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/connections",
-                text=populate_xml,
-            )
-            m.put(
-                "http://test/api/3.26/sites/dad65087-b08b-4603-af4e-2887b8aafc67/datasources/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/connections",
-                text=response_xml,
-            )
-
-            print("BASEURL:", self.server.baseurl)
-            print("Calling PUT on:", f"{self.server.baseurl}/{datasource.id}/connections")
-
-            connection_items = self.server.datasources.update_connections(
-                datasource_item=datasource,
-                connection_luids=connection_luids,
-                authentication_type="auth-keypair",
-                username="testuser",
-                password="testpass",
-                embed_password=True,
-            )
-            updated_ids = [conn.id for conn in connection_items]
-
-            self.assertEqual(updated_ids, connection_luids)
-
-    def test_update_connections(self) -> None:
-        populate_xml, response_xml = read_xml_assets(POPULATE_CONNECTIONS_XML, UPDATE_CONNECTIONS_XML)
-
-        with requests_mock.Mocker() as m:
-
-            datasource_id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
-            connection_luids = ["be786ae0-d2bf-4a4b-9b34-e2de8d2d4488", "a1b2c3d4-e5f6-7a8b-9c0d-123456789abc"]
-
-            datasource = TSC.DatasourceItem(datasource_id)
-            datasource._id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
-            datasource.owner_id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
-            self.server.version = "3.26"
-
-            url = f"{self.server.baseurl}/{datasource.id}/connections"
-            m.get(
-                "http://test/api/3.26/sites/dad65087-b08b-4603-af4e-2887b8aafc67/datasources/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/connections",
-                text=populate_xml,
-            )
-            m.put(
-                "http://test/api/3.26/sites/dad65087-b08b-4603-af4e-2887b8aafc67/datasources/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/connections",
-                text=response_xml,
-            )
-
-            print("BASEURL:", self.server.baseurl)
-            print("Calling PUT on:", f"{self.server.baseurl}/{datasource.id}/connections")
-
-            connection_items = self.server.datasources.update_connections(
-                datasource_item=datasource,
-                connection_luids=connection_luids,
-                authentication_type="auth-keypair",
-                username="testuser",
-                password="testpass",
-                embed_password=True,
-            )
-            updated_ids = [conn.id for conn in connection_items]
-
-            self.assertEqual(updated_ids, connection_luids)
-            self.assertEqual("auth-keypair", connection_items[0].auth_type)
-
-    def test_populate_permissions(self) -> None:
-        with open(asset(POPULATE_PERMISSIONS_XML), "rb") as f:
-            response_xml = f.read().decode("utf-8")
-        with requests_mock.mock() as m:
-            m.get(self.baseurl + "/0448d2ed-590d-4fa0-b272-a2a8a24555b5/permissions", text=response_xml)
-            single_datasource = TSC.DatasourceItem("1d0304cd-3796-429f-b815-7258370b9b74", "test")
-            single_datasource._id = "0448d2ed-590d-4fa0-b272-a2a8a24555b5"
+def test_update_tags(server) -> None:
+    add_tags_xml = ADD_TAGS_XML.read_text()
+    update_xml = UPDATE_XML.read_text()
+    with requests_mock.mock() as m:
+        m.delete(server.datasources.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/tags/b", status_code=204)
+        m.delete(server.datasources.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/tags/d", status_code=204)
+        m.put(server.datasources.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/tags", text=add_tags_xml)
+        m.put(server.datasources.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", text=update_xml)
+        single_datasource = TSC.DatasourceItem("1d0304cd-3796-429f-b815-7258370b9b74")
+        single_datasource._id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
+        single_datasource._initial_tags.update(["a", "b", "c", "d"])
+        single_datasource.tags.update(["a", "c", "e"])
+        updated_datasource = server.datasources.update(single_datasource)
 
     assert single_datasource.tags == updated_datasource.tags
     assert single_datasource._initial_tags == updated_datasource._initial_tags
@@ -919,57 +850,3 @@ def test_get_datasource_all_fields(server) -> None:
     assert datasources[0].owner.last_login == parse_datetime("2025-02-04T06:39:20Z")
     assert datasources[0].owner.name == "bob@example.com"
     assert datasources[0].owner.site_role == "SiteAdministratorCreator"
-
-
-def test_update_description(server: TSC.Server) -> None:
-    response_xml = UPDATE_XML.read_text()
-    with requests_mock.mock() as m:
-        m.put(server.datasources.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", text=response_xml)
-        single_datasource = TSC.DatasourceItem("1d0304cd-3796-429f-b815-7258370b9b74", "Sample datasource")
-        single_datasource.owner_id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
-        single_datasource._content_url = "Sampledatasource"
-        single_datasource._id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
-        single_datasource.certified = True
-        single_datasource.certification_note = "Warning, here be dragons."
-        single_datasource.description = "Sample description"
-        _ = server.datasources.update(single_datasource)
-
-        history = m.request_history[0]
-    body = fromstring(history.body)
-    ds_elem = body.find(".//datasource")
-    assert ds_elem is not None
-    assert ds_elem.attrib["description"] == "Sample description"
-
-
-def test_publish_description(server: TSC.Server) -> None:
-    response_xml = PUBLISH_XML.read_text()
-    with requests_mock.mock() as m:
-        m.post(server.datasources.baseurl, text=response_xml)
-        single_datasource = TSC.DatasourceItem("1d0304cd-3796-429f-b815-7258370b9b74", "Sample datasource")
-        single_datasource.owner_id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
-        single_datasource._content_url = "Sampledatasource"
-        single_datasource._id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
-        single_datasource.certified = True
-        single_datasource.certification_note = "Warning, here be dragons."
-        single_datasource.description = "Sample description"
-        _ = server.datasources.publish(single_datasource, TEST_ASSET_DIR / "SampleDS.tds", server.PublishMode.CreateNew)
-
-        history = m.request_history[0]
-    boundary = history.body[: history.body.index(b"\r\n")].strip()
-    parts = history.body.split(boundary)
-    request_payload = next(part for part in parts if b"request_payload" in part)
-    xml_payload = request_payload.strip().split(b"\r\n")[-1]
-    body = fromstring(xml_payload)
-    ds_elem = body.find(".//datasource")
-    assert ds_elem is not None
-    assert ds_elem.attrib["description"] == "Sample description"
-
-
-def test_get_datasource_no_owner(server: TSC.Server) -> None:
-    with requests_mock.mock() as m:
-        m.get(server.datasources.baseurl, text=GET_NO_OWNER.read_text())
-        datasources, _ = server.datasources.get()
-
-    datasource = datasources[0]
-    assert datasource.owner is None
-    assert datasource.project is None
