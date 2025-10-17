@@ -115,6 +115,7 @@ def test_populate_image_with_options(server: TSC.Server) -> None:
         server.custom_views.populate_image(single_view, req_option)
         assert response == single_view.image
 
+
 def test_populate_image_missing_id(server: TSC.Server) -> None:
     single_view = TSC.CustomViewItem()
     single_view._id = None
