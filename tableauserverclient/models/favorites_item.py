@@ -1,9 +1,8 @@
 import logging
 
-from typing import Union
+from typing import TypedDict, Union
 from defusedxml.ElementTree import fromstring
-
-from tableauserverclient.models.tableau_types import TableauItem
+from tableauserverclient.models.collection_item import CollectionItem
 from tableauserverclient.models.datasource_item import DatasourceItem
 from tableauserverclient.models.flow_item import FlowItem
 from tableauserverclient.models.project_item import ProjectItem
@@ -13,16 +12,22 @@ from tableauserverclient.models.workbook_item import WorkbookItem
 
 from tableauserverclient.helpers.logging import logger
 
-FavoriteType = dict[
-    str,
-    list[TableauItem],
-]
+
+class FavoriteType(TypedDict):
+    collections: list[CollectionItem]
+    datasources: list[DatasourceItem]
+    flows: list[FlowItem]
+    projects: list[ProjectItem]
+    metrics: list[MetricItem]
+    views: list[ViewItem]
+    workbooks: list[WorkbookItem]
 
 
 class FavoriteItem:
     @classmethod
     def from_response(cls, xml: Union[str, bytes], namespace: dict) -> FavoriteType:
         favorites: FavoriteType = {
+            "collections": [],
             "datasources": [],
             "flows": [],
             "projects": [],
@@ -32,6 +37,7 @@ class FavoriteItem:
         }
         parsed_response = fromstring(xml)
 
+        collections_xml = parsed_response.findall(".//t:favorite/t:collection", namespace)
         datasources_xml = parsed_response.findall(".//t:favorite/t:datasource", namespace)
         flows_xml = parsed_response.findall(".//t:favorite/t:flow", namespace)
         metrics_xml = parsed_response.findall(".//t:favorite/t:metric", namespace)
@@ -40,13 +46,14 @@ class FavoriteItem:
         workbooks_xml = parsed_response.findall(".//t:favorite/t:workbook", namespace)
 
         logger.debug(
-            "ds: {}, flows: {}, metrics: {}, projects: {}, views: {}, wbs: {}".format(
+            "ds: {}, flows: {}, metrics: {}, projects: {}, views: {}, wbs: {}, collections: {}".format(
                 len(datasources_xml),
                 len(flows_xml),
                 len(metrics_xml),
                 len(projects_xml),
                 len(views_xml),
                 len(workbooks_xml),
+                len(collections_xml),
             )
         )
         for datasource in datasources_xml:
@@ -84,6 +91,12 @@ class FavoriteItem:
             if fav_workbook:
                 logger.debug(fav_workbook)
                 favorites["workbooks"].append(fav_workbook)
+
+        for collection in collections_xml:
+            fav_collection = CollectionItem.from_xml(collection, namespace)
+            if fav_collection:
+                logger.debug(fav_collection)
+                favorites["collections"].append(fav_collection)
 
         logger.debug(favorites)
         return favorites

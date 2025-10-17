@@ -3,6 +3,7 @@ import unittest
 import requests_mock
 
 import tableauserverclient as TSC
+from tableauserverclient.datetime_helpers import parse_datetime
 from ._utils import read_xml_asset
 
 GET_FAVORITES_XML = "favorites_get.xml"
@@ -47,6 +48,17 @@ class FavoritesTests(unittest.TestCase):
         self.assertEqual(view.id, "d79634e1-6063-4ec9-95ff-50acbf609ff5")
         self.assertEqual(datasource.id, "e76a1461-3b1d-4588-bf1b-17551a879ad9")
         self.assertEqual(project.id, "1d0304cd-3796-429f-b815-7258370b9b74")
+
+        collection = self.user.favorites["collections"][0]
+
+        assert collection.id == "8c57cb8a-d65f-4a32-813e-5a3f86e8f94e"
+        assert collection.name == "sample collection"
+        assert collection.description == "description for sample collection"
+        assert collection.total_item_count == 3
+        assert collection.permissioned_item_count == 2
+        assert collection.visibility == "Private"
+        assert collection.created_at == parse_datetime("2016-08-11T21:22:40Z")
+        assert collection.updated_at == parse_datetime("2016-08-11T21:34:17Z")
 
     def test_add_favorite_workbook(self) -> None:
         response_xml = read_xml_asset(ADD_FAVORITE_WORKBOOK_XML)
