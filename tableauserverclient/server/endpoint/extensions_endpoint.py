@@ -1,6 +1,7 @@
 from tableauserverclient.models.extensions_item import ExtensionsServer
 from tableauserverclient.server.endpoint.endpoint import Endpoint
 from tableauserverclient.server.endpoint.endpoint import api
+from tableauserverclient.server.request_factory import RequestFactory
 
 
 class Extensions(Endpoint):
@@ -21,4 +22,22 @@ class Extensions(Endpoint):
             The server extensions settings
         """
         response = self.get_request(self._server_baseurl)
+        return ExtensionsServer.from_response(response.content, self.parent_srv.namespace)
+
+    @api(version="3.21")
+    def update_server_settings(self, extensions_server: ExtensionsServer) -> ExtensionsServer:
+        """Updates the settings for extensions of a server
+
+        Parameters
+        ----------
+        extensions_server : ExtensionsServer
+            The server extensions settings to update
+
+        Returns
+        -------
+        ExtensionsServer
+            The updated server extensions settings
+        """
+        req = RequestFactory.Extensions.update_server_extensions(extensions_server)
+        response = self.put_request(self._server_baseurl, req)
         return ExtensionsServer.from_response(response.content, self.parent_srv.namespace)

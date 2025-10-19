@@ -1629,6 +1629,23 @@ class OIDCRequest:
         return ET.tostring(xml_request)
 
 
+class ExtensionsRequest:
+    @_tsrequest_wrapped
+    def update_server_extensions(self, xml_request: ET.Element, extensions_server: "ExtensionsServer") -> None:
+        extensions_element = ET.SubElement(xml_request, "extensionsServerSettings")
+        if not isinstance(extensions_server.enabled, bool):
+            raise ValueError(f"Extensions Server missing enabled: {extensions_server}")
+        enabled_element = ET.SubElement(extensions_element, "extensionsGloballyEnabled")
+        enabled_element.text = str(extensions_server.enabled).lower()
+
+        if extensions_server.block_list is None:
+            return
+        for blocked in extensions_server.block_list:
+            blocked_element = ET.SubElement(extensions_element, "blockList")
+            blocked_element.text = blocked
+        return
+
+
 class RequestFactory:
     Auth = AuthRequest()
     Connection = Connection()
@@ -1639,6 +1656,7 @@ class RequestFactory:
     Database = DatabaseRequest()
     DQW = DQWRequest()
     Empty = EmptyRequest()
+    Extensions = ExtensionsRequest()
     Favorite = FavoriteRequest()
     Fileupload = FileuploadRequest()
     Flow = FlowRequest()
