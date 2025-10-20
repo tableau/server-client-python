@@ -75,7 +75,7 @@ class SafeExtension:
 class ExtensionsSiteSettings:
     def __init__(self) -> None:
         self._enabled: Optional[bool] = None
-        self._use_default_settings: Optional[bool] = None
+        self._use_default_setting: Optional[bool] = None
         self.safe_list: Optional[list[SafeExtension]] = None
 
     @property
@@ -88,13 +88,13 @@ class ExtensionsSiteSettings:
         self._enabled = value
 
     @property
-    def use_default_settings(self) -> Optional[bool]:
-        return self._use_default_settings
+    def use_default_setting(self) -> Optional[bool]:
+        return self._use_default_setting
 
-    @use_default_settings.setter
+    @use_default_setting.setter
     @property_is_boolean
-    def use_default_settings(self, value: Optional[bool]) -> None:
-        self._use_default_settings = value
+    def use_default_setting(self, value: Optional[bool]) -> None:
+        self._use_default_setting = value
 
     @classmethod
     def from_response(cls: type[Self], response, ns) -> Self:
@@ -107,7 +107,7 @@ class ExtensionsSiteSettings:
         if (enabled_element := element.find("./t:extensionsEnabled", namespaces=ns)) is not None:
             obj.enabled = string_to_bool(enabled_element.text)
         if (default_settings_element := element.find("./t:useDefaultSetting", namespaces=ns)) is not None:
-            obj.use_default_settings = string_to_bool(default_settings_element.text)
+            obj.use_default_setting = string_to_bool(default_settings_element.text)
 
         safe_list = []
         for safe_extension_element in element.findall("./t:safeList", namespaces=ns):

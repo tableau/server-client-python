@@ -1645,6 +1645,32 @@ class ExtensionsRequest:
             blocked_element.text = blocked
         return
 
+    @_tsrequest_wrapped
+    def update_site_extensions(self, xml_request: ET.Element, extensions_site_settings: ExtensionsSiteSettings) -> None:
+        ext_element = ET.SubElement(xml_request, "extensionsSiteSettings")
+        if not isinstance(extensions_site_settings.enabled, bool):
+            raise ValueError(f"Extensions Site Settings missing enabled: {extensions_site_settings}")
+        enabled_element = ET.SubElement(ext_element, "extensionsEnabled")
+        enabled_element.text = str(extensions_site_settings.enabled).lower()
+        if not isinstance(extensions_site_settings.use_default_setting, bool):
+            raise ValueError(
+                f"Extensions Site Settings missing use_default_setting: {extensions_site_settings.use_default_setting}"
+            )
+        default_element = ET.SubElement(ext_element, "useDefaultSetting")
+        default_element.text = str(extensions_site_settings.use_default_setting).lower()
+
+        for safe in extensions_site_settings.safe_list or []:
+            safe_element = ET.SubElement(ext_element, "safeList")
+            if safe.url is not None:
+                url_element = ET.SubElement(safe_element, "url")
+                url_element.text = safe.url
+            if safe.full_data_allowed is not None:
+                full_data_element = ET.SubElement(safe_element, "fullDataAllowed")
+                full_data_element.text = str(safe.full_data_allowed).lower()
+            if safe.prompt_needed is not None:
+                prompt_element = ET.SubElement(safe_element, "promptNeeded")
+                prompt_element.text = str(safe.prompt_needed).lower()
+
 
 class RequestFactory:
     Auth = AuthRequest()

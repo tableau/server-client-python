@@ -30,7 +30,8 @@ class Extensions(Endpoint):
 
     @api(version="3.21")
     def update_server_settings(self, extensions_server: ExtensionsServer) -> ExtensionsServer:
-        """Updates the settings for extensions of a server
+        """Updates the settings for extensions of a server. Overwrites all existing settings. Any
+        sites omitted from the block list will be unblocked.
 
         Parameters
         ----------
@@ -56,4 +57,23 @@ class Extensions(Endpoint):
             The site extensions settings
         """
         response = self.get_request(self.baseurl)
+        return ExtensionsSiteSettings.from_response(response.content, self.parent_srv.namespace)
+
+    @api(version="3.21")
+    def update(self, extensions_site_settings: ExtensionsSiteSettings) -> ExtensionsSiteSettings:
+        """Updates the extensions settings for the site. Overwrites all existing settings.
+        Any extensions omitted from the safe extensions list will be removed.
+
+        Parameters
+        ----------
+        extensions_site_settings : ExtensionsSiteSettings
+            The site extensions settings to update
+
+        Returns
+        -------
+        ExtensionsSiteSettings
+            The updated site extensions settings
+        """
+        req = RequestFactory.Extensions.update_site_extensions(extensions_site_settings)
+        response = self.put_request(self.baseurl, req)
         return ExtensionsSiteSettings.from_response(response.content, self.parent_srv.namespace)
