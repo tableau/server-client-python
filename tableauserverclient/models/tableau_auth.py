@@ -201,7 +201,7 @@ class JWTAuth(Credentials):
     def __init__(
         self,
         jwt: str,
-        isUat: Optional[bool] = False,
+        isUat: bool = False,
         site_id: Optional[str] = None,
         user_id_to_impersonate: Optional[str] = None,
     ) -> None:
