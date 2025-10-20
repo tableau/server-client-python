@@ -198,7 +198,13 @@ class JWTAuth(Credentials):
 
     """
 
-    def __init__(self, jwt: str, isUat: Optional[bool] = False, site_id: Optional[str] = None, user_id_to_impersonate: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        jwt: str,
+        isUat: Optional[bool] = False,
+        site_id: Optional[str] = None,
+        user_id_to_impersonate: Optional[str] = None,
+    ) -> None:
         if jwt is None:
             raise TabError("Must provide a JWT token when using JWT authentication")
         super().__init__(site_id, user_id_to_impersonate)
