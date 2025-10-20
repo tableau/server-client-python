@@ -10,7 +10,7 @@ from tableauserverclient.models.data_freshness_policy_item import DataFreshnessP
 from tableauserverclient.models.datasource_item import DatasourceItem
 from tableauserverclient.models.dqw_item import DQWItem
 from tableauserverclient.models.exceptions import UnpopulatedPropertyError
-from tableauserverclient.models.extensions_item import ExtensionsServer
+from tableauserverclient.models.extensions_item import ExtensionsServer, ExtensionsSiteSettings, SafeExtension
 from tableauserverclient.models.favorites_item import FavoriteItem
 from tableauserverclient.models.fileupload_item import FileuploadItem
 from tableauserverclient.models.flow_item import FlowItem
@@ -115,4 +115,6 @@ __all__ = [
     "LinkedTaskFlowRunItem",
     "ExtractItem",
     "ExtensionsServer",
+    "ExtensionsSiteSettings",
+    "SafeExtension",
 ]
