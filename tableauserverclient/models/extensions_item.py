@@ -77,6 +77,10 @@ class ExtensionsSiteSettings:
         self._enabled: Optional[bool] = None
         self._use_default_setting: Optional[bool] = None
         self.safe_list: Optional[list[SafeExtension]] = None
+        self._allow_trusted: Optional[bool] = None
+        self._include_tableau_built: Optional[bool] = None
+        self._include_partner_built: Optional[bool] = None
+        self._include_sandboxed: Optional[bool] = None
 
     @property
     def enabled(self) -> Optional[bool]:
@@ -96,6 +100,42 @@ class ExtensionsSiteSettings:
     def use_default_setting(self, value: Optional[bool]) -> None:
         self._use_default_setting = value
 
+    @property
+    def allow_trusted(self) -> Optional[bool]:
+        return self._allow_trusted
+
+    @allow_trusted.setter
+    @property_is_boolean
+    def allow_trusted(self, value: Optional[bool]) -> None:
+        self._allow_trusted = value
+
+    @property
+    def include_tableau_built(self) -> Optional[bool]:
+        return self._include_tableau_built
+
+    @include_tableau_built.setter
+    @property_is_boolean
+    def include_tableau_built(self, value: Optional[bool]) -> None:
+        self._include_tableau_built = value
+
+    @property
+    def include_partner_built(self) -> Optional[bool]:
+        return self._include_partner_built
+
+    @include_partner_built.setter
+    @property_is_boolean
+    def include_partner_built(self, value: Optional[bool]) -> None:
+        self._include_partner_built = value
+
+    @property
+    def include_sandboxed(self) -> Optional[bool]:
+        return self._include_sandboxed
+
+    @include_sandboxed.setter
+    @property_is_boolean
+    def include_sandboxed(self, value: Optional[bool]) -> None:
+        self._include_sandboxed = value
+
     @classmethod
     def from_response(cls: type[Self], response, ns) -> Self:
         xml = fromstring(response)
@@ -108,6 +148,14 @@ class ExtensionsSiteSettings:
             obj.enabled = string_to_bool(enabled_element.text)
         if (default_settings_element := element.find("./t:useDefaultSetting", namespaces=ns)) is not None:
             obj.use_default_setting = string_to_bool(default_settings_element.text)
+        if (allow_trusted_element := element.find("./t:allowTrusted", namespaces=ns)) is not None:
+            obj.allow_trusted = string_to_bool(allow_trusted_element.text)
+        if (include_tableau_built_element := element.find("./t:includeTableauBuilt", namespaces=ns)) is not None:
+            obj.include_tableau_built = string_to_bool(include_tableau_built_element.text)
+        if (include_partner_built_element := element.find("./t:includePartnerBuilt", namespaces=ns)) is not None:
+            obj.include_partner_built = string_to_bool(include_partner_built_element.text)
+        if (include_sandboxed_element := element.find("./t:includeSandboxed", namespaces=ns)) is not None:
+            obj.include_sandboxed = string_to_bool(include_sandboxed_element.text)
 
         safe_list = []
         for safe_extension_element in element.findall("./t:safeList", namespaces=ns):

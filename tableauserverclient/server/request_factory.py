@@ -1658,6 +1658,18 @@ class ExtensionsRequest:
             )
         default_element = ET.SubElement(ext_element, "useDefaultSetting")
         default_element.text = str(extensions_site_settings.use_default_setting).lower()
+        if extensions_site_settings.allow_trusted is not None:
+            allow_trusted_element = ET.SubElement(ext_element, "allowTrusted")
+            allow_trusted_element.text = str(extensions_site_settings.allow_trusted).lower()
+        if extensions_site_settings.include_sandboxed is not None:
+            include_sandboxed_element = ET.SubElement(ext_element, "includeSandboxed")
+            include_sandboxed_element.text = str(extensions_site_settings.include_sandboxed).lower()
+        if extensions_site_settings.include_tableau_built is not None:
+            include_tableau_built_element = ET.SubElement(ext_element, "includeTableauBuilt")
+            include_tableau_built_element.text = str(extensions_site_settings.include_tableau_built).lower()
+        if extensions_site_settings.include_partner_built is not None:
+            include_partner_built_element = ET.SubElement(ext_element, "includePartnerBuilt")
+            include_partner_built_element.text = str(extensions_site_settings.include_partner_built).lower()
 
         for safe in extensions_site_settings.safe_list or []:
             safe_element = ET.SubElement(ext_element, "safeList")

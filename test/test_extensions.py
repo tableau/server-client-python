@@ -71,6 +71,10 @@ def test_get_site_settings(server: TSC.Server) -> None:
     assert site_settings.enabled is True
     assert site_settings.use_default_setting is False
     assert site_settings.safe_list is not None
+    assert site_settings.allow_trusted is True
+    assert site_settings.include_partner_built is False
+    assert site_settings.include_sandboxed is False
+    assert site_settings.include_tableau_built is False
     assert len(site_settings.safe_list) == 1
     first_safe = site_settings.safe_list[0]
     assert first_safe.url == "http://localhost:9123/Dynamic.html"
