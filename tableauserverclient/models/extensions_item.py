@@ -1,4 +1,4 @@
-from typing import Optional, overload
+from typing import overload
 from typing_extensions import Self
 
 from defusedxml.ElementTree import fromstring
@@ -8,26 +8,26 @@ from tableauserverclient.models.property_decorators import property_is_boolean
 
 class ExtensionsServer:
     def __init__(self) -> None:
-        self._enabled: Optional[bool] = None
-        self._block_list: Optional[list[str]] = None
+        self._enabled: bool | None = None
+        self._block_list: list[str] | None = None
 
     @property
-    def enabled(self) -> Optional[bool]:
+    def enabled(self) -> bool | None:
         """Indicates whether the extensions server is enabled."""
         return self._enabled
 
     @enabled.setter
     @property_is_boolean
-    def enabled(self, value: Optional[bool]) -> None:
+    def enabled(self, value: bool | None) -> None:
         self._enabled = value
 
     @property
-    def block_list(self) -> Optional[list[str]]:
+    def block_list(self) -> list[str] | None:
         """List of blocked extensions."""
         return self._block_list
 
     @block_list.setter
-    def block_list(self, value: Optional[list[str]]) -> None:
+    def block_list(self, value: list[str] | None) -> None:
         self._block_list = value
 
     @classmethod
@@ -47,93 +47,93 @@ class ExtensionsServer:
 
 class SafeExtension:
     def __init__(
-        self, url: Optional[str] = None, full_data_allowed: Optional[bool] = None, prompt_needed: Optional[bool] = None
+        self, url: str | None = None, full_data_allowed: bool | None = None, prompt_needed: bool | None = None
     ) -> None:
         self.url = url
         self._full_data_allowed = full_data_allowed
         self._prompt_needed = prompt_needed
 
     @property
-    def full_data_allowed(self) -> Optional[bool]:
+    def full_data_allowed(self) -> bool | None:
         return self._full_data_allowed
 
     @full_data_allowed.setter
     @property_is_boolean
-    def full_data_allowed(self, value: Optional[bool]) -> None:
+    def full_data_allowed(self, value: bool | None) -> None:
         self._full_data_allowed = value
 
     @property
-    def prompt_needed(self) -> Optional[bool]:
+    def prompt_needed(self) -> bool | None:
         return self._prompt_needed
 
     @prompt_needed.setter
     @property_is_boolean
-    def prompt_needed(self, value: Optional[bool]) -> None:
+    def prompt_needed(self, value: bool | None) -> None:
         self._prompt_needed = value
 
 
 class ExtensionsSiteSettings:
     def __init__(self) -> None:
-        self._enabled: Optional[bool] = None
-        self._use_default_setting: Optional[bool] = None
-        self.safe_list: Optional[list[SafeExtension]] = None
-        self._allow_trusted: Optional[bool] = None
-        self._include_tableau_built: Optional[bool] = None
-        self._include_partner_built: Optional[bool] = None
-        self._include_sandboxed: Optional[bool] = None
+        self._enabled: bool | None = None
+        self._use_default_setting: bool | None = None
+        self.safe_list: list[SafeExtension] | None = None
+        self._allow_trusted: bool | None = None
+        self._include_tableau_built: bool | None = None
+        self._include_partner_built: bool | None = None
+        self._include_sandboxed: bool | None = None
 
     @property
-    def enabled(self) -> Optional[bool]:
+    def enabled(self) -> bool | None:
         return self._enabled
 
     @enabled.setter
     @property_is_boolean
-    def enabled(self, value: Optional[bool]) -> None:
+    def enabled(self, value: bool | None) -> None:
         self._enabled = value
 
     @property
-    def use_default_setting(self) -> Optional[bool]:
+    def use_default_setting(self) -> bool | None:
         return self._use_default_setting
 
     @use_default_setting.setter
     @property_is_boolean
-    def use_default_setting(self, value: Optional[bool]) -> None:
+    def use_default_setting(self, value: bool | None) -> None:
         self._use_default_setting = value
 
     @property
-    def allow_trusted(self) -> Optional[bool]:
+    def allow_trusted(self) -> bool | None:
         return self._allow_trusted
 
     @allow_trusted.setter
     @property_is_boolean
-    def allow_trusted(self, value: Optional[bool]) -> None:
+    def allow_trusted(self, value: bool | None) -> None:
         self._allow_trusted = value
 
     @property
-    def include_tableau_built(self) -> Optional[bool]:
+    def include_tableau_built(self) -> bool | None:
         return self._include_tableau_built
 
     @include_tableau_built.setter
     @property_is_boolean
-    def include_tableau_built(self, value: Optional[bool]) -> None:
+    def include_tableau_built(self, value: bool | None) -> None:
         self._include_tableau_built = value
 
     @property
-    def include_partner_built(self) -> Optional[bool]:
+    def include_partner_built(self) -> bool | None:
         return self._include_partner_built
 
     @include_partner_built.setter
     @property_is_boolean
-    def include_partner_built(self, value: Optional[bool]) -> None:
+    def include_partner_built(self, value: bool | None) -> None:
         self._include_partner_built = value
 
     @property
-    def include_sandboxed(self) -> Optional[bool]:
+    def include_sandboxed(self) -> bool | None:
         return self._include_sandboxed
 
     @include_sandboxed.setter
     @property_is_boolean
-    def include_sandboxed(self, value: Optional[bool]) -> None:
+    def include_sandboxed(self, value: bool | None) -> None:
         self._include_sandboxed = value
 
     @classmethod
