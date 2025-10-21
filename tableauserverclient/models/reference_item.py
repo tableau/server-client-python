@@ -1,9 +1,8 @@
-from typing import Optional
 from typing_extensions import Self
 
 
 class ResourceReference:
-    def __init__(self, id_: Optional[str], tag_name: str) -> None:
+    def __init__(self, id_: str | None, tag_name: str) -> None:
         self.id = id_
         self.tag_name = tag_name
 
@@ -21,11 +20,11 @@ class ResourceReference:
         return hash((self.id, self.tag_name))
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         return self._id
 
     @id.setter
-    def id(self, value: Optional[str]) -> None:
+    def id(self, value: str | None) -> None:
         self._id = value
 
     @property
