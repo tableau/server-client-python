@@ -380,7 +380,7 @@ class UserItem:
 
     def to_reference(self: Self) -> ResourceReference:
         if self.id is None:
-            raise ValueError("UserItem must have id to be converted to reference")
+            raise ValueError(f"{self.__class__.__qualname__} must have id to be converted to reference")
         return ResourceReference(self.id, self.tag_name)
 
     @staticmethod
