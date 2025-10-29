@@ -1638,6 +1638,38 @@ See the `metadata_query.py` sample in the Samples directory.
 <br>
 <br>
 
+#### metadata.paginated_query
+
+
+```py
+metadata.paginated_query(query, variables=None, abort_on_error=False)
+```
+
+Executes a metadata query, and returns a dictionary containing a list of the results. In order to properly paginate through all the results, the query must contain a field `pageInfo` with the subfields `hasNextPage` and `endCursor`, as well as the nodes to be returned. The query must accept the variables `first` (the number of items to return) and `afterToken` (the cursor after which to return items). The method will repeatedly call the metadata endpoint until all results have been retrieved, and return a dictionary containing a list of all results.
+
+
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`query`          | The GraphQL query
+`variables`      | Variables for the GraphQL query
+`abort_on_error` | Whether to throw an exception on error
+
+
+**Returns**
+
+The method returns the query results in a dictionary containing a list of pages as a stucture of `list`s and `dict`s as returned by the `json` package.
+
+
+**Example**
+
+See the `metadata_paginated_query.py` sample in the Samples directory.
+
+<br>
+<br>
+
 ---
 
 ## Metrics
