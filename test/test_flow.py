@@ -197,7 +197,7 @@ class FlowTests(unittest.TestCase):
         self.assertEqual("default", new_flow.project_name)
         self.assertEqual("5de011f8-5aa9-4d5b-b991-f462c8dd6bb7", new_flow.owner_id)
 
-    def test_refresh(self):
+    def test_refresh(self) -> None:
         with open(asset(REFRESH_XML), "rb") as f:
             response_xml = f.read().decode("utf-8")
         with requests_mock.mock() as m:
@@ -205,6 +205,22 @@ class FlowTests(unittest.TestCase):
             flow_item = TSC.FlowItem("test")
             flow_item._id = "92967d2d-c7e2-46d0-8847-4802df58f484"
             refresh_job = self.server.flows.refresh(flow_item)
+
+            self.assertEqual(refresh_job.id, "d1b2ccd0-6dfa-444a-aee4-723dbd6b7c9d")
+            self.assertEqual(refresh_job.mode, "Asynchronous")
+            self.assertEqual(refresh_job.type, "RunFlow")
+            self.assertEqual(format_datetime(refresh_job.created_at), "2018-05-22T13:00:29Z")
+            self.assertIsInstance(refresh_job.flow_run, TSC.FlowRunItem)
+            self.assertEqual(refresh_job.flow_run.id, "e0c3067f-2333-4eee-8028-e0a56ca496f6")
+            self.assertEqual(refresh_job.flow_run.flow_id, "92967d2d-c7e2-46d0-8847-4802df58f484")
+            self.assertEqual(format_datetime(refresh_job.flow_run.started_at), "2018-05-22T13:00:29Z")
+
+    def test_refresh_id_str(self) -> None:
+        with open(asset(REFRESH_XML), "rb") as f:
+            response_xml = f.read().decode("utf-8")
+        with requests_mock.mock() as m:
+            m.post(self.baseurl + "/92967d2d-c7e2-46d0-8847-4802df58f484/run", text=response_xml)
+            refresh_job = self.server.flows.refresh("92967d2d-c7e2-46d0-8847-4802df58f484")
 
             self.assertEqual(refresh_job.id, "d1b2ccd0-6dfa-444a-aee4-723dbd6b7c9d")
             self.assertEqual(refresh_job.mode, "Asynchronous")
