@@ -186,7 +186,7 @@ class UserItem:
         return self._name
 
     @name.setter
-    def name(self, value: str):
+    def name(self, value: Optional[str]):
         self._name = value
 
     # valid: username, domain/username, username@domain, domain/username@email
