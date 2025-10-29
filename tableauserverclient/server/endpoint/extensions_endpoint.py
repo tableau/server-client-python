@@ -53,7 +53,7 @@ class Extensions(Endpoint):
 
         Returns
         -------
-        list[ExtensionsSiteSettings]
+        ExtensionsSiteSettings
             The site extensions settings
         """
         response = self.get_request(self.baseurl)

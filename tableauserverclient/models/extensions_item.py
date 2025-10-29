@@ -40,7 +40,7 @@ class ExtensionsServer:
 
         if (enabled_element := element.find("./t:extensionsGloballyEnabled", namespaces=ns)) is not None:
             obj.enabled = string_to_bool(enabled_element.text)
-        obj.block_list = [e.text for e in element.findall("./t:blockList", namespaces=ns)]
+        obj.block_list = [e.text for e in element.findall("./t:blockList", namespaces=ns) if e.text is not None]
 
         return obj
 

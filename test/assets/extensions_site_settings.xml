@@ -5,7 +5,7 @@
         <useDefaultSetting>false</useDefaultSetting>
         <allowTrusted>true</allowTrusted>
         <includeSandboxed>false</includeSandboxed>
-        <includeTableauBuilt>>false</includeTableauBuilt>
+        <includeTableauBuilt>false</includeTableauBuilt>
         <includePartnerBuilt>false</includePartnerBuilt>
         <safeList>
             <url>http://localhost:9123/Dynamic.html</url>
