@@ -1,5 +1,4 @@
 from pathlib import Path
-from xml.etree.ElementTree import Element
 
 from defusedxml.ElementTree import fromstring
 import requests_mock
