@@ -61,8 +61,8 @@ class Extensions(Endpoint):
 
     @api(version="3.21")
     def update(self, extensions_site_settings: ExtensionsSiteSettings) -> ExtensionsSiteSettings:
-        """Updates the extensions settings for the site. Overwrites all existing settings.
-        Any extensions omitted from the safe extensions list will be removed.
+        """Updates the extensions settings for the site. Any extensions omitted
+        from the safe extensions list will be removed.
 
         Parameters
         ----------
