@@ -245,7 +245,7 @@ def test_remove_user_missing_group_id(server: TSC.Server) -> None:
 
 
 def test_create_group(server: TSC.Server) -> None:
-    response_xml = CREATE_GROUP.read_text()
+    response_xml = CREATE_GROUP.read_text(encoding="utf-8")
     with requests_mock.mock() as m:
         m.post(server.groups.baseurl, text=response_xml)
         group_to_create = TSC.GroupItem("試供品")
