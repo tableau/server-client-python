@@ -325,6 +325,11 @@ class RequestOptionTests(unittest.TestCase):
             opts.parameter("vf_Parameters.name4", "value4")
             opts.page_type = TSC.PDFRequestOptions.PageType.Tabloid
 
+            # While Tableau Server side IS case sensitive with the query string,
+            # requiring the prefix to be "vf_Parameters", requests does not end
+            # up preserving the case sensitivity with the Response.Request
+            # object. It also shows up lowercased in the requests_mock request
+            # history.
             resp = self.server.workbooks.get_request(url, request_object=opts)
             query_params = parse_qs(resp.request.query)
             self.assertIn("vf_parameters.name1@", query_params)
