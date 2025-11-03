@@ -332,16 +332,16 @@ class RequestOptionTests(unittest.TestCase):
             # history.
             resp = self.server.workbooks.get_request(url, request_object=opts)
             query_params = parse_qs(resp.request.query)
-            self.assertIn("vf_parameters.name1@", query_params)
-            self.assertIn("value1", query_params["vf_parameters.name1@"])
-            self.assertIn("vf_parameters.name2$", query_params)
-            self.assertIn("value2", query_params["vf_parameters.name2$"])
-            self.assertIn("vf_parameters.name3", query_params)
-            self.assertIn("value3", query_params["vf_parameters.name3"])
-            self.assertIn("vf_parameters.name4", query_params)
-            self.assertIn("value4", query_params["vf_parameters.name4"])
-            self.assertIn("type", query_params)
-            self.assertIn("tabloid", query_params["type"])
+            assert "vf_parameters.name1@" in query_params
+            assert "value1" in query_params["vf_parameters.name1@"]
+            assert "vf_parameters.name2$" in query_params
+            assert "value2" in query_params["vf_parameters.name2$"]
+            assert "vf_parameters.name3" in query_params
+            assert "value3" in query_params["vf_parameters.name3"]
+            assert "vf_parameters.name4" in query_params
+            assert "value4" in query_params["vf_parameters.name4"]
+            assert "type" in query_params
+            assert "tabloid" in query_params["type"]
 
     def test_queryset_endpoint_pagesize_all(self) -> None:
         for page_size in (1, 10, 100, 1000):
