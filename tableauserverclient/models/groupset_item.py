@@ -24,6 +24,14 @@ class GroupSetItem:
     def __repr__(self) -> str:
         return self.__str__()
 
+    @property
+    def name(self) -> Optional[str]:
+        return self._name
+
+    @name.setter
+    def name(self, value: Optional[str]) -> None:
+        self._name = value
+
     @classmethod
     def from_response(cls, response: bytes, ns: dict[str, str]) -> list["GroupSetItem"]:
         parsed_response = fromstring(response)

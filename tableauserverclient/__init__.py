@@ -2,6 +2,7 @@ from tableauserverclient.bin._version import get_versions
 from tableauserverclient.namespace import NEW_NAMESPACE as DEFAULT_NAMESPACE
 from tableauserverclient.models import (
     BackgroundJobItem,
+    CollectionItem,
     ColumnItem,
     ConnectionCredentials,
     ConnectionItem,
@@ -73,7 +74,7 @@ from tableauserverclient.server import (
 
 __all__ = [
     "BackgroundJobItem",
-    "BackgroundJobItem",
+    "CollectionItem",
     "ColumnItem",
     "ConnectionCredentials",
     "ConnectionItem",

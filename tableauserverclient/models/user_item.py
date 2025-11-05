@@ -17,6 +17,7 @@ from .reference_item import ResourceReference
 
 if TYPE_CHECKING:
     from tableauserverclient.server import Pager
+    from tableauserverclient.models.favorites_item import FavoriteType
 
 
 class UserItem:
@@ -131,7 +132,7 @@ class UserItem:
         self._id: Optional[str] = None
         self._last_login: Optional[datetime] = None
         self._workbooks = None
-        self._favorites: Optional[dict[str, list]] = None
+        self._favorites: Optional["FavoriteType"] = None
         self._groups = None
         self.email: Optional[str] = None
         self.fullname: Optional[str] = None
@@ -185,7 +186,7 @@ class UserItem:
         return self._name
 
     @name.setter
-    def name(self, value: str):
+    def name(self, value: Optional[str]):
         self._name = value
 
     # valid: username, domain/username, username@domain, domain/username@email
@@ -218,7 +219,7 @@ class UserItem:
         return self._workbooks()
 
     @property
-    def favorites(self) -> dict[str, list]:
+    def favorites(self) -> "FavoriteType":
         if self._favorites is None:
             error = "User item must be populated with favorites first."
             raise UnpopulatedPropertyError(error)
