@@ -308,7 +308,7 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
         return connection
 
     @api(version="3.3")
-    def refresh(self, flow_item: FlowItem) -> JobItem:
+    def refresh(self, flow_item: Union[FlowItem, str]) -> JobItem:
         """
         Runs the flow to refresh the data.
 
@@ -316,15 +316,16 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
 
         Parameters
         ----------
-        flow_item: FlowItem
-            The flow item to refresh.
+        flow_item: FlowItem | str
+            The FlowItem or str of the flow id to refresh.
 
         Returns
         -------
         JobItem
             The job item that was created to refresh the flow.
         """
-        url = f"{self.baseurl}/{flow_item.id}/run"
+        flow_id = getattr(flow_item, "id", flow_item)
+        url = f"{self.baseurl}/{flow_id}/run"
         empty_req = RequestFactory.Empty.empty_req()
         server_response = self.post_request(url, empty_req)
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
