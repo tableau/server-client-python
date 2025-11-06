@@ -850,3 +850,23 @@ def test_get_datasource_all_fields(server) -> None:
     assert datasources[0].owner.last_login == parse_datetime("2025-02-04T06:39:20Z")
     assert datasources[0].owner.name == "bob@example.com"
     assert datasources[0].owner.site_role == "SiteAdministratorCreator"
+
+
+def test_update_description(server: TSC.Server) -> None:
+    response_xml = UPDATE_XML.read_text()
+    with requests_mock.mock() as m:
+        m.put(server.datasources.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", text=response_xml)
+        single_datasource = TSC.DatasourceItem("1d0304cd-3796-429f-b815-7258370b9b74", "Sample datasource")
+        single_datasource.owner_id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
+        single_datasource._content_url = "Sampledatasource"
+        single_datasource._id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
+        single_datasource.certified = True
+        single_datasource.certification_note = "Warning, here be dragons."
+        single_datasource.description = "Sample description"
+        _ = server.datasources.update(single_datasource)
+
+        history = m.request_history[0]
+    body = fromstring(history.body)
+    ds_elem = body.find(".//datasource")
+    assert ds_elem is not None
+    assert ds_elem.attrib["description"] == "Sample description"
