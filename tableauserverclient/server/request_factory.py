@@ -512,7 +512,10 @@ class PermissionRequest:
         for rule in rules:
             grantee_capabilities_element = ET.SubElement(permissions_element, "granteeCapabilities")
             grantee_element = ET.SubElement(grantee_capabilities_element, rule.grantee.tag_name)
-            grantee_element.attrib["id"] = rule.grantee.id
+            if rule.grantee.id is not None:
+                grantee_element.attrib["id"] = rule.grantee.id
+            else:
+                raise ValueError("Grantee must have an ID")
 
             capabilities_element = ET.SubElement(grantee_capabilities_element, "capabilities")
             self._add_all_capabilities(capabilities_element, rule.capabilities)

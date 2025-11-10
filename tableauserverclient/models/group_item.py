@@ -1,6 +1,7 @@
 from typing import Callable, Optional, TYPE_CHECKING
 
 from defusedxml.ElementTree import fromstring
+from typing_extensions import Self
 
 from .exceptions import UnpopulatedPropertyError
 from .property_decorators import property_not_empty, property_is_enum
@@ -157,3 +158,8 @@ class GroupItem:
     @staticmethod
     def as_reference(id_: str) -> ResourceReference:
         return ResourceReference(id_, GroupItem.tag_name)
+
+    def to_reference(self: Self) -> ResourceReference:
+        if self.id is None:
+            raise ValueError(f"{self.__class__.__qualname__} must have id to be converted to reference")
+        return ResourceReference(self.id, self.tag_name)
