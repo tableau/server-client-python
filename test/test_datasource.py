@@ -870,3 +870,27 @@ def test_update_description(server: TSC.Server) -> None:
     ds_elem = body.find(".//datasource")
     assert ds_elem is not None
     assert ds_elem.attrib["description"] == "Sample description"
+
+
+def test_publish_description(server: TSC.Server) -> None:
+    response_xml = PUBLISH_XML.read_text()
+    with requests_mock.mock() as m:
+        m.post(server.datasources.baseurl, text=response_xml)
+        single_datasource = TSC.DatasourceItem("1d0304cd-3796-429f-b815-7258370b9b74", "Sample datasource")
+        single_datasource.owner_id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
+        single_datasource._content_url = "Sampledatasource"
+        single_datasource._id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
+        single_datasource.certified = True
+        single_datasource.certification_note = "Warning, here be dragons."
+        single_datasource.description = "Sample description"
+        _ = server.datasources.publish(single_datasource, TEST_ASSET_DIR / "SampleDS.tds", server.PublishMode.CreateNew)
+
+        history = m.request_history[0]
+    boundary = history.body[: history.body.index(b"\r\n")].strip()
+    parts = history.body.split(boundary)
+    request_payload = next(part for part in parts if b"request_payload" in part)
+    xml_payload = request_payload.strip().split(b"\r\n")[-1]
+    body = fromstring(xml_payload)
+    ds_elem = body.find(".//datasource")
+    assert ds_elem is not None
+    assert ds_elem.attrib["description"] == "Sample description"
