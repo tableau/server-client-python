@@ -184,7 +184,6 @@ def test_publish_file_object(server: TSC.Server) -> None:
         sample_flow = os.path.join(TEST_ASSET_DIR, "SampleFlow.tfl")
         publish_mode = server.PublishMode.CreateNew
 
-        
         with open(sample_flow, "rb") as fp:
             publish_mode = server.PublishMode.CreateNew
 
@@ -218,19 +217,19 @@ def test_refresh(server: TSC.Server) -> None:
 
 
 def test_refresh_id_str(server: TSC.Server) -> None:
-        response_xml = REFRESH_XML.read_text()
-        with requests_mock.mock() as m:
-            m.post(server.flows.baseurl + "/92967d2d-c7e2-46d0-8847-4802df58f484/run", text=response_xml)
-            refresh_job = server.flows.refresh("92967d2d-c7e2-46d0-8847-4802df58f484")
+    response_xml = REFRESH_XML.read_text()
+    with requests_mock.mock() as m:
+        m.post(server.flows.baseurl + "/92967d2d-c7e2-46d0-8847-4802df58f484/run", text=response_xml)
+        refresh_job = server.flows.refresh("92967d2d-c7e2-46d0-8847-4802df58f484")
 
-            assert refresh_job.id == "d1b2ccd0-6dfa-444a-aee4-723dbd6b7c9d"
-            assert refresh_job.mode == "Asynchronous"
-            assert refresh_job.type == "RunFlow"
-            assert format_datetime(refresh_job.created_at) == "2018-05-22T13:00:29Z"
-            assert isinstance(refresh_job.flow_run, TSC.FlowRunItem)
-            assert refresh_job.flow_run.id == "e0c3067f-2333-4eee-8028-e0a56ca496f6"
-            assert refresh_job.flow_run.flow_id == "92967d2d-c7e2-46d0-8847-4802df58f484"
-            assert format_datetime(refresh_job.flow_run.started_at) == "2018-05-22T13:00:29Z"
+        assert refresh_job.id == "d1b2ccd0-6dfa-444a-aee4-723dbd6b7c9d"
+        assert refresh_job.mode == "Asynchronous"
+        assert refresh_job.type == "RunFlow"
+        assert format_datetime(refresh_job.created_at) == "2018-05-22T13:00:29Z"
+        assert isinstance(refresh_job.flow_run, TSC.FlowRunItem)
+        assert refresh_job.flow_run.id == "e0c3067f-2333-4eee-8028-e0a56ca496f6"
+        assert refresh_job.flow_run.flow_id == "92967d2d-c7e2-46d0-8847-4802df58f484"
+        assert format_datetime(refresh_job.flow_run.started_at) == "2018-05-22T13:00:29Z"
 
 
 def test_bad_download_response(server: TSC.Server) -> None:
