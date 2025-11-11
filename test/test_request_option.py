@@ -116,7 +116,7 @@ def test_filter_tags_in(server: TSC.Server) -> None:
 # check if filtered projects with spaces & special characters
 # get correctly returned
 def test_filter_name_in(server: TSC.Server) -> None:
-    response_xml = FILTER_NAME_IN.read_text()
+    response_xml = FILTER_NAME_IN.read_text("utf8")
     with requests_mock.mock() as m:
         m.get(
             server.projects.baseurl + "?filter=name%3Ain%3A%5Bdefault%2CSalesforce+Sales+Proje%C5%9Bt%5D",
