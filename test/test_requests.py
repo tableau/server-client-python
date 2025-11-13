@@ -19,6 +19,7 @@ def server():
 
     return server
 
+
 def test_make_get_request(server: TSC.Server) -> None:
     with requests_mock.mock() as m:
         m.get(requests_mock.ANY)
@@ -29,6 +30,7 @@ def test_make_get_request(server: TSC.Server) -> None:
         query = parse_qs(resp.request.query)
         assert query.get("pagesize") == ["13"]
         assert query.get("pagenumber") == ["15"]
+
 
 def test_make_post_request(server: TSC.Server) -> None:
     with requests_mock.mock() as m:
@@ -46,6 +48,7 @@ def test_make_post_request(server: TSC.Server) -> None:
         assert "Tableau Server Client" in resp.request.headers["user-agent"]
         assert resp.request.body == b"1337"
 
+
 # Test that 500 server errors are handled properly
 def test_internal_server_error(server: TSC.Server) -> None:
     server.version = "3.2"
@@ -54,6 +57,7 @@ def test_internal_server_error(server: TSC.Server) -> None:
         m.register_uri("GET", server.server_info.baseurl, status_code=500, text=server_response)
         with pytest.raises(InternalServerError, match=server_response):
             server.server_info.get()
+
 
 # Test that non-xml server errors are handled properly
 def test_non_xml_error(server: TSC.Server) -> None:
