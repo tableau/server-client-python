@@ -2,6 +2,7 @@ from typing import Optional
 import xml.etree.ElementTree as ET
 
 from defusedxml.ElementTree import fromstring
+from typing_extensions import Self
 
 from tableauserverclient.models.group_item import GroupItem
 from tableauserverclient.models.reference_item import ResourceReference
@@ -59,3 +60,8 @@ class GroupSetItem:
     @staticmethod
     def as_reference(id_: str) -> ResourceReference:
         return ResourceReference(id_, GroupSetItem.tag_name)
+
+    def to_reference(self: Self) -> ResourceReference:
+        if self.id is None:
+            raise ValueError(f"{self.__class__.__qualname__} must have id to be converted to reference")
+        return ResourceReference(self.id, self.tag_name)
