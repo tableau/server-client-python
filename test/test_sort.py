@@ -1,6 +1,8 @@
 import re
 import unittest
+from urllib.parse import parse_qs
 
+import pytest
 import requests_mock
 
 import tableauserverclient as TSC
@@ -15,7 +17,8 @@ class SortTests(unittest.TestCase):
         self.baseurl = self.server.workbooks.baseurl
 
     def test_empty_filter(self):
-        self.assertRaises(TypeError, TSC.Filter, "")
+        with pytest.raises(TypeError):
+            TSC.Filter("")
 
     def test_filter_equals(self):
         with requests_mock.mock() as m:
@@ -25,16 +28,17 @@ class SortTests(unittest.TestCase):
             opts.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, "Superstore"))
 
             resp = self.server.workbooks.get_request(url, request_object=opts)
-
-            self.assertTrue(re.search("pagenumber=13", resp.request.query))
-            self.assertTrue(re.search("pagesize=13", resp.request.query))
-            self.assertTrue(re.search("filter=name%3aeq%3asuperstore", resp.request.query))
+            query = parse_qs(resp.request.query)
+            assert "pagenumber" in query
+            assert query["pagenumber"] == ["13"]
+            assert "pagesize" in query
+            assert query["pagesize"] == ["13"]
+            assert "filter" in query
+            assert query["filter"] == ["name:eq:superstore"]
 
     def test_filter_equals_list(self):
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError, match="Filter values can only be a list if the operator is 'in'.") as cm:
             TSC.Filter(TSC.RequestOptions.Field.Tags, TSC.RequestOptions.Operator.Equals, ["foo", "bar"])
-
-        self.assertEqual("Filter values can only be a list if the operator is 'in'.", str(cm.exception)),
 
     def test_filter_in(self):
         with requests_mock.mock() as m:
@@ -47,9 +51,13 @@ class SortTests(unittest.TestCase):
             )
 
             resp = self.server.workbooks.get_request(url, request_object=opts)
-            self.assertTrue(re.search("pagenumber=13", resp.request.query))
-            self.assertTrue(re.search("pagesize=13", resp.request.query))
-            self.assertTrue(re.search("filter=tags%3ain%3a%5bstocks%2cmarket%5d", resp.request.query))
+            query = parse_qs(resp.request.query)
+            assert "pagenumber" in query
+            assert query["pagenumber"] == ["13"]
+            assert "pagesize" in query
+            assert query["pagesize"] == ["13"]
+            assert "filter" in query
+            assert query["filter"] == ["tags:in:[stocks,market]"]
 
     def test_sort_asc(self):
         with requests_mock.mock() as m:
@@ -59,10 +67,13 @@ class SortTests(unittest.TestCase):
             opts.sort.add(TSC.Sort(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Direction.Asc))
 
             resp = self.server.workbooks.get_request(url, request_object=opts)
-
-            self.assertTrue(re.search("pagenumber=13", resp.request.query))
-            self.assertTrue(re.search("pagesize=13", resp.request.query))
-            self.assertTrue(re.search("sort=name%3aasc", resp.request.query))
+            query = parse_qs(resp.request.query)
+            assert "pagenumber" in query
+            assert query["pagenumber"] == ["13"]
+            assert "pagesize" in query
+            assert query["pagesize"] == ["13"]
+            assert "sort" in query
+            assert query["sort"] == ["name:asc"]
 
     def test_filter_combo(self):
         with requests_mock.mock() as m:
@@ -84,20 +95,10 @@ class SortTests(unittest.TestCase):
 
             resp = self.server.workbooks.get_request(url, request_object=opts)
 
-            expected = (
-                "pagenumber=13&pagesize=13&filter=lastlogin%3agte%3a"
-                "2017-01-15t00%3a00%3a00%3a00z%2csiterole%3aeq%3apublisher"
-            )
-
-            self.assertTrue(re.search("pagenumber=13", resp.request.query))
-            self.assertTrue(re.search("pagesize=13", resp.request.query))
-            self.assertTrue(
-                re.search(
-                    "filter=lastlogin%3agte%3a2017-01-15t00%3a00%3a00%3a00z%2csiterole%3aeq%3apublisher",
-                    resp.request.query,
-                )
-            )
-
-
-if __name__ == "__main__":
-    unittest.main()
+            query = parse_qs(resp.request.query)
+            assert "pagenumber" in query
+            assert query["pagenumber"] == ["13"]
+            assert "pagesize" in query
+            assert query["pagesize"] == ["13"]
+            assert "filter" in query
+            assert query["filter"] == ["lastlogin:gte:2017-01-15t00:00:00:00z,siterole:eq:publisher"]
