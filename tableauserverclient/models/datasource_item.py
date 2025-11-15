@@ -535,6 +535,7 @@ class DatasourceItem:
 
         project_id = None
         project_name = None
+        project = None
         project_elem = datasource_xml.find(".//t:project", namespaces=ns)
         if project_elem is not None:
             project = ProjectItem.from_xml(project_elem, ns)
@@ -542,6 +543,7 @@ class DatasourceItem:
             project_name = project_elem.get("name", None)
 
         owner_id = None
+        owner = None
         owner_elem = datasource_xml.find(".//t:owner", namespaces=ns)
         if owner_elem is not None:
             owner = UserItem.from_xml(owner_elem, ns)
