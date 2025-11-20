@@ -24,6 +24,7 @@ GET_XML = TEST_ASSET_DIR / "datasource_get.xml"
 GET_EMPTY_XML = TEST_ASSET_DIR / "datasource_get_empty.xml"
 GET_BY_ID_XML = TEST_ASSET_DIR / "datasource_get_by_id.xml"
 GET_XML_ALL_FIELDS = TEST_ASSET_DIR / "datasource_get_all_fields.xml"
+GET_NO_OWNER = TEST_ASSET_DIR / "datasource_get_no_owner.xml"
 POPULATE_CONNECTIONS_XML = TEST_ASSET_DIR / "datasource_populate_connections.xml"
 POPULATE_PERMISSIONS_XML = TEST_ASSET_DIR / "datasource_populate_permissions.xml"
 PUBLISH_XML = TEST_ASSET_DIR / "datasource_publish.xml"
@@ -850,3 +851,13 @@ def test_get_datasource_all_fields(server) -> None:
     assert datasources[0].owner.last_login == parse_datetime("2025-02-04T06:39:20Z")
     assert datasources[0].owner.name == "bob@example.com"
     assert datasources[0].owner.site_role == "SiteAdministratorCreator"
+
+
+def test_get_datasource_no_owner(server: TSC.Server) -> None:
+    with requests_mock.mock() as m:
+        m.get(server.datasources.baseurl, text=GET_NO_OWNER.read_text())
+        datasources, _ = server.datasources.get()
+
+    datasource = datasources[0]
+    assert datasource.owner is None
+    assert datasource.project is None
