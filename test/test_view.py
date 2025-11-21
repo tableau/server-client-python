@@ -1,6 +1,7 @@
 import os
 import unittest
 
+import pytest
 import requests_mock
 
 import tableauserverclient as TSC
@@ -516,3 +517,20 @@ class ViewTests(unittest.TestCase):
         assert isinstance(views[2].location, TSC.LocationItem)
         assert views[2].location.id == "669ca36b-492e-4ccf-bca1-3614fe6a9d7a"
         assert views[2].location.type == "Project"
+
+
+
+def make_view() -> TSC.ViewItem:
+    view = TSC.ViewItem()
+    view._id = "1234"
+    return view
+
+@pytest.mark.parametrize("view", [make_view, "1234"])
+def test_delete_view(server: TSC.Server, view: TSC.ViewItem | str) -> None:
+    server.version = "3.27"
+    id_ = getattr(view, "id", view)
+    with requests_mock.mock() as m:
+        m.delete(f"{server.views.baseurl}/{id_}")
+        server.views.delete(view)
+        assert m.called
+        assert m.call_count == 1
