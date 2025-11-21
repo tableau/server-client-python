@@ -24,6 +24,7 @@ GET_XML = TEST_ASSET_DIR / "datasource_get.xml"
 GET_EMPTY_XML = TEST_ASSET_DIR / "datasource_get_empty.xml"
 GET_BY_ID_XML = TEST_ASSET_DIR / "datasource_get_by_id.xml"
 GET_XML_ALL_FIELDS = TEST_ASSET_DIR / "datasource_get_all_fields.xml"
+GET_NO_OWNER = TEST_ASSET_DIR / "datasource_get_no_owner.xml"
 POPULATE_CONNECTIONS_XML = TEST_ASSET_DIR / "datasource_populate_connections.xml"
 POPULATE_PERMISSIONS_XML = TEST_ASSET_DIR / "datasource_populate_permissions.xml"
 PUBLISH_XML = TEST_ASSET_DIR / "datasource_publish.xml"
@@ -894,3 +895,12 @@ def test_publish_description(server: TSC.Server) -> None:
     ds_elem = body.find(".//datasource")
     assert ds_elem is not None
     assert ds_elem.attrib["description"] == "Sample description"
+    
+def test_get_datasource_no_owner(server: TSC.Server) -> None:
+    with requests_mock.mock() as m:
+        m.get(server.datasources.baseurl, text=GET_NO_OWNER.read_text())
+        datasources, _ = server.datasources.get()
+
+    datasource = datasources[0]
+    assert datasource.owner is None
+    assert datasource.project is None
