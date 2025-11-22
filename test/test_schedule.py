@@ -1,6 +1,4 @@
-import os
 from pathlib import Path
-import unittest
 from datetime import time
 
 import pytest
@@ -28,6 +26,7 @@ ADD_WORKBOOK_TO_SCHEDULE_WITH_WARNINGS = TEST_ASSET_DIR / "schedule_add_workbook
 ADD_DATASOURCE_TO_SCHEDULE = TEST_ASSET_DIR / "schedule_add_datasource.xml"
 ADD_FLOW_TO_SCHEDULE = TEST_ASSET_DIR / "schedule_add_flow.xml"
 GET_EXTRACT_TASKS_XML = TEST_ASSET_DIR / "schedule_get_extract_refresh_tasks.xml"
+BATCH_UPDATE_STATE = TEST_ASSET_DIR / "schedules_batch_update_state.xml"
 
 WORKBOOK_GET_BY_ID_XML = TEST_ASSET_DIR / "workbook_get_by_id.xml"
 DATASOURCE_GET_BY_ID_XML = TEST_ASSET_DIR / "datasource_get_by_id.xml"
