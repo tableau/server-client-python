@@ -1,0 +1,7 @@
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+  <scheduleLuids>
+    <scheduleLuid>593d2ebf-0d18-4deb-9d21-b113a4902583</scheduleLuid>
+    <scheduleLuid>cecbb71e-def0-4030-8068-5ae50f51db1c</scheduleLuid>
+    <scheduleLuid>f39a6e7d-405e-4c07-8c18-95845f9da80e</scheduleLuid>
+  </scheduleLuids>
+</tsResponse>
