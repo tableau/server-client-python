@@ -286,6 +286,7 @@ def test_get_usernames_from_file(server: TSC.Server):
     assert user_list[0].name == "Cassie", user_list
     assert failures == [], failures
 
+
 def test_get_users_from_file(server: TSC.Server):
     response_xml = ADD_XML.read_text()
     with requests_mock.mock() as m:
@@ -294,6 +295,7 @@ def test_get_users_from_file(server: TSC.Server):
             users, failures = server.users.create_from_file(str(USERS))
     assert users[0].name == "Cassie", users
     assert failures == []
+
 
 def test_get_users_all_fields(server: TSC.Server) -> None:
     server.version = "3.7"
@@ -405,6 +407,7 @@ def test_create_users_csv() -> None:
         assert admin_map.get(site_role, "") == csv_user["admin"]
         assert publish_map[site_role] == int(csv_user["publish"])
 
+
 def test_bulk_add(server: TSC.Server) -> None:
     server.version = "3.15"
     users = [
@@ -459,6 +462,7 @@ def test_bulk_add(server: TSC.Server) -> None:
         csv_data = create_users_csv(users).replace(b"\r\n", b"\n")
         assert csv_data.strip() == segments[0].split(b"\n\n")[1].strip()
 
+
 def test_bulk_add_no_name(server: TSC.Server) -> None:
     server.version = "3.15"
     users = [
@@ -469,6 +473,7 @@ def test_bulk_add_no_name(server: TSC.Server) -> None:
 
         with pytest.raises(ValueError, match="User name must be populated."):
             server.users.bulk_add(users)
+
 
 def test_bulk_remove(server: TSC.Server) -> None:
     server.version = "3.15"
@@ -514,12 +519,14 @@ def test_add_all(server: TSC.Server) -> None:
 
     assert mock_add.call_count == len(users)
 
+
 def test_add_idp_and_auth_error(server: TSC.Server) -> None:
     server.version = "3.24"
     users = [make_user("Alice", "Viewer", auth_setting="SAML", idp_id="01234")]
 
     with pytest.raises(ValueError, match="User cannot have both authSetting and idpConfigurationId."):
         server.users.bulk_add(users)
+
 
 def test_remove_users_csv(server: TSC.Server) -> None:
     server.version = "3.15"
