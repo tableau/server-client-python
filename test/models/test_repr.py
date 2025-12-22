@@ -1,6 +1,7 @@
 import inspect
 from typing import Any
-from test.models._models import get_unimplemented_models
+
+import _models  # type: ignore  # did not set types for this
 import tableauserverclient as TSC
 
 import pytest
@@ -45,4 +46,18 @@ def try_instantiate_class(name: str, obj: Any) -> Any | None:
             return instance
     else:
         print(f"Class '{name}' does not have a constructor (__init__ method).")
-        return None
+
+
+def is_concrete(obj: Any):
+    return inspect.isclass(obj) and not inspect.isabstract(obj)
+
+
+@pytest.mark.parametrize("class_name, obj", inspect.getmembers(TSC, is_concrete))
+def test_by_reflection(class_name, obj):
+    instantiate_class(class_name, obj)
+
+
+@pytest.mark.parametrize("model", _models.get_defined_models())
+def test_repr_is_implemented(model):
+    print(model.__name__, type(model.__repr__).__name__)
+    assert type(model.__repr__).__name__ == "function"
