@@ -180,39 +180,63 @@ def test_publish_file_object(server: TSC.Server) -> None:
     with requests_mock.mock() as m:
         m.post(server.flows.baseurl, text=response_xml)
 
-    def test_refresh(self) -> None:
-        with open(asset(REFRESH_XML), "rb") as f:
-            response_xml = f.read().decode("utf-8")
-        with requests_mock.mock() as m:
-            m.post(self.baseurl + "/92967d2d-c7e2-46d0-8847-4802df58f484/run", text=response_xml)
-            flow_item = TSC.FlowItem("test")
-            flow_item._id = "92967d2d-c7e2-46d0-8847-4802df58f484"
-            refresh_job = self.server.flows.refresh(flow_item)
+        new_flow = TSC.FlowItem(name="SampleFlow", project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760")
+        sample_flow = os.path.join(TEST_ASSET_DIR, "SampleFlow.tfl")
+        publish_mode = server.PublishMode.CreateNew
 
         with open(sample_flow, "rb") as fp:
             publish_mode = server.PublishMode.CreateNew
 
-    def test_refresh_id_str(self) -> None:
-        with open(asset(REFRESH_XML), "rb") as f:
-            response_xml = f.read().decode("utf-8")
-        with requests_mock.mock() as m:
-            m.post(self.baseurl + "/92967d2d-c7e2-46d0-8847-4802df58f484/run", text=response_xml)
-            refresh_job = self.server.flows.refresh("92967d2d-c7e2-46d0-8847-4802df58f484")
+            new_flow = server.flows.publish(new_flow, fp, publish_mode)
 
-            self.assertEqual(refresh_job.id, "d1b2ccd0-6dfa-444a-aee4-723dbd6b7c9d")
-            self.assertEqual(refresh_job.mode, "Asynchronous")
-            self.assertEqual(refresh_job.type, "RunFlow")
-            self.assertEqual(format_datetime(refresh_job.created_at), "2018-05-22T13:00:29Z")
-            self.assertIsInstance(refresh_job.flow_run, TSC.FlowRunItem)
-            self.assertEqual(refresh_job.flow_run.id, "e0c3067f-2333-4eee-8028-e0a56ca496f6")
-            self.assertEqual(refresh_job.flow_run.flow_id, "92967d2d-c7e2-46d0-8847-4802df58f484")
-            self.assertEqual(format_datetime(refresh_job.flow_run.started_at), "2018-05-22T13:00:29Z")
+    assert "2457c468-1b24-461a-8f95-a461b3209d32" == new_flow.id
+    assert "SampleFlow" == new_flow.name
+    assert "2023-01-13T09:50:55Z" == format_datetime(new_flow.created_at)
+    assert "2023-01-13T09:50:55Z" == format_datetime(new_flow.updated_at)
+    assert "ee8c6e70-43b6-11e6-af4f-f7b0d8e20760" == new_flow.project_id
+    assert "default" == new_flow.project_name
+    assert "5de011f8-5aa9-4d5b-b991-f462c8dd6bb7" == new_flow.owner_id
 
-    def test_bad_download_response(self) -> None:
-        with requests_mock.mock() as m, tempfile.TemporaryDirectory() as td:
-            m.get(
-                self.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/content",
-                headers={"Content-Disposition": '''name="tableau_flow"; filename*=UTF-8''"Sample flow.tfl"'''},
-            )
-            file_path = self.server.flows.download("9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", td)
-            self.assertTrue(os.path.exists(file_path))
+
+def test_refresh(server: TSC.Server) -> None:
+    response_xml = REFRESH_XML.read_text()
+    with requests_mock.mock() as m:
+        m.post(server.flows.baseurl + "/92967d2d-c7e2-46d0-8847-4802df58f484/run", text=response_xml)
+        flow_item = TSC.FlowItem("test")
+        flow_item._id = "92967d2d-c7e2-46d0-8847-4802df58f484"
+        refresh_job = server.flows.refresh(flow_item)
+
+        assert refresh_job.id == "d1b2ccd0-6dfa-444a-aee4-723dbd6b7c9d"
+        assert refresh_job.mode == "Asynchronous"
+        assert refresh_job.type == "RunFlow"
+        assert format_datetime(refresh_job.created_at) == "2018-05-22T13:00:29Z"
+        assert isinstance(refresh_job.flow_run, TSC.FlowRunItem)
+        assert refresh_job.flow_run.id == "e0c3067f-2333-4eee-8028-e0a56ca496f6"
+        assert refresh_job.flow_run.flow_id == "92967d2d-c7e2-46d0-8847-4802df58f484"
+        assert format_datetime(refresh_job.flow_run.started_at) == "2018-05-22T13:00:29Z"
+
+
+def test_refresh_id_str(server: TSC.Server) -> None:
+    response_xml = REFRESH_XML.read_text()
+    with requests_mock.mock() as m:
+        m.post(server.flows.baseurl + "/92967d2d-c7e2-46d0-8847-4802df58f484/run", text=response_xml)
+        refresh_job = server.flows.refresh("92967d2d-c7e2-46d0-8847-4802df58f484")
+
+        assert refresh_job.id == "d1b2ccd0-6dfa-444a-aee4-723dbd6b7c9d"
+        assert refresh_job.mode == "Asynchronous"
+        assert refresh_job.type == "RunFlow"
+        assert format_datetime(refresh_job.created_at) == "2018-05-22T13:00:29Z"
+        assert isinstance(refresh_job.flow_run, TSC.FlowRunItem)
+        assert refresh_job.flow_run.id == "e0c3067f-2333-4eee-8028-e0a56ca496f6"
+        assert refresh_job.flow_run.flow_id == "92967d2d-c7e2-46d0-8847-4802df58f484"
+        assert format_datetime(refresh_job.flow_run.started_at) == "2018-05-22T13:00:29Z"
+
+
+def test_bad_download_response(server: TSC.Server) -> None:
+    with requests_mock.mock() as m, tempfile.TemporaryDirectory() as td:
+        m.get(
+            server.flows.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/content",
+            headers={"Content-Disposition": '''name="tableau_flow"; filename*=UTF-8''"Sample flow.tfl"'''},
+        )
+        file_path = server.flows.download("9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", td)
+        assert os.path.exists(file_path) is True
