@@ -1,77 +1,68 @@
-import unittest
-import ssl
-from unittest.mock import patch, MagicMock
-from tableauserverclient import Server
-from tableauserverclient.server.endpoint import Endpoint
 import logging
+from unittest.mock import MagicMock
+
+import pytest
+
+import tableauserverclient as TSC
 
 
-class TestSSLConfig(unittest.TestCase):
-    @patch("requests.session")
-    @patch("tableauserverclient.server.endpoint.Endpoint.set_parameters")
-    def setUp(self, mock_set_parameters, mock_session):
-        """Set up test fixtures with mocked session and request validation"""
-        # Mock the session
-        self.mock_session = MagicMock()
-        mock_session.return_value = self.mock_session
+@pytest.fixture(scope="function")
+def server():
+    """Fixture to create a TSC.Server instance for testing."""
+    server = TSC.Server("http://test", False)
 
-        # Mock request preparation
-        self.mock_request = MagicMock()
-        self.mock_session.prepare_request.return_value = self.mock_request
+    # Fake signin
+    server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"
+    server._auth_token = "j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM"
 
-        # Create server instance with mocked components
-        self.server = Server("http://test")
-
-    def test_default_ssl_config(self):
-        """Test that by default, no custom SSL context is used"""
-        self.assertIsNone(self.server._ssl_context)
-        self.assertNotIn("verify", self.server.http_options)
-
-    @patch("ssl.create_default_context")
-    def test_weak_dh_config(self, mock_create_context):
-        """Test that weak DH keys can be allowed when configured"""
-        # Setup mock SSL context
-        mock_context = MagicMock()
-        mock_create_context.return_value = mock_context
-
-        # Configure SSL with weak DH
-        self.server.configure_ssl(allow_weak_dh=True)
-
-        # Verify SSL context was created and configured correctly
-        mock_create_context.assert_called_once()
-        mock_context.set_dh_parameters.assert_called_once_with(min_key_bits=512)
-
-        # Verify context was added to http options
-        self.assertEqual(self.server.http_options["verify"], mock_context)
-
-    @patch("ssl.create_default_context")
-    def test_disable_weak_dh_config(self, mock_create_context):
-        """Test that SSL config can be reset to defaults"""
-        # Setup mock SSL context
-        mock_context = MagicMock()
-        mock_create_context.return_value = mock_context
-
-        # First enable weak DH
-        self.server.configure_ssl(allow_weak_dh=True)
-        self.assertIsNotNone(self.server._ssl_context)
-        self.assertIn("verify", self.server.http_options)
-
-        # Then disable it
-        self.server.configure_ssl(allow_weak_dh=False)
-        self.assertIsNone(self.server._ssl_context)
-        self.assertNotIn("verify", self.server.http_options)
-
-    @patch("ssl.create_default_context")
-    def test_warning_on_weak_dh(self, mock_create_context):
-        """Test that a warning is logged when enabling weak DH keys"""
-        logging.getLogger().setLevel(logging.WARNING)
-        with self.assertLogs(level="WARNING") as log:
-            self.server.configure_ssl(allow_weak_dh=True)
-            self.assertTrue(
-                any("WARNING: Allowing weak Diffie-Hellman keys" in record for record in log.output),
-                "Expected warning about weak DH keys was not logged",
-            )
+    return server
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_default_ssl_config(server):
+    """Test that by default, no custom SSL context is used"""
+    assert server._ssl_context is None
+    assert "verify" not in server.http_options
+
+
+def test_weak_dh_config(server, monkeypatch):
+    """Test that weak DH keys can be allowed when configured"""
+    mock_context = MagicMock()
+    mock_create_context = MagicMock(return_value=mock_context)
+    monkeypatch.setattr("ssl.create_default_context", mock_create_context)
+
+    server.configure_ssl(allow_weak_dh=True)
+
+    mock_create_context.assert_called_once()
+    mock_context.set_dh_parameters.assert_called_once_with(min_key_bits=512)
+    assert server.http_options["verify"] == mock_context
+
+
+def test_disable_weak_dh_config(server, monkeypatch):
+    """Test that SSL config can be reset to defaults"""
+    mock_context = MagicMock()
+    mock_create_context = MagicMock(return_value=mock_context)
+    monkeypatch.setattr("ssl.create_default_context", mock_create_context)
+
+    # First enable weak DH
+    server.configure_ssl(allow_weak_dh=True)
+    assert server._ssl_context is not None
+    assert "verify" in server.http_options
+
+    # Then disable it
+    server.configure_ssl(allow_weak_dh=False)
+    assert server._ssl_context is None
+    assert "verify" not in server.http_options
+
+
+def test_warning_on_weak_dh(server, monkeypatch, caplog):
+    """Test that a warning is logged when enabling weak DH keys"""
+    mock_context = MagicMock()
+    mock_create_context = MagicMock(return_value=mock_context)
+    monkeypatch.setattr("ssl.create_default_context", mock_create_context)
+
+    with caplog.at_level(logging.WARNING):
+        server.configure_ssl(allow_weak_dh=True)
+
+    assert any(
+        "Allowing weak Diffie-Hellman keys" in record.getMessage() for record in caplog.records
+    ), "Expected warning about weak DH keys was not logged"
