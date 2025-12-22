@@ -895,7 +895,8 @@ def test_publish_description(server: TSC.Server) -> None:
     ds_elem = body.find(".//datasource")
     assert ds_elem is not None
     assert ds_elem.attrib["description"] == "Sample description"
-    
+
+
 def test_get_datasource_no_owner(server: TSC.Server) -> None:
     with requests_mock.mock() as m:
         m.get(server.datasources.baseurl, text=GET_NO_OWNER.read_text())
