@@ -131,3 +131,66 @@ def test_update_site_settings(server: TSC.Server) -> None:
     prompt_needed_elem = safe_extension_elem.find("promptNeeded")
     assert prompt_needed_elem is not None
     assert prompt_needed_elem.text == "true"
+
+
+def test_update_safe_list_none(server: TSC.Server) -> None:
+    with requests_mock.mock() as m:
+        m.put(server.extensions.baseurl, text=GET_SITE_SETTINGS.read_text())
+
+        site_settings = TSC.ExtensionsSiteSettings()
+        site_settings.enabled = True
+        site_settings.use_default_setting = False
+
+        updated_settings = server.extensions.update(site_settings)
+        history = m.request_history
+
+    assert isinstance(updated_settings, TSC.ExtensionsSiteSettings)
+    assert updated_settings.enabled is True
+    assert updated_settings.use_default_setting is False
+    assert updated_settings.safe_list is not None
+    assert len(updated_settings.safe_list) == 1
+    first_safe = updated_settings.safe_list[0]
+    assert first_safe.url == "http://localhost:9123/Dynamic.html"
+    assert first_safe.full_data_allowed is True
+    assert first_safe.prompt_needed is True
+
+    # Verify that the request body was as expected
+    assert len(history) == 1
+    xml_payload = fromstring(history[0].body)
+    extensions_site_settings_elem = xml_payload.find(".//extensionsSiteSettings")
+    assert extensions_site_settings_elem is not None
+    safe_list_element = extensions_site_settings_elem.find("safeList")
+    assert safe_list_element is None
+
+
+def test_update_safe_list_empty(server: TSC.Server) -> None:
+    with requests_mock.mock() as m:
+        m.put(server.extensions.baseurl, text=GET_SITE_SETTINGS.read_text())
+
+        site_settings = TSC.ExtensionsSiteSettings()
+        site_settings.enabled = True
+        site_settings.use_default_setting = False
+        site_settings.safe_list = []
+
+        updated_settings = server.extensions.update(site_settings)
+        history = m.request_history
+ 
+    assert isinstance(updated_settings, TSC.ExtensionsSiteSettings)
+    assert updated_settings.enabled is True
+    assert updated_settings.use_default_setting is False
+    assert updated_settings.safe_list is not None
+    assert len(updated_settings.safe_list) == 1
+    first_safe = updated_settings.safe_list[0]
+    assert first_safe.url == "http://localhost:9123/Dynamic.html"
+    assert first_safe.full_data_allowed is True
+    assert first_safe.prompt_needed is True
+
+    # Verify that the request body was as expected
+    assert len(history) == 1
+    xml_payload = fromstring(history[0].body)
+    extensions_site_settings_elem = xml_payload.find(".//extensionsSiteSettings")
+    assert extensions_site_settings_elem is not None
+    safe_list_element = extensions_site_settings_elem.find("safeList")
+    assert safe_list_element is not None
+    assert len(safe_list_element) == 0
+

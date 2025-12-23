@@ -1671,8 +1671,11 @@ class ExtensionsRequest:
             include_partner_built_element = ET.SubElement(ext_element, "includePartnerBuilt")
             include_partner_built_element.text = str(extensions_site_settings.include_partner_built).lower()
 
-        for safe in extensions_site_settings.safe_list or []:
-            safe_element = ET.SubElement(ext_element, "safeList")
+        if extensions_site_settings.safe_list is None:
+            return
+
+        safe_element = ET.SubElement(ext_element, "safeList")
+        for safe in extensions_site_settings.safe_list:
             if safe.url is not None:
                 url_element = ET.SubElement(safe_element, "url")
                 url_element.text = safe.url
