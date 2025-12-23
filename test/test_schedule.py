@@ -1,7 +1,6 @@
 from pathlib import Path
 from datetime import time
 
-from defusedxml.ElementTree import fromstring
 import pytest
 import requests_mock
 
