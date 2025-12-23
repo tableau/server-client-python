@@ -184,6 +184,9 @@ class DatasourceRequest:
             project_element = ET.SubElement(datasource_element, "project")
             project_element.attrib["id"] = datasource_item.project_id
 
+        if datasource_item.description is not None:
+            datasource_element.attrib["description"] = datasource_item.description
+
         if connection_credentials is not None and connections is not None:
             raise RuntimeError("You cannot set both `connections` and `connection_credentials`")
 
@@ -196,7 +199,7 @@ class DatasourceRequest:
                 _add_connections_element(connections_element, connection)
         return ET.tostring(xml_request)
 
-    def update_req(self, datasource_item):
+    def update_req(self, datasource_item: DatasourceItem) -> bytes:
         xml_request = ET.Element("tsRequest")
         datasource_element = ET.SubElement(xml_request, "datasource")
         if datasource_item.name:
@@ -219,6 +222,8 @@ class DatasourceRequest:
             datasource_element.attrib["certificationNote"] = str(datasource_item.certification_note)
         if datasource_item.encrypt_extracts is not None:
             datasource_element.attrib["encryptExtracts"] = str(datasource_item.encrypt_extracts).lower()
+        if datasource_item.description is not None:
+            datasource_element.attrib["description"] = datasource_item.description
 
         return ET.tostring(xml_request)
 
@@ -512,7 +517,10 @@ class PermissionRequest:
         for rule in rules:
             grantee_capabilities_element = ET.SubElement(permissions_element, "granteeCapabilities")
             grantee_element = ET.SubElement(grantee_capabilities_element, rule.grantee.tag_name)
-            grantee_element.attrib["id"] = rule.grantee.id
+            if rule.grantee.id is not None:
+                grantee_element.attrib["id"] = rule.grantee.id
+            else:
+                raise ValueError("Grantee must have an ID")
 
             capabilities_element = ET.SubElement(grantee_capabilities_element, "capabilities")
             self._add_all_capabilities(capabilities_element, rule.capabilities)
