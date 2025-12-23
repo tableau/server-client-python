@@ -643,6 +643,16 @@ class ScheduleRequest:
     def add_flow_req(self, id_: Optional[str], task_type: str = TaskItem.Type.RunFlow) -> bytes:
         return self._add_to_req(id_, "flow", task_type)
 
+    @_tsrequest_wrapped
+    def batch_update_state(self, xml: ET.Element, schedules: Iterable[ScheduleItem | str]) -> None:
+        luids = ET.SubElement(xml, "scheduleLuids")
+        for schedule in schedules:
+            luid = getattr(schedule, "id", schedule)
+            if not isinstance(luid, str):
+                continue
+            luid_tag = ET.SubElement(luids, "scheduleLuid")
+            luid_tag.text = luid
+
 
 class SiteRequest:
     def update_req(self, site_item: "SiteItem", parent_srv: Optional["Server"] = None):
