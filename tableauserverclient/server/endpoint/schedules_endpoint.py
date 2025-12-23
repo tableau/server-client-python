@@ -1,13 +1,15 @@
+from collections.abc import Iterable
 import copy
 import logging
 import warnings
 from collections import namedtuple
-from typing import TYPE_CHECKING, Callable, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Literal, Optional, Union, overload
 
 from .endpoint import Endpoint, api, parameter_added_in
 from .exceptions import MissingRequiredFieldError
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import PaginationItem, ScheduleItem, TaskItem, ExtractItem
+from tableauserverclient.models.schedule_item import parse_batch_schedule_state
 
 from tableauserverclient.helpers.logging import logger
 
@@ -279,3 +281,48 @@ class Schedules(Endpoint):
         extract_items = ExtractItem.from_response(server_response.content, self.parent_srv.namespace)
 
         return extract_items, pagination_item
+
+    @overload
+    def batch_update_state(
+        self,
+        schedules: Iterable[ScheduleItem | str],
+        state: Literal["active", "suspended"],
+        update_all: Literal[False] = False,
+    ) -> list[str]: ...
+
+    @overload
+    def batch_update_state(
+        self, schedules: Any, state: Literal["active", "suspended"], update_all: Literal[True]
+    ) -> list[str]: ...
+
+    @api(version="3.27")
+    def batch_update_state(self, schedules, state, update_all=False) -> list[str]:
+        """
+        Batch update the status of one or more scheudles. If update_all is set,
+        all schedules on the Tableau Server are affected.
+
+        Parameters
+        ----------
+        schedules: Iterable[ScheudleItem | str] | Any
+            The schedules to be updated. If update_all=True, this is ignored.
+
+        state: Literal["active", "suspended"]
+            The state of the schedules, whether active or suspended.
+
+        update_all: bool
+            Whether or not to apply the status to all schedules.
+
+        Returns
+        -------
+        List[str]
+            The IDs of the affected schedules.
+        """
+        params = {"state": state}
+        if update_all:
+            params["updateAll"] = "true"
+            payload = RequestFactory.Empty.empty_req()
+        else:
+            payload = RequestFactory.Schedule.batch_update_state(schedules)
+
+        response = self.put_request(self.baseurl, payload, parameters={"params": params})
+        return parse_batch_schedule_state(response, self.parent_srv.namespace)
