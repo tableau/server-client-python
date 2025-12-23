@@ -33,7 +33,7 @@ repository = "https://github.com/tableau/server-client-python"
 
 [project.optional-dependencies]
 test = ["black==24.10", "build", "mypy==1.4", "pytest>=7.0", "pytest-cov", "pytest-subtests",
-    "requests-mock>=1.0,<2.0", "types-requests>=2.32.4.20250913"]
+    "pytest-xdist", "requests-mock>=1.0,<2.0", "types-requests>=2.32.4.20250913"]
 [tool.black]
 line-length = 120
 target-version = ['py39', 'py310', 'py311', 'py312', 'py313']
