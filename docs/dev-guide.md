@@ -145,7 +145,7 @@ depending on how and where git is installed on your system, for example:
 ### Add tests
 
 All of our tests live under the `test/` folder in the repository. We use
-`pytest` and the built-in test runner `python setup.py test`.
+`pytest` which is run with `pytest test`.
 
 Follow the structure of existing tests, especially if new server responses
 are going to be mocked.
