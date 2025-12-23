@@ -1,4 +1,5 @@
 from pathlib import Path
+import unittest
 
 import pytest
 import requests_mock
