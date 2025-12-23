@@ -5,6 +5,7 @@ from enum import IntEnum
 from typing import Optional, TYPE_CHECKING
 
 from defusedxml.ElementTree import fromstring
+from typing_extensions import Self
 
 from tableauserverclient.datetime_helpers import parse_datetime
 from tableauserverclient.models.site_item import SiteAuthConfiguration
@@ -186,7 +187,7 @@ class UserItem:
         return self._name
 
     @name.setter
-    def name(self, value: str):
+    def name(self, value: Optional[str]):
         self._name = value
 
     # valid: username, domain/username, username@domain, domain/username@email
@@ -376,6 +377,11 @@ class UserItem:
     @staticmethod
     def as_reference(id_) -> ResourceReference:
         return ResourceReference(id_, UserItem.tag_name)
+
+    def to_reference(self: Self) -> ResourceReference:
+        if self.id is None:
+            raise ValueError(f"{self.__class__.__qualname__} must have id to be converted to reference")
+        return ResourceReference(self.id, self.tag_name)
 
     @staticmethod
     def _parse_element(user_xml, ns):

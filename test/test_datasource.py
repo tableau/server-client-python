@@ -24,6 +24,7 @@ GET_XML = TEST_ASSET_DIR / "datasource_get.xml"
 GET_EMPTY_XML = TEST_ASSET_DIR / "datasource_get_empty.xml"
 GET_BY_ID_XML = TEST_ASSET_DIR / "datasource_get_by_id.xml"
 GET_XML_ALL_FIELDS = TEST_ASSET_DIR / "datasource_get_all_fields.xml"
+GET_NO_OWNER = TEST_ASSET_DIR / "datasource_get_no_owner.xml"
 POPULATE_CONNECTIONS_XML = TEST_ASSET_DIR / "datasource_populate_connections.xml"
 POPULATE_PERMISSIONS_XML = TEST_ASSET_DIR / "datasource_populate_permissions.xml"
 PUBLISH_XML = TEST_ASSET_DIR / "datasource_publish.xml"
@@ -850,3 +851,57 @@ def test_get_datasource_all_fields(server) -> None:
     assert datasources[0].owner.last_login == parse_datetime("2025-02-04T06:39:20Z")
     assert datasources[0].owner.name == "bob@example.com"
     assert datasources[0].owner.site_role == "SiteAdministratorCreator"
+
+
+def test_update_description(server: TSC.Server) -> None:
+    response_xml = UPDATE_XML.read_text()
+    with requests_mock.mock() as m:
+        m.put(server.datasources.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", text=response_xml)
+        single_datasource = TSC.DatasourceItem("1d0304cd-3796-429f-b815-7258370b9b74", "Sample datasource")
+        single_datasource.owner_id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
+        single_datasource._content_url = "Sampledatasource"
+        single_datasource._id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
+        single_datasource.certified = True
+        single_datasource.certification_note = "Warning, here be dragons."
+        single_datasource.description = "Sample description"
+        _ = server.datasources.update(single_datasource)
+
+        history = m.request_history[0]
+    body = fromstring(history.body)
+    ds_elem = body.find(".//datasource")
+    assert ds_elem is not None
+    assert ds_elem.attrib["description"] == "Sample description"
+
+
+def test_publish_description(server: TSC.Server) -> None:
+    response_xml = PUBLISH_XML.read_text()
+    with requests_mock.mock() as m:
+        m.post(server.datasources.baseurl, text=response_xml)
+        single_datasource = TSC.DatasourceItem("1d0304cd-3796-429f-b815-7258370b9b74", "Sample datasource")
+        single_datasource.owner_id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
+        single_datasource._content_url = "Sampledatasource"
+        single_datasource._id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
+        single_datasource.certified = True
+        single_datasource.certification_note = "Warning, here be dragons."
+        single_datasource.description = "Sample description"
+        _ = server.datasources.publish(single_datasource, TEST_ASSET_DIR / "SampleDS.tds", server.PublishMode.CreateNew)
+
+        history = m.request_history[0]
+    boundary = history.body[: history.body.index(b"\r\n")].strip()
+    parts = history.body.split(boundary)
+    request_payload = next(part for part in parts if b"request_payload" in part)
+    xml_payload = request_payload.strip().split(b"\r\n")[-1]
+    body = fromstring(xml_payload)
+    ds_elem = body.find(".//datasource")
+    assert ds_elem is not None
+    assert ds_elem.attrib["description"] == "Sample description"
+
+
+def test_get_datasource_no_owner(server: TSC.Server) -> None:
+    with requests_mock.mock() as m:
+        m.get(server.datasources.baseurl, text=GET_NO_OWNER.read_text())
+        datasources, _ = server.datasources.get()
+
+    datasource = datasources[0]
+    assert datasource.owner is None
+    assert datasource.project is None
