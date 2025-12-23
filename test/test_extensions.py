@@ -174,7 +174,7 @@ def test_update_safe_list_empty(server: TSC.Server) -> None:
 
         updated_settings = server.extensions.update(site_settings)
         history = m.request_history
- 
+
     assert isinstance(updated_settings, TSC.ExtensionsSiteSettings)
     assert updated_settings.enabled is True
     assert updated_settings.use_default_setting is False
@@ -193,4 +193,3 @@ def test_update_safe_list_empty(server: TSC.Server) -> None:
     safe_list_element = extensions_site_settings_elem.find("safeList")
     assert safe_list_element is not None
     assert len(safe_list_element) == 0
-
