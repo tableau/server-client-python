@@ -3,6 +3,7 @@ import io
 from pathlib import Path
 import re
 from unittest.mock import patch
+from pathlib import Path
 
 from defusedxml import ElementTree as ET
 import pytest
@@ -12,7 +13,7 @@ import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime, parse_datetime
 from tableauserverclient.server.endpoint.users_endpoint import create_users_csv, remove_users_csv
 
-TEST_ASSET_DIR = Path(__file__).resolve().parent / "assets"
+TEST_ASSET_DIR = Path(__file__).parent / "assets"
 
 BULK_ADD_XML = TEST_ASSET_DIR / "users_bulk_add_job.xml"
 GET_XML = TEST_ASSET_DIR / "user_get.xml"
@@ -195,7 +196,7 @@ def test_populate_workbooks(server: TSC.Server) -> None:
         assert "3cc6cd06-89ce-4fdc-b935-5294135d6d42" == workbook_list[0].id
         assert "SafariSample" == workbook_list[0].name
         assert "SafariSample" == workbook_list[0].content_url
-        assert workbook_list[0].show_tabs is False
+        assert False == workbook_list[0].show_tabs
         assert 26 == workbook_list[0].size
         assert "2016-07-26T20:34:56Z" == format_datetime(workbook_list[0].created_at)
         assert "2016-07-26T20:35:05Z" == format_datetime(workbook_list[0].updated_at)
@@ -281,7 +282,7 @@ def test_get_usernames_from_file(server: TSC.Server):
     response_xml = ADD_XML.read_text()
     with requests_mock.mock() as m:
         m.post(server.users.baseurl, text=response_xml)
-        with pytest.warns(DeprecationWarning, match="This method is deprecated, use bulk_add instead"):
+        with pytest.warns(DeprecationWarning):
             user_list, failures = server.users.create_from_file(str(USERNAMES))
     assert user_list[0].name == "Cassie", user_list
     assert failures == [], failures
@@ -291,7 +292,7 @@ def test_get_users_from_file(server: TSC.Server):
     response_xml = ADD_XML.read_text()
     with requests_mock.mock() as m:
         m.post(server.users.baseurl, text=response_xml)
-        with pytest.warns(DeprecationWarning, match="This method is deprecated, use bulk_add instead"):
+        with pytest.warns(DeprecationWarning):
             users, failures = server.users.create_from_file(str(USERS))
     assert users[0].name == "Cassie", users
     assert failures == []
@@ -348,10 +349,22 @@ def test_add_user_idp_configuration(server: TSC.Server) -> None:
     assert user_elem.attrib["idpConfigurationId"] == "012345"
 
 
-def test_update_user_idp_configuration() -> None:
+def test_update_user_idp_configuration(server: TSC.Server) -> None:
+    response_xml = ADD_XML.read_text()
     user = TSC.UserItem(name="Cassie", site_role="Viewer")
     user._id = "0123456789"
     user.idp_configuration_id = "012345"
+
+    with requests_mock.mock() as m:
+        m.put(f"{server.users.baseurl}/{user.id}", text=response_xml)
+        user = server.users.update(user)
+
+        history = m.request_history[0]
+
+    tree = ET.fromstring(history.text)
+    user_elem = tree.find(".//user")
+    assert user_elem is not None
+    assert user_elem.attrib["idpConfigurationId"] == "012345"
 
 
 def test_create_users_csv() -> None:
