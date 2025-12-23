@@ -1,8 +1,3 @@
-import csv
-import io
-from pathlib import Path
-import re
-from unittest.mock import patch
 from pathlib import Path
 
 from defusedxml import ElementTree as ET
@@ -15,7 +10,6 @@ from tableauserverclient.server.endpoint.users_endpoint import create_users_csv,
 
 TEST_ASSET_DIR = Path(__file__).parent / "assets"
 
-BULK_ADD_XML = TEST_ASSET_DIR / "users_bulk_add_job.xml"
 GET_XML = TEST_ASSET_DIR / "user_get.xml"
 GET_XML_ALL_FIELDS = TEST_ASSET_DIR / "user_get_all_fields.xml"
 GET_EMPTY_XML = TEST_ASSET_DIR / "user_get_empty.xml"
@@ -28,29 +22,6 @@ POPULATE_GROUPS_XML = TEST_ASSET_DIR / "user_populate_groups.xml"
 
 USERNAMES = TEST_ASSET_DIR / "Data" / "usernames.csv"
 USERS = TEST_ASSET_DIR / "Data" / "user_details.csv"
-
-
-def make_user(
-    name: str,
-    site_role: str = "",
-    auth_setting: str = "",
-    domain: str = "",
-    fullname: str = "",
-    email: str = "",
-    idp_id: str = "",
-) -> TSC.UserItem:
-    user = TSC.UserItem(name, site_role or None)
-    if auth_setting:
-        user.auth_setting = auth_setting
-    if domain:
-        user._domain_name = domain
-    if fullname:
-        user.fullname = fullname
-    if email:
-        user.email = email
-    if idp_id:
-        user.idp_configuration_id = idp_id
-    return user
 
 
 @pytest.fixture(scope="function")
@@ -282,8 +253,7 @@ def test_get_usernames_from_file(server: TSC.Server):
     response_xml = ADD_XML.read_text()
     with requests_mock.mock() as m:
         m.post(server.users.baseurl, text=response_xml)
-        with pytest.warns(DeprecationWarning):
-            user_list, failures = server.users.create_from_file(str(USERNAMES))
+        user_list, failures = server.users.create_from_file(str(USERNAMES))
     assert user_list[0].name == "Cassie", user_list
     assert failures == [], failures
 
@@ -292,8 +262,7 @@ def test_get_users_from_file(server: TSC.Server):
     response_xml = ADD_XML.read_text()
     with requests_mock.mock() as m:
         m.post(server.users.baseurl, text=response_xml)
-        with pytest.warns(DeprecationWarning):
-            users, failures = server.users.create_from_file(str(USERS))
+        users, failures = server.users.create_from_file(str(USERS))
     assert users[0].name == "Cassie", users
     assert failures == []
 
@@ -365,209 +334,3 @@ def test_update_user_idp_configuration(server: TSC.Server) -> None:
     user_elem = tree.find(".//user")
     assert user_elem is not None
     assert user_elem.attrib["idpConfigurationId"] == "012345"
-
-
-def test_create_users_csv() -> None:
-    users = [
-        make_user("Alice", "Viewer"),
-        make_user("Bob", "Explorer"),
-        make_user("Charlie", "Creator", "SAML"),
-        make_user("Dave"),
-        make_user("Eve", "ServerAdministrator", "OpenID", "example.com", "Eve Example", "Eve@example.com"),
-        make_user("Frank", "SiteAdministratorExplorer", "TableauIDWithMFA", email="Frank@example.com"),
-        make_user("Grace", "SiteAdministratorCreator", "SAML", "example.com", "Grace Example", "gex@example.com"),
-        make_user("Hank", "Unlicensed"),
-    ]
-
-    license_map = {
-        "Viewer": "Viewer",
-        "Explorer": "Explorer",
-        "ExplorerCanPublish": "Explorer",
-        "Creator": "Creator",
-        "SiteAdministratorExplorer": "Explorer",
-        "SiteAdministratorCreator": "Creator",
-        "ServerAdministrator": "Creator",
-        "Unlicensed": "Unlicensed",
-    }
-    publish_map = {
-        "Unlicensed": 0,
-        "Viewer": 0,
-        "Explorer": 0,
-        "Creator": 1,
-        "ExplorerCanPublish": 1,
-        "SiteAdministratorExplorer": 1,
-        "SiteAdministratorCreator": 1,
-        "ServerAdministrator": 1,
-    }
-    admin_map = {
-        "SiteAdministratorExplorer": "Site",
-        "SiteAdministratorCreator": "Site",
-        "ServerAdministrator": "System",
-    }
-
-    csv_columns = ["name", "password", "fullname", "license", "admin", "publish", "email"]
-    csv_data = create_users_csv(users)
-    csv_file = io.StringIO(csv_data.decode("utf-8"))
-    csv_reader = csv.reader(csv_file)
-    for user, row in zip(users, csv_reader):
-        site_role = user.site_role or "Unlicensed"
-        name = f"{user.domain_name}\\{user.name}" if user.domain_name else user.name
-        csv_user = dict(zip(csv_columns, row))
-        assert name == csv_user["name"]
-        assert (user.fullname or "") == csv_user["fullname"]
-        assert (user.email or "") == csv_user["email"]
-        assert license_map[site_role] == csv_user["license"]
-        assert admin_map.get(site_role, "") == csv_user["admin"]
-        assert publish_map[site_role] == int(csv_user["publish"])
-
-
-def test_bulk_add(server: TSC.Server) -> None:
-    server.version = "3.15"
-    users = [
-        make_user("Alice", "Viewer"),
-        make_user("Bob", "Explorer"),
-        make_user("Charlie", "Creator", "SAML"),
-        make_user("Dave"),
-        make_user("Eve", "ServerAdministrator", "OpenID", "example.com", "Eve Example", "Eve@example.com"),
-        make_user("Frank", "SiteAdministratorExplorer", "TableauIDWithMFA", email="Frank@example.com"),
-        make_user("Grace", "SiteAdministratorCreator", "SAML", "example.com", "Grace Example", "gex@example.com"),
-        make_user("Hank", "Unlicensed"),
-        make_user("Ivy", "Unlicensed", idp_id="0123456789"),
-    ]
-    with requests_mock.mock() as m:
-        m.post(f"{server.users.baseurl}/import", text=BULK_ADD_XML.read_text())
-
-        job = server.users.bulk_add(users)
-
-        assert isinstance(job, TSC.JobItem)
-
-        assert m.last_request.method == "POST"
-        assert m.last_request.url == f"{server.users.baseurl}/import"
-
-        body = m.last_request.body.replace(b"\r\n", b"\n")
-        assert body.startswith(b"--")  # Check if it's a multipart request
-        boundary = body.split(b"\n")[0].strip()
-
-        # Body starts and ends with a boundary string. Split the body into
-        # segments and ignore the empty sections at the start and end.
-        segments = [seg for s in body.split(boundary) if (seg := s.strip()) not in [b"", b"--"]]
-        assert len(segments) == 2  # Check if there are two segments
-
-        # Check if the first segment is the csv file and the second segment is the xml
-        assert b'Content-Disposition: form-data; name="tableau_user_import"' in segments[0]
-        assert b'Content-Disposition: form-data; name="request_payload"' in segments[1]
-        assert b"Content-Type: file" in segments[0]
-        assert b"Content-Type: text/xml" in segments[1]
-
-        xml_string = segments[1].split(b"\n\n")[1].strip()
-        xml = ET.fromstring(xml_string)
-        xml_users = xml.findall(".//user", namespaces={})
-        assert len(xml_users) == len(users)
-
-        for user, xml_user in zip(users, xml_users):
-            assert user.name == xml_user.get("name")
-            if user.idp_configuration_id is None:
-                assert xml_user.get("authSetting") == (user.auth_setting or "ServerDefault")
-            else:
-                assert xml_user.get("idpConfigurationId") == user.idp_configuration_id
-                assert xml_user.get("authSetting") is None
-
-        csv_data = create_users_csv(users).replace(b"\r\n", b"\n")
-        assert csv_data.strip() == segments[0].split(b"\n\n")[1].strip()
-
-
-def test_bulk_add_no_name(server: TSC.Server) -> None:
-    server.version = "3.15"
-    users = [
-        TSC.UserItem(site_role="Viewer"),
-    ]
-    with requests_mock.mock() as m:
-        m.post(f"{server.users.baseurl}/import", text=BULK_ADD_XML.read_text())
-
-        with pytest.raises(ValueError, match="User name must be populated."):
-            server.users.bulk_add(users)
-
-
-def test_bulk_remove(server: TSC.Server) -> None:
-    server.version = "3.15"
-    users = [
-        make_user("Alice"),
-        make_user("Bob", domain="example.com"),
-    ]
-    with requests_mock.mock() as m:
-        m.post(f"{server.users.baseurl}/delete")
-
-        server.users.bulk_remove(users)
-
-        assert m.last_request.method == "POST"
-        assert m.last_request.url == f"{server.users.baseurl}/delete"
-
-        body = m.last_request.body.replace(b"\r\n", b"\n")
-        assert body.startswith(b"--")  # Check if it's a multipart request
-        boundary = body.split(b"\n")[0].strip()
-
-        content = next(seg for seg in body.split(boundary) if seg.strip())
-        assert b'Content-Disposition: form-data; name="tableau_user_delete"' in content
-        assert b"Content-Type: file" in content
-
-        content = content.replace(b"\r\n", b"\n")
-        csv_data = content.split(b"\n\n")[1].decode("utf-8")
-        for user, row in zip(users, csv_data.split("\n")):
-            name, *_ = row.split(",")
-            assert name == f"{user.domain_name}\\{user.name}" if user.domain_name else user.name
-
-
-def test_add_all(server: TSC.Server) -> None:
-    server.version = "2.0"
-    users = [
-        make_user("Alice", "Viewer"),
-        make_user("Bob", "Explorer"),
-        make_user("Charlie", "Creator", "SAML"),
-        make_user("Dave"),
-    ]
-
-    with patch("tableauserverclient.server.endpoint.users_endpoint.Users.add", autospec=True) as mock_add:
-        with pytest.warns(DeprecationWarning):
-            server.users.add_all(users)
-
-    assert mock_add.call_count == len(users)
-
-
-def test_add_idp_and_auth_error(server: TSC.Server) -> None:
-    server.version = "3.24"
-    users = [make_user("Alice", "Viewer", auth_setting="SAML", idp_id="01234")]
-
-    with pytest.raises(ValueError, match="User cannot have both authSetting and idpConfigurationId."):
-        server.users.bulk_add(users)
-
-
-def test_remove_users_csv(server: TSC.Server) -> None:
-    server.version = "3.15"
-    users = [
-        make_user("Alice", "Viewer"),
-        make_user("Bob", "Explorer"),
-        make_user("Charlie", "Creator", "SAML"),
-        make_user("Dave"),
-        make_user("Eve", "ServerAdministrator", "OpenID", "example.com", "Eve Example", "Eve@example.com"),
-        make_user("Frank", "SiteAdministratorExplorer", "TableauIDWithMFA", email="Frank@example.com"),
-        make_user("Grace", "SiteAdministratorCreator", "SAML", "example.com", "Grace Example", "gex@example.com"),
-        make_user("Hank", "Unlicensed"),
-        make_user("Ivy", "Unlicensed", idp_id="0123456789"),
-    ]
-
-    data = remove_users_csv(users)
-    assert isinstance(data, bytes), "remove_users_csv should return bytes"
-    csv_data = data.decode("utf-8")
-    records = re.split(r"\r?\n", csv_data.strip())
-    assert len(records) == len(users), "Number of records in csv does not match number of users"
-
-    for user, record in zip(users, records):
-        name, *rest = record.strip().split(",")
-        assert len(rest) == 6, "Number of fields in csv does not match expected number"
-        assert all([f == "" for f in rest]), "All fields except name should be empty"
-        if user.domain_name is None:
-            assert name == user.name, f"Name in csv does not match expected name: {user.name}"
-        else:
-            assert (
-                name == f"{user.domain_name}\\{user.name}"
-            ), f"Name in csv does not match expected name: {user.domain_name}\\{user.name}"
