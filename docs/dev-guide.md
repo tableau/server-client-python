@@ -145,7 +145,7 @@ depending on how and where git is installed on your system, for example:
 ### Add tests
 
 All of our tests live under the `test/` folder in the repository. We use
-`pytest` which is run with `pytest test`.
+`pytest` to run the tests.
 
 Follow the structure of existing tests, especially if new server responses
 are going to be mocked.
@@ -154,6 +154,13 @@ If a test needs a
 static file, like a .twb/.twbx/.xml, it should live under `test/assets/`
 
 Make sure that all tests are passing before submitting your pull request.
+
+| Test | Command |
+| --- | --- |
+| Test everything | `pytest test` |
+| Test everything, run in parallel | `pytest -n auto test` |
+| Run a specific test | `pytest test/test_user.py` |
+| Code coverage report | `pip install coverage` <br> `pytest --cov=tableauserverclient test` <br> `coverage html` <br> `open htmlcov/index.html` |
 
 ### Update the documentation
 
