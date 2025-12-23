@@ -43,8 +43,8 @@ add your contributions to the **development** branch.
    git remote add upstream https://github.com/tableau/server-client-python
    ```
    More information about configuring a remote for a fork can be found [here](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/configuring-a-remote-for-a-fork).
+   
 1. Sync your fork:
-
    ```shell
    git fetch upstream
    ```
@@ -135,17 +135,17 @@ depending on how and where git is installed on your system, for example:
 1. Add type hints to all new classes and functions added. Including type hinting
    on unit tests.
 
-1. Add a sample to show users how to use the new feature. Try to keep the command
+2. Add a sample to show users how to use the new feature. Try to keep the command
    line arguments of your sample consistent with the [Samples documentation page](samples)
    and with other samples.
 
-1. Add documentation (most likely in api-ref.md) in a separate pull request
+3. Add documentation (most likely in api-ref.md) in a separate pull request
    (see more below).
 
 ### Add tests
 
 All of our tests live under the `test/` folder in the repository. We use
-`pytest` which is run with `pytest test`.
+`pytest` and the built-in test runner `python setup.py test`.
 
 Follow the structure of existing tests, especially if new server responses
 are going to be mocked.
@@ -225,7 +225,7 @@ follow these steps:
 1. (Optional) Do a test publish to PyPI without creating the next version tag.
    This will create a pre-release package with a version like `0.30.post0.dev`.
 
-1. On a local clone of the repo, create and push the tag for the _next_ version
+1. On a local clone of the repo, create and push the tag for the *next* version
    (in this example it's "v0.31"):
 
    ```shell
