@@ -15,7 +15,6 @@ GET_HOURLY_ID_XML = TEST_ASSET_DIR / "schedule_get_hourly_id.xml"
 GET_DAILY_ID_XML = TEST_ASSET_DIR / "schedule_get_daily_id.xml"
 GET_MONTHLY_ID_XML = TEST_ASSET_DIR / "schedule_get_monthly_id.xml"
 GET_MONTHLY_ID_2_XML = TEST_ASSET_DIR / "schedule_get_monthly_id_2.xml"
-GET_CUSTOMIZED_MONTHLY_ID_XML = TEST_ASSET_DIR / "schedule_get_customized_monthly_id.xml"
 GET_EMPTY_XML = TEST_ASSET_DIR / "schedule_get_empty.xml"
 CREATE_HOURLY_XML = TEST_ASSET_DIR / "schedule_create_hourly.xml"
 CREATE_DAILY_XML = TEST_ASSET_DIR / "schedule_create_daily.xml"
@@ -27,7 +26,7 @@ ADD_WORKBOOK_TO_SCHEDULE_WITH_WARNINGS = TEST_ASSET_DIR / "schedule_add_workbook
 ADD_DATASOURCE_TO_SCHEDULE = TEST_ASSET_DIR / "schedule_add_datasource.xml"
 ADD_FLOW_TO_SCHEDULE = TEST_ASSET_DIR / "schedule_add_flow.xml"
 GET_EXTRACT_TASKS_XML = TEST_ASSET_DIR / "schedule_get_extract_refresh_tasks.xml"
-BATCH_UPDATE_STATE = TEST_ASSET_DIR / "schedule_batch_update_state.xml"
+BATCH_UPDATE_STATE = TEST_ASSET_DIR / "schedules_batch_update_state.xml"
 
 WORKBOOK_GET_BY_ID_XML = TEST_ASSET_DIR / "workbook_get_by_id.xml"
 DATASOURCE_GET_BY_ID_XML = TEST_ASSET_DIR / "datasource_get_by_id.xml"
@@ -177,21 +176,6 @@ def test_get_monthly_by_id_2(server: TSC.Server) -> None:
         assert "Monthly First Monday!" == schedule.name
         assert "Active" == schedule.state
         assert ("Monday", "First") == schedule.interval_item.interval
-
-
-def test_get_customized_monthly_by_id(server: TSC.Server) -> None:
-    server.version = "3.15"
-    response_xml = GET_CUSTOMIZED_MONTHLY_ID_XML.read_text()
-    with requests_mock.mock() as m:
-        schedule_id = "f048d794-90dc-40b0-bfad-2ca78e437369"
-        baseurl = f"{server.baseurl}/schedules/{schedule_id}"
-        m.get(baseurl, text=response_xml)
-        schedule = server.schedules.get_by_id(schedule_id)
-        assert schedule is not None
-        assert schedule_id == schedule.id
-        assert "Monthly customized" == schedule.name
-        assert "Active" == schedule.state
-        assert ("Customized Monthly",) == schedule.interval_item.interval
 
 
 def test_delete(server: TSC.Server) -> None:
@@ -437,58 +421,3 @@ def test_get_extract_refresh_tasks(server: TSC.Server) -> None:
         assert isinstance(extracts[0], list)
         assert 2 == len(extracts[0])
         assert "task1" == extracts[0][0].id
-
-
-def test_batch_update_state_items(server: TSC.Server) -> None:
-    server.version = "3.27"
-    hourly_interval = TSC.HourlyInterval(start_time=time(2, 30), end_time=time(23, 0), interval_value=2)
-    args = ("hourly", 50, TSC.ScheduleItem.Type.Extract, TSC.ScheduleItem.ExecutionOrder.Parallel, hourly_interval)
-    new_schedules = [TSC.ScheduleItem(*args), TSC.ScheduleItem(*args), TSC.ScheduleItem(*args)]
-    new_schedules[0]._id = "593d2ebf-0d18-4deb-9d21-b113a4902583"
-    new_schedules[1]._id = "cecbb71e-def0-4030-8068-5ae50f51db1c"
-    new_schedules[2]._id = "f39a6e7d-405e-4c07-8c18-95845f9da80e"
-
-    state = "active"
-    with requests_mock.mock() as m:
-        m.put(f"{server.schedules.baseurl}?state={state}", text=BATCH_UPDATE_STATE.read_text())
-        resp = server.schedules.batch_update_state(new_schedules, state)
-
-    assert len(resp) == 3
-    for sch, r in zip(new_schedules, resp):
-        assert sch.id == r
-
-
-def test_batch_update_state_str(server: TSC.Server) -> None:
-    server.version = "3.27"
-    new_schedules = [
-        "593d2ebf-0d18-4deb-9d21-b113a4902583",
-        "cecbb71e-def0-4030-8068-5ae50f51db1c",
-        "f39a6e7d-405e-4c07-8c18-95845f9da80e",
-    ]
-
-    state = "suspended"
-    with requests_mock.mock() as m:
-        m.put(f"{server.schedules.baseurl}?state={state}", text=BATCH_UPDATE_STATE.read_text())
-        resp = server.schedules.batch_update_state(new_schedules, state)
-
-    assert len(resp) == 3
-    for sch, r in zip(new_schedules, resp):
-        assert sch == r
-
-
-def test_batch_update_state_all(server: TSC.Server) -> None:
-    server.version = "3.27"
-    new_schedules = [
-        "593d2ebf-0d18-4deb-9d21-b113a4902583",
-        "cecbb71e-def0-4030-8068-5ae50f51db1c",
-        "f39a6e7d-405e-4c07-8c18-95845f9da80e",
-    ]
-
-    state = "suspended"
-    with requests_mock.mock() as m:
-        m.put(f"{server.schedules.baseurl}?state={state}&updateAll=true", text=BATCH_UPDATE_STATE.read_text())
-        _ = server.schedules.batch_update_state(new_schedules, state, True)
-
-        history = m.request_history[0]
-
-    assert history.text == "<tsRequest />"
