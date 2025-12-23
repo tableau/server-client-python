@@ -331,6 +331,37 @@ def test_queryset_filter_args_error(server: TSC.Server) -> None:
         workbooks = server.workbooks.filter("argument")
 
 
+def test_filtering_parameters(server: TSC.Server) -> None:
+    server.version = "3.6"
+    with requests_mock.mock() as m:
+        m.get(requests_mock.ANY)
+        url = server.workbooks.baseurl + "/456/data"
+        opts = TSC.PDFRequestOptions()
+        opts.parameter("name1@", "value1")
+        opts.parameter("name2$", "value2")
+        opts.parameter("Parameters.name3", "value3")
+        opts.parameter("vf_Parameters.name4", "value4")
+        opts.page_type = TSC.PDFRequestOptions.PageType.Tabloid
+
+        # While Tableau Server side IS case sensitive with the query string,
+        # requiring the prefix to be "vf_Parameters", requests does not end
+        # up preserving the case sensitivity with the Response.Request
+        # object. It also shows up lowercased in the requests_mock request
+        # history.
+        resp = server.workbooks.get_request(url, request_object=opts)
+        query_params = parse_qs(resp.request.query)
+        assert "vf_parameters.name1@" in query_params
+        assert "value1" in query_params["vf_parameters.name1@"]
+        assert "vf_parameters.name2$" in query_params
+        assert "value2" in query_params["vf_parameters.name2$"]
+        assert "vf_parameters.name3" in query_params
+        assert "value3" in query_params["vf_parameters.name3"]
+        assert "vf_parameters.name4" in query_params
+        assert "value4" in query_params["vf_parameters.name4"]
+        assert "type" in query_params
+        assert "tabloid" in query_params["type"]
+
+
 @pytest.mark.parametrize("page_size", [1, 10, 100, 1_000])
 def test_queryset_endpoint_pagesize_all(server: TSC.Server, page_size: int) -> None:
     with requests_mock.mock() as m:
@@ -347,6 +378,9 @@ def test_queryset_endpoint_pagesize_filter(server: TSC.Server, page_size: int) -
         queryset = server.views.filter(page_size=page_size)
         assert queryset.request_options.pagesize == page_size
         _ = list(queryset)
+
+
+44
 
 
 @pytest.mark.parametrize("page_size", [1, 10, 100, 1_000])
@@ -375,36 +409,6 @@ def test_queryset_fields(server: TSC.Server) -> None:
     loop = server.users.fields("id")
     assert "id" in loop.request_options.fields
     assert "_default_" in loop.request_options.fields
-
-
-def test_filtering_parameters(server: TSC.Server) -> None:
-    with requests_mock.mock() as m:
-        m.get(requests_mock.ANY)
-        url = server.workbooks.baseurl + "/views/456/data"
-        opts = TSC.PDFRequestOptions()
-        opts.parameter("name1@", "value1")
-        opts.parameter("name2$", "value2")
-        opts.parameter("Parameters.name3", "value3")
-        opts.parameter("vf_Parameters.name4", "value4")
-        opts.page_type = TSC.PDFRequestOptions.PageType.Tabloid
-
-        # While Tableau Server side IS case sensitive with the query string,
-        # requiring the prefix to be "vf_Parameters", requests does not end
-        # up preserving the case sensitivity with the Response.Request
-        # object. It also shows up lowercased in the requests_mock request
-        # history.
-        resp = server.workbooks.get_request(url, request_object=opts)
-        query_params = parse_qs(resp.request.query)
-        assert "vf_parameters.name1@" in query_params
-        assert "value1" in query_params["vf_parameters.name1@"]
-        assert "vf_parameters.name2$" in query_params
-        assert "value2" in query_params["vf_parameters.name2$"]
-        assert "vf_parameters.name3" in query_params
-        assert "value3" in query_params["vf_parameters.name3"]
-        assert "vf_parameters.name4" in query_params
-        assert "value4" in query_params["vf_parameters.name4"]
-        assert "type" in query_params
-        assert "tabloid" in query_params["type"]
 
 
 def test_queryset_only_fields(server: TSC.Server) -> None:
