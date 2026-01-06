@@ -299,7 +299,7 @@ Source file: models/custom_view_item.py
 | `name`        | The name of the custom view.                                                                                        |
 | `owner`       | The owner of the custom view (UserItem).                                                                            |
 | `pdf`         | The PDF of the custom view. You must first call the `custom_views.populate_pdf` method to access the PDF content.   |
-| `shared`      | Whether the custom view is shared.                                                                                  |
+| `shared`      | Whether the custom view is shared (boolean).                                                                        |
 | `updated_at`  | The date and time the custom view was last updated.                                                                 |
 | `view`        | The view (ViewItem) the custom view belongs to.                                                                     |
 | `workbook`    | The workbook (WorkbookItem) the custom view belongs to.                                                             |
@@ -324,13 +324,12 @@ custom_views.get(req_options=None)
 
 Returns the list of custom views on a site.
 
-If the request has no filter parameters: Administrators will see all custom views. Other users will see only custom views that they own.
+The returned list can be adjusted with filter parameters as follows:
 
-If the filter parameters include ownerId: Users will see only custom views that they own.
-
-If the filter parameters include viewId and/or workbookId, and don't include ownerId: Users will see those custom views that they have Write and WebAuthoring permissions for.
-
-If site user visibility is not set to Limited, the Users will see those custom views that are "public", meaning the value of their shared attribute is true.
+* If the request has no filter parameters: Administrators will see all custom views. Other users will see only custom views that they own.
+* If the filter parameters include ownerId: Users will see only custom views that they own.
+* If the filter parameters include viewId or workbookId, and don't include ownerId: Users will see those custom views for which they have Write and WebAuthoring permissions.
+* If site user visibility is not set to Limited, the Users will see those custom views that are "public", meaning the value of their shared attribute is true.
 
 REST API: [List Custom Views](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#list_custom_views)
 
