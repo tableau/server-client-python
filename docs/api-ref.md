@@ -3068,68 +3068,6 @@ hourly_schedule = server.schedules.create(hourly_schedule)
 <br>
 
 
-#### schedules.batch_create
-
-```py
-schedules.batch_create(schedule_items)
-```
-Creates multiple new schedules for extract refresh or subscription in a single request.
-
-REST API: [Batch Create Schedules](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#batch_create_schedules)
-
-
-**Parameters**
-
-Name  |  Description
-:--- | :---
-`schedule_items` | A list of `ScheduleItem` objects that you want to create. Each `ScheduleItem` includes the `IntervalItem` which specifies the frequency, or interval, that the schedule should run.
-
-
-**Returns**
-
-Returns a list of newly created `ScheduleItem` instances.
-
-
-**Exceptions**
-
-Error  |  Description
-:--- | :---
-`Interval item must be defined.`  |  Raises an exception if any `schedule_item.interval_item` is not specified. The interval item specifies whether the interval is hourly, daily, weekly, or monthly.
-
-
-**Example**
-
-```py
-import tableauserverclient as TSC
-from datetime import time
-
-# sign in, etc.
-
-# Create multiple schedule items
-hourly_interval = TSC.HourlyInterval(start_time=time(2, 30),
-                                     end_time=time(23, 0),
-                                     interval_value=2)
-hourly_schedule = TSC.ScheduleItem("Hourly-Schedule",
-                                   50,
-                                   TSC.ScheduleItem.Type.Extract,
-                                   TSC.ScheduleItem.ExecutionOrder.Parallel,
-                                   hourly_interval)
-
-daily_interval = TSC.DailyInterval(start_time=time(0, 30))
-daily_schedule = TSC.ScheduleItem("Daily-Schedule",
-                                  60,
-                                  TSC.ScheduleItem.Type.Subscription,
-                                  TSC.ScheduleItem.ExecutionOrder.Serial,
-                                  daily_interval)
-
-# Batch create multiple schedules
-created_schedules = server.schedules.batch_create([hourly_schedule, daily_schedule])
-```
-
-<br>
-<br>
-
-
 #### schedules.delete
 
 ```py
