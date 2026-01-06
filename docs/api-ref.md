@@ -8,15 +8,19 @@ layout: docs
 
 </div>
 
+
+
 The Tableau Server Client (TSC) is a Python library for the Tableau Server REST API. Using the TSC library, you can manage and change many of the Tableau Server and Tableau Cloud resources programmatically. You can use this library to create your own custom applications.
 
 The TSC API reference is organized by resource. The TSC library is modeled after the REST API. The methods, for example, `workbooks.get()`, correspond to the endpoints for resources, such as [workbooks](#workbooks), [users](#users), [views](#views), and [data sources](#data-sources). The model classes (for example, the [WorkbookItem class](#workbookitem-class) have attributes that represent the fields (`name`, `id`, `owner_id`) that are in the REST API request and response packages, or payloads.
 
-|:--- |
-| **Note:** Some methods and features provided in the REST API might not be currently available in the TSC library (and in some cases, the opposite is true). In addition, the same limitations apply to the TSC library that apply to the REST API with respect to resources on Tableau Server and Tableau Cloud. For more information, see the [Tableau Server REST API Reference](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm).|
+|:---  |
+| **Note:**  Some methods and features provided in the REST API might not be currently available in the TSC library (and in some cases, the opposite is true).  In addition, the same limitations apply to the TSC library that apply to the REST API with respect to resources on Tableau Server and Tableau Cloud. For more information, see the [Tableau Server REST API Reference](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm).|
 
-- TOC
-  {:toc }
+
+
+* TOC
+{:toc }
 
 <br>
 <br>
@@ -35,19 +39,19 @@ You can use the TSC library to sign in and sign out of Tableau Server and Tablea
 ```py
 TableauAuth(username, password, site_id='', user_id_to_impersonate=None)
 ```
-
 The `TableauAuth` class defines the information you can set in a sign-in request. The class members correspond to the attributes of a server request or response payload. To use this class, create a new instance, supplying user name, password, and site information if necessary, and pass the request object to the [Auth.sign_in](#auth.sign-in) method.
 
-**Note:** In the future, there might be support for additional forms of authorization and authentication (for example, OAuth).
+
+ **Note:** In the future, there might be support for additional forms of authorization and authentication (for example, OAuth).
 
 **Attributes**
 
-| Name                     | Description                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| :----------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `username`               | The name of the user whose credentials will be used to sign in.                                                                                                                                                                                                                                                                                                                                                                                  |
-| `password`               | The password of the user.                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `site_id`                | This corresponds to the `contentUrl` attribute in the Tableau REST API. The `site_id` is the portion of the URL that follows the `/site/` in the URL. For example, "MarketingTeam" is the `site_id` in the following URL _MyServer_/#/site/**MarketingTeam**/projects. To specify the default site on Tableau Server, you can use an empty string `''` (single quotes, no space). For Tableau Cloud, you must provide a value for the `site_id`. |
-| `user_id_to_impersonate` | Specifies the id (not the name) of the user to sign in as.                                                                                                                                                                                                                                                                                                                                                                                       |
+Name | Description
+:--- | :---
+`username` | The name of the user whose credentials will be used to sign in.
+`password` | The password of the user.
+`site_id` | This corresponds to the `contentUrl` attribute in the Tableau REST API. The `site_id` is the portion of the URL that follows the `/site/` in the URL. For example, "MarketingTeam" is the `site_id` in the following URL *MyServer*/#/site/**MarketingTeam**/projects. To specify the default site on Tableau Server, you can use an empty string `''`  (single quotes, no space).  For Tableau Cloud, you must provide a value for the `site_id`.
+`user_id_to_impersonate` |  Specifies the id (not the name) of the user to sign in as.
 
 Source file: models/tableau_auth.py
 
@@ -69,16 +73,15 @@ server.auth.sign_in(tableau_auth)
 ```py
 PersonalAccessTokenAuth(token_name, personal_access_token, site_id='')
 ```
-
 The `PersonalAccessTokenAuth` class serves the same purpose and is used in the same way as `TableauAuth`, but using [Personal Access Tokens](https://help.tableau.com/current/server/en-us/security_personal_access_tokens.htm) instead of username and password.
 
 **Attributes**
 
-| Name                    | Description                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| :---------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `token_name`            | The personal access token name.                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `personal_access_token` | The personal access token value.                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `site_id`               | This corresponds to the `contentUrl` attribute in the Tableau REST API. The `site_id` is the portion of the URL that follows the `/site/` in the URL. For example, "MarketingTeam" is the `site_id` in the following URL _MyServer_/#/site/**MarketingTeam**/projects. To specify the default site on Tableau Server, you can use an empty string `''` (single quotes, no space). For Tableau Cloud, you must provide a value for the `site_id`. |
+Name | Description
+:--- | :---
+`token_name` | The personal access token name.
+`personal_access_token` | The personal access token value.
+`site_id` | This corresponds to the `contentUrl` attribute in the Tableau REST API. The `site_id` is the portion of the URL that follows the `/site/` in the URL. For example, "MarketingTeam" is the `site_id` in the following URL *MyServer*/#/site/**MarketingTeam**/projects. To specify the default site on Tableau Server, you can use an empty string `''` (single quotes, no space). For Tableau Cloud, you must provide a value for the `site_id`.
 
 Source file: models/personal_access_token_auth.py
 
@@ -114,6 +117,7 @@ auth.sign_in(auth_req)
 
 Signs you in to Tableau Server.
 
+
 The method signs into Tableau Server or Tableau Cloud and manages the authentication token. You call this method from the server object you create. For information about the server object, see [Server](#server). The authentication token keeps you signed in for 240 minutes, or until you call the `auth.sign_out` method. Before you use this method, you first need to create the sign-in request (`auth_req`) object by creating an instance of the `TableauAuth`. To call this method, create a server object for your server. For more information, see [Sign in and Out](sign-in-out).
 
 REST API: [Sign In](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#sign_in)
@@ -121,6 +125,7 @@ REST API: [Sign In](https://help.tableau.com/current/api/rest_api/en-us/REST/res
 **Parameters**
 
 `auth_req` : The `TableauAuth` object that holds the sign-in credentials for the site.
+
 
 **Example**
 
@@ -140,12 +145,12 @@ server.auth.sign_in(tableau_auth)
 <br>
 <br>
 
+
 #### auth.sign_out
 
 ```py
 auth.sign_out()
 ```
-
 Signs you out of the current session.
 
 The `sign_out()` method takes care of invalidating the authentication token. For more information, see [Sign in and Out](sign-in-out).
@@ -177,6 +182,7 @@ REST API: [Switch Site](https://help.tableau.com/current/api/rest_api/en-us/REST
 
 `site_item` | The site that you want to switch to. This should be a `SiteItem` retrieved from `sites.get()`, `sites.get_by_id()` or `sites.get_by_name{}`.
 
+
 **Example**
 
 ```py
@@ -188,6 +194,7 @@ server.auth.switch_site(site)
 <br>
 <br>
 
+
 **See Also**  
 [Sign in and Out](sign-in-out)  
 [Server](#server)
@@ -197,9 +204,10 @@ server.auth.switch_site(site)
 
 ---
 
+
 ## Connections
 
-The connections for Tableau Server data sources and workbooks are represented by a `ConnectionItem` class. You can call data source and workbook methods to query or update the connection information. The `ConnectionCredentials` class represents the connection information you can update.
+The connections for Tableau Server data sources and workbooks are represented by a `ConnectionItem` class.  You can call data source and workbook methods to query or update the connection information.  The `ConnectionCredentials` class represents the connection information you can update.
 
 ### ConnectionItem class
 
@@ -213,23 +221,25 @@ In the Tableau Server REST API, there are separate endpoints to query and update
 
 **Attributes**
 
-| Name                     | Description                                                                                                                                                                                              |
-| :----------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `datasource_id`          | The identifier of the data source.                                                                                                                                                                       |
-| `datasource_name`        | The name of the data source.                                                                                                                                                                             |
-| `id`                     | The identifier of the connection.                                                                                                                                                                        |
-| `connection_type`        | The type of connection.                                                                                                                                                                                  |
-| `username`               | The username for the connection (see ConnectionCredentials).                                                                                                                                             |
-| `password`               | The password used for the connection (see ConnectionCredentials).                                                                                                                                        |
-| `embed_password`         | (Boolean) Determines whether to embed the password (`True`) for the workbook or data source connection or not (`False`) (see ConnectionCredentials).                                                     |
-| `server_address`         | The server address for the connection (host name for the Tableau Server).                                                                                                                                |
-| `server_port`            | The port used for the connection.                                                                                                                                                                        |
-| `connection_credentials` | The Connection Credentials object containing authentication details for the connection. Replaces username/password/embed_password when publishing a flow, document or workbook file in the request body. |
+Name   |  Description
+ :--- | : ---
+`datasource_id` |  The identifier of the data source.
+`datasource_name` |  The name of the data source.
+`id`  |  The identifier of the connection.
+`connection_type`  |  The type of connection.
+`username`     | The username for the connection (see ConnectionCredentials).
+`password`  |  The password used for the connection (see ConnectionCredentials).
+`embed_password`  |  (Boolean) Determines whether to embed the password (`True`) for the workbook or data source connection or not (`False`) (see ConnectionCredentials).
+`server_address`   |  The server address for the connection (host name for the Tableau Server).
+`server_port`   |  The port used for the connection.
+`connection_credentials` | The Connection Credentials object containing authentication details for the connection. Replaces username/password/embed_password when publishing a flow, document or workbook file in the request body.
 
 Source file: models/connection_item.py
 
 <br>
 <br>
+
+
 
 ### ConnectionCredentials class
 
@@ -237,16 +247,20 @@ Source file: models/connection_item.py
 ConnectionCredentials(name, password, embed=True, oauth=False)
 ```
 
+
 The `ConnectionCredentials` class is used for workbook and data source publish requests.
+
+
 
 **Attributes**
 
-| Attribute  | Description                                                                                                                                                                                            |
-| :--------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`     | The username for the connection.                                                                                                                                                                       |
-| `embed`    | (Boolean) Determines whether to embed the password (`True`) for the workbook or data source connection or not (`False`).                                                                               |
-| `password` | The password used for the connection.                                                                                                                                                                  |
-| `ouath`    | (Boolean) Specifies whether OAuth is used for the data source of workbook connection. For more information, see [OAuth Connections](https://help.tableau.com/current/server/en-us/protected_auth.htm). |
+Attribute | Description
+:--- | :---
+`name`     | The username for the connection.
+`embed`  |  (Boolean) Determines whether to embed the password (`True`) for the workbook or data source connection or not (`False`).
+`password`  |  The password used for the connection.
+`ouath`  |  (Boolean) Specifies whether OAuth is used for the data source of workbook connection. For more information, see [OAuth Connections](https://help.tableau.com/current/server/en-us/protected_auth.htm).
+
 
 Source file: models/connection_credentials.py
 
@@ -255,393 +269,7 @@ Source file: models/connection_credentials.py
 
 ---
 
-## Custom Views
-
-Using the TSC library, you can get information about custom views, update custom views, delete custom views, and export custom views as images, PDFs, or CSV files.
-
-The custom view resources for Tableau Server are defined in the `CustomViewItem` class. The class corresponds to the custom view resources you can access using the Tableau Server REST API. The custom view methods are based upon the endpoints for custom views in the REST API and operate on the `CustomViewItem` class.
-
-<br>
-
-### CustomViewItem class
-
-```
-CustomViewItem(id=None, name=None)
-```
-
-The `CustomViewItem` class contains the members or attributes for the custom view resources on Tableau Server. The `CustomViewItem` class defines the information you can request or query from Tableau Server. The class members correspond to the attributes of a server request or response payload.
-
-Source file: models/custom_view_item.py
-
-**Attributes**
-
-| Name          | Description                                                                                                         |
-| :------------ | :------------------------------------------------------------------------------------------------------------------ |
-| `content_url` | The content URL of the custom view.                                                                                 |
-| `created_at`  | The date and time the custom view was created.                                                                      |
-| `csv`         | The CSV data of the custom view. You must first call the `custom_views.populate_csv` method to access the CSV data. |
-| `id`          | The identifier of the custom view item.                                                                             |
-| `image`       | The image of the custom view. You must first call the `custom_views.populate_image` method to access the image.     |
-| `name`        | The name of the custom view.                                                                                        |
-| `owner`       | The owner of the custom view (UserItem).                                                                            |
-| `pdf`         | The PDF of the custom view. You must first call the `custom_views.populate_pdf` method to access the PDF content.   |
-| `shared`      | Whether the custom view is shared.                                                                                  |
-| `updated_at`  | The date and time the custom view was last updated.                                                                 |
-| `view`        | The view (ViewItem) the custom view belongs to.                                                                     |
-| `workbook`    | The workbook (WorkbookItem) the custom view belongs to.                                                             |
-
-<br>
-<br>
-
-### Custom Views methods
-
-The Tableau Server Client provides methods for interacting with custom view resources, or endpoints. These methods correspond to the endpoints for custom views in the Tableau Server REST API.
-
-Source file: server/endpoint/custom_views_endpoint.py
-
-<br>
-<br>
-
-#### custom_views.get
-
-```
-custom_views.get(req_options=None)
-```
-
-Returns the list of custom views on a site.
-
-If the request has no filter parameters: Administrators will see all custom views. Other users will see only custom views that they own.
-
-If the filter parameters include ownerId: Users will see only custom views that they own.
-
-If the filter parameters include viewId and/or workbookId, and don't include ownerId: Users will see those custom views that they have Write and WebAuthoring permissions for.
-
-If site user visibility is not set to Limited, the Users will see those custom views that are "public", meaning the value of their shared attribute is true.
-
-REST API: [List Custom Views](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#list_custom_views)
-
-**Version**
-
-This endpoint is available with REST API version 3.18 and up.
-
-**Parameters**
-
-| Name          | Description                                                                                              |
-| :------------ | :------------------------------------------------------------------------------------------------------- |
-| `req_options` | (Optional) Filtering options for the request. You can filter by `view_id`, `workbook_id`, or `owner_id`. |
-
-**Returns**
-
-Returns a list of all `CustomViewItem` objects and a `PaginationItem`. Use these values to iterate through the results.
-
-**Example**
-
-```py
-import tableauserverclient as TSC
-tableau_auth = TSC.TableauAuth('username', 'password')
-server = TSC.Server('https://servername')
-
-with server.auth.sign_in(tableau_auth):
-    all_custom_views, pagination_item = server.custom_views.get()
-    print([view.name for view in all_custom_views])
-```
-
-See [CustomViewItem class](#customviewitem-class)
-
-<br>
-<br>
-
-#### custom_views.get_by_id
-
-```
-custom_views.get_by_id(view_id)
-```
-
-Returns the details of a specific custom view.
-
-REST API: [Get Custom View](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#get_custom_view)
-
-**Version**
-
-This endpoint is available with REST API version 3.18 and up.
-
-**Parameters**
-
-| Name      | Description                            |
-| :-------- | :------------------------------------- |
-| `view_id` | The ID of the custom view to retrieve. |
-
-**Returns**
-
-Returns a single `CustomViewItem` object.
-
-**Example**
-
-```py
-import tableauserverclient as TSC
-tableau_auth = TSC.TableauAuth('username', 'password')
-server = TSC.Server('https://servername')
-
-with server.auth.sign_in(tableau_auth):
-    custom_view = server.custom_views.get_by_id('d79634e1-6063-4ec9-95ff-50acbf609ff5')
-    print(custom_view.name)
-```
-
-See [CustomViewItem class](#customviewitem-class)
-
-<br>
-<br>
-
-#### custom_views.populate_image
-
-```py
-custom_views.populate_image(view_item, req_options=None)
-```
-
-Populates the image of the specified custom view.
-
-This method uses the `id` field to query the image, and populates the image content as the `image` field.
-
-REST API: [Get Custom View Image](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#get_custom_view_image)
-
-**Version**
-
-This endpoint is available with REST API version 3.18 and up.
-
-**Parameters**
-
-| Name          | Description                                                                                                                                                                                                                                         |
-| :------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `view_item`   | Specifies the custom view to populate.                                                                                                                                                                                                              |
-| `req_options` | (Optional) You can pass in request options to specify the image resolution (`imageresolution`) and the maximum age of the view image cached on the server (`maxage`). See [ImageRequestOptions class](#imagerequestoptions-class) for more details. |
-
-**Exceptions**
-
-| Error                         | Description                                              |
-| :---------------------------- | :------------------------------------------------------- |
-| `Custom View item missing ID` | Raises an error if the ID of the custom view is missing. |
-
-**Returns**
-
-None. The image is added to the `view_item` and can be accessed by its `image` field.
-
-**Example**
-
-```py
-# Sign in, get custom view, etc.
-
-# Populate and save the custom view image as 'custom_view_image.png'
-server.custom_views.populate_image(custom_view_item)
-with open('./custom_view_image.png', 'wb') as f:
-	f.write(custom_view_item.image)
-```
-
-See [CustomViewItem class](#customviewitem-class)
-
-<br>
-<br>
-
-#### custom_views.populate_pdf
-
-```py
-custom_views.populate_pdf(custom_view_item, req_options=None)
-```
-
-Populates the PDF content of the specified custom view.
-
-This method populates a PDF with image(s) of the custom view you specify.
-
-REST API: [Get Custom View PDF](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#get_custom_view_pdf)
-
-**Version**
-
-This endpoint is available with REST API version 3.23 and up.
-
-**Parameters**
-
-| Name               | Description                                                                                                                                                                                                                                     |
-| :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `custom_view_item` | Specifies the custom view to populate.                                                                                                                                                                                                          |
-| `req_options`      | (Optional) You can pass in request options to specify the page type and orientation of the PDF content, as well as the maximum age of the PDF rendered on the server. See [PDFRequestOptions class](#pdfrequestoptions-class) for more details. |
-
-**Exceptions**
-
-| Error                         | Description                                              |
-| :---------------------------- | :------------------------------------------------------- |
-| `Custom View item missing ID` | Raises an error if the ID of the custom view is missing. |
-
-**Returns**
-
-None. The PDF content is added to the `custom_view_item` and can be accessed by its `pdf` field.
-
-**Example**
-
-```py
-# Sign in, get custom view, etc.
-
-# Populate and save the custom view pdf as 'custom_view_pdf.pdf'
-server.custom_views.populate_pdf(custom_view_item)
-with open('./custom_view_pdf.pdf', 'wb') as f:
-	f.write(custom_view_item.pdf)
-```
-
-See [CustomViewItem class](#customviewitem-class)
-
-<br>
-<br>
-
-#### custom_views.populate_csv
-
-```py
-custom_views.populate_csv(custom_view_item, req_options=None)
-```
-
-Populates the CSV data of the specified custom view.
-
-This method uses the `id` field to query the CSV data, and populates the data as the `csv` field.
-
-REST API: [Get Custom View Data](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#get_custom_view_data)
-
-**Version**
-
-This endpoint is available with REST API version 3.23 and up.
-
-**Parameters**
-
-| Name               | Description                                                                                                                                                                      |
-| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `custom_view_item` | Specifies the custom view to populate.                                                                                                                                           |
-| `req_options`      | (Optional) You can pass in request options to specify the maximum age of the CSV cached on the server. See [CSVRequestOptions class](#csvrequestoptions-class) for more details. |
-
-**Exceptions**
-
-| Error                         | Description                                              |
-| :---------------------------- | :------------------------------------------------------- |
-| `Custom View item missing ID` | Raises an error if the ID of the custom view is missing. |
-
-**Returns**
-
-None. The CSV data is added to the `custom_view_item` and can be accessed by its `csv` field.
-
-**Example**
-
-```py
-# Sign in, get custom view, etc.
-
-# Populate and save the CSV data in a file
-server.custom_views.populate_csv(custom_view_item)
-with open('./custom_view_data.csv', 'wb') as f:
-	# Perform byte join on the CSV data
-	f.write(b''.join(custom_view_item.csv))
-```
-
-See [CustomViewItem class](#customviewitem-class)
-
-<br>
-<br>
-
-#### custom_views.update
-
-```py
-custom_views.update(view_item)
-```
-
-Updates the name, owner, or shared status of a custom view.
-
-REST API: [Update Custom View](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#update_custom_view)
-
-**Version**
-
-This endpoint is available with REST API version 3.18 and up.
-
-**Parameters**
-
-| Name        | Description                                                                                                              |
-| :---------- | :----------------------------------------------------------------------------------------------------------------------- |
-| `view_item` | The custom view item to update. Must include the `id` field. You can update the `name`, `owner`, or `shared` attributes. |
-
-**Returns**
-
-Returns the updated `CustomViewItem` object.
-
-**Example**
-
-```py
-import tableauserverclient as TSC
-tableau_auth = TSC.TableauAuth('username', 'password')
-server = TSC.Server('https://servername')
-
-with server.auth.sign_in(tableau_auth):
-    # Get a custom view
-    custom_view = server.custom_views.get_by_id('d79634e1-6063-4ec9-95ff-50acbf609ff5')
-
-    # Update the name
-    custom_view.name = 'Updated Custom View Name'
-    updated_view = server.custom_views.update(custom_view)
-    print(f"Updated custom view: {updated_view.name}")
-```
-
-See [CustomViewItem class](#customviewitem-class)
-
-<br>
-<br>
-
-#### custom_views.delete
-
-```py
-custom_views.delete(view_id)
-```
-
-Deletes a single custom view by ID.
-
-REST API: [Delete Custom View](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#delete_custom_view)
-
-**Version**
-
-This endpoint is available with REST API version 3.19 and up.
-
-**Parameters**
-
-| Name      | Description                          |
-| :-------- | :----------------------------------- |
-| `view_id` | The ID of the custom view to delete. |
-
-**Exceptions**
-
-| Error        | Description                                                   |
-| :----------- | :------------------------------------------------------------ |
-| `ValueError` | Raises an error if the `view_id` is not provided or is empty. |
-
-**Returns**
-
-None.
-
-**Example**
-
-```py
-import tableauserverclient as TSC
-tableau_auth = TSC.TableauAuth('username', 'password')
-server = TSC.Server('https://servername')
-
-with server.auth.sign_in(tableau_auth):
-    # Get a custom view
-    custom_view = server.custom_views.get_by_id('d79634e1-6063-4ec9-95ff-50acbf609ff5')
-
-    # Delete the custom view
-    server.custom_views.delete(custom_view.id)
-    print(f"Custom view '{custom_view.name}' deleted successfully")
-```
-
-**Note**: This operation cannot be undone. Make sure you have the correct view ID before deleting.
-
-See [CustomViewItem class](#customviewitem-class)
-
-<br>
-<br>
-
----
-
-## Data Sources
+## Data sources
 
 Using the TSC library, you can get all the data sources on a site, or get the data sources for a specific project.
 The data source resources for Tableau Server are defined in the `DatasourceItem` class. The class corresponds to the data source resources you can access using the Tableau Server REST API. For example, you can gather information about the name of the data source, its type, its connections, and the project it is associated with. The data source methods are based upon the endpoints for data sources in the REST API and operate on the `DatasourceItem` class.
@@ -654,31 +282,32 @@ The data source resources for Tableau Server are defined in the `DatasourceItem`
 DatasourceItem(project_id, name=None)
 ```
 
-The `DatasourceItem` represents the data source resources on Tableau Server. This is the information that can be sent or returned in the response to an REST API request for data sources. When you create a new `DatasourceItem` instance, you must specify the `project_id` that the data source is associated with.
+The `DatasourceItem` represents the data source resources on Tableau Server. This is the information that can be sent or returned in the response to an REST API request for data sources.  When you create a new `DatasourceItem` instance, you must specify the `project_id` that the data source is associated with.
 
 **Attributes**
 
-| Name                     | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| :----------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ask_data_enablement`    | Determines if a data source allows use of Ask Data. The value can be `TSC.DatasourceItem.AskDataEnablement.Enabled`, `TSC.DatasourceItem.AskDataEnablement.Disabled`, or `TSC.DatasourceItem.AskDataEnablement.SiteDefault`. If no setting is specified, it will default to SiteDefault. See [REST API Publish Datasource](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#publish_data_source) for more information about ask_data_enablement. |
-| `connections`            | The list of data connections (`ConnectionItem`) for the specified data source. You must first call the `populate_connections` method to access this data. See the [ConnectionItem class](#connectionitem-class).                                                                                                                                                                                                                                                                       |
-| `content_url`            | The name of the data source as it would appear in a URL.                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `created_at`             | The date and time when the data source was created.                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `certified`              | A Boolean value that indicates whether the data source is certified.                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `certification_note`     | The optional note that describes the certified data source.                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `datasource_type`        | The type of data source, for example, `sqlserver` or `excel-direct`.                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `description`            | The description for the data source.                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `encrypt_extracts`       | A Boolean value to determine if a datasource should be encrypted or not. See [Extract and Encryption Methods](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_extract_and_encryption.htm) for more information.                                                                                                                                                                                                                                                  |
-| `has_extracts`           | A Boolean value that indicates whether the datasource has extracts.                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `id`                     | The identifier for the data source. You need this value to query a specific data source or to delete a data source with the `get_by_id` and `delete` methods.                                                                                                                                                                                                                                                                                                                          |
-| `name`                   | The name of the data source. If not specified, the name of the published data source file is used.                                                                                                                                                                                                                                                                                                                                                                                     |
-| `owner_id`               | The identifier of the owner of the data source.                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `project_id`             | The identifier of the project associated with the data source. You must provide this identifier when you create an instance of a `DatasourceItem`.                                                                                                                                                                                                                                                                                                                                     |
-| `project_name`           | The name of the project associated with the data source.                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `tags`                   | The tags (list of strings) that have been added to the data source.                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `updated_at`             | The date and time when the data source was last updated.                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `use_remote_query_agent` | A Boolean value that indicates whether to allow or disallow your Tableau Cloud site to use Tableau Bridge clients. Bridge allows you to maintain data sources with live connections to supported on-premises data sources. See [Configure and Manage the Bridge Client Pool](https://help.tableau.com/current/online/en-us/to_enable_bridge_live_connections.htm) for more information.                                                                                                |
-| `webpage_url`            | The url of the datasource as displayed in browsers.                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+Name | Description
+:--- | :---
+`ask_data_enablement` | Determines if a data source allows use of Ask Data. The value can be `TSC.DatasourceItem.AskDataEnablement.Enabled`, `TSC.DatasourceItem.AskDataEnablement.Disabled`, or `TSC.DatasourceItem.AskDataEnablement.SiteDefault`. If no setting is specified, it will default to SiteDefault. See [REST API Publish Datasource](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#publish_data_source) for more information about ask_data_enablement.
+`connections` |  The list of data connections (`ConnectionItem`) for the specified data source. You must first call the `populate_connections` method to access this data. See the [ConnectionItem class](#connectionitem-class).
+`content_url` |  The name of the data source as it would appear in a URL.
+`created_at` |  The date and time when the data source was created.
+`certified` | A Boolean value that indicates whether the data source is certified.
+`certification_note` |  The optional note that describes the certified data source.
+`datasource_type` | The type of data source, for example, `sqlserver` or `excel-direct`.
+`description` | The description for the data source.
+`encrypt_extracts` | A Boolean value to determine if a datasource should be encrypted or not. See [Extract and Encryption Methods](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_extract_and_encryption.htm) for more information.
+`has_extracts` | A Boolean value that indicates whether the datasource has extracts.
+`id` |  The identifier for the data source. You need this value to query a specific data source or to delete a data source with the `get_by_id` and `delete` methods.
+`name`  |  The name of the data source. If not specified, the name of the published data source file is used.
+`owner_id` |  The identifier of the owner of the data source.
+`project_id` |  The identifier of the project associated with the data source. You must provide this identifier when you create an instance of a `DatasourceItem`.
+`project_name` |  The name of the project associated with the data source.
+`tags` |  The tags (list of strings) that have been added to the data source.
+`updated_at` |  The date and time when the data source was last updated.
+`use_remote_query_agent` | A Boolean value that indicates whether to allow or disallow your Tableau Cloud site to use Tableau Bridge clients. Bridge allows you to maintain data sources with live connections to supported on-premises data sources. See [Configure and Manage the Bridge Client Pool](https://help.tableau.com/current/online/en-us/to_enable_bridge_live_connections.htm) for more information.
+`webpage_url` | The url of the datasource as displayed in browsers.
+
 
 **Example**
 
@@ -690,7 +319,8 @@ The `DatasourceItem` represents the data source resources on Tableau Server. Thi
     new_datasource = TSC.DatasourceItem('3a8b6148-493c-11e6-a621-6f3499394a39')
 ```
 
-Source file: models/datasource_item.py
+
+Source file:  models/datasource_item.py
 
 <br>
 <br>
@@ -712,22 +342,26 @@ datasources.delete(datasource_id)
 
 Removes the specified data source from Tableau Server.
 
+
 **Parameters**
 
-| Name            | Description                                                                             |
-| :-------------- | :-------------------------------------------------------------------------------------- |
-| `datasource_id` | The identifier (`id`) for the `DatasourceItem` that you want to delete from the server. |
+Name | Description
+:--- | :---
+`datasource_id`  |  The identifier (`id`) for the `DatasourceItem` that you want to delete from the server.
+
 
 **Exceptions**
 
-| Error                     | Description                                                     |
-| :------------------------ | :-------------------------------------------------------------- |
-| `Datasource ID undefined` | Raises an exception if a valid `datasource_id` is not provided. |
+Error   |  Description
+ :--- | : ---
+`Datasource ID undefined`   | Raises an exception if a valid `datasource_id` is not provided.
+
 
 REST API: [Delete Datasource](https://help.tableau.com/v0.0/api/rest_api/en-us/REST/rest_api_ref.htm#delete_data_source)
 
 <br>
 <br>
+
 
 #### datasources.download
 
@@ -735,25 +369,25 @@ REST API: [Delete Datasource](https://help.tableau.com/v0.0/api/rest_api/en-us/R
 datasources.download(datasource_id, filepath=None, include_extract=True, no_extract=None)
 
 ```
-
 Downloads the specified data source in `.tdsx` or `.hyper` format.
 
 REST API: [Download Datasource](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#download_data_source)
 
 **Parameters**
 
-| Name              | Description                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| :---------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `datasource_id`   | The identifier (`id`) for the `DatasourceItem` that you want to download from the server.                                                                                                                                                                                                                                                                                                                                                        |
-| `filepath`        | (Optional) Downloads the file to the location you specify. If no location is specified (the default is `Filepath=None`), the file is downloaded to the current working directory.                                                                                                                                                                                                                                                                |
-| `include_extract` | (Optional) Specifies whether to download the file with the extract. The default is to include the extract, if present (`include_extract=True`). When the data source has an extract, if you set the parameter `include_extract=False`, the extract is not included. You can use this parameter to improve performance if you are downloading data sources that have large extracts. Available starting with Tableau Server REST API version 2.5. |
-| `no_extract`      | (**Deprecated**) Use `include_extract` instead. The default value is to ignore this parameter (`no_extract=None`). If you set the parameter to `no_extract=True`, the download will not include an extract (if there is one). If set to `no_extract=False`, the download will include the extract (if there is one). Available starting with Tableau Server REST API version 2.5.                                                                |
+Name | Description
+:--- | :---
+`datasource_id` |  The identifier (`id`) for the `DatasourceItem` that you want to download from the server.
+`filepath` |  (Optional) Downloads the file to the location you specify. If no location is specified (the default is `Filepath=None`), the file is downloaded to the current working directory.
+`include_extract` | (Optional) Specifies whether to download the file with the extract. The default is to include the extract, if present (`include_extract=True`). When the data source has an extract, if you set the parameter `include_extract=False`, the extract is not included. You can use this parameter to improve performance if you are downloading data sources that have large extracts. Available starting with Tableau Server REST API version 2.5.
+`no_extract` | (**Deprecated**) Use `include_extract` instead. The default value is to ignore this parameter (`no_extract=None`). If you set the parameter to `no_extract=True`, the download will not include an extract (if there is one). If set to `no_extract=False`, the download will include the extract (if there is one). Available starting with Tableau Server REST API version 2.5.
 
 **Exceptions**
 
-| Error                     | Description                                                     |
-| :------------------------ | :-------------------------------------------------------------- |
-| `Datasource ID undefined` | Raises an exception if a valid `datasource_id` is not provided. |
+Error | Description
+:--- | :---
+`Datasource ID undefined`   |  Raises an exception if a valid `datasource_id` is not provided.
+
 
 **Returns**
 
@@ -768,6 +402,7 @@ The file path to the downloaded data source. The data source is downloaded in `.
 
 ```
 
+
 <br>
 <br>
 
@@ -779,19 +414,23 @@ datasources.get(req_options=None)
 
 Returns all the data sources for the site.
 
-To get the connection information for each data source, you must first populate the `DatasourceItem` with connection information using the [populate_connections(_datasource_item_)](#populate-connections-datasource) method. For more information, see [Populate Connections and Views](populate-connections-views#populate-connections-for-data-sources)
+To get the connection information for each data source, you must first populate the `DatasourceItem` with connection information using the [populate_connections(*datasource_item*)](#populate-connections-datasource) method. For more information, see [Populate Connections and Views](populate-connections-views#populate-connections-for-data-sources)
 
 REST API: [Query Datasources](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_data_sources)
 
 **Parameters**
 
-| Name          | Description                                                                                                                                                                                                                        |
-| :------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `req_options` | (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific data source, you could specify the name of the project or its id. |
+Name | Description
+:--- | :---
+`req_options` |  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific data source, you could specify the name of the project or its id.
+
 
 **Returns**
 
-Returns a list of `DatasourceItem` objects and a `PaginationItem` object. Use these values to iterate through the results.
+Returns a list of `DatasourceItem` objects and a `PaginationItem`  object.  Use these values to iterate through the results.
+
+
+
 
 **Example**
 
@@ -806,8 +445,11 @@ with server.auth.sign_in(tableau_auth):
     print([datasource.name for datasource in all_datasources])
 ```
 
+
+
 <br>
 <br>
+
 
 #### datasources.get_by_id
 
@@ -819,21 +461,25 @@ Returns the specified data source item.
 
 REST API: [Query Datasource](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_data_source)
 
+
 **Parameters**
 
-| Name            | Description                                             |
-| :-------------- | :------------------------------------------------------ |
-| `datasource_id` | The `datasource_id` specifies the data source to query. |
+Name | Description
+:--- | :---
+`datasource_id`  |  The `datasource_id` specifies the data source to query.
+
 
 **Exceptions**
 
-| Error                     | Description                                                     |
-| :------------------------ | :-------------------------------------------------------------- |
-| `Datasource ID undefined` | Raises an exception if a valid `datasource_id` is not provided. |
+Error | Description
+:--- | :---
+`Datasource ID undefined`   |  Raises an exception if a valid `datasource_id` is not provided.
+
 
 **Returns**
 
-The `DatasourceItem`. See [DatasourceItem class](#datasourceitem-class)
+The `DatasourceItem`.  See [DatasourceItem class](#datasourceitem-class)
+
 
 **Example**
 
@@ -843,6 +489,7 @@ datasource = server.datasources.get_by_id('59a57c0f-3905-4022-9e87-424fb05e9c0e'
 print(datasource.name)
 
 ```
+
 
 <br>
 <br>
@@ -859,23 +506,28 @@ Populates the connections for the specified data source.
 
 This method retrieves the connection information for the specified data source. The REST API is designed to return only the information you ask for explicitly. When you query for all the data sources, the connection information is not included. Use this method to retrieve the connections. The method adds the list of data connections to the data source item (`datasource_item.connections`). This is a list of `ConnectionItem` objects.
 
-REST API: [Query Datasource Connections](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_data_source_connections)
+REST API:  [Query Datasource Connections](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_data_source_connections)
 
 **Parameters**
 
-| Name              | Description                                                                              |
-| :---------------- | :--------------------------------------------------------------------------------------- |
-| `datasource_item` | The `datasource_item` specifies the data source to populate with connection information. |
+Name | Description
+:--- | :---
+`datasource_item`  |  The `datasource_item` specifies the data source to populate with connection information.
+
+
+
 
 **Exceptions**
 
-| Error                                                                         | Description                                            |
-| :---------------------------------------------------------------------------- | :----------------------------------------------------- |
-| `Datasource item missing ID. Datasource must be retrieved from server first.` | Raises an error if the datasource_item is unspecified. |
+Error | Description
+:--- | :---
+`Datasource item missing ID. Datasource must be retrieved from server first.` |  Raises an error if the datasource_item is unspecified.
+
 
 **Returns**
 
 None. A list of `ConnectionItem` objects are added to the data source (`datasource_item.connections`).
+
 
 **Example**
 
@@ -920,25 +572,29 @@ REST API: [Publish Datasource](https://help.tableau.com/current/api/rest_api/en-
 
 **Parameters**
 
-| Name                     | Description                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| :----------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `datasource_item`        | The `datasource_item` specifies the new data source you are adding, or the data source you are appending to. If you are adding a new data source, you need to create a new `datasource_item` with a `project_id` of an existing project. The name of the data source will be the name of the file, unless you also specify a name for the new data source when you create the instance. See [DatasourceItem](#datasourceitem-class).                     |
-| `file`                   | The file path or file object of the data source to publish.                                                                                                                                                                                                                                                                                                                                                                                              |
-| `mode`                   | Specifies whether you are publishing a new data source (`CreateNew`), overwriting an existing data source (`Overwrite`), or appending data to a data source (`Append`). If you are appending to a data source, the data source on the server and the data source you are publishing must be be extracts (.tde files) and they must share the same schema. You can also use the publish mode attributes, for example: `TSC.Server.PublishMode.Overwrite`. |
-| `connection_credentials` | (Optional) The credentials required to connect to the data source. The `ConnectionCredentials` object contains the authentication information for the data source (user name and password, and whether the credentials are embedded or OAuth is used).                                                                                                                                                                                                   |
-| `as_job`                 | (Optional) If this value is set to `True`, the publish operation will be asynchronous and return a JobItem.                                                                                                                                                                                                                                                                                                                                              |
+Name | Description
+:--- | :---
+`datasource_item`  |  The `datasource_item` specifies the new data source you are adding, or the data source you are appending to. If you are adding a new data source, you need to create a new `datasource_item` with a `project_id` of an existing project. The name of the data source will be the name of the file, unless you also specify a name for the new data source when you create the instance. See [DatasourceItem](#datasourceitem-class).
+`file`  |  The file path or file object of the data source to publish.
+`mode`     |  Specifies whether you are publishing a new data source (`CreateNew`), overwriting an existing data source (`Overwrite`), or appending data to a data source (`Append`). If you are appending to a data source, the data source on the server and the data source you are publishing must be be extracts (.tde files) and they must share the same schema. You can also use the publish mode attributes, for example: `TSC.Server.PublishMode.Overwrite`.
+`connection_credentials` | (Optional)  The credentials required to connect to the data source. The `ConnectionCredentials` object contains the authentication information for the data source (user name and password, and whether the credentials are embedded or OAuth is used).
+`as_job` | (Optional) If this value is set to `True`, the publish operation will be asynchronous and return a JobItem.
+
+
 
 **Exceptions**
 
-| Error                                                                     | Description                                                              |
-| :------------------------------------------------------------------------ | :----------------------------------------------------------------------- |
-| `File path does not lead to an existing file.`                            | Raises an error of the file path is incorrect or if the file is missing. |
-| `Invalid mode defined.`                                                   | Raises an error if the publish mode is not one of the defined options.   |
-| `Only .tds, tdsx, .tde, or .hyper files can be published as datasources.` | Raises an error if the type of file specified is not supported.          |
+Error | Description
+:--- | :---
+`File path does not lead to an existing file.`  |  Raises an error of the file path is incorrect or if the file is missing.
+`Invalid mode defined.`  |  Raises an error if the publish mode is not one of the defined options.
+`Only .tds, tdsx, .tde, or .hyper files can be published as datasources.`  |  Raises an error if the type of file specified is not supported.
+
 
 **Returns**
 
 The `DatasourceItem` for the data source that was added or appended to.
+
 
 **Example**
 
@@ -978,19 +634,22 @@ REST API: [Update Data Source Now](https://help.tableau.com/current/api/rest_api
 
 **Parameters**
 
-| Name              | Description                                                |
-| :---------------- | :--------------------------------------------------------- |
-| `datasource_item` | The `datasource_item` specifies the data source to update. |
+Name   |  Description
+ :--- | : ---
+`datasource_item`  |  The `datasource_item` specifies the data source to update.
+
 
 **Exceptions**
 
-| Error                                                                         | Description                                                                                                                                               |
-| :---------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Datasource item missing ID. Datasource must be retrieved from server first.` | Raises an error if the datasource_item is unspecified. Use the `Datasources.get()` method to retrieve that identifies for the data sources on the server. |
+Error   |  Description
+ :--- | : ---
+`Datasource item missing ID. Datasource must be retrieved from server first.` |  Raises an error if the datasource_item is unspecified. Use the `Datasources.get()` method to retrieve that identifies for the data sources on the server.
+
 
 **Returns**
 
 A refreshed `JobItem`.
+
 
 **Example**
 
@@ -1006,7 +665,6 @@ A refreshed `JobItem`.
   refreshed_datasource = server.datasources.refresh(datasource)
 
 ```
-
 <br>
 <br>
 
@@ -1016,25 +674,29 @@ A refreshed `JobItem`.
 datasource.update(datasource_item)
 ```
 
-Updates the specified data source.
+Updates the specified data source. 
 
 REST API: [Update Data Source](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_data_source)
 
 **Parameters**
 
-| Name              | Description                                                |
-| :---------------- | :--------------------------------------------------------- |
-| `datasource_item` | The `datasource_item` specifies the data source to update. |
+Name   |  Description
+ :--- | : ---
+`datasource_item`  |  The `datasource_item` specifies the data source to update.
+
+
 
 **Exceptions**
 
-| Error                                                                         | Description                                                                                                                                               |
-| :---------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Datasource item missing ID. Datasource must be retrieved from server first.` | Raises an error if the datasource_item is unspecified. Use the `Datasources.get()` method to retrieve that identifies for the data sources on the server. |
+Error   |  Description
+ :--- | : ---
+`Datasource item missing ID. Datasource must be retrieved from server first.` |  Raises an error if the datasource_item is unspecified. Use the `Datasources.get()` method to retrieve that identifies for the data sources on the server.
+
 
 **Returns**
 
 An updated `DatasourceItem`.
+
 
 **Example**
 
@@ -1055,7 +717,6 @@ An updated `DatasourceItem`.
 
 
 ```
-
 <br>
 <br>
 
@@ -1069,12 +730,14 @@ Updates the server address, port, username, or password for the specified data s
 
 REST API: [Update Datasource Connection](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_data_source_connection)
 
+
 **Parameters**
 
-| Name              | Description                                                        |
-| :---------------- | :----------------------------------------------------------------- |
-| `datasource_item` | The `datasource_item` specifies the data source to update.         |
-| `connection_item` | The `connection_item` that has the information you want to update. |
+Name   |  Description
+ :--- | : ---
+`datasource_item`  |  The `datasource_item` specifies the data source to update.
+`connection_item` | The `connection_item` that has the information you want to update.
+
 
 **Returns**
 
@@ -1083,6 +746,7 @@ An updated `ConnectionItem` for the data source.
 **Example**
 
 See the `update_connection.py` sample in the Samples directory.
+
 
 <br>
 <br>
@@ -1103,12 +767,12 @@ This endpoint is available with REST API version 3.13 and up.
 
 **Parameters**
 
-| Name                            | Description                                                                                                                                                                                                                                                                   |
-| :------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `datasource_or_connection_item` | Either a `DataSourceItem` or a `ConnectionItem`. If the datasource only contains a single connection, the `DataSourceItem` is sufficient to identify which data should be updated. Otherwise, for datasources with multiple connections, a `ConnectionItem` must be provided. |
-| `request_id`                    | User supplied arbitrary string to identify the request. A request identified with the same key will only be executed once, even if additional requests using the key are made, for instance, due to retries when facing network issues.                                       |
-| `actions`                       | a list of actions (insert, update, delete, ...) specifying how to modify the data within the published datasource                                                                                                                                                             |
-| `payload`                       | an (optional) Hyper file containing tuples to be inserted/deleted or other payload data used by the `actions`.                                                                                                                                                                |
+Name   |  Description
+ :--- | : ---
+`datasource_or_connection_item` | Either a `DataSourceItem` or a `ConnectionItem`. If the datasource only contains a single connection, the `DataSourceItem` is sufficient to identify which data should be updated. Otherwise, for datasources with multiple connections, a `ConnectionItem` must be provided.
+`request_id` | User supplied arbitrary string to identify the request. A request identified with the same key will only be executed once, even if additional requests using the key are made, for instance, due to retries when facing network issues.
+`actions` | a list of actions (insert, update, delete, ...) specifying how to modify the data within the published datasource
+`payload` | an (optional) Hyper file containing tuples to be inserted/deleted or other payload data used by the `actions`.
 
 For more information on the `actions`, see the [REST API docs on "Action batch description"](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_how_to_update_data_to_hyper.htm#action-batch-descriptions).
 To create a `payload` Hyper file, you can use [Hyper API](https://help.tableau.com/current/api/hyper_api/en-us/index.html) or [pantab](https://github.com/innobi/pantab).
@@ -1120,6 +784,7 @@ A `JobItem` for the update job on the server. Upon completion of this job, the d
 **Example**
 
 See the `update_datasource_data.py` sample in the Samples directory.
+
 
 <br>
 <br>
@@ -1137,21 +802,28 @@ You can use the `Filter` and `RequestOptions` classes to filter and sort the fol
 
 For more information, see [Filter and Sort](filter-sort).
 
+
 ### Filter class
 
 ```py
 Filter(field, operator, value)
 ```
 
-The `Filter` class corresponds to the _filter expressions_ in the Tableau REST API.
+The `Filter` class corresponds to the *filter expressions* in the Tableau REST API.
+
+
 
 **Attributes**
 
-| Name       | Description                                                 |
-| :--------- | :---------------------------------------------------------- |
-| `Field`    | Defined in the `RequestOptions.Field` class.                |
-| `Operator` | Defined in the `RequestOptions.Operator` class              |
-| `Value`    | The value to compare with the specified field and operator. |
+Name | Description
+:--- | :---
+`Field` | Defined in the `RequestOptions.Field` class.
+`Operator` | Defined in the `RequestOptions.Operator` class
+`Value` | The value to compare with the specified field and operator.
+
+
+
+
 
 <br>
 <br>
@@ -1179,14 +851,15 @@ Source file: models/group_item.py
 
 **Attributes**
 
-| Name                | Description                                                                                                                                                                                                                                                     |
-| :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `domain_name`       | The name of the Active Directory domain (`local` if local authentication is used).                                                                                                                                                                              |
-| `id`                | The id of the group.                                                                                                                                                                                                                                            |
-| `users`             | The list of users (`UserItem`).                                                                                                                                                                                                                                 |
-| `name`              | The name of the group. The `name` is required when you create an instance of a group.                                                                                                                                                                           |
-| `minimum_site_role` | The role to grant users that are added to the group.                                                                                                                                                                                                            |
-| `license_mode`      | The mode defining when to apply licenses for group members. When the mode is `onLogin`, a license is granted for each group member when they login to a site. When the mode is `onSync`, a license is granted for group members each time the domain is synced. |
+Name | Description
+:--- | :---
+`domain_name` |  The name of the Active Directory domain (`local` if local authentication is used).
+`id` |  The id of the group.
+`users`  |   The list of users (`UserItem`).
+`name` |  The name of the group.  The `name` is required when you create an instance of a group.
+`minimum_site_role` | The role to grant users that are added to the group.
+`license_mode` | The mode defining when to apply licenses for group members. When the mode is `onLogin`, a license is granted for each group member when they login to a site. When the mode is `onSync`, a license is granted for group members each time the domain is synced.
+
 
 **Example**
 
@@ -1196,12 +869,17 @@ Source file: models/group_item.py
  # call groups.create() with new group
 ```
 
+
+
+
 <br>
 <br>
 
 ### Groups methods
 
 The Tableau Server Client provides several methods for interacting with group resources, or endpoints. These methods correspond to endpoints in the Tableau Server REST API.
+
+
 
 Source file: server/endpoint/groups_endpoint.py
 
@@ -1216,18 +894,23 @@ groups.add_user(group_item, user_id):
 
 Adds a user to the specified group.
 
+
 REST API [Add User to Group](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#add_user_to_group)
 
 **Parameters**
 
-| Name         | Description                                     |
-| :----------- | :---------------------------------------------- |
-| `group_item` | The `group_item` specifies the group to update. |
-| `user_id`    | The id of the user.                             |
+Name | Description
+:--- | :---
+`group_item`  | The `group_item` specifies the group to update.
+`user_id` | The id of the user.
+
+
+
 
 **Returns**
 
 None.
+
 
 **Example**
 
@@ -1258,6 +941,7 @@ groups.add_users(group_item, user_id):
 
 Adds multiple users to the specified group.
 
+
 REST API [Add User to Group](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#add_user_to_group)
 
 **Version**
@@ -1267,14 +951,18 @@ version v0.33
 
 **Parameters**
 
-| Name         | Description                                     |
-| :----------- | :---------------------------------------------- |
-| `group_item` | The `group_item` specifies the group to update. |
-| `users`      | An Iterable of UserItems, or user ids.          |
+Name | Description
+:--- | :---
+`group_item`  | The `group_item` specifies the group to update.
+`users` | An Iterable of UserItems, or user ids.
+
+
+
 
 **Returns**
 
 list[UserItem]
+
 
 **Example**
 
@@ -1303,16 +991,22 @@ create(group_item)
 
 Creates a new local group in Tableau Server.
 
+
 REST API: [Create Group](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#create_group)
+
 
 **Parameters**
 
-| Name         | Description                                                                                                                 |
-| :----------- | :-------------------------------------------------------------------------------------------------------------------------- |
-| `group_item` | The `group_item` specifies the group to add. You first create a new instance of a `GroupItem` and pass that to this method. |
+Name | Description
+:--- | :---
+`group_item`  |  The `group_item` specifies the group to add. You first create a new instance of a `GroupItem` and pass that to this method.
+
+
+
 
 **Returns**
 Adds new `GroupItem`.
+
 
 **Example**
 
@@ -1349,17 +1043,23 @@ create_AD_group(group_item, asJob=False)
 
 Creates an active directory group in Tableau Server.
 
+
 REST API: [Create Group](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#create_group)
+
 
 **Parameters**
 
-| Name         | Description                                                                                                                                                                                |
-| :----------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `group_item` | The `group_item` specifies the group to add. You first create a new instance of a `GroupItem` and pass that to this method.                                                                |
-| `asJob`      | Boolean flag used to specify an asynchronous operation. If set to `True`, the return value will be a JobItem containing the status of the queued job. See [JobItem class](#jobitem-class). |
+Name | Description
+:--- | :---
+`group_item`  |  The `group_item` specifies the group to add. You first create a new instance of a `GroupItem` and pass that to this method.
+`asJob` | Boolean flag used to specify an asynchronous operation. If set to `True`, the return value will be a JobItem containing the status of the queued job. See [JobItem class](#jobitem-class).
+
+
+
 
 **Returns**
 Returns the created `GroupItem` or a `JobItem` if asJob flag was set to True.
+
 
 **Example**
 
@@ -1379,7 +1079,7 @@ Returns the created `GroupItem` or a `JobItem` if asJob flag was set to True.
 
 # call the create method
   newgroup = server.groups.create_AD_group(newgroup)
-
+  
 # call the create method asynchronously
   newgroup_job = server.groups.create_AD_group(newgroup, asJob=True)
 
@@ -1398,17 +1098,20 @@ Deletes the group on the site.
 
 REST API: [Delete Group](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#remove_user_from_site)
 
+
 **Parameters**
 
-| Name       | Description                                                                  |
-| :--------- | :--------------------------------------------------------------------------- |
-| `group_id` | The identifier (`id`) for the group that you want to remove from the server. |
+Name | Description
+:--- | :---
+`group_id`  |  The identifier (`id`) for the group that you want to remove from the server.
+
 
 **Exceptions**
 
-| Error                | Description                                                |
-| :------------------- | :--------------------------------------------------------- |
-| `Group ID undefined` | Raises an exception if a valid `group_id` is not provided. |
+Error | Description
+:--- | :---
+`Group ID undefined`  |  Raises an exception if a valid `group_id` is not provided.
+
 
 **Example**
 
@@ -1423,7 +1126,6 @@ REST API: [Delete Group](https://help.tableau.com/current/api/rest_api/en-us/RES
      server.groups.delete('1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d')
 
 ```
-
 <br>
 <br>
 
@@ -1435,21 +1137,26 @@ groups.get(req_options=None)
 
 Returns information about the groups on the site.
 
+
 To get information about the users in a group, you must first populate the `GroupItem` with user information using the [groups.populate_users](api-ref#groupspopulate_users) method.
+
 
 REST API: [Get Users on Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#get_users_on_site)
 
 **Parameters**
 
-| Name          | Description                                                                                                                                                                                                                      |
-| :------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `req_options` | (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific group, you could specify the name of the group or the group id. |
+Name | Description
+:--- | :---
+`req_options` |  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific group, you could specify the name of the group or the group id.
+
 
 **Returns**
 
-Returns a list of `GroupItem` objects and a `PaginationItem` object. Use these values to iterate through the results.
+Returns a list of `GroupItem` objects and a `PaginationItem`  object.  Use these values to iterate through the results.
+
 
 **Example**
+
 
 ```py
 # import tableauserverclient as TSC
@@ -1466,6 +1173,7 @@ Returns a list of `GroupItem` objects and a `PaginationItem` object. Use these v
            print(group.name, group.id)
 ```
 
+
 <br>
 <br>
 
@@ -1477,22 +1185,27 @@ groups.populate_users(group_item, req_options=None)
 
 Populates the `group_item` with the list of users.
 
-REST API: [Get Users in Group](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#get_users_in_group)
+
+REST API:  [Get Users in Group](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#get_users_in_group)
 
 **Parameters**
 
-| Name          | Description                                                             |
-| :------------ | :---------------------------------------------------------------------- |
-| `group_item`  | The `group_item` specifies the group to populate with user information. |
-| `req_options` | (Optional) Additional request options to send to the endpoint.          |
+Name | Description
+:--- | :---
+`group_item`  |  The `group_item` specifies the group to populate with user information.
+`req_options` | (Optional) Additional request options to send to the endpoint.
+
+
 
 **Exceptions**
 
-`Group item missing ID. Group must be retrieved from server first.` : Raises an error if the `group_item` is unspecified.
+`Group item missing ID. Group must be retrieved from server first.` :  Raises an error if the `group_item` is unspecified.
+
 
 **Returns**
 
 None. A list of `UserItem` objects are added to the group (`group_item.users`).
+
 
 **Example**
 
@@ -1531,24 +1244,32 @@ groups.remove_user(group_item, user_id)
 
 Removes a user from a group.
 
+
+
+
 REST API: [Remove User from Group](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#remove_user_to_group)
+
 
 **Parameters**
 
-| Name         | Description                                                   |
-| :----------- | :------------------------------------------------------------ |
-| `group_item` | The `group_item` specifies the group to remove the user from. |
-| `user_id`    | The id for the user.                                          |
+Name | Description
+:--- | :---
+`group_item`  |  The `group_item` specifies the group to remove the user from.
+`user_id` |  The id for the user.
+
+
 
 **Exceptions**
 
-| Error                                       | Description                                         |
-| :------------------------------------------ | :-------------------------------------------------- |
-| `Group must be populated with users first.` | Raises an error if the `group_item` is unpopulated. |
+Error | Description
+:--- | :---
+`Group must be populated with users first.` |  Raises an error if the `group_item` is unpopulated.
+
 
 **Returns**
 
 None. The user is removed from the group.
+
 
 **Example**
 
@@ -1581,6 +1302,7 @@ groups.remove_users(group_item, user_id):
 
 Removes multiple users from the specified group.
 
+
 REST API [Remove User from Group](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#remove_user_to_group)
 
 **Version**
@@ -1590,14 +1312,18 @@ version v0.33
 
 **Parameters**
 
-| Name         | Description                                     |
-| :----------- | :---------------------------------------------- |
-| `group_item` | The `group_item` specifies the group to update. |
-| `users`      | An Iterable of UserItems, or user ids.          |
+Name | Description
+:--- | :---
+`group_item`  | The `group_item` specifies the group to update.
+`users` | An Iterable of UserItems, or user ids.
+
+
+
 
 **Returns**
 
 None
+
 
 **Example**
 
@@ -1618,6 +1344,7 @@ None
 <br>
 <br>
 
+
 #### groups.update
 
 ```py
@@ -1628,23 +1355,27 @@ Updates a group in Tableau Server.
 
 REST API: [Update Group](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_users_and_groups.htm#update_group)
 
+
 **Parameters**
 
-| Name         | Description                                                                                                                                                                                              |
-| :----------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `group_item` | The `group_item` specifies the group to update.                                                                                                                                                          |
-| `as_job`     | (Optional) If this value is set to `True`, the update operation will be asynchronous and return a JobItem. This is only supported for Active Directory groups. By default, this value is set to `False`. |
+Name | Description
+:--- | :---
+`group_item`  |  The `group_item` specifies the group to update.
+`as_job` |  (Optional) If this value is set to `True`, the update operation will be asynchronous and return a JobItem. This is only supported for Active Directory groups. By default, this value is set to `False`. 
+
 
 **Exceptions**
 
-| Error                                            | Description                                                        |
-| :----------------------------------------------- | :----------------------------------------------------------------- |
-| `Group item missing ID.`                         | Raises an error if the `group_item` is missing the `id` attribute. |
-| `Local groups cannot be updated asynchronously.` | The `as_job` attribute was set to `True` for a local group.        |
+Error | Description
+:--- | :---
+`Group item missing ID.` |  Raises an error if the `group_item` is missing the `id` attribute.
+`Local groups cannot be updated asynchronously.` | The `as_job` attribute was set to `True` for a local group.
+
 
 **Returns**
 
 The updated `GroupItem` object. If `as_job` was set to `True`, a `JobItem` will be returned instead.
+
 
 **Example**
 
@@ -1676,11 +1407,12 @@ job = server.groups.update(group, as_job=True)
 
 ## Jobs
 
-Using the TSC library, you can get information about an asynchronous process (or _job_) on the server. These jobs can be created when Tableau runs certain tasks that could be long running, such as importing or synchronizing users from Active Directory, or running an extract refresh. For example, the REST API methods to create or update groups, to run an extract refresh task, or to publish workbooks can take an `asJob` parameter (`asJob-true`) that creates a background process (the _job_) to complete the call. Information about the asynchronous job is returned from the method.
+Using the TSC library, you can get information about an asynchronous process (or *job*) on the server. These jobs can be created when Tableau runs certain tasks that could be long running, such as importing or synchronizing users from Active Directory, or running an extract refresh. For example, the REST API methods to create or update groups, to run an extract refresh task, or to publish workbooks can take an `asJob` parameter (`asJob-true`) that creates a background process (the *job*) to complete the call. Information about the asynchronous job is returned from the method.
 
 If you have the identifier of the job, you can use the TSC library to find out the status of the asynchronous job.
 
 The job properties are defined in the `JobItem` class. The class corresponds to the properties for jobs you can access using the Tableau Server REST API. The job methods are based upon the endpoints for jobs in the REST API and operate on the `JobItem` class.
+
 
 ### JobItem class
 
@@ -1695,28 +1427,32 @@ Source file: models/job_item.py
 
 **Attributes**
 
-| Name           | Description                                                                                                                                                                                 |
-| :------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `id`           | The `id` of the job.                                                                                                                                                                        |
-| `type`         | The type of task. The types correspond to the job type categories listed for the [Query Job](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_job) REST API. |
-| `created_at`   | The time the job was created.                                                                                                                                                               |
-| `started_at`   | The time the job started.                                                                                                                                                                   |
-| `completed_at` | The time the job finished.                                                                                                                                                                  |
-| `finish_code`  | The return code from job.                                                                                                                                                                   |
-| `progress`     | The progress of the job.                                                                                                                                                                    |
-| `notes`        | The notes of the job.                                                                                                                                                                       |
-| `mode`         | The mode of the job.                                                                                                                                                                        |
+Name  |  Description
+:--- | :---
+`id`  |  The `id` of the job.
+`type` | The type of task. The types correspond to the job type categories listed for the [Query Job](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_job) REST API.
+`created_at` | The time the job was created.
+`started_at` | The time the job started.
+`completed_at` | The time the job finished.
+`finish_code` | The return code from job.
+`progress` | The progress of the job.
+`notes` | The notes of the job.
+`mode` | The mode of the job.
 
 ### Jobs methods
 
+
 The Jobs methods are based upon the endpoints for jobs in the REST API and operate on the `JobItem` class.
+
 
 Source files: server/endpoint/jobs_endpoint.py
 
 <br>
 <br>
 
+
 #### jobs.get_by_id
+
 
 ```py
 jobs.get_by_id(job_id)
@@ -1726,21 +1462,27 @@ Gets information about the specified job.
 
 REST API: [Query Job](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_job)
 
+
 **Parameters**
 
-| Name     | Description                                                                                                                                                           |
-| :------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `job_id` | The `job_id` specifies the id of the job that is returned from an asynchronous task, such as extract refresh, or an import or update to groups using Active Directory |
+Name | Description
+:--- | :---
+`job_id`  |  The `job_id` specifies the id of the job that is returned from an asynchronous task, such as extract refresh, or an import or update to groups using Active Directory
+
+
+
 
 **Exceptions**
 
-| Error                       | Description                                   |
-| :-------------------------- | :-------------------------------------------- |
-| `404018 Resource Not Found` | Raises an error if the `job_id` is not found. |
+Error | Description
+:--- | :---
+`404018 Resource Not Found` |  Raises an error if the `job_id` is not found.
+
 
 **Returns**
 
 Returns the `JobItem` requested.
+
 
 **Example**
 
@@ -1770,6 +1512,7 @@ Returns the `JobItem` requested.
 
 ```
 
+
 <br>
 <br>
 
@@ -1779,24 +1522,23 @@ Returns the `JobItem` requested.
 jobs.cancel(job_id)
 ```
 
-Cancels the currently running job. Can be used to cancel currently running jobs like extract refreshes.
+Cancels the currently running job.  Can be used to cancel currently running jobs like extract refreshes.  
 
 **Parameters**
 
-| Name     | Description                                                                                                                                                                                                                     |
-| :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `job_id` | The `job_id` specifies the id of the job that we want to cancel. It is the id of the job that is retunred from an asynchronous taks, such as extract refresh, run a flow, or import or update to groups using Active Directory. |
+Name | Description
+:----|:----
+`job_id`  |  The `job_id` specifies the id of the job that we want to cancel. It is the id of the job that is retunred from an asynchronous taks, such as extract refresh, run a flow, or import or update to groups using Active Directory.
 
 **Exceptions**
 
-| Error                  | Description                                   |
-| :--------------------- | :-------------------------------------------- |
-| 404 Resource Not Found | Raises an error if the `job_id` is not found. |
+Error | Description
+:----|:----
+404 Resource Not Found | Raises an error if the `job_id` is not found.
 
 **Returns** Returns the details of the canceled job including the URL of the site where the job was created.
 
 **Example**
-
 ```py
 #  Query a Job
 
@@ -1815,22 +1557,24 @@ Cancels the currently running job. Can be used to cancel currently running jobs 
 
 #### jobs.wait_for_job
 
+
 ```py
 jobs.wait_for_job(job_id, *, timeout=None)
 ```
 
 Waits until a given job succesfully finishes.
 Repeatedly polls the server using `jobs.get_by_id` until the job completed.
-It uses an exponentially increasing sleep time between polls to guarantee a snappy response time for fast-running jobs while not putting overly large load on the server for long-running jobs.
+It uses an exponentially increasing sleep time between polls to guarantee a snappy response time for fast-running jobs while not putting overly large load on the server for long-running jobs. 
 
 In case the job fails or is cancelled, `wait_for_job` will raise an exception.
 
 **Parameters**
 
-| Name      | Description                                                                                                                                      |
-| :-------- | :----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `job_id`  | The `job_id` specifies the id of the job that we want to wait for                                                                                |
-| `timeout` | Optional timeout interval in seconds. `wait_for_job` will raise a `TimeoutError` if the job is not finished after waiting for `timeout` seconds. |
+Name | Description
+:--- | :---
+`job_id`  |  The `job_id` specifies the id of the job that we want to wait for
+`timeout` |  Optional timeout interval in seconds. `wait_for_job` will raise a `TimeoutError` if the job is not finished after waiting for `timeout` seconds.
+
 
 **Returns**
 
@@ -1853,14 +1597,18 @@ Using the `metadata` endpoint, one can use GraphQL to query metadata on, e.g., w
 
 ### Metadata methods
 
+
 The Metadata methods call the [Metadata API](https://help.tableau.com/current/api/metadata_api/en-us/index.html) which is a GraphQL interface allowing to query metadata about objects on the server (workbooks, datasources, ...) and the relationships between them.
+
 
 Source files: server/endpoint/metadata_endpoint.py
 
 <br>
 <br>
 
+
 #### metadata.query
+
 
 ```py
 metadata.query(query, variables=None, abort_on_error=False)
@@ -1868,17 +1616,20 @@ metadata.query(query, variables=None, abort_on_error=False)
 
 Executes a metadata query and returns the result.
 
+
 **Parameters**
 
-| Name             | Description                            |
-| :--------------- | :------------------------------------- |
-| `query`          | The GraphQL query                      |
-| `variables`      | Variables for the GraphQL query        |
-| `abort_on_error` | Whether to throw an exception on error |
+Name | Description
+:--- | :---
+`query`          | The GraphQL query
+`variables`      | Variables for the GraphQL query
+`abort_on_error` | Whether to throw an exception on error
+
 
 **Returns**
 
 The method returns the query results as a stucture of `list`s and `dict`s as returned by the `json` package.
+
 
 **Example**
 
@@ -1889,23 +1640,28 @@ See the `metadata_query.py` sample in the Samples directory.
 
 #### metadata.paginated_query
 
+
 ```py
 metadata.paginated_query(query, variables=None, abort_on_error=False)
 ```
 
 Executes a metadata query, and returns a dictionary containing a list of the results. In order to properly paginate through all the results, the query must contain a field `pageInfo` with the subfields `hasNextPage` and `endCursor`, as well as the nodes to be returned. The query must accept the variables `first` (the number of items to return) and `afterToken` (the cursor after which to return items). The method will repeatedly call the metadata endpoint until all results have been retrieved, and return a dictionary containing a list of all results.
 
+
+
 **Parameters**
 
-| Name             | Description                            |
-| :--------------- | :------------------------------------- |
-| `query`          | The GraphQL query                      |
-| `variables`      | Variables for the GraphQL query        |
-| `abort_on_error` | Whether to throw an exception on error |
+Name | Description
+:--- | :---
+`query`          | The GraphQL query
+`variables`      | Variables for the GraphQL query
+`abort_on_error` | Whether to throw an exception on error
+
 
 **Returns**
 
 The method returns the query results in a dictionary containing a list of pages as a stucture of `list`s and `dict`s as returned by the `json` package.
+
 
 **Example**
 
@@ -1927,7 +1683,6 @@ Using the TSC library, you can get information about all metrics on a site, upda
 ```py
 MetricItem(name: Optional[str]=None)
 ```
-
 The metrics resources for Tableau are defined in the `MetricItem` class. The class corresponds to the metric resource you can access using the Tableau Server REST API.
 
 **Attributes**
@@ -1944,6 +1699,8 @@ Name | Description
 `project_name` | The name of the project containing the metric
 `owner_id` | REST API id for the user who owns the metric
 `view_id` | REST API id for the view from which the metric was created
+
+
 
 Source file: models/metric_item.py
 
@@ -1969,21 +1726,27 @@ metrics.delete(metric_id)
 
 Deletes a metric item from a site.
 
-To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site. See the [TableauAuth class](#tableauauth-class).
+
+To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site.  See the [TableauAuth class](#tableauauth-class).
 
 REST API: [Delete Metric](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#delete_metric)
 
+
 **Parameters**
 
-| Name        | Description                    |
-| :---------- | :----------------------------- |
-| `metric_id` | The id of the metric to delete |
+Name | Description
+:--- | :---
+`metric_id` | The id of the metric to delete
+
+
 
 **Returns**
 
 None
 
-**Example**
+
+
+ **Example**
 
 ```py
 # import tableauserverclient as TSC
@@ -2006,9 +1769,11 @@ metrics.get()
 
 Return a list of metrics items for a site.
 
-To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site. See the [TableauAuth class](#tableauauth-class).
+
+To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site.  See the [TableauAuth class](#tableauauth-class).
 
 REST API: [List Metrics for Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#list_metrics_for_site)
+
 
 **Parameters**
 
@@ -2016,9 +1781,11 @@ None.
 
 **Returns**
 
-Returns a Tuple containing a list of all `MetricItem` objects and a `PaginationItem`. Use these values to iterate through the results.
+Returns a Tuple containing a  list of all `MetricItem` objects and a `PaginationItem`. Use these values to iterate through the results.
 
-**Example**
+
+
+ **Example**
 
 ```py
 import tableauserverclient as TSC
@@ -2044,21 +1811,28 @@ metrics.get_by_id(metric_id)
 
 Return a specific metric item from the site.
 
-To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site. See the [TableauAuth class](#tableauauth-class).
+
+To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site.  See the [TableauAuth class](#tableauauth-class).
 
 REST API: [Get Metric](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#get_metric)
 
+
 **Parameters**
 
-| Name        | Description                  |
-| :---------- | :--------------------------- |
-| `metric_id` | The id of the desired metric |
+
+Name | Description
+:--- | :---
+`metric_id` | The id of the desired metric
+
+
 
 **Returns**
 
 Returns a `MetricItem` object corresponding to the ID requested.
 
-**Example**
+
+
+ **Example**
 
 ```py
 # import tableauserverclient as TSC
@@ -2081,21 +1855,27 @@ metrics.update(item)
 
 Updates a metric item on the Tableau Server.
 
-To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site. See the [TableauAuth class](#tableauauth-class).
+
+To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site.  See the [TableauAuth class](#tableauauth-class).
 
 REST API: [Update Metric](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_metric)
 
+
 **Parameters**
 
-| Name          | Description                                                  |
-| :------------ | :----------------------------------------------------------- |
-| `metric_item` | The altered `MetricItem` to be updated on the Tableau Server |
+
+Name | Description
+:--- | :---
+`metric_item` | The altered `MetricItem` to be updated on the Tableau Server
+
 
 **Returns**
 
 Returns a `MetricItem` object reflecting the changes applied to Tableau Server.
 
-**Example**
+
+
+ **Example**
 
 ```py
 # import tableauserverclient as TSC
@@ -2110,6 +1890,9 @@ server.metrics.update(metric)
 <br>
 <br>
 
+
+
+
 ---
 
 ## Projects
@@ -2117,6 +1900,10 @@ server.metrics.update(metric)
 Using the TSC library, you can get information about all the projects on a site, or you can create, update projects, or remove projects.
 
 The project resources for Tableau are defined in the `ProjectItem` class. The class corresponds to the project resources you can access using the Tableau Server REST API. The project methods are based upon the endpoints for projects in the REST API and operate on the `ProjectItem` class.
+
+
+
+
 
 <br>
 
@@ -2127,30 +1914,32 @@ The project resources for Tableau are defined in the `ProjectItem` class. The cl
 ProjectItem(name, description=None, content_permissions=None,  parent_id=None)
 
 ```
-
 The project resources for Tableau are defined in the `ProjectItem` class. The class corresponds to the project resources you can access using the Tableau Server REST API.
 
 **Attributes**
 
-| Name                  | Description                                                                                                                                                                                                                                                          |
-| :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `content_permissions` | Sets or shows the permissions for the content in the project. The options are either `LockedToProject`, `ManagedByOwner` or `LockedToProjectWithoutNested`.                                                                                                          |
-| `name`                | Name of the project.                                                                                                                                                                                                                                                 |
-| `description`         | The description of the project.                                                                                                                                                                                                                                      |
-| `id`                  | The project id.                                                                                                                                                                                                                                                      |
-| `parent_id`           | The id of the parent project. Use this option to create project hierarchies. For information about managing projects, project hierarchies, and permissions, see [Use Projects to Manage Content Access](https://help.tableau.com/current/server/en-us/projects.htm). |
+Name  |  Description
+:--- | :---
+`content_permissions`  |  Sets or shows the permissions for the content in the project. The options are either `LockedToProject`, `ManagedByOwner` or `LockedToProjectWithoutNested`.
+`name` | Name of the project.
+`description` | The description of the project.
+`id`  | The project id.
+`parent_id` | The id of the parent project. Use this option to create project hierarchies. For information about managing projects, project hierarchies, and permissions, see [Use Projects to Manage Content Access](https://help.tableau.com/current/server/en-us/projects.htm).
+
+
 
 Source file: models/project_item.py
 
+
 #### ProjectItem.ContentPermissions
 
-The `ProjectItem` class has a sub-class that defines the permissions for the project (`ProjectItem.ContentPermissions`). The options are `LockedToProject`, `ManagedByOwner` and `LockedToProjectWithoutNested`. For information on these content permissions, see [Lock Content Permissions to the Project](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#create_project).
+The `ProjectItem` class has a sub-class that defines the permissions for the project (`ProjectItem.ContentPermissions`).  The options are `LockedToProject`, `ManagedByOwner` and `LockedToProjectWithoutNested`.  For information on these content permissions, see [Lock Content Permissions to the Project](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#create_project).
 
-| Name                                                          | Description                                                                    |
-| :------------------------------------------------------------ | :----------------------------------------------------------------------------- |
-| `ProjectItem.ContentPermissions.LockedToProject`              | Locks all content permissions to the project.                                  |
-| `ProjectItem.ContentPermissions.ManagedByOwner`               | Users can manage permissions for content that they own. This is the default.   |
-| `ProjectItem.ContentPermissions.LockedToProjectWithoutNested` | Lock the permissions of a parent project, but not those of its child projects. |
+Name | Description
+:--- | :---
+`ProjectItem.ContentPermissions.LockedToProject`    |     Locks all content permissions to the project.
+`ProjectItem.ContentPermissions.ManagedByOwner`  |  Users can manage permissions for content that they own. This is the default.
+`ProjectItem.ContentPermissions.LockedToProjectWithoutNested`  |   Lock the permissions of a parent project, but not those of its child projects.
 
 **Example**
 
@@ -2178,14 +1967,16 @@ new_project = TSC.ProjectItem(name='My Project', content_permissions=by_owner, d
 <br>
 <br>
 
-### Project methods
+###  Project methods
 
 The project methods are based upon the endpoints for projects in the REST API and operate on the `ProjectItem` class.
+
 
 Source files: server/endpoint/projects_endpoint.py
 
 <br>
 <br>
+
 
 #### projects.create
 
@@ -2193,20 +1984,25 @@ Source files: server/endpoint/projects_endpoint.py
 projects.create(project_item)
 ```
 
+
 Creates a project on the specified site.
 
-To create a project, you first create a new instance of a `ProjectItem` and pass it to the create method. To specify the site to create the new project, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site. See the [TableauAuth class](#tableauauth-class).
+To create a project, you first create a new instance of a `ProjectItem` and pass it to the create method. To specify the site to create the new project, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site.  See the [TableauAuth class](#tableauauth-class).
+
 
 REST API: [Create Project](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#create_project)
 
 **Parameters**
 
-| Name           | Description                                                                                                                                                 |
-| :------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `project_item` | Specifies the properties for the project. The `project_item` is the request package. To create the request package, create a new instance of `ProjectItem`. |
+Name | Description
+:--- | :---
+`project_item` | Specifies the properties for the project. The `project_item` is the request package. To create the request package, create a new instance of `ProjectItem`.
+
 
 **Returns**
 Returns the new project item.
+
+
 
 **Example**
 
@@ -2226,6 +2022,7 @@ with server.auth.sign_in(tableau_auth):
 <br>
 <br>
 
+
 #### projects.get
 
 ```py
@@ -2235,9 +2032,11 @@ projects.get()
 
 Return a list of project items for a site.
 
-To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site. See the [TableauAuth class](#tableauauth-class).
+
+To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site.  See the [TableauAuth class](#tableauauth-class).
 
 REST API: [Query Projects](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_projects)
+
 
 **Parameters**
 
@@ -2247,7 +2046,9 @@ None.
 
 Returns a list of all `ProjectItem` objects and a `PaginationItem`. Use these values to iterate through the results.
 
-**Example**
+
+
+ **Example**
 
 ```py
 import tableauserverclient as TSC
@@ -2264,6 +2065,7 @@ with server.auth.sign_in(tableau_auth):
 <br>
 <br>
 
+
 #### projects.update
 
 ```py
@@ -2272,21 +2074,23 @@ projects.update(project_item)
 
 Modify the project settings.
 
-You can use this method to update the project name, the project description, or the project permissions. To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site. See the [TableauAuth class](#tableauauth-class).
+You can use this method to update the project name, the project description, or the project permissions. To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site.  See the [TableauAuth class](#tableauauth-class).
 
 REST API: [Update Project](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_project)
 
 **Parameters**
 
-| Name           | Description                                                                                                                |
-| :------------- | :------------------------------------------------------------------------------------------------------------------------- |
-| `project_item` | The project item object must include the project ID. The values in the project item override the current project settings. |
+Name  |  Description
+:--- | :---
+`project_item` |  The project item object must include the project ID. The values in the project item override the current project settings.
+
 
 **Exceptions**
 
-| Error                      | Description                                                                                                           |
-| :------------------------- | :-------------------------------------------------------------------------------------------------------------------- |
-| `Project item missing ID.` | Raises an exception if the project item does not have an ID. The project ID is sent to the server as part of the URI. |
+Error   |  Description
+ :--- | : ---
+`Project item missing ID.`  | Raises an exception if the project item does not have an ID. The project ID is sent to the server as part of the URI.
+
 
 **Returns**
 
@@ -2315,9 +2119,9 @@ See [ProjectItem class](#projectitem-class)
   updated_project = server.projects.update(my_project)
 
 ```
+<br>
+<br>
 
-<br>
-<br>
 
 #### projects.delete
 
@@ -2327,21 +2131,26 @@ projects.delete(project_id)
 
 Deletes a project by ID.
 
-To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site. See the [TableauAuth class](#tableauauth-class).
+
+To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site.  See the [TableauAuth class](#tableauauth-class).
+
 
 REST API: [Delete Project](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#delete_project)
 
+
 **Parameters**
 
-| Name         | Description                      |
-| :----------- | :------------------------------- |
-| `project_id` | The ID of the project to delete. |
+Name  |  Description
+:--- | :---
+`project_id`   | The ID of the project to delete.
+
 
 **Exceptions**
 
-| Error                   | Description                                                                                                           |
-| :---------------------- | :-------------------------------------------------------------------------------------------------------------------- |
-| `Project ID undefined.` | Raises an exception if the project item does not have an ID. The project ID is sent to the server as part of the URI. |
+Error  |  Description
+:--- | :---
+`Project ID undefined.`  |  Raises an exception if the project item does not have an ID. The project ID is sent to the server as part of the URI.
+
 
 **Example**
 
@@ -2354,61 +2163,62 @@ REST API: [Delete Project](https://help.tableau.com/current/api/rest_api/en-us/R
 
 ```
 
-#### projects.populate_permissions
 
+#### projects.populate_permissions
 ```py
 projects.populate_permissions(item)
 ```
 
 Queries the project permissions, parses and stores the returned the permissions.
 
-REST API: [Query Project Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_project_permissions){:target="\_blank"}
+REST API: [Query Project Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_project_permissions){:target="_blank"}  
 
 **Parameters**
 
-| Name   | Description       |
-| :----- | :---------------- |
-| `item` | A project object. |
+Name  |  Description  
+:--- | :---  
+`item`   | A project object.
 
-**Example**
 
+**Example**  
+ 
 ```py
-# import tableauserverclient as TSC
-# server = TSC.Server('https://MY-SERVER')
-# sign in, etc.
+# import tableauserverclient as TSC  
+# server = TSC.Server('https://MY-SERVER')  
+# sign in, etc.  
 
  all_project_items, pagination_item = server.projects.get()
  project_item = all_project_items[0]
  server.projects.populate_permissions(project_item)
-```
+``` 
+
 
 #### projects.update_permissions
-
 ```py
 projects.update_permissions(item, rules)
 ```
 
-Add project permissions for a user or group.
+Add project permissions for a user or group.  
 
-REST API: [Add Project Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#add_project_permissions){:target="\_blank"}
+REST API: [Add Project Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#add_project_permissions){:target="_blank"}
 
 **Parameters**
 
-| Name    | Description                        |
-| :------ | :--------------------------------- |
-| `item`  | A project object.                  |
-| `rules` | A list of PermissionsRule objects. |
+Name  |  Description  
+:--- | :---  
+`item`   | A project object.
+`rules`   | A list of PermissionsRule objects.
 
-**Example**
-
+**Example**  
+ 
 ```py
-# import tableauserverclient as TSC
-# server = TSC.Server('https://MY-SERVER')
-# sign in, etc.
+# import tableauserverclient as TSC  
+# server = TSC.Server('https://MY-SERVER')  
+# sign in, etc.  
 
  all_project_items, pagination_item = server.projects.get()
  project_item = all_project_items[0]
-
+ 
  project_capabilities = {
    TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow
  }
@@ -2417,37 +2227,37 @@ REST API: [Add Project Permissions](https://help.tableau.com/current/api/rest_ap
   grantee=project_item,
   capabilities=project_capabilities
  )
-
+ 
  server.projects.update_permissions(project_item, [project_rules])
-```
+``` 
+
 
 #### projects.delete_permission
-
 ```py
 projects.delete_permission(item, rules)
 ```
 
 Delete project permissions.
 
-REST API: [Delete Project Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_project_permission){:target="\_blank"}
+REST API: [Delete Project Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_project_permission){:target="_blank"}
 
 **Parameters**
 
-| Name    | Description                                                           |
-| :------ | :-------------------------------------------------------------------- |
-| `item`  | A project object.                                                     |
-| `rules` | A list of PermissionsRule objects or a single PermissionsRule object. |
+Name  |  Description  
+:--- | :---  
+`item`   | A project object.
+`rules`   | A list of PermissionsRule objects or a single PermissionsRule object.
 
-**Example**
-
+**Example**  
+ 
 ```py
-# import tableauserverclient as TSC
-# server = TSC.Server('https://MY-SERVER')
-# sign in, etc.
+# import tableauserverclient as TSC  
+# server = TSC.Server('https://MY-SERVER')  
+# sign in, etc.  
 
  all_project_items, pagination_item = server.projects.get()
  project_item = all_project_items[0]
-
+ 
  project_capabilities = {
    TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow
  }
@@ -2456,121 +2266,120 @@ REST API: [Delete Project Permissions](https://help.tableau.com/current/api/rest
   grantee=project_item,
   capabilities=project_capabilities
  )
-
+ 
  server.projects.delete_permission(project_item)
-```
+``` 
+
 
 #### projects.populate_workbook_default_permissions
-
 ```py
 projects.populate_workbook_default_permissions(item)
 ```
 
 Queries the default workbook permissions, parses and stores the returned the permissions.
 
-REST API: [Query Default Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_default_permissions){:target="\_blank"}
+REST API: [Query Default Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_default_permissions){:target="_blank"}  
 
 **Parameters**
 
-| Name   | Description       |
-| :----- | :---------------- |
-| `item` | A project object. |
+Name  |  Description  
+:--- | :---  
+`item`   | A project object.
 
-**Example**
-
+**Example**  
+ 
 ```py
-# import tableauserverclient as TSC
-# server = TSC.Server('https://MY-SERVER')
-# sign in, etc.
+# import tableauserverclient as TSC  
+# server = TSC.Server('https://MY-SERVER')  
+# sign in, etc.  
 
  all_project_items, pagination_item = server.projects.get()
  project_item = all_project_items[0]
  server.projects.populate_workbook_default_permissions(project_item)
-```
+``` 
 
 #### projects.populate_datasource_default_permissions
-
 ```py
 projects.populate_datasource_default_permissions(item)
 ```
 
 Queries the default datasource permissions, parses and stores the returned the permissions.
 
-REST API: [Query Default Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_default_permissions){:target="\_blank"}
+REST API: [Query Default Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_default_permissions){:target="_blank"}  
 
 **Parameters**
 
-| Name   | Description       |
-| :----- | :---------------- |
-| `item` | A project object. |
+Name  |  Description  
+:--- | :---  
+`item`   | A project object.
 
-**Example**
-
+**Example**  
+ 
 ```py
-# import tableauserverclient as TSC
-# server = TSC.Server('https://MY-SERVER')
-# sign in, etc.
+# import tableauserverclient as TSC  
+# server = TSC.Server('https://MY-SERVER')  
+# sign in, etc.  
 
  all_project_items, pagination_item = server.projects.get()
  project_item = all_project_items[0]
  server.projects.populate_datasource_default_permissions(project_item)
-```
+``` 
+
 
 #### projects.populate_flow_default_permissions
-
 ```py
 projects.populate_flow_default_permissions(item)
 ```
 
 Queries the default flow permissions, parses and stores the returned the permissions.
 
-REST API: [Query Default Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_default_permissions){:target="\_blank"}
+REST API: [Query Default Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_default_permissions){:target="_blank"}  
+
 
 **Parameters**
 
-| Name   | Description       |
-| :----- | :---------------- |
-| `item` | A project object. |
+Name  |  Description  
+:--- | :---  
+`item`   | A project object.
 
-**Example**
-
+**Example**  
+ 
 ```py
-# import tableauserverclient as TSC
-# server = TSC.Server('https://MY-SERVER')
-# sign in, etc.
+# import tableauserverclient as TSC  
+# server = TSC.Server('https://MY-SERVER')  
+# sign in, etc.  
 
  all_project_items, pagination_item = server.projects.get()
  project_item = all_project_items[0]
  server.projects.populate_flow_default_permissions(project_item)
-```
+``` 
 
 #### projects.update_workbook_default_permissions
-
 ```py
 projects.update_workbook_default_permissions(item, rules)
 ```
 
 Add or update default workbook permissions.
 
-REST API: [Add Default Workbook Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#add_default_permissions){:target="\_blank"}
+REST API: [Add Default Workbook Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#add_default_permissions){:target="_blank"}  
 
 **Parameters**
 
-| Name    | Description                        |
-| :------ | :--------------------------------- |
-| `item`  | A project object.                  |
-| `rules` | A list of PermissionsRule objects. |
+Name  |  Description  
+:--- | :---  
+`item`   | A project object.
+`rules`   | A list of PermissionsRule objects.
 
-**Example**
-
+**Example**  
+ 
 ```py
-# import tableauserverclient as TSC
-# server = TSC.Server('https://MY-SERVER')
-# sign in, etc.
+# import tableauserverclient as TSC  
+# server = TSC.Server('https://MY-SERVER')  
+# sign in, etc.  
 
  all_project_items, pagination_item = server.projects.get()
  project_item = all_project_items[0]
-
+ 
  capabilities = {
    TSC.Permission.Capability.ViewComments: TSC.Permission.Mode.Allow
  }
@@ -2579,37 +2388,36 @@ REST API: [Add Default Workbook Permissions](https://help.tableau.com/current/ap
   grantee=project_item,
   capabilities=capabilities
  )
-
+ 
  server.projects.update_workbook_default_permissions(project_item, [rules])
-```
+``` 
 
 #### projects.update_datasource_default_permissions
-
 ```py
 projects.update_datasource_default_permissions(item, rules)
 ```
 
 Add or update default datasource permissions.
 
-REST API: [Add Default Datasource Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#add_default_permissions){:target="\_blank"}
+REST API: [Add Default Datasource Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#add_default_permissions){:target="_blank"}  
 
 **Parameters**
 
-| Name    | Description                        |
-| :------ | :--------------------------------- |
-| `item`  | A project object.                  |
-| `rules` | A list of PermissionsRule objects. |
+Name  |  Description  
+:--- | :---  
+`item`   | A project object.
+`rules`   | A list of PermissionsRule objects.
 
-**Example**
-
+**Example**  
+ 
 ```py
-# import tableauserverclient as TSC
-# server = TSC.Server('https://MY-SERVER')
-# sign in, etc.
+# import tableauserverclient as TSC  
+# server = TSC.Server('https://MY-SERVER')  
+# sign in, etc.  
 
  all_project_items, pagination_item = server.projects.get()
  project_item = all_project_items[0]
-
+ 
  capabilities = {
    TSC.Permission.Capability.ExportXml: TSC.Permission.Mode.Allow
  }
@@ -2618,37 +2426,37 @@ REST API: [Add Default Datasource Permissions](https://help.tableau.com/current/
   grantee=project_item,
   capabilities=capabilities
  )
-
+ 
  server.projects.update_datasource_default_permissions(project_item, [rules])
-```
+``` 
+
 
 #### projects.update_flow_default_permissions
-
 ```py
 projects.update_flow_default_permissions(item, rules)
 ```
 
 Add or update default flow permissions.
 
-REST API: [Add Default Flow Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#add_default_permissions){:target="\_blank"}
+REST API: [Add Default Flow Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#add_default_permissions){:target="_blank"}  
 
 **Parameters**
 
-| Name    | Description                        |
-| :------ | :--------------------------------- |
-| `item`  | A project object.                  |
-| `rules` | A list of PermissionsRule objects. |
+Name  |  Description  
+:--- | :---  
+`item`   | A project object.
+`rules`   | A list of PermissionsRule objects.
 
-**Example**
-
+**Example**  
+ 
 ```py
-# import tableauserverclient as TSC
-# server = TSC.Server('https://MY-SERVER')
-# sign in, etc.
+# import tableauserverclient as TSC  
+# server = TSC.Server('https://MY-SERVER')  
+# sign in, etc.  
 
  all_project_items, pagination_item = server.projects.get()
  project_item = all_project_items[0]
-
+ 
  capabilities = {
    TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow
  }
@@ -2657,37 +2465,36 @@ REST API: [Add Default Flow Permissions](https://help.tableau.com/current/api/re
   grantee=project_item,
   capabilities=capabilities
  )
-
+ 
  server.projects.update_flow_default_permissions(project_item, [rule])
-```
+``` 
 
 #### projects.delete_workbook_default_permissions
-
 ```py
 projects.delete_workbook_default_permissions(item, rule)
 ```
 
 Delete default workbook permissions.
 
-REST API: [Delete Default Workbook Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission){:target="\_blank"}
+REST API: [Delete Default Workbook Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission){:target="_blank"}  
 
 **Parameters**
 
-| Name   | Description               |
-| :----- | :------------------------ |
-| `item` | A project object.         |
-| `rule` | A PermissionsRule object. |
+Name  |  Description  
+:--- | :---  
+`item`   | A project object.
+`rule`   | A PermissionsRule object.
 
-**Example**
-
+**Example**  
+ 
 ```py
-# import tableauserverclient as TSC
-# server = TSC.Server('https://MY-SERVER')
-# sign in, etc.
+# import tableauserverclient as TSC  
+# server = TSC.Server('https://MY-SERVER')  
+# sign in, etc.  
 
  all_project_items, pagination_item = server.projects.get()
  project_item = all_project_items[0]
-
+ 
  capabilities = {
    TSC.Permission.Capability.ViewComments: TSC.Permission.Mode.Allow
  }
@@ -2696,37 +2503,36 @@ REST API: [Delete Default Workbook Permissions](https://help.tableau.com/current
   grantee=project_item,
   capabilities=capabilities
  )
-
+ 
  server.projects.delete_workbook_default_permissions(project_item, rule)
-```
+``` 
 
 #### projects.delete_datasource_default_permissions
-
 ```py
 projects.delete_datasource_default_permissions(item, rule)
 ```
 
 Delete default datasource permissions.
 
-REST API: [Delete Default Datasource Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission){:target="\_blank"}
+REST API: [Delete Default Datasource Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission){:target="_blank"}  
 
 **Parameters**
 
-| Name   | Description               |
-| :----- | :------------------------ |
-| `item` | A project object.         |
-| `rule` | A PermissionsRule object. |
+Name  |  Description  
+:--- | :---  
+`item`   | A project object.
+`rule`   | A PermissionsRule object.
 
-**Example**
-
+**Example**  
+ 
 ```py
-# import tableauserverclient as TSC
-# server = TSC.Server('https://MY-SERVER')
-# sign in, etc.
+# import tableauserverclient as TSC  
+# server = TSC.Server('https://MY-SERVER')  
+# sign in, etc.  
 
  all_project_items, pagination_item = server.projects.get()
  project_item = all_project_items[0]
-
+ 
  capabilities = {
    TSC.Permission.Capability.ExportXml: TSC.Permission.Mode.Allow
  }
@@ -2735,37 +2541,36 @@ REST API: [Delete Default Datasource Permissions](https://help.tableau.com/curre
   grantee=project_item,
   capabilities=capabilities
  )
-
+ 
  server.projects.delete_datasource_default_permissions(project_item, rule)
-```
+``` 
 
 #### projects.delete_flow_default_permissions
-
 ```py
 projects.delete_flow_default_permissions(item, rule)
 ```
 
 Delete default flow permissions.
 
-REST API: [Delete Default Flow Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission){:target="\_blank"}
+REST API: [Delete Default Flow Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission){:target="_blank"}  
 
 **Parameters**
 
-| Name   | Description               |
-| :----- | :------------------------ |
-| `item` | A project object.         |
-| `rule` | A PermissionsRule object. |
+Name  |  Description  
+:--- | :---  
+`item`   | A project object.
+`rule`   | A PermissionsRule object.
 
-**Example**
-
+**Example**  
+ 
 ```py
-# import tableauserverclient as TSC
-# server = TSC.Server('https://MY-SERVER')
-# sign in, etc.
+# import tableauserverclient as TSC  
+# server = TSC.Server('https://MY-SERVER')  
+# sign in, etc.  
 
  all_project_items, pagination_item = server.projects.get()
  project_item = all_project_items[0]
-
+ 
  capabilities = {
    TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow
  }
@@ -2774,9 +2579,9 @@ REST API: [Delete Default Flow Permissions](https://help.tableau.com/current/api
   grantee=project_item,
   capabilities=capabilities
  )
-
+ 
  server.projects.delete_flow_default_permissions(project_item, rule)
-```
+``` 
 
 <br>
 <br>
@@ -2795,11 +2600,15 @@ You can use the `Sort` and `RequestOptions` classes to filter and sort the follo
 - Workbooks
 - Views
 
+
 You can use the `ImageRequestOptions` and `PDFRequestOptions` to set options for views returned as images and PDF files.
 
 For more information about filtering and sorting, see [Filter and Sort](filter-sort).
 
+
 <br>
+
+
 
 ### RequestOptions class
 
@@ -2808,17 +2617,21 @@ RequestOptions(pagenumber=1, pagesize=100)
 
 ```
 
+
+
 **Attributes**
 
-| Name         | Description                                                              |
-| :----------- | :----------------------------------------------------------------------- |
-| `pagenumber` | The page number of the returned results. The default value is 1.         |
-| `pagesize`   | The number of items to return with each page (the default value is 100). |
-| `sort()`     | Returns a iterable set of `Sort` objects.                                |
-| `filter()`   | Returns an iterable set of `Filter` objects.                             |
+Name  |  Description
+:--- | :---
+`pagenumber` | The page number of the returned results. The default value is 1.
+`pagesize` |  The number of items to return with each page (the default value is 100).
+`sort()`      | Returns a iterable set of `Sort` objects.
+`filter()` | Returns an iterable set of `Filter` objects.
 
 <br>
 <br>
+
+
 
 #### RequestOptions.Field class
 
@@ -2828,47 +2641,54 @@ The `RequestOptions.Field` class corresponds to the fields used in filter expres
 
 **Attributes**
 
-| Field       | Description                                                                |
-| :---------- | :------------------------------------------------------------------------- |
-| `CreatedAt` | Same as 'createdAt' in the REST API. TSC. `RequestOptions.Field.CreatedAt` |
-| `LastLogin` | Same as 'lastLogin' in the REST API. `RequestOptions.Field.LastLogin`      |
-| `Name`      | Same as 'name' in the REST API. `RequestOptions.Field.Name`                |
-| `OwnerName` | Same as 'ownerName' in the REST API. `RequestOptions.Field.OwnerName`      |
-| `SiteRole`  | Same as 'siteRole' in the REST API. `RequestOptions.Field.SiteRole`        |
-| `Tags`      | Same as 'tags' in the REST API. `RequestOptions.Field.Tags`                |
-| `UpdatedAt` | Same as 'updatedAt' in the REST API. `RequestOptions.Field.UpdatedAt`      |
+Field  |  Description
+:--- | :---
+`CreatedAt` |  Same as 'createdAt' in the REST API. TSC. `RequestOptions.Field.CreatedAt`
+`LastLogin` | Same as 'lastLogin' in the REST API.  `RequestOptions.Field.LastLogin`
+`Name` | Same as 'name' in the REST API.  `RequestOptions.Field.Name`
+`OwnerName` | Same as 'ownerName' in the REST API.  `RequestOptions.Field.OwnerName`
+`SiteRole` | Same as 'siteRole' in the REST API.  `RequestOptions.Field.SiteRole`
+`Tags` | Same as 'tags' in the REST API.  `RequestOptions.Field.Tags`
+`UpdatedAt` | Same as 'updatedAt' in the REST API.  `RequestOptions.Field.UpdatedAt`
+
 
 <br>
 <br>
+
+
 
 #### RequestOptions.Operator class
 
 Specifies the operators you can use to filter requests.
 
+
 **Attributes**
 
-| Operator             | Description                                                                                                                  |
-| :------------------- | :--------------------------------------------------------------------------------------------------------------------------- |
-| `Equals`             | Sets the operator to equals (same as `eq` in the REST API). `TSC.RequestOptions.Operator.Equals`                             |
-| `GreaterThan`        | Sets the operator to greater than (same as `gt` in the REST API). `TSC.RequestOptions.Operator.GreaterThan`                  |
-| `GreaterThanOrEqual` | Sets the operator to greater than or equal (same as `gte` in the REST API). `TSC.RequestOptions.Operator.GreaterThanOrEqual` |
-| `LessThan`           | Sets the operator to less than (same as `lt` in the REST API). `TSC.RequestOptions.Operator.LessThan`                        |
-| `LessThanOrEqual`    | Sets the operator to less than or equal (same as `lte` in the REST API). `TSC.RequestOptions.Operator.LessThanOrEqual`       |
-| `In`                 | Sets the operator to in (same as `in` in the REST API). `TSC.RequestOptions.Operator.In`                                     |
+Operator  |  Description
+:--- | :---
+`Equals` | Sets the operator to equals (same as `eq` in the REST API). `TSC.RequestOptions.Operator.Equals`
+`GreaterThan` |  Sets the operator to greater than (same as `gt` in the REST API). `TSC.RequestOptions.Operator.GreaterThan`
+`GreaterThanOrEqual` | Sets the operator to greater than or equal (same as `gte` in the REST API). `TSC.RequestOptions.Operator.GreaterThanOrEqual`
+`LessThan` | Sets the operator to less than (same as `lt` in the REST API). `TSC.RequestOptions.Operator.LessThan`
+`LessThanOrEqual` | Sets the operator to less than or equal (same as `lte` in the REST API). `TSC.RequestOptions.Operator.LessThanOrEqual`
+`In` | Sets the operator to in (same as `in` in the REST API). `TSC.RequestOptions.Operator.In`
 
 <br>
 <br>
+
+
 
 #### RequestOptions.Direction class
 
 Specifies the direction to sort the returned fields.
 
+
 **Attributes**
 
-| Name   | Description                                                                  |
-| :----- | :--------------------------------------------------------------------------- |
-| `Asc`  | Sets the sort direction to ascending (`TSC.RequestOptions.Direction.Asc`)    |
-| `Desc` | Sets the sort direction to descending (`TSC.RequestOptions.Direction.Desc`). |
+Name  |  Description
+:--- | :---
+`Asc` | Sets the sort direction to ascending (`TSC.RequestOptions.Direction.Asc`)
+`Desc`  |  Sets the sort direction to descending (`TSC.RequestOptions.Direction.Desc`).
 
 <br>
 <br>
@@ -2878,14 +2698,13 @@ Specifies the direction to sort the returned fields.
 ```py
 CSVRequestOptions(maxage=-1)
 ```
-
 Use this class to specify view filters to be applied when the CSV data is generated. Optionally, you can specify the maximum age of the CSV data cached on the server by providing a `maxage` value. See `views.populate_csv`.
 
 **Attributes**
 
-| Name     | Description                                                                                                                                                                                                                                                                                                                                                        |
-| :------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `maxage` | Optional. The maximum number of minutes the CSV data will be cached on the server before being refreshed. The value must be an integer between `1` and `240` minutes. `0` will be interpreted as 1 minute on server, as that is the shortest interval allowed. By default, `maxage` is set to `-1`, indicating the default behavior configured in server settings. |
+Name  |  Description
+:--- | :---
+`maxage` | Optional. The maximum number of minutes the CSV data will be cached on the server before being refreshed. The value must be an integer between `1` and `240` minutes. `0` will be interpreted as 1 minute on server, as that is the shortest interval allowed. By default, `maxage` is set to `-1`, indicating the default behavior configured in server settings.
 
 **Example**
 
@@ -2923,14 +2742,13 @@ server.views.populate_csv(view_item, csv_req_option)
 ```py
 ExcelRequestOptions(maxage=-1)
 ```
-
 Use this class to specify view filters to be applied when data is generated in an Excel file format. Optionally, you can specify the maximum age of the Excel data cached on the server by providing a `maxage` value. See `views.populate_csv`.
 
 **Attributes**
 
-| Name     | Description                                                                                                                                                                                                                                                                                                                                                          |
-| :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `maxage` | Optional. The maximum number of minutes the Excel data will be cached on the server before being refreshed. The value must be an integer between `1` and `240` minutes. `0` will be interpreted as 1 minute on server, as that is the shortest interval allowed. By default, `maxage` is set to `-1`, indicating the default behavior configured in server settings. |
+Name  |  Description
+:--- | :---
+`maxage` | Optional. The maximum number of minutes the Excel data will be cached on the server before being refreshed. The value must be an integer between `1` and `240` minutes. `0` will be interpreted as 1 minute on server, as that is the shortest interval allowed. By default, `maxage` is set to `-1`, indicating the default behavior configured in server settings.
 
 **Example**
 
@@ -2968,15 +2786,14 @@ server.views.populate_excel(view_item, excel_req_option)
 ```py
 ImageRequestOptions(imageresolution=None, maxage=-1)
 ```
-
 Use this class to specify the resolution of the view and, optionally, the maximum age of the image cached on the server. You can also use this class to specify view filters to be applied when the image is generated. See `views.populate_image`.
 
 **Attributes**
 
-| Name              | Description                                                                                                                                                                                                                                                                                                                                                                                  |
-| :---------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `imageresolution` | The resolution of the view returned as an image. If unspecified, the `views.populate_image` method returns an image with standard resolution (the width of the returned image is 784 pixels). If you set this parameter value to high (`Resolution.High`), the width of the returned image is 1568 pixels. For both resolutions, the height varies to preserve the aspect ratio of the view. |
-| `maxage`          | Optional. The maximum number of minutes the image will be cached on the server before being refreshed. The value must be an integer between `1` and `240` minutes. `0` will be interpreted as 1 minute on server, as that is the shortest interval allowed. By default, `maxage` is set to `-1`, indicating the default behavior configured in server settings.                              |
+Name  |  Description
+:--- | :---
+`imageresolution` | The resolution of the view returned as an image. If unspecified, the `views.populate_image` method returns an image with standard resolution (the width of the returned image is 784 pixels). If you set this parameter value to high (`Resolution.High`), the width of the returned image is 1568 pixels. For both resolutions, the height varies to preserve the aspect ratio of the view.
+`maxage` | Optional. The maximum number of minutes the image will be cached on the server before being refreshed. The value must be an integer between `1` and `240` minutes. `0` will be interpreted as 1 minute on server, as that is the shortest interval allowed. By default, `maxage` is set to `-1`, indicating the default behavior configured in server settings.
 
 **View Filters**
 
@@ -3000,6 +2817,7 @@ server.views.populate_image(view_item, image_req_option)
 
 ```
 
+
 If you set a parameter in the workbook, you can also pass the parameter value as part of the `ImageRequestOptions` object. For example, if you have a parameter named `Region` in the workbook, you can set the parameter value to `South` as follows:
 
 ```py
@@ -3020,18 +2838,17 @@ server.views.populate_image(view_item, image_req_option)
 ```py
 PDFRequestOptions(page_type=None, orientation=None, maxage=-1)
 ```
-
 Use this class to specify the format of the PDF that is returned for the view. Optionally, you can specify the maximum age of the rendered PDF that is cached on the server by providing a `maxage` value. See `views.populate_pdf`.
 
 **Attributes**
 
-| Name          | Description                                                                                                                                                                                                                                                                                                                                                                                |
-| :------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `page_type`   | The type of page returned in PDF format for the view. The page_type is set using the `PageType` class: <br> `PageType.A3`<br> `PageType.A4`<br> `PageType.A5`<br> `PageType.B5`<br> `PageType.Executive`<br> `PageType.Folio`<br> `PageType.Ledger`<br> `PageType.Legal`<br> `PageType.Letter`<br> `PageType.Note`<br> `PageType.Quarto`<br> `PageType.Tabloid`<br> `PageType.Unspecified` |
-| `orientation` | The orientation of the page. The options are portrait and landscape. The options are set using the `Orientation` class: <br>`Orientation.Portrait`<br> `Orientation.Landscape`                                                                                                                                                                                                             |
-| `maxage`      | Optional. The maximum number of minutes the rendered PDF will be cached on the server before being refreshed. The value must be an integer between `1` and `240` minutes. `0` will be interpreted as 1 minute on server, as that is the shortest interval allowed. By default, `maxage` is set to `-1`, indicating the default behavior configured in server settings.                     |
-| `viz_height`  | Optional. The height of the output PDF in pixels. If specified, viz_width must also be specified.                                                                                                                                                                                                                                                                                          |
-| `viz_width`   | Optional. The width of the output PDF in pixels. If specified, viz_height must also be specified.                                                                                                                                                                                                                                                                                          |
+Name  |  Description
+:--- | :---
+`page_type` | The type of page returned in PDF format for the view. The page_type is set using the `PageType` class: <br> `PageType.A3`<br> `PageType.A4`<br> `PageType.A5`<br> `PageType.B5`<br> `PageType.Executive`<br> `PageType.Folio`<br>  `PageType.Ledger`<br> `PageType.Legal`<br> `PageType.Letter`<br> `PageType.Note`<br> `PageType.Quarto`<br> `PageType.Tabloid`<br> `PageType.Unspecified`
+`orientation` | The orientation of the page. The options are portrait and landscape. The options are set using the `Orientation` class: <br>`Orientation.Portrait`<br> `Orientation.Landscape`
+`maxage` | Optional. The maximum number of minutes the rendered PDF will be cached on the server before being refreshed. The value must be an integer between `1` and `240` minutes. `0` will be interpreted as 1 minute on server, as that is the shortest interval allowed. By default, `maxage` is set to `-1`, indicating the default behavior configured in server settings.
+`viz_height` | Optional. The height of the output PDF in pixels. If specified, viz_width must also be specified.
+`viz_width` | Optional. The width of the output PDF in pixels. If specified, viz_height must also be specified.
 
 **View Filters**
 You can use the `vf('filter_name', 'filter_value')` method to add view filters. When the PDF is generated, the specified filters will be applied to the view.
@@ -3055,6 +2872,7 @@ pdf_req_option.vf('Region', 'West')
 server.views.populate_pdf(view_item, pdf_req_option)
 
 ```
+
 
 You can also specify height and width for the visualization to be rendered in the PDF. If you specify the height and width, you must specify both values. The height and width are set in pixels.
 
@@ -3102,6 +2920,7 @@ If you have the identifier of the job, you can use the TSC library to find out t
 
 The schedule properties are defined in the `ScheduleItem` class. The class corresponds to the properties for schedules you can access in Tableau Server or by using the Tableau Server REST API. The Schedule methods are based upon the endpoints for jobs in the REST API and operate on the `JobItem` class.
 
+
 ### ScheduleItem class
 
 ```py
@@ -3115,30 +2934,34 @@ Source file: models/schedule_item.py
 
 **Attributes**
 
-| Name              | Description                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| :---------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`            | The `name` of the schedule.                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `priority`        | The priority of the schedule (integer). Lower values represent higher priorities, with `0` indicating the highest priority.                                                                                                                                                                                                                                                                                                      |
-| `schedule_type`   | The type of task. The types are either an `Extract` for an extract refresh task or a `Subscription` for a scheduled subscription.                                                                                                                                                                                                                                                                                                |
-| `execution_order` | Specifies how the scheduled task should run. The choices are `Parallel`which uses all available background processes for this scheduled task, or `Serial`, which limits this schedule to one background process.                                                                                                                                                                                                                 |
-| `interval_item`   | Specifies the frequency that the scheduled task should run. The `interval_item` is an instance of the `IntervalItem` class. The `interval_item` has properties for frequency (hourly, daily, weekly, monthly), and what time and date the scheduled item runs. You set this value by declaring an `IntervalItem` object that is one of the following: `HourlyInterval`, `DailyInterval`, `WeeklyInterval`, or `MonthlyInterval`. |
+Name  |  Description
+:--- | :---
+`name`  |  The `name` of the schedule.
+`priority` | The priority of the schedule (integer). Lower values represent higher priorities, with `0` indicating the highest priority. 
+`schedule_type` | The type of task. The types are either an `Extract` for an extract refresh task or a `Subscription` for a scheduled subscription.
+`execution_order` | Specifies how the scheduled task should run. The choices are `Parallel`which uses all available background processes for this scheduled task, or `Serial`, which limits this schedule to one background process.
+`interval_item` | Specifies the frequency that the scheduled task should run. The `interval_item` is an instance of the `IntervalItem` class. The `interval_item` has properties for frequency (hourly, daily, weekly, monthly), and what time and date the scheduled item runs. You set this value by declaring an `IntervalItem` object that is one of the following: `HourlyInterval`, `DailyInterval`, `WeeklyInterval`, or `MonthlyInterval`.
+
 
 #### IntervalItem class
-
 This class sets the frequency and start time of the scheduled item. This class contains the classes for the hourly, daily, weekly, and monthly intervals. This class mirrors the options you can set using the REST API and the Tableau Server interface.
 
 **Attributes**
 
-| Name              | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| :---------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `HourlyInterval`  | Runs scheduled item hourly. To set the hourly interval, you create an instance of the `HourlyInterval` class and assign the following values: `start_time`, `end_time`, and `interval_value`. To set the `start_time` and `end_time`, assign the time value using this syntax: `start_time=time(`_hour_`,` _minute_`)` and `end_time=time(`_hour_`,` _minute_`)`. The _hour_ is specified in 24 hour time. The `interval_value` specifies how often the to run the task within the start and end time. The options are expressed in hours. For example, `interval_value=.25` is every 15 minutes. The values are `.25`, `.5`, `1`, `2`, `4`, `6`, `8`, `12`. Hourly schedules that run more frequently than every 60 minutes must have start and end times that are on the hour. |
-| `DailyInterval`   | Runs the scheduled item daily. To set the daily interval, you create an instance of the `DailyInterval` and assign the `start_time`. The start time uses the syntax `start_time=time(`_hour_`,` _minute_`)`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `WeeklyInterval`  | Runs the scheduled item once a week. To set the weekly interval, you create an instance of the `WeeklyInterval` and assign the start time and multiple instances for the `interval_value` (days of week and start time). The start time uses the syntax `time(`_hour_`,` _minute_`)`. The `interval_value` is the day of the week, expressed as a `IntervalItem`. For example `TSC.IntervalItem.Day.Monday` for Monday.                                                                                                                                                                                                                                                                                                                                                          |
-| `MonthlyInterval` | Runs the scheduled item once a month. To set the monthly interval, you create an instance of the `MonthlyInterval` and assign the start time and day. The                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+Name  |  Description
+:--- | :---
+`HourlyInterval`  | Runs scheduled item hourly. To set the hourly interval, you create an instance of the `HourlyInterval` class and assign the following values: `start_time`, `end_time`, and `interval_value`. To set the `start_time` and `end_time`, assign the time value using this syntax: `start_time=time(`*hour*`,` *minute*`)` and `end_time=time(`*hour*`,` *minute*`)`. The *hour* is specified in 24 hour time. The `interval_value` specifies how often the to run the task within the start and end time. The options are expressed in hours. For example, `interval_value=.25` is every 15 minutes. The values are `.25`, `.5`, `1`, `2`, `4`, `6`, `8`, `12`. Hourly schedules that run more frequently than every 60 minutes must have start and end times that are on the hour.
+`DailyInterval`  | Runs the scheduled item daily. To set the daily interval, you create an instance of the `DailyInterval` and assign the `start_time`. The start time uses the syntax `start_time=time(`*hour*`,` *minute*`)`.
+`WeeklyInterval`  |  Runs the scheduled item once a week. To set the weekly interval, you create an instance of the `WeeklyInterval` and assign the start time and multiple instances for the `interval_value` (days of week and start time). The start time uses the syntax `time(`*hour*`,` *minute*`)`. The `interval_value` is the day of the week, expressed as a `IntervalItem`. For example `TSC.IntervalItem.Day.Monday` for Monday.
+`MonthlyInterval`  |  Runs the scheduled item once a month. To set the monthly interval, you create an instance of the `MonthlyInterval` and assign the start time and day. The
+
+
+
 
 ### Schedule methods
 
 The schedule methods are based upon the endpoints for schedules in the REST API and operate on the `ScheduleItem` class.
+
 
 Source files: server/endpoint/schedules_endpoint.py
 
@@ -3150,20 +2973,25 @@ schedules.add_to_schedule(schedule_id, workbook=None, datasource=None, flow=None
 
 Adds a `DatasourceItem`, `FlowItem`, or `WorkbookItem` to a schedule.
 
+
 REST API: [Add Data Source to Schedule](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#add_data_source_to_schedule)
+
+
 
 **Parameters**
 
-| Name          | Description                                                                                                                                                    |
-| :------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `schedule_id` | The identifier (id) of the schedule to add the data source or workbook to. Can be retrieved from a `ScheduleItem`, e.g., by performing `schedules.get()`.      |
-| `workbook`    | (Optional) A `WorkbookItem` that should be added to the schedule. Only provide either `workbook` or `datasource`, passing multiple items will be deprecated.   |
-| `datasource`  | (Optional) A `DatasourceItem` that should be added to the schedule. Only provide either `workbook` or `datasource`, passing multiple items will be deprecated. |
-| `flow`        | (Optional) A `FlowItem` that should be added to the schedule. Only applicable if `workbook = None` and `datasource = None`.                                    |
-| `task_type`   | (Optional) Determines the type of task. One of `TaskItem.Type`: `ExtractRefresh`, `DataAcceleration`, `RunFlow`.                                               |
+Name  |  Description
+:--- | :---
+`schedule_id` | The identifier (id) of the schedule to add the data source or workbook to. Can be retrieved from a `ScheduleItem`, e.g., by performing `schedules.get()`.
+`workbook` | (Optional) A `WorkbookItem` that should be added to the schedule. Only provide either `workbook` or `datasource`, passing multiple items will be deprecated.
+`datasource` | (Optional) A `DatasourceItem` that should be added to the schedule. Only provide either `workbook` or `datasource`, passing multiple items will be deprecated.
+`flow` | (Optional) A `FlowItem` that should be added to the schedule. Only applicable if `workbook = None` and `datasource = None`.
+`task_type` | (Optional) Determines the type of task. One of `TaskItem.Type`: `ExtractRefresh`, `DataAcceleration`, `RunFlow`.
+
 
 **Returns**
 Returns a List of `AddResponses`.
+
 
 **Example**
 
@@ -3173,7 +3001,7 @@ import tableauserverclient as TSC
 # get a datasource item that should be added to a schedule
 datasource_item = server.datasources.get("d14dd951-01c1-4879-8bc2-e96d7dec9f0")
 
-# retrieve the id of the target schedule
+# retrieve the id of the target schedule 
 schedule_id = schedule_item.id  # can be a freshly created schedule or one queried via `schedules.get()`
 
 # Add the data source to the schedule
@@ -3182,25 +3010,28 @@ server.schedules.add_to_schedule(
     datasource=datasource_item,
 )
 ```
+<br>
+<br>
 
-<br>
-<br>
 
 #### schedules.create
 
 ```py
 schedules.create(schedule_item)
 ```
-
 Creates a new schedule for an extract refresh or a subscription.
+
 
 REST API: [Create Schedule](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#create_schedule)
 
+
+
 **Parameters**
 
-| Name            | Description                                                                                                                                                                                                                                                          |
-| :-------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `schedule_item` | The settings for the schedule that you want to create. You need to create an instance of `ScheduleItem` and pass it to the `create` method. The `ScheduleItem` includes the `IntervalItem` which specifies the frequency, or interval, that the schedule should run. |
+Name  |  Description
+:--- | :---
+`schedule_item` | The settings for the schedule that you want to create. You need to create an instance of `ScheduleItem` and pass it to the `create` method. The `ScheduleItem` includes the `IntervalItem` which specifies the frequency, or interval, that the schedule should run.
+
 
 **Returns**
 
@@ -3208,9 +3039,10 @@ Returns a new instance of `schedule_item`.
 
 **Exceptions**
 
-| Error                            | Description                                                                                                                                                       |
-| :------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Interval item must be defined.` | Raises an exception if the `schedule_item.interval_item` is not specified. The interval item specifies whether the interval is hourly, daily, weekly, or monthly. |
+Error  |  Description
+:--- | :---
+`Interval item must be defined.`  |  Raises an exception if the `schedule_item.interval_item` is not specified. The interval item specifies whether the interval is hourly, daily, weekly, or monthly.
+
 
 **Example**
 
@@ -3232,9 +3064,9 @@ hourly_schedule = TSC.ScheduleItem("Hourly-Schedule",
 # Create schedule
 hourly_schedule = server.schedules.create(hourly_schedule)
 ```
+<br>
+<br>
 
-<br>
-<br>
 
 #### schedules.delete
 
@@ -3244,13 +3076,17 @@ schedules.delete(schedule_id)
 
 Deletes an existing schedule for an extract refresh or a subscription.
 
+
 REST API: [Delete Schedule](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#delete_schedule)
+
+
 
 **Parameters**
 
-| Name          | Description                                                                                                                                           |
-| :------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `schedule_id` | The identifier (`schedule_item.id`) of the schedule to delete. Use the `schedule.get()` method to get the identifiers of the schedules on the server. |
+Name  |  Description
+:--- | :---
+`schedule_id` | The identifier (`schedule_item.id`) of the schedule to delete. Use the `schedule.get()` method to get the identifiers of the schedules on the server.
+
 
 **Returns**
 
@@ -3258,9 +3094,10 @@ None.
 
 **Exceptions**
 
-| Error                   | Description                                                            |
-| :---------------------- | :--------------------------------------------------------------------- |
-| `Schedule ID undefined` | The identifier is not a valid identifier for a schedule on the server. |
+Error  |  Description
+:--- | :---
+`Schedule ID undefined`  |  The identifier is not a valid identifier for a schedule on the server.
+
 
 #### schedules.get
 
@@ -3270,7 +3107,9 @@ schedules.get()
 
 Returns all schedule items from the server.
 
+
 REST API: [Query Schedules](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_schedules)
+
 
 #### schedules.get_by_id
 
@@ -3280,13 +3119,16 @@ schedules.get_by_id(schedule_id)
 
 Returns the specified schedule.
 
+
 REST API: [Get Schedule](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#get-schedule)
+
+
 
 **Parameters**
 
-| Name          | Description                                                    |
-| :------------ | :------------------------------------------------------------- |
-| `req_options` | (Optional) Additional request options to send to the endpoint. |
+Name  |  Description
+:--- | :---
+`req_options` | (Optional) Additional request options to send to the endpoint.
 
 #### schedules.update
 
@@ -3296,17 +3138,18 @@ schedules.update(schedule_item)
 
 **Parameters**
 
-| Name            | Description                                                                                                                                                                                                                                                                                                                                                      |
-| :-------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `schedule_item` | The settings for the schedule that you want to update. You need to fetch an existing instance of `ScheduleItem` from the `get` method, make your changes, and then pass it to the `update` method to update the schedule on the server. The `ScheduleItem` includes the `IntervalItem` which specifies the frequency, or interval, that the schedule should run. |
+Name  |  Description
+:--- | :---
+`schedule_item` | The settings for the schedule that you want to update. You need to fetch an existing instance of `ScheduleItem` from the `get` method, make your changes, and then pass it to the `update` method to update the schedule on the server. The `ScheduleItem` includes the `IntervalItem` which specifies the frequency, or interval, that the schedule should run.
+
 
 REST API: [Update Schedules](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_schedule)
 
 <br>
 <br>
 
-**Hourly schedule example**
 
+**Hourly schedule example**
 ```py
 import tableauserverclient as TSC
 from datetime import time
@@ -3329,7 +3172,6 @@ hourly_schedule = server.schedules.create(hourly_schedule)
 ```
 
 **Daily schedule example**
-
 ```py
 import tableauserverclient as TSC
 from datetime import time
@@ -3350,7 +3192,6 @@ daily_schedule = server.schedules.create(daily_schedule)
 ```
 
 **Weekly schedule example**
-
 ```py
 import tableauserverclient as TSC
 from datetime import time
@@ -3371,7 +3212,6 @@ weekly_schedule = server.schedules.create(weekly_schedule)
 ```
 
 **Monthly schedule example**
-
 ```py
 import tableauserverclient as TSC
 from datetime import time
@@ -3389,33 +3229,39 @@ monthly_schedule = TSC.ScheduleItem("Monthly-Schedule",
 monthly_schedule = server.schedules.create(monthly_schedule)
 ```
 
+
+
 <br>
 <br>
 
 ---
+
 
 ## Server
 
 In the Tableau REST API, the server (`https://MY-SERVER/`) is the base or core of the URI that makes up the various endpoints or methods for accessing resources on the server (views, workbooks, sites, users, data sources, etc.)
 The TSC library provides a `Server` class that represents the server. You create a server instance to sign in to the server and to call the various methods for accessing resources.
 
+
 <br>
 <br>
+
 
 ### Server class
 
 ```py
 Server(server_address)
 ```
-
 The `Server` class contains the attributes that represent the server on Tableau Server. After you create an instance of the `Server` class, you can sign in to the server and call methods to access all of the resources on the server.
 
 **Attributes**
 
-| Attribute        | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| :--------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `server_address` | Specifies the address of the Tableau Server or Tableau Cloud (for example, `https://MY-SERVER/`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `version`        | Specifies the version of the REST API to use (for example, `'2.5'`). When you use the TSC library to call methods that access Tableau Server, the `version` is passed to the endpoint as part of the URI (`https://MY-SERVER/api/2.5/`). Each release of Tableau Server supports specific versions of the REST API. New versions of the REST API are released with Tableau Server. By default, the value of `version` is set to `'2.3'`, which corresponds to Tableau Server 10.0. You can view or set this value. You might need to set this to a different value, for example, if you want to access features that are supported by the server and a later version of the REST API. For more information, see [REST API Versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm). |
+Attribute | Description
+:--- | :---
+`server_address`  |  Specifies the address of the Tableau Server or Tableau Cloud (for example, `https://MY-SERVER/`).
+`version`   |  Specifies the version of the REST API to use (for example, `'2.5'`). When you use the TSC library to call methods that access Tableau Server, the `version` is passed to the endpoint as part of the URI (`https://MY-SERVER/api/2.5/`). Each release of Tableau Server supports specific versions of the REST API. New versions of the REST API are released with Tableau Server. By default, the value of `version` is set to `'2.3'`, which corresponds to Tableau Server 10.0.  You can view or set this value. You might need to set this to a different value, for example, if you want to access features that are supported by the server and a later version of the REST API.  For more information, see [REST API Versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+
 
 **Example**
 
@@ -3437,39 +3283,43 @@ server.use_server_version()
 
 ```
 
-#### Server._Resources_
+#### Server.*Resources*
 
 When you create an instance of the `Server` class, you have access to the resources on the server after you sign in. You can select these resources and their methods as members of the class, for example: `server.views.get()`
 
-| Resource               | Description                                                                                            |
-| :--------------------- | :----------------------------------------------------------------------------------------------------- |
-| _server_.auth          | Sets authentication for sign in and sign out. See [Auth](#authentication)                              |
-| _server_.views         | Access the server views and methods. See [Views](#views)                                               |
-| _server_.users         | Access the user resources and methods. See [Users](#users)                                             |
-| _server_.sites         | Access the sites. See [Sites](#sites)                                                                  |
-| _server_.groups        | Access the groups resources and methods. See [Groups](#groups)                                         |
-| _server_.jobs          | Access the jobs resources and methods. See [Jobs](#jobs)                                               |
-| _server_.workbooks     | Access the resources and methods for workbooks. See [Workbooks](#workbooks)                            |
-| _server_.datasources   | Access the resources and methods for data sources. See [Data Sources](#data-sources)                   |
-| _server_.projects      | Access the resources and methods for projects. See [Projects](#projects)                               |
-| _server_.schedules     | Access the resources and methods for schedules. See [Schedules](#schedules)                            |
-| _server_.subscriptions | Access the resources and methods for subscriptions. See [Subscriptions](#subscriptions)                |
-| _server_.server_info   | Access the resources and methods for server information. See [ServerInfo class](#serverinfoitem-class) |
+
+
+Resource   |  Description
+ :--- | : ---
+*server*.auth   |   Sets authentication for sign in and sign out. See [Auth](#authentication)  |
+*server*.views  |   Access the server views and methods.  See [Views](#views)
+*server*.users  |   Access the user resources and methods.  See [Users](#users)
+*server*.sites  |   Access the sites.  See [Sites](#sites)
+*server*.groups   | Access the groups resources and methods. See [Groups](#groups)
+*server*.jobs  | Access the jobs resources and methods. See [Jobs](#jobs)
+*server*.workbooks  |  Access the resources and methods for workbooks. See [Workbooks](#workbooks)
+*server*.datasources  |  Access the resources and methods for data sources. See [Data Sources](#data-sources)
+*server*.projects  |   Access the resources and methods for projects. See [Projects](#projects)
+*server*.schedules  |  Access the resources and methods for schedules. See [Schedules](#schedules)
+*server*.subscriptions | Access the resources and methods for subscriptions. See [Subscriptions](#subscriptions)
+*server*.server_info  |  Access the resources and methods for server information. See [ServerInfo class](#serverinfoitem-class)
 
 <br>
 <br>
 
 #### Server.PublishMode
 
-The `Server` class has `PublishMode` class that enumerates the options that specify what happens when you publish a workbook or data source. The options are `Overwrite`, `Append`, or `CreateNew`.
+The `Server` class has `PublishMode` class that enumerates the options that specify what happens when you publish a workbook or data source. The options are `Overwrite`,  `Append`, or `CreateNew`.
+
 
 **Properties**
 
-| Resource                | Description                             |
-| :---------------------- | :-------------------------------------- |
-| `PublishMode.Overwrite` | Overwrites the workbook or data source. |
-| `PublishMode.Append`    | Appends to the workbook or data source. |
-| `PublishMode.CreateNew` | Creates a new workbook or data source.  |
+Resource   |  Description
+ :--- | : ---
+`PublishMode.Overwrite`  | Overwrites the workbook or data source.
+`PublishMode.Append` |  Appends to the workbook or data source.
+`PublishMode.CreateNew` |  Creates a new workbook or data source.
+
 
 **Example**
 
@@ -3490,27 +3340,30 @@ The `Server` class has `PublishMode` class that enumerates the options that spec
 
 ```
 
+
 <br>
 <br>
+
 
 ### ServerInfoItem class
 
 ```py
 ServerInfoItem(product_version, build_number, rest_api_version)
 ```
-
 The `ServerInfoItem` class contains the build and version information for Tableau Server. The server information is accessed with the `server_info.get()` method, which returns an instance of the `ServerInfo` class.
 
 **Attributes**
 
-| Name               | Description                                                                                                                                                                                                                                                                                                      |
-| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `product_version`  | Shows the version of the Tableau Server or Tableau Cloud (for example, 10.2.0).                                                                                                                                                                                                                                  |
-| `build_number`     | Shows the specific build number (for example, 10200.17.0329.1446).                                                                                                                                                                                                                                               |
-| `rest_api_version` | Shows the supported REST API version number. Note that this might be different from the default value specified for the server, with the `Server.version` attribute. To take advantage of new features, you should query the server and set the `Server.version` to match the supported REST API version number. |
+Name  |  Description
+:--- | :---
+`product_version`  |  Shows the version of the Tableau Server or Tableau Cloud (for example, 10.2.0).
+`build_number`   |  Shows the specific build number (for example, 10200.17.0329.1446).
+`rest_api_version`  |  Shows the supported REST API version number. Note that this might be different from the default value specified for the server, with the `Server.version` attribute. To take advantage of new features, you should query the server and set the `Server.version` to match the supported REST API version number.
+
 
 <br>
 <br>
+
 
 ### ServerInfo methods
 
@@ -3524,7 +3377,6 @@ The TSC library provides a method to access the build and version information fr
 server_info.get()
 
 ```
-
 Retrieve the build and version information for the server.
 
 This method makes an unauthenticated call, so no sign in or authentication token is required.
@@ -3532,13 +3384,13 @@ This method makes an unauthenticated call, so no sign in or authentication token
 REST API: [Server Info](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#server_info)
 
 **Parameters**
-None
+ None
 
 **Exceptions**
 
-| Error                    | Description                                                   |
-| :----------------------- | :------------------------------------------------------------ |
-| `404003	UNKNOWN_RESOURCE` | Raises an exception if the server info endpoint is not found. |
+Error  |  Description
+:--- | :---
+`404003	UNKNOWN_RESOURCE`  |  Raises an exception if the server info endpoint is not found.
 
 **Example**
 
@@ -3559,6 +3411,7 @@ print("\tREST API version: {0}".format(s_info.rest_api_version))
 print("\tBuild number: {0}".format(s_info.build_number))
 
 ```
+
 
 <br>
 <br>
@@ -3585,19 +3438,20 @@ The `SiteItem` class contains the members or attributes for the site resources o
 
 **Attributes**
 
-| Attribute                                                                                           | Description                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| :-------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                                                                              | The name of the site. The name of the default site is "".                                                                                                                                                                                                                                                                                                                                                                      |
-| `content_url`                                                                                       | The path to the site.                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `admin_mode`                                                                                        | (Optional) For Tableau Server only. Specify `ContentAndUsers` to allow site administrators to use the server interface and **tabcmd** commands to add and remove users. (Specifying this option does not give site administrators permissions to manage users using the REST API.) Specify `ContentOnly` to prevent site administrators from adding or removing users. (Server administrators can always add or remove users.) |
-| `user_quota`                                                                                        | (Optional) Specifies the total number of users for the site. The number can't exceed the number of licenses activated for the site; and if tiered capacity attributes are set, then `user_quota` will equal the sum of the tiered capacity values, and attempting to set `user_quota` will cause an error.                                                                                                                     |
-| Tiered capacity attributes: `tier_explorer_capacity` `tier_creator_capacity` `tier_viewer_capacity` | (Optional) The maximum number of licenses for users with the Creator, Explorer, or Viewer role, respectively, allowed on a site.                                                                                                                                                                                                                                                                                               |
-| `storage_quota`                                                                                     | (Optional) Specifies the maximum amount of space for the new site, in megabytes. If you set a quota and the site exceeds it, publishers will be prevented from uploading new content until the site is under the limit again.                                                                                                                                                                                                  |
-| `disable_subscriptions`                                                                             | (Optional) Specify `true` to prevent users from being able to subscribe to workbooks on the specified site. The default is `false`.                                                                                                                                                                                                                                                                                            |
-| `subscribe_others_enabled`                                                                          | (Optional) Specify `false` to prevent server administrators, site administrators, and project or content owners from being able to subscribe other users to workbooks on the specified site. The default is `true`.                                                                                                                                                                                                            |
-| `revision_history_enabled`                                                                          | (Optional) Specify `true` to enable revision history for content resources (workbooks and datasources). The default is `false`.                                                                                                                                                                                                                                                                                                |
-| `revision_limit`                                                                                    | (Optional) Specifies the number of revisions of a content source (workbook or data source) to allow. On Tableau Server, the default is 25.                                                                                                                                                                                                                                                                                     |
-| `state`                                                                                             | Shows the current state of the site (`Active` or `Suspended`).                                                                                                                                                                                                                                                                                                                                                                 |
+Attribute | Description
+:--- | :---
+`name` | The name of the site. The name of the default site is "".
+`content_url` | The path to the site.
+`admin_mode` | (Optional) For Tableau Server only. Specify `ContentAndUsers` to allow site administrators to use the server interface and **tabcmd** commands to add and remove users. (Specifying this option does not give site administrators permissions to manage users using the REST API.) Specify `ContentOnly` to prevent site administrators from adding or removing users. (Server administrators can always add or remove users.)
+`user_quota`| (Optional) Specifies the total number of users for the site. The number can't exceed the number of licenses activated for the site; and if tiered capacity attributes are set, then `user_quota` will equal the sum of the tiered capacity values, and attempting to set `user_quota` will cause an error. 
+Tiered capacity attributes: `tier_explorer_capacity` `tier_creator_capacity` `tier_viewer_capacity`| (Optional) The maximum number of licenses for users with the Creator, Explorer, or Viewer role, respectively, allowed on a site.  
+`storage_quota` | (Optional) 	Specifies the maximum amount of space for the new site, in megabytes. If you set a quota and the site exceeds it, publishers will be prevented from uploading new content until the site is under the limit again.
+`disable_subscriptions` | (Optional) Specify `true` to prevent users from being able to subscribe to workbooks on the specified site. The default is `false`.
+`subscribe_others_enabled` | (Optional) Specify `false` to prevent server administrators, site administrators, and project or content owners from being able to subscribe other users to workbooks on the specified site. The default is `true`.
+`revision_history_enabled` |  (Optional) Specify `true` to enable revision history for content resources (workbooks and datasources). The default is `false`.
+`revision_limit` | (Optional) Specifies the number of revisions of a content source (workbook or data source) to allow. On Tableau Server, the default is 25.
+`state` | Shows the current state of the site (`Active` or `Suspended`).
+
 
 **Example**
 
@@ -3614,19 +3468,20 @@ Source file: models/site_item.py
 <br>
 <br>
 
+
 ### SiteAuthConfiguration class
 
 The `SiteAuthConfiguration` class contains the attributes for the authentication configuration on Tableau Cloud. This class represents the authentication configuration information returned when using the `sites.list_authentication_configurations` method.
 
 **Attributes**
 
-| Attribute                | Description                                                                      |
-| :----------------------- | :------------------------------------------------------------------------------- |
-| `auth_setting`           | The authentication type (e.g., SAML, OpenID, TableauIDWithMFA).                  |
-| `enabled`                | Boolean value indicating whether the authentication configuration is enabled.    |
-| `idp_configuration_id`   | The unique identifier for the authentication configuration.                      |
-| `idp_configuration_name` | The name of the authentication configuration.                                    |
-| `known_provider_alias`   | The provider name for the authentication method in case of OpenID configuration. |
+Attribute | Description
+:--- | :---
+`auth_setting` | The authentication type (e.g., SAML, OpenID, TableauIDWithMFA).
+`enabled` | Boolean value indicating whether the authentication configuration is enabled.
+`idp_configuration_id` | The unique identifier for the authentication configuration.
+`idp_configuration_name` | The name of the authentication configuration.
+`known_provider_alias` | The provider name for the authentication method in case of OpenID configuration.
 
 **Example**
 
@@ -3654,6 +3509,7 @@ for config in auth_configs:
 
 The TSC library provides methods that operate on sites for Tableau Server and Tableau Cloud. These methods correspond to endpoints or methods for sites in the Tableau REST API.
 
+
 Source file: server/endpoint/sites_endpoint.py
 
 <br>
@@ -3669,17 +3525,22 @@ Creates a new site on the server for the specified site item object.
 
 Tableau Server only.
 
+
 REST API: [Create Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#create_site)
+
+
 
 **Parameters**
 
-| Name        | Description                                                                                                                         |
-| :---------- | :---------------------------------------------------------------------------------------------------------------------------------- |
-| `site_item` | The settings for the site that you want to create. You need to create an instance of `SiteItem` and pass it to the `create` method. |
+Name  |  Description
+:--- | :---
+`site_item` | The settings for the site that you want to create. You need to create an instance of `SiteItem` and pass it to the `create` method.
+
 
 **Returns**
 
 Returns a new instance of `SiteItem`.
+
 
 **Example**
 
@@ -3698,7 +3559,6 @@ new_site = TSC.SiteItem(name='Tableau', content_url='tableau', admin_mode=conten
 # call the sites create method with the SiteItem
 new_site = server.sites.create(new_site)
 ```
-
 <br>
 <br>
 
@@ -3710,15 +3570,18 @@ sites.get()
 
 Queries all the sites on the server.
 
+
 REST API: [Query Sites](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_sites)
+
 
 **Parameters**
 
-None.
+ None.
 
 **Returns**
 
 Returns a list of all `SiteItem` objects and a `PaginationItem`. Use these values to iterate through the results.
+
 
 **Example**
 
@@ -3740,6 +3603,8 @@ Returns a list of all `SiteItem` objects and a `PaginationItem`. Use these value
 <br>
 <br>
 
+
+
 #### sites.get_by_id
 
 ```py
@@ -3748,23 +3613,27 @@ sites.get_by_id(site_id)
 
 Queries the site with the given ID.
 
-REST API: [Query Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_site)
+
+REST API: [Query  Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_site)
 
 **Parameters**
 
-| Name      | Description                            |
-| :-------- | :------------------------------------- |
-| `site_id` | The id for the site you want to query. |
+Name  |  Description
+:--- | :---
+`site_id`  | The id for the site you want to query.
+
 
 **Exceptions**
 
-| Error                | Description                                |
-| :------------------- | :----------------------------------------- |
-| `Site ID undefined.` | Raises an error if an id is not specified. |
+Error   |  Description
+ :--- | : ---
+`Site ID undefined.` | Raises an error if an id is not specified.
+
 
 **Returns**
 
 Returns the `SiteItem`.
+
 
 **Example**
 
@@ -3790,23 +3659,27 @@ sites.get_by_name(site_name)
 
 Queries the site with the specified name.
 
-REST API: [Query Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_site)
+
+REST API: [Query  Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_site)
 
 **Parameters**
 
-| Name        | Description                             |
-| :---------- | :-------------------------------------- |
-| `site_name` | The name of the site you want to query. |
+Name  |  Description
+:--- | :---
+`site_name`  | The name of the site you want to query.
+
 
 **Exceptions**
 
-| Error                  | Description                                  |
-| :--------------------- | :------------------------------------------- |
-| `Site Name undefined.` | Raises an error if an name is not specified. |
+Error   |  Description
+ :--- | : ---
+`Site Name undefined.` | Raises an error if an name is not specified.
+
 
 **Returns**
 
 Returns the `SiteItem`.
+
 
 **Example**
 
@@ -3824,6 +3697,8 @@ Returns the `SiteItem`.
 <br>
 <br>
 
+
+
 #### sites.update
 
 ```py
@@ -3832,26 +3707,32 @@ sites.update(site_item)
 
 Modifies the settings for site.
 
+
 The site item object must include the site ID and overrides all other settings.
+
 
 REST API: [Update Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_site)
 
+
 **Parameters**
 
-| Name        | Description                                                                                                        |
-| :---------- | :----------------------------------------------------------------------------------------------------------------- |
-| `site_item` | The site item that you want to update. The settings specified in the site item override the current site settings. |
+Name  |  Description
+:--- | :---
+`site_item` |  The site item that you want to update. The settings specified in the site item override the current site settings.
+
 
 **Exceptions**
 
-| Error                                                                | Description                                                                     |
-| :------------------------------------------------------------------- | :------------------------------------------------------------------------------ |
-| `Site item missing ID.`                                              | The site id must be present and must match the id of the site you are updating. |
-| `You cannot set admin_mode to ContentOnly and also set a user quota` | To set the `user_quota`, the `AdminMode` must be set to `ContentAndUsers`       |
+Error | Description
+:--- | :---
+`Site item missing ID.` |    The site id must be present and must match the id of the site you are updating.
+`You cannot set admin_mode to ContentOnly and also set a user quota`  |  To set the `user_quota`, the `AdminMode` must be set to `ContentAndUsers`
+
 
 **Returns**
 
 Returns the updated `site_item`.
+
 
 **Example**
 
@@ -3870,7 +3751,11 @@ site_item = server.sites.update(site_item)
 <br>
 <br>
 
+
+
+
 #### sites.delete
+
 
 ```py
 Sites.delete(site_id)
@@ -3878,19 +3763,25 @@ Sites.delete(site_id)
 
 Deletes the specified site.
 
+
 REST API: [Delete Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#delete_site)
+
 
 **Parameters**
 
-| Name      | Description                                 |
-| :-------- | :------------------------------------------ |
-| `site_id` | The id of the site that you want to delete. |
+Name   |  Description
+ :--- | : ---
+`site_id`    |       The id of the site that you want to delete.
+
+
 
 **Exceptions**
 
-| Error                | Description                                                                     |
-| :------------------- | :------------------------------------------------------------------------------ |
-| `Site ID Undefined.` | The site id must be present and must match the id of the site you are deleting. |
+Error  |  Description
+:---  | :---
+`Site ID Undefined.`   |    The site id must be present and must match the id of the site you are deleting.
+
+
 
 **Example**
 
@@ -3941,6 +3832,7 @@ for config in auth_configs:
 
 ---
 
+
 ## Sort
 
 The `Sort` class is used with request options (`RequestOptions`) where you can filter and sort on the results returned from the server.
@@ -3958,12 +3850,14 @@ You can use the sort and request options to filter and sort the following endpoi
 sort(field, direction)
 ```
 
+
+
 **Attributes**
 
-| Name        | Description                                                                                                                              |
-| :---------- | :--------------------------------------------------------------------------------------------------------------------------------------- |
-| `field`     | Sets the field to sort on. The fields are defined in the `RequestOption` class.                                                          |
-| `direction` | The direction to sort, either ascending (`Asc`) or descending (`Desc`). The options are defined in the `RequestOptions.Direction` class. |
+Name  |  Description
+:--- | :---
+`field`  |  Sets the field to sort on. The fields are defined in the `RequestOption` class.
+`direction` | The direction to sort, either ascending (`Asc`) or descending (`Desc`). The options are defined in the `RequestOptions.Direction` class.
 
 **Example**
 
@@ -4003,36 +3897,40 @@ SubscriptionItem(subject, schedule_id, user_id, target)
 
 **Attributes**
 
-| Name                 | Description                                                                                                                                                                                                                                                                                                                                                                                               |
-| :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                 | The id of the subscription on the site.                                                                                                                                                                                                                                                                                                                                                                   |
-| `attach_image`       | Setting this to `True` will cause the subscriber to receive mail with .png images of workbooks or views attached to it. By default, this value is set to `True`. If `attach_pdf` is set to `False`, then this value cannot be set to `False`.                                                                                                                                                             |
-| `attach_pdf`         | Setting this to `True` will cause the subscriber to receive mail with a .pdf file containing images of workbooks or views attached to it. By default, this value is set to `False`.                                                                                                                                                                                                                       |
-| `message`            | The text body of the subscription email message.                                                                                                                                                                                                                                                                                                                                                          |
-| `page_orientation`   | The orientation of the pages produced when `attach_pdf` is `True`. If this parameter is not present the page orientation will default to `Portrait`. See chart below for a full list of values.                                                                                                                                                                                                           |
-| `page_size_option`   | The type of page produced, which determines the page dimensions when `attach_pdf` is `True`. If this parameter is not present the page type will default to `Letter`. See chart below for a full list of values.                                                                                                                                                                                          |
-| `schedule_id`        | The id of the schedule associated with the specific subscription.                                                                                                                                                                                                                                                                                                                                         |
-| `send_if_view_empty` | Applies to views only (see `target` attribute). If `True`, an image is sent even if the view specified in a subscription is empty. If `False`, nothing is sent if the view is empty. The default value is `True`.                                                                                                                                                                                         |
-| `subject`            | The subject of the subscription. This is the description that you provide to identify the subscription.                                                                                                                                                                                                                                                                                                   |
-| `suspended`          | Setting this value to `True` stops email delivery for the specified subscription. Setting it to `False` will resume email delivery for the subscription.                                                                                                                                                                                                                                                  |
-| `target`             | The target of the subscription, that is, the content that is subscribed to (view, workbook). The target is an instance of the `target` class. The `target` has two properties, the `id` of the workbook or view (`target.id`), and the `type` (`target.type`), which can either `view` or `workbook`. The `send_if_view_empty` attribute can only be set to `True` if the `target.type` is set to `View`. |
-| `user_id`            | The identifier of the user (person) who receives the subscription.                                                                                                                                                                                                                                                                                                                                        |
+Name | Description
+:--- | :---
+`id` |   The id of the subscription on the site.
+`attach_image` | Setting this to `True` will cause the subscriber to receive mail with .png images of workbooks or views attached to it. By default, this value is set to `True`. If `attach_pdf` is set to `False`, then this value cannot be set to `False`.
+`attach_pdf` | Setting this to `True` will cause the subscriber to receive mail with a .pdf file containing images of workbooks or views attached to it. By default, this value is set to `False`.
+`message` | The text body of the subscription email message.
+`page_orientation` | The orientation of the pages produced when `attach_pdf` is `True`. If this parameter is not present the page orientation will default to `Portrait`. See chart below for a full list of values.
+`page_size_option` | The type of page produced, which determines the page dimensions when `attach_pdf` is `True`. If this parameter is not present the page type will default to `Letter`. See chart below for a full list of values.
+`schedule_id` | The id of the schedule associated with the specific subscription.
+`send_if_view_empty` | Applies to views only (see `target` attribute). If `True`, an image is sent even if the view specified in a subscription is empty. If `False`, nothing is sent if the view is empty. The default value is `True`.
+`subject`|  The subject of the subscription. This is the description that you provide to identify the subscription.
+`suspended` | Setting this value to `True` stops email delivery for the specified subscription. Setting it to `False` will resume email delivery for the subscription.
+`target` | The target of the subscription, that is, the content that is subscribed to (view, workbook). The target is an instance of the `target` class. The `target` has two properties, the `id` of the workbook or view (`target.id`), and the `type` (`target.type`), which can either `view` or `workbook`. The `send_if_view_empty` attribute can only be set to `True` if the `target.type` is set to `View`.
+`user_id` | The identifier of the user (person) who receives the subscription.
 
 <br>
 **Valid PDF options (applies only if `attach_pdf` is set to `True`)**
 
-| Attribute          | Valid options                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| :----------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `page_orientation` | `TSC.PDFRequestOptions.Orientation.Landscape` <br> `TSC.PDFRequestOptions.Orientation.Portrait`                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `page_size_option` | `TSC.PDFRequestOptions.PageType.A3`<br> `TSC.PDFRequestOptions.PageType.A4`<br> `TSC.PDFRequestOptions.PageType.A5`<br> `TSC.PDFRequestOptions.PageType.B5`<br> `TSC.PDFRequestOptions.PageType.Executive`<br> `TSC.PDFRequestOptions.PageType.Folio`<br> `TSC.PDFRequestOptions.PageType.Ledger`<br> `TSC.PDFRequestOptions.PageType.Legal`<br> `TSC.PDFRequestOptions.PageType.Letter`<br> `TSC.PDFRequestOptions.PageType.Note`<br> `TSC.PDFRequestOptions.PageType.Quarto`<br> `TSC.PDFRequestOptions.PageType.Tabloid` |
+Attribute | Valid options
+:--- | :---
+`page_orientation` | `TSC.PDFRequestOptions.Orientation.Landscape` <br> `TSC.PDFRequestOptions.Orientation.Portrait`
+`page_size_option` | `TSC.PDFRequestOptions.PageType.A3`<br> `TSC.PDFRequestOptions.PageType.A4`<br> `TSC.PDFRequestOptions.PageType.A5`<br> `TSC.PDFRequestOptions.PageType.B5`<br> `TSC.PDFRequestOptions.PageType.Executive`<br> `TSC.PDFRequestOptions.PageType.Folio`<br>  `TSC.PDFRequestOptions.PageType.Ledger`<br> `TSC.PDFRequestOptions.PageType.Legal`<br> `TSC.PDFRequestOptions.PageType.Letter`<br> `TSC.PDFRequestOptions.PageType.Note`<br> `TSC.PDFRequestOptions.PageType.Quarto`<br> `TSC.PDFRequestOptions.PageType.Tabloid`
+
 
 Source files:
 server/endpoints/subscription_item.py
 server/request_options.py
 
-### Subscription methods
+
+###  Subscription methods
 
 The Tableau Server Client provides several methods for interacting with subscription resources, or endpoints. These methods correspond to endpoints in the Tableau Server REST API.
+
+
 
 Source files: server/endpoints/subscriptions_endpoint.py
 
@@ -4044,23 +3942,27 @@ Source files: server/endpoints/subscriptions_endpoint.py
 ```py
 subscription.create(subscription_item)
 ```
-
 Creates a subscription to a view or workbook for a specific user on a specific schedule.
 When a user is subscribed to the content, Tableau Server sends the content to the user in email on the schedule that's defined on Tableau Server and specified in the `subscription_item`.
 
 To create a new subscription you need to first create a new `subscription_item` (from `SubscriptionItem` class).
 
+
 REST API: [Create Subscription](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#create_subscription)
 
 **Parameters**
 
-| Name                | Description                                                                                                                                             |
-| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `subscription_item` | Specifies the user to subscribe, the content to subscribe to, the schedule to associate the subscription with, and other metadata for the subscription. |
+Name   |  Description
+ :--- | : ---
+`subscription_item` |  Specifies the user to subscribe, the content to subscribe to, the schedule to associate the subscription with, and other metadata for the subscription.
+
 
 **Returns**
 
 Returns the new `SubscriptionItem` object.
+
+
+
 
 **Example**
 
@@ -4090,8 +3992,11 @@ new_sub = server.subscriptions.create(new_sub)
 print(new_sub.subject)
 ```
 
+
 <br>
 <br>
+
+
 
 #### subscriptions.delete
 
@@ -4099,21 +4004,26 @@ print(new_sub.subject)
 subscriptions.delete(subscription_id)
 ```
 
+
+
 Deletes the specified subscription from the site.
 
 REST API: [Delete Subscription](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#delete_subscription)
 
+
 **Parameters**
 
-| Name              | Description                                                                       |
-| :---------------- | :-------------------------------------------------------------------------------- |
-| `subscription_id` | The identifier (`id`) for the subscription that you want to remove from the site. |
+Name   |  Description
+ :--- | : ---
+`subscription_id`  |  The identifier (`id`) for the subscription that you want to remove from the site.
+
 
 **Exceptions**
 
-| Error                       | Description                                                       |
-| :-------------------------- | :---------------------------------------------------------------- |
-| `Subscription ID undefined` | Raises an exception if a valid `subscription_id` is not provided. |
+Error   |  Description
+ :--- | : ---
+`Subscription ID undefined`   |  Raises an exception if a valid `subscription_id` is not provided.
+
 
 **Example**
 
@@ -4129,7 +4039,6 @@ REST API: [Delete Subscription](https://help.tableau.com/current/api/rest_api/en
      server.subscriptions.delete('9f9e9d9c-8b8a-8f8e-7d7c-7b7a6f6d6e6d')
 
 ```
-
 <br>
 <br>
 
@@ -4141,24 +4050,27 @@ REST API: [Delete Subscription](https://help.tableau.com/current/api/rest_api/en
 ```py
 subscription.get(req_options=None)
 ```
-
 Returns information about the subscriptions on the specified site.
+
 
 REST API: [Query Subscriptions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_subscriptions)
 
 **Parameters**
 
-| Name          | Description                                                                                                                                                                                                                                                     |
-| :------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `req_options` | (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific subscription, you could specify the subject of the subscription or the id of the subscription. |
+Name   |  Description
+ :--- | : ---
+`req_options` |  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific subscription, you could specify the subject of the subscription or the id of the subscription.
+
 
 **Returns**
 Returns a list of `SubscriptionItem` objects and a `PaginationItem` object. Use these values to iterate through the results.
+
 
 <br>
 <br>
 
 #### subscription.get_by_id
+
 
 ```py
 subscription.get_by_id(subscription_id)
@@ -4168,21 +4080,26 @@ Returns information about the specified subscription.
 
 REST API: [Query Subscription](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_subscription)
 
+
 **Parameters**
 
-| Name              | Description                                                |
-| :---------------- | :--------------------------------------------------------- |
-| `subscription_id` | The `subscription_id` specifies the subscription to query. |
+Name   |  Description
+ :--- | : ---
+`subscription_id`  |  The `subscription_id` specifies the subscription to query.
+
+
 
 **Exceptions**
 
-| Error                          | Description                                                       |
-| :----------------------------- | :---------------------------------------------------------------- |
-| `No Subscription ID provided.` | Raises an exception if a valid `subscription_id` is not provided. |
+Error   |  Description
+ :--- | : ---
+`No Subscription ID provided.`  |  Raises an exception if a valid `subscription_id` is not provided.
+
 
 **Returns**
 
-The `SubscriptionItem`. See [SubscriptionItem class](#subscriptionitem-class)
+The `SubscriptionItem`.  See [SubscriptionItem class](#subscriptionitem-class)
+
 
 **Example**
 
@@ -4200,20 +4117,22 @@ The `SubscriptionItem`. See [SubscriptionItem class](#subscriptionitem-class)
 ```py
 subscription.update(subscription_item)
 ```
-
 Updates a specific subscription. To update a subscription, you must first query it from server using the `subscriptions.get()` or `subscriptions.get_by_id()` method.
+
 
 REST API: [Update Subscription](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_subscription)
 
 **Parameters**
 
-| Name                | Description                                                                                                                                             |
-| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `subscription_item` | Specifies the user to subscribe, the content to subscribe to, the schedule to associate the subscription with, and other metadata for the subscription. |
+Name   |  Description
+ :--- | : ---
+`subscription_item` |  Specifies the user to subscribe, the content to subscribe to, the schedule to associate the subscription with, and other metadata for the subscription.
+
 
 **Returns**
 
 Returns the updated `SubscriptionItem` object.
+
 
 **Example**
 
@@ -4245,7 +4164,7 @@ print(new_sub.subject)
 
 Using the TSC library, you can get information about all the tasks on a site and you can remove tasks. To create new tasks see [Schedules](#schedules).
 
-The task resources for Tableau Server are defined in the `TaskItem` class. The class corresponds to the task resources you can access using the Tableau Server REST API. The task methods are based upon the endpoints for tasks in the REST API and operate on the `TaskItem` class.
+The task resources for Tableau Server are defined in the `TaskItem` class. The class corresponds to the task resources you can access using the Tableau Server REST API. The task methods are based upon the endpoints for tasks in the REST API and operate on the `TaskItem` class.  
 
 ### TaskItem class
 
@@ -4255,14 +4174,15 @@ TaskItem(id, task_type, priority, consecutive_failed_count=0, schedule_id=None, 
 
 **Attributes**
 
-| Name                       | Description                                                                                           |
-| :------------------------- | :---------------------------------------------------------------------------------------------------- |
-| `id`                       | The id of the task on the site.                                                                       |
-| `task_type`                | Type of extract task - full or incremental refresh.                                                   |
-| `priority`                 | The priority of the task on the server.                                                               |
-| `consecutive_failed_count` | The number of failed consecutive executions.                                                          |
-| `schedule_id`              | The id of the schedule on the site.                                                                   |
-| `target`                   | An object, `datasource` or `workbook`, which is associated to the task. Source file: models/target.py |
+Name | Description  
+:--- | :---  
+`id` |   The id of the task on the site.
+`task_type` | Type of extract task - full or incremental refresh.
+`priority` | The priority of the task on the server.
+`consecutive_failed_count` | The number of failed consecutive executions.
+`schedule_id` | The id of the schedule on the site.
+`target` | An object, `datasource` or `workbook`, which is associated to the task. Source file: models/target.py
+
 
 **Example**
 
@@ -4280,12 +4200,13 @@ Source file: models/task_item.py
 <br> 
 <br>
 
-### Tasks methods
+
+###  Tasks methods
 
 The Tableau Server Client provides several methods for interacting with task resources, or endpoints. These methods correspond to endpoints in the Tableau Server REST API.
 
 Source file: server/endpoint/tasks_endpoint.py
-<br>
+<br> 
 <br>
 
 #### tasks.get
@@ -4298,17 +4219,21 @@ Returns information about the tasks on the specified site.
 
 REST API: [Get Extract Refresh Tasks on Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#get_extract_refresh_tasks)
 
+
 **Parameters**
 
-| Name          | Description                                                                                                    |
-| :------------ | :------------------------------------------------------------------------------------------------------------- |
-| `req_options` | (Optional) You can pass the method a request object that contains additional parameters to filter the request. |
+Name   |  Description     
+ :--- | : ---    
+`req_options` |  (Optional) You can pass the method a request object that contains additional parameters to filter the request.
+
 
 **Returns**
 
-Returns a list of `TaskItem` objects and a `PaginationItem` object. Use these values to iterate through the results.
+Returns a list of `TaskItem` objects and a `PaginationItem` object.  Use these values to iterate through the results. 
+
 
 **Example**
+
 
 ```py
 import tableauserverclient as TSC
@@ -4326,29 +4251,34 @@ with server.auth.sign_in(tableau_auth):
 
 #### tasks.get_by_id
 
+
 ```py
 tasks.get_by_id(task_id)
 ```
 
-Returns information about the specified task.
+Returns information about the specified task.   
 
-REST API: [Query Extract Refresh Task On Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#get_extract_refresh_task){:target="\_blank"}
+REST API: [Query Extract Refresh Task On Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#get_extract_refresh_task){:target="_blank"}
+
 
 **Parameters**
 
-| Name      | Description                                |
-| :-------- | :----------------------------------------- |
-| `task_id` | The `task_id` specifies the task to query. |
+Name   |  Description     
+ :--- | : ---    
+`task_id`  |  The `task_id` specifies the task to query. 
+
 
 **Exceptions**
 
-| Error                | Description                                               |
-| :------------------- | :-------------------------------------------------------- |
-| `Task ID undefined.` | Raises an exception if a valid `task_id` is not provided. |
+Error   |  Description     
+ :--- | : ---    
+`Task ID undefined.`  |  Raises an exception if a valid `task_id` is not provided.
+
 
 **Returns**
 
-The `TaskItem`. See [TaskItem class](#taskitem-class)
+The `TaskItem`.  See [TaskItem class](#taskitem-class)
+
 
 **Example**
 
@@ -4358,25 +4288,28 @@ print(task1.task_type)
 ```
 
 <br>   
-<br>
+<br>  
 
 #### tasks.run
+
 
 ```py
 tasks.run(task_item)
 ```
 
-Runs the specified extract refresh task.
+Runs the specified extract refresh task. 
 
 To run a extract refresh task you need to first lookup the task `task_item` (`TaskItem` class).
 
-REST API: [Run Extract Refresh Task](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#run_extract_refresh_task){:target="\_blank"}
+REST API: [Run Extract Refresh Task](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#run_extract_refresh_task){:target="_blank"}
+
 
 **Parameters**
 
-| Name        | Description                            |
-| :---------- | :------------------------------------- |
-| `task_item` | You can pass the method a task object. |
+Name   |  Description     
+ :--- | : ---    
+`task_item` |  You can pass the method a task object.
+
 
 **Returns**
 
@@ -4394,9 +4327,10 @@ server.tasks.run(task)
 ```
 
 <br>   
-<br>
+<br> 
 
 #### tasks.delete
+
 
 ```py
 tasks.delete(task_id)
@@ -4404,19 +4338,21 @@ tasks.delete(task_id)
 
 Deletes an extract refresh task.
 
-REST API: [Delete Extract Refresh Task](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#delete_extract_refresh_task){:target="\_blank"}
+REST API: [Delete Extract Refresh Task](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#delete_extract_refresh_task){:target="_blank"}
 
 **Parameters**
 
-| Name      | Description                                 |
-| :-------- | :------------------------------------------ |
-| `task_id` | The `task_id` specifies the task to delete. |
+Name   |  Description     
+ :--- | : ---    
+`task_id`  |  The `task_id` specifies the task to delete. 
+
 
 **Exceptions**
 
-| Error                | Description                                               |
-| :------------------- | :-------------------------------------------------------- |
-| `Task ID undefined.` | Raises an exception if a valid `task_id` is not provided. |
+Error   |  Description     
+ :--- | : ---    
+`Task ID undefined.`  |  Raises an exception if a valid `task_id` is not provided.
+
 
 **Example**
 
@@ -4426,7 +4362,8 @@ REST API: [Delete Extract Refresh Task](https://help.tableau.com/current/api/res
 ```
 
 <br>   
-<br>
+<br>  
+
 
 ---
 
@@ -4435,6 +4372,7 @@ REST API: [Delete Extract Refresh Task](https://help.tableau.com/current/api/res
 Using the TSC library, you can get information about all the users on a site, and you can add or remove users, or update user information.
 
 The user resources for Tableau Server are defined in the `UserItem` class. The class corresponds to the user resources you can access using the Tableau Server REST API. The user methods are based upon the endpoints for users in the REST API and operate on the `UserItem` class.
+
 
 ### UserItem class
 
@@ -4446,43 +4384,43 @@ The `UserItem` class contains the members or attributes for the view resources o
 
 **Attributes**
 
-| Name                    | Description                                                                                                                                                                                                                     |
-| :---------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `auth_setting`          | This is a required attribute and is only for Tableau Cloud. The new authentication type for the user - see **User Auth** below for values.                                                                                      |
-| `domain_name`           | The name of the site.                                                                                                                                                                                                           |
-| `external_auth_user_id` | Represents ID stored in Tableau's single sign-on (SSO) system. The `externalAuthUserId` value is returned for Tableau Cloud. For other server configurations, this field contains null.                                         |
-| `id`                    | The id of the user on the site.                                                                                                                                                                                                 |
-| `last_login`            | The date and time the user last logged in.                                                                                                                                                                                      |
-| `workbooks`             | The workbooks the user owns or has Read (view) permissions. You must run the populate_workbooks method to add the workbooks to the `UserItem`.                                                                                  |
-| `email`                 | The email address of the user.                                                                                                                                                                                                  |
-| `fullname`              | The full name of the user.                                                                                                                                                                                                      |
-| `name`                  | The name of the user. This attribute is required when you are creating a `UserItem` instance.                                                                                                                                   |
-| `site_role`             | The role the user has on the site. This attribute is required if you are creating a `UserItem` instance. See _User Roles_ below for details.                                                                                    |
-| `groups`                | The groups that the user belongs to. You must run the populate_groups method to add the groups to the `UserItem`.                                                                                                               |
-| `idp_configuration_id`  | Tableau Cloud only. The authentication method for the user. To find the idp_configuration_id value, use sites.list_authentication_configurations method. **Important: Use idp_configuration_id or auth_setting, but not both.** |
+Name | Description
+:--- | :---
+`auth_setting` | This is a required attribute and is only for Tableau Cloud. The new authentication type for the user - see **User Auth** below for values.
+`domain_name`  |    The name of the site.
+`external_auth_user_id` |   Represents ID stored in Tableau's single sign-on (SSO) system. The `externalAuthUserId` value is returned for Tableau Cloud. For other server configurations, this field contains null.
+`id` |   The id of the user on the site.
+`last_login` | The date and time the user last logged in.
+`workbooks` |  The workbooks the user owns or has Read (view) permissions. You must run the populate_workbooks method to add the workbooks to the `UserItem`.
+`email` |  The email address of the user.
+`fullname` | The full name of the user.
+`name` |   The name of the user. This attribute is required when you are creating a `UserItem` instance.
+`site_role` |  The role the user has on the site. This attribute is required if you are creating a `UserItem` instance. See *User Roles* below for details.
+`groups` | The groups that the user belongs to. You must run the populate_groups method to add the groups to the `UserItem`.
+`idp_configuration_id` | Tableau Cloud only. The authentication method for the user. To find the idp_configuration_id value, use sites.list_authentication_configurations method. **Important: Use idp_configuration_id or auth_setting, but not both.**
+
 
 **User Auth**
 
-You can assign the following values for this attribute:
-
-- `OpenID`
-- `SAML` (the user signs in using **Single sign-on**)
-- `TableauIDWithMFA`
-  These options appear in the **Authentication** tab on the **Settings** page in Tableau Cloud.
+ You can assign the following values for this attribute: 
+* `OpenID` 
+* `SAML` (the user signs in using **Single sign-on**)
+* `TableauIDWithMFA`
+ These options appear in the **Authentication** tab on the **Settings** page in Tableau Cloud.
 
 **User Roles**
 
 The possible user roles for the `site_role` attribute are the following:
 
-- `Creator`
-- `Explorer`
-- `ExplorerCanPublish`
-- `ServerAdministrator`
-- `SiteAdministratorExplorer`
-- `SiteAdministratorCreator`
-- `Unlicensed`
-- `ReadOnly`
-- `Viewer`
+* `Creator`
+* `Explorer`
+* `ExplorerCanPublish`
+* `ServerAdministrator`
+* `SiteAdministratorExplorer`
+* `SiteAdministratorCreator`
+* `Unlicensed`
+* `ReadOnly`
+* `Viewer`
 
 Note: If any operations related to a user's `site_role` cause a 400 error response (for example: `Invalid site role: 'Explorer' is malformed or is not a supported user role in this version of Tableau`), ensure you are [using the latest REST API version for your server](versions#use-the-rest-api-version-supported-by-the-server).
 
@@ -4504,7 +4442,8 @@ Source file: models/user_item.py
 <br>
 <br>
 
-### Users methods
+
+###  Users methods
 
 The Tableau Server Client provides several methods for interacting with user resources, or endpoints. These methods correspond to endpoints in the Tableau Server REST API.
 
@@ -4520,19 +4459,23 @@ users.add(user_item)
 
 Adds the user to the site.
 
-To add a new user to the site you need to first create a new `user_item` (from `UserItem` class). When you create a new user, you specify the name of the user and their site role. For Tableau Cloud, you also specify the `auth_setting` attribute in your request. When you add user to Tableau Cloud, the name of the user must be the email address that is used to sign in to Tableau Cloud. After you add a user, Tableau Cloud sends the user an email invitation. The user can click the link in the invitation to sign in and update their full name and password.
+To add a new user to the site you need to first create a new `user_item` (from `UserItem` class). When you create a new user, you specify the name of the user and their site role. For Tableau Cloud, you also specify the `auth_setting` attribute in your request.  When you add user to Tableau Cloud, the name of the user must be the email address that is used to sign in to Tableau Cloud. After you add a user, Tableau Cloud sends the user an email invitation. The user can click the link in the invitation to sign in and update their full name and password.
 
 REST API: [Add User to Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#add_user_to_site)
 
 **Parameters**
 
-| Name        | Description                                                                                                                                                                                                          |
-| :---------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `user_item` | You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific user, you could specify the name of the user or the user's id. |
+Name   |  Description
+ :--- | : ---
+`user_item` |  You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific user, you could specify the name of the user or the user's id.
+
 
 **Returns**
 
 Returns the new `UserItem` object.
+
+
+
 
 **Example**
 
@@ -4558,21 +4501,25 @@ users.get(req_options=None)
 
 Returns information about the users on the specified site.
 
-To get information about the workbooks a user owns or has view permission for, you must first populate the `UserItem` with workbook information using the [populate_workbooks(_user_item_)](#populate-workbooks-user) method.
+To get information about the workbooks a user owns or has view permission for, you must first populate the `UserItem` with workbook information using the [populate_workbooks(*user_item*)](#populate-workbooks-user) method.
+
 
 REST API: [Get Users on Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#get_users_on_site)
 
 **Parameters**
 
-| Name          | Description                                                                                                                                                                                                                     |
-| :------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `req_options` | (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific user, you could specify the name of the user or the user's id. |
+Name   |  Description
+ :--- | : ---
+`req_options` |  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific user, you could specify the name of the user or the user's id.
+
 
 **Returns**
 
-Returns a list of `UserItem` objects and a `PaginationItem` object. Use these values to iterate through the results.
+Returns a list of `UserItem` objects and a `PaginationItem` object.  Use these values to iterate through the results.
+
 
 **Example**
+
 
 ```py
 import tableauserverclient as TSC
@@ -4590,6 +4537,7 @@ with server.auth.sign_in(tableau_auth):
 
 #### users.get_by_id
 
+
 ```py
 users.get_by_id(user_id)
 ```
@@ -4598,21 +4546,25 @@ Returns information about the specified user.
 
 REST API: [Query User On Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_user_on_site)
 
+
 **Parameters**
 
-| Name      | Description                                |
-| :-------- | :----------------------------------------- |
-| `user_id` | The `user_id` specifies the user to query. |
+Name   |  Description
+ :--- | : ---
+`user_id`  |  The `user_id` specifies the user to query.
+
 
 **Exceptions**
 
-| Error                | Description                                               |
-| :------------------- | :-------------------------------------------------------- |
-| `User ID undefined.` | Raises an exception if a valid `user_id` is not provided. |
+Error   |  Description
+ :--- | : ---
+`User ID undefined.`  |  Raises an exception if a valid `user_id` is not provided.
+
 
 **Returns**
 
-The `UserItem`. See [UserItem class](#useritem-class)
+The `UserItem`.  See [UserItem class](#useritem-class)
+
 
 **Example**
 
@@ -4624,6 +4576,7 @@ The `UserItem`. See [UserItem class](#useritem-class)
 
 <br>
 
+
 #### users.populate_favorites
 
 ```py
@@ -4632,7 +4585,7 @@ users.populate_favorites(user_item)
 
 Returns the list of favorites (views, workbooks, and data sources) for a user.
 
-_Not currently implemented_
+*Not currently implemented*
 
 <br>
 <br>
@@ -4649,21 +4602,26 @@ REST API: [Get Groups for a User](https://help.tableau.com/current/api/rest_api/
 
 **Parameters**
 
-| Name        | Description                                                           |
-| :---------- | :-------------------------------------------------------------------- |
-| `user_item` | The `user_item` specifies the user to populate with group membership. |
+Name   |  Description
+ :--- | : ---
+`user_item`  |  The `user_item` specifies the user to populate with group membership.
+
+
+
 
 **Exceptions**
 
-| Error                   | Description                                        |
-| :---------------------- | :------------------------------------------------- |
-| `User item missing ID.` | Raises an error if the `user_item` is unspecified. |
+Error   |  Description
+ :--- | : ---
+`User item missing ID.` |  Raises an error if the `user_item` is unspecified.
+
 
 **Returns**
 
 A list of `GroupItem`
 
 A `PaginationItem` that points (`user_item.groups`). See [UserItem class](#useritem-class)
+
 
 **Example**
 
@@ -4680,6 +4638,9 @@ A `PaginationItem` that points (`user_item.groups`). See [UserItem class](#useri
 
     ...
 ```
+
+
+
 
 <br>
 <br>
@@ -4698,21 +4659,26 @@ REST API: [Query Workbooks for User](https://help.tableau.com/current/api/rest_a
 
 **Parameters**
 
-| Name        | Description                                                               |
-| :---------- | :------------------------------------------------------------------------ |
-| `user_item` | The `user_item` specifies the user to populate with workbook information. |
+Name   |  Description
+ :--- | : ---
+`user_item`  |  The `user_item` specifies the user to populate with workbook information.
+
+
+
 
 **Exceptions**
 
-| Error                   | Description                                        |
-| :---------------------- | :------------------------------------------------- |
-| `User item missing ID.` | Raises an error if the `user_item` is unspecified. |
+Error   |  Description
+ :--- | : ---
+`User item missing ID.` |  Raises an error if the `user_item` is unspecified.
+
 
 **Returns**
 
 A list of `WorkbookItem`
 
 A `PaginationItem` that points (`user_item.workbooks`). See [UserItem class](#useritem-class)
+
 
 **Example**
 
@@ -4730,6 +4696,9 @@ A `PaginationItem` that points (`user_item.workbooks`). See [UserItem class](#us
     ...
 ```
 
+
+
+
 <br>
 <br>
 
@@ -4739,21 +4708,26 @@ A `PaginationItem` that points (`user_item.workbooks`). See [UserItem class](#us
 users.remove(user_id)
 ```
 
+
+
 Removes the specified user from the site.
 
 REST API: [Remove User from Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#remove_user_from_site)
 
+
 **Parameters**
 
-| Name      | Description                                                                 |
-| :-------- | :-------------------------------------------------------------------------- |
-| `user_id` | The identifier (`id`) for the user that you want to remove from the server. |
+Name   |  Description
+ :--- | : ---
+`user_id`  |  The identifier (`id`) for the user that you want to remove from the server.
+
 
 **Exceptions**
 
-| Error               | Description                                               |
-| :------------------ | :-------------------------------------------------------- |
-| `User ID undefined` | Raises an exception if a valid `user_id` is not provided. |
+Error   |  Description
+ :--- | : ---
+`User ID undefined`   |  Raises an exception if a valid `user_id` is not provided.
+
 
 **Example**
 
@@ -4768,9 +4742,11 @@ REST API: [Remove User from Site](https://help.tableau.com/current/api/rest_api/
      server.users.remove('9f9e9d9c-8b8a-8f8e-7d7c-7b7a6f6d6e6d')
 
 ```
+<br>
+<br>
 
-<br>
-<br>
+
+
 
 #### users.update
 
@@ -4782,24 +4758,30 @@ Updates information about the specified user.
 
 The information you can modify depends upon whether you are using Tableau Server or Tableau Cloud, and whether you have configured Tableau Server to use local authentication or Active Directory. For more information, see [Update User](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_user).
 
+
+
 REST API: [Update User](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_user)
 
 **Parameters**
 
-| Name        | Description                                   |
-| :---------- | :-------------------------------------------- |
-| `user_item` | The `user_item` specifies the user to update. |
-| `password`  | (Optional) The new password for the user.     |
+Name   |  Description
+ :--- | : ---
+`user_item`  |  The `user_item` specifies the user to update.
+`password`  | (Optional) The new password for the user.
+
+
 
 **Exceptions**
 
-| Error                   | Description                                        |
-| :---------------------- | :------------------------------------------------- |
-| `User item missing ID.` | Raises an error if the `user_item` is unspecified. |
+Error   |  Description
+ :--- | : ---
+`User item missing ID.` |  Raises an error if the `user_item` is unspecified.
+
 
 **Returns**
 
-An updated `UserItem`. See [UserItem class](#useritem-class)
+An updated `UserItem`.    See [UserItem class](#useritem-class)
+
 
 **Example**
 
@@ -4831,8 +4813,11 @@ An updated `UserItem`. See [UserItem class](#useritem-class)
 
 ```
 
+
+
 <br>
 <br>
+
 
 ---
 
@@ -4856,22 +4841,24 @@ Source file: models/view_item.py
 
 **Attributes**
 
-| Name            | Description                                                                                                                  |
-| :-------------- | :--------------------------------------------------------------------------------------------------------------------------- |
-| `content_url`   | The name of the view as it would appear in a URL.                                                                            |
-| `csv`           | The CSV data of the view. You must first call the `views.populate_csv` method to access the CSV data.                        |
-| `id`            | The identifier of the view item.                                                                                             |
-| `image`         | The image of the view. You must first call the `views.populate_image`method to access the image.                             |
-| `name`          | The name of the view.                                                                                                        |
-| `owner_id`      | The ID for the owner of the view.                                                                                            |
-| `pdf`           | The PDF of the view. You must first call the `views.populate_pdf` method to access the PDF content.                          |
-| `preview_image` | The thumbnail image for the view. You must first call the `views.populate_preview_image` method to access the preview image. |
-| `project_id`    | The ID of the project that contains the view.                                                                                |
-| `total_views`   | The usage statistics for the view. Indicates the total number of times the view has been looked at.                          |
-| `workbook_id`   | The ID of the workbook associated with the view.                                                                             |
+Name | Description
+:--- | :---
+`content_url` | The name of the view as it would appear in a URL.
+`csv` | The CSV data of the view. You must first call the `views.populate_csv` method to access the CSV data.
+`id` | The identifier of the view item.
+`image` | The image of the view. You must first call the `views.populate_image`method to access the image.
+`name`  | The name of the view.
+`owner_id` |  The ID for the owner of the view.
+`pdf` | The PDF of the view. You must first call the `views.populate_pdf` method to access the PDF content.
+`preview_image` | The thumbnail image for the view. You must first call the `views.populate_preview_image` method to access the preview image.
+`project_id` | The ID of the project that contains the view.
+`total_views`  |  The usage statistics for the view. Indicates the total number of times the view has been looked at.
+`workbook_id`  |  The ID of the workbook associated with the view.
+
 
 <br>
 <br>
+
 
 ### Views methods
 
@@ -4883,12 +4870,12 @@ Source file: server/endpoint/views_endpoint.py
 <br>
 
 #### views.get
-
 ```
 views.get(req_options=None, usage=False)
 ```
 
 Returns the list of views items for a site.
+
 
 REST API: [Query Views for Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_views_for_site)
 
@@ -4898,10 +4885,12 @@ This endpoint is available with REST API version 2.0 and up.
 
 **Parameters**
 
-| Name          | Description                                                                                                                                                                                                              |
-| :------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `req_options` | (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific view, you could specify the name of the view or its ID. |
-| `usage`       | (Optional) If true (`usage=True`) returns the usage statistics for the views. The default is `usage=False`.                                                                                                              |
+Name | Description
+:--- | :---
+`req_options`  |  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific view, you could specify the name of the view or its ID.
+`usage` | (Optional) If true (`usage=True`) returns the usage statistics for the views. The default is `usage=False`.
+
+
 
 **Returns**
 
@@ -4922,7 +4911,6 @@ with server.auth.sign_in(tableau_auth):
 **Example using Pager**
 
 You can also use the provided Pager generator to get all views on site, without having to page through the results.
-
 ```py
 for view in TSC.Pager(server.views):
     print(view.name)
@@ -4930,16 +4918,17 @@ for view in TSC.Pager(server.views):
 
 See [ViewItem class](#viewitem-class)
 
+
 <br>
 <br>
 
 #### views.get_by_id
-
 ```
 views.get_by_id(view_id)
 ```
 
 Returns the details of a specific view.
+
 
 REST API: [Get View](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#get_view)
 
@@ -4949,9 +4938,11 @@ This endpoint is available REST API version 3.1 and up.
 
 **Parameters**
 
-| Name      | Description                     |
-| :-------- | :------------------------------ |
-| `view_id` | The ID of the view to retrieve. |
+Name | Description
+:--- | :---
+`view_id`  |  The ID of the view to retrieve.
+
+
 
 **Returns**
 
@@ -4970,6 +4961,7 @@ with server.auth.sign_in(tableau_auth):
 ```
 
 See [ViewItem class](#viewitem-class)
+
 
 <br>
 <br>
@@ -4992,22 +4984,23 @@ This endpoint is available with REST API version 2.0 and up.
 
 **Parameters**
 
-| Name        | Description                     |
-| :---------- | :------------------------------ |
-| `view_item` | Specifies the view to populate. |
+Name | Description
+:--- | :---
+`view_item`  |  Specifies the view to populate.
+
 
 **Exceptions**
 
-| Error                                 | Description                                                   |
-| :------------------------------------ | :------------------------------------------------------------ |
-| `View item missing ID or workbook ID` | Raises an error if the ID of the view or workbook is missing. |
+Error | Description
+:--- | :---
+`View item missing ID or workbook ID` |  Raises an error if the ID of the view or workbook is missing.
+
 
 **Returns**
 
 None. The preview image is added to `view_item` and can be accessed by its `preview_image` field.
 
 **Example**
-
 ```py
 # Sign in, get view, etc.
 
@@ -5040,23 +5033,22 @@ This endpoint is available with REST API version 2.5 and up.
 
 **Parameters**
 
-| Name          | description                                                                                                                                                                                                                                         |
-| :------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `view_item`   | Specifies the view to populate.                                                                                                                                                                                                                     |
-| `req_options` | (Optional) You can pass in request options to specify the image resolution (`imageresolution`) and the maximum age of the view image cached on the server (`maxage`). See [ImageRequestOptions class](#imagerequestoptions-class) for more details. |
+Name | description
+:--- | :---
+`view_item` | Specifies the view to populate.
+`req_options` | (Optional) You can pass in request options to specify the image resolution (`imageresolution`) and the maximum age of the view image cached on the server (`maxage`). See [ImageRequestOptions class](#imagerequestoptions-class) for more details.
 
 **Exceptions**
 
-| Error                  | Description                                       |
-| :--------------------- | :------------------------------------------------ |
-| `View item missing ID` | Raises an error if the ID of the view is missing. |
+Error | Description
+:--- | :---
+`View item missing ID` | Raises an error if the ID of the view is missing.
 
 **Returns**
 
 None. The image is added to the `view_item` and can be accessed by its `image` field.
 
 **Example**
-
 ```py
 # Sign in, get view, etc.
 
@@ -5072,7 +5064,6 @@ See [ViewItem class](#viewitem-class)
 <br>
 
 #### views.populate_csv
-
 ```
 views.populate_csv(view_item, req_options=None)
 ```
@@ -5089,23 +5080,22 @@ This endpoint is available with REST API version 2.7 and up.
 
 **Parameters**
 
-| Name          | description                                                                                                                                                                      |
-| :------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `view_item`   | Specifies the view to populate.                                                                                                                                                  |
-| `req_options` | (Optional) You can pass in request options to specify the maximum age of the CSV cached on the server. See [CSVRequestOptions class](#csvrequestoptions-class) for more details. |
+Name | description
+:--- | :---
+`view_item` | Specifies the view to populate.
+`req_options` | (Optional) You can pass in request options to specify the maximum age of the CSV cached on the server. See [CSVRequestOptions class](#csvrequestoptions-class) for more details.
 
 **Exceptions**
 
-| Error                  | Description                                       |
-| :--------------------- | :------------------------------------------------ |
-| `View item missing ID` | Raises an error if the ID of the view is missing. |
+Error | Description
+:--- | :---
+`View item missing ID` | Raises an error if the ID of the view is missing.
 
 **Returns**
 
 None. The CSV data is added to the `view_item` and can be accessed by its `csv` field.
 
 **Example**
-
 ```py
 # Sign in, get view, etc.
 
@@ -5122,7 +5112,6 @@ See [ViewItem class](#viewitem-class)
 <br>
 
 #### views.populate_pdf
-
 ```
 views.populate_pdf(view_item, req_options=None)
 ```
@@ -5139,23 +5128,22 @@ This endpoint is available with REST API version 2.7 and up.
 
 **Parameters**
 
-| Name          | description                                                                                                                                                                                                                                     |
-| :------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `view_item`   | Specifies the view to populate.                                                                                                                                                                                                                 |
-| `req_options` | (Optional) You can pass in request options to specify the page type and orientation of the PDF content, as well as the maximum age of the PDF rendered on the server. See [PDFRequestOptions class](#pdfrequestoptions-class) for more details. |
+Name | description
+:--- | :---
+`view_item` | Specifies the view to populate.
+`req_options` | (Optional) You can pass in request options to specify the page type and orientation of the PDF content, as well as the maximum age of the PDF rendered on the server. See [PDFRequestOptions class](#pdfrequestoptions-class) for more details.
 
 **Exceptions**
 
-| Error                  | Description                                       |
-| :--------------------- | :------------------------------------------------ |
-| `View item missing ID` | Raises an error if the ID of the view is missing. |
+Error | Description
+:--- | :---
+`View item missing ID` | Raises an error if the ID of the view is missing.
 
 **Returns**
 
 None. The PDF content is added to the `view_item` and can be accessed by its `pdf` field.
 
 **Example**
-
 ```py
 # Sign in, get view, etc.
 
@@ -5170,35 +5158,33 @@ See [ViewItem class](#viewitem-class)
 <br>
 <br>
 
+
 ---
-
 ## Webhooks
-
 <br>
 <br>
 Using the Tableau Server Client (TSC), you can create a new webhook, get a list of all the webhooks, get details about a specific webhook, or delete a webhook. 
 <br>
 
-The webhook resource for Tableau Server and Tableau Cloud are defined in the `WebhookItem` class. The class corresponds to the webhook resources you can access using the Tableau REST API. For example, using REST API, you can gather information about a workbook, like the name of the Webbook, the event it is associated with, and the destination URL, and you can get the same information using TSC as well.
+The webhook resource for Tableau Server and Tableau Cloud are defined in the `WebhookItem` class. The class corresponds to the webhook resources you can access using the Tableau REST API.  For example, using REST API, you can gather information about a workbook, like the name of the Webbook, the event it is associated with, and the destination URL, and you can get the same information using TSC as well.
 <br>
 
-Tableau webhook REST API endpoints are available in **REST API version 3.16** and later.
+Tableau webhook REST API endpoints are available in **REST API version 3.16** and later. 
 <br>
 <br>
 
 ### WebhookItem class
-
-The `WebhookItem` represents the webhook resources on Tableau Server or Tableau Cloud. This is the information that can be sent or returned in response to a REST API request for webhooks.
+The `WebhookItem` represents the webhook resources on Tableau Server or Tableau Cloud. This is the information that can be sent or returned in response to a REST API request for webhooks.  
 
 **Attributes**
 
-| Name       | Description                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `id`       | The identifier (_luid_) for the webhook. You need this value to query a specific webhook with the `get_by_id` method or to delete a webhook with the `delete` method.                                                                                                                                                                                                                                                                 |
-| `name`     | The name of the webhook. You must specify this when you create an instance of the `WebhookItem`.                                                                                                                                                                                                                                                                                                                                      |
-| `url`      | The destination URL for the webhook. The webhook destination URL must be https and have a valid certificate. You must specify this when you create an instance of the `WebhookItem`.                                                                                                                                                                                                                                                  |
-| `event`    | The name of the Tableau event that triggers your webhook.This is either `api-event-name` or `webhook-source-api-event-name`: one of these is required to create an instance of the `WebhookItem`. We recommend using the `api-event-name`. <br> The event name must be one of the supported events listed in the [Trigger Events](https://help.tableau.com/current/developer/webhooks/en-us/docs/webhooks-events-payload.html) table. |
-| `owner_id` | The identifier of the owner of the webhook.                                                                                                                                                                                                                                                                                                                                                                                           |
+Name | Description
+:--- | :---
+`id` |  The identifier (*luid*) for the webhook. You need this value to query a specific webhook  with the `get_by_id` method or to delete a webhook with the  `delete` method.
+`name`  |  The name of the webhook. You must specify this when you create an instance of the `WebhookItem`.
+`url` | The destination URL for the webhook. The webhook destination URL must be https and have a valid certificate. You must specify this when you create an instance of the `WebhookItem`.
+`event` | The name of the Tableau event that triggers your webhook.This  is either `api-event-name` or `webhook-source-api-event-name`: one of these is required to create an instance of the `WebhookItem`. We recommend using the `api-event-name`. <br> The event name must be one of the supported events listed in the [Trigger Events](https://help.tableau.com/current/developer/webhooks/en-us/docs/webhooks-events-payload.html) table. 
+`owner_id` |  The identifier of the owner of the webhook.
 
 **Example**
 
@@ -5209,14 +5195,12 @@ import tableauserverclient as TSC
 
 new_webhook = TSC.WebhookItem()
 ```
-
-Source file: models/webhook_item.py
+Source file:  models/webhook_item.py
 
 <br>
 <br>
 
 ### Webhook methods
-
 The Tableau Server Client provides several methods for interacting with webhook resources, or endpoints. These methods correspond to endpoints in the Tableau REST API.
 
 Source file: server/endpoint/webhooks_endpoint.py
@@ -5225,31 +5209,28 @@ Source file: server/endpoint/webhooks_endpoint.py
 <br>
 
 #### webhook.create
-
 ```py
 webhooks.create(webhook_item)
 
 ```
-
 Creates a new webhook on a specified site.
 
-To create a webhook, you must first create a new instance of a `WebhookItem` and pass it to the create method.
+To create a webhook, you must first create a new instance of a `WebhookItem` and pass it to the create method. 
 
-To specify the site to create the new webhook in, create a `TableauAuth` instance using the content URL for the site `(site_id)` and sign in to that site. For more information on how to specify a site, see the [TableauAuth class](#tableauauth-class).
+To specify the site to create  the new webhook in, create a `TableauAuth` instance using the content URL for the site `(site_id)` and sign in to that site. For more information on how to specify a site, see the [TableauAuth class](#tableauauth-class).
 
 REST API: [Create Webhook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_notifications.htm#create_webhook)
 
 ##### **Parmeters**
 
-| Name         | Description                                                                                                                                                                                                                                                                                                                                   |
-| :----------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| webhook_item | Specifies the properties for the webhook. The webhook_item is the request package. To create a request package, create a new instance of `WebhokItem`. The `WebhookItem` includes the `name`, destination `url`, and the `event` or `source`. The `event` or `source` specifies the Tableau event that should be associated with the webhook. |
+Name | Description
+:--- | :---
+webhook_item | Specifies the properties for the webhook.  The webhook_item is the request package. To create a request package, create a new instance of `WebhokItem`.  The `WebhookItem` includes the `name`, destination `url`, and the `event` or `source`.  The `event` or `source` specifies the Tableau event that should be associated with the webhook.  
 
-**Returns**
-Returns the new webhook item.
+**Returns** 
+Returns the new webhook item. 
 
 **Example**
-
 ```py
 # import tableauserverclient as TSC
 # server = TSC.Server('https://SERVER')
@@ -5259,20 +5240,18 @@ Returns the new webhook item.
  with server.auth.sign_in(tableau_auth):
     new_webhook = TSC.WebhookItem()
     new_webhook.name = 'testWebhook'
-    new_webhook.event = "workbook-refresh-failed" # alternately, you can also use new_webhook.source="webhook-source-event-workbook-refresh-failed"
-    new_webhook.url = "https://webhook.site/6e4c957d-dd40-422c-8fc6-7151afe7fc0b"
+    new_webhook.event = "workbook-refresh-failed" # alternately, you can also use new_webhook.source="webhook-source-event-workbook-refresh-failed" 
+    new_webhook.url = "https://webhook.site/6e4c957d-dd40-422c-8fc6-7151afe7fc0b"    
     # create the webhook
     new_webhook = server.webhooks.create(new_webhook)
-
+    
   print("Webhook created. ID: {}".format(new_webhook.id))
 
 ```
-
 <br>
 <br>
 
 ### webhook.delete
-
 ```py
 webhooks.delete(webhook_id)
 ```
@@ -5281,22 +5260,21 @@ Deletes a webhook by ID.
 
 To specify the site, create a `TableauAuth` instance using the content URL for the site `(site_id)` and sign in to the site. For more information on how to specify a site, see the [TableauAuth class](#tableauauth-class).
 
-REST API: [Delete Webhook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_notifications.htm#delete_webhook)
+REST API:  [Delete Webhook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_notifications.htm#delete_webhook)
 
 **Parameters**
 
-| Name         | Description                      |
-| :----------- | :------------------------------- |
-| `webhook_id` | The ID of the webhook to delete. |
+Name|Description
+:---|:---
+`webhook_id`| The ID of the webhook to delete.
 
 **Exceptions**
 
-| Error                  | Description                                            |
-| :--------------------- | :----------------------------------------------------- |
-| `Webhook ID undefined` | Raises an exception if a `webhook_id` is not provided. |
+Error|Description
+:---|:---
+`Webhook ID undefined`| Raises an exception if a `webhook_id` is not provided. 
 
 **Example**
-
 ```py
 # import tableauserverclient as TSC
 # server = TSC.Server('https://SERVER')
@@ -5306,30 +5284,28 @@ REST API: [Delete Webhook](https://help.tableau.com/current/api/rest_api/en-us/R
 with server.auth.sign_in(tableau_auth):
   server.webhooks.delete('7d60d364-b9f5-4a9c-8aa5-4bdaa38c5dd3')
 ```
-
 <br>
 <br>
 
 #### webhook.get()
-
 ```py
 webhooks.get()
 ```
-
 Returns a list of all the webhooks for a site.  
 To specify the site, create a `TableauAuth` instance using the content URL for the site `(site_id)`, and sign in to that site. For more information on how to specify a site, see the [TableauAuth class](#tableauauth-class).
 
 REST API: [List Webhooks](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_notifications.htm#list_webhooks_for_site)
 
+
 **Parameters**
 
-| Name         | Description                                                                                                                                                                                                                                              |
-| :----------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `req_option` | (Optional) You can pass themthod oa request object that contains additional parameters to filter the request. For example, you could specify the name of the webhook or the name of the owner. For more information, see [Filter and Sort](filter-sort). |
+Name |Description
+:---|:---
+`req_option`| (Optional) You can pass themthod oa request object that contains additional parameters to filter the request.  For example, you could specify the name of the webhook or the name of the owner. For more information, see [Filter and Sort](filter-sort).
 
 **Returns**
 
-Returns a list of all `ProjectItem` objects and a `PagainationItem`. Use these values to iterate through the results.
+Returns a list of all `ProjectItem` objects and a `PagainationItem`. Use  these values to iterate through the results. 
 
 **Example**
 
@@ -5355,22 +5331,22 @@ webhooks.get_by_ide(webhook_id)
 
 Returns information about the specified workbook for a site.
 
-To specify the site, create a `TableauAuth` instance using the content URL for the site `(site_id)`, and sign in to that site. For more information on how to specify a site, see the [TableauAuth class](#tableauauth-class).
+To specify the site, create a `TableauAuth` instance using the content URL for the site `(site_id)`, and sign in to that site. For more information on how to specify a site, see the [TableauAuth class](#tableauauth-class). 
 
 **Parameters**
 
-| Name         | Description                                |
-| :----------- | :----------------------------------------- |
-| `webhook_id` | The ID of the webhook. The ID is a _luid_. |
+Name|Description
+:---|:---
+`webhook_id`| The ID of the webhook.  The ID is a *luid*.
 
 **Exceptions**
 
-| Error                  | Description                                            |
-| :--------------------- | :----------------------------------------------------- |
-| `Webhook ID undefined` | Raises an exception if a `webhook_id` is not provided. |
+Error|Description
+:---|:---
+`Webhook ID undefined`| Raises an exception if a `webhook_id` is not provided. 
+
 
 **Example**
-
 ```py
 # import tableauserverclient as TSC
 # server = TSC.Server('https://SERVER')
@@ -5378,26 +5354,23 @@ To specify the site, create a `TableauAuth` instance using the content URL for t
 
 with server.auth.sign_in(tableau_auth):
   webhook = server.webhooks.get_by_id ('7d60d364-b9f5-4a9c-8aa5-4bdaa38c5dd3')
-
+  
 print (webhook.name, webhook.url)
 
 
 ```
-
 <br>
 <br>
 
 ### Additional Resources
-
 - [REST API Endpoints](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_notifications.htm)
 - [Webhooks Documentation](https://help.tableau.com/current/developer/webhooks/en-us/)
 - [TSC webhooks samples](https://github.com/tableau/server-client-python/blob/master/samples/explore_webhooks.py)
 
 ---
-
 ## Workbooks
 
-Using the TSC library, you can get information about a specific workbook or all the workbooks on a site, and you can publish, update, or delete workbooks.
+Using the TSC library, you can get information about a specific workbook or all the workbooks on a site, and  you can publish, update, or delete workbooks.
 
 The project resources for Tableau are defined in the `WorkbookItem` class. The class corresponds to the workbook resources you can access using the Tableau REST API. The workbook methods are based upon the endpoints for projects in the REST API and operate on the `WorkbookItem` class.
 
@@ -5410,30 +5383,34 @@ The project resources for Tableau are defined in the `WorkbookItem` class. The c
  WorkbookItem(project_id, name=None, show_tabs=False)
 
 ```
-
 The workbook resources for Tableau are defined in the `WorkbookItem` class. The class corresponds to the workbook resources you can access using the Tableau REST API. Some workbook methods take an instance of the `WorkbookItem` class as arguments. The workbook item specifies the project
+
 
 **Attributes**
 
-| Name            | Description                                                                                                                                                                                                                                                             |
-| :-------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `connections`   | The list of data connections (`ConnectionItem`) for the data sources used by the workbook. You must first call the [workbooks.populate_connections](#workbooks.populate_connections) method to access this data. See the [ConnectionItem class](#connectionitem-class). |
-| `content_url`   | The name of the data source as it would appear in a URL.                                                                                                                                                                                                                |
-| `created_at`    | The date and time when the data source was created.                                                                                                                                                                                                                     |
-| `description`   | The user-defined description of the workbook                                                                                                                                                                                                                            |
-| `id`            | The identifier for the workbook. You need this value to query a specific workbook or to delete a workbook with the `get_by_id` and `delete` methods.                                                                                                                    |
-| `name`          | The name of the workbook.                                                                                                                                                                                                                                               |
-| `owner_id`      | The ID of the owner.                                                                                                                                                                                                                                                    |
-| `preview_image` | The thumbnail image for the view. You must first call the [workbooks.populate_preview_image](#workbooks.populate_preview_image) method to access this data.                                                                                                             |
-| `project_id`    | The project id.                                                                                                                                                                                                                                                         |
-| `project_name`  | The name of the project.                                                                                                                                                                                                                                                |
-| `size`          | The size of the workbook (in megabytes).                                                                                                                                                                                                                                |
-| `show_tabs`     | (Boolean) Determines whether the workbook shows tabs for the view.                                                                                                                                                                                                      |
-| `hidden_views`  | (Optional) List of string names of views that need to be hidden when the workbook is published.                                                                                                                                                                         |
-| `tags`          | The tags that have been added to the workbook.                                                                                                                                                                                                                          |
-| `updated_at`    | The date and time when the workbook was last updated.                                                                                                                                                                                                                   |
-| `views`         | The list of views (`ViewItem`) for the workbook. You must first call the [workbooks.populate_views](#workbooks.populate_views) method to access this data. See the [ViewItem class](#viewitem-class).                                                                   |
-| `webpage_url`   | The full URL of the workbook.                                                                                                                                                                                                                                           |
+Name  |  Description
+:--- | :---
+`connections` |  The list of data connections (`ConnectionItem`) for the data sources used by the workbook. You must first call the [workbooks.populate_connections](#workbooks.populate_connections) method to access this data. See the [ConnectionItem class](#connectionitem-class).
+`content_url` |  The name of the data source as it would appear in a URL.
+`created_at` |  The date and time when the data source was created.
+`description` | The user-defined description of the workbook
+`id` |  The identifier for the workbook. You need this value to query a specific workbook or to delete a workbook with the `get_by_id` and `delete` methods.
+`name` | The name of the workbook.
+`owner_id` | The ID of the owner.
+`preview_image`  | The thumbnail image for the view. You must first call the [workbooks.populate_preview_image](#workbooks.populate_preview_image) method to access this data.
+`project_id`  | The project id.
+`project_name` | The name of the project.
+`size` | The size of the workbook (in megabytes).
+`show_tabs`  |  (Boolean) Determines whether the workbook shows tabs for the view.
+`hidden_views` | (Optional) List of string names of views that need to be hidden when the workbook is published.
+`tags` |  The tags that have been added to the workbook.
+`updated_at` |  The date and time when the workbook was last updated.
+`views`   | The list of views (`ViewItem`) for the workbook. You must first call the [workbooks.populate_views](#workbooks.populate_views) method to access this data. See the [ViewItem class](#viewitem-class).
+`webpage_url` | The full URL of the workbook.
+
+
+
+
 
 **Example**
 
@@ -5456,8 +5433,10 @@ Source file: models/workbook_item.py
 
 ### Workbook methods
 
-The Tableau Server Client (TSC) library provides methods for interacting with workbooks. These methods correspond to endpoints in the Tableau Server REST API. For example, you can use the library to publish, update, download, or delete workbooks on the site.
+The Tableau Server Client (TSC) library provides methods for interacting with workbooks. These methods correspond to endpoints in the Tableau Server REST API.  For example, you can use the library to publish, update, download, or delete workbooks on the site.
 The methods operate on a workbook object (`WorkbookItem`) that represents the workbook resources.
+
+
 
 Source files: server/endpoint/workbooks_endpoint.py
 
@@ -5472,17 +5451,24 @@ workbooks.get(req_options=None)
 
 Queries the server and returns information about the workbooks the site.
 
+
+
+
+
 REST API: [Query Workbooks for Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_workbooks_for_site)
+
 
 **Parameters**
 
-| Name          | Description                                                                                                                                                                                                                                                                        |
-| :------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `req_options` | (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific workbook, you could specify the name of the workbook or the name of the owner. See [Filter and Sort](filter-sort) |
+Name | Description
+:--- | :---
+`req_options`  |  (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific workbook, you could specify the name of the workbook or the name of the owner. See [Filter and Sort](filter-sort)
+
 
 **Returns**
 
 Returns a list of all `WorkbookItem` objects and a `PaginationItem`. Use these values to iterate through the results.
+
 
 **Example**
 
@@ -5493,7 +5479,7 @@ tableau_auth = TSC.TableauAuth('username', 'password', site_id='site')
 server = TSC.Server('https://servername')
 
 with server.auth.sign_in(tableau_auth):
-  all_workbooks_items, pagination_item = server.workbooks.get()
+  all_workbooks_items, pagination_item = server.workbooks.get()  
   # print names of first 100 workbooks
   print([workbook.name for workbook in all_workbooks_items])
 
@@ -5503,6 +5489,8 @@ with server.auth.sign_in(tableau_auth):
 
 <br>
 <br>
+
+
 
 #### workbooks.get_by_id
 
@@ -5514,21 +5502,25 @@ Returns information about the specified workbook on the site.
 
 REST API: [Query Workbook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_workbook)
 
+
 **Parameters**
 
-| Name          | Description                                                                                      |
-| :------------ | :----------------------------------------------------------------------------------------------- |
-| `workbook_id` | The `workbook_id` specifies the workbook to query. The ID is a LUID (64-bit hexadecimal string). |
+Name | Description
+:--- | :---
+`workbook_id`  |  The `workbook_id` specifies the workbook to query. The ID is a LUID (64-bit hexadecimal string).
+
 
 **Exceptions**
 
-| Error                   | Description                                             |
-| :---------------------- | :------------------------------------------------------ |
-| `Workbook ID undefined` | Raises an exception if a `workbook_id` is not provided. |
+Error   |  Description
+ :--- | : ---
+`Workbook ID undefined`  |  Raises an exception if a `workbook_id` is not provided.
+
 
 **Returns**
 
-The `WorkbookItem`. See [WorkbookItem class](#workbookitem-class)
+The `WorkbookItem`.  See [WorkbookItem class](#workbookitem-class)
+
 
 **Example**
 
@@ -5539,8 +5531,10 @@ print(workbook.name)
 
 ```
 
+
 <br>
 <br>
+
 
 #### workbooks.publish
 
@@ -5552,38 +5546,43 @@ Publish a workbook to the specified site.
 
 **Note:** The REST API cannot automatically include
 extracts or other resources that the workbook uses. Therefore,
-a .twb file that uses data from an Excel or csv file on a local computer cannot be published,
+ a .twb file that uses data from an Excel or csv file on a local computer cannot be published,
 unless you package the data and workbook in a .twbx file, or publish the data source separately.
 
 For workbooks that are larger than 64 MB, the publish method automatically takes care of chunking the file in parts for uploading. Using this method is considerably more convenient than calling the publish REST APIs directly.
 
 REST API: [Publish Workbook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#publish_workbook), [Initiate File Upload](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#initiate_file_upload), [Append to File Upload](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#append_to_file_upload)
 
+
+
 **Parameters**
 
-| Name                    | Description                                                                                                                                                                                                                                                                                                                                                                                        |
-| :---------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `workbook_item`         | The `workbook_item` specifies the workbook you are publishing. When you are adding a workbook, you need to first create a new instance of a `workbook_item` that includes a `project_id` of an existing project. The name of the workbook will be the name of the file, unless you also specify a name for the new workbook when you create the instance. See [WorkbookItem](#workbookitem-class). |
-| `file`                  | The file path or file object of the workbook to publish. When providing a file object, you must also specifiy the name of the workbook in your instance of the ` workbook_item``workbook_item ` , as the name cannot be derived from the file name.                                                                                                                                                |
-| `mode`                  | Specifies whether you are publishing a new workbook (`CreateNew`) or overwriting an existing workbook (`Overwrite`). You cannot appending workbooks. You can also use the publish mode attributes, for example: `TSC.Server.PublishMode.Overwrite`.                                                                                                                                                |
-| `connections`           | List of `ConnectionItems` objects for the connections created within the workbook.                                                                                                                                                                                                                                                                                                                 |
-| `skip_connection_check` | (Optional) Set to `True` to skip connection check at time of upload. Publishing will succeed but unchecked connection issues may result in a non-functioning workbook. Defaults to `False`.                                                                                                                                                                                                        |
-| `as_job`                | (Optional) Set to `True` to run the upload as a job (asynchronous upload). If set to `True` a job will start to perform the publishing process and a `Job` object is returned. Defaults to `False`.                                                                                                                                                                                                |
+Name | Description
+:--- | :---
+`workbook_item`  |  The `workbook_item` specifies the workbook you are publishing. When you are adding a workbook, you need to first create a new instance of a `workbook_item` that includes a `project_id` of an existing project. The name of the workbook will be the name of the file, unless you also specify a name for the new workbook when you create the instance. See [WorkbookItem](#workbookitem-class).
+`file`  |  The file path or file object of the workbook to publish. When providing a file object, you must also specifiy the name of the workbook in your instance of the `workbook_item``workbook_item` , as the name cannot be derived from the file name.
+`mode`     |  Specifies whether you are publishing a new workbook (`CreateNew`) or overwriting an existing workbook (`Overwrite`).  You cannot appending workbooks.  You can also use the publish mode attributes, for example: `TSC.Server.PublishMode.Overwrite`.
+`connections` | List of `ConnectionItems` objects for the connections created within the workbook.
+`skip_connection_check` | (Optional) Set to `True` to skip connection check at time of upload. Publishing will succeed but unchecked connection issues may result in a non-functioning workbook. Defaults to `False`.
+`as_job` | (Optional) Set to `True` to run the upload as a job (asynchronous upload). If set to `True` a job will start to perform the publishing process and a `Job` object is returned. Defaults to `False`.
+
+
 
 **Exceptions**
 
-| Error                                                    | Description                                                              |
-| :------------------------------------------------------- | :----------------------------------------------------------------------- |
-| `File path does not lead to an existing file.`           | Raises an error of the file path is incorrect or if the file is missing. |
-| `Invalid mode defined.`                                  | Raises an error if the publish mode is not one of the defined options.   |
-| `Workbooks cannot be appended.`                          | The `mode` must be set to `Overwrite` or `CreateNew`.                    |
-| `Only .twb or twbx files can be published as workbooks.` | Raises an error if the type of file specified is not supported.          |
+Error | Description
+:--- | :---
+`File path does not lead to an existing file.`  |  Raises an error of the file path is incorrect or if the file is missing.
+`Invalid mode defined.`  |  Raises an error if the publish mode is not one of the defined options.
+`Workbooks cannot be appended.` | The `mode` must be set to `Overwrite` or `CreateNew`.
+`Only .twb or twbx files can be published as workbooks.`  |  Raises an error if the type of file specified is not supported.
 
 See the REST API [Publish Workbook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#publish_workbook) for additional error codes.
 
 **Returns**
 
 The `WorkbookItem` for the workbook that was published.
+
 
 **Example**
 
@@ -5611,21 +5610,23 @@ with server.auth.sign_in(tableau_auth):
 workbooks.refresh(workbook_item)
 ```
 
+
 Refreshes the extract of an existing workbook.
 
 REST API: [Update Workbook Now](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_workbook_now)
 
 **Parameters**
 
-| Name            | Description                                                                     |
-| :-------------- | :------------------------------------------------------------------------------ |
-| `workbook_item` | The `workbook_item` specifies the settings for the workbook you are refreshing. |
+Name | Description
+:--- | :---
+`workbook_item`  |  The `workbook_item` specifies the settings for the workbook you are refreshing.
 
 **Exceptions**
 
-| Error                                                                     | Description                                                                                                                                                        |
-| :------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Workbook item missing ID. Workbook must be retrieved from server first.` | Raises an error if the `workbook_item` is unspecified. Use the `workbooks.get()` or `workbooks.get_by_id()` methods to retrieve the workbook item from the server. |
+Error | Description
+:--- | :---
+`Workbook item missing ID. Workbook must be retrieved from server first.` | Raises an error if the `workbook_item` is unspecified. Use the `workbooks.get()` or `workbooks.get_by_id()` methods to retrieve the workbook item from the server.
+
 
 ```py
 
@@ -5645,6 +5646,7 @@ with server.auth.sign_in(tableau_auth):
 
 ```
 
+
 <br>
 <br>
 
@@ -5654,21 +5656,24 @@ with server.auth.sign_in(tableau_auth):
 workbooks.update(workbook_item)
 ```
 
+
 Modifies an existing workbook. Use this method to change the owner or the project that the workbook belongs to, or to change whether the workbook shows views in tabs. The workbook item must include the workbook ID and overrides the existing settings.
 
 REST API: [Update Workbooks](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_workbook)
 
 **Parameters**
 
-| Name            | Description                                                                                                                                                                                     |
-| :-------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `workbook_item` | The `workbook_item` specifies the settings for the workbook you are updating. You can change the `owner_id`, `project_id`, and the `show_tabs` values. See [WorkbookItem](#workbookitem-class). |
+Name | Description
+:--- | :---
+`workbook_item`  |  The `workbook_item` specifies the settings for the workbook you are updating. You can change the `owner_id`, `project_id`, and the `show_tabs` values. See [WorkbookItem](#workbookitem-class).
+
 
 **Exceptions**
 
-| Error                                                                     | Description                                                                                                                                                        |
-| :------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Workbook item missing ID. Workbook must be retrieved from server first.` | Raises an error if the `workbook_item` is unspecified. Use the `workbooks.get()` or `workbooks.get_by_id()` methods to retrieve the workbook item from the server. |
+Error | Description
+:--- | :---
+`Workbook item missing ID. Workbook must be retrieved from server first.` | Raises an error if the `workbook_item` is unspecified. Use the `workbooks.get()` or `workbooks.get_by_id()` methods to retrieve the workbook item from the server.
+
 
 ```py
 
@@ -5693,8 +5698,11 @@ with server.auth.sign_in(tableau_auth):
 
 ```
 
+
 <br>
 <br>
+
+
 
 #### workbooks.delete
 
@@ -5704,21 +5712,29 @@ workbooks.delete(workbook_id)
 
 Deletes a workbook with the specified ID.
 
-To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site. See the [TableauAuth class](#tableauauth-class).
+
+
+To specify the site, create a `TableauAuth` instance using the content URL for the site (`site_id`), and sign in to that site.  See the [TableauAuth class](#tableauauth-class).
+
 
 REST API: [Delete Workbook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#delete_workbook1)
 
+
 **Parameters**
 
-| Name          | Description                       |
-| :------------ | :-------------------------------- |
-| `workbook_id` | The ID of the workbook to delete. |
+Name  |  Description
+:--- | :---
+`workbook_id`   | The ID of the workbook to delete.
+
+
+
 
 **Exceptions**
 
-| Error                    | Description                                                                                                           |
-| :----------------------- | :-------------------------------------------------------------------------------------------------------------------- |
-| `Workbook ID undefined.` | Raises an exception if the project item does not have an ID. The project ID is sent to the server as part of the URI. |
+Error  |  Description
+:--- | :---
+`Workbook ID undefined.`  |  Raises an exception if the project item does not have an ID. The project ID is sent to the server as part of the URI.
+
 
 **Example**
 
@@ -5731,8 +5747,10 @@ REST API: [Delete Workbook](https://help.tableau.com/current/api/rest_api/en-us/
 
 ```
 
+
 <br>
 <br>
+
 
 #### workbooks.download
 
@@ -5742,25 +5760,31 @@ workbooks.download(workbook_id, filepath=None, no_extract=False)
 
 Downloads a workbook to the specified directory (optional).
 
+
 REST API: [Download Workbook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#download_workbook)
+
 
 **Parameters**
 
-| Name          | Description                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| :------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `workbook_id` | The ID for the `WorkbookItem` that you want to download from the server.                                                                                                                                                                                                                                                                                                                                                            |
-| `filepath`    | (Optional) Downloads the file to the location you specify. If no location is specified, the file is downloaded to the current working directory. The default is `Filepath=None`.                                                                                                                                                                                                                                                    |
-| `no_extract`  | (Optional) Specifies whether to download the file without the extract. When the workbook has an extract, if you set the parameter `no_extract=True`, the extract is not included. You can use this parameter to improve performance if you are downloading workbooks that have large extracts. The default is to include the extract, if present (`no_extract=False`). Available starting with Tableau Server REST API version 2.5. |
+Name | Description
+:--- | :---
+`workbook_id` |  The ID for the `WorkbookItem` that you want to download from the server.
+`filepath` |  (Optional) Downloads the file to the location you specify. If no location is specified, the file is downloaded to the current working directory. The default is `Filepath=None`.
+`no_extract` | (Optional) Specifies whether to download the file without the extract. When the workbook has an extract, if you set the parameter `no_extract=True`, the extract is not included. You can use this parameter to improve performance if you are downloading workbooks that have large extracts. The default is to include the extract, if present (`no_extract=False`). Available starting with Tableau Server REST API version 2.5.
+
+
 
 **Exceptions**
 
-| Error                   | Description                                                     |
-| :---------------------- | :-------------------------------------------------------------- |
-| `Workbook ID undefined` | Raises an exception if a valid `datasource_id` is not provided. |
+Error | Description
+:--- | :---
+`Workbook ID undefined`   |  Raises an exception if a valid `datasource_id` is not provided.
+
 
 **Returns**
 
 The file path to the downloaded workbook.
+
 
 **Example**
 
@@ -5771,8 +5795,10 @@ The file path to the downloaded workbook.
 
 ```
 
+
 <br>
 <br>
+
 
 #### workbooks.populate_views
 
@@ -5786,23 +5812,28 @@ You must first call this method to populate views before you can iterate through
 
 This method retrieves the view information for the specified workbook. The REST API is designed to return only the information you ask for explicitly. When you query for all the data sources, the view information is not included. Use this method to retrieve the views. The method adds the list of views to the workbook item (`workbook_item.views`). This is a list of `ViewItem`.
 
-REST API: [Query Views for Workbook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_views_for_workbook)
+REST API:  [Query Views for Workbook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_views_for_workbook)
 
 **Parameters**
 
-| Name            | Description                                                                                                                   |
-| :-------------- | :---------------------------------------------------------------------------------------------------------------------------- |
-| `workbook_item` | The `workbook_item` specifies the workbook to populate with views information. See [WorkbookItem class](#workbookitem-class). |
+Name | Description
+:--- | :---
+`workbook_item`  |  The `workbook_item` specifies the workbook to populate with views information. See [WorkbookItem class](#workbookitem-class).
+
+
+
 
 **Exceptions**
 
-| Error                                                                     | Description                                                                                                                                                 |
-| :------------------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Workbook item missing ID. Workbook must be retrieved from server first.` | Raises an error if the `workbook_item` is unspecified. You can retrieve the workbook items using the `workbooks.get()` and `workbooks.get_by_id()` methods. |
+Error | Description
+:--- | :---
+`Workbook item missing ID. Workbook must be retrieved from server first.` |  Raises an error if the `workbook_item` is unspecified. You can retrieve the workbook items using the `workbooks.get()` and `workbooks.get_by_id()` methods.
+
 
 **Returns**
 
 None. A list of `ViewItem` objects are added to the workbook (`workbook_item.views`).
+
 
 **Example**
 
@@ -5844,23 +5875,28 @@ connections.
 
 This method retrieves the data source connection information for the specified workbook. The REST API is designed to return only the information you ask for explicitly. When you query all the workbooks, the data source connection information is not included. Use this method to retrieve the connection information for any data sources used by the workbook. The method adds the list of data connections to the workbook item (`workbook_item.connections`). This is a list of `ConnectionItem`.
 
-REST API: [Query Workbook Connections](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_workbook_connections)
+REST API:  [Query Workbook Connections](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#query_workbook_connections)
 
 **Parameters**
 
-| Name            | Description                                                                              |
-| :-------------- | :--------------------------------------------------------------------------------------- |
-| `workbook_item` | The `workbook_item` specifies the workbook to populate with data connection information. |
+Name | Description
+:--- | :---
+`workbook_item`  |  The `workbook_item` specifies the workbook to populate with data connection information.
+
+
+
 
 **Exceptions**
 
-| Error                                                                     | Description                                            |
-| :------------------------------------------------------------------------ | :----------------------------------------------------- |
-| `Workbook item missing ID. Workbook must be retrieved from server first.` | Raises an error if the `workbook_item` is unspecified. |
+Error | Description
+:--- | :---
+`Workbook item missing ID. Workbook must be retrieved from server first.` |  Raises an error if the `workbook_item` is unspecified.
+
 
 **Returns**
 
 None. A list of `ConnectionItem` objects are added to the data source (`workbook_item.connections`).
+
 
 **Example**
 
@@ -5890,6 +5926,7 @@ None. A list of `ConnectionItem` objects are added to the data source (`workbook
 <br>
 <br>
 
+
 #### workbooks.populate_preview_image
 
 ```py
@@ -5904,19 +5941,25 @@ REST API: [Query View Preview Image](https://help.tableau.com/current/api/rest_a
 
 **Parameters**
 
-| Name        | Description                                                                                |
-| :---------- | :----------------------------------------------------------------------------------------- |
-| `view_item` | The view item specifies the `view.id` and `workbook.id` that identifies the preview image. |
+Name | Description
+:--- | :---
+`view_item`  |  The view item specifies the `view.id` and `workbook.id` that identifies the preview image.
+
+
 
 **Exceptions**
 
-| Error                                 | Description                                                         |
-| :------------------------------------ | :------------------------------------------------------------------ |
-| `View item missing ID or workbook ID` | Raises an error if the ID for the view item or workbook is missing. |
+Error | Description
+:--- | :---
+`View item missing ID or workbook ID` |  Raises an error if the ID for the view item or workbook is missing.
+
+
 
 **Returns**
 
 None. The preview image is added to the view.
+
+
 
 **Example**
 
@@ -5950,18 +5993,23 @@ Updates a workbook connection information (server address, server port, user nam
 
 The workbook connections must be populated before the strings can be updated. See [workbooks.populate_connections](#workbooks.populate_connections)
 
-REST API: [Update Workbook Connection](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_workbook_connection)
+REST API:  [Update Workbook Connection](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_workbook_connection)
 
 **Parameters**
 
-| Name              | Description                                                                              |
-| :---------------- | :--------------------------------------------------------------------------------------- |
-| `workbook_item`   | The `workbook_item` specifies the workbook to populate with data connection information. |
-| `connection_item` | The `connection_item` that has the information you want to update.                       |
+Name | Description
+:--- | :---
+`workbook_item`  |  The `workbook_item` specifies the workbook to populate with data connection information.
+`connection_item` | The `connection_item` that has the information you want to update.
+
+
 
 **Returns**
 
 None. The connection information is updated with the information in the `ConnectionItem`.
+
+
+
 
 **Example**
 
@@ -5983,7 +6031,6 @@ server.workbooks.update_connection(workbook, connection)
 <br>
 
 #### workbooks.populate_pdf
-
 ```
 workbooks.populate_pdf(workbook_item, req_options=None)
 ```
@@ -6000,23 +6047,22 @@ This endpoint is available with REST API version 3.4 and up.
 
 **Parameters**
 
-| Name            | description                                                                                                                                                                                                                                     |
-| :-------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `workbook_item` | Specifies the workbook to populate.                                                                                                                                                                                                             |
-| `req_options`   | (Optional) You can pass in request options to specify the page type and orientation of the PDF content, as well as the maximum age of the PDF rendered on the server. See [PDFRequestOptions class](#pdfrequestoptions-class) for more details. |
+Name | description
+:--- | :---
+`workbook_item` | Specifies the workbook to populate.
+`req_options` | (Optional) You can pass in request options to specify the page type and orientation of the PDF content, as well as the maximum age of the PDF rendered on the server. See [PDFRequestOptions class](#pdfrequestoptions-class) for more details.
 
 **Exceptions**
 
-| Error                      | Description                                           |
-| :------------------------- | :---------------------------------------------------- |
-| `Workbook item missing ID` | Raises an error if the ID of the workbook is missing. |
+Error | Description
+:--- | :---
+`Workbook item missing ID` | Raises an error if the ID of the workbook is missing.
 
 **Returns**
 
 None. The PDF content is added to the `workbook_item` and can be accessed by its `pdf` field.
 
 **Example**
-
 ```py
 # Sign in, get view, etc.
 
@@ -6028,3 +6074,5 @@ with open('./workbook_pdf.pdf', 'wb') as f:
 
 <br>
 <br>
+
+
