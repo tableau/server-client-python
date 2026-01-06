@@ -3229,6 +3229,53 @@ monthly_schedule = TSC.ScheduleItem("Monthly-Schedule",
 monthly_schedule = server.schedules.create(monthly_schedule)
 ```
 
+#### schedules.batch_update_state
+
+```py
+schedules.batch_update_state(schedules, state, update_all=False)
+```
+
+Batch update the status of one or more schedules. If `update_all` is set to `True`, all schedules on the Tableau Server are affected.
+
+REST API: [Batch Update Schedule State](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#batch_update_schedule_state)
+
+**Version**
+
+This endpoint is available with REST API version 3.27 and up.
+
+**Parameters**
+
+| Name         | Description                                                                                                                             |
+| :----------- | :-------------------------------------------------------------------------------------------------------------------------------------- |
+| `schedules`  | (Optional) An iterable of `ScheduleItem` objects or schedule ID strings to be updated. If `update_all=True`, this parameter is ignored. |
+| `state`      | The state to set for the schedules. Must be either `"active"` or `"suspended"`.                                                         |
+| `update_all` | (Optional) If set to `True`, applies the state to all schedules on the server. Defaults to `False`.                                     |
+
+**Returns**
+
+A list of strings containing the IDs of the affected schedules.
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+# sign in, etc.
+
+# Get schedules to update
+schedules, pagination = server.schedules.get()
+schedules_to_update = [schedules[0], schedules[1], schedules[2]]
+
+# Batch update schedules to active state
+affected_ids = server.schedules.batch_update_state(schedules_to_update, "active")
+
+# Or update using schedule ID strings
+schedule_ids = ["593d2ebf-0d18-4deb-9d21-b113a4902583",
+                "cecbb71e-def0-4030-8068-5ae50f51db1c"]
+affected_ids = server.schedules.batch_update_state(schedule_ids, "suspended")
+
+# Update all schedules on the server
+all_affected_ids = server.schedules.batch_update_state([], "active", update_all=True)
+```
 
 
 <br>
