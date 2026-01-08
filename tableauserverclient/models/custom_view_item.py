@@ -158,9 +158,17 @@ class CustomViewItem:
     def workbook(self) -> Optional[WorkbookItem]:
         return self._workbook
 
+    @workbook.setter
+    def workbook(self, value: WorkbookItem) -> None:
+        self._workbook = value
+
     @property
     def view(self) -> Optional[ViewItem]:
         return self._view
+
+    @view.setter
+    def view(self, value: ViewItem) -> None:
+        self._view = value
 
     @classmethod
     def from_response(cls, resp, ns, workbook_id="") -> Optional["CustomViewItem"]:

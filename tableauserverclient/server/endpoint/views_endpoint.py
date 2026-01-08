@@ -371,6 +371,29 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
         # Returning view item to stay consistent with datasource/view update functions
         return view_item
 
+    @api(version="3.27")
+    def delete(self, view: ViewItem | str) -> None:
+        """
+        Deletes a view in a workbook. If you delete the only view in a workbook,
+        the workbook is deleted. Can be used to remove hidden views when
+        republishing or migrating to a different environment.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#delete_view
+
+        Parameters
+        ----------
+        view: ViewItem | str
+            The ViewItem or the luid for the view to be deleted.
+
+        Returns
+        -------
+        None
+        """
+        id_ = getattr(view, "id", view)
+        self.delete_request(f"{self.baseurl}/{id_}")
+        logger.info(f"View({id_}) deleted.")
+        return None
+
     @api(version="1.0")
     def add_tags(self, item: Union[ViewItem, str], tags: Union[Iterable[str], str]) -> set[str]:
         """

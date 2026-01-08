@@ -643,6 +643,16 @@ class ScheduleRequest:
     def add_flow_req(self, id_: Optional[str], task_type: str = TaskItem.Type.RunFlow) -> bytes:
         return self._add_to_req(id_, "flow", task_type)
 
+    @_tsrequest_wrapped
+    def batch_update_state(self, xml: ET.Element, schedules: Iterable[ScheduleItem | str]) -> None:
+        luids = ET.SubElement(xml, "scheduleLuids")
+        for schedule in schedules:
+            luid = getattr(schedule, "id", schedule)
+            if not isinstance(luid, str):
+                continue
+            luid_tag = ET.SubElement(luids, "scheduleLuid")
+            luid_tag.text = luid
+
 
 class SiteRequest:
     def update_req(self, site_item: "SiteItem", parent_srv: Optional["Server"] = None):
@@ -974,6 +984,32 @@ class UserRequest:
         if user_item.idp_configuration_id is not None:
             user_element.attrib["idpConfigurationId"] = user_item.idp_configuration_id
         return ET.tostring(xml_request)
+
+    def import_from_csv_req(self, csv_content: bytes, users: Iterable[UserItem]):
+        xml_request = ET.Element("tsRequest")
+        for user in users:
+            if user.name is None:
+                raise ValueError("User name must be populated.")
+            user_element = ET.SubElement(xml_request, "user")
+            user_element.attrib["name"] = user.name
+            if user.auth_setting is not None and user.idp_configuration_id is not None:
+                raise ValueError("User cannot have both authSetting and idpConfigurationId.")
+            elif user.idp_configuration_id is not None:
+                user_element.attrib["idpConfigurationId"] = user.idp_configuration_id
+            else:
+                user_element.attrib["authSetting"] = user.auth_setting or "ServerDefault"
+
+        parts = {
+            "tableau_user_import": ("tsc_users_file.csv", csv_content, "file"),
+            "request_payload": ("", ET.tostring(xml_request), "text/xml"),
+        }
+        return _add_multipart(parts)
+
+    def delete_csv_req(self, csv_content: bytes):
+        parts = {
+            "tableau_user_delete": ("tsc_users_file.csv", csv_content, "file"),
+        }
+        return _add_multipart(parts)
 
 
 class WorkbookRequest:
