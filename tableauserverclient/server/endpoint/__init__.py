@@ -6,6 +6,7 @@ from tableauserverclient.server.endpoint.databases_endpoint import Databases
 from tableauserverclient.server.endpoint.datasources_endpoint import Datasources
 from tableauserverclient.server.endpoint.endpoint import Endpoint, QuerysetEndpoint
 from tableauserverclient.server.endpoint.exceptions import ServerResponseError, MissingRequiredFieldError
+from tableauserverclient.server.endpoint.extensions_endpoint import Extensions
 from tableauserverclient.server.endpoint.favorites_endpoint import Favorites
 from tableauserverclient.server.endpoint.fileuploads_endpoint import Fileuploads
 from tableauserverclient.server.endpoint.flow_runs_endpoint import FlowRuns
@@ -42,6 +43,7 @@ __all__ = [
     "QuerysetEndpoint",
     "MissingRequiredFieldError",
     "Endpoint",
+    "Extensions",
     "Favorites",
     "Fileuploads",
     "FlowRuns",

@@ -1665,6 +1665,64 @@ class OIDCRequest:
         return ET.tostring(xml_request)
 
 
+class ExtensionsRequest:
+    @_tsrequest_wrapped
+    def update_server_extensions(self, xml_request: ET.Element, extensions_server: "ExtensionsServer") -> None:
+        extensions_element = ET.SubElement(xml_request, "extensionsServerSettings")
+        if not isinstance(extensions_server.enabled, bool):
+            raise ValueError(f"Extensions Server missing enabled: {extensions_server}")
+        enabled_element = ET.SubElement(extensions_element, "extensionsGloballyEnabled")
+        enabled_element.text = str(extensions_server.enabled).lower()
+
+        if extensions_server.block_list is None:
+            return
+        for blocked in extensions_server.block_list:
+            blocked_element = ET.SubElement(extensions_element, "blockList")
+            blocked_element.text = blocked
+        return
+
+    @_tsrequest_wrapped
+    def update_site_extensions(self, xml_request: ET.Element, extensions_site_settings: ExtensionsSiteSettings) -> None:
+        ext_element = ET.SubElement(xml_request, "extensionsSiteSettings")
+        if not isinstance(extensions_site_settings.enabled, bool):
+            raise ValueError(f"Extensions Site Settings missing enabled: {extensions_site_settings}")
+        enabled_element = ET.SubElement(ext_element, "extensionsEnabled")
+        enabled_element.text = str(extensions_site_settings.enabled).lower()
+        if not isinstance(extensions_site_settings.use_default_setting, bool):
+            raise ValueError(
+                f"Extensions Site Settings missing use_default_setting: {extensions_site_settings.use_default_setting}"
+            )
+        default_element = ET.SubElement(ext_element, "useDefaultSetting")
+        default_element.text = str(extensions_site_settings.use_default_setting).lower()
+        if extensions_site_settings.allow_trusted is not None:
+            allow_trusted_element = ET.SubElement(ext_element, "allowTrusted")
+            allow_trusted_element.text = str(extensions_site_settings.allow_trusted).lower()
+        if extensions_site_settings.include_sandboxed is not None:
+            include_sandboxed_element = ET.SubElement(ext_element, "includeSandboxed")
+            include_sandboxed_element.text = str(extensions_site_settings.include_sandboxed).lower()
+        if extensions_site_settings.include_tableau_built is not None:
+            include_tableau_built_element = ET.SubElement(ext_element, "includeTableauBuilt")
+            include_tableau_built_element.text = str(extensions_site_settings.include_tableau_built).lower()
+        if extensions_site_settings.include_partner_built is not None:
+            include_partner_built_element = ET.SubElement(ext_element, "includePartnerBuilt")
+            include_partner_built_element.text = str(extensions_site_settings.include_partner_built).lower()
+
+        if extensions_site_settings.safe_list is None:
+            return
+
+        safe_element = ET.SubElement(ext_element, "safeList")
+        for safe in extensions_site_settings.safe_list:
+            if safe.url is not None:
+                url_element = ET.SubElement(safe_element, "url")
+                url_element.text = safe.url
+            if safe.full_data_allowed is not None:
+                full_data_element = ET.SubElement(safe_element, "fullDataAllowed")
+                full_data_element.text = str(safe.full_data_allowed).lower()
+            if safe.prompt_needed is not None:
+                prompt_element = ET.SubElement(safe_element, "promptNeeded")
+                prompt_element.text = str(safe.prompt_needed).lower()
+
+
 class RequestFactory:
     Auth = AuthRequest()
     Connection = Connection()
@@ -1675,6 +1733,7 @@ class RequestFactory:
     Database = DatabaseRequest()
     DQW = DQWRequest()
     Empty = EmptyRequest()
+    Extensions = ExtensionsRequest()
     Favorite = FavoriteRequest()
     Fileupload = FileuploadRequest()
     Flow = FlowRequest()

@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+    <extensionsSiteSettings>
+        <extensionsEnabled>true</extensionsEnabled>
+        <useDefaultSetting>false</useDefaultSetting>
+        <allowTrusted>true</allowTrusted>
+        <includeSandboxed>false</includeSandboxed>
+        <includeTableauBuilt>false</includeTableauBuilt>
+        <includePartnerBuilt>false</includePartnerBuilt>
+        <safeList>
+            <url>http://localhost:9123/Dynamic.html</url>
+            <fullDataAllowed>true</fullDataAllowed>
+            <promptNeeded>true</promptNeeded>
+        </safeList>
+    </extensionsSiteSettings>
+</tsResponse>
