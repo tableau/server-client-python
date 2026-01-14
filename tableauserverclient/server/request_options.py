@@ -387,7 +387,14 @@ class _DataExportOptions(RequestOptionsBase):
         Self
             The current object
         """
-        self.view_parameters.append((name, value))
+        prefix = "vf_Parameters."
+        if name.startswith(prefix):
+            proper_name = name
+        elif name.startswith("Parameters."):
+            proper_name = f"vf_{name}"
+        else:
+            proper_name = f"{prefix}{name}"
+        self.view_parameters.append((proper_name, value))
         return self
 
     def _append_view_filters(self, params) -> None:
