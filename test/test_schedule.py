@@ -15,6 +15,7 @@ GET_HOURLY_ID_XML = TEST_ASSET_DIR / "schedule_get_hourly_id.xml"
 GET_DAILY_ID_XML = TEST_ASSET_DIR / "schedule_get_daily_id.xml"
 GET_MONTHLY_ID_XML = TEST_ASSET_DIR / "schedule_get_monthly_id.xml"
 GET_MONTHLY_ID_2_XML = TEST_ASSET_DIR / "schedule_get_monthly_id_2.xml"
+GET_CUSTOMIZED_MONTHLY_ID_XML = TEST_ASSET_DIR / "schedule_get_customized_monthly_id.xml"
 GET_EMPTY_XML = TEST_ASSET_DIR / "schedule_get_empty.xml"
 CREATE_HOURLY_XML = TEST_ASSET_DIR / "schedule_create_hourly.xml"
 CREATE_DAILY_XML = TEST_ASSET_DIR / "schedule_create_daily.xml"
@@ -176,6 +177,21 @@ def test_get_monthly_by_id_2(server: TSC.Server) -> None:
         assert "Monthly First Monday!" == schedule.name
         assert "Active" == schedule.state
         assert ("Monday", "First") == schedule.interval_item.interval
+
+
+def test_get_customized_monthly_by_id(server: TSC.Server) -> None:
+    server.version = "3.15"
+    response_xml = GET_CUSTOMIZED_MONTHLY_ID_XML.read_text()
+    with requests_mock.mock() as m:
+        schedule_id = "f048d794-90dc-40b0-bfad-2ca78e437369"
+        baseurl = f"{server.baseurl}/schedules/{schedule_id}"
+        m.get(baseurl, text=response_xml)
+        schedule = server.schedules.get_by_id(schedule_id)
+        assert schedule is not None
+        assert schedule_id == schedule.id
+        assert "Monthly customized" == schedule.name
+        assert "Active" == schedule.state
+        assert ("Customized Monthly",) == schedule.interval_item.interval
 
 
 def test_delete(server: TSC.Server) -> None:
