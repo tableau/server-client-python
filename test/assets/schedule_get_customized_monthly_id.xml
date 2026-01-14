@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+  <schedule id="f048d794-90dc-40b0-bfad-2ca78e437369" name="Monthly customized" state="Active" priority="50" createdAt="2024-03-13T17:05:01Z" updatedAt="2024-03-16T16:05:14Z" type="Extract" frequency="Monthly" nextRunAt="2024-03-24T16:05:00Z" executionOrder="Parallel">
+    <frequencyDetails start="17:05:00">
+      <intervals>
+        <interval monthDay="Customized Monthly"/>
+      </intervals>
+    </frequencyDetails>
+  </schedule>
+</tsResponse>
