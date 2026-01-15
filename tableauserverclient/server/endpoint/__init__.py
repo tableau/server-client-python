@@ -6,6 +6,7 @@ from tableauserverclient.server.endpoint.databases_endpoint import Databases
 from tableauserverclient.server.endpoint.datasources_endpoint import Datasources
 from tableauserverclient.server.endpoint.endpoint import Endpoint, QuerysetEndpoint
 from tableauserverclient.server.endpoint.exceptions import ServerResponseError, MissingRequiredFieldError
+from tableauserverclient.server.endpoint.extensions_endpoint import Extensions
 from tableauserverclient.server.endpoint.favorites_endpoint import Favorites
 from tableauserverclient.server.endpoint.fileuploads_endpoint import Fileuploads
 from tableauserverclient.server.endpoint.flow_runs_endpoint import FlowRuns
@@ -17,6 +18,7 @@ from tableauserverclient.server.endpoint.jobs_endpoint import Jobs
 from tableauserverclient.server.endpoint.linked_tasks_endpoint import LinkedTasks
 from tableauserverclient.server.endpoint.metadata_endpoint import Metadata
 from tableauserverclient.server.endpoint.metrics_endpoint import Metrics
+from tableauserverclient.server.endpoint.oidc_endpoint import OIDC
 from tableauserverclient.server.endpoint.projects_endpoint import Projects
 from tableauserverclient.server.endpoint.schedules_endpoint import Schedules
 from tableauserverclient.server.endpoint.server_info_endpoint import ServerInfo
@@ -41,6 +43,7 @@ __all__ = [
     "QuerysetEndpoint",
     "MissingRequiredFieldError",
     "Endpoint",
+    "Extensions",
     "Favorites",
     "Fileuploads",
     "FlowRuns",
@@ -52,6 +55,7 @@ __all__ = [
     "LinkedTasks",
     "Metadata",
     "Metrics",
+    "OIDC",
     "Projects",
     "Schedules",
     "ServerInfo",

@@ -1,21 +1,21 @@
 import json
-import os.path
-import unittest
+from pathlib import Path
 
+import pytest
 import requests_mock
 
 import tableauserverclient as TSC
 from tableauserverclient.server.endpoint.exceptions import GraphQLError
 
-TEST_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets")
+TEST_ASSET_DIR = Path(__file__).parent / "assets"
 
-METADATA_QUERY_SUCCESS = os.path.join(TEST_ASSET_DIR, "metadata_query_success.json")
-METADATA_QUERY_ERROR = os.path.join(TEST_ASSET_DIR, "metadata_query_error.json")
-EXPECTED_PAGED_DICT = os.path.join(TEST_ASSET_DIR, "metadata_query_expected_dict.dict")
+METADATA_QUERY_SUCCESS = TEST_ASSET_DIR / "metadata_query_success.json"
+METADATA_QUERY_ERROR = TEST_ASSET_DIR / "metadata_query_error.json"
+EXPECTED_PAGED_DICT = TEST_ASSET_DIR / "metadata_query_expected_dict.dict"
 
-METADATA_PAGE_1 = os.path.join(TEST_ASSET_DIR, "metadata_paged_1.json")
-METADATA_PAGE_2 = os.path.join(TEST_ASSET_DIR, "metadata_paged_2.json")
-METADATA_PAGE_3 = os.path.join(TEST_ASSET_DIR, "metadata_paged_3.json")
+METADATA_PAGE_1 = TEST_ASSET_DIR / "metadata_paged_1.json"
+METADATA_PAGE_2 = TEST_ASSET_DIR / "metadata_paged_2.json"
+METADATA_PAGE_3 = TEST_ASSET_DIR / "metadata_paged_3.json"
 
 EXPECTED_DICT = {
     "publishedDatasources": [
@@ -29,74 +29,81 @@ EXPECTED_DICT = {
 EXPECTED_DICT_ERROR = [{"message": "Reached time limit of PT5S for query execution.", "path": None, "extensions": None}]
 
 
-class MetadataTests(unittest.TestCase):
-    def setUp(self):
-        self.server = TSC.Server("http://test", False)
-        self.baseurl = self.server.metadata.baseurl
-        self.server.version = "3.5"
+@pytest.fixture(scope="function")
+def server():
+    """Fixture to create a TSC.Server instance for testing."""
+    server = TSC.Server("http://test", False)
 
-        self.server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"
-        self.server._auth_token = "j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM"
+    # Fake signin
+    server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"
+    server._auth_token = "j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM"
+    server.version = "3.5"
 
-    def test_metadata_query(self):
-        with open(METADATA_QUERY_SUCCESS, "rb") as f:
-            response_json = json.loads(f.read().decode())
-        with requests_mock.mock() as m:
-            m.post(self.baseurl, json=response_json)
-            actual = self.server.metadata.query("fake query")
+    return server
 
-            datasources = actual["data"]
 
-        self.assertDictEqual(EXPECTED_DICT, datasources)
+def test_metadata_query(server: TSC.Server) -> None:
+    with open(METADATA_QUERY_SUCCESS, "rb") as f:
+        response_json = json.loads(f.read().decode())
+    with requests_mock.mock() as m:
+        m.post(server.metadata.baseurl, json=response_json)
+        actual = server.metadata.query("fake query")
 
-    def test_paged_metadata_query(self):
-        with open(EXPECTED_PAGED_DICT, "rb") as f:
-            expected = eval(f.read())
+        datasources = actual["data"]
 
-        # prepare the 3 pages of results
-        with open(METADATA_PAGE_1, "rb") as f:
-            result_1 = f.read().decode()
-        with open(METADATA_PAGE_2, "rb") as f:
-            result_2 = f.read().decode()
-        with open(METADATA_PAGE_3, "rb") as f:
-            result_3 = f.read().decode()
+    assert EXPECTED_DICT == datasources
 
-        with requests_mock.mock() as m:
-            m.post(
-                self.baseurl,
-                [
-                    {"text": result_1, "status_code": 200},
-                    {"text": result_2, "status_code": 200},
-                    {"text": result_3, "status_code": 200},
-                ],
-            )
 
-            # validation checks for endCursor and hasNextPage,
-            # but the query text doesn't matter for the test
-            actual = self.server.metadata.paginated_query(
-                "fake query endCursor hasNextPage", variables={"first": 1, "afterToken": None}
-            )
+def test_paged_metadata_query(server: TSC.Server) -> None:
+    with open(EXPECTED_PAGED_DICT, "rb") as f:
+        expected = eval(f.read())
 
-        self.assertDictEqual(expected, actual)
+    # prepare the 3 pages of results
+    with open(METADATA_PAGE_1, "rb") as f:
+        result_1 = f.read().decode()
+    with open(METADATA_PAGE_2, "rb") as f:
+        result_2 = f.read().decode()
+    with open(METADATA_PAGE_3, "rb") as f:
+        result_3 = f.read().decode()
 
-    def test_metadata_query_ignore_error(self):
-        with open(METADATA_QUERY_ERROR, "rb") as f:
-            response_json = json.loads(f.read().decode())
-        with requests_mock.mock() as m:
-            m.post(self.baseurl, json=response_json)
-            actual = self.server.metadata.query("fake query")
-            datasources = actual["data"]
+    with requests_mock.mock() as m:
+        m.post(
+            server.metadata.baseurl,
+            [
+                {"text": result_1, "status_code": 200},
+                {"text": result_2, "status_code": 200},
+                {"text": result_3, "status_code": 200},
+            ],
+        )
 
-        self.assertNotEqual(actual.get("errors", None), None)
-        self.assertListEqual(EXPECTED_DICT_ERROR, actual["errors"])
-        self.assertDictEqual(EXPECTED_DICT, datasources)
+        # validation checks for endCursor and hasNextPage,
+        # but the query text doesn't matter for the test
+        actual = server.metadata.paginated_query(
+            "fake query endCursor hasNextPage", variables={"first": 1, "afterToken": None}
+        )
 
-    def test_metadata_query_abort_on_error(self):
-        with open(METADATA_QUERY_ERROR, "rb") as f:
-            response_json = json.loads(f.read().decode())
-        with requests_mock.mock() as m:
-            m.post(self.baseurl, json=response_json)
+    assert expected == actual
 
-            with self.assertRaises(GraphQLError) as e:
-                self.server.metadata.query("fake query", abort_on_error=True)
-                self.assertListEqual(e.error, EXPECTED_DICT_ERROR)
+
+def test_metadata_query_ignore_error(server: TSC.Server) -> None:
+    with open(METADATA_QUERY_ERROR, "rb") as f:
+        response_json = json.loads(f.read().decode())
+    with requests_mock.mock() as m:
+        m.post(server.metadata.baseurl, json=response_json)
+        actual = server.metadata.query("fake query")
+        datasources = actual["data"]
+
+    assert actual.get("errors", None) is not None
+    assert EXPECTED_DICT_ERROR == actual["errors"]
+    assert EXPECTED_DICT == datasources
+
+
+def test_metadata_query_abort_on_error(server: TSC.Server) -> None:
+    with open(METADATA_QUERY_ERROR, "rb") as f:
+        response_json = json.loads(f.read().decode())
+    with requests_mock.mock() as m:
+        m.post(server.metadata.baseurl, json=response_json)
+
+        with pytest.raises(GraphQLError) as e:
+            server.metadata.query("fake query", abort_on_error=True)
+            assert e.error == EXPECTED_DICT_ERROR  # type: ignore[attr-defined]

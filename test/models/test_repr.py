@@ -1,10 +1,11 @@
 import inspect
+from typing import Any
 
 from unittest import TestCase
 import tableauserverclient.models as TSC_models  # type: ignore  # did not set types for this
 import tableauserverclient as TSC
 
-from typing import Any
+import pytest
 
 
 # ensure that all models can be instantiated
@@ -63,12 +64,16 @@ class TestAllModels(TestCase):
                     self.assertTrue(hasattr(model, "__repr__"))
                     self.assertEqual(type(model.__repr__).__name__, "function")
 
-    # 2 - Iterate through the objects in the module
-    def test_by_reflection(self):
-        for class_name, obj in inspect.getmembers(TSC, is_concrete):
-            with self.subTest(class_name, obj=obj):
-                instantiate_class(class_name, obj)
-
-
 def is_concrete(obj: Any):
     return inspect.isclass(obj) and not inspect.isabstract(obj)
+
+
+@pytest.mark.parametrize("class_name, obj", inspect.getmembers(TSC, is_concrete))
+def test_by_reflection(class_name, obj):
+    instantiate_class(class_name, obj)
+
+
+@pytest.mark.parametrize("model", _models.get_defined_models())
+def test_repr_is_implemented(model):
+    print(model.__name__, type(model.__repr__).__name__)
+    assert type(model.__repr__).__name__ == "function"
