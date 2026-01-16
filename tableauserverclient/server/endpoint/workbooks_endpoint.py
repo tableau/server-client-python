@@ -150,7 +150,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
             server_response = self.post_request(url, refresh_req)
         except ServerResponseError as e:
             if e.code.startswith("409") and "already" in e.detail:
-                print(e.summary + " " + e.detail)
+                logger.warning(f"{e.summary} {e.detail}")
                 return None
             else:
                 raise e
