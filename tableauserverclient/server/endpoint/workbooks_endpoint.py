@@ -145,7 +145,6 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         id_ = getattr(workbook_item, "id", workbook_item)
         url = f"{self.baseurl}/{id_}/refresh"
         refresh_req = RequestFactory.Task.refresh_req(incremental, self.parent_srv)
-        server_response = None
         try:
             server_response = self.post_request(url, refresh_req)
         except ServerResponseError as e:
