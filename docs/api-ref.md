@@ -269,7 +269,392 @@ Source file: models/connection_credentials.py
 
 ---
 
-## Data sources
+## Custom Views
+
+Using the TSC library, you can get information about custom views, update custom views, delete custom views, and export custom views as images, PDFs, or CSV files.
+
+The custom view resources for Tableau Server are defined in the `CustomViewItem` class. The class corresponds to the custom view resources you can access using the Tableau Server REST API. The custom view methods are based upon the endpoints for custom views in the REST API and operate on the `CustomViewItem` class.
+
+<br>
+
+### CustomViewItem class
+
+```
+CustomViewItem(id=None, name=None)
+```
+
+The `CustomViewItem` class contains the members or attributes for the custom view resources on Tableau Server. The `CustomViewItem` class defines the information you can request or query from Tableau Server. The class members correspond to the attributes of a server request or response payload.
+
+Source file: models/custom_view_item.py
+
+**Attributes**
+
+| Name          | Description                                                                                                         |
+| :------------ | :------------------------------------------------------------------------------------------------------------------ |
+| `content_url` | The content URL of the custom view.                                                                                 |
+| `created_at`  | The date and time the custom view was created.                                                                      |
+| `csv`         | The CSV data of the custom view. You must first call the `custom_views.populate_csv` method to access the CSV data. |
+| `id`          | The identifier of the custom view item.                                                                             |
+| `image`       | The image of the custom view. You must first call the `custom_views.populate_image` method to access the image.     |
+| `name`        | The name of the custom view.                                                                                        |
+| `owner`       | The owner of the custom view (UserItem).                                                                            |
+| `pdf`         | The PDF of the custom view. You must first call the `custom_views.populate_pdf` method to access the PDF content.   |
+| `shared`      | Whether the custom view is shared (boolean).                                                                        |
+| `updated_at`  | The date and time the custom view was last updated.                                                                 |
+| `view`        | The view (ViewItem) the custom view belongs to.                                                                     |
+| `workbook`    | The workbook (WorkbookItem) the custom view belongs to.                                                             |
+
+<br>
+<br>
+
+### Custom Views methods
+
+The Tableau Server Client provides methods for interacting with custom view resources, or endpoints. These methods correspond to the endpoints for custom views in the Tableau Server REST API.
+
+Source file: server/endpoint/custom_views_endpoint.py
+
+<br>
+<br>
+
+#### custom_views.get
+
+```
+custom_views.get(req_options=None)
+```
+
+Returns the list of custom views on a site.
+
+The returned list can be adjusted with filter parameters as follows:
+
+* If the request has no filter parameters: Administrators will see all custom views. Other users will see only custom views that they own.
+* If the filter parameters include ownerId: Users will see only custom views that they own.
+* If the filter parameters include viewId or workbookId, and don't include ownerId: Users will see those custom views for which they have Write and WebAuthoring permissions.
+* If site user visibility is not set to Limited, the Users will see those custom views that are "public", meaning the value of their shared attribute is true.
+
+REST API: [List Custom Views](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#list_custom_views)
+
+**Version**
+
+This endpoint is available with REST API version 3.18 and up.
+
+**Parameters**
+
+| Name          | Description                                                                                              |
+| :------------ | :------------------------------------------------------------------------------------------------------- |
+| `req_options` | (Optional) Filtering options for the request. You can filter by `view_id`, `workbook_id`, or `owner_id`. |
+
+**Returns**
+
+Returns a list of all `CustomViewItem` objects and a `PaginationItem`. Use these values to iterate through the results.
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+tableau_auth = TSC.TableauAuth('username', 'password')
+server = TSC.Server('https://servername')
+
+with server.auth.sign_in(tableau_auth):
+    all_custom_views, pagination_item = server.custom_views.get()
+    print([view.name for view in all_custom_views])
+```
+
+See [CustomViewItem class](#customviewitem-class)
+
+<br>
+<br>
+
+#### custom_views.get_by_id
+
+```
+custom_views.get_by_id(view_id)
+```
+
+Returns the details of a specific custom view.
+
+REST API: [Get Custom View](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#get_custom_view)
+
+**Version**
+
+This endpoint is available with REST API version 3.18 and up.
+
+**Parameters**
+
+| Name      | Description                            |
+| :-------- | :------------------------------------- |
+| `view_id` | The ID of the custom view to retrieve. |
+
+**Returns**
+
+Returns a single `CustomViewItem` object.
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+tableau_auth = TSC.TableauAuth('username', 'password')
+server = TSC.Server('https://servername')
+
+with server.auth.sign_in(tableau_auth):
+    custom_view = server.custom_views.get_by_id('d79634e1-6063-4ec9-95ff-50acbf609ff5')
+    print(custom_view.name)
+```
+
+See [CustomViewItem class](#customviewitem-class)
+
+<br>
+<br>
+
+#### custom_views.populate_image
+
+```py
+custom_views.populate_image(view_item, req_options=None)
+```
+
+Populates the image of the specified custom view.
+
+This method uses the `id` field to query the image, and populates the image content as the `image` field.
+
+REST API: [Get Custom View Image](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#get_custom_view_image)
+
+**Version**
+
+This endpoint is available with REST API version 3.18 and up.
+
+**Parameters**
+
+| Name          | Description                                                                                                                                                                                                                                         |
+| :------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `view_item`   | Specifies the custom view to populate.                                                                                                                                                                                                              |
+| `req_options` | (Optional) You can pass in request options to specify the image resolution (`imageresolution`) and the maximum age of the view image cached on the server (`maxage`). See [ImageRequestOptions class](#imagerequestoptions-class) for more details. |
+
+**Exceptions**
+
+| Error                         | Description                                              |
+| :---------------------------- | :------------------------------------------------------- |
+| `Custom View item missing ID` | Raises an error if the ID of the custom view is missing. |
+
+**Returns**
+
+None. The image is added to the `view_item` and can be accessed by its `image` field.
+
+**Example**
+
+```py
+# Sign in, get custom view, etc.
+
+# Populate and save the custom view image as 'custom_view_image.png'
+server.custom_views.populate_image(custom_view_item)
+with open('./custom_view_image.png', 'wb') as f:
+	f.write(custom_view_item.image)
+```
+
+See [CustomViewItem class](#customviewitem-class)
+
+<br>
+<br>
+
+#### custom_views.populate_pdf
+
+```py
+custom_views.populate_pdf(custom_view_item, req_options=None)
+```
+
+Populates the PDF content of the specified custom view.
+
+This method populates a PDF with image(s) of the custom view you specify.
+
+REST API: [Get Custom View PDF](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#get_custom_view_pdf)
+
+**Version**
+
+This endpoint is available with REST API version 3.23 and up.
+
+**Parameters**
+
+| Name               | Description                                                                                                                                                                                                                                     |
+| :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `custom_view_item` | Specifies the custom view to populate.                                                                                                                                                                                                          |
+| `req_options`      | (Optional) You can pass in request options to specify the page type and orientation of the PDF content, as well as the maximum age of the PDF rendered on the server. See [PDFRequestOptions class](#pdfrequestoptions-class) for more details. |
+
+**Exceptions**
+
+| Error                         | Description                                              |
+| :---------------------------- | :------------------------------------------------------- |
+| `Custom View item missing ID` | Raises an error if the ID of the custom view is missing. |
+
+**Returns**
+
+None. The PDF content is added to the `custom_view_item` and can be accessed by its `pdf` field.
+
+**Example**
+
+```py
+# Sign in, get custom view, etc.
+
+# Populate and save the custom view pdf as 'custom_view_pdf.pdf'
+server.custom_views.populate_pdf(custom_view_item)
+with open('./custom_view_pdf.pdf', 'wb') as f:
+	f.write(custom_view_item.pdf)
+```
+
+See [CustomViewItem class](#customviewitem-class)
+
+<br>
+<br>
+
+#### custom_views.populate_csv
+
+```py
+custom_views.populate_csv(custom_view_item, req_options=None)
+```
+
+Populates the CSV data of the specified custom view.
+
+This method uses the `id` field to query the CSV data, and populates the data as the `csv` field.
+
+REST API: [Get Custom View Data](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#get_custom_view_data)
+
+**Version**
+
+This endpoint is available with REST API version 3.23 and up.
+
+**Parameters**
+
+| Name               | Description                                                                                                                                                                      |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `custom_view_item` | Specifies the custom view to populate.                                                                                                                                           |
+| `req_options`      | (Optional) You can pass in request options to specify the maximum age of the CSV cached on the server. See [CSVRequestOptions class](#csvrequestoptions-class) for more details. |
+
+**Exceptions**
+
+| Error                         | Description                                              |
+| :---------------------------- | :------------------------------------------------------- |
+| `Custom View item missing ID` | Raises an error if the ID of the custom view is missing. |
+
+**Returns**
+
+None. The CSV data is added to the `custom_view_item` and can be accessed by its `csv` field.
+
+**Example**
+
+```py
+# Sign in, get custom view, etc.
+
+# Populate and save the CSV data in a file
+server.custom_views.populate_csv(custom_view_item)
+with open('./custom_view_data.csv', 'wb') as f:
+	# Perform byte join on the CSV data
+	f.write(b''.join(custom_view_item.csv))
+```
+
+See [CustomViewItem class](#customviewitem-class)
+
+<br>
+<br>
+
+#### custom_views.update
+
+```py
+custom_views.update(view_item)
+```
+
+Updates the name, owner, or shared status of a custom view.
+
+REST API: [Update Custom View](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#update_custom_view)
+
+**Version**
+
+This endpoint is available with REST API version 3.18 and up.
+
+**Parameters**
+
+| Name        | Description                                                                                                              |
+| :---------- | :----------------------------------------------------------------------------------------------------------------------- |
+| `view_item` | The custom view item to update. Must include the `id` field. You can update the `name`, `owner`, or `shared` attributes. |
+
+**Returns**
+
+Returns the updated `CustomViewItem` object.
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+tableau_auth = TSC.TableauAuth('username', 'password')
+server = TSC.Server('https://servername')
+
+with server.auth.sign_in(tableau_auth):
+    # Get a custom view
+    custom_view = server.custom_views.get_by_id('d79634e1-6063-4ec9-95ff-50acbf609ff5')
+
+    # Update the name
+    custom_view.name = 'Updated Custom View Name'
+    updated_view = server.custom_views.update(custom_view)
+    print(f"Updated custom view: {updated_view.name}")
+```
+
+See [CustomViewItem class](#customviewitem-class)
+
+<br>
+<br>
+
+#### custom_views.delete
+
+```py
+custom_views.delete(view_id)
+```
+
+Deletes a single custom view by ID.
+
+REST API: [Delete Custom View](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#delete_custom_view)
+
+**Version**
+
+This endpoint is available with REST API version 3.19 and up.
+
+**Parameters**
+
+| Name      | Description                          |
+| :-------- | :----------------------------------- |
+| `view_id` | The ID of the custom view to delete. |
+
+**Exceptions**
+
+| Error        | Description                                                   |
+| :----------- | :------------------------------------------------------------ |
+| `ValueError` | Raises an error if the `view_id` is not provided or is empty. |
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+tableau_auth = TSC.TableauAuth('username', 'password')
+server = TSC.Server('https://servername')
+
+with server.auth.sign_in(tableau_auth):
+    # Get a custom view
+    custom_view = server.custom_views.get_by_id('d79634e1-6063-4ec9-95ff-50acbf609ff5')
+
+    # Delete the custom view
+    server.custom_views.delete(custom_view.id)
+    print(f"Custom view '{custom_view.name}' deleted successfully")
+```
+
+**Note**: This operation cannot be undone. Make sure you have the correct view ID before deleting.
+
+See [CustomViewItem class](#customviewitem-class)
+
+<br>
+<br>
+
+---
+
+## Data Sources
 
 Using the TSC library, you can get all the data sources on a site, or get the data sources for a specific project.
 The data source resources for Tableau Server are defined in the `DatasourceItem` class. The class corresponds to the data source resources you can access using the Tableau Server REST API. For example, you can gather information about the name of the data source, its type, its connections, and the project it is associated with. The data source methods are based upon the endpoints for data sources in the REST API and operate on the `DatasourceItem` class.
