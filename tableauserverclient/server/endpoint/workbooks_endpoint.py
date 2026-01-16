@@ -126,7 +126,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         return WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     @api(version="2.8")
-    def refresh(self, workbook_item: Union[WorkbookItem, str], incremental: bool = False) -> JobItem:
+    def refresh(self, workbook_item: Union[WorkbookItem, str], incremental: bool = False) -> JobItem | None:
         """
         Refreshes the extract of an existing workbook.
 
