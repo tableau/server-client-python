@@ -152,8 +152,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
             if e.code.startswith("409") and "already" in e.detail:
                 print(e.summary + " " + e.detail)
                 return None
-            else:
-                raise e
+            raise
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return new_job
 
