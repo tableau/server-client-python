@@ -139,8 +139,8 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
 
         Returns
         -------
-        JobItem
-            The job item.
+        JobItem | None
+            The job item, or None if a refresh job is already queued for this workbook.
         """
         id_ = getattr(workbook_item, "id", workbook_item)
         url = f"{self.baseurl}/{id_}/refresh"
