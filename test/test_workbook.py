@@ -178,6 +178,7 @@ def test_refresh_id(server: TSC.Server) -> None:
         )
         server.workbooks.refresh("3cc6cd06-89ce-4fdc-b935-5294135d6d42")
 
+
 def test_refresh_already_running(server: TSC.Server) -> None:
     server.version = "2.8"
     server.workbooks.baseurl
@@ -190,8 +191,6 @@ def test_refresh_already_running(server: TSC.Server) -> None:
         )
         refresh_job = server.workbooks.refresh("3cc6cd06-89ce-4fdc-b935-5294135d6d42")
         assert refresh_job is None
-
-
 
 
 def test_refresh_object(server: TSC.Server) -> None:
