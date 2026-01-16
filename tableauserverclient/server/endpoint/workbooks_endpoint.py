@@ -14,6 +14,7 @@ from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api, 
 from tableauserverclient.server.endpoint.exceptions import (
     InternalServerError,
     MissingRequiredFieldError,
+    ServerResponseError,
     UnsupportedAttributeError,
 )
 from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
@@ -144,7 +145,15 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         id_ = getattr(workbook_item, "id", workbook_item)
         url = f"{self.baseurl}/{id_}/refresh"
         refresh_req = RequestFactory.Task.refresh_req(incremental, self.parent_srv)
-        server_response = self.post_request(url, refresh_req)
+        server_response = None
+        try:
+            server_response = self.post_request(url, refresh_req)
+        except ServerResponseError as e:
+            if e.code.startswith("409") and e.detail.find("already"):
+                print(e.summary + " " + e.detail)
+                return None
+            else:
+                raise e
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return new_job
 
