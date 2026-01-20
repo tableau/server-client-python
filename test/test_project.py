@@ -79,6 +79,7 @@ def test_delete_missing_id(server: TSC.Server) -> None:
     with pytest.raises(ValueError):
         server.projects.delete("")
 
+
 def test_get_by_id(server: TSC.Server) -> None:
     response_xml = UPDATE_XML.read_text()
     with requests_mock.mock() as m:

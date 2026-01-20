@@ -92,7 +92,7 @@ class Projects(QuerysetEndpoint[ProjectItem]):
     @api(version="2.0")
     def get_by_id(self, project_id: str) -> ProjectItem:
         """
-        Fetch a project by ID. This is a convenience method making up for a gap in the server API. 
+        Fetch a project by ID. This is a convenience method making up for a gap in the server API.
         It uses the same endpoint as the update method, but without the ability to update the project.
         """
         if not project_id:
