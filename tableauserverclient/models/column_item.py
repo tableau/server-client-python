@@ -4,13 +4,13 @@ from .property_decorators import property_not_empty
 
 
 class ColumnItem:
-    def __init__(self, name=None, description=None):
+    def __init__(self, name, description=None):
         self._id = None
         self.description = description
-        self._name = name
+        self.name = name
 
     def __repr__(self):
-        return f"<{self.__class__.__name__} {self._id} {self._name} {self.description}>"
+        return f"<{self.__class__.__name__} {self._id} {self.name} {self.description}>"
 
     @property
     def id(self):
