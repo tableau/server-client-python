@@ -9,6 +9,7 @@ import pytest
 def is_concrete(obj: Any):
     return inspect.isclass(obj) and not inspect.isabstract(obj)
 
+
 @pytest.mark.parametrize("class_name, obj", inspect.getmembers(TSC, is_concrete))
 def test_by_reflection(class_name, obj):
     instance = try_instantiate_class(class_name, obj)
@@ -20,7 +21,6 @@ def test_by_reflection(class_name, obj):
         else:
             assert type(instance.__repr__).__name__ == "method"
             print(instance.__repr__.__name__)
-
 
 
 # Instantiate a class if it doesn't require any parameters
