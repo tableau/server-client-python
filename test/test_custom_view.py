@@ -248,7 +248,6 @@ def test_publish_missing_wb_id(server: TSC.Server) -> None:
 def test_large_publish(server: TSC.Server):
     cv = TSC.CustomViewItem(name="test")
     cv._owner = TSC.UserItem()
-    assert cv.workbook is not None
     cv._owner._id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
     cv.workbook = TSC.WorkbookItem()
     assert cv.workbook is not None
