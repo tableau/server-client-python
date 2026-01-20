@@ -90,6 +90,18 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         logger.info(f"Deleted single project (ID: {project_id})")
 
     @api(version="2.0")
+    def get_by_id(self, project_id: str) -> ProjectItem:
+        """
+        Fetch a project by ID. This is a convenience method making up for a gap in the server API. 
+        It uses the same endpoint as the update method, but without the ability to update the project.
+        """
+        if not project_id:
+            error = "Project ID undefined."
+            raise ValueError(error)
+        project = ProjectItem(id=project_id)
+        return self.update(project, samples=False)
+
+    @api(version="2.0")
     def update(self, project_item: ProjectItem, samples: bool = False) -> ProjectItem:
         """
         Modify the project settings.

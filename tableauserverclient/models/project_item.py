@@ -86,9 +86,10 @@ class ProjectItem:
         content_permissions: Optional[str] = None,
         parent_id: Optional[str] = None,
         samples: Optional[bool] = None,
+        id: Optional[str] = None,
     ) -> None:
         self._content_permissions = None
-        self._id: Optional[str] = None
+        self._id: Optional[str] = id
         self.description: Optional[str] = description
         self.name: str = name
         self.content_permissions: Optional[str] = content_permissions

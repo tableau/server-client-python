@@ -79,6 +79,24 @@ def test_delete_missing_id(server: TSC.Server) -> None:
     with pytest.raises(ValueError):
         server.projects.delete("")
 
+def test_get_by_id(server: TSC.Server) -> None:
+    response_xml = UPDATE_XML.read_text()
+    with requests_mock.mock() as m:
+        m.put(server.projects.baseurl + "/1d0304cd-3796-429f-b815-7258370b9b74", text=response_xml)
+        project = server.projects.get_by_id("1d0304cd-3796-429f-b815-7258370b9b74")
+    assert "1d0304cd-3796-429f-b815-7258370b9b74" == project.id
+    assert "Test Project" == project.name
+    assert "Project created for testing" == project.description
+    assert "LockedToProject" == project.content_permissions
+    assert "9a8f2265-70f3-4494-96c5-e5949d7a1120" == project.parent_id
+    assert "dd2239f6-ddf1-4107-981a-4cf94e415794" == project.owner_id
+    assert "LockedToProject" == project.content_permissions
+
+
+def test_get_by_id_missing_id(server: TSC.Server) -> None:
+    with pytest.raises(ValueError):
+        server.projects.get_by_id("")
+
 
 def test_update(server: TSC.Server) -> None:
     response_xml = UPDATE_XML.read_text()
