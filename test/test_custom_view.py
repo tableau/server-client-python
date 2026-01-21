@@ -175,6 +175,7 @@ def test_publish_filepath(server: TSC.Server) -> None:
     cv._owner = TSC.UserItem()
     cv._owner._id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
     cv.workbook = TSC.WorkbookItem()
+    assert cv.workbook is not None
     cv.workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
     with requests_mock.mock() as m:
         m.post(server.custom_views.expurl, status_code=201, text=GET_XML.read_text())
@@ -191,6 +192,7 @@ def test_publish_file_str(server: TSC.Server) -> None:
     cv._owner = TSC.UserItem()
     cv._owner._id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
     cv.workbook = TSC.WorkbookItem()
+    assert cv.workbook is not None
     cv.workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
     with requests_mock.mock() as m:
         m.post(server.custom_views.expurl, status_code=201, text=GET_XML.read_text())
@@ -207,6 +209,7 @@ def test_publish_file_io(server: TSC.Server) -> None:
     cv._owner = TSC.UserItem()
     cv._owner._id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
     cv.workbook = TSC.WorkbookItem()
+    assert cv.workbook is not None
     cv.workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
     data = io.BytesIO(CUSTOM_VIEW_DOWNLOAD.read_bytes())
     with requests_mock.mock() as m:
@@ -223,6 +226,7 @@ def test_publish_missing_owner_id(server: TSC.Server) -> None:
     cv = TSC.CustomViewItem(name="test")
     cv._owner = TSC.UserItem()
     cv.workbook = TSC.WorkbookItem()
+    assert cv.workbook is not None
     cv.workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
     with requests_mock.mock() as m:
         m.post(server.custom_views.expurl, status_code=201, text=GET_XML.read_text())
@@ -246,6 +250,7 @@ def test_large_publish(server: TSC.Server):
     cv._owner = TSC.UserItem()
     cv._owner._id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
     cv.workbook = TSC.WorkbookItem()
+    assert cv.workbook is not None
     cv.workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
     with ExitStack() as stack:
         temp_dir = stack.enter_context(TemporaryDirectory())
