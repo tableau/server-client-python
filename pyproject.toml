@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=75.0", "versioneer[toml]==0.29", "wheel"]
+requires = ["setuptools>=77.0", "versioneer[toml]==0.29", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,14 +8,14 @@ name="tableauserverclient"
 dynamic = ["version"]
 description='A Python module for working with the Tableau Server REST API.'
 authors = [{name="Tableau", email="github@tableau.com"}]
-license = {file = "LICENSE"}
+license-files = ["LICENSE"]
 readme = "README.md"
 
 dependencies = [
     'defusedxml>=0.7.1',  # latest as at 7/31/23
     'packaging>=23.1',   # latest as at 7/31/23
     'requests>=2.32',  # latest as at 7/31/23
-    'urllib3>=2.2.2,<3',
+    'urllib3>=2.6.0,<3',
     'typing_extensions>=4.0',
 ]
 requires-python = ">=3.9"
@@ -32,8 +32,13 @@ classifiers = [
 repository = "https://github.com/tableau/server-client-python"
 
 [project.optional-dependencies]
-test = ["black==24.8", "build", "mypy==1.4", "pytest>=7.0", "pytest-cov", "pytest-subtests",
-    "requests-mock>=1.0,<2.0"]
+test = ["black==24.10", "build", "mypy==1.4", "pytest>=7.0", "pytest-cov", "pytest-subtests",
+    "pytest-xdist", "requests-mock>=1.0,<2.0", "types-requests>=2.32.4.20250913"]
+
+[tool.setuptools.packages.find]
+where = ["tableauserverclient"]
+[tool.setuptools.dynamic]
+version = {attr = "versioneer.get_version"}
 
 [tool.black]
 line-length = 120
@@ -61,5 +66,5 @@ addopts = "--junitxml=./test.junit.xml"
 VCS = "git"
 style = "pep440-pre"
 versionfile_source = "tableauserverclient/bin/_version.py"
-versionfile_build = "tableauserverclient/bin/_version.py"
+versionfile_build = "_version.py"
 tag_prefix = "v"

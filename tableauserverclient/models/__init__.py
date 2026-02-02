@@ -1,3 +1,4 @@
+from tableauserverclient.models.collection_item import CollectionItem
 from tableauserverclient.models.column_item import ColumnItem
 from tableauserverclient.models.connection_credentials import ConnectionCredentials
 from tableauserverclient.models.connection_item import ConnectionItem
@@ -9,6 +10,7 @@ from tableauserverclient.models.data_freshness_policy_item import DataFreshnessP
 from tableauserverclient.models.datasource_item import DatasourceItem
 from tableauserverclient.models.dqw_item import DQWItem
 from tableauserverclient.models.exceptions import UnpopulatedPropertyError
+from tableauserverclient.models.extensions_item import ExtensionsServer, ExtensionsSiteSettings, SafeExtension
 from tableauserverclient.models.favorites_item import FavoriteItem
 from tableauserverclient.models.fileupload_item import FileuploadItem
 from tableauserverclient.models.flow_item import FlowItem
@@ -30,6 +32,7 @@ from tableauserverclient.models.linked_tasks_item import (
 )
 from tableauserverclient.models.location_item import LocationItem
 from tableauserverclient.models.metric_item import MetricItem
+from tableauserverclient.models.oidc_item import SiteOIDCConfiguration
 from tableauserverclient.models.pagination_item import PaginationItem
 from tableauserverclient.models.permissions_item import PermissionsRule, Permission
 from tableauserverclient.models.project_item import ProjectItem
@@ -52,6 +55,7 @@ from tableauserverclient.models.workbook_item import WorkbookItem
 from tableauserverclient.models.extract_item import ExtractItem
 
 __all__ = [
+    "CollectionItem",
     "ColumnItem",
     "ConnectionCredentials",
     "ConnectionItem",
@@ -79,6 +83,7 @@ __all__ = [
     "BackgroundJobItem",
     "LocationItem",
     "MetricItem",
+    "SiteOIDCConfiguration",
     "PaginationItem",
     "Permission",
     "PermissionsRule",
@@ -88,6 +93,7 @@ __all__ = [
     "ServerInfoItem",
     "SiteAuthConfiguration",
     "SiteItem",
+    "SiteOIDCConfiguration",
     "SubscriptionItem",
     "TableItem",
     "TableauAuth",
@@ -108,4 +114,7 @@ __all__ = [
     "LinkedTaskStepItem",
     "LinkedTaskFlowRunItem",
     "ExtractItem",
+    "ExtensionsServer",
+    "ExtensionsSiteSettings",
+    "SafeExtension",
 ]

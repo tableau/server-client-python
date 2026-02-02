@@ -1,13 +1,12 @@
-import unittest
+import pytest
 
 import tableauserverclient as TSC
 
 
-class WorkbookModelTests(unittest.TestCase):
-    def test_invalid_show_tabs(self):
-        workbook = TSC.WorkbookItem("10")
-        with self.assertRaises(ValueError):
-            workbook.show_tabs = "Hello"
+def test_invalid_show_tabs():
+    workbook = TSC.WorkbookItem("10")
+    with pytest.raises(ValueError):
+        workbook.show_tabs = "Hello"
 
-        with self.assertRaises(ValueError):
-            workbook.show_tabs = None
+    with pytest.raises(ValueError):
+        workbook.show_tabs = None
