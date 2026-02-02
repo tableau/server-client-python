@@ -12,7 +12,7 @@ from tableauserverclient.models import (
 
 def get_unimplemented_models():
     return [
-        # these items should have repr , please fix
+        # these items should have repr, please fix
         CollectionItem,
         DQWItem,
         ExtensionsServer,
