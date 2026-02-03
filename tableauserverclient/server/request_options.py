@@ -96,10 +96,7 @@ class RequestOptions(RequestOptionsBase):
         if self.pagesize:
             params["pageSize"] = self.pagesize
         if self.fields:
-            if "_all_" in self.fields:
-                params["fields"] = "_all_"
-            else:
-                params["fields"] = ",".join(sorted(self.fields))
+            params["fields"] = ",".join(self.fields)
         return params
 
     def page_size(self, page_size):
@@ -387,14 +384,7 @@ class _DataExportOptions(RequestOptionsBase):
         Self
             The current object
         """
-        prefix = "vf_Parameters."
-        if name.startswith(prefix):
-            proper_name = name
-        elif name.startswith("Parameters."):
-            proper_name = f"vf_{name}"
-        else:
-            proper_name = f"{prefix}{name}"
-        self.view_parameters.append((proper_name, value))
+        self.view_parameters.append((name, value))
         return self
 
     def _append_view_filters(self, params) -> None:

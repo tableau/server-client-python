@@ -4,6 +4,8 @@ include CONTRIBUTORS.md
 include LICENSE
 include LICENSE.versioneer
 include README.md
+include tableauserverclient/_version.py
+include versioneer.py
 recursive-include docs *.md
 recursive-include samples *.py
 recursive-include samples *.txt
@@ -16,4 +18,5 @@ recursive-include test *.png
 recursive-include test *.py
 recursive-include test *.xml
 recursive-include test *.tde
+global-include *.pyi
 global-include *.typed

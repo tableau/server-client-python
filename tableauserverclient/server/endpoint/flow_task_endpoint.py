@@ -18,7 +18,7 @@ class FlowTasks(Endpoint):
         return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/tasks/flows"
 
     @api(version="3.22")
-    def create(self, flow_item: TaskItem) -> bytes:
+    def create(self, flow_item: TaskItem) -> TaskItem:
         if not flow_item:
             error = "No flow provided"
             raise ValueError(error)

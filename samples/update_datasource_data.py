@@ -76,7 +76,7 @@ def main():
         print("Waiting for job...")
         # `wait_for_job` will throw if the job isn't executed successfully
         job = server.jobs.wait_for_job(job)
-        print("Job finished successfully")
+        print("Job finished succesfully")
 
 
 if __name__ == "__main__":

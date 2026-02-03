@@ -2,7 +2,6 @@ from tableauserverclient.bin._version import get_versions
 from tableauserverclient.namespace import NEW_NAMESPACE as DEFAULT_NAMESPACE
 from tableauserverclient.models import (
     BackgroundJobItem,
-    CollectionItem,
     ColumnItem,
     ConnectionCredentials,
     ConnectionItem,
@@ -13,8 +12,6 @@ from tableauserverclient.models import (
     DatabaseItem,
     DataFreshnessPolicyItem,
     DatasourceItem,
-    ExtensionsServer,
-    ExtensionsSiteSettings,
     FavoriteItem,
     FlowItem,
     FlowRunItem,
@@ -38,10 +35,8 @@ from tableauserverclient.models import (
     ProjectItem,
     Resource,
     RevisionItem,
-    SafeExtension,
     ScheduleItem,
     SiteAuthConfiguration,
-    SiteOIDCConfiguration,
     SiteItem,
     ServerInfoItem,
     SubscriptionItem,
@@ -77,7 +72,7 @@ from tableauserverclient.server import (
 
 __all__ = [
     "BackgroundJobItem",
-    "CollectionItem",
+    "BackgroundJobItem",
     "ColumnItem",
     "ConnectionCredentials",
     "ConnectionItem",
@@ -91,8 +86,6 @@ __all__ = [
     "DEFAULT_NAMESPACE",
     "DQWItem",
     "ExcelRequestOptions",
-    "ExtensionsServer",
-    "ExtensionsSiteSettings",
     "FailedSignInError",
     "FavoriteItem",
     "FileuploadItem",
@@ -126,14 +119,12 @@ __all__ = [
     "RequestOptions",
     "Resource",
     "RevisionItem",
-    "SafeExtension",
     "ScheduleItem",
     "Server",
     "ServerInfoItem",
     "ServerResponseError",
     "SiteItem",
     "SiteAuthConfiguration",
-    "SiteOIDCConfiguration",
     "Sort",
     "SubscriptionItem",
     "TableauAuth",
@@ -148,3 +139,7 @@ __all__ = [
     "WeeklyInterval",
     "WorkbookItem",
 ]
+
+from .bin import _version
+
+__version__ = _version.get_versions()["version"]

@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 from datetime import datetime
-from typing import Optional, Union, TYPE_CHECKING
+from typing import Optional, Union
 
 from defusedxml.ElementTree import fromstring
 
@@ -15,10 +15,6 @@ from .interval_item import (
 from .property_decorators import (
     property_is_enum,
 )
-
-if TYPE_CHECKING:
-    from requests import Response
-
 
 Interval = Union[HourlyInterval, DailyInterval, WeeklyInterval, MonthlyInterval]
 
@@ -411,8 +407,3 @@ class ScheduleItem:
         for warning_xml in all_warning_xml:
             warnings.append(warning_xml.get("message", None))
         return warnings
-
-
-def parse_batch_schedule_state(response: "Response", ns) -> list[str]:
-    xml = fromstring(response.content)
-    return [text for tag in xml.findall(".//t:scheduleLuid", namespaces=ns) if (text := tag.text)]

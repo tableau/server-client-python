@@ -85,9 +85,6 @@ class SiteItem:
     state: str
         Shows the current state of the site (Active or Suspended).
 
-    attribute_capture_enabled: Optional[str]
-        Enables user attributes for all Tableau Server embedding workflows.
-
     """
 
     _user_quota: Optional[int] = None
@@ -167,7 +164,6 @@ class SiteItem:
         time_zone=None,
         auto_suspend_refresh_enabled: bool = True,
         auto_suspend_refresh_inactivity_window: int = 30,
-        attribute_capture_enabled: Optional[bool] = None,
     ):
         self._admin_mode = None
         self._id: Optional[str] = None
@@ -221,7 +217,6 @@ class SiteItem:
         self.time_zone = time_zone
         self.auto_suspend_refresh_enabled = auto_suspend_refresh_enabled
         self.auto_suspend_refresh_inactivity_window = auto_suspend_refresh_inactivity_window
-        self.attribute_capture_enabled = attribute_capture_enabled
 
     @property
     def admin_mode(self) -> Optional[str]:
@@ -725,7 +720,6 @@ class SiteItem:
                 time_zone,
                 auto_suspend_refresh_enabled,
                 auto_suspend_refresh_inactivity_window,
-                attribute_capture_enabled,
             ) = self._parse_element(site_xml, ns)
 
             self._set_values(
@@ -780,7 +774,6 @@ class SiteItem:
                 time_zone,
                 auto_suspend_refresh_enabled,
                 auto_suspend_refresh_inactivity_window,
-                attribute_capture_enabled,
             )
         return self
 
@@ -837,7 +830,6 @@ class SiteItem:
         time_zone,
         auto_suspend_refresh_enabled,
         auto_suspend_refresh_inactivity_window,
-        attribute_capture_enabled,
     ):
         if id is not None:
             self._id = id
@@ -945,7 +937,6 @@ class SiteItem:
             self.auto_suspend_refresh_enabled = auto_suspend_refresh_enabled
         if auto_suspend_refresh_inactivity_window is not None:
             self.auto_suspend_refresh_inactivity_window = auto_suspend_refresh_inactivity_window
-        self.attribute_capture_enabled = attribute_capture_enabled
 
     @classmethod
     def from_response(cls, resp, ns) -> list["SiteItem"]:
@@ -1005,7 +996,6 @@ class SiteItem:
                 time_zone,
                 auto_suspend_refresh_enabled,
                 auto_suspend_refresh_inactivity_window,
-                attribute_capture_enabled,
             ) = cls._parse_element(site_xml, ns)
 
             site_item = cls(name, content_url)
@@ -1061,7 +1051,6 @@ class SiteItem:
                 time_zone,
                 auto_suspend_refresh_enabled,
                 auto_suspend_refresh_inactivity_window,
-                attribute_capture_enabled,
             )
             all_site_items.append(site_item)
         return all_site_items
@@ -1143,9 +1132,6 @@ class SiteItem:
 
         flows_enabled = string_to_bool(site_xml.get("flowsEnabled", ""))
         cataloging_enabled = string_to_bool(site_xml.get("catalogingEnabled", ""))
-        attribute_capture_enabled = (
-            string_to_bool(ace) if (ace := site_xml.get("attributeCaptureEnabled")) is not None else None
-        )
 
         return (
             id,
@@ -1199,7 +1185,6 @@ class SiteItem:
             time_zone,
             auto_suspend_refresh_enabled,
             auto_suspend_refresh_inactivity_window,
-            attribute_capture_enabled,
         )
 
 
@@ -1229,17 +1214,6 @@ class SiteAuthConfiguration:
             auth_config.known_provider_alias = auth_xml.get("knownProviderAlias", None)
             all_auth_configs.append(auth_config)
         return all_auth_configs
-
-    def __str__(self):
-        return (
-            f"{self.__class__.__qualname__}(auth_setting={self.auth_setting}, "
-            f"enabled={self.enabled}, "
-            f"idp_configuration_id={self.idp_configuration_id}, "
-            f"idp_configuration_name={self.idp_configuration_name})"
-        )
-
-    def __repr__(self):
-        return f"<{str(self)}>"
 
 
 # Used to convert string represented boolean to a boolean type

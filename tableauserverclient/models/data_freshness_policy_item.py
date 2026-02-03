@@ -66,7 +66,7 @@ class DataFreshnessPolicyItem:
             return self._interval_item
 
         @interval_item.setter
-        def interval_item(self, value: Optional[list[str]]):
+        def interval_item(self, value: list[str]):
             self._interval_item = value
 
         @property
@@ -127,7 +127,7 @@ class DataFreshnessPolicyItem:
         return self._fresh_every_schedule
 
     @fresh_every_schedule.setter
-    def fresh_every_schedule(self, value: Optional[FreshEvery]):
+    def fresh_every_schedule(self, value: FreshEvery):
         self._fresh_every_schedule = value
 
     @property
@@ -135,7 +135,7 @@ class DataFreshnessPolicyItem:
         return self._fresh_at_schedule
 
     @fresh_at_schedule.setter
-    def fresh_at_schedule(self, value: Optional[FreshAt]):
+    def fresh_at_schedule(self, value: FreshAt):
         self._fresh_at_schedule = value
 
     @classmethod

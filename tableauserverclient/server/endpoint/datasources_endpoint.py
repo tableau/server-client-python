@@ -6,8 +6,8 @@ import os
 
 from contextlib import closing
 from pathlib import Path
-from typing import Literal, Optional, TYPE_CHECKING, TypedDict, TypeVar, Union, overload
-from collections.abc import Iterable, Sequence
+from typing import Literal, Optional, TYPE_CHECKING, Union, overload
+from collections.abc import Iterable, Mapping, Sequence
 
 from tableauserverclient.helpers.headers import fix_filename
 from tableauserverclient.models.dqw_item import DQWItem
@@ -50,48 +50,11 @@ FilePath = Union[str, os.PathLike]
 FileObject = Union[io.BufferedReader, io.BytesIO]
 PathOrFile = Union[FilePath, FileObject]
 
+FilePath = Union[str, os.PathLike]
 FileObjectR = Union[io.BufferedReader, io.BytesIO]
 FileObjectW = Union[io.BufferedWriter, io.BytesIO]
 PathOrFileR = Union[FilePath, FileObjectR]
 PathOrFileW = Union[FilePath, FileObjectW]
-
-
-HyperActionCondition = TypedDict(
-    "HyperActionCondition",
-    {
-        "op": str,
-        "target-col": str,
-        "source-col": str,
-    },
-)
-
-HyperActionRow = TypedDict(
-    "HyperActionRow",
-    {
-        "action": Literal[
-            "update",
-            "upsert",
-            "delete",
-        ],
-        "source-table": str,
-        "target-table": str,
-        "condition": HyperActionCondition,
-    },
-)
-
-HyperActionTable = TypedDict(
-    "HyperActionTable",
-    {
-        "action": Literal[
-            "insert",
-            "replace",
-        ],
-        "source-table": str,
-        "target-table": str,
-    },
-)
-
-HyperAction = Union[HyperActionTable, HyperActionRow]
 
 
 class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]):
@@ -228,34 +191,16 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         self.delete_request(url)
         logger.info(f"Deleted single datasource (ID: {datasource_id})")
 
-    T = TypeVar("T", bound=FileObjectW)
-
-    @overload
-    def download(
-        self,
-        datasource_id: str,
-        filepath: T,
-        include_extract: bool = True,
-    ) -> T: ...
-
-    @overload
-    def download(
-        self,
-        datasource_id: str,
-        filepath: Optional[FilePath] = None,
-        include_extract: bool = True,
-    ) -> str: ...
-
     # Download 1 datasource by id
     @api(version="2.0")
     @parameter_added_in(no_extract="2.5")
     @parameter_added_in(include_extract="2.5")
     def download(
         self,
-        datasource_id,
-        filepath=None,
-        include_extract=True,
-    ):
+        datasource_id: str,
+        filepath: Optional[PathOrFileW] = None,
+        include_extract: bool = True,
+    ) -> PathOrFileW:
         """
         Downloads the specified data source from a site. The data source is
         downloaded as a .tdsx file.
@@ -374,63 +319,8 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         logger.info(f"Updated datasource item (ID: {datasource_item.id} & connection item {connection_item.id}")
         return connection
 
-    @api(version="3.26")
-    def update_connections(
-        self,
-        datasource_item: DatasourceItem,
-        connection_luids: Iterable[str],
-        authentication_type: str,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        embed_password: Optional[bool] = None,
-    ) -> list[ConnectionItem]:
-        """
-        Bulk updates one or more datasource connections by LUID.
-
-        Parameters
-        ----------
-        datasource_item : DatasourceItem
-            The datasource item containing the connections.
-
-        connection_luids : Iterable of str
-            The connection LUIDs to update.
-
-        authentication_type : str
-            The authentication type to use (e.g., 'auth-keypair').
-
-        username : str, optional
-            The username to set.
-
-        password : str, optional
-            The password or secret to set.
-
-        embed_password : bool, optional
-            Whether to embed the password.
-
-        Returns
-        -------
-        Iterable of str
-            The connection LUIDs that were updated.
-        """
-
-        url = f"{self.baseurl}/{datasource_item.id}/connections"
-
-        request_body = RequestFactory.Datasource.update_connections_req(
-            connection_luids=connection_luids,
-            authentication_type=authentication_type,
-            username=username,
-            password=password,
-            embed_password=embed_password,
-        )
-        server_response = self.put_request(url, request_body)
-        connection_items = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
-        updated_ids: list[str] = [conn.id for conn in connection_items]
-
-        logger.info(f"Updated connections for datasource {datasource_item.id}: {', '.join(updated_ids)}")
-        return connection_items
-
     @api(version="2.8")
-    def refresh(self, datasource_item: Union[DatasourceItem, str], incremental: bool = False) -> JobItem:
+    def refresh(self, datasource_item: DatasourceItem, incremental: bool = False) -> JobItem:
         """
         Refreshes the extract of an existing workbook.
 
@@ -438,8 +328,8 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
 
         Parameters
         ----------
-        workbook_item : DatasourceItem | str
-            The datasource item or datasource ID.
+        workbook_item : WorkbookItem | str
+            The workbook item or workbook ID.
         incremental: bool
             Whether to do a full refresh or incremental refresh of the extract data
 
@@ -534,13 +424,13 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
     @parameter_added_in(as_job="3.0")
     def publish(
         self,
-        datasource_item,
-        file,
-        mode,
-        connection_credentials=None,
-        connections=None,
-        as_job=False,
-    ):
+        datasource_item: DatasourceItem,
+        file: PathOrFileR,
+        mode: str,
+        connection_credentials: Optional[ConnectionCredentials] = None,
+        connections: Optional[Sequence[ConnectionItem]] = None,
+        as_job: bool = False,
+    ) -> Union[DatasourceItem, JobItem]:
         """
         Publishes a data source to a server, or appends data to an existing
         data source.
@@ -686,7 +576,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         datasource_or_connection_item: Union[DatasourceItem, ConnectionItem, str],
         *,
         request_id: str,
-        actions: Sequence[HyperAction],
+        actions: Sequence[Mapping],
         payload: Optional[FilePath] = None,
     ) -> JobItem:
         """
@@ -953,35 +843,15 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         revisions = RevisionItem.from_response(server_response.content, self.parent_srv.namespace, datasource_item)
         return revisions
 
-    T = TypeVar("T", bound=FileObjectW)
-
-    @overload
-    def download_revision(
-        self,
-        datasource_id: str,
-        revision_number: Optional[str],
-        filepath: T,
-        include_extract: bool = True,
-    ) -> T: ...
-
-    @overload
-    def download_revision(
-        self,
-        datasource_id: str,
-        revision_number: Optional[str],
-        filepath: Optional[FilePath] = None,
-        include_extract: bool = True,
-    ) -> str: ...
-
     # Download 1 datasource revision by revision number
     @api(version="2.3")
     def download_revision(
         self,
-        datasource_id,
-        revision_number,
-        filepath=None,
-        include_extract=True,
-    ):
+        datasource_id: str,
+        revision_number: Optional[str],
+        filepath: Optional[PathOrFileW] = None,
+        include_extract: bool = True,
+    ) -> PathOrFileW:
         """
         Downloads a specific version of a data source prior to the current one
         in .tdsx format. To download the current version of a data source set

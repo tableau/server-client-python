@@ -5,7 +5,6 @@ from enum import IntEnum
 from typing import Optional, TYPE_CHECKING
 
 from defusedxml.ElementTree import fromstring
-from typing_extensions import Self
 
 from tableauserverclient.datetime_helpers import parse_datetime
 from tableauserverclient.models.site_item import SiteAuthConfiguration
@@ -18,7 +17,6 @@ from .reference_item import ResourceReference
 
 if TYPE_CHECKING:
     from tableauserverclient.server import Pager
-    from tableauserverclient.models.favorites_item import FavoriteType
 
 
 class UserItem:
@@ -133,7 +131,7 @@ class UserItem:
         self._id: Optional[str] = None
         self._last_login: Optional[datetime] = None
         self._workbooks = None
-        self._favorites: Optional["FavoriteType"] = None
+        self._favorites: Optional[dict[str, list]] = None
         self._groups = None
         self.email: Optional[str] = None
         self.fullname: Optional[str] = None
@@ -187,7 +185,7 @@ class UserItem:
         return self._name
 
     @name.setter
-    def name(self, value: Optional[str]):
+    def name(self, value: str):
         self._name = value
 
     # valid: username, domain/username, username@domain, domain/username@email
@@ -220,7 +218,7 @@ class UserItem:
         return self._workbooks()
 
     @property
-    def favorites(self) -> "FavoriteType":
+    def favorites(self) -> dict[str, list]:
         if self._favorites is None:
             error = "User item must be populated with favorites first."
             raise UnpopulatedPropertyError(error)
@@ -377,11 +375,6 @@ class UserItem:
     @staticmethod
     def as_reference(id_) -> ResourceReference:
         return ResourceReference(id_, UserItem.tag_name)
-
-    def to_reference(self: Self) -> ResourceReference:
-        if self.id is None:
-            raise ValueError(f"{self.__class__.__qualname__} must have id to be converted to reference")
-        return ResourceReference(self.id, self.tag_name)
 
     @staticmethod
     def _parse_element(user_xml, ns):

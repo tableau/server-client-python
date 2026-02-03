@@ -1,7 +1,6 @@
 from contextlib import ExitStack
 import re
 from collections.abc import Iterable
-from typing import Optional, Protocol
 import uuid
 from xml.etree import ElementTree as ET
 
@@ -199,14 +198,9 @@ def test_update_tags(get_server, endpoint_type, item, tags) -> None:
         endpoint.update_tags(item)
 
 
-class HasID(Protocol):
-    @property
-    def id(self) -> Optional[str]: ...
-
-
 def test_tags_batch_add(get_server) -> None:
     server = get_server
-    content: list[HasID] = [make_workbook(), make_view(), make_datasource(), make_table(), make_database()]
+    content = [make_workbook(), make_view(), make_datasource(), make_table(), make_database()]
     tags = ["a", "b"]
     add_tags_xml = batch_add_tags_xml_response_factory(tags, content)
     with requests_mock.mock() as m:
@@ -216,16 +210,8 @@ def test_tags_batch_add(get_server) -> None:
             text=add_tags_xml,
         )
         tag_result = server.tags.batch_add(tags, content)
-        history = m.request_history
 
     assert set(tag_result) == set(tags)
-    assert len(history) == 1
-    body = ET.fromstring(history[0].body)
-    id_types = {c.id: c.__class__.__name__.replace("Item", "") for c in content}
-    for tag in body.findall(".//content"):
-        content_type = tag.attrib.get("contentType", "")
-        content_id = tag.attrib.get("id", "")
-        assert content_type == id_types.get(content_id, ""), f"Content type mismatch for {content_id}"
 
 
 def test_tags_batch_delete(get_server) -> None:

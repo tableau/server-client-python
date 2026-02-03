@@ -10,27 +10,48 @@ from tableauserverclient.models import (
 )
 
 
+def get_defined_models():
+    # nothing clever here: list was manually copied from tsc/models/__init__.py
+    return [
+        BackgroundJobItem,
+        ConnectionItem,
+        DataAccelerationReportItem,
+        DataAlertItem,
+        DatasourceItem,
+        FlowItem,
+        GroupItem,
+        JobItem,
+        MetricItem,
+        PermissionsRule,
+        ProjectItem,
+        RevisionItem,
+        ScheduleItem,
+        SubscriptionItem,
+        Credentials,
+        JWTAuth,
+        TableauAuth,
+        PersonalAccessTokenAuth,
+        ServerInfoItem,
+        SiteItem,
+        TaskItem,
+        UserItem,
+        ViewItem,
+        WebhookItem,
+        WorkbookItem,
+        PaginationItem,
+        Permission.Mode,
+        Permission.Capability,
+        DailyInterval,
+        WeeklyInterval,
+        MonthlyInterval,
+        HourlyInterval,
+        TableItem,
+        Target,
+    ]
+
+
 def get_unimplemented_models():
     return [
-        # these items should have repr , please fix
-        CollectionItem,
-        DQWItem,
-        ExtensionsServer,
-        ExtensionsSiteSettings,
-        FileuploadItem,
-        FlowRunItem,
-        LinkedTaskFlowRunItem,
-        LinkedTaskItem,
-        LinkedTaskStepItem,
-        SafeExtension,
-        # these should be implemented together for consistency
-        CSVRequestOptions,
-        ExcelRequestOptions,
-        ImageRequestOptions,
-        PDFRequestOptions,
-        PPTXRequestOptions,
-        RequestOptions,
-        # these don't need it
         FavoriteItem,  # no repr because there is no state
         Resource,  # list of type names
         TableauItem,  # should be an interface

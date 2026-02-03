@@ -129,7 +129,7 @@ class FlowItem:
         return self._description
 
     @description.setter
-    def description(self, value: Optional[str]) -> None:
+    def description(self, value: str) -> None:
         self._description = value
 
     @property

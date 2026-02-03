@@ -330,7 +330,7 @@ class WorkbookItem:
         return self._thumbnails_user_id
 
     @thumbnails_user_id.setter
-    def thumbnails_user_id(self, value: Optional[str]):
+    def thumbnails_user_id(self, value: str):
         self._thumbnails_user_id = value
 
     @property
@@ -338,7 +338,7 @@ class WorkbookItem:
         return self._thumbnails_group_id
 
     @thumbnails_group_id.setter
-    def thumbnails_group_id(self, value: Optional[str]):
+    def thumbnails_group_id(self, value: str):
         self._thumbnails_group_id = value
 
     @property
