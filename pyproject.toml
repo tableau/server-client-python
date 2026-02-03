@@ -35,8 +35,15 @@ repository = "https://github.com/tableau/server-client-python"
 test = ["black==24.10", "build", "mypy==1.4", "pytest>=7.0", "pytest-cov", "pytest-subtests",
     "pytest-xdist", "requests-mock>=1.0,<2.0", "types-requests>=2.32.4.20250913"]
 
+# [tool.setuptools]
+# exclude-package-data = { "" = ["samples/*", "test/*", "docs/*"] }
+[tool.setuptools.package-data]
+# Only include data for tableauserverclient, not for samples, test, docs
+tableauserverclient = ["*"]
+
 [tool.setuptools.packages.find]
-where = ["tableauserverclient", "tableauserverclient.helpers", "tableauserverclient.models", "tableauserverclient.server", "tableauserverclient.server.endpoint"]
+where = ["."]
+include = ["tableauserverclient*"]
 
 [tool.setuptools.dynamic]
 version = {attr = "versioneer.get_version"}
