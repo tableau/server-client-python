@@ -23,20 +23,22 @@ In most cases this is the preferred method because it improves security by avoid
 To sign in to Tableau Server or Tableau Cloud with a personal access token, you'll need the following values:
 
 **Tableau Server**
-Name | Description
-:--- | :---
-TOKEN_NAME | The personal access token name (from the My Account settings page)
-TOKEN_VALUE | The personal access token value (from the My Account settings page)
-SITENAME | The Tableau Server site you are authenticating with. For example in the site URL http://MyServer/#/site/MarketingTeam/projects, the site name is MarketingTeam. In the REST API documentation, this field is also referred to as contentUrl. This value can be omitted to connect with the Default site on the server.
-SERVER_URL | The Tableau Server you are authenticating with. If your server has SSL enabled, this should be an HTTPS link.
+
+| Name | Description |
+| --- | --- |
+| TOKEN_NAME | The personal access token name (from the My Account settings page) |
+| TOKEN_VALUE | The personal access token value (from the My Account settings page) |
+| SITENAME | The Tableau Server site you are authenticating with. For example in the site URL http://MyServer/#/site/MarketingTeam/projects, the site name is MarketingTeam. In the REST API documentation, this field is also referred to as contentUrl. This value can be omitted to connect with the Default site on the server. |
+| SERVER_URL | The Tableau Server you are authenticating with. If your server has SSL enabled, this should be an HTTPS link. |
 
 **Tableau Cloud**
-Name | Description
-:--- | :---
-TOKEN_NAME | The personal access token name (from the My Account settings page)
-TOKEN_VALUE | The personal access token value (from the My Account settings page)
-SITENAME | The Tableau Cloud site you are authenticating with. For example in the site URL https://10ay.online.tableau.com/#/site/umbrellacorp816664/workbooks, the site name is umbrellacorp816664. In the REST API documentation, this field is also referred to as contentUrl. This value is always required when connecting to Tableau Cloud.
-SERVER_URL | The Tableau Cloud instance you are authenticating with. In the example above the server URL would be https://10ay.online.tableau.com. This will always be an an HTTPS link.
+
+| Name | Description |
+| --- | --- |
+| TOKEN_NAME | The personal access token name (from the My Account settings page) |
+| TOKEN_VALUE | The personal access token value (from the My Account settings page) |
+| SITENAME | The Tableau Cloud site you are authenticating with. For example in the site URL https://10ay.online.tableau.com/#/site/umbrellacorp816664/workbooks, the site name is umbrellacorp816664. In the REST API documentation, this field is also referred to as contentUrl. This value is always required when connecting to Tableau Cloud. |
+| SERVER_URL | The Tableau Cloud instance you are authenticating with. In the example above the server URL would be https://10ay.online.tableau.com. This will always be an an HTTPS link. |
 
 This example illustrates using the above values to sign in with a personal access token, do some operations, and then sign out:
 
@@ -82,13 +84,17 @@ server.auth.sign_out()
 
 ### Sign in with JSON Web Token (JWT)
 
-If you have Connected Apps enabled, you can create JSON Web Tokens and use them to authenticate over the REST API. To learn about Connected Apps, read the docs on [Tableau Connected Apps](https://help.tableau.com/current/server/en-us/security_auth.htm#connected-apps)
+If you have Connected Apps enabled, you can create JSON Web Tokens and use them to authenticate over the REST API. To learn about Connected Apps, read the docs on [Tableau Connected Apps](https://help.tableau.com/current/server/en-us/security_auth.htm#connected-apps).
 
 To sign in to Tableau Server or Tableau Cloud with a JWT, you'll need to have created a Connected App and generated the token locally (see [instructions to generate a JWT for your Connected App](https://help.tableau.com/current/server/en-us/connected_apps.htm#step-3-configure-the-jwt)):
 
+Starting in December 2025 with REST API version 3.27, Tableau Cloud also accepts a Unified Access Token (UAT) as a JWT-based authentication mechanism. UATs are configured via the [Tableau Cloud Manager REST API](https://help.tableau.com/current/api/cloud-manager/en-us/reference/index.html#tag/Authentication-Methods/operation/createUatConfiguration).
+
+To learn more about Unified Access Token, read the docs on [Unified Access Tokens](https://help.tableau.com/current/api/cloud-manager/en-us/docs/unified_access_tokens.html#sign-in-to-tableau-rest-api).
+
 ```py
 class JWTAuth(Credentials):
-    def __init__(self, jwt=None, site_id=None, user_id_to_impersonate=None):
+    def __init__(self, jwt, isUat=False, site_id=None, user_id_to_impersonate=None):
 ```
 
 Name | Description
@@ -96,13 +102,19 @@ Name | Description
 JWT | The generated token value
 SITENAME | The same as described for personal access tokens
 SERVER_URL | The same as described for personal access tokens
+isUat | (Tableau Cloud only) Set to `True` when authenticating with a Unified Access Token JWT. Leave it unset (or `False`) when signing in with a Connected App JWT.
 
 This example illustrates using the above values to sign in with a JWT, do some operations, and then sign out:
 
 ```py
 import tableauserverclient as TSC
 
-tableau_auth = TSC.JWTAuth('JWT', 'SITENAME')
+# Connected App JWT
+tableau_auth = TSC.JWTAuth(jwt='JWT', site_id='SITENAME')
+
+# UAT JWT
+tableau_auth = TSC.JWTAuth(jwt='JWT', site_id='SITENAME', isUat=True)
+
 server = TSC.Server('https://SERVER_URL', use_server_version=True)
 server.auth.sign_in(tableau_auth)
 
