@@ -94,7 +94,7 @@ To learn more about Unified Access Token, read the docs on [Unified Access Token
 
 ```py
 class JWTAuth(Credentials):
-    def __init__(self, jwt=None, site_id=None, user_id_to_impersonate=None):
+    def __init__(self, jwt, isUat=False, site_id=None, user_id_to_impersonate=None):
 ```
 
 Name | Description
@@ -110,10 +110,10 @@ This example illustrates using the above values to sign in with a JWT, do some o
 import tableauserverclient as TSC
 
 # Connected App JWT
-tableau_auth = TSC.JWTAuth('JWT', 'SITENAME')
+tableau_auth = TSC.JWTAuth(jwt='JWT', site_id='SITENAME')
 
 # UAT JWT
-tableau_auth = TSC.JWTAuth('JWT', 'SITENAME', isUat=True)
+tableau_auth = TSC.JWTAuth(jwt='JWT', site_id='SITENAME', isUat=True)
 
 server = TSC.Server('https://SERVER_URL', use_server_version=True)
 server.auth.sign_in(tableau_auth)
