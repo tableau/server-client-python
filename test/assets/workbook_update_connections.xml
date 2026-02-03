@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tsResponse xmlns="http://tableau.com/api"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://tableau.com/api https://help.tableau.com/samples/en-us/rest_api/ts-api_3_25.xsd">
+    <connections>
+        <connection id="abc12345-def6-7890-gh12-ijklmnopqrst"
+                    type="sqlserver"
+                    serverAddress="updated-db-host"
+                    serverPort="1433"
+                    userName="svc-client"
+                    embedPassword="true"
+                    authenticationType="AD Service Principal" />
+        <connection id="1234abcd-5678-efgh-ijkl-0987654321mn"
+                    type="sqlserver"
+                    serverAddress="updated-db-host"
+                    serverPort="1433"
+                    userName="svc-client"
+                    embedPassword="true"
+                    authenticationType="AD Service Principal" />
+    </connections>
+</tsResponse>

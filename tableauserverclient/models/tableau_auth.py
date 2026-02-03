@@ -87,7 +87,7 @@ class TableauAuth(Credentials):
             uid = f", user_id_to_impersonate=f{self.user_id_to_impersonate}"
         else:
             uid = ""
-        return f"<Credentials username={self.username} password=redacted (site={self.site_id}{uid})>"
+        return f"<{self.__class__.__qualname__} username={self.username} password=redacted (site={self.site_id}{uid})>"
 
 
 # A Tableau-generated Personal Access Token
@@ -155,8 +155,8 @@ class PersonalAccessTokenAuth(Credentials):
         else:
             uid = ""
         return (
-            f"<PersonalAccessToken name={self.token_name} token={self.personal_access_token[:2]}..."
-            f"(site={self.site_id}{uid} >"
+            f"<{self.__class__.__qualname__}(name={self.token_name} token={self.personal_access_token[:2]}..."
+            f"site={self.site_id}{uid}) >"
         )
 
 
@@ -198,19 +198,26 @@ class JWTAuth(Credentials):
 
     """
 
-    def __init__(self, jwt: str, site_id: Optional[str] = None, user_id_to_impersonate: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        jwt: str,
+        isUat: bool = False,
+        site_id: Optional[str] = None,
+        user_id_to_impersonate: Optional[str] = None,
+    ) -> None:
         if jwt is None:
             raise TabError("Must provide a JWT token when using JWT authentication")
         super().__init__(site_id, user_id_to_impersonate)
         self.jwt = jwt
+        self.isUat = isUat
 
     @property
     def credentials(self) -> dict[str, str]:
-        return {"jwt": self.jwt}
+        return {"jwt": self.jwt, "isUat": str(self.isUat).lower()}
 
     def __repr__(self):
         if self.user_id_to_impersonate:
             uid = f", user_id_to_impersonate=f{self.user_id_to_impersonate}"
         else:
             uid = ""
-        return f"<{self.__class__.__qualname__} jwt={self.jwt[:5]}... (site={self.site_id}{uid})>"
+        return f"<{self.__class__.__qualname__} jwt={self.jwt[:5]}... isUat={self.isUat} (site={self.site_id}{uid})>"

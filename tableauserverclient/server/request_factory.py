@@ -184,6 +184,9 @@ class DatasourceRequest:
             project_element = ET.SubElement(datasource_element, "project")
             project_element.attrib["id"] = datasource_item.project_id
 
+        if datasource_item.description is not None:
+            datasource_element.attrib["description"] = datasource_item.description
+
         if connection_credentials is not None and connections is not None:
             raise RuntimeError("You cannot set both `connections` and `connection_credentials`")
 
@@ -196,7 +199,7 @@ class DatasourceRequest:
                 _add_connections_element(connections_element, connection)
         return ET.tostring(xml_request)
 
-    def update_req(self, datasource_item):
+    def update_req(self, datasource_item: DatasourceItem) -> bytes:
         xml_request = ET.Element("tsRequest")
         datasource_element = ET.SubElement(xml_request, "datasource")
         if datasource_item.name:
@@ -219,6 +222,8 @@ class DatasourceRequest:
             datasource_element.attrib["certificationNote"] = str(datasource_item.certification_note)
         if datasource_item.encrypt_extracts is not None:
             datasource_element.attrib["encryptExtracts"] = str(datasource_item.encrypt_extracts).lower()
+        if datasource_item.description is not None:
+            datasource_element.attrib["description"] = datasource_item.description
 
         return ET.tostring(xml_request)
 
@@ -243,6 +248,32 @@ class DatasourceRequest:
 
         parts = {"request_payload": ("", xml_request, "text/xml")}
         return _add_multipart(parts)
+
+    @_tsrequest_wrapped
+    def update_connections_req(
+        self,
+        element: ET.Element,
+        connection_luids: Iterable[str],
+        authentication_type: str,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        embed_password: Optional[bool] = None,
+    ):
+        conn_luids_elem = ET.SubElement(element, "connectionLUIDs")
+        for luid in connection_luids:
+            ET.SubElement(conn_luids_elem, "connectionLUID").text = luid
+
+        connection_elem = ET.SubElement(element, "connection")
+        connection_elem.set("authenticationType", authentication_type)
+
+        if username is not None:
+            connection_elem.set("userName", username)
+
+        if password is not None:
+            connection_elem.set("password", password)
+
+        if embed_password is not None:
+            connection_elem.set("embedPassword", str(embed_password).lower())
 
 
 class DQWRequest:
@@ -486,7 +517,10 @@ class PermissionRequest:
         for rule in rules:
             grantee_capabilities_element = ET.SubElement(permissions_element, "granteeCapabilities")
             grantee_element = ET.SubElement(grantee_capabilities_element, rule.grantee.tag_name)
-            grantee_element.attrib["id"] = rule.grantee.id
+            if rule.grantee.id is not None:
+                grantee_element.attrib["id"] = rule.grantee.id
+            else:
+                raise ValueError("Grantee must have an ID")
 
             capabilities_element = ET.SubElement(grantee_capabilities_element, "capabilities")
             self._add_all_capabilities(capabilities_element, rule.capabilities)
@@ -609,6 +643,16 @@ class ScheduleRequest:
     def add_flow_req(self, id_: Optional[str], task_type: str = TaskItem.Type.RunFlow) -> bytes:
         return self._add_to_req(id_, "flow", task_type)
 
+    @_tsrequest_wrapped
+    def batch_update_state(self, xml: ET.Element, schedules: Iterable[ScheduleItem | str]) -> None:
+        luids = ET.SubElement(xml, "scheduleLuids")
+        for schedule in schedules:
+            luid = getattr(schedule, "id", schedule)
+            if not isinstance(luid, str):
+                continue
+            luid_tag = ET.SubElement(luids, "scheduleLuid")
+            luid_tag.text = luid
+
 
 class SiteRequest:
     def update_req(self, site_item: "SiteItem", parent_srv: Optional["Server"] = None):
@@ -715,6 +759,8 @@ class SiteRequest:
             site_element.attrib["autoSuspendRefreshInactivityWindow"] = str(
                 site_item.auto_suspend_refresh_inactivity_window
             )
+        if site_item.attribute_capture_enabled is not None:
+            site_element.attrib["attributeCaptureEnabled"] = str(site_item.attribute_capture_enabled).lower()
 
         return ET.tostring(xml_request)
 
@@ -819,6 +865,8 @@ class SiteRequest:
             site_element.attrib["autoSuspendRefreshInactivityWindow"] = str(
                 site_item.auto_suspend_refresh_inactivity_window
             )
+        if site_item.attribute_capture_enabled is not None:
+            site_element.attrib["attributeCaptureEnabled"] = str(site_item.attribute_capture_enabled).lower()
 
         return ET.tostring(xml_request)
 
@@ -894,6 +942,7 @@ class TagRequest:
             if item.id is None:
                 raise ValueError(f"Item {item} must have an ID to be tagged.")
             content_element.attrib["id"] = item.id
+            content_element.attrib["contentType"] = item.__class__.__name__.replace("Item", "")
 
         return ET.tostring(element)
 
@@ -935,6 +984,32 @@ class UserRequest:
         if user_item.idp_configuration_id is not None:
             user_element.attrib["idpConfigurationId"] = user_item.idp_configuration_id
         return ET.tostring(xml_request)
+
+    def import_from_csv_req(self, csv_content: bytes, users: Iterable[UserItem]):
+        xml_request = ET.Element("tsRequest")
+        for user in users:
+            if user.name is None:
+                raise ValueError("User name must be populated.")
+            user_element = ET.SubElement(xml_request, "user")
+            user_element.attrib["name"] = user.name
+            if user.auth_setting is not None and user.idp_configuration_id is not None:
+                raise ValueError("User cannot have both authSetting and idpConfigurationId.")
+            elif user.idp_configuration_id is not None:
+                user_element.attrib["idpConfigurationId"] = user.idp_configuration_id
+            else:
+                user_element.attrib["authSetting"] = user.auth_setting or "ServerDefault"
+
+        parts = {
+            "tableau_user_import": ("tsc_users_file.csv", csv_content, "file"),
+            "request_payload": ("", ET.tostring(xml_request), "text/xml"),
+        }
+        return _add_multipart(parts)
+
+    def delete_csv_req(self, csv_content: bytes):
+        parts = {
+            "tableau_user_delete": ("tsc_users_file.csv", csv_content, "file"),
+        }
+        return _add_multipart(parts)
 
 
 class WorkbookRequest:
@@ -1092,6 +1167,32 @@ class WorkbookRequest:
                 if (id_ := datasource_item.id) is not None:
                     datasource_element.attrib["id"] = id_
 
+    @_tsrequest_wrapped
+    def update_connections_req(
+        self,
+        element: ET.Element,
+        connection_luids: Iterable[str],
+        authentication_type: str,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        embed_password: Optional[bool] = None,
+    ):
+        conn_luids_elem = ET.SubElement(element, "connectionLUIDs")
+        for luid in connection_luids:
+            ET.SubElement(conn_luids_elem, "connectionLUID").text = luid
+
+        connection_elem = ET.SubElement(element, "connection")
+        connection_elem.set("authenticationType", authentication_type)
+
+        if username is not None:
+            connection_elem.set("userName", username)
+
+        if password is not None:
+            connection_elem.set("password", password)
+
+        if embed_password is not None:
+            connection_elem.set("embedPassword", str(embed_password).lower())
+
 
 class Connection:
     @_tsrequest_wrapped
@@ -1110,6 +1211,8 @@ class Connection:
             connection_element.attrib["userName"] = connection_item.username
         if connection_item.password is not None:
             connection_element.attrib["password"] = connection_item.password
+        if connection_item.auth_type is not None:
+            connection_element.attrib["authenticationType"] = connection_item.auth_type
         if connection_item.embed_password is not None:
             connection_element.attrib["embedPassword"] = str(connection_item.embed_password).lower()
         if connection_item.query_tagging is not None:
@@ -1446,6 +1549,180 @@ class VirtualConnectionRequest:
         return ET.tostring(xml_request)
 
 
+class OIDCRequest:
+    @_tsrequest_wrapped
+    def create_req(self, xml_request: ET.Element, oidc_item: SiteOIDCConfiguration) -> bytes:
+        oidc_element = ET.SubElement(xml_request, "siteOIDCConfiguration")
+
+        # Check required attributes first
+
+        if oidc_item.idp_configuration_name is None:
+            raise ValueError(f"OIDC Item missing idp_configuration_name: {oidc_item}")
+        if oidc_item.client_id is None:
+            raise ValueError(f"OIDC Item missing client_id: {oidc_item}")
+        if oidc_item.client_secret is None:
+            raise ValueError(f"OIDC Item missing client_secret: {oidc_item}")
+        if oidc_item.authorization_endpoint is None:
+            raise ValueError(f"OIDC Item missing authorization_endpoint: {oidc_item}")
+        if oidc_item.token_endpoint is None:
+            raise ValueError(f"OIDC Item missing token_endpoint: {oidc_item}")
+        if oidc_item.userinfo_endpoint is None:
+            raise ValueError(f"OIDC Item missing userinfo_endpoint: {oidc_item}")
+        if not isinstance(oidc_item.enabled, bool):
+            raise ValueError(f"OIDC Item missing enabled: {oidc_item}")
+        if oidc_item.jwks_uri is None:
+            raise ValueError(f"OIDC Item missing jwks_uri: {oidc_item}")
+
+        oidc_element.attrib["name"] = oidc_item.idp_configuration_name
+        oidc_element.attrib["clientId"] = oidc_item.client_id
+        oidc_element.attrib["clientSecret"] = oidc_item.client_secret
+        oidc_element.attrib["authorizationEndpoint"] = oidc_item.authorization_endpoint
+        oidc_element.attrib["tokenEndpoint"] = oidc_item.token_endpoint
+        oidc_element.attrib["userInfoEndpoint"] = oidc_item.userinfo_endpoint
+        oidc_element.attrib["enabled"] = str(oidc_item.enabled).lower()
+        oidc_element.attrib["jwksUri"] = oidc_item.jwks_uri
+
+        if oidc_item.allow_embedded_authentication is not None:
+            oidc_element.attrib["allowEmbeddedAuthentication"] = str(oidc_item.allow_embedded_authentication).lower()
+        if oidc_item.custom_scope is not None:
+            oidc_element.attrib["customScope"] = oidc_item.custom_scope
+        if oidc_item.prompt is not None:
+            oidc_element.attrib["prompt"] = oidc_item.prompt
+        if oidc_item.client_authentication is not None:
+            oidc_element.attrib["clientAuthentication"] = oidc_item.client_authentication
+        if oidc_item.essential_acr_values is not None:
+            oidc_element.attrib["essentialAcrValues"] = oidc_item.essential_acr_values
+        if oidc_item.voluntary_acr_values is not None:
+            oidc_element.attrib["voluntaryAcrValues"] = oidc_item.voluntary_acr_values
+        if oidc_item.email_mapping is not None:
+            oidc_element.attrib["emailMapping"] = oidc_item.email_mapping
+        if oidc_item.first_name_mapping is not None:
+            oidc_element.attrib["firstNameMapping"] = oidc_item.first_name_mapping
+        if oidc_item.last_name_mapping is not None:
+            oidc_element.attrib["lastNameMapping"] = oidc_item.last_name_mapping
+        if oidc_item.full_name_mapping is not None:
+            oidc_element.attrib["fullNameMapping"] = oidc_item.full_name_mapping
+        if oidc_item.use_full_name is not None:
+            oidc_element.attrib["useFullName"] = str(oidc_item.use_full_name).lower()
+
+        return ET.tostring(xml_request)
+
+    @_tsrequest_wrapped
+    def update_req(self, xml_request: ET.Element, oidc_item: SiteOIDCConfiguration) -> bytes:
+        oidc_element = ET.SubElement(xml_request, "siteOIDCConfiguration")
+
+        # Check required attributes first
+
+        if oidc_item.idp_configuration_name is None:
+            raise ValueError(f"OIDC Item missing idp_configuration_name: {oidc_item}")
+        if oidc_item.client_id is None:
+            raise ValueError(f"OIDC Item missing client_id: {oidc_item}")
+        if oidc_item.client_secret is None:
+            raise ValueError(f"OIDC Item missing client_secret: {oidc_item}")
+        if oidc_item.authorization_endpoint is None:
+            raise ValueError(f"OIDC Item missing authorization_endpoint: {oidc_item}")
+        if oidc_item.token_endpoint is None:
+            raise ValueError(f"OIDC Item missing token_endpoint: {oidc_item}")
+        if oidc_item.userinfo_endpoint is None:
+            raise ValueError(f"OIDC Item missing userinfo_endpoint: {oidc_item}")
+        if not isinstance(oidc_item.enabled, bool):
+            raise ValueError(f"OIDC Item missing enabled: {oidc_item}")
+        if oidc_item.jwks_uri is None:
+            raise ValueError(f"OIDC Item missing jwks_uri: {oidc_item}")
+
+        oidc_element.attrib["name"] = oidc_item.idp_configuration_name
+        oidc_element.attrib["clientId"] = oidc_item.client_id
+        oidc_element.attrib["clientSecret"] = oidc_item.client_secret
+        oidc_element.attrib["authorizationEndpoint"] = oidc_item.authorization_endpoint
+        oidc_element.attrib["tokenEndpoint"] = oidc_item.token_endpoint
+        oidc_element.attrib["userInfoEndpoint"] = oidc_item.userinfo_endpoint
+        oidc_element.attrib["enabled"] = str(oidc_item.enabled).lower()
+        oidc_element.attrib["jwksUri"] = oidc_item.jwks_uri
+
+        if oidc_item.allow_embedded_authentication is not None:
+            oidc_element.attrib["allowEmbeddedAuthentication"] = str(oidc_item.allow_embedded_authentication).lower()
+        if oidc_item.custom_scope is not None:
+            oidc_element.attrib["customScope"] = oidc_item.custom_scope
+        if oidc_item.prompt is not None:
+            oidc_element.attrib["prompt"] = oidc_item.prompt
+        if oidc_item.client_authentication is not None:
+            oidc_element.attrib["clientAuthentication"] = oidc_item.client_authentication
+        if oidc_item.essential_acr_values is not None:
+            oidc_element.attrib["essentialAcrValues"] = oidc_item.essential_acr_values
+        if oidc_item.voluntary_acr_values is not None:
+            oidc_element.attrib["voluntaryAcrValues"] = oidc_item.voluntary_acr_values
+        if oidc_item.email_mapping is not None:
+            oidc_element.attrib["emailMapping"] = oidc_item.email_mapping
+        if oidc_item.first_name_mapping is not None:
+            oidc_element.attrib["firstNameMapping"] = oidc_item.first_name_mapping
+        if oidc_item.last_name_mapping is not None:
+            oidc_element.attrib["lastNameMapping"] = oidc_item.last_name_mapping
+        if oidc_item.full_name_mapping is not None:
+            oidc_element.attrib["fullNameMapping"] = oidc_item.full_name_mapping
+        if oidc_item.use_full_name is not None:
+            oidc_element.attrib["useFullName"] = str(oidc_item.use_full_name).lower()
+
+        return ET.tostring(xml_request)
+
+
+class ExtensionsRequest:
+    @_tsrequest_wrapped
+    def update_server_extensions(self, xml_request: ET.Element, extensions_server: "ExtensionsServer") -> None:
+        extensions_element = ET.SubElement(xml_request, "extensionsServerSettings")
+        if not isinstance(extensions_server.enabled, bool):
+            raise ValueError(f"Extensions Server missing enabled: {extensions_server}")
+        enabled_element = ET.SubElement(extensions_element, "extensionsGloballyEnabled")
+        enabled_element.text = str(extensions_server.enabled).lower()
+
+        if extensions_server.block_list is None:
+            return
+        for blocked in extensions_server.block_list:
+            blocked_element = ET.SubElement(extensions_element, "blockList")
+            blocked_element.text = blocked
+        return
+
+    @_tsrequest_wrapped
+    def update_site_extensions(self, xml_request: ET.Element, extensions_site_settings: ExtensionsSiteSettings) -> None:
+        ext_element = ET.SubElement(xml_request, "extensionsSiteSettings")
+        if not isinstance(extensions_site_settings.enabled, bool):
+            raise ValueError(f"Extensions Site Settings missing enabled: {extensions_site_settings}")
+        enabled_element = ET.SubElement(ext_element, "extensionsEnabled")
+        enabled_element.text = str(extensions_site_settings.enabled).lower()
+        if not isinstance(extensions_site_settings.use_default_setting, bool):
+            raise ValueError(
+                f"Extensions Site Settings missing use_default_setting: {extensions_site_settings.use_default_setting}"
+            )
+        default_element = ET.SubElement(ext_element, "useDefaultSetting")
+        default_element.text = str(extensions_site_settings.use_default_setting).lower()
+        if extensions_site_settings.allow_trusted is not None:
+            allow_trusted_element = ET.SubElement(ext_element, "allowTrusted")
+            allow_trusted_element.text = str(extensions_site_settings.allow_trusted).lower()
+        if extensions_site_settings.include_sandboxed is not None:
+            include_sandboxed_element = ET.SubElement(ext_element, "includeSandboxed")
+            include_sandboxed_element.text = str(extensions_site_settings.include_sandboxed).lower()
+        if extensions_site_settings.include_tableau_built is not None:
+            include_tableau_built_element = ET.SubElement(ext_element, "includeTableauBuilt")
+            include_tableau_built_element.text = str(extensions_site_settings.include_tableau_built).lower()
+        if extensions_site_settings.include_partner_built is not None:
+            include_partner_built_element = ET.SubElement(ext_element, "includePartnerBuilt")
+            include_partner_built_element.text = str(extensions_site_settings.include_partner_built).lower()
+
+        if extensions_site_settings.safe_list is None:
+            return
+
+        safe_element = ET.SubElement(ext_element, "safeList")
+        for safe in extensions_site_settings.safe_list:
+            if safe.url is not None:
+                url_element = ET.SubElement(safe_element, "url")
+                url_element.text = safe.url
+            if safe.full_data_allowed is not None:
+                full_data_element = ET.SubElement(safe_element, "fullDataAllowed")
+                full_data_element.text = str(safe.full_data_allowed).lower()
+            if safe.prompt_needed is not None:
+                prompt_element = ET.SubElement(safe_element, "promptNeeded")
+                prompt_element.text = str(safe.prompt_needed).lower()
+
+
 class RequestFactory:
     Auth = AuthRequest()
     Connection = Connection()
@@ -1456,6 +1733,7 @@ class RequestFactory:
     Database = DatabaseRequest()
     DQW = DQWRequest()
     Empty = EmptyRequest()
+    Extensions = ExtensionsRequest()
     Favorite = FavoriteRequest()
     Fileupload = FileuploadRequest()
     Flow = FlowRequest()
@@ -1463,6 +1741,7 @@ class RequestFactory:
     Group = GroupRequest()
     GroupSet = GroupSetRequest()
     Metric = MetricRequest()
+    OIDC = OIDCRequest()
     Permission = PermissionRequest()
     Project = ProjectRequest()
     Schedule = ScheduleRequest()

@@ -305,6 +305,7 @@ class MonthlyInterval:
             "Fourth",
             "Fifth",
             "Last",
+            "Customized Monthly",
         ]
         for value in range(1, 32):
             VALID_INTERVALS.append(str(value))

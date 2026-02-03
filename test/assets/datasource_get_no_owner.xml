@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+    <pagination pageNumber="1" pageSize="100" totalAvailable="2" />
+    <datasources>
+        <datasource id="e76a1461-3b1d-4588-bf1b-17551a879ad9" name="SampleDS" size="4096" contentUrl="SampleDS" description="SampleDsDescription" type="dataengine" createdAt="2016-08-11T21:22:40Z" updatedAt="2016-08-11T21:34:17Z" encryptExtracts="false" hasExtracts="true" useRemoteQueryAgent="false" webpageUrl="https://web.com">
+            <tags />
+        </datasource>
+        <datasource id="9dbd2263-16b5-46e1-9c43-a76bb8ab65fb" name="Sample datasource" description="description Sample" size="10240" contentUrl="Sampledatasource" type="dataengine" createdAt="2016-08-04T21:31:55Z" updatedAt="2016-08-04T21:31:55Z" encryptExtracts="true" hasExtracts="false" useRemoteQueryAgent="true" webpageUrl="https://page.com">
+            <tags>
+                <tag label="world" />
+                <tag label="indicators" />
+                <tag label="sample" />
+            </tags>
+        </datasource>
+    </datasources>
+</tsResponse>

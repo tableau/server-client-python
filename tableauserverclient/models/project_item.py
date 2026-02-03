@@ -86,9 +86,10 @@ class ProjectItem:
         content_permissions: Optional[str] = None,
         parent_id: Optional[str] = None,
         samples: Optional[bool] = None,
+        id: Optional[str] = None,
     ) -> None:
         self._content_permissions = None
-        self._id: Optional[str] = None
+        self._id: Optional[str] = id
         self.description: Optional[str] = description
         self.name: str = name
         self.content_permissions: Optional[str] = content_permissions
@@ -194,7 +195,7 @@ class ProjectItem:
         return self._name
 
     @name.setter
-    def name(self, value: str) -> None:
+    def name(self, value: Optional[str]) -> None:
         self._name = value
 
     @property

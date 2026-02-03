@@ -1,5 +1,6 @@
 import os.path
 import unittest
+from typing import Optional
 from xml.etree import ElementTree as ET
 from contextlib import contextmanager
 
@@ -30,6 +31,19 @@ def server_response_error_factory(code: str, summary: str, detail: str) -> str:
     detail_element = ET.SubElement(error, "detail")
     detail_element.text = detail
     return ET.tostring(root, encoding="utf-8").decode("utf-8")
+
+
+def server_response_factory(tag: str, **attributes: str) -> bytes:
+    ns = "http://tableau.com/api"
+    ET.register_namespace("", ns)
+    root = ET.Element(
+        f"{{{ns}}}tsResponse",
+    )
+    if attributes is None:
+        attributes = {}
+
+    elem = ET.SubElement(root, f"{{{ns}}}{tag}", attrib=attributes)
+    return ET.tostring(root, encoding="utf-8")
 
 
 @contextmanager
