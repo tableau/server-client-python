@@ -34,6 +34,7 @@ POPULATE_VIEWS_USAGE_XML = TEST_ASSET_DIR / "workbook_populate_views_usage.xml"
 PUBLISH_XML = TEST_ASSET_DIR / "workbook_publish.xml"
 PUBLISH_ASYNC_XML = TEST_ASSET_DIR / "workbook_publish_async.xml"
 REFRESH_XML = TEST_ASSET_DIR / "workbook_refresh.xml"
+WORKBOOK_REFRESH_DUPLICATE_XML = TEST_ASSET_DIR / "workbook_refresh_duplicate.xml"
 REVISION_XML = TEST_ASSET_DIR / "workbook_revision.xml"
 UPDATE_XML = TEST_ASSET_DIR / "workbook_update.xml"
 UPDATE_PERMISSIONS = TEST_ASSET_DIR / "workbook_update_permissions.xml"
@@ -176,6 +177,20 @@ def test_refresh_id(server: TSC.Server) -> None:
             text=response_xml,
         )
         server.workbooks.refresh("3cc6cd06-89ce-4fdc-b935-5294135d6d42")
+
+
+def test_refresh_already_running(server: TSC.Server) -> None:
+    server.version = "2.8"
+    server.workbooks.baseurl
+    response_xml = WORKBOOK_REFRESH_DUPLICATE_XML.read_text()
+    with requests_mock.mock() as m:
+        m.post(
+            server.workbooks.baseurl + "/3cc6cd06-89ce-4fdc-b935-5294135d6d42/refresh",
+            status_code=409,
+            text=response_xml,
+        )
+        refresh_job = server.workbooks.refresh("3cc6cd06-89ce-4fdc-b935-5294135d6d42")
+        assert refresh_job is None
 
 
 def test_refresh_object(server: TSC.Server) -> None:

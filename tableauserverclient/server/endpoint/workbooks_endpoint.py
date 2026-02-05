@@ -14,6 +14,7 @@ from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api, 
 from tableauserverclient.server.endpoint.exceptions import (
     InternalServerError,
     MissingRequiredFieldError,
+    ServerResponseError,
     UnsupportedAttributeError,
 )
 from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
@@ -125,7 +126,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         return WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     @api(version="2.8")
-    def refresh(self, workbook_item: Union[WorkbookItem, str], incremental: bool = False) -> JobItem:
+    def refresh(self, workbook_item: Union[WorkbookItem, str], incremental: bool = False) -> JobItem | None:
         """
         Refreshes the extract of an existing workbook.
 
@@ -138,13 +139,19 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
 
         Returns
         -------
-        JobItem
-            The job item.
+        JobItem | None
+            The job item, or None if a refresh job is already queued for this workbook.
         """
         id_ = getattr(workbook_item, "id", workbook_item)
         url = f"{self.baseurl}/{id_}/refresh"
         refresh_req = RequestFactory.Task.refresh_req(incremental, self.parent_srv)
-        server_response = self.post_request(url, refresh_req)
+        try:
+            server_response = self.post_request(url, refresh_req)
+        except ServerResponseError as e:
+            if e.code.startswith("409") and "already" in e.detail:
+                logger.warning(f"{e.summary} {e.detail}")
+                return None
+            raise
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return new_job
 
