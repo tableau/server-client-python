@@ -298,12 +298,12 @@ class Schedules(Endpoint):
     @api(version="3.27")
     def batch_update_state(self, schedules, state, update_all=False) -> list[str]:
         """
-        Batch update the status of one or more scheudles. If update_all is set,
+        Batch update the status of one or more schedules. If update_all is set,
         all schedules on the Tableau Server are affected.
 
         Parameters
         ----------
-        schedules: Iterable[ScheudleItem | str] | Any
+        schedules: Iterable[ScheduleItem | str] | Any
             The schedules to be updated. If update_all=True, this is ignored.
 
         state: Literal["active", "suspended"]
