@@ -4925,6 +4925,118 @@ Returns the new `UserItem` object.
 
 ```
 
+#### users.bulk_add
+
+```py
+users.bulk_add(users)
+```
+
+When adding users in bulk, the server creates an asynchronous job. This method returns the `JobItem` you can use to track progress.
+
+REST API: Add User to Site. ([Tableau Help][1])
+
+**Version**
+
+This endpoint is available with REST API version **3.15** and up.
+
+**Parameters**
+
+| Name    | Description                                                                                 |
+| :------ | :------------------------------------------------------------------------------------------ |
+| `users` | An iterable of `UserItem` objects to add to the site. Each `UserItem` must have `name` set. |
+
+**UserItem field notes**
+
+* `name` **required**. If using Active Directory and the username isn’t unique across domains, include the domain-qualified form (for example `example\\Adam` or `adam@example.com`). ([Tableau Help][1])
+* `fullname` is used as the user’s display name (TSC reads the display name from `fullname`).
+* `email` optional, but if provided it must be a valid email address; it is included in the REST payload as `email`. ([Tableau Help][1])
+* `auth_setting` optional. If not provided and `idp_configuration_id` is `None`, the default is `ServerDefault`. (REST supports `authSetting` and `idpConfigurationId` as user creation attributes.) ([Tableau Help][1])
+* `site_role` optional. If not provided, defaults to `Unlicensed`.
+* `password` optional and only used when the server is using **local authentication**; do not provide a password for other auth types.
+* Admin level and publishing capability are inferred from `site_role`.
+* If the user belongs to a different IdP configuration, set `UserItem.idp_configuration_id` to that configuration’s ID. (REST supports `idpConfigurationId` when adding a user.) ([Tableau Help][1])
+
+**Returns**
+
+| Type      | Description                                   |
+| :-------- | :-------------------------------------------- |
+| `JobItem` | The job started for adding the users in bulk. |
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+
+server = TSC.Server("http://localhost")
+# Sign in to the server
+
+users = [
+    TSC.UserItem(name="user1", site_role="Unlicensed"),
+    TSC.UserItem(name="user2", site_role="Explorer"),
+    TSC.UserItem(name="user3", site_role="Creator"),
+]
+
+# If needed (Active Directory / non-unique names across domains), set the domain info
+for user in users:
+    user.domain_name = "example.com"
+
+job = server.users.bulk_add(users)
+```
+
+[1]: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_users_and_groups.htm "Users and Groups Methods - Tableau"
+
+
+#### users.bulk_remove
+
+```py
+users.bulk_remove(users)
+```
+
+Remove multiple users from the current site in a single bulk operation. Users are identified by **domain** and **name** (not by user ID). This call is "fire-and-forget" in TSC: it does **not** return a `JobItem`, and it does not provide per-user results.
+
+REST API: **Delete Users from Site with CSV** (`POST /sites/{site-id}/users/delete`). ([Tableau Help][1])
+
+**Version**
+
+This endpoint is available with REST API version **3.15** and up.  ([Tableau Help][2])
+
+**Parameters**
+
+| Name    | Description                                                                                                          |
+| :------ | :------------------------------------------------------------------------------------------------------------------- |
+| `users` | An iterable of `UserItem` objects to remove from the site. Each `UserItem` should have `name` and `domain_name` set. |
+
+**UserItem field notes**
+
+* `name` **required** for each user being removed.
+* `domain_name` **required** to disambiguate users when names may exist across domains (for example in AD setups).
+* Users are matched by **(domain, name)**; you don't need the user `id` for this bulk method (unlike some other REST operations).
+
+**Returns**
+
+| Type   | Description                                                      |
+| :----- | :--------------------------------------------------------------- |
+| `None` | No job handle or per-user status is returned by this TSC method. |
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+
+server = TSC.Server("http://localhost")
+# Sign in to the server
+
+# Example: remove all users in a particular domain
+example_users = server.users.filter(domain_name="example.com")
+server.users.bulk_remove(example_users)
+```
+
+**Notes**
+
+* The underlying REST endpoint is the "delete users from site via CSV" pattern. 
+* Removing a user from a site dissociates them from the site (and doesn't necessarily remove them from the server globally in all contexts). 
+
+
 #### users.get
 
 ```py
