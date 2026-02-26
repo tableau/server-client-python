@@ -4933,11 +4933,11 @@ users.bulk_add(users)
 
 When adding users in bulk, the server creates an asynchronous job. This method returns the `JobItem` you can use to track progress.
 
-REST API: Add User to Site. ([Tableau Help][1])
+REST API: [Import Users to Site from CSV ](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_users_and_groups.htm#import_users_to_site_from_csv)
 
 **Version**
 
-This endpoint is available with REST API version **3.15** and up.
+This endpoint is available with REST API version **3.27** and up.
 
 **Parameters**
 
@@ -4947,14 +4947,14 @@ This endpoint is available with REST API version **3.15** and up.
 
 **UserItem field notes**
 
-* `name` **required**. If using Active Directory and the username isn’t unique across domains, include the domain-qualified form (for example `example\\Adam` or `adam@example.com`). ([Tableau Help][1])
+* `name` **required**. If using Active Directory and the username isn’t unique across domains, include the domain-qualified form (for example `example\\Adam` or `adam@example.com`). 
 * `fullname` is used as the user’s display name (TSC reads the display name from `fullname`).
-* `email` optional, but if provided it must be a valid email address; it is included in the REST payload as `email`. ([Tableau Help][1])
-* `auth_setting` optional. If not provided and `idp_configuration_id` is `None`, the default is `ServerDefault`. (REST supports `authSetting` and `idpConfigurationId` as user creation attributes.) ([Tableau Help][1])
+* `email` optional, but if provided it must be a valid email address; it is included in the REST payload as `email`. 
+* `auth_setting` optional. If not provided and `idp_configuration_id` is `None`, the default is `ServerDefault`. (REST supports `authSetting` and `idpConfigurationId` as user creation attributes.) 
 * `site_role` optional. If not provided, defaults to `Unlicensed`.
 * `password` optional and only used when the server is using **local authentication**; do not provide a password for other auth types.
 * Admin level and publishing capability are inferred from `site_role`.
-* If the user belongs to a different IdP configuration, set `UserItem.idp_configuration_id` to that configuration’s ID. (REST supports `idpConfigurationId` when adding a user.) ([Tableau Help][1])
+* If the user belongs to a different IdP configuration, set `UserItem.idp_configuration_id` to that configuration’s ID. (REST supports `idpConfigurationId` when adding a user.) 
 
 **Returns**
 
@@ -4983,7 +4983,6 @@ for user in users:
 job = server.users.bulk_add(users)
 ```
 
-[1]: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_users_and_groups.htm "Users and Groups Methods - Tableau"
 
 
 #### users.bulk_remove
@@ -4994,11 +4993,11 @@ users.bulk_remove(users)
 
 Remove multiple users from the current site in a single bulk operation. Users are identified by **domain** and **name** (not by user ID). This call is "fire-and-forget" in TSC: it does **not** return a `JobItem`, and it does not provide per-user results.
 
-REST API: **Delete Users from Site with CSV** (`POST /sites/{site-id}/users/delete`). ([Tableau Help][1])
+REST API: [Delete Users from Site with CSV](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_users_and_groups.htm#delete_users_from_site_with_csv)
 
 **Version**
 
-This endpoint is available with REST API version **3.15** and up.  ([Tableau Help][2])
+This endpoint is available with REST API version **3.27** and up.
 
 **Parameters**
 
