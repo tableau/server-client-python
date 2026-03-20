@@ -512,8 +512,8 @@ class ImageRequestOptions(_ImagePDFCommonExportOptions):
     class Format:
         PNG = "PNG"
         SVG = "SVG"
-        png = "PNG"  
-        svg = "SVG"  
+        png = "PNG"
+        svg = "SVG"
 
     def __init__(self, imageresolution=None, maxage=-1, viz_height=None, viz_width=None, format=None):
         super().__init__(maxage=maxage, viz_height=viz_height, viz_width=viz_width)
