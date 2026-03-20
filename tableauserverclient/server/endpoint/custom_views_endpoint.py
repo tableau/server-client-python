@@ -121,7 +121,7 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
         view_item : CustomViewItem
 
         req_options : ImageRequestOptions, optional
-            Options to customize the image returned, by default None
+            Options to customize the image returned, including format (PNG or SVG), by default None
 
         Returns
         -------
@@ -138,6 +138,13 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
 
         def image_fetcher():
             return self._get_view_image(view_item, req_options)
+
+        if req_options is not None:
+            if not self.parent_srv.check_at_least_version("3.29"):
+                if req_options.format:
+                    from tableauserverclient.server.endpoint.exceptions import UnsupportedAttributeError
+
+                    raise UnsupportedAttributeError("format parameter is only supported in 3.29+")
 
         view_item._set_image(image_fetcher)
         logger.info(f"Populated image for custom view (ID: {view_item.id})")

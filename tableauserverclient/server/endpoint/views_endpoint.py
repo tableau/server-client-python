@@ -158,7 +158,7 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
 
         req_options: Optional[ImageRequestOptions], default None
             Optional request options for the request. These options can include
-            parameters such as image resolution and max age.
+            parameters such as image resolution, max age, and format (PNG or SVG).
 
         Returns
         -------
@@ -171,9 +171,13 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
         def image_fetcher():
             return self._get_view_image(view_item, req_options)
 
-        if not self.parent_srv.check_at_least_version("3.23") and req_options is not None:
-            if req_options.viz_height or req_options.viz_width:
-                raise UnsupportedAttributeError("viz_height and viz_width are only supported in 3.23+")
+        if req_options is not None:
+            if not self.parent_srv.check_at_least_version("3.23"):
+                if req_options.viz_height or req_options.viz_width:
+                    raise UnsupportedAttributeError("viz_height and viz_width are only supported in 3.23+")
+            if not self.parent_srv.check_at_least_version("3.29"):
+                if req_options.format:
+                    raise UnsupportedAttributeError("format parameter is only supported in 3.29+")
 
         view_item._set_image(image_fetcher)
         logger.info(f"Populated image for view (ID: {view_item.id})")

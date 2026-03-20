@@ -497,6 +497,10 @@ class ImageRequestOptions(_ImagePDFCommonExportOptions):
     viz_width: int, optional
         The width of the viz in pixels. If specified, viz_height must also be specified.
 
+    format: str, optional
+        The format of the image to export. Use Format.PNG, Format.SVG, Format.png, or Format.svg.
+        Default is "PNG". Available in API version 3.29+.
+
     """
 
     extension = "png"
@@ -505,14 +509,23 @@ class ImageRequestOptions(_ImagePDFCommonExportOptions):
     class Resolution:
         High = "high"
 
-    def __init__(self, imageresolution=None, maxage=-1, viz_height=None, viz_width=None):
+    class Format:
+        PNG = "PNG"
+        SVG = "SVG"
+        png = "PNG"  
+        svg = "SVG"  
+
+    def __init__(self, imageresolution=None, maxage=-1, viz_height=None, viz_width=None, format=None):
         super().__init__(maxage=maxage, viz_height=viz_height, viz_width=viz_width)
         self.image_resolution = imageresolution
+        self.format = format
 
     def get_query_params(self):
         params = super().get_query_params()
         if self.image_resolution:
             params["resolution"] = self.image_resolution
+        if self.format:
+            params["format"] = self.format
         return params
 
 
