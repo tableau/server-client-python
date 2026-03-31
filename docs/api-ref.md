@@ -1215,6 +1215,623 @@ Name | Description
 
 ---
 
+## Flows
+
+Using the TSC library, you can get information about all the flows on a site, or get information about a specific flow. The flow resources for Tableau Server are defined in the `FlowItem` class. The class corresponds to the flow resources you can access using the Tableau Server REST API. The flow methods are based upon the endpoints for flows in the REST API and operate on the `FlowItem` class.
+
+<br>
+
+### FlowItem class
+
+```py
+FlowItem(project_id, name=None)
+```
+
+The `FlowItem` represents the flow resources on Tableau Server. This is the information that can be sent or returned in the response to an REST API request for flows. When you create a new `FlowItem` instance, you must specify the `project_id` that the flow is associated with.
+
+**Attributes**
+
+Name | Description
+:--- | :---
+`connections` | The list of data connections (`ConnectionItem`) for the specified flow. You must first call the `populate_connections` method to access this data. See the [ConnectionItem class](#connectionitem-class).
+`created_at` | The date and time when the flow was created.
+`description` | The description for the flow.
+`dqws` | The list of data quality warnings for the flow. You must first call `populate_dqw` to access this data.
+`id` | The identifier for the flow. You need this value to query a specific flow or to delete a flow with the `get_by_id` and `delete` methods.
+`name` | The name of the flow. If not specified when publishing, the name of the published flow file is used.
+`owner_id` | The identifier of the owner of the flow.
+`permissions` | The permissions for the flow. You must first call `populate_permissions` to access this data.
+`project_id` | The identifier of the project associated with the flow. You must provide this identifier when you create an instance of a `FlowItem`.
+`project_name` | The name of the project associated with the flow.
+`tags` | The tags (set of strings) that have been added to the flow.
+`updated_at` | The date and time when the flow was last updated.
+`webpage_url` | The URL of the flow as displayed in browsers.
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+
+# Create new flow_item with project id '3a8b6148-493c-11e6-a621-6f3499394a39'
+new_flow = TSC.FlowItem('3a8b6148-493c-11e6-a621-6f3499394a39')
+```
+
+Source file: models/flow_item.py
+
+<br>
+<br>
+
+### Flows methods
+
+The Tableau Server Client provides several methods for interacting with flow resources, or endpoints. These methods correspond to endpoints in the Tableau Server REST API.
+
+Source file: server/endpoint/flows_endpoint.py
+
+<br>
+<br>
+
+#### flows.delete
+
+```py
+flows.delete(flow_id)
+```
+
+Removes the specified flow from Tableau Server.
+
+REST API: [Delete Flow](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#delete_flow){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_id` | The identifier (`id`) for the `FlowItem` that you want to delete from the server.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`Flow ID undefined` | Raises an exception if a valid `flow_id` is not provided.
+
+**Version**
+
+Version 3.3 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+<br>
+<br>
+
+#### flows.download
+
+```py
+flows.download(flow_id, filepath=None)
+```
+
+Downloads the specified flow in `.tfl` or `.tflx` format.
+
+REST API: [Download Flow](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#download_flow){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_id` | The identifier (`id`) for the `FlowItem` that you want to download from the server.
+`filepath` | (Optional) Downloads the file to the location you specify. If no location is specified (the default is `filepath=None`), the file is downloaded to the current working directory.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`Flow ID undefined` | Raises an exception if a valid `flow_id` is not provided.
+
+**Returns**
+
+The file path to the downloaded flow.
+
+**Version**
+
+Version 3.3 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+file_path = server.flows.download('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+print("\nDownloaded the file to {0}.".format(file_path))
+```
+
+<br>
+<br>
+
+#### flows.get
+
+```py
+flows.get(req_options=None)
+```
+
+Returns all the flows for the site.
+
+To get the connection information for each flow, you must first populate the `FlowItem` with connection information using the [flows.populate_connections](#flowspopulate_connections) method.
+
+REST API: [Query Flows for Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#query_flows_for_site){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`req_options` | (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific flow, you could specify the name of the project or its id.
+
+**Returns**
+
+Returns a list of `FlowItem` objects and a `PaginationItem` object. Use these values to iterate through the results.
+
+**Version**
+
+Version 3.3 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
+server = TSC.Server('https://SERVERURL')
+
+with server.auth.sign_in(tableau_auth):
+    all_flows, pagination_item = server.flows.get()
+    print("\nThere are {} flows on site: ".format(pagination_item.total_available))
+    print([flow.name for flow in all_flows])
+```
+
+<br>
+<br>
+
+#### flows.get_by_id
+
+```py
+flows.get_by_id(flow_id)
+```
+
+Returns the specified flow item.
+
+REST API: [Query Flow](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#query_flow){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_id` | The `flow_id` specifies the flow to query.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`Flow ID undefined` | Raises an exception if a valid `flow_id` is not provided.
+
+**Returns**
+
+Returns a `FlowItem`.
+
+**Version**
+
+Version 3.3 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+flow = server.flows.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+print(flow.name)
+```
+
+<br>
+<br>
+
+#### flows.populate_connections
+
+```py
+flows.populate_connections(flow_item)
+```
+
+Populates a `FlowItem` with connection information.
+
+This method retrieves the connection information for the specified flow. The method requires a `FlowItem` object and populates its `connections` property with a list of `ConnectionItem` objects. You must call this method before you can access the `connections` property of a `FlowItem`.
+
+REST API: [Query Flow Connections](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#query_flow_connections){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_item` | The `flow_item` specifies the flow to populate with connection information.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`Flow item missing ID. Flow must be retrieved from server first.` | Raises an exception if the `flow_item` does not have an id. The `flow_item` must be retrieved from the server first.
+
+**Version**
+
+Version 3.3 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+flow = server.flows.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+server.flows.populate_connections(flow)
+for connection in flow.connections:
+    print(connection.id)
+```
+
+<br>
+<br>
+
+#### flows.publish
+
+```py
+flows.publish(flow_item, file, mode, connections=None)
+```
+
+Publishes a flow to Tableau Server.
+
+REST API: [Publish Flow](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#publish_flow){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_item` | The `flow_item` specifies the flow you are publishing. The `flow_item` must have a `project_id` set.
+`file` | The file path or file object of the flow to publish. Only `.tfl` and `.tflx` files are supported.
+`mode` | Specifies whether you are publishing a new flow (`CreateNew`), or overwriting an existing one (`Overwrite`). You cannot use `Append` with flows.
+`connections` | (Optional) A list of `ConnectionItem` objects for connections in the flow that require credentials.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`Invalid mode defined.` | Raises an error if the mode specified is not valid.
+`File path does not lead to an existing file.` | Raises an error if the file path specified does not point to a valid file.
+`Only .tfl, .tflx files can be published as flows.` | Raises an error if the type of file specified is not supported.
+
+**Returns**
+
+Returns a `FlowItem` representing the published flow.
+
+**Version**
+
+Version 3.3 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+
+tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD', site_id='CONTENTURL')
+server = TSC.Server('https://SERVERURL')
+
+with server.auth.sign_in(tableau_auth):
+    project_id = 'cc867571-b4e0-4764-8083-84b9f3aa8543'
+    new_flow = TSC.FlowItem(project_id)
+    new_flow = server.flows.publish(new_flow, 'path/to/flow.tflx', TSC.Server.PublishMode.Overwrite)
+    print("Published flow ID: {0}".format(new_flow.id))
+```
+
+<br>
+<br>
+
+#### flows.refresh
+
+```py
+flows.refresh(flow_item)
+```
+
+Runs the specified flow and returns a `JobItem` to track the progress of the run.
+
+REST API: [Run Flow Now](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#run_flow_now){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_item` | The `FlowItem` to run.
+
+**Returns**
+
+Returns a `JobItem`. Use the `jobs.wait_for_job` method to block until the job is complete.
+
+**Version**
+
+Version 3.3 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+flow = server.flows.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+job = server.flows.refresh(flow)
+server.jobs.wait_for_job(job)
+```
+
+<br>
+<br>
+
+#### flows.update
+
+```py
+flows.update(flow_item)
+```
+
+Modifies an existing flow. Use this method to change the owner or project of a flow, or to update its tags.
+
+REST API: [Update Flow](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#update_flow){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_item` | The `FlowItem` with updated attributes. Must have been retrieved from the server (must have an `id`).
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`Flow item missing ID. Flow must be retrieved from server first.` | Raises an exception if the `flow_item` does not have an id.
+
+**Returns**
+
+Returns the updated `FlowItem`.
+
+**Version**
+
+Version 3.3 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+flow = server.flows.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+flow.project_id = 'new-project-id'
+updated_flow = server.flows.update(flow)
+```
+
+<br>
+<br>
+
+#### flows.update_connection
+
+```py
+flows.update_connection(flow_item, connection_item)
+```
+
+Updates the server address, port, username, or password for the specified flow connection.
+
+REST API: [Update Flow Connection](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#update_flow_connection){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_item` | The `FlowItem` to update.
+`connection_item` | The `ConnectionItem` with updated attributes.
+
+**Returns**
+
+Returns the updated `ConnectionItem`.
+
+**Version**
+
+Version 3.3 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+flow = server.flows.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+server.flows.populate_connections(flow)
+connection = flow.connections[0]
+connection.server_address = 'new-server.example.com'
+updated_connection = server.flows.update_connection(flow, connection)
+```
+
+<br>
+<br>
+
+#### flows.populate_permissions
+
+```py
+flows.populate_permissions(flow_item)
+```
+
+Populates the permissions for the specified flow.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_item` | The `FlowItem` to populate with permissions.
+
+**Version**
+
+Version 3.3 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+flow = server.flows.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+server.flows.populate_permissions(flow)
+for permission in flow.permissions:
+    print(permission.grantee_id, permission.capabilities)
+```
+
+<br>
+<br>
+
+#### flows.update_permissions
+
+```py
+flows.update_permissions(flow_item, permission_item)
+```
+
+Adds or updates permissions for the specified flow.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_item` | The `FlowItem` to update permissions for.
+`permission_item` | A list of `PermissionsRule` objects representing the permissions to add or update.
+
+**Version**
+
+Version 3.3 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+<br>
+<br>
+
+#### flows.delete_permission
+
+```py
+flows.delete_permission(flow_item, capability_item)
+```
+
+Removes a permission from the specified flow.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_item` | The `FlowItem` to remove the permission from.
+`capability_item` | The `PermissionsRule` object representing the permission to remove.
+
+**Version**
+
+Version 3.3 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+<br>
+<br>
+
+#### flows.populate_dqw
+
+```py
+flows.populate_dqw(flow_item)
+```
+
+Populates the data quality warnings for the specified flow.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_item` | The `FlowItem` to populate with data quality warnings.
+
+**Version**
+
+Version 3.5 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+flow = server.flows.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+server.flows.populate_dqw(flow)
+for dqw in flow.dqws:
+    print(dqw.message)
+```
+
+<br>
+<br>
+
+#### flows.add_dqw
+
+```py
+flows.add_dqw(flow_item, warning)
+```
+
+Adds a data quality warning to the specified flow.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_item` | The `FlowItem` to add the data quality warning to.
+`warning` | The `DQWItem` object representing the data quality warning to add.
+
+**Version**
+
+Version 3.5 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+<br>
+<br>
+
+#### flows.update_dqw
+
+```py
+flows.update_dqw(flow_item, warning)
+```
+
+Updates a data quality warning on the specified flow.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_item` | The `FlowItem` to update the data quality warning on.
+`warning` | The `DQWItem` object representing the updated data quality warning.
+
+**Version**
+
+Version 3.5 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+<br>
+<br>
+
+#### flows.delete_dqw
+
+```py
+flows.delete_dqw(flow_item)
+```
+
+Removes all data quality warnings from the specified flow.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_item` | The `FlowItem` to remove data quality warnings from.
+
+**Version**
+
+Version 3.5 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+<br>
+<br>
+
+#### flows.schedule_flow_run
+
+```py
+flows.schedule_flow_run(schedule_id, item)
+```
+
+Convenience method to add a flow to an existing schedule.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`schedule_id` | The identifier of the schedule to add the flow to.
+`item` | The `FlowItem` to add to the schedule.
+
+**Returns**
+
+Returns a list of `AddResponse` objects.
+
+**Version**
+
+Version 3.3 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+flow = server.flows.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+result = server.flows.schedule_flow_run('schedule-id-here', flow)
+```
+
+<br>
+
+---
+
 ## Groups
 
 Using the TSC library, you can get information about all the groups on a site, you can add or remove groups, or add or remove users in a group.
