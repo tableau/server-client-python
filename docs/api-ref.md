@@ -1790,6 +1790,340 @@ job = server.groups.update(group, as_job=True)
 
 ---
 
+## GroupSets
+
+Using the TSC library, you can get information about all the group sets on a site, create or delete group sets, and add or remove groups from a group set.
+
+The group set resources for Tableau Server are defined in the `GroupSetItem` class. The class corresponds to the group set resources you can access using the Tableau Server REST API. The group set methods are based upon the endpoints for group sets in the REST API and operate on the `GroupSetItem` class.
+
+<br>
+<br>
+
+### GroupSetItem class
+
+```py
+GroupSetItem(name)
+```
+
+The `GroupSetItem` class contains the attributes for the group set resources on Tableau Server. The `GroupSetItem` class defines the information you can request or query from Tableau Server. The class members correspond to the attributes of a server request or response payload.
+
+Source file: models/groupset_item.py
+
+**Attributes**
+
+Name | Description
+:--- | :---
+`id` | The id of the group set.
+`name` | The name of the group set. The `name` is required when you create an instance of a group set.
+`groups` | The list of groups (`GroupItem`) that belong to this group set.
+`group_count` | The number of groups in the group set.
+
+**Example**
+
+```py
+new_groupset = TSC.GroupSetItem('My Group Set')
+
+# call groupsets.create() with new group set
+groupset = server.groupsets.create(new_groupset)
+```
+
+<br>
+<br>
+
+### GroupSets methods
+
+The Tableau Server Client provides several methods for interacting with group set resources, or endpoints. These methods correspond to endpoints in the Tableau Server REST API.
+
+Source file: server/endpoint/groupsets_endpoint.py
+
+<br>
+<br>
+
+#### groupsets.get
+
+```py
+groupsets.get(req_options=None, result_level=None)
+```
+
+Returns information about the group sets on the specified site.
+
+REST API: [Get Group Sets](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_users_and_groups.htm#get_group_sets)
+
+**Version**
+
+This endpoint is available with REST API version 3.22 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`req_options` | (Optional) You can pass the method a request object that contains additional parameters to filter the request. Filter parameters can include `page_size` and `page_number`.
+`result_level` | (Optional) Specifies the level of detail in the response. Can be `"members"` to include member groups, or `"local"` for local group sets only.
+
+**Returns**
+
+Returns a list of `GroupSetItem` objects and a `PaginationItem` object.
+
+**Example**
+
+```py
+all_groupsets, pagination_item = server.groupsets.get()
+for groupset in all_groupsets:
+    print(groupset.id, groupset.name)
+```
+
+<br>
+<br>
+
+#### groupsets.get_by_id
+
+```py
+groupsets.get_by_id(groupset_id)
+```
+
+Returns information about the specified group set.
+
+REST API: [Get Group Set](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_users_and_groups.htm#get_group_set)
+
+**Version**
+
+This endpoint is available with REST API version 3.22 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`groupset_id` | The id of the group set.
+
+**Returns**
+
+Returns a `GroupSetItem` object.
+
+**Example**
+
+```py
+groupset = server.groupsets.get_by_id('1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d')
+print(groupset.name)
+```
+
+<br>
+<br>
+
+#### groupsets.create
+
+```py
+groupsets.create(groupset_item)
+```
+
+Creates a new group set on the specified site.
+
+REST API: [Create Group Set](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_users_and_groups.htm#create_group_set)
+
+**Version**
+
+This endpoint is available with REST API version 3.22 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`groupset_item` | The `GroupSetItem` specifies the group set to add. You first create a new instance of a `GroupSetItem` and pass that to this method.
+
+**Returns**
+
+Returns the newly created `GroupSetItem` object.
+
+**Example**
+
+```py
+new_groupset = TSC.GroupSetItem('My Group Set')
+created_groupset = server.groupsets.create(new_groupset)
+print(created_groupset.id)
+```
+
+<br>
+<br>
+
+#### groupsets.update
+
+```py
+groupsets.update(groupset_item)
+```
+
+Modifies an existing group set. You can use this method to rename a group set.
+
+REST API: [Update Group Set](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_users_and_groups.htm#update_group_set)
+
+**Version**
+
+This endpoint is available with REST API version 3.22 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`groupset_item` | The `GroupSetItem` to update. The group set item must have a valid `id`.
+
+**Returns**
+
+Returns the updated `GroupSetItem` object.
+
+**Example**
+
+```py
+groupset.name = 'Renamed Group Set'
+updated_groupset = server.groupsets.update(groupset)
+```
+
+<br>
+<br>
+
+#### groupsets.delete
+
+```py
+groupsets.delete(groupset)
+```
+
+Deletes the specified group set from the site.
+
+REST API: [Delete Group Set](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_users_and_groups.htm#delete_group_set)
+
+**Version**
+
+This endpoint is available with REST API version 3.22 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`groupset` | The `GroupSetItem` or group set id (`str`) to delete.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.groupsets.delete(groupset.id)
+```
+
+<br>
+<br>
+
+#### groupsets.add_group
+
+```py
+groupsets.add_group(groupset_item, group)
+```
+
+Adds a group to the specified group set.
+
+REST API: [Add Group to Group Set](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_users_and_groups.htm#add_group_to_group_set)
+
+**Version**
+
+This endpoint is available with REST API version 3.22 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`groupset_item` | The `GroupSetItem` specifying the group set to update.
+`group` | The `GroupItem` or group id (`str`) to add to the group set.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+all_groups, _ = server.groups.get()
+mygroup = all_groups[0]
+
+server.groupsets.add_group(groupset, mygroup)
+```
+
+<br>
+<br>
+
+#### groupsets.remove_group
+
+```py
+groupsets.remove_group(groupset_item, group)
+```
+
+Removes a group from the specified group set.
+
+REST API: [Remove Group from Group Set](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_users_and_groups.htm#remove_group_from_group_set)
+
+**Version**
+
+This endpoint is available with REST API version 3.22 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`groupset_item` | The `GroupSetItem` specifying the group set to update.
+`group` | The `GroupItem` or group id (`str`) to remove from the group set.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.groupsets.remove_group(groupset, mygroup)
+```
+
+<br>
+<br>
+
+#### groupsets.filter
+
+```py
+groupsets.filter(**kwargs)
+```
+
+Returns a list of group sets that match the specified filters. Fields and operators are passed as keyword arguments in the form `field_name=value` or `field_name__operator=value`.
+
+**Version**
+
+This endpoint is available with REST API version 3.22 and up.
+
+**Supported fields and operators**
+
+Field | Operators
+:--- | :---
+`domain_name` | `eq`, `in`
+`domain_nickname` | `eq`, `in`
+`is_external_user_enabled` | `eq`
+`is_local` | `eq`
+`luid` | `eq`, `in`
+`minimum_site_role` | `eq`, `in`
+`name` | `eq`, `cieq`, `in`, `like`
+`user_count` | `eq`, `gt`, `gte`, `lt`, `lte`
+
+**Returns**
+
+Returns a `QuerySet` of `GroupSetItem` objects.
+
+**Example**
+
+```py
+local_groupsets = server.groupsets.filter(is_local=True)
+for groupset in local_groupsets:
+    print(groupset.name)
+```
+
+<br>
+<br>
+
+---
+
 ## Jobs
 
 Using the TSC library, you can get information about an asynchronous process (or *job*) on the server. These jobs can be created when Tableau runs certain tasks that could be long running, such as importing or synchronizing users from Active Directory, or running an extract refresh. For example, the REST API methods to create or update groups, to run an extract refresh task, or to publish workbooks can take an `asJob` parameter (`asJob-true`) that creates a background process (the *job*) to complete the call. Information about the asynchronous job is returned from the method.
