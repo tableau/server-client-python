@@ -5701,6 +5701,146 @@ See [ViewItem class](#viewitem-class)
 <br>
 <br>
 
+#### views.populate_excel
+
+```py
+views.populate_excel(view_item, req_options=None)
+```
+
+Populates the Excel content of the specified view.
+
+After calling this method, the Excel data is available through the view's `excel` property.
+
+REST API: [Download View Excel](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#download_view_excel){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`view_item` | The `ViewItem` to populate with Excel data.
+`req_options` | (Optional) You can pass in request options to filter data or set the maximum age of the Excel content cached on the server. See [ExcelRequestOptions class](#excelrequestoptions-class) for more details.
+
+**Returns**
+
+None. The Excel content is added to the `view_item` and can be accessed by its `excel` field.
+
+**Version**
+
+Version 3.8 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+server.views.populate_excel(view_item)
+with open('./view_data.xlsx', 'wb') as f:
+    f.write(view_item.excel)
+```
+
+<br>
+<br>
+
+#### views.update
+
+```py
+views.update(view_item)
+```
+
+Modifies the specified view. Use this method to change the owner of a view or update its settings.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`view_item` | The `ViewItem` with updated attributes.
+
+**Returns**
+
+Returns the updated `ViewItem`.
+
+**Example**
+
+```py
+view = server.views.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+view.owner_id = 'new-owner-id'
+updated_view = server.views.update(view)
+```
+
+<br>
+<br>
+
+#### views.populate_permissions
+
+```py
+views.populate_permissions(view_item)
+```
+
+Populates the permissions for the specified view.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`view_item` | The `ViewItem` to populate with permissions.
+
+**Version**
+
+Version 3.2 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+view = server.views.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+server.views.populate_permissions(view)
+for permission in view.permissions:
+    print(permission.grantee_id, permission.capabilities)
+```
+
+<br>
+<br>
+
+#### views.update_permissions
+
+```py
+views.update_permissions(view_item, permission_item)
+```
+
+Adds or updates permissions for the specified view.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`view_item` | The `ViewItem` to update permissions for.
+`permission_item` | A list of `PermissionsRule` objects representing the permissions to add or update.
+
+**Version**
+
+Version 3.2 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+<br>
+<br>
+
+#### views.delete_permission
+
+```py
+views.delete_permission(view_item, capability_item)
+```
+
+Removes a permission from the specified view.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`view_item` | The `ViewItem` to remove the permission from.
+`capability_item` | The `PermissionsRule` object representing the permission to remove.
+
+**Version**
+
+Version 3.2 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+<br>
+<br>
 
 ---
 ## Webhooks
