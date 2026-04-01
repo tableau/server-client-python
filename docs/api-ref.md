@@ -5842,6 +5842,176 @@ Version 3.2 and later. See [REST API versions](https://help.tableau.com/current/
 <br>
 <br>
 
+#### views.add_tags
+
+```py
+views.add_tags(item, tags)
+```
+
+Adds one or more tags to the specified view.
+
+REST API: [Add Tags to View](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#add_tags_to_view)
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `ViewItem` or view ID to add tags to.
+`tags` | A single tag string or iterable of tag strings to add.
+
+**Returns**
+
+Returns a `set[str]` of the tags added.
+
+**Example**
+
+```py
+server.views.add_tags(view_item, ['finance', 'quarterly'])
+```
+
+<br>
+<br>
+
+#### views.delete_tags
+
+```py
+views.delete_tags(item, tags)
+```
+
+Removes one or more tags from the specified view.
+
+REST API: [Delete Tags from View](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#delete_tags_from_view)
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `ViewItem` or view ID to remove tags from.
+`tags` | A single tag string or iterable of tag strings to remove.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.views.delete_tags(view_item, 'finance')
+```
+
+<br>
+<br>
+
+#### views.update_tags
+
+```py
+views.update_tags(item)
+```
+
+Updates the tags on the server to match the tags on the specified view item. Changes to tags must be made on the `ViewItem.tags` attribute before calling this method.
+
+REST API: [Add Tags to View](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#add_tags_to_view)
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `ViewItem` whose tags to synchronize to the server.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+view_item.tags.add('quarterly')
+server.views.update_tags(view_item)
+```
+
+<br>
+<br>
+
+#### views.delete
+
+```py
+views.delete(view)
+```
+
+Deletes a view. If you delete the only view in a workbook, the workbook is also deleted. This can be used to remove hidden views when migrating content.
+
+REST API: [Delete View](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#delete_view)
+
+**Version**
+
+This endpoint is available with REST API version 3.27 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`view` | The `ViewItem` or view ID (str) to delete.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.views.delete(view_item.id)
+```
+
+<br>
+<br>
+
+#### views.filter
+
+```py
+views.filter(**kwargs)
+```
+
+Returns a list of views that match the specified filters. Fields and operators are passed as keyword arguments in the form `field_name=value` or `field_name__operator=value`.
+
+**Supported fields and operators**
+
+Field | Operators
+:--- | :---
+`caption` | `eq`, `in`
+`content_url` | `eq`, `in`
+`created_at` | `eq`, `gt`, `gte`, `lt`, `lte`
+`favorites_total` | `eq`, `gt`, `gte`, `lt`, `lte`
+`fields` | `eq`, `in`
+`hits_total` | `eq`, `gt`, `gte`, `lt`, `lte`
+`name` | `eq`, `in`
+`owner_domain` | `eq`, `in`
+`owner_email` | `eq`, `in`
+`owner_name` | `eq`
+`project_name` | `eq`, `in`
+`sheet_number` | `eq`, `gt`, `gte`, `lt`, `lte`
+`sheet_type` | `eq`, `in`
+`tags` | `eq`, `in`
+`title` | `eq`, `in`
+`updated_at` | `eq`, `gt`, `gte`, `lt`, `lte`
+`view_url_name` | `eq`, `in`
+`workbook_description` | `eq`, `in`
+`workbook_name` | `eq`, `in`
+
+**Returns**
+
+Returns a `QuerySet` of `ViewItem` objects.
+
+**Example**
+
+```py
+matching_views = server.views.filter(project_name='Finance', sheet_type='story')
+for view in matching_views:
+    print(view.name)
+```
+
+<br>
+<br>
+
 ---
 ## Webhooks
 <br>
