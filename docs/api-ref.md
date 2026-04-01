@@ -6948,4 +6948,170 @@ result = server.workbooks.schedule_extract_refresh('schedule-id-here', workbook)
 <br>
 <br>
 
+#### workbooks.update_connections
+
+```py
+workbooks.update_connections(workbook_item, connection_luids, authentication_type, username=None, password=None, embed_password=None)
+```
+
+Bulk updates one or more workbook connections by LUID, including the authentication type, username, password, and whether to embed the password.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`workbook_item` | The `WorkbookItem` containing the connections to update.
+`connection_luids` | An iterable of connection LUIDs (strings) to update.
+`authentication_type` | The authentication type to use (e.g., `'AD Service Principal'`).
+`username` | (Optional) The username to set (e.g., client ID for keypair auth).
+`password` | (Optional) The password or secret to set.
+`embed_password` | (Optional) Whether to embed the password.
+
+**Returns**
+
+Returns a list of updated `ConnectionItem` objects.
+
+**Example**
+
+```py
+workbook = server.workbooks.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+server.workbooks.populate_connections(workbook)
+luids = [conn.id for conn in workbook.connections]
+updated = server.workbooks.update_connections(workbook, luids, 'UserNameAndPassword', username='myuser', password='mypassword', embed_password=True)
+```
+
+<br>
+<br>
+
+#### workbooks.add_tags
+
+```py
+workbooks.add_tags(item, tags)
+```
+
+Adds one or more tags to the specified workbook.
+
+REST API: [Add Tags to Workbook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#add_tags_to_workbook)
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `WorkbookItem` or workbook ID to add tags to.
+`tags` | A single tag string or iterable of tag strings to add.
+
+**Returns**
+
+Returns a `set[str]` of the tags added.
+
+**Example**
+
+```py
+server.workbooks.add_tags(workbook_item, ['finance', 'quarterly'])
+```
+
+<br>
+<br>
+
+#### workbooks.delete_tags
+
+```py
+workbooks.delete_tags(item, tags)
+```
+
+Removes one or more tags from the specified workbook.
+
+REST API: [Delete Tag from Workbook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#delete_tag_from_workbook)
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `WorkbookItem` or workbook ID to remove tags from.
+`tags` | A single tag string or iterable of tag strings to remove.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.workbooks.delete_tags(workbook_item, 'finance')
+```
+
+<br>
+<br>
+
+#### workbooks.update_tags
+
+```py
+workbooks.update_tags(item)
+```
+
+Updates the tags on the server to match the tags on the specified workbook item. Changes to tags must be made on the `WorkbookItem.tags` attribute before calling this method.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `WorkbookItem` whose tags to synchronize to the server.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+workbook_item.tags.add('quarterly')
+server.workbooks.update_tags(workbook_item)
+```
+
+<br>
+<br>
+
+#### workbooks.filter
+
+```py
+workbooks.filter(**kwargs)
+```
+
+Returns a list of workbooks that match the specified filters. Fields and operators are passed as keyword arguments in the form `field_name=value` or `field_name__operator=value`.
+
+**Supported fields and operators**
+
+Field | Operators
+:--- | :---
+`content_url` | `eq`, `in`
+`created_at` | `eq`, `gt`, `gte`, `lt`, `lte`
+`display_tabs` | `eq`
+`favorites_total` | `eq`, `gt`, `gte`, `lt`, `lte`
+`has_alerts` | `eq`
+`has_extracts` | `eq`
+`name` | `eq`, `in`
+`owner_domain` | `eq`, `in`
+`owner_email` | `eq`, `in`
+`owner_name` | `eq`, `in`
+`project_name` | `eq`, `in`
+`sheet_count` | `eq`, `gt`, `gte`, `lt`, `lte`
+`size` | `eq`, `gt`, `gte`, `lt`, `lte`
+`subscriptions_total` | `eq`, `gt`, `gte`, `lt`, `lte`
+`tags` | `eq`, `in`
+`updated_at` | `eq`, `gt`, `gte`, `lt`, `lte`
+
+**Returns**
+
+Returns a `QuerySet` of `WorkbookItem` objects.
+
+**Example**
+
+```py
+finance_workbooks = server.workbooks.filter(project_name='Finance', has_extracts=True)
+for wb in finance_workbooks:
+    print(wb.name)
+```
+
+<br>
+<br>
 
