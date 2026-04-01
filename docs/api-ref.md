@@ -1651,6 +1651,256 @@ result = server.datasources.schedule_extract_refresh('schedule-id-here', datasou
 <br>
 <br>
 
+#### datasources.update_connection
+
+```py
+datasources.update_connection(datasource_item, connection_item)
+```
+
+Updates the server address, port, username, or password for the specified data source connection.
+
+REST API: [Update Data Source Connection](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#update_data_source_connection)
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`datasource_item` | The `DatasourceItem` to update.
+`connection_item` | The `ConnectionItem` containing the updated connection details.
+
+**Returns**
+
+Returns the updated `ConnectionItem`, or `None` if no connection was returned.
+
+**Example**
+
+```py
+server.datasources.populate_connections(datasource_item)
+conn = datasource_item.connections[0]
+conn.username = 'newuser'
+updated_conn = server.datasources.update_connection(datasource_item, conn)
+```
+
+<br>
+<br>
+
+#### datasources.update_connections
+
+```py
+datasources.update_connections(datasource_item, connection_luids, authentication_type, username=None, password=None, embed_password=None)
+```
+
+Bulk updates one or more datasource connections by LUID.
+
+**Version**
+
+This endpoint is available with REST API version 3.26 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`datasource_item` | The `DatasourceItem` containing the connections to update.
+`connection_luids` | An iterable of connection LUIDs (strings) to update.
+`authentication_type` | The authentication type to use (e.g., `'auth-keypair'`).
+`username` | (Optional) The username to set.
+`password` | (Optional) The password or secret to set.
+`embed_password` | (Optional) Whether to embed the password.
+
+**Returns**
+
+Returns a list of updated `ConnectionItem` objects.
+
+**Example**
+
+```py
+server.datasources.populate_connections(datasource_item)
+luids = [conn.id for conn in datasource_item.connections]
+updated = server.datasources.update_connections(datasource_item, luids, 'auth-keypair', username='myuser', password='mysecret')
+```
+
+<br>
+<br>
+
+#### datasources.update_hyper_data
+
+```py
+datasources.update_hyper_data(datasource_or_connection_item, *, request_id, actions, payload=None)
+```
+
+Incrementally updates data (insert, update, upsert, replace, or delete) in a published datasource from a live-to-Hyper connection.
+
+For all connections to Parquet files and for datasources with a single connection, you can pass a `DatasourceItem`. For datasources with multiple connections, pass a `ConnectionItem` to target the specific connection.
+
+REST API: [Update Data in Hyper Data Source](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#update_data_in_hyper_connection)
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`datasource_or_connection_item` | A `DatasourceItem`, `ConnectionItem`, or datasource ID string. Use a `ConnectionItem` when the datasource has multiple connections.
+`request_id` | A user-supplied string to uniquely identify the request. Duplicate requests with the same key are executed only once.
+`actions` | A sequence of action mappings (insert, update, delete, etc.) specifying how to modify the data. See the [REST API documentation](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_how_to_update_data_to_hyper.htm#action-batch-descriptions) for action format.
+`payload` | (Optional) Path to a Hyper file containing tuple data for the actions.
+
+**Returns**
+
+Returns a `JobItem` for the running job on the server.
+
+**Example**
+
+```py
+actions = [{"action": "insert", "source-table": "my_table", "target-table": "my_table"}]
+job = server.datasources.update_hyper_data(
+    datasource_item,
+    request_id='unique-request-id-001',
+    actions=actions,
+    payload='/path/to/data.hyper'
+)
+job = server.jobs.wait_for_job(job)
+```
+
+<br>
+<br>
+
+#### datasources.add_tags
+
+```py
+datasources.add_tags(item, tags)
+```
+
+Adds one or more tags to the specified datasource.
+
+REST API: [Add Tags to Data Source](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#add_tags_to_data_source)
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `DatasourceItem` or datasource ID to add tags to.
+`tags` | A single tag string or iterable of tag strings to add.
+
+**Returns**
+
+Returns a `set[str]` of the tags added.
+
+**Example**
+
+```py
+server.datasources.add_tags(datasource_item, ['finance', 'quarterly'])
+```
+
+<br>
+<br>
+
+#### datasources.delete_tags
+
+```py
+datasources.delete_tags(item, tags)
+```
+
+Removes one or more tags from the specified datasource.
+
+REST API: [Delete Tag from Data Source](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#delete_tag_from_data_source)
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `DatasourceItem` or datasource ID to remove tags from.
+`tags` | A single tag string or iterable of tag strings to remove.
+
+**Example**
+
+```py
+server.datasources.delete_tags(datasource_item, 'finance')
+```
+
+<br>
+<br>
+
+#### datasources.update_tags
+
+```py
+datasources.update_tags(item)
+```
+
+Updates the tags on the server to match the tags on the specified datasource item. Changes to tags must be made on the `DatasourceItem.tags` attribute before calling this method.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `DatasourceItem` whose tags to synchronize to the server.
+
+**Example**
+
+```py
+datasource_item.tags.add('quarterly')
+server.datasources.update_tags(datasource_item)
+```
+
+<br>
+<br>
+
+#### datasources.filter
+
+```py
+datasources.filter(**kwargs)
+```
+
+Returns a list of datasources that match the specified filters. Fields and operators are passed as keyword arguments in the form `field_name=value` or `field_name__operator=value`.
+
+**Supported fields and operators**
+
+Field | Operators
+:--- | :---
+`authentication_type` | `eq`, `in`
+`connected_workbook_type` | `eq`, `gt`, `gte`, `lt`, `lte`
+`connection_to` | `eq`, `in`
+`connection_type` | `eq`, `in`
+`content_url` | `eq`, `in`
+`created_at` | `eq`, `gt`, `gte`, `lt`, `lte`
+`database_name` | `eq`, `in`
+`database_user_name` | `eq`, `in`
+`description` | `eq`, `in`
+`favorites_total` | `eq`, `gt`, `gte`, `lt`, `lte`
+`has_alert` | `eq`
+`has_embedded_password` | `eq`
+`has_extracts` | `eq`
+`is_certified` | `eq`
+`is_connectable` | `eq`
+`is_default_port` | `eq`
+`is_hierarchical` | `eq`
+`is_published` | `eq`
+`name` | `eq`, `in`
+`owner_domain` | `eq`, `in`
+`owner_email` | `eq`
+`owner_name` | `eq`, `in`
+`project_name` | `eq`, `in`
+`server_name` | `eq`, `in`
+`server_port` | `eq`
+`size` | `eq`, `gt`, `gte`, `lt`, `lte`
+`table_name` | `eq`, `in`
+`tags` | `eq`, `in`
+`type` | `eq`
+`updated_at` | `eq`, `gt`, `gte`, `lt`, `lte`
+
+**Returns**
+
+Returns a `QuerySet` of `DatasourceItem` objects.
+
+**Example**
+
+```py
+certified_ds = server.datasources.filter(is_certified=True, project_name='Finance')
+for ds in certified_ds:
+    print(ds.name)
+```
+
+<br>
+<br>
+
 
 ---
 
