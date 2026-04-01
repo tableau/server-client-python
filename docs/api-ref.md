@@ -1835,6 +1835,46 @@ Source files: server/endpoint/jobs_endpoint.py
 <br>
 <br>
 
+#### jobs.get
+
+```py
+jobs.get(job_id=None, req_options=None)
+```
+
+Returns a list of active jobs on the current site, or the status of a specific job if `job_id` is provided.
+
+REST API: [Get Background Jobs on Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#get_background_jobs_on_site){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`job_id` | (Optional) The `job_id` specifies the job to query. When provided, returns the status of that specific job.
+`req_options` | (Optional) You can pass the method a request object that contains additional parameters to filter the request.
+
+**Returns**
+
+Returns a list of `BackgroundJobItem` objects and a `PaginationItem` object.
+
+**Version**
+
+Version 2.6 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
+server = TSC.Server('https://SERVERURL')
+
+with server.auth.sign_in(tableau_auth):
+    all_jobs, pagination_item = server.jobs.get()
+    print("\nThere are {} jobs on site: ".format(pagination_item.total_available))
+    print([job.id for job in all_jobs])
+```
+
+<br>
+<br>
 
 #### jobs.get_by_id
 
