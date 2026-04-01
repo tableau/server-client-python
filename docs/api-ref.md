@@ -4262,6 +4262,127 @@ for config in auth_configs:
 <br>
 <br>
 
+#### sites.get_by_content_url
+
+```py
+sites.get_by_content_url(content_url)
+```
+
+Returns the site with the specified content URL.
+
+REST API: [Query Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_site.htm#query_site){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`content_url` | The `content_url` for the site to query. This is the `contentUrl` value in the REST API and corresponds to the portion of the URL after `/site/` (for example, `"MarketingTeam"`). Use an empty string for the default site.
+
+**Returns**
+
+Returns a `SiteItem`.
+
+**Version**
+
+Version 2.0 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+site = server.sites.get_by_content_url('MarketingTeam')
+print(site.id, site.name)
+```
+
+<br>
+<br>
+
+#### sites.encrypt_extracts
+
+```py
+sites.encrypt_extracts(site_id)
+```
+
+Encrypts all extracts on the specified site.
+
+REST API: [Encrypt Extracts](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_extract_and_encryption.htm#encrypt_extracts){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`site_id` | The identifier (`id`) for the site on which to encrypt all extracts.
+
+**Version**
+
+Version 3.5 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+server.sites.encrypt_extracts(server.site_id)
+```
+
+<br>
+<br>
+
+#### sites.decrypt_extracts
+
+```py
+sites.decrypt_extracts(site_id)
+```
+
+Decrypts all extracts on the specified site.
+
+REST API: [Decrypt Extracts](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_extract_and_encryption.htm#decrypt_extracts){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`site_id` | The identifier (`id`) for the site on which to decrypt all extracts.
+
+**Version**
+
+Version 3.5 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+server.sites.decrypt_extracts(server.site_id)
+```
+
+<br>
+<br>
+
+#### sites.re_encrypt_extracts
+
+```py
+sites.re_encrypt_extracts(site_id)
+```
+
+Re-encrypts all extracts on the specified site using new encryption keys.
+
+REST API: [Reencrypt Extracts](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_extract_and_encryption.htm#reencrypt_extracts){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`site_id` | The identifier (`id`) for the site on which to re-encrypt all extracts.
+
+**Version**
+
+Version 3.5 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+server.sites.re_encrypt_extracts(server.site_id)
+```
+
+<br>
+<br>
+
 ---
 
 
