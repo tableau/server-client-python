@@ -5361,6 +5361,82 @@ An updated `UserItem`.    See [UserItem class](#useritem-class)
 <br>
 <br>
 
+#### users.add_all
+
+```py
+users.add_all(users)
+```
+
+Adds a list of users to the site. Unlike `bulk_add`, this method adds users one at a time and collects successes and failures rather than stopping on the first error.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`users` | A list of `UserItem` objects to add to the site.
+
+**Returns**
+
+Returns a tuple of two lists: `(created, failed)`. The `created` list contains the successfully added `UserItem` objects. The `failed` list contains the `UserItem` objects that could not be added.
+
+**Version**
+
+Version 2.0 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+users_to_add = [TSC.UserItem('user1'), TSC.UserItem('user2')]
+created, failed = server.users.add_all(users_to_add)
+print("Added {} users, {} failed.".format(len(created), len(failed)))
+```
+
+<br>
+<br>
+
+#### users.create_from_file
+
+```py
+users.create_from_file(filepath)
+```
+
+Adds users from a CSV file to the site. The CSV file format matches the format used in the Tableau Server UI for bulk user import.
+
+The CSV file should have the following column format (header row optional):
+`Username, Password, Display Name, License Level, Admin Level, Publishing Access`
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`filepath` | The path to a CSV file containing user information to import.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`ValueError` | Raises an exception if the file path does not point to a CSV file.
+
+**Returns**
+
+Returns a tuple of two lists: `(created, failed)`. The `created` list contains successfully added `UserItem` objects. The `failed` list contains tuples of `(UserItem, ServerResponseError)` for users that could not be added.
+
+**Version**
+
+Version 2.0 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+created, failed = server.users.create_from_file('/path/to/users.csv')
+print("Imported {} users. {} failed.".format(len(created), len(failed)))
+for user, error in failed:
+    print("Failed to import {}: {}".format(user.name, error))
+```
+
+<br>
+<br>
+
 
 ---
 
