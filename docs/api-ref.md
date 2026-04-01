@@ -5437,6 +5437,40 @@ for user, error in failed:
 <br>
 <br>
 
+#### users.filter
+
+```py
+users.filter(**kwargs)
+```
+
+Returns a list of users that match the specified filters. Fields and operators are passed as keyword arguments in the form `field_name=value` or `field_name__operator=value`.
+
+**Supported fields and operators**
+
+Field | Operators
+:--- | :---
+`domain_name` | `eq`, `in`
+`friendly_name` | `eq`, `in`
+`is_local` | `eq`
+`last_login` | `eq`, `gt`, `gte`, `lt`, `lte`
+`luid` | `eq`, `in`
+`name` | `eq`, `cieq`, `in`
+`site_role` | `eq`, `in`
+
+**Returns**
+
+Returns a `QuerySet` of `UserItem` objects.
+
+**Example**
+
+```py
+viewers = server.users.filter(site_role='Viewer')
+for user in viewers:
+    print(user.name)
+```
+
+<br>
+<br>
 
 ---
 
