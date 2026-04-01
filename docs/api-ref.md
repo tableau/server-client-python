@@ -5905,6 +5905,65 @@ print (webhook.name, webhook.url)
 <br>
 <br>
 
+#### webhook.delete
+
+```py
+webhooks.delete(webhook_id)
+```
+
+Deletes the specified webhook.
+
+REST API: [Delete Webhook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_notifications.htm#delete_webhook){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`webhook_id` | The identifier (`id`) for the `WebhookItem` to delete.
+
+**Version**
+
+Version 3.6 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+server.webhooks.delete('7d60d364-b9f5-4a9c-8aa5-4bdaa38c5dd3')
+```
+
+<br>
+<br>
+
+#### webhook.test
+
+```py
+webhooks.test(webhook_id)
+```
+
+Tests the specified webhook. Sends an empty payload to the webhook destination URL and returns the response from the server.
+
+REST API: [Test a Webhook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_notifications.htm#test_webhook){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`webhook_id` | The identifier (`id`) for the `WebhookItem` to test.
+
+**Version**
+
+Version 3.6 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+webhook = server.webhooks.get_by_id('7d60d364-b9f5-4a9c-8aa5-4bdaa38c5dd3')
+server.webhooks.test(webhook.id)
+```
+
+<br>
+<br>
+
 ### Additional Resources
 - [REST API Endpoints](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_notifications.htm)
 - [Webhooks Documentation](https://help.tableau.com/current/developer/webhooks/en-us/)
