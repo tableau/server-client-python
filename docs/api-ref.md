@@ -652,6 +652,115 @@ See [CustomViewItem class](#customviewitem-class)
 <br>
 <br>
 
+#### custom_views.download
+
+```py
+custom_views.download(view_item, file)
+```
+
+Downloads the definition of a custom view as JSON to a file path or file object. The downloaded file may contain sensitive information.
+
+**Version**
+
+This endpoint is available with REST API version 3.21 and up.
+
+**Parameters**
+
+| Name        | Description                                                                          |
+| :---------- | :----------------------------------------------------------------------------------- |
+| `view_item` | The `CustomViewItem` to download.                                                    |
+| `file`      | The file path (`str` or `Path`) or writable file object to write the definition to. |
+
+**Returns**
+
+Returns the file path or file object that the custom view definition was written to.
+
+**Example**
+
+```py
+custom_view = server.custom_views.get_by_id('d79634e1-6063-4ec9-95ff-50acbf609ff5')
+server.custom_views.download(custom_view, './my_custom_view.json')
+```
+
+See [CustomViewItem class](#customviewitem-class)
+
+<br>
+<br>
+
+#### custom_views.publish
+
+```py
+custom_views.publish(view_item, file)
+```
+
+Publishes a custom view to Tableau Server from a JSON definition file previously downloaded with `custom_views.download`.
+
+**Version**
+
+This endpoint is available with REST API version 3.21 and up.
+
+**Parameters**
+
+| Name        | Description                                                                           |
+| :---------- | :------------------------------------------------------------------------------------ |
+| `view_item` | The `CustomViewItem` describing the custom view to publish. Must have a `name` set.   |
+| `file`      | The file path (`str` or `Path`) or readable file object containing the definition.   |
+
+**Exceptions**
+
+| Error                        | Description                                                             |
+| :--------------------------- | :---------------------------------------------------------------------- |
+| `ValueError`                 | Raised if `file` is not a valid file path or file object.               |
+| `MissingRequiredFieldError`  | Raised if `view_item.name` is not set when passing a file object.       |
+
+**Returns**
+
+Returns the published `CustomViewItem`, or `None`.
+
+**Example**
+
+```py
+new_view = TSC.CustomViewItem(name='My Custom View')
+published = server.custom_views.publish(new_view, './my_custom_view.json')
+print(published.id)
+```
+
+See [CustomViewItem class](#customviewitem-class)
+
+<br>
+<br>
+
+#### custom_views.filter
+
+```py
+custom_views.filter(**kwargs)
+```
+
+Returns a list of custom views that match the specified filters. Fields and operators are passed as keyword arguments in the form `field_name=value`.
+
+**Supported fields and operators**
+
+Field | Operators
+:--- | :---
+`owner_id` | `eq`
+`view_id` | `eq`
+`workbook_id` | `eq`
+
+**Returns**
+
+Returns a `QuerySet` of `CustomViewItem` objects.
+
+**Example**
+
+```py
+my_views = server.custom_views.filter(owner_id=user_item.id)
+for view in my_views:
+    print(view.name)
+```
+
+<br>
+<br>
+
 ---
 
 ## Data Sources
