@@ -1415,6 +1415,40 @@ print("Flow run completed with status: {}".format(flow_run.status))
 <br>
 <br>
 
+#### flow_runs.filter
+
+```py
+flow_runs.filter(**kwargs)
+```
+
+Returns a list of flow runs that match the specified filters. Fields and operators are passed as keyword arguments in the form `field_name=value` or `field_name__operator=value`.
+
+**Supported fields and operators**
+
+Field | Operators
+:--- | :---
+`complete_at` | `eq`, `gt`, `gte`, `lt`, `lte`
+`flow_id` | `eq`, `in`
+`progress` | `eq`, `gt`, `gte`, `lt`, `lte`
+`started_at` | `eq`, `gt`, `gte`, `lt`, `lte`
+`user_id` | `eq`, `in`
+
+**Returns**
+
+Returns a `QuerySet` of `FlowRunItem` objects.
+
+**Example**
+
+```py
+flow = server.flows.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+recent_runs = server.flow_runs.filter(flow_id=flow.id)
+for run in recent_runs:
+    print(run.id, run.status)
+```
+
+<br>
+<br>
+
 ---
 
 ## Groups
