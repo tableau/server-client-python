@@ -2014,6 +2014,45 @@ See the `update_datasource_data.py` or `refresh.py` sample in the Samples direct
 <br>
 <br>
 
+#### jobs.filter
+
+```py
+jobs.filter(**kwargs)
+```
+
+Returns a list of background jobs that match the specified filters. Fields and operators are passed as keyword arguments in the form `field_name=value` or `field_name__operator=value`.
+
+**Supported fields and operators**
+
+Field | Operators
+:--- | :---
+`args` | `has`
+`completed_at` | `eq`, `gt`, `gte`, `lt`, `lte`
+`created_at` | `eq`, `gt`, `gte`, `lt`, `lte`
+`job_type` | `eq`, `in`
+`notes` | `has`
+`priority` | `eq`, `gt`, `gte`, `lt`, `lte`
+`progress` | `eq`, `gt`, `gte`, `lt`, `lte`
+`started_at` | `eq`, `gt`, `gte`, `lt`, `lte`
+`status` | `eq`
+`subtitle` | `eq`, `has`
+`title` | `eq`, `has`
+
+**Returns**
+
+Returns a `QuerySet` of `BackgroundJobItem` objects.
+
+**Example**
+
+```py
+failed_jobs = server.jobs.filter(status='Failed')
+for job in failed_jobs:
+    print(job.id, job.type)
+```
+
+<br>
+<br>
+
 ---
 
 ## Metadata
