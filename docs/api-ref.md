@@ -1174,6 +1174,536 @@ See the `update_datasource_data.py` sample in the Samples directory.
 <br>
 <br>
 
+---
+
+## Favorites
+
+Using the TSC library, you can get, add, and remove favorites for a user. Favorites can be workbooks, views, datasources, flows, projects, or metrics.
+
+The favorites for a user are stored as a dictionary on the `UserItem` object. The dictionary is keyed by content type (`"workbooks"`, `"views"`, `"datasources"`, `"flows"`, `"projects"`, `"metrics"`, `"collections"`) and each value is a list of the corresponding item objects.
+
+<br>
+<br>
+
+### Favorites methods
+
+The Tableau Server Client provides several methods for interacting with favorites. These methods correspond to endpoints in the Tableau Server REST API.
+
+Source file: server/endpoint/favorites_endpoint.py
+
+<br>
+<br>
+
+#### favorites.get
+
+```py
+favorites.get(user_item, req_options=None)
+```
+
+Populates the favorites for the specified user. After calling this method, the favorites are available through `user_item.favorites`.
+
+REST API: [Get Favorites for User](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#get_favorites_for_user)
+
+**Version**
+
+This endpoint is available with REST API version 2.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` for which to retrieve favorites.
+`req_options` | (Optional) Request options such as page size and page number.
+
+**Returns**
+
+None. Favorites are populated on `user_item.favorites`.
+
+**Example**
+
+```py
+server.favorites.get(user_item)
+for workbook in user_item.favorites['workbooks']:
+    print(workbook.name)
+```
+
+<br>
+<br>
+
+#### favorites.add_favorite
+
+```py
+favorites.add_favorite(user_item, content_type, item)
+```
+
+Adds a content item of any supported type to the specified user's favorites.
+
+REST API: [Add Workbook to Favorites](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#add_workbook_to_favorites)
+
+**Version**
+
+This endpoint is available with REST API version 3.15 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to add the favorite for.
+`content_type` | The type of content as a string (e.g., `"workbook"`, `"view"`, `"datasource"`, `"flow"`, `"project"`).
+`item` | The content item to favorite. Must have `id` and `name` attributes.
+
+**Returns**
+
+Returns the server `Response` object.
+
+**Example**
+
+```py
+server.favorites.add_favorite(user_item, 'workbook', workbook_item)
+```
+
+<br>
+<br>
+
+#### favorites.add_favorite_workbook
+
+```py
+favorites.add_favorite_workbook(user_item, workbook_item)
+```
+
+Adds a workbook to the specified user's favorites.
+
+REST API: [Add Workbook to Favorites](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#add_workbook_to_favorites)
+
+**Version**
+
+This endpoint is available with REST API version 2.0 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to add the favorite for.
+`workbook_item` | The `WorkbookItem` to add to favorites.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.favorites.add_favorite_workbook(user_item, workbook_item)
+```
+
+<br>
+<br>
+
+#### favorites.add_favorite_view
+
+```py
+favorites.add_favorite_view(user_item, view_item)
+```
+
+Adds a view to the specified user's favorites.
+
+REST API: [Add View to Favorites](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#add_view_to_favorites)
+
+**Version**
+
+This endpoint is available with REST API version 2.0 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to add the favorite for.
+`view_item` | The `ViewItem` to add to favorites.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.favorites.add_favorite_view(user_item, view_item)
+```
+
+<br>
+<br>
+
+#### favorites.add_favorite_datasource
+
+```py
+favorites.add_favorite_datasource(user_item, datasource_item)
+```
+
+Adds a datasource to the specified user's favorites.
+
+REST API: [Add Data Source to Favorites](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#add_data_source_to_favorites)
+
+**Version**
+
+This endpoint is available with REST API version 2.3 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to add the favorite for.
+`datasource_item` | The `DatasourceItem` to add to favorites.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.favorites.add_favorite_datasource(user_item, datasource_item)
+```
+
+<br>
+<br>
+
+#### favorites.add_favorite_project
+
+```py
+favorites.add_favorite_project(user_item, project_item)
+```
+
+Adds a project to the specified user's favorites.
+
+REST API: [Add Project to Favorites](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#add_project_to_favorites)
+
+**Version**
+
+This endpoint is available with REST API version 3.1 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to add the favorite for.
+`project_item` | The `ProjectItem` to add to favorites.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.favorites.add_favorite_project(user_item, project_item)
+```
+
+<br>
+<br>
+
+#### favorites.add_favorite_flow
+
+```py
+favorites.add_favorite_flow(user_item, flow_item)
+```
+
+Adds a flow to the specified user's favorites.
+
+REST API: [Add Flow to Favorites](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#add_flow_to_favorites)
+
+**Version**
+
+This endpoint is available with REST API version 3.3 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to add the favorite for.
+`flow_item` | The `FlowItem` to add to favorites.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.favorites.add_favorite_flow(user_item, flow_item)
+```
+
+<br>
+<br>
+
+#### favorites.add_favorite_metric
+
+```py
+favorites.add_favorite_metric(user_item, metric_item)
+```
+
+Adds a metric to the specified user's favorites.
+
+**Version**
+
+This endpoint is available with REST API version 3.3 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to add the favorite for.
+`metric_item` | The `MetricItem` to add to favorites.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.favorites.add_favorite_metric(user_item, metric_item)
+```
+
+<br>
+<br>
+
+#### favorites.delete_favorite
+
+```py
+favorites.delete_favorite(user_item, content_type, item)
+```
+
+Removes a content item of any supported type from the specified user's favorites.
+
+**Version**
+
+This endpoint is available with REST API version 3.15 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to remove the favorite from.
+`content_type` | The `Resource` type of the content (e.g., `Resource.Workbook`, `Resource.View`).
+`item` | The content item to remove from favorites. Must have an `id` attribute.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.favorites.delete_favorite(user_item, Resource.Workbook, workbook_item)
+```
+
+<br>
+<br>
+
+#### favorites.delete_favorite_workbook
+
+```py
+favorites.delete_favorite_workbook(user_item, workbook_item)
+```
+
+Removes a workbook from the specified user's favorites.
+
+REST API: [Delete Workbook from Favorites](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#delete_workbook_from_favorites)
+
+**Version**
+
+This endpoint is available with REST API version 2.0 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to remove the favorite from.
+`workbook_item` | The `WorkbookItem` to remove from favorites.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.favorites.delete_favorite_workbook(user_item, workbook_item)
+```
+
+<br>
+<br>
+
+#### favorites.delete_favorite_view
+
+```py
+favorites.delete_favorite_view(user_item, view_item)
+```
+
+Removes a view from the specified user's favorites.
+
+REST API: [Delete View from Favorites](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#delete_view_from_favorites)
+
+**Version**
+
+This endpoint is available with REST API version 2.0 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to remove the favorite from.
+`view_item` | The `ViewItem` to remove from favorites.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.favorites.delete_favorite_view(user_item, view_item)
+```
+
+<br>
+<br>
+
+#### favorites.delete_favorite_datasource
+
+```py
+favorites.delete_favorite_datasource(user_item, datasource_item)
+```
+
+Removes a datasource from the specified user's favorites.
+
+REST API: [Delete Data Source from Favorites](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#delete_data_source_from_favorites)
+
+**Version**
+
+This endpoint is available with REST API version 2.3 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to remove the favorite from.
+`datasource_item` | The `DatasourceItem` to remove from favorites.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.favorites.delete_favorite_datasource(user_item, datasource_item)
+```
+
+<br>
+<br>
+
+#### favorites.delete_favorite_project
+
+```py
+favorites.delete_favorite_project(user_item, project_item)
+```
+
+Removes a project from the specified user's favorites.
+
+REST API: [Delete Project from Favorites](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#delete_project_from_favorites)
+
+**Version**
+
+This endpoint is available with REST API version 3.1 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to remove the favorite from.
+`project_item` | The `ProjectItem` to remove from favorites.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.favorites.delete_favorite_project(user_item, project_item)
+```
+
+<br>
+<br>
+
+#### favorites.delete_favorite_flow
+
+```py
+favorites.delete_favorite_flow(user_item, flow_item)
+```
+
+Removes a flow from the specified user's favorites.
+
+REST API: [Delete Flow from Favorites](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#delete_flow_from_favorites)
+
+**Version**
+
+This endpoint is available with REST API version 3.3 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to remove the favorite from.
+`flow_item` | The `FlowItem` to remove from favorites.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.favorites.delete_favorite_flow(user_item, flow_item)
+```
+
+<br>
+<br>
+
+#### favorites.delete_favorite_metric
+
+```py
+favorites.delete_favorite_metric(user_item, metric_item)
+```
+
+Removes a metric from the specified user's favorites.
+
+**Version**
+
+This endpoint is available with REST API version 3.15 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to remove the favorite from.
+`metric_item` | The `MetricItem` to remove from favorites.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.favorites.delete_favorite_metric(user_item, metric_item)
+```
+
+<br>
+<br>
+
+---
+
 ## Filters
 
 The TSC library provides a `Filter` class that you can use to filter results returned from the server.
