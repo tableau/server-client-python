@@ -1829,6 +1829,40 @@ result = server.flows.schedule_flow_run('schedule-id-here', flow)
 ```
 
 <br>
+<br>
+
+#### flows.filter
+
+```py
+flows.filter(**kwargs)
+```
+
+Returns a list of flows that match the specified filters. Fields and operators are passed as keyword arguments in the form `field_name=value` or `field_name__operator=value`.
+
+**Supported fields and operators**
+
+Field | Operators
+:--- | :---
+`created_at` | `eq`, `gt`, `gte`, `lt`, `lte`
+`name` | `eq`, `in`
+`owner_name` | `eq`
+`project_id` | `eq`
+`project_name` | `eq`, `in`
+`updated` | `eq`, `gt`, `gte`, `lt`, `lte`
+
+**Returns**
+
+Returns a `QuerySet` of `FlowItem` objects.
+
+**Example**
+
+```py
+matching_flows = server.flows.filter(project_name='My Project')
+for flow in matching_flows:
+    print(flow.name)
+```
+
+<br>
 
 ---
 
