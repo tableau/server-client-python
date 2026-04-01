@@ -2505,6 +2505,241 @@ for flow in matching_flows:
 
 ---
 
+## Flow Runs
+
+Using the TSC library, you can query flow runs on a site, get details about a specific flow run, cancel a running flow, or wait for a flow run to complete. Flow runs are created when a flow is triggered to run, either manually or on a schedule.
+
+The flow run resources for Tableau Server are defined in the `FlowRunItem` class. The class corresponds to the flow run resources you can access using the Tableau Server REST API.
+
+<br>
+
+### FlowRunItem class
+
+The `FlowRunItem` represents the result of a flow run on Tableau Server. Instances of this class are returned by the flow run methods; you do not create them directly.
+
+**Attributes**
+
+Name | Description
+:--- | :---
+`id` | The identifier for the flow run.
+`flow_id` | The identifier of the flow that was run.
+`status` | The current status of the flow run. Possible values include `Success`, `Failed`, and `Cancelled`.
+`started_at` | The date and time when the flow run started.
+`completed_at` | The date and time when the flow run completed. Is `None` if the run is still in progress.
+`progress` | The progress percentage of the flow run.
+`background_job_id` | The identifier of the background job associated with the flow run.
+
+Source file: models/flow_run_item.py
+
+<br>
+<br>
+
+### Flow Runs methods
+
+The Tableau Server Client provides several methods for interacting with flow run resources. These methods correspond to endpoints in the Tableau Server REST API.
+
+Source file: server/endpoint/flow_runs_endpoint.py
+
+<br>
+<br>
+
+#### flow_runs.get
+
+```py
+flow_runs.get(req_options=None)
+```
+
+Returns all flow runs on the site.
+
+REST API: [Get Flow Runs](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#get_flow_runs){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`req_options` | (Optional) You can pass the method a request object that contains additional parameters to filter the request.
+
+**Returns**
+
+Returns a list of `FlowRunItem` objects. Be aware that `flowruns.get` does *NOT* return a `PaginationItem`.
+
+**Version**
+
+Version 3.10 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
+server = TSC.Server('https://SERVERURL')
+
+with server.auth.sign_in(tableau_auth):
+    all_runs, pagination_item = server.flow_runs.get()
+    print("\nThere are {} flow runs on site.".format(pagination_item.total_available))
+    for run in all_runs:
+        print(run.id, run.status)
+```
+
+<br>
+<br>
+
+#### flow_runs.get_by_id
+
+```py
+flow_runs.get_by_id(flow_run_id)
+```
+
+Returns the specified flow run item.
+
+REST API: [Get Flow Run](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#get_flow_run){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_run_id` | The identifier (`id`) for the `FlowRunItem` to query.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`Flow ID undefined` | Raises an exception if a valid `flow_run_id` is not provided.
+
+**Returns**
+
+Returns a `FlowRunItem`.
+
+**Version**
+
+Version 3.10 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+flow_run = server.flow_runs.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+print(flow_run.status, flow_run.progress)
+```
+
+<br>
+<br>
+
+#### flow_runs.cancel
+
+```py
+flow_runs.cancel(flow_run_id)
+```
+
+Cancels the specified flow run.
+
+REST API: [Cancel Flow Run](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#cancel_flow_run){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_run_id` | The identifier (`id`) for the `FlowRunItem` to cancel. Can be the id string or a `FlowRunItem` object.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`Flow ID undefined` | Raises an exception if a valid `flow_run_id` is not provided.
+
+**Version**
+
+Version 3.10 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+flow_run = server.flow_runs.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+server.flow_runs.cancel(flow_run.id)
+```
+
+<br>
+<br>
+
+#### flow_runs.wait_for_job
+
+```py
+flow_runs.wait_for_job(flow_run_id, *, timeout=None)
+```
+
+Waits for the specified flow run to complete and returns the finished `FlowRunItem`. This method polls the server repeatedly using exponential backoff until the run completes, then raises an exception if it failed or was cancelled.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_run_id` | The identifier (`id`) for the flow run to wait for. Can be the id string or a `FlowRunItem` object.
+`timeout` | (Optional) The maximum number of seconds to wait before raising a timeout error. If not specified, waits indefinitely.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`FlowRunFailedException` | Raised if the flow run completes with a `Failed` status.
+`FlowRunCancelledException` | Raised if the flow run completes with a `Cancelled` status.
+
+**Returns**
+
+Returns the completed `FlowRunItem` if the run succeeded.
+
+**Version**
+
+Version 3.10 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+# Trigger a flow run and wait for it to finish
+flow = server.flows.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+job = server.flows.refresh(flow)
+
+# Wait for the resulting flow run to complete
+flow_run = server.flow_runs.wait_for_job(job.id, timeout=300)
+print("Flow run completed with status: {}".format(flow_run.status))
+```
+
+<br>
+<br>
+
+#### flow_runs.filter
+
+```py
+flow_runs.filter(**kwargs)
+```
+
+Returns a list of flow runs that match the specified filters. Fields and operators are passed as keyword arguments in the form `field_name=value` or `field_name__operator=value`.
+
+**Supported fields and operators**
+
+Field | Operators
+:--- | :---
+`complete_at` | `eq`, `gt`, `gte`, `lt`, `lte`
+`flow_id` | `eq`, `in`
+`progress` | `eq`, `gt`, `gte`, `lt`, `lte`
+`started_at` | `eq`, `gt`, `gte`, `lt`, `lte`
+`user_id` | `eq`, `in`
+
+**Returns**
+
+Returns a `QuerySet` of `FlowRunItem` objects.
+
+**Example**
+
+```py
+flow = server.flows.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+recent_runs = server.flow_runs.filter(flow_id=flow.id)
+for run in recent_runs:
+    print(run.id, run.status)
+```
+
+<br>
+
+---
+
 ## Groups
 
 Using the TSC library, you can get information about all the groups on a site, you can add or remove groups, or add or remove users in a group.
