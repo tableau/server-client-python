@@ -5703,6 +5703,586 @@ See [ViewItem class](#viewitem-class)
 
 
 ---
+
+## Virtual Connections
+
+Using the TSC library, you can get information about virtual connections on a site, publish, update, or delete virtual connections, manage their connections and revisions, and control permissions and tags.
+
+The virtual connection resources for Tableau Server are defined in the `VirtualConnectionItem` class. The class corresponds to the virtual connection resources you can access using the Tableau Server REST API.
+
+<br>
+<br>
+
+### VirtualConnectionItem class
+
+```py
+VirtualConnectionItem(name)
+```
+
+The `VirtualConnectionItem` class contains the attributes for virtual connection resources on Tableau Server.
+
+Source file: models/virtual_connection_item.py
+
+**Attributes**
+
+Name | Description
+:--- | :---
+`id` | The ID of the virtual connection.
+`name` | The name of the virtual connection. Required when creating an instance.
+`created_at` | The date and time the virtual connection was created.
+`updated_at` | The date and time the virtual connection was last updated.
+`project_id` | The ID of the project that contains the virtual connection.
+`owner_id` | The ID of the owner of the virtual connection.
+`has_extracts` | Whether the virtual connection has extracts.
+`is_certified` | Whether the virtual connection is certified.
+`certification_note` | The certification note for the virtual connection.
+`webpage_url` | The URL for the virtual connection on Tableau Server.
+`content` | The JSON content definition of the virtual connection. Populated by `get_by_id` or `download`.
+`connections` | The list of `ConnectionItem` objects. Must be populated first with `populate_connections`.
+
+**Example**
+
+```py
+new_vc = TSC.VirtualConnectionItem('My Virtual Connection')
+new_vc.project_id = project.id
+```
+
+<br>
+<br>
+
+### Virtual Connections methods
+
+The Tableau Server Client provides several methods for interacting with virtual connection resources. These methods correspond to endpoints in the Tableau Server REST API.
+
+Source file: server/endpoint/virtual_connections_endpoint.py
+
+<br>
+<br>
+
+#### virtual_connections.get
+
+```py
+virtual_connections.get(req_options=None)
+```
+
+Returns a list of all virtual connections on the site.
+
+REST API: [List Virtual Connections](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_virtual_connections.htm#list_virtual_connections)
+
+**Version**
+
+This endpoint is available with REST API version 3.18 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`req_options` | (Optional) Request options such as page size and filters.
+
+**Returns**
+
+Returns a tuple of `(list[VirtualConnectionItem], PaginationItem)`.
+
+**Example**
+
+```py
+all_vcs, pagination = server.virtual_connections.get()
+for vc in all_vcs:
+    print(vc.id, vc.name)
+```
+
+<br>
+<br>
+
+#### virtual_connections.get_by_id
+
+```py
+virtual_connections.get_by_id(virtual_connection)
+```
+
+Returns the details of a specific virtual connection, including its JSON content definition.
+
+REST API: [Get Virtual Connection](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_virtual_connections.htm#get_virtual_connection)
+
+**Version**
+
+This endpoint is available with REST API version 3.23 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`virtual_connection` | The `VirtualConnectionItem` or virtual connection ID string.
+
+**Returns**
+
+Returns a `VirtualConnectionItem` with its `content` attribute populated.
+
+**Example**
+
+```py
+vc = server.virtual_connections.get_by_id('1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d')
+print(vc.name, vc.content)
+```
+
+<br>
+<br>
+
+#### virtual_connections.populate_connections
+
+```py
+virtual_connections.populate_connections(virtual_connection)
+```
+
+Populates the database connections for a virtual connection. After calling this method, iterate `virtual_connection.connections` to access the `ConnectionItem` objects.
+
+REST API: [List Virtual Connection Database Connections](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_virtual_connections.htm#list_virtual_connection_database_connections)
+
+**Version**
+
+This endpoint is available with REST API version 3.18 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`virtual_connection` | The `VirtualConnectionItem` to populate connections for.
+
+**Returns**
+
+Returns the `VirtualConnectionItem` with connections available via `virtual_connection.connections`.
+
+**Example**
+
+```py
+server.virtual_connections.populate_connections(vc)
+for conn in vc.connections:
+    print(conn.id, conn.server_address)
+```
+
+<br>
+<br>
+
+#### virtual_connections.update_connection_db_connection
+
+```py
+virtual_connections.update_connection_db_connection(virtual_connection, connection)
+```
+
+Updates the database connection details for a specific connection within a virtual connection.
+
+REST API: [Update Virtual Connection Database Connection](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_virtual_connections.htm#update_virtual_connection_database_connection)
+
+**Version**
+
+This endpoint is available with REST API version 3.18 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`virtual_connection` | The `VirtualConnectionItem` or virtual connection ID string.
+`connection` | The `ConnectionItem` containing the updated connection details.
+
+**Returns**
+
+Returns the updated `ConnectionItem`.
+
+**Example**
+
+```py
+server.virtual_connections.populate_connections(vc)
+conn = list(vc.connections)[0]
+conn.server_address = 'new-db-server.example.com'
+updated_conn = server.virtual_connections.update_connection_db_connection(vc, conn)
+```
+
+<br>
+<br>
+
+#### virtual_connections.update
+
+```py
+virtual_connections.update(virtual_connection)
+```
+
+Updates the metadata of a virtual connection (name, project, owner, certified status, etc.).
+
+REST API: [Update Virtual Connection](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_virtual_connections.htm#update_virtual_connection)
+
+**Version**
+
+This endpoint is available with REST API version 3.23 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`virtual_connection` | The `VirtualConnectionItem` to update. Must have a valid `id`.
+
+**Returns**
+
+Returns the updated `VirtualConnectionItem`.
+
+**Example**
+
+```py
+vc.is_certified = True
+vc.certification_note = 'Approved by data team'
+updated_vc = server.virtual_connections.update(vc)
+```
+
+<br>
+<br>
+
+#### virtual_connections.publish
+
+```py
+virtual_connections.publish(virtual_connection, virtual_connection_content, mode='CreateNew', publish_as_draft=False)
+```
+
+Publishes a virtual connection to Tableau Server.
+
+REST API: [Publish Virtual Connection](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_virtual_connections.htm#publish_virtual_connection)
+
+**Version**
+
+This endpoint is available with REST API version 3.23 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`virtual_connection` | The `VirtualConnectionItem` to publish. Must have `name`, `project_id`, and `owner_id` set.
+`virtual_connection_content` | The virtual connection definition as a JSON string or a file path to a JSON file.
+`mode` | `"CreateNew"` (default) or `"Overwrite"`. Use `"Overwrite"` to replace an existing virtual connection.
+`publish_as_draft` | If `True`, publishes the virtual connection as a draft. Default is `False`.
+
+**Exceptions**
+
+Name | Description
+:--- | :---
+`ValueError` | Raised if `mode` is not `"CreateNew"` or `"Overwrite"`.
+`RuntimeError` | Raised if `virtual_connection_content` is neither valid JSON nor a path to an existing file.
+
+**Returns**
+
+Returns the published `VirtualConnectionItem`.
+
+**Example**
+
+```py
+new_vc = TSC.VirtualConnectionItem('My Virtual Connection')
+new_vc.project_id = project.id
+new_vc.owner_id = user.id
+published = server.virtual_connections.publish(new_vc, '/path/to/vc_definition.json', mode='CreateNew')
+print(published.id)
+```
+
+<br>
+<br>
+
+#### virtual_connections.download
+
+```py
+virtual_connections.download(virtual_connection)
+```
+
+Downloads the JSON definition of a virtual connection as a string.
+
+REST API: [Get Virtual Connection](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_virtual_connections.htm#get_virtual_connection)
+
+**Version**
+
+This endpoint is available with REST API version 3.23 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`virtual_connection` | The `VirtualConnectionItem` or virtual connection ID string.
+
+**Returns**
+
+Returns the virtual connection definition as a JSON string.
+
+**Example**
+
+```py
+content_json = server.virtual_connections.download(vc)
+with open('vc_backup.json', 'w') as f:
+    f.write(content_json)
+```
+
+<br>
+<br>
+
+#### virtual_connections.delete
+
+```py
+virtual_connections.delete(virtual_connection)
+```
+
+Deletes the specified virtual connection from the site.
+
+REST API: [Delete Virtual Connection](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_virtual_connections.htm#delete_virtual_connection)
+
+**Version**
+
+This endpoint is available with REST API version 3.23 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`virtual_connection` | The `VirtualConnectionItem` or virtual connection ID string to delete.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.virtual_connections.delete(vc.id)
+```
+
+<br>
+<br>
+
+#### virtual_connections.get_revisions
+
+```py
+virtual_connections.get_revisions(virtual_connection, req_options=None)
+```
+
+Returns a list of revisions for the specified virtual connection.
+
+**Version**
+
+This endpoint is available with REST API version 3.23 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`virtual_connection` | The `VirtualConnectionItem` to retrieve revisions for.
+`req_options` | (Optional) Request options such as page size.
+
+**Returns**
+
+Returns a tuple of `(list[RevisionItem], PaginationItem)`.
+
+**Example**
+
+```py
+revisions, pagination = server.virtual_connections.get_revisions(vc)
+for rev in revisions:
+    print(rev.revision_number, rev.created_at)
+```
+
+<br>
+<br>
+
+#### virtual_connections.download_revision
+
+```py
+virtual_connections.download_revision(virtual_connection, revision_number)
+```
+
+Downloads the JSON definition of a specific revision of a virtual connection.
+
+**Version**
+
+This endpoint is available with REST API version 3.23 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`virtual_connection` | The `VirtualConnectionItem` to download the revision for.
+`revision_number` | The revision number to download (integer).
+
+**Returns**
+
+Returns the virtual connection definition at that revision as a JSON string.
+
+**Example**
+
+```py
+revisions, _ = server.virtual_connections.get_revisions(vc)
+json_str = server.virtual_connections.download_revision(vc, revisions[0].revision_number)
+```
+
+<br>
+<br>
+
+#### virtual_connections.populate_permissions
+
+```py
+virtual_connections.populate_permissions(item)
+```
+
+Populates the permissions for the specified virtual connection.
+
+**Version**
+
+This endpoint is available with REST API version 3.22 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `VirtualConnectionItem` to populate permissions for.
+
+**Returns**
+
+None. Permissions are available via `item.permissions`.
+
+**Example**
+
+```py
+server.virtual_connections.populate_permissions(vc)
+for rule in vc.permissions:
+    print(rule)
+```
+
+<br>
+<br>
+
+#### virtual_connections.add_permissions
+
+```py
+virtual_connections.add_permissions(resource, rules)
+```
+
+Adds or updates permissions on the specified virtual connection.
+
+**Version**
+
+This endpoint is available with REST API version 3.22 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`resource` | The `VirtualConnectionItem` to update permissions on.
+`rules` | A list of `PermissionsRule` objects to apply.
+
+**Returns**
+
+Returns the updated list of `PermissionsRule` objects.
+
+**Example**
+
+```py
+permission = TSC.PermissionsRule(
+    TSC.UserItem.as_reference(user.id),
+    {'Connect': 'Allow'}
+)
+server.virtual_connections.add_permissions(vc, [permission])
+```
+
+<br>
+<br>
+
+#### virtual_connections.delete_permission
+
+```py
+virtual_connections.delete_permission(item, capability_item)
+```
+
+Removes a specific permission from the specified virtual connection.
+
+**Version**
+
+This endpoint is available with REST API version 3.22 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `VirtualConnectionItem` to remove the permission from.
+`capability_item` | The `PermissionsRule` to remove.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.virtual_connections.delete_permission(vc, permission_rule)
+```
+
+<br>
+<br>
+
+#### virtual_connections.add_tags
+
+```py
+virtual_connections.add_tags(virtual_connection, tags)
+```
+
+Adds one or more tags to the specified virtual connection.
+
+**Version**
+
+This endpoint is available with REST API version 3.23 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`virtual_connection` | The `VirtualConnectionItem` or virtual connection ID to tag.
+`tags` | A single tag string or iterable of tag strings.
+
+**Returns**
+
+Returns a `set[str]` of the tags added.
+
+**Example**
+
+```py
+server.virtual_connections.add_tags(vc, ['finance', 'certified'])
+```
+
+<br>
+<br>
+
+#### virtual_connections.delete_tags
+
+```py
+virtual_connections.delete_tags(virtual_connection, tags)
+```
+
+Removes one or more tags from the specified virtual connection.
+
+**Version**
+
+This endpoint is available with REST API version 3.23 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`virtual_connection` | The `VirtualConnectionItem` or virtual connection ID to remove tags from.
+`tags` | A single tag string or iterable of tag strings.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.virtual_connections.delete_tags(vc, 'finance')
+```
+
+<br>
+<br>
+
+---
 ## Webhooks
 <br>
 <br>
