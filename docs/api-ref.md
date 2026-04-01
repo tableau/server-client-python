@@ -4793,8 +4793,50 @@ Error   |  Description
 
 ```
 
-<br>   
-<br>  
+<br>
+<br>
+
+#### tasks.create
+
+```py
+tasks.create(extract_item)
+```
+
+Creates a new extract refresh task on the site.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`extract_item` | The `TaskItem` specifying the extract refresh task to create. The task item must have the target workbook or datasource set.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`ValueError` | Raises an exception if no extract item is provided.
+
+**Returns**
+
+Returns the created `TaskItem`.
+
+**Version**
+
+Version 3.19 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+
+task_item = TSC.TaskItem(TSC.TaskItem.Type.ExtractRefresh)
+task_item.target = TSC.Target(datasource_id, 'datasource')
+new_task = server.tasks.create(task_item)
+print("Created task ID: {}".format(new_task.id))
+```
+
+<br>
+<br>
 
 
 ---
