@@ -5402,6 +5402,8 @@ print("Added {} users, {} failed.".format(len(created), len(failed)))
 users.create_from_file(filepath)
 ```
 
+**DEPRECATED**
+
 Adds users from a CSV file to the site. The CSV file format matches the format used in the Tableau Server UI for bulk user import.
 
 The CSV file should have the following column format (header row optional):
