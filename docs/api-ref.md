@@ -5367,7 +5367,9 @@ An updated `UserItem`.    See [UserItem class](#useritem-class)
 users.add_all(users)
 ```
 
-Adds a list of users to the site. Unlike `bulk_add`, this method adds users one at a time and collects successes and failures rather than stopping on the first error.
+**DEPRECATED**
+
+Adds a list of users to the site. Unlike `bulk_add`, this method adds users one at a time and collects successes and failures.
 
 **Parameters**
 
