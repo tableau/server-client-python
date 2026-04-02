@@ -1841,7 +1841,8 @@ Source files: server/endpoint/jobs_endpoint.py
 jobs.get(job_id=None, req_options=None)
 ```
 
-Returns a list of active jobs on the current site, or the status of a specific job if `job_id` is provided.
+Retrieve jobs for the site. Endpoint is paginated and will return a list of jobs and pagination information. If a job_id is provided, the method will return information about that specific job. Specifying a job_id is deprecated and will be removed in a future version.
+
 
 REST API: [Get Background Jobs on Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#get_background_jobs_on_site){:target="_blank"}
 
