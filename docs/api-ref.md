@@ -4802,7 +4802,7 @@ Error   |  Description
 tasks.create(extract_item)
 ```
 
-Creates a new extract refresh task on the site.
+Creates a custom schedule for an extract refresh on Tableau Cloud. For Tableau Server, use the Schedules endpoint to create a schedule.
 
 **Parameters**
 
