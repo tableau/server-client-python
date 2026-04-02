@@ -1271,7 +1271,7 @@ Name | Description
 
 **Returns**
 
-Returns a list of `FlowRunItem` objects and a `PaginationItem` object. Use these values to iterate through the results.
+Returns a list of `FlowRunItem` objects. Be aware that `flowruns.get` does *NOT* return a `PaginationItem`.
 
 **Version**
 
