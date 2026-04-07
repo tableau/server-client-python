@@ -727,6 +727,8 @@ datasources.delete(datasource_id)
 
 Removes the specified data source from Tableau Server.
 
+REST API: [Delete Data Source](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#delete_data_source)
+
 
 **Parameters**
 
@@ -1182,6 +1184,8 @@ datasources.create_extract(datasource_item, encrypt=False)
 
 Creates an extract for the specified data source.
 
+REST API: [Create an Extract for a Data Source](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_extract_and_encryption.htm#create_extract_for_datasource)
+
 **Parameters**
 
 Name | Description
@@ -1216,6 +1220,8 @@ datasources.delete_extract(datasource_item)
 
 Removes the extract from the specified data source.
 
+REST API: [Delete the Extract from a Data Source](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_extract_and_encryption.htm#delete_extract_from_datasource)
+
 **Parameters**
 
 Name | Description
@@ -1243,6 +1249,8 @@ datasources.populate_permissions(datasource_item)
 ```
 
 Populates the permissions for the specified data source.
+
+REST API: [List Data Source Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_data_source_permissions)
 
 **Parameters**
 
@@ -1274,6 +1282,8 @@ datasources.update_permissions(datasource_item, permission_item)
 
 Adds or updates permissions for the specified data source.
 
+REST API: [Replace Content Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#replace_permissions_for_content)
+
 **Parameters**
 
 Name | Description
@@ -1296,6 +1306,8 @@ datasources.delete_permission(datasource_item, capability_item)
 
 Removes a permission from the specified data source.
 
+REST API: [Delete Data Source Permission](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_data_source_permission)
+
 **Parameters**
 
 Name | Description
@@ -1317,6 +1329,8 @@ datasources.populate_dqw(datasource_item)
 ```
 
 Populates the data quality warnings for the specified data source.
+
+REST API: [Query Data Quality Warning by Content](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#query_dqws)
 
 **Parameters**
 
@@ -1348,6 +1362,8 @@ datasources.add_dqw(datasource_item, warning)
 
 Adds a data quality warning to the specified data source.
 
+REST API: [Add Data Quality Warning](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#add_dqw)
+
 **Parameters**
 
 Name | Description
@@ -1369,6 +1385,8 @@ datasources.update_dqw(datasource_item, warning)
 ```
 
 Updates a data quality warning on the specified data source.
+
+REST API: [Update Data Quality Warning](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#update_dqw)
 
 **Parameters**
 
@@ -1392,6 +1410,8 @@ datasources.delete_dqw(datasource_item)
 
 Removes all data quality warnings from the specified data source.
 
+REST API: [Delete Quality Warning Triggers by Content](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#delete_dqw_triggers)
+
 **Parameters**
 
 Name | Description
@@ -1412,6 +1432,8 @@ datasources.populate_revisions(datasource_item)
 ```
 
 Populates the revision history for the specified data source.
+
+REST API: [Get Data Source Revisions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#get_data_source_revisions)
 
 **Parameters**
 
@@ -1448,6 +1470,8 @@ datasources.download_revision(datasource_id, revision_number, filepath=None, inc
 ```
 
 Downloads a specific revision of the specified data source.
+
+REST API: [Download Data Source Revision](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#download_data_source_revision)
 
 **Parameters**
 
@@ -1493,6 +1517,8 @@ datasources.delete_revision(datasource_id, revision_number)
 
 Removes a specific revision of the specified data source from Tableau Server.
 
+REST API: [Remove Data Source Revision](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#remove_data_source_revision)
+
 **Parameters**
 
 Name | Description
@@ -1520,6 +1546,8 @@ datasources.schedule_extract_refresh(schedule_id, item)
 ```
 
 Convenience method to add a data source to an existing extract refresh schedule.
+
+REST API: [Add Data Source to Server Schedule](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#add_data_source_to_schedule)
 
 **Parameters**
 
@@ -1586,6 +1614,8 @@ datasources.update_connections(datasource_item, connection_luids, authentication
 ```
 
 Bulk updates one or more datasource connections by LUID.
+
+REST API: [Update Data Source Connections](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#update_data_source_connections)
 
 **Version**
 
@@ -1726,6 +1756,8 @@ datasources.update_tags(item)
 
 Updates the tags on the server to match the tags on the specified datasource item. Changes to tags must be made on the `DatasourceItem.tags` attribute before calling this method.
 
+REST API: [Delete Tag from Data Source](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#delete_tag_from_data_source) and [Add Tags to Data Source](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#add_tags_to_data_source)
+
 **Parameters**
 
 Name | Description
@@ -1753,6 +1785,8 @@ datasources.filter(**kwargs)
 ```
 
 Returns a list of datasources that match the specified filters. Fields and operators are passed as keyword arguments in the form `field_name=value` or `field_name__operator=value`.
+
+REST API: [Filtering & Sorting Datasources](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_filtering_and_sorting.htm#datasources)
 
 **Supported fields and operators**
 
