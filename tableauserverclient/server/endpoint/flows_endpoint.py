@@ -8,8 +8,6 @@ from pathlib import Path
 from typing import Optional, TYPE_CHECKING, Union
 from collections.abc import Iterable
 
-from tableauserverclient.helpers.headers import fix_filename
-
 from tableauserverclient.server.endpoint.dqw_endpoint import _DataQualityWarningEndpoint
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
 from tableauserverclient.server.endpoint.exceptions import InternalServerError, MissingRequiredFieldError
@@ -227,14 +225,13 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
         with closing(self.get_request(url, parameters={"stream": True})) as server_response:
             m = Message()
             m["Content-Disposition"] = server_response.headers["Content-Disposition"]
-            params = m.get_filename(failobj="")
+            filename = m.get_filename(failobj="")
             if isinstance(filepath, io_types_w):
                 for chunk in server_response.iter_content(1024):  # 1KB
                     filepath.write(chunk)
                 return_path = filepath
             else:
-                params = fix_filename(params)
-                filename = to_filename(os.path.basename(params))
+                filename = to_filename(os.path.basename(filename))
                 download_path = make_download_path(filepath, filename)
                 with open(download_path, "wb") as f:
                     for chunk in server_response.iter_content(1024):  # 1KB
