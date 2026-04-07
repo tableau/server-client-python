@@ -6670,7 +6670,7 @@ workbooks.create_extract(workbook_item, encrypt=False, includeAll=True, datasour
 
 Creates extracts for the embedded data sources of the specified workbook.
 
-Rest API: [Create Extracts for Embedded Data Sources in a Workbook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_extract_and_encryption.htm#create_extracts_for_workbook)
+REST API: [Create Extracts for Embedded Data Sources in a Workbook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_extract_and_encryption.htm#create_extracts_for_workbook)
 
 **Parameters**
 
@@ -6708,7 +6708,7 @@ workbooks.delete_extract(workbook_item, includeAll=True, datasources=None)
 
 Removes the extracts from the embedded data sources of the specified workbook.
 
-Rest API: [Delete Extracts of Embedded Data Sources from a Workbook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_extract_and_encryption.htm#delete_extracts_from_workbook)
+REST API: [Delete Extracts of Embedded Data Sources from a Workbook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_extract_and_encryption.htm#delete_extracts_from_workbook)
 
 **Parameters**
 
@@ -6745,7 +6745,7 @@ workbooks.populate_permissions(workbook_item)
 
 Populates the permissions for the specified workbook.
 
-Rest API: [List Workbook Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_workbook_permissions)
+REST API: [List Workbook Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#query_workbook_permissions)
 
 **Parameters**
 
@@ -6777,7 +6777,7 @@ workbooks.update_permissions(workbook_item, rules)
 
 Adds or updates permissions for the specified workbook. Any server side permissions not included in `rules` are removed.
 
-Rest API: [Replace Content Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#replace_permissions_for_content)
+REST API: [Replace Content Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#replace_permissions_for_content)
 
 **Parameters**
 
@@ -6801,6 +6801,8 @@ workbooks.delete_permission(workbook_item, capability_item)
 
 Removes a permission from the specified workbook.
 
+REST API: [Delete Workbook Permission](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_workbook_permission)
+
 **Parameters**
 
 Name | Description
@@ -6823,7 +6825,7 @@ workbooks.populate_revisions(workbook_item)
 
 Populates the revision history for the specified workbook.
 
-Rest API: [Get Workbook Revisions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#get_workbook_revisions)
+REST API: [Get Workbook Revisions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#get_workbook_revisions)
 
 **Parameters**
 
@@ -6861,7 +6863,7 @@ workbooks.download_revision(workbook_id, revision_number, filepath=None, include
 
 Downloads a specific revision of the specified workbook.
 
-Rest API: [Download Workbook Revision](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#download_workbook_revision)
+REST API: [Download Workbook Revision](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#download_workbook_revision)
 
 **Parameters**
 
@@ -6907,7 +6909,7 @@ workbooks.delete_revision(workbook_id, revision_number)
 
 Removes a specific revision of the specified workbook from Tableau Server.
 
-Rest API: [Remove Workbook Revision](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_revisions.htm#remove_workbook_revision)
+REST API: [Remove Workbook Revision](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_revisions.htm#remove_workbook_revision)
 
 **Parameters**
 
@@ -6937,7 +6939,7 @@ workbooks.schedule_extract_refresh(schedule_id, item)
 
 Convenience method to add a workbook to an existing extract refresh schedule.
 
-Rest API: [Add Workbook to Server Schedule](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#add_workbook_to_schedule)
+REST API: [Add Workbook to Server Schedule](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#add_workbook_to_schedule)
 
 **Parameters**
 
@@ -6972,7 +6974,7 @@ workbooks.update_connections(workbook_item, connection_luids, authentication_typ
 
 Bulk updates one or more workbook connections by LUID, including the authentication type, username, password, and whether to embed the password.
 
-Rest API: [Update Workbook Connections](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#update_workbook_connections)
+REST API: [Update Workbook Connections](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#update_workbook_connections)
 
 **Parameters**
 
@@ -7069,6 +7071,8 @@ workbooks.update_tags(item)
 
 Updates the tags on the server to match the tags on the specified workbook item. Changes to tags must be made on the `WorkbookItem.tags` attribute before calling this method.
 
+REST API: [Delete Tag from Workbook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#delete_tag_from_workbook) and [Add Tags to Workbook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#add_tags_to_workbook)
+
 **Parameters**
 
 Name | Description
@@ -7096,6 +7100,8 @@ workbooks.filter(**kwargs)
 ```
 
 Returns a list of workbooks that match the specified filters. Fields and operators are passed as keyword arguments in the form `field_name=value` or `field_name__operator=value`.
+
+REST API: [Filtering and Sorting Workbooks](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_filtering_and_sorting.htm#workbooks)
 
 **Supported fields and operators**
 
