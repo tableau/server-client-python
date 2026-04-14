@@ -211,11 +211,11 @@ class Databases(Endpoint, TaggingMixin):
         self._data_quality_warnings.clear(item)
 
     @api(version="3.9")
-    def add_tags(self, item: Union[DatabaseItem, str], tags: Iterable[str]) -> set[str]:
+    def add_tags(self, item: DatabaseItem | str, tags: Iterable[str]) -> set[str]:
         return super().add_tags(item, tags)
 
     @api(version="3.9")
-    def delete_tags(self, item: Union[DatabaseItem, str], tags: Iterable[str]) -> None:
+    def delete_tags(self, item: DatabaseItem | str, tags: Iterable[str]) -> None:
         super().delete_tags(item, tags)
 
     @api(version="3.9")

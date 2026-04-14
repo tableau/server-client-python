@@ -75,7 +75,7 @@ class Jobs(QuerysetEndpoint[BackgroundJobItem]):
         return jobs, pagination_item
 
     @api(version="3.1")
-    def cancel(self, job_id: Union[str, JobItem]):
+    def cancel(self, job_id: str | JobItem):
         """
         Cancels a job specified by job ID. To get a list of job IDs for jobs that are currently queued or in-progress, use the Query Jobs method.
 
@@ -143,7 +143,7 @@ class Jobs(QuerysetEndpoint[BackgroundJobItem]):
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return new_job
 
-    def wait_for_job(self, job_id: Union[str, JobItem], *, timeout: Optional[float] = None) -> JobItem:
+    def wait_for_job(self, job_id: str | JobItem, *, timeout: float | None = None) -> JobItem:
         """
         Waits for a job to complete. The method will poll the server for the job
         status until the job is completed. If the job is successful, the method

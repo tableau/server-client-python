@@ -439,7 +439,7 @@ class GroupRequest:
         return ET.tostring(xml_request)
 
     @_tsrequest_wrapped
-    def remove_users_req(self, xml_request: ET.Element, users: Iterable[Union[str, UserItem]]) -> bytes:
+    def remove_users_req(self, xml_request: ET.Element, users: Iterable[str | UserItem]) -> bytes:
         users_element = ET.SubElement(xml_request, "users")
         for user in users:
             user_element = ET.SubElement(users_element, "user")
@@ -918,7 +918,7 @@ class TableRequest:
         return ET.tostring(xml_request)
 
 
-content_types = Iterable[Union["ColumnItem", "DatabaseItem", "DatasourceItem", "FlowItem", "TableItem", "WorkbookItem"]]
+content_types = Iterable["ColumnItem" | "DatabaseItem" | "DatasourceItem" | "FlowItem" | "TableItem" | "WorkbookItem"]
 
 
 class TagRequest:

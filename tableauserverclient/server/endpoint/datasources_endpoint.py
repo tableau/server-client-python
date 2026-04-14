@@ -46,14 +46,14 @@ io_types = (io.BytesIO, io.BufferedReader)
 io_types_r = (io.BytesIO, io.BufferedReader)
 io_types_w = (io.BytesIO, io.BufferedWriter)
 
-FilePath = Union[str, os.PathLike]
-FileObject = Union[io.BufferedReader, io.BytesIO]
-PathOrFile = Union[FilePath, FileObject]
+FilePath = str | os.PathLike
+FileObject = io.BufferedReader | io.BytesIO
+PathOrFile = FilePath | FileObject
 
-FileObjectR = Union[io.BufferedReader, io.BytesIO]
-FileObjectW = Union[io.BufferedWriter, io.BytesIO]
-PathOrFileR = Union[FilePath, FileObjectR]
-PathOrFileW = Union[FilePath, FileObjectW]
+FileObjectR = io.BufferedReader | io.BytesIO
+FileObjectW = io.BufferedWriter | io.BytesIO
+PathOrFileR = FilePath | FileObjectR
+PathOrFileW = FilePath | FileObjectW
 
 
 HyperActionCondition = TypedDict(
@@ -91,7 +91,7 @@ HyperActionTable = TypedDict(
     },
 )
 
-HyperAction = Union[HyperActionTable, HyperActionRow]
+HyperAction = HyperActionTable | HyperActionRow
 
 
 class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]):
@@ -434,7 +434,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         return connection_items
 
     @api(version="2.8")
-    def refresh(self, datasource_item: Union[DatasourceItem, str], incremental: bool = False) -> JobItem:
+    def refresh(self, datasource_item: DatasourceItem | str, incremental: bool = False) -> JobItem:
         """
         Refreshes the extract of an existing workbook.
 
@@ -546,47 +546,47 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         as_job=False,
     ):
         """
-        Publishes a data source to a server, or appends data to an existing
-        data source.
+         Publishes a data source to a server, or appends data to an existing
+         data source.
 
-        This method checks the size of the data source and automatically
-        determines whether the publish the data source in multiple parts or in
-        one operation.
+         This method checks the size of the data source and automatically
+         determines whether the publish the data source in multiple parts or in
+         one operation.
 
-        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#publish_data_source
+         REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#publish_data_source
 
-        Parameters
-        ----------
-        datasource_item : DatasourceItem
-            The datasource item to publish. The fields for name and project_id
-            are required.
+         Parameters
+         ----------
+         datasource_item : DatasourceItem
+             The datasource item to publish. The fields for name and project_id
+             are required.
 
-        file : PathOrFileR
-            The file path or file object to publish.
+         file : PathOrFileR
+             The file path or file object to publish.
 
-        mode : str
-            Specifies whether you are publishing a new datasource (CreateNew),
-            overwriting an existing datasource (Overwrite), or add to an
-            existing datasource (Append). You can also use the publish mode
-            attributes, for example: TSC.Server.PublishMode.Overwrite.
+         mode : str
+             Specifies whether you are publishing a new datasource (CreateNew),
+             overwriting an existing datasource (Overwrite), or add to an
+             existing datasource (Append). You can also use the publish mode
+             attributes, for example: TSC.Server.PublishMode.Overwrite.
 
-        connection_credentials : Optional[ConnectionCredentials]
-            The connection credentials to use when publishing the datasource.
-            Mutually exclusive with the connections parameter.
+         connection_credentials : Optional[ConnectionCredentials]
+             The connection credentials to use when publishing the datasource.
+             Mutually exclusive with the connections parameter.
 
-        connections : Optional[Sequence[ConnectionItem]]
-            The connections to use when publishing the datasource. Mutually
-            exclusive with the connection_credentials parameter.
+         connections : Optional[Sequence[ConnectionItem]]
+             The connections to use when publishing the datasource. Mutually
+             exclusive with the connection_credentials parameter.
 
-        as_job : bool, default False
-            If True, the publish operation is asynchronous and returns a job
-            item. If False, the publish operation is synchronous and returns a
-            datasource item.
+         as_job : bool, default False
+             If True, the publish operation is asynchronous and returns a job
+             item. If False, the publish operation is synchronous and returns a
+             datasource item.
 
-        Returns
-        -------
-        Union[DatasourceItem, JobItem]
-            The datasource item or job item.
+         Returns
+         -------
+        DatasourceItem | JobItem
+             The datasource item or job item.
 
         """
         if isinstance(file, (os.PathLike, str)):
@@ -687,7 +687,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
     @api(version="3.13")
     def update_hyper_data(
         self,
-        datasource_or_connection_item: Union[DatasourceItem, ConnectionItem, str],
+        datasource_or_connection_item: DatasourceItem | ConnectionItem | str,
         *,
         request_id: str,
         actions: Sequence[HyperAction],
@@ -709,7 +709,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
 
         Parameters
         ----------
-        datasource_or_connection_item : Union[DatasourceItem, ConnectionItem, str]
+        datasource_or_connection_item : DatasourceItem | ConnectionItem | str
             The datasource item, connection item, or datasource ID. Either a
             DataSourceItem or a ConnectionItem. If the datasource only contains
             a single connection, the DataSourceItem is sufficient to identify
@@ -1103,7 +1103,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         return self.parent_srv.schedules.add_to_schedule(schedule_id, datasource=item)
 
     @api(version="1.0")
-    def add_tags(self, item: Union[DatasourceItem, str], tags: Union[Iterable[str], str]) -> set[str]:
+    def add_tags(self, item: DatasourceItem | str, tags: Iterable[str] | str) -> set[str]:
         """
         Adds one or more tags to the specified datasource item.
 
@@ -1111,10 +1111,10 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
 
         Parameters
         ----------
-        item : Union[DatasourceItem, str]
+        item : DatasourceItem | str
             The datasource item or ID to add tags to.
 
-        tags : Union[Iterable[str], str]
+        tags : Iterable[str] | str
             The tag or tags to add to the datasource item.
 
         Returns
@@ -1125,7 +1125,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         return super().add_tags(item, tags)
 
     @api(version="1.0")
-    def delete_tags(self, item: Union[DatasourceItem, str], tags: Union[Iterable[str], str]) -> None:
+    def delete_tags(self, item: DatasourceItem | str, tags: Iterable[str] | str) -> None:
         """
         Deletes one or more tags from the specified datasource item.
 
@@ -1133,10 +1133,10 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
 
         Parameters
         ----------
-        item : Union[DatasourceItem, str]
+        item : DatasourceItem | str
             The datasource item or ID to delete tags from.
 
-        tags : Union[Iterable[str], str]
+        tags : Iterable[str] | str
             The tag or tags to delete from the datasource item.
 
         Returns

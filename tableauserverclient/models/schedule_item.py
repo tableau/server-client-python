@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from requests import Response
 
 
-Interval = Union[HourlyInterval, DailyInterval, WeeklyInterval, MonthlyInterval]
+Interval = HourlyInterval | DailyInterval | WeeklyInterval | MonthlyInterval
 
 
 class ScheduleItem:

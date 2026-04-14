@@ -48,7 +48,7 @@ class FlowRuns(QuerysetEndpoint[FlowRunItem]):
 
     # Cancel 1 flow run by id
     @api(version="3.10")
-    def cancel(self, flow_run_id: Union[str, FlowRunItem]) -> None:
+    def cancel(self, flow_run_id: str | FlowRunItem) -> None:
         if not flow_run_id:
             error = "Flow ID undefined."
             raise ValueError(error)

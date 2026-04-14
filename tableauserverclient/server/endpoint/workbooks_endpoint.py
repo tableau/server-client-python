@@ -56,12 +56,12 @@ ALLOWED_FILE_EXTENSIONS = ["twb", "twbx"]
 
 from tableauserverclient.helpers.logging import logger
 
-FilePath = Union[str, os.PathLike]
-FileObject = Union[io.BufferedReader, io.BytesIO]
-FileObjectR = Union[io.BufferedReader, io.BytesIO]
-FileObjectW = Union[io.BufferedWriter, io.BytesIO]
-PathOrFileR = Union[FilePath, FileObjectR]
-PathOrFileW = Union[FilePath, FileObjectW]
+FilePath = str | os.PathLike
+FileObject = io.BufferedReader | io.BytesIO
+FileObjectR = io.BufferedReader | io.BytesIO
+FileObjectW = io.BufferedWriter | io.BytesIO
+PathOrFileR = FilePath | FileObjectR
+PathOrFileW = FilePath | FileObjectW
 
 
 class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
@@ -126,7 +126,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         return WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     @api(version="2.8")
-    def refresh(self, workbook_item: Union[WorkbookItem, str], incremental: bool = False) -> JobItem | None:
+    def refresh(self, workbook_item: WorkbookItem | str, incremental: bool = False) -> JobItem | None:
         """
         Refreshes the extract of an existing workbook.
 
@@ -1176,7 +1176,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         return self.parent_srv.schedules.add_to_schedule(schedule_id, workbook=item)
 
     @api(version="1.0")
-    def add_tags(self, item: Union[WorkbookItem, str], tags: Union[Iterable[str], str]) -> set[str]:
+    def add_tags(self, item: WorkbookItem | str, tags: Iterable[str] | str) -> set[str]:
         """
         Adds tags to a workbook. One or more tags may be added at a time. If a
         tag already exists on the workbook, it will not be duplicated.
@@ -1200,7 +1200,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         return super().add_tags(item, tags)
 
     @api(version="1.0")
-    def delete_tags(self, item: Union[WorkbookItem, str], tags: Union[Iterable[str], str]) -> None:
+    def delete_tags(self, item: WorkbookItem | str, tags: Iterable[str] | str) -> None:
         """
         Deletes tags from a workbook. One or more tags may be deleted at a time.
 

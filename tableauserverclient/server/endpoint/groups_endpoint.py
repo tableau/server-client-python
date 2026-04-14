@@ -181,32 +181,32 @@ class Groups(QuerysetEndpoint[GroupItem]):
     @api(version="2.0")
     def update(self, group_item, as_job=False):
         """
-        Updates a group on the site.
+         Updates a group on the site.
 
-        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_users_and_groups.htm#update_group
+         REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_users_and_groups.htm#update_group
 
-        Parameters
-        ----------
-        group_item : GroupItem
-            The group item to update.
+         Parameters
+         ----------
+         group_item : GroupItem
+             The group item to update.
 
-        as_job : bool
-            (Optional) If this value is set to True, the update operation will
-            be asynchronous and return a JobItem. This is only supported for
-            Active Directory groups. By default, this value is set to False.
+         as_job : bool
+             (Optional) If this value is set to True, the update operation will
+             be asynchronous and return a JobItem. This is only supported for
+             Active Directory groups. By default, this value is set to False.
 
-        Returns
-        -------
-        Union[GroupItem, JobItem]
+         Returns
+         -------
+        GroupItem | JobItem
 
-        Raises
-        ------
-        MissingRequiredFieldError
-            If the group_item does not have an ID, the method raises an error.
+         Raises
+         ------
+         MissingRequiredFieldError
+             If the group_item does not have an ID, the method raises an error.
 
-        ValueError
-            If the group_item is a local group and as_job is set to True, the
-            method raises an error.
+         ValueError
+             If the group_item is a local group and as_job is set to True, the
+             method raises an error.
         """
         url = f"{self.baseurl}/{group_item.id}"
 
@@ -284,7 +284,7 @@ class Groups(QuerysetEndpoint[GroupItem]):
 
         Returns
         -------
-        Union[GroupItem, JobItem]
+        GroupItem | JobItem
 
         Examples
         --------
@@ -347,7 +347,7 @@ class Groups(QuerysetEndpoint[GroupItem]):
         logger.info(f"Removed user (id: {user_id}) from group (ID: {group_item.id})")
 
     @api(version="3.21")
-    def remove_users(self, group_item: GroupItem, users: Iterable[Union[str, UserItem]]) -> None:
+    def remove_users(self, group_item: GroupItem, users: Iterable[str | UserItem]) -> None:
         """
         Removes multiple users from 1 group. This makes a single API call to
         remove the provided users.
@@ -359,7 +359,7 @@ class Groups(QuerysetEndpoint[GroupItem]):
         group_item : GroupItem
             The group item from which to remove the user.
 
-        users : Iterable[Union[str, UserItem]]
+        users : Iterable[str | UserItem]
             The IDs or UserItems with IDs of the users to remove from the group.
 
         Returns
@@ -436,7 +436,7 @@ class Groups(QuerysetEndpoint[GroupItem]):
         return user
 
     @api(version="3.21")
-    def add_users(self, group_item: GroupItem, users: Iterable[Union[str, UserItem]]) -> list[UserItem]:
+    def add_users(self, group_item: GroupItem, users: Iterable[str | UserItem]) -> list[UserItem]:
         """
         Adds 1 or more user to 1 group
 
@@ -447,7 +447,7 @@ class Groups(QuerysetEndpoint[GroupItem]):
         group_item : GroupItem
             The group item to which to add the user.
 
-        user_id : Iterable[Union[str, UserItem]]
+        user_id : Iterable[str | UserItem]
             User IDs or UserItems with IDs to add to the group.
 
         Returns

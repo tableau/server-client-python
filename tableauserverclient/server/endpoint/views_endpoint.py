@@ -399,7 +399,7 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
         return None
 
     @api(version="1.0")
-    def add_tags(self, item: Union[ViewItem, str], tags: Union[Iterable[str], str]) -> set[str]:
+    def add_tags(self, item: ViewItem | str, tags: Iterable[str] | str) -> set[str]:
         """
         Adds tags to the specified view.
 
@@ -407,10 +407,10 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
 
         Parameters
         ----------
-        item: Union[ViewItem, str]
+        item: ViewItem | str
             The view item or view ID to which to add tags.
 
-        tags: Union[Iterable[str], str]
+        tags: Iterable[str] | str
             The tags to add to the view.
 
         Returns
@@ -421,7 +421,7 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
         return super().add_tags(item, tags)
 
     @api(version="1.0")
-    def delete_tags(self, item: Union[ViewItem, str], tags: Union[Iterable[str], str]) -> None:
+    def delete_tags(self, item: ViewItem | str, tags: Iterable[str] | str) -> None:
         """
         Deletes tags from the specified view.
 
@@ -429,10 +429,10 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
 
         Parameters
         ----------
-        item: Union[ViewItem, str]
+        item: ViewItem | str
             The view item or view ID from which to delete tags.
 
-        tags: Union[Iterable[str], str]
+        tags: Iterable[str] | str
             The tags to delete from the view.
 
         Returns

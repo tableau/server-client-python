@@ -54,7 +54,7 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem], TaggingMixin):
 
     @api(version="3.18")
     def update_connection_db_connection(
-        self, virtual_connection: Union[str, VirtualConnectionItem], connection: ConnectionItem
+        self, virtual_connection: str | VirtualConnectionItem, connection: ConnectionItem
     ) -> ConnectionItem:
         vconn_id = getattr(virtual_connection, "id", virtual_connection)
         url = f"{self.baseurl}/{vconn_id}/connections/{connection.id}/modify"
@@ -63,14 +63,14 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem], TaggingMixin):
         return ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     @api(version="3.23")
-    def get_by_id(self, virtual_connection: Union[str, VirtualConnectionItem]) -> VirtualConnectionItem:
+    def get_by_id(self, virtual_connection: str | VirtualConnectionItem) -> VirtualConnectionItem:
         vconn_id = getattr(virtual_connection, "id", virtual_connection)
         url = f"{self.baseurl}/{vconn_id}"
         server_response = self.get_request(url)
         return VirtualConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     @api(version="3.23")
-    def download(self, virtual_connection: Union[str, VirtualConnectionItem]) -> str:
+    def download(self, virtual_connection: str | VirtualConnectionItem) -> str:
         v_conn = self.get_by_id(virtual_connection)
         return json.dumps(v_conn.content)
 
@@ -98,7 +98,7 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem], TaggingMixin):
         return json.dumps(virtual_connection.content)
 
     @api(version="3.23")
-    def delete(self, virtual_connection: Union[VirtualConnectionItem, str]) -> None:
+    def delete(self, virtual_connection: VirtualConnectionItem | str) -> None:
         vconn_id = getattr(virtual_connection, "id", virtual_connection)
         self.delete_request(f"{self.baseurl}/{vconn_id}")
 
@@ -158,15 +158,11 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem], TaggingMixin):
         return self._permissions.delete(item, capability_item)
 
     @api(version="3.23")
-    def add_tags(
-        self, virtual_connection: Union[VirtualConnectionItem, str], tags: Union[Iterable[str], str]
-    ) -> set[str]:
+    def add_tags(self, virtual_connection: VirtualConnectionItem | str, tags: Iterable[str] | str) -> set[str]:
         return super().add_tags(virtual_connection, tags)
 
     @api(version="3.23")
-    def delete_tags(
-        self, virtual_connection: Union[VirtualConnectionItem, str], tags: Union[Iterable[str], str]
-    ) -> None:
+    def delete_tags(self, virtual_connection: VirtualConnectionItem | str, tags: Iterable[str] | str) -> None:
         return super().delete_tags(virtual_connection, tags)
 
     @api(version="3.23")

@@ -44,7 +44,7 @@ class _PermissionsEndpoint(Endpoint):
 
         return permissions
 
-    def delete(self, resource: TableauItem, rules: Union[PermissionsRule, list[PermissionsRule]]):
+    def delete(self, resource: TableauItem, rules: PermissionsRule | list[PermissionsRule]):
         # Delete is the only endpoint that doesn't take a list of rules
         # so let's fake it to keep it consistent
         # TODO that means we need error handling around the call

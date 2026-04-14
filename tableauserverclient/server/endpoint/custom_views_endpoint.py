@@ -32,12 +32,12 @@ Delete a custom view
 update the name or owner of a custom view.
 """
 
-FilePath = Union[str, os.PathLike]
-FileObject = Union[io.BufferedReader, io.BytesIO]
-FileObjectR = Union[io.BufferedReader, io.BytesIO]
-FileObjectW = Union[io.BufferedWriter, io.BytesIO]
-PathOrFileR = Union[FilePath, FileObjectR]
-PathOrFileW = Union[FilePath, FileObjectW]
+FilePath = str | os.PathLike
+FileObject = io.BufferedReader | io.BytesIO
+FileObjectR = io.BufferedReader | io.BytesIO
+FileObjectW = io.BufferedWriter | io.BytesIO
+PathOrFileR = FilePath | FileObjectR
+PathOrFileW = FilePath | FileObjectW
 io_types_r = (io.BufferedReader, io.BytesIO)
 io_types_w = (io.BufferedWriter, io.BytesIO)
 

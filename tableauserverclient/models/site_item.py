@@ -154,9 +154,9 @@ class SiteItem:
         notify_site_admins_on_throttle: bool = False,
         authoring_enabled: bool = True,
         custom_subscription_email_enabled: bool = False,
-        custom_subscription_email: Union[str, bool] = False,
+        custom_subscription_email: str | bool = False,
         custom_subscription_footer_enabled: bool = False,
-        custom_subscription_footer: Union[str, bool] = False,
+        custom_subscription_footer: str | bool = False,
         ask_data_mode: str = "EnabledByDefault",
         named_sharing_enabled: bool = True,
         mobile_biometrics_enabled: bool = False,
@@ -555,11 +555,11 @@ class SiteItem:
         self._custom_subscription_email_enabled = value
 
     @property
-    def custom_subscription_email(self) -> Union[str, bool]:
+    def custom_subscription_email(self) -> str | bool:
         return self._custom_subscription_email
 
     @custom_subscription_email.setter
-    def custom_subscription_email(self, value: Union[str, bool]):
+    def custom_subscription_email(self, value: str | bool):
         self._custom_subscription_email = value
 
     @property
@@ -572,11 +572,11 @@ class SiteItem:
         self._custom_subscription_footer_enabled = value
 
     @property
-    def custom_subscription_footer(self) -> Union[str, bool]:
+    def custom_subscription_footer(self) -> str | bool:
         return self._custom_subscription_footer
 
     @custom_subscription_footer.setter
-    def custom_subscription_footer(self, value: Union[str, bool]) -> None:
+    def custom_subscription_footer(self, value: str | bool) -> None:
         self._custom_subscription_footer = value
 
     @property

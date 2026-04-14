@@ -27,7 +27,7 @@ class LinkedTasks(QuerysetEndpoint[LinkedTaskItem]):
         return all_group_items, pagination_item
 
     @api(version="3.15")
-    def get_by_id(self, linked_task: Union[LinkedTaskItem, str]) -> LinkedTaskItem:
+    def get_by_id(self, linked_task: LinkedTaskItem | str) -> LinkedTaskItem:
         task_id = getattr(linked_task, "id", linked_task)
         logger.info("Querying all linked tasks on site")
         url = f"{self.baseurl}/{task_id}"
@@ -36,7 +36,7 @@ class LinkedTasks(QuerysetEndpoint[LinkedTaskItem]):
         return all_group_items[0]
 
     @api(version="3.15")
-    def run_now(self, linked_task: Union[LinkedTaskItem, str]) -> LinkedTaskJobItem:
+    def run_now(self, linked_task: LinkedTaskItem | str) -> LinkedTaskJobItem:
         task_id = getattr(linked_task, "id", linked_task)
         logger.info(f"Running linked task {task_id} now")
         url = f"{self.baseurl}/{task_id}/runNow"

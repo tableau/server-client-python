@@ -55,7 +55,7 @@ class Pager(Iterable[T]):
 
     def __init__(
         self,
-        endpoint: Union[CallableEndpoint[T], Endpoint[T]],
+        endpoint: CallableEndpoint[T] | Endpoint[T],
         request_opts: Optional[RequestOptions] = None,
         **kwargs,
     ) -> None:

@@ -45,11 +45,11 @@ if TYPE_CHECKING:
     from tableauserverclient.server.endpoint.schedules_endpoint import AddResponse
 
 
-FilePath = Union[str, os.PathLike]
-FileObjectR = Union[io.BufferedReader, io.BytesIO]
-FileObjectW = Union[io.BufferedWriter, io.BytesIO]
-PathOrFileR = Union[FilePath, FileObjectR]
-PathOrFileW = Union[FilePath, FileObjectW]
+FilePath = str | os.PathLike
+FileObjectR = io.BufferedReader | io.BytesIO
+FileObjectW = io.BufferedWriter | io.BytesIO
+PathOrFileR = FilePath | FileObjectR
+PathOrFileW = FilePath | FileObjectW
 
 
 class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
@@ -308,7 +308,7 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
         return connection
 
     @api(version="3.3")
-    def refresh(self, flow_item: Union[FlowItem, str]) -> JobItem:
+    def refresh(self, flow_item: FlowItem | str) -> JobItem:
         """
         Runs the flow to refresh the data.
 

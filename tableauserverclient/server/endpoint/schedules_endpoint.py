@@ -210,7 +210,7 @@ class Schedules(Endpoint):
         if workbook and datasource:
             warnings.warn("Passing in multiple items for add_to_schedule will be deprecated", PendingDeprecationWarning)
         items: list[
-            tuple[str, Union[WorkbookItem, FlowItem, DatasourceItem], str, Callable[[Optional[str], str], bytes], str]
+            tuple[str, WorkbookItem | FlowItem | DatasourceItem, str, Callable[[Optional[str], str], bytes], str]
         ] = []
 
         if workbook is not None:
@@ -234,7 +234,7 @@ class Schedules(Endpoint):
     def _add_to(
         self,
         schedule_id,
-        resource: Union["DatasourceItem", "WorkbookItem", "FlowItem"],
+        resource: "DatasourceItem | WorkbookItem | FlowItem",
         type_: str,
         req_factory: Callable[
             [

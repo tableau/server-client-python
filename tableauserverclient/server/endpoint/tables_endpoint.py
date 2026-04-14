@@ -252,11 +252,11 @@ class Tables(Endpoint, TaggingMixin[TableItem]):
         self._data_quality_warnings.clear(item)
 
     @api(version="3.9")
-    def add_tags(self, item: Union[TableItem, str], tags: Union[Iterable[str], str]) -> set[str]:
+    def add_tags(self, item: TableItem | str, tags: Iterable[str] | str) -> set[str]:
         return super().add_tags(item, tags)
 
     @api(version="3.9")
-    def delete_tags(self, item: Union[TableItem, str], tags: Union[Iterable[str], str]) -> None:
+    def delete_tags(self, item: TableItem | str, tags: Iterable[str] | str) -> None:
         return super().delete_tags(item, tags)
 
     def update_tags(self, item: TableItem) -> None:  # type: ignore
