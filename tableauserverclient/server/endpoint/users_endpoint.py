@@ -4,7 +4,6 @@ import csv
 import io
 import itertools
 import logging
-from typing import Optional
 import warnings
 
 from tableauserverclient.server.query import QuerySet
@@ -33,14 +32,14 @@ class Users(QuerysetEndpoint[UserItem]):
 
     # Gets all users
     @api(version="2.0")
-    def get(self, req_options: Optional[RequestOptions] = None) -> tuple[list[UserItem], PaginationItem]:
+    def get(self, req_options: RequestOptions | None = None) -> tuple[list[UserItem], PaginationItem]:
         """
         Query all users on the site. Request is paginated and returns a subset of users.
         By default, the request returns the first 100 users on the site.
 
         Parameters
         ----------
-        req_options : Optional[RequestOptions]
+        req_options : RequestOptions | None
             Optional request options to filter and sort the results.
 
         Returns
@@ -156,7 +155,7 @@ class Users(QuerysetEndpoint[UserItem]):
 
     # Update user
     @api(version="2.0")
-    def update(self, user_item: UserItem, password: Optional[str] = None) -> UserItem:
+    def update(self, user_item: UserItem, password: str | None = None) -> UserItem:
         """
         Modifies information about the specified user.
 
@@ -178,7 +177,7 @@ class Users(QuerysetEndpoint[UserItem]):
         user_item : UserItem
             The user item to update.
 
-        password : Optional[str]
+        password : str | None
             The new password for the user.
 
         Returns
@@ -211,7 +210,7 @@ class Users(QuerysetEndpoint[UserItem]):
 
     # Delete 1 user by id
     @api(version="2.0")
-    def remove(self, user_id: str, map_assets_to: Optional[str] = None) -> None:
+    def remove(self, user_id: str, map_assets_to: str | None = None) -> None:
         """
         Removes a user from the site. You can also specify a user to map the
         assets to when you remove the user.
@@ -221,7 +220,7 @@ class Users(QuerysetEndpoint[UserItem]):
         user_id : str
             The ID of the user to remove.
 
-        map_assets_to : Optional[str]
+        map_assets_to : str | None
             The ID of the user to map the assets to when you remove the user.
 
         Returns
@@ -549,7 +548,7 @@ class Users(QuerysetEndpoint[UserItem]):
     # Get workbooks for user
     @api(version="2.0")
     def populate_workbooks(
-        self, user_item: UserItem, req_options: Optional[RequestOptions] = None, owned_only: bool = False
+        self, user_item: UserItem, req_options: RequestOptions | None = None, owned_only: bool = False
     ) -> None:
         """
         Returns information about the workbooks that the specified user owns
@@ -571,7 +570,7 @@ class Users(QuerysetEndpoint[UserItem]):
         user_item : UserItem
             The user item to populate workbooks for.
 
-        req_options : Optional[RequestOptions]
+        req_options : RequestOptions | None
             Optional request options to filter and sort the results.
 
         owned_only : bool, default=False
@@ -609,7 +608,7 @@ class Users(QuerysetEndpoint[UserItem]):
     def _get_wbs_for_user(
         self,
         user_item: UserItem,
-        req_options: Optional[RequestOptions] = None,
+        req_options: RequestOptions | None = None,
         owned_only: bool = False,
     ) -> tuple[list[WorkbookItem], PaginationItem]:
         url = f"{self.baseurl}/{user_item.id}/workbooks"
@@ -651,7 +650,7 @@ class Users(QuerysetEndpoint[UserItem]):
 
     # Get groups for user
     @api(version="3.7")
-    def populate_groups(self, user_item: UserItem, req_options: Optional[RequestOptions] = None) -> None:
+    def populate_groups(self, user_item: UserItem, req_options: RequestOptions | None = None) -> None:
         """
         Populate the groups for the user.
 
@@ -660,7 +659,7 @@ class Users(QuerysetEndpoint[UserItem]):
         user_item : UserItem
             The user item to populate groups for.
 
-        req_options : Optional[RequestOptions]
+        req_options : RequestOptions | None
             Optional request options to filter and sort the results.
 
         Returns
@@ -691,7 +690,7 @@ class Users(QuerysetEndpoint[UserItem]):
         user_item._set_groups(groups_for_user_pager)
 
     def _get_groups_for_user(
-        self, user_item: UserItem, req_options: Optional[RequestOptions] = None
+        self, user_item: UserItem, req_options: RequestOptions | None = None
     ) -> tuple[list[GroupItem], PaginationItem]:
         url = f"{self.baseurl}/{user_item.id}/groups"
         server_response = self.get_request(url, req_options)
@@ -700,7 +699,7 @@ class Users(QuerysetEndpoint[UserItem]):
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         return group_item, pagination_item
 
-    def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[UserItem]:
+    def filter(self, *invalid, page_size: int | None = None, **kwargs) -> QuerySet[UserItem]:
         """
         Queries the Tableau Server for items using the specified filters. Page
         size can be specified to limit the number of items returned in a single

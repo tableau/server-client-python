@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from defusedxml.ElementTree import fromstring
 
@@ -57,10 +56,10 @@ class TaskItem:
         task_type: str,
         priority: int,
         consecutive_failed_count: int = 0,
-        schedule_id: Optional[str] = None,
-        schedule_item: Optional[ScheduleItem] = None,
-        last_run_at: Optional[datetime] = None,
-        target: Optional[Target] = None,
+        schedule_id: str | None = None,
+        schedule_item: ScheduleItem | None = None,
+        last_run_at: datetime | None = None,
+        target: Target | None = None,
     ):
         self.id = id_
         self.task_type = task_type

@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING
 from collections.abc import Iterable
 
 from tableauserverclient.models.permissions_item import PermissionsRule
@@ -31,7 +31,7 @@ class Tables(Endpoint, TaggingMixin[TableItem]):
         return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/tables"
 
     @api(version="3.5")
-    def get(self, req_options: Optional[RequestOptions] = None) -> tuple[list[TableItem], PaginationItem]:
+    def get(self, req_options: RequestOptions | None = None) -> tuple[list[TableItem], PaginationItem]:
         """
         Get information about all tables on the site. Endpoint is paginated, and
         will return a default of 100 items per page. Use the `req_options`
@@ -149,7 +149,7 @@ class Tables(Endpoint, TaggingMixin[TableItem]):
 
     # Get all columns of the table
     @api(version="3.5")
-    def populate_columns(self, table_item: TableItem, req_options: Optional[RequestOptions] = None) -> None:
+    def populate_columns(self, table_item: TableItem, req_options: RequestOptions | None = None) -> None:
         """
         Populate the columns of a table item. Sets a fetcher function to
         retrieve the columns when needed.
@@ -187,7 +187,7 @@ class Tables(Endpoint, TaggingMixin[TableItem]):
         logger.info(f"Populated columns for table (ID: {table_item.id}")
 
     def _get_columns_for_table(
-        self, table_item: TableItem, req_options: Optional[RequestOptions] = None
+        self, table_item: TableItem, req_options: RequestOptions | None = None
     ) -> tuple[list[ColumnItem], PaginationItem]:
         url = f"{self.baseurl}/{table_item.id}/columns"
         server_response = self.get_request(url, req_options)

@@ -1,6 +1,6 @@
 import abc
 import copy
-from typing import Generic, Optional, Protocol, TypeVar, Union, TYPE_CHECKING, runtime_checkable
+from typing import Generic, Protocol, TypeVar, TYPE_CHECKING, runtime_checkable
 from collections.abc import Iterable
 import urllib.parse
 
@@ -73,7 +73,7 @@ class Taggable(Protocol):
     _initial_tags: set[str]
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         pass
 
 

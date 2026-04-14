@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from defusedxml.ElementTree import fromstring
 
@@ -8,45 +7,45 @@ from tableauserverclient.datetime_helpers import parse_datetime
 
 class RevisionItem:
     def __init__(self):
-        self._resource_id: Optional[str] = None
-        self._resource_name: Optional[str] = None
-        self._revision_number: Optional[str] = None
-        self._current: Optional[bool] = None
-        self._deleted: Optional[bool] = None
-        self._created_at: Optional[datetime] = None
-        self._user_id: Optional[str] = None
-        self._user_name: Optional[str] = None
+        self._resource_id: str | None = None
+        self._resource_name: str | None = None
+        self._revision_number: str | None = None
+        self._current: bool | None = None
+        self._deleted: bool | None = None
+        self._created_at: datetime | None = None
+        self._user_id: str | None = None
+        self._user_name: str | None = None
 
     @property
-    def resource_id(self) -> Optional[str]:
+    def resource_id(self) -> str | None:
         return self._resource_id
 
     @property
-    def resource_name(self) -> Optional[str]:
+    def resource_name(self) -> str | None:
         return self._resource_name
 
     @property
-    def revision_number(self) -> Optional[str]:
+    def revision_number(self) -> str | None:
         return self._revision_number
 
     @property
-    def current(self) -> Optional[bool]:
+    def current(self) -> bool | None:
         return self._current
 
     @property
-    def deleted(self) -> Optional[bool]:
+    def deleted(self) -> bool | None:
         return self._deleted
 
     @property
-    def created_at(self) -> Optional[datetime]:
+    def created_at(self) -> datetime | None:
         return self._created_at
 
     @property
-    def user_id(self) -> Optional[str]:
+    def user_id(self) -> str | None:
         return self._user_id
 
     @property
-    def user_name(self) -> Optional[str]:
+    def user_name(self) -> str | None:
         return self._user_name
 
     def __repr__(self):

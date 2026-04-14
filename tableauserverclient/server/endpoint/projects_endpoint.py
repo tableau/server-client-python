@@ -8,7 +8,7 @@ from tableauserverclient.server import RequestFactory, RequestOptions
 from tableauserverclient.models.permissions_item import PermissionsRule
 from tableauserverclient.models import ProjectItem, PaginationItem, Resource
 
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from tableauserverclient.server.query import QuerySet
 
@@ -36,7 +36,7 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/projects"
 
     @api(version="2.0")
-    def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[ProjectItem], PaginationItem]:
+    def get(self, req_options: "RequestOptions | None" = None) -> tuple[list[ProjectItem], PaginationItem]:
         """
         Retrieves all projects on the site. The endpoint is paginated and can
         be filtered using the req_options parameter.
@@ -820,7 +820,7 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         """
         self._default_permissions.delete_default_permission(item, rule, Resource.Table)
 
-    def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[ProjectItem]:
+    def filter(self, *invalid, page_size: int | None = None, **kwargs) -> QuerySet[ProjectItem]:
         """
         Queries the Tableau Server for items using the specified filters. Page
         size can be specified to limit the number of items returned in a single

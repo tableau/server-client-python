@@ -2,7 +2,7 @@ import io
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from enum import IntEnum
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from defusedxml.ElementTree import fromstring
 from typing_extensions import Self
@@ -43,40 +43,40 @@ class UserItem:
 
     Attributes
     ----------
-    domain_name: Optional[str]
+    domain_name: str | None
         The name of the Active Directory domain ("local" if local authentication
         is used).
 
-    email: Optional[str]
+    email: str | None
         The email address of the user.
 
-    external_auth_user_id: Optional[str]
+    external_auth_user_id: str | None
         The unique identifier for the user in the external authentication system.
 
-    id: Optional[str]
+    id: str | None
         The unique identifier for the user.
 
     favorites: dict[str, list]
         The favorites of the user. Must be populated with a call to
         `populate_favorites()`.
 
-    fullname: Optional[str]
+    fullname: str | None
         The full name of the user.
 
     groups: Pager
         The groups the user belongs to. Must be populated with a call to
         `populate_groups()`.
 
-    last_login: Optional[datetime]
+    last_login: datetime | None
         The last time the user logged in.
 
-    locale: Optional[str]
+    locale: str | None
         The locale of the user.
 
-    language: Optional[str]
+    language: str | None
         Language setting for the user.
 
-    idp_configuration_id: Optional[str]
+    idp_configuration_id: str | None
         The ID of the identity provider configuration.
 
     workbooks: Pager
@@ -124,25 +124,23 @@ class UserItem:
         TableauIDWithMFA = "TableauIDWithMFA"
         ServerDefault = "ServerDefault"
 
-    def __init__(
-        self, name: Optional[str] = None, site_role: Optional[str] = None, auth_setting: Optional[str] = None
-    ) -> None:
-        self._auth_setting: Optional[str] = None
-        self._domain_name: Optional[str] = None
-        self._external_auth_user_id: Optional[str] = None
-        self._id: Optional[str] = None
-        self._last_login: Optional[datetime] = None
+    def __init__(self, name: str | None = None, site_role: str | None = None, auth_setting: str | None = None) -> None:
+        self._auth_setting: str | None = None
+        self._domain_name: str | None = None
+        self._external_auth_user_id: str | None = None
+        self._id: str | None = None
+        self._last_login: datetime | None = None
         self._workbooks = None
-        self._favorites: Optional["FavoriteType"] = None
+        self._favorites: "FavoriteType | None" = None
         self._groups = None
-        self.email: Optional[str] = None
-        self.fullname: Optional[str] = None
-        self.name: Optional[str] = name
-        self.site_role: Optional[str] = site_role
-        self.auth_setting: Optional[str] = auth_setting
-        self._locale: Optional[str] = None
-        self._language: Optional[str] = None
-        self._idp_configuration_id: Optional[str] = None
+        self.email: str | None = None
+        self.fullname: str | None = None
+        self.name: str | None = name
+        self.site_role: str | None = site_role
+        self.auth_setting: str | None = auth_setting
+        self._locale: str | None = None
+        self._language: str | None = None
+        self._idp_configuration_id: str | None = None
 
         return None
 
@@ -154,7 +152,7 @@ class UserItem:
         return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"
 
     @property
-    def auth_setting(self) -> Optional[str]:
+    def auth_setting(self) -> str | None:
         return self._auth_setting
 
     @auth_setting.setter
@@ -163,15 +161,15 @@ class UserItem:
         self._auth_setting = value
 
     @property
-    def domain_name(self) -> Optional[str]:
+    def domain_name(self) -> str | None:
         return self._domain_name
 
     @property
-    def external_auth_user_id(self) -> Optional[str]:
+    def external_auth_user_id(self) -> str | None:
         return self._external_auth_user_id
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         return self._id
 
     @id.setter
@@ -179,15 +177,15 @@ class UserItem:
         self._id = value
 
     @property
-    def last_login(self) -> Optional[datetime]:
+    def last_login(self) -> datetime | None:
         return self._last_login
 
     @property
-    def name(self) -> Optional[str]:
+    def name(self) -> str | None:
         return self._name
 
     @name.setter
-    def name(self, value: Optional[str]):
+    def name(self, value: str | None):
         self._name = value
 
     # valid: username, domain/username, username@domain, domain/username@email
@@ -204,7 +202,7 @@ class UserItem:
                 raise AttributeError("Username cannot repeat '@'")
 
     @property
-    def site_role(self) -> Optional[str]:
+    def site_role(self) -> str | None:
         return self._site_role
 
     @site_role.setter
@@ -234,15 +232,15 @@ class UserItem:
         return self._groups()
 
     @property
-    def locale(self) -> Optional[str]:
+    def locale(self) -> str | None:
         return self._locale
 
     @property
-    def language(self) -> Optional[str]:
+    def language(self) -> str | None:
         return self._language
 
     @property
-    def idp_configuration_id(self) -> Optional[str]:
+    def idp_configuration_id(self) -> str | None:
         """
         IDP configuration id for the user. This is only available on Tableau
         Cloud, 3.24 or later
@@ -331,7 +329,7 @@ class UserItem:
         return cls._parse_xml(element_name, resp, ns)
 
     @classmethod
-    def from_xml(cls, xml: ET.Element, ns: Optional[dict] = None) -> "UserItem":
+    def from_xml(cls, xml: ET.Element, ns: dict | None = None) -> "UserItem":
         item = cls()
         item._set_values(*cls._parse_element(xml, ns))
         return item

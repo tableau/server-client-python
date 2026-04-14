@@ -1,5 +1,4 @@
 import sys
-from typing import Optional
 import warnings
 
 from typing_extensions import Self
@@ -321,13 +320,13 @@ class _DataExportOptions(RequestOptionsBase):
         super().__init__()
         self.view_filters: list[tuple[str, str]] = []
         self.view_parameters: list[tuple[str, str]] = []
-        self.max_age: Optional[int] = maxage
+        self.max_age: int | None = maxage
         """
         This setting will affect the contents of the workbook as they are exported.
         Valid language values are tableau-supported languages like de, es, en
         If no locale is specified, the default locale for that language will be used
         """
-        self.language: Optional[str] = None
+        self.language: str | None = None
 
     @property
     def max_age(self) -> int:

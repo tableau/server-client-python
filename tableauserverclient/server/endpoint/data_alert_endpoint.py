@@ -7,7 +7,7 @@ from tableauserverclient.models import DataAlertItem, PaginationItem, UserItem
 
 from tableauserverclient.helpers.logging import logger
 
-from typing import Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 
 if TYPE_CHECKING:
@@ -24,7 +24,7 @@ class DataAlerts(Endpoint):
         return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/dataAlerts"
 
     @api(version="3.2")
-    def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[DataAlertItem], PaginationItem]:
+    def get(self, req_options: "RequestOptions | None" = None) -> tuple[list[DataAlertItem], PaginationItem]:
         logger.info("Querying all dataAlerts on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)

@@ -1,7 +1,7 @@
 from functools import partial
 import json
 from pathlib import Path
-from typing import Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 from collections.abc import Iterable
 
 from tableauserverclient.models.connection_item import ConnectionItem
@@ -29,7 +29,7 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem], TaggingMixin):
         return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/virtualConnections"
 
     @api(version="3.18")
-    def get(self, req_options: Optional[RequestOptions] = None) -> tuple[list[VirtualConnectionItem], PaginationItem]:
+    def get(self, req_options: RequestOptions | None = None) -> tuple[list[VirtualConnectionItem], PaginationItem]:
         server_response = self.get_request(self.baseurl, req_options)
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         virtual_connections = VirtualConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
@@ -44,7 +44,7 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem], TaggingMixin):
         return virtual_connection
 
     def _get_virtual_database_connections(
-        self, virtual_connection: VirtualConnectionItem, req_options: Optional[RequestOptions] = None
+        self, virtual_connection: VirtualConnectionItem, req_options: RequestOptions | None = None
     ) -> tuple[list[ConnectionItem], PaginationItem]:
         server_response = self.get_request(f"{self.baseurl}/{virtual_connection.id}/connections", req_options)
         connections = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
@@ -83,7 +83,7 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem], TaggingMixin):
 
     @api(version="3.23")
     def get_revisions(
-        self, virtual_connection: VirtualConnectionItem, req_options: Optional[RequestOptions] = None
+        self, virtual_connection: VirtualConnectionItem, req_options: RequestOptions | None = None
     ) -> tuple[list[RevisionItem], PaginationItem]:
         server_response = self.get_request(f"{self.baseurl}/{virtual_connection.id}/revisions", req_options)
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)

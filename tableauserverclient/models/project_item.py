@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from typing import Optional, overload
+from typing import overload
 
 from defusedxml.ElementTree import fromstring
 
@@ -45,7 +45,7 @@ class ProjectItem:
     id : str
         The unique identifier for the project.
 
-    owner: Optional[UserItem]
+    owner: UserItem | None
         The UserItem owner of the project.
 
     owner_id : str
@@ -81,23 +81,23 @@ class ProjectItem:
 
     def __init__(
         self,
-        name: Optional[str] = None,
-        description: Optional[str] = None,
-        content_permissions: Optional[str] = None,
-        parent_id: Optional[str] = None,
-        samples: Optional[bool] = None,
-        id: Optional[str] = None,
+        name: str | None = None,
+        description: str | None = None,
+        content_permissions: str | None = None,
+        parent_id: str | None = None,
+        samples: bool | None = None,
+        id: str | None = None,
     ) -> None:
         self._content_permissions = None
-        self._id: Optional[str] = id
-        self.description: Optional[str] = description
+        self._id: str | None = id
+        self.description: str | None = description
         self.name: str = name
-        self.content_permissions: Optional[str] = content_permissions
-        self.parent_id: Optional[str] = parent_id
-        self._samples: Optional[bool] = samples
-        self._owner_id: Optional[str] = None
-        self._top_level_project: Optional[bool] = None
-        self._writeable: Optional[bool] = None
+        self.content_permissions: str | None = content_permissions
+        self.parent_id: str | None = parent_id
+        self._samples: bool | None = samples
+        self._owner_id: str | None = None
+        self._top_level_project: bool | None = None
+        self._writeable: bool | None = None
 
         self._permissions = None
         self._default_workbook_permissions = None
@@ -110,12 +110,12 @@ class ProjectItem:
         self._default_database_permissions = None
         self._default_table_permissions = None
 
-        self._project_count: Optional[int] = None
-        self._workbook_count: Optional[int] = None
-        self._view_count: Optional[int] = None
-        self._datasource_count: Optional[int] = None
+        self._project_count: int | None = None
+        self._workbook_count: int | None = None
+        self._view_count: int | None = None
+        self._datasource_count: int | None = None
 
-        self._owner: Optional[UserItem] = None
+        self._owner: UserItem | None = None
 
     @property
     def content_permissions(self):
@@ -123,7 +123,7 @@ class ProjectItem:
 
     @content_permissions.setter
     @property_is_enum(ContentPermissions)
-    def content_permissions(self, value: Optional[str]) -> None:
+    def content_permissions(self, value: str | None) -> None:
         self._content_permissions = value
 
     @property
@@ -187,19 +187,19 @@ class ProjectItem:
         return self._default_table_permissions()
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         return self._id
 
     @property
-    def name(self) -> Optional[str]:
+    def name(self) -> str | None:
         return self._name
 
     @name.setter
-    def name(self, value: Optional[str]) -> None:
+    def name(self, value: str | None) -> None:
         self._name = value
 
     @property
-    def owner_id(self) -> Optional[str]:
+    def owner_id(self) -> str | None:
         return self._owner_id
 
     @owner_id.setter
@@ -207,31 +207,31 @@ class ProjectItem:
         self._owner_id = value
 
     @property
-    def top_level_project(self) -> Optional[bool]:
+    def top_level_project(self) -> bool | None:
         return self._top_level_project
 
     @property
-    def writeable(self) -> Optional[bool]:
+    def writeable(self) -> bool | None:
         return self._writeable
 
     @property
-    def project_count(self) -> Optional[int]:
+    def project_count(self) -> int | None:
         return self._project_count
 
     @property
-    def workbook_count(self) -> Optional[int]:
+    def workbook_count(self) -> int | None:
         return self._workbook_count
 
     @property
-    def view_count(self) -> Optional[int]:
+    def view_count(self) -> int | None:
         return self._view_count
 
     @property
-    def datasource_count(self) -> Optional[int]:
+    def datasource_count(self) -> int | None:
         return self._datasource_count
 
     @property
-    def owner(self) -> Optional[UserItem]:
+    def owner(self) -> UserItem | None:
         return self._owner
 
     def is_default(self):
@@ -292,7 +292,7 @@ class ProjectItem:
         )
 
     @classmethod
-    def from_response(cls, resp: bytes, ns: Optional[dict]) -> list["ProjectItem"]:
+    def from_response(cls, resp: bytes, ns: dict | None) -> list["ProjectItem"]:
         all_project_items = list()
         parsed_response = fromstring(resp)
         all_project_xml = parsed_response.findall(".//t:project", namespaces=ns)
@@ -303,13 +303,13 @@ class ProjectItem:
         return all_project_items
 
     @classmethod
-    def from_xml(cls, project_xml: ET.Element, namespace: Optional[dict] = None) -> "ProjectItem":
+    def from_xml(cls, project_xml: ET.Element, namespace: dict | None = None) -> "ProjectItem":
         project_item = cls()
         project_item._set_values(*cls._parse_element(project_xml, namespace))
         return project_item
 
     @staticmethod
-    def _parse_element(project_xml: ET.Element, namespace: Optional[dict]) -> tuple:
+    def _parse_element(project_xml: ET.Element, namespace: dict | None) -> tuple:
         id = project_xml.get("id", None)
         name = project_xml.get("name", None)
         description = project_xml.get("description", None)

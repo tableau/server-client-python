@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, Optional, Protocol, TYPE_CHECKING
+from typing import Callable, Protocol, TYPE_CHECKING
 
 from .endpoint import Endpoint
 from .exceptions import MissingRequiredFieldError
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 class HasId(Protocol):
     @property
-    def id(self) -> Optional[str]: ...
+    def id(self) -> str | None: ...
     def _set_data_quality_warnings(self, dqw: Callable[[], list[DQWItem]]): ...
 
 
@@ -62,7 +62,7 @@ class _DataQualityWarningEndpoint(Endpoint):
         item._set_data_quality_warnings(dqw_fetcher)
         logger.info(f"Populated permissions for item (ID: {item.id})")
 
-    def _get_data_quality_warnings(self, item: HasId, req_options: Optional["RequestOptions"] = None) -> list[DQWItem]:
+    def _get_data_quality_warnings(self, item: HasId, req_options: "RequestOptions | None" = None) -> list[DQWItem]:
         url = f"{self.baseurl}/{item.id}"
         server_response = self.get_request(url, req_options)
         dqws = DQWItem.from_response(server_response.content, self.parent_srv.namespace)

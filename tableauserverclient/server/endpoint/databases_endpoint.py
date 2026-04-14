@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 from collections.abc import Iterable
 
 from tableauserverclient.models.permissions_item import PermissionsRule
@@ -32,7 +32,7 @@ class Databases(Endpoint, TaggingMixin):
         return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/databases"
 
     @api(version="3.5")
-    def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[DatabaseItem], PaginationItem]:
+    def get(self, req_options: "RequestOptions | None" = None) -> tuple[list[DatabaseItem], PaginationItem]:
         """
         Get information about all databases on the site. Endpoint is paginated,
         and will return a default of 100 items per page. Use the `req_options`

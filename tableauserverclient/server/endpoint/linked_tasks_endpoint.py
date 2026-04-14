@@ -1,5 +1,3 @@
-from typing import Optional, Union
-
 from tableauserverclient.helpers.logging import logger
 from tableauserverclient.models.linked_tasks_item import LinkedTaskItem, LinkedTaskJobItem
 from tableauserverclient.models.pagination_item import PaginationItem
@@ -18,7 +16,7 @@ class LinkedTasks(QuerysetEndpoint[LinkedTaskItem]):
         return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/tasks/linked"
 
     @api(version="3.15")
-    def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[LinkedTaskItem], PaginationItem]:
+    def get(self, req_options: "RequestOptions | None" = None) -> tuple[list[LinkedTaskItem], PaginationItem]:
         logger.info("Querying all linked tasks on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)

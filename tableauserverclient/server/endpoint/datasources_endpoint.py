@@ -6,7 +6,7 @@ import os
 
 from contextlib import closing
 from pathlib import Path
-from typing import Literal, Optional, TYPE_CHECKING, TypedDict, TypeVar, Union, overload
+from typing import Literal, TYPE_CHECKING, TypedDict, TypeVar, overload
 from collections.abc import Iterable, Sequence
 
 from tableauserverclient.helpers.headers import fix_filename
@@ -108,7 +108,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
 
     # Get all datasources
     @api(version="2.0")
-    def get(self, req_options: Optional[RequestOptions] = None) -> tuple[list[DatasourceItem], PaginationItem]:
+    def get(self, req_options: RequestOptions | None = None) -> tuple[list[DatasourceItem], PaginationItem]:
         """
         Returns a list of published data sources on the specified site, with
         optional parameters for specifying the paging of large results. To get
@@ -121,7 +121,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
 
         Parameters
         ----------
-        req_options : Optional[RequestOptions]
+        req_options : RequestOptions | None
             Optional parameters for the request, such as filters, sorting, page
             size, and page number.
 
@@ -192,7 +192,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         logger.info(f"Populated connections for datasource (ID: {datasource_item.id})")
 
     def _get_datasource_connections(
-        self, datasource_item: DatasourceItem, req_options: Optional[RequestOptions] = None
+        self, datasource_item: DatasourceItem, req_options: RequestOptions | None = None
     ) -> list[ConnectionItem]:
         url = f"{self.baseurl}/{datasource_item.id}/connections"
         server_response = self.get_request(url, req_options)
@@ -242,7 +242,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
     def download(
         self,
         datasource_id: str,
-        filepath: Optional[FilePath] = None,
+        filepath: FilePath | None = None,
         include_extract: bool = True,
     ) -> str: ...
 
@@ -267,7 +267,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         datasource_id : str
             The unique ID of the datasource to download.
 
-        filepath : Optional[PathOrFileW]
+        filepath : PathOrFileW | None
             The file path to save the downloaded datasource to. If not
             specified, the file will be saved to the current working directory.
 
@@ -338,7 +338,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
     @api(version="2.3")
     def update_connection(
         self, datasource_item: DatasourceItem, connection_item: ConnectionItem
-    ) -> Optional[ConnectionItem]:
+    ) -> ConnectionItem | None:
         """
         Updates the server address, port, username, or password for the
         specified data source connection.
@@ -355,7 +355,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
 
         Returns
         -------
-        Optional[ConnectionItem]
+        ConnectionItem | None
             An object containing information about the updated connection.
         """
 
@@ -379,10 +379,10 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         self,
         datasource_item: DatasourceItem,
         connection_luids: Iterable[str],
-        authentication_type: Optional[str] = None,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        embed_password: Optional[bool] = None,
+        authentication_type: str,
+        username: str | None = None,
+        password: str | None = None,
+        embed_password: bool | None = None,
     ) -> list[ConnectionItem]:
         """
         Bulk updates one or more datasource connections by LUID.
@@ -514,8 +514,8 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         datasource_item: DatasourceItem,
         file: PathOrFileR,
         mode: str,
-        connection_credentials: Optional[ConnectionCredentials] = None,
-        connections: Optional[Sequence[ConnectionItem]] = None,
+        connection_credentials: ConnectionCredentials | None = None,
+        connections: Sequence[ConnectionItem] | None = None,
         as_job: Literal[False] = False,
     ) -> DatasourceItem:
         pass
@@ -526,8 +526,8 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         datasource_item: DatasourceItem,
         file: PathOrFileR,
         mode: str,
-        connection_credentials: Optional[ConnectionCredentials] = None,
-        connections: Optional[Sequence[ConnectionItem]] = None,
+        connection_credentials: ConnectionCredentials | None = None,
+        connections: Sequence[ConnectionItem] | None = None,
         as_job: Literal[True] = True,
     ) -> JobItem:
         pass
@@ -570,11 +570,11 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
              existing datasource (Append). You can also use the publish mode
              attributes, for example: TSC.Server.PublishMode.Overwrite.
 
-         connection_credentials : Optional[ConnectionCredentials]
+         connection_credentials : ConnectionCredentials | None
              The connection credentials to use when publishing the datasource.
              Mutually exclusive with the connections parameter.
 
-         connections : Optional[Sequence[ConnectionItem]]
+         connections : Sequence[ConnectionItem] | None
              The connections to use when publishing the datasource. Mutually
              exclusive with the connection_credentials parameter.
 
@@ -691,7 +691,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         *,
         request_id: str,
         actions: Sequence[HyperAction],
-        payload: Optional[FilePath] = None,
+        payload: FilePath | None = None,
     ) -> JobItem:
         """
         Incrementally updates data (insert, update, upsert, replace and delete)
@@ -727,7 +727,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
             modify the data within the published datasource. For more
             information on the actions, see: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_how_to_update_data_to_hyper.htm#action-batch-descriptions
 
-        payload : Optional[FilePath]
+        payload : FilePath | None
             A Hyper file containing tuples to be inserted/deleted/updated or
             other payload data used by the actions. Hyper files can be created
             using the Tableau Hyper API or pantab.
@@ -950,7 +950,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         logger.info(f"Populated revisions for datasource (ID: {datasource_item.id})")
 
     def _get_datasource_revisions(
-        self, datasource_item: DatasourceItem, req_options: Optional["RequestOptions"] = None
+        self, datasource_item: DatasourceItem, req_options: "RequestOptions | None" = None
     ) -> list[RevisionItem]:
         url = f"{self.baseurl}/{datasource_item.id}/revisions"
         server_response = self.get_request(url, req_options)
@@ -963,7 +963,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
     def download_revision(
         self,
         datasource_id: str,
-        revision_number: Optional[str],
+        revision_number: str | None,
         filepath: T,
         include_extract: bool = True,
     ) -> T: ...
@@ -972,8 +972,8 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
     def download_revision(
         self,
         datasource_id: str,
-        revision_number: Optional[str],
-        filepath: Optional[FilePath] = None,
+        revision_number: str | None,
+        filepath: FilePath | None = None,
         include_extract: bool = True,
     ) -> str: ...
 
@@ -998,12 +998,12 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         datasource_id : str
             The unique ID of the datasource to download.
 
-        revision_number : Optional[str]
+        revision_number : str | None
             The revision number of the data source to download. To determine
             what versions are available, call the `populate_revisions` method.
             Pass None to download the current version.
 
-        filepath : Optional[PathOrFileW]
+        filepath : PathOrFileW | None
             The file path to save the downloaded datasource to. If not
             specified, the file will be saved to the current working directory.
 
@@ -1161,7 +1161,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         """
         return super().update_tags(item)
 
-    def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[DatasourceItem]:
+    def filter(self, *invalid, page_size: int | None = None, **kwargs) -> QuerySet[DatasourceItem]:
         """
         Queries the Tableau Server for items using the specified filters. Page
         size can be specified to limit the number of items returned in a single

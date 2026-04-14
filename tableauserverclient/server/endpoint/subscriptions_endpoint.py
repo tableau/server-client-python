@@ -7,7 +7,7 @@ from tableauserverclient.models import SubscriptionItem, PaginationItem
 
 from tableauserverclient.helpers.logging import logger
 
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..request_options import RequestOptions
@@ -19,7 +19,7 @@ class Subscriptions(Endpoint):
         return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/subscriptions"
 
     @api(version="2.3")
-    def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[SubscriptionItem], PaginationItem]:
+    def get(self, req_options: "RequestOptions | None" = None) -> tuple[list[SubscriptionItem], PaginationItem]:
         logger.info("Querying all subscriptions for the site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)

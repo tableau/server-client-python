@@ -8,7 +8,7 @@ from tableauserverclient.server.pager import Pager
 
 from tableauserverclient.helpers.logging import logger
 
-from typing import Literal, Optional, TYPE_CHECKING, Union, overload
+from typing import Literal, TYPE_CHECKING, overload
 from collections.abc import Iterable
 
 from tableauserverclient.server.query import QuerySet
@@ -28,7 +28,7 @@ class Groups(QuerysetEndpoint[GroupItem]):
         return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/groups"
 
     @api(version="2.0")
-    def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[GroupItem], PaginationItem]:
+    def get(self, req_options: "RequestOptions | None" = None) -> tuple[list[GroupItem], PaginationItem]:
         """
         Returns information about the groups on the site.
 
@@ -40,7 +40,7 @@ class Groups(QuerysetEndpoint[GroupItem]):
 
         Parameters
         ----------
-        req_options : Optional[RequestOptions]
+        req_options : RequestOptions | None
             (Optional) You can pass the method a request object that contains
             additional parameters to filter the request. For example, if you
             were searching for a specific group, you could specify the name of
@@ -76,7 +76,7 @@ class Groups(QuerysetEndpoint[GroupItem]):
         return all_group_items, pagination_item
 
     @api(version="2.0")
-    def populate_users(self, group_item: GroupItem, req_options: Optional["RequestOptions"] = None) -> None:
+    def populate_users(self, group_item: GroupItem, req_options: "RequestOptions | None" = None) -> None:
         """
         Populates the group_item with the list of users.
 
@@ -87,7 +87,7 @@ class Groups(QuerysetEndpoint[GroupItem]):
         group_item : GroupItem
             The group item to populate with user information.
 
-        req_options : Optional[RequestOptions]
+        req_options : RequestOptions | None
             (Optional) You can pass the method a request object that contains
             page size and page number.
 
@@ -128,7 +128,7 @@ class Groups(QuerysetEndpoint[GroupItem]):
         group_item._set_users(user_pager)
 
     def _get_users_for_group(
-        self, group_item: GroupItem, req_options: Optional["RequestOptions"] = None
+        self, group_item: GroupItem, req_options: "RequestOptions | None" = None
     ) -> tuple[list[UserItem], PaginationItem]:
         url = f"{self.baseurl}/{group_item.id}/users"
         server_response = self.get_request(url, req_options)
@@ -480,7 +480,7 @@ class Groups(QuerysetEndpoint[GroupItem]):
         logger.info(f"Added users to group (ID: {group_item.id})")
         return users
 
-    def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[GroupItem]:
+    def filter(self, *invalid, page_size: int | None = None, **kwargs) -> QuerySet[GroupItem]:
         """
         Queries the Tableau Server for items using the specified filters. Page
         size can be specified to limit the number of items returned in a single

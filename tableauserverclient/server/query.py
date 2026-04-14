@@ -1,6 +1,6 @@
 from collections.abc import Iterable, Iterator, Sized
 from itertools import count
-from typing import Optional, Protocol, TYPE_CHECKING, TypeVar, overload
+from typing import Protocol, TYPE_CHECKING, TypeVar, overload
 import sys
 from tableauserverclient.config import config
 from tableauserverclient.models.pagination_item import PaginationItem
@@ -19,9 +19,9 @@ T = TypeVar("T")
 
 
 class Slice(Protocol):
-    start: Optional[int]
-    step: Optional[int]
-    stop: Optional[int]
+    start: int | None
+    step: int | None
+    stop: int | None
 
 
 def to_camel_case(word: str) -> str:
@@ -62,7 +62,7 @@ class QuerySet(Iterable[T], Sized):
     contains the item you are looking for.
     """
 
-    def __init__(self, model: "QuerysetEndpoint[T]", page_size: Optional[int] = None) -> None:
+    def __init__(self, model: "QuerysetEndpoint[T]", page_size: int | None = None) -> None:
         self.model = model
         self.request_options = RequestOptions(pagesize=page_size or config.PAGE_SIZE)
         self._result_cache: list[T] = []
@@ -184,7 +184,7 @@ class QuerySet(Iterable[T], Sized):
         # pagesize from the RequestOptions.
         return self._pagination_item.page_size or self.request_options.pagesize
 
-    def filter(self: Self, *invalid, page_size: Optional[int] = None, **kwargs) -> Self:
+    def filter(self: Self, *invalid, page_size: int | None = None, **kwargs) -> Self:
         if invalid:
             raise RuntimeError("Only accepts keyword arguments.")
         for kwarg_key, value in kwargs.items():

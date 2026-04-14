@@ -1,7 +1,7 @@
 from contextlib import ExitStack
 import re
 from collections.abc import Iterable
-from typing import Optional, Protocol
+from typing import Protocol
 import uuid
 from xml.etree import ElementTree as ET
 
@@ -201,7 +201,7 @@ def test_update_tags(get_server, endpoint_type, item, tags) -> None:
 
 class HasID(Protocol):
     @property
-    def id(self) -> Optional[str]: ...
+    def id(self) -> str | None: ...
 
 
 def test_tags_batch_add(get_server) -> None:

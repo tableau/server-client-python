@@ -1,5 +1,4 @@
 import xml.etree.ElementTree as ET
-from typing import Optional
 
 from defusedxml.ElementTree import fromstring
 
@@ -131,7 +130,7 @@ class PermissionsRule:
         return rules
 
     @staticmethod
-    def _parse_grantee_element(grantee_capability_xml: ET.Element, ns: Optional[dict[str, str]]) -> ResourceReference:
+    def _parse_grantee_element(grantee_capability_xml: ET.Element, ns: dict[str, str] | None) -> ResourceReference:
         """Use Xpath magic and some string splitting to get the right object type from the xml"""
 
         # Get the first element in the tree with an 'id' attribute

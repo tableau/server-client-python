@@ -80,7 +80,7 @@ class Endpoint:
                 parameters["headers"][USER_AGENT_HEADER] = parameters[USER_AGENT_HEADER]
             else:
                 # only set the TSC user agent if not already populated
-                _client_version: Optional[str] = get_versions()["version"]
+                _client_version: str | None = get_versions()["version"]
                 parameters["headers"][USER_AGENT_HEADER] = f"Tableau Server Client/{_client_version}"
 
         # result: parameters["headers"]["User-Agent"] is set
@@ -107,10 +107,10 @@ class Endpoint:
         self,
         method: Callable[..., "Response"],
         url: str,
-        content: Optional[bytes] = None,
-        auth_token: Optional[str] = None,
-        content_type: Optional[str] = None,
-        parameters: Optional[dict[str, Any]] = None,
+        content: bytes | None = None,
+        auth_token: str | None = None,
+        content_type: str | None = None,
+        parameters: dict[str, Any] | None = None,
     ) -> "Response":
         parameters = Endpoint.set_parameters(
             self.parent_srv.http_options, auth_token, content, content_type, parameters
@@ -152,7 +152,7 @@ class Endpoint:
 
         return server_response
 
-    def _check_status(self, server_response: "Response", url: Optional[str] = None):
+    def _check_status(self, server_response: "Response", url: str | None = None):
         logger.debug(f"Response status: {server_response}")
         if not hasattr(server_response, "status_code"):
             raise OSError("Response is not a http response?")
@@ -326,14 +326,14 @@ T = TypeVar("T")
 
 class QuerysetEndpoint(Endpoint, Generic[T]):
     @api(version="2.0")
-    def all(self, *args, page_size: Optional[int] = None, **kwargs) -> QuerySet[T]:
+    def all(self, *args, page_size: int | None = None, **kwargs) -> QuerySet[T]:
         if args or kwargs:
             raise ValueError(".all method takes no arguments.")
         queryset = QuerySet(self, page_size=page_size)
         return queryset
 
     @api(version="2.0")
-    def filter(self, *_, page_size: Optional[int] = None, **kwargs) -> QuerySet[T]:
+    def filter(self, *_, page_size: int | None = None, **kwargs) -> QuerySet[T]:
         if _:
             raise RuntimeError("Only keyword arguments accepted.")
         queryset = QuerySet(self, page_size=page_size).filter(**kwargs)
@@ -352,7 +352,7 @@ class QuerysetEndpoint(Endpoint, Generic[T]):
         return queryset
 
     @abc.abstractmethod
-    def get(self, request_options: Optional[RequestOptions] = None) -> tuple[list[T], PaginationItem]:
+    def get(self, request_options: RequestOptions | None = None) -> tuple[list[T], PaginationItem]:
         raise NotImplementedError(f".get has not been implemented for {self.__class__.__qualname__}")
 
     def fields(self: Self, *fields: str) -> QuerySet:

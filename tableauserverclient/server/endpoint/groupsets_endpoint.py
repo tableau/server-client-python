@@ -1,4 +1,4 @@
-from typing import Literal, Optional, TYPE_CHECKING, Union
+from typing import Literal, TYPE_CHECKING
 
 from tableauserverclient.helpers.logging import logger
 from tableauserverclient.models.group_item import GroupItem
@@ -25,8 +25,8 @@ class GroupSets(QuerysetEndpoint[GroupSetItem]):
     @api(version="3.22")
     def get(
         self,
-        req_options: Optional[RequestOptions] = None,
-        result_level: Optional[Literal["members", "local"]] = None,
+        req_options: RequestOptions | None = None,
+        result_level: Literal["members", "local"] | None = None,
     ) -> tuple[list[GroupSetItem], PaginationItem]:
         logger.info("Querying all group sets on site")
         url = self.baseurl
@@ -87,7 +87,7 @@ class GroupSets(QuerysetEndpoint[GroupSetItem]):
         updated_groupset = GroupSetItem.from_response(server_response.content, self.parent_srv.namespace)
         return updated_groupset[0]
 
-    def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[GroupSetItem]:
+    def filter(self, *invalid, page_size: int | None = None, **kwargs) -> QuerySet[GroupSetItem]:
         """
         Queries the Tableau Server for items using the specified filters. Page
         size can be specified to limit the number of items returned in a single

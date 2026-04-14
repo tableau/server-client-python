@@ -1,7 +1,6 @@
 import copy
 import datetime
 import xml.etree.ElementTree as ET
-from typing import Optional
 
 from defusedxml.ElementTree import fromstring
 
@@ -27,15 +26,15 @@ class DatasourceItem:
 
     Parameters
     ----------
-    project_id : Optional[str]
+    project_id : str | None
         The project ID that the datasource belongs to.
 
-    name : Optional[str]
+    name : str | None
         The name of the datasource.
 
     Attributes
     ----------
-    ask_data_enablement : Optional[str]
+    ask_data_enablement : str | None
         Determines if a data source allows use of Ask Data. The value can be
         TSC.DatasourceItem.AskDataEnablement.Enabled,
         TSC.DatasourceItem.AskDataEnablement.Disabled, or
@@ -43,7 +42,7 @@ class DatasourceItem:
         specified, it will default to SiteDefault. See REST API Publish
         Datasource for more information about ask_data_enablement.
 
-    connected_workbooks_count : Optional[int]
+    connected_workbooks_count : int | None
         The number of workbooks connected to the datasource.
 
     connections : list[ConnectionItem]
@@ -51,82 +50,82 @@ class DatasourceItem:
         source. You must first call the populate_connections method to access
         this data. See the ConnectionItem class.
 
-    content_url : Optional[str]
+    content_url : str | None
         The name of the data source as it would appear in a URL.
 
-    created_at : Optional[datetime.datetime]
+    created_at : datetime.datetime | None
         The time the data source was created.
 
-    certified : Optional[bool]
+    certified : bool | None
         A Boolean value that indicates whether the data source is certified.
 
-    certification_note : Optional[str]
+    certification_note : str | None
         The optional note that describes the certified data source.
 
-    datasource_type : Optional[str]
+    datasource_type : str | None
         The type of data source, for example, sqlserver or excel-direct.
 
-    description : Optional[str]
+    description : str | None
         The description for the data source.
 
-    encrypt_extracts : Optional[bool]
+    encrypt_extracts : bool | None
         A Boolean value to determine if a datasource should be encrypted or not.
         See Extract and Encryption Methods for more information.
 
-    favorites_total : Optional[int]
+    favorites_total : int | None
         The number of users who have marked the data source as a favorite.
 
-    has_alert : Optional[bool]
+    has_alert : bool | None
         A Boolean value that indicates whether the data source has an alert.
 
-    has_extracts : Optional[bool]
+    has_extracts : bool | None
         A Boolean value that indicates whether the datasource has extracts.
 
-    id : Optional[str]
+    id : str | None
         The identifier for the data source. You need this value to query a
         specific data source or to delete a data source with the get_by_id and
         delete methods.
 
-    is_published : Optional[bool]
+    is_published : bool | None
         A Boolean value that indicates whether the data source is published.
 
-    name : Optional[str]
+    name : str | None
         The name of the data source. If not specified, the name of the published
         data source file is used.
 
-    owner: Optional[UserItem]
+    owner: UserItem | None
         The owner of the data source.
 
-    owner_id : Optional[str]
+    owner_id : str | None
         The identifier of the owner of the data source.
 
-    project : Optional[ProjectItem]
+    project : ProjectItem | None
         The project that the data source belongs to.
 
-    project_id : Optional[str]
+    project_id : str | None
         The identifier of the project associated with the data source. You must
         provide this identifier when you create an instance of a DatasourceItem.
 
-    project_name : Optional[str]
+    project_name : str | None
         The name of the project associated with the data source.
 
-    server_name : Optional[str]
+    server_name : str | None
         The name of the server where the data source is published.
 
-    tags : Optional[set[str]]
+    tags : set[str] | None
         The tags (list of strings) that have been added to the data source.
 
-    updated_at : Optional[datetime.datetime]
+    updated_at : datetime.datetime | None
         The date and time when the data source was last updated.
 
-    use_remote_query_agent : Optional[bool]
+    use_remote_query_agent : bool | None
         A Boolean value that indicates whether to allow or disallow your Tableau
         Cloud site to use Tableau Bridge clients. Bridge allows you to maintain
         data sources with live connections to supported on-premises data
         sources. See Configure and Manage the Bridge Client Pool for more
         information.
 
-    webpage_url : Optional[str]
+    webpage_url : str | None
         The url of the datasource as displayed in browsers.
     """
 
@@ -143,37 +142,37 @@ class DatasourceItem:
             self.project_id,
         )
 
-    def __init__(self, project_id: Optional[str] = None, name: Optional[str] = None) -> None:
-        self._ask_data_enablement: Optional[str] = None
-        self._certified: Optional[bool] = None
-        self._certification_note: Optional[str] = None
-        self._connections: Optional[list[ConnectionItem]] = None
-        self._content_url: Optional[str] = None
-        self._created_at: Optional[datetime.datetime] = None
-        self._datasource_type: Optional[str] = None
-        self._description: Optional[str] = None
-        self._encrypt_extracts: Optional[bool] = None
-        self._has_extracts: Optional[bool] = None
-        self._id: Optional[str] = None
+    def __init__(self, project_id: str | None = None, name: str | None = None) -> None:
+        self._ask_data_enablement: str | None = None
+        self._certified: bool | None = None
+        self._certification_note: str | None = None
+        self._connections: list[ConnectionItem] | None = None
+        self._content_url: str | None = None
+        self._created_at: datetime.datetime | None = None
+        self._datasource_type: str | None = None
+        self._description: str | None = None
+        self._encrypt_extracts: bool | None = None
+        self._has_extracts: bool | None = None
+        self._id: str | None = None
         self._initial_tags: set = set()
-        self._project_name: Optional[str] = None
+        self._project_name: str | None = None
         self._revisions = None
-        self._size: Optional[int] = None
-        self._updated_at: Optional[datetime.datetime] = None
-        self._use_remote_query_agent: Optional[bool] = None
-        self._webpage_url: Optional[str] = None
-        self.description: Optional[str] = None
-        self.name: Optional[str] = name
-        self.owner_id: Optional[str] = None
-        self.project_id: Optional[str] = project_id
+        self._size: int | None = None
+        self._updated_at: datetime.datetime | None = None
+        self._use_remote_query_agent: bool | None = None
+        self._webpage_url: str | None = None
+        self.description: str | None = None
+        self.name: str | None = name
+        self.owner_id: str | None = None
+        self.project_id: str | None = project_id
         self.tags: set[str] = set()
-        self._connected_workbooks_count: Optional[int] = None
-        self._favorites_total: Optional[int] = None
-        self._has_alert: Optional[bool] = None
-        self._is_published: Optional[bool] = None
-        self._server_name: Optional[str] = None
-        self._project: Optional[ProjectItem] = None
-        self._owner: Optional[UserItem] = None
+        self._connected_workbooks_count: int | None = None
+        self._favorites_total: int | None = None
+        self._has_alert: bool | None = None
+        self._is_published: bool | None = None
+        self._server_name: str | None = None
+        self._project: ProjectItem | None = None
+        self._owner: UserItem | None = None
 
         self._permissions = None
         self._data_quality_warnings = None
@@ -181,12 +180,12 @@ class DatasourceItem:
         return None
 
     @property
-    def ask_data_enablement(self) -> Optional[str]:
+    def ask_data_enablement(self) -> str | None:
         return self._ask_data_enablement
 
     @ask_data_enablement.setter
     @property_is_enum(AskDataEnablement)
-    def ask_data_enablement(self, value: Optional[str]):
+    def ask_data_enablement(self, value: str | None):
         self._ask_data_enablement = value
 
     @property
@@ -197,45 +196,45 @@ class DatasourceItem:
         return self._connections()
 
     @property
-    def permissions(self) -> Optional[list[PermissionsRule]]:
+    def permissions(self) -> list[PermissionsRule] | None:
         if self._permissions is None:
             error = "Project item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
         return self._permissions()
 
     @property
-    def content_url(self) -> Optional[str]:
+    def content_url(self) -> str | None:
         return self._content_url
 
     @property
-    def created_at(self) -> Optional[datetime.datetime]:
+    def created_at(self) -> datetime.datetime | None:
         return self._created_at
 
     @property
-    def certified(self) -> Optional[bool]:
+    def certified(self) -> bool | None:
         return self._certified
 
     @certified.setter
     @property_not_nullable
     @property_is_boolean
-    def certified(self, value: Optional[bool]):
+    def certified(self, value: bool | None):
         self._certified = value
 
     @property
-    def certification_note(self) -> Optional[str]:
+    def certification_note(self) -> str | None:
         return self._certification_note
 
     @certification_note.setter
-    def certification_note(self, value: Optional[str]):
+    def certification_note(self, value: str | None):
         self._certification_note = value
 
     @property
-    def encrypt_extracts(self) -> Optional[bool]:
+    def encrypt_extracts(self) -> bool | None:
         return self._encrypt_extracts
 
     @encrypt_extracts.setter
     @property_is_boolean
-    def encrypt_extracts(self, value: Optional[bool]):
+    def encrypt_extracts(self, value: bool | None):
         self._encrypt_extracts = value
 
     @property
@@ -246,43 +245,43 @@ class DatasourceItem:
         return self._data_quality_warnings()
 
     @property
-    def has_extracts(self) -> Optional[bool]:
+    def has_extracts(self) -> bool | None:
         return self._has_extracts
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         return self._id
 
     @property
-    def project_id(self) -> Optional[str]:
+    def project_id(self) -> str | None:
         return self._project_id
 
     @project_id.setter
-    def project_id(self, value: Optional[str]):
+    def project_id(self, value: str | None):
         self._project_id = value
 
     @property
-    def project_name(self) -> Optional[str]:
+    def project_name(self) -> str | None:
         return self._project_name
 
     @property
-    def datasource_type(self) -> Optional[str]:
+    def datasource_type(self) -> str | None:
         return self._datasource_type
 
     @property
-    def description(self) -> Optional[str]:
+    def description(self) -> str | None:
         return self._description
 
     @description.setter
-    def description(self, value: Optional[str]):
+    def description(self, value: str | None):
         self._description = value
 
     @property
-    def updated_at(self) -> Optional[datetime.datetime]:
+    def updated_at(self) -> datetime.datetime | None:
         return self._updated_at
 
     @property
-    def use_remote_query_agent(self) -> Optional[bool]:
+    def use_remote_query_agent(self) -> bool | None:
         return self._use_remote_query_agent
 
     @use_remote_query_agent.setter
@@ -291,7 +290,7 @@ class DatasourceItem:
         self._use_remote_query_agent = value
 
     @property
-    def webpage_url(self) -> Optional[str]:
+    def webpage_url(self) -> str | None:
         return self._webpage_url
 
     @property
@@ -302,35 +301,35 @@ class DatasourceItem:
         return self._revisions()
 
     @property
-    def size(self) -> Optional[int]:
+    def size(self) -> int | None:
         return self._size
 
     @property
-    def connected_workbooks_count(self) -> Optional[int]:
+    def connected_workbooks_count(self) -> int | None:
         return self._connected_workbooks_count
 
     @property
-    def favorites_total(self) -> Optional[int]:
+    def favorites_total(self) -> int | None:
         return self._favorites_total
 
     @property
-    def has_alert(self) -> Optional[bool]:
+    def has_alert(self) -> bool | None:
         return self._has_alert
 
     @property
-    def is_published(self) -> Optional[bool]:
+    def is_published(self) -> bool | None:
         return self._is_published
 
     @property
-    def server_name(self) -> Optional[str]:
+    def server_name(self) -> str | None:
         return self._server_name
 
     @property
-    def project(self) -> Optional[ProjectItem]:
+    def project(self) -> ProjectItem | None:
         return self._project
 
     @property
-    def owner(self) -> Optional[UserItem]:
+    def owner(self) -> UserItem | None:
         return self._owner
 
     def _set_connections(self, connections) -> None:

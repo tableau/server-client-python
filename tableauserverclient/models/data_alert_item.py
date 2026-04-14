@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from defusedxml.ElementTree import fromstring
 
@@ -19,22 +18,22 @@ class DataAlertItem:
         Weekly = "Weekly"
 
     def __init__(self):
-        self._id: Optional[str] = None
-        self._subject: Optional[str] = None
-        self._creatorId: Optional[str] = None
-        self._createdAt: Optional[datetime] = None
-        self._updatedAt: Optional[datetime] = None
-        self._frequency: Optional[str] = None
-        self._public: Optional[bool] = None
-        self._owner_id: Optional[str] = None
-        self._owner_name: Optional[str] = None
-        self._view_id: Optional[str] = None
-        self._view_name: Optional[str] = None
-        self._workbook_id: Optional[str] = None
-        self._workbook_name: Optional[str] = None
-        self._project_id: Optional[str] = None
-        self._project_name: Optional[str] = None
-        self._recipients: Optional[list[str]] = None
+        self._id: str | None = None
+        self._subject: str | None = None
+        self._creatorId: str | None = None
+        self._createdAt: datetime | None = None
+        self._updatedAt: datetime | None = None
+        self._frequency: str | None = None
+        self._public: bool | None = None
+        self._owner_id: str | None = None
+        self._owner_name: str | None = None
+        self._view_id: str | None = None
+        self._view_name: str | None = None
+        self._workbook_id: str | None = None
+        self._workbook_name: str | None = None
+        self._project_id: str | None = None
+        self._project_name: str | None = None
+        self._recipients: list[str] | None = None
 
     def __repr__(self) -> str:
         return "<Data Alert {_id} subject={_subject} frequency={_frequency} \
@@ -43,11 +42,11 @@ class DataAlertItem:
         )
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         return self._id
 
     @property
-    def subject(self) -> Optional[str]:
+    def subject(self) -> str | None:
         return self._subject
 
     @subject.setter
@@ -56,7 +55,7 @@ class DataAlertItem:
         self._subject = value
 
     @property
-    def frequency(self) -> Optional[str]:
+    def frequency(self) -> str | None:
         return self._frequency
 
     @frequency.setter
@@ -65,7 +64,7 @@ class DataAlertItem:
         self._frequency = value
 
     @property
-    def public(self) -> Optional[bool]:
+    def public(self) -> bool | None:
         return self._public
 
     @public.setter
@@ -74,7 +73,7 @@ class DataAlertItem:
         self._public = value
 
     @property
-    def creatorId(self) -> Optional[str]:
+    def creatorId(self) -> str | None:
         return self._creatorId
 
     @property
@@ -82,43 +81,43 @@ class DataAlertItem:
         return self._recipients or list()
 
     @property
-    def createdAt(self) -> Optional[datetime]:
+    def createdAt(self) -> datetime | None:
         return self._createdAt
 
     @property
-    def updatedAt(self) -> Optional[datetime]:
+    def updatedAt(self) -> datetime | None:
         return self._updatedAt
 
     @property
-    def owner_id(self) -> Optional[str]:
+    def owner_id(self) -> str | None:
         return self._owner_id
 
     @property
-    def owner_name(self) -> Optional[str]:
+    def owner_name(self) -> str | None:
         return self._owner_name
 
     @property
-    def view_id(self) -> Optional[str]:
+    def view_id(self) -> str | None:
         return self._view_id
 
     @property
-    def view_name(self) -> Optional[str]:
+    def view_name(self) -> str | None:
         return self._view_name
 
     @property
-    def workbook_id(self) -> Optional[str]:
+    def workbook_id(self) -> str | None:
         return self._workbook_id
 
     @property
-    def workbook_name(self) -> Optional[str]:
+    def workbook_name(self) -> str | None:
         return self._workbook_name
 
     @property
-    def project_id(self) -> Optional[str]:
+    def project_id(self) -> str | None:
         return self._project_id
 
     @property
-    def project_name(self) -> Optional[str]:
+    def project_name(self) -> str | None:
         return self._project_name
 
     def _set_values(

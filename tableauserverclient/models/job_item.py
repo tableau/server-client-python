@@ -1,5 +1,4 @@
 import datetime
-from typing import Optional
 
 from defusedxml.ElementTree import fromstring
 
@@ -40,36 +39,36 @@ class JobItem:
     created_at : datetime.datetime
         The date and time the job was created.
 
-    started_at : Optional[datetime.datetime]
+    started_at : datetime.datetime | None
         The date and time the job was started.
 
-    completed_at : Optional[datetime.datetime]
+    completed_at : datetime.datetime | None
         The date and time the job was completed.
 
     finish_code : int
         The finish code of the job. 0 for success, 1 for failure, 2 for cancelled.
 
-    notes : Optional[list[str]]
+    notes : list[str] | None
         Contains detailed notes about the job.
 
-    mode : Optional[str]
+    mode : str | None
 
-    workbook_id : Optional[str]
+    workbook_id : str | None
         The identifier of the workbook associated with the job.
 
-    datasource_id : Optional[str]
+    datasource_id : str | None
         The identifier of the datasource associated with the job.
 
-    flow_run : Optional[FlowRunItem]
+    flow_run : FlowRunItem | None
         The flow run associated with the job.
 
-    updated_at : Optional[datetime.datetime]
+    updated_at : datetime.datetime | None
         The date and time the job was last updated.
 
-    workbook_name : Optional[str]
+    workbook_name : str | None
         The name of the workbook associated with the job.
 
-    datasource_name : Optional[str]
+    datasource_name : str | None
         The name of the datasource associated with the job.
     """
 
@@ -90,17 +89,17 @@ class JobItem:
         job_type: str,
         progress: str,
         created_at: datetime.datetime,
-        started_at: Optional[datetime.datetime] = None,
-        completed_at: Optional[datetime.datetime] = None,
+        started_at: datetime.datetime | None = None,
+        completed_at: datetime.datetime | None = None,
         finish_code: int = 0,
-        notes: Optional[list[str]] = None,
-        mode: Optional[str] = None,
-        workbook_id: Optional[str] = None,
-        datasource_id: Optional[str] = None,
-        flow_run: Optional[FlowRunItem] = None,
-        updated_at: Optional[datetime.datetime] = None,
-        workbook_name: Optional[str] = None,
-        datasource_name: Optional[str] = None,
+        notes: list[str] | None = None,
+        mode: str | None = None,
+        workbook_id: str | None = None,
+        datasource_id: str | None = None,
+        flow_run: FlowRunItem | None = None,
+        updated_at: datetime.datetime | None = None,
+        workbook_name: str | None = None,
+        datasource_name: str | None = None,
     ):
         self._id = id_
         self._type = job_type
@@ -135,11 +134,11 @@ class JobItem:
         return self._created_at
 
     @property
-    def started_at(self) -> Optional[datetime.datetime]:
+    def started_at(self) -> datetime.datetime | None:
         return self._started_at
 
     @property
-    def completed_at(self) -> Optional[datetime.datetime]:
+    def completed_at(self) -> datetime.datetime | None:
         return self._completed_at
 
     @property
@@ -151,7 +150,7 @@ class JobItem:
         return self._notes
 
     @property
-    def mode(self) -> Optional[str]:
+    def mode(self) -> str | None:
         return self._mode
 
     @mode.setter
@@ -160,19 +159,19 @@ class JobItem:
         self._mode = value
 
     @property
-    def workbook_id(self) -> Optional[str]:
+    def workbook_id(self) -> str | None:
         return self._workbook_id
 
     @workbook_id.setter
-    def workbook_id(self, value: Optional[str]) -> None:
+    def workbook_id(self, value: str | None) -> None:
         self._workbook_id = value
 
     @property
-    def datasource_id(self) -> Optional[str]:
+    def datasource_id(self) -> str | None:
         return self._datasource_id
 
     @datasource_id.setter
-    def datasource_id(self, value: Optional[str]) -> None:
+    def datasource_id(self, value: str | None) -> None:
         self._datasource_id = value
 
     @property
@@ -184,15 +183,15 @@ class JobItem:
         self._flow_run = value
 
     @property
-    def updated_at(self) -> Optional[datetime.datetime]:
+    def updated_at(self) -> datetime.datetime | None:
         return self._updated_at
 
     @property
-    def workbook_name(self) -> Optional[str]:
+    def workbook_name(self) -> str | None:
         return self._workbook_name
 
     @property
-    def datasource_name(self) -> Optional[str]:
+    def datasource_name(self) -> str | None:
         return self._datasource_name
 
     def __str__(self):
@@ -272,10 +271,10 @@ class BackgroundJobItem:
         priority: int,
         job_type: str,
         status: str,
-        title: Optional[str] = None,
-        subtitle: Optional[str] = None,
-        started_at: Optional[datetime.datetime] = None,
-        ended_at: Optional[datetime.datetime] = None,
+        title: str | None = None,
+        subtitle: str | None = None,
+        started_at: datetime.datetime | None = None,
+        ended_at: datetime.datetime | None = None,
     ):
         self._id = id_
         self._type = job_type
@@ -298,7 +297,7 @@ class BackgroundJobItem:
         return self._id
 
     @property
-    def name(self) -> Optional[str]:
+    def name(self) -> str | None:
         """For API consistency - all other resource endpoints have a name attribute which is used to display what
         they are.  Alias title as name to allow consistent handling of resources in the list sample."""
         return self._title
@@ -316,19 +315,19 @@ class BackgroundJobItem:
         return self._created_at
 
     @property
-    def started_at(self) -> Optional[datetime.datetime]:
+    def started_at(self) -> datetime.datetime | None:
         return self._started_at
 
     @property
-    def ended_at(self) -> Optional[datetime.datetime]:
+    def ended_at(self) -> datetime.datetime | None:
         return self._ended_at
 
     @property
-    def title(self) -> Optional[str]:
+    def title(self) -> str | None:
         return self._title
 
     @property
-    def subtitle(self) -> Optional[str]:
+    def subtitle(self) -> str | None:
         return self._subtitle
 
     @property
