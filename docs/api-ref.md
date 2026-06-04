@@ -652,6 +652,115 @@ See [CustomViewItem class](#customviewitem-class)
 <br>
 <br>
 
+#### custom_views.download
+
+```py
+custom_views.download(view_item, file)
+```
+
+Downloads the definition of a custom view as JSON to a file path or file object. The downloaded file may contain sensitive information.
+
+**Version**
+
+This endpoint is available with REST API version 3.21 and up.
+
+**Parameters**
+
+| Name        | Description                                                                          |
+| :---------- | :----------------------------------------------------------------------------------- |
+| `view_item` | The `CustomViewItem` to download.                                                    |
+| `file`      | The file path (`str` or `Path`) or writable file object to write the definition to. |
+
+**Returns**
+
+Returns the file path or file object that the custom view definition was written to.
+
+**Example**
+
+```py
+custom_view = server.custom_views.get_by_id('d79634e1-6063-4ec9-95ff-50acbf609ff5')
+server.custom_views.download(custom_view, './my_custom_view.json')
+```
+
+See [CustomViewItem class](#customviewitem-class)
+
+<br>
+<br>
+
+#### custom_views.publish
+
+```py
+custom_views.publish(view_item, file)
+```
+
+Publishes a custom view to Tableau Server from a JSON definition file previously downloaded with `custom_views.download`.
+
+**Version**
+
+This endpoint is available with REST API version 3.21 and up.
+
+**Parameters**
+
+| Name        | Description                                                                           |
+| :---------- | :------------------------------------------------------------------------------------ |
+| `view_item` | The `CustomViewItem` describing the custom view to publish. Must have a `name` set.   |
+| `file`      | The file path (`str` or `Path`) or readable file object containing the definition.   |
+
+**Exceptions**
+
+| Error                        | Description                                                             |
+| :--------------------------- | :---------------------------------------------------------------------- |
+| `ValueError`                 | Raised if `file` is not a valid file path or file object.               |
+| `MissingRequiredFieldError`  | Raised if `view_item.name` is not set when passing a file object.       |
+
+**Returns**
+
+Returns the published `CustomViewItem`, or `None`.
+
+**Example**
+
+```py
+new_view = TSC.CustomViewItem(name='My Custom View')
+published = server.custom_views.publish(new_view, './my_custom_view.json')
+print(published.id)
+```
+
+See [CustomViewItem class](#customviewitem-class)
+
+<br>
+<br>
+
+#### custom_views.filter
+
+```py
+custom_views.filter(**kwargs)
+```
+
+Returns a list of custom views that match the specified filters. Fields and operators are passed as keyword arguments in the form `field_name=value`.
+
+**Supported fields and operators**
+
+Field | Operators
+:--- | :---
+`owner_id` | `eq`
+`view_id` | `eq`
+`workbook_id` | `eq`
+
+**Returns**
+
+Returns a `QuerySet` of `CustomViewItem` objects.
+
+**Example**
+
+```py
+my_views = server.custom_views.filter(owner_id=user_item.id)
+for view in my_views:
+    print(view.name)
+```
+
+<br>
+<br>
+
 ---
 
 ## Data Sources
@@ -1174,6 +1283,536 @@ See the `update_datasource_data.py` sample in the Samples directory.
 <br>
 <br>
 
+---
+
+## Favorites
+
+Using the TSC library, you can get, add, and remove favorites for a user. Favorites can be workbooks, views, datasources, flows, projects, or metrics.
+
+The favorites for a user are stored as a dictionary on the `UserItem` object. The dictionary is keyed by content type (`"workbooks"`, `"views"`, `"datasources"`, `"flows"`, `"projects"`, `"metrics"`, `"collections"`) and each value is a list of the corresponding item objects.
+
+<br>
+<br>
+
+### Favorites methods
+
+The Tableau Server Client provides several methods for interacting with favorites. These methods correspond to endpoints in the Tableau Server REST API.
+
+Source file: server/endpoint/favorites_endpoint.py
+
+<br>
+<br>
+
+#### favorites.get
+
+```py
+favorites.get(user_item, req_options=None)
+```
+
+Populates the favorites for the specified user. After calling this method, the favorites are available through `user_item.favorites`.
+
+REST API: [Get Favorites for User](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#get_favorites_for_user)
+
+**Version**
+
+This endpoint is available with REST API version 2.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` for which to retrieve favorites.
+`req_options` | (Optional) Request options such as page size and page number.
+
+**Returns**
+
+None. Favorites are populated on `user_item.favorites`.
+
+**Example**
+
+```py
+server.favorites.get(user_item)
+for workbook in user_item.favorites['workbooks']:
+    print(workbook.name)
+```
+
+<br>
+<br>
+
+#### favorites.add_favorite
+
+```py
+favorites.add_favorite(user_item, content_type, item)
+```
+
+Adds a content item of any supported type to the specified user's favorites.
+
+REST API: [Add Workbook to Favorites](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#add_workbook_to_favorites)
+
+**Version**
+
+This endpoint is available with REST API version 3.15 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to add the favorite for.
+`content_type` | The type of content as a string (e.g., `"workbook"`, `"view"`, `"datasource"`, `"flow"`, `"project"`).
+`item` | The content item to favorite. Must have `id` and `name` attributes.
+
+**Returns**
+
+Returns the server `Response` object.
+
+**Example**
+
+```py
+server.favorites.add_favorite(user_item, 'workbook', workbook_item)
+```
+
+<br>
+<br>
+
+#### favorites.add_favorite_workbook
+
+```py
+favorites.add_favorite_workbook(user_item, workbook_item)
+```
+
+Adds a workbook to the specified user's favorites.
+
+REST API: [Add Workbook to Favorites](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#add_workbook_to_favorites)
+
+**Version**
+
+This endpoint is available with REST API version 2.0 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to add the favorite for.
+`workbook_item` | The `WorkbookItem` to add to favorites.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.favorites.add_favorite_workbook(user_item, workbook_item)
+```
+
+<br>
+<br>
+
+#### favorites.add_favorite_view
+
+```py
+favorites.add_favorite_view(user_item, view_item)
+```
+
+Adds a view to the specified user's favorites.
+
+REST API: [Add View to Favorites](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#add_view_to_favorites)
+
+**Version**
+
+This endpoint is available with REST API version 2.0 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to add the favorite for.
+`view_item` | The `ViewItem` to add to favorites.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.favorites.add_favorite_view(user_item, view_item)
+```
+
+<br>
+<br>
+
+#### favorites.add_favorite_datasource
+
+```py
+favorites.add_favorite_datasource(user_item, datasource_item)
+```
+
+Adds a datasource to the specified user's favorites.
+
+REST API: [Add Data Source to Favorites](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#add_data_source_to_favorites)
+
+**Version**
+
+This endpoint is available with REST API version 2.3 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to add the favorite for.
+`datasource_item` | The `DatasourceItem` to add to favorites.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.favorites.add_favorite_datasource(user_item, datasource_item)
+```
+
+<br>
+<br>
+
+#### favorites.add_favorite_project
+
+```py
+favorites.add_favorite_project(user_item, project_item)
+```
+
+Adds a project to the specified user's favorites.
+
+REST API: [Add Project to Favorites](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#add_project_to_favorites)
+
+**Version**
+
+This endpoint is available with REST API version 3.1 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to add the favorite for.
+`project_item` | The `ProjectItem` to add to favorites.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.favorites.add_favorite_project(user_item, project_item)
+```
+
+<br>
+<br>
+
+#### favorites.add_favorite_flow
+
+```py
+favorites.add_favorite_flow(user_item, flow_item)
+```
+
+Adds a flow to the specified user's favorites.
+
+REST API: [Add Flow to Favorites](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#add_flow_to_favorites)
+
+**Version**
+
+This endpoint is available with REST API version 3.3 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to add the favorite for.
+`flow_item` | The `FlowItem` to add to favorites.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.favorites.add_favorite_flow(user_item, flow_item)
+```
+
+<br>
+<br>
+
+#### favorites.add_favorite_metric
+
+```py
+favorites.add_favorite_metric(user_item, metric_item)
+```
+
+Adds a metric to the specified user's favorites.
+
+**Version**
+
+This endpoint is available with REST API version 3.3 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to add the favorite for.
+`metric_item` | The `MetricItem` to add to favorites.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.favorites.add_favorite_metric(user_item, metric_item)
+```
+
+<br>
+<br>
+
+#### favorites.delete_favorite
+
+```py
+favorites.delete_favorite(user_item, content_type, item)
+```
+
+Removes a content item of any supported type from the specified user's favorites.
+
+**Version**
+
+This endpoint is available with REST API version 3.15 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to remove the favorite from.
+`content_type` | The `Resource` type of the content (e.g., `Resource.Workbook`, `Resource.View`).
+`item` | The content item to remove from favorites. Must have an `id` attribute.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.favorites.delete_favorite(user_item, Resource.Workbook, workbook_item)
+```
+
+<br>
+<br>
+
+#### favorites.delete_favorite_workbook
+
+```py
+favorites.delete_favorite_workbook(user_item, workbook_item)
+```
+
+Removes a workbook from the specified user's favorites.
+
+REST API: [Delete Workbook from Favorites](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#delete_workbook_from_favorites)
+
+**Version**
+
+This endpoint is available with REST API version 2.0 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to remove the favorite from.
+`workbook_item` | The `WorkbookItem` to remove from favorites.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.favorites.delete_favorite_workbook(user_item, workbook_item)
+```
+
+<br>
+<br>
+
+#### favorites.delete_favorite_view
+
+```py
+favorites.delete_favorite_view(user_item, view_item)
+```
+
+Removes a view from the specified user's favorites.
+
+REST API: [Delete View from Favorites](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#delete_view_from_favorites)
+
+**Version**
+
+This endpoint is available with REST API version 2.0 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to remove the favorite from.
+`view_item` | The `ViewItem` to remove from favorites.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.favorites.delete_favorite_view(user_item, view_item)
+```
+
+<br>
+<br>
+
+#### favorites.delete_favorite_datasource
+
+```py
+favorites.delete_favorite_datasource(user_item, datasource_item)
+```
+
+Removes a datasource from the specified user's favorites.
+
+REST API: [Delete Data Source from Favorites](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#delete_data_source_from_favorites)
+
+**Version**
+
+This endpoint is available with REST API version 2.3 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to remove the favorite from.
+`datasource_item` | The `DatasourceItem` to remove from favorites.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.favorites.delete_favorite_datasource(user_item, datasource_item)
+```
+
+<br>
+<br>
+
+#### favorites.delete_favorite_project
+
+```py
+favorites.delete_favorite_project(user_item, project_item)
+```
+
+Removes a project from the specified user's favorites.
+
+REST API: [Delete Project from Favorites](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#delete_project_from_favorites)
+
+**Version**
+
+This endpoint is available with REST API version 3.1 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to remove the favorite from.
+`project_item` | The `ProjectItem` to remove from favorites.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.favorites.delete_favorite_project(user_item, project_item)
+```
+
+<br>
+<br>
+
+#### favorites.delete_favorite_flow
+
+```py
+favorites.delete_favorite_flow(user_item, flow_item)
+```
+
+Removes a flow from the specified user's favorites.
+
+REST API: [Delete Flow from Favorites](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#delete_flow_from_favorites)
+
+**Version**
+
+This endpoint is available with REST API version 3.3 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to remove the favorite from.
+`flow_item` | The `FlowItem` to remove from favorites.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.favorites.delete_favorite_flow(user_item, flow_item)
+```
+
+<br>
+<br>
+
+#### favorites.delete_favorite_metric
+
+```py
+favorites.delete_favorite_metric(user_item, metric_item)
+```
+
+Removes a metric from the specified user's favorites.
+
+**Version**
+
+This endpoint is available with REST API version 3.15 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`user_item` | The `UserItem` to remove the favorite from.
+`metric_item` | The `MetricItem` to remove from favorites.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.favorites.delete_favorite_metric(user_item, metric_item)
+```
+
+<br>
+<br>
+
+---
+
 ## Filters
 
 The TSC library provides a `Filter` class that you can use to filter results returned from the server.
@@ -1211,6 +1850,657 @@ Name | Description
 
 
 <br>
+<br>
+
+---
+
+## Flows
+
+Using the TSC library, you can get information about all the flows on a site, or get information about a specific flow. The flow resources for Tableau Server are defined in the `FlowItem` class. The class corresponds to the flow resources you can access using the Tableau Server REST API. The flow methods are based upon the endpoints for flows in the REST API and operate on the `FlowItem` class.
+
+<br>
+
+### FlowItem class
+
+```py
+FlowItem(project_id, name=None)
+```
+
+The `FlowItem` represents the flow resources on Tableau Server. This is the information that can be sent or returned in the response to an REST API request for flows. When you create a new `FlowItem` instance, you must specify the `project_id` that the flow is associated with.
+
+**Attributes**
+
+Name | Description
+:--- | :---
+`connections` | The list of data connections (`ConnectionItem`) for the specified flow. You must first call the `populate_connections` method to access this data. See the [ConnectionItem class](#connectionitem-class).
+`created_at` | The date and time when the flow was created.
+`description` | The description for the flow.
+`dqws` | The list of data quality warnings for the flow. You must first call `populate_dqw` to access this data.
+`id` | The identifier for the flow. You need this value to query a specific flow or to delete a flow with the `get_by_id` and `delete` methods.
+`name` | The name of the flow. If not specified when publishing, the name of the published flow file is used.
+`owner_id` | The identifier of the owner of the flow.
+`permissions` | The permissions for the flow. You must first call `populate_permissions` to access this data.
+`project_id` | The identifier of the project associated with the flow. You must provide this identifier when you create an instance of a `FlowItem`.
+`project_name` | The name of the project associated with the flow.
+`tags` | The tags (set of strings) that have been added to the flow.
+`updated_at` | The date and time when the flow was last updated.
+`webpage_url` | The URL of the flow as displayed in browsers.
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+
+# Create new flow_item with project id '3a8b6148-493c-11e6-a621-6f3499394a39'
+new_flow = TSC.FlowItem('3a8b6148-493c-11e6-a621-6f3499394a39')
+```
+
+Source file: models/flow_item.py
+
+<br>
+<br>
+
+### Flows methods
+
+The Tableau Server Client provides several methods for interacting with flow resources, or endpoints. These methods correspond to endpoints in the Tableau Server REST API.
+
+Source file: server/endpoint/flows_endpoint.py
+
+<br>
+<br>
+
+#### flows.delete
+
+```py
+flows.delete(flow_id)
+```
+
+Removes the specified flow from Tableau Server.
+
+REST API: [Delete Flow](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#delete_flow){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_id` | The identifier (`id`) for the `FlowItem` that you want to delete from the server.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`Flow ID undefined` | Raises an exception if a valid `flow_id` is not provided.
+
+**Version**
+
+Version 3.3 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+<br>
+<br>
+
+#### flows.download
+
+```py
+flows.download(flow_id, filepath=None)
+```
+
+Downloads the specified flow in `.tfl` or `.tflx` format.
+
+REST API: [Download Flow](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#download_flow){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_id` | The identifier (`id`) for the `FlowItem` that you want to download from the server.
+`filepath` | (Optional) Downloads the file to the location you specify. If no location is specified (the default is `filepath=None`), the file is downloaded to the current working directory.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`Flow ID undefined` | Raises an exception if a valid `flow_id` is not provided.
+
+**Returns**
+
+The file path to the downloaded flow.
+
+**Version**
+
+Version 3.3 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+file_path = server.flows.download('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+print("\nDownloaded the file to {0}.".format(file_path))
+```
+
+<br>
+<br>
+
+#### flows.get
+
+```py
+flows.get(req_options=None)
+```
+
+Returns all the flows for the site.
+
+To get the connection information for each flow, you must first populate the `FlowItem` with connection information using the [flows.populate_connections](#flowspopulate_connections) method.
+
+REST API: [Query Flows for Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#query_flows_for_site){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`req_options` | (Optional) You can pass the method a request object that contains additional parameters to filter the request. For example, if you were searching for a specific flow, you could specify the name of the project or its id.
+
+**Returns**
+
+Returns a list of `FlowItem` objects and a `PaginationItem` object. Use these values to iterate through the results.
+
+**Version**
+
+Version 3.3 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
+server = TSC.Server('https://SERVERURL')
+
+with server.auth.sign_in(tableau_auth):
+    all_flows, pagination_item = server.flows.get()
+    print("\nThere are {} flows on site: ".format(pagination_item.total_available))
+    print([flow.name for flow in all_flows])
+```
+
+<br>
+<br>
+
+#### flows.get_by_id
+
+```py
+flows.get_by_id(flow_id)
+```
+
+Returns the specified flow item.
+
+REST API: [Query Flow](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#query_flow){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_id` | The `flow_id` specifies the flow to query.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`Flow ID undefined` | Raises an exception if a valid `flow_id` is not provided.
+
+**Returns**
+
+Returns a `FlowItem`.
+
+**Version**
+
+Version 3.3 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+flow = server.flows.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+print(flow.name)
+```
+
+<br>
+<br>
+
+#### flows.populate_connections
+
+```py
+flows.populate_connections(flow_item)
+```
+
+Populates a `FlowItem` with connection information.
+
+This method retrieves the connection information for the specified flow. The method requires a `FlowItem` object and populates its `connections` property with a list of `ConnectionItem` objects. You must call this method before you can access the `connections` property of a `FlowItem`.
+
+REST API: [Query Flow Connections](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#query_flow_connections){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_item` | The `flow_item` specifies the flow to populate with connection information.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`Flow item missing ID. Flow must be retrieved from server first.` | Raises an exception if the `flow_item` does not have an id. The `flow_item` must be retrieved from the server first.
+
+**Version**
+
+Version 3.3 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+flow = server.flows.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+server.flows.populate_connections(flow)
+for connection in flow.connections:
+    print(connection.id)
+```
+
+<br>
+<br>
+
+#### flows.publish
+
+```py
+flows.publish(flow_item, file, mode, connections=None)
+```
+
+Publishes a flow to Tableau Server.
+
+REST API: [Publish Flow](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#publish_flow){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_item` | The `flow_item` specifies the flow you are publishing. The `flow_item` must have a `project_id` set.
+`file` | The file path or file object of the flow to publish. Only `.tfl` and `.tflx` files are supported.
+`mode` | Specifies whether you are publishing a new flow (`CreateNew`), or overwriting an existing one (`Overwrite`). You cannot use `Append` with flows.
+`connections` | (Optional) A list of `ConnectionItem` objects for connections in the flow that require credentials.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`Invalid mode defined.` | Raises an error if the mode specified is not valid.
+`File path does not lead to an existing file.` | Raises an error if the file path specified does not point to a valid file.
+`Only .tfl, .tflx files can be published as flows.` | Raises an error if the type of file specified is not supported.
+
+**Returns**
+
+Returns a `FlowItem` representing the published flow.
+
+**Version**
+
+Version 3.3 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+
+tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD', site_id='CONTENTURL')
+server = TSC.Server('https://SERVERURL')
+
+with server.auth.sign_in(tableau_auth):
+    project_id = 'cc867571-b4e0-4764-8083-84b9f3aa8543'
+    new_flow = TSC.FlowItem(project_id)
+    new_flow = server.flows.publish(new_flow, 'path/to/flow.tflx', TSC.Server.PublishMode.Overwrite)
+    print("Published flow ID: {0}".format(new_flow.id))
+```
+
+<br>
+<br>
+
+#### flows.refresh
+
+```py
+flows.refresh(flow_item)
+```
+
+Runs the specified flow and returns a `JobItem` to track the progress of the run.
+
+REST API: [Run Flow Now](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#run_flow_now){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_item` | The `FlowItem` to run.
+
+**Returns**
+
+Returns a `JobItem`. Use the `jobs.wait_for_job` method to block until the job is complete.
+
+**Version**
+
+Version 3.3 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+flow = server.flows.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+job = server.flows.refresh(flow)
+server.jobs.wait_for_job(job)
+```
+
+<br>
+<br>
+
+#### flows.update
+
+```py
+flows.update(flow_item)
+```
+
+Modifies an existing flow. Use this method to change the owner or project of a flow, or to update its tags.
+
+REST API: [Update Flow](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#update_flow){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_item` | The `FlowItem` with updated attributes. Must have been retrieved from the server (must have an `id`).
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`Flow item missing ID. Flow must be retrieved from server first.` | Raises an exception if the `flow_item` does not have an id.
+
+**Returns**
+
+Returns the updated `FlowItem`.
+
+**Version**
+
+Version 3.3 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+flow = server.flows.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+flow.project_id = 'new-project-id'
+updated_flow = server.flows.update(flow)
+```
+
+<br>
+<br>
+
+#### flows.update_connection
+
+```py
+flows.update_connection(flow_item, connection_item)
+```
+
+Updates the server address, port, username, or password for the specified flow connection.
+
+REST API: [Update Flow Connection](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#update_flow_connection){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_item` | The `FlowItem` to update.
+`connection_item` | The `ConnectionItem` with updated attributes.
+
+**Returns**
+
+Returns the updated `ConnectionItem`.
+
+**Version**
+
+Version 3.3 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+flow = server.flows.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+server.flows.populate_connections(flow)
+connection = flow.connections[0]
+connection.server_address = 'new-server.example.com'
+updated_connection = server.flows.update_connection(flow, connection)
+```
+
+<br>
+<br>
+
+#### flows.populate_permissions
+
+```py
+flows.populate_permissions(flow_item)
+```
+
+Populates the permissions for the specified flow.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_item` | The `FlowItem` to populate with permissions.
+
+**Version**
+
+Version 3.3 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+flow = server.flows.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+server.flows.populate_permissions(flow)
+for permission in flow.permissions:
+    print(permission.grantee_id, permission.capabilities)
+```
+
+<br>
+<br>
+
+#### flows.update_permissions
+
+```py
+flows.update_permissions(flow_item, permission_item)
+```
+
+Adds or updates permissions for the specified flow.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_item` | The `FlowItem` to update permissions for.
+`permission_item` | A list of `PermissionsRule` objects representing the permissions to add or update.
+
+**Version**
+
+Version 3.3 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+<br>
+<br>
+
+#### flows.delete_permission
+
+```py
+flows.delete_permission(flow_item, capability_item)
+```
+
+Removes a permission from the specified flow.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_item` | The `FlowItem` to remove the permission from.
+`capability_item` | The `PermissionsRule` object representing the permission to remove.
+
+**Version**
+
+Version 3.3 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+<br>
+<br>
+
+#### flows.populate_dqw
+
+```py
+flows.populate_dqw(flow_item)
+```
+
+Populates the data quality warnings for the specified flow.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_item` | The `FlowItem` to populate with data quality warnings.
+
+**Version**
+
+Version 3.5 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+flow = server.flows.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+server.flows.populate_dqw(flow)
+for dqw in flow.dqws:
+    print(dqw.message)
+```
+
+<br>
+<br>
+
+#### flows.add_dqw
+
+```py
+flows.add_dqw(flow_item, warning)
+```
+
+Adds a data quality warning to the specified flow.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_item` | The `FlowItem` to add the data quality warning to.
+`warning` | The `DQWItem` object representing the data quality warning to add.
+
+**Version**
+
+Version 3.5 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+<br>
+<br>
+
+#### flows.update_dqw
+
+```py
+flows.update_dqw(flow_item, warning)
+```
+
+Updates a data quality warning on the specified flow.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_item` | The `FlowItem` to update the data quality warning on.
+`warning` | The `DQWItem` object representing the updated data quality warning.
+
+**Version**
+
+Version 3.5 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+<br>
+<br>
+
+#### flows.delete_dqw
+
+```py
+flows.delete_dqw(flow_item)
+```
+
+Removes all data quality warnings from the specified flow.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`flow_item` | The `FlowItem` to remove data quality warnings from.
+
+**Version**
+
+Version 3.5 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+<br>
+<br>
+
+#### flows.schedule_flow_run
+
+```py
+flows.schedule_flow_run(schedule_id, item)
+```
+
+Convenience method to add a flow to an existing schedule.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`schedule_id` | The identifier of the schedule to add the flow to.
+`item` | The `FlowItem` to add to the schedule.
+
+**Returns**
+
+Returns a list of `AddResponse` objects.
+
+**Version**
+
+Version 3.3 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+flow = server.flows.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+result = server.flows.schedule_flow_run('schedule-id-here', flow)
+```
+
+<br>
+<br>
+
+#### flows.filter
+
+```py
+flows.filter(**kwargs)
+```
+
+Returns a list of flows that match the specified filters. Fields and operators are passed as keyword arguments in the form `field_name=value` or `field_name__operator=value`.
+
+**Supported fields and operators**
+
+Field | Operators
+:--- | :---
+`created_at` | `eq`, `gt`, `gte`, `lt`, `lte`
+`name` | `eq`, `in`
+`owner_name` | `eq`
+`project_id` | `eq`
+`project_name` | `eq`, `in`
+`updated` | `eq`, `gt`, `gte`, `lt`, `lte`
+
+**Returns**
+
+Returns a `QuerySet` of `FlowItem` objects.
+
+**Example**
+
+```py
+matching_flows = server.flows.filter(project_name='My Project')
+for flow in matching_flows:
+    print(flow.name)
+```
+
 <br>
 
 ---
@@ -1790,6 +3080,340 @@ job = server.groups.update(group, as_job=True)
 
 ---
 
+## GroupSets
+
+Using the TSC library, you can get information about all the group sets on a site, create or delete group sets, and add or remove groups from a group set.
+
+The group set resources for Tableau Server are defined in the `GroupSetItem` class. The class corresponds to the group set resources you can access using the Tableau Server REST API. The group set methods are based upon the endpoints for group sets in the REST API and operate on the `GroupSetItem` class.
+
+<br>
+<br>
+
+### GroupSetItem class
+
+```py
+GroupSetItem(name)
+```
+
+The `GroupSetItem` class contains the attributes for the group set resources on Tableau Server. The `GroupSetItem` class defines the information you can request or query from Tableau Server. The class members correspond to the attributes of a server request or response payload.
+
+Source file: models/groupset_item.py
+
+**Attributes**
+
+Name | Description
+:--- | :---
+`id` | The id of the group set.
+`name` | The name of the group set. The `name` is required when you create an instance of a group set.
+`groups` | The list of groups (`GroupItem`) that belong to this group set.
+`group_count` | The number of groups in the group set.
+
+**Example**
+
+```py
+new_groupset = TSC.GroupSetItem('My Group Set')
+
+# call groupsets.create() with new group set
+groupset = server.groupsets.create(new_groupset)
+```
+
+<br>
+<br>
+
+### GroupSets methods
+
+The Tableau Server Client provides several methods for interacting with group set resources, or endpoints. These methods correspond to endpoints in the Tableau Server REST API.
+
+Source file: server/endpoint/groupsets_endpoint.py
+
+<br>
+<br>
+
+#### groupsets.get
+
+```py
+groupsets.get(req_options=None, result_level=None)
+```
+
+Returns information about the group sets on the specified site.
+
+REST API: [Get Group Sets](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_users_and_groups.htm#get_group_sets)
+
+**Version**
+
+This endpoint is available with REST API version 3.22 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`req_options` | (Optional) You can pass the method a request object that contains additional parameters to filter the request. Filter parameters can include `page_size` and `page_number`.
+`result_level` | (Optional) Specifies the level of detail in the response. Can be `"members"` to include member groups, or `"local"` for local group sets only.
+
+**Returns**
+
+Returns a list of `GroupSetItem` objects and a `PaginationItem` object.
+
+**Example**
+
+```py
+all_groupsets, pagination_item = server.groupsets.get()
+for groupset in all_groupsets:
+    print(groupset.id, groupset.name)
+```
+
+<br>
+<br>
+
+#### groupsets.get_by_id
+
+```py
+groupsets.get_by_id(groupset_id)
+```
+
+Returns information about the specified group set.
+
+REST API: [Get Group Set](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_users_and_groups.htm#get_group_set)
+
+**Version**
+
+This endpoint is available with REST API version 3.22 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`groupset_id` | The id of the group set.
+
+**Returns**
+
+Returns a `GroupSetItem` object.
+
+**Example**
+
+```py
+groupset = server.groupsets.get_by_id('1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d')
+print(groupset.name)
+```
+
+<br>
+<br>
+
+#### groupsets.create
+
+```py
+groupsets.create(groupset_item)
+```
+
+Creates a new group set on the specified site.
+
+REST API: [Create Group Set](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_users_and_groups.htm#create_group_set)
+
+**Version**
+
+This endpoint is available with REST API version 3.22 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`groupset_item` | The `GroupSetItem` specifies the group set to add. You first create a new instance of a `GroupSetItem` and pass that to this method.
+
+**Returns**
+
+Returns the newly created `GroupSetItem` object.
+
+**Example**
+
+```py
+new_groupset = TSC.GroupSetItem('My Group Set')
+created_groupset = server.groupsets.create(new_groupset)
+print(created_groupset.id)
+```
+
+<br>
+<br>
+
+#### groupsets.update
+
+```py
+groupsets.update(groupset_item)
+```
+
+Modifies an existing group set. You can use this method to rename a group set.
+
+REST API: [Update Group Set](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_users_and_groups.htm#update_group_set)
+
+**Version**
+
+This endpoint is available with REST API version 3.22 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`groupset_item` | The `GroupSetItem` to update. The group set item must have a valid `id`.
+
+**Returns**
+
+Returns the updated `GroupSetItem` object.
+
+**Example**
+
+```py
+groupset.name = 'Renamed Group Set'
+updated_groupset = server.groupsets.update(groupset)
+```
+
+<br>
+<br>
+
+#### groupsets.delete
+
+```py
+groupsets.delete(groupset)
+```
+
+Deletes the specified group set from the site.
+
+REST API: [Delete Group Set](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_users_and_groups.htm#delete_group_set)
+
+**Version**
+
+This endpoint is available with REST API version 3.22 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`groupset` | The `GroupSetItem` or group set id (`str`) to delete.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.groupsets.delete(groupset.id)
+```
+
+<br>
+<br>
+
+#### groupsets.add_group
+
+```py
+groupsets.add_group(groupset_item, group)
+```
+
+Adds a group to the specified group set.
+
+REST API: [Add Group to Group Set](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_users_and_groups.htm#add_group_to_group_set)
+
+**Version**
+
+This endpoint is available with REST API version 3.22 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`groupset_item` | The `GroupSetItem` specifying the group set to update.
+`group` | The `GroupItem` or group id (`str`) to add to the group set.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+all_groups, _ = server.groups.get()
+mygroup = all_groups[0]
+
+server.groupsets.add_group(groupset, mygroup)
+```
+
+<br>
+<br>
+
+#### groupsets.remove_group
+
+```py
+groupsets.remove_group(groupset_item, group)
+```
+
+Removes a group from the specified group set.
+
+REST API: [Remove Group from Group Set](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_users_and_groups.htm#remove_group_from_group_set)
+
+**Version**
+
+This endpoint is available with REST API version 3.22 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`groupset_item` | The `GroupSetItem` specifying the group set to update.
+`group` | The `GroupItem` or group id (`str`) to remove from the group set.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.groupsets.remove_group(groupset, mygroup)
+```
+
+<br>
+<br>
+
+#### groupsets.filter
+
+```py
+groupsets.filter(**kwargs)
+```
+
+Returns a list of group sets that match the specified filters. Fields and operators are passed as keyword arguments in the form `field_name=value` or `field_name__operator=value`.
+
+**Version**
+
+This endpoint is available with REST API version 3.22 and up.
+
+**Supported fields and operators**
+
+Field | Operators
+:--- | :---
+`domain_name` | `eq`, `in`
+`domain_nickname` | `eq`, `in`
+`is_external_user_enabled` | `eq`
+`is_local` | `eq`
+`luid` | `eq`, `in`
+`minimum_site_role` | `eq`, `in`
+`name` | `eq`, `cieq`, `in`, `like`
+`user_count` | `eq`, `gt`, `gte`, `lt`, `lte`
+
+**Returns**
+
+Returns a `QuerySet` of `GroupSetItem` objects.
+
+**Example**
+
+```py
+local_groupsets = server.groupsets.filter(is_local=True)
+for groupset in local_groupsets:
+    print(groupset.name)
+```
+
+<br>
+<br>
+
+---
+
 ## Jobs
 
 Using the TSC library, you can get information about an asynchronous process (or *job*) on the server. These jobs can be created when Tableau runs certain tasks that could be long running, such as importing or synchronizing users from Active Directory, or running an extract refresh. For example, the REST API methods to create or update groups, to run an extract refresh task, or to publish workbooks can take an `asJob` parameter (`asJob-true`) that creates a background process (the *job*) to complete the call. Information about the asynchronous job is returned from the method.
@@ -1835,6 +3459,47 @@ Source files: server/endpoint/jobs_endpoint.py
 <br>
 <br>
 
+#### jobs.get
+
+```py
+jobs.get(job_id=None, req_options=None)
+```
+
+Retrieve jobs for the site. Endpoint is paginated and will return a list of jobs and pagination information. If a job_id is provided, the method will return information about that specific job. Specifying a job_id is deprecated and will be removed in a future version.
+
+
+REST API: [Get Background Jobs on Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#get_background_jobs_on_site){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`job_id` | (Optional) The `job_id` specifies the job to query. When provided, returns the status of that specific job.
+`req_options` | (Optional) You can pass the method a request object that contains additional parameters to filter the request.
+
+**Returns**
+
+Returns a list of `BackgroundJobItem` objects and a `PaginationItem` object.
+
+**Version**
+
+Version 2.6 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+tableau_auth = TSC.TableauAuth('USERNAME', 'PASSWORD')
+server = TSC.Server('https://SERVERURL')
+
+with server.auth.sign_in(tableau_auth):
+    all_jobs, pagination_item = server.jobs.get()
+    print("\nThere are {} jobs on site: ".format(pagination_item.total_available))
+    print([job.id for job in all_jobs])
+```
+
+<br>
+<br>
 
 #### jobs.get_by_id
 
@@ -1970,6 +3635,45 @@ Usually, you can just discard the return value without checking the job status. 
 **Example**
 
 See the `update_datasource_data.py` or `refresh.py` sample in the Samples directory.
+
+<br>
+<br>
+
+#### jobs.filter
+
+```py
+jobs.filter(**kwargs)
+```
+
+Returns a list of background jobs that match the specified filters. Fields and operators are passed as keyword arguments in the form `field_name=value` or `field_name__operator=value`.
+
+**Supported fields and operators**
+
+Field | Operators
+:--- | :---
+`args` | `has`
+`completed_at` | `eq`, `gt`, `gte`, `lt`, `lte`
+`created_at` | `eq`, `gt`, `gte`, `lt`, `lte`
+`job_type` | `eq`, `in`
+`notes` | `has`
+`priority` | `eq`, `gt`, `gte`, `lt`, `lte`
+`progress` | `eq`, `gt`, `gte`, `lt`, `lte`
+`started_at` | `eq`, `gt`, `gte`, `lt`, `lte`
+`status` | `eq`
+`subtitle` | `eq`, `has`
+`title` | `eq`, `has`
+
+**Returns**
+
+Returns a `QuerySet` of `BackgroundJobItem` objects.
+
+**Example**
+
+```py
+failed_jobs = server.jobs.filter(status='Failed')
+for job in failed_jobs:
+    print(job.id, job.type)
+```
 
 <br>
 <br>
@@ -3903,7 +5607,7 @@ Source file: models/site_item.py
 
 ### SiteAuthConfiguration class
 
-The `SiteAuthConfiguration` class contains the attributes for the authentication configuration on Tableau Cloud. This class represents the authentication configuration information returned when using the `sites.list_authentication_configurations` method.
+The `SiteAuthConfiguration` class contains the attributes for the authentication configuration on Tableau Cloud. This class represents the authentication configuration information returned when using the `sites.list_auth_configurations` method.
 
 **Attributes**
 
@@ -3923,7 +5627,7 @@ Attribute | Description
 # sign in, etc.
 
 # Get authentication configurations for the current site
-auth_configs = server.sites.list_authentication_configurations()
+auth_configs = server.sites.list_auth_configurations()
 
 # Display configuration details
 for config in auth_configs:
@@ -4230,15 +5934,15 @@ server.sites.delete('9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d')
 <br>
 <br>
 
-#### sites.list_authentication_configurations
+#### sites.list_auth_configurations
 
 ```py
-sites.list_authentication_configurations()
+sites.list_auth_configurations()
 ```
 
 Lists the authentication configurations for the current site.
 
-REST API: [List Authentication Configurations for the current Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_site.htm#list_authentication_configurations_site)
+REST API: [List Authentication Configurations for the current Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_site.htm#list_auth_configurations_site)
 
 **Returns**
 
@@ -4251,12 +5955,133 @@ Returns a list of authentication configurations for the current site.
 # server = TSC.Server('https://MY-SERVER')
 # sign in, etc.
 
-auth_configs = server.sites.list_authentication_configurations()
+auth_configs = server.sites.list_auth_configurations()
 for config in auth_configs:
     print(f"IDP Configuration ID: {config.idp_configuration_id}")
     print(f"Name: {config.idp_configuration_name}")
     print(f"Type: {config.auth_setting}")
     print(f"Enabled: {config.enabled}")
+```
+
+<br>
+<br>
+
+#### sites.get_by_content_url
+
+```py
+sites.get_by_content_url(content_url)
+```
+
+Returns the site with the specified content URL.
+
+REST API: [Query Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_site.htm#query_site){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`content_url` | The `content_url` for the site to query. This is the `contentUrl` value in the REST API and corresponds to the portion of the URL after `/site/` (for example, `"MarketingTeam"`). Use an empty string for the default site.
+
+**Returns**
+
+Returns a `SiteItem`.
+
+**Version**
+
+Version 2.0 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+site = server.sites.get_by_content_url('MarketingTeam')
+print(site.id, site.name)
+```
+
+<br>
+<br>
+
+#### sites.encrypt_extracts
+
+```py
+sites.encrypt_extracts(site_id)
+```
+
+Encrypts all extracts on the specified site.
+
+REST API: [Encrypt Extracts](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_extract_and_encryption.htm#encrypt_extracts){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`site_id` | The identifier (`id`) for the site on which to encrypt all extracts.
+
+**Version**
+
+Version 3.5 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+server.sites.encrypt_extracts(server.site_id)
+```
+
+<br>
+<br>
+
+#### sites.decrypt_extracts
+
+```py
+sites.decrypt_extracts(site_id)
+```
+
+Decrypts all extracts on the specified site.
+
+REST API: [Decrypt Extracts](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_extract_and_encryption.htm#decrypt_extracts){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`site_id` | The identifier (`id`) for the site on which to decrypt all extracts.
+
+**Version**
+
+Version 3.5 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+server.sites.decrypt_extracts(server.site_id)
+```
+
+<br>
+<br>
+
+#### sites.re_encrypt_extracts
+
+```py
+sites.re_encrypt_extracts(site_id)
+```
+
+Re-encrypts all extracts on the specified site using new encryption keys.
+
+REST API: [Reencrypt Extracts](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_extract_and_encryption.htm#reencrypt_extracts){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`site_id` | The identifier (`id`) for the site on which to re-encrypt all extracts.
+
+**Version**
+
+Version 3.5 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+server.sites.re_encrypt_extracts(server.site_id)
 ```
 
 <br>
@@ -4793,8 +6618,50 @@ Error   |  Description
 
 ```
 
-<br>   
-<br>  
+<br>
+<br>
+
+#### tasks.create
+
+```py
+tasks.create(extract_item)
+```
+
+Creates a custom schedule for an extract refresh on Tableau Cloud. For Tableau Server, use the Schedules endpoint to create a schedule.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`extract_item` | The `TaskItem` specifying the extract refresh task to create. The task item must have the target workbook or datasource set.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`ValueError` | Raises an exception if no extract item is provided.
+
+**Returns**
+
+Returns the created `TaskItem`.
+
+**Version**
+
+Version 3.19 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+
+task_item = TSC.TaskItem(TSC.TaskItem.Type.ExtractRefresh)
+task_item.target = TSC.Target(datasource_id, 'datasource')
+new_task = server.tasks.create(task_item)
+print("Created task ID: {}".format(new_task.id))
+```
+
+<br>
+<br>
 
 
 ---
@@ -4829,7 +6696,7 @@ Name | Description
 `name` |   The name of the user. This attribute is required when you are creating a `UserItem` instance.
 `site_role` |  The role the user has on the site. This attribute is required if you are creating a `UserItem` instance. See *User Roles* below for details.
 `groups` | The groups that the user belongs to. You must run the populate_groups method to add the groups to the `UserItem`.
-`idp_configuration_id` | Tableau Cloud only. The authentication method for the user. To find the idp_configuration_id value, use sites.list_authentication_configurations method. **Important: Use idp_configuration_id or auth_setting, but not both.**
+`idp_configuration_id` | Tableau Cloud only. The authentication method for the user. To find the idp_configuration_id value, use sites.list_auth_configurations method. **Important: Use idp_configuration_id or auth_setting, but not both.**
 
 
 **User Auth**
@@ -5361,6 +7228,120 @@ An updated `UserItem`.    See [UserItem class](#useritem-class)
 <br>
 <br>
 
+#### users.add_all
+
+```py
+users.add_all(users)
+```
+
+**DEPRECATED**
+
+Adds a list of users to the site. Unlike `bulk_add`, this method adds users one at a time and collects successes and failures.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`users` | A list of `UserItem` objects to add to the site.
+
+**Returns**
+
+Returns a tuple of two lists: `(created, failed)`. The `created` list contains the successfully added `UserItem` objects. The `failed` list contains the `UserItem` objects that could not be added.
+
+**Version**
+
+Version 2.0 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+users_to_add = [TSC.UserItem('user1'), TSC.UserItem('user2')]
+created, failed = server.users.add_all(users_to_add)
+print("Added {} users, {} failed.".format(len(created), len(failed)))
+```
+
+<br>
+<br>
+
+#### users.create_from_file
+
+```py
+users.create_from_file(filepath)
+```
+
+**DEPRECATED**
+
+Adds users from a CSV file to the site. The CSV file format matches the format used in the Tableau Server UI for bulk user import.
+
+The CSV file should have the following column format (header row optional):
+`Username, Password, Display Name, License Level, Admin Level, Publishing Access`
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`filepath` | The path to a CSV file containing user information to import.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`ValueError` | Raises an exception if the file path does not point to a CSV file.
+
+**Returns**
+
+Returns a tuple of two lists: `(created, failed)`. The `created` list contains successfully added `UserItem` objects. The `failed` list contains tuples of `(UserItem, ServerResponseError)` for users that could not be added.
+
+**Version**
+
+Version 2.0 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+created, failed = server.users.create_from_file('/path/to/users.csv')
+print("Imported {} users. {} failed.".format(len(created), len(failed)))
+for user, error in failed:
+    print("Failed to import {}: {}".format(user.name, error))
+```
+
+<br>
+<br>
+
+#### users.filter
+
+```py
+users.filter(**kwargs)
+```
+
+Returns a list of users that match the specified filters. Fields and operators are passed as keyword arguments in the form `field_name=value` or `field_name__operator=value`.
+
+**Supported fields and operators**
+
+Field | Operators
+:--- | :---
+`domain_name` | `eq`, `in`
+`friendly_name` | `eq`, `in`
+`is_local` | `eq`
+`last_login` | `eq`, `gt`, `gte`, `lt`, `lte`
+`luid` | `eq`, `in`
+`name` | `eq`, `cieq`, `in`
+`site_role` | `eq`, `in`
+
+**Returns**
+
+Returns a `QuerySet` of `UserItem` objects.
+
+**Example**
+
+```py
+viewers = server.users.filter(site_role='Viewer')
+for user in viewers:
+    print(user.name)
+```
+
+<br>
+<br>
 
 ---
 
@@ -5701,6 +7682,896 @@ See [ViewItem class](#viewitem-class)
 <br>
 <br>
 
+#### views.populate_excel
+
+```py
+views.populate_excel(view_item, req_options=None)
+```
+
+Populates the Excel content of the specified view.
+
+After calling this method, the Excel data is available through the view's `excel` property.
+
+REST API: [Download View Excel](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#download_view_excel){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`view_item` | The `ViewItem` to populate with Excel data.
+`req_options` | (Optional) You can pass in request options to filter data or set the maximum age of the Excel content cached on the server. See [ExcelRequestOptions class](#excelrequestoptions-class) for more details.
+
+**Returns**
+
+None. The Excel content is added to the `view_item` and can be accessed by its `excel` field.
+
+**Version**
+
+Version 3.8 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+server.views.populate_excel(view_item)
+with open('./view_data.xlsx', 'wb') as f:
+    f.write(view_item.excel)
+```
+
+<br>
+<br>
+
+#### views.update
+
+```py
+views.update(view_item)
+```
+
+Modifies the specified view. Use this method to change the owner of a view or update its settings.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`view_item` | The `ViewItem` with updated attributes.
+
+**Returns**
+
+Returns the updated `ViewItem`.
+
+**Example**
+
+```py
+view = server.views.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+view.owner_id = 'new-owner-id'
+updated_view = server.views.update(view)
+```
+
+<br>
+<br>
+
+#### views.populate_permissions
+
+```py
+views.populate_permissions(view_item)
+```
+
+Populates the permissions for the specified view.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`view_item` | The `ViewItem` to populate with permissions.
+
+**Version**
+
+Version 3.2 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+view = server.views.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+server.views.populate_permissions(view)
+for permission in view.permissions:
+    print(permission.grantee_id, permission.capabilities)
+```
+
+<br>
+<br>
+
+#### views.update_permissions
+
+```py
+views.update_permissions(view_item, permission_item)
+```
+
+Adds or updates permissions for the specified view.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`view_item` | The `ViewItem` to update permissions for.
+`permission_item` | A list of `PermissionsRule` objects representing the permissions to add or update.
+
+**Version**
+
+Version 3.2 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+<br>
+<br>
+
+#### views.delete_permission
+
+```py
+views.delete_permission(view_item, capability_item)
+```
+
+Removes a permission from the specified view.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`view_item` | The `ViewItem` to remove the permission from.
+`capability_item` | The `PermissionsRule` object representing the permission to remove.
+
+**Version**
+
+Version 3.2 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+<br>
+<br>
+
+#### views.add_tags
+
+```py
+views.add_tags(item, tags)
+```
+
+Adds one or more tags to the specified view.
+
+REST API: [Add Tags to View](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#add_tags_to_view)
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `ViewItem` or view ID to add tags to.
+`tags` | A single tag string or iterable of tag strings to add.
+
+**Returns**
+
+Returns a `set[str]` of the tags added.
+
+**Example**
+
+```py
+server.views.add_tags(view_item, ['finance', 'quarterly'])
+```
+
+<br>
+<br>
+
+#### views.delete_tags
+
+```py
+views.delete_tags(item, tags)
+```
+
+Removes one or more tags from the specified view.
+
+REST API: [Delete Tags from View](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#delete_tags_from_view)
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `ViewItem` or view ID to remove tags from.
+`tags` | A single tag string or iterable of tag strings to remove.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.views.delete_tags(view_item, 'finance')
+```
+
+<br>
+<br>
+
+#### views.update_tags
+
+```py
+views.update_tags(item)
+```
+
+Updates the tags on the server to match the tags on the specified view item. Changes to tags must be made on the `ViewItem.tags` attribute before calling this method.
+
+REST API: [Add Tags to View](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#add_tags_to_view)
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `ViewItem` whose tags to synchronize to the server.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+view_item.tags.add('quarterly')
+server.views.update_tags(view_item)
+```
+
+<br>
+<br>
+
+#### views.delete
+
+```py
+views.delete(view)
+```
+
+Deletes a view. If you delete the only view in a workbook, the workbook is also deleted. This can be used to remove hidden views when migrating content.
+
+REST API: [Delete View](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#delete_view)
+
+**Version**
+
+This endpoint is available with REST API version 3.27 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`view` | The `ViewItem` or view ID (str) to delete.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.views.delete(view_item.id)
+```
+
+<br>
+<br>
+
+#### views.filter
+
+```py
+views.filter(**kwargs)
+```
+
+Returns a list of views that match the specified filters. Fields and operators are passed as keyword arguments in the form `field_name=value` or `field_name__operator=value`.
+
+**Supported fields and operators**
+
+Field | Operators
+:--- | :---
+`caption` | `eq`, `in`
+`content_url` | `eq`, `in`
+`created_at` | `eq`, `gt`, `gte`, `lt`, `lte`
+`favorites_total` | `eq`, `gt`, `gte`, `lt`, `lte`
+`fields` | `eq`, `in`
+`hits_total` | `eq`, `gt`, `gte`, `lt`, `lte`
+`name` | `eq`, `in`
+`owner_domain` | `eq`, `in`
+`owner_email` | `eq`, `in`
+`owner_name` | `eq`
+`project_name` | `eq`, `in`
+`sheet_number` | `eq`, `gt`, `gte`, `lt`, `lte`
+`sheet_type` | `eq`, `in`
+`tags` | `eq`, `in`
+`title` | `eq`, `in`
+`updated_at` | `eq`, `gt`, `gte`, `lt`, `lte`
+`view_url_name` | `eq`, `in`
+`workbook_description` | `eq`, `in`
+`workbook_name` | `eq`, `in`
+
+**Returns**
+
+Returns a `QuerySet` of `ViewItem` objects.
+
+**Example**
+
+```py
+matching_views = server.views.filter(project_name='Finance', sheet_type='story')
+for view in matching_views:
+    print(view.name)
+```
+
+<br>
+<br>
+
+---
+
+## Virtual Connections
+
+Using the TSC library, you can get information about virtual connections on a site, publish, update, or delete virtual connections, manage their connections and revisions, and control permissions and tags.
+
+The virtual connection resources for Tableau Server are defined in the `VirtualConnectionItem` class. The class corresponds to the virtual connection resources you can access using the Tableau Server REST API.
+
+<br>
+<br>
+
+### VirtualConnectionItem class
+
+```py
+VirtualConnectionItem(name)
+```
+
+The `VirtualConnectionItem` class contains the attributes for virtual connection resources on Tableau Server.
+
+Source file: models/virtual_connection_item.py
+
+**Attributes**
+
+Name | Description
+:--- | :---
+`id` | The ID of the virtual connection.
+`name` | The name of the virtual connection. Required when creating an instance.
+`created_at` | The date and time the virtual connection was created.
+`updated_at` | The date and time the virtual connection was last updated.
+`project_id` | The ID of the project that contains the virtual connection.
+`owner_id` | The ID of the owner of the virtual connection.
+`has_extracts` | Whether the virtual connection has extracts.
+`is_certified` | Whether the virtual connection is certified.
+`certification_note` | The certification note for the virtual connection.
+`webpage_url` | The URL for the virtual connection on Tableau Server.
+`content` | The JSON content definition of the virtual connection. Populated by `get_by_id` or `download`.
+`connections` | The list of `ConnectionItem` objects. Must be populated first with `populate_connections`.
+
+**Example**
+
+```py
+new_vc = TSC.VirtualConnectionItem('My Virtual Connection')
+new_vc.project_id = project.id
+```
+
+<br>
+<br>
+
+### Virtual Connections methods
+
+The Tableau Server Client provides several methods for interacting with virtual connection resources. These methods correspond to endpoints in the Tableau Server REST API.
+
+Source file: server/endpoint/virtual_connections_endpoint.py
+
+<br>
+<br>
+
+#### virtual_connections.get
+
+```py
+virtual_connections.get(req_options=None)
+```
+
+Returns a list of all virtual connections on the site.
+
+REST API: [List Virtual Connections](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_virtual_connections.htm#list_virtual_connections)
+
+**Version**
+
+This endpoint is available with REST API version 3.18 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`req_options` | (Optional) Request options such as page size and filters.
+
+**Returns**
+
+Returns a tuple of `(list[VirtualConnectionItem], PaginationItem)`.
+
+**Example**
+
+```py
+all_vcs, pagination = server.virtual_connections.get()
+for vc in all_vcs:
+    print(vc.id, vc.name)
+```
+
+<br>
+<br>
+
+#### virtual_connections.get_by_id
+
+```py
+virtual_connections.get_by_id(virtual_connection)
+```
+
+Returns the details of a specific virtual connection, including its JSON content definition.
+
+REST API: [Get Virtual Connection](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_virtual_connections.htm#get_virtual_connection)
+
+**Version**
+
+This endpoint is available with REST API version 3.23 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`virtual_connection` | The `VirtualConnectionItem` or virtual connection ID string.
+
+**Returns**
+
+Returns a `VirtualConnectionItem` with its `content` attribute populated.
+
+**Example**
+
+```py
+vc = server.virtual_connections.get_by_id('1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d')
+print(vc.name, vc.content)
+```
+
+<br>
+<br>
+
+#### virtual_connections.populate_connections
+
+```py
+virtual_connections.populate_connections(virtual_connection)
+```
+
+Populates the database connections for a virtual connection. After calling this method, iterate `virtual_connection.connections` to access the `ConnectionItem` objects.
+
+REST API: [List Virtual Connection Database Connections](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_virtual_connections.htm#list_virtual_connection_database_connections)
+
+**Version**
+
+This endpoint is available with REST API version 3.18 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`virtual_connection` | The `VirtualConnectionItem` to populate connections for.
+
+**Returns**
+
+Returns the `VirtualConnectionItem` with connections available via `virtual_connection.connections`.
+
+**Example**
+
+```py
+server.virtual_connections.populate_connections(vc)
+for conn in vc.connections:
+    print(conn.id, conn.server_address)
+```
+
+<br>
+<br>
+
+#### virtual_connections.update_connection_db_connection
+
+```py
+virtual_connections.update_connection_db_connection(virtual_connection, connection)
+```
+
+Updates the database connection details for a specific connection within a virtual connection.
+
+REST API: [Update Virtual Connection Database Connection](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_virtual_connections.htm#update_virtual_connection_database_connection)
+
+**Version**
+
+This endpoint is available with REST API version 3.18 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`virtual_connection` | The `VirtualConnectionItem` or virtual connection ID string.
+`connection` | The `ConnectionItem` containing the updated connection details.
+
+**Returns**
+
+Returns the updated `ConnectionItem`.
+
+**Example**
+
+```py
+server.virtual_connections.populate_connections(vc)
+conn = list(vc.connections)[0]
+conn.server_address = 'new-db-server.example.com'
+updated_conn = server.virtual_connections.update_connection_db_connection(vc, conn)
+```
+
+<br>
+<br>
+
+#### virtual_connections.update
+
+```py
+virtual_connections.update(virtual_connection)
+```
+
+Updates the metadata of a virtual connection (name, project, owner, certified status, etc.).
+
+REST API: [Update Virtual Connection](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_virtual_connections.htm#update_virtual_connection)
+
+**Version**
+
+This endpoint is available with REST API version 3.23 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`virtual_connection` | The `VirtualConnectionItem` to update. Must have a valid `id`.
+
+**Returns**
+
+Returns the updated `VirtualConnectionItem`.
+
+**Example**
+
+```py
+vc.is_certified = True
+vc.certification_note = 'Approved by data team'
+updated_vc = server.virtual_connections.update(vc)
+```
+
+<br>
+<br>
+
+#### virtual_connections.publish
+
+```py
+virtual_connections.publish(virtual_connection, virtual_connection_content, mode='CreateNew', publish_as_draft=False)
+```
+
+Publishes a virtual connection to Tableau Server.
+
+REST API: [Publish Virtual Connection](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_virtual_connections.htm#publish_virtual_connection)
+
+**Version**
+
+This endpoint is available with REST API version 3.23 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`virtual_connection` | The `VirtualConnectionItem` to publish. Must have `name`, `project_id`, and `owner_id` set.
+`virtual_connection_content` | The virtual connection definition as a JSON string or a file path to a JSON file.
+`mode` | `"CreateNew"` (default) or `"Overwrite"`. Use `"Overwrite"` to replace an existing virtual connection.
+`publish_as_draft` | If `True`, publishes the virtual connection as a draft. Default is `False`.
+
+**Exceptions**
+
+Name | Description
+:--- | :---
+`ValueError` | Raised if `mode` is not `"CreateNew"` or `"Overwrite"`.
+`RuntimeError` | Raised if `virtual_connection_content` is neither valid JSON nor a path to an existing file.
+
+**Returns**
+
+Returns the published `VirtualConnectionItem`.
+
+**Example**
+
+```py
+new_vc = TSC.VirtualConnectionItem('My Virtual Connection')
+new_vc.project_id = project.id
+new_vc.owner_id = user.id
+published = server.virtual_connections.publish(new_vc, '/path/to/vc_definition.json', mode='CreateNew')
+print(published.id)
+```
+
+<br>
+<br>
+
+#### virtual_connections.download
+
+```py
+virtual_connections.download(virtual_connection)
+```
+
+Downloads the JSON definition of a virtual connection as a string.
+
+REST API: [Get Virtual Connection](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_virtual_connections.htm#get_virtual_connection)
+
+**Version**
+
+This endpoint is available with REST API version 3.23 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`virtual_connection` | The `VirtualConnectionItem` or virtual connection ID string.
+
+**Returns**
+
+Returns the virtual connection definition as a JSON string.
+
+**Example**
+
+```py
+content_json = server.virtual_connections.download(vc)
+with open('vc_backup.json', 'w') as f:
+    f.write(content_json)
+```
+
+<br>
+<br>
+
+#### virtual_connections.delete
+
+```py
+virtual_connections.delete(virtual_connection)
+```
+
+Deletes the specified virtual connection from the site.
+
+REST API: [Delete Virtual Connection](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_virtual_connections.htm#delete_virtual_connection)
+
+**Version**
+
+This endpoint is available with REST API version 3.23 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`virtual_connection` | The `VirtualConnectionItem` or virtual connection ID string to delete.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.virtual_connections.delete(vc.id)
+```
+
+<br>
+<br>
+
+#### virtual_connections.get_revisions
+
+```py
+virtual_connections.get_revisions(virtual_connection, req_options=None)
+```
+
+Returns a list of revisions for the specified virtual connection.
+
+**Version**
+
+This endpoint is available with REST API version 3.23 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`virtual_connection` | The `VirtualConnectionItem` to retrieve revisions for.
+`req_options` | (Optional) Request options such as page size.
+
+**Returns**
+
+Returns a tuple of `(list[RevisionItem], PaginationItem)`.
+
+**Example**
+
+```py
+revisions, pagination = server.virtual_connections.get_revisions(vc)
+for rev in revisions:
+    print(rev.revision_number, rev.created_at)
+```
+
+<br>
+<br>
+
+#### virtual_connections.download_revision
+
+```py
+virtual_connections.download_revision(virtual_connection, revision_number)
+```
+
+Downloads the JSON definition of a specific revision of a virtual connection.
+
+**Version**
+
+This endpoint is available with REST API version 3.23 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`virtual_connection` | The `VirtualConnectionItem` to download the revision for.
+`revision_number` | The revision number to download (integer).
+
+**Returns**
+
+Returns the virtual connection definition at that revision as a JSON string.
+
+**Example**
+
+```py
+revisions, _ = server.virtual_connections.get_revisions(vc)
+json_str = server.virtual_connections.download_revision(vc, revisions[0].revision_number)
+```
+
+<br>
+<br>
+
+#### virtual_connections.populate_permissions
+
+```py
+virtual_connections.populate_permissions(item)
+```
+
+Populates the permissions for the specified virtual connection.
+
+**Version**
+
+This endpoint is available with REST API version 3.22 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `VirtualConnectionItem` to populate permissions for.
+
+**Returns**
+
+None. Permissions are available via `item.permissions`.
+
+**Example**
+
+```py
+server.virtual_connections.populate_permissions(vc)
+for rule in vc.permissions:
+    print(rule)
+```
+
+<br>
+<br>
+
+#### virtual_connections.add_permissions
+
+```py
+virtual_connections.add_permissions(resource, rules)
+```
+
+Adds or updates permissions on the specified virtual connection.
+
+**Version**
+
+This endpoint is available with REST API version 3.22 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`resource` | The `VirtualConnectionItem` to update permissions on.
+`rules` | A list of `PermissionsRule` objects to apply.
+
+**Returns**
+
+Returns the updated list of `PermissionsRule` objects.
+
+**Example**
+
+```py
+permission = TSC.PermissionsRule(
+    TSC.UserItem.as_reference(user.id),
+    {'Connect': 'Allow'}
+)
+server.virtual_connections.add_permissions(vc, [permission])
+```
+
+<br>
+<br>
+
+#### virtual_connections.delete_permission
+
+```py
+virtual_connections.delete_permission(item, capability_item)
+```
+
+Removes a specific permission from the specified virtual connection.
+
+**Version**
+
+This endpoint is available with REST API version 3.22 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `VirtualConnectionItem` to remove the permission from.
+`capability_item` | The `PermissionsRule` to remove.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.virtual_connections.delete_permission(vc, permission_rule)
+```
+
+<br>
+<br>
+
+#### virtual_connections.add_tags
+
+```py
+virtual_connections.add_tags(virtual_connection, tags)
+```
+
+Adds one or more tags to the specified virtual connection.
+
+**Version**
+
+This endpoint is available with REST API version 3.23 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`virtual_connection` | The `VirtualConnectionItem` or virtual connection ID to tag.
+`tags` | A single tag string or iterable of tag strings.
+
+**Returns**
+
+Returns a `set[str]` of the tags added.
+
+**Example**
+
+```py
+server.virtual_connections.add_tags(vc, ['finance', 'certified'])
+```
+
+<br>
+<br>
+
+#### virtual_connections.delete_tags
+
+```py
+virtual_connections.delete_tags(virtual_connection, tags)
+```
+
+Removes one or more tags from the specified virtual connection.
+
+**Version**
+
+This endpoint is available with REST API version 3.23 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`virtual_connection` | The `VirtualConnectionItem` or virtual connection ID to remove tags from.
+`tags` | A single tag string or iterable of tag strings.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.virtual_connections.delete_tags(vc, 'finance')
+```
+
+<br>
+<br>
 
 ---
 ## Webhooks
@@ -5902,6 +8773,65 @@ print (webhook.name, webhook.url)
 
 
 ```
+<br>
+<br>
+
+#### webhook.delete
+
+```py
+webhooks.delete(webhook_id)
+```
+
+Deletes the specified webhook.
+
+REST API: [Delete Webhook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_notifications.htm#delete_webhook){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`webhook_id` | The identifier (`id`) for the `WebhookItem` to delete.
+
+**Version**
+
+Version 3.6 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+server.webhooks.delete('7d60d364-b9f5-4a9c-8aa5-4bdaa38c5dd3')
+```
+
+<br>
+<br>
+
+#### webhook.test
+
+```py
+webhooks.test(webhook_id)
+```
+
+Tests the specified webhook. Sends an empty payload to the webhook destination URL and returns the response from the server.
+
+REST API: [Test a Webhook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_notifications.htm#test_webhook){:target="_blank"}
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`webhook_id` | The identifier (`id`) for the `WebhookItem` to test.
+
+**Version**
+
+Version 3.6 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
+
+**Example**
+
+```py
+webhook = server.webhooks.get_by_id('7d60d364-b9f5-4a9c-8aa5-4bdaa38c5dd3')
+server.webhooks.test(webhook.id)
+```
+
 <br>
 <br>
 

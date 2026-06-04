@@ -21,7 +21,7 @@ add your contributions to the **development** branch.
 ### Get the source code and set up your branch
 
 1. Fork the repository. We follow the "Fork and Pull" model as described
-   [here](https://help.github.com/articles/about-collaborative-development-models/).
+   [here](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/getting-started/about-collaborative-development-models#fork-and-pull-model).
 
 1. Clone your fork:
 
@@ -42,7 +42,7 @@ add your contributions to the **development** branch.
    ```shell
    git remote add upstream https://github.com/tableau/server-client-python
    ```
-   More information about configuring a remote for a fork can be found [here](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/configuring-a-remote-for-a-fork).
+   More information about configuring a remote for a fork can be found [here](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/configuring-a-remote-repository-for-a-fork).
    
 1. Sync your fork:
    ```shell
@@ -145,7 +145,7 @@ depending on how and where git is installed on your system, for example:
 ### Add tests
 
 All of our tests live under the `test/` folder in the repository. We use
-`pytest` and the built-in test runner `python setup.py test`.
+`pytest` to run the tests.
 
 Follow the structure of existing tests, especially if new server responses
 are going to be mocked.
@@ -154,6 +154,13 @@ If a test needs a
 static file, like a .twb/.twbx/.xml, it should live under `test/assets/`
 
 Make sure that all tests are passing before submitting your pull request.
+
+| Test | Command |
+| --- | --- |
+| Test everything | `pytest test` |
+| Test everything, run in parallel | `pytest -n auto test` |
+| Run a specific test | `pytest test/test_user.py` |
+| Code coverage report | `pip install coverage` <br> `pytest --cov=tableauserverclient test` <br> `coverage html` <br> `open htmlcov/index.html` |
 
 ### Update the documentation
 
@@ -164,7 +171,7 @@ section below for details.
 ### Commit changes to your fork and open a pull request
 
 1. Make a PR as described
-   [here](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request-from-a-fork)
+   [here](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork)
    against the **development** branch for code changes.
 
 1. In your first pull request, the Salesforce Contributor License Agreement bot
@@ -190,7 +197,7 @@ on GitHub Pages.
 
 All of the documentation source files can be found in `/docs` folder in the
 **gh-pages** branch. The docs are hosted on the following URL:
-<https://tableau.github.io/server-client-python>.
+<https://tableau.github.io/server-client-python/>.
 
 To make changes or additions to the documentation, please create a pull request
 against the **gh-pages** branch. Because the docs are in a separate branch, you
@@ -212,7 +219,7 @@ To preview and run the documentation locally, these are the steps:
 1. In your browser, connect to <http://127.0.0.1:4000/server-client-python/> to preview the changes. As long as the Jekyll serve process is running, it will rebuild any new file changes automatically.
 
 For more details, see the GitHub Pages topic on
-[testing locally](https://docs.github.com/en/github/working-with-github-pages/testing-your-github-pages-site-locally-with-jekyll).
+[testing locally](https://docs.github.com/en/pages/setting-up-a-github-pages-site-with-jekyll/testing-your-github-pages-site-locally-with-jekyll).
 
 ## Release process (maintainers)
 
