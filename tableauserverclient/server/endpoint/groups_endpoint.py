@@ -197,7 +197,7 @@ class Groups(QuerysetEndpoint[GroupItem]):
 
          Returns
          -------
-        GroupItem | JobItem
+         GroupItem | JobItem
 
          Raises
          ------
