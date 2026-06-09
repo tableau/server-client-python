@@ -379,7 +379,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         self,
         datasource_item: DatasourceItem,
         connection_luids: Iterable[str],
-        authentication_type: str,
+        authentication_type: str | None = None,
         username: str | None = None,
         password: str | None = None,
         embed_password: bool | None = None,
