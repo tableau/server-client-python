@@ -55,7 +55,7 @@ class OIDC(Endpoint):
 
         Parameters
         ----------
-        id : str | HasID
+        id : str | HasIdpConfigurationID
             The ID of the OIDC configuration to retrieve. Can be either the
             ID string or an object with an id attribute.
 
@@ -122,7 +122,7 @@ class OIDC(Endpoint):
 
         Parameters
         ----------
-        config : str | HasID
+        config : str | HasIdpConfigurationID
             The OIDC configuration to delete. Can be either the ID of the
             configuration or the configuration object itself.
         """
