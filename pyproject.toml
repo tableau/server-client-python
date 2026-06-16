@@ -8,6 +8,7 @@ name="tableauserverclient"
 dynamic = ["version"]
 description='A Python module for working with the Tableau Server REST API.'
 authors = [{name="Tableau", email="github@tableau.com"}]
+license = "MIT"
 license-files = ["LICENSE"]
 readme = "README.md"
 

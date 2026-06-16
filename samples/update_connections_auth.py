@@ -22,9 +22,9 @@ def main():
     # Resource-specific
     parser.add_argument("resource_type", choices=["workbook", "datasource"])
     parser.add_argument("resource_id")
-    parser.add_argument("datasource_username")
-    parser.add_argument("authentication_type")
-    parser.add_argument("--datasource_password", default=None, help="Datasource password (optional)")
+    parser.add_argument("--datasource_username", help="Datasource username (optional)")
+    parser.add_argument("--authentication_type", help="Authentication type (optional)")
+    parser.add_argument("--datasource_password", help="Datasource password (optional)")
     parser.add_argument(
         "--embed_password", default="true", choices=["true", "false"], help="Embed password (default: true)"
     )

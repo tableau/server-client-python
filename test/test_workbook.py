@@ -39,6 +39,7 @@ REVISION_XML = TEST_ASSET_DIR / "workbook_revision.xml"
 UPDATE_XML = TEST_ASSET_DIR / "workbook_update.xml"
 UPDATE_PERMISSIONS = TEST_ASSET_DIR / "workbook_update_permissions.xml"
 UPDATE_CONNECTIONS_XML = TEST_ASSET_DIR / "workbook_update_connections.xml"
+UPDATE_CONNECTIONS_NO_AUTH_XML = TEST_ASSET_DIR / "workbook_update_connections_no_auth.xml"
 
 
 @pytest.fixture(scope="function")
@@ -1045,6 +1046,42 @@ def test_update_workbook_connections(server: TSC.Server) -> None:
 
         assert updated_ids == connection_luids
         assert "AD Service Principal" == connection_items[0].auth_type
+
+
+def test_update_workbook_connections_without_auth_type(server: TSC.Server) -> None:
+    """Test that update_connections works when authentication_type is not provided."""
+    populate_xml = POPULATE_CONNECTIONS_XML.read_text()
+    response_xml = UPDATE_CONNECTIONS_NO_AUTH_XML.read_text()
+
+    with requests_mock.Mocker() as m:
+        workbook_id = "1a2b3c4d-5e6f-7a8b-9c0d-112233445566"
+        connection_luids = ["abc12345-def6-7890-gh12-ijklmnopqrst", "1234abcd-5678-efgh-ijkl-0987654321mn"]
+
+        workbook = TSC.WorkbookItem(workbook_id)
+        workbook._id = workbook_id
+        server.version = "3.26"
+        url = f"{server.baseurl}/{workbook_id}/connections"
+        m.get(
+            "http://test/api/3.26/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks/1a2b3c4d-5e6f-7a8b-9c0d-112233445566/connections",
+            text=populate_xml,
+        )
+        m.put(
+            "http://test/api/3.26/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks/1a2b3c4d-5e6f-7a8b-9c0d-112233445566/connections",
+            text=response_xml,
+        )
+
+        # Update connections without specifying authentication_type
+        connection_items = server.workbooks.update_connections(
+            workbook_item=workbook,
+            connection_luids=connection_luids,
+            username="user1",
+            embed_password=True,
+        )
+        updated_ids = [conn.id for conn in connection_items]
+
+        assert updated_ids == connection_luids
+        # Verify that the auth type from the response is preserved (UsernamePassword)
+        assert connection_items[0].auth_type == "UsernamePassword"
 
 
 def test_get_workbook_all_fields(server: TSC.Server) -> None:

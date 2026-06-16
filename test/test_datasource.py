@@ -35,6 +35,7 @@ UPDATE_XML = TEST_ASSET_DIR / "datasource_update.xml"
 UPDATE_HYPER_DATA_XML = TEST_ASSET_DIR / "datasource_data_update.xml"
 UPDATE_CONNECTION_XML = TEST_ASSET_DIR / "datasource_connection_update.xml"
 UPDATE_CONNECTIONS_XML = TEST_ASSET_DIR / "datasource_connections_update.xml"
+UPDATE_CONNECTIONS_NO_AUTH_XML = TEST_ASSET_DIR / "datasource_connections_update_no_auth.xml"
 
 
 @pytest.fixture(scope="function")
@@ -274,6 +275,44 @@ def test_update_connections(server) -> None:
 
         assert updated_ids == connection_luids
         assert "auth-keypair" == connection_items[0].auth_type
+
+
+def test_update_connections_without_auth_type(server) -> None:
+    """Test that update_connections works when authentication_type is not provided."""
+    populate_xml = POPULATE_CONNECTIONS_XML.read_text()
+    response_xml = UPDATE_CONNECTIONS_NO_AUTH_XML.read_text()
+
+    with requests_mock.Mocker() as m:
+
+        datasource_id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
+        connection_luids = ["be786ae0-d2bf-4a4b-9b34-e2de8d2d4488", "a1b2c3d4-e5f6-7a8b-9c0d-123456789abc"]
+
+        datasource = TSC.DatasourceItem(datasource_id)
+        datasource._id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
+        datasource.owner_id = "dd2239f6-ddf1-4107-981a-4cf94e415794"
+        server.version = "3.26"
+
+        m.get(
+            "http://test/api/3.26/sites/dad65087-b08b-4603-af4e-2887b8aafc67/datasources/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/connections",
+            text=populate_xml,
+        )
+        m.put(
+            "http://test/api/3.26/sites/dad65087-b08b-4603-af4e-2887b8aafc67/datasources/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/connections",
+            text=response_xml,
+        )
+
+        # Update connections without specifying authentication_type
+        connection_items = server.datasources.update_connections(
+            datasource_item=datasource,
+            connection_luids=connection_luids,
+            username="user1",
+            embed_password=True,
+        )
+        updated_ids = [conn.id for conn in connection_items]
+
+        assert updated_ids == connection_luids
+        # Verify that the auth type from the response is preserved (UsernamePassword)
+        assert connection_items[0].auth_type == "UsernamePassword"
 
 
 def test_populate_permissions(server) -> None:

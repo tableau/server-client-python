@@ -254,7 +254,7 @@ class DatasourceRequest:
         self,
         element: ET.Element,
         connection_luids: Iterable[str],
-        authentication_type: str,
+        authentication_type: Optional[str] = None,
         username: Optional[str] = None,
         password: Optional[str] = None,
         embed_password: Optional[bool] = None,
@@ -264,7 +264,8 @@ class DatasourceRequest:
             ET.SubElement(conn_luids_elem, "connectionLUID").text = luid
 
         connection_elem = ET.SubElement(element, "connection")
-        connection_elem.set("authenticationType", authentication_type)
+        if authentication_type is not None:
+            connection_elem.set("authenticationType", authentication_type)
 
         if username is not None:
             connection_elem.set("userName", username)
@@ -1172,7 +1173,7 @@ class WorkbookRequest:
         self,
         element: ET.Element,
         connection_luids: Iterable[str],
-        authentication_type: str,
+        authentication_type: Optional[str] = None,
         username: Optional[str] = None,
         password: Optional[str] = None,
         embed_password: Optional[bool] = None,
@@ -1182,7 +1183,8 @@ class WorkbookRequest:
             ET.SubElement(conn_luids_elem, "connectionLUID").text = luid
 
         connection_elem = ET.SubElement(element, "connection")
-        connection_elem.set("authenticationType", authentication_type)
+        if authentication_type is not None:
+            connection_elem.set("authenticationType", authentication_type)
 
         if username is not None:
             connection_elem.set("userName", username)

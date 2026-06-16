@@ -340,13 +340,16 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         self,
         workbook_item: WorkbookItem,
         connection_luids: Iterable[str],
-        authentication_type: str,
+        authentication_type: Optional[str] = None,
         username: Optional[str] = None,
         password: Optional[str] = None,
         embed_password: Optional[bool] = None,
     ) -> list[ConnectionItem]:
         """
-        Bulk updates one or more workbook connections by LUID, including authenticationType, username, password, and embedPassword.
+        Bulk updates one or more workbook connections by LUID.
+
+        This method allows updating authentication type, credentials, and other
+        connection properties for multiple connections at once.
 
         Parameters
         ----------
@@ -356,8 +359,9 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         connection_luids : Iterable of str
             The connection LUIDs to update.
 
-        authentication_type : str
-            The authentication type to use (e.g., 'AD Service Principal').
+        authentication_type : str, optional
+            The authentication type to use (e.g., 'AD Service Principal', 'auth-keypair').
+            If not provided, the existing authentication type is preserved.
 
         username : str, optional
             The username to set (e.g., client ID for keypair auth).

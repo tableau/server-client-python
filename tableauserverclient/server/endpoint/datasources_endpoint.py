@@ -378,13 +378,16 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         self,
         datasource_item: DatasourceItem,
         connection_luids: Iterable[str],
-        authentication_type: str,
+        authentication_type: Optional[str] = None,
         username: Optional[str] = None,
         password: Optional[str] = None,
         embed_password: Optional[bool] = None,
     ) -> list[ConnectionItem]:
         """
         Bulk updates one or more datasource connections by LUID.
+
+        This method allows updating authentication type, credentials, and other
+        connection properties for multiple connections at once.
 
         Parameters
         ----------
@@ -394,8 +397,9 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         connection_luids : Iterable of str
             The connection LUIDs to update.
 
-        authentication_type : str
-            The authentication type to use (e.g., 'auth-keypair').
+        authentication_type : str, optional
+            The authentication type to use (e.g., 'auth-keypair', 'AD Service Principal').
+            If not provided, the existing authentication type is preserved.
 
         username : str, optional
             The username to set.
