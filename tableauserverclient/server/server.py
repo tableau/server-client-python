@@ -48,7 +48,6 @@ from tableauserverclient.server.exceptions import (
 from tableauserverclient.server.endpoint.exceptions import NotSignedInError
 from tableauserverclient.namespace import Namespace
 
-
 _PRODUCT_TO_REST_VERSION = {
     "10.0": "2.3",
     "9.3": "2.2",

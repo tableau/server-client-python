@@ -37,9 +37,7 @@ class DataAlertItem:
 
     def __repr__(self) -> str:
         return "<Data Alert {_id} subject={_subject} frequency={_frequency} \
-                public={_public}>".format(
-            **self.__dict__
-        )
+                public={_public}>".format(**self.__dict__)
 
     @property
     def id(self) -> str | None:

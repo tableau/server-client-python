@@ -9,7 +9,6 @@ from tableauserverclient.helpers.logging import logger
 
 from typing import TYPE_CHECKING
 
-
 if TYPE_CHECKING:
     from ..server import Server
     from ..request_options import RequestOptions

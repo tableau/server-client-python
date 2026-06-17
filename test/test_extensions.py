@@ -6,7 +6,6 @@ import pytest
 
 import tableauserverclient as TSC
 
-
 TEST_ASSET_DIR = Path(__file__).parent / "assets"
 
 GET_SERVER_EXT_SETTINGS = TEST_ASSET_DIR / "extensions_server_settings_true.xml"
