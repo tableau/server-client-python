@@ -679,7 +679,9 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
                         "TSC_CHUNK_SIZE_MB environment variable to a lower value (current default: 50)."
                     )
                 else:
-                    err.content = "Timeout error while publishing. Please use asynchronous publishing to avoid timeouts."
+                    err.content = (
+                        "Timeout error while publishing. Please use asynchronous publishing to avoid timeouts."
+                    )
             raise err
 
         if as_job:
