@@ -763,6 +763,22 @@ def test_synchronous_publish_timeout_error(server) -> None:
             )
 
 
+def test_async_publish_timeout_error(server) -> None:
+    with requests_mock.mock() as m:
+        m.register_uri("POST", server.datasources.baseurl, status_code=504)
+
+        new_datasource = TSC.DatasourceItem(project_id="")
+        publish_mode = server.PublishMode.CreateNew
+
+        with pytest.raises(InternalServerError, match="TSC_CHUNK_SIZE_MB"):
+            server.datasources.publish(
+                new_datasource,
+                TEST_ASSET_DIR / "SampleDS.tds",
+                publish_mode,
+                as_job=True,
+            )
+
+
 def test_delete_extracts(server) -> None:
     server.version = "3.10"
     with requests_mock.mock() as m:

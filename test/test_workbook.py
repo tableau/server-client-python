@@ -879,6 +879,17 @@ def test_synchronous_publish_timeout_error(server: TSC.Server) -> None:
             server.workbooks.publish(new_workbook, TEST_ASSET_DIR / "SampleWB.twbx", publish_mode)
 
 
+def test_async_publish_timeout_error(server: TSC.Server) -> None:
+    with requests_mock.mock() as m:
+        m.register_uri("POST", server.workbooks.baseurl, status_code=504)
+
+        new_workbook = TSC.WorkbookItem(project_id="")
+        publish_mode = server.PublishMode.CreateNew
+
+        with pytest.raises(InternalServerError, match="TSC_CHUNK_SIZE_MB"):
+            server.workbooks.publish(new_workbook, TEST_ASSET_DIR / "SampleWB.twbx", publish_mode, as_job=True)
+
+
 def test_delete_extracts_all(server: TSC.Server) -> None:
     server.version = "3.10"
     server.workbooks.baseurl
