@@ -47,6 +47,9 @@ class ConnectionItem:
         The Connection Credentials object containing authentication details for
         the connection. Replaces username/password/embed_password when
         publishing a flow, document or workbook file in the request body.
+
+    database_name: str
+        The name of the database for the connection.
     """
 
     def __init__(self):
@@ -62,6 +65,7 @@ class ConnectionItem:
         self.connection_credentials: ConnectionCredentials | None = None
         self._query_tagging: bool | None = None
         self._auth_type: str | None = None
+        self._database_name: str | None = None
 
     @property
     def datasource_id(self) -> str | None:
@@ -102,6 +106,14 @@ class ConnectionItem:
     def auth_type(self, value: str | None):
         self._auth_type = value
 
+    @property
+    def database_name(self) -> str | None:
+        return self._database_name
+
+    @database_name.setter
+    def database_name(self, value: str | None):
+        self._database_name = value
+
     def __repr__(self):
         return "<ConnectionItem#{_id} embed={embed_password} type={_connection_type} auth={_auth_type} username={username}>".format(
             **self.__dict__
@@ -124,6 +136,11 @@ class ConnectionItem:
                 string_to_bool(s) if (s := connection_xml.get("queryTagging", None)) else None
             )
             connection_item._auth_type = connection_xml.get("authenticationType", None)
+            # The REST API GET /connections response uses "dbName" for the database
+            # name attribute.  This is different from the publish request body, which
+            # uses "databaseName" (see _add_connections_element in request_factory.py).
+            # Both names map to the same database_name property on ConnectionItem.
+            connection_item._database_name = connection_xml.get("dbName", None)
             datasource_elem = connection_xml.find(".//t:datasource", namespaces=ns)
             if datasource_elem is not None:
                 connection_item._datasource_id = datasource_elem.get("id", None)
@@ -152,6 +169,10 @@ class ConnectionItem:
             connection_item.server_address = connection_xml.get("serverAddress", None)
             connection_item.server_port = connection_xml.get("serverPort", None)
             connection_item._auth_type = connection_xml.get("authenticationType", None)
+            # Publish/update request bodies use "databaseName" (matching the
+            # publish-request schema), while GET responses use "dbName".  See
+            # from_response() above and _add_connections_element() in request_factory.py.
+            connection_item._database_name = connection_xml.get("databaseName", None)
 
             connection_credentials = connection_xml.find(".//t:connectionCredentials", namespaces=ns)
 

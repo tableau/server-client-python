@@ -47,6 +47,8 @@ def _add_connections_element(connections_element, connection):
     connection_element.attrib["serverAddress"] = connection.server_address
     if connection.server_port:
         connection_element.attrib["serverPort"] = connection.server_port
+    if connection.database_name:
+        connection_element.attrib["databaseName"] = connection.database_name
     if connection.connection_credentials:
         connection_credentials = connection.connection_credentials
     elif connection.username is not None and connection.password is not None and connection.embed_password is not None:
