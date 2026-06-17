@@ -72,12 +72,17 @@ class WebhookItem:
     @property
     def event(self) -> str | None:
         if self._event:
-            return self._event.replace("webhook-source-event-", "")
+            return self._event.removeprefix("webhook-source-event-")
         return None
 
     @event.setter
-    def event(self, value: str) -> None:
-        self._event = f"webhook-source-event-{value}"
+    def event(self, value: str | None) -> None:
+        if value is None:
+            self._event = None
+        elif value.startswith("webhook-source-event-") or value.startswith("webhook-event-"):
+            self._event = value
+        else:
+            self._event = f"webhook-source-event-{value}"
 
     @classmethod
     def from_response(cls: type["WebhookItem"], resp: bytes, ns) -> list["WebhookItem"]:
