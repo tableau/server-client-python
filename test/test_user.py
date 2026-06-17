@@ -467,7 +467,7 @@ def test_bulk_add(server: TSC.Server) -> None:
         for user, xml_user in zip(users, xml_users):
             assert user.name == xml_user.get("name")
             if user.idp_configuration_id is None:
-                assert xml_user.get("authSetting") == (user.auth_setting or "ServerDefault")
+                assert xml_user.get("authSetting") == user.auth_setting
             else:
                 assert xml_user.get("idpConfigurationId") == user.idp_configuration_id
                 assert xml_user.get("authSetting") is None
