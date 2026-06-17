@@ -137,6 +137,7 @@ class RequestOptions(RequestOptionsBase):
         DisplayTabs = "displayTabs"
         DomainName = "domainName"
         DomainNickname = "domainNickname"
+        Email = "email"
         FavoritesTotal = "favoritesTotal"
         Fields = "fields"
         FlowId = "flowId"
