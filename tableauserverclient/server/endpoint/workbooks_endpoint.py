@@ -854,7 +854,9 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         as_job : bool, default False
             Set to True to run the upload as a job (asynchronous upload). If set
             to True a job will start to perform the publishing process and a Job
-            object is returned. Defaults to False.
+            object is returned. Defaults to False. For large files on slow
+            connections, if uploads time out you can tune the chunk size with
+            the TSC_CHUNK_SIZE_MB environment variable (default: 50).
 
         skip_connection_check : bool, default False
             Set to True to skip connection check at time of upload. Publishing
@@ -976,8 +978,14 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         try:
             server_response = self.post_request(url, xml_request, content_type, parameters)
         except InternalServerError as err:
-            if err.code == 504 and not as_job:
-                err.content = "Timeout error while publishing. Please use asynchronous publishing to avoid timeouts."
+            if err.code == 504:
+                if as_job:
+                    err.content = (
+                        "Timeout error during chunked file upload. Try reducing the chunk size by setting the "
+                        "TSC_CHUNK_SIZE_MB environment variable to a lower value (current default: 50)."
+                    )
+                else:
+                    err.content = "Timeout error while publishing. Please use asynchronous publishing to avoid timeouts."
             raise err
 
         if as_job:

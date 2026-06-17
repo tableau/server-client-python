@@ -580,7 +580,9 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         as_job : bool, default False
             If True, the publish operation is asynchronous and returns a job
             item. If False, the publish operation is synchronous and returns a
-            datasource item.
+            datasource item. For large files on slow connections, if uploads
+            time out you can tune the chunk size with the TSC_CHUNK_SIZE_MB
+            environment variable (default: 50).
 
         Returns
         -------
@@ -670,8 +672,14 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         try:
             server_response = self.post_request(url, xml_request, content_type)
         except InternalServerError as err:
-            if err.code == 504 and not as_job:
-                err.content = "Timeout error while publishing. Please use asynchronous publishing to avoid timeouts."
+            if err.code == 504:
+                if as_job:
+                    err.content = (
+                        "Timeout error during chunked file upload. Try reducing the chunk size by setting the "
+                        "TSC_CHUNK_SIZE_MB environment variable to a lower value (current default: 50)."
+                    )
+                else:
+                    err.content = "Timeout error while publishing. Please use asynchronous publishing to avoid timeouts."
             raise err
 
         if as_job:
