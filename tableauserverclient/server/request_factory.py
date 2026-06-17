@@ -997,8 +997,8 @@ class UserRequest:
                 raise ValueError("User cannot have both authSetting and idpConfigurationId.")
             elif user.idp_configuration_id is not None:
                 user_element.attrib["idpConfigurationId"] = user.idp_configuration_id
-            else:
-                user_element.attrib["authSetting"] = user.auth_setting or "ServerDefault"
+            elif user.auth_setting is not None:
+                user_element.attrib["authSetting"] = user.auth_setting
 
         parts = {
             "tableau_user_import": ("tsc_users_file.csv", csv_content, "file"),
