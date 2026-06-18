@@ -93,6 +93,9 @@ HyperActionTable = TypedDict(
 HyperAction = HyperActionTable | HyperActionRow
 
 
+_UNSET = object()
+
+
 class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]):
     def __init__(self, parent_srv: "Server") -> None:
         super().__init__(parent_srv)
@@ -235,6 +238,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         datasource_id: str,
         filepath: T,
         include_extract: bool = True,
+        no_extract: object = ...,
     ) -> T: ...
 
     @overload
@@ -243,17 +247,18 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         datasource_id: str,
         filepath: FilePath | None = None,
         include_extract: bool = True,
+        no_extract: object = ...,
     ) -> str: ...
 
     # Download 1 datasource by id
     @api(version="2.0")
-    @parameter_added_in(no_extract="2.5")
     @parameter_added_in(include_extract="2.5")
     def download(
         self,
         datasource_id,
         filepath=None,
         include_extract=True,
+        no_extract=_UNSET,
     ):
         """
         Downloads the specified data source from a site. The data source is
@@ -274,10 +279,20 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
             If True, the extract is included in the download. If False, the
             extract is not included.
 
-        Returns
-        -------
-        filepath : PathOrFileW
+        Notes
+        -----
+        The ``no_extract`` parameter is deprecated. Use ``include_extract=False``
+        instead.
         """
+        if no_extract is not _UNSET:
+            import warnings
+
+            warnings.warn(
+                "no_extract is deprecated and will be removed. Use include_extract=False instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            include_extract = not no_extract
         return self.download_revision(
             datasource_id,
             None,

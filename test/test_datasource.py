@@ -645,6 +645,22 @@ def test_download_extract_only(server) -> None:
     os.remove(file_path)
 
 
+def test_download_no_extract_emits_deprecation_warning(server) -> None:
+    """no_extract=True should emit a DeprecationWarning and map to includeExtract=False."""
+    server.version = "2.5"
+
+    with requests_mock.mock() as m:
+        m.get(
+            server.datasources.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/content?includeExtract=False",
+            headers={"Content-Disposition": 'name="tableau_datasource"; filename="Sample datasource.tds"'},
+            complete_qs=True,
+        )
+        with pytest.warns(DeprecationWarning, match="deprecated and will be removed"):
+            file_path = server.datasources.download("9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", no_extract=True)
+        assert os.path.exists(file_path)
+    os.remove(file_path)
+
+
 def test_update_missing_id(server) -> None:
     single_datasource = TSC.DatasourceItem("ee8c6e70-43b6-11e6-af4f-f7b0d8e20760", "test")
     with pytest.raises(TSC.MissingRequiredFieldError):
