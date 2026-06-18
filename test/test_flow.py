@@ -17,6 +17,7 @@ POPULATE_PERMISSIONS_XML = TEST_ASSET_DIR / "flow_populate_permissions.xml"
 PUBLISH_XML = TEST_ASSET_DIR / "flow_publish.xml"
 UPDATE_XML = TEST_ASSET_DIR / "flow_update.xml"
 REFRESH_XML = TEST_ASSET_DIR / "flow_refresh.xml"
+REFRESH_DUPLICATE_XML = TEST_ASSET_DIR / "flow_refresh_duplicate.xml"
 
 
 @pytest.fixture(scope="function")
@@ -230,6 +231,18 @@ def test_refresh_id_str(server: TSC.Server) -> None:
         assert refresh_job.flow_run.id == "e0c3067f-2333-4eee-8028-e0a56ca496f6"
         assert refresh_job.flow_run.flow_id == "92967d2d-c7e2-46d0-8847-4802df58f484"
         assert format_datetime(refresh_job.flow_run.started_at) == "2018-05-22T13:00:29Z"
+
+
+def test_refresh_already_running(server: TSC.Server) -> None:
+    response_xml = REFRESH_DUPLICATE_XML.read_text()
+    with requests_mock.mock() as m:
+        m.post(
+            server.flows.baseurl + "/92967d2d-c7e2-46d0-8847-4802df58f484/run",
+            status_code=409,
+            text=response_xml,
+        )
+        refresh_job = server.flows.refresh("92967d2d-c7e2-46d0-8847-4802df58f484")
+        assert refresh_job is None
 
 
 def test_bad_download_response(server: TSC.Server) -> None:

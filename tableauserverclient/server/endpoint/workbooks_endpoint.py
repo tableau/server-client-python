@@ -11,6 +11,7 @@ from tableauserverclient.server.query import QuerySet
 
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api, parameter_added_in
 from tableauserverclient.server.endpoint.exceptions import (
+    DUPLICATE_EXTRACT_JOB_CODE,
     InternalServerError,
     MissingRequiredFieldError,
     ServerResponseError,
@@ -147,7 +148,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         try:
             server_response = self.post_request(url, refresh_req)
         except ServerResponseError as e:
-            if e.code.startswith("409") and "already" in e.detail:
+            if e.code == DUPLICATE_EXTRACT_JOB_CODE:
                 logger.warning(f"{e.summary} {e.detail}")
                 return None
             raise

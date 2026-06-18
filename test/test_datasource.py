@@ -35,6 +35,7 @@ UPDATE_HYPER_DATA_XML = TEST_ASSET_DIR / "datasource_data_update.xml"
 UPDATE_CONNECTION_XML = TEST_ASSET_DIR / "datasource_connection_update.xml"
 UPDATE_CONNECTIONS_XML = TEST_ASSET_DIR / "datasource_connections_update.xml"
 UPDATE_CONNECTIONS_NO_AUTH_XML = TEST_ASSET_DIR / "datasource_connections_update_no_auth.xml"
+REFRESH_DUPLICATE_XML = TEST_ASSET_DIR / "datasource_refresh_duplicate.xml"
 
 
 @pytest.fixture(scope="function")
@@ -471,6 +472,19 @@ def test_refresh_object(server) -> None:
 
     # We only check the `id`; remaining fields are already tested in `test_refresh_id`
     assert "7c3d599e-949f-44c3-94a1-f30ba85757e4" == new_job.id
+
+
+def test_refresh_already_running(server) -> None:
+    server.version = "2.8"
+    response_xml = REFRESH_DUPLICATE_XML.read_text()
+    with requests_mock.mock() as m:
+        m.post(
+            server.datasources.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/refresh",
+            status_code=409,
+            text=response_xml,
+        )
+        refresh_job = server.datasources.refresh("9dbd2263-16b5-46e1-9c43-a76bb8ab65fb")
+        assert refresh_job is None
 
 
 def test_datasource_refresh_request_empty(server) -> None:

@@ -1,6 +1,10 @@
 from defusedxml.ElementTree import fromstring
 from typing import TypeVar
 
+# Server error code for "extract refresh already queued" — treated as a
+# non-fatal warning rather than an exception in refresh() methods.
+DUPLICATE_EXTRACT_JOB_CODE = "409093"
+
 
 def split_pascal_case(s: str) -> str:
     return "".join([f" {c}" if c.isupper() else c for c in s]).strip()

@@ -10,7 +10,12 @@ from collections.abc import Iterable
 
 from tableauserverclient.server.endpoint.dqw_endpoint import _DataQualityWarningEndpoint
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
-from tableauserverclient.server.endpoint.exceptions import InternalServerError, MissingRequiredFieldError
+from tableauserverclient.server.endpoint.exceptions import (
+    DUPLICATE_EXTRACT_JOB_CODE,
+    InternalServerError,
+    MissingRequiredFieldError,
+    ServerResponseError,
+)
 from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
 from tableauserverclient.server.endpoint.resource_tagger import _ResourceTagger, TaggingMixin
 from tableauserverclient.models import FlowItem, PaginationItem, ConnectionItem, JobItem
@@ -305,7 +310,7 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
         return connection
 
     @api(version="3.3")
-    def refresh(self, flow_item: FlowItem | str) -> JobItem:
+    def refresh(self, flow_item: FlowItem | str) -> JobItem | None:
         """
         Runs the flow to refresh the data.
 
@@ -324,7 +329,13 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
         flow_id = getattr(flow_item, "id", flow_item)
         url = f"{self.baseurl}/{flow_id}/run"
         empty_req = RequestFactory.Empty.empty_req()
-        server_response = self.post_request(url, empty_req)
+        try:
+            server_response = self.post_request(url, empty_req)
+        except ServerResponseError as e:
+            if e.code == DUPLICATE_EXTRACT_JOB_CODE:
+                logger.warning(f"{e.summary} {e.detail}")
+                return None
+            raise
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return new_job
 
