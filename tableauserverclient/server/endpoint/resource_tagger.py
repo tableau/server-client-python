@@ -1,6 +1,6 @@
 import abc
 import copy
-from typing import Generic, Optional, Protocol, TypeVar, Union, TYPE_CHECKING, runtime_checkable
+from typing import Generic, Protocol, TypeVar, TYPE_CHECKING, runtime_checkable
 from collections.abc import Iterable
 import urllib.parse
 
@@ -73,7 +73,7 @@ class Taggable(Protocol):
     _initial_tags: set[str]
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         pass
 
 
@@ -96,7 +96,7 @@ class TaggingMixin(abc.ABC, Generic[T]):
     def delete_request(self, url) -> None:
         pass
 
-    def add_tags(self, item: Union[T, str], tags: Union[Iterable[str], str]) -> set[str]:
+    def add_tags(self, item: T | str, tags: Iterable[str] | str) -> set[str]:
         item_id = getattr(item, "id", item)
 
         if not isinstance(item_id, str):
@@ -112,7 +112,7 @@ class TaggingMixin(abc.ABC, Generic[T]):
         server_response = self.put_request(url, add_req)
         return TagItem.from_response(server_response.content, self.parent_srv.namespace)
 
-    def delete_tags(self, item: Union[T, str], tags: Union[Iterable[str], str]) -> None:
+    def delete_tags(self, item: T | str, tags: Iterable[str] | str) -> None:
         item_id = getattr(item, "id", item)
 
         if not isinstance(item_id, str):
@@ -147,7 +147,7 @@ class TaggingMixin(abc.ABC, Generic[T]):
         logger.info(f"Updated tags to {tags}")
 
 
-content = Iterable[Union["ColumnItem", "DatabaseItem", "DatasourceItem", "FlowItem", "TableItem", "WorkbookItem"]]
+content = Iterable["ColumnItem | DatabaseItem | DatasourceItem | FlowItem | TableItem | WorkbookItem"]
 
 
 class Tags(Endpoint):
@@ -159,7 +159,7 @@ class Tags(Endpoint):
         return f"{self.parent_srv.baseurl}/tags"
 
     @api(version="3.9")
-    def batch_add(self, tags: Union[Iterable[str], str], content: content) -> set[str]:
+    def batch_add(self, tags: Iterable[str] | str, content: content) -> set[str]:
         if isinstance(tags, str):
             tag_set = {tags}
         else:
@@ -171,7 +171,7 @@ class Tags(Endpoint):
         return TagItem.from_response(server_response.content, self.parent_srv.namespace)
 
     @api(version="3.9")
-    def batch_delete(self, tags: Union[Iterable[str], str], content: content) -> set[str]:
+    def batch_delete(self, tags: Iterable[str] | str, content: content) -> set[str]:
         if isinstance(tags, str):
             tag_set = {tags}
         else:

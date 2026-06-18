@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 from defusedxml.ElementTree import fromstring
 
@@ -51,42 +50,42 @@ class ConnectionItem:
     """
 
     def __init__(self):
-        self._datasource_id: Optional[str] = None
-        self._datasource_name: Optional[str] = None
-        self._id: Optional[str] = None
-        self._connection_type: Optional[str] = None
+        self._datasource_id: str | None = None
+        self._datasource_name: str | None = None
+        self._id: str | None = None
+        self._connection_type: str | None = None
         self.embed_password: bool = None
-        self.password: Optional[str] = None
-        self.server_address: Optional[str] = None
-        self.server_port: Optional[str] = None
-        self.username: Optional[str] = None
-        self.connection_credentials: Optional[ConnectionCredentials] = None
-        self._query_tagging: Optional[bool] = None
-        self._auth_type: Optional[str] = None
+        self.password: str | None = None
+        self.server_address: str | None = None
+        self.server_port: str | None = None
+        self.username: str | None = None
+        self.connection_credentials: ConnectionCredentials | None = None
+        self._query_tagging: bool | None = None
+        self._auth_type: str | None = None
 
     @property
-    def datasource_id(self) -> Optional[str]:
+    def datasource_id(self) -> str | None:
         return self._datasource_id
 
     @property
-    def datasource_name(self) -> Optional[str]:
+    def datasource_name(self) -> str | None:
         return self._datasource_name
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         return self._id
 
     @property
-    def connection_type(self) -> Optional[str]:
+    def connection_type(self) -> str | None:
         return self._connection_type
 
     @property
-    def query_tagging(self) -> Optional[bool]:
+    def query_tagging(self) -> bool | None:
         return self._query_tagging
 
     @query_tagging.setter
     @property_is_boolean
-    def query_tagging(self, value: Optional[bool]):
+    def query_tagging(self, value: bool | None):
         # if connection type = hyper, Snowflake, or Teradata, we can't change this value: it is always true
         if self._connection_type in ["hyper", "snowflake", "teradata"]:
             logger.debug(
@@ -96,11 +95,11 @@ class ConnectionItem:
         self._query_tagging = value
 
     @property
-    def auth_type(self) -> Optional[str]:
+    def auth_type(self) -> str | None:
         return self._auth_type
 
     @auth_type.setter
-    def auth_type(self, value: Optional[str]):
+    def auth_type(self, value: str | None):
         self._auth_type = value
 
     def __repr__(self):

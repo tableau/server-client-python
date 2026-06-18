@@ -1,7 +1,7 @@
 import copy
 from datetime import datetime
 from requests import Response
-from typing import TYPE_CHECKING, Callable, Optional, overload
+from typing import TYPE_CHECKING, Callable, overload
 from collections.abc import Iterator
 
 from defusedxml.ElementTree import fromstring
@@ -27,92 +27,92 @@ class ViewItem:
 
     Attributes
     ----------
-    content_url: Optional[str], default None
+    content_url: str | None, default None
         The name of the view as it would appear in a URL.
 
-    created_at: Optional[datetime], default None
+    created_at: datetime | None, default None
         The date and time when the view was created.
 
-    id: Optional[str], default None
+    id: str | None, default None
         The unique identifier for the view.
 
-    image: Optional[Callable[[], bytes]], default None
+    image: Callable[[], bytes] | None, default None
         The image of the view. You must first call the `views.populate_image`
         method to access the image.
 
-    location: Optional[LocationItem], default None
+    location: LocationItem | None, default None
         The location of the view. The location can be a personal space or a
         project.
 
-    name: Optional[str], default None
+    name: str | None, default None
         The name of the view.
 
-    owner: Optional[UserItem], default None
+    owner: UserItem | None, default None
         The owner of the view.
 
-    owner_id: Optional[str], default None
+    owner_id: str | None, default None
         The ID for the owner of the view.
 
-    pdf: Optional[Callable[[], bytes]], default None
+    pdf: Callable[[], bytes] | None, default None
         The PDF of the view. You must first call the `views.populate_pdf`
         method to access the PDF.
 
-    preview_image: Optional[Callable[[], bytes]], default None
+    preview_image: Callable[[], bytes] | None, default None
         The preview image of the view. You must first call the
         `views.populate_preview_image` method to access the preview image.
 
-    project: Optional[ProjectItem], default None
+    project: ProjectItem | None, default None
         The project that contains the view.
 
-    project_id: Optional[str], default None
+    project_id: str | None, default None
         The ID for the project that contains the view.
 
     tags: set[str], default set()
         The tags associated with the view.
 
-    total_views: Optional[int], default None
+    total_views: int | None, default None
         The total number of views for the view.
 
-    updated_at: Optional[datetime], default None
+    updated_at: datetime | None, default None
         The date and time when the view was last updated.
 
-    workbook: Optional[WorkbookItem], default None
+    workbook: WorkbookItem | None, default None
         The workbook that contains the view.
 
-    workbook_id: Optional[str], default None
+    workbook_id: str | None, default None
         The ID for the workbook that contains the view.
     """
 
     def __init__(self) -> None:
-        self._content_url: Optional[str] = None
-        self._created_at: Optional[datetime] = None
-        self._id: Optional[str] = None
-        self._image: Optional[Callable[[], bytes]] = None
+        self._content_url: str | None = None
+        self._created_at: datetime | None = None
+        self._id: str | None = None
+        self._image: Callable[[], bytes] | None = None
         self._initial_tags: set[str] = set()
-        self._name: Optional[str] = None
-        self._owner_id: Optional[str] = None
-        self._preview_image: Optional[Callable[[], bytes]] = None
-        self._project_id: Optional[str] = None
-        self._pdf: Optional[Callable[[], bytes]] = None
-        self._csv: Optional[Callable[[], Iterator[bytes]]] = None
-        self._excel: Optional[Callable[[], Iterator[bytes]]] = None
-        self._total_views: Optional[int] = None
-        self._sheet_type: Optional[str] = None
-        self._updated_at: Optional[datetime] = None
-        self._workbook_id: Optional[str] = None
-        self._permissions: Optional[Callable[[], list[PermissionsRule]]] = None
+        self._name: str | None = None
+        self._owner_id: str | None = None
+        self._preview_image: Callable[[], bytes] | None = None
+        self._project_id: str | None = None
+        self._pdf: Callable[[], bytes] | None = None
+        self._csv: Callable[[], Iterator[bytes]] | None = None
+        self._excel: Callable[[], Iterator[bytes]] | None = None
+        self._total_views: int | None = None
+        self._sheet_type: str | None = None
+        self._updated_at: datetime | None = None
+        self._workbook_id: str | None = None
+        self._permissions: Callable[[], list[PermissionsRule]] | None = None
         self.tags: set[str] = set()
-        self._favorites_total: Optional[int] = None
-        self._view_url_name: Optional[str] = None
+        self._favorites_total: int | None = None
+        self._view_url_name: str | None = None
         self._data_acceleration_config = {
             "acceleration_enabled": None,
             "acceleration_status": None,
         }
 
-        self._owner: Optional[UserItem] = None
-        self._project: Optional[ProjectItem] = None
-        self._workbook: Optional["WorkbookItem"] = None
-        self._location: Optional[LocationItem] = None
+        self._owner: UserItem | None = None
+        self._project: ProjectItem | None = None
+        self._workbook: "WorkbookItem | None" = None
+        self._location: LocationItem | None = None
 
     def __str__(self):
         return "<ViewItem {} '{}' contentUrl='{}' project={}>".format(
@@ -138,15 +138,15 @@ class ViewItem:
         self._excel = excel
 
     @property
-    def content_url(self) -> Optional[str]:
+    def content_url(self) -> str | None:
         return self._content_url
 
     @property
-    def created_at(self) -> Optional[datetime]:
+    def created_at(self) -> datetime | None:
         return self._created_at
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         return self._id
 
     @property
@@ -157,11 +157,11 @@ class ViewItem:
         return self._image()
 
     @property
-    def name(self) -> Optional[str]:
+    def name(self) -> str | None:
         return self._name
 
     @property
-    def owner_id(self) -> Optional[str]:
+    def owner_id(self) -> str | None:
         return self._owner_id
 
     @property
@@ -172,7 +172,7 @@ class ViewItem:
         return self._preview_image()
 
     @property
-    def project_id(self) -> Optional[str]:
+    def project_id(self) -> str | None:
         return self._project_id
 
     @property
@@ -197,7 +197,7 @@ class ViewItem:
         return self._excel()
 
     @property
-    def sheet_type(self) -> Optional[str]:
+    def sheet_type(self) -> str | None:
         return self._sheet_type
 
     @property
@@ -208,19 +208,19 @@ class ViewItem:
         return self._total_views
 
     @property
-    def updated_at(self) -> Optional[datetime]:
+    def updated_at(self) -> datetime | None:
         return self._updated_at
 
     @property
-    def workbook_id(self) -> Optional[str]:
+    def workbook_id(self) -> str | None:
         return self._workbook_id
 
     @property
-    def view_url_name(self) -> Optional[str]:
+    def view_url_name(self) -> str | None:
         return self._view_url_name
 
     @property
-    def favorites_total(self) -> Optional[int]:
+    def favorites_total(self) -> int | None:
         return self._favorites_total
 
     @property
@@ -232,19 +232,19 @@ class ViewItem:
         self._data_acceleration_config = value
 
     @property
-    def project(self) -> Optional["ProjectItem"]:
+    def project(self) -> "ProjectItem | None":
         return self._project
 
     @property
-    def workbook(self) -> Optional["WorkbookItem"]:
+    def workbook(self) -> "WorkbookItem | None":
         return self._workbook
 
     @property
-    def owner(self) -> Optional[UserItem]:
+    def owner(self) -> UserItem | None:
         return self._owner
 
     @property
-    def location(self) -> Optional[LocationItem]:
+    def location(self) -> LocationItem | None:
         return self._location
 
     @property

@@ -1,4 +1,3 @@
-from typing import Optional
 import xml.etree.ElementTree as ET
 
 
@@ -23,27 +22,27 @@ class LocationItem:
         Project = "Project"
 
     def __init__(self):
-        self._id: Optional[str] = None
-        self._type: Optional[str] = None
-        self._name: Optional[str] = None
+        self._id: str | None = None
+        self._type: str | None = None
+        self._name: str | None = None
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.__dict__!r})"
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         return self._id
 
     @property
-    def type(self) -> Optional[str]:
+    def type(self) -> str | None:
         return self._type
 
     @property
-    def name(self) -> Optional[str]:
+    def name(self) -> str | None:
         return self._name
 
     @classmethod
-    def from_xml(cls, xml: ET.Element, ns: Optional[dict] = None) -> "LocationItem":
+    def from_xml(cls, xml: ET.Element, ns: dict | None = None) -> "LocationItem":
         if ns is None:
             ns = {}
         location = cls()

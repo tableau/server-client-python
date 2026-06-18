@@ -1,4 +1,3 @@
-from typing import Optional, List
 from defusedxml.ElementTree import fromstring
 import xml.etree.ElementTree as ET
 
@@ -22,16 +21,16 @@ class ExtractItem:
     """
 
     def __init__(
-        self, priority: int, refresh_type: str, workbook_id: Optional[str] = None, datasource_id: Optional[str] = None
+        self, priority: int, refresh_type: str, workbook_id: str | None = None, datasource_id: str | None = None
     ):
-        self._id: Optional[str] = None
+        self._id: str | None = None
         self._priority = priority
         self._type = refresh_type
         self._workbook_id = workbook_id
         self._datasource_id = datasource_id
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         return self._id
 
     @property
@@ -43,21 +42,21 @@ class ExtractItem:
         return self._type
 
     @property
-    def workbook_id(self) -> Optional[str]:
+    def workbook_id(self) -> str | None:
         return self._workbook_id
 
     @property
-    def datasource_id(self) -> Optional[str]:
+    def datasource_id(self) -> str | None:
         return self._datasource_id
 
     @classmethod
-    def from_response(cls, resp: str, ns: dict) -> List["ExtractItem"]:
+    def from_response(cls, resp: str, ns: dict) -> list["ExtractItem"]:
         """Create ExtractItem objects from XML response."""
         parsed_response = fromstring(resp)
         return cls.from_xml_element(parsed_response, ns)
 
     @classmethod
-    def from_xml_element(cls, parsed_response: ET.Element, ns: dict) -> List["ExtractItem"]:
+    def from_xml_element(cls, parsed_response: ET.Element, ns: dict) -> list["ExtractItem"]:
         """Create ExtractItem objects from XML element."""
         all_extract_items = []
         all_extract_xml = parsed_response.findall(".//t:extract", namespaces=ns)

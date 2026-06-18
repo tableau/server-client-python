@@ -12,7 +12,7 @@ from tableauserverclient.models import ViewItem, PaginationItem
 
 from tableauserverclient.helpers.logging import logger
 
-from typing import Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 from collections.abc import Iterable, Iterator
 
 if TYPE_CHECKING:
@@ -47,7 +47,7 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
 
     @api(version="2.2")
     def get(
-        self, req_options: Optional["RequestOptions"] = None, usage: bool = False
+        self, req_options: "RequestOptions | None" = None, usage: bool = False
     ) -> tuple[list[ViewItem], PaginationItem]:
         """
         Returns the list of views on the site. Paginated endpoint.
@@ -56,7 +56,7 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
 
         Parameters
         ----------
-        req_options: Optional[RequestOptions], default None
+        req_options: RequestOptions | None, default None
             The request options for the request. These options can include
             parameters such as page size and sorting.
 
@@ -142,7 +142,7 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
         return image
 
     @api(version="2.5")
-    def populate_image(self, view_item: ViewItem, req_options: Optional["ImageRequestOptions"] = None) -> None:
+    def populate_image(self, view_item: ViewItem, req_options: "ImageRequestOptions | None" = None) -> None:
         """
         Populates the image of the specified view.
 
@@ -156,7 +156,7 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
         view_item: ViewItem
             The view item for which to populate the image.
 
-        req_options: Optional[ImageRequestOptions], default None
+        req_options: ImageRequestOptions | None, default None
             Optional request options for the request. These options can include
             parameters such as image resolution, max age, and format (PNG or SVG).
 
@@ -182,14 +182,14 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
         view_item._set_image(image_fetcher)
         logger.info(f"Populated image for view (ID: {view_item.id})")
 
-    def _get_view_image(self, view_item: ViewItem, req_options: Optional["ImageRequestOptions"]) -> bytes:
+    def _get_view_image(self, view_item: ViewItem, req_options: "ImageRequestOptions | None") -> bytes:
         url = f"{self.baseurl}/{view_item.id}/image"
         server_response = self.get_request(url, req_options)
         image = server_response.content
         return image
 
     @api(version="2.7")
-    def populate_pdf(self, view_item: ViewItem, req_options: Optional["PDFRequestOptions"] = None) -> None:
+    def populate_pdf(self, view_item: ViewItem, req_options: "PDFRequestOptions | None" = None) -> None:
         """
         Populates the PDF content of the specified view.
 
@@ -202,7 +202,7 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
         view_item: ViewItem
             The view item for which to populate the PDF.
 
-        req_options: Optional[PDFRequestOptions], default None
+        req_options: PDFRequestOptions | None, default None
             Optional request options for the request. These options can include
             parameters such as orientation and paper size.
 
@@ -220,14 +220,14 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
         view_item._set_pdf(pdf_fetcher)
         logger.info(f"Populated pdf for view (ID: {view_item.id})")
 
-    def _get_view_pdf(self, view_item: ViewItem, req_options: Optional["PDFRequestOptions"]) -> bytes:
+    def _get_view_pdf(self, view_item: ViewItem, req_options: "PDFRequestOptions | None") -> bytes:
         url = f"{self.baseurl}/{view_item.id}/pdf"
         server_response = self.get_request(url, req_options)
         pdf = server_response.content
         return pdf
 
     @api(version="2.7")
-    def populate_csv(self, view_item: ViewItem, req_options: Optional["CSVRequestOptions"] = None) -> None:
+    def populate_csv(self, view_item: ViewItem, req_options: "CSVRequestOptions | None" = None) -> None:
         """
         Populates the CSV data of the specified view.
 
@@ -241,7 +241,7 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
         view_item: ViewItem
             The view item for which to populate the CSV data.
 
-        req_options: Optional[CSVRequestOptions], default None
+        req_options: CSVRequestOptions | None, default None
             Optional request options for the request. These options can include
             parameters such as view filters and max age.
 
@@ -259,14 +259,14 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
         view_item._set_csv(csv_fetcher)
         logger.info(f"Populated csv for view (ID: {view_item.id})")
 
-    def _get_view_csv(self, view_item: ViewItem, req_options: Optional["CSVRequestOptions"]) -> Iterator[bytes]:
+    def _get_view_csv(self, view_item: ViewItem, req_options: "CSVRequestOptions | None") -> Iterator[bytes]:
         url = f"{self.baseurl}/{view_item.id}/data"
 
         with closing(self.get_request(url, request_object=req_options, parameters={"stream": True})) as server_response:
             yield from server_response.iter_content(1024)
 
     @api(version="3.8")
-    def populate_excel(self, view_item: ViewItem, req_options: Optional["ExcelRequestOptions"] = None) -> None:
+    def populate_excel(self, view_item: ViewItem, req_options: "ExcelRequestOptions | None" = None) -> None:
         """
         Populates the Excel data of the specified view.
 
@@ -280,7 +280,7 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
         view_item: ViewItem
             The view item for which to populate the Excel data.
 
-        req_options: Optional[ExcelRequestOptions], default None
+        req_options: ExcelRequestOptions | None, default None
             Optional request options for the request. These options can include
             parameters such as view filters and max age.
 
@@ -298,7 +298,7 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
         view_item._set_excel(excel_fetcher)
         logger.info(f"Populated excel for view (ID: {view_item.id})")
 
-    def _get_view_excel(self, view_item: ViewItem, req_options: Optional["ExcelRequestOptions"]) -> Iterator[bytes]:
+    def _get_view_excel(self, view_item: ViewItem, req_options: "ExcelRequestOptions | None") -> Iterator[bytes]:
         url = f"{self.baseurl}/{view_item.id}/crosstab/excel"
 
         with closing(self.get_request(url, request_object=req_options, parameters={"stream": True})) as server_response:
@@ -399,7 +399,7 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
         return None
 
     @api(version="1.0")
-    def add_tags(self, item: Union[ViewItem, str], tags: Union[Iterable[str], str]) -> set[str]:
+    def add_tags(self, item: ViewItem | str, tags: Iterable[str] | str) -> set[str]:
         """
         Adds tags to the specified view.
 
@@ -407,10 +407,10 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
 
         Parameters
         ----------
-        item: Union[ViewItem, str]
+        item: ViewItem | str
             The view item or view ID to which to add tags.
 
-        tags: Union[Iterable[str], str]
+        tags: Iterable[str] | str
             The tags to add to the view.
 
         Returns
@@ -421,7 +421,7 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
         return super().add_tags(item, tags)
 
     @api(version="1.0")
-    def delete_tags(self, item: Union[ViewItem, str], tags: Union[Iterable[str], str]) -> None:
+    def delete_tags(self, item: ViewItem | str, tags: Iterable[str] | str) -> None:
         """
         Deletes tags from the specified view.
 
@@ -429,10 +429,10 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
 
         Parameters
         ----------
-        item: Union[ViewItem, str]
+        item: ViewItem | str
             The view item or view ID from which to delete tags.
 
-        tags: Union[Iterable[str], str]
+        tags: Iterable[str] | str
             The tags to delete from the view.
 
         Returns
@@ -460,7 +460,7 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
         """
         return super().update_tags(item)
 
-    def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[ViewItem]:
+    def filter(self, *invalid, page_size: int | None = None, **kwargs) -> QuerySet[ViewItem]:
         """
         Queries the Tableau Server for items using the specified filters. Page
         size can be specified to limit the number of items returned in a single

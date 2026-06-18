@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 from datetime import datetime
-from typing import Optional, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from defusedxml.ElementTree import fromstring
 
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from requests import Response
 
 
-Interval = Union[HourlyInterval, DailyInterval, WeeklyInterval, MonthlyInterval]
+Interval = HourlyInterval | DailyInterval | WeeklyInterval | MonthlyInterval
 
 
 class ScheduleItem:
@@ -98,12 +98,12 @@ class ScheduleItem:
         Suspended = "Suspended"
 
     def __init__(self, name: str, priority: int, schedule_type: str, execution_order: str, interval_item: Interval):
-        self._created_at: Optional[datetime] = None
-        self._end_schedule_at: Optional[datetime] = None
-        self._id: Optional[str] = None
-        self._next_run_at: Optional[datetime] = None
-        self._state: Optional[str] = None
-        self._updated_at: Optional[datetime] = None
+        self._created_at: datetime | None = None
+        self._end_schedule_at: datetime | None = None
+        self._id: str | None = None
+        self._next_run_at: datetime | None = None
+        self._state: str | None = None
+        self._updated_at: datetime | None = None
         self.interval_item: Interval = interval_item
         self.execution_order: str = execution_order
         self.name: str = name
@@ -117,11 +117,11 @@ class ScheduleItem:
         return self.__str__() + "  { " + ", ".join(" % s: % s" % item for item in vars(self).items()) + "}"
 
     @property
-    def created_at(self) -> Optional[datetime]:
+    def created_at(self) -> datetime | None:
         return self._created_at
 
     @property
-    def end_schedule_at(self) -> Optional[datetime]:
+    def end_schedule_at(self) -> datetime | None:
         return self._end_schedule_at
 
     @property
@@ -134,11 +134,11 @@ class ScheduleItem:
         self._execution_order = value
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         return self._id
 
     @property
-    def name(self) -> Optional[str]:
+    def name(self) -> str | None:
         return self._name
 
     @name.setter
@@ -146,7 +146,7 @@ class ScheduleItem:
         self._name = value
 
     @property
-    def next_run_at(self) -> Optional[datetime]:
+    def next_run_at(self) -> datetime | None:
         return self._next_run_at
 
     @property
@@ -167,7 +167,7 @@ class ScheduleItem:
         self._schedule_type = value
 
     @property
-    def state(self) -> Optional[str]:
+    def state(self) -> str | None:
         return self._state
 
     @state.setter
@@ -176,7 +176,7 @@ class ScheduleItem:
         self._state = value
 
     @property
-    def updated_at(self) -> Optional[datetime]:
+    def updated_at(self) -> datetime | None:
         return self._updated_at
 
     @property

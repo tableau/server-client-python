@@ -1,5 +1,5 @@
 from defusedxml.ElementTree import fromstring
-from typing import Mapping, Optional, TypeVar
+from typing import TypeVar
 
 
 def split_pascal_case(s: str) -> str:
@@ -14,7 +14,7 @@ T = TypeVar("T")
 
 
 class XMLError(TableauError):
-    def __init__(self, code: str, summary: str, detail: str, url: Optional[str] = None) -> None:
+    def __init__(self, code: str, summary: str, detail: str, url: str | None = None) -> None:
         self.code = code
         self.summary = summary
         self.detail = detail
@@ -45,7 +45,7 @@ class ServerResponseError(XMLError):
 
 
 class InternalServerError(TableauError):
-    def __init__(self, server_response, request_url: Optional[str] = None):
+    def __init__(self, server_response, request_url: str | None = None):
         self.code = server_response.status_code
         self.content = server_response.content
         self.url = request_url or "server"

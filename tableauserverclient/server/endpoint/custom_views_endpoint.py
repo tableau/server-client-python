@@ -3,7 +3,7 @@ import logging
 import os
 from contextlib import closing
 from pathlib import Path
-from typing import Optional, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING
 from collections.abc import Iterator
 
 from tableauserverclient.config import BYTES_PER_MB, config
@@ -32,12 +32,12 @@ Delete a custom view
 update the name or owner of a custom view.
 """
 
-FilePath = Union[str, os.PathLike]
-FileObject = Union[io.BufferedReader, io.BytesIO]
-FileObjectR = Union[io.BufferedReader, io.BytesIO]
-FileObjectW = Union[io.BufferedWriter, io.BytesIO]
-PathOrFileR = Union[FilePath, FileObjectR]
-PathOrFileW = Union[FilePath, FileObjectW]
+FilePath = str | os.PathLike
+FileObject = io.BufferedReader | io.BytesIO
+FileObjectR = io.BufferedReader | io.BytesIO
+FileObjectW = io.BufferedWriter | io.BytesIO
+PathOrFileR = FilePath | FileObjectR
+PathOrFileW = FilePath | FileObjectW
 io_types_r = (io.BufferedReader, io.BytesIO)
 io_types_w = (io.BufferedWriter, io.BytesIO)
 
@@ -55,7 +55,7 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
         return f"{self.parent_srv._server_address}/api/exp/sites/{self.parent_srv.site_id}/customviews"
 
     @api(version="3.18")
-    def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[CustomViewItem], PaginationItem]:
+    def get(self, req_options: "RequestOptions | None" = None) -> tuple[list[CustomViewItem], PaginationItem]:
         """
         Get a list of custom views on a site.
 
@@ -87,7 +87,7 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
         return all_view_items, pagination_item
 
     @api(version="3.18")
-    def get_by_id(self, view_id: str) -> Optional[CustomViewItem]:
+    def get_by_id(self, view_id: str) -> CustomViewItem | None:
         """
         Get the details of a specific custom view.
 
@@ -99,7 +99,7 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
 
         Returns
         -------
-        Optional[CustomViewItem]
+        CustomViewItem | None
         """
         if not view_id:
             error = "Custom view item missing ID."
@@ -110,7 +110,7 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
         return CustomViewItem.from_response(server_response.content, self.parent_srv.namespace)
 
     @api(version="3.18")
-    def populate_image(self, view_item: CustomViewItem, req_options: Optional["ImageRequestOptions"] = None) -> None:
+    def populate_image(self, view_item: CustomViewItem, req_options: "ImageRequestOptions | None" = None) -> None:
         """
         Populate the image of a custom view.
 
@@ -149,14 +149,14 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
         view_item._set_image(image_fetcher)
         logger.info(f"Populated image for custom view (ID: {view_item.id})")
 
-    def _get_view_image(self, view_item: CustomViewItem, req_options: Optional["ImageRequestOptions"]) -> bytes:
+    def _get_view_image(self, view_item: CustomViewItem, req_options: "ImageRequestOptions | None") -> bytes:
         url = f"{self.baseurl}/{view_item.id}/image"
         server_response = self.get_request(url, req_options)
         image = server_response.content
         return image
 
     @api(version="3.23")
-    def populate_pdf(self, custom_view_item: CustomViewItem, req_options: Optional["PDFRequestOptions"] = None) -> None:
+    def populate_pdf(self, custom_view_item: CustomViewItem, req_options: "PDFRequestOptions | None" = None) -> None:
         """
         Populate the PDF of a custom view.
 
@@ -187,16 +187,14 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
         custom_view_item._set_pdf(pdf_fetcher)
         logger.info(f"Populated pdf for custom view (ID: {custom_view_item.id})")
 
-    def _get_custom_view_pdf(
-        self, custom_view_item: CustomViewItem, req_options: Optional["PDFRequestOptions"]
-    ) -> bytes:
+    def _get_custom_view_pdf(self, custom_view_item: CustomViewItem, req_options: "PDFRequestOptions | None") -> bytes:
         url = f"{self.baseurl}/{custom_view_item.id}/pdf"
         server_response = self.get_request(url, req_options)
         pdf = server_response.content
         return pdf
 
     @api(version="3.23")
-    def populate_csv(self, custom_view_item: CustomViewItem, req_options: Optional["CSVRequestOptions"] = None) -> None:
+    def populate_csv(self, custom_view_item: CustomViewItem, req_options: "CSVRequestOptions | None" = None) -> None:
         """
         Populate the CSV of a custom view.
 
@@ -228,7 +226,7 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
         logger.info(f"Populated csv for custom view (ID: {custom_view_item.id})")
 
     def _get_custom_view_csv(
-        self, custom_view_item: CustomViewItem, req_options: Optional["CSVRequestOptions"]
+        self, custom_view_item: CustomViewItem, req_options: "CSVRequestOptions | None"
     ) -> Iterator[bytes]:
         url = f"{self.baseurl}/{custom_view_item.id}/data"
 
@@ -236,7 +234,7 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
             yield from server_response.iter_content(1024)
 
     @api(version="3.18")
-    def update(self, view_item: CustomViewItem) -> Optional[CustomViewItem]:
+    def update(self, view_item: CustomViewItem) -> CustomViewItem | None:
         """
         Updates the name, owner, or shared status of a custom view.
 
@@ -249,7 +247,7 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
 
         Returns
         -------
-        Optional[CustomViewItem]
+        CustomViewItem | None
             The updated custom view item.
         """
         if not view_item.id:
@@ -330,7 +328,7 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
         return file
 
     @api(version="3.21")
-    def publish(self, view_item: CustomViewItem, file: PathOrFileR) -> Optional[CustomViewItem]:
+    def publish(self, view_item: CustomViewItem, file: PathOrFileR) -> CustomViewItem | None:
         """
         Publish a custom view to Tableau Server. The file parameter can be a
         file path or a file object. If a file path is provided, the file will be
@@ -347,7 +345,7 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
 
         Returns
         -------
-        Optional[CustomViewItem]
+        CustomViewItem | None
             The published custom view item.
         """
         url = self.expurl
@@ -378,7 +376,7 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
         server_response = self.post_request(url, xml_request, content_type)
         return CustomViewItem.from_response(server_response.content, self.parent_srv.namespace)
 
-    def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> "QuerySet[CustomViewItem]":
+    def filter(self, *invalid, page_size: int | None = None, **kwargs) -> "QuerySet[CustomViewItem]":
         """
         Queries the Tableau Server for items using the specified filters. Page
         size can be specified to limit the number of items returned in a single

@@ -1,6 +1,5 @@
 import xml.etree.ElementTree as ET
 from datetime import datetime
-from typing import Optional
 
 from tableauserverclient.datetime_helpers import parse_datetime
 from .property_decorators import property_is_boolean, property_is_datetime
@@ -9,52 +8,52 @@ from .permissions_item import Permission
 
 
 class MetricItem:
-    def __init__(self, name: Optional[str] = None):
-        self._id: Optional[str] = None
-        self._name: Optional[str] = name
-        self._description: Optional[str] = None
-        self._webpage_url: Optional[str] = None
-        self._created_at: Optional[datetime] = None
-        self._updated_at: Optional[datetime] = None
-        self._suspended: Optional[bool] = None
-        self._project_id: Optional[str] = None
-        self._project_name: Optional[str] = None
-        self._owner_id: Optional[str] = None
-        self._view_id: Optional[str] = None
+    def __init__(self, name: str | None = None):
+        self._id: str | None = None
+        self._name: str | None = name
+        self._description: str | None = None
+        self._webpage_url: str | None = None
+        self._created_at: datetime | None = None
+        self._updated_at: datetime | None = None
+        self._suspended: bool | None = None
+        self._project_id: str | None = None
+        self._project_name: str | None = None
+        self._owner_id: str | None = None
+        self._view_id: str | None = None
         self._initial_tags: set[str] = set()
         self.tags: set[str] = set()
-        self._permissions: Optional[Permission] = None
+        self._permissions: Permission | None = None
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         return self._id
 
     @id.setter
-    def id(self, value: Optional[str]) -> None:
+    def id(self, value: str | None) -> None:
         self._id = value
 
     @property
-    def name(self) -> Optional[str]:
+    def name(self) -> str | None:
         return self._name
 
     @name.setter
-    def name(self, value: Optional[str]) -> None:
+    def name(self, value: str | None) -> None:
         self._name = value
 
     @property
-    def description(self) -> Optional[str]:
+    def description(self) -> str | None:
         return self._description
 
     @description.setter
-    def description(self, value: Optional[str]) -> None:
+    def description(self, value: str | None) -> None:
         self._description = value
 
     @property
-    def webpage_url(self) -> Optional[str]:
+    def webpage_url(self) -> str | None:
         return self._webpage_url
 
     @property
-    def created_at(self) -> Optional[datetime]:
+    def created_at(self) -> datetime | None:
         return self._created_at
 
     @created_at.setter
@@ -63,7 +62,7 @@ class MetricItem:
         self._created_at = value
 
     @property
-    def updated_at(self) -> Optional[datetime]:
+    def updated_at(self) -> datetime | None:
         return self._updated_at
 
     @updated_at.setter
@@ -72,7 +71,7 @@ class MetricItem:
         self._updated_at = value
 
     @property
-    def suspended(self) -> Optional[bool]:
+    def suspended(self) -> bool | None:
         return self._suspended
 
     @suspended.setter
@@ -81,35 +80,35 @@ class MetricItem:
         self._suspended = value
 
     @property
-    def project_id(self) -> Optional[str]:
+    def project_id(self) -> str | None:
         return self._project_id
 
     @project_id.setter
-    def project_id(self, value: Optional[str]) -> None:
+    def project_id(self, value: str | None) -> None:
         self._project_id = value
 
     @property
-    def project_name(self) -> Optional[str]:
+    def project_name(self) -> str | None:
         return self._project_name
 
     @project_name.setter
-    def project_name(self, value: Optional[str]) -> None:
+    def project_name(self, value: str | None) -> None:
         self._project_name = value
 
     @property
-    def owner_id(self) -> Optional[str]:
+    def owner_id(self) -> str | None:
         return self._owner_id
 
     @owner_id.setter
-    def owner_id(self, value: Optional[str]) -> None:
+    def owner_id(self, value: str | None) -> None:
         self._owner_id = value
 
     @property
-    def view_id(self) -> Optional[str]:
+    def view_id(self) -> str | None:
         return self._view_id
 
     @view_id.setter
-    def view_id(self, value: Optional[str]) -> None:
+    def view_id(self, value: str | None) -> None:
         self._view_id = value
 
     def _set_permissions(self, permissions):

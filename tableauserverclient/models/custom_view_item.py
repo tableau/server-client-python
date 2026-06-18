@@ -2,7 +2,7 @@ from datetime import datetime
 
 from defusedxml import ElementTree
 from defusedxml.ElementTree import fromstring, tostring
-from typing import Callable, Optional
+from typing import Callable
 from collections.abc import Iterator
 
 from tableauserverclient.models.exceptions import UnpopulatedPropertyError
@@ -18,18 +18,18 @@ class CustomViewItem:
 
     Parameters
     ----------
-    id : Optional[str]
+    id : str | None
         The ID of the Custom View item.
 
-    name : Optional[str]
+    name : str | None
         The name of the Custom View item.
 
     Attributes
     ----------
-    content_url : Optional[str]
+    content_url : str | None
         The content URL of the Custom View item.
 
-    created_at : Optional[datetime]
+    created_at : datetime | None
         The date and time the Custom View item was created.
 
     image: bytes
@@ -41,36 +41,36 @@ class CustomViewItem:
     csv: Iterator[bytes]
         The CSV of the Custom View item. Must be populated first.
 
-    shared : Optional[bool]
+    shared : bool | None
         Whether the Custom View item is shared.
 
-    updated_at : Optional[datetime]
+    updated_at : datetime | None
         The date and time the Custom View item was last updated.
 
-    owner : Optional[UserItem]
+    owner : UserItem | None
         The id of the owner of the Custom View item.
 
-    workbook : Optional[WorkbookItem]
+    workbook : WorkbookItem | None
         The id of the workbook the Custom View item belongs to.
 
-    view : Optional[ViewItem]
+    view : ViewItem | None
         The id of the view the Custom View item belongs to.
     """
 
-    def __init__(self, id: Optional[str] = None, name: Optional[str] = None) -> None:
-        self._content_url: Optional[str] = None  # ?
-        self._created_at: Optional["datetime"] = None
-        self._id: Optional[str] = id
-        self._image: Optional[Callable[[], bytes]] = None
-        self._pdf: Optional[Callable[[], bytes]] = None
-        self._csv: Optional[Callable[[], Iterator[bytes]]] = None
-        self._name: Optional[str] = name
-        self._shared: Optional[bool] = False
-        self._updated_at: Optional["datetime"] = None
+    def __init__(self, id: str | None = None, name: str | None = None) -> None:
+        self._content_url: str | None = None  # ?
+        self._created_at: "datetime | None" = None
+        self._id: str | None = id
+        self._image: Callable[[], bytes] | None = None
+        self._pdf: Callable[[], bytes] | None = None
+        self._csv: Callable[[], Iterator[bytes]] | None = None
+        self._name: str | None = name
+        self._shared: bool | None = False
+        self._updated_at: "datetime | None" = None
 
-        self._owner: Optional[UserItem] = None
-        self._view: Optional[ViewItem] = None
-        self._workbook: Optional[WorkbookItem] = None
+        self._owner: UserItem | None = None
+        self._view: ViewItem | None = None
+        self._workbook: WorkbookItem | None = None
 
     def __repr__(self: "CustomViewItem"):
         view_info = ""
@@ -94,15 +94,15 @@ class CustomViewItem:
         self._csv = csv
 
     @property
-    def content_url(self) -> Optional[str]:
+    def content_url(self) -> str | None:
         return self._content_url
 
     @property
-    def created_at(self) -> Optional["datetime"]:
+    def created_at(self) -> "datetime | None":
         return self._created_at
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         return self._id
 
     @property
@@ -127,7 +127,7 @@ class CustomViewItem:
         return self._csv()
 
     @property
-    def name(self) -> Optional[str]:
+    def name(self) -> str | None:
         return self._name
 
     @name.setter
@@ -135,7 +135,7 @@ class CustomViewItem:
         self._name = value
 
     @property
-    def shared(self) -> Optional[bool]:
+    def shared(self) -> bool | None:
         return self._shared
 
     @shared.setter
@@ -143,11 +143,11 @@ class CustomViewItem:
         self._shared = value
 
     @property
-    def updated_at(self) -> Optional["datetime"]:
+    def updated_at(self) -> "datetime | None":
         return self._updated_at
 
     @property
-    def owner(self) -> Optional[UserItem]:
+    def owner(self) -> UserItem | None:
         return self._owner
 
     @owner.setter
@@ -155,7 +155,7 @@ class CustomViewItem:
         self._owner = value
 
     @property
-    def workbook(self) -> Optional[WorkbookItem]:
+    def workbook(self) -> WorkbookItem | None:
         return self._workbook
 
     @workbook.setter
@@ -163,7 +163,7 @@ class CustomViewItem:
         self._workbook = value
 
     @property
-    def view(self) -> Optional[ViewItem]:
+    def view(self) -> ViewItem | None:
         return self._view
 
     @view.setter
@@ -171,7 +171,7 @@ class CustomViewItem:
         self._view = value
 
     @classmethod
-    def from_response(cls, resp, ns, workbook_id="") -> Optional["CustomViewItem"]:
+    def from_response(cls, resp, ns, workbook_id="") -> "CustomViewItem | None":
         item = cls.list_from_response(resp, ns, workbook_id)
         if not item or len(item) == 0:
             return None
@@ -232,5 +232,5 @@ class CustomViewItem:
         return all_view_items
 
 
-def string_to_bool(s: Optional[str]) -> bool:
+def string_to_bool(s: str | None) -> bool:
     return (s or "").lower() == "true"

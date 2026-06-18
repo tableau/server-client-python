@@ -29,7 +29,7 @@ class ServerInfo(Endpoint):
         return f"{self.parent_srv.baseurl}/serverInfo"
 
     @api(version="2.4")
-    def get(self) -> Union[ServerInfoItem, None]:
+    def get(self) -> ServerInfoItem | None:
         """
         Retrieve the build and version information for the server.
 

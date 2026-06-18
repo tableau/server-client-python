@@ -2,7 +2,7 @@ import copy
 import datetime
 import uuid
 import xml.etree.ElementTree as ET
-from typing import Callable, Optional, overload
+from typing import Callable, overload
 
 from defusedxml.ElementTree import fromstring
 
@@ -32,10 +32,10 @@ class WorkbookItem:
 
     Parameters
     ----------
-    project_id : Optional[str], optional
+    project_id : str | None, optional
         The project ID for the workbook, by default None.
 
-    name : Optional[str], optional
+    name : str | None, optional
         The name of the workbook, by default None.
 
     show_tabs : bool, optional
@@ -48,61 +48,61 @@ class WorkbookItem:
         by the workbook. You must first call the workbooks.populate_connections
         method to access this data. See the ConnectionItem class.
 
-    content_url : Optional[str]
+    content_url : str | None
         The name of the workbook as it appears in the URL.
 
-    created_at : Optional[datetime.datetime]
+    created_at : datetime.datetime | None
         The date and time the workbook was created.
 
-    default_view_id : Optional[str]
+    default_view_id : str | None
         The identifier for the default view of the workbook.
 
-    description : Optional[str]
+    description : str | None
         User-defined description of the workbook.
 
-    encrypt_extracts : Optional[bool]
+    encrypt_extracts : bool | None
         Indicates whether extracts are encrypted.
 
-    has_extracts : Optional[bool]
+    has_extracts : bool | None
         Indicates whether the workbook has extracts.
 
-    id : Optional[str]
+    id : str | None
        The identifier for the workbook. You need this value to query a specific
        workbook or to delete a workbook with the get_by_id and delete methods.
 
-    last_published_at : Optional[datetime.datetime]
+    last_published_at : datetime.datetime | None
         The date and time the workbook was last published.
 
-    location : Optional[LocationItem]
+    location : LocationItem | None
         The location of the workbook, such as a personal space or project.
 
-    owner : Optional[UserItem]
+    owner : UserItem | None
         The owner of the workbook.
 
-    owner_id : Optional[str]
+    owner_id : str | None
         The identifier for the owner (UserItem) of the workbook.
 
     preview_image : bytes
         The thumbnail image for the view. You must first call the
         workbooks.populate_preview_image method to access this data.
 
-    project: Optional[ProjectItem]
+    project: ProjectItem | None
         The project that contains the workbook.
 
-    project_name : Optional[str]
+    project_name : str | None
         The name of the project that contains the workbook.
 
     size: int
         The size of the workbook in megabytes.
 
-    hidden_views: Optional[list[str]]
+    hidden_views: list[str] | None
         List of string names of views that need to be hidden when the workbook
         is published.
 
     tags: set[str]
         The set of tags associated with the workbook.
 
-    updated_at : Optional[datetime.datetime]
+    updated_at : datetime.datetime | None
         The date and time the workbook was last updated.
 
     views : list[ViewItem]
@@ -110,7 +110,7 @@ class WorkbookItem:
         workbooks.populate_views method to access this data. See the ViewItem
         class.
 
-    web_page_url : Optional[str]
+    web_page_url : str | None
         The full URL for the workbook.
 
     Examples
@@ -125,17 +125,17 @@ class WorkbookItem:
 
     def __init__(
         self,
-        project_id: Optional[str] = None,
-        name: Optional[str] = None,
+        project_id: str | None = None,
+        name: str | None = None,
         show_tabs: bool = False,
-        thumbnails_user_id: Optional[str] = None,
-        thumbnails_group_id: Optional[str] = None,
+        thumbnails_user_id: str | None = None,
+        thumbnails_group_id: str | None = None,
     ) -> None:
         self._connections = None
         self._content_url = None
         self._webpage_url = None
         self._created_at = None
-        self._id: Optional[str] = None
+        self._id: str | None = None
         self._initial_tags: set = set()
         self._pdf = None
         self._powerpoint = None
@@ -144,14 +144,14 @@ class WorkbookItem:
         self._revisions = None
         self._size = None
         self._updated_at = None
-        self._views: Optional[Callable[[], list[ViewItem]]] = None
+        self._views: Callable[[], list[ViewItem]] | None = None
         self.name = name
         self._description = None
-        self.owner_id: Optional[str] = None
+        self.owner_id: str | None = None
         # workaround for Personal Space workbooks without a project
-        self.project_id: Optional[str] = project_id or uuid.uuid4().__str__()
+        self.project_id: str | None = project_id or uuid.uuid4().__str__()
         self.show_tabs = show_tabs
-        self.hidden_views: Optional[list[str]] = None
+        self.hidden_views: list[str] | None = None
         self.tags: set[str] = set()
         self.data_acceleration_config = {
             "acceleration_enabled": None,
@@ -163,15 +163,15 @@ class WorkbookItem:
         self._permissions = None
         self.thumbnails_user_id = thumbnails_user_id
         self.thumbnails_group_id = thumbnails_group_id
-        self._sheet_count: Optional[int] = None
-        self._has_extracts: Optional[bool] = None
-        self._project: Optional[ProjectItem] = None
-        self._owner: Optional[UserItem] = None
-        self._location: Optional[LocationItem] = None
-        self._encrypt_extracts: Optional[bool] = None
-        self._default_view_id: Optional[str] = None
-        self._share_description: Optional[str] = None
-        self._last_published_at: Optional[datetime.datetime] = None
+        self._sheet_count: int | None = None
+        self._has_extracts: bool | None = None
+        self._project: ProjectItem | None = None
+        self._owner: UserItem | None = None
+        self._location: LocationItem | None = None
+        self._encrypt_extracts: bool | None = None
+        self._default_view_id: str | None = None
+        self._share_description: str | None = None
+        self._last_published_at: datetime.datetime | None = None
 
         return None
 
@@ -198,19 +198,19 @@ class WorkbookItem:
         return self._permissions()
 
     @property
-    def content_url(self) -> Optional[str]:
+    def content_url(self) -> str | None:
         return self._content_url
 
     @property
-    def webpage_url(self) -> Optional[str]:
+    def webpage_url(self) -> str | None:
         return self._webpage_url
 
     @property
-    def created_at(self) -> Optional[datetime.datetime]:
+    def created_at(self) -> datetime.datetime | None:
         return self._created_at
 
     @property
-    def description(self) -> Optional[str]:
+    def description(self) -> str | None:
         return self._description
 
     @description.setter
@@ -218,7 +218,7 @@ class WorkbookItem:
         self._description = value
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         return self._id
 
     @property
@@ -243,7 +243,7 @@ class WorkbookItem:
         return self._preview_image()
 
     @property
-    def project_id(self) -> Optional[str]:
+    def project_id(self) -> str | None:
         return self._project_id
 
     @project_id.setter
@@ -251,7 +251,7 @@ class WorkbookItem:
         self._project_id = value
 
     @property
-    def project_name(self) -> Optional[str]:
+    def project_name(self) -> str | None:
         return self._project_name
 
     @property
@@ -268,15 +268,15 @@ class WorkbookItem:
         return self._size
 
     @property
-    def sheet_count(self) -> Optional[int]:
+    def sheet_count(self) -> int | None:
         return self._sheet_count
 
     @property
-    def has_extracts(self) -> Optional[bool]:
+    def has_extracts(self) -> bool | None:
         return self._has_extracts
 
     @property
-    def updated_at(self) -> Optional[datetime.datetime]:
+    def updated_at(self) -> datetime.datetime | None:
         return self._updated_at
 
     @property
@@ -326,47 +326,47 @@ class WorkbookItem:
         return self._revisions()
 
     @property
-    def thumbnails_user_id(self) -> Optional[str]:
+    def thumbnails_user_id(self) -> str | None:
         return self._thumbnails_user_id
 
     @thumbnails_user_id.setter
-    def thumbnails_user_id(self, value: Optional[str]):
+    def thumbnails_user_id(self, value: str | None):
         self._thumbnails_user_id = value
 
     @property
-    def thumbnails_group_id(self) -> Optional[str]:
+    def thumbnails_group_id(self) -> str | None:
         return self._thumbnails_group_id
 
     @thumbnails_group_id.setter
-    def thumbnails_group_id(self, value: Optional[str]):
+    def thumbnails_group_id(self, value: str | None):
         self._thumbnails_group_id = value
 
     @property
-    def project(self) -> Optional[ProjectItem]:
+    def project(self) -> ProjectItem | None:
         return self._project
 
     @property
-    def owner(self) -> Optional[UserItem]:
+    def owner(self) -> UserItem | None:
         return self._owner
 
     @property
-    def location(self) -> Optional[LocationItem]:
+    def location(self) -> LocationItem | None:
         return self._location
 
     @property
-    def encrypt_extracts(self) -> Optional[bool]:
+    def encrypt_extracts(self) -> bool | None:
         return self._encrypt_extracts
 
     @property
-    def default_view_id(self) -> Optional[str]:
+    def default_view_id(self) -> str | None:
         return self._default_view_id
 
     @property
-    def share_description(self) -> Optional[str]:
+    def share_description(self) -> str | None:
         return self._share_description
 
     @property
-    def last_published_at(self) -> Optional[datetime.datetime]:
+    def last_published_at(self) -> datetime.datetime | None:
         return self._last_published_at
 
     def _set_connections(self, connections):

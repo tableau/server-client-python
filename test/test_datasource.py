@@ -2,7 +2,6 @@ from io import BytesIO
 import os
 from pathlib import Path
 import tempfile
-from typing import Optional
 import unittest
 from zipfile import ZipFile
 
@@ -188,7 +187,7 @@ def test_populate_connections(server) -> None:
         single_datasource._id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
         server.datasources.populate_connections(single_datasource)
         assert "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb" == single_datasource.id
-        connections: Optional[list[ConnectionItem]] = single_datasource.connections
+        connections: list[ConnectionItem] | None = single_datasource.connections
 
     assert connections is not None
     ds1, ds2 = connections

@@ -1,4 +1,4 @@
-from typing import Callable, Optional, TYPE_CHECKING
+from typing import Callable, TYPE_CHECKING
 
 from defusedxml.ElementTree import fromstring
 from typing_extensions import Self
@@ -47,7 +47,7 @@ class GroupItem:
 
     Attributes
     ----------
-    user_count: Optional[int]
+    user_count: int | None
         The number of users in the group.
 
     Examples
@@ -65,19 +65,19 @@ class GroupItem:
         onSync: str = "onSync"
 
     def __init__(self, name=None, domain_name=None) -> None:
-        self._id: Optional[str] = None
-        self._license_mode: Optional[str] = None
-        self._minimum_site_role: Optional[str] = None
-        self._users: Optional[Callable[..., "Pager"]] = None
-        self.name: Optional[str] = name
-        self.domain_name: Optional[str] = domain_name
-        self._user_count: Optional[int] = None
+        self._id: str | None = None
+        self._license_mode: str | None = None
+        self._minimum_site_role: str | None = None
+        self._users: Callable[..., "Pager"] | None = None
+        self.name: str | None = name
+        self.domain_name: str | None = domain_name
+        self._user_count: int | None = None
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.__dict__!r})"
 
     @property
-    def domain_name(self) -> Optional[str]:
+    def domain_name(self) -> str | None:
         return self._domain_name
 
     @domain_name.setter
@@ -85,19 +85,19 @@ class GroupItem:
         self._domain_name = value
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         return self._id
 
     @property
-    def name(self) -> Optional[str]:
+    def name(self) -> str | None:
         return self._name
 
     @name.setter
-    def name(self, value: Optional[str]) -> None:
+    def name(self, value: str | None) -> None:
         self._name = value
 
     @property
-    def license_mode(self) -> Optional[str]:
+    def license_mode(self) -> str | None:
         return self._license_mode
 
     @license_mode.setter
@@ -106,7 +106,7 @@ class GroupItem:
         self._license_mode = value
 
     @property
-    def minimum_site_role(self) -> Optional[str]:
+    def minimum_site_role(self) -> str | None:
         return self._minimum_site_role
 
     @minimum_site_role.setter
@@ -126,7 +126,7 @@ class GroupItem:
         self._users = users
 
     @property
-    def user_count(self) -> Optional[int]:
+    def user_count(self) -> int | None:
         return self._user_count
 
     @classmethod

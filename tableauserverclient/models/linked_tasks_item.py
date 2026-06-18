@@ -1,5 +1,4 @@
 import datetime as dt
-from typing import Optional
 
 from defusedxml.ElementTree import fromstring
 
@@ -9,9 +8,9 @@ from tableauserverclient.models.schedule_item import ScheduleItem
 
 class LinkedTaskItem:
     def __init__(self) -> None:
-        self.id: Optional[str] = None
-        self.num_steps: Optional[int] = None
-        self.schedule: Optional[ScheduleItem] = None
+        self.id: str | None = None
+        self.num_steps: int | None = None
+        self.schedule: ScheduleItem | None = None
 
     @classmethod
     def from_response(cls, resp: bytes, namespace) -> list["LinkedTaskItem"]:
@@ -32,9 +31,9 @@ class LinkedTaskItem:
 
 class LinkedTaskStepItem:
     def __init__(self) -> None:
-        self.id: Optional[str] = None
-        self.step_number: Optional[int] = None
-        self.stop_downstream_on_failure: Optional[bool] = None
+        self.id: str | None = None
+        self.step_number: int | None = None
+        self.stop_downstream_on_failure: bool | None = None
         self.task_details: list[LinkedTaskFlowRunItem] = []
 
     @classmethod
@@ -53,12 +52,12 @@ class LinkedTaskStepItem:
 
 class LinkedTaskFlowRunItem:
     def __init__(self) -> None:
-        self.flow_run_id: Optional[str] = None
-        self.flow_run_priority: Optional[int] = None
-        self.flow_run_consecutive_failed_count: Optional[int] = None
-        self.flow_run_task_type: Optional[str] = None
-        self.flow_id: Optional[str] = None
-        self.flow_name: Optional[str] = None
+        self.flow_run_id: str | None = None
+        self.flow_run_priority: int | None = None
+        self.flow_run_consecutive_failed_count: int | None = None
+        self.flow_run_task_type: str | None = None
+        self.flow_id: str | None = None
+        self.flow_name: str | None = None
 
     @classmethod
     def _parse_element(cls, xml, namespace) -> list["LinkedTaskFlowRunItem"]:
@@ -79,10 +78,10 @@ class LinkedTaskFlowRunItem:
 
 class LinkedTaskJobItem:
     def __init__(self) -> None:
-        self.id: Optional[str] = None
-        self.linked_task_id: Optional[str] = None
-        self.status: Optional[str] = None
-        self.created_at: Optional[dt.datetime] = None
+        self.id: str | None = None
+        self.linked_task_id: str | None = None
+        self.status: str | None = None
+        self.created_at: dt.datetime | None = None
 
     @classmethod
     def from_response(cls, resp: bytes, namespace) -> "LinkedTaskJobItem":

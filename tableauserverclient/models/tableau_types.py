@@ -40,7 +40,7 @@ TableauItem = Union[
 ]
 
 
-def plural_type(content_type: Union[Resource, str]) -> str:
+def plural_type(content_type: Resource | str) -> str:
     if content_type == Resource.Lens:
         return "lenses"
     else:

@@ -6,7 +6,7 @@ from tableauserverclient.models import TableauItem, PermissionsRule
 from .endpoint import Endpoint
 from .exceptions import MissingRequiredFieldError
 
-from typing import Callable, TYPE_CHECKING, Optional, Union
+from typing import Callable, TYPE_CHECKING
 
 from tableauserverclient.helpers.logging import logger
 
@@ -44,7 +44,7 @@ class _PermissionsEndpoint(Endpoint):
 
         return permissions
 
-    def delete(self, resource: TableauItem, rules: Union[PermissionsRule, list[PermissionsRule]]):
+    def delete(self, resource: TableauItem, rules: PermissionsRule | list[PermissionsRule]):
         # Delete is the only endpoint that doesn't take a list of rules
         # so let's fake it to keep it consistent
         # TODO that means we need error handling around the call
@@ -80,7 +80,7 @@ class _PermissionsEndpoint(Endpoint):
         item._set_permissions(permission_fetcher)
         logger.info(f"Populated permissions for item (ID: {item.id})")
 
-    def _get_permissions(self, item: TableauItem, req_options: Optional["RequestOptions"] = None):
+    def _get_permissions(self, item: TableauItem, req_options: "RequestOptions | None" = None):
         url = f"{self.owner_baseurl()}/{item.id}/permissions"
         server_response = self.get_request(url, req_options)
         permissions = PermissionsRule.from_response(server_response.content, self.parent_srv.namespace)

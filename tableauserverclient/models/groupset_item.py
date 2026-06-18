@@ -1,4 +1,3 @@
-from typing import Optional
 import xml.etree.ElementTree as ET
 
 from defusedxml.ElementTree import fromstring
@@ -11,9 +10,9 @@ from tableauserverclient.models.reference_item import ResourceReference
 class GroupSetItem:
     tag_name: str = "groupSet"
 
-    def __init__(self, name: Optional[str] = None) -> None:
+    def __init__(self, name: str | None = None) -> None:
         self.name = name
-        self.id: Optional[str] = None
+        self.id: str | None = None
         self.groups: list["GroupItem"] = []
         self.group_count: int = 0
 
@@ -26,11 +25,11 @@ class GroupSetItem:
         return self.__str__()
 
     @property
-    def name(self) -> Optional[str]:
+    def name(self) -> str | None:
         return self._name
 
     @name.setter
-    def name(self, value: Optional[str]) -> None:
+    def name(self, value: str | None) -> None:
         self._name = value
 
     @classmethod

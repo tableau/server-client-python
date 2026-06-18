@@ -5,7 +5,7 @@ import logging
 import os
 from contextlib import closing
 from pathlib import Path
-from typing import Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 from collections.abc import Iterable
 
 from tableauserverclient.server.endpoint.dqw_endpoint import _DataQualityWarningEndpoint
@@ -43,11 +43,11 @@ if TYPE_CHECKING:
     from tableauserverclient.server.endpoint.schedules_endpoint import AddResponse
 
 
-FilePath = Union[str, os.PathLike]
-FileObjectR = Union[io.BufferedReader, io.BytesIO]
-FileObjectW = Union[io.BufferedWriter, io.BytesIO]
-PathOrFileR = Union[FilePath, FileObjectR]
-PathOrFileW = Union[FilePath, FileObjectW]
+FilePath = str | os.PathLike
+FileObjectR = io.BufferedReader | io.BytesIO
+FileObjectW = io.BufferedWriter | io.BytesIO
+PathOrFileR = FilePath | FileObjectR
+PathOrFileW = FilePath | FileObjectW
 
 
 class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
@@ -63,7 +63,7 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
 
     # Get all flows
     @api(version="3.3")
-    def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[FlowItem], PaginationItem]:
+    def get(self, req_options: "RequestOptions | None" = None) -> tuple[list[FlowItem], PaginationItem]:
         """
         Get all flows on site. Returns a tuple of all flow items and pagination item.
         This method is paginated, and returns one page of items per call. The
@@ -74,7 +74,7 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
 
         Parameters
         ----------
-        req_options: Optional[RequestOptions]
+        req_options: RequestOptions | None
             An optional Request Options object that can be used to specify
             sorting, filtering, and pagination options.
 
@@ -150,7 +150,7 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
         flow_item._set_connections(connections_fetcher)
         logger.info(f"Populated connections for flow (ID: {flow_item.id})")
 
-    def _get_flow_connections(self, flow_item, req_options: Optional["RequestOptions"] = None) -> list[ConnectionItem]:
+    def _get_flow_connections(self, flow_item, req_options: "RequestOptions | None" = None) -> list[ConnectionItem]:
         url = f"{self.baseurl}/{flow_item.id}/connections"
         server_response = self.get_request(url, req_options)
         connections = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
@@ -187,7 +187,7 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
 
     # Download 1 flow by id
     @api(version="3.3")
-    def download(self, flow_id: str, filepath: Optional[PathOrFileW] = None) -> PathOrFileW:
+    def download(self, flow_id: str, filepath: PathOrFileW | None = None) -> PathOrFileW:
         """
         Download a single flow by id. The flow will be downloaded to the
         specified file path. If no file path is specified, the flow will be
@@ -200,7 +200,7 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
         flow_id: str
             The id of the flow to download.
 
-        filepath: Optional[PathOrFileW]
+        filepath: PathOrFileW | None
             The file path to download the flow to. This can be a file path or
             a file object. If a file object is passed, the flow will be written
             to the file object. If a file path is passed, the flow will be
@@ -305,7 +305,7 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
         return connection
 
     @api(version="3.3")
-    def refresh(self, flow_item: Union[FlowItem, str]) -> JobItem:
+    def refresh(self, flow_item: FlowItem | str) -> JobItem:
         """
         Runs the flow to refresh the data.
 
@@ -331,7 +331,7 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
     # Publish flow
     @api(version="3.3")
     def publish(
-        self, flow_item: FlowItem, file: PathOrFileR, mode: str, connections: Optional[list[ConnectionItem]] = None
+        self, flow_item: FlowItem, file: PathOrFileR, mode: str, connections: list[ConnectionItem] | None = None
     ) -> FlowItem:
         """
         Publishes a flow to the Tableau Server.
@@ -353,7 +353,7 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
             exists. If the mode is "CreateNew", a new flow will be created with
             the same name as the flow item.
 
-        connections: Optional[list[ConnectionItem]]
+        connections: list[ConnectionItem] | None
             A list of connection items to publish with the flow. If the flow
             contains connections, they must be included in this list.
 
@@ -610,7 +610,7 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
         """
         return self.parent_srv.schedules.add_to_schedule(schedule_id, flow=item)
 
-    def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[FlowItem]:
+    def filter(self, *invalid, page_size: int | None = None, **kwargs) -> QuerySet[FlowItem]:
         """
         Queries the Tableau Server for items using the specified filters. Page
         size can be specified to limit the number of items returned in a single

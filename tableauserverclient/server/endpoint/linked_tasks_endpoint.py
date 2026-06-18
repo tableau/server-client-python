@@ -1,5 +1,3 @@
-from typing import Optional, Union
-
 from tableauserverclient.helpers.logging import logger
 from tableauserverclient.models.linked_tasks_item import LinkedTaskItem, LinkedTaskJobItem
 from tableauserverclient.models.pagination_item import PaginationItem
@@ -18,7 +16,7 @@ class LinkedTasks(QuerysetEndpoint[LinkedTaskItem]):
         return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/tasks/linked"
 
     @api(version="3.15")
-    def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[LinkedTaskItem], PaginationItem]:
+    def get(self, req_options: "RequestOptions | None" = None) -> tuple[list[LinkedTaskItem], PaginationItem]:
         logger.info("Querying all linked tasks on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -27,7 +25,7 @@ class LinkedTasks(QuerysetEndpoint[LinkedTaskItem]):
         return all_group_items, pagination_item
 
     @api(version="3.15")
-    def get_by_id(self, linked_task: Union[LinkedTaskItem, str]) -> LinkedTaskItem:
+    def get_by_id(self, linked_task: LinkedTaskItem | str) -> LinkedTaskItem:
         task_id = getattr(linked_task, "id", linked_task)
         logger.info("Querying all linked tasks on site")
         url = f"{self.baseurl}/{task_id}"
@@ -36,7 +34,7 @@ class LinkedTasks(QuerysetEndpoint[LinkedTaskItem]):
         return all_group_items[0]
 
     @api(version="3.15")
-    def run_now(self, linked_task: Union[LinkedTaskItem, str]) -> LinkedTaskJobItem:
+    def run_now(self, linked_task: LinkedTaskItem | str) -> LinkedTaskJobItem:
         task_id = getattr(linked_task, "id", linked_task)
         logger.info(f"Running linked task {task_id} now")
         url = f"{self.baseurl}/{task_id}/runNow"

@@ -1,6 +1,6 @@
 import datetime as dt
 import json
-from typing import Callable, Optional
+from typing import Callable
 from collections.abc import Iterable
 from xml.etree.ElementTree import Element
 
@@ -15,17 +15,17 @@ from tableauserverclient.models.permissions_item import PermissionsRule
 class VirtualConnectionItem:
     def __init__(self, name: str) -> None:
         self.name = name
-        self.created_at: Optional[dt.datetime] = None
-        self.has_extracts: Optional[bool] = None
-        self._id: Optional[str] = None
-        self.is_certified: Optional[bool] = None
-        self.updated_at: Optional[dt.datetime] = None
-        self.webpage_url: Optional[str] = None
-        self._connections: Optional[Callable[[], Iterable[ConnectionItem]]] = None
-        self.project_id: Optional[str] = None
-        self.owner_id: Optional[str] = None
-        self.content: Optional[dict[str, dict]] = None
-        self.certification_note: Optional[str] = None
+        self.created_at: dt.datetime | None = None
+        self.has_extracts: bool | None = None
+        self._id: str | None = None
+        self.is_certified: bool | None = None
+        self.updated_at: dt.datetime | None = None
+        self.webpage_url: str | None = None
+        self._connections: Callable[[], Iterable[ConnectionItem]] | None = None
+        self.project_id: str | None = None
+        self.owner_id: str | None = None
+        self.content: dict[str, dict] | None = None
+        self.certification_note: str | None = None
 
     def __str__(self) -> str:
         return f"{self.__class__.__qualname__}(name={self.name})"
@@ -37,7 +37,7 @@ class VirtualConnectionItem:
         self._permissions = permissions
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         return self._id
 
     @property

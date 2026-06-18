@@ -8,7 +8,7 @@ from tableauserverclient.models import MetricItem, PaginationItem
 
 import logging
 
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..request_options import RequestOptions
@@ -31,7 +31,7 @@ class Metrics(QuerysetEndpoint[MetricItem]):
 
     # Get all metrics
     @api(version="3.9")
-    def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[MetricItem], PaginationItem]:
+    def get(self, req_options: "RequestOptions | None" = None) -> tuple[list[MetricItem], PaginationItem]:
         logger.info("Querying all metrics on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)

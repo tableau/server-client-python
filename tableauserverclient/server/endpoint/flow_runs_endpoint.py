@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
 from tableauserverclient.server.endpoint.exceptions import FlowRunFailedException, FlowRunCancelledException
@@ -28,7 +28,7 @@ class FlowRuns(QuerysetEndpoint[FlowRunItem]):
     # QuerysetEndpoint expects a PaginationItem to be returned, but FlowRuns
     # does not return a PaginationItem. Suppressing the mypy error because the
     # changes to the QuerySet class should permit this to function regardless.
-    def get(self, req_options: Optional["RequestOptions"] = None) -> list[FlowRunItem]:  # type: ignore[override]
+    def get(self, req_options: "RequestOptions | None" = None) -> list[FlowRunItem]:  # type: ignore[override]
         logger.info("Querying all flow runs on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -48,7 +48,7 @@ class FlowRuns(QuerysetEndpoint[FlowRunItem]):
 
     # Cancel 1 flow run by id
     @api(version="3.10")
-    def cancel(self, flow_run_id: Union[str, FlowRunItem]) -> None:
+    def cancel(self, flow_run_id: str | FlowRunItem) -> None:
         if not flow_run_id:
             error = "Flow ID undefined."
             raise ValueError(error)
@@ -58,7 +58,7 @@ class FlowRuns(QuerysetEndpoint[FlowRunItem]):
         logger.info(f"Deleted single flow (ID: {id_})")
 
     @api(version="3.10")
-    def wait_for_job(self, flow_run_id: str, *, timeout: Optional[int] = None) -> FlowRunItem:
+    def wait_for_job(self, flow_run_id: str, *, timeout: int | None = None) -> FlowRunItem:
         if isinstance(flow_run_id, FlowRunItem):
             flow_run_id = flow_run_id.id
         assert isinstance(flow_run_id, str)
@@ -82,7 +82,7 @@ class FlowRuns(QuerysetEndpoint[FlowRunItem]):
         else:
             raise AssertionError("Unexpected status in flow_run", flow_run)
 
-    def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[FlowRunItem]:
+    def filter(self, *invalid, page_size: int | None = None, **kwargs) -> QuerySet[FlowRunItem]:
         """
         Queries the Tableau Server for items using the specified filters. Page
         size can be specified to limit the number of items returned in a single

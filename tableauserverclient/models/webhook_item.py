@@ -1,6 +1,5 @@
 import re
 import xml.etree.ElementTree as ET
-from typing import Optional
 
 from defusedxml.ElementTree import fromstring
 
@@ -21,21 +20,21 @@ class WebhookItem:
 
     Attributes
     ----------
-    id : Optional[str]
+    id : str | None
         The identifier (luid) for the webhook. You need this value to query a
         specific webhook with the get_by_id method or to delete a webhook with
         the delete method.
 
-    name : Optional[str]
+    name : str | None
         The name of the webhook. You must specify this when you create an
         instance of the WebhookItem.
 
-    url : Optional[str]
+    url : str | None
         The destination URL for the webhook. The webhook destination URL must
         be https and have a valid certificate. You must specify this when you
         create an instance of the WebhookItem.
 
-    event : Optional[str]
+    event : str | None
         The name of the Tableau event that triggers your webhook.This is either
         api-event-name or webhook-source-api-event-name: one of these is
         required to create an instance of the WebhookItem. We recommend using
@@ -43,16 +42,16 @@ class WebhookItem:
         listed in the Trigger Events table.
         https://help.tableau.com/current/developer/webhooks/en-us/docs/webhooks-events-payload.html
 
-    owner_id : Optional[str]
+    owner_id : str | None
         The identifier (luid) of the user who owns the webhook.
     """
 
     def __init__(self):
-        self._id: Optional[str] = None
-        self.name: Optional[str] = None
-        self.url: Optional[str] = None
-        self._event: Optional[str] = None
-        self.owner_id: Optional[str] = None
+        self._id: str | None = None
+        self.name: str | None = None
+        self.url: str | None = None
+        self._event: str | None = None
+        self.owner_id: str | None = None
 
     def _set_values(self, id, name, url, event, owner_id):
         if id is not None:
@@ -67,11 +66,11 @@ class WebhookItem:
             self.owner_id = owner_id
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         return self._id
 
     @property
-    def event(self) -> Optional[str]:
+    def event(self) -> str | None:
         if self._event:
             return self._event.replace("webhook-source-event-", "")
         return None
