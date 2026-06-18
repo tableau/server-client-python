@@ -1,4 +1,5 @@
 from pathlib import Path
+from urllib.parse import parse_qs, urlparse
 
 import pytest
 import requests_mock
@@ -22,6 +23,9 @@ POPULATE_VIRTUALCONNECTION_DEFAULT_PERMISSIONS_XML = (
 UPDATE_VIRTUALCONNECTION_DEFAULT_PERMISSIONS_XML = (
     TEST_ASSET_DIR / "project_update_virtualconnection_default_permissions.xml"
 )
+GET_BY_NAME_TOP_LEVEL_XML = TEST_ASSET_DIR / "project_get_by_name_top_level.xml"
+GET_BY_NAME_CHILD_XML = TEST_ASSET_DIR / "project_get_by_name_child.xml"
+GET_EMPTY_XML = TEST_ASSET_DIR / "project_get_empty.xml"
 
 
 @pytest.fixture(scope="function")
@@ -464,3 +468,117 @@ def test_get_all_fields(server: TSC.Server) -> None:
     assert project.content_permissions == "ManagedByOwner"
     assert project.parent_id is None
     assert project.writeable is True
+
+
+# --- get_by_path tests ---
+
+
+def test_get_by_path_top_level(server: TSC.Server) -> None:
+    """A single-component path resolves to a top-level project."""
+    response_xml = GET_BY_NAME_TOP_LEVEL_XML.read_text()
+    with requests_mock.mock() as m:
+        m.get(server.projects.baseurl + "?filter=name:eq:Tableau", text=response_xml)
+        project = server.projects.get_by_path("Tableau")
+
+    assert project is not None
+    assert project.id == "1d0304cd-3796-429f-b815-7258370b9b74"
+    assert project.name == "Tableau"
+    assert project.parent_id is None
+
+
+def test_get_by_path_top_level_with_leading_slash(server: TSC.Server) -> None:
+    """Leading slash is stripped; result is the same as without it."""
+    response_xml = GET_BY_NAME_TOP_LEVEL_XML.read_text()
+    with requests_mock.mock() as m:
+        m.get(server.projects.baseurl + "?filter=name:eq:Tableau", text=response_xml)
+        project = server.projects.get_by_path("/Tableau")
+
+    assert project is not None
+    assert project.id == "1d0304cd-3796-429f-b815-7258370b9b74"
+
+
+def _filter_params(request) -> dict:
+    """Parse the comma-separated 'filter' query param into a dict of field:value pairs."""
+    qs = parse_qs(urlparse(request.url).query)
+    filters = {}
+    for token in qs.get("filter", [""])[0].split(","):
+        if ":" in token:
+            parts = token.split(":", 2)  # field, operator, value
+            if len(parts) == 3:
+                filters[parts[0]] = parts[2]
+    return filters
+
+
+def test_get_by_path_nested(server: TSC.Server) -> None:
+    """A two-component path walks the hierarchy and returns the child project."""
+    top_level_xml = GET_BY_NAME_TOP_LEVEL_XML.read_text()
+    child_xml = GET_BY_NAME_CHILD_XML.read_text()
+    baseurl = server.projects.baseurl
+
+    def respond(request, context):
+        params = _filter_params(request)
+        if params.get("name") == "Tableau" and "parentProjectId" not in params:
+            return top_level_xml
+        if params.get("name") == "Child 1" and params.get("parentProjectId") == "1d0304cd-3796-429f-b815-7258370b9b74":
+            return child_xml
+        context.status_code = 404
+        return ""
+
+    with requests_mock.mock() as m:
+        m.get(baseurl, text=respond)
+        project = server.projects.get_by_path("Tableau/Child 1")
+
+    assert project is not None
+    assert project.id == "4cc52973-5e3a-4d1f-a4fb-5b5f73796edf"
+    assert project.name == "Child 1"
+    assert project.parent_id == "1d0304cd-3796-429f-b815-7258370b9b74"
+
+
+def test_get_by_path_not_found_root(server: TSC.Server) -> None:
+    """Returns None when the root-level component does not exist."""
+    empty_xml = GET_EMPTY_XML.read_text()
+    baseurl = server.projects.baseurl
+
+    def respond(request, context):
+        params = _filter_params(request)
+        if params.get("name") == "NonExistent":
+            return empty_xml
+        context.status_code = 404
+        return ""
+
+    with requests_mock.mock() as m:
+        m.get(baseurl, text=respond)
+        project = server.projects.get_by_path("NonExistent")
+
+    assert project is None
+
+
+def test_get_by_path_not_found_child(server: TSC.Server) -> None:
+    """Returns None when a child component does not exist under the parent."""
+    top_level_xml = GET_BY_NAME_TOP_LEVEL_XML.read_text()
+    empty_xml = GET_EMPTY_XML.read_text()
+    baseurl = server.projects.baseurl
+
+    def respond(request, context):
+        params = _filter_params(request)
+        if params.get("name") == "Tableau" and "parentProjectId" not in params:
+            return top_level_xml
+        if params.get("name") == "NoSuchChild":
+            return empty_xml
+        context.status_code = 404
+        return ""
+
+    with requests_mock.mock() as m:
+        m.get(baseurl, text=respond)
+        project = server.projects.get_by_path("Tableau/NoSuchChild")
+
+    assert project is None
+
+
+def test_get_by_path_empty_raises(server: TSC.Server) -> None:
+    """An empty or slash-only path raises ValueError."""
+    with pytest.raises(ValueError):
+        server.projects.get_by_path("")
+
+    with pytest.raises(ValueError):
+        server.projects.get_by_path("/")

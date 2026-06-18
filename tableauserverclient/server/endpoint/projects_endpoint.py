@@ -5,6 +5,7 @@ from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api, 
 from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
 from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
 from tableauserverclient.server import RequestFactory, RequestOptions
+from tableauserverclient.server.filter import Filter
 from tableauserverclient.models.permissions_item import PermissionsRule
 from tableauserverclient.models import ProjectItem, PaginationItem, Resource
 
@@ -88,6 +89,65 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         url = f"{self.baseurl}/{project_id}"
         self.delete_request(url)
         logger.info(f"Deleted single project (ID: {project_id})")
+
+    @api(version="2.0")
+    def get_by_path(self, path: str) -> "ProjectItem | None":
+        """
+        Retrieves a project by its path. The path is a slash-separated string
+        of project names from the root to the target project, for example
+        ``"Marketing/Q1 Reports"`` or ``"/Marketing/Q1 Reports"``.
+
+        There is no native path filter in the Tableau REST API, so this method
+        walks the project hierarchy level by level using ``filter(name=...)``.
+        Each level makes one API request, so a path with *n* components issues
+        *n* requests.
+
+        Parameters
+        ----------
+        path : str
+            The slash-separated path of the project. Leading and trailing
+            slashes are ignored.
+
+        Returns
+        -------
+        ProjectItem | None
+            The matching project, or ``None`` if no project exists at the
+            given path.
+
+        Raises
+        ------
+        ValueError
+            If ``path`` is empty or contains only slashes.
+        """
+        components = [c for c in path.split("/") if c]
+        if not components:
+            raise ValueError("Project path must not be empty.")
+
+        # Walk the hierarchy one level at a time.
+        parent_id: "str | None" = None
+        current: "ProjectItem | None" = None
+
+        for name in components:
+            opts = RequestOptions()
+            opts.filter.add(Filter(RequestOptions.Field.Name, RequestOptions.Operator.Equals, name))
+            if parent_id is not None:
+                opts.filter.add(Filter(RequestOptions.Field.ParentProjectId, RequestOptions.Operator.Equals, parent_id))
+
+            projects, _ = self.get(opts)
+
+            if parent_id is None:
+                # At the root level the API may return projects with the same
+                # name that belong to different parents; keep only top-level ones.
+                projects = [p for p in projects if p.parent_id is None]
+
+            if not projects:
+                return None
+
+            # If multiple sibling projects share the same name, take the first.
+            current = projects[0]
+            parent_id = current.id
+
+        return current
 
     @api(version="2.0")
     def get_by_id(self, project_id: str) -> ProjectItem:
