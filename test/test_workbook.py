@@ -245,6 +245,42 @@ def test_update(server: TSC.Server) -> None:
     assert not single_workbook.data_acceleration_config["accelerate_now"]
 
 
+def test_update_description_in_request_xml(server: TSC.Server) -> None:
+    """description should be included in the update request XML when server >= 3.20."""
+    server.version = "3.20"
+    server.workbooks.baseurl
+    response_xml = UPDATE_XML.read_text()
+    with requests_mock.mock() as m:
+        m.put(server.workbooks.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2", text=response_xml)
+        single_workbook = TSC.WorkbookItem("1d0304cd-3796-429f-b815-7258370b9b74", show_tabs=True)
+        single_workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
+        single_workbook.description = "A great workbook"
+        server.workbooks.update(single_workbook)
+        request_body = m.request_history[0].body
+    xml_root = fromstring(request_body)
+    workbook_el = xml_root.find(".//workbook")
+    assert workbook_el is not None
+    assert workbook_el.get("description") == "A great workbook"
+
+
+def test_update_description_excluded_below_v3_20(server: TSC.Server) -> None:
+    """description should be excluded from the update request XML when server < 3.20."""
+    server.version = "3.19"
+    server.workbooks.baseurl
+    response_xml = UPDATE_XML.read_text()
+    with requests_mock.mock() as m:
+        m.put(server.workbooks.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2", text=response_xml)
+        single_workbook = TSC.WorkbookItem("1d0304cd-3796-429f-b815-7258370b9b74", show_tabs=True)
+        single_workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
+        single_workbook.description = "A great workbook"
+        server.workbooks.update(single_workbook)
+        request_body = m.request_history[0].body
+    xml_root = fromstring(request_body)
+    workbook_el = xml_root.find(".//workbook")
+    assert workbook_el is not None
+    assert workbook_el.get("description") is None
+
+
 def test_update_missing_id(server: TSC.Server) -> None:
     single_workbook = TSC.WorkbookItem("test")
     with pytest.raises(TSC.MissingRequiredFieldError):
@@ -590,6 +626,21 @@ def test_publish(server: TSC.Server) -> None:
     assert "GDP per capita" == new_workbook.views[0].name
     assert "RESTAPISample_0/sheets/GDPpercapita" == new_workbook.views[0].content_url
     assert "REST API Testing" == new_workbook.description
+
+
+def test_publish_description_in_request_xml(server: TSC.Server) -> None:
+    """description should be included in the publish request XML."""
+    response_xml = PUBLISH_XML.read_text()
+    with requests_mock.mock() as m:
+        m.post(server.workbooks.baseurl, text=response_xml)
+        new_workbook = TSC.WorkbookItem(
+            name="Sample", show_tabs=False, project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760"
+        )
+        new_workbook.description = "A great workbook"
+        sample_workbook = os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")
+        server.workbooks.publish(new_workbook, sample_workbook, server.PublishMode.CreateNew)
+        request_body = m.request_history[0].body
+    assert b'description="A great workbook"' in request_body
 
 
 def test_publish_a_packaged_file_object(server: TSC.Server) -> None:
