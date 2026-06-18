@@ -427,8 +427,25 @@ def test_filter_excel(server: TSC.Server) -> None:
         assert response == excel_file
 
 
-def test_pdf_height(server: TSC.Server) -> None:
+def test_pdf_viz_dimensions_unsupported(server: TSC.Server) -> None:
     server.version = "3.8"
+    response = POPULATE_PDF.read_bytes()
+    with requests_mock.mock() as m:
+        m.get(
+            server.views.baseurl + "/d79634e1-6063-4ec9-95ff-50acbf609ff5/pdf?vizHeight=1080&vizWidth=1920",
+            content=response,
+        )
+        single_view = TSC.ViewItem()
+        single_view._id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
+
+        req_option = TSC.PDFRequestOptions(viz_height=1080, viz_width=1920)
+
+        with pytest.raises(UnsupportedAttributeError):
+            server.views.populate_pdf(single_view, req_option)
+
+
+def test_pdf_viz_dimensions(server: TSC.Server) -> None:
+    server.version = "3.26"
     response = POPULATE_PDF.read_bytes()
     with requests_mock.mock() as m:
         m.get(

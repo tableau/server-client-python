@@ -380,9 +380,6 @@ def test_queryset_endpoint_pagesize_filter(server: TSC.Server, page_size: int) -
         _ = list(queryset)
 
 
-44
-
-
 @pytest.mark.parametrize("page_size", [1, 10, 100, 1_000])
 def test_queryset_pagesize_filter(server: TSC.Server, page_size: int) -> None:
     with requests_mock.mock() as m:
@@ -441,3 +438,41 @@ def test_queryset_field_all(server: TSC.Server) -> None:
     fields = history.qs.get("fields", [""])[0]
 
     assert fields == "_all_"
+
+
+def test_pdf_viz_dimensions_query_params() -> None:
+    opts = TSC.PDFRequestOptions(viz_width=1920, viz_height=1080)
+    params = opts.get_query_params()
+    assert params["vizWidth"] == 1920
+    assert params["vizHeight"] == 1080
+
+
+def test_pdf_viz_dimensions_only_one_raises() -> None:
+    opts = TSC.PDFRequestOptions(viz_width=1920)
+    with pytest.raises(ValueError):
+        opts.get_query_params()
+
+    opts2 = TSC.PDFRequestOptions(viz_height=1080)
+    with pytest.raises(ValueError):
+        opts2.get_query_params()
+
+
+def test_pdf_viz_dimensions_none_by_default() -> None:
+    opts = TSC.PDFRequestOptions()
+    params = opts.get_query_params()
+    assert "vizWidth" not in params
+    assert "vizHeight" not in params
+
+
+def test_pdf_viz_dimensions_via_request(server: TSC.Server) -> None:
+    with requests_mock.mock() as m:
+        m.get(requests_mock.ANY)
+        url = server.views.baseurl + "/abc/pdf"
+        opts = TSC.PDFRequestOptions(viz_width=800, viz_height=600)
+
+        resp = server.views.get_request(url, request_object=opts)
+        query_string = parse_qs(resp.request.query)
+    assert "vizwidth" in query_string
+    assert ["800"] == query_string["vizwidth"]
+    assert "vizheight" in query_string
+    assert ["600"] == query_string["vizheight"]
