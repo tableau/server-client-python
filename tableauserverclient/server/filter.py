@@ -1,3 +1,6 @@
+import datetime
+
+from tableauserverclient.datetime_helpers import format_datetime
 from .request_options import RequestOptions
 
 
@@ -9,6 +12,8 @@ class Filter:
         self.value = value
 
     def __str__(self):
+        if isinstance(self._value, datetime.datetime):
+            return f"{self.field}:{self.operator}:{format_datetime(self._value)}"
         value_string = str(self._value)
         if isinstance(self._value, list):
             # this should turn the string representation of the list
