@@ -84,8 +84,9 @@ class QuerySet(Iterable[T], Sized):
                 if e.code == "400006":
                     # If the endpoint does not support pagination, it will end
                     # up overrunning the total number of pages. Catch the
-                    # error and break out of the loop.
-                    raise StopIteration
+                    # error and return to cleanly end the generator.
+                    # (raise StopIteration would cause RuntimeError per PEP 479)
+                    return
             if len(self._result_cache) == 0:
                 return
             yield from self._result_cache

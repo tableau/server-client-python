@@ -136,3 +136,36 @@ def test_queryset_no_matches(server: TSC.Server) -> None:
         all_groups = server.groups.all()
         groups = list(all_groups)
     assert len(groups) == 0
+
+
+def test_queryset_400006_returns_cleanly() -> None:
+    """Regression test for PEP 479: 400006 must not raise RuntimeError.
+
+    Before the fix, QuerySet.__iter__ raised StopIteration which PEP 479
+    converts to RuntimeError inside a generator. This test directly exercises
+    the __iter__ method with a mock that raises 400006 on the second call.
+    """
+    from tableauserverclient.server.endpoint.exceptions import ServerResponseError
+    from tableauserverclient.server.query import QuerySet
+
+    calls = [0]
+
+    class MockEndpoint:
+        def get(self, req_options=None):
+            calls[0] += 1
+            assert calls[0] <= 10, f"get() called {calls[0]} times — infinite loop detected"
+            if calls[0] >= 2:
+                raise ServerResponseError("400006", "Bad Request", "Invalid page number", "http://test")
+            item = TSC.ProjectItem(name="Test")
+            item._id = "abc"
+            pagination = TSC.PaginationItem()
+            pagination._total_available = None  # unknown size — triggers loop
+            return [item], pagination
+
+    qs: QuerySet[TSC.ProjectItem] = QuerySet(MockEndpoint())  # type: ignore[arg-type]
+
+    # Use a generator expression to bypass list()'s __len__ optimization,
+    # which would consume the first page before __iter__ starts.
+    # Before the fix this raised: RuntimeError: generator raised StopIteration
+    results = [x for x in qs]
+    assert len(results) == 1
