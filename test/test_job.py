@@ -9,7 +9,6 @@ from tableauserverclient.datetime_helpers import utc
 from tableauserverclient.server.endpoint.exceptions import JobFailedException
 from ._utils import mocked_time
 
-
 TEST_ASSET_DIR = Path(__file__).parent / "assets"
 GET_XML = TEST_ASSET_DIR / "job_get.xml"
 GET_BY_ID_XML = TEST_ASSET_DIR / "job_get_by_id.xml"

@@ -73,7 +73,7 @@ def main():
         # We encode that information above in the const=(...) parameter to the add_argument function to make
         # the code automatically adapt for the type of export the user is doing.
         # We unroll that information into methods we can call, or objects we can create by using getattr()
-        (populate_func_name, option_factory_name, member_name, extension) = args.type
+        populate_func_name, option_factory_name, member_name, extension = args.type
         populate = getattr(server.views, populate_func_name)
         if args.workbook:
             populate = getattr(server.workbooks, populate_func_name)

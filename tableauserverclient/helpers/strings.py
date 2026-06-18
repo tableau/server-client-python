@@ -2,7 +2,6 @@ from defusedxml.ElementTree import fromstring, tostring
 from functools import singledispatch
 from typing import TypeVar, overload
 
-
 # the redact method can handle either strings or bytes, but it can't mix them.
 # Generic type so we can write the actual logic once, then use singledispatch to
 # create the replacement text with the correct type

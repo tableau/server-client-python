@@ -226,7 +226,7 @@ class Schedules(Endpoint):
                 task_type = TaskItem.Type.RunFlow
             items.append(
                 (schedule_id, flow, "flow", RequestFactory.Schedule.add_flow_req, task_type)
-            )  # type:ignore[arg-type]
+            )  # type: ignore[arg-type]
 
         results = (self._add_to(*x) for x in items)
         return [x for x in results if not x.result]

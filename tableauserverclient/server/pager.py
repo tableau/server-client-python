@@ -6,7 +6,6 @@ from collections.abc import Iterable, Iterator
 from tableauserverclient.models.pagination_item import PaginationItem
 from tableauserverclient.server.request_options import RequestOptions
 
-
 T = TypeVar("T")
 
 
