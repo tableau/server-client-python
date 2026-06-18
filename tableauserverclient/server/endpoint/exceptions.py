@@ -29,13 +29,22 @@ class XMLError(TableauError):
         # Check elements exist before .text
         parsed_response = fromstring(resp)
         try:
-            error_response = cls(
-                parsed_response.find("t:error", namespaces=ns).get("code", ""),
-                parsed_response.find(".//t:summary", namespaces=ns).text,
-                parsed_response.find(".//t:detail", namespaces=ns).text,
-                url,
-            )
-        except Exception as e:
+            error_element = parsed_response.find("t:error", namespaces=ns)
+            summary_element = parsed_response.find(".//t:summary", namespaces=ns)
+            detail_element = parsed_response.find(".//t:detail", namespaces=ns)
+
+            # Guard against responses that don't contain a t:error element
+            if error_element is None:
+                raw = resp.decode("utf-8", errors="replace") if isinstance(resp, bytes) else str(resp)
+                error_response = cls("", raw, raw, url)
+            else:
+                error_response = cls(
+                    error_element.get("code", ""),
+                    summary_element.text if summary_element is not None else "",
+                    detail_element.text if detail_element is not None else "",
+                    url,
+                )
+        except Exception:
             raise NonXMLResponseError(resp)
         return error_response
 
