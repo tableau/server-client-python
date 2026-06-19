@@ -169,7 +169,6 @@ def test_get_by_id_missing_id(server: TSC.Server) -> None:
 
 def test_refresh_id(server: TSC.Server) -> None:
     server.version = "2.8"
-    server.workbooks.baseurl
     response_xml = REFRESH_XML.read_text()
     with requests_mock.mock() as m:
         m.post(
@@ -182,7 +181,6 @@ def test_refresh_id(server: TSC.Server) -> None:
 
 def test_refresh_already_running(server: TSC.Server) -> None:
     server.version = "2.8"
-    server.workbooks.baseurl
     response_xml = WORKBOOK_REFRESH_DUPLICATE_XML.read_text()
     with requests_mock.mock() as m:
         m.post(
@@ -196,7 +194,6 @@ def test_refresh_already_running(server: TSC.Server) -> None:
 
 def test_refresh_object(server: TSC.Server) -> None:
     server.version = "2.8"
-    server.workbooks.baseurl
     workbook = TSC.WorkbookItem("")
     workbook._id = "3cc6cd06-89ce-4fdc-b935-5294135d6d42"
     response_xml = REFRESH_XML.read_text()
@@ -326,7 +323,6 @@ def test_download_sanitizes_name(server: TSC.Server) -> None:
 def test_download_extract_only(server: TSC.Server) -> None:
     # Pretend we're 2.5 for 'extract_only'
     server.version = "2.5"
-    server.workbooks.baseurl
 
     with requests_mock.mock() as m:
         m.get(
@@ -467,7 +463,6 @@ def test_populate_connections_missing_id(server: TSC.Server) -> None:
 
 def test_populate_pdf(server: TSC.Server) -> None:
     server.version = "3.4"
-    server.workbooks.baseurl
     response = POPULATE_PDF.read_bytes()
     with requests_mock.mock() as m:
         m.get(
@@ -487,7 +482,6 @@ def test_populate_pdf(server: TSC.Server) -> None:
 
 def test_populate_pdf_unsupported(server: TSC.Server) -> None:
     server.version = "3.4"
-    server.workbooks.baseurl
     with requests_mock.mock() as m:
         m.get(
             server.workbooks.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/pdf?type=a5&orientation=landscape",
@@ -507,7 +501,6 @@ def test_populate_pdf_unsupported(server: TSC.Server) -> None:
 
 def test_populate_pdf_vf_dims(server: TSC.Server) -> None:
     server.version = "3.23"
-    server.workbooks.baseurl
     response = POPULATE_PDF.read_bytes()
     with requests_mock.mock() as m:
         m.get(
@@ -531,7 +524,6 @@ def test_populate_pdf_vf_dims(server: TSC.Server) -> None:
 
 def test_populate_powerpoint(server: TSC.Server) -> None:
     server.version = "3.8"
-    server.workbooks.baseurl
     response = POPULATE_POWERPOINT.read_bytes()
     with requests_mock.mock() as m:
         m.get(server.workbooks.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/powerpoint?maxAge=1", content=response)
@@ -881,7 +873,6 @@ def test_synchronous_publish_timeout_error(server: TSC.Server) -> None:
 
 def test_delete_extracts_all(server: TSC.Server) -> None:
     server.version = "3.10"
-    server.workbooks.baseurl
 
     response_xml = PUBLISH_ASYNC_XML.read_text()
     with requests_mock.mock() as m:
@@ -895,7 +886,6 @@ def test_delete_extracts_all(server: TSC.Server) -> None:
 
 def test_create_extracts_all(server: TSC.Server) -> None:
     server.version = "3.10"
-    server.workbooks.baseurl
 
     response_xml = PUBLISH_ASYNC_XML.read_text()
     with requests_mock.mock() as m:
@@ -909,7 +899,6 @@ def test_create_extracts_all(server: TSC.Server) -> None:
 
 def test_create_extracts_one(server: TSC.Server) -> None:
     server.version = "3.10"
-    server.workbooks.baseurl
 
     datasource = TSC.DatasourceItem("test")
     datasource._id = "1f951daf-4061-451a-9df1-69a8062664f2"
@@ -925,7 +914,6 @@ def test_create_extracts_one(server: TSC.Server) -> None:
 
 
 def test_revisions(server: TSC.Server) -> None:
-    server.workbooks.baseurl
     workbook = TSC.WorkbookItem("project", "test")
     workbook._id = "06b944d2-959d-4604-9305-12323c95e70e"
 
@@ -956,7 +944,6 @@ def test_revisions(server: TSC.Server) -> None:
 
 
 def test_delete_revision(server: TSC.Server) -> None:
-    server.workbooks.baseurl
     workbook = TSC.WorkbookItem("project", "test")
     workbook._id = "06b944d2-959d-4604-9305-12323c95e70e"
 
@@ -986,7 +973,6 @@ def test_bad_download_response(server: TSC.Server) -> None:
 
 
 def test_odata_connection(server: TSC.Server) -> None:
-    server.workbooks.baseurl
     workbook = TSC.WorkbookItem("project", "test")
     workbook._id = "06b944d2-959d-4604-9305-12323c95e70e"
     connection = TSC.ConnectionItem()
