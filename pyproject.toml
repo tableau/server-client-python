@@ -67,7 +67,7 @@ exclude = ['/bin/']
 
 [tool.pytest.ini_options]
 testpaths = ["test"]
-addopts = "--junitxml=./test.junit.xml"
+addopts = "--junitxml=./test.junit.xml -n auto"
 
 [tool.versioneer]
 VCS = "git"
