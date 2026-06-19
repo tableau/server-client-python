@@ -506,9 +506,7 @@ def test_populate_pdf_unsupported(server: TSC.Server) -> None:
 
 
 def test_populate_pdf_vf_dims(server: TSC.Server) -> None:
-    # vizWidth/vizHeight require API 3.26 on both workbooks and views populate_pdf
-    server.version = "3.26"
-    server.workbooks.baseurl
+    server.version = "3.23"
     response = POPULATE_PDF.read_bytes()
     with requests_mock.mock() as m:
         m.get(

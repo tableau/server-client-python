@@ -205,7 +205,7 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
         req_options: PDFRequestOptions | None, default None
             Optional request options for the request. These options can include
             parameters such as orientation, paper size, and viz dimensions
-            (viz_width and viz_height, which require API version 3.26+).
+            (viz_width and viz_height).
 
         Returns
         -------
@@ -214,11 +214,6 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
         if not view_item.id:
             error = "View item missing ID."
             raise MissingRequiredFieldError(error)
-
-        if req_options is not None:
-            if not self.parent_srv.check_at_least_version("3.26"):
-                if req_options.viz_height or req_options.viz_width:
-                    raise UnsupportedAttributeError("viz_height and viz_width are only supported in API 3.26+")
 
         def pdf_fetcher():
             return self._get_view_pdf(view_item, req_options)
