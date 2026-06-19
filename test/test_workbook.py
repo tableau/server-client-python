@@ -246,9 +246,8 @@ def test_update(server: TSC.Server) -> None:
 
 
 def test_update_description_in_request_xml(server: TSC.Server) -> None:
-    """description should be included in the update request XML when server >= 3.20."""
-    server.version = "3.20"
-    server.workbooks.baseurl
+    """description should be included in the update request XML when server >= 3.21."""
+    server.version = "3.21"
     response_xml = UPDATE_XML.read_text()
     with requests_mock.mock() as m:
         m.put(server.workbooks.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2", text=response_xml)
@@ -263,10 +262,9 @@ def test_update_description_in_request_xml(server: TSC.Server) -> None:
     assert workbook_el.get("description") == "A great workbook"
 
 
-def test_update_description_excluded_below_v3_20(server: TSC.Server) -> None:
-    """description should be excluded from the update request XML when server < 3.20."""
-    server.version = "3.19"
-    server.workbooks.baseurl
+def test_update_description_excluded_below_v3_21(server: TSC.Server) -> None:
+    """description should be excluded from the update request XML when server < 3.21."""
+    server.version = "3.20"
     response_xml = UPDATE_XML.read_text()
     with requests_mock.mock() as m:
         m.put(server.workbooks.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2", text=response_xml)
@@ -639,8 +637,8 @@ def test_publish_description_in_request_xml(server: TSC.Server) -> None:
         new_workbook.description = "A great workbook"
         sample_workbook = os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")
         server.workbooks.publish(new_workbook, sample_workbook, server.PublishMode.CreateNew)
-        request_body = m.request_history[0].body
-    assert b'description="A great workbook"' in request_body
+        request_body = m._adapter.request_history[0]._request.body
+    assert re.search(b'description=\\"A great workbook\\"', request_body)
 
 
 def test_publish_a_packaged_file_object(server: TSC.Server) -> None:
