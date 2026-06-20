@@ -12,17 +12,22 @@
 
 # conf.py
 
-import tomli
-with open("../../pyproject.toml", "rb") as f:
-    toml = tomli.load(f)
+try:
+    import tomllib
+except ImportError:
+    import tomli as tomllib
+
+from pathlib import Path
+import importlib.metadata
+
+with open(Path(__file__).parent.parent / "pyproject.toml", "rb") as f:
+    toml = tomllib.load(f)
 
 # -- Project information -----------------------------------------------------
 
-pyproject = toml["tool"]["setuptools"]
-
-project = pyproject["name"]
-version = pyproject["version"]
-release = pyproject["version"]
+project = toml["project"]["name"]
+release = importlib.metadata.version(project)
+version = ".".join(release.split(".")[:2])
 
 # -- General configuration ---------------------------------------------------
 # -- General configuration
@@ -54,9 +59,9 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "alabaster"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+html_static_path = []

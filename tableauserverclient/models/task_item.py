@@ -13,7 +13,7 @@ class TaskItem:
 
     Parameters
     ----------
-    id_ : str
+    id : str
         The ID of the task.
 
     task_type : str

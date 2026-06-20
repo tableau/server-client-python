@@ -27,7 +27,7 @@ class JobItem:
 
     Parameters
     ----------
-    id_ : str
+    id : str
         The identifier of the job.
 
     job_type : str
