@@ -1,0 +1,46 @@
+name: Build and publish docs
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  build-and-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install docs dependencies
+        run: pip install -e ".[docs]"
+
+      - name: Build Sphinx docs
+        run: sphinx-build -b html docs sphinx_build
+
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Copy Sphinx output into gh-pages/sphinx
+        run: |
+          rm -rf gh-pages/sphinx
+          cp -r sphinx_build gh-pages/sphinx
+
+      - name: Create PR to gh-pages
+        uses: peter-evans/create-pull-request@v6
+        with:
+          path: gh-pages
+          branch: docs-update
+          base: gh-pages
+          title: "docs: update generated API reference"
+          body: "Automated update of Sphinx-generated API reference from master."
+          commit-message: "docs: regenerate Sphinx API reference"
