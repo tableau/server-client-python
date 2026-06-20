@@ -6,11 +6,23 @@
 
 
 # -- Project information -----------------------------------------------------
+# Source - https://stackoverflow.com/a/75396624
+# Posted by Jan, modified by community. See post 'Timeline' for change history
+# Retrieved 2026-06-19, License - CC BY-SA 4.0
 
-project = "Basic Sphinx Example Project"
-copyright = "2022, Read the Docs core team"
-author = "Read the Docs core team"
+# conf.py
 
+import tomli
+with open("../../pyproject.toml", "rb") as f:
+    toml = tomli.load(f)
+
+# -- Project information -----------------------------------------------------
+
+pyproject = toml["tool"]["setuptools"]
+
+project = pyproject["name"]
+version = pyproject["version"]
+release = pyproject["version"]
 
 # -- General configuration ---------------------------------------------------
 # -- General configuration
