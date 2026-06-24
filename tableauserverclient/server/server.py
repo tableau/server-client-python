@@ -195,8 +195,7 @@ class Server:
         self.validate_connection_settings()  # does not make an actual outgoing request
 
         self.version = default_server_version
-        if use_server_version:
-            self.use_server_version()  # this makes a server call
+        self._use_server_version = use_server_version
 
     def validate_connection_settings(self):
         try:

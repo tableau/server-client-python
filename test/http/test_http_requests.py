@@ -49,9 +49,11 @@ def test_init_server_model_bad_server_name_not_version_check():
     server = TSC.Server("fake-url", use_server_version=False)
 
 
-@mock.patch("requests.sessions.Session.get", side_effect=mocked_requests_get)
-def test_init_server_model_bad_server_name_do_version_check(mock_get):
+def test_init_server_model_bad_server_name_do_version_check():
+    # use_server_version=True no longer makes a network call at construction;
+    # version detection is deferred until sign_in
     server = TSC.Server("fake-url", use_server_version=True)
+    assert server._use_server_version is True
 
 
 def test_init_server_model_bad_server_name_not_version_check_random_options():
