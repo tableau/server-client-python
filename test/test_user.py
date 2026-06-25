@@ -467,7 +467,7 @@ def test_bulk_add(server: TSC.Server) -> None:
         for user, xml_user in zip(users, xml_users):
             assert user.name == xml_user.get("name")
             if user.idp_configuration_id is None:
-                assert xml_user.get("authSetting") == (user.auth_setting or "ServerDefault")
+                assert xml_user.get("authSetting") == user.auth_setting
             else:
                 assert xml_user.get("idpConfigurationId") == user.idp_configuration_id
                 assert xml_user.get("authSetting") is None
@@ -539,6 +539,33 @@ def test_add_idp_and_auth_error(server: TSC.Server) -> None:
 
     with pytest.raises(ValueError, match="User cannot have both authSetting and idpConfigurationId."):
         server.users.bulk_add(users)
+
+
+def test_filter_by_email(server: TSC.Server) -> None:
+    response_xml = GET_XML.read_text()
+    with requests_mock.mock() as m:
+        m.get(requests_mock.ANY, text=response_xml)
+        qs = server.users.filter(email="test@example.com")
+
+        # Access total_available to trigger the HTTP request and inspect the query string
+        assert qs.total_available == 2
+        assert len(m.request_history) >= 1
+        first_request_qs = m.request_history[0].qs
+        assert "filter" in first_request_qs
+        assert "email:eq:test@example.com" in first_request_qs["filter"]
+
+
+def test_filter_by_email_in(server: TSC.Server) -> None:
+    response_xml = GET_XML.read_text()
+    with requests_mock.mock() as m:
+        m.get(requests_mock.ANY, text=response_xml)
+        qs = server.users.filter(email__in=["alice@example.com", "bob@example.com"])
+
+        assert qs.total_available == 2
+        assert len(m.request_history) >= 1
+        first_request_qs = m.request_history[0].qs
+        assert "filter" in first_request_qs
+        assert "email:in:[alice@example.com,bob@example.com]" in first_request_qs["filter"]
 
 
 def test_remove_users_csv(server: TSC.Server) -> None:

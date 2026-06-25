@@ -89,6 +89,8 @@ class Auth(Endpoint):
         auth_token = parsed_response.find("t:credentials", namespaces=self.parent_srv.namespace).get("token", None)
         self.parent_srv._set_auth(site_id, user_id, auth_token, site_url)
         logger.info(f"Signed into {self.parent_srv.server_address} as user with id {user_id}")
+        if self.parent_srv._use_server_version:
+            self.parent_srv.use_server_version()
         return Auth.contextmgr(self.sign_out)
 
     # We use the same request that username/password login uses for all auth types.

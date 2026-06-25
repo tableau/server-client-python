@@ -1,6 +1,5 @@
 import os.path
 import unittest
-from typing import Optional
 from xml.etree import ElementTree as ET
 from contextlib import contextmanager
 

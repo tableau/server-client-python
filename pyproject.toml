@@ -8,6 +8,7 @@ name="tableauserverclient"
 dynamic = ["version"]
 description='A Python module for working with the Tableau Server REST API.'
 authors = [{name="Tableau", email="github@tableau.com"}]
+license = "MIT"
 license-files = ["LICENSE"]
 readme = "README.md"
 
@@ -18,21 +19,21 @@ dependencies = [
     'urllib3>=2.6.0,<3',
     'typing_extensions>=4.0',
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 classifiers = [
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: 3.13"
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14"
 ]
 [project.urls]
 repository = "https://github.com/tableau/server-client-python"
 
 [project.optional-dependencies]
-test = ["black==24.10", "build", "mypy==1.4", "pytest>=7.0", "pytest-cov", "pytest-subtests",
+test = ["black==26.3.1", "build", "mypy==1.4", "pytest>=7.0", "pytest-cov", "pytest-subtests",
     "pytest-xdist", "requests-mock>=1.0,<2.0", "types-requests>=2.32.4.20250913"]
 
 [tool.setuptools.package-data]
@@ -41,7 +42,7 @@ tableauserverclient = ["*"]
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["tableauserverclient*"]
+exclude = ["test*", "samples*", "test_e2e*", "docs*", "dist*", "build*"]
 
 [tool.setuptools.dynamic]
 version = {attr = "versioneer.get_version"}
@@ -66,7 +67,11 @@ exclude = ['/bin/']
 
 [tool.pytest.ini_options]
 testpaths = ["test"]
-addopts = "--junitxml=./test.junit.xml"
+addopts = "--junitxml=./test.junit.xml -n auto"
+markers = [
+    "e2e: mark test as end-to-end (requires a real Tableau server)",
+    "packaging: mark test as requiring a built wheel in dist/",
+]
 
 [tool.versioneer]
 VCS = "git"

@@ -1,4 +1,4 @@
-from typing import Callable, Optional, TYPE_CHECKING
+from typing import Callable, TYPE_CHECKING
 from defusedxml.ElementTree import fromstring
 
 from .exceptions import UnpopulatedPropertyError
@@ -44,7 +44,7 @@ class TableItem:
         return self._data_quality_warnings()
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         return self._id
 
     @property

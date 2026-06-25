@@ -34,10 +34,12 @@ POPULATE_VIEWS_USAGE_XML = TEST_ASSET_DIR / "workbook_populate_views_usage.xml"
 PUBLISH_XML = TEST_ASSET_DIR / "workbook_publish.xml"
 PUBLISH_ASYNC_XML = TEST_ASSET_DIR / "workbook_publish_async.xml"
 REFRESH_XML = TEST_ASSET_DIR / "workbook_refresh.xml"
+WORKBOOK_REFRESH_DUPLICATE_XML = TEST_ASSET_DIR / "workbook_refresh_duplicate.xml"
 REVISION_XML = TEST_ASSET_DIR / "workbook_revision.xml"
 UPDATE_XML = TEST_ASSET_DIR / "workbook_update.xml"
 UPDATE_PERMISSIONS = TEST_ASSET_DIR / "workbook_update_permissions.xml"
 UPDATE_CONNECTIONS_XML = TEST_ASSET_DIR / "workbook_update_connections.xml"
+UPDATE_CONNECTIONS_NO_AUTH_XML = TEST_ASSET_DIR / "workbook_update_connections_no_auth.xml"
 
 
 @pytest.fixture(scope="function")
@@ -167,7 +169,6 @@ def test_get_by_id_missing_id(server: TSC.Server) -> None:
 
 def test_refresh_id(server: TSC.Server) -> None:
     server.version = "2.8"
-    server.workbooks.baseurl
     response_xml = REFRESH_XML.read_text()
     with requests_mock.mock() as m:
         m.post(
@@ -178,9 +179,21 @@ def test_refresh_id(server: TSC.Server) -> None:
         server.workbooks.refresh("3cc6cd06-89ce-4fdc-b935-5294135d6d42")
 
 
+def test_refresh_already_running(server: TSC.Server) -> None:
+    server.version = "2.8"
+    response_xml = WORKBOOK_REFRESH_DUPLICATE_XML.read_text()
+    with requests_mock.mock() as m:
+        m.post(
+            server.workbooks.baseurl + "/3cc6cd06-89ce-4fdc-b935-5294135d6d42/refresh",
+            status_code=409,
+            text=response_xml,
+        )
+        refresh_job = server.workbooks.refresh("3cc6cd06-89ce-4fdc-b935-5294135d6d42")
+        assert refresh_job is None
+
+
 def test_refresh_object(server: TSC.Server) -> None:
     server.version = "2.8"
-    server.workbooks.baseurl
     workbook = TSC.WorkbookItem("")
     workbook._id = "3cc6cd06-89ce-4fdc-b935-5294135d6d42"
     response_xml = REFRESH_XML.read_text()
@@ -229,6 +242,40 @@ def test_update(server: TSC.Server) -> None:
     assert not single_workbook.data_acceleration_config["accelerate_now"]
 
 
+def test_update_description_in_request_xml(server: TSC.Server) -> None:
+    """description should be included in the update request XML when server >= 3.21."""
+    server.version = "3.21"
+    response_xml = UPDATE_XML.read_text()
+    with requests_mock.mock() as m:
+        m.put(server.workbooks.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2", text=response_xml)
+        single_workbook = TSC.WorkbookItem("1d0304cd-3796-429f-b815-7258370b9b74", show_tabs=True)
+        single_workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
+        single_workbook.description = "A great workbook"
+        server.workbooks.update(single_workbook)
+        request_body = m.request_history[0].body
+    xml_root = fromstring(request_body)
+    workbook_el = xml_root.find(".//workbook")
+    assert workbook_el is not None
+    assert workbook_el.get("description") == "A great workbook"
+
+
+def test_update_description_excluded_below_v3_21(server: TSC.Server) -> None:
+    """description should be excluded from the update request XML when server < 3.21."""
+    server.version = "3.20"
+    response_xml = UPDATE_XML.read_text()
+    with requests_mock.mock() as m:
+        m.put(server.workbooks.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2", text=response_xml)
+        single_workbook = TSC.WorkbookItem("1d0304cd-3796-429f-b815-7258370b9b74", show_tabs=True)
+        single_workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
+        single_workbook.description = "A great workbook"
+        server.workbooks.update(single_workbook)
+        request_body = m.request_history[0].body
+    xml_root = fromstring(request_body)
+    workbook_el = xml_root.find(".//workbook")
+    assert workbook_el is not None
+    assert workbook_el.get("description") is None
+
+
 def test_update_missing_id(server: TSC.Server) -> None:
     single_workbook = TSC.WorkbookItem("test")
     with pytest.raises(TSC.MissingRequiredFieldError):
@@ -271,15 +318,14 @@ def test_update_tags(server: TSC.Server) -> None:
     assert single_workbook._initial_tags == updated_workbook._initial_tags
 
 
-def test_download(server: TSC.Server) -> None:
+def test_download(server: TSC.Server, tmp_path: Path) -> None:
     with requests_mock.mock() as m:
         m.get(
             server.workbooks.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/content",
             headers={"Content-Disposition": 'name="tableau_workbook"; filename="RESTAPISample.twbx"'},
         )
-        file_path = server.workbooks.download("1f951daf-4061-451a-9df1-69a8062664f2")
+        file_path = server.workbooks.download("1f951daf-4061-451a-9df1-69a8062664f2", filepath=tmp_path)
         assert os.path.exists(file_path)
-    os.remove(file_path)
 
 
 def test_download_object(server: TSC.Server) -> None:
@@ -293,7 +339,7 @@ def test_download_object(server: TSC.Server) -> None:
             assert isinstance(file_path, BytesIO)
 
 
-def test_download_sanitizes_name(server: TSC.Server) -> None:
+def test_download_sanitizes_name(server: TSC.Server, tmp_path: Path) -> None:
     filename = "Name,With,Commas.twbx"
     disposition = f'name="tableau_workbook"; filename="{filename}"'
     with requests_mock.mock() as m:
@@ -301,16 +347,14 @@ def test_download_sanitizes_name(server: TSC.Server) -> None:
             server.workbooks.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/content",
             headers={"Content-Disposition": disposition},
         )
-        file_path = server.workbooks.download("1f951daf-4061-451a-9df1-69a8062664f2")
+        file_path = server.workbooks.download("1f951daf-4061-451a-9df1-69a8062664f2", filepath=tmp_path)
         assert os.path.basename(file_path) == "NameWithCommas.twbx"
         assert os.path.exists(file_path)
-    os.remove(file_path)
 
 
-def test_download_extract_only(server: TSC.Server) -> None:
+def test_download_extract_only(server: TSC.Server, tmp_path: Path) -> None:
     # Pretend we're 2.5 for 'extract_only'
     server.version = "2.5"
-    server.workbooks.baseurl
 
     with requests_mock.mock() as m:
         m.get(
@@ -319,9 +363,27 @@ def test_download_extract_only(server: TSC.Server) -> None:
             complete_qs=True,
         )
         # Technically this shouldn't download a twbx, but we are interested in the qs, not the file
-        file_path = server.workbooks.download("1f951daf-4061-451a-9df1-69a8062664f2", include_extract=False)
+        file_path = server.workbooks.download(
+            "1f951daf-4061-451a-9df1-69a8062664f2", include_extract=False, filepath=tmp_path
+        )
         assert os.path.exists(file_path)
-    os.remove(file_path)
+
+
+def test_download_no_extract_emits_deprecation_warning(server: TSC.Server, tmp_path: Path) -> None:
+    """no_extract=True should emit a DeprecationWarning and map to includeExtract=False."""
+    server.version = "2.5"
+
+    with requests_mock.mock() as m:
+        m.get(
+            server.workbooks.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/content?includeExtract=False",
+            headers={"Content-Disposition": 'name="tableau_workbook"; filename="RESTAPISample.twbx"'},
+            complete_qs=True,
+        )
+        with pytest.warns(DeprecationWarning, match="deprecated and will be removed"):
+            file_path = server.workbooks.download(
+                "1f951daf-4061-451a-9df1-69a8062664f2", no_extract=True, filepath=tmp_path
+            )
+        assert os.path.exists(file_path)
 
 
 def test_download_missing_id(server: TSC.Server) -> None:
@@ -451,7 +513,6 @@ def test_populate_connections_missing_id(server: TSC.Server) -> None:
 
 def test_populate_pdf(server: TSC.Server) -> None:
     server.version = "3.4"
-    server.workbooks.baseurl
     response = POPULATE_PDF.read_bytes()
     with requests_mock.mock() as m:
         m.get(
@@ -471,7 +532,6 @@ def test_populate_pdf(server: TSC.Server) -> None:
 
 def test_populate_pdf_unsupported(server: TSC.Server) -> None:
     server.version = "3.4"
-    server.workbooks.baseurl
     with requests_mock.mock() as m:
         m.get(
             server.workbooks.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/pdf?type=a5&orientation=landscape",
@@ -491,7 +551,6 @@ def test_populate_pdf_unsupported(server: TSC.Server) -> None:
 
 def test_populate_pdf_vf_dims(server: TSC.Server) -> None:
     server.version = "3.23"
-    server.workbooks.baseurl
     response = POPULATE_PDF.read_bytes()
     with requests_mock.mock() as m:
         m.get(
@@ -515,7 +574,6 @@ def test_populate_pdf_vf_dims(server: TSC.Server) -> None:
 
 def test_populate_powerpoint(server: TSC.Server) -> None:
     server.version = "3.8"
-    server.workbooks.baseurl
     response = POPULATE_POWERPOINT.read_bytes()
     with requests_mock.mock() as m:
         m.get(server.workbooks.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/powerpoint?maxAge=1", content=response)
@@ -574,6 +632,21 @@ def test_publish(server: TSC.Server) -> None:
     assert "GDP per capita" == new_workbook.views[0].name
     assert "RESTAPISample_0/sheets/GDPpercapita" == new_workbook.views[0].content_url
     assert "REST API Testing" == new_workbook.description
+
+
+def test_publish_description_in_request_xml(server: TSC.Server) -> None:
+    """description should be included in the publish request XML."""
+    response_xml = PUBLISH_XML.read_text()
+    with requests_mock.mock() as m:
+        m.post(server.workbooks.baseurl, text=response_xml)
+        new_workbook = TSC.WorkbookItem(
+            name="Sample", show_tabs=False, project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760"
+        )
+        new_workbook.description = "A great workbook"
+        sample_workbook = os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")
+        server.workbooks.publish(new_workbook, sample_workbook, server.PublishMode.CreateNew)
+        request_body = m._adapter.request_history[0]._request.body
+    assert re.search(b'description=\\"A great workbook\\"', request_body)
 
 
 def test_publish_a_packaged_file_object(server: TSC.Server) -> None:
@@ -863,9 +936,19 @@ def test_synchronous_publish_timeout_error(server: TSC.Server) -> None:
             server.workbooks.publish(new_workbook, TEST_ASSET_DIR / "SampleWB.twbx", publish_mode)
 
 
+def test_async_publish_timeout_error(server: TSC.Server) -> None:
+    with requests_mock.mock() as m:
+        m.register_uri("POST", server.workbooks.baseurl, status_code=504)
+
+        new_workbook = TSC.WorkbookItem(project_id="")
+        publish_mode = server.PublishMode.CreateNew
+
+        with pytest.raises(InternalServerError, match="TSC_CHUNK_SIZE_MB"):
+            server.workbooks.publish(new_workbook, TEST_ASSET_DIR / "SampleWB.twbx", publish_mode, as_job=True)
+
+
 def test_delete_extracts_all(server: TSC.Server) -> None:
     server.version = "3.10"
-    server.workbooks.baseurl
 
     response_xml = PUBLISH_ASYNC_XML.read_text()
     with requests_mock.mock() as m:
@@ -879,7 +962,6 @@ def test_delete_extracts_all(server: TSC.Server) -> None:
 
 def test_create_extracts_all(server: TSC.Server) -> None:
     server.version = "3.10"
-    server.workbooks.baseurl
 
     response_xml = PUBLISH_ASYNC_XML.read_text()
     with requests_mock.mock() as m:
@@ -893,7 +975,6 @@ def test_create_extracts_all(server: TSC.Server) -> None:
 
 def test_create_extracts_one(server: TSC.Server) -> None:
     server.version = "3.10"
-    server.workbooks.baseurl
 
     datasource = TSC.DatasourceItem("test")
     datasource._id = "1f951daf-4061-451a-9df1-69a8062664f2"
@@ -909,7 +990,6 @@ def test_create_extracts_one(server: TSC.Server) -> None:
 
 
 def test_revisions(server: TSC.Server) -> None:
-    server.workbooks.baseurl
     workbook = TSC.WorkbookItem("project", "test")
     workbook._id = "06b944d2-959d-4604-9305-12323c95e70e"
 
@@ -940,7 +1020,6 @@ def test_revisions(server: TSC.Server) -> None:
 
 
 def test_delete_revision(server: TSC.Server) -> None:
-    server.workbooks.baseurl
     workbook = TSC.WorkbookItem("project", "test")
     workbook._id = "06b944d2-959d-4604-9305-12323c95e70e"
 
@@ -970,7 +1049,6 @@ def test_bad_download_response(server: TSC.Server) -> None:
 
 
 def test_odata_connection(server: TSC.Server) -> None:
-    server.workbooks.baseurl
     workbook = TSC.WorkbookItem("project", "test")
     workbook._id = "06b944d2-959d-4604-9305-12323c95e70e"
     connection = TSC.ConnectionItem()
@@ -1030,6 +1108,42 @@ def test_update_workbook_connections(server: TSC.Server) -> None:
 
         assert updated_ids == connection_luids
         assert "AD Service Principal" == connection_items[0].auth_type
+
+
+def test_update_workbook_connections_without_auth_type(server: TSC.Server) -> None:
+    """Test that update_connections works when authentication_type is not provided."""
+    populate_xml = POPULATE_CONNECTIONS_XML.read_text()
+    response_xml = UPDATE_CONNECTIONS_NO_AUTH_XML.read_text()
+
+    with requests_mock.Mocker() as m:
+        workbook_id = "1a2b3c4d-5e6f-7a8b-9c0d-112233445566"
+        connection_luids = ["abc12345-def6-7890-gh12-ijklmnopqrst", "1234abcd-5678-efgh-ijkl-0987654321mn"]
+
+        workbook = TSC.WorkbookItem(workbook_id)
+        workbook._id = workbook_id
+        server.version = "3.26"
+        url = f"{server.baseurl}/{workbook_id}/connections"
+        m.get(
+            "http://test/api/3.26/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks/1a2b3c4d-5e6f-7a8b-9c0d-112233445566/connections",
+            text=populate_xml,
+        )
+        m.put(
+            "http://test/api/3.26/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks/1a2b3c4d-5e6f-7a8b-9c0d-112233445566/connections",
+            text=response_xml,
+        )
+
+        # Update connections without specifying authentication_type
+        connection_items = server.workbooks.update_connections(
+            workbook_item=workbook,
+            connection_luids=connection_luids,
+            username="user1",
+            embed_password=True,
+        )
+        updated_ids = [conn.id for conn in connection_items]
+
+        assert updated_ids == connection_luids
+        # Verify that the auth type from the response is preserved (UsernamePassword)
+        assert connection_items[0].auth_type == "UsernamePassword"
 
 
 def test_get_workbook_all_fields(server: TSC.Server) -> None:

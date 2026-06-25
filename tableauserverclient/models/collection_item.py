@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 from xml.etree.ElementTree import Element
 
 from defusedxml.ElementTree import fromstring
@@ -11,15 +10,15 @@ from tableauserverclient.models.user_item import UserItem
 
 class CollectionItem:
     def __init__(self) -> None:
-        self.id: Optional[str] = None
-        self.name: Optional[str] = None
-        self.description: Optional[str] = None
-        self.created_at: Optional[datetime] = None
-        self.updated_at: Optional[datetime] = None
-        self.owner: Optional[UserItem] = None
-        self.total_item_count: Optional[int] = None
-        self.permissioned_item_count: Optional[int] = None
-        self.visibility: Optional[str] = None  # Assuming visibility is a string, adjust as necessary
+        self.id: str | None = None
+        self.name: str | None = None
+        self.description: str | None = None
+        self.created_at: datetime | None = None
+        self.updated_at: datetime | None = None
+        self.owner: UserItem | None = None
+        self.total_item_count: int | None = None
+        self.permissioned_item_count: int | None = None
+        self.visibility: str | None = None  # Assuming visibility is a string, adjust as necessary
 
     @classmethod
     def from_response(cls, response: bytes, ns) -> list[Self]:

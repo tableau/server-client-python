@@ -8,7 +8,7 @@ from tableauserverclient.models import SiteAuthConfiguration, SiteItem, Paginati
 
 from tableauserverclient.helpers.logging import logger
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..request_options import RequestOptions
@@ -31,7 +31,7 @@ class Sites(Endpoint):
 
     # Gets all sites
     @api(version="2.0")
-    def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[SiteItem], PaginationItem]:
+    def get(self, req_options: "RequestOptions | None" = None) -> tuple[list[SiteItem], PaginationItem]:
         """
         Query all sites on the server. This method requires server admin
         permissions. This endpoint is paginated, meaning that the server will

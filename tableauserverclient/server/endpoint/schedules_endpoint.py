@@ -3,7 +3,7 @@ import copy
 import logging
 import warnings
 from collections import namedtuple
-from typing import TYPE_CHECKING, Any, Callable, Literal, Optional, Union, overload
+from typing import TYPE_CHECKING, Any, Callable, Literal, overload
 
 from .endpoint import Endpoint, api, parameter_added_in
 from .exceptions import MissingRequiredFieldError
@@ -31,7 +31,7 @@ class Schedules(Endpoint):
         return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/schedules"
 
     @api(version="2.3")
-    def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[ScheduleItem], PaginationItem]:
+    def get(self, req_options: "RequestOptions | None" = None) -> tuple[list[ScheduleItem], PaginationItem]:
         """
         Returns a list of flows, extract, and subscription server schedules on
         Tableau Server. For each schedule, the API returns name, frequency,
@@ -41,7 +41,7 @@ class Schedules(Endpoint):
 
         Parameters
         ----------
-        req_options : Optional[RequestOptions]
+        req_options : RequestOptions | None
             Filtering and paginating options for request.
 
         Returns
@@ -166,10 +166,10 @@ class Schedules(Endpoint):
     def add_to_schedule(
         self,
         schedule_id: str,
-        workbook: Optional["WorkbookItem"] = None,
-        datasource: Optional["DatasourceItem"] = None,
-        flow: Optional["FlowItem"] = None,
-        task_type: Optional[str] = None,
+        workbook: "WorkbookItem | None" = None,
+        datasource: "DatasourceItem | None" = None,
+        flow: "FlowItem | None" = None,
+        task_type: str | None = None,
     ) -> list[AddResponse]:
         """
         Adds a workbook, datasource, or flow to a schedule on Tableau Server.
@@ -187,16 +187,16 @@ class Schedules(Endpoint):
         schedule_id : str
             The ID of the schedule to add the item to.
 
-        workbook : Optional[WorkbookItem]
+        workbook : WorkbookItem | None
             The workbook to add to the schedule.
 
-        datasource : Optional[DatasourceItem]
+        datasource : DatasourceItem | None
             The datasource to add to the schedule.
 
-        flow : Optional[FlowItem]
+        flow : FlowItem | None
             The flow to add to the schedule.
 
-        task_type : Optional[str]
+        task_type : str | None
             The type of task to add to the schedule. If not provided, it will
             default to ExtractRefresh if a workbook or datasource is passed in,
             and RunFlow if a flow is passed in.
@@ -210,7 +210,7 @@ class Schedules(Endpoint):
         if workbook and datasource:
             warnings.warn("Passing in multiple items for add_to_schedule will be deprecated", PendingDeprecationWarning)
         items: list[
-            tuple[str, Union[WorkbookItem, FlowItem, DatasourceItem], str, Callable[[Optional[str], str], bytes], str]
+            tuple[str, WorkbookItem | FlowItem | DatasourceItem, str, Callable[[str | None, str], bytes], str]
         ] = []
 
         if workbook is not None:
@@ -226,7 +226,7 @@ class Schedules(Endpoint):
                 task_type = TaskItem.Type.RunFlow
             items.append(
                 (schedule_id, flow, "flow", RequestFactory.Schedule.add_flow_req, task_type)
-            )  # type:ignore[arg-type]
+            )  # type: ignore[arg-type]
 
         results = (self._add_to(*x) for x in items)
         return [x for x in results if not x.result]
@@ -234,7 +234,7 @@ class Schedules(Endpoint):
     def _add_to(
         self,
         schedule_id,
-        resource: Union["DatasourceItem", "WorkbookItem", "FlowItem"],
+        resource: "DatasourceItem | WorkbookItem | FlowItem",
         type_: str,
         req_factory: Callable[
             [
@@ -266,7 +266,7 @@ class Schedules(Endpoint):
 
     @api(version="2.3")
     def get_extract_refresh_tasks(
-        self, schedule_id: str, req_options: Optional["RequestOptions"] = None
+        self, schedule_id: str, req_options: "RequestOptions | None" = None
     ) -> tuple[list["ExtractItem"], "PaginationItem"]:
         """Get all extract refresh tasks for the specified schedule."""
         if not schedule_id:
@@ -298,12 +298,12 @@ class Schedules(Endpoint):
     @api(version="3.27")
     def batch_update_state(self, schedules, state, update_all=False) -> list[str]:
         """
-        Batch update the status of one or more scheudles. If update_all is set,
+        Batch update the status of one or more schedules. If update_all is set,
         all schedules on the Tableau Server are affected.
 
         Parameters
         ----------
-        schedules: Iterable[ScheudleItem | str] | Any
+        schedules: Iterable[ScheduleItem | str] | Any
             The schedules to be updated. If update_all=True, this is ignored.
 
         state: Literal["active", "suspended"]

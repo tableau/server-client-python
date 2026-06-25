@@ -98,7 +98,7 @@ def test_populate_data_quality_warning(server):
         first_dqw = dqws.pop()
         assert first_dqw.id == "c2e0e406-84fb-4f4e-9998-f20dd9306710"
         assert first_dqw.warning_type == "WARNING"
-        assert first_dqw.message, "Hello == World!"
+        assert first_dqw.message == "Hello, World!"
         assert first_dqw.owner_id == "eddc8c5f-6af0-40be-b6b0-2c790290a43f"
         assert first_dqw.active
         assert first_dqw.severe

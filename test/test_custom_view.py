@@ -116,6 +116,54 @@ def test_populate_image_with_options(server: TSC.Server) -> None:
         assert response == single_view.image
 
 
+def test_populate_image_svg_format(server: TSC.Server) -> None:
+    server.version = "3.29"
+    response = b"<svg>test</svg>"
+    with requests_mock.mock() as m:
+        m.get(
+            server.custom_views.baseurl + "/d79634e1-6063-4ec9-95ff-50acbf609ff5/image?format=SVG",
+            content=response,
+        )
+        single_view = TSC.CustomViewItem()
+        single_view._id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
+        req_option = TSC.ImageRequestOptions(format=TSC.ImageRequestOptions.Format.SVG)
+        server.custom_views.populate_image(single_view, req_option)
+        assert response == single_view.image
+
+
+def test_populate_image_png_format(server: TSC.Server) -> None:
+    server.version = "3.29"
+    response = POPULATE_PREVIEW_IMAGE.read_bytes()
+    with requests_mock.mock() as m:
+        m.get(
+            server.custom_views.baseurl + "/d79634e1-6063-4ec9-95ff-50acbf609ff5/image?format=PNG",
+            content=response,
+        )
+        single_view = TSC.CustomViewItem()
+        single_view._id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
+        req_option = TSC.ImageRequestOptions(format=TSC.ImageRequestOptions.Format.PNG)
+        server.custom_views.populate_image(single_view, req_option)
+        assert response == single_view.image
+
+
+def test_populate_image_format_unsupported_version(server: TSC.Server) -> None:
+    from tableauserverclient.server.endpoint.exceptions import UnsupportedAttributeError
+
+    server.version = "3.28"
+    response = POPULATE_PREVIEW_IMAGE.read_bytes()
+    with requests_mock.mock() as m:
+        m.get(
+            server.custom_views.baseurl + "/d79634e1-6063-4ec9-95ff-50acbf609ff5/image?format=SVG",
+            content=response,
+        )
+        single_view = TSC.CustomViewItem()
+        single_view._id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
+        req_option = TSC.ImageRequestOptions(format=TSC.ImageRequestOptions.Format.SVG)
+
+        with pytest.raises(UnsupportedAttributeError):
+            server.custom_views.populate_image(single_view, req_option)
+
+
 def test_populate_image_missing_id(server: TSC.Server) -> None:
     single_view = TSC.CustomViewItem()
     single_view._id = None

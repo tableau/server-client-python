@@ -14,7 +14,7 @@ from .property_decorators import (
 
 VALID_CONTENT_URL_RE = r"^[a-zA-Z0-9_\-]*$"
 
-from typing import Optional, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from tableauserverclient.server import Server
@@ -85,15 +85,15 @@ class SiteItem:
     state: str
         Shows the current state of the site (Active or Suspended).
 
-    attribute_capture_enabled: Optional[str]
+    attribute_capture_enabled: str | None
         Enables user attributes for all Tableau Server embedding workflows.
 
     """
 
-    _user_quota: Optional[int] = None
-    _tier_creator_capacity: Optional[int] = None
-    _tier_explorer_capacity: Optional[int] = None
-    _tier_viewer_capacity: Optional[int] = None
+    _user_quota: int | None = None
+    _tier_creator_capacity: int | None = None
+    _tier_explorer_capacity: int | None = None
+    _tier_viewer_capacity: int | None = None
 
     def __str__(self):
         return (
@@ -123,14 +123,14 @@ class SiteItem:
         self,
         name: str,
         content_url: str,
-        admin_mode: Optional[str] = None,
-        user_quota: Optional[int] = None,
-        storage_quota: Optional[int] = None,
+        admin_mode: str | None = None,
+        user_quota: int | None = None,
+        storage_quota: int | None = None,
         disable_subscriptions: bool = False,
         subscribe_others_enabled: bool = True,
         revision_history_enabled: bool = False,
         revision_limit: int = 25,
-        data_acceleration_mode: Optional[str] = None,
+        data_acceleration_mode: str | None = None,
         flows_enabled: bool = True,
         cataloging_enabled: bool = True,
         editing_flows_enabled: bool = True,
@@ -139,12 +139,12 @@ class SiteItem:
         guest_access_enabled: bool = False,
         cache_warmup_enabled: bool = True,
         commenting_enabled: bool = True,
-        extract_encryption_mode: Optional[str] = None,
+        extract_encryption_mode: str | None = None,
         request_access_enabled: bool = False,
         run_now_enabled: bool = True,
-        tier_explorer_capacity: Optional[int] = None,
-        tier_creator_capacity: Optional[int] = None,
-        tier_viewer_capacity: Optional[int] = None,
+        tier_explorer_capacity: int | None = None,
+        tier_creator_capacity: int | None = None,
+        tier_viewer_capacity: int | None = None,
         data_alerts_enabled: bool = True,
         commenting_mentions_enabled: bool = True,
         catalog_obfuscation_enabled: bool = True,
@@ -154,9 +154,9 @@ class SiteItem:
         notify_site_admins_on_throttle: bool = False,
         authoring_enabled: bool = True,
         custom_subscription_email_enabled: bool = False,
-        custom_subscription_email: Union[str, bool] = False,
+        custom_subscription_email: str | bool = False,
         custom_subscription_footer_enabled: bool = False,
-        custom_subscription_footer: Union[str, bool] = False,
+        custom_subscription_footer: str | bool = False,
         ask_data_mode: str = "EnabledByDefault",
         named_sharing_enabled: bool = True,
         mobile_biometrics_enabled: bool = False,
@@ -167,14 +167,14 @@ class SiteItem:
         time_zone=None,
         auto_suspend_refresh_enabled: bool = True,
         auto_suspend_refresh_inactivity_window: int = 30,
-        attribute_capture_enabled: Optional[bool] = None,
+        attribute_capture_enabled: bool | None = None,
     ):
         self._admin_mode = None
-        self._id: Optional[str] = None
+        self._id: str | None = None
         self._num_users = None
         self._state = None
         self._status_reason = None
-        self._storage: Optional[str] = None
+        self._storage: str | None = None
         self.user_quota = user_quota
         self.storage_quota = storage_quota
         self.content_url = content_url
@@ -224,12 +224,12 @@ class SiteItem:
         self.attribute_capture_enabled = attribute_capture_enabled
 
     @property
-    def admin_mode(self) -> Optional[str]:
+    def admin_mode(self) -> str | None:
         return self._admin_mode
 
     @admin_mode.setter
     @property_is_enum(AdminMode)
-    def admin_mode(self, value: Optional[str]) -> None:
+    def admin_mode(self, value: str | None) -> None:
         self._admin_mode = value
 
     @property
@@ -255,7 +255,7 @@ class SiteItem:
         self._disable_subscriptions = value
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         return self._id
 
     @property
@@ -290,24 +290,24 @@ class SiteItem:
         self._revision_limit = value
 
     @property
-    def state(self) -> Optional[str]:
+    def state(self) -> str | None:
         return self._state
 
     @state.setter
     @property_is_enum(State)
-    def state(self, value: Optional[str]) -> None:
+    def state(self, value: str | None) -> None:
         self._state = value
 
     @property
-    def status_reason(self) -> Optional[str]:
+    def status_reason(self) -> str | None:
         return self._status_reason
 
     @property
-    def storage(self) -> Optional[str]:
+    def storage(self) -> str | None:
         return self._storage
 
     @property
-    def user_quota(self) -> Optional[int]:
+    def user_quota(self) -> int | None:
         if any((self.tier_creator_capacity, self.tier_explorer_capacity, self.tier_viewer_capacity)):
             warnings.warn("Tiered license level is set. Returning None for user_quota")
             return None
@@ -315,7 +315,7 @@ class SiteItem:
             return self._user_quota
 
     @user_quota.setter
-    def user_quota(self, value: Optional[int]) -> None:
+    def user_quota(self, value: int | None) -> None:
         if value is not None and any(
             (self.tier_creator_capacity, self.tier_explorer_capacity, self.tier_viewer_capacity)
         ):
@@ -336,11 +336,11 @@ class SiteItem:
         self._subscribe_others_enabled = value
 
     @property
-    def data_acceleration_mode(self) -> Optional[str]:
+    def data_acceleration_mode(self) -> str | None:
         return self._data_acceleration_mode
 
     @data_acceleration_mode.setter
-    def data_acceleration_mode(self, value: Optional[str]):
+    def data_acceleration_mode(self, value: str | None):
         self._data_acceleration_mode = value
 
     @property
@@ -424,11 +424,11 @@ class SiteItem:
         self._commenting_enabled = value
 
     @property
-    def extract_encryption_mode(self) -> Optional[str]:
+    def extract_encryption_mode(self) -> str | None:
         return self._extract_encryption_mode
 
     @extract_encryption_mode.setter
-    def extract_encryption_mode(self, value: Optional[str]):
+    def extract_encryption_mode(self, value: str | None):
         self._extract_encryption_mode = value
 
     @property
@@ -450,27 +450,27 @@ class SiteItem:
         self._run_now_enabled = value
 
     @property
-    def tier_explorer_capacity(self) -> Optional[int]:
+    def tier_explorer_capacity(self) -> int | None:
         return self._tier_explorer_capacity
 
     @tier_explorer_capacity.setter
-    def tier_explorer_capacity(self, value: Optional[int]) -> None:
+    def tier_explorer_capacity(self, value: int | None) -> None:
         self._tier_explorer_capacity = value
 
     @property
-    def tier_creator_capacity(self) -> Optional[int]:
+    def tier_creator_capacity(self) -> int | None:
         return self._tier_creator_capacity
 
     @tier_creator_capacity.setter
-    def tier_creator_capacity(self, value: Optional[int]) -> None:
+    def tier_creator_capacity(self, value: int | None) -> None:
         self._tier_creator_capacity = value
 
     @property
-    def tier_viewer_capacity(self) -> Optional[int]:
+    def tier_viewer_capacity(self) -> int | None:
         return self._tier_viewer_capacity
 
     @tier_viewer_capacity.setter
-    def tier_viewer_capacity(self, value: Optional[int]):
+    def tier_viewer_capacity(self, value: int | None):
         self._tier_viewer_capacity = value
 
     @property
@@ -555,11 +555,11 @@ class SiteItem:
         self._custom_subscription_email_enabled = value
 
     @property
-    def custom_subscription_email(self) -> Union[str, bool]:
+    def custom_subscription_email(self) -> str | bool:
         return self._custom_subscription_email
 
     @custom_subscription_email.setter
-    def custom_subscription_email(self, value: Union[str, bool]):
+    def custom_subscription_email(self, value: str | bool):
         self._custom_subscription_email = value
 
     @property
@@ -572,11 +572,11 @@ class SiteItem:
         self._custom_subscription_footer_enabled = value
 
     @property
-    def custom_subscription_footer(self) -> Union[str, bool]:
+    def custom_subscription_footer(self) -> str | bool:
         return self._custom_subscription_footer
 
     @custom_subscription_footer.setter
-    def custom_subscription_footer(self, value: Union[str, bool]) -> None:
+    def custom_subscription_footer(self, value: str | bool) -> None:
         self._custom_subscription_footer = value
 
     @property
@@ -1209,11 +1209,11 @@ class SiteAuthConfiguration:
     """
 
     def __init__(self):
-        self.auth_setting: Optional[str] = None
-        self.enabled: Optional[bool] = None
-        self.idp_configuration_id: Optional[str] = None
-        self.idp_configuration_name: Optional[str] = None
-        self.known_provider_alias: Optional[str] = None
+        self.auth_setting: str | None = None
+        self.enabled: bool | None = None
+        self.idp_configuration_id: str | None = None
+        self.idp_configuration_name: str | None = None
+        self.known_provider_alias: str | None = None
 
     @classmethod
     def from_response(cls, resp: bytes, ns: dict) -> list["SiteAuthConfiguration"]:

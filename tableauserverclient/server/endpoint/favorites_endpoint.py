@@ -14,7 +14,6 @@ from tableauserverclient.models import (
     WorkbookItem,
 )
 from tableauserverclient.server import RequestFactory, RequestOptions
-from typing import Optional
 
 
 class Favorites(Endpoint):
@@ -24,7 +23,7 @@ class Favorites(Endpoint):
 
     # Gets all favorites
     @api(version="2.5")
-    def get(self, user_item: UserItem, req_options: Optional[RequestOptions] = None) -> None:
+    def get(self, user_item: UserItem, req_options: RequestOptions | None = None) -> None:
         logger.info(f"Querying all favorites for user {user_item.name}")
         url = f"{self.baseurl}/{user_item.id}"
         server_response = self.get_request(url, req_options)

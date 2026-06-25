@@ -1,6 +1,5 @@
 import xml.etree.ElementTree as ET
 
-from typing import Optional
 from tableauserverclient.models.property_decorators import property_is_enum, property_not_nullable
 from .interval_item import IntervalItem
 
@@ -50,11 +49,11 @@ class DataFreshnessPolicyItem:
             Week = "Week"
             Month = "Month"
 
-        def __init__(self, frequency: str, time: str, timezone, interval_item: Optional[list[str]] = None):
+        def __init__(self, frequency: str, time: str, timezone, interval_item: list[str] | None = None):
             self.frequency = frequency
             self.time = time
             self.timezone = timezone
-            self.interval_item: Optional[list[str]] = interval_item
+            self.interval_item: list[str] | None = interval_item
 
         def __repr__(self):
             return (
@@ -62,11 +61,11 @@ class DataFreshnessPolicyItem:
             ).format(**vars(self))
 
         @property
-        def interval_item(self) -> Optional[list[str]]:
+        def interval_item(self) -> list[str] | None:
             return self._interval_item
 
         @interval_item.setter
-        def interval_item(self, value: Optional[list[str]]):
+        def interval_item(self, value: list[str] | None):
             self._interval_item = value
 
         @property
@@ -107,8 +106,8 @@ class DataFreshnessPolicyItem:
 
     def __init__(self, option: str):
         self.option = option
-        self.fresh_every_schedule: Optional[DataFreshnessPolicyItem.FreshEvery] = None
-        self.fresh_at_schedule: Optional[DataFreshnessPolicyItem.FreshAt] = None
+        self.fresh_every_schedule: DataFreshnessPolicyItem.FreshEvery | None = None
+        self.fresh_at_schedule: DataFreshnessPolicyItem.FreshAt | None = None
 
     def __repr__(self):
         return "<DataFreshnessPolicy option={_option}>".format(**vars(self))
@@ -123,19 +122,19 @@ class DataFreshnessPolicyItem:
         self._option = value
 
     @property
-    def fresh_every_schedule(self) -> Optional[FreshEvery]:
+    def fresh_every_schedule(self) -> FreshEvery | None:
         return self._fresh_every_schedule
 
     @fresh_every_schedule.setter
-    def fresh_every_schedule(self, value: Optional[FreshEvery]):
+    def fresh_every_schedule(self, value: FreshEvery | None):
         self._fresh_every_schedule = value
 
     @property
-    def fresh_at_schedule(self) -> Optional[FreshAt]:
+    def fresh_at_schedule(self) -> FreshAt | None:
         return self._fresh_at_schedule
 
     @fresh_at_schedule.setter
-    def fresh_at_schedule(self, value: Optional[FreshAt]):
+    def fresh_at_schedule(self, value: FreshAt | None):
         self._fresh_at_schedule = value
 
     @classmethod

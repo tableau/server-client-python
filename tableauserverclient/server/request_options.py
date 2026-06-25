@@ -1,5 +1,4 @@
 import sys
-from typing import Optional
 import warnings
 
 from typing_extensions import Self
@@ -138,6 +137,7 @@ class RequestOptions(RequestOptionsBase):
         DisplayTabs = "displayTabs"
         DomainName = "domainName"
         DomainNickname = "domainNickname"
+        Email = "email"
         FavoritesTotal = "favoritesTotal"
         Fields = "fields"
         FlowId = "flowId"
@@ -317,25 +317,26 @@ These options can be used by methods that are fetching data exported from a spec
 
 
 class _DataExportOptions(RequestOptionsBase):
-    def __init__(self, maxage: int = -1):
+    def __init__(self, maxage: int | None = -1):
         super().__init__()
         self.view_filters: list[tuple[str, str]] = []
         self.view_parameters: list[tuple[str, str]] = []
-        self.max_age: Optional[int] = maxage
+        self._max_age: int | None = None
+        self.max_age: int | None = maxage
         """
         This setting will affect the contents of the workbook as they are exported.
         Valid language values are tableau-supported languages like de, es, en
         If no locale is specified, the default locale for that language will be used
         """
-        self.language: Optional[str] = None
+        self.language: str | None = None
 
     @property
-    def max_age(self) -> int:
+    def max_age(self) -> int | None:
         return self._max_age
 
     @max_age.setter
-    @property_is_int(range=(0, 240), allowed=[-1])
-    def max_age(self, value):
+    @property_is_int(range=(0, 240), allowed=[-1, None])
+    def max_age(self, value: int | None) -> None:
         self._max_age = value
 
     def get_query_params(self):
@@ -497,6 +498,10 @@ class ImageRequestOptions(_ImagePDFCommonExportOptions):
     viz_width: int, optional
         The width of the viz in pixels. If specified, viz_height must also be specified.
 
+    format: str, optional
+        The format of the image to export. Use Format.PNG, Format.SVG, Format.png, or Format.svg.
+        Default is "PNG". Available in API version 3.29+.
+
     """
 
     extension = "png"
@@ -505,14 +510,21 @@ class ImageRequestOptions(_ImagePDFCommonExportOptions):
     class Resolution:
         High = "high"
 
-    def __init__(self, imageresolution=None, maxage=-1, viz_height=None, viz_width=None):
+    class Format:
+        PNG = "PNG"
+        SVG = "SVG"
+
+    def __init__(self, imageresolution=None, maxage=-1, viz_height=None, viz_width=None, format=None):
         super().__init__(maxage=maxage, viz_height=viz_height, viz_width=viz_width)
         self.image_resolution = imageresolution
+        self.format = format
 
     def get_query_params(self):
         params = super().get_query_params()
         if self.image_resolution:
             params["resolution"] = self.image_resolution
+        if self.format:
+            params["format"] = self.format
         return params
 
 

@@ -48,7 +48,6 @@ from tableauserverclient.server.exceptions import (
 from tableauserverclient.server.endpoint.exceptions import NotSignedInError
 from tableauserverclient.namespace import Namespace
 
-
 _PRODUCT_TO_REST_VERSION = {
     "10.0": "2.3",
     "9.3": "2.2",
@@ -196,8 +195,7 @@ class Server:
         self.validate_connection_settings()  # does not make an actual outgoing request
 
         self.version = default_server_version
-        if use_server_version:
-            self.use_server_version()  # this makes a server call
+        self._use_server_version = use_server_version
 
     def validate_connection_settings(self):
         try:

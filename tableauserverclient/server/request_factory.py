@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from typing import Any, Callable, Optional, TypeVar, TYPE_CHECKING, Union
+from typing import Any, Callable, TypeVar, TYPE_CHECKING
 from collections.abc import Iterable
 
 from typing_extensions import ParamSpec
@@ -47,6 +47,8 @@ def _add_connections_element(connections_element, connection):
     connection_element.attrib["serverAddress"] = connection.server_address
     if connection.server_port:
         connection_element.attrib["serverPort"] = connection.server_port
+    if connection.database_name:
+        connection_element.attrib["databaseName"] = connection.database_name
     if connection.connection_credentials:
         connection_credentials = connection.connection_credentials
     elif connection.username is not None and connection.password is not None and connection.embed_password is not None:
@@ -254,17 +256,18 @@ class DatasourceRequest:
         self,
         element: ET.Element,
         connection_luids: Iterable[str],
-        authentication_type: str,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        embed_password: Optional[bool] = None,
+        authentication_type: str | None = None,
+        username: str | None = None,
+        password: str | None = None,
+        embed_password: bool | None = None,
     ):
         conn_luids_elem = ET.SubElement(element, "connectionLUIDs")
         for luid in connection_luids:
             ET.SubElement(conn_luids_elem, "connectionLUID").text = luid
 
         connection_elem = ET.SubElement(element, "connection")
-        connection_elem.set("authenticationType", authentication_type)
+        if authentication_type is not None:
+            connection_elem.set("authenticationType", authentication_type)
 
         if username is not None:
             connection_elem.set("userName", username)
@@ -307,7 +310,7 @@ class DQWRequest:
 
 
 class FavoriteRequest:
-    def add_request(self, id_: Optional[str], target_type: str, label: Optional[str]) -> bytes:
+    def add_request(self, id_: str | None, target_type: str, label: str | None) -> bytes:
         """
         <favorite label="...">
         <target_type id="..." />
@@ -325,35 +328,35 @@ class FavoriteRequest:
 
         return ET.tostring(xml_request)
 
-    def add_datasource_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
+    def add_datasource_req(self, id_: str | None, name: str | None) -> bytes:
         if id_ is None:
             raise ValueError("id must exist to add to favorites")
         if name is None:
             raise ValueError("Name must exist to add to favorites.")
         return self.add_request(id_, Resource.Datasource, name)
 
-    def add_flow_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
+    def add_flow_req(self, id_: str | None, name: str | None) -> bytes:
         if id_ is None:
             raise ValueError("id must exist to add to favorites")
         if name is None:
             raise ValueError("Name must exist to add to favorites.")
         return self.add_request(id_, Resource.Flow, name)
 
-    def add_project_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
+    def add_project_req(self, id_: str | None, name: str | None) -> bytes:
         if id_ is None:
             raise ValueError("id must exist to add to favorites")
         if name is None:
             raise ValueError("Name must exist to add to favorites.")
         return self.add_request(id_, Resource.Project, name)
 
-    def add_view_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
+    def add_view_req(self, id_: str | None, name: str | None) -> bytes:
         if id_ is None:
             raise ValueError("id must exist to add to favorites")
         if name is None:
             raise ValueError("Name must exist to add to favorites.")
         return self.add_request(id_, Resource.View, name)
 
-    def add_workbook_req(self, id_: Optional[str], name: Optional[str]) -> bytes:
+    def add_workbook_req(self, id_: str | None, name: str | None) -> bytes:
         if id_ is None:
             raise ValueError("id must exist to add to favorites")
         if name is None:
@@ -371,7 +374,7 @@ class FileuploadRequest:
 
 
 class FlowRequest:
-    def _generate_xml(self, flow_item: "FlowItem", connections: Optional[list["ConnectionItem"]] = None) -> bytes:
+    def _generate_xml(self, flow_item: "FlowItem", connections: list["ConnectionItem"] | None = None) -> bytes:
         xml_request = ET.Element("tsRequest")
         flow_element = ET.SubElement(xml_request, "flow")
         if flow_item.name is not None:
@@ -402,7 +405,7 @@ class FlowRequest:
         flow_item: "FlowItem",
         filename: str,
         file_contents: bytes,
-        connections: Optional[list["ConnectionItem"]] = None,
+        connections: list["ConnectionItem"] | None = None,
     ) -> tuple[Any, str]:
         xml_request = self._generate_xml(flow_item, connections)
 
@@ -427,7 +430,7 @@ class GroupRequest:
         return ET.tostring(xml_request)
 
     @_tsrequest_wrapped
-    def add_users_req(self, xml_request: ET.Element, users: Iterable[Union[str, UserItem]]) -> bytes:
+    def add_users_req(self, xml_request: ET.Element, users: Iterable[str | UserItem]) -> bytes:
         users_element = ET.SubElement(xml_request, "users")
         for user in users:
             user_element = ET.SubElement(users_element, "user")
@@ -438,7 +441,7 @@ class GroupRequest:
         return ET.tostring(xml_request)
 
     @_tsrequest_wrapped
-    def remove_users_req(self, xml_request: ET.Element, users: Iterable[Union[str, UserItem]]) -> bytes:
+    def remove_users_req(self, xml_request: ET.Element, users: Iterable[str | UserItem]) -> bytes:
         users_element = ET.SubElement(xml_request, "users")
         for user in users:
             user_element = ET.SubElement(users_element, "user")
@@ -610,12 +613,12 @@ class ScheduleRequest:
             intervals_element = ET.SubElement(frequency_element, "intervals")
             if hasattr(interval_item, "interval"):
                 for interval in interval_item._interval_type_pairs():
-                    (expression, value) = interval
+                    expression, value = interval
                     single_interval_element = ET.SubElement(intervals_element, "interval")
                     single_interval_element.attrib[expression] = value
         return ET.tostring(xml_request)
 
-    def _add_to_req(self, id_: Optional[str], target_type: str, task_type: str = TaskItem.Type.ExtractRefresh) -> bytes:
+    def _add_to_req(self, id_: str | None, target_type: str, task_type: str = TaskItem.Type.ExtractRefresh) -> bytes:
         """
         <task>
           <target_type>
@@ -634,13 +637,13 @@ class ScheduleRequest:
 
         return ET.tostring(xml_request)
 
-    def add_workbook_req(self, id_: Optional[str], task_type: str = TaskItem.Type.ExtractRefresh) -> bytes:
+    def add_workbook_req(self, id_: str | None, task_type: str = TaskItem.Type.ExtractRefresh) -> bytes:
         return self._add_to_req(id_, "workbook", task_type)
 
-    def add_datasource_req(self, id_: Optional[str], task_type: str = TaskItem.Type.ExtractRefresh) -> bytes:
+    def add_datasource_req(self, id_: str | None, task_type: str = TaskItem.Type.ExtractRefresh) -> bytes:
         return self._add_to_req(id_, "datasource", task_type)
 
-    def add_flow_req(self, id_: Optional[str], task_type: str = TaskItem.Type.RunFlow) -> bytes:
+    def add_flow_req(self, id_: str | None, task_type: str = TaskItem.Type.RunFlow) -> bytes:
         return self._add_to_req(id_, "flow", task_type)
 
     @_tsrequest_wrapped
@@ -655,7 +658,7 @@ class ScheduleRequest:
 
 
 class SiteRequest:
-    def update_req(self, site_item: "SiteItem", parent_srv: Optional["Server"] = None):
+    def update_req(self, site_item: "SiteItem", parent_srv: "Server | None" = None):
         xml_request = ET.Element("tsRequest")
         site_element = ET.SubElement(xml_request, "site")
         if site_item.name:
@@ -765,7 +768,7 @@ class SiteRequest:
         return ET.tostring(xml_request)
 
     # server: the site request model changes based on api version
-    def create_req(self, site_item: "SiteItem", parent_srv: Optional["Server"] = None):
+    def create_req(self, site_item: "SiteItem", parent_srv: "Server | None" = None):
         xml_request = ET.Element("tsRequest")
         site_element = ET.SubElement(xml_request, "site")
         site_element.attrib["name"] = site_item.name
@@ -917,7 +920,15 @@ class TableRequest:
         return ET.tostring(xml_request)
 
 
-content_types = Iterable[Union["ColumnItem", "DatabaseItem", "DatasourceItem", "FlowItem", "TableItem", "WorkbookItem"]]
+content_types = Iterable["ColumnItem | DatabaseItem | DatasourceItem | FlowItem | TableItem | WorkbookItem"]
+
+
+def _encode_tag_label(tag: str) -> str:
+    # The server splits unquoted labels on spaces or commas. Wrap in double
+    # quotes so labels containing spaces are stored as a single tag.
+    if " " in tag or "," in tag:
+        return f'"{tag}"'
+    return tag
 
 
 class TagRequest:
@@ -926,7 +937,7 @@ class TagRequest:
         tags_element = ET.SubElement(xml_request, "tags")
         for tag in tag_set:
             tag_element = ET.SubElement(tags_element, "tag")
-            tag_element.attrib["label"] = tag
+            tag_element.attrib["label"] = _encode_tag_label(tag)
         return ET.tostring(xml_request)
 
     @_tsrequest_wrapped
@@ -935,7 +946,7 @@ class TagRequest:
         tags_element = ET.SubElement(tag_batch, "tags")
         for tag in tags:
             tag_element = ET.SubElement(tags_element, "tag")
-            tag_element.attrib["label"] = tag
+            tag_element.attrib["label"] = _encode_tag_label(tag)
         contents_element = ET.SubElement(tag_batch, "contents")
         for item in content:
             content_element = ET.SubElement(contents_element, "content")
@@ -948,7 +959,7 @@ class TagRequest:
 
 
 class UserRequest:
-    def update_req(self, user_item: UserItem, password: Optional[str]) -> bytes:
+    def update_req(self, user_item: UserItem, password: str | None) -> bytes:
         xml_request = ET.Element("tsRequest")
         user_element = ET.SubElement(xml_request, "user")
         if user_item.fullname:
@@ -996,8 +1007,8 @@ class UserRequest:
                 raise ValueError("User cannot have both authSetting and idpConfigurationId.")
             elif user.idp_configuration_id is not None:
                 user_element.attrib["idpConfigurationId"] = user.idp_configuration_id
-            else:
-                user_element.attrib["authSetting"] = user.auth_setting or "ServerDefault"
+            elif user.auth_setting is not None:
+                user_element.attrib["authSetting"] = user.auth_setting
 
         parts = {
             "tableau_user_import": ("tsc_users_file.csv", csv_content, "file"),
@@ -1046,7 +1057,7 @@ class WorkbookRequest:
 
         return ET.tostring(xml_request)
 
-    def update_req(self, workbook_item, parent_srv: Optional["Server"] = None):
+    def update_req(self, workbook_item, parent_srv: "Server | None" = None):
         xml_request = ET.Element("tsRequest")
         workbook_element = ET.SubElement(xml_request, "workbook")
         if workbook_item.name:
@@ -1156,7 +1167,7 @@ class WorkbookRequest:
 
     @_tsrequest_wrapped
     def embedded_extract_req(
-        self, xml_request: ET.Element, include_all: bool = True, datasources: Optional[Iterable[DatasourceItem]] = None
+        self, xml_request: ET.Element, include_all: bool = True, datasources: Iterable[DatasourceItem] | None = None
     ) -> None:
         list_element = ET.SubElement(xml_request, "datasources")
         if include_all:
@@ -1172,17 +1183,18 @@ class WorkbookRequest:
         self,
         element: ET.Element,
         connection_luids: Iterable[str],
-        authentication_type: str,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        embed_password: Optional[bool] = None,
+        authentication_type: str | None = None,
+        username: str | None = None,
+        password: str | None = None,
+        embed_password: bool | None = None,
     ):
         conn_luids_elem = ET.SubElement(element, "connectionLUIDs")
         for luid in connection_luids:
             ET.SubElement(conn_luids_elem, "connectionLUID").text = luid
 
         connection_elem = ET.SubElement(element, "connection")
-        connection_elem.set("authenticationType", authentication_type)
+        if authentication_type is not None:
+            connection_elem.set("authenticationType", authentication_type)
 
         if username is not None:
             connection_elem.set("userName", username)
@@ -1227,8 +1239,8 @@ class TaskRequest:
 
     @_tsrequest_wrapped
     def refresh_req(
-        self, xml_request: ET.Element, incremental: bool = False, parent_srv: Optional["Server"] = None
-    ) -> Optional[bytes]:
+        self, xml_request: ET.Element, incremental: bool = False, parent_srv: "Server | None" = None
+    ) -> bytes | None:
         if parent_srv is not None and parent_srv.check_at_least_version("3.25"):
             task_element = ET.SubElement(xml_request, "extractRefresh")
             if incremental:

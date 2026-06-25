@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 from defusedxml.ElementTree import fromstring
 
@@ -48,45 +47,49 @@ class ConnectionItem:
         The Connection Credentials object containing authentication details for
         the connection. Replaces username/password/embed_password when
         publishing a flow, document or workbook file in the request body.
+
+    database_name: str
+        The name of the database for the connection.
     """
 
     def __init__(self):
-        self._datasource_id: Optional[str] = None
-        self._datasource_name: Optional[str] = None
-        self._id: Optional[str] = None
-        self._connection_type: Optional[str] = None
+        self._datasource_id: str | None = None
+        self._datasource_name: str | None = None
+        self._id: str | None = None
+        self._connection_type: str | None = None
         self.embed_password: bool = None
-        self.password: Optional[str] = None
-        self.server_address: Optional[str] = None
-        self.server_port: Optional[str] = None
-        self.username: Optional[str] = None
-        self.connection_credentials: Optional[ConnectionCredentials] = None
-        self._query_tagging: Optional[bool] = None
-        self._auth_type: Optional[str] = None
+        self.password: str | None = None
+        self.server_address: str | None = None
+        self.server_port: str | None = None
+        self.username: str | None = None
+        self.connection_credentials: ConnectionCredentials | None = None
+        self._query_tagging: bool | None = None
+        self._auth_type: str | None = None
+        self._database_name: str | None = None
 
     @property
-    def datasource_id(self) -> Optional[str]:
+    def datasource_id(self) -> str | None:
         return self._datasource_id
 
     @property
-    def datasource_name(self) -> Optional[str]:
+    def datasource_name(self) -> str | None:
         return self._datasource_name
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         return self._id
 
     @property
-    def connection_type(self) -> Optional[str]:
+    def connection_type(self) -> str | None:
         return self._connection_type
 
     @property
-    def query_tagging(self) -> Optional[bool]:
+    def query_tagging(self) -> bool | None:
         return self._query_tagging
 
     @query_tagging.setter
     @property_is_boolean
-    def query_tagging(self, value: Optional[bool]):
+    def query_tagging(self, value: bool | None):
         # if connection type = hyper, Snowflake, or Teradata, we can't change this value: it is always true
         if self._connection_type in ["hyper", "snowflake", "teradata"]:
             logger.debug(
@@ -96,12 +99,20 @@ class ConnectionItem:
         self._query_tagging = value
 
     @property
-    def auth_type(self) -> Optional[str]:
+    def auth_type(self) -> str | None:
         return self._auth_type
 
     @auth_type.setter
-    def auth_type(self, value: Optional[str]):
+    def auth_type(self, value: str | None):
         self._auth_type = value
+
+    @property
+    def database_name(self) -> str | None:
+        return self._database_name
+
+    @database_name.setter
+    def database_name(self, value: str | None):
+        self._database_name = value
 
     def __repr__(self):
         return "<ConnectionItem#{_id} embed={embed_password} type={_connection_type} auth={_auth_type} username={username}>".format(
@@ -125,6 +136,11 @@ class ConnectionItem:
                 string_to_bool(s) if (s := connection_xml.get("queryTagging", None)) else None
             )
             connection_item._auth_type = connection_xml.get("authenticationType", None)
+            # The REST API GET /connections response uses "dbName" for the database
+            # name attribute.  This is different from the publish request body, which
+            # uses "databaseName" (see _add_connections_element in request_factory.py).
+            # Both names map to the same database_name property on ConnectionItem.
+            connection_item._database_name = connection_xml.get("dbName", None)
             datasource_elem = connection_xml.find(".//t:datasource", namespaces=ns)
             if datasource_elem is not None:
                 connection_item._datasource_id = datasource_elem.get("id", None)
@@ -153,6 +169,10 @@ class ConnectionItem:
             connection_item.server_address = connection_xml.get("serverAddress", None)
             connection_item.server_port = connection_xml.get("serverPort", None)
             connection_item._auth_type = connection_xml.get("authenticationType", None)
+            # Publish/update request bodies use "databaseName" (matching the
+            # publish-request schema), while GET responses use "dbName".  See
+            # from_response() above and _add_connections_element() in request_factory.py.
+            connection_item._database_name = connection_xml.get("databaseName", None)
 
             connection_credentials = connection_xml.find(".//t:connectionCredentials", namespaces=ns)
 

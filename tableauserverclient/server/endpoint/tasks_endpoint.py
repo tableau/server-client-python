@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from tableauserverclient.server.endpoint.endpoint import Endpoint, api
 from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
@@ -29,7 +29,7 @@ class Tasks(Endpoint):
 
     @api(version="2.6")
     def get(
-        self, req_options: Optional["RequestOptions"] = None, task_type: str = TaskItem.Type.ExtractRefresh
+        self, req_options: "RequestOptions | None" = None, task_type: str = TaskItem.Type.ExtractRefresh
     ) -> tuple[list[TaskItem], PaginationItem]:
         """
         Returns information about tasks on the specified site.

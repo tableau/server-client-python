@@ -18,7 +18,7 @@ class IDPProperty(Protocol):
     def idp_configuration_id(self) -> str: ...
 
 
-HasIdpConfigurationID = Union[str, IDPAttributes]
+HasIdpConfigurationID = str | IDPAttributes
 
 
 class OIDC(Endpoint):
@@ -45,7 +45,7 @@ class OIDC(Endpoint):
         return self.parent_srv.sites.list_auth_configurations()
 
     @api(version="3.24")
-    def get_by_id(self, id: Union[str, HasIdpConfigurationID]) -> SiteOIDCConfiguration:
+    def get_by_id(self, id: str | HasIdpConfigurationID) -> SiteOIDCConfiguration:
         """
         Get details about a specific OpenID Connect (OIDC) configuration on the
         current Tableau Cloud site. Only retrieves configurations for the
@@ -55,7 +55,7 @@ class OIDC(Endpoint):
 
         Parameters
         ----------
-        id : Union[str, HasID]
+        id : str | HasIdpConfigurationID
             The ID of the OIDC configuration to retrieve. Can be either the
             ID string or an object with an id attribute.
 
@@ -105,7 +105,7 @@ class OIDC(Endpoint):
         return SiteOIDCConfiguration.from_response(response.content, self.parent_srv.namespace)
 
     @api(version="3.24")
-    def delete_configuration(self, config: Union[str, HasIdpConfigurationID]) -> None:
+    def delete_configuration(self, config: str | HasIdpConfigurationID) -> None:
         """
         Delete the OpenID Connect (OIDC) configuration for the currently
         authenticated Tableau Cloud site. The config parameter can be either
@@ -122,7 +122,7 @@ class OIDC(Endpoint):
 
         Parameters
         ----------
-        config : Union[str, HasID]
+        config : str | HasIdpConfigurationID
             The OIDC configuration to delete. Can be either the ID of the
             configuration or the configuration object itself.
         """

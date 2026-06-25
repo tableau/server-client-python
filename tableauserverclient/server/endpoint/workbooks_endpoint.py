@@ -6,14 +6,15 @@ import os
 from contextlib import closing
 from pathlib import Path
 
-from tableauserverclient.helpers.headers import fix_filename
 from tableauserverclient.models.permissions_item import PermissionsRule
 from tableauserverclient.server.query import QuerySet
 
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api, parameter_added_in
 from tableauserverclient.server.endpoint.exceptions import (
+    DUPLICATE_EXTRACT_JOB_CODE,
     InternalServerError,
     MissingRequiredFieldError,
+    ServerResponseError,
     UnsupportedAttributeError,
 )
 from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
@@ -55,12 +56,15 @@ ALLOWED_FILE_EXTENSIONS = ["twb", "twbx"]
 
 from tableauserverclient.helpers.logging import logger
 
-FilePath = Union[str, os.PathLike]
-FileObject = Union[io.BufferedReader, io.BytesIO]
-FileObjectR = Union[io.BufferedReader, io.BytesIO]
-FileObjectW = Union[io.BufferedWriter, io.BytesIO]
-PathOrFileR = Union[FilePath, FileObjectR]
-PathOrFileW = Union[FilePath, FileObjectW]
+FilePath = str | os.PathLike
+FileObject = io.BufferedReader | io.BytesIO
+FileObjectR = io.BufferedReader | io.BytesIO
+FileObjectW = io.BufferedWriter | io.BytesIO
+PathOrFileR = FilePath | FileObjectR
+PathOrFileW = FilePath | FileObjectW
+
+
+_UNSET = object()
 
 
 class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
@@ -76,7 +80,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
 
     # Get all workbooks on site
     @api(version="2.0")
-    def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[WorkbookItem], PaginationItem]:
+    def get(self, req_options: "RequestOptions | None" = None) -> tuple[list[WorkbookItem], PaginationItem]:
         """
         Queries the server and returns information about the workbooks the site.
 
@@ -125,7 +129,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         return WorkbookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     @api(version="2.8")
-    def refresh(self, workbook_item: Union[WorkbookItem, str], incremental: bool = False) -> JobItem:
+    def refresh(self, workbook_item: WorkbookItem | str, incremental: bool = False) -> JobItem | None:
         """
         Refreshes the extract of an existing workbook.
 
@@ -138,13 +142,19 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
 
         Returns
         -------
-        JobItem
-            The job item.
+        JobItem | None
+            The job item, or None if a refresh job is already queued for this workbook.
         """
         id_ = getattr(workbook_item, "id", workbook_item)
         url = f"{self.baseurl}/{id_}/refresh"
         refresh_req = RequestFactory.Task.refresh_req(incremental, self.parent_srv)
-        server_response = self.post_request(url, refresh_req)
+        try:
+            server_response = self.post_request(url, refresh_req)
+        except ServerResponseError as e:
+            if e.code == DUPLICATE_EXTRACT_JOB_CODE:
+                logger.warning(f"{e.summary} {e.detail}")
+                return None
+            raise
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return new_job
 
@@ -155,7 +165,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         workbook_item: WorkbookItem,
         encrypt: bool = False,
         includeAll: bool = True,
-        datasources: Optional[list["DatasourceItem"]] = None,
+        datasources: list["DatasourceItem"] | None = None,
     ) -> JobItem:
         """
         Create one or more extracts on 1 workbook, optionally encrypted.
@@ -334,13 +344,16 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         self,
         workbook_item: WorkbookItem,
         connection_luids: Iterable[str],
-        authentication_type: str,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        embed_password: Optional[bool] = None,
+        authentication_type: str | None = None,
+        username: str | None = None,
+        password: str | None = None,
+        embed_password: bool | None = None,
     ) -> list[ConnectionItem]:
         """
-        Bulk updates one or more workbook connections by LUID, including authenticationType, username, password, and embedPassword.
+        Bulk updates one or more workbook connections by LUID.
+
+        This method allows updating authentication type, credentials, and other
+        connection properties for multiple connections at once.
 
         Parameters
         ----------
@@ -350,8 +363,9 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         connection_luids : Iterable of str
             The connection LUIDs to update.
 
-        authentication_type : str
-            The authentication type to use (e.g., 'AD Service Principal').
+        authentication_type : str, optional
+            The authentication type to use (e.g., 'AD Service Principal', 'auth-keypair').
+            If not provided, the existing authentication type is preserved.
 
         username : str, optional
             The username to set (e.g., client ID for keypair auth).
@@ -394,25 +408,27 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         workbook_id: str,
         filepath: T,
         include_extract: bool = True,
+        no_extract: object = ...,
     ) -> T: ...
 
     @overload
     def download(
         self,
         workbook_id: str,
-        filepath: Optional[FilePath] = None,
+        filepath: FilePath | None = None,
         include_extract: bool = True,
+        no_extract: object = ...,
     ) -> str: ...
 
     # Download workbook contents with option of passing in filepath
     @api(version="2.0")
-    @parameter_added_in(no_extract="2.5")
     @parameter_added_in(include_extract="2.5")
     def download(
         self,
         workbook_id,
         filepath=None,
         include_extract=True,
+        no_extract=_UNSET,
     ):
         """
         Downloads a workbook to the specified directory (optional).
@@ -440,8 +456,21 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         ------
         ValueError
             If the workbook ID is not defined.
-        """
 
+        Notes
+        -----
+        The ``no_extract`` parameter is deprecated. Use ``include_extract=False``
+        instead.
+        """
+        if no_extract is not _UNSET:
+            import warnings
+
+            warnings.warn(
+                "no_extract is deprecated and will be removed. Use include_extract=False instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            include_extract = not no_extract
         return self.download_revision(
             workbook_id,
             None,
@@ -548,7 +577,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         logger.info(f"Populated connections for workbook (ID: {workbook_item.id})")
 
     def _get_workbook_connections(
-        self, workbook_item: WorkbookItem, req_options: Optional["RequestOptions"] = None
+        self, workbook_item: WorkbookItem, req_options: "RequestOptions | None" = None
     ) -> list[ConnectionItem]:
         url = f"{self.baseurl}/{workbook_item.id}/connections"
         server_response = self.get_request(url, req_options)
@@ -556,7 +585,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         return connections
 
     @api(version="3.4")
-    def populate_pdf(self, workbook_item: WorkbookItem, req_options: Optional["PDFRequestOptions"] = None) -> None:
+    def populate_pdf(self, workbook_item: WorkbookItem, req_options: "PDFRequestOptions | None" = None) -> None:
         """
         Populates the PDF for the specified workbook item. Get the pdf of the
         entire workbook if its tabs are enabled, pdf of the default view if its
@@ -594,26 +623,22 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         def pdf_fetcher() -> bytes:
             return self._get_wb_pdf(workbook_item, req_options)
 
-        if not self.parent_srv.check_at_least_version("3.23") and req_options is not None:
-            if req_options.view_filters or req_options.view_parameters:
-                raise UnsupportedAttributeError("view_filters and view_parameters are only supported in 3.23+")
-
-            if req_options.viz_height or req_options.viz_width:
-                raise UnsupportedAttributeError("viz_height and viz_width are only supported in 3.23+")
+        if req_options is not None:
+            if not self.parent_srv.check_at_least_version("3.23"):
+                if req_options.view_filters or req_options.view_parameters:
+                    raise UnsupportedAttributeError("view_filters and view_parameters are only supported in 3.23+")
 
         workbook_item._set_pdf(pdf_fetcher)
         logger.info(f"Populated pdf for workbook (ID: {workbook_item.id})")
 
-    def _get_wb_pdf(self, workbook_item: WorkbookItem, req_options: Optional["PDFRequestOptions"]) -> bytes:
+    def _get_wb_pdf(self, workbook_item: WorkbookItem, req_options: "PDFRequestOptions | None") -> bytes:
         url = f"{self.baseurl}/{workbook_item.id}/pdf"
         server_response = self.get_request(url, req_options)
         pdf = server_response.content
         return pdf
 
     @api(version="3.8")
-    def populate_powerpoint(
-        self, workbook_item: WorkbookItem, req_options: Optional["PPTXRequestOptions"] = None
-    ) -> None:
+    def populate_powerpoint(self, workbook_item: WorkbookItem, req_options: "PPTXRequestOptions | None" = None) -> None:
         """
         Populates the PowerPoint for the specified workbook item.
 
@@ -654,7 +679,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         workbook_item._set_powerpoint(pptx_fetcher)
         logger.info(f"Populated powerpoint for workbook (ID: {workbook_item.id})")
 
-    def _get_wb_pptx(self, workbook_item: WorkbookItem, req_options: Optional["PPTXRequestOptions"]) -> bytes:
+    def _get_wb_pptx(self, workbook_item: WorkbookItem, req_options: "PPTXRequestOptions | None") -> bytes:
         url = f"{self.baseurl}/{workbook_item.id}/powerpoint"
         server_response = self.get_request(url, req_options)
         pptx = server_response.content
@@ -768,7 +793,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         workbook_item: WorkbookItem,
         file: PathOrFileR,
         mode: str,
-        connections: Optional[Sequence[ConnectionItem]],
+        connections: Sequence[ConnectionItem] | None,
         as_job: Literal[False],
         skip_connection_check: bool,
         parameters=None,
@@ -780,7 +805,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         workbook_item: WorkbookItem,
         file: PathOrFileR,
         mode: str,
-        connections: Optional[Sequence[ConnectionItem]],
+        connections: Sequence[ConnectionItem] | None,
         as_job: Literal[True],
         skip_connection_check: bool,
         parameters=None,
@@ -794,7 +819,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         workbook_item: WorkbookItem,
         file: PathOrFileR,
         mode: str,
-        connections: Optional[Sequence[ConnectionItem]] = None,
+        connections: Sequence[ConnectionItem] | None = None,
         as_job: bool = False,
         skip_connection_check: bool = False,
         parameters=None,
@@ -844,7 +869,9 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         as_job : bool, default False
             Set to True to run the upload as a job (asynchronous upload). If set
             to True a job will start to perform the publishing process and a Job
-            object is returned. Defaults to False.
+            object is returned. Defaults to False. For large files on slow
+            connections, if uploads time out you can tune the chunk size with
+            the TSC_CHUNK_SIZE_MB environment variable (default: 50).
 
         skip_connection_check : bool, default False
             Set to True to skip connection check at time of upload. Publishing
@@ -966,8 +993,16 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         try:
             server_response = self.post_request(url, xml_request, content_type, parameters)
         except InternalServerError as err:
-            if err.code == 504 and not as_job:
-                err.content = "Timeout error while publishing. Please use asynchronous publishing to avoid timeouts."
+            if err.code == 504:
+                if as_job:
+                    err.content = (
+                        "Timeout error during chunked file upload. Try reducing the chunk size by setting the "
+                        "TSC_CHUNK_SIZE_MB environment variable to a lower value (current default: 50)."
+                    )
+                else:
+                    err.content = (
+                        "Timeout error while publishing. Please use asynchronous publishing to avoid timeouts."
+                    )
             raise err
 
         if as_job:
@@ -1015,7 +1050,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         logger.info(f"Populated revisions for workbook (ID: {workbook_item.id})")
 
     def _get_workbook_revisions(
-        self, workbook_item: WorkbookItem, req_options: Optional["RequestOptions"] = None
+        self, workbook_item: WorkbookItem, req_options: "RequestOptions | None" = None
     ) -> list[RevisionItem]:
         url = f"{self.baseurl}/{workbook_item.id}/revisions"
         server_response = self.get_request(url, req_options)
@@ -1026,12 +1061,12 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
 
     @overload
     def download_revision(
-        self, workbook_id: str, revision_number: Optional[str], filepath: T, include_extract: bool
+        self, workbook_id: str, revision_number: str | None, filepath: T, include_extract: bool
     ) -> T: ...
 
     @overload
     def download_revision(
-        self, workbook_id: str, revision_number: Optional[str], filepath: Optional[FilePath], include_extract: bool
+        self, workbook_id: str, revision_number: str | None, filepath: FilePath | None, include_extract: bool
     ) -> str: ...
 
     # Download 1 workbook revision by revision number
@@ -1091,14 +1126,13 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         with closing(self.get_request(url, parameters={"stream": True})) as server_response:
             m = Message()
             m["Content-Disposition"] = server_response.headers["Content-Disposition"]
-            params = m.get_filename(failobj="")
+            filename = m.get_filename(failobj="")
             if isinstance(filepath, io_types_w):
                 for chunk in server_response.iter_content(1024):  # 1KB
                     filepath.write(chunk)
                 return_path = filepath
             else:
-                params = fix_filename(params)
-                filename = to_filename(os.path.basename(params))
+                filename = to_filename(os.path.basename(filename))
                 download_path = make_download_path(filepath, filename)
                 with open(download_path, "wb") as f:
                     for chunk in server_response.iter_content(1024):  # 1KB
@@ -1165,7 +1199,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         return self.parent_srv.schedules.add_to_schedule(schedule_id, workbook=item)
 
     @api(version="1.0")
-    def add_tags(self, item: Union[WorkbookItem, str], tags: Union[Iterable[str], str]) -> set[str]:
+    def add_tags(self, item: WorkbookItem | str, tags: Iterable[str] | str) -> set[str]:
         """
         Adds tags to a workbook. One or more tags may be added at a time. If a
         tag already exists on the workbook, it will not be duplicated.
@@ -1189,7 +1223,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         return super().add_tags(item, tags)
 
     @api(version="1.0")
-    def delete_tags(self, item: Union[WorkbookItem, str], tags: Union[Iterable[str], str]) -> None:
+    def delete_tags(self, item: WorkbookItem | str, tags: Iterable[str] | str) -> None:
         """
         Deletes tags from a workbook. One or more tags may be deleted at a time.
 
@@ -1230,7 +1264,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         """
         return super().update_tags(item)
 
-    def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[WorkbookItem]:
+    def filter(self, *invalid, page_size: int | None = None, **kwargs) -> QuerySet[WorkbookItem]:
         """
         Queries the Tableau Server for items using the specified filters. Page
         size can be specified to limit the number of items returned in a single

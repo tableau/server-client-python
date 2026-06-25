@@ -1,7 +1,7 @@
 from contextlib import ExitStack
 import re
 from collections.abc import Iterable
-from typing import Optional, Protocol
+from typing import Protocol
 import uuid
 from xml.etree import ElementTree as ET
 
@@ -21,7 +21,9 @@ def get_server() -> TSC.Server:
     return server
 
 
-def add_tag_xml_response_factory(tags: Iterable[str]) -> str:
+def add_tag_xml_response_factory(tags: Iterable[str] | str) -> str:
+    if isinstance(tags, str):
+        tags = [tags]
     root = ET.Element("tsResponse")
     tags_element = ET.SubElement(root, "tags")
     for tag in tags:
@@ -201,7 +203,7 @@ def test_update_tags(get_server, endpoint_type, item, tags) -> None:
 
 class HasID(Protocol):
     @property
-    def id(self) -> Optional[str]: ...
+    def id(self) -> str | None: ...
 
 
 def test_tags_batch_add(get_server) -> None:
@@ -242,3 +244,39 @@ def test_tags_batch_delete(get_server) -> None:
         tag_result = server.tags.batch_delete(tags, content)
 
     assert set(tag_result) == set(tags)
+
+
+def test_tag_with_spaces_is_quoted_in_request() -> None:
+    """Tags containing spaces must be quoted in the XML request to prevent server-side splitting."""
+    from tableauserverclient.server.request_factory import RequestFactory
+
+    tag_set = {"Yearly Sales", "simple"}
+    xml_bytes = RequestFactory.Tag.add_req(tag_set)
+    root = ET.fromstring(xml_bytes)
+    labels = {tag.get("label") for tag in root.findall(".//tag")}
+    assert '"Yearly Sales"' in labels
+    assert "simple" in labels
+
+
+@pytest.mark.parametrize(
+    "tag, expected_encoded",
+    [
+        ("tag#name", "tag%23name"),  # issue #675: hash must be percent-encoded
+        ("tag.name", "tag.name"),  # issue #994: dot is safe, no encoding needed
+        ("tag+name", "tag%2Bname"),  # plus must be percent-encoded
+        ("tag/name", "tag%2Fname"),  # slash must be percent-encoded (safe='' fix)
+        ("tag name", "tag%20name"),  # space must be percent-encoded
+    ],
+)
+def test_delete_tags_special_characters_encoded(get_server, tag, expected_encoded) -> None:
+    """Verify delete_tags percent-encodes special characters in the tag path segment."""
+    server = get_server
+    workbook = make_workbook()
+
+    with requests_mock.mock() as m:
+        m.delete(requests_mock.ANY, status_code=200)
+        server.workbooks.delete_tags(workbook, tag)
+        history = m.request_history
+
+    assert len(history) == 1
+    assert history[0].url.endswith(f"/tags/{expected_encoded}")

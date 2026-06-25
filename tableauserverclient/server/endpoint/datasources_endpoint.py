@@ -6,10 +6,9 @@ import os
 
 from contextlib import closing
 from pathlib import Path
-from typing import Literal, Optional, TYPE_CHECKING, TypedDict, TypeVar, Union, overload
+from typing import Literal, TYPE_CHECKING, TypedDict, TypeVar, overload
 from collections.abc import Iterable, Sequence
 
-from tableauserverclient.helpers.headers import fix_filename
 from tableauserverclient.models.dqw_item import DQWItem
 from tableauserverclient.server.query import QuerySet
 
@@ -20,7 +19,12 @@ if TYPE_CHECKING:
 
 from tableauserverclient.server.endpoint.dqw_endpoint import _DataQualityWarningEndpoint
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api, parameter_added_in
-from tableauserverclient.server.endpoint.exceptions import InternalServerError, MissingRequiredFieldError
+from tableauserverclient.server.endpoint.exceptions import (
+    DUPLICATE_EXTRACT_JOB_CODE,
+    InternalServerError,
+    MissingRequiredFieldError,
+    ServerResponseError,
+)
 from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
 from tableauserverclient.server.endpoint.resource_tagger import TaggingMixin
 
@@ -46,14 +50,14 @@ io_types = (io.BytesIO, io.BufferedReader)
 io_types_r = (io.BytesIO, io.BufferedReader)
 io_types_w = (io.BytesIO, io.BufferedWriter)
 
-FilePath = Union[str, os.PathLike]
-FileObject = Union[io.BufferedReader, io.BytesIO]
-PathOrFile = Union[FilePath, FileObject]
+FilePath = str | os.PathLike
+FileObject = io.BufferedReader | io.BytesIO
+PathOrFile = FilePath | FileObject
 
-FileObjectR = Union[io.BufferedReader, io.BytesIO]
-FileObjectW = Union[io.BufferedWriter, io.BytesIO]
-PathOrFileR = Union[FilePath, FileObjectR]
-PathOrFileW = Union[FilePath, FileObjectW]
+FileObjectR = io.BufferedReader | io.BytesIO
+FileObjectW = io.BufferedWriter | io.BytesIO
+PathOrFileR = FilePath | FileObjectR
+PathOrFileW = FilePath | FileObjectW
 
 
 HyperActionCondition = TypedDict(
@@ -91,7 +95,10 @@ HyperActionTable = TypedDict(
     },
 )
 
-HyperAction = Union[HyperActionTable, HyperActionRow]
+HyperAction = HyperActionTable | HyperActionRow
+
+
+_UNSET = object()
 
 
 class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]):
@@ -108,7 +115,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
 
     # Get all datasources
     @api(version="2.0")
-    def get(self, req_options: Optional[RequestOptions] = None) -> tuple[list[DatasourceItem], PaginationItem]:
+    def get(self, req_options: RequestOptions | None = None) -> tuple[list[DatasourceItem], PaginationItem]:
         """
         Returns a list of published data sources on the specified site, with
         optional parameters for specifying the paging of large results. To get
@@ -121,7 +128,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
 
         Parameters
         ----------
-        req_options : Optional[RequestOptions]
+        req_options : RequestOptions | None
             Optional parameters for the request, such as filters, sorting, page
             size, and page number.
 
@@ -192,7 +199,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         logger.info(f"Populated connections for datasource (ID: {datasource_item.id})")
 
     def _get_datasource_connections(
-        self, datasource_item: DatasourceItem, req_options: Optional[RequestOptions] = None
+        self, datasource_item: DatasourceItem, req_options: RequestOptions | None = None
     ) -> list[ConnectionItem]:
         url = f"{self.baseurl}/{datasource_item.id}/connections"
         server_response = self.get_request(url, req_options)
@@ -236,25 +243,27 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         datasource_id: str,
         filepath: T,
         include_extract: bool = True,
+        no_extract: object = ...,
     ) -> T: ...
 
     @overload
     def download(
         self,
         datasource_id: str,
-        filepath: Optional[FilePath] = None,
+        filepath: FilePath | None = None,
         include_extract: bool = True,
+        no_extract: object = ...,
     ) -> str: ...
 
     # Download 1 datasource by id
     @api(version="2.0")
-    @parameter_added_in(no_extract="2.5")
     @parameter_added_in(include_extract="2.5")
     def download(
         self,
         datasource_id,
         filepath=None,
         include_extract=True,
+        no_extract=_UNSET,
     ):
         """
         Downloads the specified data source from a site. The data source is
@@ -267,7 +276,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         datasource_id : str
             The unique ID of the datasource to download.
 
-        filepath : Optional[PathOrFileW]
+        filepath : PathOrFileW | None
             The file path to save the downloaded datasource to. If not
             specified, the file will be saved to the current working directory.
 
@@ -275,10 +284,20 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
             If True, the extract is included in the download. If False, the
             extract is not included.
 
-        Returns
-        -------
-        filepath : PathOrFileW
+        Notes
+        -----
+        The ``no_extract`` parameter is deprecated. Use ``include_extract=False``
+        instead.
         """
+        if no_extract is not _UNSET:
+            import warnings
+
+            warnings.warn(
+                "no_extract is deprecated and will be removed. Use include_extract=False instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            include_extract = not no_extract
         return self.download_revision(
             datasource_id,
             None,
@@ -338,7 +357,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
     @api(version="2.3")
     def update_connection(
         self, datasource_item: DatasourceItem, connection_item: ConnectionItem
-    ) -> Optional[ConnectionItem]:
+    ) -> ConnectionItem | None:
         """
         Updates the server address, port, username, or password for the
         specified data source connection.
@@ -355,7 +374,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
 
         Returns
         -------
-        Optional[ConnectionItem]
+        ConnectionItem | None
             An object containing information about the updated connection.
         """
 
@@ -379,13 +398,16 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         self,
         datasource_item: DatasourceItem,
         connection_luids: Iterable[str],
-        authentication_type: str,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        embed_password: Optional[bool] = None,
+        authentication_type: str | None = None,
+        username: str | None = None,
+        password: str | None = None,
+        embed_password: bool | None = None,
     ) -> list[ConnectionItem]:
         """
         Bulk updates one or more datasource connections by LUID.
+
+        This method allows updating authentication type, credentials, and other
+        connection properties for multiple connections at once.
 
         Parameters
         ----------
@@ -395,8 +417,9 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         connection_luids : Iterable of str
             The connection LUIDs to update.
 
-        authentication_type : str
-            The authentication type to use (e.g., 'auth-keypair').
+        authentication_type : str, optional
+            The authentication type to use (e.g., 'auth-keypair', 'AD Service Principal').
+            If not provided, the existing authentication type is preserved.
 
         username : str, optional
             The username to set.
@@ -430,7 +453,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         return connection_items
 
     @api(version="2.8")
-    def refresh(self, datasource_item: Union[DatasourceItem, str], incremental: bool = False) -> JobItem:
+    def refresh(self, datasource_item: DatasourceItem | str, incremental: bool = False) -> JobItem | None:
         """
         Refreshes the extract of an existing workbook.
 
@@ -451,7 +474,13 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         id_ = getattr(datasource_item, "id", datasource_item)
         url = f"{self.baseurl}/{id_}/refresh"
         refresh_req = RequestFactory.Task.refresh_req(incremental, self.parent_srv)
-        server_response = self.post_request(url, refresh_req)
+        try:
+            server_response = self.post_request(url, refresh_req)
+        except ServerResponseError as e:
+            if e.code == DUPLICATE_EXTRACT_JOB_CODE:
+                logger.warning(f"{e.summary} {e.detail}")
+                return None
+            raise
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return new_job
 
@@ -510,8 +539,8 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         datasource_item: DatasourceItem,
         file: PathOrFileR,
         mode: str,
-        connection_credentials: Optional[ConnectionCredentials] = None,
-        connections: Optional[Sequence[ConnectionItem]] = None,
+        connection_credentials: ConnectionCredentials | None = None,
+        connections: Sequence[ConnectionItem] | None = None,
         as_job: Literal[False] = False,
     ) -> DatasourceItem:
         pass
@@ -522,8 +551,8 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         datasource_item: DatasourceItem,
         file: PathOrFileR,
         mode: str,
-        connection_credentials: Optional[ConnectionCredentials] = None,
-        connections: Optional[Sequence[ConnectionItem]] = None,
+        connection_credentials: ConnectionCredentials | None = None,
+        connections: Sequence[ConnectionItem] | None = None,
         as_job: Literal[True] = True,
     ) -> JobItem:
         pass
@@ -542,47 +571,49 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         as_job=False,
     ):
         """
-        Publishes a data source to a server, or appends data to an existing
-        data source.
+         Publishes a data source to a server, or appends data to an existing
+         data source.
 
-        This method checks the size of the data source and automatically
-        determines whether the publish the data source in multiple parts or in
-        one operation.
+         This method checks the size of the data source and automatically
+         determines whether the publish the data source in multiple parts or in
+         one operation.
 
-        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#publish_data_source
+         REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#publish_data_source
 
-        Parameters
-        ----------
-        datasource_item : DatasourceItem
-            The datasource item to publish. The fields for name and project_id
-            are required.
+         Parameters
+         ----------
+         datasource_item : DatasourceItem
+             The datasource item to publish. The fields for name and project_id
+             are required.
 
-        file : PathOrFileR
-            The file path or file object to publish.
+         file : PathOrFileR
+             The file path or file object to publish.
 
-        mode : str
-            Specifies whether you are publishing a new datasource (CreateNew),
-            overwriting an existing datasource (Overwrite), or add to an
-            existing datasource (Append). You can also use the publish mode
-            attributes, for example: TSC.Server.PublishMode.Overwrite.
+         mode : str
+             Specifies whether you are publishing a new datasource (CreateNew),
+             overwriting an existing datasource (Overwrite), or add to an
+             existing datasource (Append). You can also use the publish mode
+             attributes, for example: TSC.Server.PublishMode.Overwrite.
 
-        connection_credentials : Optional[ConnectionCredentials]
-            The connection credentials to use when publishing the datasource.
-            Mutually exclusive with the connections parameter.
+         connection_credentials : ConnectionCredentials | None
+             The connection credentials to use when publishing the datasource.
+             Mutually exclusive with the connections parameter.
 
-        connections : Optional[Sequence[ConnectionItem]]
-            The connections to use when publishing the datasource. Mutually
-            exclusive with the connection_credentials parameter.
+         connections : Sequence[ConnectionItem] | None
+             The connections to use when publishing the datasource. Mutually
+             exclusive with the connection_credentials parameter.
 
         as_job : bool, default False
             If True, the publish operation is asynchronous and returns a job
             item. If False, the publish operation is synchronous and returns a
-            datasource item.
+            datasource item. For large files on slow connections, if uploads
+            time out you can tune the chunk size with the TSC_CHUNK_SIZE_MB
+            environment variable (default: 50).
 
-        Returns
-        -------
-        Union[DatasourceItem, JobItem]
-            The datasource item or job item.
+         Returns
+         -------
+        DatasourceItem | JobItem
+             The datasource item or job item.
 
         """
         if isinstance(file, (os.PathLike, str)):
@@ -667,8 +698,16 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         try:
             server_response = self.post_request(url, xml_request, content_type)
         except InternalServerError as err:
-            if err.code == 504 and not as_job:
-                err.content = "Timeout error while publishing. Please use asynchronous publishing to avoid timeouts."
+            if err.code == 504:
+                if as_job:
+                    err.content = (
+                        "Timeout error during chunked file upload. Try reducing the chunk size by setting the "
+                        "TSC_CHUNK_SIZE_MB environment variable to a lower value (current default: 50)."
+                    )
+                else:
+                    err.content = (
+                        "Timeout error while publishing. Please use asynchronous publishing to avoid timeouts."
+                    )
             raise err
 
         if as_job:
@@ -683,11 +722,11 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
     @api(version="3.13")
     def update_hyper_data(
         self,
-        datasource_or_connection_item: Union[DatasourceItem, ConnectionItem, str],
+        datasource_or_connection_item: DatasourceItem | ConnectionItem | str,
         *,
         request_id: str,
         actions: Sequence[HyperAction],
-        payload: Optional[FilePath] = None,
+        payload: FilePath | None = None,
     ) -> JobItem:
         """
         Incrementally updates data (insert, update, upsert, replace and delete)
@@ -705,7 +744,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
 
         Parameters
         ----------
-        datasource_or_connection_item : Union[DatasourceItem, ConnectionItem, str]
+        datasource_or_connection_item : DatasourceItem | ConnectionItem | str
             The datasource item, connection item, or datasource ID. Either a
             DataSourceItem or a ConnectionItem. If the datasource only contains
             a single connection, the DataSourceItem is sufficient to identify
@@ -723,7 +762,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
             modify the data within the published datasource. For more
             information on the actions, see: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_how_to_update_data_to_hyper.htm#action-batch-descriptions
 
-        payload : Optional[FilePath]
+        payload : FilePath | None
             A Hyper file containing tuples to be inserted/deleted/updated or
             other payload data used by the actions. Hyper files can be created
             using the Tableau Hyper API or pantab.
@@ -946,7 +985,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         logger.info(f"Populated revisions for datasource (ID: {datasource_item.id})")
 
     def _get_datasource_revisions(
-        self, datasource_item: DatasourceItem, req_options: Optional["RequestOptions"] = None
+        self, datasource_item: DatasourceItem, req_options: "RequestOptions | None" = None
     ) -> list[RevisionItem]:
         url = f"{self.baseurl}/{datasource_item.id}/revisions"
         server_response = self.get_request(url, req_options)
@@ -959,7 +998,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
     def download_revision(
         self,
         datasource_id: str,
-        revision_number: Optional[str],
+        revision_number: str | None,
         filepath: T,
         include_extract: bool = True,
     ) -> T: ...
@@ -968,8 +1007,8 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
     def download_revision(
         self,
         datasource_id: str,
-        revision_number: Optional[str],
-        filepath: Optional[FilePath] = None,
+        revision_number: str | None,
+        filepath: FilePath | None = None,
         include_extract: bool = True,
     ) -> str: ...
 
@@ -994,12 +1033,12 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         datasource_id : str
             The unique ID of the datasource to download.
 
-        revision_number : Optional[str]
+        revision_number : str | None
             The revision number of the data source to download. To determine
             what versions are available, call the `populate_revisions` method.
             Pass None to download the current version.
 
-        filepath : Optional[PathOrFileW]
+        filepath : PathOrFileW | None
             The file path to save the downloaded datasource to. If not
             specified, the file will be saved to the current working directory.
 
@@ -1025,14 +1064,13 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         with closing(self.get_request(url, parameters={"stream": True})) as server_response:
             m = Message()
             m["Content-Disposition"] = server_response.headers["Content-Disposition"]
-            params = m.get_filename(failobj="")
+            filename = m.get_filename(failobj="")
             if isinstance(filepath, io_types_w):
                 for chunk in server_response.iter_content(1024):  # 1KB
                     filepath.write(chunk)
                 return_path = filepath
             else:
-                params = fix_filename(params)
-                filename = to_filename(os.path.basename(params))
+                filename = to_filename(os.path.basename(filename))
                 download_path = make_download_path(filepath, filename)
                 with open(download_path, "wb") as f:
                     for chunk in server_response.iter_content(1024):  # 1KB
@@ -1099,7 +1137,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         return self.parent_srv.schedules.add_to_schedule(schedule_id, datasource=item)
 
     @api(version="1.0")
-    def add_tags(self, item: Union[DatasourceItem, str], tags: Union[Iterable[str], str]) -> set[str]:
+    def add_tags(self, item: DatasourceItem | str, tags: Iterable[str] | str) -> set[str]:
         """
         Adds one or more tags to the specified datasource item.
 
@@ -1107,10 +1145,10 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
 
         Parameters
         ----------
-        item : Union[DatasourceItem, str]
+        item : DatasourceItem | str
             The datasource item or ID to add tags to.
 
-        tags : Union[Iterable[str], str]
+        tags : Iterable[str] | str
             The tag or tags to add to the datasource item.
 
         Returns
@@ -1121,7 +1159,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         return super().add_tags(item, tags)
 
     @api(version="1.0")
-    def delete_tags(self, item: Union[DatasourceItem, str], tags: Union[Iterable[str], str]) -> None:
+    def delete_tags(self, item: DatasourceItem | str, tags: Iterable[str] | str) -> None:
         """
         Deletes one or more tags from the specified datasource item.
 
@@ -1129,10 +1167,10 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
 
         Parameters
         ----------
-        item : Union[DatasourceItem, str]
+        item : DatasourceItem | str
             The datasource item or ID to delete tags from.
 
-        tags : Union[Iterable[str], str]
+        tags : Iterable[str] | str
             The tag or tags to delete from the datasource item.
 
         Returns
@@ -1157,7 +1195,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         """
         return super().update_tags(item)
 
-    def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[DatasourceItem]:
+    def filter(self, *invalid, page_size: int | None = None, **kwargs) -> QuerySet[DatasourceItem]:
         """
         Queries the Tableau Server for items using the specified filters. Page
         size can be specified to limit the number of items returned in a single

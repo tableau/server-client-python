@@ -1,4 +1,4 @@
-from typing import Literal, Optional, TYPE_CHECKING, Union
+from typing import Literal, TYPE_CHECKING
 
 from tableauserverclient.helpers.logging import logger
 from tableauserverclient.models.group_item import GroupItem
@@ -25,8 +25,8 @@ class GroupSets(QuerysetEndpoint[GroupSetItem]):
     @api(version="3.22")
     def get(
         self,
-        req_options: Optional[RequestOptions] = None,
-        result_level: Optional[Literal["members", "local"]] = None,
+        req_options: RequestOptions | None = None,
+        result_level: Literal["members", "local"] | None = None,
     ) -> tuple[list[GroupSetItem], PaginationItem]:
         logger.info("Querying all group sets on site")
         url = self.baseurl
@@ -55,7 +55,7 @@ class GroupSets(QuerysetEndpoint[GroupSetItem]):
         return created_groupset[0]
 
     @api(version="3.22")
-    def add_group(self, groupset_item: GroupSetItem, group: Union[GroupItem, str]) -> None:
+    def add_group(self, groupset_item: GroupSetItem, group: GroupItem | str) -> None:
         group_id = group.id if isinstance(group, GroupItem) else group
         logger.info(f"Adding group (ID: {group_id}) to group set (ID: {groupset_item.id})")
         url = f"{self.baseurl}/{groupset_item.id}/groups/{group_id}"
@@ -63,7 +63,7 @@ class GroupSets(QuerysetEndpoint[GroupSetItem]):
         return None
 
     @api(version="3.22")
-    def remove_group(self, groupset_item: GroupSetItem, group: Union[GroupItem, str]) -> None:
+    def remove_group(self, groupset_item: GroupSetItem, group: GroupItem | str) -> None:
         group_id = group.id if isinstance(group, GroupItem) else group
         logger.info(f"Removing group (ID: {group_id}) from group set (ID: {groupset_item.id})")
         url = f"{self.baseurl}/{groupset_item.id}/groups/{group_id}"
@@ -71,7 +71,7 @@ class GroupSets(QuerysetEndpoint[GroupSetItem]):
         return None
 
     @api(version="3.22")
-    def delete(self, groupset: Union[GroupSetItem, str]) -> None:
+    def delete(self, groupset: GroupSetItem | str) -> None:
         groupset_id = groupset.id if isinstance(groupset, GroupSetItem) else groupset
         logger.info(f"Deleting group set (ID: {groupset_id})")
         url = f"{self.baseurl}/{groupset_id}"
@@ -87,7 +87,7 @@ class GroupSets(QuerysetEndpoint[GroupSetItem]):
         updated_groupset = GroupSetItem.from_response(server_response.content, self.parent_srv.namespace)
         return updated_groupset[0]
 
-    def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[GroupSetItem]:
+    def filter(self, *invalid, page_size: int | None = None, **kwargs) -> QuerySet[GroupSetItem]:
         """
         Queries the Tableau Server for items using the specified filters. Page
         size can be specified to limit the number of items returned in a single

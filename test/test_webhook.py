@@ -10,6 +10,7 @@ from tableauserverclient.models import WebhookItem
 TEST_ASSET_DIR = Path(__file__).parent / "assets"
 
 GET_XML = TEST_ASSET_DIR / "webhook_get.xml"
+GET_NEW_EVENT_XML = TEST_ASSET_DIR / "webhook_get_new_event.xml"
 CREATE_XML = TEST_ASSET_DIR / "webhook_create.xml"
 CREATE_REQUEST_XML = TEST_ASSET_DIR / "webhook_create_request.xml"
 
@@ -87,3 +88,82 @@ def test_request_factory():
     webhook_request_actual = "{}\n".format(RequestFactory.Webhook.create_req(webhook_item).decode("utf-8"))
     # windows does /r/n for linebreaks, remove the extra char if it is there
     assert webhook_request_expected.replace("\r", "") == webhook_request_actual
+
+
+def test_event_setter_none():
+    """Setting event to None should store None without crashing."""
+    item = WebhookItem()
+    item.event = "datasource-updated"
+    assert item.event == "datasource-updated"
+    item.event = None
+    assert item._event is None
+    assert item.event is None
+
+
+def test_event_setter_short_name():
+    """Short event names should be stored with the webhook-source-event- prefix."""
+    item = WebhookItem()
+    item.event = "datasource-updated"
+    assert item._event == "webhook-source-event-datasource-updated"
+    assert item.event == "datasource-updated"
+
+
+def test_event_setter_full_source_name():
+    """Full webhook-source-event- names should be accepted and stored as-is."""
+    item = WebhookItem()
+    item.event = "webhook-source-event-datasource-updated"
+    assert item._event == "webhook-source-event-datasource-updated"
+    assert item.event == "datasource-updated"
+
+
+def test_event_setter_new_style_event_name():
+    """New-style event names (webhook-event-*) should be stored as-is and not mangled."""
+    item = WebhookItem()
+    item.event = "webhook-event-user-promoted-admin"
+    assert item._event == "webhook-event-user-promoted-admin"
+    assert item.event == "webhook-event-user-promoted-admin"
+
+
+def test_get_new_style_event(server: TSC.Server) -> None:
+    """Webhooks with new-style event names (webhook-event-*) should parse correctly."""
+    response_xml = GET_NEW_EVENT_XML.read_text()
+    with requests_mock.mock() as m:
+        m.get(server.webhooks.baseurl, text=response_xml)
+        webhooks, _ = server.webhooks.get()
+        assert len(webhooks) == 1
+        webhook = webhooks[0]
+
+        assert webhook.id == "webhook-id-2"
+        assert webhook.name == "webhook-name-2"
+        assert webhook.url == "https://example.com/hook"
+        # New-style event name should not have the webhook-source-event- prefix stripped
+        assert webhook.event == "webhook-event-user-promoted-admin"
+        assert webhook.owner_id == "webhook_owner_luid"
+
+
+def test_create_with_short_event_name(server: TSC.Server) -> None:
+    """Creating a webhook with a short event name (e.g. datasource-created) should work."""
+    response_xml = CREATE_XML.read_text()
+    with requests_mock.mock() as m:
+        m.post(server.webhooks.baseurl, text=response_xml)
+        webhook_model = TSC.WebhookItem()
+        webhook_model.name = "Test Webhook"
+        webhook_model.url = "https://ifttt.com/maker-url"
+        webhook_model.event = "datasource-created"
+
+        new_webhook = server.webhooks.create(webhook_model)
+        assert new_webhook.id is not None
+
+
+def test_create_with_source_event_name(server: TSC.Server) -> None:
+    """Creating a webhook with a full webhook-source-event-* name should work."""
+    response_xml = CREATE_XML.read_text()
+    with requests_mock.mock() as m:
+        m.post(server.webhooks.baseurl, text=response_xml)
+        webhook_model = TSC.WebhookItem()
+        webhook_model.name = "Test Webhook"
+        webhook_model.url = "https://ifttt.com/maker-url"
+        webhook_model.event = "webhook-source-event-datasource-created"
+
+        new_webhook = server.webhooks.create(webhook_model)
+        assert new_webhook.id is not None

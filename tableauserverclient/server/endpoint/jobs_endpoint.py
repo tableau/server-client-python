@@ -11,8 +11,6 @@ from tableauserverclient.exponential_backoff import ExponentialBackoffTimer
 
 from tableauserverclient.helpers.logging import logger
 
-from typing import Optional, Union
-
 
 class Jobs(QuerysetEndpoint[BackgroundJobItem]):
     @property
@@ -20,7 +18,7 @@ class Jobs(QuerysetEndpoint[BackgroundJobItem]):
         return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/jobs"
 
     @overload  # type: ignore[override]
-    def get(self: Self, job_id: str, req_options: Optional[RequestOptionsBase] = None) -> JobItem:  # type: ignore[override]
+    def get(self: Self, job_id: str, req_options: RequestOptionsBase | None = None) -> JobItem:  # type: ignore[override]
         ...
 
     @overload  # type: ignore[override]
@@ -28,7 +26,7 @@ class Jobs(QuerysetEndpoint[BackgroundJobItem]):
         ...
 
     @overload  # type: ignore[override]
-    def get(self: Self, job_id: None, req_options: Optional[RequestOptionsBase]) -> tuple[list[BackgroundJobItem], PaginationItem]:  # type: ignore[override]
+    def get(self: Self, job_id: None, req_options: RequestOptionsBase | None) -> tuple[list[BackgroundJobItem], PaginationItem]:  # type: ignore[override]
         ...
 
     @api(version="2.6")
@@ -75,7 +73,7 @@ class Jobs(QuerysetEndpoint[BackgroundJobItem]):
         return jobs, pagination_item
 
     @api(version="3.1")
-    def cancel(self, job_id: Union[str, JobItem]):
+    def cancel(self, job_id: str | JobItem):
         """
         Cancels a job specified by job ID. To get a list of job IDs for jobs that are currently queued or in-progress, use the Query Jobs method.
 
@@ -143,7 +141,7 @@ class Jobs(QuerysetEndpoint[BackgroundJobItem]):
         new_job = JobItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return new_job
 
-    def wait_for_job(self, job_id: Union[str, JobItem], *, timeout: Optional[float] = None) -> JobItem:
+    def wait_for_job(self, job_id: str | JobItem, *, timeout: float | None = None) -> JobItem:
         """
         Waits for a job to complete. The method will poll the server for the job
         status until the job is completed. If the job is successful, the method
@@ -197,7 +195,7 @@ class Jobs(QuerysetEndpoint[BackgroundJobItem]):
         else:
             raise AssertionError("Unexpected finish_code in job", job)
 
-    def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[BackgroundJobItem]:
+    def filter(self, *invalid, page_size: int | None = None, **kwargs) -> QuerySet[BackgroundJobItem]:
         """
         Queries the Tableau Server for items using the specified filters. Page
         size can be specified to limit the number of items returned in a single

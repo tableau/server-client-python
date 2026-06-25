@@ -54,7 +54,7 @@ class ColumnItem:
         all_column_xml = parsed_response.findall(".//t:column", namespaces=ns)
 
         for column_xml in all_column_xml:
-            (id, name, description, remote_type) = cls._parse_element(column_xml, ns)
+            id, name, description, remote_type = cls._parse_element(column_xml, ns)
             column_item = cls(name)
             column_item._set_values(id, name, description, remote_type)
             all_column_items.append(column_item)

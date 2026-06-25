@@ -1,9 +1,8 @@
 import abc
-from typing import Optional
 
 
 class Credentials(abc.ABC):
-    def __init__(self, site_id: Optional[str] = None, user_id_to_impersonate: Optional[str] = None) -> None:
+    def __init__(self, site_id: str | None = None, user_id_to_impersonate: str | None = None) -> None:
         self.site_id = site_id or ""
         self.user_id_to_impersonate = user_id_to_impersonate or None
 
@@ -70,7 +69,7 @@ class TableauAuth(Credentials):
     """
 
     def __init__(
-        self, username: str, password: str, site_id: Optional[str] = None, user_id_to_impersonate: Optional[str] = None
+        self, username: str, password: str, site_id: str | None = None, user_id_to_impersonate: str | None = None
     ) -> None:
         super().__init__(site_id, user_id_to_impersonate)
         if password is None:
@@ -133,8 +132,8 @@ class PersonalAccessTokenAuth(Credentials):
         self,
         token_name: str,
         personal_access_token: str,
-        site_id: Optional[str] = None,
-        user_id_to_impersonate: Optional[str] = None,
+        site_id: str | None = None,
+        user_id_to_impersonate: str | None = None,
     ) -> None:
         if personal_access_token is None or token_name is None:
             raise TabError("Must provide a token and token name when using PAT authentication")
@@ -202,8 +201,8 @@ class JWTAuth(Credentials):
         self,
         jwt: str,
         isUat: bool = False,
-        site_id: Optional[str] = None,
-        user_id_to_impersonate: Optional[str] = None,
+        site_id: str | None = None,
+        user_id_to_impersonate: str | None = None,
     ) -> None:
         if jwt is None:
             raise TabError("Must provide a JWT token when using JWT authentication")

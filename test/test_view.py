@@ -238,6 +238,52 @@ def test_populate_image_with_options(server: TSC.Server) -> None:
         assert response == single_view.image
 
 
+def test_populate_image_svg_format(server: TSC.Server) -> None:
+    server.version = "3.29"
+    response = b"<svg>test</svg>"
+    with requests_mock.mock() as m:
+        m.get(
+            server.views.baseurl + "/d79634e1-6063-4ec9-95ff-50acbf609ff5/image?format=SVG",
+            content=response,
+        )
+        single_view = TSC.ViewItem()
+        single_view._id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
+        req_option = TSC.ImageRequestOptions(format=TSC.ImageRequestOptions.Format.SVG)
+        server.views.populate_image(single_view, req_option)
+        assert response == single_view.image
+
+
+def test_populate_image_png_format(server: TSC.Server) -> None:
+    server.version = "3.29"
+    response = POPULATE_PREVIEW_IMAGE.read_bytes()
+    with requests_mock.mock() as m:
+        m.get(
+            server.views.baseurl + "/d79634e1-6063-4ec9-95ff-50acbf609ff5/image?format=PNG",
+            content=response,
+        )
+        single_view = TSC.ViewItem()
+        single_view._id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
+        req_option = TSC.ImageRequestOptions(format=TSC.ImageRequestOptions.Format.PNG)
+        server.views.populate_image(single_view, req_option)
+        assert response == single_view.image
+
+
+def test_populate_image_format_unsupported_version(server: TSC.Server) -> None:
+    server.version = "3.28"
+    response = POPULATE_PREVIEW_IMAGE.read_bytes()
+    with requests_mock.mock() as m:
+        m.get(
+            server.views.baseurl + "/d79634e1-6063-4ec9-95ff-50acbf609ff5/image?format=SVG",
+            content=response,
+        )
+        single_view = TSC.ViewItem()
+        single_view._id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
+        req_option = TSC.ImageRequestOptions(format=TSC.ImageRequestOptions.Format.SVG)
+
+        with pytest.raises(UnsupportedAttributeError):
+            server.views.populate_image(single_view, req_option)
+
+
 def test_populate_pdf(server: TSC.Server) -> None:
     response = POPULATE_PDF.read_bytes()
     with requests_mock.mock() as m:
@@ -381,8 +427,7 @@ def test_filter_excel(server: TSC.Server) -> None:
         assert response == excel_file
 
 
-def test_pdf_height(server: TSC.Server) -> None:
-    server.version = "3.8"
+def test_pdf_viz_dimensions(server: TSC.Server) -> None:
     response = POPULATE_PDF.read_bytes()
     with requests_mock.mock() as m:
         m.get(

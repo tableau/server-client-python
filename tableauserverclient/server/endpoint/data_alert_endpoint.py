@@ -7,8 +7,7 @@ from tableauserverclient.models import DataAlertItem, PaginationItem, UserItem
 
 from tableauserverclient.helpers.logging import logger
 
-from typing import Optional, TYPE_CHECKING, Union
-
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..server import Server
@@ -24,7 +23,7 @@ class DataAlerts(Endpoint):
         return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/dataAlerts"
 
     @api(version="3.2")
-    def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[DataAlertItem], PaginationItem]:
+    def get(self, req_options: "RequestOptions | None" = None) -> tuple[list[DataAlertItem], PaginationItem]:
         logger.info("Querying all dataAlerts on site")
         url = self.baseurl
         server_response = self.get_request(url, req_options)
@@ -44,7 +43,7 @@ class DataAlerts(Endpoint):
         return DataAlertItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     @api(version="3.2")
-    def delete(self, dataAlert: Union[DataAlertItem, str]) -> None:
+    def delete(self, dataAlert: DataAlertItem | str) -> None:
         if isinstance(dataAlert, DataAlertItem):
             dataAlert_id = dataAlert.id
         elif isinstance(dataAlert, str):
@@ -60,7 +59,7 @@ class DataAlerts(Endpoint):
         logger.info(f"Deleted single dataAlert (ID: {dataAlert_id})")
 
     @api(version="3.2")
-    def delete_user_from_alert(self, dataAlert: Union[DataAlertItem, str], user: Union[UserItem, str]) -> None:
+    def delete_user_from_alert(self, dataAlert: DataAlertItem | str, user: UserItem | str) -> None:
         if isinstance(dataAlert, DataAlertItem):
             dataAlert_id = dataAlert.id
         elif isinstance(dataAlert, str):
@@ -85,7 +84,7 @@ class DataAlerts(Endpoint):
         logger.info(f"Deleted User (ID {user_id}) from dataAlert (ID: {dataAlert_id})")
 
     @api(version="3.2")
-    def add_user_to_alert(self, dataAlert_item: DataAlertItem, user: Union[UserItem, str]) -> UserItem:
+    def add_user_to_alert(self, dataAlert_item: DataAlertItem, user: UserItem | str) -> UserItem:
         if isinstance(user, UserItem):
             user_id = user.id
         elif isinstance(user, str):

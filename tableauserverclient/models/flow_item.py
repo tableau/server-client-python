@@ -1,7 +1,7 @@
+from collections.abc import Iterable
 import copy
 import datetime
 import xml.etree.ElementTree as ET
-from typing import Iterable, Optional
 
 from defusedxml.ElementTree import fromstring
 
@@ -23,7 +23,7 @@ class FlowItem:
     project_id: str
         The ID of the project that the flow belongs to.
 
-    name: Optional[str]
+    name: str | None
         The name of the flow.
 
     Attributes
@@ -33,10 +33,10 @@ class FlowItem:
         by default and must be populated by calling the `populate_connections`
         method.
 
-    created_at: Optional[datetime.datetime]
+    created_at: datetime.datetime | None
         The date and time when the flow was created.
 
-    description: Optional[str]
+    description: str | None
         The description of the flow.
 
     dqws: Iterable[DQWItem]
@@ -44,16 +44,16 @@ class FlowItem:
         populated by default and must be populated by calling the `populate_dqws`
         method.
 
-    id: Optional[str]
+    id: str | None
         The ID of the flow.
 
-    name: Optional[str]
+    name: str | None
         The name of the flow.
 
-    owner_id: Optional[str]
+    owner_id: str | None
         The ID of the user who owns the flow.
 
-    project_name: Optional[str]
+    project_name: str | None
         The name of the project that the flow belongs to.
 
     tags: set[str]
@@ -65,22 +65,22 @@ class FlowItem:
             self._id, self.name, self.description, self.project_id, self.created_at
         )
 
-    def __init__(self, project_id: str, name: Optional[str] = None) -> None:
-        self._webpage_url: Optional[str] = None
-        self._created_at: Optional[datetime.datetime] = None
-        self._id: Optional[str] = None
+    def __init__(self, project_id: str, name: str | None = None) -> None:
+        self._webpage_url: str | None = None
+        self._created_at: datetime.datetime | None = None
+        self._id: str | None = None
         self._initial_tags: set[str] = set()
-        self._project_name: Optional[str] = None
-        self._updated_at: Optional[datetime.datetime] = None
-        self.name: Optional[str] = name
-        self.owner_id: Optional[str] = None
+        self._project_name: str | None = None
+        self._updated_at: datetime.datetime | None = None
+        self.name: str | None = name
+        self.owner_id: str | None = None
         self.project_id: str = project_id
         self.tags: set[str] = set()
-        self.description: Optional[str] = None
+        self.description: str | None = None
 
-        self._connections: Optional[Iterable[ConnectionItem]] = None
-        self._permissions: Optional[Iterable[Permission]] = None
-        self._data_quality_warnings: Optional[Iterable[DQWItem]] = None
+        self._connections: Iterable[ConnectionItem] | None = None
+        self._permissions: Iterable[Permission] | None = None
+        self._data_quality_warnings: Iterable[DQWItem] | None = None
 
     @property
     def connections(self):
@@ -97,11 +97,11 @@ class FlowItem:
         return self._permissions()
 
     @property
-    def webpage_url(self) -> Optional[str]:
+    def webpage_url(self) -> str | None:
         return self._webpage_url
 
     @property
-    def created_at(self) -> Optional[datetime.datetime]:
+    def created_at(self) -> datetime.datetime | None:
         return self._created_at
 
     @property
@@ -112,7 +112,7 @@ class FlowItem:
         return self._data_quality_warnings()
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         return self._id
 
     @property
@@ -125,19 +125,19 @@ class FlowItem:
         self._project_id = value
 
     @property
-    def description(self) -> Optional[str]:
+    def description(self) -> str | None:
         return self._description
 
     @description.setter
-    def description(self, value: Optional[str]) -> None:
+    def description(self, value: str | None) -> None:
         self._description = value
 
     @property
-    def project_name(self) -> Optional[str]:
+    def project_name(self) -> str | None:
         return self._project_name
 
     @property
-    def updated_at(self) -> Optional[datetime.datetime]:
+    def updated_at(self) -> datetime.datetime | None:
         return self._updated_at
 
     def _set_connections(self, connections):

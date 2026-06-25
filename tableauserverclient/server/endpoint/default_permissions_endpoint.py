@@ -4,7 +4,7 @@ from .endpoint import Endpoint
 from .exceptions import MissingRequiredFieldError
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import DatabaseItem, PermissionsRule, ProjectItem, plural_type, Resource
-from typing import TYPE_CHECKING, Callable, Optional, Union
+from typing import TYPE_CHECKING, Callable
 from collections.abc import Sequence
 
 if TYPE_CHECKING:
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 from tableauserverclient.helpers.logging import logger
 
 # these are the only two items that can hold default permissions for another type
-BaseItem = Union[DatabaseItem, ProjectItem]
+BaseItem = DatabaseItem | ProjectItem
 
 
 class _DefaultPermissionsEndpoint(Endpoint):
@@ -39,7 +39,7 @@ class _DefaultPermissionsEndpoint(Endpoint):
     __repr__ = __str__
 
     def update_default_permissions(
-        self, resource: BaseItem, permissions: Sequence[PermissionsRule], content_type: Union[Resource, str]
+        self, resource: BaseItem, permissions: Sequence[PermissionsRule], content_type: Resource | str
     ) -> list[PermissionsRule]:
         url = f"{self.owner_baseurl()}/{resource.id}/default-permissions/{plural_type(content_type)}"
         update_req = RequestFactory.Permission.add_req(permissions)
@@ -51,7 +51,7 @@ class _DefaultPermissionsEndpoint(Endpoint):
         return permissions
 
     def delete_default_permission(
-        self, resource: BaseItem, rule: PermissionsRule, content_type: Union[Resource, str]
+        self, resource: BaseItem, rule: PermissionsRule, content_type: Resource | str
     ) -> None:
         for capability, mode in rule.capabilities.items():
             # Made readability better but line is too long, will make this look better
@@ -74,7 +74,7 @@ class _DefaultPermissionsEndpoint(Endpoint):
 
         logger.info(f"Deleted permission for {rule.grantee.tag_name} {rule.grantee.id} item {resource.id}")
 
-    def populate_default_permissions(self, item: BaseItem, content_type: Union[Resource, str]) -> None:
+    def populate_default_permissions(self, item: BaseItem, content_type: Resource | str) -> None:
         if not item.id:
             error = "Server item is missing ID. Item must be retrieved from server first."
             raise MissingRequiredFieldError(error)
@@ -86,7 +86,7 @@ class _DefaultPermissionsEndpoint(Endpoint):
         logger.info(f"Populated default {content_type} permissions for item (ID: {item.id})")
 
     def _get_default_permissions(
-        self, item: BaseItem, content_type: Union[Resource, str], req_options: Optional["RequestOptions"] = None
+        self, item: BaseItem, content_type: Resource | str, req_options: "RequestOptions | None" = None
     ) -> list[PermissionsRule]:
         url = f"{self.owner_baseurl()}/{item.id}/default-permissions/{plural_type(content_type)}"
         server_response = self.get_request(url, req_options)

@@ -25,7 +25,7 @@ class FavoriteType(TypedDict):
 
 class FavoriteItem:
     @classmethod
-    def from_response(cls, xml: Union[str, bytes], namespace: dict) -> FavoriteType:
+    def from_response(cls, xml: str | bytes, namespace: dict) -> FavoriteType:
         favorites: FavoriteType = {
             "collections": [],
             "datasources": [],

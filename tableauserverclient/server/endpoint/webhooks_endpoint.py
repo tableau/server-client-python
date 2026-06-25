@@ -6,7 +6,7 @@ from tableauserverclient.models import WebhookItem, PaginationItem
 
 from tableauserverclient.helpers.logging import logger
 
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..server import Server
@@ -22,7 +22,7 @@ class Webhooks(Endpoint):
         return f"{self.parent_srv.baseurl}/sites/{self.parent_srv.site_id}/webhooks"
 
     @api(version="3.6")
-    def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[WebhookItem], PaginationItem]:
+    def get(self, req_options: "RequestOptions | None" = None) -> tuple[list[WebhookItem], PaginationItem]:
         """
         Returns a list of all webhooks on the site.
 
@@ -30,7 +30,7 @@ class Webhooks(Endpoint):
 
         Parameters
         ----------
-        req_options : Optional[RequestOptions]
+        req_options : RequestOptions | None
             Filter and sorting options for the request.
 
         Returns

@@ -66,11 +66,11 @@ def test_server_info_use_highest_version_upgrades(server: TSC.Server) -> None:
 
 
 def test_server_use_server_version_flag(server: TSC.Server) -> None:
-    si_response_xml = SERVER_INFO_25_XML.read_text()
-    with requests_mock.mock() as m:
-        m.get("http://test/api/2.4/serverInfo", text=si_response_xml)
-        server = TSC.Server("http://test", use_server_version=True)
-        assert server.version == "2.5"
+    # use_server_version=True defers version detection to sign_in, so the
+    # version is not updated at construction time
+    server = TSC.Server("http://test", use_server_version=True)
+    assert server._use_server_version is True
+    assert server.version == "2.4"  # still at default until sign_in
 
 
 def test_server_wrong_site(server: TSC.Server) -> None:

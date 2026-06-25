@@ -4,7 +4,6 @@
 import logging
 import tableauserverclient as TSC
 
-
 logger = logging.getLogger("Sample")
 logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.StreamHandler())

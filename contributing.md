@@ -23,3 +23,33 @@ the limitations that you are running into, and provide us with a use case to kno
 ### Making Contributions
 
 Refer to the [Developer Guide](https://tableau.github.io/server-client-python/docs/dev-guide) which explains how to make contributions to the TSC project.
+
+## Running Tests
+
+### Unit tests
+
+```bash
+pip install -e ".[test]"
+pytest
+```
+
+### End-to-end tests
+
+E2e tests run against a real Tableau server and are kept in `test_e2e/`. They are excluded from the default `pytest` run.
+
+**Required environment variables:**
+
+| Variable | Description |
+|---|---|
+| `TABLEAU_SERVER` | Server URL, e.g. `https://10ax.online.tableau.com/` |
+| `TABLEAU_SITE` | Site content URL |
+| `TABLEAU_TOKEN` | Personal access token value |
+| `TABLEAU_TOKEN_NAME` | Personal access token name |
+| `TABLEAU_PROJECT` | Project to publish test content into (defaults to `Default`) |
+
+**Run:**
+
+```bash
+TABLEAU_SERVER=https://... TABLEAU_SITE=mysite TABLEAU_TOKEN=... TABLEAU_TOKEN_NAME=mytoken TABLEAU_PROJECT="My Project" \
+pytest test_e2e/
+```

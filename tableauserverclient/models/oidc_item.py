@@ -1,32 +1,31 @@
-from typing import Optional
 from defusedxml.ElementTree import fromstring
 
 
 class SiteOIDCConfiguration:
     def __init__(self) -> None:
         self.enabled: bool = False
-        self.test_login_url: Optional[str] = None
-        self.known_provider_alias: Optional[str] = None
+        self.test_login_url: str | None = None
+        self.known_provider_alias: str | None = None
         self.allow_embedded_authentication: bool = False
         self.use_full_name: bool = False
-        self.idp_configuration_name: Optional[str] = None
-        self.idp_configuration_id: Optional[str] = None
-        self.client_id: Optional[str] = None
-        self.client_secret: Optional[str] = None
-        self.authorization_endpoint: Optional[str] = None
-        self.token_endpoint: Optional[str] = None
-        self.userinfo_endpoint: Optional[str] = None
-        self.jwks_uri: Optional[str] = None
-        self.end_session_endpoint: Optional[str] = None
-        self.custom_scope: Optional[str] = None
-        self.essential_acr_values: Optional[str] = None
-        self.email_mapping: Optional[str] = None
-        self.first_name_mapping: Optional[str] = None
-        self.last_name_mapping: Optional[str] = None
-        self.full_name_mapping: Optional[str] = None
-        self.prompt: Optional[str] = None
-        self.client_authentication: Optional[str] = None
-        self.voluntary_acr_values: Optional[str] = None
+        self.idp_configuration_name: str | None = None
+        self.idp_configuration_id: str | None = None
+        self.client_id: str | None = None
+        self.client_secret: str | None = None
+        self.authorization_endpoint: str | None = None
+        self.token_endpoint: str | None = None
+        self.userinfo_endpoint: str | None = None
+        self.jwks_uri: str | None = None
+        self.end_session_endpoint: str | None = None
+        self.custom_scope: str | None = None
+        self.essential_acr_values: str | None = None
+        self.email_mapping: str | None = None
+        self.first_name_mapping: str | None = None
+        self.last_name_mapping: str | None = None
+        self.full_name_mapping: str | None = None
+        self.prompt: str | None = None
+        self.client_authentication: str | None = None
+        self.voluntary_acr_values: str | None = None
 
     def __str__(self) -> str:
         return (

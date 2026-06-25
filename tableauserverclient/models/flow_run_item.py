@@ -1,6 +1,5 @@
 import itertools
 from datetime import datetime
-from typing import Optional
 
 from defusedxml.ElementTree import fromstring
 
@@ -10,39 +9,39 @@ from tableauserverclient.datetime_helpers import parse_datetime
 class FlowRunItem:
     def __init__(self) -> None:
         self._id: str = ""
-        self._flow_id: Optional[str] = None
-        self._status: Optional[str] = None
-        self._started_at: Optional[datetime] = None
-        self._completed_at: Optional[datetime] = None
-        self._progress: Optional[str] = None
-        self._background_job_id: Optional[str] = None
+        self._flow_id: str | None = None
+        self._status: str | None = None
+        self._started_at: datetime | None = None
+        self._completed_at: datetime | None = None
+        self._progress: str | None = None
+        self._background_job_id: str | None = None
 
     @property
     def id(self) -> str:
         return self._id
 
     @property
-    def flow_id(self) -> Optional[str]:
+    def flow_id(self) -> str | None:
         return self._flow_id
 
     @property
-    def status(self) -> Optional[str]:
+    def status(self) -> str | None:
         return self._status
 
     @property
-    def started_at(self) -> Optional[datetime]:
+    def started_at(self) -> datetime | None:
         return self._started_at
 
     @property
-    def completed_at(self) -> Optional[datetime]:
+    def completed_at(self) -> datetime | None:
         return self._completed_at
 
     @property
-    def progress(self) -> Optional[str]:
+    def progress(self) -> str | None:
         return self._progress
 
     @property
-    def background_job_id(self) -> Optional[str]:
+    def background_job_id(self) -> str | None:
         return self._background_job_id
 
     def _set_values(
@@ -71,7 +70,7 @@ class FlowRunItem:
             self._background_job_id = background_job_id
 
     @classmethod
-    def from_response(cls: type["FlowRunItem"], resp: bytes, ns: Optional[dict]) -> list["FlowRunItem"]:
+    def from_response(cls: type["FlowRunItem"], resp: bytes, ns: dict | None) -> list["FlowRunItem"]:
         all_flowrun_items = list()
         parsed_response = fromstring(resp)
         all_flowrun_xml = itertools.chain(

@@ -4,6 +4,11 @@ import requests
 
 import tableauserverclient as TSC
 from tableauserverclient.server.endpoint import Endpoint
+from tableauserverclient.server.endpoint.exceptions import (
+    FailedSignInError,
+    NonXMLResponseError,
+    ServerResponseError,
+)
 
 import requests_mock
 
@@ -91,3 +96,66 @@ def test_set_user_agent_when_blank(server: TSC.Server) -> None:
     params = {"headers": {}}  # type: ignore
     result = Endpoint.set_user_agent(params)
     assert result["headers"]["User-Agent"].startswith("Tableau Server Client")
+
+
+# --- ServerResponseError / FailedSignInError exception parsing (issue #1083) ---
+
+NS = {"t": "http://tableau.com/api"}
+
+STANDARD_ERROR_XML = b"""<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api">
+  <error code="401002">
+    <summary>Unauthorized Access</summary>
+    <detail>Invalid credentials were provided.</detail>
+  </error>
+</tsResponse>"""
+
+NO_ERROR_ELEMENT_XML = b"""<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api">
+  <message>Something went wrong but with no error element</message>
+</tsResponse>"""
+
+NOT_XML_CONTENT = b"Internal Server Error (not XML at all)"
+
+
+def test_server_response_error_standard_xml():
+    """Standard XML with a t:error element parses code/summary/detail correctly."""
+    err = ServerResponseError.from_response(STANDARD_ERROR_XML, NS, "http://test/")
+    assert err.code == "401002"
+    assert "Unauthorized" in err.summary
+    assert "Invalid credentials" in err.detail
+
+
+def test_server_response_error_no_error_element_does_not_raise():
+    """XML without a t:error element must not raise AttributeError (issue #1083)."""
+    err = ServerResponseError.from_response(NO_ERROR_ELEMENT_XML, NS, "http://test/")
+    assert err.code == ""
+    # The raw XML content should appear in summary/detail as the fallback
+    assert "Something went wrong" in err.summary or len(err.summary) > 0
+
+
+def test_server_response_error_not_xml_raises_parse_error():
+    """Non-XML content causes fromstring to raise a ParseError (not AttributeError)."""
+    import xml.etree.ElementTree as ET
+
+    with pytest.raises(ET.ParseError):
+        ServerResponseError.from_response(NOT_XML_CONTENT, NS, "http://test/")
+
+
+def test_failed_sign_in_error_no_error_element_does_not_raise():
+    """FailedSignInError shares from_response — same None guard must apply."""
+    err = FailedSignInError.from_response(NO_ERROR_ELEMENT_XML, NS, "http://test/")
+    assert err.code == ""
+    assert isinstance(err, FailedSignInError)
+
+
+def test_server_response_error_missing_summary_and_detail():
+    """XML with t:error but missing summary/detail children falls back gracefully."""
+    xml = b"""<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api">
+  <error code="500001"></error>
+</tsResponse>"""
+    err = ServerResponseError.from_response(xml, NS, "http://test/")
+    assert err.code == "500001"
+    assert err.summary == ""
+    assert err.detail == ""
