@@ -33,15 +33,14 @@ def server():
     return server
 
 
-def test_download(server: TSC.Server) -> None:
+def test_download(server: TSC.Server, tmp_path: Path) -> None:
     with requests_mock.mock() as m:
         m.get(
             server.flows.baseurl + "/587daa37-b84d-4400-a9a2-aa90e0be7837/content",
             headers={"Content-Disposition": 'name="tableau_flow"; filename="FlowOne.tfl"'},
         )
-        file_path = server.flows.download("587daa37-b84d-4400-a9a2-aa90e0be7837")
+        file_path = server.flows.download("587daa37-b84d-4400-a9a2-aa90e0be7837", filepath=tmp_path)
         assert os.path.exists(file_path) is True
-    os.remove(file_path)
 
 
 def test_download_object(server: TSC.Server) -> None:

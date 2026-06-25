@@ -608,15 +608,14 @@ def test_delete(server) -> None:
         server.datasources.delete("9dbd2263-16b5-46e1-9c43-a76bb8ab65fb")
 
 
-def test_download(server) -> None:
+def test_download(server, tmp_path) -> None:
     with requests_mock.mock() as m:
         m.get(
             server.datasources.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/content",
             headers={"Content-Disposition": 'name="tableau_datasource"; filename="Sample datasource.tds"'},
         )
-        file_path = server.datasources.download("9dbd2263-16b5-46e1-9c43-a76bb8ab65fb")
+        file_path = server.datasources.download("9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", filepath=tmp_path)
         assert os.path.exists(file_path)
-    os.remove(file_path)
 
 
 def test_download_object(server) -> None:
@@ -630,7 +629,7 @@ def test_download_object(server) -> None:
             assert isinstance(file_path, BytesIO)
 
 
-def test_download_sanitizes_name(server) -> None:
+def test_download_sanitizes_name(server, tmp_path) -> None:
     filename = "Name,With,Commas.tds"
     disposition = f'name="tableau_workbook"; filename="{filename}"'
     with requests_mock.mock() as m:
@@ -638,13 +637,12 @@ def test_download_sanitizes_name(server) -> None:
             server.datasources.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/content",
             headers={"Content-Disposition": disposition},
         )
-        file_path = server.datasources.download("1f951daf-4061-451a-9df1-69a8062664f2")
+        file_path = server.datasources.download("1f951daf-4061-451a-9df1-69a8062664f2", filepath=tmp_path)
         assert os.path.basename(file_path) == "NameWithCommas.tds"
         assert os.path.exists(file_path)
-    os.remove(file_path)
 
 
-def test_download_extract_only(server) -> None:
+def test_download_extract_only(server, tmp_path) -> None:
     # Pretend we're 2.5 for 'extract_only'
     server.version = "2.5"
 
@@ -654,12 +652,13 @@ def test_download_extract_only(server) -> None:
             headers={"Content-Disposition": 'name="tableau_datasource"; filename="Sample datasource.tds"'},
             complete_qs=True,
         )
-        file_path = server.datasources.download("9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", include_extract=False)
+        file_path = server.datasources.download(
+            "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", include_extract=False, filepath=tmp_path
+        )
         assert os.path.exists(file_path)
-    os.remove(file_path)
 
 
-def test_download_no_extract_emits_deprecation_warning(server) -> None:
+def test_download_no_extract_emits_deprecation_warning(server, tmp_path) -> None:
     """no_extract=True should emit a DeprecationWarning and map to includeExtract=False."""
     server.version = "2.5"
 
@@ -670,9 +669,10 @@ def test_download_no_extract_emits_deprecation_warning(server) -> None:
             complete_qs=True,
         )
         with pytest.warns(DeprecationWarning, match="deprecated and will be removed"):
-            file_path = server.datasources.download("9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", no_extract=True)
+            file_path = server.datasources.download(
+                "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", no_extract=True, filepath=tmp_path
+            )
         assert os.path.exists(file_path)
-    os.remove(file_path)
 
 
 def test_update_missing_id(server) -> None:

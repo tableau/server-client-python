@@ -339,7 +339,7 @@ def test_download_object(server: TSC.Server) -> None:
             assert isinstance(file_path, BytesIO)
 
 
-def test_download_sanitizes_name(server: TSC.Server) -> None:
+def test_download_sanitizes_name(server: TSC.Server, tmp_path: Path) -> None:
     filename = "Name,With,Commas.twbx"
     disposition = f'name="tableau_workbook"; filename="{filename}"'
     with requests_mock.mock() as m:
@@ -347,13 +347,12 @@ def test_download_sanitizes_name(server: TSC.Server) -> None:
             server.workbooks.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/content",
             headers={"Content-Disposition": disposition},
         )
-        file_path = server.workbooks.download("1f951daf-4061-451a-9df1-69a8062664f2")
+        file_path = server.workbooks.download("1f951daf-4061-451a-9df1-69a8062664f2", filepath=tmp_path)
         assert os.path.basename(file_path) == "NameWithCommas.twbx"
         assert os.path.exists(file_path)
-    os.remove(file_path)
 
 
-def test_download_extract_only(server: TSC.Server) -> None:
+def test_download_extract_only(server: TSC.Server, tmp_path: Path) -> None:
     # Pretend we're 2.5 for 'extract_only'
     server.version = "2.5"
 
@@ -364,12 +363,13 @@ def test_download_extract_only(server: TSC.Server) -> None:
             complete_qs=True,
         )
         # Technically this shouldn't download a twbx, but we are interested in the qs, not the file
-        file_path = server.workbooks.download("1f951daf-4061-451a-9df1-69a8062664f2", include_extract=False)
+        file_path = server.workbooks.download(
+            "1f951daf-4061-451a-9df1-69a8062664f2", include_extract=False, filepath=tmp_path
+        )
         assert os.path.exists(file_path)
-    os.remove(file_path)
 
 
-def test_download_no_extract_emits_deprecation_warning(server: TSC.Server) -> None:
+def test_download_no_extract_emits_deprecation_warning(server: TSC.Server, tmp_path: Path) -> None:
     """no_extract=True should emit a DeprecationWarning and map to includeExtract=False."""
     server.version = "2.5"
 
@@ -380,9 +380,10 @@ def test_download_no_extract_emits_deprecation_warning(server: TSC.Server) -> No
             complete_qs=True,
         )
         with pytest.warns(DeprecationWarning, match="deprecated and will be removed"):
-            file_path = server.workbooks.download("1f951daf-4061-451a-9df1-69a8062664f2", no_extract=True)
+            file_path = server.workbooks.download(
+                "1f951daf-4061-451a-9df1-69a8062664f2", no_extract=True, filepath=tmp_path
+            )
         assert os.path.exists(file_path)
-    os.remove(file_path)
 
 
 def test_download_missing_id(server: TSC.Server) -> None:
