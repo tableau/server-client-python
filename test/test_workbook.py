@@ -318,15 +318,14 @@ def test_update_tags(server: TSC.Server) -> None:
     assert single_workbook._initial_tags == updated_workbook._initial_tags
 
 
-def test_download(server: TSC.Server) -> None:
+def test_download(server: TSC.Server, tmp_path: Path) -> None:
     with requests_mock.mock() as m:
         m.get(
             server.workbooks.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/content",
             headers={"Content-Disposition": 'name="tableau_workbook"; filename="RESTAPISample.twbx"'},
         )
-        file_path = server.workbooks.download("1f951daf-4061-451a-9df1-69a8062664f2")
+        file_path = server.workbooks.download("1f951daf-4061-451a-9df1-69a8062664f2", filepath=tmp_path)
         assert os.path.exists(file_path)
-    os.remove(file_path)
 
 
 def test_download_object(server: TSC.Server) -> None:
