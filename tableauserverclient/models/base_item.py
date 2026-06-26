@@ -50,9 +50,7 @@ class OwnedItem(BaseItem, Protocol):
 
     Structurally satisfied by WorkbookItem, DatasourceItem, ViewItem,
     FlowItem, ProjectItem, and MetricItem -- every item class that exposes
-    an ``owner_id`` attribute.  Note that ProjectItem and MetricItem satisfy
-    this protocol even though they do not satisfy ContentItem: they have an
-    owner but lack timestamps and tags.
+    an ``owner_id`` attribute.
 
     No concrete class needs to explicitly inherit from OwnedItem.  Protocol
     structural subtyping means any class that exposes the required attribute
@@ -69,24 +67,18 @@ class TaggableItem(BaseItem, Protocol):
     Structurally satisfied by WorkbookItem, DatasourceItem, ViewItem,
     FlowItem, and MetricItem.  ProjectItem is intentionally excluded because
     it does not expose a ``tags`` attribute.
-
-    This is the interface duck-typed by ``_ResourceTagger.update_tags`` in the
-    server layer.  Formalising it as a protocol enables type-safe tagging
-    helpers without requiring concrete classes to change their inheritance
-    chain.
     """
 
     tags: set[str]
-    _initial_tags: set[str]
 
 
 @runtime_checkable
 class ContentItem(OwnedItem, TaggableItem, Protocol):
     """Extended interface for publishable content items.
 
-    Composes OwnedItem (carries ``owner_id``), TaggableItem (carries ``tags``
-    and ``_initial_tags``), and adds server-assigned timestamps.  Structurally
-    satisfied by WorkbookItem, DatasourceItem, ViewItem, and FlowItem.
+    Composes OwnedItem (carries ``owner_id``), TaggableItem (carries ``tags``),
+    and adds server-assigned timestamps.  Structurally satisfied by
+    WorkbookItem, DatasourceItem, ViewItem, FlowItem, and MetricItem.
 
     No concrete class needs to explicitly inherit from ContentItem.  Protocol
     structural subtyping means any class that exposes all required attributes
