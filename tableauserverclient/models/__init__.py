@@ -1,3 +1,4 @@
+from tableauserverclient.models.base_item import BaseItem, ContentItem
 from tableauserverclient.models.collection_item import CollectionItem
 from tableauserverclient.models.column_item import ColumnItem
 from tableauserverclient.models.connection_credentials import ConnectionCredentials
@@ -55,6 +56,8 @@ from tableauserverclient.models.workbook_item import WorkbookItem
 from tableauserverclient.models.extract_item import ExtractItem
 
 __all__ = [
+    "BaseItem",
+    "ContentItem",
     "CollectionItem",
     "ColumnItem",
     "ConnectionCredentials",
