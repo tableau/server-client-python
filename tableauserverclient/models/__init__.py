@@ -98,7 +98,6 @@ __all__ = [
     "ServerInfoItem",
     "SiteAuthConfiguration",
     "SiteItem",
-    "SiteOIDCConfiguration",
     "SubscriptionItem",
     "TableItem",
     "TableauAuth",

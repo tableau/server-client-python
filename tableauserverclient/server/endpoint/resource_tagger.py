@@ -1,6 +1,6 @@
 import abc
 import copy
-from typing import Generic, Protocol, TypeVar, TYPE_CHECKING, runtime_checkable
+from typing import Generic, Protocol, TypeVar, TYPE_CHECKING
 from collections.abc import Iterable
 import urllib.parse
 
@@ -65,16 +65,6 @@ class _ResourceTagger(Endpoint):
 
 class Response(Protocol):
     content: bytes
-
-
-@runtime_checkable
-class Taggable(Protocol):
-    tags: set[str]
-    _initial_tags: set[str]
-
-    @property
-    def id(self) -> str | None:
-        pass
 
 
 T = TypeVar("T")
