@@ -45,13 +45,48 @@ class BaseItem(Protocol):
 
 
 @runtime_checkable
-class ContentItem(BaseItem, Protocol):
+class OwnedItem(BaseItem, Protocol):
+    """Structural interface for TSC items that carry an owner reference.
+
+    Structurally satisfied by WorkbookItem, DatasourceItem, ViewItem,
+    FlowItem, ProjectItem, and MetricItem -- every item class that exposes
+    an ``owner_id`` attribute.  Note that ProjectItem and MetricItem satisfy
+    this protocol even though they do not satisfy ContentItem: they have an
+    owner but lack timestamps and tags.
+
+    No concrete class needs to explicitly inherit from OwnedItem.  Protocol
+    structural subtyping means any class that exposes the required attribute
+    satisfies the protocol implicitly.
+    """
+
+    owner_id: str | None
+
+
+@runtime_checkable
+class TaggableItem(BaseItem, Protocol):
+    """Structural interface for TSC items that carry a mutable tag set.
+
+    Structurally satisfied by WorkbookItem, DatasourceItem, ViewItem,
+    FlowItem, and MetricItem.  ProjectItem is intentionally excluded because
+    it does not expose a ``tags`` attribute.
+
+    This is the interface duck-typed by ``_ResourceTagger.update_tags`` in the
+    server layer.  Formalising it as a protocol enables type-safe tagging
+    helpers without requiring concrete classes to change their inheritance
+    chain.
+    """
+
+    tags: set[str]
+    _initial_tags: set[str]
+
+
+@runtime_checkable
+class ContentItem(OwnedItem, TaggableItem, Protocol):
     """Extended interface for publishable content items.
 
-    Structurally satisfied by WorkbookItem, DatasourceItem, ViewItem, and
-    FlowItem -- the four classes that carry timestamps and a mutable tag set.
-    ProjectItem and UserItem are intentionally excluded because they lack
-    ``tags``, ``created_at``, or ``updated_at``.
+    Composes OwnedItem (carries ``owner_id``), TaggableItem (carries ``tags``
+    and ``_initial_tags``), and adds server-assigned timestamps.  Structurally
+    satisfied by WorkbookItem, DatasourceItem, ViewItem, and FlowItem.
 
     No concrete class needs to explicitly inherit from ContentItem.  Protocol
     structural subtyping means any class that exposes all required attributes
@@ -62,5 +97,3 @@ class ContentItem(BaseItem, Protocol):
 
     created_at: datetime.datetime | None
     updated_at: datetime.datetime | None
-    # Plain mutable attribute on all four classes.
-    tags: set[str]
