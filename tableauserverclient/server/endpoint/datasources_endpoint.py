@@ -42,9 +42,7 @@ from tableauserverclient.models import (
 )
 from tableauserverclient.server import RequestFactory, RequestOptions
 
-io_types = (io.BytesIO, io.BufferedReader)
 io_types_r = (io.BytesIO, io.BufferedReader)
-io_types_w = (io.BytesIO, io.BufferedWriter)
 
 FilePath = str | os.PathLike
 FileObject = io.BufferedReader | io.BytesIO
