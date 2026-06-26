@@ -55,9 +55,15 @@ class OwnedItem(BaseItem, Protocol):
     No concrete class needs to explicitly inherit from OwnedItem.  Protocol
     structural subtyping means any class that exposes the required attribute
     satisfies the protocol implicitly.
+
+    ``owner_id`` is declared as a read-only ``@property`` so that ViewItem
+    (whose owner is determined by its parent workbook and is not independently
+    writable) satisfies the protocol.  Plain writable instance attributes on
+    other item classes also satisfy a read-only property protocol.
     """
 
-    owner_id: str | None
+    @property
+    def owner_id(self) -> str | None: ...
 
 
 @runtime_checkable
