@@ -14,6 +14,9 @@ class Filter:
     def __str__(self):
         if isinstance(self._value, datetime.datetime):
             return f"{self.field}:{self.operator}:{format_datetime(self._value)}"
+        if isinstance(self._value, bool):
+            # Tableau REST API requires lowercase 'true'/'false', not Python's 'True'/'False'
+            return f"{self.field}:{self.operator}:{str(self._value).lower()}"
         value_string = str(self._value)
         if isinstance(self._value, list):
             # this should turn the string representation of the list
