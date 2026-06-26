@@ -26,6 +26,9 @@ UPDATE_VIRTUALCONNECTION_DEFAULT_PERMISSIONS_XML = (
 GET_BY_NAME_TOP_LEVEL_XML = TEST_ASSET_DIR / "project_get_by_name_top_level.xml"
 GET_BY_NAME_CHILD_XML = TEST_ASSET_DIR / "project_get_by_name_child.xml"
 GET_EMPTY_XML = TEST_ASSET_DIR / "project_get_empty.xml"
+GET_BY_NAME_AMBIGUOUS_ROOT_XML = TEST_ASSET_DIR / "project_get_by_name_ambiguous_root.xml"
+GET_BY_NAME_DUPLICATE_SIBLINGS_XML = TEST_ASSET_DIR / "project_get_by_name_duplicate_siblings.xml"
+GET_BY_NAME_GRANDCHILD_XML = TEST_ASSET_DIR / "project_get_by_name_grandchild.xml"
 
 
 @pytest.fixture(scope="function")
@@ -582,3 +585,115 @@ def test_get_by_path_empty_raises(server: TSC.Server) -> None:
 
     with pytest.raises(ValueError):
         server.projects.get_by_path("/")
+
+
+def test_get_by_path_trailing_slash(server: TSC.Server) -> None:
+    """Trailing slash is stripped; result is the same as the bare name."""
+    response_xml = GET_BY_NAME_TOP_LEVEL_XML.read_text()
+    with requests_mock.mock() as m:
+        m.get(server.projects.baseurl + "?filter=name:eq:Tableau", text=response_xml)
+        project = server.projects.get_by_path("Tableau/")
+
+    assert project is not None
+    assert project.id == "1d0304cd-3796-429f-b815-7258370b9b74"
+
+
+def test_get_by_path_root_filters_non_top_level(server: TSC.Server) -> None:
+    """When the API returns projects with the same name at different levels,
+    get_by_path keeps only the one with no parent when looking at the root."""
+    ambiguous_xml = GET_BY_NAME_AMBIGUOUS_ROOT_XML.read_text()
+    baseurl = server.projects.baseurl
+
+    def respond(request, context):
+        params = _filter_params(request)
+        if params.get("name") == "Shared" and "parentProjectId" not in params:
+            return ambiguous_xml
+        context.status_code = 404
+        return ""
+
+    with requests_mock.mock() as m:
+        m.get(baseurl, text=respond)
+        project = server.projects.get_by_path("Shared")
+
+    # The implementation filters to parent_id is None at the root level, so
+    # only "bbbbbbbb-..." (the actual top-level project) should be returned.
+    assert project is not None
+    assert project.id == "bbbbbbbb-0000-0000-0000-000000000002"
+    assert project.parent_id is None
+
+
+def test_get_by_path_duplicate_siblings_returns_first(server: TSC.Server) -> None:
+    """When multiple sibling projects share the same name, the first one is returned."""
+    top_level_xml = GET_BY_NAME_TOP_LEVEL_XML.read_text()
+    duplicate_xml = GET_BY_NAME_DUPLICATE_SIBLINGS_XML.read_text()
+    baseurl = server.projects.baseurl
+
+    def respond(request, context):
+        params = _filter_params(request)
+        if params.get("name") == "Tableau" and "parentProjectId" not in params:
+            return top_level_xml
+        if params.get("name") == "Reports" and params.get("parentProjectId") == "1d0304cd-3796-429f-b815-7258370b9b74":
+            return duplicate_xml
+        context.status_code = 404
+        return ""
+
+    with requests_mock.mock() as m:
+        m.get(baseurl, text=respond)
+        project = server.projects.get_by_path("Tableau/Reports")
+
+    # Duplicate siblings: implementation takes the first result from the API.
+    assert project is not None
+    assert project.id == "cccccccc-0000-0000-0000-000000000001"
+
+
+def test_get_by_path_deep_three_levels(server: TSC.Server) -> None:
+    """A three-component path issues three requests and returns the deepest project."""
+    top_level_xml = GET_BY_NAME_TOP_LEVEL_XML.read_text()
+    child_xml = GET_BY_NAME_CHILD_XML.read_text()
+    grandchild_xml = GET_BY_NAME_GRANDCHILD_XML.read_text()
+    baseurl = server.projects.baseurl
+
+    def respond(request, context):
+        params = _filter_params(request)
+        if params.get("name") == "Tableau" and "parentProjectId" not in params:
+            return top_level_xml
+        if params.get("name") == "Child 1" and params.get("parentProjectId") == "1d0304cd-3796-429f-b815-7258370b9b74":
+            return child_xml
+        if params.get("name") == "Q1" and params.get("parentProjectId") == "4cc52973-5e3a-4d1f-a4fb-5b5f73796edf":
+            return grandchild_xml
+        context.status_code = 404
+        return ""
+
+    with requests_mock.mock() as m:
+        m.get(baseurl, text=respond)
+        project = server.projects.get_by_path("Tableau/Child 1/Q1")
+
+    assert project is not None
+    assert project.id == "eeeeeeee-0000-0000-0000-000000000001"
+    assert project.name == "Q1"
+    assert project.parent_id == "4cc52973-5e3a-4d1f-a4fb-5b5f73796edf"
+
+
+def test_get_by_path_with_spaces_in_name(server: TSC.Server) -> None:
+    """Project names containing spaces are handled correctly."""
+    # Reuses the child fixture whose name is 'Child 1' (contains a space).
+    top_level_xml = GET_BY_NAME_TOP_LEVEL_XML.read_text()
+    child_xml = GET_BY_NAME_CHILD_XML.read_text()
+    baseurl = server.projects.baseurl
+
+    def respond(request, context):
+        params = _filter_params(request)
+        if params.get("name") == "Tableau" and "parentProjectId" not in params:
+            return top_level_xml
+        if params.get("name") == "Child 1" and params.get("parentProjectId") == "1d0304cd-3796-429f-b815-7258370b9b74":
+            return child_xml
+        context.status_code = 404
+        return ""
+
+    with requests_mock.mock() as m:
+        m.get(baseurl, text=respond)
+        project = server.projects.get_by_path("Tableau/Child 1")
+
+    assert project is not None
+    assert project.id == "4cc52973-5e3a-4d1f-a4fb-5b5f73796edf"
+    assert project.name == "Child 1"

@@ -102,11 +102,22 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         Each level makes one API request, so a path with *n* components issues
         *n* requests.
 
+        At the root level, the API ``filter(name=...)`` may return projects from
+        different levels of the hierarchy that share the same name. Only
+        projects with no parent (``parentProjectId`` absent) are considered at
+        this step. For subsequent levels, the ``parentProjectId`` filter is sent
+        to the server so only direct children of the current project are
+        returned.
+
+        If multiple sibling projects share the same name at any level, the
+        first project returned by the API is used and the rest are ignored.
+
         Parameters
         ----------
         path : str
             The slash-separated path of the project. Leading and trailing
-            slashes are ignored.
+            slashes are ignored. Empty components (e.g. from consecutive
+            slashes) are discarded.
 
         Returns
         -------
