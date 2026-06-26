@@ -4,11 +4,13 @@ ALLOWED_SPECIAL = (" ", ".", "_", "-")
 
 
 def to_filename(string_to_sanitize):
+    """Strip characters from a string that are not safe for use in a filename."""
     sanitized = (c for c in string_to_sanitize if c.isalnum() or c in ALLOWED_SPECIAL)
     return "".join(sanitized)
 
 
 def make_download_path(filepath, filename):
+    """Resolve a download destination path from an optional target filepath and the server-provided filename."""
     download_path = None
 
     if filepath is None:
@@ -24,6 +26,7 @@ def make_download_path(filepath, filename):
 
 
 def get_file_object_size(file):
+    """Return the size in bytes of an open binary file object."""
     # Returns the size of a file object
     file.seek(0, os.SEEK_END)
     file_size = file.tell()
@@ -32,6 +35,7 @@ def get_file_object_size(file):
 
 
 def get_file_type(file):
+    """Detect the type of an open binary file by inspecting its magic bytes, returning one of 'zip', 'tde', 'xml', or 'hyper'."""
     # Tableau workbooks (twb) and data sources (tds) are both stored as xml files.
     # Packaged workbooks (twbx) and data sources (tdsx) are zip files
     # containing original files accompanied with supporting local files.
