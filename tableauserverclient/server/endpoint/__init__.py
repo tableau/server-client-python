@@ -40,6 +40,7 @@ __all__ = [
     "DataAlerts",
     "Databases",
     "Datasources",
+    "DownloadableMixin",
     "QuerysetEndpoint",
     "MissingRequiredFieldError",
     "Endpoint",
