@@ -1,15 +1,13 @@
-from email.message import Message
 import copy
 import io
 import logging
 import os
-from contextlib import closing
 from pathlib import Path
 from typing import TYPE_CHECKING
 from collections.abc import Iterable
 
 from tableauserverclient.server.endpoint.dqw_endpoint import _DataQualityWarningEndpoint
-from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
+from tableauserverclient.server.endpoint.endpoint import DownloadableMixin, QuerysetEndpoint, api
 from tableauserverclient.server.endpoint.exceptions import (
     DUPLICATE_EXTRACT_JOB_CODE,
     InternalServerError,
@@ -21,8 +19,6 @@ from tableauserverclient.server.endpoint.resource_tagger import _ResourceTagger,
 from tableauserverclient.models import FlowItem, PaginationItem, ConnectionItem, JobItem
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.filesys_helpers import (
-    to_filename,
-    make_download_path,
     get_file_type,
     get_file_object_size,
 )
@@ -55,7 +51,7 @@ PathOrFileR = FilePath | FileObjectR
 PathOrFileW = FilePath | FileObjectW
 
 
-class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
+class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem], DownloadableMixin):
     def __init__(self, parent_srv):
         super().__init__(parent_srv)
         self._resource_tagger = _ResourceTagger(parent_srv)
@@ -227,22 +223,7 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem]):
             raise ValueError(error)
         url = f"{self.baseurl}/{flow_id}/content"
 
-        with closing(self.get_request(url, parameters={"stream": True})) as server_response:
-            m = Message()
-            m["Content-Disposition"] = server_response.headers["Content-Disposition"]
-            filename = m.get_filename(failobj="")
-            if isinstance(filepath, io_types_w):
-                for chunk in server_response.iter_content(1024):  # 1KB
-                    filepath.write(chunk)
-                return_path = filepath
-            else:
-                filename = to_filename(os.path.basename(filename))
-                download_path = make_download_path(filepath, filename)
-                with open(download_path, "wb") as f:
-                    for chunk in server_response.iter_content(1024):  # 1KB
-                        f.write(chunk)
-                return_path = os.path.abspath(download_path)
-
+        return_path = self._download_content(url, filepath)
         logger.info(f"Downloaded flow to {return_path} (ID: {flow_id})")
         return return_path
 
