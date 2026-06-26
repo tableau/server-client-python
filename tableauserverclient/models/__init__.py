@@ -56,10 +56,12 @@ from tableauserverclient.models.workbook_item import WorkbookItem
 from tableauserverclient.models.extract_item import ExtractItem
 
 __all__ = [
+    # Structural protocols (base_item.py)
     "BaseItem",
     "ContentItem",
     "OwnedItem",
     "TaggableItem",
+    # Concrete model classes (alphabetical)
     "CollectionItem",
     "ColumnItem",
     "ConnectionCredentials",

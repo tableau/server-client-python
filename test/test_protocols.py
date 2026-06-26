@@ -6,6 +6,8 @@ Verifies that:
 - Items that lack required attributes do NOT satisfy stricter protocols.
 """
 
+import datetime
+
 import tableauserverclient as TSC
 from tableauserverclient.models.base_item import BaseItem, ContentItem, OwnedItem, TaggableItem
 
@@ -220,8 +222,6 @@ class TestContentItem:
         assert not isinstance(NoTimestamps(), ContentItem)
 
     def test_complete_plain_object_satisfies_content_item(self):
-        import datetime
-
         class Full:
             id: str | None = None
             name: str | None = "x"
