@@ -107,6 +107,16 @@ def test_filter_bool_has_extracts():
     assert str(filter) == "hasExtracts:eq:true"
 
 
+def test_filter_date_naive_raises():
+    """A naive datetime (no tzinfo) raises ValueError with a helpful message."""
+    import pytest
+
+    naive_dt = datetime.datetime(2023, 1, 1, 12, 0, 0)  # no tzinfo
+    f = TSC.Filter(TSC.RequestOptions.Field.CreatedAt, TSC.RequestOptions.Operator.Equals, naive_dt)
+    with pytest.raises(ValueError, match="Naive datetime"):
+        str(f)
+
+
 def test_filter_list_rejects_non_in_operator():
     """A list value with a non-In operator raises ValueError."""
     import pytest
