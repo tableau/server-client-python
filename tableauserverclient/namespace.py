@@ -8,10 +8,12 @@ NAMESPACE_RE = re.compile(r"\{(.*?)\}")
 
 
 class UnknownNamespaceError(Exception):
-    pass
+    """Raised when an XML response contains an unrecognized Tableau API namespace."""
 
 
 class Namespace:
+    """Detects and stores the Tableau REST API XML namespace from server responses."""
+
     def __init__(self):
         self._namespace = {"t": NEW_NAMESPACE}
         self._detected = False
@@ -20,6 +22,7 @@ class Namespace:
         return self._namespace
 
     def detect(self, xml):
+        """Detect the XML namespace from raw response bytes, updating the stored namespace on first call."""
         if self._detected:
             return
 
