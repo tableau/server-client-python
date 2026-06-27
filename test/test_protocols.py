@@ -9,62 +9,62 @@ Verifies that:
 import datetime
 
 import tableauserverclient as TSC
-from tableauserverclient.models.base_item import BaseItem, ContentItem, OwnedItem, TaggableItem
+from tableauserverclient.models.base_item import TableauItem, ContentItem, OwnedItem, TaggableItem
 
 # ---------------------------------------------------------------------------
-# BaseItem: id + name
+# TableauItem: id + name
 # ---------------------------------------------------------------------------
 
 
-class TestBaseItem:
-    def test_workbook_satisfies_base_item(self):
+class TestTableauItem:
+    def test_workbook_satisfies_tableau_item(self):
         item = TSC.WorkbookItem(project_id="p1", name="wb")
-        assert isinstance(item, BaseItem)
+        assert isinstance(item, TableauItem)
 
-    def test_datasource_satisfies_base_item(self):
+    def test_datasource_satisfies_tableau_item(self):
         item = TSC.DatasourceItem(project_id="p1", name="ds")
-        assert isinstance(item, BaseItem)
+        assert isinstance(item, TableauItem)
 
-    def test_view_satisfies_base_item(self):
+    def test_view_satisfies_tableau_item(self):
         item = TSC.ViewItem()
-        assert isinstance(item, BaseItem)
+        assert isinstance(item, TableauItem)
 
-    def test_flow_satisfies_base_item(self):
+    def test_flow_satisfies_tableau_item(self):
         item = TSC.FlowItem(project_id="p1", name="f")
-        assert isinstance(item, BaseItem)
+        assert isinstance(item, TableauItem)
 
-    def test_project_satisfies_base_item(self):
+    def test_project_satisfies_tableau_item(self):
         item = TSC.ProjectItem(name="proj")
-        assert isinstance(item, BaseItem)
+        assert isinstance(item, TableauItem)
 
-    def test_metric_satisfies_base_item(self):
+    def test_metric_satisfies_tableau_item(self):
         item = TSC.MetricItem()
-        assert isinstance(item, BaseItem)
+        assert isinstance(item, TableauItem)
 
-    def test_user_satisfies_base_item(self):
+    def test_user_satisfies_tableau_item(self):
         item = TSC.UserItem(name="u", site_role="Viewer")
-        assert isinstance(item, BaseItem)
+        assert isinstance(item, TableauItem)
 
-    def test_plain_object_with_id_and_name_satisfies_base_item(self):
+    def test_plain_object_with_id_and_name_satisfies_tableau_item(self):
         """Structural subtyping: any object with id and name suffices."""
 
         class Minimal:
             id: str | None = None
             name: str | None = "x"
 
-        assert isinstance(Minimal(), BaseItem)
+        assert isinstance(Minimal(), TableauItem)
 
-    def test_object_missing_name_does_not_satisfy_base_item(self):
+    def test_object_missing_name_does_not_satisfy_tableau_item(self):
         class NoName:
             id: str | None = None
 
-        assert not isinstance(NoName(), BaseItem)
+        assert not isinstance(NoName(), TableauItem)
 
-    def test_object_missing_id_does_not_satisfy_base_item(self):
+    def test_object_missing_id_does_not_satisfy_tableau_item(self):
         class NoId:
             name: str | None = "x"
 
-        assert not isinstance(NoId(), BaseItem)
+        assert not isinstance(NoId(), TableauItem)
 
 
 # ---------------------------------------------------------------------------
@@ -237,7 +237,7 @@ class TestContentItem:
 
 
 # ---------------------------------------------------------------------------
-# Protocol hierarchy: ContentItem implies OwnedItem, TaggableItem, and BaseItem
+# Protocol hierarchy: ContentItem implies OwnedItem, TaggableItem, and TableauItem
 # ---------------------------------------------------------------------------
 
 
@@ -252,10 +252,10 @@ class TestProtocolHierarchy:
         item = TSC.WorkbookItem(project_id="p1", name="wb")
         assert isinstance(item, TaggableItem)
 
-    def test_content_item_satisfier_also_satisfies_base_item(self):
+    def test_content_item_satisfier_also_satisfies_tableau_item(self):
         item = TSC.WorkbookItem(project_id="p1", name="wb")
-        assert isinstance(item, BaseItem)
+        assert isinstance(item, TableauItem)
 
-    def test_owned_item_satisfier_also_satisfies_base_item(self):
+    def test_owned_item_satisfier_also_satisfies_tableau_item(self):
         item = TSC.ProjectItem(name="proj")
-        assert isinstance(item, BaseItem)
+        assert isinstance(item, TableauItem)
