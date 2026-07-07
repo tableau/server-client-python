@@ -136,3 +136,36 @@ def test_validate_usernames_file() -> None:
     test_data = _mock_file_content(usernames)
     valid, invalid = TSC.UserItem.CSVImport.validate_file_for_import(test_data, logger)
     assert valid == 5, f"Exactly 5 of the lines were valid, counted {valid + len(invalid)}"
+
+
+def test_validate_mixed_case_license() -> None:
+    # Regression: issue #1809 — 'Viewer' (capital V) was rejected by case-sensitive check
+    TSC.UserItem.CSVImport._validate_import_line_or_throw("username, pword, fname, Viewer, None, no, email", logger)
+    TSC.UserItem.CSVImport._validate_import_line_or_throw("username, pword, fname, Creator, Site, yes, email", logger)
+    TSC.UserItem.CSVImport._validate_import_line_or_throw("username, pword, fname, EXPLORER, NONE, YES, email", logger)
+
+
+def test_validate_tableauid_with_mfa_auth() -> None:
+    # TableauIDWithMFA is a valid auth value and must not be rejected
+    TSC.UserItem.CSVImport._validate_import_line_or_throw(
+        "username, pword, fname, creator, none, yes, email, TableauIDWithMFA", logger
+    )
+
+
+def test_create_user_preserves_username_case() -> None:
+    # Username must not be lowercased — case matters for LDAP and email-format usernames
+    user = TSC.UserItem.CSVImport.create_user_from_line("JSmith, pword, John Smith, creator, none, yes, j@example.com")
+    assert user is not None
+    assert user.name == "JSmith", f"Username was lowercased: {user.name}"
+
+
+def test_create_user_with_auth_column() -> None:
+    # AUTH column (position 7) must be parsed — was broken by MAX=7 off-by-one
+    user = TSC.UserItem.CSVImport.create_user_from_line("username, pword, fname, creator, none, yes, email, SAML")
+    assert user is not None
+    assert user.auth_setting == "SAML", f"Expected SAML, got {user.auth_setting}"
+
+
+def test_too_many_columns_raises() -> None:
+    with pytest.raises((ValueError, AttributeError)):
+        TSC.UserItem.CSVImport.create_user_from_line("u, p, n, creator, none, yes, email, SAML, extra")

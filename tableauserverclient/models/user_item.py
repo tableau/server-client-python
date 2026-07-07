@@ -432,36 +432,37 @@ class UserItem:
             EMAIL = 6
             AUTH = 7
 
-            MAX = 7
+            MAX = 8  # total number of columns (not last index)
 
         # Read a csv line and create a user item populated by the given attributes
         @staticmethod
         def create_user_from_line(line: str):
             if line is None or line is False or line == "\n" or line == "":
                 return None
-            line = line.strip().lower()
-            values: list[str] = list(map(str.strip, line.split(",")))
-            user = UserItem(values[UserItem.CSVImport.ColumnType.USERNAME])
+            values: list[str] = list(map(str.strip, line.strip().split(",")))
+            if len(values) > UserItem.CSVImport.ColumnType.MAX:
+                raise ValueError("Too many attributes for user import")
+            username = values[UserItem.CSVImport.ColumnType.USERNAME]
+            user = UserItem(username)
             if len(values) > 1:
-                if len(values) > UserItem.CSVImport.ColumnType.MAX:
-                    raise ValueError("Too many attributes for user import")
-                while len(values) <= UserItem.CSVImport.ColumnType.MAX:
+                while len(values) < UserItem.CSVImport.ColumnType.MAX:
                     values.append("")
                 site_role = UserItem.CSVImport._evaluate_site_role(
                     values[UserItem.CSVImport.ColumnType.LICENSE],
                     values[UserItem.CSVImport.ColumnType.ADMIN],
                     values[UserItem.CSVImport.ColumnType.PUBLISHER],
                 )
-
+                raw_auth = values[UserItem.CSVImport.ColumnType.AUTH]
+                auth = UserItem.CSVImport._auth_canonical().get(raw_auth.lower()) if raw_auth else None
                 user._set_values(
                     None,
-                    values[UserItem.CSVImport.ColumnType.USERNAME],
+                    username,
                     site_role,
                     None,
                     None,
                     values[UserItem.CSVImport.ColumnType.DISPLAY_NAME],
                     values[UserItem.CSVImport.ColumnType.EMAIL],
-                    values[UserItem.CSVImport.ColumnType.AUTH],
+                    auth,
                     None,
                     None,
                     None,
@@ -492,6 +493,16 @@ class UserItem:
         # Some fields in the import file are restricted to specific values
         # Iterate through each field and validate the given value against hardcoded constraints
         @staticmethod
+        def _auth_canonical() -> dict[str, str]:
+            """Lowercase → canonical form mapping for Auth values."""
+            return {
+                "saml": "SAML",
+                "openid": "OpenID",
+                "serverdefault": "ServerDefault",
+                "tableauidwithmfa": "TableauIDWithMFA",
+            }
+
+        @staticmethod
         def _validate_import_line_or_throw(incoming, logger) -> None:
             _valid_attributes: list[list[str]] = [
                 [],
@@ -501,7 +512,12 @@ class UserItem:
                 ["system", "site", "none", "no"],  # admin
                 ["yes", "true", "1", "no", "false", "0"],  # publisher
                 [],
-                [UserItem.Auth.SAML, UserItem.Auth.OpenID, UserItem.Auth.ServerDefault],  # auth
+                [
+                    "SAML",
+                    "OpenID",
+                    "ServerDefault",
+                    "TableauIDWithMFA",
+                ],  # auth — normalized by _auth_canonical before comparison
             ]
 
             line = list(map(str.strip, incoming.split(",")))
@@ -511,10 +527,16 @@ class UserItem:
             logger.debug(f"> details - {username}")
             UserItem.validate_username_or_throw(username)
             for i in range(1, len(line)):
-                logger.debug(f"column {UserItem.CSVImport.ColumnType(i).name}: {line[i]}")
-                UserItem.CSVImport._validate_attribute_value(
-                    line[i], _valid_attributes[i], UserItem.CSVImport.ColumnType(i)
-                )
+                value = line[i]
+                valid = _valid_attributes[i]
+                # normalize case for fields with a restricted value set
+                if valid:
+                    if i == UserItem.CSVImport.ColumnType.AUTH:
+                        value = UserItem.CSVImport._auth_canonical().get(value.lower(), value)
+                    else:
+                        value = value.lower()
+                logger.debug(f"column {UserItem.CSVImport.ColumnType(i).name}: {value}")
+                UserItem.CSVImport._validate_attribute_value(value, valid, UserItem.CSVImport.ColumnType(i))
 
         # Given a restricted set of possible values, confirm the item is in that set
         @staticmethod
