@@ -764,22 +764,7 @@ def create_users_csv(users: Iterable[UserItem]) -> bytes:
     with io.StringIO() as output:
         writer = csv.writer(output, quoting=csv.QUOTE_MINIMAL)
         for user in users:
-            site_role = user.site_role or "Unlicensed"
-            if site_role == "ServerAdministrator":
-                license = "Creator"
-                admin_level = "System"
-            elif site_role.startswith("SiteAdministrator"):
-                admin_level = "Site"
-                license = site_role.replace("SiteAdministrator", "")
-            else:
-                license = site_role
-                admin_level = ""
-
-            if any(x in site_role for x in ("Creator", "Admin", "Publish")):
-                publish = 1
-            else:
-                publish = 0
-
+            license, admin_level, publish = UserItem.CSVImport._decompose_site_role(user.site_role or "Unlicensed")
             writer.writerow(
                 (
                     f"{user.domain_name}\\{user.name}" if user.domain_name else user.name,

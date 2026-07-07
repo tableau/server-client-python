@@ -548,6 +548,27 @@ class UserItem:
                 return
             raise AttributeError(f"Invalid value {item} for {column_type}")
 
+        # Inverse of _evaluate_site_role: decompose a site role back to (license, admin_level, publish)
+        # for writing the CSV import format.
+        @staticmethod
+        def _decompose_site_role(site_role: str) -> tuple[str, str, str]:
+            """Return (license, admin_level, publish) CSV column values for a given site role."""
+            _role_map: dict[str, tuple[str, str, str]] = {
+                "ServerAdministrator": ("Creator", "System", "1"),
+                "SiteAdministratorCreator": ("Creator", "Site", "1"),
+                "SiteAdministratorExplorer": ("Explorer", "Site", "1"),
+                "SiteAdministrator": ("Explorer", "Site", "1"),  # legacy role, treat as SiteAdministratorExplorer
+                "Creator": ("Creator", "None", "1"),
+                "ExplorerCanPublish": ("Explorer", "None", "1"),
+                "Explorer": ("Explorer", "None", "0"),
+                "Viewer": ("Viewer", "None", "0"),
+                "Unlicensed": ("Unlicensed", "None", "0"),
+                "ReadOnly": ("Viewer", "None", "0"),
+                "Publisher": ("Explorer", "None", "1"),
+                "Interactor": ("Explorer", "None", "0"),
+            }
+            return _role_map.get(site_role, ("Unlicensed", "None", "0"))
+
         # https://help.tableau.com/current/server/en-us/csvguidelines.htm#settings_and_site_roles
         # This logic is hardcoded to match the existing rules for import csv files
         @staticmethod

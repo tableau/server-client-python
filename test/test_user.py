@@ -405,7 +405,7 @@ def test_create_users_csv() -> None:
         "ServerAdministrator": "System",
     }
 
-    csv_columns = ["name", "password", "fullname", "license", "admin", "publish", "email"]
+    csv_columns = ["name", "password", "fullname", "license", "admin", "publish", "email", "auth"]
     csv_data = create_users_csv(users)
     csv_file = io.StringIO(csv_data.decode("utf-8"))
     csv_reader = csv.reader(csv_file)
@@ -417,8 +417,9 @@ def test_create_users_csv() -> None:
         assert (user.fullname or "") == csv_user["fullname"]
         assert (user.email or "") == csv_user["email"]
         assert license_map[site_role] == csv_user["license"]
-        assert admin_map.get(site_role, "") == csv_user["admin"]
+        assert admin_map.get(site_role, "None") == csv_user["admin"]
         assert publish_map[site_role] == int(csv_user["publish"])
+        assert (user.auth_setting or "") == csv_user["auth"]
 
 
 def test_bulk_add(server: TSC.Server) -> None:
