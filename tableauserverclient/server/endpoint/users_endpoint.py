@@ -527,7 +527,7 @@ class Users(QuerysetEndpoint[UserItem]):
         warnings.warn("This method is deprecated, use bulk_add instead", DeprecationWarning)
         created = []
         failed = []
-        if not filepath.find("csv"):
+        if "csv" not in filepath:
             raise ValueError("Only csv files are accepted")
 
         with open(filepath) as csv_file:
@@ -536,11 +536,9 @@ class Users(QuerysetEndpoint[UserItem]):
             while line and line != "":
                 user: UserItem = UserItem.CSVImport.create_user_from_line(line)
                 try:
-                    print(user)
                     result = self.add(user)
                     created.append(result)
                 except ServerResponseError as serverError:
-                    print("failed")
                     failed.append((user, serverError))
                 line = csv_file.readline()
         return created, failed
@@ -751,6 +749,7 @@ def create_users_csv(users: Iterable[UserItem]) -> bytes:
     - Admin Level
     - Publish capability
     - Email
+    - Auth setting
 
     Parameters
     ----------
@@ -790,6 +789,7 @@ def create_users_csv(users: Iterable[UserItem]) -> bytes:
                     admin_level,
                     publish,
                     user.email,
+                    user.auth_setting or "",
                 )
             )
         output.seek(0)
