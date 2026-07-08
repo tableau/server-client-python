@@ -238,6 +238,23 @@ def test_vf(server: TSC.Server) -> None:
     assert "tabloid" in query_string["type"]
 
 
+def test_vf_with_operator(server: TSC.Server) -> None:
+    server.version = "3.23"
+    with requests_mock.mock() as m:
+        m.get(requests_mock.ANY)
+        url = server.workbooks.baseurl + "/456/data"
+        opts = TSC.PDFRequestOptions()
+        opts.vf("Sales", "1000", operator=TSC.RequestOptions.Operator.GreaterThan)
+        opts.vf("Region", "West")
+
+        resp = server.workbooks.get_request(url, request_object=opts)
+        query_string = parse_qs(resp.request.query)
+    assert "vf_sales" in query_string
+    assert "gt:1000" in query_string["vf_sales"]
+    assert "vf_region" in query_string
+    assert "west" in query_string["vf_region"]
+
+
 # Test req_options for versions below 3.7
 def test_vf_legacy(server: TSC.Server) -> None:
     server.version = "3.6"

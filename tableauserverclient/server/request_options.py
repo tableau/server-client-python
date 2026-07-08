@@ -349,7 +349,7 @@ class _DataExportOptions(RequestOptionsBase):
         self._append_view_filters(params)
         return params
 
-    def vf(self, name: str, value: str) -> Self:
+    def vf(self, name: str, value: str, operator: str | None = None) -> Self:
         """Apply a filter based on a column within the view.
         Note that when filtering on a boolean type field, the only valid values are 'true' and 'false'
 
@@ -363,12 +363,18 @@ class _DataExportOptions(RequestOptionsBase):
         value: str
             The value to filter on
 
+        operator: str, optional
+            A comparison operator from RequestOptions.Operator (e.g. 'gt', 'lte').
+            When provided the filter is encoded as ``operator:value``.
+            Defaults to an exact-match filter when omitted.
+
         Returns
         -------
         Self
             The current object
         """
-        self.view_filters.append((name, value))
+        encoded_value = f"{operator}:{value}" if operator else value
+        self.view_filters.append((name, encoded_value))
         return self
 
     def parameter(self, name: str, value: str) -> Self:
