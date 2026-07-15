@@ -1,0 +1,176 @@
+name: Test Package Installation
+
+on:
+  pull_request:
+    paths:
+      - 'pyproject.toml'
+      - 'setup.py'
+      - 'MANIFEST.in'
+      - 'tableauserverclient/**'
+      - '.github/workflows/test-package-install.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-wheel-install:
+    name: Test wheel installation on ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.11']
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      
+      - name: Install build tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install build check-wheel-contents
+      
+      - name: Build wheel
+        run: python -m build
+      
+      - name: Check wheel contents
+        run: check-wheel-contents dist/*.whl
+      
+      - name: Inspect wheel structure (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          unzip -l dist/*.whl > wheel-contents.txt
+          cat wheel-contents.txt
+          
+          echo "Checking for correct package structure..."
+          
+          # Check for required files
+          if ! grep -q "tableauserverclient/__init__.py" wheel-contents.txt; then
+            echo "❌ ERROR: tableauserverclient/__init__.py not found in wheel!"
+            exit 1
+          fi
+          
+          if ! grep -q "tableauserverclient/server/server.py" wheel-contents.txt; then
+            echo "❌ ERROR: tableauserverclient/server/server.py not found in wheel!"
+            exit 1
+          fi
+          
+          if ! grep -q "tableauserverclient/models/workbook_item.py" wheel-contents.txt; then
+            echo "❌ ERROR: tableauserverclient/models/workbook_item.py not found in wheel!"
+            exit 1
+          fi
+          
+          # Check that files are NOT at wrong location (missing tableauserverclient/ prefix)
+          # Look for lines like "    123  server/server.py" which would be wrong
+          if grep -E "^[[:space:]]+[0-9]+.*[[:space:]]server/server.py" wheel-contents.txt; then
+            echo "❌ ERROR: Files found at wrong location (missing tableauserverclient/ prefix)!"
+            echo "Files should be under tableauserverclient/, not at root level"
+            exit 1
+          fi
+          
+          echo "✅ Wheel structure looks correct"
+      
+      - name: Inspect wheel structure (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $wheel = Get-ChildItem dist/*.whl | Select-Object -First 1
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zip = [System.IO.Compression.ZipFile]::OpenRead($wheel.FullName)
+          $zip.Entries | Select-Object FullName | Out-File wheel-contents.txt
+          $zip.Dispose()
+          
+          Get-Content wheel-contents.txt
+          
+          $contents = Get-Content wheel-contents.txt -Raw
+          
+          if ($contents -notmatch "tableauserverclient/__init__.py") {
+            Write-Error "❌ ERROR: tableauserverclient/__init__.py not found in wheel!"
+            exit 1
+          }
+          
+          if ($contents -notmatch "tableauserverclient/server/server.py") {
+            Write-Error "❌ ERROR: tableauserverclient/server/server.py not found in wheel!"
+            exit 1
+          }
+          
+          Write-Host "✅ Wheel structure looks correct"
+      
+      - name: Test installation in clean environment
+        shell: bash
+        run: |
+          # Create and activate virtual environment
+          python -m venv test-env
+          
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            source test-env/Scripts/activate
+          else
+            source test-env/bin/activate
+          fi
+          
+          # Install the wheel (not editable!)
+          pip install dist/*.whl
+          
+          # Move to temp directory to ensure we're not importing from source
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            cd $TEMP
+          else
+            cd /tmp
+          fi
+          
+          # Test basic import
+          python -c "import tableauserverclient as TSC; print('✅ Import successful!')"
+          
+          # Test version access
+          python -c "import tableauserverclient as TSC; print(f'Version info: {TSC.get_versions()}')"
+          
+          # Test that key classes are available
+          python -c "
+import tableauserverclient as TSC
+
+# Check main classes are available
+assert hasattr(TSC, 'Server'), 'Server class not found'
+assert hasattr(TSC, 'TableauAuth'), 'TableauAuth class not found'
+assert hasattr(TSC, 'WorkbookItem'), 'WorkbookItem class not found'
+assert hasattr(TSC, 'DatasourceItem'), 'DatasourceItem class not found'
+assert hasattr(TSC, 'ProjectItem'), 'ProjectItem class not found'
+
+print('✅ All expected classes are available')
+"
+          
+          # Test basic functionality
+          python -c "
+import tableauserverclient as TSC
+
+server = TSC.Server('http://example.com', use_server_version=False)
+print(f'✅ Server object created: {server}')
+
+auth = TSC.TableauAuth('username', 'password', 'site')
+print(f'✅ TableauAuth object created: {auth}')
+"
+          
+          # Show where package is installed
+          python -c "
+import tableauserverclient
+import os
+pkg_location = os.path.dirname(tableauserverclient.__file__)
+print(f'Package installed at: {pkg_location}')
+"
+          
+          echo "✅ All installation tests passed!"
+      
+      - name: Upload wheel as artifact
+        if: runner.os == 'Linux'  # Only upload once
+        uses: actions/upload-artifact@v7
+        with:
+          name: wheel
+          path: dist/*.whl
+          retention-days: 7
