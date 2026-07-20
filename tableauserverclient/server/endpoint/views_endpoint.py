@@ -1,6 +1,8 @@
 import logging
 from contextlib import closing
 
+from tableauserverclient.config import BYTES_PER_MB, config
+
 from tableauserverclient.models.permissions_item import PermissionsRule
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
 from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError, UnsupportedAttributeError
@@ -264,7 +266,7 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
         url = f"{self.baseurl}/{view_item.id}/data"
 
         with closing(self.get_request(url, request_object=req_options, parameters={"stream": True})) as server_response:
-            yield from server_response.iter_content(1024)
+            yield from server_response.iter_content(config.CHUNK_SIZE_MB * BYTES_PER_MB)
 
     @api(version="3.8")
     def populate_excel(self, view_item: ViewItem, req_options: "ExcelRequestOptions | None" = None) -> None:
@@ -303,7 +305,7 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
         url = f"{self.baseurl}/{view_item.id}/crosstab/excel"
 
         with closing(self.get_request(url, request_object=req_options, parameters={"stream": True})) as server_response:
-            yield from server_response.iter_content(1024)
+            yield from server_response.iter_content(config.CHUNK_SIZE_MB * BYTES_PER_MB)
 
     @api(version="3.2")
     def populate_permissions(self, item: ViewItem) -> None:
