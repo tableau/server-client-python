@@ -1,0 +1,93 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<datasource formatted-name='postgres.1of3kl00aoax5d1a1ejma1397430' inline='true' source-platform='mac' version='9.3' xmlns:user='http://www.tableausoftware.com/xml/user'>
+  <connection authentication='username-password' class='postgres' dbname='TestV1' odbc-native-protocol='yes' port='5432' server='postgres91.test.tsi.lan' username='test'>
+    <relation name='xy' table='[public].[xy]' type='table' />
+    <metadata-records>
+      <metadata-record class='column'>
+        <remote-name>a</remote-name>
+        <remote-type>130</remote-type>
+        <local-name>[a]</local-name>
+        <parent-name>[xy]</parent-name>
+        <remote-alias>a</remote-alias>
+        <ordinal>1</ordinal>
+        <local-type>string</local-type>
+        <aggregation>Count</aggregation>
+        <width>255</width>
+        <contains-null>true</contains-null>
+        <attributes>
+          <attribute datatype='string' name='DebugRemoteType'>&quot;SQL_WVARCHAR&quot;</attribute>
+          <attribute datatype='string' name='DebugWireType'>&quot;SQL_C_WCHAR&quot;</attribute>
+          <attribute datatype='string' name='TypeIsVarchar'>&quot;true&quot;</attribute>
+        </attributes>
+      </metadata-record>
+      <metadata-record class='column'>
+        <remote-name>Today's Date</remote-name>
+        <remote-type>130</remote-type>
+        <local-name>[Today&apos;s Date]</local-name>
+        <parent-name>[xy]</parent-name>
+        <remote-alias>a</remote-alias>
+        <ordinal>1</ordinal>
+        <local-type>string</local-type>
+        <aggregation>Count</aggregation>
+        <width>255</width>
+        <contains-null>true</contains-null>
+        <attributes>
+          <attribute datatype='string' name='DebugRemoteType'>&quot;SQL_WVARCHAR&quot;</attribute>
+          <attribute datatype='string' name='DebugWireType'>&quot;SQL_C_WCHAR&quot;</attribute>
+          <attribute datatype='string' name='TypeIsVarchar'>&quot;true&quot;</attribute>
+        </attributes>
+      </metadata-record>
+      <metadata-record class='column'>
+        <remote-name>x</remote-name>
+        <remote-type>3</remote-type>
+        <local-name>[x]</local-name>
+        <parent-name>[xy]</parent-name>
+        <remote-alias>x</remote-alias>
+        <ordinal>2</ordinal>
+        <local-type>integer</local-type>
+        <aggregation>Sum</aggregation>
+        <precision>10</precision>
+        <contains-null>true</contains-null>
+        <attributes>
+          <attribute datatype='string' name='DebugRemoteType'>&quot;SQL_INTEGER&quot;</attribute>
+          <attribute datatype='string' name='DebugWireType'>&quot;SQL_C_SLONG&quot;</attribute>
+        </attributes>
+      </metadata-record>
+      <metadata-record class='column'>
+        <remote-name>y</remote-name>
+        <remote-type>3</remote-type>
+        <local-name>[y]</local-name>
+        <parent-name>[xy]</parent-name>
+        <remote-alias>y</remote-alias>
+        <ordinal>3</ordinal>
+        <local-type>integer</local-type>
+        <aggregation>Sum</aggregation>
+        <precision>10</precision>
+        <contains-null>true</contains-null>
+        <attributes>
+          <attribute datatype='string' name='DebugRemoteType'>&quot;SQL_INTEGER&quot;</attribute>
+          <attribute datatype='string' name='DebugWireType'>&quot;SQL_C_SLONG&quot;</attribute>
+        </attributes>
+      </metadata-record>
+    </metadata-records>
+  </connection>
+  <aliases enabled='yes' />
+  <column datatype='integer' name='[Number of Records]' role='measure' type='quantitative' user:auto-column='numrec'>
+    <calculation class='tableau' formula='1' />
+  </column>
+  <column caption='A' datatype='string' name='[a]' role='dimension' type='nominal'>
+    <desc>
+      <formatted-text>
+        <run bold='true' fontsize='96'>A thing</run>
+        <run fontcolor='#686868'>&#10;Something will go here too, in a muted gray</run>
+      </formatted-text>
+    </desc>
+  </column>
+  <column caption='Today&apos;s Date' datatype='string' name='[Today&apos;s Date]' role='dimension' type='nominal' />
+  <column caption='X' datatype='integer' name='[x]' role='measure' type='ordinal' />
+  <column caption='Y' datatype='integer' name='[y]' role='measure' type='quantitative' />
+  <layout dim-ordering='alphabetic' dim-percentage='0.5' measure-ordering='alphabetic' measure-percentage='0.5' show-structure='true' />
+  <semantic-values>
+    <semantic-value key='[Country].[Name]' value='&quot;United States&quot;' />
+  </semantic-values>
+</datasource>
