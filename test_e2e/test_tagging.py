@@ -5,7 +5,6 @@ Run with:
     TABLEAU_SERVER=https://... TABLEAU_SITE=mysite TABLEAU_TOKEN=... TABLEAU_TOKEN_NAME=... \
     pytest test_e2e/test_tagging.py -v
 """
-import os
 from pathlib import Path
 
 import pytest
@@ -19,41 +18,21 @@ pytestmark = pytest.mark.e2e
 
 
 @pytest.fixture(scope="module")
-def workbook(server):
-    """Publish a workbook for tagging tests, clean up after.
-
-    Uses TABLEAU_PROJECT env var if set, otherwise falls back to the first
-    project named 'Default' or 'Personal Work', then the first available project.
-    """
-    project_name = os.environ.get("TABLEAU_PROJECT", "Default")
-    opts = TSC.RequestOptions()
-    opts.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, project_name))
-    projects, _ = server.projects.get(opts)
-    if not projects:
-        pytest.skip(f"Project {project_name!r} not found — set TABLEAU_PROJECT env var")
-    project = projects[0]
-
-    wb = TSC.WorkbookItem(name="tsc-e2e-tagging-test", project_id=project.id)
+def workbook(server, project_id):
+    """Publish a workbook for tagging tests, clean up after."""
+    wb = TSC.WorkbookItem(name="tsc-e2e-tagging-test", project_id=project_id)
     wb = server.workbooks.publish(wb, SAMPLE_WORKBOOK, TSC.Server.PublishMode.Overwrite)
     yield wb
     server.workbooks.delete(wb.id)
 
 
 @pytest.fixture(scope="module")
-def datasource(server):
+def datasource(server, project_id):
     """Publish a datasource for tagging tests, clean up after."""
     if not SAMPLE_DATASOURCE.exists():
         pytest.skip(f"Datasource asset not found: {SAMPLE_DATASOURCE}")
 
-    project_name = os.environ.get("TABLEAU_PROJECT", "Default")
-    opts = TSC.RequestOptions()
-    opts.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, project_name))
-    projects, _ = server.projects.get(opts)
-    if not projects:
-        pytest.skip(f"Project {project_name!r} not found — set TABLEAU_PROJECT env var")
-    project = projects[0]
-
-    ds = TSC.DatasourceItem(project_id=project.id, name="tsc-e2e-tagging-test-ds")
+    ds = TSC.DatasourceItem(project_id=project_id, name="tsc-e2e-tagging-test-ds")
     ds = server.datasources.publish(ds, SAMPLE_DATASOURCE, TSC.Server.PublishMode.Overwrite)
     yield ds
     server.datasources.delete(ds.id)
@@ -98,7 +77,6 @@ def test_add_tag_with_comma(server, workbook):
         assert tag in updated.tags, (
             f"Tag {tag!r} not found in {updated.tags!r} — was it split on the comma?"
         )
-        # Confirm it was NOT split into two separate tags
         assert "Sales" not in updated.tags, "Tag was split — 'Sales' must not be a standalone tag"
         assert "Revenue" not in updated.tags, "Tag was split — 'Revenue' must not be a standalone tag"
     finally:
@@ -110,7 +88,6 @@ def test_delete_tag_with_space(server, workbook):
     tag = "Yearly Sales"
     server.workbooks.add_tags(workbook, tag)
     try:
-        # Verify it was added before we try to delete it
         after_add = server.workbooks.get_by_id(workbook.id)
         assert tag in after_add.tags, (
             f"Precondition failed: tag {tag!r} not in {after_add.tags!r} after add_tags"
@@ -130,7 +107,6 @@ def test_delete_tag_with_comma(server, workbook):
     tag = "Sales, Revenue"
     server.workbooks.add_tags(workbook, tag)
     try:
-        # Verify it was added before we try to delete it
         after_add = server.workbooks.get_by_id(workbook.id)
         assert tag in after_add.tags, (
             f"Precondition failed: tag {tag!r} not in {after_add.tags!r} after add_tags"

@@ -5,7 +5,6 @@ Run with:
     TABLEAU_SERVER=https://... TABLEAU_SITE=mysite TABLEAU_TOKEN=... TABLEAU_TOKEN_NAME=... \
     pytest test_e2e/test_views_export.py -v
 """
-import os
 from pathlib import Path
 
 import pytest
@@ -18,17 +17,9 @@ pytestmark = pytest.mark.e2e
 
 
 @pytest.fixture(scope="module")
-def workbook_with_view(server):
+def workbook_with_view(server, project_id):
     """Publish a workbook for export tests, clean up after."""
-    project_name = os.environ.get("TABLEAU_PROJECT", "Default")
-    opts = TSC.RequestOptions()
-    opts.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, project_name))
-    projects, _ = server.projects.get(opts)
-    if not projects:
-        pytest.skip(f"Project {project_name!r} not found — set TABLEAU_PROJECT env var")
-    project = projects[0]
-
-    wb = TSC.WorkbookItem(name="tsc-e2e-views-export-test", project_id=project.id)
+    wb = TSC.WorkbookItem(name="tsc-e2e-views-export-test", project_id=project_id)
     wb = server.workbooks.publish(wb, SAMPLE_WORKBOOK, TSC.Server.PublishMode.Overwrite)
     try:
         yield wb

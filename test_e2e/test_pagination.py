@@ -5,7 +5,6 @@ Run with:
     TABLEAU_SERVER=https://... TABLEAU_SITE=mysite TABLEAU_TOKEN=... TABLEAU_TOKEN_NAME=... \
     pytest test_e2e/test_pagination.py -v
 """
-import os
 import warnings
 from pathlib import Path
 
@@ -21,26 +20,11 @@ PAGINATION_WB_NAMES = ["tsc-e2e-pagination-alpha", "tsc-e2e-pagination-zeta"]
 pytestmark = pytest.mark.e2e
 
 
-def _get_project(server):
-    project_name = os.environ.get("TABLEAU_PROJECT", "Default")
-    opts = TSC.RequestOptions()
-    opts.filter.add(TSC.Filter(
-        TSC.RequestOptions.Field.Name,
-        TSC.RequestOptions.Operator.Equals,
-        project_name,
-    ))
-    projects, _ = server.projects.get(opts)
-    if not projects:
-        pytest.skip(f"Project {project_name!r} not found — set TABLEAU_PROJECT env var")
-    return projects[0]
-
-
 @pytest.fixture(scope="module")
-def workbooks_for_pagination(server):
-    project = _get_project(server)
+def workbooks_for_pagination(server, project_id):
     published = []
     for name in PAGINATION_WB_NAMES:
-        wb = TSC.WorkbookItem(name=name, project_id=project.id)
+        wb = TSC.WorkbookItem(name=name, project_id=project_id)
         wb = server.workbooks.publish(wb, SAMPLE_WORKBOOK, TSC.Server.PublishMode.Overwrite)
         published.append(wb)
     yield published
@@ -52,9 +36,8 @@ def workbooks_for_pagination(server):
 
 
 @pytest.fixture(scope="module")
-def datasource_for_pagination(server):
-    project = _get_project(server)
-    ds = TSC.DatasourceItem(project_id=project.id, name="tsc-e2e-pagination-ds")
+def datasource_for_pagination(server, project_id):
+    ds = TSC.DatasourceItem(project_id=project_id, name="tsc-e2e-pagination-ds")
     ds = server.datasources.publish(ds, SAMPLE_DATASOURCE, TSC.Server.PublishMode.Overwrite)
     yield ds
     try:
@@ -115,7 +98,6 @@ def test_queryset_filter_by_name(server, workbooks_for_pagination):
 
 def test_queryset_order_by_name_ascending(server, workbooks_for_pagination):
     """server.workbooks.order_by('name') returns fixture workbooks sorted A to Z by name."""
-    # Scope to fixture workbooks only to avoid flakiness from other workbooks on the server
     all_results = list(server.workbooks.order_by("name"))
     fixture_name_set = set(PAGINATION_WB_NAMES)
     fixture_results = [wb for wb in all_results if wb.name in fixture_name_set]

@@ -6,7 +6,6 @@ Run with:
     pytest test_e2e/test_workbooks_crud.py -v
 """
 import io
-import os
 from pathlib import Path
 
 import pytest
@@ -19,55 +18,14 @@ SAMPLE_WORKBOOK = ASSETS_DIR / "WorkbookWithoutExtract.twbx"
 pytestmark = pytest.mark.e2e
 
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-def _get_project(server):
-    """Return a project to publish into.
-
-    Uses TABLEAU_PROJECT env var if set, otherwise falls back to the first
-    project named 'Default' or 'Personal Work', then the first available project.
-    """
-    project_name = os.environ.get("TABLEAU_PROJECT", "Default")
-    opts = TSC.RequestOptions()
-    opts.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, project_name))
-    projects, _ = server.projects.get(opts)
-    if projects:
-        return projects[0]
-
-    # Fallback: try "Personal Work", then whatever is first
-    for fallback_name in ("Personal Work",):
-        opts2 = TSC.RequestOptions()
-        opts2.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, fallback_name))
-        fallback_projects, _ = server.projects.get(opts2)
-        if fallback_projects:
-            return fallback_projects[0]
-
-    all_projects, _ = server.projects.get()
-    if all_projects:
-        return all_projects[0]
-
-    pytest.skip(f"Project {project_name!r} not found and no fallback project available — set TABLEAU_PROJECT env var")
-
-
-# ---------------------------------------------------------------------------
-# Fixtures
-# ---------------------------------------------------------------------------
-
 @pytest.fixture(scope="module")
-def published_workbook(server):
+def published_workbook(server, project_id):
     """Publish WorkbookWithoutExtract.twbx once for all CRUD tests; delete after module."""
-    project = _get_project(server)
-    wb = TSC.WorkbookItem(name="tsc-e2e-crud-test", project_id=project.id)
+    wb = TSC.WorkbookItem(name="tsc-e2e-crud-test", project_id=project_id)
     wb = server.workbooks.publish(wb, SAMPLE_WORKBOOK, TSC.Server.PublishMode.Overwrite)
     yield wb
     server.workbooks.delete(wb.id)
 
-
-# ---------------------------------------------------------------------------
-# Tests
-# ---------------------------------------------------------------------------
 
 def test_workbook_publish_returns_item_with_id(published_workbook):
     """publish() returns a WorkbookItem with a server-assigned ID and the expected name."""
@@ -126,10 +84,9 @@ def test_workbook_download_returns_nonempty_bytes(server, published_workbook):
     assert buffer.tell() > 0
 
 
-def test_workbook_delete_removes_workbook(server):
+def test_workbook_delete_removes_workbook(server, project_id):
     """delete() removes a workbook; get_by_id afterwards raises ServerResponseError."""
-    project = _get_project(server)
-    wb = TSC.WorkbookItem(name="tsc-e2e-delete-test", project_id=project.id)
+    wb = TSC.WorkbookItem(name="tsc-e2e-delete-test", project_id=project_id)
     wb = server.workbooks.publish(wb, SAMPLE_WORKBOOK, TSC.Server.PublishMode.Overwrite)
     try:
         server.workbooks.delete(wb.id)

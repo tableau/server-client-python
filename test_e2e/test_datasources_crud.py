@@ -19,20 +19,9 @@ pytestmark = pytest.mark.e2e
 
 
 @pytest.fixture(scope="module")
-def datasource(server):
-    """Publish a datasource for CRUD tests; clean up after.
-
-    Mirrors the pattern from test_tagging.py's workbook fixture.
-    """
-    project_name = os.environ.get("TABLEAU_PROJECT", "Default")
-    opts = TSC.RequestOptions()
-    opts.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, project_name))
-    projects, _ = server.projects.get(opts)
-    if not projects:
-        pytest.skip(f"Project {project_name!r} not found — set TABLEAU_PROJECT env var")
-    project = projects[0]
-
-    ds_item = TSC.DatasourceItem(project_id=project.id, name="tsc-e2e-datasource-crud")
+def datasource(server, project_id):
+    """Publish a datasource for CRUD tests; clean up after."""
+    ds_item = TSC.DatasourceItem(project_id=project_id, name="tsc-e2e-datasource-crud")
     ds_item = server.datasources.publish(ds_item, SAMPLE_DATASOURCE, TSC.Server.PublishMode.Overwrite)
     yield ds_item
     server.datasources.delete(ds_item.id)
@@ -108,22 +97,13 @@ def test_datasources_download(server, datasource, tmp_path):
     assert os.path.getsize(result_path) > 0
 
 
-def test_datasources_delete(server):
+def test_datasources_delete(server, project_id):
     """datasources.delete() removes a datasource; subsequent get_by_id raises ServerResponseError."""
-    project_name = os.environ.get("TABLEAU_PROJECT", "Default")
-    opts = TSC.RequestOptions()
-    opts.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, project_name))
-    projects, _ = server.projects.get(opts)
-    if not projects:
-        pytest.skip(f"Project {project_name!r} not found — set TABLEAU_PROJECT env var")
-    project = projects[0]
-
-    ds_item = TSC.DatasourceItem(project_id=project.id, name="tsc-e2e-datasource-delete")
+    ds_item = TSC.DatasourceItem(project_id=project_id, name="tsc-e2e-datasource-delete")
     published = server.datasources.publish(ds_item, SAMPLE_DATASOURCE, TSC.Server.PublishMode.Overwrite)
     ds_id = published.id
     try:
         server.datasources.delete(ds_id)
-
         with pytest.raises(ServerResponseError):
             server.datasources.get_by_id(ds_id)
     finally:
