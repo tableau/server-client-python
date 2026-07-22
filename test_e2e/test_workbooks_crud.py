@@ -72,6 +72,12 @@ def test_workbook_populate_connections_does_not_raise(server, published_workbook
     assert published_workbook.connections is not None
 
 
+def test_workbook_populate_preview_image(server, published_workbook):
+    """populate_preview_image() sets preview_image without error."""
+    server.workbooks.populate_preview_image(published_workbook)
+    assert published_workbook.preview_image is not None
+
+
 def test_workbook_download_returns_nonempty_bytes(server, published_workbook):
     """download() writes a non-empty file into a BytesIO buffer."""
     buffer = io.BytesIO()
