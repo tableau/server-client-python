@@ -40,7 +40,7 @@ def _(xml: str) -> str:
 
 @redact_xml.register  # type: ignore[no-redef]
 def _(xml: bytes) -> bytes:
-    return _redact_any_type(bytearray(xml), b"password", b"..[redacted]")
+    return cast(bytes, _redact_any_type(xml, b"password", b"..[redacted]"))
 
 
 @overload
