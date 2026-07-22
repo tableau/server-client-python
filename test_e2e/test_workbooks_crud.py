@@ -34,17 +34,12 @@ def test_workbook_publish_returns_item_with_id(published_workbook):
 
 
 def test_workbook_get_lists_published_workbook(server, published_workbook):
-    """workbooks.get() with a name filter returns the published workbook."""
-    opts = TSC.RequestOptions()
-    opts.filter.add(
-        TSC.Filter(
-            TSC.RequestOptions.Field.Name,
-            TSC.RequestOptions.Operator.Equals,
-            "tsc-e2e-crud-test",
-        )
+    """workbooks.filter() with a name filter returns the published workbook."""
+    results = list(server.workbooks.filter(name="tsc-e2e-crud-test"))
+    assert any(wb.id == published_workbook.id for wb in results), (
+        f"Published workbook {published_workbook.id!r} not found in filter results: "
+        f"{[wb.id for wb in results]}"
     )
-    workbooks, _ = server.workbooks.get(opts)
-    assert any(wb.id == published_workbook.id for wb in workbooks)
 
 
 def test_workbook_get_by_id_returns_correct_item(server, published_workbook):

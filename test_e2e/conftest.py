@@ -27,7 +27,8 @@ def server():
     if not all([url, token, token_name]):
         pytest.skip("E2E tests require TABLEAU_SERVER, TABLEAU_TOKEN, and TABLEAU_TOKEN_NAME env vars")
 
-    server = TSC.Server(url, use_server_version=True)
+    http_options = {"verify": os.environ.get("TABLEAU_VERIFY_SSL", "true").lower() != "false"}
+    server = TSC.Server(url, use_server_version=True, http_options=http_options)
     auth = TSC.PersonalAccessTokenAuth(token_name, token, site)
     with server.auth.sign_in(auth):
         yield server
@@ -44,7 +45,8 @@ def server_admin():
     if not all([url, token, token_name]):
         pytest.skip("Admin e2e tests require TABLEAU_SERVER, TABLEAU_SITEADMIN_TOKEN, and TABLEAU_SITEADMIN_TOKEN_NAME env vars")
 
-    server = TSC.Server(url, use_server_version=True)
+    http_options = {"verify": os.environ.get("TABLEAU_VERIFY_SSL", "true").lower() != "false"}
+    server = TSC.Server(url, use_server_version=True, http_options=http_options)
     auth = TSC.PersonalAccessTokenAuth(token_name, token, site)
     with server.auth.sign_in(auth):
         yield server

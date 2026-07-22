@@ -99,7 +99,10 @@ def test_delete_tag_with_space(server, workbook):
             "delete may have failed to match the space-quoting used at write time"
         )
     finally:
-        server.workbooks.delete_tags(workbook, tag)
+        try:
+            server.workbooks.delete_tags(workbook, tag)
+        except Exception:
+            pass
 
 
 def test_delete_tag_with_comma(server, workbook):
@@ -118,7 +121,10 @@ def test_delete_tag_with_comma(server, workbook):
             "delete may have failed to URL-encode the comma in the delete path"
         )
     finally:
-        server.workbooks.delete_tags(workbook, tag)
+        try:
+            server.workbooks.delete_tags(workbook, tag)
+        except Exception:
+            pass
 
 
 def test_add_space_tag_to_datasource(server, datasource):
