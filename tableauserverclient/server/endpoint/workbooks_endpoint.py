@@ -36,11 +36,20 @@ from typing import (
 )
 from collections.abc import Iterable, Sequence
 
+from tableauserverclient.types import (
+    FilePath,
+    FileObject,
+    FileObjectR,
+    FileObjectW,
+    PathOrFileR,
+    PathOrFileW,
+    AddResponse,
+)
+
 if TYPE_CHECKING:
     from tableauserverclient.server import Server
     from tableauserverclient.server.request_options import RequestOptions, PDFRequestOptions, PPTXRequestOptions
     from tableauserverclient.models import DatasourceItem
-    from tableauserverclient.server.endpoint.schedules_endpoint import AddResponse
 
 io_types_r = (io.BytesIO, io.BufferedReader)
 
@@ -50,14 +59,6 @@ FILESIZE_LIMIT = 1024 * 1024 * 64  # 64MB
 ALLOWED_FILE_EXTENSIONS = ["twb", "twbx"]
 
 from tableauserverclient.helpers.logging import logger
-
-FilePath = str | os.PathLike
-FileObject = io.BufferedReader | io.BytesIO
-FileObjectR = io.BufferedReader | io.BytesIO
-FileObjectW = io.BufferedWriter | io.BytesIO
-PathOrFileR = FilePath | FileObjectR
-PathOrFileW = FilePath | FileObjectW
-
 
 _UNSET = object()
 

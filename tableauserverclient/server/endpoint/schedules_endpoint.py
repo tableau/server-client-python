@@ -2,7 +2,6 @@ from collections.abc import Iterable
 import copy
 import logging
 import warnings
-from collections import namedtuple
 from typing import TYPE_CHECKING, Any, Callable, Literal, overload
 
 from .endpoint import Endpoint, api, parameter_added_in
@@ -10,10 +9,10 @@ from .exceptions import MissingRequiredFieldError
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import PaginationItem, ScheduleItem, TaskItem, ExtractItem
 from tableauserverclient.models.schedule_item import parse_batch_schedule_state
+from tableauserverclient.types import AddResponse
 
 from tableauserverclient.helpers.logging import logger
 
-AddResponse = namedtuple("AddResponse", ("result", "error", "warnings", "task_created"))
 OK = AddResponse(result=True, error=None, warnings=None, task_created=None)
 
 if TYPE_CHECKING:

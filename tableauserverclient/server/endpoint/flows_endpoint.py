@@ -33,18 +33,12 @@ ALLOWED_FILE_EXTENSIONS = ["tfl", "tflx"]
 
 from tableauserverclient.helpers.logging import logger
 
+from tableauserverclient.types import FilePath, FileObjectR, FileObjectW, PathOrFileR, PathOrFileW, AddResponse
+
 if TYPE_CHECKING:
     from tableauserverclient.models import DQWItem
     from tableauserverclient.models.permissions_item import PermissionsRule
     from tableauserverclient.server.request_options import RequestOptions
-    from tableauserverclient.server.endpoint.schedules_endpoint import AddResponse
-
-
-FilePath = str | os.PathLike
-FileObjectR = io.BufferedReader | io.BytesIO
-FileObjectW = io.BufferedWriter | io.BytesIO
-PathOrFileR = FilePath | FileObjectR
-PathOrFileW = FilePath | FileObjectW
 
 
 class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem], DownloadableMixin):

@@ -32,12 +32,8 @@ Delete a custom view
 update the name or owner of a custom view.
 """
 
-FilePath = str | os.PathLike
-FileObject = io.BufferedReader | io.BytesIO
-FileObjectR = io.BufferedReader | io.BytesIO
-FileObjectW = io.BufferedWriter | io.BytesIO
-PathOrFileR = FilePath | FileObjectR
-PathOrFileW = FilePath | FileObjectW
+from tableauserverclient.types import FilePath, FileObject, FileObjectR, FileObjectW, PathOrFileR, PathOrFileW
+
 io_types_r = (io.BufferedReader, io.BytesIO)
 io_types_w = (io.BufferedWriter, io.BytesIO)
 
