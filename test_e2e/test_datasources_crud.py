@@ -13,7 +13,7 @@ import tableauserverclient as TSC
 from tableauserverclient.server.endpoint.exceptions import ServerResponseError
 
 ASSETS_DIR = Path(__file__).parent / "assets"
-SAMPLE_DATASOURCE = ASSETS_DIR / "SampleDS.tds"
+SAMPLE_DATASOURCE = ASSETS_DIR / "WorldIndicators.tdsx"
 
 pytestmark = pytest.mark.e2e
 
