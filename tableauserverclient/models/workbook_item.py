@@ -1,7 +1,7 @@
 import copy
 import datetime
 import uuid
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # building XML request bodies only; use defusedxml for parsing
 from typing import Callable, overload
 
 from defusedxml.ElementTree import fromstring

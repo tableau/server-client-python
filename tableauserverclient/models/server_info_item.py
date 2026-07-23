@@ -1,6 +1,6 @@
 import logging
 import warnings
-import xml
+import xml  # for xml.etree.ElementTree.ParseError exception type only; defusedxml raises this same class
 
 from defusedxml.ElementTree import fromstring
 from tableauserverclient.helpers.logging import logger

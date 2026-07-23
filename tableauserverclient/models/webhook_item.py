@@ -1,5 +1,5 @@
 import re
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # building XML request bodies only; use defusedxml for parsing
 
 from defusedxml.ElementTree import fromstring
 

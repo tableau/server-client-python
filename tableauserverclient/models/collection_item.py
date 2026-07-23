@@ -1,5 +1,5 @@
 from datetime import datetime
-from xml.etree.ElementTree import Element
+from xml.etree.ElementTree import Element  # building XML request bodies only; use defusedxml for parsing
 
 from defusedxml.ElementTree import fromstring
 from typing_extensions import Self

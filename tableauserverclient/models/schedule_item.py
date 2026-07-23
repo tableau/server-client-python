@@ -1,4 +1,4 @@
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # building XML request bodies only; use defusedxml for parsing
 from datetime import datetime
 from typing import TYPE_CHECKING
 
