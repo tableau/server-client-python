@@ -1,3 +1,7 @@
+from email.message import Message
+import io
+import os
+from contextlib import closing
 from typing_extensions import Concatenate, ParamSpec
 from tableauserverclient import datetime_helpers as datetime
 
@@ -18,6 +22,7 @@ from typing_extensions import Self
 
 from tableauserverclient.models.pagination_item import PaginationItem
 from tableauserverclient.server.request_options import RequestOptions
+from tableauserverclient.filesys_helpers import to_filename, make_download_path
 
 from tableauserverclient.server.endpoint.exceptions import (
     FailedSignInError,
@@ -322,6 +327,58 @@ def parameter_added_in(**params: str) -> Callable[[Callable[Concatenate[E, P], R
 
 
 T = TypeVar("T")
+
+_io_types_w = (io.BytesIO, io.BufferedWriter)
+
+FilePath = str | os.PathLike
+FileObjectW = io.BufferedWriter | io.BytesIO
+PathOrFileW = FilePath | FileObjectW
+
+
+class DownloadableMixin:
+    """Mixin for endpoints whose resources can be downloaded as binary files.
+
+    Provides a single private helper that streams a server response to a file
+    path or writable file object, avoiding copy-paste of the identical streaming
+    loop in Workbooks, Datasources, and Flows.
+    """
+
+    def _download_content(
+        self,
+        url: str,
+        filepath: PathOrFileW | None,
+    ) -> PathOrFileW:
+        """Stream content at url to filepath and return the resolved path.
+
+        Parameters
+        ----------
+        url : str
+            Fully-qualified URL whose response body should be saved.
+        filepath : PathOrFileW | None
+            Destination file path or writable file object.  When None the file
+            is saved to the current working directory using the server-supplied
+            filename from the Content-Disposition header.
+
+        Returns
+        -------
+        PathOrFileW
+            The absolute file path written, or the caller-supplied file object.
+        """
+        with closing(self.get_request(url, parameters={"stream": True})) as server_response:  # type: ignore[attr-defined]
+            m = Message()
+            m["Content-Disposition"] = server_response.headers["Content-Disposition"]
+            filename = m.get_filename(failobj="")
+            if isinstance(filepath, _io_types_w):
+                for chunk in server_response.iter_content(1024):  # 1KB
+                    filepath.write(chunk)
+                return filepath
+            else:
+                filename = to_filename(os.path.basename(filename))
+                download_path = make_download_path(filepath, filename)
+                with open(download_path, "wb") as f:
+                    for chunk in server_response.iter_content(1024):  # 1KB
+                        f.write(chunk)
+                return os.path.abspath(download_path)
 
 
 class QuerysetEndpoint(Endpoint, Generic[T]):
