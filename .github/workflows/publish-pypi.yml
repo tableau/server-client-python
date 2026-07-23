@@ -75,6 +75,7 @@ jobs:
     needs: smoke-test-pypi
     if: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v') }}
     runs-on: ubuntu-latest
+    environment: pypi
     steps:
       - uses: actions/download-artifact@v8
         with:
