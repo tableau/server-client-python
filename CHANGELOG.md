@@ -5,6 +5,16 @@
   hierarchy path (e.g. `"Marketing/Q1 Reports"`). The walk is performed level by
   level using the REST API name filter, so a path with *n* components issues *n*
   requests. Returns the matching `ProjectItem` or `None` if no project is found.
+* **Behavior change**: `UserItem.CSVImport.create_user_from_line` no longer
+  lowercases the entire CSV line before parsing. Previously the whole line,
+  including the username, display name, fullname, and email fields, was
+  lowercased destructively (e.g. `JSmith` became `jsmith`). Case is now
+  preserved for those fields; only the comparison-relevant fields (license,
+  admin_level, publisher, auth_setting) are normalized internally for
+  validation. Callers relying on the previous lowercased output — e.g. dict
+  lookups keyed on `user.name`, or assertions against lowercased values —
+  need to update. This unblocks CSV imports for LDAP and other case-sensitive
+  auth backends where mixed-case usernames must be preserved.
 
 ## 0.18.0 (6 April 2022)    
 * Switched to using defused_xml for xml attack protection
