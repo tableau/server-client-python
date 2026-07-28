@@ -5580,6 +5580,8 @@ You can use the `Sort` and `RequestOptions` classes to filter and sort the follo
 
 You can use the `ImageRequestOptions` and `PDFRequestOptions` to set options for views returned as images and PDF files.
 
+**Note**: View filters set via `vf()` on `CSVRequestOptions`, `ImageRequestOptions`, or `PDFRequestOptions` apply exact-match only. Operators like greater-than, less-than, contains, or value ranges are not supported by the underlying REST endpoint. See the Tableau REST API [filtering documentation](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_filtering_and_sorting.htm) for the server-side detail. If you need range filtering for exports, expose the range bounds as workbook parameters and use `.parameter()` to set them.
+
 For more information about filtering and sorting, see [Filter and Sort](filter-sort).
 
 
