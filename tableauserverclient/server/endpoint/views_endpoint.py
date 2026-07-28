@@ -1,10 +1,7 @@
 import logging
-from contextlib import closing
-
-from tableauserverclient.config import BYTES_PER_MB, config
 
 from tableauserverclient.models.permissions_item import PermissionsRule
-from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
+from tableauserverclient.server.endpoint.endpoint import DownloadableMixin, QuerysetEndpoint, api
 from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError, UnsupportedAttributeError
 from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
 from tableauserverclient.server.endpoint.resource_tagger import TaggingMixin
@@ -27,7 +24,7 @@ if TYPE_CHECKING:
     )
 
 
-class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
+class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem], DownloadableMixin):
     """
     The Tableau Server Client provides methods for interacting with view
     resources, or endpoints. These methods correspond to the endpoints for views
@@ -264,9 +261,7 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
 
     def _get_view_csv(self, view_item: ViewItem, req_options: "CSVRequestOptions | None") -> Iterator[bytes]:
         url = f"{self.baseurl}/{view_item.id}/data"
-
-        with closing(self.get_request(url, request_object=req_options, parameters={"stream": True})) as server_response:
-            yield from server_response.iter_content(config.CHUNK_SIZE_MB * BYTES_PER_MB)
+        return self._stream_content(url, req_options)
 
     @api(version="3.8")
     def populate_excel(self, view_item: ViewItem, req_options: "ExcelRequestOptions | None" = None) -> None:
@@ -303,9 +298,7 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
 
     def _get_view_excel(self, view_item: ViewItem, req_options: "ExcelRequestOptions | None") -> Iterator[bytes]:
         url = f"{self.baseurl}/{view_item.id}/crosstab/excel"
-
-        with closing(self.get_request(url, request_object=req_options, parameters={"stream": True})) as server_response:
-            yield from server_response.iter_content(config.CHUNK_SIZE_MB * BYTES_PER_MB)
+        return self._stream_content(url, req_options)
 
     @api(version="3.2")
     def populate_permissions(self, item: ViewItem) -> None:

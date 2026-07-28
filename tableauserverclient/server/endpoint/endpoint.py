@@ -9,6 +9,7 @@ import abc
 from packaging.version import Version
 from functools import wraps
 from xml.etree.ElementTree import ParseError
+from collections.abc import Iterator
 from typing import (
     Any,
     Callable,
@@ -20,8 +21,9 @@ from typing import (
 )
 from typing_extensions import Self
 
+from tableauserverclient.config import BYTES_PER_MB, config
 from tableauserverclient.models.pagination_item import PaginationItem
-from tableauserverclient.server.request_options import RequestOptions
+from tableauserverclient.server.request_options import RequestOptions, RequestOptionsBase
 from tableauserverclient.filesys_helpers import to_filename, make_download_path
 
 from tableauserverclient.server.endpoint.exceptions import (
@@ -338,9 +340,13 @@ PathOrFileW = FilePath | FileObjectW
 class DownloadableMixin:
     """Mixin for endpoints whose resources can be downloaded as binary files.
 
-    Provides a single private helper that streams a server response to a file
-    path or writable file object, avoiding copy-paste of the identical streaming
-    loop in Workbooks, Datasources, and Flows.
+    Provides two private helpers, avoiding copy-paste of the streaming loop
+    across endpoints:
+
+    - _download_content streams a response to a file path or writable object
+      (used by Workbooks, Datasources, Flows).
+    - _stream_content yields chunks for callers that want to materialize the
+      body in-memory or process it lazily (used by Views, CustomViews).
     """
 
     def _download_content(
@@ -368,17 +374,35 @@ class DownloadableMixin:
             m = Message()
             m["Content-Disposition"] = server_response.headers["Content-Disposition"]
             filename = m.get_filename(failobj="")
+            chunk_size = config.CHUNK_SIZE_MB * BYTES_PER_MB
             if isinstance(filepath, _io_types_w):
-                for chunk in server_response.iter_content(1024):  # 1KB
+                for chunk in server_response.iter_content(chunk_size):
                     filepath.write(chunk)
                 return filepath
             else:
                 filename = to_filename(os.path.basename(filename))
                 download_path = make_download_path(filepath, filename)
                 with open(download_path, "wb") as f:
-                    for chunk in server_response.iter_content(1024):  # 1KB
+                    for chunk in server_response.iter_content(chunk_size):
                         f.write(chunk)
                 return os.path.abspath(download_path)
+
+    def _stream_content(
+        self,
+        url: str,
+        request_object: RequestOptionsBase | None = None,
+    ) -> Iterator[bytes]:
+        """Stream content at url as chunks.
+
+        Suitable for callers that want to materialize the body in-memory
+        (e.g. b"".join(iterator)) or process it lazily as a stream, rather than
+        write it to a file. Complements _download_content, which writes to disk.
+        """
+        chunk_size = config.CHUNK_SIZE_MB * BYTES_PER_MB
+        with closing(
+            self.get_request(url, request_object=request_object, parameters={"stream": True})  # type: ignore[attr-defined]
+        ) as server_response:
+            yield from server_response.iter_content(chunk_size)
 
 
 class QuerysetEndpoint(Endpoint, Generic[T]):
