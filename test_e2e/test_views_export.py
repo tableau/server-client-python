@@ -5,6 +5,7 @@ Run with:
     TABLEAU_SERVER=https://... TABLEAU_SITE=mysite TABLEAU_TOKEN=... TABLEAU_TOKEN_NAME=... \
     pytest test_e2e/test_views_export.py -v
 """
+
 from pathlib import Path
 
 import pytest
@@ -32,7 +33,8 @@ def a_view(server, workbook_with_view):
     """Return the first view from the published workbook."""
     server.workbooks.populate_views(workbook_with_view)
     views = workbook_with_view.views
-    if not views: pytest.fail("Published workbook has no views")
+    if not views:
+        pytest.fail("Published workbook has no views")
     return views[0]
 
 

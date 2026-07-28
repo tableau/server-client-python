@@ -5,11 +5,16 @@ Run with:
     TABLEAU_SERVER=https://... TABLEAU_SITE=mysite TABLEAU_TOKEN=... TABLEAU_TOKEN_NAME=... \
     pytest test_e2e/test_jobs.py -v
 """
+
 from pathlib import Path
 
 import pytest
 import tableauserverclient as TSC
-from tableauserverclient.server.endpoint.exceptions import JobCancelledException, JobFailedException, ServerResponseError
+from tableauserverclient.server.endpoint.exceptions import (
+    JobCancelledException,
+    JobFailedException,
+    ServerResponseError,
+)
 
 ASSETS_DIR = Path(__file__).parent / "assets"
 SAMPLE_WORKBOOK = ASSETS_DIR / "WorkbookWithoutExtract.twbx"
@@ -34,7 +39,7 @@ def workbook(server, project_id):
 def datasource(server, project_id):
     """Publish a datasource for jobs tests, clean up after."""
     ds = TSC.DatasourceItem(project_id=project_id, name="tsc-e2e-jobs-ds")
-    ds = server.datasources.publish(ds, str(SAMPLE_DATASOURCE), TSC.Server.PublishMode.Overwrite)
+    ds = server.datasources.publish(ds, SAMPLE_DATASOURCE, TSC.Server.PublishMode.Overwrite)
     try:
         yield ds
     finally:
@@ -112,9 +117,7 @@ def test_workbook_refresh_job_completes(server, workbook):
         pytest.fail(f"Job failed — workbook must contain an extract for this test: {e}")
     except JobCancelledException as e:
         pytest.skip(f"Job was cancelled: {e}")
-    assert completed_job.finish_code in (
-        TSC.JobItem.FinishCode.Success, TSC.JobItem.FinishCode.Completed
-    )
+    assert completed_job.finish_code in (TSC.JobItem.FinishCode.Success, TSC.JobItem.FinishCode.Completed)
     assert completed_job.completed_at is not None
 
 
@@ -131,9 +134,7 @@ def test_datasource_refresh_job_completes(server, datasource):
         pytest.skip(f"Datasource refresh job failed: {e}")
     except JobCancelledException as e:
         pytest.skip(f"Job was cancelled: {e}")
-    assert completed_job.finish_code in (
-        TSC.JobItem.FinishCode.Success, TSC.JobItem.FinishCode.Completed
-    )
+    assert completed_job.finish_code in (TSC.JobItem.FinishCode.Success, TSC.JobItem.FinishCode.Completed)
     assert completed_job.completed_at is not None
 
 
@@ -148,7 +149,5 @@ def test_extract_workbook_refresh_completes(server, extract_workbook):
         pytest.skip(f"Extract workbook refresh job failed (check asset compatibility): {e}")
     except JobCancelledException as e:
         pytest.skip(f"Job was cancelled: {e}")
-    assert completed_job.finish_code in (
-        TSC.JobItem.FinishCode.Success, TSC.JobItem.FinishCode.Completed
-    )
+    assert completed_job.finish_code in (TSC.JobItem.FinishCode.Success, TSC.JobItem.FinishCode.Completed)
     assert completed_job.completed_at is not None

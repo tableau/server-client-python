@@ -5,6 +5,8 @@ Run with:
     TABLEAU_SERVER=https://... TABLEAU_SITE=mysite TABLEAU_TOKEN=... TABLEAU_TOKEN_NAME=... \
     pytest test_e2e/test_tagging.py -v
 """
+
+import warnings
 from pathlib import Path
 
 import pytest
@@ -56,12 +58,10 @@ def test_add_tag_with_space(server, workbook):
     server.workbooks.add_tags(workbook, tag)
     updated = server.workbooks.get_by_id(workbook.id)
     try:
-        assert tag in updated.tags, (
-            f"Tag {tag!r} not found in {updated.tags!r} — was it split on the space?"
-        )
-        assert '"Yearly Sales"' not in updated.tags, (
-            "Tag was stored with literal surrounding quotes — double-quoting leaked into the label"
-        )
+        assert tag in updated.tags, f"Tag {tag!r} not found in {updated.tags!r} — was it split on the space?"
+        assert (
+            '"Yearly Sales"' not in updated.tags
+        ), "Tag was stored with literal surrounding quotes — double-quoting leaked into the label"
         assert "Yearly" not in updated.tags, "Tag was split — 'Yearly' must not be a standalone tag"
         assert "Sales" not in updated.tags, "Tag was split — 'Sales' must not be a standalone tag"
     finally:
@@ -74,9 +74,7 @@ def test_add_tag_with_comma(server, workbook):
     server.workbooks.add_tags(workbook, tag)
     updated = server.workbooks.get_by_id(workbook.id)
     try:
-        assert tag in updated.tags, (
-            f"Tag {tag!r} not found in {updated.tags!r} — was it split on the comma?"
-        )
+        assert tag in updated.tags, f"Tag {tag!r} not found in {updated.tags!r} — was it split on the comma?"
         assert "Sales" not in updated.tags, "Tag was split — 'Sales' must not be a standalone tag"
         assert "Revenue" not in updated.tags, "Tag was split — 'Revenue' must not be a standalone tag"
     finally:
@@ -89,9 +87,7 @@ def test_delete_tag_with_space(server, workbook):
     server.workbooks.add_tags(workbook, tag)
     try:
         after_add = server.workbooks.get_by_id(workbook.id)
-        assert tag in after_add.tags, (
-            f"Precondition failed: tag {tag!r} not in {after_add.tags!r} after add_tags"
-        )
+        assert tag in after_add.tags, f"Precondition failed: tag {tag!r} not in {after_add.tags!r} after add_tags"
         server.workbooks.delete_tags(workbook, tag)
         after_delete = server.workbooks.get_by_id(workbook.id)
         assert tag not in after_delete.tags, (
@@ -101,8 +97,8 @@ def test_delete_tag_with_space(server, workbook):
     finally:
         try:
             server.workbooks.delete_tags(workbook, tag)
-        except Exception:
-            pass
+        except Exception as exc:
+            warnings.warn(f"Failed to delete tag: {exc}")
 
 
 def test_delete_tag_with_comma(server, workbook):
@@ -111,9 +107,7 @@ def test_delete_tag_with_comma(server, workbook):
     server.workbooks.add_tags(workbook, tag)
     try:
         after_add = server.workbooks.get_by_id(workbook.id)
-        assert tag in after_add.tags, (
-            f"Precondition failed: tag {tag!r} not in {after_add.tags!r} after add_tags"
-        )
+        assert tag in after_add.tags, f"Precondition failed: tag {tag!r} not in {after_add.tags!r} after add_tags"
         server.workbooks.delete_tags(workbook, tag)
         after_delete = server.workbooks.get_by_id(workbook.id)
         assert tag not in after_delete.tags, (
@@ -123,8 +117,8 @@ def test_delete_tag_with_comma(server, workbook):
     finally:
         try:
             server.workbooks.delete_tags(workbook, tag)
-        except Exception:
-            pass
+        except Exception as exc:
+            warnings.warn(f"Failed to delete tag: {exc}")
 
 
 def test_add_space_tag_to_datasource(server, datasource):
@@ -133,12 +127,10 @@ def test_add_space_tag_to_datasource(server, datasource):
     server.datasources.add_tags(datasource, tag)
     updated = server.datasources.get_by_id(datasource.id)
     try:
-        assert tag in updated.tags, (
-            f"Tag {tag!r} not found in datasource tags {updated.tags!r} — was it split on the space?"
-        )
-        assert '"Yearly Sales"' not in updated.tags, (
-            "Tag was stored with literal surrounding quotes on the datasource"
-        )
+        assert (
+            tag in updated.tags
+        ), f"Tag {tag!r} not found in datasource tags {updated.tags!r} — was it split on the space?"
+        assert '"Yearly Sales"' not in updated.tags, "Tag was stored with literal surrounding quotes on the datasource"
         assert "Yearly" not in updated.tags, "Tag was split — 'Yearly' must not be a standalone datasource tag"
         assert "Sales" not in updated.tags, "Tag was split — 'Sales' must not be a standalone datasource tag"
     finally:

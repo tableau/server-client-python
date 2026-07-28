@@ -5,6 +5,7 @@ Run with:
     TABLEAU_SERVER=https://... TABLEAU_SITE=mysite TABLEAU_TOKEN=... TABLEAU_TOKEN_NAME=... \
     pytest test_e2e/test_pagination.py -v
 """
+
 import warnings
 from pathlib import Path
 
@@ -42,8 +43,8 @@ def datasource_for_pagination(server, project_id):
     yield ds
     try:
         server.datasources.delete(ds.id)
-    except Exception:
-        pass
+    except Exception as exc:
+        warnings.warn(f"Failed to delete datasource: {exc}")
 
 
 def test_pager_workbooks_count_matches_get(server, workbooks_for_pagination):
@@ -54,9 +55,7 @@ def test_pager_workbooks_count_matches_get(server, workbooks_for_pagination):
 
     pager_count = sum(1 for _ in TSC.Pager(server.workbooks))
 
-    assert pager_count >= 2, (
-        f"Pager yielded {pager_count} workbooks but expected at least 2 fixture workbooks"
-    )
+    assert pager_count >= 2, f"Pager yielded {pager_count} workbooks but expected at least 2 fixture workbooks"
 
 
 def test_pager_datasources_returns_items(server, datasource_for_pagination):
@@ -67,9 +66,9 @@ def test_pager_datasources_returns_items(server, datasource_for_pagination):
 
     pager_count = sum(1 for _ in TSC.Pager(server.datasources))
 
-    assert pager_count == total_declared, (
-        f"Pager yielded {pager_count} datasources but server reported {total_declared}"
-    )
+    assert (
+        pager_count == total_declared
+    ), f"Pager yielded {pager_count} datasources but server reported {total_declared}"
 
 
 def test_queryset_all_workbooks_matches_pager(server, workbooks_for_pagination):
@@ -78,9 +77,7 @@ def test_queryset_all_workbooks_matches_pager(server, workbooks_for_pagination):
     queryset_count = sum(1 for _ in server.workbooks.all())
 
     assert queryset_count > 0
-    assert queryset_count == pager_count, (
-        f"QuerySet yielded {queryset_count} but Pager yielded {pager_count}"
-    )
+    assert queryset_count == pager_count, f"QuerySet yielded {queryset_count} but Pager yielded {pager_count}"
 
 
 def test_queryset_filter_by_name(server, workbooks_for_pagination):
@@ -91,9 +88,7 @@ def test_queryset_filter_by_name(server, workbooks_for_pagination):
 
     assert len(results) >= 1, f"No workbook named {known_name!r} returned by filter"
     for wb in results:
-        assert wb.name == known_name, (
-            f"Filter returned {wb.name!r}, expected {known_name!r}"
-        )
+        assert wb.name == known_name, f"Filter returned {wb.name!r}, expected {known_name!r}"
 
 
 def test_queryset_order_by_name_ascending(server, workbooks_for_pagination):
@@ -102,13 +97,11 @@ def test_queryset_order_by_name_ascending(server, workbooks_for_pagination):
     fixture_name_set = set(PAGINATION_WB_NAMES)
     fixture_results = [wb for wb in all_results if wb.name in fixture_name_set]
 
-    assert len(fixture_results) >= 2, (
-        f"Expected at least 2 fixture workbooks in results, got {len(fixture_results)}"
-    )
+    assert len(fixture_results) >= 2, f"Expected at least 2 fixture workbooks in results, got {len(fixture_results)}"
     names = [wb.name for wb in fixture_results]
-    assert names == sorted(names, key=str.casefold), (
-        f"Fixture workbooks not in ascending case-insensitive name order: {names}"
-    )
+    assert names == sorted(
+        names, key=str.casefold
+    ), f"Fixture workbooks not in ascending case-insensitive name order: {names}"
 
 
 def test_pager_small_pagesize(server, workbooks_for_pagination):
@@ -118,6 +111,4 @@ def test_pager_small_pagesize(server, workbooks_for_pagination):
 
     assert len(items) >= 1, "Pager with pagesize=1 returned no items"
     for item in items:
-        assert isinstance(item, TSC.WorkbookItem), (
-            f"Expected WorkbookItem, got {type(item).__name__}"
-        )
+        assert isinstance(item, TSC.WorkbookItem), f"Expected WorkbookItem, got {type(item).__name__}"

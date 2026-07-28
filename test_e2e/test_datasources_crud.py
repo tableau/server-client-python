@@ -5,7 +5,9 @@ Run with:
     TABLEAU_SERVER=https://... TABLEAU_SITE=mysite TABLEAU_TOKEN=... TABLEAU_TOKEN_NAME=... \
     pytest test_e2e/test_datasources_crud.py -v
 """
+
 import os
+import warnings
 from pathlib import Path
 
 import pytest
@@ -109,5 +111,5 @@ def test_datasources_delete(server, project_id):
     finally:
         try:
             server.datasources.delete(ds_id)
-        except Exception:
-            pass
+        except Exception as exc:
+            warnings.warn(f"Failed to delete datasource: {exc}")

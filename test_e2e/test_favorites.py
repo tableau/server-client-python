@@ -5,6 +5,7 @@ Run with:
     TABLEAU_SERVER=https://... TABLEAU_SITE=mysite TABLEAU_TOKEN=... TABLEAU_TOKEN_NAME=... \
     pytest test_e2e/test_favorites.py -v
 """
+
 from pathlib import Path
 
 import pytest
@@ -31,7 +32,7 @@ def workbook(server, project_id):
 @pytest.fixture(scope="module")
 def datasource(server, project_id):
     ds = TSC.DatasourceItem(project_id=project_id, name="tsc-e2e-favorites-ds")
-    ds = server.datasources.publish(ds, str(SAMPLE_DATASOURCE), TSC.Server.PublishMode.Overwrite)
+    ds = server.datasources.publish(ds, SAMPLE_DATASOURCE, TSC.Server.PublishMode.Overwrite)
     try:
         yield ds
     finally:

@@ -6,7 +6,10 @@ Run with:
     TABLEAU_SITEADMIN_TOKEN_NAME=... TABLEAU_SITEADMIN_TOKEN=... \
     pytest test_e2e/test_projects_admin.py -v
 """
+
 import uuid
+import warnings
+
 import pytest
 import tableauserverclient as TSC
 from tableauserverclient.models.permissions_item import Permission, PermissionsRule
@@ -38,9 +41,9 @@ def test_get_includes_created_project(server_admin):
     created = server_admin.projects.create(project)
     try:
         matches = list(server_admin.projects.filter(name=project_name))
-        assert any(p.id == created.id for p in matches), (
-            f"Newly created project {created.id!r} not found in projects.filter(name={project_name!r}) result"
-        )
+        assert any(
+            p.id == created.id for p in matches
+        ), f"Newly created project {created.id!r} not found in projects.filter(name={project_name!r}) result"
     finally:
         server_admin.projects.delete(created.id)
 
@@ -76,8 +79,8 @@ def test_create_child_project(server_admin):
         if created_child is not None:
             try:
                 server_admin.projects.delete(created_child.id)
-            except Exception:
-                pass
+            except Exception as exc:
+                warnings.warn(f"Failed to delete child project: {exc}")
         server_admin.projects.delete(created_parent.id)
 
 
@@ -86,9 +89,7 @@ def test_delete_projects(server_admin):
     parent_name = _name("tsc-e2e-del-parent")
     child_name = _name("tsc-e2e-del-child")
     parent = server_admin.projects.create(TSC.ProjectItem(name=parent_name))
-    child = server_admin.projects.create(
-        TSC.ProjectItem(name=child_name, parent_id=parent.id)
-    )
+    child = server_admin.projects.create(TSC.ProjectItem(name=child_name, parent_id=parent.id))
 
     parent_id = parent.id
     child_id = child.id
@@ -105,12 +106,12 @@ def test_delete_projects(server_admin):
     finally:
         try:
             server_admin.projects.delete(child_id)
-        except Exception:
-            pass
+        except Exception as exc:
+            warnings.warn(f"Failed to delete child project: {exc}")
         try:
             server_admin.projects.delete(parent_id)
-        except Exception:
-            pass
+        except Exception as exc:
+            warnings.warn(f"Failed to delete parent project: {exc}")
 
 
 def test_populate_workbook_default_permissions(server_admin):
@@ -142,8 +143,7 @@ def test_update_workbook_default_permissions(server_admin):
         updated_rules = server_admin.projects.update_workbook_default_permissions(project, [rule])
         assert isinstance(updated_rules, list)
         assert any(
-            r.grantee.id == group.id
-            and r.capabilities.get(Permission.Capability.Read) == Permission.Mode.Allow
+            r.grantee.id == group.id and r.capabilities.get(Permission.Capability.Read) == Permission.Mode.Allow
             for r in updated_rules
         )
     finally:

@@ -6,7 +6,7 @@ Run with:
     TABLEAU_SITEADMIN_TOKEN_NAME=... TABLEAU_SITEADMIN_TOKEN=... \
     pytest test_e2e/test_workbook_permissions.py -v
 """
-import os
+
 from pathlib import Path
 
 import pytest
@@ -19,26 +19,9 @@ pytestmark = pytest.mark.e2e_admin
 
 
 @pytest.fixture(scope="module")
-def workbook_and_user(server_admin):
-    """Publish a workbook and create a test user for permissions tests; clean up after.
-
-    Uses TABLEAU_PROJECT env var if set, otherwise falls back to 'Default'.
-    """
-    project_name = os.environ.get("TABLEAU_PROJECT", "Default")
-    opts = TSC.RequestOptions()
-    opts.filter.add(
-        TSC.Filter(
-            TSC.RequestOptions.Field.Name,
-            TSC.RequestOptions.Operator.Equals,
-            project_name,
-        )
-    )
-    projects, _ = server_admin.projects.get(opts)
-    if not projects:
-        pytest.skip(f"Project {project_name!r} not found — set TABLEAU_PROJECT env var")
-    project = projects[0]
-
-    wb = TSC.WorkbookItem(name="tsc-e2e-permissions-test", project_id=project.id)
+def workbook_and_user(server_admin, default_project):
+    """Publish a workbook and create a test user for permissions tests; clean up after."""
+    wb = TSC.WorkbookItem(name="tsc-e2e-permissions-test", project_id=default_project.id)
     wb = server_admin.workbooks.publish(wb, SAMPLE_WORKBOOK, TSC.Server.PublishMode.Overwrite)
 
     try:
@@ -84,15 +67,9 @@ def test_update_permissions_appears_on_populate(server_admin, workbook_and_user)
 
         # Re-populate to get fresh permissions from the server
         server_admin.workbooks.populate_permissions(workbook)
-        user_rules = [
-            r for r in workbook.permissions
-            if r.grantee.id == user.id and r.grantee.tag_name == "user"
-        ]
+        user_rules = [r for r in workbook.permissions if r.grantee.id == user.id and r.grantee.tag_name == "user"]
         assert len(user_rules) == 1
-        assert (
-            user_rules[0].capabilities.get(TSC.Permission.Capability.Read)
-            == TSC.Permission.Mode.Allow
-        )
+        assert user_rules[0].capabilities.get(TSC.Permission.Capability.Read) == TSC.Permission.Mode.Allow
     finally:
         # Clean up: build the delete rule directly to avoid masking the original exception
         delete_rule = TSC.PermissionsRule(
@@ -133,13 +110,9 @@ def test_delete_permission_removes_rule(server_admin, workbook_and_user):
 
         # Confirm it was granted
         server_admin.workbooks.populate_permissions(workbook)
-        user_rules = [
-            r for r in workbook.permissions
-            if r.grantee.id == user.id and r.grantee.tag_name == "user"
-        ]
+        user_rules = [r for r in workbook.permissions if r.grantee.id == user.id and r.grantee.tag_name == "user"]
         assert any(
-            r.capabilities.get(TSC.Permission.Capability.ExportImage) == TSC.Permission.Mode.Allow
-            for r in user_rules
+            r.capabilities.get(TSC.Permission.Capability.ExportImage) == TSC.Permission.Mode.Allow for r in user_rules
         ), "ExportImage/Allow rule not found after update_permissions"
 
         # Delete the permission rule
@@ -149,8 +122,7 @@ def test_delete_permission_removes_rule(server_admin, workbook_and_user):
         # Confirm it is gone
         server_admin.workbooks.populate_permissions(workbook)
         remaining_user_rules = [
-            r for r in workbook.permissions
-            if r.grantee.id == user.id and r.grantee.tag_name == "user"
+            r for r in workbook.permissions if r.grantee.id == user.id and r.grantee.tag_name == "user"
         ]
         assert not any(
             r.capabilities.get(TSC.Permission.Capability.ExportImage) == TSC.Permission.Mode.Allow
