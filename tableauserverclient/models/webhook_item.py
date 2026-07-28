@@ -109,6 +109,21 @@ class WebhookItem:
             all_webhooks_items.append(webhook_item)
         return all_webhooks_items
 
+    def _parse_common_tags(self, webhook_xml, ns) -> "WebhookItem":
+        """Merge fields from a server response into this item.
+
+        Used by the update endpoint (matching the convention in users_endpoint
+        and datasources_endpoint) so that locally-set fields are preserved
+        when the server's response omits them.
+        """
+        if not isinstance(webhook_xml, ET.Element):
+            parsed = fromstring(webhook_xml)
+            webhook_xml = parsed.find(".//t:webhook", namespaces=ns)
+        if webhook_xml is not None:
+            values = self._parse_element(webhook_xml, ns)
+            self._set_values(*values)
+        return self
+
     @staticmethod
     def _parse_element(webhook_xml: ET.Element, ns) -> tuple:
         id = webhook_xml.get("id", None)

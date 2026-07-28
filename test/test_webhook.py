@@ -207,6 +207,46 @@ def test_update_missing_id(server: TSC.Server) -> None:
         server.webhooks.update(webhook_item)
 
 
+def test_update_preserves_locally_set_fields_omitted_by_server(server: TSC.Server) -> None:
+    """update should preserve locally-set fields that the server response omits.
+
+    Matches the pattern used by users_endpoint.update and datasources_endpoint.update:
+    fields set on the input item should survive when the server returns a partial
+    response.
+    """
+    # Server response omits is_enabled, owner, and url; only id and name are returned.
+    partial_response = (
+        "<?xml version='1.0' encoding='UTF-8'?>"
+        '<tsResponse xmlns="http://tableau.com/api">'
+        '  <webhook id="webhook-id" name="webhook-name-updated">'
+        "    <webhook-source>"
+        "      <webhook-source-event-datasource-created />"
+        "    </webhook-source>"
+        "  </webhook>"
+        "</tsResponse>"
+    )
+    with requests_mock.mock() as m:
+        m.put(server.webhooks.baseurl + "/webhook-id", text=partial_response)
+        webhook_item = WebhookItem()
+        webhook_item._set_values(
+            "webhook-id",
+            "webhook-name-original",
+            "https://local-url.example.com/hook",
+            "datasource-created",
+            "local-owner-luid",
+        )
+        webhook_item.is_enabled = False
+
+        updated_webhook = server.webhooks.update(webhook_item)
+
+        # Fields returned by the server should be updated.
+        assert updated_webhook.name == "webhook-name-updated"
+        # Fields omitted by the server should retain their locally-set values.
+        assert updated_webhook.url == "https://local-url.example.com/hook"
+        assert updated_webhook.owner_id == "local-owner-luid"
+        assert updated_webhook.is_enabled is False
+
+
 def test_update_request_factory_is_enabled() -> None:
     webhook_item = WebhookItem()
     webhook_item._set_values(

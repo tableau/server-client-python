@@ -1,3 +1,4 @@
+import copy
 import logging
 
 from .endpoint import Endpoint, api
@@ -142,9 +143,9 @@ class Webhooks(Endpoint):
         url = f"{self.baseurl}/{webhook_item.id}"
         update_req = RequestFactory.Webhook.update_req(webhook_item)
         server_response = self.put_request(url, update_req)
-        updated_webhook = WebhookItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         logger.info(f"Updated webhook (ID: {webhook_item.id})")
-        return updated_webhook
+        updated_webhook = copy.copy(webhook_item)
+        return updated_webhook._parse_common_tags(server_response.content, self.parent_srv.namespace)
 
     @api(version="3.6")
     def test(self, webhook_id: str):
