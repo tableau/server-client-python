@@ -554,25 +554,34 @@ class UserItem:
         def _decompose_site_role(site_role: str) -> tuple[str, str, str]:
             """Return (license, admin_level, publish) CSV column values for a given site role.
 
-            Site roles not in _role_map emit license="Invalid" so the server rejects that
-            row with USER_CSV_INVALID_LICENSE. This preserves per-row error semantics for
-            legacy UserItem.Roles values (UnlicensedWithPublish, ViewerWithPublish, Guest,
-            SupportUser) that the server-side CSV parser has never accepted, rather than
-            silently coercing to a valid-but-wrong Unlicensed user.
+            Legacy `UserItem.Roles` values are handled in two ways depending on whether
+            the server has a sensible modern equivalent:
+
+            - **Mapped to modern equivalents** (row emitted, server accepts): the legacy
+              roles `SiteAdministrator`, `Publisher`, `Interactor`, and `ReadOnly` each
+              map to the current-model role that best matches their historical intent
+              (SiteAdministratorExplorer, ExplorerCanPublish, Explorer, Viewer).
+            - **Emitted as `license="Invalid"`** (row rejected server-side with
+              USER_CSV_INVALID_LICENSE): the legacy roles `UnlicensedWithPublish`,
+              `ViewerWithPublish`, `Guest`, and `SupportUser` have no equivalent in the
+              current server model (`RestApiSiteRole` does not accept them on any code
+              path). Emitting `"Invalid"` preserves the per-row error semantics callers
+              of `bulk_add` had before this refactor, rather than silently coercing
+              those users to a valid-but-wrong Unlicensed account.
             """
             _role_map: dict[str, tuple[str, str, str]] = {
                 "ServerAdministrator": ("Creator", "System", "1"),
                 "SiteAdministratorCreator": ("Creator", "Site", "1"),
                 "SiteAdministratorExplorer": ("Explorer", "Site", "1"),
-                "SiteAdministrator": ("Explorer", "Site", "1"),  # legacy role, treat as SiteAdministratorExplorer
+                "SiteAdministrator": ("Explorer", "Site", "1"),  # legacy, mapped to SiteAdministratorExplorer
                 "Creator": ("Creator", "None", "1"),
                 "ExplorerCanPublish": ("Explorer", "None", "1"),
                 "Explorer": ("Explorer", "None", "0"),
                 "Viewer": ("Viewer", "None", "0"),
                 "Unlicensed": ("Unlicensed", "None", "0"),
-                "ReadOnly": ("Viewer", "None", "0"),
-                "Publisher": ("Explorer", "None", "1"),
-                "Interactor": ("Explorer", "None", "0"),
+                "ReadOnly": ("Viewer", "None", "0"),  # legacy, mapped to Viewer
+                "Publisher": ("Explorer", "None", "1"),  # legacy, mapped to ExplorerCanPublish
+                "Interactor": ("Explorer", "None", "0"),  # legacy, mapped to Explorer
             }
             return _role_map.get(site_role, ("Invalid", "None", "0"))
 
