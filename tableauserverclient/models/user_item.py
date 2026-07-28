@@ -308,7 +308,10 @@ class UserItem:
         if email:
             self.email = email
         if auth_setting:
-            self._auth_setting = auth_setting
+            # Go through the @property_is_enum(Auth) setter rather than writing
+            # to _auth_setting directly, so CSV-parsed users can't carry an
+            # invalid auth_setting that only fails later at the API call.
+            self.auth_setting = auth_setting
         if domain_name:
             self._domain_name = domain_name
         if locale:
@@ -453,7 +456,15 @@ class UserItem:
                     values[UserItem.CSVImport.ColumnType.PUBLISHER],
                 )
                 raw_auth = values[UserItem.CSVImport.ColumnType.AUTH]
-                auth = UserItem.CSVImport._auth_canonical().get(raw_auth.lower()) if raw_auth else None
+                if raw_auth:
+                    auth = UserItem.CSVImport._auth_canonical().get(raw_auth.lower())
+                    if auth is None:
+                        raise ValueError(
+                            f"Unknown auth setting: {raw_auth!r}. "
+                            f"Valid values: {sorted(UserItem.CSVImport._auth_canonical().values())}"
+                        )
+                else:
+                    auth = None
                 user._set_values(
                     None,
                     username,
