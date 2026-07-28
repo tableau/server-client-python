@@ -8,6 +8,8 @@ Verifies that:
 
 import datetime
 
+import pytest
+
 import tableauserverclient as TSC
 from tableauserverclient.models.base_item import TableauItem, ContentItem, OwnedItem, TaggableItem
 
@@ -44,6 +46,29 @@ class TestTableauItem:
     def test_user_satisfies_tableau_item(self):
         item = TSC.UserItem(name="u", site_role="Viewer")
         assert isinstance(item, TableauItem)
+
+    def test_database_satisfies_tableau_item(self):
+        item = TSC.DatabaseItem(name="db")
+        assert isinstance(item, TableauItem)
+
+    def test_table_satisfies_tableau_item(self):
+        item = TSC.TableItem(name="tbl")
+        assert isinstance(item, TableauItem)
+
+    def test_virtual_connection_satisfies_tableau_item(self):
+        item = TSC.VirtualConnectionItem(name="vc")
+        assert isinstance(item, TableauItem)
+
+    def test_task_item_does_not_satisfy_tableau_item(self):
+        """TaskItem has an id but no name attribute."""
+        item = TSC.TaskItem(id_="t1", task_type="refresh", priority=1)
+        assert not isinstance(item, TableauItem)
+
+    def test_issubclass_on_data_protocol_raises(self):
+        """runtime_checkable data-attribute Protocols don't support issubclass;
+        they raise TypeError. Callers must use isinstance() on an instance."""
+        with pytest.raises(TypeError):
+            issubclass(TSC.WorkbookItem, TableauItem)
 
     def test_plain_object_with_id_and_name_satisfies_tableau_item(self):
         """Structural subtyping: any object with id and name suffices."""
@@ -102,6 +127,10 @@ class TestOwnedItem:
         item = TSC.UserItem(name="u", site_role="Viewer")
         assert not isinstance(item, OwnedItem)
 
+    def test_virtual_connection_satisfies_owned_item(self):
+        item = TSC.VirtualConnectionItem(name="vc")
+        assert isinstance(item, OwnedItem)
+
     def test_plain_object_satisfies_owned_item(self):
         class Owned:
             id: str | None = None
@@ -155,6 +184,11 @@ class TestTaggableItem:
     def test_user_does_not_satisfy_taggable_item(self):
         """UserItem does not expose a tags attribute."""
         item = TSC.UserItem(name="u", site_role="Viewer")
+        assert not isinstance(item, TaggableItem)
+
+    def test_virtual_connection_does_not_satisfy_taggable_item(self):
+        """VirtualConnectionItem does not expose a tags attribute."""
+        item = TSC.VirtualConnectionItem(name="vc")
         assert not isinstance(item, TaggableItem)
 
     def test_plain_object_with_tags_satisfies_taggable_item(self):

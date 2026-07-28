@@ -15,35 +15,31 @@ from typing import Protocol, runtime_checkable
 
 @runtime_checkable
 class TableauItem(Protocol):
-    """Structural interface satisfied by all primary TSC resource item classes.
+    """Structural interface satisfied by TSC resource item classes that carry an id and a name.
 
-    Every TSC item class (WorkbookItem, DatasourceItem, ViewItem, FlowItem,
-    UserItem, ProjectItem, ScheduleItem, GroupItem) exposes at minimum an ``id``
-    attribute and a ``name`` attribute.  This protocol captures that minimal
-    shared surface, fulfilling the role previously held by the ``TableauItem``
-    Union type in ``tableau_types.py``.
-
-    ``id`` and ``name`` are declared as plain Protocol attributes (not
-    ``@property``) so that concrete classes may implement them as either plain
-    instance attributes or read-only properties.  Protocol structural subtyping
-    means no concrete class needs to list ``TableauItem`` in its MRO -- any class
-    with matching attributes satisfies the protocol implicitly.
+    Structurally satisfied by the primary content classes (WorkbookItem,
+    DatasourceItem, ViewItem, FlowItem, MetricItem), user/group/project/schedule/
+    site/webhook/custom-view/table/database/virtual-connection items, and any
+    other class exposing ``id`` and ``name``. Items without a ``name`` attribute
+    (e.g. TaskItem, DataAlertItem) do NOT satisfy this protocol.
 
     Notes
     -----
+    ``id`` and ``name`` are declared as read-only ``@property`` so that concrete
+    classes with narrower return types (e.g. ``name: str``) satisfy the protocol
+    under mypy's covariant property checking. Plain writable instance attributes
+    also satisfy a read-only property protocol.
+
     ``runtime_checkable`` enables ``isinstance(obj, TableauItem)`` checks at
     runtime, but these only verify attribute *presence*, not types or
-    signatures.  Full static checking requires a type checker such as mypy.
+    signatures. Full static checking requires a type checker such as mypy.
+    ``issubclass`` is NOT supported for data-attribute Protocols and will raise
+    ``TypeError`` -- use ``isinstance`` on an instance instead.
 
     ``from_response`` is intentionally excluded from this protocol because the
-    four primary content classes have divergent signatures (different ``resp``
+    primary content classes have divergent signatures (different ``resp``
     parameter types, extra parameters) that cannot be unified without widening
     to ``Any``.
-
-    ``id`` and ``name`` are declared as read-only ``@property`` so that
-    concrete classes with narrower return types (e.g. ``name: str``) satisfy
-    the protocol under mypy's covariant property checking.  Plain writable
-    instance attributes also satisfy a read-only property Protocol requirement.
     """
 
     @property
