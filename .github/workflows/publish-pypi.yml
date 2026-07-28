@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.13'
       - name: Build dist files
@@ -60,7 +60,7 @@ jobs:
         python-version: ['3.x']
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install from Test PyPI
@@ -75,6 +75,7 @@ jobs:
     needs: smoke-test-pypi
     if: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v') }}
     runs-on: ubuntu-latest
+    environment: pypi
     steps:
       - uses: actions/download-artifact@v8
         with:
