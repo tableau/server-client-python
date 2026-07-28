@@ -1,4 +1,11 @@
 
+## Unreleased
+
+* Added `Projects.get_by_path(path)` to look up a project by its slash-separated
+  hierarchy path (e.g. `"Marketing/Q1 Reports"`). The walk is performed level by
+  level using the REST API name filter, so a path with *n* components issues *n*
+  requests. Returns the matching `ProjectItem` or `None` if no project is found.
+
 ## 0.18.0 (6 April 2022)    
 * Switched to using defused_xml for xml attack protection
 * added linting and type hints

@@ -15,10 +15,10 @@ jobs:
     name: Build and check wheel
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.13'
       - name: Build dist files
@@ -29,7 +29,7 @@ jobs:
           git describe --tag --dirty --always
       - name: Check wheel structure
         run: python -m pytest test/test_packaging.py -m packaging -v
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist/
@@ -39,7 +39,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: dist
           path: dist/
@@ -60,7 +60,7 @@ jobs:
         python-version: ['3.x']
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install from Test PyPI
@@ -75,8 +75,9 @@ jobs:
     needs: smoke-test-pypi
     if: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v') }}
     runs-on: ubuntu-latest
+    environment: pypi
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: dist
           path: dist/
