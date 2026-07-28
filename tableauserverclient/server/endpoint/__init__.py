@@ -4,7 +4,7 @@ from tableauserverclient.server.endpoint.data_acceleration_report_endpoint impor
 from tableauserverclient.server.endpoint.data_alert_endpoint import DataAlerts
 from tableauserverclient.server.endpoint.databases_endpoint import Databases
 from tableauserverclient.server.endpoint.datasources_endpoint import Datasources
-from tableauserverclient.server.endpoint.endpoint import Endpoint, QuerysetEndpoint
+from tableauserverclient.server.endpoint.endpoint import Endpoint, QuerysetEndpoint, DownloadableMixin
 from tableauserverclient.server.endpoint.exceptions import ServerResponseError, MissingRequiredFieldError
 from tableauserverclient.server.endpoint.extensions_endpoint import Extensions
 from tableauserverclient.server.endpoint.favorites_endpoint import Favorites
@@ -40,6 +40,7 @@ __all__ = [
     "DataAlerts",
     "Databases",
     "Datasources",
+    "DownloadableMixin",
     "QuerysetEndpoint",
     "MissingRequiredFieldError",
     "Endpoint",
