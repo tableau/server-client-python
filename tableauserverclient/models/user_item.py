@@ -552,7 +552,14 @@ class UserItem:
         # for writing the CSV import format.
         @staticmethod
         def _decompose_site_role(site_role: str) -> tuple[str, str, str]:
-            """Return (license, admin_level, publish) CSV column values for a given site role."""
+            """Return (license, admin_level, publish) CSV column values for a given site role.
+
+            Site roles not in _role_map emit license="Invalid" so the server rejects that
+            row with USER_CSV_INVALID_LICENSE. This preserves per-row error semantics for
+            legacy UserItem.Roles values (UnlicensedWithPublish, ViewerWithPublish, Guest,
+            SupportUser) that the server-side CSV parser has never accepted, rather than
+            silently coercing to a valid-but-wrong Unlicensed user.
+            """
             _role_map: dict[str, tuple[str, str, str]] = {
                 "ServerAdministrator": ("Creator", "System", "1"),
                 "SiteAdministratorCreator": ("Creator", "Site", "1"),
@@ -567,7 +574,7 @@ class UserItem:
                 "Publisher": ("Explorer", "None", "1"),
                 "Interactor": ("Explorer", "None", "0"),
             }
-            return _role_map.get(site_role, ("Unlicensed", "None", "0"))
+            return _role_map.get(site_role, ("Invalid", "None", "0"))
 
         # https://help.tableau.com/current/server/en-us/csvguidelines.htm#settings_and_site_roles
         # This logic is hardcoded to match the existing rules for import csv files
