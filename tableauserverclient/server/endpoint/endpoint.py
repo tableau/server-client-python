@@ -2,7 +2,6 @@ from email.message import Message
 import io
 import os
 from contextlib import closing
-from typing_extensions import Concatenate, ParamSpec
 from tableauserverclient import datetime_helpers as datetime
 
 import abc
@@ -12,8 +11,10 @@ from xml.etree.ElementTree import ParseError
 from typing import (
     Any,
     Callable,
+    Concatenate,
     Generic,
     Optional,
+    ParamSpec,
     TYPE_CHECKING,
     TypeVar,
     Union,
