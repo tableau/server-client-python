@@ -351,9 +351,37 @@ class _DataExportOptions(RequestOptionsBase):
 
     def vf(self, name: str, value: str) -> Self:
         """Apply a filter based on a column within the view.
-        Note that when filtering on a boolean type field, the only valid values are 'true' and 'false'
 
-        For more detail see: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_filtering_and_sorting.htm#Filter-query-views
+        Serialized to the REST API as ``vf_<name>=<value>``. The rules below
+        describe how the server interprets the wire value; ``vf()`` itself
+        does not transform your input.
+
+        Value syntax
+        ------------
+        - **Exact match (default):** a single value matches rows where the
+          column equals that value exactly. Case-sensitivity follows the
+          underlying data source.
+        - **OR-list:** commas separate alternatives, so ``"East,West"``
+          matches rows where the column is ``East`` OR ``West``.
+        - **Literal comma in a value:** escape with a backslash --
+          ``"Rock\\, Paper\\, Scissors"`` matches the single value
+          ``Rock, Paper, Scissors``. URL-encoding the comma (``%2C``)
+          does NOT escape it.
+        - **Empty value** (``vf_<name>=``) overrides any workbook-embedded
+          filter on that column, effectively widening it to all values.
+          This is undocumented but stable behavior that some users rely on.
+        - **Wildcards** (``*``) are NOT supported by the REST view-filter
+          layer. Wildcard matching is a viz-configured behavior on filter
+          controls inside a workbook; use ``.parameter()`` and design the
+          workbook accordingly if you need it.
+        - **Ranges, comparisons, operators** (``>``, ``<=``, ``BETWEEN``,
+          etc.) are NOT supported here. Use workbook-side filter design or
+          the ``filter=`` query parameter on list endpoints, which is a
+          separate syntax.
+        - **Booleans:** the only valid values are ``'true'`` and ``'false'``.
+
+        For more detail see:
+        https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_filtering_and_sorting.htm#Filter-query-views
 
         Parameters
         ----------
