@@ -49,7 +49,16 @@ HyperAction = HyperActionTable | HyperActionRow
 AddResponse = namedtuple("AddResponse", ("result", "error", "warnings", "task_created"))
 
 
-# IDP types for OIDC endpoint
+# IDP types for OIDC endpoint. Two Protocol variants are provided so callers
+# can satisfy the interface with either style:
+# - IDPAttributes: idp_configuration_id declared as a plain class attribute
+#   (invariant under mypy; matches simple dataclasses / attrs-style objects).
+# - IDPProperty: idp_configuration_id declared as a read-only @property
+#   (matches classes that compute the value or want to prevent external writes).
+#
+# HasIdpConfigurationID unions both so downstream callers can implement either
+# style without hitting mypy invariance errors. Callers accept
+# `str | HasIdpConfigurationID` -- passing a raw id string or an object.
 class IDPAttributes(Protocol):
     idp_configuration_id: str
 
@@ -59,4 +68,4 @@ class IDPProperty(Protocol):
     def idp_configuration_id(self) -> str: ...
 
 
-HasIdpConfigurationID = str | IDPAttributes
+HasIdpConfigurationID = IDPAttributes | IDPProperty

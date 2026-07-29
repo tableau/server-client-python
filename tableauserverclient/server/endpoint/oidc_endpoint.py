@@ -3,7 +3,7 @@ from tableauserverclient.models.oidc_item import SiteOIDCConfiguration
 from tableauserverclient.server.endpoint import Endpoint
 from tableauserverclient.server.request_factory import RequestFactory
 from tableauserverclient.server.endpoint.endpoint import api
-from tableauserverclient.types import IDPAttributes, IDPProperty, HasIdpConfigurationID
+from tableauserverclient.types import HasIdpConfigurationID
 
 if TYPE_CHECKING:
     from tableauserverclient.models.site_item import SiteAuthConfiguration
