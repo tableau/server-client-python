@@ -375,9 +375,8 @@ class _DataExportOptions(RequestOptionsBase):
           controls inside a workbook; use ``.parameter()`` and design the
           workbook accordingly if you need it.
         - **Ranges, comparisons, operators** (``>``, ``<=``, ``BETWEEN``,
-          etc.) are NOT supported here. Use workbook-side filter design or
-          the ``filter=`` query parameter on list endpoints, which is a
-          separate syntax.
+          etc.) are NOT supported. Design the workbook's filters to expose
+          the shape you need at export time.
         - **Booleans:** the only valid values are ``'true'`` and ``'false'``.
 
         For more detail see:
