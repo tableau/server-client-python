@@ -7,3 +7,4 @@ tableauserverclient
 
 .. automodule:: tableauserverclient
    :members:
+   :imported-members:

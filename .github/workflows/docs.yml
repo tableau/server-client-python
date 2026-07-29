@@ -8,6 +8,12 @@ permissions:
   contents: write
   pull-requests: write
 
+# Serialize docs regen runs so a new push doesn't rewrite the docs-update
+# branch mid-flight for a prior run that hasn't finished opening its PR.
+concurrency:
+  group: docs-publish
+  cancel-in-progress: false
+
 jobs:
   build-and-pr:
     runs-on: ubuntu-latest
@@ -29,18 +35,24 @@ jobs:
         with:
           ref: gh-pages
           path: gh-pages
+          fetch-depth: 0
 
       - name: Copy Sphinx output into gh-pages/sphinx
         run: |
           rm -rf gh-pages/sphinx
           cp -r sphinx_build gh-pages/sphinx
 
+      # delete-branch: true removes the docs-update branch after its PR is
+      # merged/closed. Without it, an unmerged prior PR's branch gets
+      # force-updated on the next run and any review comments on it are
+      # stranded.
       - name: Create PR to gh-pages
         uses: peter-evans/create-pull-request@v6
         with:
           path: gh-pages
           branch: docs-update
           base: gh-pages
+          delete-branch: true
           title: "docs: update generated API reference"
           body: "Automated update of Sphinx-generated API reference from master."
           commit-message: "docs: regenerate Sphinx API reference"
