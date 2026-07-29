@@ -363,10 +363,10 @@ class _DataExportOptions(RequestOptionsBase):
           underlying data source.
         - **OR-list:** commas separate alternatives, so ``"East,West"``
           matches rows where the column is ``East`` OR ``West``.
-        - **Backslash is an escape character.** ``\\c`` in the wire value
-          means "literal ``c``, don't interpret it." To match a value
-          containing a literal ``,`` escape it: ``"Rock\\, Paper\\, Scissors"``
-          matches ``Rock, Paper, Scissors``. To match a literal backslash,
+        - **Backslash escapes.** To match a value that contains a literal
+          comma, escape it: ``"Rock\\, Paper\\, Scissors"`` matches
+          ``Rock, Paper, Scissors`` (without escaping, the comma would be
+          treated as an OR-list separator). To match a literal backslash,
           double it: ``"C:\\\\temp\\\\file"`` matches ``C:\\temp\\file``.
           URL-encoding (``%2C``, ``%5C``) does NOT escape either character.
         - **Empty value** (``vf_<name>=``) overrides any workbook-embedded
