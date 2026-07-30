@@ -20,21 +20,14 @@ import logging
 import tableauserverclient as TSC
 from tableauserverclient import ConnectionCredentials, ConnectionItem
 
+from _shared import add_common_arguments, build_auth, resolve_credentials
+
 
 def main():
     parser = argparse.ArgumentParser(description="Publish a workbook to server.")
-    # Common options; please keep those in sync across all samples
-    parser.add_argument("--server", "-s", help="server address")
-    parser.add_argument("--site", "-S", help="site name")
-    parser.add_argument("--token-name", "-p", help="name of the personal access token used to sign into the server")
-    parser.add_argument("--token-value", "-v", help="value of the personal access token used to sign into the server")
-    parser.add_argument(
-        "--logging-level",
-        "-l",
-        choices=["debug", "info", "error"],
-        default="error",
-        help="desired logging level (set to error by default)",
-    )
+    # Common options -- credentials come from CLI args, env vars, a .env file,
+    # or an interactive prompt. See samples/_shared.py.
+    add_common_arguments(parser)
     # Options specific to this sample
     group = parser.add_mutually_exclusive_group(required=False)
     group.add_argument("--thumbnails-user-id", "-u", help="User ID to use for thumbnails")
@@ -49,12 +42,14 @@ def main():
 
     args = parser.parse_args()
 
+    resolve_credentials(args)
+
     # Set logging level based on user input, or error by default
     logging_level = getattr(logging, args.logging_level.upper())
     logging.basicConfig(level=logging_level)
 
     # Step 1: Sign in to server.
-    tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
+    tableau_auth = build_auth(args)
     server = TSC.Server(args.server, use_server_version=True, http_options={"verify": False})
     with server.auth.sign_in(tableau_auth):
         # Step2: Retrieve the project id, if a project name was passed
