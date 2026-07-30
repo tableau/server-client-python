@@ -43,8 +43,9 @@ def main():
         server.favorites.get(user)
         print(user.favorites)
 
-        # get list of workbooks
-        all_workbook_items, pagination_item = server.workbooks.get()
+        # get list of workbooks. `.get()` only returns one page; use
+        # TSC.Pager to iterate every workbook on the site.
+        all_workbook_items = list(TSC.Pager(server.workbooks))
         if all_workbook_items is not None and len(all_workbook_items) > 0:
             my_workbook = all_workbook_items[0]
             server.favorites.add_favorite(user, Resource.Workbook, all_workbook_items[0])
@@ -59,7 +60,7 @@ def main():
                 server.favorites.add_favorite_view(user, my_view)
                 print(f"View added to favorites. View Name: {my_view.name}, View ID: {my_view.id}")
 
-        all_datasource_items, pagination_item = server.datasources.get()
+        all_datasource_items = list(TSC.Pager(server.datasources))
         if all_datasource_items:
             my_datasource = all_datasource_items[0]
         server.favorites.add_favorite_datasource(user, my_datasource)

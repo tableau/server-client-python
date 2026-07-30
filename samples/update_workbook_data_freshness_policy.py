@@ -43,9 +43,11 @@ def main():
     server.add_http_options({"verify": False})
     server.use_server_version()
     with server.auth.sign_in(tableau_auth):
-        # Get workbook
-        all_workbooks, pagination_item = server.workbooks.get()
+        # Get workbooks. `.get()` only returns the first page; iterate with
+        # TSC.Pager to see every workbook on the site.
+        first_page, pagination_item = server.workbooks.get()
         print(f"\nThere are {pagination_item.total_available} workbooks on site: ")
+        all_workbooks = list(TSC.Pager(server.workbooks))
         print([workbook.name for workbook in all_workbooks])
 
         if all_workbooks:

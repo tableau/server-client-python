@@ -43,9 +43,10 @@ def main():
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
     server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
-        # Query projects for use when demonstrating publishing and updating
-        all_projects, pagination_item = server.projects.get()
-        default_project = next((project for project in all_projects if project.is_default()), None)
+        # Query projects for use when demonstrating publishing and updating.
+        # Use TSC.Pager (or `.all()` / `.filter()`) to iterate every page;
+        # a raw `server.projects.get()` only returns the first page.
+        default_project = next((project for project in TSC.Pager(server.projects) if project.is_default()), None)
 
         # Publish datasource if publish flag is set (-publish, -p)
         if args.publish:
@@ -59,9 +60,12 @@ def main():
             else:
                 print("Publish failed. Could not find the default project.")
 
-        # Gets all datasource items
-        all_datasources, pagination_item = server.datasources.get()
+        # Gets all datasource items. `.get()` returns only one page; use
+        # TSC.Pager to iterate every page. The first response also gives us
+        # the total_available count without paging through everything.
+        first_page, pagination_item = server.datasources.get()
         print(f"\nThere are {pagination_item.total_available} datasources on site: ")
+        all_datasources = list(TSC.Pager(server.datasources))
         print([datasource.name for datasource in all_datasources])
 
         if all_datasources:

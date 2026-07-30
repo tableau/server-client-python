@@ -53,9 +53,11 @@ def main():
             if ds is None:
                 raise ValueError(f"Datasource not found for id {args.datasource}")
         else:
-            # Gets all workbook items
-            all_workbooks, pagination_item = server.workbooks.get()
+            # Gets all workbook items. `.get()` returns only the first page,
+            # so we use TSC.Pager to iterate every page.
+            first_page, pagination_item = server.workbooks.get()
             print(f"\nThere are {pagination_item.total_available} workbooks on site: ")
+            all_workbooks = list(TSC.Pager(server.workbooks))
             print([workbook.name for workbook in all_workbooks])
 
             if all_workbooks:

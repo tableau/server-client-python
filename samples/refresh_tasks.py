@@ -17,8 +17,8 @@ def handle_run(server, args):
 
 
 def handle_list(server, _):
-    tasks, pagination = server.tasks.get()
-    for task in tasks:
+    # Use TSC.Pager to iterate every task; `.get()` returns only the first page.
+    for task in TSC.Pager(server.tasks):
         print(f"{task}")
 
 
