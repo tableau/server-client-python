@@ -65,10 +65,10 @@ def main():
             try:
                 workbook_path = source_server.workbooks.download(all_workbooks[0].id, tmpdir)
 
-                # Step 4: Check if destination site exists, then sign in to the site
-                all_sites, pagination_info = source_server.sites.get()
+                # Step 4: Check if destination site exists, then sign in to the site.
+                # Use TSC.Pager because `.get()` only returns the first page of sites.
                 found_destination_site = any(
-                    True for site in all_sites if args.destination_site.lower() == site.content_url.lower()
+                    args.destination_site.lower() == site.content_url.lower() for site in TSC.Pager(source_server.sites)
                 )
                 if not found_destination_site:
                     error = f"No site named {args.destination_site} found."

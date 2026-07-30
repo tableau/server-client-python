@@ -54,9 +54,11 @@ def main():
             new_webhook = server.webhooks.create(new_webhook)
             print(f"Webhook created. ID: {new_webhook.id}")
 
-        # Gets all webhook items
-        all_webhooks, pagination_item = server.webhooks.get()
+        # Gets all webhook items. `.get()` returns only one page; use
+        # TSC.Pager to iterate every webhook on the site.
+        first_page, pagination_item = server.webhooks.get()
         print(f"\nThere are {pagination_item.total_available} webhooks on site: ")
+        all_webhooks = list(TSC.Pager(server.webhooks))
         print([webhook.name for webhook in all_webhooks])
 
         if all_webhooks:

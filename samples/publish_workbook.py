@@ -64,8 +64,11 @@ def main():
             project_id = projects[0].id
         else:
             # Get all the projects on server, then look for the default one.
-            all_projects, pagination_item = server.projects.get()
-            project_id = next((project for project in all_projects if project.is_default()), None).id
+            # Use TSC.Pager because `.get()` only returns the first page.
+            default_project = next((project for project in TSC.Pager(server.projects) if project.is_default()), None)
+            if default_project is None:
+                raise LookupError("The destination project could not be found.")
+            project_id = default_project.id
 
         connection1 = ConnectionItem()
         connection1.server_address = "mssql.test.com"

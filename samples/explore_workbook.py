@@ -53,8 +53,9 @@ def main():
         # Publish workbook if publish flag is set (-publish, -p)
         overwrite_true = TSC.Server.PublishMode.Overwrite
         if args.publish:
-            all_projects, pagination_item = server.projects.get()
-            default_project = next((project for project in all_projects if project.is_default()), None)
+            # Use TSC.Pager rather than a raw `.get()` because `.get()` only
+            # returns the first page of results.
+            default_project = next((project for project in TSC.Pager(server.projects) if project.is_default()), None)
 
             if default_project is not None:
                 new_workbook = TSC.WorkbookItem(default_project.id)
@@ -63,9 +64,11 @@ def main():
             else:
                 print("Publish failed. Could not find the default project.")
 
-        # Gets all workbook items
-        all_workbooks, pagination_item = server.workbooks.get()
+        # Gets all workbook items. Note that `.get()` only returns the first
+        # page of results; use TSC.Pager to iterate every page.
+        first_page, pagination_item = server.workbooks.get()
         print(f"\nThere are {pagination_item.total_available} workbooks on site: ")
+        all_workbooks = list(TSC.Pager(server.workbooks))
         print([workbook.name for workbook in all_workbooks])
 
         if all_workbooks:
@@ -123,9 +126,9 @@ def main():
                     f.write(sample_workbook.preview_image)
                 print(f"\nDownloaded preview image of workbook to {os.path.abspath(args.preview_image)}")
 
-            # get custom views
-            cvs, _ = server.custom_views.get()
-            for c in cvs:
+            # Get custom views. `.get()` only returns the first page;
+            # use TSC.Pager to iterate every custom view on the site.
+            for c in TSC.Pager(server.custom_views):
                 print(c)
 
             # for the last custom view in the list
