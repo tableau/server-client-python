@@ -10965,32 +10965,32 @@ Some behaviors you may hit while using TSC are not bugs in the TSC library. They
 
 For the live, maintainer-updated view of these issues, filter open issues in this repository by the [`Server-Side Enhancement`](https://github.com/tableau/server-client-python/labels/Server-Side%20Enhancement) label.
 
-Each entry below notes where the fix is expected to land (server-side vs. client-side). Items marked *server-side* require a change in Tableau Server / Tableau Cloud before TSC can expose the behavior. Internal Salesforce work-item numbers (`W-...`) are included as breadcrumbs for Tableau maintainers; external users are not expected to be able to resolve them.
+Every item in this list requires a change in Tableau Server / Tableau Cloud before TSC can expose the behavior.
 
 <br>
 
 **View filter query parameters (`vf_`) support exact match only**
-: The REST API's `vf_<field>=<value>` mechanism (used by `ImageRequestOptions.vf(...)`, `PDFRequestOptions.vf(...)`, `CSVRequestOptions.vf(...)`, and the `filter=` builder on view endpoints) accepts an exact value only. Operator prefixes (`gt:`, `lt:`, `in:`), wildcards, and range expressions are not supported by the server. Tracked in [#1431](https://github.com/tableau/server-client-python/issues/1431). *Fix expected: server-side.*
+: The REST API's `vf_<field>=<value>` mechanism (used by `ImageRequestOptions.vf(...)`, `PDFRequestOptions.vf(...)`, `CSVRequestOptions.vf(...)`, and the `filter=` builder on view endpoints) accepts an exact value only. Operator prefixes (`gt:`, `lt:`, `in:`), wildcards, and range expressions are not supported by the server. Tracked in [#1431](https://github.com/tableau/server-client-python/issues/1431).
 
 <br>
 
 **`vf_` view filter is silently dropped when the server-side view already has an operator-based filter**
-: If the underlying view definition includes a filter that uses an operator (for example, a range filter), a client-supplied `vf_` value on that same field can be silently ignored rather than layered on top. There is no error surfaced through the REST API. Tracked internally as W-23617673. *Fix expected: server-side.*
+: If the underlying view definition includes a filter that uses an operator (for example, a range filter), a client-supplied `vf_` value on that same field can be silently ignored rather than layered on top. There is no error surfaced through the REST API.
 
 <br>
 
 **Daily extract-refresh schedules cannot be created via the REST API on Tableau Cloud**
-: Creating an extract-refresh task on a daily schedule fails through the REST API (returns a 500), and the underlying Cloud scheduler has a separate bug where daily executes hourly. Tracked in [#1508](https://github.com/tableau/server-client-python/issues/1508) and internally as W-23464657. *Fix expected: server-side.*
+: Creating an extract-refresh task on a daily schedule fails through the REST API (returns a 500), and the underlying Cloud scheduler has a separate bug where daily executes hourly. Tracked in [#1508](https://github.com/tableau/server-client-python/issues/1508).
 
 <br>
 
 **Subscriptions cannot use an "On Extract Refresh" schedule via the REST API**
-: The "When data refreshes" (a.k.a. "On Extract Refresh") subscription trigger available in the Tableau UI has no equivalent in the REST API surface, so TSC cannot expose it. Tracked in [#1658](https://github.com/tableau/server-client-python/issues/1658). *Fix expected: server-side.*
+: The "When data refreshes" (a.k.a. "On Extract Refresh") subscription trigger available in the Tableau UI has no equivalent in the REST API surface, so TSC cannot expose it. Tracked in [#1658](https://github.com/tableau/server-client-python/issues/1658).
 
 <br>
 
 **Flow thumbnail image is not generated when a flow is published via the REST API**
-: A flow published through the REST API (and therefore through TSC's `flows.publish(...)`) is stored without a thumbnail image, whereas the same flow uploaded through the Tableau Prep UI receives one. Tracked in [#1537](https://github.com/tableau/server-client-python/issues/1537). *Fix expected: server-side.*
+: A flow published through the REST API (and therefore through TSC's `flows.publish(...)`) is stored without a thumbnail image, whereas the same flow uploaded through the Tableau Prep UI receives one. Tracked in [#1537](https://github.com/tableau/server-client-python/issues/1537).
 
 <br>
 
