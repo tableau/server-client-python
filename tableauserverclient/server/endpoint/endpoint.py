@@ -3,6 +3,7 @@ import io
 import os
 from contextlib import closing
 from typing_extensions import Concatenate, ParamSpec
+from urllib.parse import urljoin, urlparse
 from tableauserverclient import datetime_helpers as datetime
 
 import abc
@@ -30,6 +31,7 @@ from tableauserverclient.server.endpoint.exceptions import (
     InternalServerError,
     NonXMLResponseError,
     NotSignedInError,
+    RedirectError,
 )
 from tableauserverclient.server.exceptions import EndpointUnavailableError
 
@@ -44,6 +46,13 @@ if TYPE_CHECKING:
 
 
 Success_codes = [200, 201, 202, 204]
+
+# 301/302/303/307/308 all indicate the caller should re-request at a new URL.
+# `requests`' default handler converts POST -> GET on 301/302/303, which drops
+# the POST body and breaks sign-in / addusers / publish / any write endpoint
+# whose target sits behind a redirect. We disable that and walk the chain
+# manually, keeping the original method and body across every hop.
+Redirect_codes = [301, 302, 303, 307, 308]
 
 XML_CONTENT_TYPE = "text/xml"
 JSON_CONTENT_TYPE = "application/json"
@@ -120,6 +129,11 @@ class Endpoint:
         parameters = Endpoint.set_parameters(
             self.parent_srv.http_options, auth_token, content, content_type, parameters
         )
+        # Manual redirect handling: see Redirect_codes comment. `requests`
+        # follows 301/302/303 by converting POST to GET (RFC-conforming but
+        # loses the body). We disable it here and re-issue the same method
+        # ourselves in _follow_redirect_if_any.
+        parameters["allow_redirects"] = False
 
         logger.debug(f"request method {method.__name__}, url: {url}")
         if content:
@@ -144,6 +158,7 @@ class Endpoint:
             raise RuntimeError
         if isinstance(server_response, Exception):
             raise server_response
+        server_response, url = self._follow_redirect_if_any(method, url, parameters, server_response)
         self._check_status(server_response, url)
 
         loggable_response = self.log_response_safely(server_response)
@@ -156,6 +171,54 @@ class Endpoint:
             self.parent_srv._namespace.detect(server_response.content)
 
         return server_response
+
+    def _follow_redirect_if_any(
+        self,
+        method: Callable[..., "Response"],
+        url: str,
+        parameters: dict[str, Any],
+        server_response: "Response",
+    ) -> tuple["Response", str]:
+        # Walk a 301/302/303/307/308 chain up to session.max_redirects hops,
+        # preserving method and body. Rejects HTTPS -> HTTP scheme downgrades
+        # (silent security regression). Raises RedirectError on a missing
+        # Location header instead of the KeyError requests emits deep in its
+        # internals, and on exceeding the session hop limit.
+        try:
+            max_hops = int(self.parent_srv.session.max_redirects)
+        except (AttributeError, TypeError):
+            max_hops = 30  # requests' library default
+        current_url = url
+        response = server_response
+        for hop in range(max_hops):
+            if response.status_code not in Redirect_codes:
+                return response, current_url
+            location = response.headers.get("Location")
+            if not location:
+                raise RedirectError(
+                    f"{method.__name__.upper()} {current_url} returned HTTP {response.status_code} "
+                    f"without a Location header; can't follow the redirect."
+                )
+            # Support relative Locations per RFC 7231.
+            next_url = urljoin(current_url, location)
+            if urlparse(current_url).scheme == "https" and urlparse(next_url).scheme == "http":
+                raise RedirectError(
+                    f"Refusing to follow redirect from {current_url} to {next_url}: "
+                    f"HTTPS -> HTTP scheme downgrade would send request data over plaintext."
+                )
+            logger.debug(f"Following {response.status_code} redirect: {current_url} -> {next_url}")
+            current_url = next_url
+            next_response = self._blocking_request(method, current_url, parameters)
+            if next_response is None:
+                raise RuntimeError(f"No response after redirect to {current_url}")
+            if isinstance(next_response, Exception):
+                raise next_response
+            response = next_response
+        # Still a redirect after max_hops hops -> loop / misconfiguration.
+        raise RedirectError(
+            f"Exceeded {max_hops} redirect hops starting from {url}; last Location was {current_url}. "
+            f"Increase session.max_redirects if this is legitimate."
+        )
 
     def _check_status(self, server_response: "Response", url: str | None = None):
         logger.debug(f"Response status: {server_response}")

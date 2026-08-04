@@ -5,6 +5,14 @@
   hierarchy path (e.g. `"Marketing/Q1 Reports"`). The walk is performed level by
   level using the REST API name filter, so a path with *n* components issues *n*
   requests. Returns the matching `ProjectItem` or `None` if no project is found.
+* Preserve HTTP method and body across 3xx redirects. Previously `requests`
+  followed 301/302/303 by converting POST to GET and dropping the body, so
+  endpoints like `users.add`, `workbooks.publish`, and any write hitting a
+  server behind a redirect would 405. TSC now disables `requests`'s
+  auto-redirect and walks the chain manually, up to `session.max_redirects`
+  hops (default 30). Refuses HTTPS -> HTTP scheme downgrades and raises
+  `RedirectError` with a clear message on missing `Location` headers or hop
+  overflow. Fixes #1127 and #1828.
 
 ## 0.18.0 (6 April 2022)    
 * Switched to using defused_xml for xml attack protection
