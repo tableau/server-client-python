@@ -205,6 +205,36 @@ def test_update_missing_id(server: TSC.Server) -> None:
         server.sites.update(single_site)
 
 
+def test_update_subscription_email_and_footer_preserve_case() -> None:
+    # Regression for #1849: RequestFactory used to .lower() customSubscriptionEmail
+    # and customSubscriptionFooter, silently mangling caller intent. Footer
+    # especially, since it is displayed verbatim in outgoing subscription emails.
+    site = TSC.SiteItem(name="X", content_url="x")
+    site.custom_subscription_email = "Sales@Company.com"
+    site.custom_subscription_footer = "Sent by Tableau -- Confidential. See https://Example.com/Legal"
+
+    xml_bytes = RequestFactory.Site.update_req(site)
+    xml_text = xml_bytes.decode("utf-8")
+
+    assert 'customSubscriptionEmail="Sales@Company.com"' in xml_text, xml_text
+    assert (
+        'customSubscriptionFooter="Sent by Tableau -- Confidential. See https://Example.com/Legal"' in xml_text
+    ), xml_text
+
+
+def test_create_subscription_email_and_footer_preserve_case() -> None:
+    # Same regression for the create-site path.
+    site = TSC.SiteItem(name="X", content_url="x")
+    site.custom_subscription_email = "Support@Company.com"
+    site.custom_subscription_footer = "COMPANY, Inc. -- All Rights Reserved."
+
+    xml_bytes = RequestFactory.Site.create_req(site)
+    xml_text = xml_bytes.decode("utf-8")
+
+    assert 'customSubscriptionEmail="Support@Company.com"' in xml_text, xml_text
+    assert 'customSubscriptionFooter="COMPANY, Inc. -- All Rights Reserved."' in xml_text, xml_text
+
+
 def test_null_site_quota(server: TSC.Server) -> None:
     test_site = TSC.SiteItem("testname", "testcontenturl", tier_explorer_capacity=1, user_quota=None)
     assert test_site.tier_explorer_capacity == 1
