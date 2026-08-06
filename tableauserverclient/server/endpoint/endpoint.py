@@ -190,13 +190,15 @@ class Endpoint:
             max_hops = 30  # requests' library default
         current_url = url
         response = server_response
-        for hop in range(max_hops):
-            if response.status_code not in Redirect_codes:
-                return response, current_url
+        # Not a redirect? Return immediately regardless of max_hops (including 0).
+        if response.status_code not in Redirect_codes:
+            return response, current_url
+        method_name = getattr(method, "__name__", "REQUEST").upper()
+        for _ in range(max_hops):
             location = response.headers.get("Location")
             if not location:
                 raise RedirectError(
-                    f"{method.__name__.upper()} {current_url} returned HTTP {response.status_code} "
+                    f"{method_name} {current_url} returned HTTP {response.status_code} "
                     f"without a Location header; can't follow the redirect."
                 )
             # Support relative Locations per RFC 7231.
@@ -212,8 +214,13 @@ class Endpoint:
             if next_response is None:
                 raise RuntimeError(f"No response after redirect to {current_url}")
             if isinstance(next_response, Exception):
+                # _blocking_request already re-raises via except -> raise, so this
+                # branch is defensive; keep it to satisfy the Response|Exception|None
+                # return type.
                 raise next_response
             response = next_response
+            if response.status_code not in Redirect_codes:
+                return response, current_url
         # Still a redirect after max_hops hops -> loop / misconfiguration.
         raise RedirectError(
             f"Exceeded {max_hops} redirect hops starting from {url}; last Location was {current_url}. "
