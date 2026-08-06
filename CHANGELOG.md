@@ -1,4 +1,18 @@
 
+## Unreleased
+
+* Added `Projects.get_by_path(path)` to look up a project by its slash-separated
+  hierarchy path (e.g. `"Marketing/Q1 Reports"`). The walk is performed level by
+  level using the REST API name filter, so a path with *n* components issues *n*
+  requests. Returns the matching `ProjectItem` or `None` if no project is found.
+* Added `JobItem.status_notes` for the structured `<statusNotes><statusNote
+  type=".." value=".." text=".."/></statusNotes>` block documented on the Query
+  Job REST endpoint. Populated for UserImport and other multi-row jobs where
+  individual rows have distinct outcomes; each entry is a dict with keys
+  `type` / `value` / `text`. The existing `notes: list[str]` attribute is
+  unchanged (it parses the separate legacy `<notes>` element still emitted by
+  some job types). Fixes #1850.
+
 ## 0.18.0 (6 April 2022)    
 * Switched to using defused_xml for xml attack protection
 * added linting and type hints
