@@ -7,10 +7,24 @@ Run with:
     TABLEAU_SITEADMIN_TOKEN_NAME=... TABLEAU_SITEADMIN_TOKEN=... \
     pytest test_e2e/test_users_groups.py -v
 """
+
+import uuid
+
 import pytest
 import tableauserverclient as TSC
 
 pytestmark = pytest.mark.e2e_admin
+
+
+def _unique(prefix: str) -> str:
+    """Generate a name unique to this test run.
+
+    Every user/group name used by an e2e test must be per-run to avoid
+    409 conflicts when: (a) two runs execute against the same site in
+    parallel, or (b) a prior run crashed after `create` but before the
+    `finally` block removed it.
+    """
+    return f"{prefix}-{uuid.uuid4().hex[:8]}"
 
 
 def test_users_get_returns_nonempty_list(server_admin):
@@ -29,12 +43,13 @@ def test_groups_get_returns_nonempty_list(server_admin):
 
 def test_user_add_creates_user(server_admin):
     """users.add() creates a new local user and returns it with an assigned id."""
-    new_user = TSC.UserItem("tsc-e2e-user", TSC.UserItem.Roles.Unlicensed)
+    user_name = _unique("tsc-e2e-user")
+    new_user = TSC.UserItem(user_name, TSC.UserItem.Roles.Unlicensed)
     created = None
     try:
         created = server_admin.users.add(new_user)
         assert created.id is not None
-        assert created.name == "tsc-e2e-user"
+        assert created.name == user_name
     finally:
         if created and created.id:
             server_admin.users.remove(created.id)
@@ -42,13 +57,14 @@ def test_user_add_creates_user(server_admin):
 
 def test_user_get_by_id_returns_user(server_admin):
     """users.get_by_id() returns the correct user for a known id."""
-    new_user = TSC.UserItem("tsc-e2e-user-byid", TSC.UserItem.Roles.Unlicensed)
+    user_name = _unique("tsc-e2e-user-byid")
+    new_user = TSC.UserItem(user_name, TSC.UserItem.Roles.Unlicensed)
     created = None
     try:
         created = server_admin.users.add(new_user)
         fetched = server_admin.users.get_by_id(created.id)
         assert fetched.id == created.id
-        assert fetched.name == "tsc-e2e-user-byid"
+        assert fetched.name == user_name
     finally:
         if created and created.id:
             server_admin.users.remove(created.id)
@@ -56,7 +72,7 @@ def test_user_get_by_id_returns_user(server_admin):
 
 def test_user_update_changes_role(server_admin):
     """users.update() with a new site_role persists the change."""
-    new_user = TSC.UserItem("tsc-e2e-user-update", TSC.UserItem.Roles.Unlicensed)
+    new_user = TSC.UserItem(_unique("tsc-e2e-user-update"), TSC.UserItem.Roles.Unlicensed)
     created = None
     try:
         created = server_admin.users.add(new_user)
@@ -74,12 +90,13 @@ def test_user_update_changes_role(server_admin):
 
 def test_group_create_creates_group(server_admin):
     """groups.create() creates a local group and returns it with an assigned id."""
-    new_group = TSC.GroupItem("tsc-e2e-group")
+    group_name = _unique("tsc-e2e-group")
+    new_group = TSC.GroupItem(group_name)
     created = None
     try:
         created = server_admin.groups.create(new_group)
         assert created.id is not None
-        assert created.name == "tsc-e2e-group"
+        assert created.name == group_name
     finally:
         if created and created.id:
             server_admin.groups.delete(created.id)
@@ -90,8 +107,8 @@ def test_group_add_user_appears_in_populate_users(server_admin):
     user = None
     group = None
     try:
-        user = server_admin.users.add(TSC.UserItem("tsc-e2e-user-grp", TSC.UserItem.Roles.Unlicensed))
-        group = server_admin.groups.create(TSC.GroupItem("tsc-e2e-group-add"))
+        user = server_admin.users.add(TSC.UserItem(_unique("tsc-e2e-user-grp"), TSC.UserItem.Roles.Unlicensed))
+        group = server_admin.groups.create(TSC.GroupItem(_unique("tsc-e2e-group-add")))
 
         server_admin.groups.add_user(group, user.id)
 
@@ -110,8 +127,8 @@ def test_group_remove_user_no_longer_in_group(server_admin):
     user = None
     group = None
     try:
-        user = server_admin.users.add(TSC.UserItem("tsc-e2e-user-rmv", TSC.UserItem.Roles.Unlicensed))
-        group = server_admin.groups.create(TSC.GroupItem("tsc-e2e-group-rmv"))
+        user = server_admin.users.add(TSC.UserItem(_unique("tsc-e2e-user-rmv"), TSC.UserItem.Roles.Unlicensed))
+        group = server_admin.groups.create(TSC.GroupItem(_unique("tsc-e2e-group-rmv")))
 
         server_admin.groups.add_user(group, user.id)
         server_admin.groups.remove_user(group, user.id)
@@ -128,14 +145,15 @@ def test_group_remove_user_no_longer_in_group(server_admin):
 
 def test_group_delete_removes_group(server_admin):
     """groups.delete() removes the group; it no longer appears in groups.get()."""
+    group_name = _unique("tsc-e2e-group-del")
     created = None
     try:
-        created = server_admin.groups.create(TSC.GroupItem("tsc-e2e-group-del"))
+        created = server_admin.groups.create(TSC.GroupItem(group_name))
         group_id = created.id
         server_admin.groups.delete(group_id)
         created = None
 
-        remaining = list(server_admin.groups.filter(name="tsc-e2e-group-del"))
+        remaining = list(server_admin.groups.filter(name=group_name))
         assert len(remaining) == 0
     finally:
         if created and created.id:
@@ -144,7 +162,8 @@ def test_group_delete_removes_group(server_admin):
 
 def test_user_remove_removes_user(server_admin):
     """users.remove() removes the user; they no longer appear in users.get()."""
-    new_user = TSC.UserItem("tsc-e2e-user-del", TSC.UserItem.Roles.Unlicensed)
+    user_name = _unique("tsc-e2e-user-del")
+    new_user = TSC.UserItem(user_name, TSC.UserItem.Roles.Unlicensed)
     created = None
     try:
         created = server_admin.users.add(new_user)
@@ -152,7 +171,7 @@ def test_user_remove_removes_user(server_admin):
         server_admin.users.remove(user_id)
         created = None
 
-        remaining = list(server_admin.users.filter(name="tsc-e2e-user-del"))
+        remaining = list(server_admin.users.filter(name=user_name))
         assert len(remaining) == 0
     finally:
         if created and created.id:

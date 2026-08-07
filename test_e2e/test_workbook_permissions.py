@@ -76,7 +76,10 @@ def test_update_permissions_appears_on_populate(server_admin, workbook_and_user)
             grantee,
             {TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow},
         )
-        server_admin.workbooks.delete_permission(workbook, delete_rule)
+        try:
+            server_admin.workbooks.delete_permission(workbook, delete_rule)
+        except Exception:
+            pass  # Rule may already be deleted by the test body
 
 
 def test_view_populate_permissions_returns_list(server_admin, workbook_and_user):
