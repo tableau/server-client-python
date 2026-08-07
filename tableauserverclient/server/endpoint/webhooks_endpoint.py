@@ -138,7 +138,10 @@ class Webhooks(Endpoint):
             An object containing information about the updated webhook.
         """
         if not webhook_item.id:
-            error = "Webhook item missing ID. Webhook must be retrieved from server first."
+            error = (
+                "Webhook item missing ID. Set webhook_item.id directly, or fetch the "
+                "webhook via webhooks.get_by_id() / webhooks.get() before updating."
+            )
             raise MissingRequiredFieldError(error)
         url = f"{self.baseurl}/{webhook_item.id}"
         update_req = RequestFactory.Webhook.update_req(webhook_item)

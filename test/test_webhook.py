@@ -110,7 +110,10 @@ def test_event_setter_short_name() -> None:
 
 
 def test_event_setter_full_source_name() -> None:
-    """Full webhook-source-event- names should be accepted and stored as-is."""
+    """Full webhook-source-event-* names: _event stores the full name; the
+    public event getter strips the webhook-source-event- prefix for backwards
+    compatibility with callers that expect the short form.
+    """
     item = WebhookItem()
     item.event = "webhook-source-event-datasource-updated"
     assert item._event == "webhook-source-event-datasource-updated"
@@ -315,3 +318,72 @@ def test_parse_is_enabled_false() -> None:
     webhooks = WebhookItem.from_response(xml, ns)
     assert len(webhooks) == 1
     assert webhooks[0].is_enabled is False
+
+
+def test_update_request_factory_partial_update_is_enabled_only() -> None:
+    """update_req with only is_enabled set (no name, url, event) should emit
+    only the isEnabled attribute. Server should accept this per Update Webhook
+    REST spec, though the actual accepted-fields matrix must be validated e2e.
+    """
+    webhook_item = WebhookItem()
+    webhook_item._set_values("wh-1", None, None, None, None)
+    webhook_item.is_enabled = False
+
+    request_bytes = RequestFactory.Webhook.update_req(webhook_item)
+    request_str = request_bytes.decode("utf-8")
+
+    assert 'isEnabled="false"' in request_str
+    assert "webhook-source" not in request_str
+    assert "webhook-destination" not in request_str
+    # name attribute is only emitted when webhook_item.name is set
+    assert 'name="' not in request_str
+
+
+def test_status_change_reason_absent_from_response_is_none() -> None:
+    """A webhook response without a statusChangeReason attribute should leave
+    the parsed item.status_change_reason as None (not empty string, not raise).
+    """
+    xml = (
+        b"<?xml version='1.0' encoding='UTF-8'?>"
+        b'<tsResponse xmlns="http://tableau.com/api">'
+        b'  <webhook id="wh-2" name="wh-nosr" isEnabled="true">'
+        b"    <webhook-source><webhook-source-event-datasource-created /></webhook-source>"
+        b'    <webhook-destination><webhook-destination-http method="POST" url="https://x.example.com/h"/>'
+        b"    </webhook-destination>"
+        b"  </webhook>"
+        b"</tsResponse>"
+    )
+    ns = {"t": "http://tableau.com/api"}
+    webhooks = WebhookItem.from_response(xml, ns)
+    assert len(webhooks) == 1
+    assert webhooks[0].status_change_reason is None
+
+
+def test_update_raises_on_server_below_3_6(server: TSC.Server) -> None:
+    """webhooks.update is decorated @api(version="3.6"); calling on an older
+    server must raise EndpointUnavailableError, not silently attempt the PUT.
+    """
+    from tableauserverclient.server.exceptions import EndpointUnavailableError
+
+    server.version = "3.5"
+    webhook_item = WebhookItem()
+    webhook_item._set_values("wh-1", "new-name", None, None, None)
+
+    with pytest.raises(EndpointUnavailableError):
+        server.webhooks.update(webhook_item)
+
+
+def test_update_request_factory_new_style_event_name() -> None:
+    """Webhooks created with new-style webhook-event-* event names should
+    round-trip through update_req: the full event name is emitted as an
+    XML element inside <webhook-source> and stored verbatim in _event.
+    """
+    webhook_item = WebhookItem()
+    webhook_item._set_values("wh-3", None, None, None, None)
+    webhook_item.event = "webhook-event-user-promoted-admin"
+
+    request_bytes = RequestFactory.Webhook.update_req(webhook_item)
+    request_str = request_bytes.decode("utf-8")
+
+    assert "webhook-source" in request_str
+    assert "webhook-event-user-promoted-admin" in request_str
