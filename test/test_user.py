@@ -598,3 +598,24 @@ def test_remove_users_csv(server: TSC.Server) -> None:
             assert (
                 name == f"{user.domain_name}\\{user.name}"
             ), f"Name in csv does not match expected name: {user.domain_name}\\{user.name}"
+
+
+def test_from_xml_accepts_unknown_auth_setting() -> None:
+    # Regression: response parsing must not enforce the UserItem.Auth enum. If a
+    # future Tableau release adds a new auth type, TSC's `_set_values` used to
+    # route through the @property_is_enum(Auth) setter, which raised ValueError
+    # on any value outside {SAML, OpenID, TableauIDWithMFA, ServerDefault},
+    # breaking response parsing entirely. The CSV import path validates upstream
+    # against CSVImport._AUTH_CANONICAL, so the enum guard on _set_values was
+    # redundant there and harmful on server-parse paths.
+    ns = {"t": "http://tableau.com/api"}
+    xml = ET.fromstring(
+        b"<user xmlns='http://tableau.com/api' "
+        b"id='u1' name='alice' siteRole='Viewer' authSetting='FutureAuthType42' />"
+    )
+    item = TSC.UserItem.from_xml(xml, ns)
+    assert (
+        item.auth_setting == "FutureAuthType42"
+    ), "from_xml must preserve unknown auth values verbatim, not raise or drop them"
+    assert item.name == "alice"
+    assert item.site_role == "Viewer"

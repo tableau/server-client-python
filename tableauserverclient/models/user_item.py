@@ -308,10 +308,15 @@ class UserItem:
         if email:
             self.email = email
         if auth_setting:
-            # Go through the @property_is_enum(Auth) setter rather than writing
-            # to _auth_setting directly, so CSV-parsed users can't carry an
-            # invalid auth_setting that only fails later at the API call.
-            self.auth_setting = auth_setting
+            # Write directly to _auth_setting rather than going through the
+            # @property_is_enum(Auth) setter. This method is called from both
+            # CSV import and server response parsing (from_xml, populate, etc.);
+            # if the server ever returns an auth type we don't yet know about
+            # (a new Auth value in a future Tableau release), the enum guard
+            # would raise ValueError during response parsing. CSV callers
+            # already validate the auth string against CSVImport._AUTH_CANONICAL
+            # before calling here, so this write is safe.
+            self._auth_setting = auth_setting
         if domain_name:
             self._domain_name = domain_name
         if locale:
