@@ -1709,6 +1709,21 @@ conn.username = 'newuser'
 updated_conn = server.datasources.update_connection(datasource_item, conn)
 ```
 
+**How-to: convert an existing connection to Snowflake keypair auth**
+
+As of REST API v3.27, an existing connection can be flipped from username/password to Snowflake keypair authentication in place. First save the private key on the site under **Site Settings -> Saved Credentials for Data Sources** (keyed on server address + username); the update call only records the auth type and username, it does not carry the key. Then:
+
+```py
+server.datasources.populate_connections(datasource_item)
+conn = next(c for c in datasource_item.connections if c.connection_type == 'snowflake')
+conn.auth_type = 'auth-keypair'
+conn.username = 'my_snowflake_user'
+conn.embed_password = True
+server.datasources.update_connection(datasource_item, conn)
+```
+
+See [`samples/update_connection_to_keypair.py`](https://github.com/tableau/server-client-python/blob/master/samples/update_connection_to_keypair.py) for a runnable end-to-end example, and the REST API [authenticationType reference](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#update_data_source_connection) for the full list of supported values.
+
 <br>
 <br>
 
