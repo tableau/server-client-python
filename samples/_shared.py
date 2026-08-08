@@ -47,26 +47,26 @@ def add_common_arguments(parser: argparse.ArgumentParser) -> None:
     are pulled from the environment or prompted for interactively.
     """
     parser.add_argument("--server", "-s", help="server address (env: TABLEAU_SERVER)")
-    parser.add_argument("--site", "-S", help="site content URL (env: TABLEAU_SITE)")
+    parser.add_argument("--site", "-t", help="site content URL (env: TABLEAU_SITE)")
     parser.add_argument(
         "--token-name",
-        "-p",
         help="name of the personal access token used to sign into the server " "(env: TABLEAU_TOKEN_NAME)",
     )
     parser.add_argument(
         "--token-value",
-        "-v",
         help="value of the personal access token used to sign into the server "
         "(env: TABLEAU_TOKEN_VALUE). Prefer the env var or interactive prompt over the "
         "command line so the secret does not land in shell history.",
     )
     parser.add_argument(
         "--username",
+        "-u",
         help="username to sign into the server (env: TABLEAU_USERNAME). Only used if "
         "no personal access token is supplied.",
     )
     parser.add_argument(
         "--password",
+        "-p",
         help="password (env: TABLEAU_PASSWORD). Prefer the env var or interactive " "prompt over the command line.",
     )
     parser.add_argument(
