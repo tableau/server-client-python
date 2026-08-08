@@ -9,7 +9,8 @@
 # update will succeed but subsequent extract refreshes / connection tests will
 # fail authentication.
 #
-# Supported since REST API v3.27.
+# Supported since REST API v3.27 for datasource and workbook connections;
+# flow connections gained the same capability in v3.28.
 # See: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#update_data_source_connection
 #
 # To run the script, you must have installed Python 3.7 or later.
@@ -105,8 +106,12 @@ def main():
 
         connection.auth_type = "auth-keypair"
         connection.username = args.keypair_username
-        # embedPassword=true tells the server to use the pre-saved credential
-        # from Site Settings -> Saved Credentials rather than prompt at query time.
+        # embedPassword=true binds this connection to a matching pre-saved
+        # key-pair credential at query/refresh time. It requires that a
+        # credential for the SAME username was already saved on the site
+        # under Site Settings -> Saved Credentials for Data Sources. Without
+        # that prerequisite the update writes 'auth-keypair' into the
+        # metadata but query/refresh will fail because there's no bound key.
         connection.embed_password = True
 
         endpoint.update_connection(resource, connection)
