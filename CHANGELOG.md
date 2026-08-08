@@ -5,6 +5,14 @@
   hierarchy path (e.g. `"Marketing/Q1 Reports"`). The walk is performed level by
   level using the REST API name filter, so a path with *n* components issues *n*
   requests. Returns the matching `ProjectItem` or `None` if no project is found.
+* **Behavior change:** `TableauItem` is now a structural Protocol rather than
+  a `Union` of concrete item classes. Static type checks that used to fail on
+  unrelated types will now succeed if the object exposes the expected attributes
+  (`id`, `name`, `owner_id`, `tags`, etc.). More importantly,
+  `isinstance(x, TableauItem)` previously raised `TypeError` (Union isn't a
+  runtime-checkable class); it now returns `True` for any object with the
+  right shape. If you relied on the `TypeError` as a guard, add an explicit
+  concrete-type check instead.
 
 ## 0.18.0 (6 April 2022)    
 * Switched to using defused_xml for xml attack protection
