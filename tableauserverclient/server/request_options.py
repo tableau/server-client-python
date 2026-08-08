@@ -353,8 +353,10 @@ class _DataExportOptions(RequestOptionsBase):
         """Apply a filter based on a column within the view.
 
         Serialized to the REST API as ``vf_<name>=<value>``. The rules below
-        describe how the server interprets the wire value; ``vf()`` itself
-        does not transform your input.
+        describe how the server interprets the wire value. ``vf()`` itself
+        does not apply any Tableau-specific escaping or semantic transforms
+        to your value; it only percent-encodes the value for HTTP transport,
+        which the server decodes back before applying the rules below.
 
         Value syntax
         ------------
@@ -365,17 +367,20 @@ class _DataExportOptions(RequestOptionsBase):
           matches rows where the column is ``East`` OR ``West``.
         - **Escaping** applies to two characters only, comma and backslash;
           all other characters (``&``, ``=``, ``/``, ``#``, ``%``, ``+``,
-          quotes, brackets, etc.) pass through untouched -- ``vf()`` URL-
-          encodes them for transport and the server treats them as literal
-          data. To match a value containing a literal comma, escape it:
+          quotes, brackets, etc.) pass through untouched and the server
+          treats them as literal data. Percent-encoding is transport only:
+          ``%2C`` and ``%5C`` reach the server as ``,`` and ``\\`` and are
+          then processed like any other comma or backslash -- so URL-
+          encoding does NOT escape a literal comma or backslash. To match a
+          value containing a literal comma, escape it:
           ``"Rock\\, Paper\\, Scissors"`` matches ``Rock, Paper, Scissors``
           (without escaping, the comma starts an OR-list). To match a
           literal backslash, double it: ``"C:\\\\temp\\\\file"`` matches
-          ``C:\\temp\\file``. URL-encoding (``%2C``, ``%5C``) does NOT
-          escape either character.
-        - **Empty value** (``vf_<name>=``) overrides any workbook-embedded
-          filter on that column, effectively widening it to all values.
-          This is undocumented but stable behavior that some users rely on.
+          ``C:\\temp\\file``.
+        - **Empty value** (``vf_<name>=``) is observed to override any
+          workbook-embedded filter on that column, effectively widening it
+          to all values. Not officially documented; behavior may change
+          without notice.
         - **Wildcards** (``*``) are NOT supported by the REST view-filter
           layer. Wildcard matching is a viz-configured behavior on filter
           controls inside a workbook; use ``.parameter()`` and design the
