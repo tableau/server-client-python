@@ -25,10 +25,13 @@ class Filter:
 
     Workaround for names containing these characters: use the ``Equals``
     operator with an asterisk substituted for the special character. Asterisk
-    behaves as a wildcard, so for example filtering a workbook named
+    behaves as a wildcard (starts-with, ends-with, and contains matching are
+    supported by the server; see the Tableau REST API docs for "Filtering
+    and Sorting"), so for example filtering a workbook named
     ``T(L-F,SZ&V-MY) - PC`` can be found via ``name="T(L-F*SZ*V-MY) - PC"``.
-    Post-filter the result client-side to disambiguate if multiple names could
-    match.
+    Wildcard filtering requires Tableau Cloud May 2023 or Tableau Server
+    2022.1.14 or later. Post-filter the result client-side to disambiguate
+    if multiple names could match.
 
     Parameters
     ----------
