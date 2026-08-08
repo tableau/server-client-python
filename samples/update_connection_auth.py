@@ -1,3 +1,31 @@
+####
+# This script updates a single connection on a datasource or workbook to embed
+# credentials. It's a generic authentication-change helper: the same code path
+# works whether you're setting username+password, switching to OAuth, or moving
+# a Snowflake connection to keypair auth.
+#
+# Common authentication_type values:
+#   - "Username Password"      -- username + password auth
+#   - "oauth"                  -- OAuth
+#   - "auth-keypair"           -- Snowflake keypair auth (see prerequisite below)
+#   - "AD Service Principal"   -- Azure AD Service Principal
+#   - "sqlserver"              -- SQL Server username + password
+#
+# When embed_password=True the server binds the connection to a matching
+# pre-saved credential on the site (looked up by username, connection class,
+# and role). For keypair-auth conversions this means the Snowflake private key
+# MUST already be saved on the site under Site Settings -> Saved Credentials
+# for Data Sources before running this script. If not, the update writes the
+# new auth type into metadata but subsequent extract refreshes and connection
+# tests fail because no bound credential is found.
+#
+# Ability to change a connection's authentication type via this endpoint was
+# added in REST API v3.27 for datasource and workbook connections; flow
+# connections gained the same capability in v3.28.
+#
+# See: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#update_data_source_connection
+####
+
 import argparse
 import logging
 import tableauserverclient as TSC
