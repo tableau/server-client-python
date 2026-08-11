@@ -9570,42 +9570,6 @@ Returns the new webhook item.
 <br>
 <br>
 
-### webhooks.delete
-```py
-webhooks.delete(webhook_id)
-```
-
-Deletes a webhook by ID.
-
-To specify the site, create a `TableauAuth` instance using the content URL for the site `(site_id)` and sign in to the site. For more information on how to specify a site, see the [TableauAuth class](#tableauauth-class).
-
-REST API:  [Delete Webhook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_notifications.htm#delete_webhook)
-
-**Parameters**
-
-Name|Description
-:---|:---
-`webhook_id`| The ID of the webhook to delete.
-
-**Exceptions**
-
-Error|Description
-:---|:---
-`Webhook ID undefined`| Raises an exception if a `webhook_id` is not provided. 
-
-**Example**
-```py
-# import tableauserverclient as TSC
-# server = TSC.Server('https://SERVER')
-# sign in . For authentication examples, see https://github.com/tableau/server-client-python/blob/master/samples/login.py
-
-# Delete the webhook
-with server.auth.sign_in(tableau_auth):
-  server.webhooks.delete('7d60d364-b9f5-4a9c-8aa5-4bdaa38c5dd3')
-```
-<br>
-<br>
-
 #### webhooks.get()
 ```py
 webhooks.get()
