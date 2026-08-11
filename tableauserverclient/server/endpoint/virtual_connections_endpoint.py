@@ -169,10 +169,20 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem], TaggingMixin):
         >>> vc = server.virtual_connections.get_by_id('1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d')
         >>> print(vc.name, vc.content)
         """
-        vconn_id = getattr(virtual_connection, "id", virtual_connection)
+        if isinstance(virtual_connection, VirtualConnectionItem):
+            vconn_id = virtual_connection.id or ""
+        else:
+            vconn_id = virtual_connection
         url = f"{self.baseurl}/{vconn_id}"
         server_response = self.get_request(url)
-        return VirtualConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        result = VirtualConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
+        # The Get Virtual Connection response omits the `id` attribute on the
+        # <virtualConnection> element (server-side response builder never calls
+        # setId). Stamp it back from the request path so downstream calls that
+        # need result.id (add_tags, delete_tags, update_tags) work.
+        if result._id is None:
+            result._id = vconn_id
+        return result
 
     @api(version="3.23")
     def download(self, virtual_connection: str | VirtualConnectionItem) -> str:
@@ -487,7 +497,8 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem], TaggingMixin):
         Returns
         -------
         set[str]
-            The set of tags added.
+            The full tag set on the virtual connection after the add,
+            as returned by the server.
 
         Examples
         --------
@@ -517,23 +528,37 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem], TaggingMixin):
         """
         return super().delete_tags(virtual_connection, tags)
 
-    @api(version="3.23")
+    @api(version="3.30")
     def update_tags(self, virtual_connection: VirtualConnectionItem) -> None:
-        """Not implemented for virtual connections.
+        """Push local tag edits to the server as add / delete calls.
 
-        `TaggingMixin.update_tags` computes an add/remove diff from the
-        item's ``tags`` and ``_initial_tags`` attributes. The REST API's
-        `List Virtual Connections` and `Get Virtual Connection` responses
-        do not include tags in the schema, so there's no way to populate
-        those attributes on the item, and no diff basis for `update_tags`.
-        Tags on virtual connections exist server-side and are manipulated
-        via the dedicated `Add Tags to Virtual Connection` and
-        `Delete Tag from Virtual Connection` endpoints, which the
-        ``add_tags`` and ``delete_tags`` methods on this endpoint wrap.
+        Computes the diff between ``virtual_connection.tags`` (mutated
+        locally) and ``virtual_connection._initial_tags`` (captured at
+        parse time), then issues `Add Tags to Virtual Connection` and
+        `Delete Tag from Virtual Connection` calls to bring the server
+        state in line.
 
-        Raises
-        ------
-        NotImplementedError
-            Always. Use ``add_tags`` and ``delete_tags`` directly.
+        Requires Tableau Server 2026.2 / Cloud April 2026 or later (REST
+        API 3.30+): earlier server versions do not populate tags on the
+        response, so ``_initial_tags`` is empty and every tag on the item
+        would be treated as new.
+
+        Parameters
+        ----------
+        virtual_connection : VirtualConnectionItem
+            The virtual connection whose tags to synchronize. Must have
+            been fetched via `get` / `get_by_id` (which populates
+            ``_initial_tags``) then edited via ``virtual_connection.tags``.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> vc = server.virtual_connections.get_by_id(vc_id)
+        >>> vc.tags.add('finance')
+        >>> vc.tags.discard('stale')
+        >>> server.virtual_connections.update_tags(vc)
         """
-        raise NotImplementedError("Update tags is not implemented for Virtual Connections")
+        return super().update_tags(virtual_connection)

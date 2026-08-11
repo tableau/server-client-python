@@ -1,3 +1,4 @@
+import copy
 import datetime as dt
 import json
 from typing import Callable
@@ -10,6 +11,7 @@ from tableauserverclient.datetime_helpers import parse_datetime
 from tableauserverclient.models.connection_item import ConnectionItem
 from tableauserverclient.models.exceptions import UnpopulatedPropertyError
 from tableauserverclient.models.permissions_item import PermissionsRule
+from tableauserverclient.models.tag_item import TagItem
 
 
 class VirtualConnectionItem:
@@ -26,6 +28,12 @@ class VirtualConnectionItem:
         self.owner_id: str | None = None
         self.content: dict[str, dict] | None = None
         self.certification_note: str | None = None
+        # Tags on virtual connections are populated by the server on List and
+        # Get responses since Tableau Server 2026.2 / Cloud April 2026
+        # (REST API 3.30, W-21424436). Callers on earlier server versions
+        # will see these as empty sets; add_tags / delete_tags still work.
+        self.tags: set[str] = set()
+        self._initial_tags: set[str] = set()
 
     def __str__(self) -> str:
         return f"{self.__class__.__qualname__}(name={self.name})"
@@ -43,7 +51,7 @@ class VirtualConnectionItem:
     @property
     def permissions(self) -> list[PermissionsRule]:
         if self._permissions is None:
-            error = "Workbook item must be populated with permissions first."
+            error = "Virtual connection item must be populated with permissions first."
             raise UnpopulatedPropertyError(error)
         return self._permissions()
 
@@ -71,6 +79,10 @@ class VirtualConnectionItem:
         v_conn.project_id = p.get("id", None) if ((p := xml.find(".//t:project[@id]", ns)) is not None) else None
         v_conn.owner_id = o.get("id", None) if ((o := xml.find(".//t:owner[@id]", ns)) is not None) else None
         v_conn.content = json.loads(c.text or "{}") if ((c := xml.find(".//t:content", ns)) is not None) else None
+        tags_elem = xml.find(".//t:tags", ns)
+        if tags_elem is not None:
+            v_conn.tags = TagItem.from_xml_element(tags_elem, ns)
+            v_conn._initial_tags = copy.copy(v_conn.tags)
         return v_conn
 
 
