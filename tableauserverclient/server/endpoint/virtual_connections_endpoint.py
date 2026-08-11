@@ -6,6 +6,7 @@ from collections.abc import Iterable
 
 from tableauserverclient.models.connection_item import ConnectionItem
 from tableauserverclient.models.pagination_item import PaginationItem
+from tableauserverclient.models.permissions_item import PermissionsRule
 from tableauserverclient.models.revision_item import RevisionItem
 from tableauserverclient.models.virtual_connection_item import VirtualConnectionItem
 from tableauserverclient.server.request_factory import RequestFactory
@@ -30,7 +31,7 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem], TaggingMixin):
     The virtual connection resources are represented by the
     ``VirtualConnectionItem`` class in ``tableauserverclient.models``.
 
-    REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_virtual_connections.htm
+    REST API: `Virtual Connections Methods <https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_virtual_connections.htm>`_
     """
 
     def __init__(self, parent_srv: "Server") -> None:
@@ -396,21 +397,21 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem], TaggingMixin):
         return VirtualConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
 
     @api(version="3.22")
-    def populate_permissions(self, item: VirtualConnectionItem) -> None:
+    def populate_permissions(self, virtual_connection: VirtualConnectionItem) -> None:
         """Populate the permissions for a virtual connection.
 
-        After calling this method, iterate ``item.permissions`` to access the
-        ``PermissionsRule`` objects.
+        After calling this method, iterate ``virtual_connection.permissions``
+        to access the ``PermissionsRule`` objects.
 
         Parameters
         ----------
-        item : VirtualConnectionItem
+        virtual_connection : VirtualConnectionItem
             The virtual connection to populate permissions for.
 
         Returns
         -------
         None
-            Permissions are populated on ``item.permissions``.
+            Permissions are populated on ``virtual_connection.permissions``.
 
         Examples
         --------
@@ -418,15 +419,17 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem], TaggingMixin):
         >>> for rule in vc.permissions:
         ...     print(rule)
         """
-        self._permissions.populate(item)
+        self._permissions.populate(virtual_connection)
 
     @api(version="3.22")
-    def add_permissions(self, resource, rules):
+    def add_permissions(
+        self, virtual_connection: VirtualConnectionItem, rules: list[PermissionsRule]
+    ) -> list[PermissionsRule]:
         """Add or update permissions on a virtual connection.
 
         Parameters
         ----------
-        resource : VirtualConnectionItem
+        virtual_connection : VirtualConnectionItem
             The virtual connection to update permissions on.
 
         rules : list[PermissionsRule]
@@ -435,7 +438,7 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem], TaggingMixin):
         Returns
         -------
         list[PermissionsRule]
-            The updated list of permission rules.
+            The updated list of permission rules as returned by the server.
 
         Examples
         --------
@@ -445,18 +448,18 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem], TaggingMixin):
         ... )
         >>> server.virtual_connections.add_permissions(vc, [permission])
         """
-        return self._permissions.update(resource, rules)
+        return self._permissions.update(virtual_connection, rules)
 
     @api(version="3.22")
-    def delete_permission(self, item, capability_item):
+    def delete_permission(self, virtual_connection: VirtualConnectionItem, permission_rule: PermissionsRule) -> None:
         """Remove a specific permission from a virtual connection.
 
         Parameters
         ----------
-        item : VirtualConnectionItem
+        virtual_connection : VirtualConnectionItem
             The virtual connection to remove the permission from.
 
-        capability_item : PermissionsRule
+        permission_rule : PermissionsRule
             The permission rule to remove.
 
         Returns
@@ -467,7 +470,7 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem], TaggingMixin):
         --------
         >>> server.virtual_connections.delete_permission(vc, permission_rule)
         """
-        return self._permissions.delete(item, capability_item)
+        return self._permissions.delete(virtual_connection, permission_rule)
 
     @api(version="3.23")
     def add_tags(self, virtual_connection: VirtualConnectionItem | str, tags: Iterable[str] | str) -> set[str]:
@@ -518,9 +521,19 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem], TaggingMixin):
     def update_tags(self, virtual_connection: VirtualConnectionItem) -> None:
         """Not implemented for virtual connections.
 
+        `TaggingMixin.update_tags` computes an add/remove diff from the
+        item's ``tags`` and ``_initial_tags`` attributes. The REST API's
+        `List Virtual Connections` and `Get Virtual Connection` responses
+        do not include tags in the schema, so there's no way to populate
+        those attributes on the item, and no diff basis for `update_tags`.
+        Tags on virtual connections exist server-side and are manipulated
+        via the dedicated `Add Tags to Virtual Connection` and
+        `Delete Tag from Virtual Connection` endpoints, which the
+        ``add_tags`` and ``delete_tags`` methods on this endpoint wrap.
+
         Raises
         ------
         NotImplementedError
-            Always. Use ``add_tags`` and ``delete_tags`` instead.
+            Always. Use ``add_tags`` and ``delete_tags`` directly.
         """
         raise NotImplementedError("Update tags is not implemented for Virtual Connections")
