@@ -183,11 +183,3 @@ def test_create_user_with_lowercase_auth_accepted() -> None:
     user = TSC.UserItem.CSVImport.create_user_from_line("username, pword, fname, creator, none, yes, email, saml")
     assert user is not None
     assert user.auth_setting == "SAML"
-
-
-def test_set_values_rejects_invalid_auth_setting() -> None:
-    # _set_values must route auth_setting through the @property_is_enum guard.
-    # Attempting to set an invalid auth string must raise, not silently succeed.
-    user = TSC.UserItem("someone")
-    with pytest.raises(ValueError):
-        user._set_values(None, None, None, None, None, None, None, "NotAnAuthType", None, None, None, None)

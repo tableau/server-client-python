@@ -539,7 +539,7 @@ class UserItem:
 
             line = list(map(str.strip, incoming.split(",")))
             if len(line) > UserItem.CSVImport.COLUMN_COUNT:
-                raise AttributeError("Too many attributes in line")
+                raise ValueError("Too many attributes for user import")
             username = line[UserItem.CSVImport.ColumnType.USERNAME.value]
             logger.debug(f"> details - {username}")
             UserItem.validate_username_or_throw(username)
