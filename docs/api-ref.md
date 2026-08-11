@@ -1216,10 +1216,10 @@ An updated `DatasourceItem`.
 <br>
 <br>
 
-#### datasource.update_connection
+#### datasources.update_connection
 
 ```py
-datasource.update_connection(datasource_item, connection_item)
+datasources.update_connection(datasource_item, connection_item)
 ```
 
 Updates the server address, port, username, or password for the specified data source connection.
@@ -1247,10 +1247,10 @@ See the `update_connection.py` sample in the Samples directory.
 <br>
 <br>
 
-#### datasource.update_hyper_data
+#### datasources.update_hyper_data
 
 ```py
-datasource.update_hyper_data(datasource_or_connection_item, *, request_id, actions, payload=None)
+datasources.update_hyper_data(datasource_or_connection_item, *, request_id, actions, payload=None)
 ```
 
 Updates the data contained within a published live-to-Hyper datasource.
@@ -4032,10 +4032,10 @@ Source file: server/endpoint/groupsets_endpoint.py
 <br>
 <br>
 
-#### groupsets.get
+#### group_sets.get
 
 ```py
-groupsets.get(req_options=None, result_level=None)
+group_sets.get(req_options=None, result_level=None)
 ```
 
 Returns information about the group sets on the specified site.
@@ -4068,10 +4068,10 @@ for groupset in all_groupsets:
 <br>
 <br>
 
-#### groupsets.get_by_id
+#### group_sets.get_by_id
 
 ```py
-groupsets.get_by_id(groupset_id)
+group_sets.get_by_id(groupset_id)
 ```
 
 Returns information about the specified group set.
@@ -4102,10 +4102,10 @@ print(groupset.name)
 <br>
 <br>
 
-#### groupsets.create
+#### group_sets.create
 
 ```py
-groupsets.create(groupset_item)
+group_sets.create(groupset_item)
 ```
 
 Creates a new group set on the specified site.
@@ -4137,10 +4137,10 @@ print(created_groupset.id)
 <br>
 <br>
 
-#### groupsets.update
+#### group_sets.update
 
 ```py
-groupsets.update(groupset_item)
+group_sets.update(groupset_item)
 ```
 
 Modifies an existing group set. You can use this method to rename a group set.
@@ -4171,10 +4171,10 @@ updated_groupset = server.groupsets.update(groupset)
 <br>
 <br>
 
-#### groupsets.delete
+#### group_sets.delete
 
 ```py
-groupsets.delete(groupset)
+group_sets.delete(groupset)
 ```
 
 Deletes the specified group set from the site.
@@ -4204,10 +4204,10 @@ server.groupsets.delete(groupset.id)
 <br>
 <br>
 
-#### groupsets.add_group
+#### group_sets.add_group
 
 ```py
-groupsets.add_group(groupset_item, group)
+group_sets.add_group(groupset_item, group)
 ```
 
 Adds a group to the specified group set.
@@ -4241,10 +4241,10 @@ server.groupsets.add_group(groupset, mygroup)
 <br>
 <br>
 
-#### groupsets.remove_group
+#### group_sets.remove_group
 
 ```py
-groupsets.remove_group(groupset_item, group)
+group_sets.remove_group(groupset_item, group)
 ```
 
 Removes a group from the specified group set.
@@ -4275,10 +4275,10 @@ server.groupsets.remove_group(groupset, mygroup)
 <br>
 <br>
 
-#### groupsets.filter
+#### group_sets.filter
 
 ```py
-groupsets.filter(**kwargs)
+group_sets.filter(**kwargs)
 ```
 
 Returns a list of group sets that match the specified filters. Fields and operators are passed as keyword arguments in the form `field_name=value` or `field_name__operator=value`.
@@ -7099,10 +7099,10 @@ Source files: server/endpoints/subscriptions_endpoint.py
 <br>
 <br>
 
-#### subscription.create
+#### subscriptions.create
 
 ```py
-subscription.create(subscription_item)
+subscriptions.create(subscription_item)
 ```
 Creates a subscription to a view or workbook for a specific user on a specific schedule.
 When a user is subscribed to the content, Tableau Server sends the content to the user in email on the schedule that's defined on Tableau Server and specified in the `subscription_item`.
@@ -7207,10 +7207,10 @@ Error   |  Description
 <br>
 <br>
 
-#### subscription.get
+#### subscriptions.get
 
 ```py
-subscription.get(req_options=None)
+subscriptions.get(req_options=None)
 ```
 Returns information about the subscriptions on the specified site.
 
@@ -7231,11 +7231,11 @@ Returns a list of `SubscriptionItem` objects and a `PaginationItem` object. Use 
 <br>
 <br>
 
-#### subscription.get_by_id
+#### subscriptions.get_by_id
 
 
 ```py
-subscription.get_by_id(subscription_id)
+subscriptions.get_by_id(subscription_id)
 ```
 
 Returns information about the specified subscription.
@@ -7274,10 +7274,10 @@ The `SubscriptionItem`.  See [SubscriptionItem class](#subscriptionitem-class)
 <br>
 <br>
 
-#### subscription.update
+#### subscriptions.update
 
 ```py
-subscription.update(subscription_item)
+subscriptions.update(subscription_item)
 ```
 Updates a specific subscription. To update a subscription, you must first query it from server using the `subscriptions.get()` or `subscriptions.get_by_id()` method.
 
@@ -9527,7 +9527,7 @@ Source file: server/endpoint/webhooks_endpoint.py
 <br>
 <br>
 
-#### webhook.create
+#### webhooks.create
 ```py
 webhooks.create(webhook_item)
 
@@ -9570,7 +9570,7 @@ Returns the new webhook item.
 <br>
 <br>
 
-### webhook.delete
+### webhooks.delete
 ```py
 webhooks.delete(webhook_id)
 ```
@@ -9606,7 +9606,7 @@ with server.auth.sign_in(tableau_auth):
 <br>
 <br>
 
-#### webhook.get()
+#### webhooks.get()
 ```py
 webhooks.get()
 ```
@@ -9642,7 +9642,7 @@ print(["Webhook Name:"+ webhook.name+ ";" + "ID:" + webhook.id for webhook in al
 
 ```
 
-#### webhook.get_by_id
+#### webhooks.get_by_id
 
 ```py
 webhooks.get_by_ide(webhook_id)
@@ -9681,7 +9681,7 @@ print (webhook.name, webhook.url)
 <br>
 <br>
 
-#### webhook.delete
+#### webhooks.delete
 
 ```py
 webhooks.delete(webhook_id)
@@ -9710,7 +9710,7 @@ server.webhooks.delete('7d60d364-b9f5-4a9c-8aa5-4bdaa38c5dd3')
 <br>
 <br>
 
-#### webhook.test
+#### webhooks.test
 
 ```py
 webhooks.test(webhook_id)
