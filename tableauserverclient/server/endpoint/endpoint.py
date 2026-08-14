@@ -203,11 +203,26 @@ class Endpoint:
                 )
             # Support relative Locations per RFC 7231.
             next_url = urljoin(current_url, location)
-            if urlparse(current_url).scheme == "https" and urlparse(next_url).scheme == "http":
+            current_scheme = urlparse(current_url).scheme
+            next_scheme = urlparse(next_url).scheme
+            if current_scheme == "https" and next_scheme == "http":
                 raise RedirectError(
                     f"Refusing to follow redirect from {current_url} to {next_url}: "
                     f"HTTPS -> HTTP scheme downgrade would send request data over plaintext."
                 )
+            # http -> https upgrade on the same host: promote the stored server
+            # address so subsequent requests skip this redirect round-trip.
+            # Only rewrite on same-host, same-path-root redirects to avoid
+            # accidentally pointing the client at an unrelated server.
+            if current_scheme == "http" and next_scheme == "https":
+                current_parsed = urlparse(current_url)
+                next_parsed = urlparse(next_url)
+                if current_parsed.netloc == next_parsed.netloc:
+                    old_address = self.parent_srv._server_address
+                    if old_address.startswith("http://") and old_address[7:].startswith(current_parsed.netloc):
+                        new_address = "https://" + old_address[7:]
+                        self.parent_srv._server_address = new_address
+                        logger.info(f"Server redirected to HTTPS; updated server address to {new_address}")
             logger.debug(f"Following {response.status_code} redirect: {current_url} -> {next_url}")
             current_url = next_url
             next_response = self._blocking_request(method, current_url, parameters)

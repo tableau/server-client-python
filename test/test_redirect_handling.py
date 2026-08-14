@@ -196,6 +196,37 @@ def test_http_to_https_upgrade_allowed(server: TSC.Server) -> None:
     assert server.auth_token is not None
 
 
+def test_http_to_https_upgrade_promotes_stored_server_address(server: TSC.Server) -> None:
+    # When the server redirects http://host -> https://host on the same host,
+    # promote server._server_address so subsequent requests skip the redirect.
+    assert server._server_address == "http://test"
+    xml = _sign_in_xml()
+    with requests_mock.mock() as m:
+        m.post(
+            server.auth.baseurl + "/signin", status_code=301, headers={"Location": "https://test/api/3.6/auth/signin"}
+        )
+        m.post("https://test/api/3.6/auth/signin", text=xml)
+        server.auth.sign_in(TSC.TableauAuth("u", "p"))
+    assert server._server_address == "https://test"
+
+
+def test_http_to_https_upgrade_does_not_promote_on_different_host(server: TSC.Server) -> None:
+    # If the redirect target is on a different host, do NOT rewrite the stored
+    # server address -- the redirect might be to a completely unrelated server
+    # and rewriting would silently point every future call at it.
+    assert server._server_address == "http://test"
+    xml = _sign_in_xml()
+    with requests_mock.mock() as m:
+        m.post(
+            server.auth.baseurl + "/signin",
+            status_code=301,
+            headers={"Location": "https://other-host/api/3.6/auth/signin"},
+        )
+        m.post("https://other-host/api/3.6/auth/signin", text=xml)
+        server.auth.sign_in(TSC.TableauAuth("u", "p"))
+    assert server._server_address == "http://test"
+
+
 def test_cross_host_redirect_followed(server: TSC.Server) -> None:
     # e.g. http://online.tableau.com -> http://east.online.tableau.com.
     # This is the scenario in the original inline signin comment.
