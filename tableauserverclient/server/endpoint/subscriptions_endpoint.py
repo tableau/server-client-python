@@ -43,6 +43,11 @@ class Subscriptions(Endpoint):
         if not subscription_item:
             error = "No Susbcription provided"
             raise ValueError(error)
+        if not subscription_item.schedule_id:
+            # See tableau/server-client-python#1658: users trying to create an
+            # "On Extract Refresh" subscription pass schedule_id=None and hit
+            # a confusing wire-layer error. Point them at the factory.
+            raise ValueError("schedule_id is required; see SubscriptionItem.on_extract_refresh")
         logger.info(f"Creating a subscription ({subscription_item})")
         url = self.baseurl
         create_req = RequestFactory.Subscription.create_req(subscription_item)
@@ -63,6 +68,12 @@ class Subscriptions(Endpoint):
         if not subscription_item.id:
             error = "Subscription item missing ID. Subscription must be retrieved from server first."
             raise MissingRequiredFieldError(error)
+        if not subscription_item.schedule_id:
+            # A subscription round-tripped from an inline-schedule response
+            # (Cloud/TOL) has schedule_id=None. Updating it in that state
+            # sends <schedule/> with no id and hits the same wire-layer error
+            # that create() guards against. See tableau/server-client-python#1658.
+            raise ValueError("schedule_id is required to update a subscription")
         url = f"{self.baseurl}/{subscription_item.id}"
         update_req = RequestFactory.Subscription.update_req(subscription_item)
         server_response = self.put_request(url, update_req)

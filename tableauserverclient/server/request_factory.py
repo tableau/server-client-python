@@ -1334,6 +1334,13 @@ class SubscriptionRequest:
             subscription_element.attrib["pageOrientation"] = subscription_item.page_orientation
         if subscription_item.page_size_option is not None:
             subscription_element.attrib["pageSizeOption"] = subscription_item.page_size_option
+        # On create, only emit refreshExtractTriggered when True -- server default
+        # is False, and emitting the attribute unconditionally would surface as a
+        # payload change on servers that treat absence differently from an explicit
+        # False. update_req is asymmetric here: it must emit False to enable the
+        # True -> False transition on an existing subscription.
+        if subscription_item.refresh_extract_triggered:
+            subscription_element.attrib["refreshExtractTriggered"] = "true"
 
         # Content element
         content_element = ET.SubElement(subscription_element, "content")
@@ -1368,6 +1375,10 @@ class SubscriptionRequest:
             subscription.attrib["pageSizeOption"] = subscription_item.page_size_option
         if subscription_item.suspended is not None:
             subscription.attrib["suspended"] = str(subscription_item.suspended).lower()
+        # update_req always emits the flag so callers can turn it off. The
+        # server retains the prior value when the attribute is absent, so
+        # omission would silently prevent True -> False transitions.
+        subscription.attrib["refreshExtractTriggered"] = str(subscription_item.refresh_extract_triggered).lower()
 
         # Schedule element
         schedule = ET.SubElement(subscription, "schedule")
