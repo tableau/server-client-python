@@ -1,5 +1,5 @@
 from tableauserverclient.bin._version import get_versions
-from tableauserverclient.namespace import NEW_NAMESPACE as DEFAULT_NAMESPACE
+from tableauserverclient.server.server import NAMESPACE as DEFAULT_NAMESPACE
 from tableauserverclient.models import (
     BackgroundJobItem,
     CollectionItem,
