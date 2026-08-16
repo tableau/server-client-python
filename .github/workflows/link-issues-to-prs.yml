@@ -1,0 +1,72 @@
+name: Mark linked issues in-progress
+
+# When an open PR references an issue with Closes/Fixes/Resolves, apply the
+# 'in-progress' label to that issue so the stale bot leaves it alone (the
+# stale workflow already exempts 'in-progress'). Remove the label when the
+# PR closes without merging, so a genuinely abandoned PR does not keep its
+# referenced issues shielded forever.
+#
+# actions/stale looks at issue-level events only; a PR that references an
+# issue does not reset the issue's stale timer or move it off the stale
+# label. This workflow bridges that gap.
+#
+# Security note: the script only reads pr.body, extracts decimal issue
+# numbers via a fixed regex, and passes those numbers to the REST API.
+# Body content is never expanded into a run: command or a shell.
+
+on:
+  pull_request_target:
+    types: [opened, edited, reopened, synchronize, ready_for_review, closed]
+
+permissions:
+  issues: write
+  pull-requests: read
+
+jobs:
+  link:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const body = pr.body || '';
+            const re = /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)/gi;
+            const nums = [...new Set([...body.matchAll(re)].map(m => Number(m[1])))];
+            if (nums.length === 0) {
+              core.info('No Closes/Fixes/Resolves references found; nothing to do.');
+              return;
+            }
+
+            // Apply the label while the PR is open. Remove it when the PR
+            // closes without merging (merged PRs also close, but the issue
+            // will be auto-closed by GitHub once the merge lands, so the
+            // in-progress label on it is harmless).
+            const shouldLabel = pr.state === 'open';
+            const shouldUnlabel = pr.state === 'closed' && !pr.merged;
+
+            for (const n of nums) {
+              try {
+                if (shouldLabel) {
+                  await github.rest.issues.addLabels({
+                    ...context.repo,
+                    issue_number: n,
+                    labels: ['in-progress'],
+                  });
+                  core.info(`#${n}: added in-progress`);
+                } else if (shouldUnlabel) {
+                  await github.rest.issues.removeLabel({
+                    ...context.repo,
+                    issue_number: n,
+                    name: 'in-progress',
+                  }).catch(err => {
+                    // 404 just means the label was not present; not an error.
+                    if (err.status !== 404) throw err;
+                  });
+                  core.info(`#${n}: removed in-progress (PR closed unmerged)`);
+                }
+              } catch (err) {
+                // Do not fail the whole run on one bad reference; log and continue.
+                core.warning(`#${n}: ${err.message}`);
+              }
+            }
