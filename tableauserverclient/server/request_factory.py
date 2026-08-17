@@ -1414,6 +1414,21 @@ class WebhookRequest:
 
     @_tsrequest_wrapped
     def update_req(self, xml_request: ET.Element, webhook_item: "WebhookItem") -> bytes:
+        # Reject a no-op update up front. Without at least one updatable
+        # attribute set the payload is <tsRequest><webhook/></tsRequest>,
+        # which the server rejects with a generic 400 that gives the caller
+        # no idea what happened. Raise here with an actionable message.
+        if (
+            webhook_item.name is None
+            and webhook_item.is_enabled is None
+            and webhook_item._event is None
+            and webhook_item.url is None
+        ):
+            raise ValueError(
+                "WebhookItem has no updatable fields set; "
+                "at least one of name, is_enabled, event, or url must be provided."
+            )
+
         webhook = ET.SubElement(xml_request, "webhook")
         if webhook_item.name is not None:
             webhook.attrib["name"] = webhook_item.name

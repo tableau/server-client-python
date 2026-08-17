@@ -197,6 +197,19 @@ def test_update(server: TSC.Server) -> None:
 
         updated_webhook = server.webhooks.update(webhook_item)
 
+        # Verify the actual PUT body reached the wire with the caller's values.
+        # Without this, deleting the update_req call in the endpoint would still
+        # pass every response-derived assertion below (response is mocked and
+        # comes back verbatim). This is the load-bearing endpoint <-> factory
+        # contract check.
+        assert m.last_request is not None
+        assert m.last_request.method == "PUT"
+        body = m.last_request.text or ""
+        assert 'name="webhook-name-updated"' in body, body
+        assert 'isEnabled="true"' in body, body
+        assert 'url="https://updated-url.example.com/hook"' in body, body
+        assert "datasource-created" in body, body
+
         assert updated_webhook.id == "webhook-id"
         assert updated_webhook.name == "webhook-name-updated"
         assert updated_webhook.url == "https://updated-url.example.com/hook"
@@ -208,6 +221,19 @@ def test_update_missing_id(server: TSC.Server) -> None:
     webhook_item.name = "some-webhook"
     with pytest.raises(TSC.MissingRequiredFieldError):
         server.webhooks.update(webhook_item)
+
+
+def test_update_rejects_empty_payload() -> None:
+    # A WebhookItem with no updatable fields set should raise up front rather
+    # than serializing to <tsRequest><webhook/></tsRequest> and letting the
+    # server return a generic 400. Uses update_req directly so the guard is
+    # exercised even before the endpoint sees the item.
+    from tableauserverclient.server.request_factory import RequestFactory
+
+    webhook_item = WebhookItem()
+    webhook_item._id = "webhook-id"  # has an id but nothing to update
+    with pytest.raises(ValueError, match="no updatable fields"):
+        RequestFactory.Webhook.update_req(webhook_item)
 
 
 def test_update_preserves_locally_set_fields_omitted_by_server(server: TSC.Server) -> None:
