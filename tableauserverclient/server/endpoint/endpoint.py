@@ -374,7 +374,7 @@ class DownloadableMixin:
             m = Message()
             m["Content-Disposition"] = server_response.headers["Content-Disposition"]
             filename = m.get_filename(failobj="")
-            chunk_size = config.CHUNK_SIZE_MB * BYTES_PER_MB
+            chunk_size = config.DOWNLOAD_CHUNK_SIZE_MB * BYTES_PER_MB
             if isinstance(filepath, _io_types_w):
                 for chunk in server_response.iter_content(chunk_size):
                     filepath.write(chunk)
@@ -398,7 +398,7 @@ class DownloadableMixin:
         (e.g. b"".join(iterator)) or process it lazily as a stream, rather than
         write it to a file. Complements _download_content, which writes to disk.
         """
-        chunk_size = config.CHUNK_SIZE_MB * BYTES_PER_MB
+        chunk_size = config.DOWNLOAD_CHUNK_SIZE_MB * BYTES_PER_MB
         with closing(
             self.get_request(url, request_object=request_object, parameters={"stream": True})  # type: ignore[attr-defined]
         ) as server_response:

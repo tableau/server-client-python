@@ -330,7 +330,8 @@ def test_populate_csv_default_maxage(server: TSC.Server) -> None:
 
 def test_stream_content_uses_configured_chunk_size(server: TSC.Server, monkeypatch) -> None:
     # Regression guard: the shared DownloadableMixin._stream_content path must
-    # stream with config.CHUNK_SIZE_MB * BYTES_PER_MB, not the pre-fix 1024 bytes.
+    # stream with config.DOWNLOAD_CHUNK_SIZE_MB * BYTES_PER_MB, not the pre-fix
+    # 1024 bytes.
     from tableauserverclient.config import BYTES_PER_MB, config
 
     captured: list[int] = []
@@ -356,7 +357,7 @@ def test_stream_content_uses_configured_chunk_size(server: TSC.Server, monkeypat
         b"".join(single_view.csv)
 
     assert captured, "iter_content was never invoked"
-    assert captured[0] == config.CHUNK_SIZE_MB * BYTES_PER_MB
+    assert captured[0] == config.DOWNLOAD_CHUNK_SIZE_MB * BYTES_PER_MB
 
 
 def test_populate_image_missing_id(server: TSC.Server) -> None:

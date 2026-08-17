@@ -341,7 +341,8 @@ def test_download_object(server: TSC.Server) -> None:
 
 def test_download_uses_configured_chunk_size(server: TSC.Server, tmp_path: Path, monkeypatch) -> None:
     # Regression guard: the shared DownloadableMixin._download_content path must
-    # stream with config.CHUNK_SIZE_MB * BYTES_PER_MB, not the pre-fix 1024 bytes.
+    # stream with config.DOWNLOAD_CHUNK_SIZE_MB * BYTES_PER_MB, not the pre-fix
+    # 1024 bytes.
     from tableauserverclient.config import BYTES_PER_MB, config
 
     captured: list[int] = []
@@ -365,7 +366,7 @@ def test_download_uses_configured_chunk_size(server: TSC.Server, tmp_path: Path,
         server.workbooks.download("1f951daf-4061-451a-9df1-69a8062664f2", filepath=tmp_path)
 
     assert captured, "iter_content was never invoked"
-    assert captured[0] == config.CHUNK_SIZE_MB * BYTES_PER_MB
+    assert captured[0] == config.DOWNLOAD_CHUNK_SIZE_MB * BYTES_PER_MB
 
 
 def test_download_sanitizes_name(server: TSC.Server, tmp_path: Path) -> None:
