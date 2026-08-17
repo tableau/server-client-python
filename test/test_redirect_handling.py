@@ -206,7 +206,7 @@ def test_non_followed_3xx_codes_pass_through(signed_in_server: TSC.Server, code:
             status_code=code,
             text="<tsResponse xmlns='http://tableau.com/api'><error code='foo'><summary>x</summary><detail>y</detail></error></tsResponse>",
         )
-        with pytest.raises((TSC.ServerResponseError, Exception)):
+        with pytest.raises(TSC.ServerResponseError):
             signed_in_server.workbooks.get()
 
 

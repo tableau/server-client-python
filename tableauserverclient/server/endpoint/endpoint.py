@@ -230,15 +230,18 @@ class Endpoint:
                 )
             # http -> https upgrade on the same host: promote the stored server
             # address so subsequent requests skip this redirect round-trip.
-            # Only rewrite on same-host, same-path-root redirects to avoid
-            # accidentally pointing the client at an unrelated server.
+            # Only rewrite when the stored address's netloc exactly matches
+            # the redirected netloc to avoid pointing the client at an
+            # unrelated server (prefix matching could match e.g. "test"
+            # against a stored address of "test.other.example").
             if current_scheme == "http" and next_scheme == "https":
                 current_parsed = urlparse(current_url)
                 next_parsed = urlparse(next_url)
                 if current_parsed.netloc == next_parsed.netloc:
                     old_address = self.parent_srv._server_address
-                    if old_address.startswith("http://") and old_address[7:].startswith(current_parsed.netloc):
-                        new_address = "https://" + old_address[7:]
+                    old_parsed = urlparse(old_address)
+                    if old_parsed.scheme == "http" and old_parsed.netloc == current_parsed.netloc:
+                        new_address = "https://" + old_address[len("http://") :]
                         self.parent_srv._server_address = new_address
                         logger.info(f"Server redirected to HTTPS; updated server address to {new_address}")
             # Auth-material policy: the request `parameters` (including the
@@ -273,7 +276,7 @@ class Endpoint:
                 return response, current_url
         # Still a redirect after max_hops hops -> loop / misconfiguration.
         raise RedirectError(
-            f"Exceeded {max_hops} redirect hops starting from {url}; last Location was {current_url}. "
+            f"Exceeded {max_hops} redirect hops starting from {url}; last URL attempted was {current_url}. "
             f"Increase session.max_redirects if this is legitimate."
         )
 
