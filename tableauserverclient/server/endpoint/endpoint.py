@@ -223,6 +223,21 @@ class Endpoint:
                         new_address = "https://" + old_address[7:]
                         self.parent_srv._server_address = new_address
                         logger.info(f"Server redirected to HTTPS; updated server address to {new_address}")
+            # Auth-material policy: the request `parameters` (including the
+            # X-Tableau-Auth header and any session cookies) are forwarded
+            # to the redirect target unchanged. This is intentional and
+            # required. TSC is a client library for a specific server the
+            # caller has already agreed to trust, and customers routinely
+            # deploy Tableau Server behind reverse proxies, load balancers,
+            # and SSO front-ends that redirect between hosts within their
+            # own infrastructure (e.g. tableau.corp.example -> east.tableau.
+            # corp.example, or an SSO IdP -> the auth-callback endpoint on
+            # a different subdomain). Stripping X-Tableau-Auth on cross-
+            # host redirects would break sign-in against every such
+            # deployment. The HTTPS -> HTTP downgrade guard above (line 208)
+            # is the boundary that keeps this from becoming a security
+            # regression: once the caller connects over HTTPS, the token
+            # never leaves TLS.
             logger.debug(f"Following {response.status_code} redirect: {current_url} -> {next_url}")
             current_url = next_url
             next_response = self._blocking_request(method, current_url, parameters)
