@@ -213,13 +213,12 @@ def test_update_subscription_email_and_footer_preserve_case() -> None:
     site.custom_subscription_email = "Sales@Company.com"
     site.custom_subscription_footer = "Sent by Tableau -- Confidential. See https://Example.com/Legal"
 
-    xml_bytes = RequestFactory.Site.update_req(site)
-    xml_text = xml_bytes.decode("utf-8")
-
-    assert 'customSubscriptionEmail="Sales@Company.com"' in xml_text, xml_text
-    assert (
-        'customSubscriptionFooter="Sent by Tableau -- Confidential. See https://Example.com/Legal"' in xml_text
-    ), xml_text
+    site_elem = ET.fromstring(RequestFactory.Site.update_req(site)).find(".//site")
+    assert site_elem is not None
+    assert site_elem.attrib["customSubscriptionEmail"] == "Sales@Company.com"
+    assert site_elem.attrib["customSubscriptionFooter"] == (
+        "Sent by Tableau -- Confidential. See https://Example.com/Legal"
+    )
 
 
 def test_create_subscription_email_and_footer_preserve_case() -> None:
@@ -228,11 +227,10 @@ def test_create_subscription_email_and_footer_preserve_case() -> None:
     site.custom_subscription_email = "Support@Company.com"
     site.custom_subscription_footer = "COMPANY, Inc. -- All Rights Reserved."
 
-    xml_bytes = RequestFactory.Site.create_req(site)
-    xml_text = xml_bytes.decode("utf-8")
-
-    assert 'customSubscriptionEmail="Support@Company.com"' in xml_text, xml_text
-    assert 'customSubscriptionFooter="COMPANY, Inc. -- All Rights Reserved."' in xml_text, xml_text
+    site_elem = ET.fromstring(RequestFactory.Site.create_req(site)).find(".//site")
+    assert site_elem is not None
+    assert site_elem.attrib["customSubscriptionEmail"] == "Support@Company.com"
+    assert site_elem.attrib["customSubscriptionFooter"] == "COMPANY, Inc. -- All Rights Reserved."
 
 
 def test_null_site_quota(server: TSC.Server) -> None:
