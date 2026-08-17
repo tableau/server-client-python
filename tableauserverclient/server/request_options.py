@@ -368,11 +368,14 @@ class _DataExportOptions(RequestOptionsBase):
         - **Escaping** applies to two characters only, comma and backslash;
           all other characters (``&``, ``=``, ``/``, ``#``, ``%``, ``+``,
           quotes, brackets, etc.) pass through untouched and the server
-          treats them as literal data. Percent-encoding is transport only:
-          ``%2C`` and ``%5C`` reach the server as ``,`` and ``\\`` and are
-          then processed like any other comma or backslash -- so URL-
-          encoding does NOT escape a literal comma or backslash. To match a
-          value containing a literal comma, escape it:
+          treats them as literal data. The ``\\,`` escape for a literal
+          comma is documented on the Tableau REST API filtering page. The
+          ``\\\\`` escape for a literal backslash, and the observation that
+          percent-encoding is transport-only (``%2C`` and ``%5C`` reach the
+          server as ``,`` and ``\\`` and are then processed like any other
+          comma or backslash, so URL-encoding does NOT escape them), are
+          empirical -- verified end-to-end against Tableau Cloud in
+          August 2026. To match a value containing a literal comma:
           ``"Rock\\, Paper\\, Scissors"`` matches ``Rock, Paper, Scissors``
           (without escaping, the comma starts an OR-list). To match a
           literal backslash, double it: ``"C:\\\\temp\\\\file"`` matches
@@ -381,10 +384,10 @@ class _DataExportOptions(RequestOptionsBase):
           workbook-embedded filter on that column, effectively widening it
           to all values. Not officially documented; behavior may change
           without notice.
-        - **Wildcards** (``*``) are NOT supported by the REST view-filter
-          layer. Wildcard matching is a viz-configured behavior on filter
-          controls inside a workbook; use ``.parameter()`` and design the
-          workbook accordingly if you need it.
+        - **Wildcards** (``*``, ``%``) are NOT supported. ``vf_`` is
+          exact-match / OR-list only; there is no equivalent of the
+          "contains" / "starts with" / "ends with" behavior available on
+          filter controls inside a workbook.
         - **Ranges, comparisons, operators** (``>``, ``<=``, ``BETWEEN``,
           etc.) are NOT supported. Design the workbook's filters to expose
           the shape you need at export time.
