@@ -139,9 +139,14 @@ class Endpoint:
         )
         # Manual redirect handling: see Redirect_codes comment. `requests`
         # follows 301/302/303 by converting POST to GET (RFC-conforming but
-        # loses the body). We disable it here and re-issue the same method
-        # ourselves in _follow_redirect_if_any.
-        parameters["allow_redirects"] = False
+        # loses the body). We default it off here and re-issue the same
+        # method ourselves in _follow_redirect_if_any. Use setdefault so a
+        # caller who has a specific reason to override (e.g. a security
+        # policy that says "fail loudly on any redirect, don't silently
+        # follow it") can pass allow_redirects=True or =False on their
+        # http_options and have it respected -- the manual redirect walk
+        # is a default, not a mandate.
+        parameters.setdefault("allow_redirects", False)
 
         logger.debug(f"request method {method.__name__}, url: {url}")
         if content:
