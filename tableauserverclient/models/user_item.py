@@ -568,6 +568,12 @@ class UserItem:
               path). Emitting `"Invalid"` preserves the per-row error semantics callers
               of `bulk_add` had before this refactor, rather than silently coercing
               those users to a valid-but-wrong Unlicensed account.
+
+            Round-trip note: `_evaluate_site_role(*_decompose_site_role(r)) == r` for
+            every current-model role. Two label asymmetries: `ServerAdministrator`
+            round-trips through the legacy label `SiteAdministrator` (that's the only
+            label `_evaluate_site_role` emits for `admin="System"`), and the legacy
+            roles above are folded into their modern equivalents by design.
             """
             _role_map: dict[str, tuple[str, str, str]] = {
                 "ServerAdministrator": ("Creator", "System", "1"),
@@ -606,14 +612,14 @@ class UserItem:
                 else:
                     site_role = "SiteAdministratorExplorer"
             else:  # if it wasn't 'system' or 'site' then we can treat it as 'none'
-                if publisher == "yes":
+                if publisher in ("yes", "true", "1"):
                     if license_level == "creator":
                         site_role = "Creator"
                     elif license_level == "explorer":
                         site_role = "ExplorerCanPublish"
                     else:
                         site_role = "Unlicensed"  # is this the expected outcome?
-                else:  # publisher == 'no':
+                else:  # publisher is "no" / "false" / "0" / any other value:
                     if license_level == "explorer" or license_level == "creator":
                         site_role = "Explorer"
                     elif license_level == "viewer":

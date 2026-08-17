@@ -80,6 +80,39 @@ def test_evaluate_role() -> None:
         assert actual == line[3], line + [actual]
 
 
+# _decompose_site_role writes CSV rows that the server (and TSC's own
+# _evaluate_site_role) parse back into a site role. This parametrized test
+# pins the round-trip so a change in either direction can't drift silently.
+# The two documented asymmetries are the ServerAdministrator/SiteAdministrator
+# label pair and the legacy-role fold; both are captured explicitly below.
+@pytest.mark.parametrize(
+    "role, expected",
+    [
+        # Canonical current-model roles round-trip identity.
+        ("SiteAdministratorCreator", "SiteAdministratorCreator"),
+        ("SiteAdministratorExplorer", "SiteAdministratorExplorer"),
+        ("Creator", "Creator"),
+        ("ExplorerCanPublish", "ExplorerCanPublish"),
+        ("Explorer", "Explorer"),
+        ("Viewer", "Viewer"),
+        ("Unlicensed", "Unlicensed"),
+        # admin="System" always evaluates back to the legacy "SiteAdministrator"
+        # label -- that's the only label _evaluate_site_role emits for System.
+        ("ServerAdministrator", "SiteAdministrator"),
+        # Legacy roles fold into their modern equivalents on the way through.
+        # Documented in _decompose_site_role's docstring.
+        ("SiteAdministrator", "SiteAdministratorExplorer"),
+        ("ReadOnly", "Viewer"),
+        ("Publisher", "ExplorerCanPublish"),
+        ("Interactor", "Explorer"),
+    ],
+)
+def test_decompose_then_evaluate_round_trips(role: str, expected: str) -> None:
+    license_level, admin_level, publish = TSC.UserItem.CSVImport._decompose_site_role(role)
+    actual = TSC.UserItem.CSVImport._evaluate_site_role(license_level, admin_level, publish)
+    assert actual == expected, (role, license_level, admin_level, publish, actual)
+
+
 def test_get_user_detail_empty_line() -> None:
     test_line = ""
     test_user = TSC.UserItem.CSVImport.create_user_from_line(test_line)
