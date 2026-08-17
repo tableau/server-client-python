@@ -206,6 +206,11 @@ class Endpoint:
         # Not a redirect? Return immediately regardless of max_hops (including 0).
         if response.status_code not in Redirect_codes:
             return response, current_url
+        # Preserve requests' `response.history` semantics: the intermediate 3xx
+        # responses in receipt order, with the final non-3xx response as the
+        # returned value. Callers doing forensic debugging on `.history` see
+        # the same shape they would from requests' native follower.
+        history: list["Response"] = []
         method_name = getattr(method, "__name__", "REQUEST").upper()
         for _ in range(max_hops):
             location = response.headers.get("Location")
@@ -252,6 +257,7 @@ class Endpoint:
             # regression: once the caller connects over HTTPS, the token
             # never leaves TLS.
             logger.debug(f"Following {response.status_code} redirect: {current_url} -> {next_url}")
+            history.append(response)
             current_url = next_url
             next_response = self._blocking_request(method, current_url, parameters)
             if next_response is None:
@@ -263,6 +269,7 @@ class Endpoint:
                 raise next_response
             response = next_response
             if response.status_code not in Redirect_codes:
+                response.history = history
                 return response, current_url
         # Still a redirect after max_hops hops -> loop / misconfiguration.
         raise RedirectError(

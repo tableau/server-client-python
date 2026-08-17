@@ -122,6 +122,59 @@ def test_get_redirect_still_works(signed_in_server: TSC.Server) -> None:
 # --- Redirect codes ---------------------------------------------------------
 
 
+def test_response_history_populated_across_multi_hop_chain(server: TSC.Server) -> None:
+    # Regression: `requests` normally populates `response.history` with the
+    # intermediate 3xx responses when it follows a redirect chain. TSC's
+    # manual walker took over that job, so we have to populate .history
+    # ourselves for callers doing forensic debugging.
+    from unittest.mock import patch
+
+    xml = _sign_in_xml()
+    captured: list = []
+    original_check = TSC.server.endpoint.Endpoint._check_status  # type: ignore[attr-defined]
+
+    def capture(self, response, url=None):
+        captured.append(response)
+        return original_check(self, response, url)
+
+    with requests_mock.mock() as m:
+        m.post(server.auth.baseurl + "/signin", status_code=301, headers={"Location": "http://test/b"})
+        m.post("http://test/b", status_code=302, headers={"Location": "http://test/c"})
+        m.post("http://test/c", text=xml)
+        with patch.object(TSC.server.endpoint.Endpoint, "_check_status", capture):  # type: ignore[attr-defined]
+            server.auth.sign_in(TSC.TableauAuth("u", "p"))
+
+    assert len(captured) == 1, f"Expected one final response, got {len(captured)}"
+    final = captured[0]
+    assert final.status_code == 200
+    assert len(final.history) == 2, f"Expected 2 intermediate hops in history, got {len(final.history)}"
+    assert final.history[0].status_code == 301
+    assert final.history[1].status_code == 302
+
+
+def test_response_history_empty_when_no_redirect(signed_in_server: TSC.Server) -> None:
+    # When there's no redirect, .history stays as whatever requests set it
+    # (empty list). We don't overwrite it in the no-redirect short-circuit.
+    from unittest.mock import patch
+
+    captured: list = []
+    original_check = TSC.server.endpoint.Endpoint._check_status  # type: ignore[attr-defined]
+
+    def capture(self, response, url=None):
+        captured.append(response)
+        return original_check(self, response, url)
+
+    baseurl = signed_in_server.workbooks.baseurl
+    with requests_mock.mock() as m:
+        m.get(baseurl, text=_workbooks_get_xml())
+        with patch.object(TSC.server.endpoint.Endpoint, "_check_status", capture):  # type: ignore[attr-defined]
+            signed_in_server.workbooks.get()
+
+    assert len(captured) == 1
+    assert captured[0].status_code == 200
+    assert captured[0].history == []
+
+
 @pytest.mark.parametrize("code", [301, 302, 303, 307, 308])
 def test_all_supported_redirect_codes_preserve_post_body(server: TSC.Server, code: int) -> None:
     xml = _sign_in_xml()
