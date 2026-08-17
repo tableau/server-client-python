@@ -563,7 +563,7 @@ class UserItem:
                 return
             if item in possible_values or possible_values == []:
                 return
-            raise AttributeError(f"Invalid value {item} for {column_type}")
+            raise ValueError(f"Invalid value {item} for {column_type}")
 
         # https://help.tableau.com/current/server/en-us/csvguidelines.htm#settings_and_site_roles
         # This logic is hardcoded to match the existing rules for import csv files
