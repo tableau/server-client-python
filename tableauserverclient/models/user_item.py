@@ -534,7 +534,7 @@ class UserItem:
                 ["system", "site", "none", "no"],  # admin
                 ["yes", "true", "1", "no", "false", "0"],  # publisher
                 [],
-                list(UserItem.CSVImport._AUTH_CANONICAL.values()),  # auth — normalized before comparison
+                list(UserItem.CSVImport._AUTH_CANONICAL.values()),  # auth - normalized before comparison
             ]
 
             line = list(map(str.strip, incoming.split(",")))

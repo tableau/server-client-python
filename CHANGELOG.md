@@ -11,10 +11,17 @@
   lowercased destructively (e.g. `JSmith` became `jsmith`). Case is now
   preserved for those fields; only the comparison-relevant fields (license,
   admin_level, publisher, auth_setting) are normalized internally for
-  validation. Callers relying on the previous lowercased output — e.g. dict
-  lookups keyed on `user.name`, or assertions against lowercased values —
+  validation. Callers relying on the previous lowercased output -- e.g. dict
+  lookups keyed on `user.name`, or assertions against lowercased values --
   need to update. This unblocks CSV imports for LDAP and other case-sensitive
   auth backends where mixed-case usernames must be preserved.
+* `UserItem.CSVImport._validate_attribute_value` and the too-many-columns
+  branch of `_validate_import_line_or_throw` now raise `ValueError` instead
+  of `AttributeError` for invalid CSV input. `AttributeError` was the wrong
+  exception type for input validation and inconsistent with
+  `create_user_from_line`. `validate_file_for_import` catches `Exception` so
+  it is unaffected; direct callers who caught `AttributeError` specifically
+  need to widen their handler.
 * Added `JobItem.status_notes` for the structured `<statusNotes><statusNote
   type=".." value=".." text=".."/></statusNotes>` block documented on the Query
   Job REST endpoint. Populated for UserImport and other multi-row jobs where
