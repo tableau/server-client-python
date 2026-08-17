@@ -52,6 +52,14 @@ Success_codes = [200, 201, 202, 204]
 # the POST body and breaks sign-in / addusers / publish / any write endpoint
 # whose target sits behind a redirect. We disable that and walk the chain
 # manually, keeping the original method and body across every hop.
+#
+# RFC 7231 §6.4.4 says 303 SHOULD change the method to GET on retry. We do NOT
+# follow that recommendation, deliberately: Tableau Server does not emit 303
+# for POST endpoints in normal operation (writes redirect via 301/302 in
+# proxy/HA setups), and preserving the method + body uniformly is the
+# behavior that fixes the reported bug (#1127). If a Tableau deployment ever
+# starts emitting 303 for writes, revisit; treating it identically today is
+# a conscious deviation, not an oversight.
 Redirect_codes = [301, 302, 303, 307, 308]
 
 XML_CONTENT_TYPE = "text/xml"
