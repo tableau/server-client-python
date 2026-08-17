@@ -384,13 +384,14 @@ class _DataExportOptions(RequestOptionsBase):
           workbook-embedded filter on that column, effectively widening it
           to all values. Not officially documented; behavior may change
           without notice.
-        - **Wildcards** (``*``, ``%``) are NOT supported. ``vf_`` is
-          exact-match / OR-list only; there is no equivalent of the
-          "contains" / "starts with" / "ends with" behavior available on
-          filter controls inside a workbook.
-        - **Ranges, comparisons, operators** (``>``, ``<=``, ``BETWEEN``,
-          etc.) are NOT supported. Design the workbook's filters to expose
-          the shape you need at export time.
+        - **Wildcards, ranges, comparisons, operators** -- not documented
+          for ``vf_``. The public filtering docs describe only exact match
+          and OR-lists, and TSC does not emit any operator prefix. Behavior
+          of ``*``, ``%``, ``>``, ``<=``, ``BETWEEN``, etc. inside a ``vf_``
+          value is not covered by the docs; if you need them, verify against
+          your target server before relying on the outcome. For matching
+          shapes the REST API cannot express (e.g. "contains"), configure
+          the equivalent filter inside the workbook.
         - **Booleans:** the only valid values are ``'true'`` and ``'false'``.
 
         For more detail see:
