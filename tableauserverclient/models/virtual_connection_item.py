@@ -24,14 +24,15 @@ class VirtualConnectionItem:
         self.updated_at: dt.datetime | None = None
         self.webpage_url: str | None = None
         self._connections: Callable[[], Iterable[ConnectionItem]] | None = None
+        self._permissions: Callable[[], list[PermissionsRule]] | None = None
         self.project_id: str | None = None
         self.owner_id: str | None = None
         self.content: dict[str, dict] | None = None
         self.certification_note: str | None = None
         # Tags on virtual connections are populated by the server on List and
         # Get responses since Tableau Server 2026.2 / Cloud April 2026
-        # (REST API 3.30, W-21424436). Callers on earlier server versions
-        # will see these as empty sets; add_tags / delete_tags still work.
+        # (REST API 3.30). Callers on earlier server versions will see these
+        # as empty sets; add_tags / delete_tags still work.
         self.tags: set[str] = set()
         self._initial_tags: set[str] = set()
 

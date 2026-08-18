@@ -277,8 +277,8 @@ def test_update_tags_diff_round_trip(server: TSC.Server) -> None:
     tags and _initial_tags and issues the right PUT / DELETE calls.
 
     Simulates: server returned {a,b,c,d} at fetch time; caller mutated to
-    {a,c,e}. Expected calls: PUT /tags with {a,c,e} (add path adds e), DELETE
-    /tags/b, DELETE /tags/d.
+    {a,c,e}. Expected calls: PUT /tags with {e} (the add-set, per
+    TaggingMixin.update_tags diff), DELETE /tags/b, DELETE /tags/d.
     """
     server.version = "3.30"  # update_tags requires 3.30 (see @api decorator)
     vconn_id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"

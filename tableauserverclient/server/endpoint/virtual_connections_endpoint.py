@@ -152,6 +152,12 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem], TaggingMixin):
         The returned item has its ``content`` attribute populated with the
         virtual connection's JSON definition.
 
+        Note: the ``id`` on the returned item is stamped from the request path,
+        not the response body. The server-side response builder for Get Virtual
+        Connection does not emit an ``id`` attribute on the ``<virtualConnection>``
+        element (tracked in an internal ticket); this method works around that
+        so downstream tag / permission calls see a populated ``id``.
+
         REST API: `Get Virtual Connection <https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_virtual_connections.htm#get_virtual_connection>`_
 
         Parameters
@@ -170,9 +176,11 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem], TaggingMixin):
         >>> print(vc.name, vc.content)
         """
         if isinstance(virtual_connection, VirtualConnectionItem):
-            vconn_id = virtual_connection.id or ""
+            vconn_id = virtual_connection.id
         else:
             vconn_id = virtual_connection
+        if not vconn_id:
+            raise ValueError("VirtualConnectionItem has no id; fetch it via get() first.")
         url = f"{self.baseurl}/{vconn_id}"
         server_response = self.get_request(url)
         result = VirtualConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
