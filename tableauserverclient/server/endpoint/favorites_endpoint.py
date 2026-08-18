@@ -19,11 +19,12 @@ from tableauserverclient.server import RequestFactory, RequestOptions
 class Favorites(Endpoint):
     """Get, add, and remove favorites for a user.
 
-    Favorites can be workbooks, views, datasources, flows, projects, or metrics.
-    Retrieved favorites are stored on the target ``UserItem`` object as a
-    dictionary keyed by content type (e.g. ``"workbooks"``, ``"views"``,
-    ``"datasources"``, ``"flows"``, ``"projects"``, ``"metrics"``), where
-    each value is a list of the corresponding item objects.
+    Favorites can be workbooks, views, datasources, flows, projects, metrics,
+    or collections. Retrieved favorites are stored on the target ``UserItem``
+    object as a dictionary keyed by content type (e.g. ``"workbooks"``,
+    ``"views"``, ``"datasources"``, ``"flows"``, ``"projects"``, ``"metrics"``,
+    ``"collections"``), where each value is a list of the corresponding item
+    objects.
 
     REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm
     """
@@ -77,7 +78,7 @@ class Favorites(Endpoint):
         etc.) exist for each individual content type; this method is the
         polymorphic entry point.
 
-        REST API: `Add to Favorites <https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#add_workbook_to_favorites>`_
+        REST API: `Favorites Methods <https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm>`_
 
         Parameters
         ----------
@@ -222,6 +223,8 @@ class Favorites(Endpoint):
     def add_favorite_metric(self, user_item: UserItem, metric_item: MetricItem) -> None:
         """Add a metric to the user's favorites.
 
+        REST API: `Add Metric to Favorites <https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#add_metric_to_favorites>`_
+
         Parameters
         ----------
         user_item : UserItem
@@ -256,6 +259,8 @@ class Favorites(Endpoint):
         Type-specific helpers (``delete_favorite_workbook``,
         ``delete_favorite_view``, etc.) exist for each individual content
         type; this method is the polymorphic entry point.
+
+        REST API: `Favorites Methods <https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm>`_
 
         Parameters
         ----------
@@ -374,7 +379,7 @@ class Favorites(Endpoint):
     def delete_favorite_flow(self, user_item: UserItem, flow_item: FlowItem) -> None:
         """Remove a flow from the user's favorites.
 
-        REST API: `Delete Flow from Favorites <https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#delete_flow_from_favorites>`_
+        REST API: `Delete Flow from Favorites <https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm#ref_delete_flow_from_favorites>`_
 
         Parameters
         ----------
@@ -395,6 +400,8 @@ class Favorites(Endpoint):
     @api(version="3.15")
     def delete_favorite_metric(self, user_item: UserItem, metric_item: MetricItem) -> None:
         """Remove a metric from the user's favorites.
+
+        REST API: `Favorites Methods <https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_favorites.htm>`_
 
         Parameters
         ----------
