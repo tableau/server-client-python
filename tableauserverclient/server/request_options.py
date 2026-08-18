@@ -384,14 +384,15 @@ class _DataExportOptions(RequestOptionsBase):
           workbook-embedded filter on that column, effectively widening it
           to all values. Not officially documented; behavior may change
           without notice.
-        - **Wildcards, ranges, comparisons, operators** -- not documented
-          for ``vf_``. The public filtering docs describe only exact match
-          and OR-lists, and TSC does not emit any operator prefix. Behavior
-          of ``*``, ``%``, ``>``, ``<=``, ``BETWEEN``, etc. inside a ``vf_``
-          value is not covered by the docs; if you need them, verify against
-          your target server before relying on the outcome. For matching
-          shapes the REST API cannot express (e.g. "contains"), configure
-          the equivalent filter inside the workbook.
+        - **No wildcards, ranges, comparisons, or operators.** Characters
+          like ``*`` and ``%`` are treated as literal data, not glob or SQL
+          wildcards; ``vf_Product=Widget*`` matches only a product literally
+          named ``Widget*``. Verified end-to-end against Tableau Server 3.30
+          in August 2026 (``vf_Product Name=*`` and ``vf_Product Name=%``
+          returned zero rows; ``vf_Product Name=META /star*/`` returned the
+          single row whose value contains a literal ``*``). If you need
+          contains / prefix / range matching, configure the equivalent
+          filter inside the workbook.
         - **Booleans:** the only valid values are ``'true'`` and ``'false'``.
 
         For more detail see:
