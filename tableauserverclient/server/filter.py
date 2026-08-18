@@ -18,10 +18,10 @@ class Filter:
     server does NOT support escaping them, so a value containing any of these
     characters cannot be matched exactly with the `Equals` operator:
 
-    - ``,`` — separates values in an ``in`` list.
-    - ``&`` — separates filter clauses.
-    - ``:`` — separates field/operator/value.
-    - ``[`` and ``]`` — bracket an ``in`` value list.
+    - ``,`` -- separates values in an ``in`` list.
+    - ``&`` -- separates filter clauses.
+    - ``:`` -- separates field/operator/value.
+    - ``[`` and ``]`` -- bracket an ``in`` value list.
 
     Workaround for names containing these characters: use the ``Equals``
     operator with an asterisk substituted for the special character. Asterisk

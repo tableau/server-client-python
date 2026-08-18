@@ -269,10 +269,10 @@ class Users(QuerysetEndpoint[UserItem]):
         - Active Directory: the fully-qualified AD username, either
           ``SAMAccountName@FullyQualifiedDomain`` (e.g.
           ``jsmith@corp.example.com``) or the User Principal Name (UPN) if AD
-          is configured to use UPNs. A bare ``SAMAccountName`` typically will
-          not resolve.
+          is configured to use UPNs. A bare ``SAMAccountName`` may not
+          resolve depending on how AD is configured.
 
-        Set the person's display name via ``user_item.fullname`` — it is a
+        Set the person's display name via ``user_item.fullname``; it is a
         separate attribute.
 
         Parameters

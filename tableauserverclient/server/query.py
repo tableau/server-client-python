@@ -190,8 +190,9 @@ class QuerySet(Iterable[T], Sized):
 
         Each keyword argument becomes one filter. Shorthand suffixes select
         the operator (e.g. ``name__gt="A"`` -> operator ``GreaterThan``); a
-        bare keyword uses ``Equals``. See ``docs/filter-sort.md`` for the
-        supported suffixes.
+        bare keyword uses ``Equals``. See
+        https://tableau.github.io/server-client-python/docs/filter-sort for
+        the supported suffixes.
 
         Special-character caveat: values containing ``,``, ``&``, ``:``, ``[``
         or ``]`` cannot be matched exactly with ``Equals``; the REST filter
