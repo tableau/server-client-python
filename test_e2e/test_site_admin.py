@@ -7,6 +7,7 @@ Requires SiteAdmin credentials:
 Run with:
     pytest test_e2e/test_site_admin.py -v -m e2e_admin
 """
+
 import uuid
 from datetime import time
 from pathlib import Path
@@ -29,15 +30,16 @@ def _name(base):
 # Schedules
 # ---------------------------------------------------------------------------
 
+
 def test_schedule_create_and_delete(server_admin):
     """An extract schedule can be created and deleted."""
     interval = TSC.HourlyInterval(start_time=time(3, 0), end_time=time(23, 0), interval_value=4)
     schedule = TSC.ScheduleItem(
-        _name("tsc-e2e-schedule"),
-        50,
-        TSC.ScheduleItem.Type.Extract,
-        TSC.ScheduleItem.ExecutionOrder.Parallel,
-        interval,
+        name=_name("tsc-e2e-schedule"),
+        priority=50,
+        schedule_type=TSC.ScheduleItem.Type.Extract,
+        execution_order=TSC.ScheduleItem.ExecutionOrder.Parallel,
+        interval_item=interval,
     )
     schedule = server_admin.schedules.create(schedule)
     try:
@@ -53,11 +55,11 @@ def test_schedule_add_workbook(server_admin, project_id):
     interval = TSC.DailyInterval(start_time=time(4, 0))
     schedule_name = _name("tsc-e2e-sched-wb")
     schedule = TSC.ScheduleItem(
-        schedule_name,
-        60,
-        TSC.ScheduleItem.Type.Extract,
-        TSC.ScheduleItem.ExecutionOrder.Serial,
-        interval,
+        name=schedule_name,
+        priority=60,
+        schedule_type=TSC.ScheduleItem.Type.Extract,
+        execution_order=TSC.ScheduleItem.ExecutionOrder.Serial,
+        interval_item=interval,
     )
     schedule = server_admin.schedules.create(schedule)
     wb = TSC.WorkbookItem(name=_name("tsc-e2e-sched-wb"), project_id=project_id)
@@ -74,6 +76,7 @@ def test_schedule_add_workbook(server_admin, project_id):
 # ---------------------------------------------------------------------------
 # Webhooks
 # ---------------------------------------------------------------------------
+
 
 def test_webhook_create_and_delete(server_admin):
     """A webhook can be created and deleted."""
@@ -93,6 +96,7 @@ def test_webhook_create_and_delete(server_admin):
 # ---------------------------------------------------------------------------
 # Connection update
 # ---------------------------------------------------------------------------
+
 
 def test_datasource_update_connection(server_admin, project_id):
     """A datasource connection's embed_password flag can be toggled via update_connection."""
@@ -114,6 +118,7 @@ def test_datasource_update_connection(server_admin, project_id):
 # Data freshness policy
 # ---------------------------------------------------------------------------
 
+
 def test_workbook_data_freshness_policy(server_admin, project_id):
     """Workbook data freshness policy can be set to AlwaysLive and back to SiteDefault."""
     wb = TSC.WorkbookItem(name=_name("tsc-e2e-freshness"), project_id=project_id)
@@ -133,6 +138,7 @@ def test_workbook_data_freshness_policy(server_admin, project_id):
 # ---------------------------------------------------------------------------
 # Workbook move between projects
 # ---------------------------------------------------------------------------
+
 
 def test_workbook_move_project(server_admin, project_id):
     """A workbook can be moved from one project to another."""
@@ -154,6 +160,7 @@ def test_workbook_move_project(server_admin, project_id):
 # Users
 # ---------------------------------------------------------------------------
 
+
 def test_user_add_and_remove(server_admin):
     """A user can be added to the site and removed."""
     username = _name("tsc-e2e-user")
@@ -170,6 +177,7 @@ def test_user_add_and_remove(server_admin):
 # ---------------------------------------------------------------------------
 # Groups
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture(scope="module")
 def group(server_admin):

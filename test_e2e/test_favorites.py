@@ -54,6 +54,8 @@ def test_favorites_workbook(server, workbook):
 def test_favorites_view(server, workbook):
     """A view can be added to and removed from favorites."""
     server.workbooks.populate_views(workbook)
+    if not workbook.views:
+        pytest.skip(f"Published workbook {workbook.name!r} has no views")
     view = workbook.views[0]
     user = TSC.UserItem()
     user.id = server.user_id

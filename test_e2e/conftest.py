@@ -1,4 +1,5 @@
 import os
+import warnings
 import pytest
 import tableauserverclient as TSC
 
@@ -6,6 +7,16 @@ import tableauserverclient as TSC
 def pytest_configure(config):
     config.addinivalue_line("markers", "e2e: mark test as end-to-end (requires a real Tableau server)")
     config.addinivalue_line("markers", "e2e_admin: mark test as end-to-end requiring SiteAdmin credentials")
+
+
+def _http_options() -> dict:
+    verify = os.environ.get("TABLEAU_VERIFY_SSL", "true").lower() != "false"
+    if not verify:
+        warnings.warn(
+            "TABLEAU_VERIFY_SSL=false — TLS certificate verification is disabled for e2e tests.",
+            stacklevel=2,
+        )
+    return {"verify": verify}
 
 
 @pytest.fixture(scope="session")
@@ -27,8 +38,7 @@ def server():
     if not all([url, token, token_name]):
         pytest.skip("E2E tests require TABLEAU_SERVER, TABLEAU_TOKEN, and TABLEAU_TOKEN_NAME env vars")
 
-    http_options = {"verify": os.environ.get("TABLEAU_VERIFY_SSL", "true").lower() != "false"}
-    server = TSC.Server(url, use_server_version=True, http_options=http_options)
+    server = TSC.Server(url, use_server_version=True, http_options=_http_options())
     auth = TSC.PersonalAccessTokenAuth(token_name, token, site)
     with server.auth.sign_in(auth):
         yield server
@@ -43,10 +53,11 @@ def server_admin():
     token_name = os.environ.get("TABLEAU_SITEADMIN_TOKEN_NAME")
 
     if not all([url, token, token_name]):
-        pytest.skip("Admin e2e tests require TABLEAU_SERVER, TABLEAU_SITEADMIN_TOKEN, and TABLEAU_SITEADMIN_TOKEN_NAME env vars")
+        pytest.skip(
+            "Admin e2e tests require TABLEAU_SERVER, TABLEAU_SITEADMIN_TOKEN, and TABLEAU_SITEADMIN_TOKEN_NAME env vars"
+        )
 
-    http_options = {"verify": os.environ.get("TABLEAU_VERIFY_SSL", "true").lower() != "false"}
-    server = TSC.Server(url, use_server_version=True, http_options=http_options)
+    server = TSC.Server(url, use_server_version=True, http_options=_http_options())
     auth = TSC.PersonalAccessTokenAuth(token_name, token, site)
     with server.auth.sign_in(auth):
         yield server
