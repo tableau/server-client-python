@@ -35,7 +35,7 @@ def get_file_object_size(file):
 
 
 def get_file_type(file):
-    """Detect the type of an open binary file by inspecting its magic bytes, returning one of 'zip', 'tde', 'xml', or 'hyper'."""
+    """Detect the type of an open binary file by inspecting its magic bytes, returning one of 'zip', 'tde', 'xml', or 'hyper'. Raises ValueError if none match."""
     # Tableau workbooks (twb) and data sources (tds) are both stored as xml files.
     # Packaged workbooks (twbx) and data sources (tdsx) are zip files
     # containing original files accompanied with supporting local files.

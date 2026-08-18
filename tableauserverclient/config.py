@@ -19,7 +19,7 @@ class Config:
     # For when a datasource is over 64MB, break it into 5MB(standard chunk size) chunks
     @property
     def CHUNK_SIZE_MB(self):
-        """Chunk size in MB for multipart publish requests (env: TSC_CHUNK_SIZE_MB)."""
+        """Chunk size in MB for multipart publish requests (env: TSC_CHUNK_SIZE_MB, default 50)."""
         return int(os.getenv("TSC_CHUNK_SIZE_MB", 5 * 10))  # 5MB felt too slow, upped it to 50
 
     # Default page size
