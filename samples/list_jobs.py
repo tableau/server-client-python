@@ -20,7 +20,7 @@
 #   # Wait for a specific job to finish.
 #   python samples/list_jobs.py --wait <job_id>
 #
-# To run the script, you must have installed Python 3.9 or later.
+# To run the script, you must have installed Python 3.10 or later.
 ####
 
 import argparse
@@ -119,13 +119,16 @@ def _wait_for_job(server, job_id, timeout):
     """Poll a single job until it finishes, using the built-in helper."""
     try:
         job = server.jobs.wait_for_job(job_id, timeout=timeout)
+    except JobCancelledException:
+        # JobCancelledException is a subclass of JobFailedException, so this
+        # branch must come first or cancelled jobs get reported as failed
+        # with the wrong exit code.
+        print(f"Job {job_id} was cancelled.")
+        raise SystemExit(2)
     except JobFailedException as exc:
         # The exception carries the failed JobItem so callers can inspect it.
         print(f"Job {job_id} failed: notes={exc.job.notes}")
         raise SystemExit(1) from exc
-    except JobCancelledException:
-        print(f"Job {job_id} was cancelled.")
-        raise SystemExit(2)
 
     print(f"Job {job_id} finished. finish_code={job.finish_code}  notes={job.notes}")
 

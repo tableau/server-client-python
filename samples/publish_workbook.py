@@ -11,7 +11,7 @@
 # For more information, refer to the documentations on 'Publish Workbook'
 # (https://onlinehelp.tableau.com/current/api/rest_api/en-us/help.htm)
 #
-# To run the script, you must have installed Python 3.7 or later.
+# To run the script, you must have installed Python 3.10 or later.
 ####
 
 import argparse
@@ -30,7 +30,9 @@ def main():
     add_common_arguments(parser)
     # Options specific to this sample
     group = parser.add_mutually_exclusive_group(required=False)
-    group.add_argument("--thumbnails-user-id", "-u", help="User ID to use for thumbnails")
+    # `-u` is already taken by --username in add_common_arguments; use `-U` here
+    # so argparse does not raise a conflicting-option-string error at import.
+    group.add_argument("--thumbnails-user-id", "-U", help="User ID to use for thumbnails")
     group.add_argument("--thumbnails-group-id", "-g", help="Group ID to use for thumbnails")
 
     parser.add_argument("--workbook-name", "-n", help="Name with which to publish the workbook")

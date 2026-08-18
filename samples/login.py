@@ -1,13 +1,14 @@
 ####
 # This script demonstrates how to log in to Tableau Server Client.
 #
-# To run the script, you must have installed Python 3.7 or later.
+# To run the script, you must have installed Python 3.10 or later.
 #
 # Credentials can be supplied on the command line, from environment variables
 # (TABLEAU_SERVER, TABLEAU_SITE, TABLEAU_TOKEN_NAME, TABLEAU_TOKEN_VALUE,
-# TABLEAU_USERNAME, TABLEAU_PASSWORD), from a `.env` file in the current
-# working directory, or interactively via getpass. Prefer env or a .env file
-# over CLI args so secrets do not end up in your shell history.
+# TABLEAU_USERNAME, TABLEAU_PASSWORD, TABLEAU_JWT, TABLEAU_JWT_FILE), from a
+# `.env` file in the current working directory (or samples/, or repo root),
+# or interactively via getpass. Prefer env or a .env file over CLI args so
+# secrets do not end up in your shell history.
 ####
 
 import argparse
@@ -35,10 +36,13 @@ def set_up_and_log_in():
 
 def sample_connect_to_server(args):
     tableau_auth = build_auth(args)
-    if isinstance(tableau_auth, TSC.PersonalAccessTokenAuth):
-        print(f"\nSigning in...\nServer: {args.server}\nSite: {args.site}\nToken name: {args.token_name}")
+    if isinstance(tableau_auth, TSC.JWTAuth):
+        identifier = "JWT (Connected App)"
+    elif isinstance(tableau_auth, TSC.PersonalAccessTokenAuth):
+        identifier = f"Token name: {args.token_name}"
     else:
-        print(f"\nSigning in...\nServer: {args.server}\nSite: {args.site}\nUsername: {args.username}")
+        identifier = f"Username: {args.username}"
+    print(f"\nSigning in...\nServer: {args.server}\nSite: {args.site}\n{identifier}")
 
     # Only set this to False if you are running against a server you trust AND you know why the cert is broken
     check_ssl_certificate = True
