@@ -4017,7 +4017,7 @@ Name | Description
 new_groupset = TSC.GroupSetItem('My Group Set')
 
 # call groupsets.create() with new group set
-groupset = server.groupsets.create(new_groupset)
+groupset = server.group_sets.create(new_groupset)
 ```
 
 <br>
@@ -4060,7 +4060,7 @@ Returns a list of `GroupSetItem` objects and a `PaginationItem` object.
 **Example**
 
 ```py
-all_groupsets, pagination_item = server.groupsets.get()
+all_groupsets, pagination_item = server.group_sets.get()
 for groupset in all_groupsets:
     print(groupset.id, groupset.name)
 ```
@@ -4095,7 +4095,7 @@ Returns a `GroupSetItem` object.
 **Example**
 
 ```py
-groupset = server.groupsets.get_by_id('1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d')
+groupset = server.group_sets.get_by_id('1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d')
 print(groupset.name)
 ```
 
@@ -4130,7 +4130,7 @@ Returns the newly created `GroupSetItem` object.
 
 ```py
 new_groupset = TSC.GroupSetItem('My Group Set')
-created_groupset = server.groupsets.create(new_groupset)
+created_groupset = server.group_sets.create(new_groupset)
 print(created_groupset.id)
 ```
 
@@ -4165,7 +4165,7 @@ Returns the updated `GroupSetItem` object.
 
 ```py
 groupset.name = 'Renamed Group Set'
-updated_groupset = server.groupsets.update(groupset)
+updated_groupset = server.group_sets.update(groupset)
 ```
 
 <br>
@@ -4198,7 +4198,7 @@ None.
 **Example**
 
 ```py
-server.groupsets.delete(groupset.id)
+server.group_sets.delete(groupset.id)
 ```
 
 <br>
@@ -4235,7 +4235,7 @@ None.
 all_groups, _ = server.groups.get()
 mygroup = all_groups[0]
 
-server.groupsets.add_group(groupset, mygroup)
+server.group_sets.add_group(groupset, mygroup)
 ```
 
 <br>
@@ -4269,7 +4269,7 @@ None.
 **Example**
 
 ```py
-server.groupsets.remove_group(groupset, mygroup)
+server.group_sets.remove_group(groupset, mygroup)
 ```
 
 <br>
@@ -4307,7 +4307,7 @@ Returns a `QuerySet` of `GroupSetItem` objects.
 **Example**
 
 ```py
-local_groupsets = server.groupsets.filter(is_local=True)
+local_groupsets = server.group_sets.filter(is_local=True)
 for groupset in local_groupsets:
     print(groupset.name)
 ```
@@ -7266,7 +7266,7 @@ The `SubscriptionItem`.  See [SubscriptionItem class](#subscriptionitem-class)
 **Example**
 
 ```py
-  sub1 = server.subscription.get_by_id('9f9e9d9c-8b8a-8f8e-7d7c-7b7a6f6d6e6d')
+  sub1 = server.subscriptions.get_by_id('9f9e9d9c-8b8a-8f8e-7d7c-7b7a6f6d6e6d')
   print(sub1.subject)
 
 ```
@@ -9570,7 +9570,7 @@ Returns the new webhook item.
 <br>
 <br>
 
-#### webhooks.get()
+#### webhooks.get
 ```py
 webhooks.get()
 ```
@@ -9609,7 +9609,7 @@ print(["Webhook Name:"+ webhook.name+ ";" + "ID:" + webhook.id for webhook in al
 #### webhooks.get_by_id
 
 ```py
-webhooks.get_by_ide(webhook_id)
+webhooks.get_by_id(webhook_id)
 ```
 
 Returns information about the specified workbook for a site.
@@ -9660,6 +9660,12 @@ REST API: [Delete Webhook](https://help.tableau.com/current/api/rest_api/en-us/R
 Name | Description
 :--- | :---
 `webhook_id` | The identifier (`id`) for the `WebhookItem` to delete.
+
+**Exceptions**
+
+Error|Description
+:---|:---
+`Webhook ID undefined`| Raises an exception if a `webhook_id` is not provided.
 
 **Version**
 
