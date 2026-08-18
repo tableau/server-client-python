@@ -1,6 +1,8 @@
 <!--
 Delete sections that don't apply. The prompts are here to make review
-faster, not to add ceremony -- one sentence per section is often enough.
+faster, not to add ceremony - one sentence per section is often enough.
+See contributing.md for background; add a bullet to CHANGELOG.md under
+Unreleased for any user-visible behavior change.
 -->
 
 ## Motivation
@@ -15,7 +17,7 @@ prompted it.
 
 <!--
 For users of the library or CLI: what changes in observable behavior?
-"None -- refactor only" is a valid answer. If a public symbol, endpoint
+"None - refactor only" is a valid answer. If a public symbol, endpoint
 signature, exception type, or return value shape changes, call it out
 here and in the CHANGELOG so downstream code isn't surprised.
 -->
