@@ -32,41 +32,73 @@ jobs:
             const pr = context.payload.pull_request;
             const body = pr.body || '';
             const re = /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)/gi;
-            const nums = [...new Set([...body.matchAll(re)].map(m => Number(m[1])))];
-            if (nums.length === 0) {
-              core.info('No Closes/Fixes/Resolves references found; nothing to do.');
-              return;
+            // Cross-repo references (owner/repo#123) are intentionally skipped;
+            // this workflow only labels issues in the current repo.
+            const MAX_REFS = 50; // cap runaway PR bodies from forks (pull_request_target).
+            const extract = (text) => [...new Set(
+              [...(text || '').matchAll(re)].map(m => Number(m[1]))
+            )].slice(0, MAX_REFS);
+
+            const current = extract(body);
+
+            // On `edited`, compute which references were REMOVED so their
+            // labels come off. Without this, a PR that once said "Closes #42"
+            // and no longer does would leave #42 shielded indefinitely.
+            let removed = [];
+            if (context.payload.action === 'edited') {
+              const prevBody = context.payload.changes?.body?.from;
+              if (prevBody !== undefined) {
+                const previous = extract(prevBody);
+                const now = new Set(current);
+                removed = previous.filter(n => !now.has(n));
+              }
             }
 
             // Apply the label while the PR is open. Remove it when the PR
             // closes without merging (merged PRs also close, but the issue
             // will be auto-closed by GitHub once the merge lands, so the
-            // in-progress label on it is harmless).
+            // in-progress label on it is harmless). Also remove on `edited`
+            // when a reference was deleted from the body.
             const shouldLabel = pr.state === 'open';
-            const shouldUnlabel = pr.state === 'closed' && !pr.merged;
+            const closeUnlabel = pr.state === 'closed' && !pr.merged ? current : [];
+            const toUnlabel = [...new Set([...removed, ...closeUnlabel])];
 
-            for (const n of nums) {
-              try {
-                if (shouldLabel) {
+            if (current.length === 0 && toUnlabel.length === 0) {
+              core.info('No Closes/Fixes/Resolves references to process; nothing to do.');
+              return;
+            }
+
+            const removeLabelSafe = async (n) => {
+              await github.rest.issues.removeLabel({
+                ...context.repo,
+                issue_number: n,
+                name: 'in-progress',
+              }).catch(err => {
+                // 404 just means the label was not present; not an error.
+                if (err.status !== 404) throw err;
+              });
+              core.info(`#${n}: removed in-progress`);
+            };
+
+            if (shouldLabel) {
+              for (const n of current) {
+                try {
                   await github.rest.issues.addLabels({
                     ...context.repo,
                     issue_number: n,
                     labels: ['in-progress'],
                   });
                   core.info(`#${n}: added in-progress`);
-                } else if (shouldUnlabel) {
-                  await github.rest.issues.removeLabel({
-                    ...context.repo,
-                    issue_number: n,
-                    name: 'in-progress',
-                  }).catch(err => {
-                    // 404 just means the label was not present; not an error.
-                    if (err.status !== 404) throw err;
-                  });
-                  core.info(`#${n}: removed in-progress (PR closed unmerged)`);
+                } catch (err) {
+                  core.warning(`#${n}: ${err.message}`);
                 }
+              }
+            }
+
+            for (const n of toUnlabel) {
+              try {
+                await removeLabelSafe(n);
               } catch (err) {
-                // Do not fail the whole run on one bad reference; log and continue.
                 core.warning(`#${n}: ${err.message}`);
               }
             }
