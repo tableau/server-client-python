@@ -10961,7 +10961,7 @@ for wb in finance_workbooks:
 
 ## Known server-side limitations
 
-Some behaviors you may hit while using TSC are not bugs in the TSC library. They are limitations of the Tableau Server REST API itself, and cannot be fixed in TSC alone. This section lists the currently-tracked server-side gaps so you can identify them quickly and follow the appropriate issues.
+Some behaviors you may hit while using TSC are not bugs in the TSC library. They are limitations of the Tableau Server REST API itself, and cannot be fixed in TSC alone. This section lists known server-side gaps so you can identify them quickly and follow the tracking issues where filed.
 
 For the live, maintainer-updated view of these issues, filter open issues in this repository by the [`Server-Side Enhancement`](https://github.com/tableau/server-client-python/labels/Server-Side%20Enhancement) label.
 
@@ -10980,12 +10980,7 @@ Every item in this list requires a change in Tableau Server / Tableau Cloud befo
 <br>
 
 **Daily extract-refresh schedules cannot be created via the REST API on Tableau Cloud**
-: Creating an extract-refresh task on a daily schedule fails through the REST API (returns a 500), and the underlying Cloud scheduler has a separate bug where daily executes hourly. Tracked in [#1508](https://github.com/tableau/server-client-python/issues/1508).
-
-<br>
-
-**Subscriptions cannot use an "On Extract Refresh" schedule via the REST API**
-: The "When data refreshes" (a.k.a. "On Extract Refresh") subscription trigger available in the Tableau UI has no equivalent in the REST API surface, so TSC cannot expose it. Tracked in [#1658](https://github.com/tableau/server-client-python/issues/1658).
+: Creating an extract-refresh task on a daily schedule fails through the REST API (returns a 500), and the underlying Cloud scheduler currently runs daily schedules hourly instead. Tracked in [#1508](https://github.com/tableau/server-client-python/issues/1508).
 
 <br>
 
