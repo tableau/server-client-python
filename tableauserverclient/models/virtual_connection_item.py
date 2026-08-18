@@ -2,7 +2,7 @@ import datetime as dt
 import json
 from typing import Callable
 from collections.abc import Iterable
-from xml.etree.ElementTree import Element  # building XML request bodies only; use defusedxml for parsing
+from xml.etree.ElementTree import Element  # type annotation only; parsing uses defusedxml
 
 from defusedxml.ElementTree import fromstring
 

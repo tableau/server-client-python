@@ -1,4 +1,4 @@
-import xml.etree.ElementTree as ET  # building XML request bodies only; use defusedxml for parsing
+from defusedxml.ElementTree import fromstring  # parsing server responses; defusedxml protects against XML attacks
 from datetime import datetime
 
 from tableauserverclient.datetime_helpers import parse_datetime
@@ -127,7 +127,7 @@ class MetricItem:
         ns,
     ) -> list["MetricItem"]:
         all_metric_items = list()
-        parsed_response = ET.fromstring(resp)
+        parsed_response = fromstring(resp)
         all_metric_xml = parsed_response.findall(".//t:metric", namespaces=ns)
         for metric_xml in all_metric_xml:
             all_metric_items.append(cls.from_xml(metric_xml, ns))

@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 import copy
 import datetime
-import xml.etree.ElementTree as ET  # building XML request bodies only; use defusedxml for parsing
+import xml.etree.ElementTree as ET  # type annotation only; parsing uses defusedxml
 
 from defusedxml.ElementTree import fromstring
 
