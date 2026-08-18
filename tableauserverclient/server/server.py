@@ -293,7 +293,7 @@ class Server:
 
     @property
     def namespace(self):
-        return _NAMESPACE_MAP
+        return dict(_NAMESPACE_MAP)
 
     @property
     def auth_token(self):
