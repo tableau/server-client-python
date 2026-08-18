@@ -1349,7 +1349,10 @@ class SubscriptionRequest:
         if subscription_item.send_if_view_empty is not None:
             content_element.attrib["sendIfViewEmpty"] = str(subscription_item.send_if_view_empty).lower()
 
-        # Schedule element
+        # Schedule element. schedule_id can be None on items parsed from
+        # inline-schedule responses; subscriptions.create() guards against
+        # that before we get here, so the value is non-None at this point.
+        assert subscription_item.schedule_id is not None
         schedule_element = ET.SubElement(subscription_element, "schedule")
         schedule_element.attrib["id"] = subscription_item.schedule_id
 

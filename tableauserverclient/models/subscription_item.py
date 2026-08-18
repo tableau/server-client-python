@@ -55,7 +55,7 @@ class SubscriptionItem:
     >>> server.subscriptions.create(sub)
     """
 
-    def __init__(self, subject: str, schedule_id: str, user_id: str, target: "Target") -> None:
+    def __init__(self, subject: str, schedule_id: str | None, user_id: str, target: "Target") -> None:
         self._id = None
         self.attach_image = True
         self.attach_pdf = False
@@ -194,6 +194,15 @@ class SubscriptionItem:
         convert a time-based subscription into an extract-refresh-triggered
         one, issue two updates: first change ``schedule_id``, then set
         ``refresh_extract_triggered = True`` on a second call.
+
+        **Manual-build update() footgun:** every ``subscriptions.update()``
+        payload now carries ``refreshExtractTriggered="true"`` or
+        ``"false"``. The safe pattern is fetch-then-mutate-then-update, so
+        the value round-trips through the parser. If instead you build a
+        fresh ``SubscriptionItem`` locally, assign ``_id`` yourself, and
+        call ``update()``, the default False on the new item will flip an
+        existing extract-refresh-triggered subscription off on the server.
+        Fetch first.
         """
         return self._refresh_extract_triggered
 

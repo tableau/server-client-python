@@ -47,7 +47,10 @@ class Subscriptions(Endpoint):
             # See tableau/server-client-python#1658: users trying to create an
             # "On Extract Refresh" subscription pass schedule_id=None and hit
             # a confusing wire-layer error. Point them at the factory.
-            raise ValueError("schedule_id is required; see SubscriptionItem.on_extract_refresh")
+            raise ValueError(
+                "schedule_id is required; for on-extract-refresh subscriptions "
+                "use SubscriptionItem.on_extract_refresh(...)"
+            )
         logger.info(f"Creating a subscription ({subscription_item})")
         url = self.baseurl
         create_req = RequestFactory.Subscription.create_req(subscription_item)

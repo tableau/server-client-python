@@ -116,7 +116,7 @@ def test_create_rejects_none_schedule_id(server: TSC.Server) -> None:
     the inline-schedule form (no schedule id on the wire).
     """
     target = TSC.Target("view-id", "view")
-    sub = TSC.SubscriptionItem("subject", None, "user-id", target)  # type: ignore[arg-type]
+    sub = TSC.SubscriptionItem("subject", None, "user-id", target)
     with pytest.raises(ValueError, match="on_extract_refresh"):
         server.subscriptions.create(sub)
 
@@ -217,7 +217,7 @@ def test_update_rejects_missing_schedule_id(server: TSC.Server) -> None:
     target = TSC.Target("view-id", "view")
     sub = TSC.SubscriptionItem("subject", "sched-id", "user-id", target)
     sub._id = "existing-sub-id"  # type: ignore[assignment]
-    sub.schedule_id = None  # type: ignore[assignment]
+    sub.schedule_id = None
     with pytest.raises(ValueError, match="schedule_id is required"):
         server.subscriptions.update(sub)
 

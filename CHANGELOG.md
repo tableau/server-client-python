@@ -1,6 +1,16 @@
 
 ## Unreleased
 
+* Added support for "On Extract Refresh" subscriptions. These are Tableau
+  Cloud subscriptions that fire when a referenced extract-refresh schedule
+  completes, rather than on a time trigger, so recipients always get the
+  freshest data. New `SubscriptionItem.on_extract_refresh(subject,
+  extract_refresh_schedule_id, user_id, target)` classmethod is the
+  recommended way to construct them, and `SubscriptionItem.refresh_extract_triggered`
+  is a boolean property that reflects the `refreshExtractTriggered`
+  attribute on the wire. `subscriptions.create()` and `.update()` now
+  raise `ValueError` if `schedule_id` is missing (previously a confusing
+  server-side error). Fixes #1658.
 * Added `Projects.get_by_path(path)` to look up a project by its slash-separated
   hierarchy path (e.g. `"Marketing/Q1 Reports"`). The walk is performed level by
   level using the REST API name filter, so a path with *n* components issues *n*
