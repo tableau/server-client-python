@@ -196,6 +196,9 @@ def test_redact_password_column_helper() -> None:
     assert redact("jsmith,hunter2,fname\n") == "jsmith,***,fname\n"
     # CRLF-terminated (the \r rides with the last field, ending is preserved)
     assert redact("jsmith,hunter2,fname\r\n") == "jsmith,***,fname\r\n"
+    # CRLF where password IS the last field: the \r must not be silently
+    # dropped when the password value is replaced.
+    assert redact("jsmith,hunter2\r\n") == "jsmith,***\r\n"
     # No trailing newline
     assert redact("jsmith,hunter2,fname") == "jsmith,***,fname"
     # Empty password field: still replaced (unconditional mask)

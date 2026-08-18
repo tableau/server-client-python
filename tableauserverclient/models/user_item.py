@@ -492,14 +492,21 @@ class UserItem:
 
         # Return a copy of a raw CSV line with the password column replaced by "***".
         # Callers that log or expose invalid rows will not disclose the credential.
+        # Preserves the original line ending (\r\n or \n) so log output and
+        # returned rows stay byte-identical apart from the redaction.
         @staticmethod
         def _redact_password_column(line: str) -> str:
-            trailing_newline = "\n" if line.endswith("\n") else ""
-            fields = line.rstrip("\n").split(",")
+            if line.endswith("\r\n"):
+                body, ending = line[:-2], "\r\n"
+            elif line.endswith("\n"):
+                body, ending = line[:-1], "\n"
+            else:
+                body, ending = line, ""
+            fields = body.split(",")
             pass_index = UserItem.CSVImport.ColumnType.PASS.value
             if len(fields) > pass_index:
                 fields[pass_index] = "***"
-            return ",".join(fields) + trailing_newline
+            return ",".join(fields) + ending
 
         # Some fields in the import file are restricted to specific values
         # Iterate through each field and validate the given value against hardcoded constraints
