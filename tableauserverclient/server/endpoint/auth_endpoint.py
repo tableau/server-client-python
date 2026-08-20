@@ -4,7 +4,7 @@ import warnings
 
 from defusedxml.ElementTree import fromstring
 
-from tableauserverclient.server.endpoint.endpoint import Endpoint, api
+from tableauserverclient.server.endpoint.endpoint import Endpoint, XML_CONTENT_TYPE, api
 from tableauserverclient.server.endpoint.exceptions import ServerResponseError
 from tableauserverclient.server.request_factory import RequestFactory
 
@@ -68,20 +68,18 @@ class Auth(Endpoint):
         """
         url = f"{self.baseurl}/signin"
         signin_req = RequestFactory.Auth.signin_req(auth_req)
-        server_response = self.parent_srv.session.post(
-            url, data=signin_req, **self.parent_srv.http_options, allow_redirects=False
+        # Route through _make_request so signin gets the same redirect handling
+        # (multi-hop, HTTPS->HTTP scheme guard, missing-Location diagnostic,
+        # hop limit) that every other endpoint uses. Explicit auth_token=None
+        # because we don't have one yet -- and self.parent_srv.auth_token
+        # raises NotSignedInError pre-signin, so post_request can't help here.
+        server_response = self._make_request(
+            self.parent_srv.session.post,
+            url,
+            content=signin_req,
+            auth_token=None,
+            content_type=XML_CONTENT_TYPE,
         )
-        # manually handle a redirect so that we send the correct POST request instead of GET
-        # this will make e.g http://online.tableau.com work to redirect to http://east.online.tableau.com
-        if server_response.status_code == 301:
-            server_response = self.parent_srv.session.post(
-                server_response.headers["Location"],
-                data=signin_req,
-                **self.parent_srv.http_options,
-                allow_redirects=False,
-            )
-        self.parent_srv._namespace.detect(server_response.content)
-        self._check_status(server_response, url)
         parsed_response = fromstring(server_response.content)
         site_id = parsed_response.find(".//t:site", namespaces=self.parent_srv.namespace).get("id", None)
         site_url = parsed_response.find(".//t:site", namespaces=self.parent_srv.namespace).get("contentUrl", None)
