@@ -1,5 +1,11 @@
 from tableauserverclient.bin._version import get_versions
-from tableauserverclient.server.server import NAMESPACE as DEFAULT_NAMESPACE
+
+# Inlined as a string literal (rather than imported from server.server) so
+# loading `tableauserverclient` doesn't force the full server + endpoint
+# import graph to load just to read a constant. Kept in sync with the
+# NAMESPACE constant defined in tableauserverclient/server/server.py.
+DEFAULT_NAMESPACE = "http://tableau.com/api"
+
 from tableauserverclient.models import (
     BackgroundJobItem,
     CollectionItem,
