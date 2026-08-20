@@ -10969,11 +10969,6 @@ Every item in this list requires a change in Tableau Server / Tableau Cloud befo
 
 <br>
 
-**View filter query parameters (`vf_`) support exact match only**
-: The REST API's `vf_<field>=<value>` mechanism (used by `ImageRequestOptions.vf(...)`, `PDFRequestOptions.vf(...)`, `CSVRequestOptions.vf(...)`, and the `filter=` builder on view endpoints) accepts an exact value only. Operator prefixes (`gt:`, `lt:`, `in:`), wildcards, and range expressions are not supported by the server. Tracked in [#1431](https://github.com/tableau/server-client-python/issues/1431).
-
-<br>
-
 **`vf_` view filter is silently dropped when the server-side view already has an operator-based filter**
 : If the underlying view definition includes a filter that uses an operator (for example, a range filter), a client-supplied `vf_` value on that same field can be silently ignored rather than layered on top. There is no error surfaced through the REST API.
 
