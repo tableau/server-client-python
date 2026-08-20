@@ -1,4 +1,4 @@
-name: Mark stale issues and pull requests
+name: Stale issues and pull requests
 
 on:
   schedule:
@@ -8,12 +8,13 @@ on:
 permissions:
   issues: write
   pull-requests: write
+  actions: write
 
 jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v9
+      - uses: actions/stale@v11
         with:
           stale-issue-label: 'stale'
           stale-pr-label: 'stale'
@@ -24,6 +25,8 @@ jobs:
           days-before-issue-close: 14
           days-before-pr-stale: 90
           days-before-pr-close: 14
+
+          operations-per-run: 300
 
           close-issue-reason: 'not_planned'
 
