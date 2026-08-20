@@ -27,9 +27,18 @@ class _TaggableWithInitial(Protocol):
 
     Extends the public TaggableItem interface with the ``_initial_tags``
     implementation detail used internally to track server-side tag state.
+
+    ``id`` is declared as a read-only ``@property`` so that concrete item
+    classes (``WorkbookItem``, ``DatasourceItem``, ``FlowItem``, etc.) that
+    expose ``id`` as an ``@property`` satisfy the protocol under mypy's
+    Protocol variance rules for data attributes.  ``tags`` and
+    ``_initial_tags`` remain writable attributes because the tagger mutates
+    them.
     """
 
-    id: str | None
+    @property
+    def id(self) -> str | None: ...
+
     tags: set[str]
     _initial_tags: set[str]
 
