@@ -96,6 +96,15 @@ class WebhookItem:
         else:
             self._event = f"webhook-source-event-{value}"
 
+    @property
+    def event_tag(self) -> str | None:
+        """Internal event tag as stored (e.g. 'webhook-source-event-datasource-created'
+        or 'webhook-event-user-promoted-admin'). Unlike `event`, this returns the
+        raw tag without stripping the `webhook-source-event-` prefix. Used by the
+        request-factory serializers so they don't reach into the private `_event`.
+        """
+        return self._event
+
     @classmethod
     def from_response(cls: type["WebhookItem"], resp: bytes, ns) -> list["WebhookItem"]:
         all_webhooks_items = list()

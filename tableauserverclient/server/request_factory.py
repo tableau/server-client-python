@@ -1397,10 +1397,10 @@ class WebhookRequest:
             raise ValueError(f"Name must be provided for {webhook_item}")
 
         source = ET.SubElement(webhook, "webhook-source")
-        if isinstance(webhook_item._event, str):
-            ET.SubElement(source, webhook_item._event)
+        if isinstance(webhook_item.event_tag, str):
+            ET.SubElement(source, webhook_item.event_tag)
         else:
-            raise ValueError(f"_event for Webhook must be provided. {webhook_item}")
+            raise ValueError(f"event for Webhook must be provided. {webhook_item}")
 
         destination = ET.SubElement(webhook, "webhook-destination")
         post = ET.SubElement(destination, "webhook-destination-http")
@@ -1421,7 +1421,7 @@ class WebhookRequest:
         if (
             webhook_item.name is None
             and webhook_item.is_enabled is None
-            and webhook_item._event is None
+            and webhook_item.event_tag is None
             and webhook_item.url is None
         ):
             raise ValueError(
@@ -1435,9 +1435,9 @@ class WebhookRequest:
         if webhook_item.is_enabled is not None:
             webhook.attrib["isEnabled"] = str(webhook_item.is_enabled).lower()
 
-        if webhook_item._event is not None:
+        if webhook_item.event_tag is not None:
             source = ET.SubElement(webhook, "webhook-source")
-            ET.SubElement(source, webhook_item._event)
+            ET.SubElement(source, webhook_item.event_tag)
 
         if webhook_item.url is not None:
             destination = ET.SubElement(webhook, "webhook-destination")
