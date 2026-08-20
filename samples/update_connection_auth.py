@@ -5,9 +5,17 @@
 # connection to keypair auth.
 #
 # Common authentication_type values (case-sensitive wire values):
-#   - "UsernamePassword"       -- username + password auth
-#   - "auth-keypair"           -- Snowflake keypair auth (see prerequisite below)
+#   - "auth-user-pass"         -- username + password (canonical)
+#   - "username-password"      -- alternate spelling used by some connectors
+#                                 (SAP HANA, SAP Sybase ASE, SAP NetWeaver BW,
+#                                 Denodo, Salesforce)
+#   - "auth-keypair"           -- Snowflake keypair (see prerequisite below)
+#   - "oauth"                  -- OAuth
+#   - "auth-none"              -- no auth on the connection
 #   - "AD Service Principal"   -- Azure AD Service Principal
+#   - "Azure AD Password"      -- Azure AD username/password
+# For the full list including connector-specific values, see the REST reference
+# link below or query an existing connection to observe its wire value.
 #
 # SECURITY: datasource_password is a positional CLI argument. For keypair auth
 # it carries the private-key material, which will leak into shell history, ps
