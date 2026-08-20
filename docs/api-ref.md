@@ -15,7 +15,7 @@ The Tableau Server Client (TSC) is a Python library for the Tableau Server REST 
 The TSC API reference is organized by resource. The TSC library is modeled after the REST API. The methods, for example, `workbooks.get()`, correspond to the endpoints for resources, such as [workbooks](#workbooks), [users](#users), [views](#views), and [data sources](#data-sources). The model classes (for example, the [WorkbookItem class](#workbookitem-class) have attributes that represent the fields (`name`, `id`, `owner_id`) that are in the REST API request and response packages, or payloads.
 
 |:---  |
-| **Note:**  Some methods and features provided in the REST API might not be currently available in the TSC library (and in some cases, the opposite is true).  In addition, the same limitations apply to the TSC library that apply to the REST API with respect to resources on Tableau Server and Tableau Cloud. For more information, see the [Tableau Server REST API Reference](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm).|
+| **Note:**  Some methods and features provided in the REST API might not be currently available in the TSC library (and in some cases, the opposite is true).  In addition, the same limitations apply to the TSC library that apply to the REST API with respect to resources on Tableau Server and Tableau Cloud. For more information, see the [Tableau Server REST API Reference](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm). See also [Known server-side limitations](#known-server-side-limitations) below for behaviors that TSC cannot work around because they are constrained by the Tableau Server REST API itself.|
 
 
 
@@ -10970,6 +10970,38 @@ finance_workbooks = server.workbooks.filter(project_name='Finance', has_extracts
 for wb in finance_workbooks:
     print(wb.name)
 ```
+
+<br>
+<br>
+
+---
+
+## Known server-side limitations
+
+Some behaviors you may hit while using TSC are not bugs in the TSC library. They are limitations of the Tableau Server REST API itself, and cannot be fixed in TSC alone. This section lists known server-side gaps so you can identify them quickly and follow the tracking issues where filed.
+
+For the live, maintainer-updated view of these issues, filter open issues in this repository by the [`Server-Side Enhancement`](https://github.com/tableau/server-client-python/labels/Server-Side%20Enhancement) label.
+
+Every item in this list requires a change in Tableau Server / Tableau Cloud before TSC can expose the behavior.
+
+<br>
+
+**`vf_` view filter is silently dropped when the server-side view already has an operator-based filter**
+: If the underlying view definition includes a filter that uses an operator (for example, a range filter), a client-supplied `vf_` value on that same field can be silently ignored rather than layered on top. There is no error surfaced through the REST API.
+
+<br>
+
+**Daily extract-refresh schedules cannot be created via the REST API on Tableau Cloud**
+: Creating an extract-refresh task on a daily schedule fails through the REST API (returns a 500), and the underlying Cloud scheduler currently runs daily schedules hourly instead. Tracked in [#1508](https://github.com/tableau/server-client-python/issues/1508).
+
+<br>
+
+**Flow thumbnail image is not generated when a flow is published via the REST API**
+: A flow published through the REST API (and therefore through TSC's `flows.publish(...)`) is stored without a thumbnail image, whereas the same flow uploaded through the Tableau Prep UI receives one. Tracked in [#1537](https://github.com/tableau/server-client-python/issues/1537).
+
+<br>
+
+If you believe you have found another server-side limitation, please open an issue and mention this section so a maintainer can apply the `Server-Side Enhancement` label and add it to the list above.
 
 <br>
 <br>
