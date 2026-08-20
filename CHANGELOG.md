@@ -37,6 +37,13 @@
   `type` / `value` / `text`. The existing `notes: list[str]` attribute is
   unchanged (it parses the separate legacy `<notes>` element still emitted by
   some job types). Fixes #1850.
+* Removed the pre-Tableau-8.3 XML namespace fallback
+  (`http://tableausoftware.com/api`). Every server TSC's `minimum_supported_server_version`
+  guard has ever admitted uses the current namespace (`http://tableau.com/api`),
+  and the runtime-detection code has been unreachable in practice for a
+  decade. `tableauserverclient.namespace` module and `UnknownNamespaceError`
+  are removed; the public `TSC.DEFAULT_NAMESPACE` re-export still works and
+  now points at `tableauserverclient.server.server.NAMESPACE`. Fixes #1046.
 
 ## 0.18.0 (6 April 2022)    
 * Switched to using defused_xml for xml attack protection

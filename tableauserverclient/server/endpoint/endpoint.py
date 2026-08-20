@@ -180,9 +180,6 @@ class Endpoint:
         # BE CAREFUL WHEN SHARING THESE RESULTS - MAY CONTAIN YOUR SENSITIVE DATA
         # logger.debug(loggable_response)
 
-        if content_type == "application/xml":
-            self.parent_srv._namespace.detect(server_response.content)
-
         return server_response
 
     def _follow_redirect_if_any(
