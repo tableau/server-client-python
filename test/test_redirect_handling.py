@@ -177,6 +177,12 @@ def test_response_history_empty_when_no_redirect(signed_in_server: TSC.Server) -
 
 @pytest.mark.parametrize("code", [301, 302, 303, 307, 308])
 def test_all_supported_redirect_codes_preserve_post_body(server: TSC.Server, code: int) -> None:
+    # Uniform method preservation across all five supported codes -- 303 is
+    # a deliberate deviation from RFC 7231 section 6.4.4 (which says 303
+    # SHOULD convert POST to GET). Tableau Server has historically returned
+    # 303s that expect the original method/body, so we preserve rather than
+    # convert. If a future refactor "helpfully" converts 303 to GET, this
+    # test fails on the 303 param.
     xml = _sign_in_xml()
     seen_bodies: list[bytes | None] = []
 
