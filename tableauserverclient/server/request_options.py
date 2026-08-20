@@ -358,8 +358,8 @@ class _DataExportOptions(RequestOptionsBase):
         to your value; it only percent-encodes the value for HTTP transport,
         which the server decodes back before applying the rules below.
 
-        Value syntax
-        ------------
+        **Value syntax**
+
         - **Exact match (default):** a single value matches rows where the
           column equals that value exactly. Case-sensitivity follows the
           underlying data source.
@@ -374,12 +374,14 @@ class _DataExportOptions(RequestOptionsBase):
           percent-encoding is transport-only (``%2C`` and ``%5C`` reach the
           server as ``,`` and ``\\`` and are then processed like any other
           comma or backslash, so URL-encoding does NOT escape them), are
-          empirical -- verified end-to-end against Tableau Cloud in
-          August 2026. To match a value containing a literal comma:
-          ``"Rock\\, Paper\\, Scissors"`` matches ``Rock, Paper, Scissors``
-          (without escaping, the comma starts an OR-list). To match a
-          literal backslash, double it: ``"C:\\\\temp\\\\file"`` matches
-          ``C:\\temp\\file``.
+          empirical -- verified end-to-end against Tableau REST API 3.30
+          in August 2026. Examples below give the wire form (what the
+          server sees after URL decoding) and the data value it matches.
+          To match a value containing a literal comma, wire form
+          ``Rock\, Paper\, Scissors`` matches data value ``Rock, Paper,
+          Scissors`` (without escaping, the comma starts an OR-list). To
+          match a literal backslash, double it: wire form ``C:\\temp\\file``
+          matches data value ``C:\temp\file``.
         - **Empty value** (``vf_<name>=``) is observed to override any
           workbook-embedded filter on that column, effectively widening it
           to all values. Not officially documented; behavior may change
@@ -387,7 +389,7 @@ class _DataExportOptions(RequestOptionsBase):
         - **No wildcards, ranges, comparisons, or operators.** Characters
           like ``*`` and ``%`` are treated as literal data, not glob or SQL
           wildcards; ``vf_Product=Widget*`` matches only a product literally
-          named ``Widget*``. Verified end-to-end against Tableau Server 3.30
+          named ``Widget*``. Verified end-to-end against Tableau REST API 3.30
           in August 2026 (``vf_Product Name=*`` and ``vf_Product Name=%``
           returned zero rows; ``vf_Product Name=META /star*/`` returned the
           single row whose value contains a literal ``*``). If you need
