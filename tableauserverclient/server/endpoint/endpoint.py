@@ -3,6 +3,7 @@ import io
 import os
 from contextlib import closing
 from typing_extensions import Concatenate, ParamSpec
+from urllib.parse import urljoin, urlparse
 from tableauserverclient import datetime_helpers as datetime
 
 import abc
@@ -30,6 +31,7 @@ from tableauserverclient.server.endpoint.exceptions import (
     InternalServerError,
     NonXMLResponseError,
     NotSignedInError,
+    RedirectError,
 )
 from tableauserverclient.server.exceptions import EndpointUnavailableError
 
@@ -44,6 +46,21 @@ if TYPE_CHECKING:
 
 
 Success_codes = [200, 201, 202, 204]
+
+# 301/302/303/307/308 all indicate the caller should re-request at a new URL.
+# `requests`' default handler converts POST -> GET on 301/302/303, which drops
+# the POST body and breaks sign-in / addusers / publish / any write endpoint
+# whose target sits behind a redirect. We disable that and walk the chain
+# manually, keeping the original method and body across every hop.
+#
+# RFC 7231 §6.4.4 says 303 SHOULD change the method to GET on retry. We do NOT
+# follow that recommendation, deliberately: Tableau Server does not emit 303
+# for POST endpoints in normal operation (writes redirect via 301/302 in
+# proxy/HA setups), and preserving the method + body uniformly is the
+# behavior that fixes the reported bug (#1127). If a Tableau deployment ever
+# starts emitting 303 for writes, revisit; treating it identically today is
+# a conscious deviation, not an oversight.
+Redirect_codes = [301, 302, 303, 307, 308]
 
 XML_CONTENT_TYPE = "text/xml"
 JSON_CONTENT_TYPE = "application/json"
@@ -120,6 +137,16 @@ class Endpoint:
         parameters = Endpoint.set_parameters(
             self.parent_srv.http_options, auth_token, content, content_type, parameters
         )
+        # Manual redirect handling: see Redirect_codes comment. `requests`
+        # follows 301/302/303 by converting POST to GET (RFC-conforming but
+        # loses the body). We default it off here and re-issue the same
+        # method ourselves in _follow_redirect_if_any. Use setdefault so a
+        # caller who has a specific reason to override (e.g. a security
+        # policy that says "fail loudly on any redirect, don't silently
+        # follow it") can pass allow_redirects=True or =False on their
+        # http_options and have it respected -- the manual redirect walk
+        # is a default, not a mandate.
+        parameters.setdefault("allow_redirects", False)
 
         logger.debug(f"request method {method.__name__}, url: {url}")
         if content:
@@ -144,6 +171,7 @@ class Endpoint:
             raise RuntimeError
         if isinstance(server_response, Exception):
             raise server_response
+        server_response, url = self._follow_redirect_if_any(method, url, parameters, server_response)
         self._check_status(server_response, url)
 
         loggable_response = self.log_response_safely(server_response)
@@ -153,6 +181,101 @@ class Endpoint:
         # logger.debug(loggable_response)
 
         return server_response
+
+    def _follow_redirect_if_any(
+        self,
+        method: Callable[..., "Response"],
+        url: str,
+        parameters: dict[str, Any],
+        server_response: "Response",
+    ) -> tuple["Response", str]:
+        # Walk a 301/302/303/307/308 chain up to session.max_redirects hops,
+        # preserving method and body. Rejects HTTPS -> HTTP scheme downgrades
+        # (silent security regression). Raises RedirectError on a missing
+        # Location header instead of the KeyError requests emits deep in its
+        # internals, and on exceeding the session hop limit.
+        try:
+            max_hops = int(self.parent_srv.session.max_redirects)
+        except (AttributeError, TypeError):
+            max_hops = 30  # requests' library default
+        current_url = url
+        response = server_response
+        # Not a redirect? Return immediately regardless of max_hops (including 0).
+        if response.status_code not in Redirect_codes:
+            return response, current_url
+        # Preserve requests' `response.history` semantics: the intermediate 3xx
+        # responses in receipt order, with the final non-3xx response as the
+        # returned value. Callers doing forensic debugging on `.history` see
+        # the same shape they would from requests' native follower.
+        history: list["Response"] = []
+        method_name = getattr(method, "__name__", "REQUEST").upper()
+        for _ in range(max_hops):
+            location = response.headers.get("Location")
+            if not location:
+                raise RedirectError(
+                    f"{method_name} {current_url} returned HTTP {response.status_code} "
+                    f"without a Location header; can't follow the redirect."
+                )
+            # Support relative Locations per RFC 7231.
+            next_url = urljoin(current_url, location)
+            current_scheme = urlparse(current_url).scheme
+            next_scheme = urlparse(next_url).scheme
+            if current_scheme == "https" and next_scheme == "http":
+                raise RedirectError(
+                    f"Refusing to follow redirect from {current_url} to {next_url}: "
+                    f"HTTPS -> HTTP scheme downgrade would send request data over plaintext."
+                )
+            # http -> https upgrade on the same host: promote the stored server
+            # address so subsequent requests skip this redirect round-trip.
+            # Only rewrite when the stored address's netloc exactly matches
+            # the redirected netloc to avoid pointing the client at an
+            # unrelated server (prefix matching could match e.g. "test"
+            # against a stored address of "test.other.example").
+            if current_scheme == "http" and next_scheme == "https":
+                current_parsed = urlparse(current_url)
+                next_parsed = urlparse(next_url)
+                if current_parsed.netloc == next_parsed.netloc:
+                    old_address = self.parent_srv._server_address
+                    old_parsed = urlparse(old_address)
+                    if old_parsed.scheme == "http" and old_parsed.netloc == current_parsed.netloc:
+                        new_address = "https://" + old_address[len("http://") :]
+                        self.parent_srv._server_address = new_address
+                        logger.info(f"Server redirected to HTTPS; updated server address to {new_address}")
+            # Auth-material policy: the request `parameters` (including the
+            # X-Tableau-Auth header and any session cookies) are forwarded
+            # to the redirect target unchanged. This is intentional and
+            # required. TSC is a client library for a specific server the
+            # caller has already agreed to trust, and customers routinely
+            # deploy Tableau Server behind reverse proxies, load balancers,
+            # and SSO front-ends that redirect between hosts within their
+            # own infrastructure (e.g. tableau.corp.example -> east.tableau.
+            # corp.example, or an SSO IdP -> the auth-callback endpoint on
+            # a different subdomain). Stripping X-Tableau-Auth on cross-
+            # host redirects would break sign-in against every such
+            # deployment. The HTTPS -> HTTP downgrade guard above (line 208)
+            # is the boundary that keeps this from becoming a security
+            # regression: once the caller connects over HTTPS, the token
+            # never leaves TLS.
+            logger.debug(f"Following {response.status_code} redirect: {current_url} -> {next_url}")
+            history.append(response)
+            current_url = next_url
+            next_response = self._blocking_request(method, current_url, parameters)
+            if next_response is None:
+                raise RuntimeError(f"No response after redirect to {current_url}")
+            if isinstance(next_response, Exception):
+                # _blocking_request already re-raises via except -> raise, so this
+                # branch is defensive; keep it to satisfy the Response|Exception|None
+                # return type.
+                raise next_response
+            response = next_response
+            if response.status_code not in Redirect_codes:
+                response.history = history
+                return response, current_url
+        # Still a redirect after max_hops hops -> loop / misconfiguration.
+        raise RedirectError(
+            f"Exceeded {max_hops} redirect hops starting from {url}; last URL attempted was {current_url}. "
+            f"Increase session.max_redirects if this is legitimate."
+        )
 
     def _check_status(self, server_response: "Response", url: str | None = None):
         logger.debug(f"Response status: {server_response}")
