@@ -16,7 +16,7 @@ dependencies = [
     'defusedxml>=0.7.1',  # latest as at 7/31/23
     'packaging>=23.1',   # latest as at 7/31/23
     'requests>=2.32',  # latest as at 7/31/23
-    'urllib3>=2.6.0,<3',
+    'urllib3>=2.6.3,<3',
     'typing_extensions>=4.0',
 ]
 requires-python = ">=3.10"
