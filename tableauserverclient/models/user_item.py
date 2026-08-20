@@ -1,4 +1,5 @@
 import io
+import warnings
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from enum import IntEnum
@@ -476,12 +477,23 @@ class UserItem:
                 )
                 raw_auth = values[UserItem.CSVImport.ColumnType.AUTH]
                 if raw_auth:
-                    auth = UserItem.CSVImport._AUTH_CANONICAL.get(raw_auth.lower())
-                    if auth is None:
-                        raise ValueError(
-                            f"Unknown auth setting: {raw_auth!r}. "
-                            f"Valid values: {sorted(UserItem.CSVImport._AUTH_CANONICAL.values())}"
+                    canonical = UserItem.CSVImport._AUTH_CANONICAL.get(raw_auth.lower())
+                    if canonical is None:
+                        # Unknown auth value: pass it through instead of raising.
+                        # TSC's _AUTH_CANONICAL is a hardcoded list that will lag
+                        # server-side additions; refusing to build the UserItem
+                        # here would block CSV imports against newer servers as
+                        # soon as Tableau ships a new auth type. If it is a
+                        # typo, the server rejects the row when the request
+                        # posts. Warn so the caller has a shot at noticing.
+                        warnings.warn(
+                            f"Unknown auth setting {raw_auth!r}; passing through unchanged. "
+                            f"Known values: {sorted(UserItem.CSVImport._AUTH_CANONICAL.values())}",
+                            stacklevel=2,
                         )
+                        auth = raw_auth
+                    else:
+                        auth = canonical
                 else:
                     auth = None
                 user._set_values(
@@ -546,14 +558,35 @@ class UserItem:
             for i in range(1, len(line)):
                 value = line[i]
                 valid = _valid_attributes[i]
+                column = UserItem.CSVImport.ColumnType(i)
                 # normalize case for fields with a restricted value set
+                skip_validation = False
                 if valid:
                     if i == UserItem.CSVImport.ColumnType.AUTH:
-                        value = UserItem.CSVImport._AUTH_CANONICAL.get(value.lower(), value)
+                        canonical = UserItem.CSVImport._AUTH_CANONICAL.get(value.lower())
+                        if canonical is not None:
+                            value = canonical
+                        elif value:
+                            # Unknown auth value: warn and pass through instead
+                            # of raising. TSC's _AUTH_CANONICAL is a hardcoded
+                            # list that lags server-side additions; refusing
+                            # would block CSV imports against newer servers as
+                            # soon as Tableau ships a new auth type. Skip the
+                            # allowlist check so the row still validates.
+                            # Matches create_user_from_line's warn-and-pass.
+                            warnings.warn(
+                                f"Unknown auth setting {value!r}; passing through unchanged. "
+                                f"Known values: {sorted(UserItem.CSVImport._AUTH_CANONICAL.values())}",
+                                stacklevel=2,
+                            )
+                            skip_validation = True
                     else:
                         value = value.lower()
-                logger.debug(f"column {UserItem.CSVImport.ColumnType(i).name}: {value}")
-                UserItem.CSVImport._validate_attribute_value(value, valid, UserItem.CSVImport.ColumnType(i))
+                # Mask the password column so it never reaches log handlers.
+                safe_value = "***" if column == UserItem.CSVImport.ColumnType.PASS else value
+                logger.debug(f"column {column.name}: {safe_value}")
+                if not skip_validation:
+                    UserItem.CSVImport._validate_attribute_value(value, valid, column)
 
         # Given a restricted set of possible values, confirm the item is in that set
         @staticmethod

@@ -204,11 +204,18 @@ def test_too_many_columns_raises() -> None:
         TSC.UserItem.CSVImport.create_user_from_line("u, p, n, creator, none, yes, email, SAML, extra")
 
 
-def test_create_user_with_unknown_auth_raises() -> None:
-    # Unknown AUTH values must raise, not silently produce a UserItem with auth_setting=None.
-    # A caller can catch this if lenient behavior is wanted.
-    with pytest.raises(ValueError, match="Unknown auth setting"):
-        TSC.UserItem.CSVImport.create_user_from_line("username, pword, fname, creator, none, yes, email, NotAnAuthType")
+def test_create_user_with_unknown_auth_passes_through_with_warning() -> None:
+    # Unknown AUTH values pass through with a UserWarning rather than raising.
+    # TSC's _AUTH_CANONICAL is a hardcoded list that lags server-side auth-type
+    # additions; refusing would block CSV imports against newer servers as
+    # soon as Tableau ships a new auth type. If the value really is a typo,
+    # the server rejects the row when the request posts.
+    with pytest.warns(UserWarning, match="Unknown auth setting"):
+        user = TSC.UserItem.CSVImport.create_user_from_line(
+            "username, pword, fname, creator, none, yes, email, NotAnAuthType"
+        )
+    assert user is not None
+    assert user.auth_setting == "NotAnAuthType"
 
 
 def test_create_user_with_lowercase_auth_accepted() -> None:
@@ -218,12 +225,11 @@ def test_create_user_with_lowercase_auth_accepted() -> None:
     assert user.auth_setting == "SAML"
 
 
-def test_validate_import_line_rejects_unknown_auth() -> None:
-    # _validate_import_line_or_throw shares the AUTH canonicalization with
-    # create_user_from_line -- confirm both paths reject unknown auth values so
-    # that validate_file_for_import (which uses this path) doesn't silently
-    # accept rows create_user_from_line would refuse.
-    with pytest.raises(ValueError, match="Invalid value"):
+def test_validate_import_line_warns_on_unknown_auth() -> None:
+    # _validate_import_line_or_throw matches create_user_from_line's warn-and-
+    # pass behavior on unknown auth values: the same row shouldn't be accepted
+    # by one path and rejected by the other.
+    with pytest.warns(UserWarning, match="Unknown auth setting"):
         TSC.UserItem.CSVImport._validate_import_line_or_throw(
             "username, pword, fname, creator, none, yes, email, NotAnAuthType",
             logger,
