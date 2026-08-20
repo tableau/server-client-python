@@ -25,7 +25,7 @@ class Config:
     # Default page size
     @property
     def PAGE_SIZE(self):
-        """Default page size for paginated API requests (env: TSC_PAGE_SIZE)."""
+        """Default page size for paginated API requests (env: TSC_PAGE_SIZE, default 100)."""
         return int(os.getenv("TSC_PAGE_SIZE", 100))
 
 

@@ -22,7 +22,7 @@ class Namespace:
         return self._namespace
 
     def detect(self, xml):
-        """Detect the XML namespace from raw response bytes, updating the stored namespace on first call."""
+        """Detect the XML namespace from raw response bytes, updating the stored namespace on first call. Raises UnknownNamespaceError if the namespace is not a recognized Tableau REST API namespace."""
         if self._detected:
             return
 
