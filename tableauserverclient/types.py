@@ -1,11 +1,11 @@
 import io
 import os
 from collections import namedtuple
-from typing import Literal, Protocol, TypedDict
+from typing import BinaryIO, Literal, Protocol, TypedDict, runtime_checkable
 
 # File path and object type aliases used across publish/download methods
-FilePath = str | os.PathLike
-FileObject = io.BufferedReader | io.BytesIO
+FilePath = str | os.PathLike[str]
+FileObject = BinaryIO
 FileObjectR = io.BufferedReader | io.BytesIO
 FileObjectW = io.BufferedWriter | io.BytesIO
 PathOrFile = FilePath | FileObject
@@ -59,10 +59,12 @@ AddResponse = namedtuple("AddResponse", ("result", "error", "warnings", "task_cr
 # HasIdpConfigurationID unions both so downstream callers can implement either
 # style without hitting mypy invariance errors. Callers accept
 # `str | HasIdpConfigurationID` -- passing a raw id string or an object.
+@runtime_checkable
 class IDPAttributes(Protocol):
     idp_configuration_id: str
 
 
+@runtime_checkable
 class IDPProperty(Protocol):
     @property
     def idp_configuration_id(self) -> str: ...
