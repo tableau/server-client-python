@@ -351,9 +351,54 @@ class _DataExportOptions(RequestOptionsBase):
 
     def vf(self, name: str, value: str) -> Self:
         """Apply a filter based on a column within the view.
-        Note that when filtering on a boolean type field, the only valid values are 'true' and 'false'
 
-        For more detail see: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_filtering_and_sorting.htm#Filter-query-views
+        Serialized to the REST API as ``vf_<name>=<value>``. The rules below
+        describe how the server interprets the wire value. ``vf()`` itself
+        does not apply any Tableau-specific escaping or semantic transforms
+        to your value; it only percent-encodes the value for HTTP transport,
+        which the server decodes back before applying the rules below.
+
+        **Value syntax**
+
+        - **Exact match (default):** a single value matches rows where the
+          column equals that value exactly. Case-sensitivity follows the
+          underlying data source.
+        - **OR-list:** commas separate alternatives, so ``"East,West"``
+          matches rows where the column is ``East`` OR ``West``.
+        - **Escaping** applies to two characters only, comma and backslash;
+          all other characters (``&``, ``=``, ``/``, ``#``, ``%``, ``+``,
+          quotes, brackets, etc.) pass through untouched and the server
+          treats them as literal data. The ``\\,`` escape for a literal
+          comma is documented on the Tableau REST API filtering page. The
+          ``\\\\`` escape for a literal backslash, and the observation that
+          percent-encoding is transport-only (``%2C`` and ``%5C`` reach the
+          server as ``,`` and ``\\`` and are then processed like any other
+          comma or backslash, so URL-encoding does NOT escape them), are
+          empirical -- verified end-to-end against Tableau REST API 3.30
+          in August 2026. Examples below give the wire form (what the
+          server sees after URL decoding) and the data value it matches.
+          To match a value containing a literal comma, wire form
+          ``Rock\, Paper\, Scissors`` matches data value ``Rock, Paper,
+          Scissors`` (without escaping, the comma starts an OR-list). To
+          match a literal backslash, double it: wire form ``C:\\temp\\file``
+          matches data value ``C:\temp\file``.
+        - **Empty value** (``vf_<name>=``) is observed to override any
+          workbook-embedded filter on that column, effectively widening it
+          to all values. Not officially documented; behavior may change
+          without notice.
+        - **No wildcards, ranges, comparisons, or operators.** Characters
+          like ``*`` and ``%`` are treated as literal data, not glob or SQL
+          wildcards; ``vf_Product=Widget*`` matches only a product literally
+          named ``Widget*``. Verified end-to-end against Tableau REST API 3.30
+          in August 2026 (``vf_Product Name=*`` and ``vf_Product Name=%``
+          returned zero rows; ``vf_Product Name=META /star*/`` returned the
+          single row whose value contains a literal ``*``). If you need
+          contains / prefix / range matching, configure the equivalent
+          filter inside the workbook.
+        - **Booleans:** the only valid values are ``'true'`` and ``'false'``.
+
+        For more detail see:
+        https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_filtering_and_sorting.htm#Filter-query-views
 
         Parameters
         ----------

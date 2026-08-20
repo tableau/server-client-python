@@ -13,6 +13,38 @@
   runtime-checkable class); it now returns `True` for any object with the
   right shape. If you relied on the `TypeError` as a guard, add an explicit
   concrete-type check instead.
+* Preserve HTTP method and body across 3xx redirects. Previously `requests`
+  followed 301/302/303 by converting POST to GET and dropping the body, so
+  endpoints like `users.add`, `workbooks.publish`, and any write hitting a
+  server behind a redirect would 405. TSC now disables `requests`'s
+  auto-redirect and walks the chain manually, up to `session.max_redirects`
+  hops (default 30). Refuses HTTPS -> HTTP scheme downgrades and raises
+  `RedirectError` with a clear message on missing `Location` headers or hop
+  overflow. Fixes #1127 and #1828.
+* `UserItem.CSVImport.create_user_from_line` no longer
+  lowercases the entire CSV line before parsing. Previously the whole line,
+  including the username, display name, fullname, and email fields, was
+  lowercased destructively (e.g. `JSmith` became `jsmith`). Case is now
+  preserved for those fields; only the comparison-relevant fields (license,
+  admin_level, publisher, auth_setting) are normalized internally for
+  validation. Callers relying on the previous lowercased output -- e.g. dict
+  lookups keyed on `user.name`, or assertions against lowercased values --
+  need to update. This unblocks CSV imports for LDAP and other case-sensitive
+  auth backends where mixed-case usernames must be preserved.
+* `UserItem.CSVImport._validate_attribute_value` and the too-many-columns
+  branch of `_validate_import_line_or_throw` now raise `ValueError` instead
+  of `AttributeError` for invalid CSV input. `AttributeError` was the wrong
+  exception type for input validation and inconsistent with
+  `create_user_from_line`. `validate_file_for_import` catches `Exception` so
+  it is unaffected; direct callers who caught `AttributeError` specifically
+  need to widen their handler.
+* Added `JobItem.status_notes` for the structured `<statusNotes><statusNote
+  type=".." value=".." text=".."/></statusNotes>` block documented on the Query
+  Job REST endpoint. Populated for UserImport and other multi-row jobs where
+  individual rows have distinct outcomes; each entry is a dict with keys
+  `type` / `value` / `text`. The existing `notes: list[str]` attribute is
+  unchanged (it parses the separate legacy `<notes>` element still emitted by
+  some job types). Fixes #1850.
 
 ## 0.18.0 (6 April 2022)    
 * Switched to using defused_xml for xml attack protection
