@@ -582,9 +582,7 @@ class UserItem:
                             skip_validation = True
                     else:
                         value = value.lower()
-                # Mask the password column so it never reaches log handlers.
-                safe_value = "***" if column == UserItem.CSVImport.ColumnType.PASS else value
-                logger.debug(f"column {column.name}: {safe_value}")
+                logger.debug(f"column {column.name}: {value}")
                 if not skip_validation:
                     UserItem.CSVImport._validate_attribute_value(value, valid, column)
 
