@@ -453,7 +453,12 @@ class UserItem:
                     values[UserItem.CSVImport.ColumnType.PUBLISHER],
                 )
                 raw_auth = values[UserItem.CSVImport.ColumnType.AUTH]
-                auth = UserItem.CSVImport._auth_canonical().get(raw_auth.lower()) if raw_auth else None
+                # Pass unknown values through unchanged rather than silently
+                # dropping them to None: _validate_import_line_or_throw on the
+                # same input would have raised, so the two entry points must
+                # not disagree on what constitutes a valid auth value. If a
+                # bad value gets here, the API call downstream rejects it.
+                auth = UserItem.CSVImport._auth_canonical().get(raw_auth.lower(), raw_auth) if raw_auth else None
                 user._set_values(
                     None,
                     username,
@@ -494,7 +499,7 @@ class UserItem:
         # Iterate through each field and validate the given value against hardcoded constraints
         @staticmethod
         def _auth_canonical() -> dict[str, str]:
-            """Lowercase → canonical form mapping for Auth values."""
+            """Lowercase -> canonical form mapping for Auth values."""
             return {
                 "saml": "SAML",
                 "openid": "OpenID",
@@ -517,7 +522,7 @@ class UserItem:
                     "OpenID",
                     "ServerDefault",
                     "TableauIDWithMFA",
-                ],  # auth — normalized by _auth_canonical before comparison
+                ],  # auth - normalized by _auth_canonical before comparison
             ]
 
             line = list(map(str.strip, incoming.split(",")))
