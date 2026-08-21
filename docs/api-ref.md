@@ -1216,10 +1216,10 @@ An updated `DatasourceItem`.
 <br>
 <br>
 
-#### datasource.update_connection
+#### datasources.update_connection
 
 ```py
-datasource.update_connection(datasource_item, connection_item)
+datasources.update_connection(datasource_item, connection_item)
 ```
 
 Updates the server address, port, username, or password for the specified data source connection.
@@ -1247,10 +1247,10 @@ See the `update_connection.py` sample in the Samples directory.
 <br>
 <br>
 
-#### datasource.update_hyper_data
+#### datasources.update_hyper_data
 
 ```py
-datasource.update_hyper_data(datasource_or_connection_item, *, request_id, actions, payload=None)
+datasources.update_hyper_data(datasource_or_connection_item, *, request_id, actions, payload=None)
 ```
 
 Updates the data contained within a published live-to-Hyper datasource.
@@ -4017,7 +4017,7 @@ Name | Description
 new_groupset = TSC.GroupSetItem('My Group Set')
 
 # call groupsets.create() with new group set
-groupset = server.groupsets.create(new_groupset)
+groupset = server.group_sets.create(new_groupset)
 ```
 
 <br>
@@ -4032,10 +4032,10 @@ Source file: server/endpoint/groupsets_endpoint.py
 <br>
 <br>
 
-#### groupsets.get
+#### group_sets.get
 
 ```py
-groupsets.get(req_options=None, result_level=None)
+group_sets.get(req_options=None, result_level=None)
 ```
 
 Returns information about the group sets on the specified site.
@@ -4060,7 +4060,7 @@ Returns a list of `GroupSetItem` objects and a `PaginationItem` object.
 **Example**
 
 ```py
-all_groupsets, pagination_item = server.groupsets.get()
+all_groupsets, pagination_item = server.group_sets.get()
 for groupset in all_groupsets:
     print(groupset.id, groupset.name)
 ```
@@ -4068,10 +4068,10 @@ for groupset in all_groupsets:
 <br>
 <br>
 
-#### groupsets.get_by_id
+#### group_sets.get_by_id
 
 ```py
-groupsets.get_by_id(groupset_id)
+group_sets.get_by_id(groupset_id)
 ```
 
 Returns information about the specified group set.
@@ -4095,17 +4095,17 @@ Returns a `GroupSetItem` object.
 **Example**
 
 ```py
-groupset = server.groupsets.get_by_id('1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d')
+groupset = server.group_sets.get_by_id('1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d')
 print(groupset.name)
 ```
 
 <br>
 <br>
 
-#### groupsets.create
+#### group_sets.create
 
 ```py
-groupsets.create(groupset_item)
+group_sets.create(groupset_item)
 ```
 
 Creates a new group set on the specified site.
@@ -4130,17 +4130,17 @@ Returns the newly created `GroupSetItem` object.
 
 ```py
 new_groupset = TSC.GroupSetItem('My Group Set')
-created_groupset = server.groupsets.create(new_groupset)
+created_groupset = server.group_sets.create(new_groupset)
 print(created_groupset.id)
 ```
 
 <br>
 <br>
 
-#### groupsets.update
+#### group_sets.update
 
 ```py
-groupsets.update(groupset_item)
+group_sets.update(groupset_item)
 ```
 
 Modifies an existing group set. You can use this method to rename a group set.
@@ -4165,16 +4165,16 @@ Returns the updated `GroupSetItem` object.
 
 ```py
 groupset.name = 'Renamed Group Set'
-updated_groupset = server.groupsets.update(groupset)
+updated_groupset = server.group_sets.update(groupset)
 ```
 
 <br>
 <br>
 
-#### groupsets.delete
+#### group_sets.delete
 
 ```py
-groupsets.delete(groupset)
+group_sets.delete(groupset)
 ```
 
 Deletes the specified group set from the site.
@@ -4198,16 +4198,16 @@ None.
 **Example**
 
 ```py
-server.groupsets.delete(groupset.id)
+server.group_sets.delete(groupset.id)
 ```
 
 <br>
 <br>
 
-#### groupsets.add_group
+#### group_sets.add_group
 
 ```py
-groupsets.add_group(groupset_item, group)
+group_sets.add_group(groupset_item, group)
 ```
 
 Adds a group to the specified group set.
@@ -4235,16 +4235,16 @@ None.
 all_groups, _ = server.groups.get()
 mygroup = all_groups[0]
 
-server.groupsets.add_group(groupset, mygroup)
+server.group_sets.add_group(groupset, mygroup)
 ```
 
 <br>
 <br>
 
-#### groupsets.remove_group
+#### group_sets.remove_group
 
 ```py
-groupsets.remove_group(groupset_item, group)
+group_sets.remove_group(groupset_item, group)
 ```
 
 Removes a group from the specified group set.
@@ -4269,16 +4269,16 @@ None.
 **Example**
 
 ```py
-server.groupsets.remove_group(groupset, mygroup)
+server.group_sets.remove_group(groupset, mygroup)
 ```
 
 <br>
 <br>
 
-#### groupsets.filter
+#### group_sets.filter
 
 ```py
-groupsets.filter(**kwargs)
+group_sets.filter(**kwargs)
 ```
 
 Returns a list of group sets that match the specified filters. Fields and operators are passed as keyword arguments in the form `field_name=value` or `field_name__operator=value`.
@@ -4307,7 +4307,7 @@ Returns a `QuerySet` of `GroupSetItem` objects.
 **Example**
 
 ```py
-local_groupsets = server.groupsets.filter(is_local=True)
+local_groupsets = server.group_sets.filter(is_local=True)
 for groupset in local_groupsets:
     print(groupset.name)
 ```
@@ -7099,10 +7099,10 @@ Source files: server/endpoints/subscriptions_endpoint.py
 <br>
 <br>
 
-#### subscription.create
+#### subscriptions.create
 
 ```py
-subscription.create(subscription_item)
+subscriptions.create(subscription_item)
 ```
 Creates a subscription to a view or workbook for a specific user on a specific schedule.
 When a user is subscribed to the content, Tableau Server sends the content to the user in email on the schedule that's defined on Tableau Server and specified in the `subscription_item`.
@@ -7207,10 +7207,10 @@ Error   |  Description
 <br>
 <br>
 
-#### subscription.get
+#### subscriptions.get
 
 ```py
-subscription.get(req_options=None)
+subscriptions.get(req_options=None)
 ```
 Returns information about the subscriptions on the specified site.
 
@@ -7231,11 +7231,11 @@ Returns a list of `SubscriptionItem` objects and a `PaginationItem` object. Use 
 <br>
 <br>
 
-#### subscription.get_by_id
+#### subscriptions.get_by_id
 
 
 ```py
-subscription.get_by_id(subscription_id)
+subscriptions.get_by_id(subscription_id)
 ```
 
 Returns information about the specified subscription.
@@ -7266,7 +7266,7 @@ The `SubscriptionItem`.  See [SubscriptionItem class](#subscriptionitem-class)
 **Example**
 
 ```py
-  sub1 = server.subscription.get_by_id('9f9e9d9c-8b8a-8f8e-7d7c-7b7a6f6d6e6d')
+  sub1 = server.subscriptions.get_by_id('9f9e9d9c-8b8a-8f8e-7d7c-7b7a6f6d6e6d')
   print(sub1.subject)
 
 ```
@@ -7274,10 +7274,10 @@ The `SubscriptionItem`.  See [SubscriptionItem class](#subscriptionitem-class)
 <br>
 <br>
 
-#### subscription.update
+#### subscriptions.update
 
 ```py
-subscription.update(subscription_item)
+subscriptions.update(subscription_item)
 ```
 Updates a specific subscription. To update a subscription, you must first query it from server using the `subscriptions.get()` or `subscriptions.get_by_id()` method.
 
@@ -9527,7 +9527,7 @@ Source file: server/endpoint/webhooks_endpoint.py
 <br>
 <br>
 
-#### webhook.create
+#### webhooks.create
 ```py
 webhooks.create(webhook_item)
 
@@ -9570,43 +9570,7 @@ Returns the new webhook item.
 <br>
 <br>
 
-### webhook.delete
-```py
-webhooks.delete(webhook_id)
-```
-
-Deletes a webhook by ID.
-
-To specify the site, create a `TableauAuth` instance using the content URL for the site `(site_id)` and sign in to the site. For more information on how to specify a site, see the [TableauAuth class](#tableauauth-class).
-
-REST API:  [Delete Webhook](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_notifications.htm#delete_webhook)
-
-**Parameters**
-
-Name|Description
-:---|:---
-`webhook_id`| The ID of the webhook to delete.
-
-**Exceptions**
-
-Error|Description
-:---|:---
-`Webhook ID undefined`| Raises an exception if a `webhook_id` is not provided. 
-
-**Example**
-```py
-# import tableauserverclient as TSC
-# server = TSC.Server('https://SERVER')
-# sign in . For authentication examples, see https://github.com/tableau/server-client-python/blob/master/samples/login.py
-
-# Delete the webhook
-with server.auth.sign_in(tableau_auth):
-  server.webhooks.delete('7d60d364-b9f5-4a9c-8aa5-4bdaa38c5dd3')
-```
-<br>
-<br>
-
-#### webhook.get()
+#### webhooks.get
 ```py
 webhooks.get()
 ```
@@ -9642,10 +9606,10 @@ print(["Webhook Name:"+ webhook.name+ ";" + "ID:" + webhook.id for webhook in al
 
 ```
 
-#### webhook.get_by_id
+#### webhooks.get_by_id
 
 ```py
-webhooks.get_by_ide(webhook_id)
+webhooks.get_by_id(webhook_id)
 ```
 
 Returns information about the specified workbook for a site.
@@ -9681,7 +9645,7 @@ print (webhook.name, webhook.url)
 <br>
 <br>
 
-#### webhook.delete
+#### webhooks.delete
 
 ```py
 webhooks.delete(webhook_id)
@@ -9697,6 +9661,12 @@ Name | Description
 :--- | :---
 `webhook_id` | The identifier (`id`) for the `WebhookItem` to delete.
 
+**Exceptions**
+
+Error|Description
+:---|:---
+`Webhook ID undefined`| Raises an exception if a `webhook_id` is not provided.
+
 **Version**
 
 Version 3.6 and later. See [REST API versions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm).
@@ -9710,7 +9680,7 @@ server.webhooks.delete('7d60d364-b9f5-4a9c-8aa5-4bdaa38c5dd3')
 <br>
 <br>
 
-#### webhook.test
+#### webhooks.test
 
 ```py
 webhooks.test(webhook_id)
