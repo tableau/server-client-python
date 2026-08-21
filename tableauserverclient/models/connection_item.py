@@ -150,16 +150,7 @@ class ConnectionItem:
 
     @classmethod
     def from_xml_element(cls, parsed_response, ns) -> list["ConnectionItem"]:
-        """
-        <connections>
-            <connection serverAddress="mysql.test.com">
-                <connectionCredentials embed="true" name="test" password="secret" />
-            </connection>
-            <connection serverAddress="pgsql.test.com">
-                <connectionCredentials embed="true" name="test" password="secret" />
-                </connection>
-        </connections>
-        """
+        """Parse connection items from an XML ``<connections>`` element."""
         all_connection_items: list["ConnectionItem"] = list()
         all_connection_xml = parsed_response.findall(".//t:connection", namespaces=ns)
 
