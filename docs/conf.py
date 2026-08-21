@@ -39,7 +39,30 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
+    "autoapi.extension",
 ]
+
+# -- sphinx-autoapi configuration --------------------------------------------
+# Walk the tableauserverclient source tree and generate reference docs for
+# every module. A top-level `.. automodule::` would only cover names
+# re-exported from `tableauserverclient/__init__.py`, which misses all the
+# endpoint classes (Favorites, Workbooks, VirtualConnections, ...) and the
+# root helper modules (config, filesys_helpers, namespace, datetime_helpers,
+# exponential_backoff). autoapi picks those up.
+#
+# NOTE: `autoapi_root` also drives the generated tree's on-disk location.
+# It is referenced from `.gitignore` (docs/reference/); keep them in sync.
+autoapi_dirs = ["../tableauserverclient"]
+autoapi_root = "reference"
+autoapi_options = [
+    "members",
+    "undoc-members",
+    "show-inheritance",
+    "show-module-summary",
+]
+autoapi_ignore = ["*/bin/*", "*/_version.py"]
+autoapi_add_toctree_entry = True
+autoapi_keep_files = False
 
 intersphinx_mapping = {
     "rtd": ("https://docs.readthedocs.io/en/stable/", None),
