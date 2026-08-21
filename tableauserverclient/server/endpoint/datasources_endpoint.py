@@ -4,16 +4,29 @@ import io
 import os
 
 from pathlib import Path
-from typing import Literal, TYPE_CHECKING, TypedDict, TypeVar, overload
+from typing import Literal, TYPE_CHECKING, TypeVar, overload
 from collections.abc import Iterable, Sequence
 
 from tableauserverclient.models.dqw_item import DQWItem
 from tableauserverclient.server.query import QuerySet
+from tableauserverclient.types import (
+    FilePath,
+    FileObject,
+    FileObjectR,
+    FileObjectW,
+    PathOrFile,
+    PathOrFileR,
+    PathOrFileW,
+    HyperAction,
+    HyperActionCondition,
+    HyperActionRow,
+    HyperActionTable,
+    AddResponse,
+)
 
 if TYPE_CHECKING:
     from tableauserverclient.server import Server
     from tableauserverclient.models import PermissionsRule
-    from .schedules_endpoint import AddResponse
 
 from tableauserverclient.server.endpoint.dqw_endpoint import _DataQualityWarningEndpoint
 from tableauserverclient.server.endpoint.endpoint import DownloadableMixin, QuerysetEndpoint, api, parameter_added_in
@@ -43,53 +56,6 @@ from tableauserverclient.models import (
 from tableauserverclient.server import RequestFactory, RequestOptions
 
 io_types_r = (io.BytesIO, io.BufferedReader)
-
-FilePath = str | os.PathLike
-FileObject = io.BufferedReader | io.BytesIO
-PathOrFile = FilePath | FileObject
-
-FileObjectR = io.BufferedReader | io.BytesIO
-FileObjectW = io.BufferedWriter | io.BytesIO
-PathOrFileR = FilePath | FileObjectR
-PathOrFileW = FilePath | FileObjectW
-
-
-HyperActionCondition = TypedDict(
-    "HyperActionCondition",
-    {
-        "op": str,
-        "target-col": str,
-        "source-col": str,
-    },
-)
-
-HyperActionRow = TypedDict(
-    "HyperActionRow",
-    {
-        "action": Literal[
-            "update",
-            "upsert",
-            "delete",
-        ],
-        "source-table": str,
-        "target-table": str,
-        "condition": HyperActionCondition,
-    },
-)
-
-HyperActionTable = TypedDict(
-    "HyperActionTable",
-    {
-        "action": Literal[
-            "insert",
-            "replace",
-        ],
-        "source-table": str,
-        "target-table": str,
-    },
-)
-
-HyperAction = HyperActionTable | HyperActionRow
 
 
 _UNSET = object()
