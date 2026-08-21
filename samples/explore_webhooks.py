@@ -11,37 +11,25 @@
 
 import argparse
 import logging
-import os.path
 
 import tableauserverclient as TSC
+
+from _shared import add_common_arguments, build_auth, resolve_credentials
 
 
 def main():
     parser = argparse.ArgumentParser(description="Explore webhook functions supported by the Server API.")
-    # Common options; please keep those in sync across all samples
-    parser.add_argument("--server", "-s", help="server address")
-    parser.add_argument("--site", "-S", help="site name")
-    parser.add_argument("--token-name", "-p", help="name of the personal access token used to sign into the server")
-    parser.add_argument("--token-value", "-v", help="value of the personal access token used to sign into the server")
-    parser.add_argument(
-        "--logging-level",
-        "-l",
-        choices=["debug", "info", "error"],
-        default="error",
-        help="desired logging level (set to error by default)",
-    )
+    add_common_arguments(parser)
     # Options specific to this sample
     parser.add_argument("--create", help="create a webhook")
     parser.add_argument("--delete", help="delete a webhook", action="store_true")
 
     args = parser.parse_args()
 
-    # Set logging level based on user input, or error by default
-    logging_level = getattr(logging, args.logging_level.upper())
-    logging.basicConfig(level=logging_level)
+    resolve_credentials(args)
+    logging.basicConfig(level=getattr(logging, args.logging_level.upper()))
 
-    # SIGN IN
-    tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
+    tableau_auth = build_auth(args)
     server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
         # Create webhook if create flag is set (-create, -c)
@@ -54,9 +42,11 @@ def main():
             new_webhook = server.webhooks.create(new_webhook)
             print(f"Webhook created. ID: {new_webhook.id}")
 
-        # Gets all webhook items
-        all_webhooks, pagination_item = server.webhooks.get()
+        # Gets all webhook items. `.get()` returns only one page; use
+        # TSC.Pager to iterate every webhook on the site.
+        first_page, pagination_item = server.webhooks.get()
         print(f"\nThere are {pagination_item.total_available} webhooks on site: ")
+        all_webhooks = list(TSC.Pager(server.webhooks))
         print([webhook.name for webhook in all_webhooks])
 
         if all_webhooks:

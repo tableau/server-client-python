@@ -4,7 +4,7 @@
 # a workbook that matches a given name, download the workbook,
 # and then publish it to the destination site.
 #
-# To run the script, you must have installed Python 3.7 or later.
+# To run the script, you must have installed Python 3.10 or later.
 ####
 
 import argparse
@@ -14,6 +14,8 @@ import tempfile
 
 import tableauserverclient as TSC
 
+from _shared import add_common_arguments, build_auth, resolve_credentials
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -21,30 +23,18 @@ def main():
         "default project of the default site to"
         "the default project of another site."
     )
-    # Common options; please keep those in sync across all samples
-    parser.add_argument("--server", "-s", help="server address")
-    parser.add_argument("--site", "-S", help="site name")
-    parser.add_argument("--token-name", "-p", help="name of the personal access token used to sign into the server")
-    parser.add_argument("--token-value", "-v", help="value of the personal access token used to sign into the server")
-    parser.add_argument(
-        "--logging-level",
-        "-l",
-        choices=["debug", "info", "error"],
-        default="error",
-        help="desired logging level (set to error by default)",
-    )
+    add_common_arguments(parser)
     # Options specific to this sample
     parser.add_argument("--workbook-name", "-w", help="name of workbook to move")
     parser.add_argument("--destination-site", "-d", help="name of site to move workbook into")
 
     args = parser.parse_args()
 
-    # Set logging level based on user input, or error by default
-    logging_level = getattr(logging, args.logging_level.upper())
-    logging.basicConfig(level=logging_level)
+    resolve_credentials(args)
+    logging.basicConfig(level=getattr(logging, args.logging_level.upper()))
 
     # Step 1: Sign in to both sites on server
-    tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
+    tableau_auth = build_auth(args)
 
     source_server = TSC.Server(args.server)
     dest_server = TSC.Server(args.server)
@@ -65,10 +55,10 @@ def main():
             try:
                 workbook_path = source_server.workbooks.download(all_workbooks[0].id, tmpdir)
 
-                # Step 4: Check if destination site exists, then sign in to the site
-                all_sites, pagination_info = source_server.sites.get()
+                # Step 4: Check if destination site exists, then sign in to the site.
+                # Use TSC.Pager because `.get()` only returns the first page of sites.
                 found_destination_site = any(
-                    True for site in all_sites if args.destination_site.lower() == site.content_url.lower()
+                    args.destination_site.lower() == site.content_url.lower() for site in TSC.Pager(source_server.sites)
                 )
                 if not found_destination_site:
                     error = f"No site named {args.destination_site} found."
