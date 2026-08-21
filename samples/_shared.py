@@ -245,18 +245,3 @@ def build_auth(args: argparse.Namespace) -> TSC.TableauAuth | TSC.PersonalAccess
         "--token-name/--token-value, --username/--password, or set the "
         "corresponding env vars."
     )
-
-
-def sign_in(args: argparse.Namespace, *, use_server_version: bool = True) -> TSC.Server:
-    """Convenience helper: resolve credentials, build the server, and sign in.
-
-    The caller is responsible for calling `server.auth.sign_out()` or using
-    the `with server.auth.sign_in(...)` context manager pattern themselves
-    when they need finer control. This helper is intended for the small
-    samples that just want a signed-in server object to poke at.
-    """
-    resolve_credentials(args)
-    auth = build_auth(args)
-    server = TSC.Server(args.server, use_server_version=use_server_version)
-    server.auth.sign_in(auth)
-    return server

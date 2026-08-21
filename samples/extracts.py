@@ -5,25 +5,15 @@
 
 import argparse
 import logging
-import os.path
 
 import tableauserverclient as TSC
+
+from _shared import add_common_arguments, build_auth, resolve_credentials
 
 
 def main():
     parser = argparse.ArgumentParser(description="Explore extract functions supported by the Server API.")
-    # Common options; please keep those in sync across all samples
-    parser.add_argument("--server", "-s", help="server address")
-    parser.add_argument("--site", help="site name")
-    parser.add_argument("--token-name", "-tn", help="name of the personal access token used to sign into the server")
-    parser.add_argument("--token-value", "-tv", help="value of the personal access token used to sign into the server")
-    parser.add_argument(
-        "--logging-level",
-        "-l",
-        choices=["debug", "info", "error"],
-        default="error",
-        help="desired logging level (set to error by default)",
-    )
+    add_common_arguments(parser)
     # Options specific to this sample
     parser.add_argument("--create", action="store_true")
     parser.add_argument("--delete", action="store_true")
@@ -32,15 +22,11 @@ def main():
     parser.add_argument("--datasource", required=False)
     args = parser.parse_args()
 
-    # Set logging level based on user input, or error by default
-    logging_level = getattr(logging, args.logging_level.upper())
-    logging.basicConfig(level=logging_level)
+    resolve_credentials(args)
+    logging.basicConfig(level=getattr(logging, args.logging_level.upper()))
 
-    # SIGN IN
-    tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
-    server = TSC.Server(args.server, use_server_version=False)
-    server.add_http_options({"verify": False})
-    server.use_server_version()
+    tableau_auth = build_auth(args)
+    server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
         wb = None
         ds = None

@@ -5,30 +5,19 @@ import logging
 import tableauserverclient as TSC
 from tableauserverclient.models import Resource
 
+from _shared import add_common_arguments, build_auth, resolve_credentials
+
 
 def main():
     parser = argparse.ArgumentParser(description="Explore favoriting functions supported by the Server API.")
-    # Common options; please keep those in sync across all samples
-    parser.add_argument("--server", "-s", help="server address")
-    parser.add_argument("--site", "-S", help="site name")
-    parser.add_argument("--token-name", "-p", help="name of the personal access token used to sign into the server")
-    parser.add_argument("--token-value", "-v", help="value of the personal access token used to sign into the server")
-    parser.add_argument(
-        "--logging-level",
-        "-l",
-        choices=["debug", "info", "error"],
-        default="error",
-        help="desired logging level (set to error by default)",
-    )
+    add_common_arguments(parser)
 
     args = parser.parse_args()
 
-    # Set logging level based on user input, or error by default
-    logging_level = getattr(logging, args.logging_level.upper())
-    logging.basicConfig(level=logging_level)
+    resolve_credentials(args)
+    logging.basicConfig(level=getattr(logging, args.logging_level.upper()))
 
-    # SIGN IN
-    tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
+    tableau_auth = build_auth(args)
     server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
         print(server)
@@ -63,12 +52,12 @@ def main():
         all_datasource_items = list(TSC.Pager(server.datasources))
         if all_datasource_items:
             my_datasource = all_datasource_items[0]
-        server.favorites.add_favorite_datasource(user, my_datasource)
-        print(
-            "Datasource added to favorites. Datasource Name: {}, Datasource ID: {}".format(
-                my_datasource.name, my_datasource.id
+            server.favorites.add_favorite_datasource(user, my_datasource)
+            print(
+                "Datasource added to favorites. Datasource Name: {}, Datasource ID: {}".format(
+                    my_datasource.name, my_datasource.id
+                )
             )
-        )
 
     server.favorites.delete_favorite_workbook(user, my_workbook)
     print(f"Workbook deleted from favorites. Workbook Name: {my_workbook.name}, Workbook ID: {my_workbook.id}")
@@ -76,9 +65,10 @@ def main():
     server.favorites.delete_favorite_view(user, my_view)
     print(f"View deleted from favorites. View Name: {my_view.name}, View ID: {my_view.id}")
 
-    server.favorites.delete_favorite_datasource(user, my_datasource)
-    print(
-        "Datasource deleted from favorites. Datasource Name: {}, Datasource ID: {}".format(
-            my_datasource.name, my_datasource.id
+    if my_datasource is not None:
+        server.favorites.delete_favorite_datasource(user, my_datasource)
+        print(
+            "Datasource deleted from favorites. Datasource Name: {}, Datasource ID: {}".format(
+                my_datasource.name, my_datasource.id
+            )
         )
-    )

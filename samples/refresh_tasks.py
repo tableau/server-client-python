@@ -10,6 +10,8 @@ import logging
 
 import tableauserverclient as TSC
 
+from _shared import add_common_arguments, build_auth, resolve_credentials
+
 
 def handle_run(server, args):
     task = server.tasks.get_by_id(args.id)
@@ -29,18 +31,7 @@ def handle_info(server, args):
 
 def main():
     parser = argparse.ArgumentParser(description="Get all of the refresh tasks available on a server")
-    # Common options; please keep those in sync across all samples
-    parser.add_argument("--server", "-s", help="server address")
-    parser.add_argument("--site", "-S", help="site name")
-    parser.add_argument("--token-name", "-p", help="name of the personal access token used to sign into the server")
-    parser.add_argument("--token-value", "-v", help="value of the personal access token used to sign into the server")
-    parser.add_argument(
-        "--logging-level",
-        "-l",
-        choices=["debug", "info", "error"],
-        default="error",
-        help="desired logging level (set to error by default)",
-    )
+    add_common_arguments(parser)
     # Options specific to this sample
     subcommands = parser.add_subparsers()
 
@@ -57,12 +48,10 @@ def main():
 
     args = parser.parse_args()
 
-    # Set logging level based on user input, or error by default
-    logging_level = getattr(logging, args.logging_level.upper())
-    logging.basicConfig(level=logging_level)
+    resolve_credentials(args)
+    logging.basicConfig(level=getattr(logging, args.logging_level.upper()))
 
-    # SIGN IN
-    tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
+    tableau_auth = build_auth(args)
     server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
         args.func(server, args)
