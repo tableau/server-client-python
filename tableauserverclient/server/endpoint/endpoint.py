@@ -230,35 +230,54 @@ class Endpoint:
                 )
             # http -> https upgrade on the same host: promote the stored server
             # address so subsequent requests skip this redirect round-trip.
-            # Only rewrite when the stored address's netloc exactly matches
-            # the redirected netloc to avoid pointing the client at an
-            # unrelated server (prefix matching could match e.g. "test"
-            # against a stored address of "test.other.example").
+            # Two comparisons here:
+            #   * current vs next: same-host check across schemes. Compare
+            #     hostnames case-insensitively (RFC 3986); scheme-default
+            #     port differs across schemes so port is not part of this
+            #     check. Explicit ports are rare in real Tableau deployments
+            #     and a cross-scheme cross-port hop is unusual enough that
+            #     falling through to "no promotion" is the safe default.
+            #   * old_address vs current: same-scheme (both http) check.
+            #     Normalize explicit-vs-implicit port so http://host and
+            #     http://host:80 compare equal.
             if current_scheme == "http" and next_scheme == "https":
                 current_parsed = urlparse(current_url)
                 next_parsed = urlparse(next_url)
-                if current_parsed.netloc == next_parsed.netloc:
+                current_host = (current_parsed.hostname or "").lower()
+                next_host = (next_parsed.hostname or "").lower()
+                if current_host and current_host == next_host:
                     old_address = self.parent_srv._server_address
                     old_parsed = urlparse(old_address)
-                    if old_parsed.scheme == "http" and old_parsed.netloc == current_parsed.netloc:
+                    default_http_port = 80
+
+                    def _hostport(parsed):
+                        return ((parsed.hostname or "").lower(), parsed.port or default_http_port)
+
+                    if old_parsed.scheme == "http" and _hostport(old_parsed) == _hostport(current_parsed):
                         new_address = "https://" + old_address[len("http://") :]
                         self.parent_srv._server_address = new_address
                         logger.info(f"Server redirected to HTTPS; updated server address to {new_address}")
-            # Auth-material policy: the request `parameters` (including the
-            # X-Tableau-Auth header and any session cookies) are forwarded
-            # to the redirect target unchanged. This is intentional and
-            # required. TSC is a client library for a specific server the
-            # caller has already agreed to trust, and customers routinely
-            # deploy Tableau Server behind reverse proxies, load balancers,
-            # and SSO front-ends that redirect between hosts within their
-            # own infrastructure (e.g. tableau.corp.example -> east.tableau.
-            # corp.example, or an SSO IdP -> the auth-callback endpoint on
-            # a different subdomain). Stripping X-Tableau-Auth on cross-
-            # host redirects would break sign-in against every such
-            # deployment. The HTTPS -> HTTP downgrade guard above (line 208)
-            # is the boundary that keeps this from becoming a security
-            # regression: once the caller connects over HTTPS, the token
-            # never leaves TLS.
+            # Auth-material policy: the request `parameters` (headers, body,
+            # cookies) are forwarded to the redirect target unchanged. Two
+            # cases carry credentials:
+            #   1. Already-signed-in calls carry the issued token in the
+            #      X-Tableau-Auth header and session cookies.
+            #   2. sign_in itself has no token yet; the raw credentials
+            #      (username+password or PAT secret) travel in the POST
+            #      body of the signin request.
+            # Both are forwarded on redirect. This is intentional. TSC is a
+            # client library for a specific server the caller has already
+            # agreed to trust, and customers routinely deploy Tableau Server
+            # behind reverse proxies, load balancers, and SSO front-ends that
+            # redirect between hosts within their own infrastructure
+            # (e.g. tableau.corp.example -> east.tableau.corp.example, or
+            # an SSO IdP -> the auth-callback endpoint on a different
+            # subdomain). Stripping credentials on cross-host redirects
+            # would break sign-in against every such deployment.
+            # The HTTPS -> HTTP downgrade guard above (line 208) is the
+            # boundary that keeps this from becoming a security regression:
+            # once the caller connects over HTTPS, credentials never leave
+            # TLS to a downgraded target.
             logger.debug(f"Following {response.status_code} redirect: {current_url} -> {next_url}")
             history.append(response)
             current_url = next_url
