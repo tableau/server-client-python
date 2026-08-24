@@ -1,6 +1,16 @@
 
 ## Unreleased
 
+* Security: `UserItem.CSVImport` no longer logs the password column when
+  validating a user-import CSV file. Previously, `validate_file_for_import`
+  emitted the first four characters of each raw row at INFO (which could
+  include the beginning of the password when the username was short), and the
+  full raw row was pushed into the returned `invalid_lines` list unmasked; the
+  per-column log inside `_validate_import_line_or_throw` also wrote the
+  password value at DEBUG. Row-level logging is now DEBUG-only and logs the
+  username instead of a raw slice, and the password column is replaced with
+  `***` before any line reaches a log handler or the invalid-lines list.
+  Fixes #1829.
 * Added `Projects.get_by_path(path)` to look up a project by its slash-separated
   hierarchy path (e.g. `"Marketing/Q1 Reports"`). The walk is performed level by
   level using the REST API name filter, so a path with *n* components issues *n*

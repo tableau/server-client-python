@@ -509,16 +509,35 @@ class UserItem:
             csv_file.seek(0)  # set to start of file in case it has been read earlier
             line: str = csv_file.readline()
             while line and line != "":
+                # Log only the username (column 0); the rest of the line contains the password (column 1) and other PII.
+                username = line.partition(",")[0].strip()
                 try:
-                    # do not print passwords
-                    logger.info(f"Reading user {line[:4]}")
+                    logger.debug(f"Reading user {username}")
                     UserItem.CSVImport._validate_import_line_or_throw(line, logger)
                     num_valid_lines += 1
                 except Exception as exc:
-                    logger.info(f"Error parsing {line[:4]}: {exc}")
-                    invalid_lines.append(line)
+                    logger.debug(f"Error parsing user {username}: {exc}")
+                    invalid_lines.append(UserItem.CSVImport._redact_password_column(line))
                 line = csv_file.readline()
             return num_valid_lines, invalid_lines
+
+        # Return a copy of a raw CSV line with the password column replaced by "***".
+        # Callers that log or expose invalid rows will not disclose the credential.
+        # Preserves the original line ending (\r\n or \n) so log output and
+        # returned rows stay byte-identical apart from the redaction.
+        @staticmethod
+        def _redact_password_column(line: str) -> str:
+            if line.endswith("\r\n"):
+                body, ending = line[:-2], "\r\n"
+            elif line.endswith("\n"):
+                body, ending = line[:-1], "\n"
+            else:
+                body, ending = line, ""
+            fields = body.split(",")
+            pass_index = UserItem.CSVImport.ColumnType.PASS.value
+            if len(fields) > pass_index:
+                fields[pass_index] = "***"
+            return ",".join(fields) + ending
 
         # Some fields in the import file are restricted to specific values
         # Iterate through each field and validate the given value against hardcoded constraints
@@ -544,6 +563,7 @@ class UserItem:
             logger.debug(f"> details - {username}")
             UserItem.validate_username_or_throw(username)
             for i in range(1, len(line)):
+                column = UserItem.CSVImport.ColumnType(i)
                 value = line[i]
                 valid = _valid_attributes[i]
                 # normalize case for fields with a restricted value set
@@ -552,8 +572,10 @@ class UserItem:
                         value = UserItem.CSVImport._AUTH_CANONICAL.get(value.lower(), value)
                     else:
                         value = value.lower()
-                logger.debug(f"column {UserItem.CSVImport.ColumnType(i).name}: {value}")
-                UserItem.CSVImport._validate_attribute_value(value, valid, UserItem.CSVImport.ColumnType(i))
+                # Mask the password column so it never reaches log handlers.
+                safe_value = "***" if column == UserItem.CSVImport.ColumnType.PASS else value
+                logger.debug(f"column {column.name}: {safe_value}")
+                UserItem.CSVImport._validate_attribute_value(value, valid, column)
 
         # Given a restricted set of possible values, confirm the item is in that set
         @staticmethod
