@@ -1,8 +1,10 @@
 from tableauserverclient.helpers.logging import logger
 
 import requests
+import threading
 import urllib3
 import ssl
+import weakref
 
 from defusedxml.ElementTree import fromstring, ParseError
 from packaging.version import Version
@@ -121,6 +123,18 @@ class Server:
 
     Notes
     -----
+    A single Server instance may be shared across threads (for example with
+    ``concurrent.futures.ThreadPoolExecutor``). Authentication state (the auth
+    token, site and user IDs, and API version) is shared by all threads, while
+    each thread transparently gets its own ``requests.Session`` for HTTP calls,
+    since ``requests.Session`` itself is not guaranteed to be thread-safe. Sign
+    in, and call ``use_server_version()`` if you need it, before spawning
+    worker threads; signing out invalidates the sessions of all threads.
+    ``session_factory`` may be called once per thread, so a custom factory
+    should be safe to call concurrently. Call ``close()`` (or use the Server
+    as a context manager) after worker threads finish to release the pooled
+    HTTP connections of every thread's session.
+
     When using Python 3.12 or later with older versions of Tableau Server, you may encounter
     SSL errors related to weak Diffie-Hellman keys. This is because newer Python versions
     enforce stronger security requirements. You can temporarily work around this using
@@ -152,6 +166,19 @@ class Server:
 
         self._server_address: str = server_address
         self._session_factory = session_factory or requests.session
+
+        # Thread-safety machinery. requests.Session is not guaranteed to be
+        # thread-safe (see psf/requests#2766), so each thread that makes calls
+        # through this Server instance gets its own Session object, created
+        # lazily from session_factory. The epoch counter invalidates every
+        # thread's cached session when auth state is cleared (sign out).
+        self._auth_lock = threading.Lock()
+        self._session_epoch = 0
+        self._thread_sessions = threading.local()
+        # Weak references to every session created for any thread, so close()
+        # can release their pooled connections. Weak so that sessions belonging
+        # to threads that have exited can still be garbage collected.
+        self._all_sessions: "weakref.WeakSet[requests.Session]" = weakref.WeakSet()
 
         self.auth = Auth(self)
         self.views = Views(self)
@@ -187,7 +214,6 @@ class Server:
         self.oidc = OIDC(self)
         self.extensions = Extensions(self)
 
-        self._session = self._session_factory()
         self._http_options = dict()  # must set this before making a server call
         if http_options:
             self.add_http_options(http_options)
@@ -203,7 +229,7 @@ class Server:
             Endpoint.set_user_agent(params)
             if not self._server_address.startswith("http://") and not self._server_address.startswith("https://"):
                 self._server_address = "http://" + self._server_address
-            self._session.prepare_request(requests.Request("GET", url=self._server_address, params=self._http_options))
+            self.session.prepare_request(requests.Request("GET", url=self._server_address, params=self._http_options))
         except Exception as req_ex:
             raise ValueError("Server connection settings not valid", req_ex)
 
@@ -226,21 +252,28 @@ class Server:
         self._http_options = dict()
 
     def _clear_auth(self):
-        self._site_id = None
-        self._user_id = None
-        self._auth_token = None
-        self._site_url = None
-        self._session = self._session_factory()
+        with self._auth_lock:
+            self._site_id = None
+            self._user_id = None
+            self._auth_token = None
+            self._site_url = None
+            # Invalidate the cached session of every thread so state such as
+            # cookies does not leak into a later sign in. Sessions are replaced
+            # lazily on next use rather than closed here, so requests already
+            # in flight on other threads are not disrupted (this matches the
+            # previous behavior of re-assigning the shared session).
+            self._session_epoch += 1
 
     def _set_auth(self, site_id, user_id, auth_token, site_url=None):
-        self._site_id = site_id
-        self._user_id = user_id
-        self._auth_token = auth_token
-        self._site_url = site_url
+        with self._auth_lock:
+            self._site_id = site_id
+            self._user_id = user_id
+            self._auth_token = auth_token
+            self._site_url = site_url
 
     def _get_legacy_version(self):
         # the serverInfo call was introduced in 2.4, earlier than that we have this different call
-        response = self._session.get(self.server_address + "/auth?format=xml")
+        response = self.session.get(self.server_address + "/auth?format=xml")
         try:
             info_xml = fromstring(response.content)
         except ParseError as parseError:
@@ -329,8 +362,29 @@ class Server:
         return self._http_options
 
     @property
-    def session(self):
-        return self._session
+    def session(self) -> requests.Session:
+        """
+        The requests.Session used for HTTP calls made by the current thread.
+
+        requests.Session is not guaranteed to be thread-safe (see
+        psf/requests#2766), so each thread that makes calls through this Server
+        instance transparently gets its own Session object, created from
+        ``session_factory``. Sessions are cached per thread, so a thread pool
+        worker reuses its session (and its connection pool) across tasks.
+        Signing out invalidates the cached sessions of all threads.
+        """
+        local = self._thread_sessions
+        epoch = self._session_epoch
+        if getattr(local, "session", None) is None or local.epoch != epoch:
+            session = self._session_factory()
+            with self._auth_lock:
+                self._all_sessions.add(session)
+            local.session = session
+            # `epoch` was read before the factory ran: if a sign out happened
+            # in between, local.epoch is already stale and the session will be
+            # replaced on the next access.
+            local.epoch = epoch
+        return local.session
 
     def is_signed_in(self):
         return self._auth_token is not None
@@ -357,3 +411,33 @@ class Server:
             # Remove any custom SSL context if we're reverting to default settings
             if "verify" in self._http_options:
                 del self._http_options["verify"]
+
+    def close(self) -> None:
+        """
+        Release the pooled HTTP connections held by every thread's session.
+
+        Call this when you are done with the server, after any worker threads
+        have finished their requests. Closing is a transport-level operation:
+        it does not sign out, so the auth token remains valid on the server
+        (use ``auth.sign_out()`` for that). The Server object remains usable
+        after close; any subsequent call transparently creates a new session.
+        """
+        with self._auth_lock:
+            sessions = list(self._all_sessions)
+            self._all_sessions.clear()
+            # Invalidate every thread's cached (now closed) session so later
+            # use creates a fresh one instead of hitting closed pools.
+            self._session_epoch += 1
+        for session in sessions:
+            session.close()
+
+    def __enter__(self) -> "Server":
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        # Note: does not sign out. server.auth.sign_in() already returns a
+        # context manager that signs out; nesting the two composes cleanly:
+        #     with TSC.Server(...) as server:
+        #         with server.auth.sign_in(auth):
+        #             ...
+        self.close()
