@@ -32,7 +32,16 @@ class UserItem:
     Parameters
     ----------
     name: str
-        The name of the user.
+        The username used to authenticate the user, NOT the person's display
+        name (that is ``fullname``). The required format depends on the site's
+        authentication scheme:
+
+        - Tableau Cloud: the sign-in email address (e.g. ``user@example.com``).
+        - Local authentication (on-prem Tableau Server): any unique username
+          for the site (e.g. ``jsmith``).
+        - Active Directory: the fully-qualified AD username, typically
+          ``SAMAccountName@FullyQualifiedDomain`` (e.g.
+          ``jsmith@corp.example.com``), or the User Principal Name (UPN).
 
     site_role: str
         The role of the user on the site.
