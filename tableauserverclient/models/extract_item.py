@@ -1,5 +1,5 @@
 from defusedxml.ElementTree import fromstring
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # type annotation only; parsing uses defusedxml
 
 
 class ExtractItem:

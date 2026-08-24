@@ -1,5 +1,5 @@
 from datetime import datetime
-from xml.etree.ElementTree import Element
+from xml.etree.ElementTree import Element  # type annotation only; parsing uses defusedxml
 
 from defusedxml.ElementTree import fromstring
 from typing_extensions import Self

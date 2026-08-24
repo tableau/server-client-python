@@ -9,7 +9,7 @@ from tableauserverclient import datetime_helpers as datetime
 import abc
 from packaging.version import Version
 from functools import wraps
-from xml.etree.ElementTree import ParseError
+from xml.etree.ElementTree import ParseError  # exception type only; defusedxml raises this same class
 from typing import (
     Any,
     Callable,

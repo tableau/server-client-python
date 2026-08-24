@@ -1,5 +1,5 @@
 import io
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # type annotation only; parsing uses defusedxml
 from datetime import datetime
 from enum import IntEnum
 from typing import TYPE_CHECKING

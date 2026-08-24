@@ -1,6 +1,6 @@
 import logging
 import warnings
-import xml
+from xml.etree.ElementTree import ParseError  # exception class only; defusedxml raises this same class
 
 from defusedxml.ElementTree import fromstring
 from tableauserverclient.helpers.logging import logger
@@ -61,7 +61,7 @@ class ServerInfoItem:
     def from_response(cls, resp, ns):
         try:
             parsed_response = fromstring(resp)
-        except xml.etree.ElementTree.ParseError as error:
+        except ParseError as error:
             logger.exception(f"Unexpected response for ServerInfo: {resp}")
             return cls("Unknown", "Unknown", "Unknown")
         except Exception as error:

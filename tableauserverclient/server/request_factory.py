@@ -1,4 +1,4 @@
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # building XML request bodies only; use defusedxml for parsing
 from typing import Any, Callable, TypeVar, TYPE_CHECKING
 from collections.abc import Iterable
 

@@ -13,7 +13,7 @@ license-files = ["LICENSE"]
 readme = "README.md"
 
 dependencies = [
-    'defusedxml>=0.7.1',  # latest as at 7/31/23
+    'defusedxml>=0.7.1',  # latest as at 7/31/23; use for all XML parsing — stdlib xml is unsafe against XXE. XML building (Element/SubElement/tostring) still uses stdlib as defusedxml has no equivalents.
     'packaging>=23.1',   # latest as at 7/31/23
     'requests>=2.32',  # latest as at 7/31/23
     'urllib3>=2.6.0,<3',

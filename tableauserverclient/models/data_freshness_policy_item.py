@@ -1,4 +1,4 @@
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # type annotation only; parsing uses defusedxml
 
 from tableauserverclient.models.property_decorators import property_is_enum, property_not_nullable
 from .interval_item import IntervalItem
