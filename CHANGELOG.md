@@ -22,14 +22,14 @@
   hops (default 30). Refuses HTTPS -> HTTP scheme downgrades and raises
   `RedirectError` with a clear message on missing `Location` headers or hop
   overflow. Fixes #1127 and #1828.
-* Fixed `Filter` serialization for `datetime`, `date`, and `bool` values.
-  Datetimes now emit ISO-8601 UTC (`2023-01-01T00:00:00Z`) instead of
-  `str(dt)`'s space-separated form, and booleans emit lowercase
-  `true`/`false` rather than Python's capitalized `True`/`False`. Both
-  previously produced 400s from the REST API on fields like `isCertified`,
-  `hasExtracts`, and any `createdAt` / `updatedAt` filter. Naive datetimes
-  now raise `ValueError` up front rather than silently producing a
-  wrong-timezone value. Fixes #1025.
+* Fixed `Filter` serialization for `datetime` and `bool` values. Datetimes
+  now emit ISO-8601 UTC (`2023-01-01T00:00:00Z`) instead of `str(dt)`'s
+  space-separated form, and booleans emit lowercase `true`/`false` rather
+  than Python's capitalized `True`/`False`. Both previously produced 400s
+  from the REST API on fields like `isCertified`, `hasExtracts`, and any
+  `createdAt` / `updatedAt` filter. Naive datetimes now raise `ValueError`
+  up front rather than silently producing a wrong-timezone value. Fixes
+  #1025.
 * `UserItem.CSVImport.create_user_from_line` no longer
   lowercases the entire CSV line before parsing. Previously the whole line,
   including the username, display name, fullname, and email fields, was
