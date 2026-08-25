@@ -1,6 +1,8 @@
 
 ## Unreleased
 
+## v0.42 (2026-08-25)
+
 * Bumped the urllib3 floor to 2.6.3 to pick up the fix for CVE-2026-21441
   (GHSA-38jv-5279-wg99, 8.9 High): urllib3's streaming decompression
   safeguards were bypassed when HTTP redirects were followed. TSC's manual
