@@ -1,6 +1,13 @@
 
 ## Unreleased
 
+* Bumped the urllib3 floor to 2.6.3 to pick up the fix for CVE-2026-21441
+  (GHSA-38jv-5279-wg99, 8.9 High): urllib3's streaming decompression
+  safeguards were bypassed when HTTP redirects were followed. TSC's manual
+  redirect walker (#1848) disables urllib3's built-in follower on new code
+  paths, but downstream callers using urllib3 directly (and TSC endpoints
+  that predate #1848) still relied on the built-in path, so the floor bump
+  closes the gap for all callers. The existing `<3` upper bound is unchanged.
 * Added `Projects.get_by_path(path)` to look up a project by its slash-separated
   hierarchy path (e.g. `"Marketing/Q1 Reports"`). The walk is performed level by
   level using the REST API name filter, so a path with *n* components issues *n*
