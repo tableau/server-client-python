@@ -1,6 +1,11 @@
 
 ## Unreleased
 
+* Added `Schedules.get_subscriptions_by_schedule(schedule_id)` to list the
+  subscriptions attached to a server schedule. The REST API has no per-schedule
+  subscriptions endpoint (only extract refresh tasks have one), so this pages
+  through the site's subscriptions and returns those whose `schedule_id`
+  matches, mirroring `get_extract_refresh_tasks`. Closes #1250.
 * Added `Projects.get_by_path(path)` to look up a project by its slash-separated
   hierarchy path (e.g. `"Marketing/Q1 Reports"`). The walk is performed level by
   level using the REST API name filter, so a path with *n* components issues *n*

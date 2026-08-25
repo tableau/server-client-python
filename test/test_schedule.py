@@ -28,6 +28,7 @@ ADD_DATASOURCE_TO_SCHEDULE = TEST_ASSET_DIR / "schedule_add_datasource.xml"
 ADD_FLOW_TO_SCHEDULE = TEST_ASSET_DIR / "schedule_add_flow.xml"
 GET_EXTRACT_TASKS_XML = TEST_ASSET_DIR / "schedule_get_extract_refresh_tasks.xml"
 BATCH_UPDATE_STATE = TEST_ASSET_DIR / "schedule_batch_update_state.xml"
+SUBSCRIPTION_GET_XML = TEST_ASSET_DIR / "subscription_get.xml"
 
 WORKBOOK_GET_BY_ID_XML = TEST_ASSET_DIR / "workbook_get_by_id.xml"
 DATASOURCE_GET_BY_ID_XML = TEST_ASSET_DIR / "datasource_get_by_id.xml"
@@ -437,6 +438,40 @@ def test_get_extract_refresh_tasks(server: TSC.Server) -> None:
         assert isinstance(extracts[0], list)
         assert 2 == len(extracts[0])
         assert "task1" == extracts[0][0].id
+
+
+def test_get_subscriptions_by_schedule(server: TSC.Server) -> None:
+    server.version = "2.3"
+
+    response_xml = SUBSCRIPTION_GET_XML.read_text()
+    with requests_mock.mock() as m:
+        # The two subscriptions in the asset sit on different schedules.
+        schedule_id = "7617c389-cdca-4940-a66e-69956fcebf3e"
+        m.get(server.subscriptions.baseurl, text=response_xml)
+
+        subscriptions = server.schedules.get_subscriptions_by_schedule(schedule_id)
+
+    assert isinstance(subscriptions, list)
+    assert 1 == len(subscriptions)
+    assert "382e9a6e-0c08-4a95-b6c1-c14df7bac3e4" == subscriptions[0].id
+    assert schedule_id == subscriptions[0].schedule_id
+
+
+def test_get_subscriptions_by_schedule_no_match(server: TSC.Server) -> None:
+    server.version = "2.3"
+
+    response_xml = SUBSCRIPTION_GET_XML.read_text()
+    with requests_mock.mock() as m:
+        m.get(server.subscriptions.baseurl, text=response_xml)
+
+        subscriptions = server.schedules.get_subscriptions_by_schedule("no-such-schedule")
+
+    assert [] == subscriptions
+
+
+def test_get_subscriptions_by_schedule_empty_id(server: TSC.Server) -> None:
+    with pytest.raises(ValueError):
+        server.schedules.get_subscriptions_by_schedule("")
 
 
 def test_batch_update_state_items(server: TSC.Server) -> None:
