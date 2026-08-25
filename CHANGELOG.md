@@ -20,6 +20,14 @@
   hops (default 30). Refuses HTTPS -> HTTP scheme downgrades and raises
   `RedirectError` with a clear message on missing `Location` headers or hop
   overflow. Fixes #1127 and #1828.
+* Fixed `Filter` serialization for `datetime`, `date`, and `bool` values.
+  Datetimes now emit ISO-8601 UTC (`2023-01-01T00:00:00Z`) instead of
+  `str(dt)`'s space-separated form, and booleans emit lowercase
+  `true`/`false` rather than Python's capitalized `True`/`False`. Both
+  previously produced 400s from the REST API on fields like `isCertified`,
+  `hasExtracts`, and any `createdAt` / `updatedAt` filter. Naive datetimes
+  now raise `ValueError` up front rather than silently producing a
+  wrong-timezone value. Fixes #1025.
 * `UserItem.CSVImport.create_user_from_line` no longer
   lowercases the entire CSV line before parsing. Previously the whole line,
   including the username, display name, fullname, and email fields, was
@@ -30,6 +38,13 @@
   lookups keyed on `user.name`, or assertions against lowercased values --
   need to update. This unblocks CSV imports for LDAP and other case-sensitive
   auth backends where mixed-case usernames must be preserved.
+* `SiteItem.custom_subscription_email` and `custom_subscription_footer` now
+  serialize verbatim in create and update requests. Previously
+  `RequestFactory.Site` lowercased both values before sending, which
+  mangled the customer-facing footer that ships in outgoing subscription
+  emails (removing company-name casing, sentence capitalization, and brand
+  terms). The paired `*_enabled` boolean fields still serialize as
+  `"true"`/`"false"`. Fixes #1849.
 * `UserItem.CSVImport._validate_attribute_value` and the too-many-columns
   branch of `_validate_import_line_or_throw` now raise `ValueError` instead
   of `AttributeError` for invalid CSV input. `AttributeError` was the wrong
