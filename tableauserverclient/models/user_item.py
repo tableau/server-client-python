@@ -1,4 +1,5 @@
 import io
+import warnings
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from enum import IntEnum
@@ -476,12 +477,23 @@ class UserItem:
                 )
                 raw_auth = values[UserItem.CSVImport.ColumnType.AUTH]
                 if raw_auth:
-                    auth = UserItem.CSVImport._AUTH_CANONICAL.get(raw_auth.lower())
-                    if auth is None:
-                        raise ValueError(
-                            f"Unknown auth setting: {raw_auth!r}. "
-                            f"Valid values: {sorted(UserItem.CSVImport._AUTH_CANONICAL.values())}"
+                    canonical = UserItem.CSVImport._AUTH_CANONICAL.get(raw_auth.lower())
+                    if canonical is None:
+                        # Unknown auth value: pass it through instead of raising.
+                        # TSC's _AUTH_CANONICAL is a hardcoded list that will lag
+                        # server-side additions; refusing to build the UserItem
+                        # here would block CSV imports against newer servers as
+                        # soon as Tableau ships a new auth type. If it is a
+                        # typo, the server rejects the row when the request
+                        # posts. Warn so the caller has a shot at noticing.
+                        warnings.warn(
+                            f"Unknown auth setting {raw_auth!r}; passing through unchanged. "
+                            f"Known values: {sorted(UserItem.CSVImport._AUTH_CANONICAL.values())}",
+                            stacklevel=2,
                         )
+                        auth = raw_auth
+                    else:
+                        auth = canonical
                 else:
                     auth = None
                 user._set_values(
@@ -546,14 +558,33 @@ class UserItem:
             for i in range(1, len(line)):
                 value = line[i]
                 valid = _valid_attributes[i]
+                column = UserItem.CSVImport.ColumnType(i)
                 # normalize case for fields with a restricted value set
+                skip_validation = False
                 if valid:
                     if i == UserItem.CSVImport.ColumnType.AUTH:
-                        value = UserItem.CSVImport._AUTH_CANONICAL.get(value.lower(), value)
+                        canonical = UserItem.CSVImport._AUTH_CANONICAL.get(value.lower())
+                        if canonical is not None:
+                            value = canonical
+                        elif value:
+                            # Unknown auth value: warn and pass through instead
+                            # of raising. TSC's _AUTH_CANONICAL is a hardcoded
+                            # list that lags server-side additions; refusing
+                            # would block CSV imports against newer servers as
+                            # soon as Tableau ships a new auth type. Skip the
+                            # allowlist check so the row still validates.
+                            # Matches create_user_from_line's warn-and-pass.
+                            warnings.warn(
+                                f"Unknown auth setting {value!r}; passing through unchanged. "
+                                f"Known values: {sorted(UserItem.CSVImport._AUTH_CANONICAL.values())}",
+                                stacklevel=2,
+                            )
+                            skip_validation = True
                     else:
                         value = value.lower()
-                logger.debug(f"column {UserItem.CSVImport.ColumnType(i).name}: {value}")
-                UserItem.CSVImport._validate_attribute_value(value, valid, UserItem.CSVImport.ColumnType(i))
+                logger.debug(f"column {column.name}: {value}")
+                if not skip_validation:
+                    UserItem.CSVImport._validate_attribute_value(value, valid, column)
 
         # Given a restricted set of possible values, confirm the item is in that set
         @staticmethod
@@ -564,6 +595,49 @@ class UserItem:
             if item in possible_values or possible_values == []:
                 return
             raise ValueError(f"Invalid value {item} for {column_type}")
+
+        # Inverse of _evaluate_site_role: decompose a site role back to (license, admin_level, publish)
+        # for writing the CSV import format.
+        @staticmethod
+        def _decompose_site_role(site_role: str) -> tuple[str, str, str]:
+            """Return (license, admin_level, publish) CSV column values for a given site role.
+
+            Legacy `UserItem.Roles` values are handled in two ways depending on whether
+            the server has a sensible modern equivalent:
+
+            - **Mapped to modern equivalents** (row emitted, server accepts): the legacy
+              roles `SiteAdministrator`, `Publisher`, `Interactor`, and `ReadOnly` each
+              map to the current-model role that best matches their historical intent
+              (SiteAdministratorExplorer, ExplorerCanPublish, Explorer, Viewer).
+            - **Emitted as `license="Invalid"`** (row rejected server-side with
+              USER_CSV_INVALID_LICENSE): the legacy roles `UnlicensedWithPublish`,
+              `ViewerWithPublish`, `Guest`, and `SupportUser` have no equivalent in the
+              current server model (`RestApiSiteRole` does not accept them on any code
+              path). Emitting `"Invalid"` preserves the per-row error semantics callers
+              of `bulk_add` had before this refactor, rather than silently coercing
+              those users to a valid-but-wrong Unlicensed account.
+
+            Round-trip note: `_evaluate_site_role(*_decompose_site_role(r)) == r` for
+            every current-model role. Two label asymmetries: `ServerAdministrator`
+            round-trips through the legacy label `SiteAdministrator` (that's the only
+            label `_evaluate_site_role` emits for `admin="System"`), and the legacy
+            roles above are folded into their modern equivalents by design.
+            """
+            _role_map: dict[str, tuple[str, str, str]] = {
+                "ServerAdministrator": ("Creator", "System", "1"),
+                "SiteAdministratorCreator": ("Creator", "Site", "1"),
+                "SiteAdministratorExplorer": ("Explorer", "Site", "1"),
+                "SiteAdministrator": ("Explorer", "Site", "1"),  # legacy, mapped to SiteAdministratorExplorer
+                "Creator": ("Creator", "None", "1"),
+                "ExplorerCanPublish": ("Explorer", "None", "1"),
+                "Explorer": ("Explorer", "None", "0"),
+                "Viewer": ("Viewer", "None", "0"),
+                "Unlicensed": ("Unlicensed", "None", "0"),
+                "ReadOnly": ("Viewer", "None", "0"),  # legacy, mapped to Viewer
+                "Publisher": ("Explorer", "None", "1"),  # legacy, mapped to ExplorerCanPublish
+                "Interactor": ("Explorer", "None", "0"),  # legacy, mapped to Explorer
+            }
+            return _role_map.get(site_role, ("Invalid", "None", "0"))
 
         # https://help.tableau.com/current/server/en-us/csvguidelines.htm#settings_and_site_roles
         # This logic is hardcoded to match the existing rules for import csv files
@@ -586,14 +660,14 @@ class UserItem:
                 else:
                     site_role = "SiteAdministratorExplorer"
             else:  # if it wasn't 'system' or 'site' then we can treat it as 'none'
-                if publisher == "yes":
+                if publisher in ("yes", "true", "1"):
                     if license_level == "creator":
                         site_role = "Creator"
                     elif license_level == "explorer":
                         site_role = "ExplorerCanPublish"
                     else:
                         site_role = "Unlicensed"  # is this the expected outcome?
-                else:  # publisher == 'no':
+                else:  # publisher is "no" / "false" / "0" / any other value:
                     if license_level == "explorer" or license_level == "creator":
                         site_role = "Explorer"
                     elif license_level == "viewer":

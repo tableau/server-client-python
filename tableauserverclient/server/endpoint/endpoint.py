@@ -554,6 +554,9 @@ class QuerysetEndpoint(Endpoint, Generic[T]):
         queryset.request_options.fields |= set(fields) | set(("_default_",))
         return queryset
 
+    def find_by_name(self, name: str) -> list[T]:
+        return list(self.filter(name=name))
+
     def only_fields(self: Self, *fields: str) -> QuerySet:
         """
         Add fields to the request options. If no fields are provided, the
