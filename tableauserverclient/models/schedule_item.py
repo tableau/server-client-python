@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from defusedxml.ElementTree import fromstring
 
 from tableauserverclient.datetime_helpers import parse_datetime
+from tableauserverclient.helpers.logging import logger
 from .interval_item import (
     IntervalItem,
     HourlyInterval,
@@ -65,20 +66,58 @@ class ScheduleItem:
 
     Attributes
     ----------
-    created_at : datetime
+    When a ``ScheduleItem`` is returned from the ``/schedules`` endpoint every
+    field below is populated. When it is materialised out of the inlined
+    ``<schedule>`` element of a Tableau **Cloud** subscription response,
+    only ``frequency``, ``next_run_at`` and ``interval_item`` are populated --
+    ``id``, ``name``, ``state``, ``created_at``, ``updated_at``, ``priority``,
+    ``execution_order`` and ``schedule_type`` will all be ``None`` on that path.
+
+    created_at : datetime | None
         The date and time the schedule was created.
 
-    end_schedule_at : datetime
+    end_schedule_at : datetime | None
         The date and time the schedule ends.
 
-    id : str
-        The unique identifier for the schedule.
+    execution_order : str | None
+        How the scheduled tasks run -- ``Parallel`` (uses all available background
+        processes) or ``Serial`` (limits the schedule to one background process).
+        See :class:`ScheduleItem.ExecutionOrder`.
 
-    next_run_at : datetime
+    frequency : str | None
+        One of ``Hourly`` / ``Daily`` / ``Weekly`` / ``Monthly`` when known.
+        Populated wherever the API returns ``<schedule frequency=...>`` --
+        notably by Tableau Cloud when a schedule is inlined into a
+        ``<subscription>`` response, and by the standard ``/schedules`` endpoint.
+
+    id : str | None
+        The unique identifier for the schedule. ``None`` for schedules inlined
+        into a Tableau Cloud subscription (the API does not send one).
+
+    interval_item : Interval | None
+        The parsed frequency detail as an :class:`IntervalItem` subclass
+        (``DailyInterval`` / ``WeeklyInterval`` / ``MonthlyInterval`` /
+        ``HourlyInterval``). ``None`` if the response omitted
+        ``<frequencyDetails>`` or if the intervals were malformed enough that
+        this client couldn't construct a strict-validated interval.
+
+    next_run_at : datetime | None
         The date and time the schedule is next run.
 
-    state : str
-        The state of the schedule. See ScheduleItem.State for the possible values.
+    priority : int | None
+        The priority of the schedule. Lower values represent higher priority,
+        with ``0`` indicating the highest priority.
+
+    schedule_type : str | None
+        The type of task schedule. See :class:`ScheduleItem.Type` for the
+        possible values (``Extract``, ``Flow``, ``Subscription``, ...).
+
+    state : str | None
+        The state of the schedule. See :class:`ScheduleItem.State` for the
+        possible values (``Active`` / ``Suspended``).
+
+    updated_at : datetime | None
+        The date and time the schedule was last updated.
     """
 
     class Type:
@@ -100,6 +139,7 @@ class ScheduleItem:
     def __init__(self, name: str, priority: int, schedule_type: str, execution_order: str, interval_item: Interval):
         self._created_at: datetime | None = None
         self._end_schedule_at: datetime | None = None
+        self._frequency: str | None = None
         self._id: str | None = None
         self._next_run_at: datetime | None = None
         self._state: str | None = None
@@ -132,6 +172,15 @@ class ScheduleItem:
     @property_is_enum(ExecutionOrder)
     def execution_order(self, value: str):
         self._execution_order = value
+
+    @property
+    def frequency(self) -> str | None:
+        """One of ``Hourly``, ``Daily``, ``Weekly``, ``Monthly`` when known.
+
+        Populated when the API returns ``<schedule frequency=...>`` -- notably by
+        Tableau Cloud when a schedule is inlined into a ``<subscription>`` response.
+        """
+        return self._frequency
 
     @property
     def id(self) -> str | None:
@@ -194,6 +243,7 @@ class ScheduleItem:
                 _,
                 updated_at,
                 _,
+                _,
                 next_run_at,
                 end_schedule_at,
                 execution_order,
@@ -231,6 +281,7 @@ class ScheduleItem:
         priority,
         interval_item,
         warnings=None,
+        frequency=None,
     ):
         if id_ is not None:
             self._id = id_
@@ -256,6 +307,8 @@ class ScheduleItem:
             self._interval_item = interval_item
         if warnings:
             self._warnings = warnings
+        if frequency:
+            self._frequency = frequency
 
     @classmethod
     def from_response(cls, resp, ns):
@@ -276,6 +329,7 @@ class ScheduleItem:
                 created_at,
                 updated_at,
                 schedule_type,
+                frequency,
                 next_run_at,
                 end_schedule_at,
                 execution_order,
@@ -298,6 +352,7 @@ class ScheduleItem:
                 priority=None,
                 interval_item=None,
                 warnings=warnings,
+                frequency=frequency,
             )
 
             all_schedule_items.append(schedule_item)
@@ -305,8 +360,11 @@ class ScheduleItem:
 
     @staticmethod
     def _parse_interval_item(parsed_response, frequency, ns):
+        # Cloud <frequencyDetails> can omit ``start`` -- guard so we don't crash
+        # the whole subscriptions.get() page on ``datetime.strptime(None, ...)``.
         start_time = parsed_response.get("start", None)
-        start_time = datetime.strptime(start_time, "%H:%M:%S").time()
+        if start_time is not None:
+            start_time = datetime.strptime(start_time, "%H:%M:%S").time()
         end_time = parsed_response.get("end", None)
         if end_time is not None:
             end_time = datetime.strptime(end_time, "%H:%M:%S").time()
@@ -315,44 +373,63 @@ class ScheduleItem:
         for interval_elem in interval_elems:
             interval.extend(interval_elem.attrib.items())
 
-        if frequency == IntervalItem.Frequency.Daily:
-            converted_intervals = []
+        # IntervalItem constructors validate against a fixed VALID_INTERVALS set
+        # (e.g. ``{0.25, 0.5, 1, 2, 4, 6, 8, 12, 24}`` for hours) and raise
+        # ``ValueError`` on anything outside it. On Cloud we've seen values like
+        # ``hours="3"`` that Server never emits; letting that propagate would kill
+        # the whole subscription list. Degrade the single malformed schedule to
+        # ``interval_item = None`` so its siblings still parse.
+        try:
+            if frequency == IntervalItem.Frequency.Daily:
+                converted_intervals = []
 
-            for i in interval:
-                # We use fractional hours for the two minute-based intervals.
-                # Need to convert to hours from minutes here
-                if i[0] == IntervalItem.Occurrence.Minutes:
-                    converted_intervals.append(float(i[1]) / 60)
-                elif i[0] == IntervalItem.Occurrence.Hours:
-                    converted_intervals.append(float(i[1]))
-                else:
-                    converted_intervals.append(i[1])
+                for i in interval:
+                    # We use fractional hours for the two minute-based intervals.
+                    # Need to convert to hours from minutes here
+                    if i[0] == IntervalItem.Occurrence.Minutes:
+                        converted_intervals.append(float(i[1]) / 60)
+                    elif i[0] == IntervalItem.Occurrence.Hours:
+                        converted_intervals.append(float(i[1]))
+                    else:
+                        converted_intervals.append(i[1])
 
-            return DailyInterval(start_time, *converted_intervals)
+                return DailyInterval(start_time, *converted_intervals)
 
-        if frequency == IntervalItem.Frequency.Hourly:
-            converted_intervals = []
+            if frequency == IntervalItem.Frequency.Hourly:
+                converted_intervals = []
 
-            for i in interval:
-                # We use fractional hours for the two minute-based intervals.
-                # Need to convert to hours from minutes here
-                if i[0] == IntervalItem.Occurrence.Minutes:
-                    converted_intervals.append(float(i[1]) / 60)
-                elif i[0] == IntervalItem.Occurrence.Hours:
-                    converted_intervals.append(i[1])
-                else:
-                    converted_intervals.append(i[1])
+                for i in interval:
+                    # We use fractional hours for the two minute-based intervals.
+                    # Need to convert to hours from minutes here
+                    if i[0] == IntervalItem.Occurrence.Minutes:
+                        converted_intervals.append(float(i[1]) / 60)
+                    elif i[0] == IntervalItem.Occurrence.Hours:
+                        converted_intervals.append(i[1])
+                    else:
+                        converted_intervals.append(i[1])
 
-            return HourlyInterval(start_time, end_time, tuple(converted_intervals))
+                return HourlyInterval(start_time, end_time, tuple(converted_intervals))
 
-        if frequency == IntervalItem.Frequency.Weekly:
-            interval_values = [i[1] for i in interval]
-            return WeeklyInterval(start_time, *interval_values)
+            if frequency == IntervalItem.Frequency.Weekly:
+                interval_values = [i[1] for i in interval]
+                return WeeklyInterval(start_time, *interval_values)
 
-        if frequency == IntervalItem.Frequency.Monthly:
-            interval_values = [i[1] for i in interval]
+            if frequency == IntervalItem.Frequency.Monthly:
+                interval_values = [i[1] for i in interval]
 
-            return MonthlyInterval(start_time, tuple(interval_values))
+                return MonthlyInterval(start_time, tuple(interval_values))
+        except ValueError as exc:
+            logger.warning(
+                "Skipping malformed <frequencyDetails> " "(frequency=%s, start=%s, end=%s, intervals=%s): %s",
+                frequency,
+                start_time,
+                end_time,
+                interval,
+                exc,
+            )
+            return None
+
+        return None
 
     @staticmethod
     def _parse_element(schedule_xml, ns):
@@ -383,6 +460,7 @@ class ScheduleItem:
             created_at,
             updated_at,
             schedule_type,
+            frequency,
             next_run_at,
             end_schedule_at,
             execution_order,

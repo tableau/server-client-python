@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse
+    xmlns="http://tableau.com/api"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.29.xsd">
+    <pagination pageNumber="1" pageSize="100" totalAvailable="1" />
+    <subscriptions>
+        <subscription id="df1c0a85-1234-4b6f-a2c4-1234567890ab" subject="Cloud daily digest" message="Daily overview" attachImage="true" attachPdf="false" suspended="false">
+            <content id="aaaa1111-2222-3333-4444-555555555555" type="View" sendIfViewEmpty="false" />
+            <schedule frequency="Daily" nextRunAt="2026-08-29T16:55:00-0700">
+                <frequencyDetails start="16:55:00" end="16:55:00">
+                    <intervals>
+                        <interval hours="24"/>
+                        <interval weekDay="Saturday"/>
+                    </intervals>
+                </frequencyDetails>
+            </schedule>
+            <user id="bbbb1111-2222-3333-4444-555555555555" name="cloud.user@example.com" />
+        </subscription>
+    </subscriptions>
+</tsResponse>

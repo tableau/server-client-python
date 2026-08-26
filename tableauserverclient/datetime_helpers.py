@@ -26,15 +26,30 @@ class UTC(datetime.tzinfo):
 
 utc = UTC()
 TABLEAU_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+# Tableau Cloud emits some datetimes with a numeric UTC offset instead of the trailing "Z"
+# used by Tableau Server -- e.g. the ``nextRunAt`` attribute inlined into a subscription's
+# ``<schedule>`` element on Cloud looks like ``2026-08-29T16:55:00-0700``. Accept both.
+TABLEAU_CLOUD_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 
 
 def parse_datetime(date):
-    """Parse a Tableau API datetime string into a UTC-aware datetime, or None if absent or unparseable."""
+    """Parse a Tableau API datetime string into a timezone-aware datetime, or ``None``.
+
+    Handles both the Server ``...Z`` form and the Cloud ``...+/-HHMM`` form. Returns
+    ``None`` for both absent input (``None``) and unparseable non-empty input --
+    matching the pre-Cloud lenient contract so a malformed server response cannot
+    crash a page-through of unrelated data. User-supplied setter values are
+    validated at the property-decorator boundary (see
+    :func:`tableauserverclient.models.property_decorators.property_is_datetime`).
+    """
     if date is None:
         return None
-
     try:
         return datetime.datetime.strptime(date, TABLEAU_DATE_FORMAT).replace(tzinfo=utc)
+    except ValueError:
+        pass
+    try:
+        return datetime.datetime.strptime(date, TABLEAU_CLOUD_DATE_FORMAT)
     except ValueError:
         return None
 
