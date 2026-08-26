@@ -15,7 +15,28 @@ To see sample code that works directly with the REST API (in Java, Python, or Po
 
 For more information on installing and using TSC, see the documentation:
 <https://tableau.github.io/server-client-python/docs/>
- 
+
+### Authenticating from environment variables
+
+The [`samples/login.py`](samples/login.py) sample shows three ways to
+supply Tableau credentials, in precedence order:
+
+1. Command-line arguments (`--server`, `--username`, `--password`,
+   `--token-name`, `--token-value`, `--site`, `--api-version`)
+2. `TABLEAU_*` environment variables — one way to keep credentials out
+   of your source code:
+   * `TABLEAU_SERVER` (required) — server URL
+   * `TABLEAU_SITE` (optional) — site content URL; `""` for the default site
+   * `TABLEAU_TOKEN_NAME` + `TABLEAU_TOKEN` — personal access token (preferred)
+   * `TABLEAU_USERNAME` + `TABLEAU_PASSWORD` — basic auth (fallback)
+   * `TABLEAU_API_VERSION` (optional) — pin REST API version; otherwise
+     the sample negotiates with the server
+3. Pass `--interactive` to prompt for a missing password on a terminal
+   via `getpass` instead of exporting it. PATs are never prompted for.
+
+Names are `TABLEAU_`-prefixed to avoid collision with generic shell
+variables like `USERNAME` (which Windows sets automatically).
+
 To contribute, see our [Developer Guide](https://tableau.github.io/server-client-python/docs/dev-guide). A list of all our contributors to date is in [CONTRIBUTORS.md].
 
 ## License
