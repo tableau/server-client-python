@@ -126,6 +126,11 @@ def property_is_datetime(func):
 
     Because we return everything with Z as the timezone, we assume everything is in UTC and create
     a timezone aware datetime.
+
+    Setter-side strictness lives here: ``parse_datetime`` is deliberately lenient
+    on the server-response side (unparseable -> ``None``), so bad user input would
+    otherwise silently clear the attribute. We reject it here instead so misuse
+    surfaces at the assignment site with the offending value in the message.
     """
 
     @wraps(func)
@@ -138,6 +143,11 @@ def property_is_datetime(func):
             )
 
         dt = parse_datetime(value)
+        if dt is None:
+            # ``value`` is a str (checked above) so a ``None`` result here can only
+            # mean "neither format matched" -- i.e. a genuine parse failure. Bubble
+            # it up so callers don't silently null out the attribute.
+            raise ValueError(f"Cannot parse {value!r} as a datetime, cannot update {func.__name__}")
         return func(self, dt)
 
     return wrapper
