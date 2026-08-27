@@ -1,6 +1,5 @@
 ####
 # This sample demonstrates three ways to supply Tableau credentials --
-# they compose in this precedence order:
 #
 #   1. Command-line arguments      (highest precedence)
 #   2. TABLEAU_* environment variables
