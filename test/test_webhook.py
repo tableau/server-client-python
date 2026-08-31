@@ -13,6 +13,7 @@ GET_XML = TEST_ASSET_DIR / "webhook_get.xml"
 GET_NEW_EVENT_XML = TEST_ASSET_DIR / "webhook_get_new_event.xml"
 CREATE_XML = TEST_ASSET_DIR / "webhook_create.xml"
 CREATE_REQUEST_XML = TEST_ASSET_DIR / "webhook_create_request.xml"
+UPDATE_XML = TEST_ASSET_DIR / "webhook_update.xml"
 
 
 @pytest.fixture(scope="function")
@@ -90,7 +91,7 @@ def test_request_factory():
     assert webhook_request_expected.replace("\r", "") == webhook_request_actual
 
 
-def test_event_setter_none():
+def test_event_setter_none() -> None:
     """Setting event to None should store None without crashing."""
     item = WebhookItem()
     item.event = "datasource-updated"
@@ -100,7 +101,7 @@ def test_event_setter_none():
     assert item.event is None
 
 
-def test_event_setter_short_name():
+def test_event_setter_short_name() -> None:
     """Short event names should be stored with the webhook-source-event- prefix."""
     item = WebhookItem()
     item.event = "datasource-updated"
@@ -108,15 +109,18 @@ def test_event_setter_short_name():
     assert item.event == "datasource-updated"
 
 
-def test_event_setter_full_source_name():
-    """Full webhook-source-event- names should be accepted and stored as-is."""
+def test_event_setter_full_source_name() -> None:
+    """Full webhook-source-event-* names: _event stores the full name; the
+    public event getter strips the webhook-source-event- prefix for backwards
+    compatibility with callers that expect the short form.
+    """
     item = WebhookItem()
     item.event = "webhook-source-event-datasource-updated"
     assert item._event == "webhook-source-event-datasource-updated"
     assert item.event == "datasource-updated"
 
 
-def test_event_setter_new_style_event_name():
+def test_event_setter_new_style_event_name() -> None:
     """New-style event names (webhook-event-*) should be stored as-is and not mangled."""
     item = WebhookItem()
     item.event = "webhook-event-user-promoted-admin"
@@ -167,3 +171,245 @@ def test_create_with_source_event_name(server: TSC.Server) -> None:
 
         new_webhook = server.webhooks.create(webhook_model)
         assert new_webhook.id is not None
+
+
+def test_get_parses_is_enabled_and_status_change_reason(server: TSC.Server) -> None:
+    response_xml = UPDATE_XML.read_text()
+    with requests_mock.mock() as m:
+        m.get(server.webhooks.baseurl + "/webhook-id", text=response_xml)
+        webhook = server.webhooks.get_by_id("webhook-id")
+
+        assert webhook.is_enabled is True
+        assert webhook.status_change_reason == ""
+        assert webhook.name == "webhook-name-updated"
+        assert webhook.url == "https://updated-url.example.com/hook"
+
+
+def test_update(server: TSC.Server) -> None:
+    response_xml = UPDATE_XML.read_text()
+    with requests_mock.mock() as m:
+        m.put(server.webhooks.baseurl + "/webhook-id", text=response_xml)
+        webhook_item = WebhookItem()
+        webhook_item._set_values(
+            "webhook-id", "webhook-name-updated", "https://updated-url.example.com/hook", "datasource-created", None
+        )
+        webhook_item.is_enabled = True
+
+        updated_webhook = server.webhooks.update(webhook_item)
+
+        # Verify the actual PUT body reached the wire with the caller's values.
+        # Without this, deleting the update_req call in the endpoint would still
+        # pass every response-derived assertion below (response is mocked and
+        # comes back verbatim). This is the load-bearing endpoint <-> factory
+        # contract check.
+        assert m.last_request is not None
+        assert m.last_request.method == "PUT"
+        body = m.last_request.text or ""
+        assert 'name="webhook-name-updated"' in body, body
+        assert 'isEnabled="true"' in body, body
+        assert 'url="https://updated-url.example.com/hook"' in body, body
+        assert "datasource-created" in body, body
+
+        assert updated_webhook.id == "webhook-id"
+        assert updated_webhook.name == "webhook-name-updated"
+        assert updated_webhook.url == "https://updated-url.example.com/hook"
+        assert updated_webhook.is_enabled is True
+
+
+def test_update_missing_id(server: TSC.Server) -> None:
+    webhook_item = WebhookItem()
+    webhook_item.name = "some-webhook"
+    with pytest.raises(TSC.MissingRequiredFieldError):
+        server.webhooks.update(webhook_item)
+
+
+def test_update_rejects_empty_payload() -> None:
+    # A WebhookItem with no updatable fields set should raise up front rather
+    # than serializing to <tsRequest><webhook/></tsRequest> and letting the
+    # server return a generic 400. Uses update_req directly so the guard is
+    # exercised even before the endpoint sees the item.
+    from tableauserverclient.server.request_factory import RequestFactory
+
+    webhook_item = WebhookItem()
+    webhook_item._id = "webhook-id"  # has an id but nothing to update
+    with pytest.raises(ValueError, match="no updatable fields"):
+        RequestFactory.Webhook.update_req(webhook_item)
+
+
+def test_update_preserves_locally_set_fields_omitted_by_server(server: TSC.Server) -> None:
+    """update should preserve locally-set fields that the server response omits.
+
+    Matches the pattern used by users_endpoint.update and datasources_endpoint.update:
+    fields set on the input item should survive when the server returns a partial
+    response.
+    """
+    # Server response omits is_enabled, owner, and url; only id and name are returned.
+    partial_response = (
+        "<?xml version='1.0' encoding='UTF-8'?>"
+        '<tsResponse xmlns="http://tableau.com/api">'
+        '  <webhook id="webhook-id" name="webhook-name-updated">'
+        "    <webhook-source>"
+        "      <webhook-source-event-datasource-created />"
+        "    </webhook-source>"
+        "  </webhook>"
+        "</tsResponse>"
+    )
+    with requests_mock.mock() as m:
+        m.put(server.webhooks.baseurl + "/webhook-id", text=partial_response)
+        webhook_item = WebhookItem()
+        webhook_item._set_values(
+            "webhook-id",
+            "webhook-name-original",
+            "https://local-url.example.com/hook",
+            "datasource-created",
+            "local-owner-luid",
+        )
+        webhook_item.is_enabled = False
+
+        updated_webhook = server.webhooks.update(webhook_item)
+
+        # Fields returned by the server should be updated.
+        assert updated_webhook.name == "webhook-name-updated"
+        # Fields omitted by the server should retain their locally-set values.
+        assert updated_webhook.url == "https://local-url.example.com/hook"
+        assert updated_webhook.owner_id == "local-owner-luid"
+        assert updated_webhook.is_enabled is False
+
+
+def test_update_request_factory_is_enabled() -> None:
+    webhook_item = WebhookItem()
+    webhook_item._set_values(
+        "webhook-id", "webhook-name", "https://example.com/hook", "datasource-created", None, is_enabled=False
+    )
+
+    request_bytes = RequestFactory.Webhook.update_req(webhook_item)
+    request_str = request_bytes.decode("utf-8")
+
+    assert 'isEnabled="false"' in request_str
+    assert "webhook-name" in request_str
+
+
+def test_update_request_factory_url_and_event() -> None:
+    """update_req should serialize url and event into the request body."""
+    webhook_item = WebhookItem()
+    webhook_item._set_values("webhook-id", "webhook-name", "https://example.com/hook", "datasource-created", None)
+
+    request_bytes = RequestFactory.Webhook.update_req(webhook_item)
+    request_str = request_bytes.decode("utf-8")
+
+    assert "https://example.com/hook" in request_str
+    assert "webhook-source-event-datasource-created" in request_str
+    assert 'method="POST"' in request_str
+
+
+def test_update_request_factory_partial_update_name_only() -> None:
+    """update_req with only name set should omit url, event, and isEnabled."""
+    webhook_item = WebhookItem()
+    webhook_item.name = "new-name"
+
+    request_bytes = RequestFactory.Webhook.update_req(webhook_item)
+    request_str = request_bytes.decode("utf-8")
+
+    assert "new-name" in request_str
+    assert "isEnabled" not in request_str
+    assert "webhook-source" not in request_str
+    assert "webhook-destination" not in request_str
+
+
+def test_update_request_factory_omits_is_enabled_when_none() -> None:
+    """update_req should not emit isEnabled when is_enabled is None."""
+    webhook_item = WebhookItem()
+    webhook_item._set_values("webhook-id", "webhook-name", "https://example.com/hook", "datasource-created", None)
+    # is_enabled is None by default
+
+    request_bytes = RequestFactory.Webhook.update_req(webhook_item)
+    request_str = request_bytes.decode("utf-8")
+
+    assert "isEnabled" not in request_str
+
+
+def test_parse_is_enabled_false() -> None:
+    """isEnabled='false' in XML should parse to boolean False."""
+    xml = (
+        b"<?xml version='1.0' encoding='UTF-8'?>"
+        b'<tsResponse xmlns="http://tableau.com/api">'
+        b'  <webhook id="wh-1" name="wh" isEnabled="false">'
+        b"    <webhook-source><webhook-source-event-datasource-created /></webhook-source>"
+        b'    <webhook-destination><webhook-destination-http method="POST" url="https://x.example.com/h"/>'
+        b"    </webhook-destination>"
+        b"  </webhook>"
+        b"</tsResponse>"
+    )
+    ns = {"t": "http://tableau.com/api"}
+    webhooks = WebhookItem.from_response(xml, ns)
+    assert len(webhooks) == 1
+    assert webhooks[0].is_enabled is False
+
+
+def test_update_request_factory_partial_update_is_enabled_only() -> None:
+    """update_req with only is_enabled set (no name, url, event) should emit
+    only the isEnabled attribute. Server should accept this per Update Webhook
+    REST spec, though the actual accepted-fields matrix must be validated e2e.
+    """
+    webhook_item = WebhookItem()
+    webhook_item._set_values("wh-1", None, None, None, None)
+    webhook_item.is_enabled = False
+
+    request_bytes = RequestFactory.Webhook.update_req(webhook_item)
+    request_str = request_bytes.decode("utf-8")
+
+    assert 'isEnabled="false"' in request_str
+    assert "webhook-source" not in request_str
+    assert "webhook-destination" not in request_str
+    # name attribute is only emitted when webhook_item.name is set
+    assert 'name="' not in request_str
+
+
+def test_status_change_reason_absent_from_response_is_none() -> None:
+    """A webhook response without a statusChangeReason attribute should leave
+    the parsed item.status_change_reason as None (not empty string, not raise).
+    """
+    xml = (
+        b"<?xml version='1.0' encoding='UTF-8'?>"
+        b'<tsResponse xmlns="http://tableau.com/api">'
+        b'  <webhook id="wh-2" name="wh-nosr" isEnabled="true">'
+        b"    <webhook-source><webhook-source-event-datasource-created /></webhook-source>"
+        b'    <webhook-destination><webhook-destination-http method="POST" url="https://x.example.com/h"/>'
+        b"    </webhook-destination>"
+        b"  </webhook>"
+        b"</tsResponse>"
+    )
+    ns = {"t": "http://tableau.com/api"}
+    webhooks = WebhookItem.from_response(xml, ns)
+    assert len(webhooks) == 1
+    assert webhooks[0].status_change_reason is None
+
+
+def test_update_raises_on_server_below_3_6(server: TSC.Server) -> None:
+    """webhooks.update is decorated @api(version="3.6"); calling on an older
+    server must raise EndpointUnavailableError, not silently attempt the PUT.
+    """
+    from tableauserverclient.server.exceptions import EndpointUnavailableError
+
+    server.version = "3.5"
+    webhook_item = WebhookItem()
+    webhook_item._set_values("wh-1", "new-name", None, None, None)
+
+    with pytest.raises(EndpointUnavailableError):
+        server.webhooks.update(webhook_item)
+
+
+def test_update_request_factory_new_style_event_name() -> None:
+    """Webhooks created with new-style webhook-event-* event names should
+    round-trip through update_req: the full event name is emitted as an
+    XML element inside <webhook-source> and stored verbatim in _event.
+    """
+    webhook_item = WebhookItem()
+    webhook_item._set_values("wh-3", None, None, None, None)
+    webhook_item.event = "webhook-event-user-promoted-admin"
+
+    request_bytes = RequestFactory.Webhook.update_req(webhook_item)
+    request_str = request_bytes.decode("utf-8")
+
+    assert "webhook-source" in request_str
+    assert "webhook-event-user-promoted-admin" in request_str

@@ -1397,10 +1397,10 @@ class WebhookRequest:
             raise ValueError(f"Name must be provided for {webhook_item}")
 
         source = ET.SubElement(webhook, "webhook-source")
-        if isinstance(webhook_item._event, str):
-            ET.SubElement(source, webhook_item._event)
+        if isinstance(webhook_item.event_tag, str):
+            ET.SubElement(source, webhook_item.event_tag)
         else:
-            raise ValueError(f"_event for Webhook must be provided. {webhook_item}")
+            raise ValueError(f"event for Webhook must be provided. {webhook_item}")
 
         destination = ET.SubElement(webhook, "webhook-destination")
         post = ET.SubElement(destination, "webhook-destination-http")
@@ -1409,6 +1409,41 @@ class WebhookRequest:
             post.attrib["url"] = webhook_item.url
         else:
             raise ValueError(f"URL must be provided on {webhook_item}")
+
+        return ET.tostring(xml_request)
+
+    @_tsrequest_wrapped
+    def update_req(self, xml_request: ET.Element, webhook_item: "WebhookItem") -> bytes:
+        # Reject a no-op update up front. Without at least one updatable
+        # attribute set the payload is <tsRequest><webhook/></tsRequest>,
+        # which the server rejects with a generic 400 that gives the caller
+        # no idea what happened. Raise here with an actionable message.
+        if (
+            webhook_item.name is None
+            and webhook_item.is_enabled is None
+            and webhook_item.event_tag is None
+            and webhook_item.url is None
+        ):
+            raise ValueError(
+                "WebhookItem has no updatable fields set; "
+                "at least one of name, is_enabled, event, or url must be provided."
+            )
+
+        webhook = ET.SubElement(xml_request, "webhook")
+        if webhook_item.name is not None:
+            webhook.attrib["name"] = webhook_item.name
+        if webhook_item.is_enabled is not None:
+            webhook.attrib["isEnabled"] = str(webhook_item.is_enabled).lower()
+
+        if webhook_item.event_tag is not None:
+            source = ET.SubElement(webhook, "webhook-source")
+            ET.SubElement(source, webhook_item.event_tag)
+
+        if webhook_item.url is not None:
+            destination = ET.SubElement(webhook, "webhook-destination")
+            post = ET.SubElement(destination, "webhook-destination-http")
+            post.attrib["method"] = "POST"
+            post.attrib["url"] = webhook_item.url
 
         return ET.tostring(xml_request)
 
