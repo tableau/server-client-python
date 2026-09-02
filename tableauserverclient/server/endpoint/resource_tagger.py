@@ -1,6 +1,6 @@
 import abc
 import copy
-from typing import Generic, Protocol, TypeVar, TYPE_CHECKING, runtime_checkable
+from typing import Generic, Protocol, TypeVar, TYPE_CHECKING
 from collections.abc import Iterable
 import urllib.parse
 
@@ -22,9 +22,30 @@ if TYPE_CHECKING:
     from tableauserverclient.server.server import Server
 
 
+class _TaggableWithInitial(Protocol):
+    """Private structural protocol for items managed by _ResourceTagger.
+
+    Extends the public TaggableItem interface with the ``_initial_tags``
+    implementation detail used internally to track server-side tag state.
+
+    ``id`` is declared as a read-only ``@property`` so that concrete item
+    classes (``WorkbookItem``, ``DatasourceItem``, ``FlowItem``, etc.) that
+    expose ``id`` as an ``@property`` satisfy the protocol under mypy's
+    Protocol variance rules for data attributes.  ``tags`` and
+    ``_initial_tags`` remain writable attributes because the tagger mutates
+    them.
+    """
+
+    @property
+    def id(self) -> str | None: ...
+
+    tags: set[str]
+    _initial_tags: set[str]
+
+
 class _ResourceTagger(Endpoint):
     # Add new tags to resource
-    def _add_tags(self, baseurl, resource_id, tag_set):
+    def _add_tags(self, baseurl: str, resource_id: str | None, tag_set: set[str]) -> set[str]:
         url = f"{baseurl}/{resource_id}/tags"
         add_req = RequestFactory.Tag.add_req(tag_set)
 
@@ -38,7 +59,7 @@ class _ResourceTagger(Endpoint):
             raise  # Some other error
 
     # Delete a resource's tag by name
-    def _delete_tag(self, baseurl, resource_id, tag_name):
+    def _delete_tag(self, baseurl: str, resource_id: str | None, tag_name: str) -> None:
         encoded_tag_name = urllib.parse.quote(tag_name, safe="")
         url = f"{baseurl}/{resource_id}/tags/{encoded_tag_name}"
 
@@ -51,7 +72,7 @@ class _ResourceTagger(Endpoint):
             raise  # Some other error
 
     # Remove and add tags to match the resource item's tag set
-    def update_tags(self, baseurl, resource_item):
+    def update_tags(self, baseurl: str, resource_item: _TaggableWithInitial) -> None:
         if resource_item.tags != resource_item._initial_tags:
             add_set = resource_item.tags - resource_item._initial_tags
             remove_set = resource_item._initial_tags - resource_item.tags
@@ -65,16 +86,6 @@ class _ResourceTagger(Endpoint):
 
 class Response(Protocol):
     content: bytes
-
-
-@runtime_checkable
-class Taggable(Protocol):
-    tags: set[str]
-    _initial_tags: set[str]
-
-    @property
-    def id(self) -> str | None:
-        pass
 
 
 T = TypeVar("T")

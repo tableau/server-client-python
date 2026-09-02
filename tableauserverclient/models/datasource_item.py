@@ -154,7 +154,7 @@ class DatasourceItem:
         self._encrypt_extracts: bool | None = None
         self._has_extracts: bool | None = None
         self._id: str | None = None
-        self._initial_tags: set = set()
+        self._initial_tags: set[str] = set()
         self._project_name: str | None = None
         self._revisions = None
         self._size: int | None = None
