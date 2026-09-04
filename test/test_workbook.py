@@ -339,6 +339,36 @@ def test_download_object(server: TSC.Server) -> None:
             assert isinstance(file_path, BytesIO)
 
 
+def test_download_uses_configured_chunk_size(server: TSC.Server, tmp_path: Path, monkeypatch) -> None:
+    # Regression guard: the shared DownloadableMixin._download_content path must
+    # stream with config.DOWNLOAD_CHUNK_SIZE_MB * BYTES_PER_MB, not the pre-fix
+    # 1024 bytes.
+    from tableauserverclient.config import BYTES_PER_MB, config
+
+    captured: list[int] = []
+    real_iter_content = None
+
+    def spy_iter_content(self, chunk_size=None, decode_unicode=False):
+        captured.append(chunk_size)
+        assert real_iter_content is not None
+        return real_iter_content(self, chunk_size, decode_unicode)
+
+    import requests
+
+    real_iter_content = requests.Response.iter_content
+    monkeypatch.setattr(requests.Response, "iter_content", spy_iter_content)
+
+    with requests_mock.mock() as m:
+        m.get(
+            server.workbooks.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2/content",
+            headers={"Content-Disposition": 'name="tableau_workbook"; filename="RESTAPISample.twbx"'},
+        )
+        server.workbooks.download("1f951daf-4061-451a-9df1-69a8062664f2", filepath=tmp_path)
+
+    assert captured, "iter_content was never invoked"
+    assert captured[0] == config.DOWNLOAD_CHUNK_SIZE_MB * BYTES_PER_MB
+
+
 def test_download_sanitizes_name(server: TSC.Server, tmp_path: Path) -> None:
     filename = "Name,With,Commas.twbx"
     disposition = f'name="tableau_workbook"; filename="{filename}"'

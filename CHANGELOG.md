@@ -12,6 +12,18 @@
   hierarchy path (e.g. `"Marketing/Q1 Reports"`). The walk is performed level by
   level using the REST API name filter, so a path with *n* components issues *n*
   requests. Returns the matching `ProjectItem` or `None` if no project is found.
+* Unified streaming download chunk size across `views.populate_csv` /
+  `_pdf` / `_excel`, `custom_views.*`, `workbooks.download`,
+  `datasources.download`, and `flows.download`. Previously the mixed 1024-byte
+  and 10240-byte chunks caused multi-second latency for large view exports.
+  Downloads now use a dedicated `DOWNLOAD_CHUNK_SIZE_MB` config value
+  (default 1 MB, overridable via the `TSC_DOWNLOAD_CHUNK_SIZE_MB` env var).
+  Upload / chunked-publish continues to use `CHUNK_SIZE_MB` (default 50 MB,
+  overridable via `TSC_CHUNK_SIZE_MB`) -- they are separate knobs because a
+  large read chunk delays first-byte yield on slow connections while a large
+  write chunk reduces per-request overhead. Behavior note: callers that
+  previously streamed 1 KB at a time will now hold up to 1 MB resident per
+  chunk; memory-constrained callers can drop this via the env var.
 * Preserve HTTP method and body across 3xx redirects. Previously `requests`
   followed 301/302/303 by converting POST to GET and dropping the body, so
   endpoints like `users.add`, `workbooks.publish`, and any write hitting a

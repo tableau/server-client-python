@@ -328,6 +328,38 @@ def test_populate_csv_default_maxage(server: TSC.Server) -> None:
         assert response == csv_file
 
 
+def test_stream_content_uses_configured_chunk_size(server: TSC.Server, monkeypatch) -> None:
+    # Regression guard: the shared DownloadableMixin._stream_content path must
+    # stream with config.DOWNLOAD_CHUNK_SIZE_MB * BYTES_PER_MB, not the pre-fix
+    # 1024 bytes.
+    from tableauserverclient.config import BYTES_PER_MB, config
+
+    captured: list[int] = []
+    real_iter_content = None
+
+    def spy_iter_content(self, chunk_size=None, decode_unicode=False):
+        captured.append(chunk_size)
+        assert real_iter_content is not None
+        return real_iter_content(self, chunk_size, decode_unicode)
+
+    import requests
+
+    real_iter_content = requests.Response.iter_content
+    monkeypatch.setattr(requests.Response, "iter_content", spy_iter_content)
+
+    response = POPULATE_CSV.read_bytes()
+    with requests_mock.mock() as m:
+        m.get(server.views.baseurl + "/d79634e1-6063-4ec9-95ff-50acbf609ff5/data", content=response)
+        single_view = TSC.ViewItem()
+        single_view._id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
+        server.views.populate_csv(single_view)
+        # Materialize the iterator so iter_content is actually invoked.
+        b"".join(single_view.csv)
+
+    assert captured, "iter_content was never invoked"
+    assert captured[0] == config.DOWNLOAD_CHUNK_SIZE_MB * BYTES_PER_MB
+
+
 def test_populate_image_missing_id(server: TSC.Server) -> None:
     single_view = TSC.ViewItem()
     single_view._id = None
