@@ -448,6 +448,24 @@ class Server:
             local.epoch = epoch
         return local.session
 
+    # Backwards-compatible access to the pre-thread-safety private attribute.
+    # Reading returns the current thread's session; assigning replaces the
+    # CURRENT thread's session only (other threads keep sessions created by
+    # session_factory), which preserves the common single-threaded pattern of
+    # injecting a prepared session before making calls. The injected session
+    # is registered so close() still reaches it.
+    @property
+    def _session(self) -> requests.Session:
+        return self.session
+
+    @_session.setter
+    def _session(self, value: requests.Session) -> None:
+        local = self._thread_sessions
+        with self._session_lock:
+            self._all_sessions.add(value)
+        local.session = value
+        local.epoch = self._session_epoch
+
     def is_signed_in(self):
         return self._auth_state.auth_token is not None
 

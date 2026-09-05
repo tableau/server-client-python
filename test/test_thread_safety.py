@@ -263,3 +263,30 @@ def test_context_manager_closes_on_exit() -> None:
         server.session
     assert len(created) == 1
     assert all(s.closed for s in created)
+
+
+def test_private_session_attribute_shim() -> None:
+    # backwards compatibility: external code reads and assigns
+    # Server._session (the pre-thread-safety attribute)
+    server, created = _tracking_server()
+    assert server._session is server.session  # alias for this thread's session
+
+    injected = _TrackingSession()
+    server._session = injected
+    assert server.session is injected  # this thread now uses the injection
+
+    # injection is per-thread: another thread still gets a factory session
+    other: dict[str, requests.Session] = {}
+
+    def worker() -> None:
+        other["session"] = server.session
+
+    t = threading.Thread(target=worker)
+    t.start()
+    t.join()
+    assert other["session"] is not injected
+    assert isinstance(other["session"], _TrackingSession)
+
+    # close() reaches the injected session too
+    server.close()
+    assert injected.closed
