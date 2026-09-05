@@ -147,21 +147,36 @@ def test_concurrent_api_calls_use_per_thread_sessions(signed_in_server: TSC.Serv
 
 
 def test_auth_state_is_set_atomically(server: TSC.Server) -> None:
-    """Readers must never observe a half-updated (site_id, user_id, token) triple."""
+    """Readers must never observe a half-updated (site_id, user_id, token) state.
+
+    The reader takes ONE snapshot of the immutable auth state and asserts
+    consistency within it. Asserting across two separate property reads
+    (server.auth_token then server.site_id) would be a bug in the test: a
+    writer can legitimately complete a full swap between the two reads,
+    which free-threaded (no-GIL) builds surface readily. Individual
+    property reads are each internally consistent; only the snapshot
+    guarantees a consistent multi-field view.
+    """
     stop = threading.Event()
     errors: list[Exception] = []
 
     def reader() -> None:
         while not stop.is_set():
             try:
-                if server.is_signed_in():
-                    token = server.auth_token
-                    site = server.site_id
-                    # tokens and site ids are written together; a mismatched
-                    # pair means a reader saw a partial update
-                    assert (token, site) in (("token-a", "site-a"), ("token-b", "site-b"))
-            except TSC.server.endpoint.exceptions.NotSignedInError:
-                pass  # signed out at the moment of the read; that's fine
+                state = server._auth_state
+                if state.auth_token is not None:
+                    # all fields come from the same snapshot; a mismatched
+                    # pair means a writer published a partial update
+                    assert (state.auth_token, state.site_id, state.user_id) in (
+                        ("token-a", "site-a", "user-a"),
+                        ("token-b", "site-b", "user-b"),
+                    )
+                # single property reads must be internally consistent too:
+                # either a value or NotSignedInError, never None
+                try:
+                    assert server.auth_token is not None
+                except TSC.server.endpoint.exceptions.NotSignedInError:
+                    pass  # signed out at the moment of the read; that's fine
             except Exception as e:  # pragma: no cover - only on failure
                 errors.append(e)
                 stop.set()

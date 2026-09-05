@@ -6,6 +6,8 @@ import urllib3
 import ssl
 import weakref
 
+from typing import NamedTuple, Optional
+
 from defusedxml.ElementTree import fromstring, ParseError
 from packaging.version import Version
 from tableauserverclient.server.endpoint import (
@@ -60,6 +62,23 @@ _PRODUCT_TO_REST_VERSION = {
 
 minimum_supported_server_version = "2.3"
 default_server_version = "2.4"  # first version that dropped the legacy auth endpoint
+
+
+class _AuthState(NamedTuple):
+    """
+    Immutable bundle of the auth fields that must change together.
+
+    The whole state is swapped by assigning a new instance, and a single
+    reference assignment or read is atomic on every CPython build,
+    free-threaded (no-GIL) builds included. Readers take one snapshot of
+    ``Server._auth_state`` and destructure it, so they can never observe a
+    token paired with the site or user of a different sign in.
+    """
+
+    site_id: Optional[str] = None
+    user_id: Optional[str] = None
+    auth_token: Optional[str] = None
+    site_url: Optional[str] = None
 
 
 class Server:
@@ -155,9 +174,7 @@ class Server:
         Replace = "Replace"
 
     def __init__(self, server_address, use_server_version=False, http_options=None, session_factory=None):
-        self._auth_token = None
-        self._site_id = None
-        self._user_id = None
+        self._auth_state = _AuthState()
         self._ssl_context = None
 
         # TODO: this needs to change to default to https, but without breaking existing code
@@ -171,8 +188,11 @@ class Server:
         # thread-safe (see psf/requests#2766), so each thread that makes calls
         # through this Server instance gets its own Session object, created
         # lazily from session_factory. The epoch counter invalidates every
-        # thread's cached session when auth state is cleared (sign out).
-        self._auth_lock = threading.Lock()
+        # thread's cached session when auth state is cleared (sign out). The
+        # lock guards the epoch counter and the session WeakSet; auth state
+        # itself is an immutable _AuthState swapped by reference and needs
+        # no lock.
+        self._session_lock = threading.Lock()
         self._session_epoch = 0
         self._thread_sessions = threading.local()
         # Weak references to every session created for any thread, so close()
@@ -252,24 +272,60 @@ class Server:
         self._http_options = dict()
 
     def _clear_auth(self):
-        with self._auth_lock:
-            self._site_id = None
-            self._user_id = None
-            self._auth_token = None
-            self._site_url = None
+        # swapping the whole immutable state in one assignment is atomic on
+        # every CPython build, free-threaded (no-GIL) builds included
+        self._auth_state = _AuthState()
+        with self._session_lock:
             # Invalidate the cached session of every thread so state such as
             # cookies does not leak into a later sign in. Sessions are replaced
             # lazily on next use rather than closed here, so requests already
             # in flight on other threads are not disrupted (this matches the
-            # previous behavior of re-assigning the shared session).
+            # previous behavior of re-assigning the shared session). The lock
+            # guards the epoch increment, which is not atomic without the GIL.
             self._session_epoch += 1
 
     def _set_auth(self, site_id, user_id, auth_token, site_url=None):
-        with self._auth_lock:
-            self._site_id = site_id
-            self._user_id = user_id
-            self._auth_token = auth_token
-            self._site_url = site_url
+        # swapping the whole immutable state in one assignment is atomic on
+        # every CPython build, free-threaded (no-GIL) builds included, so
+        # readers can never observe a partially-updated state
+        self._auth_state = _AuthState(site_id, user_id, auth_token, site_url)
+
+    # Backwards-compatible access to the individual auth fields. Existing code
+    # (including this project's tests) reads and assigns these directly as a
+    # sign-in shortcut. Each assignment swaps in a fully-formed state, so
+    # readers never see torn fields; assigning fields one at a time is not
+    # atomic as a group, though, so concurrent writers should use _set_auth.
+    @property
+    def _auth_token(self):
+        return self._auth_state.auth_token
+
+    @_auth_token.setter
+    def _auth_token(self, value) -> None:
+        self._auth_state = self._auth_state._replace(auth_token=value)
+
+    @property
+    def _site_id(self):
+        return self._auth_state.site_id
+
+    @_site_id.setter
+    def _site_id(self, value) -> None:
+        self._auth_state = self._auth_state._replace(site_id=value)
+
+    @property
+    def _user_id(self):
+        return self._auth_state.user_id
+
+    @_user_id.setter
+    def _user_id(self, value) -> None:
+        self._auth_state = self._auth_state._replace(user_id=value)
+
+    @property
+    def _site_url(self):
+        return self._auth_state.site_url
+
+    @_site_url.setter
+    def _site_url(self, value) -> None:
+        self._auth_state = self._auth_state._replace(site_url=value)
 
     def _get_legacy_version(self):
         # the serverInfo call was introduced in 2.4, earlier than that we have this different call
@@ -327,31 +383,37 @@ class Server:
 
     @property
     def auth_token(self):
-        if self._auth_token is None:
+        # read the state once: a second self._auth_state read could observe
+        # a concurrent sign out and return None instead of raising
+        token = self._auth_state.auth_token
+        if token is None:
             error = "Missing authentication token. You must sign in first."
             raise NotSignedInError(error)
-        return self._auth_token
+        return token
 
     @property
     def site_id(self):
-        if self._site_id is None:
+        site_id = self._auth_state.site_id
+        if site_id is None:
             error = "Missing site ID. You must sign in first."
             raise NotSignedInError(error)
-        return self._site_id
+        return site_id
 
     @property
     def site_url(self):
-        if self._site_url is None:
+        site_url = self._auth_state.site_url
+        if site_url is None:
             error = "Missing site URL. You must sign in first."
             raise NotSignedInError(error)
-        return self._site_url
+        return site_url
 
     @property
     def user_id(self):
-        if self._user_id is None:
+        user_id = self._auth_state.user_id
+        if user_id is None:
             error = "Missing user ID. You must sign in first."
             raise NotSignedInError(error)
-        return self._user_id
+        return user_id
 
     @property
     def server_address(self):
@@ -377,7 +439,7 @@ class Server:
         epoch = self._session_epoch
         if getattr(local, "session", None) is None or local.epoch != epoch:
             session = self._session_factory()
-            with self._auth_lock:
+            with self._session_lock:
                 self._all_sessions.add(session)
             local.session = session
             # `epoch` was read before the factory ran: if a sign out happened
@@ -387,7 +449,7 @@ class Server:
         return local.session
 
     def is_signed_in(self):
-        return self._auth_token is not None
+        return self._auth_state.auth_token is not None
 
     def configure_ssl(self, *, allow_weak_dh=False):
         """Configure SSL/TLS settings for the server connection.
@@ -422,7 +484,7 @@ class Server:
         (use ``auth.sign_out()`` for that). The Server object remains usable
         after close; any subsequent call transparently creates a new session.
         """
-        with self._auth_lock:
+        with self._session_lock:
             sessions = list(self._all_sessions)
             self._all_sessions.clear()
             # Invalidate every thread's cached (now closed) session so later
