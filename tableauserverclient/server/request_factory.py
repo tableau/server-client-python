@@ -1431,15 +1431,21 @@ class WebhookRequest:
 
         webhook = ET.SubElement(xml_request, "webhook")
         if webhook_item.name is not None:
+            if not isinstance(webhook_item.name, str):
+                raise ValueError(f"Name must be a string on {webhook_item}")
             webhook.attrib["name"] = webhook_item.name
         if webhook_item.is_enabled is not None:
             webhook.attrib["isEnabled"] = str(webhook_item.is_enabled).lower()
 
         if webhook_item.event_tag is not None:
+            if not isinstance(webhook_item.event_tag, str):
+                raise ValueError(f"event for Webhook must be a string on {webhook_item}")
             source = ET.SubElement(webhook, "webhook-source")
             ET.SubElement(source, webhook_item.event_tag)
 
         if webhook_item.url is not None:
+            if not isinstance(webhook_item.url, str):
+                raise ValueError(f"URL must be a string on {webhook_item}")
             destination = ET.SubElement(webhook, "webhook-destination")
             post = ET.SubElement(destination, "webhook-destination-http")
             post.attrib["method"] = "POST"

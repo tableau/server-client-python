@@ -125,6 +125,10 @@ class Webhooks(Endpoint):
         """
         Modifies an existing webhook.
 
+        Fields serialized to the wire: name, url, event, is_enabled. Other
+        fields on the passed `WebhookItem` (e.g. `status_change_reason`,
+        `owner_id`) are not sent.
+
         REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_webhook
 
         Parameters

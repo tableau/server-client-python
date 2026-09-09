@@ -59,7 +59,7 @@ class WebhookItem:
         self._event: str | None = None
         self.owner_id: str | None = None
         self.is_enabled: bool | None = None
-        self.status_change_reason: str | None = None
+        self._status_change_reason: str | None = None
 
     def _set_values(self, id, name, url, event, owner_id, is_enabled=None, status_change_reason=None):
         if id is not None:
@@ -75,11 +75,16 @@ class WebhookItem:
         if is_enabled is not None:
             self.is_enabled = is_enabled
         if status_change_reason is not None:
-            self.status_change_reason = status_change_reason
+            self._status_change_reason = status_change_reason
 
     @property
     def id(self) -> str | None:
         return self._id
+
+    @property
+    def status_change_reason(self) -> str | None:
+        """Server-set; assignment has no effect on the wire."""
+        return self._status_change_reason
 
     @property
     def event(self) -> str | None:
@@ -129,12 +134,22 @@ class WebhookItem:
             parsed = fromstring(webhook_xml)
             webhook_xml = parsed.find(".//t:webhook", namespaces=ns)
         if webhook_xml is not None:
-            values = self._parse_element(webhook_xml, ns)
-            self._set_values(*values)
+            (
+                _,
+                name,
+                url,
+                event,
+                _,
+                is_enabled,
+                status_change_reason,
+            ) = self._parse_element(webhook_xml, ns)
+            self._set_values(None, name, url, event, None, is_enabled, status_change_reason)
         return self
 
     @staticmethod
-    def _parse_element(webhook_xml: ET.Element, ns) -> tuple:
+    def _parse_element(
+        webhook_xml: ET.Element, ns
+    ) -> tuple[str | None, str | None, str | None, str | None, str | None, bool | None, str | None]:
         id = webhook_xml.get("id", None)
         name = webhook_xml.get("name", None)
 
@@ -143,9 +158,10 @@ class WebhookItem:
         if url_tag is not None:
             url = url_tag.get("url", None)
 
-        event = webhook_xml.findall(".//t:webhook-source/*", namespaces=ns)
-        if event is not None and len(event) > 0:
-            event = _parse_event(event)
+        event: str | None = None
+        event_elements = webhook_xml.findall(".//t:webhook-source/*", namespaces=ns)
+        if event_elements:
+            event = _parse_event(event_elements)
 
         owner_id = None
         owner_tag = webhook_xml.find(".//t:owner", namespaces=ns)

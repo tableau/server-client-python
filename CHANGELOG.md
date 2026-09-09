@@ -5,6 +5,10 @@
   hierarchy path (e.g. `"Marketing/Q1 Reports"`). The walk is performed level by
   level using the REST API name filter, so a path with *n* components issues *n*
   requests. Returns the matching `ProjectItem` or `None` if no project is found.
+* Added `Webhooks.update()` to modify an existing webhook's name, url, event, or
+  enabled state. Exposed new `WebhookItem` fields: `is_enabled`,
+  `status_change_reason` (read-only, server-set), and `event_tag` (raw wire form
+  of the event tag).
 
 ## 0.18.0 (6 April 2022)    
 * Switched to using defused_xml for xml attack protection

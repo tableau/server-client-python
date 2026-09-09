@@ -81,7 +81,7 @@ def test_create(server: TSC.Server) -> None:
         assert new_webhook.id is not None
 
 
-def test_request_factory():
+def test_request_factory() -> None:
     webhook_request_expected = CREATE_REQUEST_XML.read_text()
 
     webhook_item = WebhookItem()
