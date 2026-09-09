@@ -8,23 +8,12 @@ Run with:
     pytest test_e2e/test_users_groups.py -v
 """
 
-import uuid
-
 import pytest
 import tableauserverclient as TSC
 
+from test_e2e._helpers import _unique
+
 pytestmark = pytest.mark.e2e_admin
-
-
-def _unique(prefix: str) -> str:
-    """Generate a name unique to this test run.
-
-    Every user/group name used by an e2e test must be per-run to avoid
-    409 conflicts when: (a) two runs execute against the same site in
-    parallel, or (b) a prior run crashed after `create` but before the
-    `finally` block removed it.
-    """
-    return f"{prefix}-{uuid.uuid4().hex[:8]}"
 
 
 def test_users_get_returns_nonempty_list(server_admin):

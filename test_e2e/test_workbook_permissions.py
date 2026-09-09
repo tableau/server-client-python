@@ -7,10 +7,13 @@ Run with:
     pytest test_e2e/test_workbook_permissions.py -v
 """
 
+import warnings
 from pathlib import Path
 
 import pytest
 import tableauserverclient as TSC
+
+from test_e2e._helpers import _unique
 
 ASSETS_DIR = Path(__file__).parent / "assets"
 SAMPLE_WORKBOOK = ASSETS_DIR / "WorkbookWithoutExtract.twbx"
@@ -25,7 +28,7 @@ def workbook_and_user(server_admin, default_project):
     wb = server_admin.workbooks.publish(wb, SAMPLE_WORKBOOK, TSC.Server.PublishMode.Overwrite)
 
     try:
-        user = TSC.UserItem("tsc-e2e-perm-testuser", TSC.UserItem.Roles.Viewer)
+        user = TSC.UserItem(_unique("tsc-e2e-perm-testuser"), TSC.UserItem.Roles.Viewer)
         user = server_admin.users.add(user)
     except Exception:
         server_admin.workbooks.delete(wb.id)
@@ -78,8 +81,8 @@ def test_update_permissions_appears_on_populate(server_admin, workbook_and_user)
         )
         try:
             server_admin.workbooks.delete_permission(workbook, delete_rule)
-        except Exception:
-            pass  # Rule may already be deleted by the test body
+        except Exception as exc:
+            warnings.warn(f"Cleanup delete_permission failed (rule may already be deleted): {exc}")
 
 
 def test_view_populate_permissions_returns_list(server_admin, workbook_and_user):
@@ -139,5 +142,5 @@ def test_delete_permission_removes_rule(server_admin, workbook_and_user):
         )
         try:
             server_admin.workbooks.delete_permission(workbook, delete_rule)
-        except Exception:
-            pass  # Rule may already be deleted by the test body
+        except Exception as exc:
+            warnings.warn(f"Cleanup delete_permission failed (rule may already be deleted): {exc}")

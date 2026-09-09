@@ -36,14 +36,11 @@ def test_datasource_publish(server, datasource):
 
 
 def test_datasources_get(server, datasource):
-    """datasources.get() with a name filter returns the published datasource."""
-    opts = TSC.RequestOptions()
-    opts.filter.add(
-        TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, "tsc-e2e-datasource-crud")
+    """datasources.filter() by name returns the published datasource."""
+    results = list(server.datasources.filter(name="tsc-e2e-datasource-crud"))
+    assert any(ds.id == datasource.id for ds in results), (
+        f"Published datasource {datasource.id!r} not found in filter results: " f"{[ds.id for ds in results]}"
     )
-    results, pagination = server.datasources.get(opts)
-    assert len(results) >= 1
-    assert any(ds.id == datasource.id for ds in results)
 
 
 def test_datasources_get_by_id(server, datasource):

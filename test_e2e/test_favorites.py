@@ -10,7 +10,6 @@ from pathlib import Path
 
 import pytest
 import tableauserverclient as TSC
-from tableauserverclient.models import Resource
 
 ASSETS_DIR = Path(__file__).parent / "assets"
 SAMPLE_WORKBOOK = ASSETS_DIR / "WorkbookWithoutExtract.twbx"
@@ -43,7 +42,7 @@ def test_favorites_workbook(server, workbook):
     """A workbook can be added to and removed from favorites."""
     user = TSC.UserItem()
     user.id = server.user_id
-    server.favorites.add_favorite(user, Resource.Workbook, workbook)
+    server.favorites.add_favorite(user, TSC.Resource.Workbook, workbook)
     server.favorites.get(user)
     try:
         assert any(f.id == workbook.id for f in user.favorites.get("workbooks", []))

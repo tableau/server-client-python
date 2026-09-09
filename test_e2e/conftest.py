@@ -9,6 +9,20 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "e2e_admin: mark test as end-to-end requiring SiteAdmin credentials")
 
 
+def pytest_collection_modifyitems(config, items):
+    """Force sequential execution for e2e tests.
+
+    The project-level pytest addopts includes ``-n auto`` (pytest-xdist),
+    which parallelises test execution. Our e2e tests share module-scoped
+    server fixtures and mutate the same live site, so they must run
+    sequentially to avoid races (409 conflicts, cleanup ordering, etc.).
+    """
+    if getattr(config.option, "numprocesses", None) not in (None, 0):
+        config.option.numprocesses = 0
+    if getattr(config.option, "dist", None) not in (None, "no"):
+        config.option.dist = "no"
+
+
 def _http_options() -> dict:
     verify = os.environ.get("TABLEAU_VERIFY_SSL", "true").lower() != "false"
     if not verify:
