@@ -420,7 +420,7 @@ class ScheduleItem:
                 return MonthlyInterval(start_time, tuple(interval_values))
         except ValueError as exc:
             logger.warning(
-                "Skipping malformed <frequencyDetails> " "(frequency=%s, start=%s, end=%s, intervals=%s): %s",
+                "Skipping malformed <frequencyDetails> (frequency=%s, start=%s, end=%s, intervals=%s): %s",
                 frequency,
                 start_time,
                 end_time,
