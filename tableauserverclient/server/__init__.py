@@ -14,6 +14,8 @@ from tableauserverclient.server.server import Server
 from tableauserverclient.server.pager import Pager
 from tableauserverclient.server.endpoint.exceptions import (
     FailedSignInError,
+    FlowRunCancelledException,
+    FlowRunFailedException,
     JobCancelledException,
     JobFailedException,
     NotSignedInError,
@@ -65,6 +67,8 @@ __all__ = [
     "Server",
     "Pager",
     "FailedSignInError",
+    "FlowRunCancelledException",
+    "FlowRunFailedException",
     "JobCancelledException",
     "JobFailedException",
     "NotSignedInError",
