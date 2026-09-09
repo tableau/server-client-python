@@ -340,7 +340,10 @@ def test_stream_content_uses_configured_chunk_size(server: TSC.Server, monkeypat
     def spy_iter_content(self, chunk_size=None, decode_unicode=False):
         captured.append(chunk_size)
         assert real_iter_content is not None
-        return real_iter_content(self, chunk_size, decode_unicode)
+        # Pass chunk_size / decode_unicode by name so a signature reorder in
+        # requests fails loudly here instead of silently binding to the wrong
+        # parameter.
+        return real_iter_content(self, chunk_size=chunk_size, decode_unicode=decode_unicode)
 
     import requests
 
@@ -358,6 +361,24 @@ def test_stream_content_uses_configured_chunk_size(server: TSC.Server, monkeypat
 
     assert captured, "iter_content was never invoked"
     assert captured[0] == config.DOWNLOAD_CHUNK_SIZE_MB * BYTES_PER_MB
+
+
+def test_download_chunk_size_clamps_zero(monkeypatch) -> None:
+    # TSC_DOWNLOAD_CHUNK_SIZE_MB=0 would cause requests.iter_content to read the
+    # entire response as a single chunk (defeating the streaming behavior); make
+    # sure the config clamps to the 1 MB default instead.
+    from tableauserverclient.config import config
+
+    monkeypatch.setenv("TSC_DOWNLOAD_CHUNK_SIZE_MB", "0")
+    assert config.DOWNLOAD_CHUNK_SIZE_MB == 1
+
+
+def test_download_chunk_size_rejects_non_numeric(monkeypatch) -> None:
+    # Non-numeric env values must not crash the download path; fall back to 1 MB.
+    from tableauserverclient.config import config
+
+    monkeypatch.setenv("TSC_DOWNLOAD_CHUNK_SIZE_MB", "abc")
+    assert config.DOWNLOAD_CHUNK_SIZE_MB == 1
 
 
 def test_populate_image_missing_id(server: TSC.Server) -> None:

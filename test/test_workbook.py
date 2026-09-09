@@ -351,7 +351,10 @@ def test_download_uses_configured_chunk_size(server: TSC.Server, tmp_path: Path,
     def spy_iter_content(self, chunk_size=None, decode_unicode=False):
         captured.append(chunk_size)
         assert real_iter_content is not None
-        return real_iter_content(self, chunk_size, decode_unicode)
+        # Pass chunk_size / decode_unicode by name so a signature reorder in
+        # requests fails loudly here instead of silently binding to the wrong
+        # parameter.
+        return real_iter_content(self, chunk_size=chunk_size, decode_unicode=decode_unicode)
 
     import requests
 

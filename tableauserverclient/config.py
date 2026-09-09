@@ -19,7 +19,7 @@ class Config:
     def CHUNK_SIZE_MB(self):
         return int(os.getenv("TSC_CHUNK_SIZE_MB", 5 * 10))  # 5MB felt too slow, upped it to 50
 
-    # Chunk size for streaming *downloads* (view CSV / Excel / PDF, workbook /
+    # Chunk size for streaming *downloads* (view CSV / Excel, workbook /
     # datasource / flow downloads). Kept separate from the upload knob because
     # a large read chunk delays the first-byte yield on slow connections --
     # requests.iter_content buffers up to chunk_size before yielding, so on a
@@ -27,9 +27,24 @@ class Config:
     # 1 MB is empirically a reasonable balance between per-chunk overhead and
     # progressive-yield latency; callers who want a different tradeoff can
     # tune via TSC_DOWNLOAD_CHUNK_SIZE_MB.
+    #
+    # No upper bound is enforced, but very large values (thousands of MB) will
+    # OOM on constrained hosts because each chunk is buffered in memory before
+    # it is written or yielded. Keep this under ~100 MB unless the caller has
+    # specifically measured a benefit at higher values.
+    #
+    # Bounds: values <= 0 or non-numeric input are treated as invalid and fall
+    # back to the 1 MB default; 0 or a negative chunk size would silently
+    # corrupt the output because iter_content interprets it as "read all".
     @property
-    def DOWNLOAD_CHUNK_SIZE_MB(self):
-        return int(os.getenv("TSC_DOWNLOAD_CHUNK_SIZE_MB", 1))
+    def DOWNLOAD_CHUNK_SIZE_MB(self) -> int:
+        raw = os.getenv("TSC_DOWNLOAD_CHUNK_SIZE_MB", "1")
+        try:
+            value = int(raw)
+        except ValueError:
+            # invalid env value; fall back to default
+            value = 1
+        return max(1, value)
 
     # Default page size
     @property
