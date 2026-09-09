@@ -58,6 +58,24 @@ from tableauserverclient.models import (
     WorkbookItem,
 )
 
+from tableauserverclient.types import (
+    AddResponse,
+    FilePath,
+    FileObject,
+    FileObjectR,
+    FileObjectW,
+    HasIdpConfigurationID,
+    HyperAction,
+    HyperActionCondition,
+    HyperActionRow,
+    HyperActionTable,
+    IDPAttributes,
+    IDPProperty,
+    PathOrFile,
+    PathOrFileR,
+    PathOrFileW,
+)
+
 from tableauserverclient.server import (
     CSVRequestOptions,
     ExcelRequestOptions,
@@ -76,6 +94,7 @@ from tableauserverclient.server import (
 )
 
 __all__ = [
+    "AddResponse",
     "BackgroundJobItem",
     "CollectionItem",
     "ColumnItem",
@@ -96,13 +115,24 @@ __all__ = [
     "FailedSignInError",
     "FavoriteItem",
     "FileuploadItem",
+    "FilePath",
+    "FileObject",
+    "FileObjectR",
+    "FileObjectW",
     "Filter",
     "FlowItem",
     "FlowRunItem",
     "get_versions",
     "GroupItem",
     "GroupSetItem",
+    "HasIdpConfigurationID",
     "HourlyInterval",
+    "HyperAction",
+    "HyperActionCondition",
+    "HyperActionRow",
+    "HyperActionTable",
+    "IDPAttributes",
+    "IDPProperty",
     "ImageRequestOptions",
     "IntervalItem",
     "JobItem",
@@ -122,6 +152,9 @@ __all__ = [
     "Permission",
     "PermissionsRule",
     "PersonalAccessTokenAuth",
+    "PathOrFile",
+    "PathOrFileR",
+    "PathOrFileW",
     "ProjectItem",
     "RequestOptions",
     "Resource",

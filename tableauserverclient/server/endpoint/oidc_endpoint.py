@@ -1,24 +1,13 @@
-from typing import Protocol, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING
 from tableauserverclient.models.oidc_item import SiteOIDCConfiguration
 from tableauserverclient.server.endpoint import Endpoint
 from tableauserverclient.server.request_factory import RequestFactory
 from tableauserverclient.server.endpoint.endpoint import api
+from tableauserverclient.types import HasIdpConfigurationID
 
 if TYPE_CHECKING:
     from tableauserverclient.models.site_item import SiteAuthConfiguration
     from tableauserverclient.server.server import Server
-
-
-class IDPAttributes(Protocol):
-    idp_configuration_id: str
-
-
-class IDPProperty(Protocol):
-    @property
-    def idp_configuration_id(self) -> str: ...
-
-
-HasIdpConfigurationID = str | IDPAttributes
 
 
 class OIDC(Endpoint):
