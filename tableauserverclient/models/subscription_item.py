@@ -34,10 +34,12 @@ class SubscriptionItem:
         </schedule>
 
     The reliable Cloud-vs-Server discriminator on a parsed ``SubscriptionItem``
-    is ``schedule.interval_item is not None`` (Cloud inlines the interval
-    detail; Server only sends an ``id``/``name`` reference and this field will
-    always be ``None`` there). ``schedule.id is None`` also identifies Cloud
-    but only in combination with ``schedule is not None`` -- see below.
+    is ``schedule is not None and schedule.id is None``. Cloud inlines the
+    ``<schedule>`` element **without** an ``id`` attribute; Server always sends
+    an ``id``/``name`` reference. ``schedule.interval_item`` is **not** a safe
+    discriminator: Cloud responses may omit ``<frequencyDetails>`` entirely
+    (leaving ``interval_item`` as ``None``), and malformed intervals are
+    intentionally downgraded to ``None`` during parsing.
 
     Attributes
     ----------
@@ -58,7 +60,7 @@ class SubscriptionItem:
         child at all -- always guard before dereferencing.
     """
 
-    def __init__(self, subject: str, schedule_id: str, user_id: str, target: "Target") -> None:
+    def __init__(self, subject: str, schedule_id: Optional[str], user_id: str, target: "Target") -> None:
         self._id = None
         self.attach_image = True
         self.attach_pdf = False

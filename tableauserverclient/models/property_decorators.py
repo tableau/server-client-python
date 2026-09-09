@@ -120,17 +120,24 @@ def property_matches(regex_to_match, error):
 
 
 def property_is_datetime(func):
-    """Takes the following datetime format and turns it into a datetime object:
+    """Coerces the incoming value into a timezone-aware ``datetime`` object.
 
-    2016-08-18T18:25:36Z
+    ``parse_datetime`` (used on the read side) accepts two wire formats:
 
-    Because we return everything with Z as the timezone, we assume everything is in UTC and create
-    a timezone aware datetime.
+    * trailing-``Z`` UTC, e.g. ``2016-08-18T18:25:36Z``
+    * explicit ``%z`` offset, e.g. ``2026-09-01T10:00:00-0700`` (produced by
+      Tableau Cloud's inlined ``<schedule nextRunAt=...>``)
 
-    Setter-side strictness lives here: ``parse_datetime`` is deliberately lenient
-    on the server-response side (unparseable -> ``None``), so bad user input would
-    otherwise silently clear the attribute. We reject it here instead so misuse
-    surfaces at the assignment site with the offending value in the message.
+    The returned ``datetime`` preserves the offset that was on the wire; it is
+    always offset-aware but is only guaranteed to be UTC when the input used
+    the trailing-``Z`` form.
+
+    Setter-side strictness lives here: ``parse_datetime`` is deliberately
+    lenient on the server-response side (unparseable -> ``None``). This
+    decorator instead raises ``ValueError`` when the input is a string that
+    matches neither format, so bad user input surfaces at the assignment site
+    with the offending value in the message rather than silently clearing the
+    attribute.
     """
 
     @wraps(func)
