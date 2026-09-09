@@ -35,11 +35,16 @@ TABLEAU_CLOUD_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 def parse_datetime(date):
     """Parse a Tableau API datetime string into a timezone-aware datetime, or ``None``.
 
-    Handles both the Server ``...Z`` form and the Cloud ``...+/-HHMM`` form. Returns
-    ``None`` for both absent input (``None``) and unparseable non-empty input --
-    matching the pre-Cloud lenient contract so a malformed server response cannot
-    crash a page-through of unrelated data. User-supplied setter values are
-    validated at the property-decorator boundary (see
+    Accepts both the Server ``...Z`` form and the Cloud ``...+/-HHMM`` form on
+    the wire. The returned ``datetime`` is **always tz-aware and always UTC**
+    (``tzinfo == utc``) regardless of which wire form was parsed -- the Cloud
+    branch converts the wire's numeric offset to UTC via ``astimezone`` so
+    callers see a single uniform tzinfo across Server and Cloud responses.
+
+    Returns ``None`` for both absent input (``None``) and unparseable non-empty
+    input -- matching the pre-Cloud lenient contract so a malformed server
+    response cannot crash a page-through of unrelated data. User-supplied
+    setter values are validated at the property-decorator boundary (see
     :func:`tableauserverclient.models.property_decorators.property_is_datetime`).
     """
     if date is None:
@@ -49,7 +54,9 @@ def parse_datetime(date):
     except ValueError:
         pass
     try:
-        return datetime.datetime.strptime(date, TABLEAU_CLOUD_DATE_FORMAT)
+        # strptime %z produces a datetime with the wire's offset; convert to UTC so
+        # callers get a single uniform tzinfo across Server (already UTC) and Cloud.
+        return datetime.datetime.strptime(date, TABLEAU_CLOUD_DATE_FORMAT).astimezone(utc)
     except ValueError:
         return None
 

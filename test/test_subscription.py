@@ -157,13 +157,16 @@ def test_get_subscriptions_cloud_inline_schedule(server: TSC.Server) -> None:
     assert subscription.schedule.next_run_at is not None
     assert 2026 == subscription.schedule.next_run_at.year
     assert 8 == subscription.schedule.next_run_at.month
+    # 16:55 -07:00 on the wire -> 23:55 UTC after normalisation; wall date is unchanged.
     assert 29 == subscription.schedule.next_run_at.day
+    assert 23 == subscription.schedule.next_run_at.hour
+    assert 55 == subscription.schedule.next_run_at.minute
 
-    # The Cloud path deliberately preserves the ``-0700`` offset that came off
-    # the wire rather than normalising to UTC. A future regression to
-    # ``.replace(tzinfo=utc)`` after ``strptime`` would silently shift the
-    # instant by seven hours -- lock the non-UTC offset in here.
-    assert timedelta(hours=-7) == subscription.schedule.next_run_at.utcoffset()
+    # parse_datetime normalises Cloud's numeric wire offset to UTC so callers
+    # see a single uniform tzinfo across Server (already ``Z``) and Cloud
+    # (converted from ``-0700``). Locking that in guards against a future
+    # regression that would drop the ``astimezone(utc)`` on the Cloud branch.
+    assert timedelta(0) == subscription.schedule.next_run_at.utcoffset()
 
     # <frequencyDetails> nested <intervals> parsed into a DailyInterval carrying
     # the (hours, weekDay) pairs from the XML.

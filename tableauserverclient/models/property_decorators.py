@@ -128,9 +128,10 @@ def property_is_datetime(func):
     * explicit ``%z`` offset, e.g. ``2026-09-01T10:00:00-0700`` (produced by
       Tableau Cloud's inlined ``<schedule nextRunAt=...>``)
 
-    The returned ``datetime`` preserves the offset that was on the wire; it is
-    always offset-aware but is only guaranteed to be UTC when the input used
-    the trailing-``Z`` form.
+    Regardless of which wire form was accepted, the resulting ``datetime`` is
+    always tz-aware with ``tzinfo == utc`` -- the Cloud branch converts the
+    wire's numeric offset to UTC on parse so downstream callers see one
+    uniform tzinfo across Server and Cloud responses.
 
     Setter-side strictness lives here: ``parse_datetime`` is deliberately
     lenient on the server-response side (unparseable -> ``None``). This

@@ -9,8 +9,9 @@ contract is deliberately lenient on the read side and strict on the write side:
 
 * Absent input (``None``) -> ``None``.
 * Well-formed Server form -> UTC-aware ``datetime``.
-* Well-formed Cloud form -> aware ``datetime`` with the on-the-wire offset
-  preserved (**not** normalised to UTC).
+* Well-formed Cloud form -> UTC-aware ``datetime``; the wire's numeric offset
+  is converted to UTC on parse so every returned ``datetime`` carries the same
+  ``tzinfo`` regardless of which wire form arrived.
 * Unparseable non-empty input -> ``None``. A malformed server response should
   not crash a page-through of unrelated data. This matches the pre-Cloud
   behaviour.
@@ -60,14 +61,21 @@ def test_parse_datetime_server_z_form():
     assert timedelta(0) == result.utcoffset()
 
 
-def test_parse_datetime_cloud_offset_form_preserved():
+def test_parse_datetime_cloud_offset_form_normalised_to_utc():
     result = parse_datetime("2026-08-29T16:55:00-0700")
     assert result is not None
-    # Cloud offsets are deliberately kept -- a future .replace(tzinfo=utc)
-    # after strptime would silently shift the instant. Lock that in.
-    assert timedelta(hours=-7) == result.utcoffset()
+    # The Cloud branch normalises to UTC via astimezone(utc) so every parsed
+    # datetime carries the same tzinfo regardless of wire form. A future
+    # regression that drops the astimezone would leave tzinfo == timezone(-7:00)
+    # and break callers doing .strftime("...Z") or == against a UTC constant.
+    assert timedelta(0) == result.utcoffset()
+    assert result.tzinfo is utc
+    # 16:55 -07:00 == 23:55 UTC on the same wall date.
     assert 2026 == result.year
-    assert 16 == result.hour
+    assert 8 == result.month
+    assert 29 == result.day
+    assert 23 == result.hour
+    assert 55 == result.minute
 
 
 def test_parse_datetime_cloud_offset_with_colon():
@@ -129,7 +137,10 @@ def test_property_is_datetime_accepts_valid_cloud_string():
     holder = _DateHolder()
     holder.created_at = "2026-08-29T16:55:00-0700"
     assert holder._value is not None
-    assert timedelta(hours=-7) == holder._value.utcoffset()
+    # parse_datetime normalises Cloud offsets to UTC on the read side, and the
+    # property decorator funnels through parse_datetime for string input.
+    assert timedelta(0) == holder._value.utcoffset()
+    assert holder._value.tzinfo is utc
 
 
 def test_property_is_datetime_accepts_datetime_instance():
