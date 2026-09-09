@@ -37,6 +37,7 @@ from tableauserverclient.server.query import QuerySet
 from tableauserverclient import helpers, get_versions
 
 from tableauserverclient.helpers.logging import logger
+from tableauserverclient.types import PathOrFileW
 
 if TYPE_CHECKING:
     from tableauserverclient.server.server import Server
@@ -329,10 +330,6 @@ def parameter_added_in(**params: str) -> Callable[[Callable[Concatenate[E, P], R
 T = TypeVar("T")
 
 _io_types_w = (io.BytesIO, io.BufferedWriter)
-
-FilePath = str | os.PathLike
-FileObjectW = io.BufferedWriter | io.BytesIO
-PathOrFileW = FilePath | FileObjectW
 
 
 class DownloadableMixin:

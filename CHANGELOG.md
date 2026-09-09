@@ -5,6 +5,12 @@
   hierarchy path (e.g. `"Marketing/Q1 Reports"`). The walk is performed level by
   level using the REST API name filter, so a path with *n* components issues *n*
   requests. Returns the matching `ProjectItem` or `None` if no project is found.
+* Consolidated public typing surface under `tableauserverclient.types` and
+  exported it at the top level. The following names are now stable public API
+  for downstream type checkers: `HyperAction`, `HyperActionCondition`,
+  `HyperActionRow`, `HyperActionTable`, `FilePath`, `FileObjectR`,
+  `FileObjectW`, `PathOrFileR`, `PathOrFileW`, `AddResponse`,
+  `HasIdpConfigurationID`.
 
 ## 0.18.0 (6 April 2022)    
 * Switched to using defused_xml for xml attack protection
