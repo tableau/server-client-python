@@ -1,6 +1,16 @@
 
 ## Unreleased
 
+* Security: `UserItem.CSVImport` no longer logs the password column when
+  validating a user-import CSV file. Previously, `validate_file_for_import`
+  emitted the first four characters of each raw row at INFO (which could
+  include the beginning of the password when the username was short), and the
+  full raw row was pushed into the returned `invalid_lines` list unmasked; the
+  per-column log inside `_validate_import_line_or_throw` also wrote the
+  password value at DEBUG. Row-level logging is now DEBUG-only and logs the
+  username instead of a raw slice, and the password column is replaced with
+  `***` before any line reaches a log handler or the invalid-lines list.
+  Fixes #1829.
 * Bumped the urllib3 floor to 2.6.3 to pick up the fix for CVE-2026-21441
   (GHSA-38jv-5279-wg99, 8.9 High): urllib3's streaming decompression
   safeguards were bypassed when HTTP redirects were followed. TSC's manual
