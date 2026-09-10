@@ -12,6 +12,17 @@
   hierarchy path (e.g. `"Marketing/Q1 Reports"`). The walk is performed level by
   level using the REST API name filter, so a path with *n* components issues *n*
   requests. Returns the matching `ProjectItem` or `None` if no project is found.
+* **Behavior change:** `TableauItem` is now a structural, `@runtime_checkable`
+  Protocol rather than a `Union` of nine concrete item classes.  `isinstance`
+  semantics have shifted from *nominal* to *structural* matching: previously,
+  `isinstance(x, TableauItem)` returned `True` only for actual instances of the
+  listed classes (`DatasourceItem`, `FlowItem`, `MetricItem`, `ProjectItem`,
+  `ViewItem`, `WorkbookItem`, `VirtualConnectionItem`, `DatabaseItem`,
+  `TableItem`); it now returns `True` for *any* object that exposes the
+  required `id` and `name` attributes, regardless of its class.  Mypy checks
+  against `TableauItem` widen from that closed set to any
+  structurally-compatible type.  If you relied on the closed nominal match as
+  a guard, add an explicit concrete-type check instead.
 * Preserve HTTP method and body across 3xx redirects. Previously `requests`
   followed 301/302/303 by converting POST to GET and dropping the body, so
   endpoints like `users.add`, `workbooks.publish`, and any write hitting a

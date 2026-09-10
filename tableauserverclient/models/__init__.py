@@ -1,3 +1,4 @@
+from tableauserverclient.models.base_item import TableauItem, ContentItem, OwnedItem, TaggableItem
 from tableauserverclient.models.collection_item import CollectionItem
 from tableauserverclient.models.column_item import ColumnItem
 from tableauserverclient.models.connection_credentials import ConnectionCredentials
@@ -43,7 +44,7 @@ from tableauserverclient.models.site_item import SiteItem, SiteAuthConfiguration
 from tableauserverclient.models.subscription_item import SubscriptionItem
 from tableauserverclient.models.table_item import TableItem
 from tableauserverclient.models.tableau_auth import Credentials, TableauAuth, PersonalAccessTokenAuth, JWTAuth
-from tableauserverclient.models.tableau_types import Resource, TableauItem, plural_type
+from tableauserverclient.models.tableau_types import Resource, plural_type
 from tableauserverclient.models.tag_item import TagItem
 from tableauserverclient.models.target import Target
 from tableauserverclient.models.task_item import TaskItem
@@ -55,6 +56,12 @@ from tableauserverclient.models.workbook_item import WorkbookItem
 from tableauserverclient.models.extract_item import ExtractItem
 
 __all__ = [
+    # Structural protocols (base_item.py)
+    "TableauItem",
+    "ContentItem",
+    "OwnedItem",
+    "TaggableItem",
+    # Concrete model classes (alphabetical)
     "CollectionItem",
     "ColumnItem",
     "ConnectionCredentials",
@@ -93,14 +100,12 @@ __all__ = [
     "ServerInfoItem",
     "SiteAuthConfiguration",
     "SiteItem",
-    "SiteOIDCConfiguration",
     "SubscriptionItem",
     "TableItem",
     "TableauAuth",
     "PersonalAccessTokenAuth",
     "JWTAuth",
     "Resource",
-    "TableauItem",
     "plural_type",
     "TagItem",
     "Target",
