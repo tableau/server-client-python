@@ -66,6 +66,9 @@ def test_get(server: TSC.Server) -> None:
     assert "2016-09-13T11:00:32Z" == format_datetime(extract.updated_at)
     assert "Extract" == extract.schedule_type
     assert "2016-09-14T11:00:00Z" == format_datetime(extract.next_run_at)
+    # The standard /schedules endpoint has always sent frequency=... on <schedule>;
+    # ScheduleItem now surfaces it as a property. Lock that in.
+    assert "Weekly" == extract.frequency
 
     assert "bcb79d07-6e47-472f-8a65-d7f51f40c36c" == subscription.id
     assert "Saturday night" == subscription.name
@@ -75,6 +78,7 @@ def test_get(server: TSC.Server) -> None:
     assert "2016-09-12T16:39:38Z" == format_datetime(subscription.updated_at)
     assert "Subscription" == subscription.schedule_type
     assert "2016-09-18T06:00:00Z" == format_datetime(subscription.next_run_at)
+    assert "Weekly" == subscription.frequency
 
     assert "f456e8f2-aeb2-4a8e-b823-00b6f08640f0" == flow.id
     assert "First of the month 1:00AM" == flow.name
@@ -84,6 +88,7 @@ def test_get(server: TSC.Server) -> None:
     assert "2019-02-19T18:55:51Z" == format_datetime(flow.updated_at)
     assert "Flow" == flow.schedule_type
     assert "2019-03-01T09:00:00Z" == format_datetime(flow.next_run_at)
+    assert "Monthly" == flow.frequency
 
     assert "3cfa4713-ce7c-4fa7-aa2e-f752bfc8dd04" == system.id
     assert "First of the month 2:00AM" == system.name
@@ -93,6 +98,7 @@ def test_get(server: TSC.Server) -> None:
     assert "2019-02-19T18:55:51Z" == format_datetime(system.updated_at)
     assert "System" == system.schedule_type
     assert "2019-03-01T09:00:00Z" == format_datetime(system.next_run_at)
+    assert "Monthly" == system.frequency
 
 
 def test_get_empty(server: TSC.Server) -> None:

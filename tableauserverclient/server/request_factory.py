@@ -1342,7 +1342,11 @@ class SubscriptionRequest:
         if subscription_item.send_if_view_empty is not None:
             content_element.attrib["sendIfViewEmpty"] = str(subscription_item.send_if_view_empty).lower()
 
-        # Schedule element
+        # Schedule element -- create_req is the Server workflow (Cloud
+        # subscriptions come with an inlined schedule and no id, and are not
+        # created via this path), so schedule_id is required here.
+        if subscription_item.schedule_id is None:
+            raise ValueError("schedule_id is required to create a subscription")
         schedule_element = ET.SubElement(subscription_element, "schedule")
         schedule_element.attrib["id"] = subscription_item.schedule_id
 
