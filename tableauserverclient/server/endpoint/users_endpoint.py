@@ -527,7 +527,7 @@ class Users(QuerysetEndpoint[UserItem]):
         warnings.warn("This method is deprecated, use bulk_add instead", DeprecationWarning)
         created = []
         failed = []
-        if not filepath.find("csv"):
+        if "csv" not in filepath:
             raise ValueError("Only csv files are accepted")
 
         with open(filepath) as csv_file:
@@ -536,11 +536,9 @@ class Users(QuerysetEndpoint[UserItem]):
             while line and line != "":
                 user: UserItem = UserItem.CSVImport.create_user_from_line(line)
                 try:
-                    print(user)
                     result = self.add(user)
                     created.append(result)
                 except ServerResponseError as serverError:
-                    print("failed")
                     failed.append((user, serverError))
                 line = csv_file.readline()
         return created, failed
@@ -751,6 +749,7 @@ def create_users_csv(users: Iterable[UserItem]) -> bytes:
     - Admin Level
     - Publish capability
     - Email
+    - Auth setting
 
     Parameters
     ----------
@@ -765,22 +764,7 @@ def create_users_csv(users: Iterable[UserItem]) -> bytes:
     with io.StringIO() as output:
         writer = csv.writer(output, quoting=csv.QUOTE_MINIMAL)
         for user in users:
-            site_role = user.site_role or "Unlicensed"
-            if site_role == "ServerAdministrator":
-                license = "Creator"
-                admin_level = "System"
-            elif site_role.startswith("SiteAdministrator"):
-                admin_level = "Site"
-                license = site_role.replace("SiteAdministrator", "")
-            else:
-                license = site_role
-                admin_level = ""
-
-            if any(x in site_role for x in ("Creator", "Admin", "Publish")):
-                publish = 1
-            else:
-                publish = 0
-
+            license, admin_level, publish = UserItem.CSVImport._decompose_site_role(user.site_role or "Unlicensed")
             writer.writerow(
                 (
                     f"{user.domain_name}\\{user.name}" if user.domain_name else user.name,
@@ -790,6 +774,7 @@ def create_users_csv(users: Iterable[UserItem]) -> bytes:
                     admin_level,
                     publish,
                     user.email,
+                    user.auth_setting or "",
                 )
             )
         output.seek(0)

@@ -18,7 +18,7 @@ jobs:
         with:
           stale-issue-label: 'stale'
           stale-pr-label: 'stale'
-          exempt-issue-labels: 'good first issue,Design Proposal,in-progress'
+          exempt-issue-labels: 'good first issue,Design Proposal,in-progress,Server-Side Enhancement'
           exempt-pr-labels: 'in-progress'
 
           days-before-issue-stale: 60
