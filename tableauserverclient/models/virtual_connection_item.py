@@ -45,6 +45,18 @@ class VirtualConnectionItem:
     def _set_permissions(self, permissions):
         self._permissions = permissions
 
+    def _stamp_id_from_request(self, vconn_id: str) -> None:
+        """Populate ``_id`` from the request path when the server response
+        omits it. Workaround for an internal server-side ticket: the
+        response builder for ``GET /virtualConnections/{id}`` does not
+        emit an ``id`` attribute on the ``<virtualConnection>`` element,
+        so downstream calls that need ``self.id`` (add_tags, delete_tags,
+        update_tags, add_permissions, ...) would fail without this
+        backfill. Remove once the server-side fix ships.
+        """
+        if self._id is None:
+            self._id = vconn_id
+
     @property
     def id(self) -> str | None:
         return self._id

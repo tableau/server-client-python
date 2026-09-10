@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from xml.etree.ElementTree import fromstring
 
 import pytest
 import requests_mock
@@ -282,11 +283,12 @@ def test_update_tags_diff_round_trip(server: TSC.Server) -> None:
     """
     server.version = "3.30"  # update_tags requires 3.30 (see @api decorator)
     vconn_id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
+    tags_url = f"{server.virtual_connections.baseurl}/{vconn_id}/tags"
     add_tags_response = VIRTUAL_CONNECTION_ADD_TAGS.read_text()
     with requests_mock.mock() as m:
-        m.put(f"{server.virtual_connections.baseurl}/{vconn_id}/tags", text=add_tags_response)
-        m.delete(f"{server.virtual_connections.baseurl}/{vconn_id}/tags/b", status_code=204)
-        m.delete(f"{server.virtual_connections.baseurl}/{vconn_id}/tags/d", status_code=204)
+        m.put(tags_url, text=add_tags_response)
+        m.delete(f"{tags_url}/b", status_code=204)
+        m.delete(f"{tags_url}/d", status_code=204)
 
         vconn = VirtualConnectionItem("vconn")
         vconn._id = vconn_id
@@ -296,6 +298,30 @@ def test_update_tags_diff_round_trip(server: TSC.Server) -> None:
 
         # add PUT + 2 deletes = 3 calls
         assert m.call_count == 3, m.request_history
+
+        # TaggingMixin.update_tags does DELETEs first, then PUT for the
+        # add-set. Assert the two DELETEs target /tags/b and /tags/d
+        # (set-iteration order isn't guaranteed, so compare as a set)
+        # and the PUT is last.
+        delete_calls = [r for r in m.request_history if r.method == "DELETE"]
+        put_calls = [r for r in m.request_history if r.method == "PUT"]
+        assert len(delete_calls) == 2
+        assert len(put_calls) == 1
+        assert {r.url for r in delete_calls} == {f"{tags_url}/b", f"{tags_url}/d"}
+        assert m.request_history[-1].method == "PUT"
+        assert m.request_history[-1].url == tags_url
+
+        # The PUT body must carry exactly the add-set {"e"}. This is the
+        # test that catches the class of regression Copilot flagged as a
+        # docstring lie ("PUT with {a,c,e}") -- if update_tags started
+        # sending the full target set instead of the diff, or dropped the
+        # add-set entirely, the labels below would change.
+        put_body = put_calls[0].text
+        assert put_body is not None
+        root = fromstring(put_body)
+        # <tsRequest><tags><tag label="..."/>...</tags></tsRequest> - no namespace
+        labels = {tag.get("label") for tag in root.findall("./tags/tag")}
+        assert labels == {"e"}, put_body
 
 
 def test_add_permissions(server: TSC.Server) -> None:

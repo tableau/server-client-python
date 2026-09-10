@@ -185,11 +185,10 @@ class VirtualConnections(QuerysetEndpoint[VirtualConnectionItem], TaggingMixin):
         server_response = self.get_request(url)
         result = VirtualConnectionItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         # The Get Virtual Connection response omits the `id` attribute on the
-        # <virtualConnection> element (server-side response builder never calls
-        # setId). Stamp it back from the request path so downstream calls that
-        # need result.id (add_tags, delete_tags, update_tags) work.
-        if result._id is None:
-            result._id = vconn_id
+        # <virtualConnection> element. Backfill it from the request path so
+        # downstream calls (add_tags, delete_tags, update_tags, ...) work.
+        # See VirtualConnectionItem._stamp_id_from_request for the ticket ref.
+        result._stamp_id_from_request(vconn_id)
         return result
 
     @api(version="3.23")
