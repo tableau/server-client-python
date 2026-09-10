@@ -269,6 +269,60 @@ def test_http_to_https_upgrade_promotes_stored_server_address(server: TSC.Server
     assert server._server_address == "https://test"
 
 
+def test_http_to_https_upgrade_preserves_explicit_target_port(server: TSC.Server) -> None:
+    # Enterprise on-prem installs commonly run HTTPS on a non-default port
+    # (e.g. 8443). If the redirect target carries an explicit port, the
+    # promoted server address must keep it -- otherwise every subsequent
+    # request goes to :443 and fails.
+    assert server._server_address == "http://test"
+    xml = _sign_in_xml()
+    with requests_mock.mock() as m:
+        m.post(
+            server.auth.baseurl + "/signin",
+            status_code=301,
+            headers={"Location": "https://test:8443/api/3.6/auth/signin"},
+        )
+        m.post("https://test:8443/api/3.6/auth/signin", text=xml)
+        server.auth.sign_in(TSC.TableauAuth("u", "p"))
+    assert server._server_address == "https://test:8443"
+
+
+def test_http_to_https_upgrade_normalizes_default_ports() -> None:
+    # http://host:80 -> https://host:443 with both ports at their scheme
+    # defaults should collapse to "https://host" (no port suffix), matching
+    # how a user would type it.
+    s = TSC.Server("http://test:80", False)
+    assert s._server_address == "http://test:80"
+    xml = _sign_in_xml()
+    with requests_mock.mock() as m:
+        m.post(
+            s.auth.baseurl + "/signin",
+            status_code=301,
+            headers={"Location": "https://test:443/api/3.6/auth/signin"},
+        )
+        m.post("https://test:443/api/3.6/auth/signin", text=xml)
+        s.auth.sign_in(TSC.TableauAuth("u", "p"))
+    assert s._server_address == "https://test"
+
+
+def test_http_to_https_upgrade_does_not_promote_to_different_host_with_port(server: TSC.Server) -> None:
+    # Cross-host redirect: even to an https:8443 endpoint, do NOT rewrite
+    # the stored server address. Same non-promotion contract as the
+    # port-less different-host case; guards against a scenario where the
+    # port-preserving fix accidentally widens the same-host check.
+    assert server._server_address == "http://test"
+    xml = _sign_in_xml()
+    with requests_mock.mock() as m:
+        m.post(
+            server.auth.baseurl + "/signin",
+            status_code=301,
+            headers={"Location": "https://other-host:8443/api/3.6/auth/signin"},
+        )
+        m.post("https://other-host:8443/api/3.6/auth/signin", text=xml)
+        server.auth.sign_in(TSC.TableauAuth("u", "p"))
+    assert server._server_address == "http://test"
+
+
 def test_http_to_https_upgrade_does_not_promote_on_different_host(server: TSC.Server) -> None:
     # If the redirect target is on a different host, do NOT rewrite the stored
     # server address -- the redirect might be to a completely unrelated server

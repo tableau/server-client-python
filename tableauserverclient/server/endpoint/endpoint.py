@@ -254,7 +254,15 @@ class Endpoint:
                         return ((parsed.hostname or "").lower(), parsed.port or default_http_port)
 
                     if old_parsed.scheme == "http" and _hostport(old_parsed) == _hostport(current_parsed):
-                        new_address = "https://" + old_address[len("http://") :]
+                        # Build new_address from the redirect target's netloc so the
+                        # target's port survives. Stripping "http://" off old_address
+                        # (its predecessor) silently dropped the target port and
+                        # broke enterprise on-prem deployments that run HTTPS on a
+                        # non-default port (e.g. 8443). Normalize an explicit 443
+                        # away since it is the HTTPS default.
+                        next_port = next_parsed.port
+                        port_suffix = f":{next_port}" if next_port and next_port != 443 else ""
+                        new_address = f"https://{next_host}{port_suffix}"
                         self.parent_srv._server_address = new_address
                         logger.info(f"Server redirected to HTTPS; updated server address to {new_address}")
             # Auth-material policy: the request `parameters` (headers, body,
