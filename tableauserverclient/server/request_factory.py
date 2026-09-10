@@ -1351,8 +1351,17 @@ class SubscriptionRequest:
 
         # Schedule element. schedule_id can be None on items parsed from
         # inline-schedule responses; subscriptions.create() guards against
-        # that before we get here, so the value is non-None at this point.
-        assert subscription_item.schedule_id is not None
+        # that before we get here. Re-check explicitly with a raise (not
+        # assert) so callers importing RequestFactory directly get an
+        # actionable error rather than the TypeError ElementTree raises when
+        # attrib["id"] is set to None, and so python -O doesn't strip the
+        # check entirely.
+        if subscription_item.schedule_id is None:
+            raise ValueError(
+                "schedule_id is required to build a subscription create "
+                "request; for on-extract-refresh subscriptions use "
+                "SubscriptionItem.on_extract_refresh(...)"
+            )
         schedule_element = ET.SubElement(subscription_element, "schedule")
         schedule_element.attrib["id"] = subscription_item.schedule_id
 

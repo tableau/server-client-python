@@ -71,12 +71,23 @@ class Subscriptions(Endpoint):
         if not subscription_item.id:
             error = "Subscription item missing ID. Subscription must be retrieved from server first."
             raise MissingRequiredFieldError(error)
-        if not subscription_item.schedule_id:
-            # A subscription round-tripped from an inline-schedule response
-            # (Cloud/TOL) has schedule_id=None. Updating it in that state
-            # sends <schedule/> with no id and hits the same wire-layer error
-            # that create() guards against. See tableau/server-client-python#1658.
-            raise ValueError("schedule_id is required to update a subscription")
+        # Cloud subscriptions parsed from a GET response arrive with
+        # schedule_id=None because the schedule is inlined without an id
+        # attribute (see SubscriptionItem._parse_element). Fall back to the
+        # parsed schedule object's id so fetch-then-update -- the safe pattern
+        # the refresh_extract_triggered docstring recommends -- works on Cloud.
+        schedule_id = subscription_item.schedule_id
+        if schedule_id is None and subscription_item.schedule is not None:
+            schedule_id = subscription_item.schedule.id
+            if schedule_id is not None:
+                subscription_item.schedule_id = schedule_id
+        if not schedule_id:
+            raise ValueError(
+                "schedule_id is required to update a subscription. On Tableau "
+                "Cloud, subscriptions parsed from a GET response may not carry "
+                "a schedule id; if you constructed this SubscriptionItem "
+                "manually, set schedule_id explicitly."
+            )
         url = f"{self.baseurl}/{subscription_item.id}"
         update_req = RequestFactory.Subscription.update_req(subscription_item)
         server_response = self.put_request(url, update_req)
