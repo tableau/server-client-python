@@ -222,6 +222,45 @@ def test_password_with_comma_partially_masks(caplog: pytest.LogCaptureFixture) -
     assert _mask_present(caplog.records)
 
 
+def test_password_not_in_validate_attribute_value_error(
+    caplog: pytest.LogCaptureFixture, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Regression test: _validate_import_line_or_throw must never call
+    _validate_attribute_value for the PASS column. Today PASS has an empty
+    allowlist so the validator returns early, but if a future PR adds
+    password-format checks (length, complexity, banned chars) the raw password
+    would leak through ValueError("Invalid value {item} for {column_type}").
+    Guarantee the invariant at the caller so it doesn't depend on the allowlist
+    staying empty."""
+    secret = "hunter2SUPERSECRET"
+    line = f"jsmith,{secret},John Smith,creator,site,yes,jsmith@example.com"
+
+    # Spy that records every call and simulates a future PR that added a
+    # non-empty allowlist to PASS (any value not in the allowlist raises).
+    calls: list[tuple] = []
+    original = TSC.UserItem.CSVImport._validate_attribute_value
+
+    def spy(item: str, possible_values: list, column_type) -> None:
+        calls.append((item, column_type))
+        if column_type == TSC.UserItem.CSVImport.ColumnType.PASS:
+            # Simulate a hypothetical password-format check.
+            raise ValueError(f"Invalid value {item} for {column_type}")
+        return original(item, possible_values, column_type)
+
+    monkeypatch.setattr(TSC.UserItem.CSVImport, "_validate_attribute_value", spy)
+
+    with caplog.at_level(logging.DEBUG, logger=logger.name):
+        # If PASS were passed to the validator, the spy would raise with the
+        # raw secret embedded in the ValueError. It must not raise.
+        TSC.UserItem.CSVImport._validate_import_line_or_throw(line, logger)
+
+    pass_calls = [c for c in calls if c[1] == TSC.UserItem.CSVImport.ColumnType.PASS]
+    assert not pass_calls, f"_validate_attribute_value was called for PASS: {pass_calls!r}"
+
+    combined = "\n".join(record.getMessage() for record in caplog.records)
+    assert secret not in combined, f"Password leaked into logs: {combined!r}"
+
+
 def test_redact_password_column_helper() -> None:
     """Unit-level coverage for _redact_password_column across newline and edge cases."""
     redact = TSC.UserItem.CSVImport._redact_password_column

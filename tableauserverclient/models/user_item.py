@@ -605,7 +605,12 @@ class UserItem:
                 # Mask the password column so it never reaches log handlers.
                 safe_value = "***" if column == UserItem.CSVImport.ColumnType.PASS else value
                 logger.debug(f"column {column.name}: {safe_value}")
-                if not skip_validation:
+                # Never call _validate_attribute_value for PASS: its ValueError
+                # embeds the raw value, and a future PR that adds password-format
+                # checks to PASS's allowlist would leak the password through the
+                # exception message. Belt-and-braces even though PASS's allowlist
+                # is currently empty.
+                if not skip_validation and column != UserItem.CSVImport.ColumnType.PASS:
                     UserItem.CSVImport._validate_attribute_value(value, valid, column)
 
         # Given a restricted set of possible values, confirm the item is in that set
