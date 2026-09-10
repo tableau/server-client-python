@@ -254,11 +254,26 @@ class Users(QuerysetEndpoint[UserItem]):
         To add a new user to the site you need to first create a new user_item
         (from UserItem class). When you create a new user, you specify the name
         of the user and their site role. For Tableau Cloud, you also specify
-        the auth_setting attribute in your request. When you add user to
-        Tableau Cloud, the name of the user must be the email address that is
-        used to sign in to Tableau Cloud. After you add a user, Tableau Cloud
-        sends the user an email invitation. The user can click the link in the
-        invitation to sign in and update their full name and password.
+        the auth_setting attribute in your request. After you add a user, Tableau
+        Cloud sends the user an email invitation. The user can click the link in
+        the invitation to sign in and update their full name and password.
+
+        The value of ``user_item.name`` is the username the server uses to
+        authenticate the user, NOT the person's display name. Its required
+        format depends on the site's authentication scheme:
+
+        - Tableau Cloud: the user's email address (e.g. ``user@example.com``),
+          which is also what they sign in with.
+        - Local authentication (on-prem Tableau Server): any username unique to
+          the site (e.g. ``jsmith``).
+        - Active Directory: the fully-qualified AD username, either
+          ``SAMAccountName@FullyQualifiedDomain`` (e.g.
+          ``jsmith@corp.example.com``) or the User Principal Name (UPN) if AD
+          is configured to use UPNs. A bare ``SAMAccountName`` may not
+          resolve depending on how AD is configured.
+
+        Set the person's display name via ``user_item.fullname``; it is a
+        separate attribute.
 
         Parameters
         ----------
@@ -333,8 +348,15 @@ class Users(QuerysetEndpoint[UserItem]):
         >>> server = TSC.Server('https://SERVERURL')
         >>> # Login to the server
 
-        >>> new_user = TSC.UserItem(name='new_user', site_role=TSC.UserItem.Role.Unlicensed)
+        >>> # Tableau Cloud: name must be the sign-in email address
+        >>> new_user = TSC.UserItem(name='jsmith@example.com', site_role=TSC.UserItem.Role.Explorer)
+        >>> new_user.auth_setting = TSC.UserItem.Auth.TableauIDWithMFA
+        >>> new_user.fullname = 'Jane Smith'
         >>> new_user = server.users.add(new_user)
+
+        >>> # Active Directory-backed Tableau Server: name is SAMAccountName@Domain
+        >>> ad_user = TSC.UserItem(name='jsmith@corp.example.com', site_role=TSC.UserItem.Role.Viewer)
+        >>> ad_user = server.users.add(ad_user)
 
         """
         url = self.baseurl
