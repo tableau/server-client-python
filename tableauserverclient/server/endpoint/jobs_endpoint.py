@@ -1,5 +1,6 @@
 import logging
-from typing_extensions import Self, overload
+from typing import overload
+from typing_extensions import Self
 
 
 from tableauserverclient.models import JobItem, BackgroundJobItem, PaginationItem

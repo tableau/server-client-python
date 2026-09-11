@@ -1,12 +1,9 @@
 import xml.etree.ElementTree as ET
-from typing import Any, Callable, TypeVar, TYPE_CHECKING
+from typing import Any, Callable, Concatenate, ParamSpec, TypeVar, TYPE_CHECKING
 from collections.abc import Iterable
-
-from typing_extensions import ParamSpec
 
 from requests.packages.urllib3.fields import RequestField
 from requests.packages.urllib3.filepost import encode_multipart_formdata
-from typing_extensions import Concatenate
 
 from tableauserverclient.models import *
 
