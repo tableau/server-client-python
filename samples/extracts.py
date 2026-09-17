@@ -18,8 +18,11 @@ def main():
     parser.add_argument("--create", action="store_true")
     parser.add_argument("--delete", action="store_true")
     parser.add_argument("--refresh", action="store_true")
-    parser.add_argument("--workbook", required=False)
-    parser.add_argument("--datasource", required=False)
+    # --workbook / --datasource are mutually exclusive; if neither is passed we
+    # fall back to picking the first workbook on the site (see below).
+    target = parser.add_mutually_exclusive_group()
+    target.add_argument("--workbook")
+    target.add_argument("--datasource")
     args = parser.parse_args()
 
     resolve_credentials(args)
@@ -47,13 +50,17 @@ def main():
             print([workbook.name for workbook in all_workbooks])
 
             if all_workbooks:
-                # Pick one workbook from the list
-                wb = all_workbooks[3]
+                # Fall back to the first workbook on the site. For a real run,
+                # pass --workbook <id> for a workbook you know has an extract.
+                wb = all_workbooks[0]
 
         if args.create:
-            print("create extract on wb ", wb.name)
-            extract_job = server.workbooks.create_extract(wb, includeAll=True)
-            print(extract_job)
+            if wb is None:
+                print("no workbook selected to create an extract on")
+            else:
+                print(f"create extract on workbook {wb.name}")
+                extract_job = server.workbooks.create_extract(wb, includeAll=True)
+                print(extract_job)
 
         if args.refresh:
             extract_job = None
@@ -69,9 +76,12 @@ def main():
             print(extract_job)
 
         if args.delete:
-            print("delete extract on wb ", wb.name)
-            jj = server.workbooks.delete_extract(wb)
-            print(jj)
+            if wb is None:
+                print("no workbook selected to delete an extract from")
+            else:
+                print(f"delete extract on workbook {wb.name}")
+                jj = server.workbooks.delete_extract(wb)
+                print(jj)
 
 
 if __name__ == "__main__":

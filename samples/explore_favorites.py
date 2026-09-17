@@ -59,16 +59,22 @@ def main():
                 )
             )
 
-    server.favorites.delete_favorite_workbook(user, my_workbook)
-    print(f"Workbook deleted from favorites. Workbook Name: {my_workbook.name}, Workbook ID: {my_workbook.id}")
+        # Cleanup — delete the favorites we just created. Must stay inside the
+        # `with server.auth.sign_in(...)` block; a delete after sign-out fails
+        # with a not-signed-in error. Each guard mirrors the "add" check above
+        # so we do not try to delete a favorite we never created.
+        if my_workbook is not None:
+            server.favorites.delete_favorite_workbook(user, my_workbook)
+            print(f"Workbook deleted from favorites. Workbook Name: {my_workbook.name}, Workbook ID: {my_workbook.id}")
 
-    server.favorites.delete_favorite_view(user, my_view)
-    print(f"View deleted from favorites. View Name: {my_view.name}, View ID: {my_view.id}")
+        if my_view is not None:
+            server.favorites.delete_favorite_view(user, my_view)
+            print(f"View deleted from favorites. View Name: {my_view.name}, View ID: {my_view.id}")
 
-    if my_datasource is not None:
-        server.favorites.delete_favorite_datasource(user, my_datasource)
-        print(
-            "Datasource deleted from favorites. Datasource Name: {}, Datasource ID: {}".format(
-                my_datasource.name, my_datasource.id
+        if my_datasource is not None:
+            server.favorites.delete_favorite_datasource(user, my_datasource)
+            print(
+                "Datasource deleted from favorites. Datasource Name: {}, Datasource ID: {}".format(
+                    my_datasource.name, my_datasource.id
+                )
             )
-        )

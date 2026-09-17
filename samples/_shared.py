@@ -232,7 +232,17 @@ def build_auth(args: argparse.Namespace) -> TSC.TableauAuth | TSC.PersonalAccess
     Priority is JWT > PAT > username/password: a script that has a JWT
     minted for a specific session should never fall back to a longer-lived
     credential if the JWT-adjacent fields were left set by accident.
+
+    Also validates that `--server` is set. `resolve_credentials` skips prompting
+    in non-interactive contexts (CI, piped stdin), so a missing server URL would
+    otherwise reach `TSC.Server(None, ...)` and fail with a confusing error;
+    catching it here gives the caller a clear message.
     """
+    if not getattr(args, "server", None):
+        raise ValueError(
+            "No Tableau server URL. Provide --server, set the TABLEAU_SERVER env "
+            "var, or run in an interactive terminal to be prompted."
+        )
     site = getattr(args, "site", None) or ""
     if getattr(args, "jwt", None):
         return TSC.JWTAuth(args.jwt, site_id=site)

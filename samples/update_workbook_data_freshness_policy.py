@@ -16,7 +16,9 @@ from _shared import add_common_arguments, build_auth, resolve_credentials
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Creates sample schedules for each type of frequency.")
+    parser = argparse.ArgumentParser(
+        description="Update a workbook's data freshness policy across the supported schedule types."
+    )
     add_common_arguments(parser)
     # Options specific to this sample:
     # This sample has no additional options, yet. If you add some, please add them here
@@ -37,10 +39,12 @@ def main():
         print([workbook.name for workbook in all_workbooks])
 
         if all_workbooks:
-            # Pick 1 workbook that has live datasource connection.
-            # Assuming 1st workbook met the criteria for sample purposes
-            # Data Freshness Policy is not available on extract & file-based datasource.
-            sample_workbook = all_workbooks[2]
+            # Pick 1 workbook that has a live datasource connection. Data
+            # freshness policy is not available on extract or file-based
+            # datasources, so this sample will print a warning below if the
+            # chosen workbook has none. Adjust the index (or add a lookup by
+            # name) for a workbook on your site with a live connection.
+            sample_workbook = all_workbooks[0]
 
             # Get more info from the workbook selected
             # Troubleshoot: if sample_workbook_extended.data_freshness_policy.option returns with AttributeError

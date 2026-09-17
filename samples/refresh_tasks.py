@@ -33,7 +33,7 @@ def main():
     parser = argparse.ArgumentParser(description="Get all of the refresh tasks available on a server")
     add_common_arguments(parser)
     # Options specific to this sample
-    subcommands = parser.add_subparsers()
+    subcommands = parser.add_subparsers(dest="command", required=True)
 
     list_arguments = subcommands.add_parser("list")
     list_arguments.set_defaults(func=handle_list)

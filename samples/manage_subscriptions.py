@@ -18,16 +18,6 @@
 #       --schedule-id <schedule_id> \
 #       --subject "Daily sales snapshot"
 #
-#   # Create an "On Extract Refresh" subscription (fires when the referenced
-#   # extract-refresh schedule completes, rather than on the schedule's time
-#   # trigger). --schedule-id must reference an extract-refresh schedule.
-#   python samples/manage_subscriptions.py create \
-#       --target-type view \
-#       --target-id <view_id> \
-#       --schedule-id <extract_refresh_schedule_id> \
-#       --subject "Snapshot when refresh finishes" \
-#       --on-extract-refresh
-#
 #   # Delete an existing subscription.
 #   python samples/manage_subscriptions.py delete --id <subscription_id>
 #
@@ -67,34 +57,19 @@ def handle_create(server, args):
     # The REST API expects lowercase content types ("workbook" or "view").
     target = TSC.Target(args.target_id, args.target_type.lower())
 
-    if args.on_extract_refresh:
-        # Extract-refresh-triggered: the subscription fires when the referenced
-        # extract-refresh schedule finishes running the refresh. On Tableau
-        # Cloud this shows up as schedule type "On Extract Refresh" in the UI.
-        # `SubscriptionItem.on_extract_refresh` wires up schedule_id and the
-        # refreshExtractTriggered flag together so the server accepts the
-        # payload; --schedule-id must reference an extract-refresh schedule.
-        new_sub = TSC.SubscriptionItem.on_extract_refresh(
-            subject=args.subject,
-            extract_refresh_schedule_id=args.schedule_id,
-            user_id=user_id,
-            target=target,
-        )
-    else:
-        new_sub = TSC.SubscriptionItem(
-            subject=args.subject,
-            schedule_id=args.schedule_id,
-            user_id=user_id,
-            target=target,
-        )
+    new_sub = TSC.SubscriptionItem(
+        subject=args.subject,
+        schedule_id=args.schedule_id,
+        user_id=user_id,
+        target=target,
+    )
     if args.message:
         new_sub.message = args.message
     new_sub.attach_image = args.attach_image
     new_sub.attach_pdf = args.attach_pdf
 
     created = server.subscriptions.create(new_sub)
-    trigger = "on-extract-refresh" if args.on_extract_refresh else "on-schedule"
-    print(f"Created {trigger} subscription {created.id} " f"for user {created.user_id} against {created.target}")
+    print(f"Created subscription {created.id} for user {created.user_id} against {created.target}")
 
 
 def handle_delete(server, args):
@@ -138,17 +113,6 @@ def main():
         action=argparse.BooleanOptionalAction,
         default=False,
         help="Also attach a PDF snapshot (default: off).",
-    )
-    create_p.add_argument(
-        "--on-extract-refresh",
-        action="store_true",
-        default=False,
-        help=(
-            "Fire this subscription when the referenced extract-refresh schedule "
-            "completes, rather than on the schedule's time trigger. --schedule-id "
-            "must reference an extract-refresh schedule (see create_extract_refresh_"
-            "subscription.py for the fully worked example)."
-        ),
     )
     create_p.set_defaults(func=handle_create)
 

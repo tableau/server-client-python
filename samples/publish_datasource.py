@@ -66,6 +66,8 @@ def main():
                 TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, args.project)
             )
             projects = list(TSC.Pager(server.projects, req_options))
+            if not projects:
+                raise ValueError(f"No project named {args.project!r} on this site.")
             if len(projects) > 1:
                 raise ValueError("The project name is not unique")
             project_id = projects[0].id
@@ -97,11 +99,8 @@ def main():
                 new_datasource, args.file, publish_mode, connection_credentials=new_conn_creds
             )
             print(
-                (
-                    "{}Datasource published. Datasource ID: {}".format(
-                        new_datasource.id, tableauserverclient.datetime_helpers.timestamp()
-                    )
-                )
+                f"[{tableauserverclient.datetime_helpers.timestamp()}] "
+                f"Datasource published. Datasource ID: {new_datasource.id}"
             )
             print("\t\tClosing connection")
 
