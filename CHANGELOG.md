@@ -1,16 +1,6 @@
 
 ## Unreleased
 
-* Added support for "On Extract Refresh" subscriptions. These are Tableau
-  Cloud subscriptions that fire when a referenced extract-refresh schedule
-  completes, rather than on a time trigger, so recipients always get the
-  freshest data. New `SubscriptionItem.on_extract_refresh(subject,
-  extract_refresh_schedule_id, user_id, target)` classmethod is the
-  recommended way to construct them, and `SubscriptionItem.refresh_extract_triggered`
-  is a boolean property that reflects the `refreshExtractTriggered`
-  attribute on the wire. `subscriptions.create()` and `.update()` now
-  raise `ValueError` if `schedule_id` is missing (previously a confusing
-  server-side error). Fixes #1658.
 * Bumped the urllib3 floor to 2.6.3 to pick up the fix for CVE-2026-21441
   (GHSA-38jv-5279-wg99, 8.9 High): urllib3's streaming decompression
   safeguards were bypassed when HTTP redirects were followed. TSC's manual
