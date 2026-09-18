@@ -30,6 +30,11 @@ def main():
     parser.add_argument(
         "--powerpoint", "-ppt", metavar="FILENAME", help="filename (a .ppt file) to save the powerpoint deck"
     )
+    parser.add_argument(
+        "--delete",
+        action="store_true",
+        help="delete the last custom view on the site after the update/export demo",
+    )
 
     args = parser.parse_args()
 
@@ -117,23 +122,26 @@ def main():
 
             # Get custom views. `.get()` only returns the first page;
             # use TSC.Pager to iterate every custom view on the site.
-            for c in TSC.Pager(server.custom_views):
+            custom_views = list(TSC.Pager(server.custom_views))
+            for c in custom_views:
                 print(c)
 
-            # for the last custom view in the list
+            if custom_views:
+                # For the last custom view in the list.
+                c = custom_views[-1]
 
-            # update the name
-            # note that this will fail if the name is already changed to this value
-            changed: TSC.CustomViewItem(id=c.id, name="I was updated by tsc")
-            verified_change = server.custom_views.update(changed)
-            print(verified_change)
+                # update the name
+                # note that this will fail if the name is already changed to this value
+                changed = TSC.CustomViewItem(id=c.id, name="I was updated by tsc")
+                verified_change = server.custom_views.update(changed)
+                print(verified_change)
 
-            # export as image. Filters etc could be added here as usual
-            server.custom_views.populate_image(c)
-            filename = c.id + "-image-export.png"
-            with open(filename, "wb") as f:
-                f.write(c.image)
-            print("saved to " + filename)
+                # export as image. Filters etc could be added here as usual
+                server.custom_views.populate_image(c)
+                filename = c.id + "-image-export.png"
+                with open(filename, "wb") as f:
+                    f.write(c.image)
+                print("saved to " + filename)
 
             if args.powerpoint:
                 # Populate workbook preview image
@@ -143,9 +151,12 @@ def main():
                 print(f"\nDownloaded powerpoint of workbook to {os.path.abspath(args.powerpoint)}")
 
             if args.delete:
-                print(f"deleting {c.id}")
-                unlucky = TSC.CustomViewItem(c.id)
-                server.custom_views.delete(unlucky.id)
+                if not custom_views:
+                    print("--delete requested but no custom views on this site; nothing to delete.")
+                else:
+                    print(f"deleting {c.id}")
+                    unlucky = TSC.CustomViewItem(c.id)
+                    server.custom_views.delete(unlucky.id)
 
 
 if __name__ == "__main__":
