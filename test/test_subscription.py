@@ -256,6 +256,9 @@ def test_parse_response_with_inline_schedule_no_id(server: TSC.Server) -> None:
     """Regression: on Cloud/TOL the server may return a <schedule> element with
     no id attribute (the full schedule is inlined instead). Parse must handle
     this without raising -- the constructor cannot demand a schedule_id here.
+    The parsed `.schedule` must be a single ScheduleItem instance so callers
+    can read `.id` directly (ScheduleItem.from_element returns a list; the
+    parser unwraps it for us).
     """
     xml = (
         b'<tsResponse xmlns="http://tableau.com/api">'
@@ -274,6 +277,37 @@ def test_parse_response_with_inline_schedule_no_id(server: TSC.Server) -> None:
     assert len(subs) == 1
     assert subs[0].schedule_id is None
     assert subs[0].schedule is not None
+    assert isinstance(subs[0].schedule, TSC.ScheduleItem)
+    assert subs[0].schedule.id is None  # inline-no-id case; the fallback in update() cannot recover this
+
+
+def test_update_raises_clear_error_when_inline_schedule_has_no_id(server: TSC.Server) -> None:
+    """Cloud inline-schedule WITHOUT id: fetch-then-update must raise a clear
+    ValueError. Both parser and endpoint agree there is no schedule id to send
+    back; the user has to look up the schedule separately.
+    """
+    get_xml = (
+        b'<tsResponse xmlns="http://tableau.com/api">'
+        b'  <subscription id="sub-inline-no-id" subject="Cloud sub" attachImage="true" '
+        b'                attachPdf="false" suspended="false">'
+        b'    <content id="view-2" type="View" sendIfViewEmpty="false" />'
+        b'    <schedule name="Nightly refresh" frequency="Daily">'
+        b'      <frequencyDetails start="02:00:00" />'
+        b"    </schedule>"
+        b'    <user id="user-2" />'
+        b"  </subscription>"
+        b"</tsResponse>"
+    )
+    subs = TSC.SubscriptionItem.from_response(get_xml, {"t": "http://tableau.com/api"})
+    sub = subs[0]
+    assert sub.schedule_id is None
+    assert sub.schedule is not None and sub.schedule.id is None
+
+    with pytest.raises(ValueError) as excinfo:
+        server.subscriptions.update(sub)
+    msg = str(excinfo.value)
+    assert "schedule_id is required" in msg
+    assert "server.schedules.get" in msg
 
 
 def test_update_manually_built_subscription_emits_flag_false(server: TSC.Server) -> None:

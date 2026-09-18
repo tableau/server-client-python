@@ -203,6 +203,14 @@ class SubscriptionItem:
         call ``update()``, the default False on the new item will flip an
         existing extract-refresh-triggered subscription off on the server.
         Fetch first.
+
+        **Cloud inline-schedule caveat:** on Tableau Cloud, GET responses
+        sometimes inline the referenced schedule element without an ``id``
+        attribute. Fetch-then-update on such a subscription raises
+        ``ValueError`` because there is no schedule id to send back — TSC
+        cannot invent one. Work around it by looking up the schedule via
+        ``server.schedules.get(...)`` and setting ``schedule_id`` on the
+        SubscriptionItem before calling ``update()``.
         """
         return self._refresh_extract_triggered
 
@@ -231,9 +239,16 @@ class SubscriptionItem:
         if schedule_element is not None:
             schedule_id = schedule_element.get("id", None)
 
-            # If schedule id is not provided, then TOL with full schedule provided
+            # If schedule id is not provided, then TOL/Cloud has inlined the
+            # full schedule element in place of a bare `<schedule id=...>`
+            # reference. ScheduleItem.from_element returns a list (it is the
+            # parser for a <schedules> response), so pick the first entry to
+            # keep .schedule a single ScheduleItem — matches how callers in
+            # task_item.py and linked_tasks_item.py unwrap it.
             if schedule_id is None:
-                schedule = ScheduleItem.from_element(element, ns)
+                inline_schedules = ScheduleItem.from_element(element, ns)
+                if inline_schedules:
+                    schedule = inline_schedules[0]
 
         # Content element
         target = None
