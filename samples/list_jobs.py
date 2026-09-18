@@ -131,10 +131,14 @@ def _wait_for_job(server, job_id, timeout):
         raise SystemExit(2)
     except JobFailedException as exc:
         # The exception carries the failed JobItem so callers can inspect it.
-        print(f"Job {job_id} failed: notes={exc.job.notes}")
+        # `notes` is the legacy list[str] surface; `status_notes` is the structured
+        # list[dict] shape emitted for modern job types (see JobItem docstring).
+        print(f"Job {job_id} failed: notes={exc.job.notes}  status_notes={exc.job.status_notes}")
         raise SystemExit(1) from exc
 
-    print(f"Job {job_id} finished. finish_code={job.finish_code}  notes={job.notes}")
+    print(
+        f"Job {job_id} finished. finish_code={job.finish_code}" f"  notes={job.notes}  status_notes={job.status_notes}"
+    )
 
 
 if __name__ == "__main__":
