@@ -19,9 +19,9 @@ from _shared import add_common_arguments, build_auth, resolve_credentials
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Move one workbook from the"
-        "default project of the default site to"
-        "the default project of another site."
+        description=(
+            "Move one workbook from the default project of the default site " "to the default project of another site."
+        )
     )
     add_common_arguments(parser)
     # Options specific to this sample
