@@ -3,11 +3,16 @@ updates:
   - package-ecosystem: "pip"
     directory: "/"
     target-branch: "development"
+    # Security advisories fire independently of the weekly schedule as long
+    # as the repo has "Dependabot security updates" enabled under
+    # Settings -> Code security. Weekly = non-security updates.
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
 
   - package-ecosystem: "github-actions"
     directory: "/"
     target-branch: "development"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10

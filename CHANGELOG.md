@@ -1,10 +1,49 @@
 
 ## Unreleased
 
+* Bumped the urllib3 floor to 2.6.3 to pick up the fix for CVE-2026-21441
+  (GHSA-38jv-5279-wg99, 8.9 High): urllib3's streaming decompression
+  safeguards were bypassed when HTTP redirects were followed. TSC's manual
+  redirect walker (#1848) disables urllib3's built-in follower on new code
+  paths, but downstream callers using urllib3 directly (and TSC endpoints
+  that predate #1848) still relied on the built-in path, so the floor bump
+  closes the gap for all callers. The existing `<3` upper bound is unchanged.
 * Added `Projects.get_by_path(path)` to look up a project by its slash-separated
   hierarchy path (e.g. `"Marketing/Q1 Reports"`). The walk is performed level by
   level using the REST API name filter, so a path with *n* components issues *n*
   requests. Returns the matching `ProjectItem` or `None` if no project is found.
+* Preserve HTTP method and body across 3xx redirects. Previously `requests`
+  followed 301/302/303 by converting POST to GET and dropping the body, so
+  endpoints like `users.add`, `workbooks.publish`, and any write hitting a
+  server behind a redirect would 405. TSC now disables `requests`'s
+  auto-redirect and walks the chain manually, up to `session.max_redirects`
+  hops (default 30). Refuses HTTPS -> HTTP scheme downgrades and raises
+  `RedirectError` with a clear message on missing `Location` headers or hop
+  overflow. Fixes #1127 and #1828.
+* `UserItem.CSVImport.create_user_from_line` no longer
+  lowercases the entire CSV line before parsing. Previously the whole line,
+  including the username, display name, fullname, and email fields, was
+  lowercased destructively (e.g. `JSmith` became `jsmith`). Case is now
+  preserved for those fields; only the comparison-relevant fields (license,
+  admin_level, publisher, auth_setting) are normalized internally for
+  validation. Callers relying on the previous lowercased output -- e.g. dict
+  lookups keyed on `user.name`, or assertions against lowercased values --
+  need to update. This unblocks CSV imports for LDAP and other case-sensitive
+  auth backends where mixed-case usernames must be preserved.
+* `UserItem.CSVImport._validate_attribute_value` and the too-many-columns
+  branch of `_validate_import_line_or_throw` now raise `ValueError` instead
+  of `AttributeError` for invalid CSV input. `AttributeError` was the wrong
+  exception type for input validation and inconsistent with
+  `create_user_from_line`. `validate_file_for_import` catches `Exception` so
+  it is unaffected; direct callers who caught `AttributeError` specifically
+  need to widen their handler.
+* Added `JobItem.status_notes` for the structured `<statusNotes><statusNote
+  type=".." value=".." text=".."/></statusNotes>` block documented on the Query
+  Job REST endpoint. Populated for UserImport and other multi-row jobs where
+  individual rows have distinct outcomes; each entry is a dict with keys
+  `type` / `value` / `text`. The existing `notes: list[str]` attribute is
+  unchanged (it parses the separate legacy `<notes>` element still emitted by
+  some job types). Fixes #1850.
 
 ## 0.18.0 (6 April 2022)    
 * Switched to using defused_xml for xml attack protection

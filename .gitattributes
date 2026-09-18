@@ -1,2 +1,6 @@
 tableauserverclient/_version.py export-subst
 tableauserverclient/bin/_version.py export-subst
+
+# Normalize line endings to LF to prevent CRLF from creeping into Python files
+* text=auto
+*.py text eol=lf

@@ -254,11 +254,26 @@ class Users(QuerysetEndpoint[UserItem]):
         To add a new user to the site you need to first create a new user_item
         (from UserItem class). When you create a new user, you specify the name
         of the user and their site role. For Tableau Cloud, you also specify
-        the auth_setting attribute in your request. When you add user to
-        Tableau Cloud, the name of the user must be the email address that is
-        used to sign in to Tableau Cloud. After you add a user, Tableau Cloud
-        sends the user an email invitation. The user can click the link in the
-        invitation to sign in and update their full name and password.
+        the auth_setting attribute in your request. After you add a user, Tableau
+        Cloud sends the user an email invitation. The user can click the link in
+        the invitation to sign in and update their full name and password.
+
+        The value of ``user_item.name`` is the username the server uses to
+        authenticate the user, NOT the person's display name. Its required
+        format depends on the site's authentication scheme:
+
+        - Tableau Cloud: the user's email address (e.g. ``user@example.com``),
+          which is also what they sign in with.
+        - Local authentication (on-prem Tableau Server): any username unique to
+          the site (e.g. ``jsmith``).
+        - Active Directory: the fully-qualified AD username, either
+          ``SAMAccountName@FullyQualifiedDomain`` (e.g.
+          ``jsmith@corp.example.com``) or the User Principal Name (UPN) if AD
+          is configured to use UPNs. A bare ``SAMAccountName`` may not
+          resolve depending on how AD is configured.
+
+        Set the person's display name via ``user_item.fullname``; it is a
+        separate attribute.
 
         Parameters
         ----------
@@ -333,8 +348,15 @@ class Users(QuerysetEndpoint[UserItem]):
         >>> server = TSC.Server('https://SERVERURL')
         >>> # Login to the server
 
-        >>> new_user = TSC.UserItem(name='new_user', site_role=TSC.UserItem.Role.Unlicensed)
+        >>> # Tableau Cloud: name must be the sign-in email address
+        >>> new_user = TSC.UserItem(name='jsmith@example.com', site_role=TSC.UserItem.Role.Explorer)
+        >>> new_user.auth_setting = TSC.UserItem.Auth.TableauIDWithMFA
+        >>> new_user.fullname = 'Jane Smith'
         >>> new_user = server.users.add(new_user)
+
+        >>> # Active Directory-backed Tableau Server: name is SAMAccountName@Domain
+        >>> ad_user = TSC.UserItem(name='jsmith@corp.example.com', site_role=TSC.UserItem.Role.Viewer)
+        >>> ad_user = server.users.add(ad_user)
 
         """
         url = self.baseurl
@@ -527,7 +549,7 @@ class Users(QuerysetEndpoint[UserItem]):
         warnings.warn("This method is deprecated, use bulk_add instead", DeprecationWarning)
         created = []
         failed = []
-        if not filepath.find("csv"):
+        if "csv" not in filepath:
             raise ValueError("Only csv files are accepted")
 
         with open(filepath) as csv_file:
@@ -536,11 +558,9 @@ class Users(QuerysetEndpoint[UserItem]):
             while line and line != "":
                 user: UserItem = UserItem.CSVImport.create_user_from_line(line)
                 try:
-                    print(user)
                     result = self.add(user)
                     created.append(result)
                 except ServerResponseError as serverError:
-                    print("failed")
                     failed.append((user, serverError))
                 line = csv_file.readline()
         return created, failed
@@ -751,6 +771,7 @@ def create_users_csv(users: Iterable[UserItem]) -> bytes:
     - Admin Level
     - Publish capability
     - Email
+    - Auth setting
 
     Parameters
     ----------
@@ -765,22 +786,7 @@ def create_users_csv(users: Iterable[UserItem]) -> bytes:
     with io.StringIO() as output:
         writer = csv.writer(output, quoting=csv.QUOTE_MINIMAL)
         for user in users:
-            site_role = user.site_role or "Unlicensed"
-            if site_role == "ServerAdministrator":
-                license = "Creator"
-                admin_level = "System"
-            elif site_role.startswith("SiteAdministrator"):
-                admin_level = "Site"
-                license = site_role.replace("SiteAdministrator", "")
-            else:
-                license = site_role
-                admin_level = ""
-
-            if any(x in site_role for x in ("Creator", "Admin", "Publish")):
-                publish = 1
-            else:
-                publish = 0
-
+            license, admin_level, publish = UserItem.CSVImport._decompose_site_role(user.site_role or "Unlicensed")
             writer.writerow(
                 (
                     f"{user.domain_name}\\{user.name}" if user.domain_name else user.name,
@@ -790,6 +796,7 @@ def create_users_csv(users: Iterable[UserItem]) -> bytes:
                     admin_level,
                     publish,
                     user.email,
+                    user.auth_setting or "",
                 )
             )
         output.seek(0)

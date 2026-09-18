@@ -49,7 +49,19 @@ class JobItem:
         The finish code of the job. 0 for success, 1 for failure, 2 for cancelled.
 
     notes : list[str] | None
-        Contains detailed notes about the job.
+        Detail notes emitted by legacy job types (e.g. extract refresh) inside
+        job-specific elements like `<extractRefreshJob><notes>...</notes></extractRefreshJob>`.
+        For modern job types see `status_notes`.
+
+    status_notes : list[dict] | None
+        Structured per-row / per-metric status entries from the modern job response
+        schema (`<statusNotes><statusNote type="..." value="..." text="..." /></statusNotes>`).
+        Each element is a dict with keys `type`, `value`, `text` (any of which may
+        be None if the server omitted them). Populated for UserImport and other
+        multi-row jobs where individual rows have distinct outcomes; documented
+        types include `CountOfUsersAddedToSite`, `CountOfUsersSkipped`,
+        `CountOfUsersWithInsufficientLicenses`, etc.
+        See https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#query_job
 
     mode : str | None
 
@@ -100,6 +112,7 @@ class JobItem:
         updated_at: datetime.datetime | None = None,
         workbook_name: str | None = None,
         datasource_name: str | None = None,
+        status_notes: list[dict] | None = None,
     ):
         self._id = id_
         self._type = job_type
@@ -116,6 +129,7 @@ class JobItem:
         self._updated_at = updated_at
         self._workbook_name = workbook_name
         self._datasource_name = datasource_name
+        self._status_notes: list[dict] = status_notes or []
 
     @property
     def id(self) -> str:
@@ -148,6 +162,10 @@ class JobItem:
     @property
     def notes(self) -> list[str]:
         return self._notes
+
+    @property
+    def status_notes(self) -> list[dict]:
+        return self._status_notes
 
     @property
     def mode(self) -> str | None:
@@ -222,6 +240,14 @@ class JobItem:
         completed_at = parse_datetime(element.get("completedAt", None))
         finish_code = int(element.get("finishCode", -1))
         notes = [note.text for note in element.findall(".//t:notes", namespaces=ns)] or None
+        status_notes = [
+            {
+                "type": note.get("type"),
+                "value": note.get("value"),
+                "text": note.get("text"),
+            }
+            for note in element.findall(".//t:statusNotes/t:statusNote", namespaces=ns)
+        ] or None
         mode = element.get("mode", None)
         workbook = element.find(".//t:workbook[@id]", namespaces=ns)
         workbook_id = workbook.get("id") if workbook is not None else None
@@ -253,6 +279,7 @@ class JobItem:
             updated_at,
             workbook_name,
             datasource_name,
+            status_notes,
         )
 
 

@@ -15,21 +15,12 @@ import os.path
 
 import tableauserverclient as TSC
 
+from _shared import add_common_arguments, build_auth, resolve_credentials
+
 
 def main():
     parser = argparse.ArgumentParser(description="Explore workbook functions supported by the Server API.")
-    # Common options; please keep those in sync across all samples
-    parser.add_argument("--server", "-s", help="server address")
-    parser.add_argument("--site", "-S", help="site name")
-    parser.add_argument("--token-name", "-p", help="name of the personal access token used to sign into the server")
-    parser.add_argument("--token-value", "-v", help="value of the personal access token used to sign into the server")
-    parser.add_argument(
-        "--logging-level",
-        "-l",
-        choices=["debug", "info", "error"],
-        default="error",
-        help="desired logging level (set to error by default)",
-    )
+    add_common_arguments(parser)
     # Options specific to this sample
     parser.add_argument("--publish", metavar="FILEPATH", help="path to workbook to publish")
     parser.add_argument("--download", metavar="FILEPATH", help="path to save downloaded workbook")
@@ -42,19 +33,18 @@ def main():
 
     args = parser.parse_args()
 
-    # Set logging level based on user input, or error by default
-    logging_level = getattr(logging, args.logging_level.upper())
-    logging.basicConfig(level=logging_level)
+    resolve_credentials(args)
+    logging.basicConfig(level=getattr(logging, args.logging_level.upper()))
 
-    # SIGN IN
-    tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
+    tableau_auth = build_auth(args)
     server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
         # Publish workbook if publish flag is set (-publish, -p)
         overwrite_true = TSC.Server.PublishMode.Overwrite
         if args.publish:
-            all_projects, pagination_item = server.projects.get()
-            default_project = next((project for project in all_projects if project.is_default()), None)
+            # Use TSC.Pager rather than a raw `.get()` because `.get()` only
+            # returns the first page of results.
+            default_project = next((project for project in TSC.Pager(server.projects) if project.is_default()), None)
 
             if default_project is not None:
                 new_workbook = TSC.WorkbookItem(default_project.id)
@@ -63,9 +53,11 @@ def main():
             else:
                 print("Publish failed. Could not find the default project.")
 
-        # Gets all workbook items
-        all_workbooks, pagination_item = server.workbooks.get()
+        # Gets all workbook items. Note that `.get()` only returns the first
+        # page of results; use TSC.Pager to iterate every page.
+        first_page, pagination_item = server.workbooks.get()
         print(f"\nThere are {pagination_item.total_available} workbooks on site: ")
+        all_workbooks = list(TSC.Pager(server.workbooks))
         print([workbook.name for workbook in all_workbooks])
 
         if all_workbooks:
@@ -123,9 +115,9 @@ def main():
                     f.write(sample_workbook.preview_image)
                 print(f"\nDownloaded preview image of workbook to {os.path.abspath(args.preview_image)}")
 
-            # get custom views
-            cvs, _ = server.custom_views.get()
-            for c in cvs:
+            # Get custom views. `.get()` only returns the first page;
+            # use TSC.Pager to iterate every custom view on the site.
+            for c in TSC.Pager(server.custom_views):
                 print(c)
 
             # for the last custom view in the list
