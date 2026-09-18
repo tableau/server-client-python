@@ -31,7 +31,8 @@ def main():
     # Options specific to this sample
     group = parser.add_mutually_exclusive_group(required=False)
     # `-u` is already taken by --username in add_common_arguments; use `-U` here
-    # so argparse does not raise a conflicting-option-string error at import.
+    # so argparse does not raise a conflicting-option-string error when the
+    # parser is built at run time (inside main()).
     group.add_argument("--thumbnails-user-id", "-U", help="User ID to use for thumbnails")
     group.add_argument("--thumbnails-group-id", "-g", help="Group ID to use for thumbnails")
 

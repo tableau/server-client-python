@@ -91,7 +91,11 @@ def _list_jobs(server, args):
         cutoff = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=args.hours)
         # Filter operator suffixes: __gt / __gte / __lt / __lte / __in / __has
         # See tableauserverclient.server.query.QuerySet for the full list.
-        query = query.filter(created_at__gte=cutoff.isoformat())
+        # Pass the tz-aware datetime directly; QuerySet serializes it as UTC
+        # with a trailing `Z`, which older Tableau Server versions require.
+        # A raw isoformat() string can end up with a `+00:00` offset that
+        # those versions reject.
+        query = query.filter(created_at__gte=cutoff)
 
     if args.status:
         query = query.filter(status=args.status)

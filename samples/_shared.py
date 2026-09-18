@@ -87,7 +87,8 @@ def add_common_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--jwt",
         help="encoded JSON Web Token for Connected-App sign-in (env: TABLEAU_JWT). "
-        "Mutually exclusive with token/username auth; see JWTAuth in the docs.",
+        "When multiple auth options are set, JWT wins over PAT and PAT wins over "
+        "username/password (see build_auth in _shared.py and JWTAuth in the docs).",
     )
     parser.add_argument(
         "--jwt-file",
@@ -211,12 +212,21 @@ def resolve_credentials(args: argparse.Namespace, *, allow_prompt: bool = True) 
     if has_jwt or has_token or has_user:
         return
 
-    # Partial info supplied -- fill in the matching missing piece.
+    # Partial info supplied -- fill in the matching missing piece. Handle
+    # both directions of each pair so a user who set only the secret half
+    # (e.g. TABLEAU_TOKEN_VALUE without TABLEAU_TOKEN_NAME) is prompted for
+    # the non-secret half, not asked to re-type the secret they already have.
     if getattr(args, "token_name", None) and not getattr(args, "token_value", None):
         args.token_value = getpass.getpass(f"Personal access token value for '{args.token_name}': ")
         return
+    if getattr(args, "token_value", None) and not getattr(args, "token_name", None):
+        args.token_name = input("Personal access token name: ").strip()
+        return
     if getattr(args, "username", None) and not getattr(args, "password", None):
         args.password = getpass.getpass(f"Password for '{args.username}': ")
+        return
+    if getattr(args, "password", None) and not getattr(args, "username", None):
+        args.username = input("Username: ").strip()
         return
 
     # Fully unspecified: default to PAT since that's what the docs recommend.
