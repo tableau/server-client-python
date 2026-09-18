@@ -14,38 +14,28 @@ import logging
 
 import tableauserverclient as TSC
 
+from _shared import add_common_arguments, build_auth, resolve_credentials
+
 
 def main():
     parser = argparse.ArgumentParser(description="Explore datasource functions supported by the Server API.")
-    # Common options; please keep those in sync across all samples
-    parser.add_argument("--server", "-s", help="server address")
-    parser.add_argument("--site", "-S", help="site name")
-    parser.add_argument("--token-name", "-p", help="name of the personal access token used to sign into the server")
-    parser.add_argument("--token-value", "-v", help="value of the personal access token used to sign into the server")
-    parser.add_argument(
-        "--logging-level",
-        "-l",
-        choices=["debug", "info", "error"],
-        default="error",
-        help="desired logging level (set to error by default)",
-    )
+    add_common_arguments(parser)
     # Options specific to this sample
     parser.add_argument("--publish", metavar="FILEPATH", help="path to datasource to publish")
     parser.add_argument("--download", metavar="FILEPATH", help="path to save downloaded datasource")
 
     args = parser.parse_args()
 
-    # Set logging level based on user input, or error by default
-    logging_level = getattr(logging, args.logging_level.upper())
-    logging.basicConfig(level=logging_level)
+    resolve_credentials(args)
+    logging.basicConfig(level=getattr(logging, args.logging_level.upper()))
 
-    # SIGN IN
-    tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
+    tableau_auth = build_auth(args)
     server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
-        # Query projects for use when demonstrating publishing and updating
-        all_projects, pagination_item = server.projects.get()
-        default_project = next((project for project in all_projects if project.is_default()), None)
+        # Query projects for use when demonstrating publishing and updating.
+        # Use TSC.Pager (or `.all()` / `.filter()`) to iterate every page;
+        # a raw `server.projects.get()` only returns the first page.
+        default_project = next((project for project in TSC.Pager(server.projects) if project.is_default()), None)
 
         # Publish datasource if publish flag is set (-publish, -p)
         if args.publish:
@@ -59,9 +49,12 @@ def main():
             else:
                 print("Publish failed. Could not find the default project.")
 
-        # Gets all datasource items
-        all_datasources, pagination_item = server.datasources.get()
+        # Gets all datasource items. `.get()` returns only one page; use
+        # TSC.Pager to iterate every page. The first response also gives us
+        # the total_available count without paging through everything.
+        first_page, pagination_item = server.datasources.get()
         print(f"\nThere are {pagination_item.total_available} datasources on site: ")
+        all_datasources = list(TSC.Pager(server.datasources))
         print([datasource.name for datasource in all_datasources])
 
         if all_datasources:

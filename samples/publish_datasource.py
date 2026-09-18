@@ -11,41 +11,29 @@
 # For more information, refer to the documentations:
 # (https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_datasources.htm#publish_data_source)
 #
-# For signing into server, this script uses personal access tokens. For
-# more information on personal access tokens, refer to the documentations:
+# Sign-in delegates to `build_auth()` in samples/_shared.py, which accepts
+# JWT (Connected App), personal access token, or username + password (JWT
+# wins over PAT wins over username/password when more than one is set).
+# For PATs specifically, see:
 # (https://help.tableau.com/current/server/en-us/security_personal_access_tokens.htm)
 #
-# To run the script, you must have installed Python 3.7 or later.
+# To run the script, you must have installed Python 3.10 or later.
 ####
 
 import argparse
 import logging
 
-import os
 import tableauserverclient as TSC
 import tableauserverclient.datetime_helpers
 
-
-def get_env(key):
-    if key in os.environ:
-        return os.environ[key]
-    return None
+from _shared import add_common_arguments, build_auth, resolve_credentials
 
 
 def main():
     parser = argparse.ArgumentParser(description="Publish a datasource to server.")
-    # Common options; please keep those in sync across all samples
-    parser.add_argument("--server", "-s", help="server address")
-    parser.add_argument("--site", "-S", help="site name")
-    parser.add_argument("--token-name", "-p", help="name of the personal access token used to sign into the server")
-    parser.add_argument("--token-value", "-v", help="value of the personal access token used to sign into the server")
-    parser.add_argument(
-        "--logging-level",
-        "-l",
-        choices=["debug", "info", "error"],
-        default="error",
-        help="desired logging level (set to error by default)",
-    )
+    # Common options -- credentials come from CLI args, env vars, a .env file,
+    # or an interactive prompt. See samples/_shared.py.
+    add_common_arguments(parser)
     # Options specific to this sample
     parser.add_argument("--file", "-f", help="filepath to the datasource to publish")
     parser.add_argument("--project", help="Project within which to publish the datasource")
@@ -56,30 +44,18 @@ def main():
     parser.add_argument("--conn-oauth", help="connection is configured to use oAuth", action="store_true")
 
     args = parser.parse_args()
-    if not args.server:
-        args.server = get_env("SERVER")
-    if not args.site:
-        args.site = get_env("SITE")
-    if not args.token_name:
-        args.token_name = get_env("TOKEN_NAME")
-    if not args.token_value:
-        args.token_value = get_env("TOKEN_VALUE")
-    args.logging = "debug"
-    args.file = "C:/dev/tab-samples/5M.tdsx"
-    args.async_ = True
+
+    resolve_credentials(args)
 
     # Ensure that both the connection username and password are provided, or none at all
     if (args.conn_username and not args.conn_password) or (not args.conn_username and args.conn_password):
         parser.error("Both the connection username and password must be provided")
 
     # Set logging level based on user input, or error by default
-
-    _logger = logging.getLogger(__name__)
-    _logger.setLevel(logging.DEBUG)
-    _logger.addHandler(logging.StreamHandler())
+    logging.basicConfig(level=getattr(logging, args.logging_level.upper()))
 
     # Sign in to server
-    tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
+    tableau_auth = build_auth(args)
     server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
         # Empty project_id field will default the publish to the site's default project
@@ -92,6 +68,8 @@ def main():
                 TSC.Filter(TSC.RequestOptions.Field.Name, TSC.RequestOptions.Operator.Equals, args.project)
             )
             projects = list(TSC.Pager(server.projects, req_options))
+            if not projects:
+                raise ValueError(f"No project named {args.project!r} on this site.")
             if len(projects) > 1:
                 raise ValueError("The project name is not unique")
             project_id = projects[0].id
@@ -123,11 +101,8 @@ def main():
                 new_datasource, args.file, publish_mode, connection_credentials=new_conn_creds
             )
             print(
-                (
-                    "{}Datasource published. Datasource ID: {}".format(
-                        new_datasource.id, tableauserverclient.datetime_helpers.timestamp()
-                    )
-                )
+                f"[{tableauserverclient.datetime_helpers.timestamp()}] "
+                f"Datasource published. Datasource ID: {new_datasource.id}"
             )
             print("\t\tClosing connection")
 
