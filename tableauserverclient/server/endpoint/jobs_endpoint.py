@@ -1,15 +1,31 @@
 import logging
+from typing import cast
 from typing_extensions import Self, overload
 
 
 from tableauserverclient.models import JobItem, BackgroundJobItem, PaginationItem
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
-from tableauserverclient.server.endpoint.exceptions import JobCancelledException, JobFailedException
+from tableauserverclient.server.endpoint.exceptions import (
+    JobCancelledException,
+    JobFailedException,
+    ServerResponseError,
+)
+from tableauserverclient.server.pager import Endpoint, Pager
 from tableauserverclient.server.query import QuerySet
-from tableauserverclient.server.request_options import RequestOptionsBase
+from tableauserverclient.server.request_options import RequestOptions, RequestOptionsBase
 from tableauserverclient.exponential_backoff import ExponentialBackoffTimer
 
 from tableauserverclient.helpers.logging import logger
+
+# Server error code raised by GET /jobs/{id} for jobs whose ids are not
+# addressable via the single-job endpoint (notably the JobItems returned by
+# `create_extract`). Tracked at tableau/server-client-python#1093.
+_UNQUERYABLE_JOB_ERROR_CODE = "400031"
+
+# Server max for the pageSize query parameter (Tableau raises 403014 above
+# this). Used when the fallback poll walks /jobs looking for a specific id;
+# a large page keeps sequential GETs on a busy site down to O(1) per poll.
+_JOBS_LISTING_FALLBACK_PAGE_SIZE = 1000
 
 
 class Jobs(QuerysetEndpoint[BackgroundJobItem]):
@@ -171,6 +187,26 @@ class Jobs(QuerysetEndpoint[BackgroundJobItem]):
 
         JobCancelledException
             If the job was cancelled.
+
+        Notes
+        -----
+        Some job ids returned elsewhere in the client are not addressable
+        via `GET /jobs/{id}` and produce a `ServerResponseError` with code
+        `400031`. When that happens, this method transparently falls back
+        to polling the paginated `/jobs` listing and matches on `id`. See
+        tableau/server-client-python#1093.
+
+        On the fallback path the returned `JobItem` is translated from a
+        `BackgroundJobItem` (the shape the listing endpoint returns).
+        `BackgroundJobItem` doesn't carry every field a `JobItem` normally
+        has, so these come back as defaults:
+          * `progress` = `""`
+          * `notes` = `[]`
+          * `status_notes` = `[]`
+          * `mode`, `workbook_id`, `datasource_id`, `updated_at`,
+            `workbook_name`, `datasource_name`, `flow_run` = `None`
+        Check the values, not the type -- e.g. use `if not job.notes:`, not
+        `if job.notes is None:`.
         """
         if isinstance(job_id, JobItem):
             job_id = job_id.id
@@ -178,10 +214,10 @@ class Jobs(QuerysetEndpoint[BackgroundJobItem]):
         logger.debug(f"Waiting for job {job_id}")
 
         backoffTimer = ExponentialBackoffTimer(timeout=timeout)
-        job = self.get_by_id(job_id)
+        job = self._poll_job(job_id)
         while job.completed_at is None:
             backoffTimer.sleep()
-            job = self.get_by_id(job_id)
+            job = self._poll_job(job_id)
             logger.debug(f"\tJob {job_id} progress={job.progress}")
 
         logger.info(f"Job {job_id} Completed: Finish Code: {job.finish_code} - Notes:{job.notes}")
@@ -194,6 +230,58 @@ class Jobs(QuerysetEndpoint[BackgroundJobItem]):
             raise JobCancelledException(job)
         else:
             raise AssertionError("Unexpected finish_code in job", job)
+
+    def _poll_job(self, job_id: str) -> JobItem:
+        try:
+            return self.get_by_id(job_id)
+        except ServerResponseError as err:
+            if err.code != _UNQUERYABLE_JOB_ERROR_CODE:
+                raise
+            logger.debug(
+                f"Job {job_id} not queryable via /jobs/{{id}} (400031); falling back to /jobs listing (see #1093)."
+            )
+
+            # `Jobs.get`'s overloads don't line up with the single-signature
+            # `Endpoint`/`CallableEndpoint` protocols, so a bare `Pager(self)`
+            # fails mypy even though it works at runtime. Cast at the call
+            # site: expresses intent locally, and if `Jobs.get`'s overloads
+            # ever change to match the protocol the cast surfaces the
+            # mismatch instead of silently hiding it.
+            options = RequestOptions(pagesize=_JOBS_LISTING_FALLBACK_PAGE_SIZE)
+            pager: Pager[BackgroundJobItem] = Pager(cast(Endpoint[BackgroundJobItem], self), request_opts=options)
+            for bg_job in pager:
+                if bg_job.id == job_id:
+                    return self._background_to_job(bg_job)
+            raise
+
+    @staticmethod
+    def _background_to_job(bg_job: BackgroundJobItem) -> JobItem:
+        status_map = {
+            BackgroundJobItem.Status.Success: JobItem.FinishCode.Success,
+            BackgroundJobItem.Status.Failed: JobItem.FinishCode.Failed,
+            BackgroundJobItem.Status.Cancelled: JobItem.FinishCode.Cancelled,
+        }
+        # Success, Failed, and Cancelled map to their FinishCode. Anything else --
+        # Pending, InProgress, a None status, or a future addition -- keeps
+        # completed_at=None so wait_for_job's loop re-polls, and uses finish_code=-1
+        # (never a real FinishCode) so a reader inspecting finish_code alone can't
+        # mistake an unfinished job for Success.
+        if bg_job.status in status_map:
+            finish_code = status_map[bg_job.status]
+            completed_at = bg_job.ended_at
+        else:
+            finish_code = -1
+            completed_at = None
+        return JobItem(
+            id_=bg_job.id,
+            job_type=bg_job.type,
+            progress="",
+            created_at=bg_job.created_at,
+            started_at=bg_job.started_at,
+            completed_at=completed_at,
+            finish_code=finish_code,
+            notes=None,
+        )
 
     def filter(self, *invalid, page_size: int | None = None, **kwargs) -> QuerySet[BackgroundJobItem]:
         """

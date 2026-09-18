@@ -187,7 +187,23 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem], Down
         Returns
         -------
         JobItem
-            The job item for the extract creation.
+            The job item for the extract creation. The id it carries cannot
+            be round-tripped through `server.jobs.get_by_id(job.id)` -- that
+            call raises `ServerResponseError` with error code `400031` (see
+            Notes). `server.jobs.wait_for_job(job)` handles this
+            transparently.
+
+        Notes
+        -----
+        Unlike `workbooks.refresh(...)`, the JobItem returned here is not
+        addressable by `server.jobs.get_by_id(job.id)`: that call raises
+        `ServerResponseError` with error code `400031` and the message
+        "There was a problem querying job '{id}'.". See
+        tableau/server-client-python#1093. `server.jobs.wait_for_job(job)`
+        works normally -- it detects that error and falls back to polling
+        the paginated `/jobs` listing (see its own docstring for detail).
+        Callers who need a single JobItem outside the polling flow can
+        match on id themselves via `TSC.Pager(server.jobs)`.
         """
         id_ = getattr(workbook_item, "id", workbook_item)
         url = f"{self.baseurl}/{id_}/createExtract?encrypt={encrypt}"
@@ -222,6 +238,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem], Down
         Returns
         -------
         JobItem
+            The job item.
         """
         id_ = getattr(workbook_item, "id", workbook_item)
         url = f"{self.baseurl}/{id_}/deleteExtract"

@@ -6,7 +6,11 @@ import requests_mock
 
 import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import utc
-from tableauserverclient.server.endpoint.exceptions import JobFailedException
+from tableauserverclient.server.endpoint.exceptions import (
+    JobCancelledException,
+    JobFailedException,
+    ServerResponseError,
+)
 from ._utils import mocked_time
 
 TEST_ASSET_DIR = Path(__file__).parent / "assets"
@@ -218,3 +222,249 @@ def test_background_job_str() -> None:
     assert not str(job).startswith("<<property")
     assert not repr(job).startswith("<<property")
     assert "BackgroundJobItem" in str(job)
+
+
+# ---------------------------------------------------------------------------
+# Regression coverage for issue #1093: create_extract returns a JobItem whose
+# id is not addressable via GET /jobs/{id}. wait_for_job falls back to polling
+# the paginated /jobs listing when it hits ServerResponseError 400031.
+# ---------------------------------------------------------------------------
+
+UNQUERYABLE_JOB_ID = "8a1b2c3d-4e5f-6789-abcd-ef0123456789"
+
+
+def _listing_xml(
+    job_id: str,
+    status: str | None,
+    ended: bool,
+    *,
+    page_number: int = 1,
+    page_size: int = 100,
+    total_available: int = 1,
+    extra_jobs: str = "",
+) -> str:
+    ended_attr = ' endedAt="2024-01-02T00:00:45Z"' if ended else ""
+    status_attr = f' status="{status}"' if status is not None else ""
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<tsResponse xmlns="http://tableau.com/api">'
+        f'<pagination pageNumber="{page_number}" pageSize="{page_size}" totalAvailable="{total_available}"/>'
+        "<backgroundJobs>"
+        f'{extra_jobs}<backgroundJob id="{job_id}"{status_attr} '
+        'createdAt="2024-01-02T00:00:00Z" startedAt="2024-01-02T00:00:05Z"'
+        f'{ended_attr} priority="50" jobType="createExtract"/>'
+        "</backgroundJobs>"
+        "</tsResponse>"
+    )
+
+
+def _listing_xml_page1_only(
+    filler_job_id: str,
+    page_size: int,
+    total_available: int,
+) -> str:
+    # A page that does NOT contain the target job -- used to force Pager to
+    # request page 2.
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<tsResponse xmlns="http://tableau.com/api">'
+        f'<pagination pageNumber="1" pageSize="{page_size}" totalAvailable="{total_available}"/>'
+        "<backgroundJobs>"
+        f'<backgroundJob id="{filler_job_id}" status="Success" '
+        'createdAt="2024-01-02T00:00:00Z" startedAt="2024-01-02T00:00:05Z" '
+        'endedAt="2024-01-02T00:00:45Z" priority="50" jobType="createExtract"/>'
+        "</backgroundJobs>"
+        "</tsResponse>"
+    )
+
+
+def _empty_listing_xml() -> str:
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<tsResponse xmlns="http://tableau.com/api">'
+        '<pagination pageNumber="1" pageSize="100" totalAvailable="0"/>'
+        "<backgroundJobs/>"
+        "</tsResponse>"
+    )
+
+
+def _error_xml(code: str, summary: str = "Bad Request", detail: str = "") -> str:
+    # `ServerResponseError.from_response` parses `t:error` using the tableau
+    # namespace, so a bare `<tsResponse>` (as produced by
+    # `_utils.server_response_error_factory`) returns .code == "". Always
+    # include the xmlns declaration here so the parsed error carries the code.
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<tsResponse xmlns="http://tableau.com/api">'
+        f'<error code="{code}">'
+        f"<summary>{summary}</summary>"
+        f"<detail>{detail}</detail>"
+        "</error>"
+        "</tsResponse>"
+    )
+
+
+def _400031_error_xml() -> str:
+    return _error_xml(
+        "400031",
+        detail=f"There was a problem querying job '{UNQUERYABLE_JOB_ID}'.",
+    )
+
+
+def test_wait_for_job_no_listing_call_on_happy_path(server: TSC.Server) -> None:
+    response_xml = GET_BY_ID_XML.read_text()
+    job_id = "2eef4225-aa0c-41c4-8662-a76d89ed7336"
+    with mocked_time(), requests_mock.mock() as m:
+        m.get(f"{server.jobs.baseurl}/{job_id}", text=response_xml)
+        listing_mock = m.get(server.jobs.baseurl, text=_empty_listing_xml())
+
+        job = server.jobs.wait_for_job(job_id)
+
+        assert job.id == job_id
+        assert listing_mock.call_count == 0
+
+
+def test_wait_for_job_fallback_success(server: TSC.Server) -> None:
+    with mocked_time(), requests_mock.mock() as m:
+        m.get(
+            f"{server.jobs.baseurl}/{UNQUERYABLE_JOB_ID}",
+            text=_400031_error_xml(),
+            status_code=400,
+        )
+        m.get(
+            server.jobs.baseurl,
+            text=_listing_xml(UNQUERYABLE_JOB_ID, status="Success", ended=True),
+        )
+
+        job = server.jobs.wait_for_job(UNQUERYABLE_JOB_ID)
+
+        assert isinstance(job, TSC.JobItem)
+        assert job.id == UNQUERYABLE_JOB_ID
+        assert job.finish_code == TSC.JobItem.FinishCode.Success
+        assert job.completed_at == datetime(2024, 1, 2, 0, 0, 45, tzinfo=utc)
+
+
+def test_wait_for_job_fallback_failed(server: TSC.Server) -> None:
+    with mocked_time(), requests_mock.mock() as m:
+        m.get(
+            f"{server.jobs.baseurl}/{UNQUERYABLE_JOB_ID}",
+            text=_400031_error_xml(),
+            status_code=400,
+        )
+        m.get(
+            server.jobs.baseurl,
+            text=_listing_xml(UNQUERYABLE_JOB_ID, status="Failed", ended=True),
+        )
+
+        with pytest.raises(JobFailedException):
+            server.jobs.wait_for_job(UNQUERYABLE_JOB_ID)
+
+
+def test_wait_for_job_fallback_cancelled(server: TSC.Server) -> None:
+    with mocked_time(), requests_mock.mock() as m:
+        m.get(
+            f"{server.jobs.baseurl}/{UNQUERYABLE_JOB_ID}",
+            text=_400031_error_xml(),
+            status_code=400,
+        )
+        m.get(
+            server.jobs.baseurl,
+            text=_listing_xml(UNQUERYABLE_JOB_ID, status="Cancelled", ended=True),
+        )
+
+        with pytest.raises(JobCancelledException):
+            server.jobs.wait_for_job(UNQUERYABLE_JOB_ID)
+
+
+def test_wait_for_job_fallback_not_in_listing(server: TSC.Server) -> None:
+    with mocked_time(), requests_mock.mock() as m:
+        m.get(
+            f"{server.jobs.baseurl}/{UNQUERYABLE_JOB_ID}",
+            text=_400031_error_xml(),
+            status_code=400,
+        )
+        m.get(server.jobs.baseurl, text=_empty_listing_xml())
+
+        with pytest.raises(ServerResponseError) as exc_info:
+            server.jobs.wait_for_job(UNQUERYABLE_JOB_ID)
+        assert exc_info.value.code == "400031"
+
+
+def test_wait_for_job_non_400031_not_swallowed(server: TSC.Server) -> None:
+    other_error = _error_xml("400000", detail="Something else")
+    with mocked_time(), requests_mock.mock() as m:
+        m.get(f"{server.jobs.baseurl}/{UNQUERYABLE_JOB_ID}", text=other_error, status_code=400)
+        listing_mock = m.get(server.jobs.baseurl, text=_empty_listing_xml())
+
+        with pytest.raises(ServerResponseError) as exc_info:
+            server.jobs.wait_for_job(UNQUERYABLE_JOB_ID)
+        assert exc_info.value.code == "400000"
+        assert listing_mock.call_count == 0
+
+
+def test_wait_for_job_fallback_inprogress_then_success(server: TSC.Server) -> None:
+    with mocked_time(), requests_mock.mock() as m:
+        m.get(
+            f"{server.jobs.baseurl}/{UNQUERYABLE_JOB_ID}",
+            text=_400031_error_xml(),
+            status_code=400,
+        )
+        m.get(
+            server.jobs.baseurl,
+            [
+                {"text": _listing_xml(UNQUERYABLE_JOB_ID, status="InProgress", ended=False)},
+                {"text": _listing_xml(UNQUERYABLE_JOB_ID, status="Success", ended=True)},
+            ],
+        )
+
+        job = server.jobs.wait_for_job(UNQUERYABLE_JOB_ID)
+
+        assert job.finish_code == TSC.JobItem.FinishCode.Success
+        assert job.completed_at == datetime(2024, 1, 2, 0, 0, 45, tzinfo=utc)
+
+
+def test_wait_for_job_fallback_walks_multiple_pages(server: TSC.Server) -> None:
+    other_job_id = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+    with mocked_time(), requests_mock.mock() as m:
+        m.get(
+            f"{server.jobs.baseurl}/{UNQUERYABLE_JOB_ID}",
+            text=_400031_error_xml(),
+            status_code=400,
+        )
+        m.get(
+            server.jobs.baseurl,
+            [
+                {"text": _listing_xml_page1_only(other_job_id, page_size=1, total_available=2)},
+                {
+                    "text": _listing_xml(
+                        UNQUERYABLE_JOB_ID,
+                        status="Success",
+                        ended=True,
+                        page_number=2,
+                        page_size=1,
+                        total_available=2,
+                    )
+                },
+            ],
+        )
+
+        job = server.jobs.wait_for_job(UNQUERYABLE_JOB_ID)
+
+        assert job.id == UNQUERYABLE_JOB_ID
+        assert job.finish_code == TSC.JobItem.FinishCode.Success
+
+
+def test_wait_for_job_fallback_timeout(server: TSC.Server) -> None:
+    with mocked_time(), requests_mock.mock() as m:
+        m.get(
+            f"{server.jobs.baseurl}/{UNQUERYABLE_JOB_ID}",
+            text=_400031_error_xml(),
+            status_code=400,
+        )
+        m.get(
+            server.jobs.baseurl,
+            text=_listing_xml(UNQUERYABLE_JOB_ID, status="InProgress", ended=False),
+        )
+
+        with pytest.raises(TimeoutError):
+            server.jobs.wait_for_job(UNQUERYABLE_JOB_ID, timeout=30)
