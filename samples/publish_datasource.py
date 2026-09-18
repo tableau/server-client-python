@@ -11,8 +11,10 @@
 # For more information, refer to the documentations:
 # (https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_datasources.htm#publish_data_source)
 #
-# For signing into server, this script uses personal access tokens. For
-# more information on personal access tokens, refer to the documentations:
+# Sign-in delegates to `build_auth()` in samples/_shared.py, which accepts
+# JWT (Connected App), personal access token, or username + password (JWT
+# wins over PAT wins over username/password when more than one is set).
+# For PATs specifically, see:
 # (https://help.tableau.com/current/server/en-us/security_personal_access_tokens.htm)
 #
 # To run the script, you must have installed Python 3.10 or later.
