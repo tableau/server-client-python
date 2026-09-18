@@ -18,7 +18,7 @@
 #   - server-client-python#160  (queryband, initial_sql)
 #   - server-client-python#353  (SQL Server database + schema + table)
 #
-# To run the script, you must have installed Python 3.7 or later.
+# To run the script, you must have installed Python 3.10 or later.
 ####
 
 import argparse
@@ -26,6 +26,8 @@ import logging
 import tempfile
 
 import tableauserverclient as TSC
+
+from _shared import add_common_arguments, build_auth, resolve_credentials
 
 try:
     from tableaudocumentapi import Datasource, Workbook
@@ -74,28 +76,19 @@ def main():
             "Downloads the item via TSC, then parses its embedded XML with tableau-document-api."
         )
     )
-    # Common options; please keep those in sync across all samples
-    parser.add_argument("--server", "-s", help="server address")
-    parser.add_argument("--site", "-S", help="site name")
-    parser.add_argument("--token-name", "-p", help="name of the personal access token used to sign into the server")
-    parser.add_argument("--token-value", "-v", help="value of the personal access token used to sign into the server")
-    parser.add_argument(
-        "--logging-level",
-        "-l",
-        choices=["debug", "info", "error"],
-        default="error",
-        help="desired logging level (set to error by default)",
-    )
+    # Common options -- credentials come from CLI args, env vars, a .env file,
+    # or an interactive prompt. See samples/_shared.py.
+    add_common_arguments(parser)
     # Options specific to this sample
     parser.add_argument("resource_type", choices=["workbook", "datasource"])
     parser.add_argument("resource_id", help="LUID of the workbook or datasource")
 
     args = parser.parse_args()
 
-    logging_level = getattr(logging, args.logging_level.upper())
-    logging.basicConfig(level=logging_level)
+    resolve_credentials(args)
+    logging.basicConfig(level=getattr(logging, args.logging_level.upper()))
 
-    tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
+    tableau_auth = build_auth(args)
     server = TSC.Server(args.server, use_server_version=True)
 
     with server.auth.sign_in(tableau_auth):
