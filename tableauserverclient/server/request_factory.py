@@ -1226,6 +1226,10 @@ class Connection:
             connection_element.attrib["embedPassword"] = str(connection_item.embed_password).lower()
         if connection_item.query_tagging is not None:
             connection_element.attrib["queryTaggingEnabled"] = str(connection_item.query_tagging).lower()
+        if connection_item.workgroup_auth_mode is not None:
+            connection_element.attrib["workgroupAuthMode"] = connection_item.workgroup_auth_mode
+        if connection_item.auth_federation_service_account is not None:
+            connection_element.attrib["authFederationServiceAccount"] = connection_item.auth_federation_service_account
 
 
 class TaskRequest:

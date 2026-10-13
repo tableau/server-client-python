@@ -6,6 +6,11 @@ from .connection_credentials import ConnectionCredentials
 from .property_decorators import property_is_boolean
 from tableauserverclient.helpers.logging import logger
 
+# Workload Identity Federation (WIF) auth-mode values for ConnectionItem.workgroup_auth_mode.
+# Requires server REST API 3.30+.
+WORKGROUP_AUTH_MODE_WIF = "workload-identity-federation"
+WORKGROUP_AUTH_MODE_WIF_IMPERSONATION = "workload-identity-federation-impersonation"
+
 
 class ConnectionItem:
     """
@@ -66,6 +71,8 @@ class ConnectionItem:
         self._query_tagging: bool | None = None
         self._auth_type: str | None = None
         self._database_name: str | None = None
+        self._workgroup_auth_mode: str | None = None
+        self._auth_federation_service_account: str | None = None
 
     @property
     def datasource_id(self) -> str | None:
@@ -107,6 +114,22 @@ class ConnectionItem:
         self._auth_type = value
 
     @property
+    def workgroup_auth_mode(self) -> str | None:
+        return self._workgroup_auth_mode
+
+    @workgroup_auth_mode.setter
+    def workgroup_auth_mode(self, value: str | None):
+        self._workgroup_auth_mode = value
+
+    @property
+    def auth_federation_service_account(self) -> str | None:
+        return self._auth_federation_service_account
+
+    @auth_federation_service_account.setter
+    def auth_federation_service_account(self, value: str | None):
+        self._auth_federation_service_account = value
+
+    @property
     def database_name(self) -> str | None:
         return self._database_name
 
@@ -136,6 +159,10 @@ class ConnectionItem:
                 string_to_bool(s) if (s := connection_xml.get("queryTagging", None)) else None
             )
             connection_item._auth_type = connection_xml.get("authenticationType", None)
+            connection_item._workgroup_auth_mode = connection_xml.get("workgroupAuthMode", None)
+            connection_item._auth_federation_service_account = connection_xml.get(
+                "authFederationServiceAccount", None
+            )
             # The REST API GET /connections response uses "dbName" for the database
             # name attribute.  This is different from the publish request body, which
             # uses "databaseName" (see _add_connections_element in request_factory.py).

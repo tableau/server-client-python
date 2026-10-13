@@ -40,6 +40,7 @@ UPDATE_XML = TEST_ASSET_DIR / "workbook_update.xml"
 UPDATE_PERMISSIONS = TEST_ASSET_DIR / "workbook_update_permissions.xml"
 UPDATE_CONNECTIONS_XML = TEST_ASSET_DIR / "workbook_update_connections.xml"
 UPDATE_CONNECTIONS_NO_AUTH_XML = TEST_ASSET_DIR / "workbook_update_connections_no_auth.xml"
+UPDATE_CONNECTION_WIF_XML = TEST_ASSET_DIR / "workbook_update_connection_wif.xml"
 
 
 @pytest.fixture(scope="function")
@@ -1073,6 +1074,47 @@ def test_odata_connection(server: TSC.Server) -> None:
 
     assert xml_connection is not None
     assert xml_connection.get("serverAddress") == url
+
+
+def test_update_connection_wif_direct(server: TSC.Server) -> None:
+    workbook = TSC.WorkbookItem("project", "test")
+    workbook._id = "06b944d2-959d-4604-9305-12323c95e70e"
+    connection = TSC.ConnectionItem()
+    connection._id = "17376070-64d1-4d17-acb4-a56e4b5b1768"
+    connection.workgroup_auth_mode = TSC.WORKGROUP_AUTH_MODE_WIF
+    response_xml = UPDATE_CONNECTION_WIF_XML.read_text()
+
+    with requests_mock.mock() as m:
+        m.put(f"{server.workbooks.baseurl}/{workbook.id}/connections/{connection.id}", text=response_xml)
+        server.workbooks.update_connection(workbook, connection)
+
+        request = m.request_history[0]
+
+    xml_connection = fromstring(request.body).find(".//connection")
+    assert xml_connection is not None
+    assert xml_connection.get("workgroupAuthMode") == "workload-identity-federation"
+    assert xml_connection.get("authFederationServiceAccount") is None
+
+
+def test_update_connection_wif_impersonation(server: TSC.Server) -> None:
+    workbook = TSC.WorkbookItem("project", "test")
+    workbook._id = "06b944d2-959d-4604-9305-12323c95e70e"
+    connection = TSC.ConnectionItem()
+    connection._id = "17376070-64d1-4d17-acb4-a56e4b5b1768"
+    connection.workgroup_auth_mode = TSC.WORKGROUP_AUTH_MODE_WIF_IMPERSONATION
+    connection.auth_federation_service_account = "sa@proj.iam.gserviceaccount.com"
+    response_xml = UPDATE_CONNECTION_WIF_XML.read_text()
+
+    with requests_mock.mock() as m:
+        m.put(f"{server.workbooks.baseurl}/{workbook.id}/connections/{connection.id}", text=response_xml)
+        server.workbooks.update_connection(workbook, connection)
+
+        request = m.request_history[0]
+
+    xml_connection = fromstring(request.body).find(".//connection")
+    assert xml_connection is not None
+    assert xml_connection.get("workgroupAuthMode") == "workload-identity-federation-impersonation"
+    assert xml_connection.get("authFederationServiceAccount") == "sa@proj.iam.gserviceaccount.com"
 
 
 def test_update_workbook_connections(server: TSC.Server) -> None:

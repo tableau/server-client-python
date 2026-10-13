@@ -36,6 +36,7 @@ UPDATE_HYPER_DATA_XML = TEST_ASSET_DIR / "datasource_data_update.xml"
 UPDATE_CONNECTION_XML = TEST_ASSET_DIR / "datasource_connection_update.xml"
 UPDATE_CONNECTIONS_XML = TEST_ASSET_DIR / "datasource_connections_update.xml"
 UPDATE_CONNECTIONS_NO_AUTH_XML = TEST_ASSET_DIR / "datasource_connections_update_no_auth.xml"
+UPDATE_CONNECTION_WIF_XML = TEST_ASSET_DIR / "datasource_update_connection_wif.xml"
 REFRESH_DUPLICATE_XML = TEST_ASSET_DIR / "datasource_refresh_duplicate.xml"
 
 
@@ -235,6 +236,51 @@ def test_update_connection(server) -> None:
         assert "bar" == new_connection.server_address
         assert "9876" == new_connection.server_port
         assert "foo" == new_connection.username
+
+
+def test_update_connection_wif_direct(server) -> None:
+    datasource_id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
+    connection_id = "be786ae0-d2bf-4a4b-9b34-e2de8d2d4488"
+    response_xml = UPDATE_CONNECTION_WIF_XML.read_text()
+
+    with requests_mock.mock() as m:
+        m.put(f"{server.datasources.baseurl}/{datasource_id}/connections/{connection_id}", text=response_xml)
+        datasource = TSC.DatasourceItem(datasource_id)
+        datasource._id = datasource_id
+        connection = TSC.ConnectionItem()
+        connection._id = connection_id
+        connection.workgroup_auth_mode = TSC.WORKGROUP_AUTH_MODE_WIF
+        server.datasources.update_connection(datasource, connection)
+
+        request = m.request_history[0]
+
+    xml_connection = fromstring(request.body).find(".//connection")
+    assert xml_connection is not None
+    assert xml_connection.get("workgroupAuthMode") == "workload-identity-federation"
+    assert xml_connection.get("authFederationServiceAccount") is None
+
+
+def test_update_connection_wif_impersonation(server) -> None:
+    datasource_id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
+    connection_id = "be786ae0-d2bf-4a4b-9b34-e2de8d2d4488"
+    response_xml = UPDATE_CONNECTION_WIF_XML.read_text()
+
+    with requests_mock.mock() as m:
+        m.put(f"{server.datasources.baseurl}/{datasource_id}/connections/{connection_id}", text=response_xml)
+        datasource = TSC.DatasourceItem(datasource_id)
+        datasource._id = datasource_id
+        connection = TSC.ConnectionItem()
+        connection._id = connection_id
+        connection.workgroup_auth_mode = TSC.WORKGROUP_AUTH_MODE_WIF_IMPERSONATION
+        connection.auth_federation_service_account = "sa@proj.iam.gserviceaccount.com"
+        server.datasources.update_connection(datasource, connection)
+
+        request = m.request_history[0]
+
+    xml_connection = fromstring(request.body).find(".//connection")
+    assert xml_connection is not None
+    assert xml_connection.get("workgroupAuthMode") == "workload-identity-federation-impersonation"
+    assert xml_connection.get("authFederationServiceAccount") == "sa@proj.iam.gserviceaccount.com"
 
 
 def test_update_connections(server) -> None:

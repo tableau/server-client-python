@@ -1,0 +1,3 @@
+<?xml version='1.0' encoding='UTF-8'?><tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api https://help.tableau.com/samples/en-us/rest_api/ts-api_3_30.xsd">
+    <connection id="17376070-64d1-4d17-acb4-a56e4b5b1768" type="snowflake" serverAddress="account.snowflakecomputing.com" userName="" embedPassword="false" queryTaggingEnabled="false"/>
+</tsResponse>

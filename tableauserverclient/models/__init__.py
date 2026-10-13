@@ -1,7 +1,11 @@
 from tableauserverclient.models.collection_item import CollectionItem
 from tableauserverclient.models.column_item import ColumnItem
 from tableauserverclient.models.connection_credentials import ConnectionCredentials
-from tableauserverclient.models.connection_item import ConnectionItem
+from tableauserverclient.models.connection_item import (
+    ConnectionItem,
+    WORKGROUP_AUTH_MODE_WIF,
+    WORKGROUP_AUTH_MODE_WIF_IMPERSONATION,
+)
 from tableauserverclient.models.custom_view_item import CustomViewItem
 from tableauserverclient.models.data_acceleration_report_item import DataAccelerationReportItem
 from tableauserverclient.models.data_alert_item import DataAlertItem
@@ -117,4 +121,6 @@ __all__ = [
     "ExtensionsServer",
     "ExtensionsSiteSettings",
     "SafeExtension",
+    "WORKGROUP_AUTH_MODE_WIF",
+    "WORKGROUP_AUTH_MODE_WIF_IMPERSONATION",
 ]
