@@ -160,9 +160,7 @@ class ConnectionItem:
             )
             connection_item._auth_type = connection_xml.get("authenticationType", None)
             connection_item._workgroup_auth_mode = connection_xml.get("workgroupAuthMode", None)
-            connection_item._auth_federation_service_account = connection_xml.get(
-                "authFederationServiceAccount", None
-            )
+            connection_item._auth_federation_service_account = connection_xml.get("authFederationServiceAccount", None)
             # The REST API GET /connections response uses "dbName" for the database
             # name attribute.  This is different from the publish request body, which
             # uses "databaseName" (see _add_connections_element in request_factory.py).
