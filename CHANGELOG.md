@@ -1,6 +1,19 @@
 
 ## Unreleased
 
+* Added Workload Identity Federation (WIF) support to the connection update
+  endpoints. `ConnectionItem` now has `workgroup_auth_mode` and
+  `auth_federation_service_account` string properties, which are emitted on
+  the `<connection>` payload by `workbooks.update_connection` /
+  `workbooks.update_connections` and `datasources.update_connection` /
+  `datasources.update_connections`. Set `workgroup_auth_mode` to one of the
+  new module-level constants `WORKGROUP_AUTH_MODE_WIF`
+  (`"workload-identity-federation"`, e.g. Snowflake) or
+  `WORKGROUP_AUTH_MODE_WIF_IMPERSONATION`
+  (`"workload-identity-federation-impersonation"`, e.g. Google BigQuery);
+  the service account email is required only for the impersonation mode.
+  Requires Tableau Server REST API 3.30+ and server-side WIF to be configured
+  and enabled on the site.
 * Bumped the urllib3 floor to 2.6.3 to pick up the fix for CVE-2026-21441
   (GHSA-38jv-5279-wg99, 8.9 High): urllib3's streaming decompression
   safeguards were bypassed when HTTP redirects were followed. TSC's manual
