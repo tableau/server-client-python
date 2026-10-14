@@ -625,8 +625,9 @@ class UserItem:
                             skip_validation = True
                     else:
                         value = value.lower()
-                # Mask the password column so it never reaches log handlers.
-                safe_value = "***" if column == UserItem.CSVImport.ColumnType.PASS else value
+                # A malformed row can shift password fragments into later columns;
+                # keep every field after the username out of the logs.
+                safe_value = value if column.value < UserItem.CSVImport.ColumnType.PASS.value else "***"
                 logger.debug(f"column {column.name}: {safe_value}")
                 # Never call _validate_attribute_value for PASS: its ValueError
                 # embeds the raw value, and a future PR that adds password-format
