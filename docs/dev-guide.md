@@ -223,11 +223,18 @@ For more details, see the GitHub Pages topic on
 
 ### Link checking
 
-To run a link checker locally, this is one way to do it using the Python [linkchecker](https://github.com/linkchecker/linkchecker) project:
+To run a link checker locally, this is one way to do it using the Python [linkchecker](https://github.com/linkchecker/linkchecker) project.
+
+First, start the local preview server:
 
 ```bash
 bundle install # or bundle update
 bundle exec jekyll serve
+```
+
+Then, in another shell run the link checker:
+
+```bash
 uvx linkchecker --check-extern --no-warnings http://localhost:4000/server-client-python/ --ignore-url="tableau.github.io" --ignore-url="127.0.0.1"
 ```
 
