@@ -1722,7 +1722,7 @@ conn.embed_password = True
 server.datasources.update_connection(datasource_item, conn)
 ```
 
-See [`samples/update_connection_to_keypair.py`](https://github.com/tableau/server-client-python/blob/master/samples/update_connection_to_keypair.py) for a runnable end-to-end example, and the REST API [authenticationType reference](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#update_data_source_connection) for the full list of supported values.
+See [`samples/update_connection_auth.py`](https://github.com/tableau/server-client-python/blob/master/samples/update_connection_auth.py) for a runnable end-to-end example, and the REST API [authenticationType reference](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#update_data_source_connection) for the full list of supported values.
 
 <br>
 <br>
