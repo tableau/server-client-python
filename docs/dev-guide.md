@@ -208,7 +208,7 @@ to link them to each other in comments so it's clear they go together.
 
 To preview and run the documentation locally, these are the steps:
 
-1. Install [Ruby](https://www.ruby-lang.org/en/documentation/installation/) (v2.5.0 or higher).
+1. Install [Ruby](https://www.ruby-lang.org/en/documentation/installation/) v3.1.x. This matches what GitHub is currently using; higher versions can have package version problems.
 
 1. Install [Bundler](https://bundler.io/).
 
@@ -220,6 +220,16 @@ To preview and run the documentation locally, these are the steps:
 
 For more details, see the GitHub Pages topic on
 [testing locally](https://docs.github.com/en/pages/setting-up-a-github-pages-site-with-jekyll/testing-your-github-pages-site-locally-with-jekyll).
+
+### Link checking
+
+To run a link checker locally, this is one way to do it using the Python [linkchecker](https://github.com/linkchecker/linkchecker) project:
+
+```bash
+bundle install # or bundle update
+bundle exec jekyll serve
+uvx linkchecker --check-extern --no-warnings http://localhost:4000/server-client-python/ --ignore-url="tableau.github.io" --ignore-url="127.0.0.1"
+```
 
 ## Release process (maintainers)
 
