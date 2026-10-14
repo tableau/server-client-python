@@ -203,23 +203,31 @@ def test_password_not_logged_when_line_invalid(caplog: pytest.LogCaptureFixture)
     assert secret not in combined, f"Password leaked into logs on invalid row: {combined!r}"
 
 
-def test_password_with_comma_partially_masks(caplog: pytest.LogCaptureFixture) -> None:
-    """A password containing commas is misaligned by the naive split parser: only the
-    portion that lands in column 1 gets masked. The remaining fragments still leak.
-    This documents the limitation — fully protecting passwords with embedded commas
-    requires a proper CSV parser — but confirms that the column-1 mask holds even
-    when the password value contains a comma."""
-    line = "jsmith,hunter2,SECRETTAIL,creator,site,yes,jsmith@example.com"
+def test_password_with_comma_is_fully_redacted(caplog: pytest.LogCaptureFixture) -> None:
+    """A quoted comma in a password must not leak from invalid row output or logs."""
+    line = 'jsmith,"hunter2,SECRETTAIL",John Smith,not-a-real-license,site,yes,jsmith@example.com'
+    test_data = _mock_file_content([line])
     with caplog.at_level(logging.DEBUG, logger=logger.name):
-        try:
-            TSC.UserItem.CSVImport._validate_import_line_or_throw(line, logger)
-        except Exception:
-            pass  # misaligned columns are expected to fail validation
+        valid, invalid = TSC.UserItem.CSVImport.validate_file_for_import(test_data, logger)
+    assert valid == 0
+    assert len(invalid) == 1
+    assert "hunter2" not in invalid[0]
+    assert "SECRETTAIL" not in invalid[0]
     combined = "\n".join(record.getMessage() for record in caplog.records)
-    # Column 1 ("hunter2") is masked; the fragment that spilled into column 2
-    # ("SECRETTAIL") is not — this is the documented limitation.
     assert "hunter2" not in combined
+    assert "SECRETTAIL" not in combined
     assert _mask_present(caplog.records)
+
+
+def test_malformed_csv_row_is_not_returned_unredacted(caplog: pytest.LogCaptureFixture) -> None:
+    secret = "SECRETTAIL"
+    test_data = _mock_file_content([f'jsmith,"{secret}'])
+    with caplog.at_level(logging.DEBUG, logger=logger.name):
+        valid, invalid = TSC.UserItem.CSVImport.validate_file_for_import(test_data, logger)
+    assert valid == 0
+    assert invalid == ["<invalid CSV row redacted>"]
+    combined = "\n".join(record.getMessage() for record in caplog.records)
+    assert secret not in combined
 
 
 def test_password_not_in_validate_attribute_value_error(
@@ -308,6 +316,12 @@ def test_create_user_with_auth_column() -> None:
     user = TSC.UserItem.CSVImport.create_user_from_line("username, pword, fname, creator, none, yes, email, SAML")
     assert user is not None
     assert user.auth_setting == "SAML", f"Expected SAML, got {user.auth_setting}"
+
+
+def test_create_user_with_comma_in_password() -> None:
+    user = TSC.UserItem.CSVImport.create_user_from_line('username,"pass,word",fname,creator,none,yes,email')
+    assert user is not None
+    assert user.fullname == "fname"
 
 
 def test_too_many_columns_raises() -> None:

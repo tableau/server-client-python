@@ -1,3 +1,4 @@
+import csv
 import io
 import warnings
 import xml.etree.ElementTree as ET
@@ -471,7 +472,7 @@ class UserItem:
         def create_user_from_line(line: str):
             if line is None or line is False or line == "\n" or line == "":
                 return None
-            values: list[str] = list(map(str.strip, line.strip().split(",")))
+            values = UserItem.CSVImport._parse_csv_line(line)
             if len(values) > UserItem.CSVImport.COLUMN_COUNT:
                 raise ValueError("Too many attributes for user import")
             username = values[UserItem.CSVImport.ColumnType.USERNAME]
@@ -521,6 +522,13 @@ class UserItem:
                 )
             return user
 
+        @staticmethod
+        def _parse_csv_line(line: str) -> list[str]:
+            values = next(csv.reader([line], strict=True), [])
+            if not values:
+                values = [""]
+            return list(map(str.strip, values))
+
         # Read through an entire CSV file meant for user import
         # Return the number of valid lines and a list of all the invalid lines
         @staticmethod
@@ -554,11 +562,17 @@ class UserItem:
                 body, ending = line[:-1], "\n"
             else:
                 body, ending = line, ""
-            fields = body.split(",")
+            try:
+                fields = UserItem.CSVImport._parse_csv_line(body)
+            except csv.Error:
+                return "<invalid CSV row redacted>" + ending
             pass_index = UserItem.CSVImport.ColumnType.PASS.value
             if len(fields) > pass_index:
                 fields[pass_index] = "***"
-            return ",".join(fields) + ending
+                output = io.StringIO()
+                csv.writer(output, lineterminator="").writerow(fields)
+                return output.getvalue() + ending
+            return line
 
         # Some fields in the import file are restricted to specific values
         # Iterate through each field and validate the given value against hardcoded constraints
@@ -577,7 +591,7 @@ class UserItem:
                 list(UserItem.CSVImport._AUTH_CANONICAL.values()),  # auth - normalized before comparison
             ]
 
-            line = list(map(str.strip, incoming.split(",")))
+            line = UserItem.CSVImport._parse_csv_line(incoming)
             if len(line) > UserItem.CSVImport.COLUMN_COUNT:
                 raise ValueError("Too many attributes for user import")
             username = line[UserItem.CSVImport.ColumnType.USERNAME.value]
