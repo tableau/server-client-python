@@ -1,3 +1,41 @@
+####
+# This script updates a single connection on a datasource or workbook to embed
+# credentials. It's a generic authentication-change helper: the same code path
+# works whether you're setting username+password or moving a Snowflake
+# connection to keypair auth.
+#
+# Common authentication_type values (case-sensitive wire values):
+#   - "auth-user-pass"         -- username + password (canonical)
+#   - "username-password"      -- alternate spelling used by some connectors
+#                                 (SAP HANA, SAP Sybase ASE, SAP NetWeaver BW,
+#                                 Denodo, Salesforce)
+#   - "auth-keypair"           -- Snowflake keypair (see prerequisite below)
+#   - "oauth"                  -- OAuth
+#   - "auth-none"              -- no auth on the connection
+#   - "AD Service Principal"   -- Azure AD Service Principal
+#   - "Azure AD Password"      -- Azure AD username/password
+# For the full list including connector-specific values, see the REST reference
+# link below or query an existing connection to observe its wire value.
+#
+# SECURITY: datasource_password is a positional CLI argument. For keypair auth
+# it carries the private-key material, which will leak into shell history, ps
+# output, and audit logs on the machine running this script. Prefer supplying
+# the key via an environment variable or stdin, or adapt this sample to read
+# the key from a file that is protected by filesystem permissions.
+#
+# When embed_password=True the server binds the connection to a matching
+# pre-saved credential on the site (looked up by attributes including username
+# and connection class). For keypair-auth conversions this means the Snowflake
+# private key MUST already be saved on the site under Site Settings -> Saved
+# Credentials for Data Sources before running this script. If not, the update
+# writes the new auth type into metadata but subsequent extract refreshes and
+# connection tests fail because no bound credential is found.
+#
+# See:
+#   https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#update_data_source_connection
+#   https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#update_workbook_connection
+####
+
 import argparse
 import logging
 import tableauserverclient as TSC
