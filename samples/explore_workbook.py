@@ -65,6 +65,7 @@ def main():
         all_workbooks = list(TSC.Pager(server.workbooks))
         print([workbook.name for workbook in all_workbooks])
 
+        custom_views = []
         if all_workbooks:
             # Pick one workbook from the list
             sample_workbook = all_workbooks[0]
