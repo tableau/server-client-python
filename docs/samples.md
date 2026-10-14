@@ -45,6 +45,7 @@ The following list describes the samples available in the repository:
 * `create_group.py` Creates a user group.
 * `create_project.py` Creates a project in a site.
 * `create_schedules.py` Creates schedules for extract refreshes and subscriptions.
+* `create_user.py` Creates a user on a site.
 * `explore_datasource.py` Queries datasources, selects a datasource, populates connections for the datasource, then updates the datasource.
 * `explore_favorites.py` Queries favorites and optionally add or delete favorites.
 * `explore_site.py` Interacts with sites (create, delete, and so on).
@@ -54,10 +55,17 @@ The following list describes the samples available in the repository:
 * `extracts.py` Interacts with extracts, including querying, deleting or creating.
 * `filter_sort_groups.py` Demonstrates filtering and sorting user groups.
 * `filter_sort_projects.py` Demonstrates filtering and sorting projects.
+* `getting_started/1_hello_server.py` Connects to a server and prints server info, with no site or sign-in.
+* `getting_started/2_hello_site.py` Signs in and lists projects on a site.
+* `getting_started/3_hello_universe.py` Signs in and lists the main content types on a site.
 * `initialize_server.py` Sets up an existing server instance with site, workbooks and datasources.
+* `inspect_connection_details.py` Downloads a workbook or datasource and reads connector-specific connection attributes that the REST connection object does not expose.
 * `kill_all_jobs.py` Kills all running jobs.
 * `list.py` Lists all datasources or workbooks of a site.
+* `list_jobs.py` Lists background jobs on a site and can wait for a specific job to finish.
 * `login.py` Demonstrates logging in to the server with either username/password or personal access token.
+* `manage_subscriptions.py` Lists, creates, and deletes subscriptions.
+* `metadata_paginated_query.py` Uses the metadata API to query published data sources, paging through the results.
 * `metadata_query.py` Uses the metadata API to query information on a published data source.
 * `move_workbook_projects.py` Moves a workbook from one project to another.
 * `move_workbook_sites.py` Downloads a workbook, stores it in-memory, and uploads it to another site.
@@ -70,6 +78,8 @@ The following list describes the samples available in the repository:
 * `set_refresh_schedule.py` Sets the schedule to refresh a workbook or datasource.
 * `smoke_test.py` Verifies that TSC is installed correctly and is able to run.
 * `update_connection.py` Updates and embeds connection credentials of a datasource.
+* `update_connection_auth.py` Updates authentication on a single workbook or datasource connection.
+* `update_connections_auth.py` Updates authentication on every connection of a workbook or datasource.
 * `update_datasource_data.py` Updates the data within a published live-to-Hyper datasource.
 * `update_workbook_data_freshness_policy.py` Updates workbook data freshness policy settings.
 
