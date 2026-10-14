@@ -10,7 +10,7 @@
 # with the community `tableaudocumentapi` library to reach the extra attributes.
 #
 # Requires:
-#   pip install tableauserverclient tableau-document-api
+#   pip install tableauserverclient tableaudocumentapi
 #
 # Related GitHub issues:
 #   - server-client-python#1807 (Oracle service on ConnectionItem)
@@ -33,7 +33,7 @@ try:
     from tableaudocumentapi import Datasource, Workbook
 except ImportError:
     raise SystemExit(
-        "This sample requires the tableau-document-api package.\n" "Install it with: pip install tableau-document-api"
+        "This sample requires the tableaudocumentapi package.\n" "Install it with: pip install tableaudocumentapi"
     )
 
 
@@ -55,13 +55,13 @@ def dump_connections_from_workbook_file(path):
 
 def _print_connection(label, c):
     print(f"--- {label} ---")
-    # Every attribute below comes from the raw XML embedded in the file; none of
-    # these are exposed by TSC's ConnectionItem today.
     print(f"  dbclass:      {c.dbclass}")
     print(f"  server:       {c.server}")
     print(f"  port:         {c.port}")
     print(f"  username:     {c.username}")
     print(f"  dbname:       {c.dbname}")
+    # Schema, service, query-band, and initial-SQL fields are connector-specific
+    # and are not exposed by TSC's ConnectionItem today.
     print(f"  schema:       {c.schema}")
     print(f"  service:      {c.service}")
     print(f"  authentication: {c.authentication}")
