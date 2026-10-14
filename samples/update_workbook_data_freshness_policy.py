@@ -2,7 +2,7 @@
 # This script demonstrates how to update workbook data freshness policy using the Tableau
 # Server Client.
 #
-# To run the script, you must have installed Python 3.7 or later.
+# To run the script, you must have installed Python 3.10 or later.
 ####
 
 
@@ -12,47 +12,39 @@ import logging
 import tableauserverclient as TSC
 from tableauserverclient import IntervalItem
 
+from _shared import add_common_arguments, build_auth, resolve_credentials
+
 
 def main():
-    parser = argparse.ArgumentParser(description="Creates sample schedules for each type of frequency.")
-    # Common options; please keep those in sync across all samples
-    parser.add_argument("--server", "-s", help="server address")
-    parser.add_argument("--site", "-S", help="site name")
-    parser.add_argument("--token-name", "-p", help="name of the personal access token " "used to sign into the server")
-    parser.add_argument(
-        "--token-value", "-v", help="value of the personal access token " "used to sign into the server"
+    parser = argparse.ArgumentParser(
+        description="Update a workbook's data freshness policy across the supported schedule types."
     )
-    parser.add_argument(
-        "--logging-level",
-        "-l",
-        choices=["debug", "info", "error"],
-        default="error",
-        help="desired logging level (set to error by default)",
-    )
+    add_common_arguments(parser)
     # Options specific to this sample:
     # This sample has no additional options, yet. If you add some, please add them here
 
     args = parser.parse_args()
 
-    # Set logging level based on user input, or error by default
-    logging_level = getattr(logging, args.logging_level.upper())
-    logging.basicConfig(level=logging_level)
+    resolve_credentials(args)
+    logging.basicConfig(level=getattr(logging, args.logging_level.upper()))
 
-    tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
-    server = TSC.Server(args.server, use_server_version=False)
-    server.add_http_options({"verify": False})
-    server.use_server_version()
+    tableau_auth = build_auth(args)
+    server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
-        # Get workbook
-        all_workbooks, pagination_item = server.workbooks.get()
+        # Get workbooks. `.get()` only returns the first page; iterate with
+        # TSC.Pager to see every workbook on the site.
+        _, pagination_item = server.workbooks.get()
         print(f"\nThere are {pagination_item.total_available} workbooks on site: ")
+        all_workbooks = list(TSC.Pager(server.workbooks))
         print([workbook.name for workbook in all_workbooks])
 
         if all_workbooks:
-            # Pick 1 workbook that has live datasource connection.
-            # Assuming 1st workbook met the criteria for sample purposes
-            # Data Freshness Policy is not available on extract & file-based datasource.
-            sample_workbook = all_workbooks[2]
+            # Pick 1 workbook that has a live datasource connection. Data
+            # freshness policy is not available on extract or file-based
+            # datasources, so this sample will print a warning below if the
+            # chosen workbook has none. Adjust the index (or add a lookup by
+            # name) for a workbook on your site with a live connection.
+            sample_workbook = all_workbooks[0]
 
             # Get more info from the workbook selected
             # Troubleshoot: if sample_workbook_extended.data_freshness_policy.option returns with AttributeError
