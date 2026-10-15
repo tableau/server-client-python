@@ -524,7 +524,7 @@ class UserItem:
 
         @staticmethod
         def _parse_csv_line(line: str) -> list[str]:
-            values = next(csv.reader([line], strict=True), [])
+            values = next(csv.reader([line], strict=True, skipinitialspace=True), [])
             if not values:
                 values = [""]
             return list(map(str.strip, values))
