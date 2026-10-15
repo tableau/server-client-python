@@ -238,7 +238,20 @@ def test_update_connection(server) -> None:
         assert "foo" == new_connection.username
 
 
-def test_update_connection_wif_direct(server) -> None:
+@pytest.mark.parametrize(
+    "workgroup_auth_mode, service_account, expected_mode, expected_sa",
+    [
+        (TSC.ConnectionItem.WorkgroupAuthMode.WIF, None, "workload-identity-federation", None),
+        (
+            TSC.ConnectionItem.WorkgroupAuthMode.WIF_IMPERSONATION,
+            "sa@proj.iam.gserviceaccount.com",
+            "workload-identity-federation-impersonation",
+            "sa@proj.iam.gserviceaccount.com",
+        ),
+    ],
+    ids=["direct", "impersonation"],
+)
+def test_update_connection_wif(server, workgroup_auth_mode, service_account, expected_mode, expected_sa) -> None:
     datasource_id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
     connection_id = "be786ae0-d2bf-4a4b-9b34-e2de8d2d4488"
     response_xml = UPDATE_CONNECTION_WIF_XML.read_text()
@@ -249,18 +262,21 @@ def test_update_connection_wif_direct(server) -> None:
         datasource._id = datasource_id
         connection = TSC.ConnectionItem()
         connection._id = connection_id
-        connection.workgroup_auth_mode = TSC.WORKGROUP_AUTH_MODE_WIF
+        connection.workgroup_auth_mode = workgroup_auth_mode
+        if service_account is not None:
+            connection.auth_federation_service_account = service_account
         server.datasources.update_connection(datasource, connection)
 
         request = m.request_history[0]
 
     xml_connection = fromstring(request.body).find(".//connection")
     assert xml_connection is not None
-    assert xml_connection.get("workgroupAuthMode") == "workload-identity-federation"
-    assert xml_connection.get("authFederationServiceAccount") is None
+    assert xml_connection.get("workgroupAuthMode") == expected_mode
+    assert xml_connection.get("authFederationServiceAccount") == expected_sa
 
 
-def test_update_connection_wif_impersonation(server) -> None:
+def test_update_connection_wif_switch_from_oauth(server) -> None:
+    """OAuth -> WIF: WIF attrs ride alongside the existing auth_type."""
     datasource_id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
     connection_id = "be786ae0-d2bf-4a4b-9b34-e2de8d2d4488"
     response_xml = UPDATE_CONNECTION_WIF_XML.read_text()
@@ -271,7 +287,8 @@ def test_update_connection_wif_impersonation(server) -> None:
         datasource._id = datasource_id
         connection = TSC.ConnectionItem()
         connection._id = connection_id
-        connection.workgroup_auth_mode = TSC.WORKGROUP_AUTH_MODE_WIF_IMPERSONATION
+        connection.auth_type = "oauth"
+        connection.workgroup_auth_mode = TSC.ConnectionItem.WorkgroupAuthMode.WIF_IMPERSONATION
         connection.auth_federation_service_account = "sa@proj.iam.gserviceaccount.com"
         server.datasources.update_connection(datasource, connection)
 
@@ -279,8 +296,138 @@ def test_update_connection_wif_impersonation(server) -> None:
 
     xml_connection = fromstring(request.body).find(".//connection")
     assert xml_connection is not None
+    assert xml_connection.get("authenticationType") == "oauth"
     assert xml_connection.get("workgroupAuthMode") == "workload-identity-federation-impersonation"
     assert xml_connection.get("authFederationServiceAccount") == "sa@proj.iam.gserviceaccount.com"
+
+
+def test_update_connection_wif_cleared_fields_omit_attrs(server) -> None:
+    """Unset WIF fields -> no WIF attrs on wire; revert is a server-side decision."""
+    datasource_id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
+    connection_id = "be786ae0-d2bf-4a4b-9b34-e2de8d2d4488"
+    response_xml = UPDATE_CONNECTION_WIF_XML.read_text()
+
+    with requests_mock.mock() as m:
+        m.put(f"{server.datasources.baseurl}/{datasource_id}/connections/{connection_id}", text=response_xml)
+        datasource = TSC.DatasourceItem(datasource_id)
+        datasource._id = datasource_id
+        connection = TSC.ConnectionItem()
+        connection._id = connection_id
+        connection.auth_type = "oauth"
+        server.datasources.update_connection(datasource, connection)
+
+        request = m.request_history[0]
+
+    xml_connection = fromstring(request.body).find(".//connection")
+    assert xml_connection is not None
+    assert xml_connection.get("authenticationType") == "oauth"
+    assert xml_connection.get("workgroupAuthMode") is None
+    assert xml_connection.get("authFederationServiceAccount") is None
+
+
+def test_update_connection_wif_service_account_without_mode(server) -> None:
+    """TSC is permissive: a lone service account emits as-is and the server rejects it."""
+    datasource_id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
+    connection_id = "be786ae0-d2bf-4a4b-9b34-e2de8d2d4488"
+    response_xml = UPDATE_CONNECTION_WIF_XML.read_text()
+
+    with requests_mock.mock() as m:
+        m.put(f"{server.datasources.baseurl}/{datasource_id}/connections/{connection_id}", text=response_xml)
+        datasource = TSC.DatasourceItem(datasource_id)
+        datasource._id = datasource_id
+        connection = TSC.ConnectionItem()
+        connection._id = connection_id
+        connection.auth_federation_service_account = "sa@proj.iam.gserviceaccount.com"
+        server.datasources.update_connection(datasource, connection)
+
+        request = m.request_history[0]
+
+    xml_connection = fromstring(request.body).find(".//connection")
+    assert xml_connection is not None
+    assert xml_connection.get("workgroupAuthMode") is None
+    assert xml_connection.get("authFederationServiceAccount") == "sa@proj.iam.gserviceaccount.com"
+
+
+def test_update_connection_wif_from_response(server) -> None:
+    """When the server echoes WIF attrs, ConnectionItem.from_response surfaces them."""
+    datasource_id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
+    connection_id = "be786ae0-d2bf-4a4b-9b34-e2de8d2d4488"
+    response_xml = UPDATE_CONNECTION_WIF_XML.read_text()
+
+    with requests_mock.mock() as m:
+        m.put(f"{server.datasources.baseurl}/{datasource_id}/connections/{connection_id}", text=response_xml)
+        datasource = TSC.DatasourceItem(datasource_id)
+        datasource._id = datasource_id
+        connection = TSC.ConnectionItem()
+        connection._id = connection_id
+        updated = server.datasources.update_connection(datasource, connection)
+
+    assert updated is not None
+    assert updated.workgroup_auth_mode == "workload-identity-federation-impersonation"
+    assert updated.auth_federation_service_account == "sa@proj.iam.gserviceaccount.com"
+
+
+def test_update_connection_wif_from_response_absent(server) -> None:
+    """Older servers (REST < 3.30) don't echo WIF attrs; from_response parses them as None."""
+    datasource_id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
+    connection_id = "be786ae0-d2bf-4a4b-9b34-e2de8d2d4488"
+    response_xml = UPDATE_CONNECTION_XML.read_text()
+
+    with requests_mock.mock() as m:
+        m.put(f"{server.datasources.baseurl}/{datasource_id}/connections/{connection_id}", text=response_xml)
+        datasource = TSC.DatasourceItem(datasource_id)
+        datasource._id = datasource_id
+        connection = TSC.ConnectionItem()
+        connection._id = connection_id
+        updated = server.datasources.update_connection(datasource, connection)
+
+    assert updated is not None
+    assert updated.workgroup_auth_mode is None
+    assert updated.auth_federation_service_account is None
+
+
+@pytest.mark.parametrize(
+    "workgroup_auth_mode, service_account, expected_mode, expected_sa",
+    [
+        (TSC.ConnectionItem.WorkgroupAuthMode.WIF, None, "workload-identity-federation", None),
+        (
+            TSC.ConnectionItem.WorkgroupAuthMode.WIF_IMPERSONATION,
+            "sa@proj.iam.gserviceaccount.com",
+            "workload-identity-federation-impersonation",
+            "sa@proj.iam.gserviceaccount.com",
+        ),
+    ],
+    ids=["direct", "impersonation"],
+)
+def test_update_connections_wif(server, workgroup_auth_mode, service_account, expected_mode, expected_sa) -> None:
+    """Bulk update_connections forwards WIF kwargs onto the single <connection> payload."""
+    response_xml = UPDATE_CONNECTIONS_XML.read_text()
+
+    with requests_mock.Mocker() as m:
+        datasource_id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
+        connection_luids = ["be786ae0-d2bf-4a4b-9b34-e2de8d2d4488", "a1b2c3d4-e5f6-7a8b-9c0d-123456789abc"]
+
+        datasource = TSC.DatasourceItem(datasource_id)
+        datasource._id = datasource_id
+        server.version = "3.26"
+        m.put(
+            "http://test/api/3.26/sites/dad65087-b08b-4603-af4e-2887b8aafc67/datasources/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/connections",
+            text=response_xml,
+        )
+
+        server.datasources.update_connections(
+            datasource_item=datasource,
+            connection_luids=connection_luids,
+            workgroup_auth_mode=workgroup_auth_mode,
+            auth_federation_service_account=service_account,
+        )
+
+        request = m.request_history[0]
+
+    xml_connection = fromstring(request.body).find(".//connection")
+    assert xml_connection is not None
+    assert xml_connection.get("workgroupAuthMode") == expected_mode
+    assert xml_connection.get("authFederationServiceAccount") == expected_sa
 
 
 def test_update_connections(server) -> None:

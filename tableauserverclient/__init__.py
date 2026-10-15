@@ -56,8 +56,6 @@ from tableauserverclient.models import (
     WebhookItem,
     WeeklyInterval,
     WorkbookItem,
-    WORKGROUP_AUTH_MODE_WIF,
-    WORKGROUP_AUTH_MODE_WIF_IMPERSONATION,
 )
 
 from tableauserverclient.server import (
@@ -149,6 +147,4 @@ __all__ = [
     "WebhookItem",
     "WeeklyInterval",
     "WorkbookItem",
-    "WORKGROUP_AUTH_MODE_WIF",
-    "WORKGROUP_AUTH_MODE_WIF_IMPERSONATION",
 ]
