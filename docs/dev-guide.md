@@ -208,7 +208,7 @@ to link them to each other in comments so it's clear they go together.
 
 To preview and run the documentation locally, these are the steps:
 
-1. Install [Ruby](https://www.ruby-lang.org/en/documentation/installation/) (v2.5.0 or higher).
+1. Install [Ruby](https://www.ruby-lang.org/en/documentation/installation/) v3.1.x. This matches what GitHub is currently using; higher versions can have package version problems.
 
 1. Install [Bundler](https://bundler.io/).
 
@@ -221,15 +221,34 @@ To preview and run the documentation locally, these are the steps:
 For more details, see the GitHub Pages topic on
 [testing locally](https://docs.github.com/en/pages/setting-up-a-github-pages-site-with-jekyll/testing-your-github-pages-site-locally-with-jekyll).
 
+### Link checking
+
+To run a link checker locally, this is one way to do it using the Python [linkchecker](https://github.com/linkchecker/linkchecker) project.
+
+First, start the local preview server:
+
+```bash
+bundle install # or bundle update
+bundle exec jekyll serve
+```
+
+Then, in another shell run the link checker:
+
+```bash
+uvx linkchecker --check-extern --no-warnings http://localhost:4000/server-client-python/ --ignore-url="tableau.github.io" --ignore-url="127.0.0.1"
+```
+
 ## Release process (maintainers)
 
 To do a release and publish a new version to [PyPI](https://pypi.org/project/tableauserverclient/),
 follow these steps:
 
-1. Do a `development` to `master` branch merge. This should be a regular merge
-   (not a squash) to ensure all individual commits are visible.
+1. Do a `development` to `master` branch merge. This should be a Merge commit
+   (not Squash or Rebase) to ensure all individual commits are visible in both
+   branches.
 
 1. (Optional) Do a test publish to PyPI without creating the next version tag.
+   Run the [Publish][] job and choosing the `development` branch.
    This will create a pre-release package with a version like `0.30.post0.dev`.
 
 1. On a local clone of the repo, create and push the tag for the *next* version
@@ -245,12 +264,40 @@ follow these steps:
    git push origin tag v0.31
    ```
 
-1. Publish the updated release to PyPI by running the [Publish](https://github.com/tableau/server-client-python/actions/workflows/publish-pypi.yml)
-   job and choosing the `master` branch.
-
-1. The job should just take a few minutes to complete, then check the updated
-   package exists on [PyPI](https://pypi.org/project/tableauserverclient/).
-
 1. Create a release in GitHub with the title like "v0.31" and release notes
    with changes from the last release. You can try the automatic generation
-   of notes, or just create a list of merged PR titles with reference PR numbers.
+   of notes, or create a list with your favorite AI agent (see below).
+
+1. Creating the release from the new tag should automatically start the publish
+   to PyPI. View the [Publish][] job to confirm the new version is running. If
+   you need or want to trigger one manually, choose the `master` branch.
+
+1. Ask another maintainer to approve the publish to PyPI step from the Publish
+   flow.
+
+1. After the final publishing step, check the updated
+   package exists on [PyPI](https://pypi.org/project/tableauserverclient/).
+
+[Publish]: https://github.com/tableau/server-client-python/actions/workflows/publish-pypi.yml
+
+### AI prompt for release notes
+
+```
+Generate draft release notes for this project. Use the template below. Replace "vNEW" with the new tag and "vOLD" with the prior one. For example we might have vNEW=v0.42 and vOLD=v0.41.
+
+Review all the merged pull requests from vOLD to current. Make a determination between new features and bug improvements. We can also create a category called Other for anything that doesn't fit the first two buckets. For each line item, give a bold summary, a link to the pull request, and then a short explanation.
+
+Markdown template follows:
+
+## vNEW Release Summary
+
+## New Features
+
+- **SVG format support for view images** (PR #1772) — sheet images can now be downloaded as SVG in addition to PNG
+
+## Bug Fixes
+
+- **Treat 409 errors as success on already-created jobs** (PR #1772) — recognize when the job the user wants to create already exists
+
+**Full Changelog**: https://github.com/tableau/server-client-python/compare/vOLD...vNEW
+```
