@@ -2,18 +2,37 @@
 ## Unreleased
 
 * Added Workload Identity Federation (WIF) support to the connection update
-  endpoints. `ConnectionItem` now has `workgroup_auth_mode` and
-  `auth_federation_service_account` string properties, which are emitted on
-  the `<connection>` payload by `workbooks.update_connection` /
-  `workbooks.update_connections` and `datasources.update_connection` /
-  `datasources.update_connections`. Set `workgroup_auth_mode` to one of the
-  new module-level constants `WORKGROUP_AUTH_MODE_WIF`
-  (`"workload-identity-federation"`, e.g. Snowflake) or
-  `WORKGROUP_AUTH_MODE_WIF_IMPERSONATION`
-  (`"workload-identity-federation-impersonation"`, e.g. Google BigQuery);
-  the service account email is required only for the impersonation mode.
-  Requires Tableau Server REST API 3.30+ and server-side WIF to be configured
-  and enabled on the site.
+  endpoints. `ConnectionItem` has two new string properties,
+  `workgroup_auth_mode` and `auth_federation_service_account`, that are
+  emitted on the `<connection>` payload by `workbooks.update_connection`,
+  `workbooks.update_connections`, `datasources.update_connection`,
+  `datasources.update_connections`, and `flows.update_connection`. The two
+  bulk endpoints also accept matching `workgroup_auth_mode` and
+  `auth_federation_service_account` keyword arguments and apply them to
+  every connection LUID in the request. Set `workgroup_auth_mode` to one of
+  the values on the new nested value set
+  `ConnectionItem.WorkgroupAuthMode`:
+  - `ConnectionItem.WorkgroupAuthMode.WIF` =
+    `"workload-identity-federation"` — direct WIF, e.g. Snowflake
+  - `ConnectionItem.WorkgroupAuthMode.WIF_IMPERSONATION` =
+    `"workload-identity-federation-impersonation"` — impersonation WIF,
+    e.g. Google BigQuery
+  Usage rules:
+  - Resend `workgroup_auth_mode` on every subsequent update of a WIF
+    connection; omitting it on a later update returns HTTP 400.
+  - Leave `auth_type` unset (or `"oauth"`) when sending a WIF mode; the
+    server derives the stored auth type from the mode.
+  - Set `auth_federation_service_account` only with `WIF_IMPERSONATION`.
+    The server rejects a service account with the direct `WIF` mode. TSC
+    does not validate this combination client-side.
+  - The server does not echo these attributes on GET responses today, so
+    `ConnectionItem.workgroup_auth_mode` and
+    `ConnectionItem.auth_federation_service_account` parsed from a response
+    will typically be `None` even when the connection is WIF-configured.
+  Requires Tableau Server REST API 3.30+ (Tableau Server release 26.3) with
+  WIF configured and enabled on the site. Older servers silently ignore
+  unknown connection attributes, so these fields are safe to leave unset on
+  pre-3.30 targets.
 * Bumped the urllib3 floor to 2.6.3 to pick up the fix for CVE-2026-21441
   (GHSA-38jv-5279-wg99, 8.9 High): urllib3's streaming decompression
   safeguards were bypassed when HTTP redirects were followed. TSC's manual
