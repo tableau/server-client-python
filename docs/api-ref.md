@@ -233,6 +233,8 @@ Name   |  Description
 `server_address`   |  The server address for the connection (host name for the Tableau Server).
 `server_port`   |  The port used for the connection.
 `connection_credentials` | The Connection Credentials object containing authentication details for the connection. Replaces username/password/embed_password when publishing a flow, document or workbook file in the request body.
+`workgroup_auth_mode` | (Optional) The Workload Identity Federation (WIF) auth mode for the connection. Set to one of the values on the `ConnectionItem.WorkgroupAuthMode` nested value set: `WIF` (`"workload-identity-federation"`, e.g. Snowflake direct WIF) or `WIF_IMPERSONATION` (`"workload-identity-federation-impersonation"`, e.g. Google BigQuery impersonation WIF). Requires REST API 3.30+ (Tableau Server release 26.3) with WIF configured on the site. Older servers silently ignore the attribute.
+`auth_federation_service_account` | (Optional) The service account email the server impersonates for WIF. Set this only together with `workgroup_auth_mode = WorkgroupAuthMode.WIF_IMPERSONATION`; the server rejects a service account alongside the direct `WIF` mode.
 
 Source file: models/connection_item.py
 
@@ -1724,13 +1726,42 @@ server.datasources.update_connection(datasource_item, conn)
 
 See [`samples/update_connection_auth.py`](https://github.com/tableau/server-client-python/blob/master/samples/update_connection_auth.py) for a runnable end-to-end example, and the REST API [authenticationType reference](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_data_sources.htm#update_data_source_connection) for the full list of supported values.
 
+**How-to: convert an existing connection to Workload Identity Federation (WIF)**
+
+As of REST API v3.30 (Tableau Server release 26.3), an existing connection on a WIF-configured site can be flipped to WIF authentication in place. Set `workgroup_auth_mode` on the `ConnectionItem` to one of the values on the `ConnectionItem.WorkgroupAuthMode` nested value set; for the impersonation mode, also set `auth_federation_service_account` to the service account email. The server derives the stored auth type from the mode, so leave `auth_type` unset or `"oauth"`.
+
+Direct WIF (e.g., Snowflake):
+
+```py
+server.datasources.populate_connections(datasource_item)
+conn = next(c for c in datasource_item.connections if c.connection_type == 'snowflake')
+conn.workgroup_auth_mode = TSC.ConnectionItem.WorkgroupAuthMode.WIF
+server.datasources.update_connection(datasource_item, conn)
+```
+
+Impersonation WIF (e.g., Google BigQuery):
+
+```py
+server.datasources.populate_connections(datasource_item)
+conn = next(c for c in datasource_item.connections if c.connection_type == 'googlebigquery')
+conn.workgroup_auth_mode = TSC.ConnectionItem.WorkgroupAuthMode.WIF_IMPERSONATION
+conn.auth_federation_service_account = 'sa@proj.iam.gserviceaccount.com'
+server.datasources.update_connection(datasource_item, conn)
+```
+
+Usage rules the server enforces:
+
+- Resend `workgroup_auth_mode` on every subsequent update of a WIF connection; omitting it on a later update returns HTTP 400.
+- Set `auth_federation_service_account` only with `WorkgroupAuthMode.WIF_IMPERSONATION`. The server rejects a service account alongside the direct `WIF` mode.
+- The server does not echo `workgroupAuthMode` or `authFederationServiceAccount` on connections-GET responses today, so `ConnectionItem.workgroup_auth_mode` and `ConnectionItem.auth_federation_service_account` parsed from a response will typically be `None` even when the connection is WIF-configured.
+
 <br>
 <br>
 
 #### datasources.update_connections
 
 ```py
-datasources.update_connections(datasource_item, connection_luids, authentication_type, username=None, password=None, embed_password=None)
+datasources.update_connections(datasource_item, connection_luids, authentication_type, username=None, password=None, embed_password=None, workgroup_auth_mode=None, auth_federation_service_account=None)
 ```
 
 Bulk updates one or more datasource connections by LUID.
@@ -1739,7 +1770,7 @@ REST API: [Update Data Source Connections](https://help.tableau.com/current/api/
 
 **Version**
 
-This endpoint is available with REST API version 3.26 and up.
+This endpoint is available with REST API version 3.26 and up. The `workgroup_auth_mode` and `auth_federation_service_account` parameters require REST API 3.30+ (Tableau Server release 26.3).
 
 **Parameters**
 
@@ -1747,10 +1778,12 @@ Name | Description
 :--- | :---
 `datasource_item` | The `DatasourceItem` containing the connections to update.
 `connection_luids` | An iterable of connection LUIDs (strings) to update.
-`authentication_type` | The authentication type to use (e.g., `'auth-keypair'`).
+`authentication_type` | The authentication type to use (e.g., `'auth-keypair'`). Leave unset or `"oauth"` when sending `workgroup_auth_mode`; the server derives the stored auth type from the WIF mode.
 `username` | (Optional) The username to set.
 `password` | (Optional) The password or secret to set.
 `embed_password` | (Optional) Whether to embed the password.
+`workgroup_auth_mode` | (Optional) WIF auth mode to apply to every LUID in the request. One of `ConnectionItem.WorkgroupAuthMode.WIF` or `ConnectionItem.WorkgroupAuthMode.WIF_IMPERSONATION`. Requires REST API 3.30+.
+`auth_federation_service_account` | (Optional) Service account email to apply to every LUID. Set only together with `WIF_IMPERSONATION`.
 
 **Returns**
 
@@ -1762,6 +1795,19 @@ Returns a list of updated `ConnectionItem` objects.
 server.datasources.populate_connections(datasource_item)
 luids = [conn.id for conn in datasource_item.connections]
 updated = server.datasources.update_connections(datasource_item, luids, 'auth-keypair', username='myuser', password='mysecret')
+```
+
+**Example — flip connections to WIF (impersonation):**
+
+```py
+server.datasources.populate_connections(datasource_item)
+luids = [conn.id for conn in datasource_item.connections if conn.connection_type == 'googlebigquery']
+updated = server.datasources.update_connections(
+    datasource_item, luids,
+    authentication_type='oauth',
+    workgroup_auth_mode=TSC.ConnectionItem.WorkgroupAuthMode.WIF_IMPERSONATION,
+    auth_federation_service_account='sa@proj.iam.gserviceaccount.com',
+)
 ```
 
 <br>
@@ -2932,6 +2978,8 @@ connection = flow.connections[0]
 connection.server_address = 'new-server.example.com'
 updated_connection = server.flows.update_connection(flow, connection)
 ```
+
+**Workload Identity Federation (WIF):** setting `connection_item.workgroup_auth_mode` (and, for impersonation, `connection_item.auth_federation_service_account`) emits the matching attributes on the request payload via the shared `Connection.update_req` builder. Server-side handling of WIF on flow connections is governed by the flow endpoint and may differ from workbook and datasource behavior.
 
 <br>
 <br>
@@ -10375,6 +10423,26 @@ connection.password = 'PASSWORD'
 server.workbooks.update_connection(workbook, connection)
 ```
 
+**How-to: convert an existing workbook connection to Workload Identity Federation (WIF)**
+
+As of REST API v3.30 (Tableau Server release 26.3), an existing connection on a WIF-configured site can be flipped to WIF authentication in place. Set `workgroup_auth_mode` on the `ConnectionItem` to one of the values on the `ConnectionItem.WorkgroupAuthMode` nested value set; for the impersonation mode, also set `auth_federation_service_account`. The server derives the stored auth type from the mode, so leave `auth_type` unset or `"oauth"`.
+
+```py
+# Direct WIF (e.g., Snowflake)
+server.workbooks.populate_connections(workbook)
+conn = next(c for c in workbook.connections if c.connection_type == 'snowflake')
+conn.workgroup_auth_mode = TSC.ConnectionItem.WorkgroupAuthMode.WIF
+server.workbooks.update_connection(workbook, conn)
+
+# Impersonation WIF (e.g., Google BigQuery)
+conn = next(c for c in workbook.connections if c.connection_type == 'googlebigquery')
+conn.workgroup_auth_mode = TSC.ConnectionItem.WorkgroupAuthMode.WIF_IMPERSONATION
+conn.auth_federation_service_account = 'sa@proj.iam.gserviceaccount.com'
+server.workbooks.update_connection(workbook, conn)
+```
+
+Resend `workgroup_auth_mode` on every subsequent update of a WIF connection; omitting it on a later update returns HTTP 400. Set `auth_federation_service_account` only with `WIF_IMPERSONATION` — the server rejects a service account alongside the direct `WIF` mode. The server does not echo these attributes on connections-GET responses today, so parsed values are typically `None`.
+
 <br>
 <br>
 
@@ -10774,12 +10842,16 @@ result = server.workbooks.schedule_extract_refresh('schedule-id-here', workbook)
 #### workbooks.update_connections
 
 ```py
-workbooks.update_connections(workbook_item, connection_luids, authentication_type, username=None, password=None, embed_password=None)
+workbooks.update_connections(workbook_item, connection_luids, authentication_type, username=None, password=None, embed_password=None, workgroup_auth_mode=None, auth_federation_service_account=None)
 ```
 
 Bulk updates one or more workbook connections by LUID, including the authentication type, username, password, and whether to embed the password.
 
 REST API: [Update Workbook Connections](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#update_workbook_connections)
+
+**Version**
+
+The `workgroup_auth_mode` and `auth_federation_service_account` parameters require REST API 3.30+ (Tableau Server release 26.3).
 
 **Parameters**
 
@@ -10787,10 +10859,12 @@ Name | Description
 :--- | :---
 `workbook_item` | The `WorkbookItem` containing the connections to update.
 `connection_luids` | An iterable of connection LUIDs (strings) to update.
-`authentication_type` | The authentication type to use (e.g., `'AD Service Principal'`).
+`authentication_type` | The authentication type to use (e.g., `'AD Service Principal'`). Leave unset or `"oauth"` when sending `workgroup_auth_mode`; the server derives the stored auth type from the WIF mode.
 `username` | (Optional) The username to set (e.g., client ID for keypair auth).
 `password` | (Optional) The password or secret to set.
 `embed_password` | (Optional) Whether to embed the password.
+`workgroup_auth_mode` | (Optional) WIF auth mode to apply to every LUID in the request. One of `ConnectionItem.WorkgroupAuthMode.WIF` or `ConnectionItem.WorkgroupAuthMode.WIF_IMPERSONATION`. Requires REST API 3.30+.
+`auth_federation_service_account` | (Optional) Service account email to apply to every LUID. Set only together with `WIF_IMPERSONATION`.
 
 **Returns**
 
@@ -10803,6 +10877,18 @@ workbook = server.workbooks.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
 server.workbooks.populate_connections(workbook)
 luids = [conn.id for conn in workbook.connections]
 updated = server.workbooks.update_connections(workbook, luids, 'UserNameAndPassword', username='myuser', password='mypassword', embed_password=True)
+```
+
+**Example — flip workbook connections to WIF (direct):**
+
+```py
+server.workbooks.populate_connections(workbook)
+luids = [conn.id for conn in workbook.connections if conn.connection_type == 'snowflake']
+updated = server.workbooks.update_connections(
+    workbook, luids,
+    authentication_type='oauth',
+    workgroup_auth_mode=TSC.ConnectionItem.WorkgroupAuthMode.WIF,
+)
 ```
 
 <br>
