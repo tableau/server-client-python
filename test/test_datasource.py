@@ -987,6 +987,8 @@ def test_synchronous_publish_timeout_error(server) -> None:
 
 
 def test_async_publish_timeout_error(server) -> None:
+    server.version = "3.0"
+
     with requests_mock.mock() as m:
         m.register_uri("POST", server.datasources.baseurl, status_code=504)
 
