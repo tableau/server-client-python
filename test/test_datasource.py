@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 import tempfile
 import unittest
+import unittest.mock
 from zipfile import ZipFile
 
 from defusedxml.ElementTree import fromstring

@@ -1,10 +1,8 @@
-from email.message import Message
 import copy
 import json
 import io
 import os
 
-from contextlib import closing
 from pathlib import Path
 from typing import Literal, TYPE_CHECKING, TypedDict, TypeVar, overload
 from collections.abc import Iterable, Sequence
@@ -18,7 +16,7 @@ if TYPE_CHECKING:
     from .schedules_endpoint import AddResponse
 
 from tableauserverclient.server.endpoint.dqw_endpoint import _DataQualityWarningEndpoint
-from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api, parameter_added_in
+from tableauserverclient.server.endpoint.endpoint import DownloadableMixin, QuerysetEndpoint, api, parameter_added_in
 from tableauserverclient.server.endpoint.exceptions import (
     DUPLICATE_EXTRACT_JOB_CODE,
     InternalServerError,
@@ -30,10 +28,8 @@ from tableauserverclient.server.endpoint.resource_tagger import TaggingMixin
 
 from tableauserverclient.config import ALLOWED_FILE_EXTENSIONS, BYTES_PER_MB, config
 from tableauserverclient.filesys_helpers import (
-    make_download_path,
     get_file_type,
     get_file_object_size,
-    to_filename,
 )
 from tableauserverclient.helpers.logging import logger
 from tableauserverclient.models import (
@@ -46,9 +42,7 @@ from tableauserverclient.models import (
 )
 from tableauserverclient.server import RequestFactory, RequestOptions
 
-io_types = (io.BytesIO, io.BufferedReader)
 io_types_r = (io.BytesIO, io.BufferedReader)
-io_types_w = (io.BytesIO, io.BufferedWriter)
 
 FilePath = str | os.PathLike
 FileObject = io.BufferedReader | io.BytesIO
@@ -101,7 +95,7 @@ HyperAction = HyperActionTable | HyperActionRow
 _UNSET = object()
 
 
-class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]):
+class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem], DownloadableMixin):
     def __init__(self, parent_srv: "Server") -> None:
         super().__init__(parent_srv)
         self._permissions = _PermissionsEndpoint(parent_srv, lambda: self.baseurl)
@@ -1061,22 +1055,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         if not include_extract:
             url += "?includeExtract=False"
 
-        with closing(self.get_request(url, parameters={"stream": True})) as server_response:
-            m = Message()
-            m["Content-Disposition"] = server_response.headers["Content-Disposition"]
-            filename = m.get_filename(failobj="")
-            if isinstance(filepath, io_types_w):
-                for chunk in server_response.iter_content(1024):  # 1KB
-                    filepath.write(chunk)
-                return_path = filepath
-            else:
-                filename = to_filename(os.path.basename(filename))
-                download_path = make_download_path(filepath, filename)
-                with open(download_path, "wb") as f:
-                    for chunk in server_response.iter_content(1024):  # 1KB
-                        f.write(chunk)
-                return_path = os.path.abspath(download_path)
-
+        return_path = self._download_content(url, filepath)
         logger.info(f"Downloaded datasource revision {revision_number} to {return_path} (ID: {datasource_id})")
         return return_path
 

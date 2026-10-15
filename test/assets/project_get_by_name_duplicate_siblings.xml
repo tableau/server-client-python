@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+    <pagination pageNumber="1" pageSize="100" totalAvailable="2" />
+    <projects>
+        <project id="cccccccc-0000-0000-0000-000000000001" name="Reports" description="" contentPermissions="ManagedByOwner" parentProjectId="1d0304cd-3796-429f-b815-7258370b9b74"><owner id="dd2239f6-ddf1-4107-981a-4cf94e415794" /></project>
+        <project id="dddddddd-0000-0000-0000-000000000002" name="Reports" description="" contentPermissions="ManagedByOwner" parentProjectId="1d0304cd-3796-429f-b815-7258370b9b74"><owner id="dd2239f6-ddf1-4107-981a-4cf94e415794" /></project>
+    </projects>
+</tsResponse>

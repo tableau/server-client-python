@@ -130,3 +130,10 @@ class FlowRunCancelledException(FlowRunFailedException):
 
 class UnsupportedAttributeError(TableauError):
     pass
+
+
+class RedirectError(TableauError):
+    # Raised when a manual redirect can't be followed safely or at all.
+    # Cases: missing Location header, HTTPS -> HTTP downgrade, redirect loop
+    # exceeding session.max_redirects. See Endpoint._follow_redirect_if_any.
+    pass

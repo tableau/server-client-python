@@ -1,12 +1,9 @@
 import xml.etree.ElementTree as ET
-from typing import Any, Callable, TypeVar, TYPE_CHECKING
+from typing import Any, Callable, Concatenate, ParamSpec, TypeVar, TYPE_CHECKING
 from collections.abc import Iterable
-
-from typing_extensions import ParamSpec
 
 from requests.packages.urllib3.fields import RequestField
 from requests.packages.urllib3.filepost import encode_multipart_formdata
-from typing_extensions import Concatenate
 
 from tableauserverclient.models import *
 
@@ -733,13 +730,13 @@ class SiteRequest:
                 site_item.custom_subscription_email_enabled
             ).lower()
         if site_item.custom_subscription_email is not None:
-            site_element.attrib["customSubscriptionEmail"] = str(site_item.custom_subscription_email).lower()
+            site_element.attrib["customSubscriptionEmail"] = str(site_item.custom_subscription_email)
         if site_item.custom_subscription_footer_enabled is not None:
             site_element.attrib["customSubscriptionFooterEnabled"] = str(
                 site_item.custom_subscription_footer_enabled
             ).lower()
         if site_item.custom_subscription_footer is not None:
-            site_element.attrib["customSubscriptionFooter"] = str(site_item.custom_subscription_footer).lower()
+            site_element.attrib["customSubscriptionFooter"] = str(site_item.custom_subscription_footer)
         if site_item.ask_data_mode is not None:
             site_element.attrib["askDataMode"] = str(site_item.ask_data_mode)
         if site_item.named_sharing_enabled is not None:
@@ -837,13 +834,13 @@ class SiteRequest:
                 site_item.custom_subscription_email_enabled
             ).lower()
         if site_item.custom_subscription_email is not None:
-            site_element.attrib["customSubscriptionEmail"] = str(site_item.custom_subscription_email).lower()
+            site_element.attrib["customSubscriptionEmail"] = str(site_item.custom_subscription_email)
         if site_item.custom_subscription_footer_enabled is not None:
             site_element.attrib["customSubscriptionFooterEnabled"] = str(
                 site_item.custom_subscription_footer_enabled
             ).lower()
         if site_item.custom_subscription_footer is not None:
-            site_element.attrib["customSubscriptionFooter"] = str(site_item.custom_subscription_footer).lower()
+            site_element.attrib["customSubscriptionFooter"] = str(site_item.custom_subscription_footer)
         if site_item.ask_data_mode is not None:
             site_element.attrib["askDataMode"] = str(site_item.ask_data_mode)
         if site_item.named_sharing_enabled is not None:

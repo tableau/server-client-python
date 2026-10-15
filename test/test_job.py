@@ -63,6 +63,53 @@ def test_get_by_id(server: TSC.Server) -> None:
         assert job_id == job.id
         assert updated_at == job.updated_at
         assert job.notes == ["Job detail notes"]
+        # Regression for #1850: the response also carries a <statusNotes><statusNote .../></statusNotes>
+        # block per the public REST doc. Verify it now surfaces via job.status_notes.
+        assert job.status_notes == [
+            {
+                "type": "CountOfUsersAddedToGroup",
+                "value": "5",
+                "text": "Description of how many users were added to the group during the import.",
+            }
+        ]
+
+
+def test_status_notes_empty_when_absent() -> None:
+    # A job element with no <statusNotes> yields an empty list, not None or an error.
+    xml = (
+        b"<tsResponse xmlns='http://tableau.com/api'>"
+        b"<job id='j1' type='extractRefreshJob' progress='100' createdAt='2020-05-13T20:23:45Z' finishCode='0'/>"
+        b"</tsResponse>"
+    )
+    jobs = TSC.JobItem.from_response(xml, {"t": "http://tableau.com/api"})
+    assert len(jobs) == 1
+    assert jobs[0].status_notes == []
+
+
+def test_status_notes_multiple_entries() -> None:
+    # Multiple statusNote elements yield an ordered list of dicts. Any of type /
+    # value / text may be absent on a given note; missing attributes come back as None.
+    xml = (
+        b"<tsResponse xmlns='http://tableau.com/api'>"
+        b"<job id='j1' type='UserImport' progress='100' createdAt='2020-05-13T20:23:45Z' finishCode='1'>"
+        b"<statusNotes>"
+        b"<statusNote type='line' value='0'/>"
+        b"<statusNote type='errorCode' value='1'/>"
+        b"<statusNote type='message' value='Actor does not have permission'/>"
+        b"<statusNote type='username' value='unknown'/>"
+        b"</statusNotes>"
+        b"</job>"
+        b"</tsResponse>"
+    )
+    jobs = TSC.JobItem.from_response(xml, {"t": "http://tableau.com/api"})
+    assert len(jobs) == 1
+    notes = jobs[0].status_notes
+    assert notes == [
+        {"type": "line", "value": "0", "text": None},
+        {"type": "errorCode", "value": "1", "text": None},
+        {"type": "message", "value": "Actor does not have permission", "text": None},
+        {"type": "username", "value": "unknown", "text": None},
+    ]
 
 
 def test_get_before_signin(server: TSC.Server) -> None:

@@ -1,6 +1,6 @@
 from defusedxml.ElementTree import fromstring, tostring
 from functools import singledispatch
-from typing import TypeVar, overload
+from typing import TypeVar, cast, overload
 
 # the redact method can handle either strings or bytes, but it can't mix them.
 # Generic type so we can write the actual logic once, then use singledispatch to
@@ -17,8 +17,9 @@ def _redact_any_type(xml: T, sensitive_word: T, replacement: T, encoding=None) -
         matches = root.findall(".//password")
         for item in matches:
             item.text = "********"
-        # tostring returns bytes unless an encoding value is passed
-        return tostring(root, encoding=encoding)
+        # tostring returns bytes unless an encoding value is passed; cast since
+        # the callers pass encoding="unicode" for str and None for bytes
+        return cast(T, tostring(root, encoding=encoding))
     except Exception:
         # something about the xml handling failed. Just cut off the text at the first occurrence of "password"
         location = xml.find(sensitive_word)
@@ -39,7 +40,7 @@ def _(xml: str) -> str:
 
 @redact_xml.register  # type: ignore[no-redef]
 def _(xml: bytes) -> bytes:
-    return _redact_any_type(bytearray(xml), b"password", b"..[redacted]")
+    return cast(bytes, _redact_any_type(xml, b"password", b"..[redacted]"))
 
 
 @overload
