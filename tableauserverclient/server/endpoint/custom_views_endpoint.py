@@ -1,14 +1,13 @@
 import io
 import logging
 import os
-from contextlib import closing
 from pathlib import Path
 from typing import TYPE_CHECKING
 from collections.abc import Iterator
 
 from tableauserverclient.config import BYTES_PER_MB, config
 from tableauserverclient.filesys_helpers import get_file_object_size
-from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
+from tableauserverclient.server.endpoint.endpoint import DownloadableMixin, QuerysetEndpoint, api
 from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
 from tableauserverclient.models import CustomViewItem, PaginationItem
 from tableauserverclient.server import (
@@ -42,7 +41,7 @@ io_types_r = (io.BufferedReader, io.BytesIO)
 io_types_w = (io.BufferedWriter, io.BytesIO)
 
 
-class CustomViews(QuerysetEndpoint[CustomViewItem]):
+class CustomViews(QuerysetEndpoint[CustomViewItem], DownloadableMixin):
     def __init__(self, parent_srv):
         super().__init__(parent_srv)
 
@@ -229,9 +228,7 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
         self, custom_view_item: CustomViewItem, req_options: "CSVRequestOptions | None"
     ) -> Iterator[bytes]:
         url = f"{self.baseurl}/{custom_view_item.id}/data"
-
-        with closing(self.get_request(url, request_object=req_options, parameters={"stream": True})) as server_response:
-            yield from server_response.iter_content(1024)
+        return self._stream_content(url, req_options)
 
     @api(version="3.18")
     def update(self, view_item: CustomViewItem) -> CustomViewItem | None:
