@@ -52,10 +52,13 @@ class SiteItem:
         cause an error.
 
     tier_explorer_capacity: int
+        (Optional) The maximum number of licenses for users with the Explorer role allowed on a site.
+
     tier_creator_capacity: int
+        (Optional) The maximum number of licenses for users with the Creator role allowed on a site.
+
     tier_viewer_capacity: int
-        (Optional) The maximum number of licenses for users with the Creator,
-        Explorer, or Viewer role, respectively, allowed on a site.
+        (Optional) The maximum number of licenses for users with the Viewer role allowed on a site.
 
     storage_quota: int
         (Optional) Specifies the maximum amount of space for the new site, in
