@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from xml.etree.ElementTree import fromstring
 
 import pytest
 import requests_mock
@@ -10,7 +11,9 @@ from tableauserverclient.models.virtual_connection_item import VirtualConnection
 
 ASSET_DIR = Path(__file__).parent / "assets"
 
+VIRTUAL_CONNECTION_ADD_TAGS = ASSET_DIR / "virtual_connection_add_tags.xml"
 VIRTUAL_CONNECTION_GET_XML = ASSET_DIR / "virtual_connections_get.xml"
+VIRTUAL_CONNECTION_GET_WITH_TAGS_XML = ASSET_DIR / "virtual_connections_get_with_tags.xml"
 VIRTUAL_CONNECTION_POPULATE_CONNECTIONS = ASSET_DIR / "virtual_connection_populate_connections.xml"
 VIRTUAL_CONNECTION_POPULATE_CONNECTIONS2 = ASSET_DIR / "virtual_connection_populate_connections2.xml"
 VC_DB_CONN_UPDATE = ASSET_DIR / "virtual_connection_database_connection_update.xml"
@@ -46,6 +49,33 @@ def test_from_xml(server: TSC.Server) -> None:
     assert virtual_connection.name == "vconn"
     assert virtual_connection.updated_at == parse_datetime("2024-06-18T09:00:00Z")
     assert virtual_connection.webpage_url == "https://test/#/site/site-name/virtualconnections/3"
+    # Response element carries <tags> since Tableau Server 2026.2 (API 3.30);
+    # empty when the VC has no tags.
+    assert virtual_connection.tags == set()
+    assert virtual_connection._initial_tags == set()
+
+
+def test_from_xml_populated_tags(server: TSC.Server) -> None:
+    """When the response's <tags> element carries <tag label="..."/> children,
+    those values populate `tags` and `_initial_tags` so the diff-based
+    update_tags mixin can compute changes.
+    """
+    items = VirtualConnectionItem.from_response(VIRTUAL_CONNECTION_GET_WITH_TAGS_XML.read_bytes(), server.namespace)
+
+    assert len(items) == 2
+
+    with_tags = items[0]
+    assert with_tags.name == "vconn_with_tags"
+    assert with_tags.tags == {"finance", "certified"}
+    assert with_tags._initial_tags == {"finance", "certified"}
+    # _initial_tags is a copy: mutating tags after parse doesn't leak back
+    with_tags.tags.add("later-added")
+    assert with_tags._initial_tags == {"finance", "certified"}
+
+    without_tags = items[1]
+    assert without_tags.name == "vconn_no_tags"
+    assert without_tags.tags == set()
+    assert without_tags._initial_tags == set()
 
 
 def test_virtual_connection_get(server: TSC.Server) -> None:
@@ -113,7 +143,10 @@ def test_virtual_connection_get_by_id(server: TSC.Server) -> None:
 
     assert vconn.content
     assert vconn.created_at is None
-    assert vconn.id is None
+    # The server's Get Virtual Connection response omits the `id` attribute on
+    # the <virtualConnection> element, but get_by_id stamps it back from the
+    # request path so downstream tag/permission calls can find it.
+    assert vconn.id == "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
     assert "policyCollection" in vconn.content
     assert "revision" in vconn.content
 
@@ -238,6 +271,57 @@ def test_virtual_connection_publish_draft_overwrite(server: TSC.Server) -> None:
     assert vconn.content
     assert "policyCollection" in vconn.content
     assert "revision" in vconn.content
+
+
+def test_update_tags_diff_round_trip(server: TSC.Server) -> None:
+    """Diff-based update_tags computes add-set / remove-set from the item's
+    tags and _initial_tags and issues the right PUT / DELETE calls.
+
+    Simulates: server returned {a,b,c,d} at fetch time; caller mutated to
+    {a,c,e}. Expected calls: PUT /tags with {e} (the add-set, per
+    TaggingMixin.update_tags diff), DELETE /tags/b, DELETE /tags/d.
+    """
+    server.version = "3.30"  # update_tags requires 3.30 (see @api decorator)
+    vconn_id = "8fd7cc02-bb55-4d15-b8b1-9650239efe79"
+    tags_url = f"{server.virtual_connections.baseurl}/{vconn_id}/tags"
+    add_tags_response = VIRTUAL_CONNECTION_ADD_TAGS.read_text()
+    with requests_mock.mock() as m:
+        m.put(tags_url, text=add_tags_response)
+        m.delete(f"{tags_url}/b", status_code=204)
+        m.delete(f"{tags_url}/d", status_code=204)
+
+        vconn = VirtualConnectionItem("vconn")
+        vconn._id = vconn_id
+        vconn._initial_tags = {"a", "b", "c", "d"}
+        vconn.tags = {"a", "c", "e"}
+        server.virtual_connections.update_tags(vconn)
+
+        # add PUT + 2 deletes = 3 calls
+        assert m.call_count == 3, m.request_history
+
+        # TaggingMixin.update_tags does DELETEs first, then PUT for the
+        # add-set. Assert the two DELETEs target /tags/b and /tags/d
+        # (set-iteration order isn't guaranteed, so compare as a set)
+        # and the PUT is last.
+        delete_calls = [r for r in m.request_history if r.method == "DELETE"]
+        put_calls = [r for r in m.request_history if r.method == "PUT"]
+        assert len(delete_calls) == 2
+        assert len(put_calls) == 1
+        assert {r.url for r in delete_calls} == {f"{tags_url}/b", f"{tags_url}/d"}
+        assert m.request_history[-1].method == "PUT"
+        assert m.request_history[-1].url == tags_url
+
+        # The PUT body must carry exactly the add-set {"e"}. This is the
+        # test that catches the class of regression Copilot flagged as a
+        # docstring lie ("PUT with {a,c,e}") -- if update_tags started
+        # sending the full target set instead of the diff, or dropped the
+        # add-set entirely, the labels below would change.
+        put_body = put_calls[0].text
+        assert put_body is not None
+        root = fromstring(put_body)
+        # <tsRequest><tags><tag label="..."/>...</tags></tsRequest> - no namespace
+        labels = {tag.get("label") for tag in root.findall("./tags/tag")}
+        assert labels == {"e"}, put_body
 
 
 def test_add_permissions(server: TSC.Server) -> None:
