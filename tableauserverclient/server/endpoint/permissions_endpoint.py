@@ -6,13 +6,22 @@ from tableauserverclient.models import TableauItem, PermissionsRule
 from .endpoint import Endpoint
 from .exceptions import MissingRequiredFieldError
 
-from typing import Callable, TYPE_CHECKING
+from typing import Callable, Protocol, TYPE_CHECKING
 
 from tableauserverclient.helpers.logging import logger
 
 if TYPE_CHECKING:
     from ..server import Server
     from ..request_options import RequestOptions
+
+
+class _PermissibleItem(Protocol):
+    """Private protocol for items that support the permissions population pattern."""
+
+    @property
+    def id(self) -> str | None: ...
+
+    def _set_permissions(self, permissions: Callable) -> None: ...
 
 
 class _PermissionsEndpoint(Endpoint):
@@ -69,7 +78,7 @@ class _PermissionsEndpoint(Endpoint):
 
             logger.info(f"Deleted permission for {rule.grantee.tag_name} {rule.grantee.id} item {resource.id}")
 
-    def populate(self, item: TableauItem):
+    def populate(self, item: _PermissibleItem):
         if not item.id:
             error = "Server item is missing ID. Item must be retrieved from server first."
             raise MissingRequiredFieldError(error)

@@ -136,7 +136,7 @@ class WorkbookItem:
         self._webpage_url = None
         self._created_at = None
         self._id: str | None = None
-        self._initial_tags: set = set()
+        self._initial_tags: set[str] = set()
         self._pdf = None
         self._powerpoint = None
         self._preview_image = None
