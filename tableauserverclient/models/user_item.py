@@ -550,6 +550,16 @@ class UserItem:
                 line = csv_file.readline()
             return num_valid_lines, invalid_lines
 
+        # Single source of truth for "is this column (or, for a malformed row that
+        # shifted fields, anything at or after it) sensitive enough to mask before
+        # it reaches a log handler or an exposed invalid-lines entry." Both
+        # _redact_password_column (whole-line redaction) and
+        # _validate_import_line_or_throw (per-column debug logging) key off this
+        # instead of each re-deriving the PASS boundary independently.
+        @staticmethod
+        def _is_sensitive_column(column_index: int) -> bool:
+            return column_index >= UserItem.CSVImport.ColumnType.PASS.value
+
         # Return a copy of a raw CSV line with the password column replaced by "***".
         # Callers that log or expose invalid rows will not disclose the credential.
         # Preserves the original line ending (\r\n or \n) so log output and
@@ -601,7 +611,6 @@ class UserItem:
                 column = UserItem.CSVImport.ColumnType(i)
                 value = line[i]
                 valid = _valid_attributes[i]
-                column = UserItem.CSVImport.ColumnType(i)
                 # normalize case for fields with a restricted value set
                 skip_validation = False
                 if valid:
@@ -626,8 +635,8 @@ class UserItem:
                     else:
                         value = value.lower()
                 # A malformed row can shift password fragments into later columns;
-                # keep every field after the username out of the logs.
-                safe_value = value if column.value < UserItem.CSVImport.ColumnType.PASS.value else "***"
+                # keep every field at or after PASS out of the logs.
+                safe_value = "***" if UserItem.CSVImport._is_sensitive_column(column.value) else value
                 logger.debug(f"column {column.name}: {safe_value}")
                 # Never call _validate_attribute_value for PASS: its ValueError
                 # embeds the raw value, and a future PR that adds password-format
