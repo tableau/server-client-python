@@ -36,14 +36,16 @@ class Config:
     # Bounds: values <= 0 or non-numeric input are treated as invalid and fall
     # back to the 1 MB default; 0 or a negative chunk size would silently
     # corrupt the output because iter_content interprets it as "read all".
+    _DOWNLOAD_CHUNK_SIZE_MB_DEFAULT = 1
+
     @property
     def DOWNLOAD_CHUNK_SIZE_MB(self) -> int:
-        raw = os.getenv("TSC_DOWNLOAD_CHUNK_SIZE_MB", "1")
+        raw = os.getenv("TSC_DOWNLOAD_CHUNK_SIZE_MB", str(self._DOWNLOAD_CHUNK_SIZE_MB_DEFAULT))
         try:
             value = int(raw)
         except ValueError:
             # invalid env value; fall back to default
-            value = 1
+            value = self._DOWNLOAD_CHUNK_SIZE_MB_DEFAULT
         return max(1, value)
 
     # Default page size
