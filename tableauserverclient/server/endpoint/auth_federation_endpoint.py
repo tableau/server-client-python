@@ -153,8 +153,8 @@ class AuthFederation(Endpoint):
         """
         List every WIF connector registered on the site. Returns an empty list
         if WIF is enabled but has no connectors. If WIF is not enabled on the
-        site, the server raises a precondition error (surfaced as
-        ``ServerResponseError``) — call ``enable()`` first.
+        site, the server returns HTTP 404 (surfaced as ``ServerResponseError``)
+        — call ``enable()`` first.
 
         Returns
         -------
