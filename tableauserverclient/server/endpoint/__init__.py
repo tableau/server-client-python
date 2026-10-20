@@ -1,4 +1,5 @@
 from tableauserverclient.server.endpoint.auth_endpoint import Auth
+from tableauserverclient.server.endpoint.auth_federation_endpoint import AuthFederation
 from tableauserverclient.server.endpoint.custom_views_endpoint import CustomViews
 from tableauserverclient.server.endpoint.data_acceleration_report_endpoint import DataAccelerationReport
 from tableauserverclient.server.endpoint.data_alert_endpoint import DataAlerts
@@ -35,6 +36,7 @@ from tableauserverclient.server.endpoint.workbooks_endpoint import Workbooks
 
 __all__ = [
     "Auth",
+    "AuthFederation",
     "CustomViews",
     "DataAccelerationReport",
     "DataAlerts",

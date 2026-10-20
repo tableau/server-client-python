@@ -1,6 +1,33 @@
 
 ## Unreleased
 
+* Added Workload Identity Federation (WIF) admin REST API support
+  (`server.auth_federation`). Site admins can now manage the WIF config and
+  its signing keys and connectors from TSC. New endpoints:
+  - `server.auth_federation.get()` -> `AuthFederationItem` — read the
+    site's WIF admin config (enabled flag, issuer URL, active key id,
+    JWT lifetime, connectors)
+  - `server.auth_federation.enable(config)` -> `AuthFederationItem` —
+    idempotent PUT; `AuthFederationItem.enabled` must be `True`
+  - `server.auth_federation.update(config)` -> `AuthFederationItem` —
+    merge-patch; only `token_lifetime_seconds` is mutable
+  - `server.auth_federation.delete()` — deletes the WIF config along
+    with every signing key and connector on the site
+  - `server.auth_federation.create_connector(connector)` -> `AuthFederationConnectorItem`
+  - `server.auth_federation.list_connectors()` -> `list[AuthFederationConnectorItem]`
+  - `server.auth_federation.get_connector(id)` and
+    `server.auth_federation.delete_connector(id)` accept either a connector
+    LUID string or an `AuthFederationConnectorItem` with `luid` set
+  - `server.auth_federation.create_key()` -> `AuthFederationKeyItem` —
+    generates a new (inactive) signing key; private key is never returned
+  - `server.auth_federation.activate_key(id)` /
+    `server.auth_federation.deactivate_key(id)` /
+    `server.auth_federation.delete_key(id)` accept either a `kid` string
+    or an `AuthFederationKeyItem` with `kid` set; `activate_key` is atomic
+    and deactivates any previously active key
+  Three new exports: `AuthFederationItem`, `AuthFederationConnectorItem`,
+  `AuthFederationKeyItem`. Requires Tableau Server REST API 3.30+
+  (Tableau Server release 26.3) and site-admin credentials.
 * Added Workload Identity Federation (WIF) support to the connection update
   endpoints. `ConnectionItem` has two new string properties,
   `workgroup_auth_mode` and `auth_federation_service_account`, that are

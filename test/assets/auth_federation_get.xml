@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<tsResponse
+  xmlns="http://tableau.com/api"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://tableau.com/api https://help.tableau.com/samples/en-us/rest_api/ts-api_3_30.xsd">
+  <authFederationAdmin
+    enabled="true"
+    issuerUrl="https://10ax.online.tableau.com/sites/mySite/auth-federation"
+    activeKeyId="a4b9c2d7-ff81-45e8-9c3e-6b19d2a5c0ee"
+    tokenLifetimeSeconds="3600">
+    <connectors>
+      <connector
+        luid="d3a8e5b2-7c01-4e13-9c82-6f45a9b4e8d1"
+        connectorClass="bigquery"
+        audience="//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/tableau-pool/providers/tableau-provider"/>
+      <connector
+        luid="aa21fe8b-6c34-4d9d-8b7a-0e21c89fbd12"
+        connectorClass="snowflake"
+        audience="snowflakecomputing.com"/>
+    </connectors>
+  </authFederationAdmin>
+</tsResponse>
