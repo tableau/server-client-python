@@ -1,4 +1,5 @@
-from typing import Protocol, TYPE_CHECKING, Union
+import uuid
+from typing import Protocol, TYPE_CHECKING
 
 from tableauserverclient.models.auth_federation_item import (
     AuthFederationConnectorItem,
@@ -22,19 +23,50 @@ class HasKid(Protocol):
     def kid(self) -> str | None: ...
 
 
-ConnectorIdentifier = Union[str, HasLuid]
-KeyIdentifier = Union[str, HasKid]
+ConnectorIdentifier = str | HasLuid
+KeyIdentifier = str | HasKid
+
+
+def _coerce_uuid(target: object) -> str:
+    """Validate ``target`` is a UUID and return its canonical string form.
+
+    Guards every id-taking method against path injection: without this, a
+    caller could pass ``"../../admin"`` and delete the entire WIF config via
+    the key-delete route.
+    """
+    try:
+        return str(uuid.UUID(str(target)))
+    except (ValueError, AttributeError, TypeError) as e:
+        raise ValueError(f"Invalid UUID: {target!r}") from e
 
 
 class AuthFederation(Endpoint):
     """
     Workload Identity Federation (WIF) admin configuration for a Tableau Cloud
-    site. Lets a site admin enable WIF, manage the signing keys that mint JWTs
-    for cloud-provider federation, and register the connectors (BigQuery,
-    Snowflake, ...) that each JWT is scoped to. Requires REST API version 3.30
-    (Tableau Server 2026.3) or later.
+    / Tableau Server site. Lets a site admin enable WIF, manage the signing
+    keys that mint JWTs for cloud-provider federation, and register the
+    connectors (BigQuery, Snowflake, ...) that each JWT is scoped to. Requires
+    REST API version 3.30 (Tableau Server 2026.3) or later.
 
-    REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_auth_federation.htm
+    All methods require the caller to be a Site Administrator on the current
+    site; the server returns HTTP 403 (``ServerResponseError``) for non-admin
+    callers. Beyond ``get()`` and ``enable()``, every method also requires
+    WIF to be enabled on the site — call ``enable()`` first, otherwise the
+    server returns HTTP 404.
+
+    The four key-management methods (``create_key``, ``activate_key``,
+    ``deactivate_key``, ``delete_key``) are bound to ``OAuthScopes.NO_ACCESS``
+    server-side, which means every OAuth-scoped session is rejected
+    unconditionally — including every PAT session, regardless of granted
+    scopes. Authenticate with a username/password session to call them. The
+    config and connector methods accept the
+    ``tableau:connectivity_auth_federation:*`` OAuth scopes.
+
+    ``delete()`` permanently removes the config, every signing key, and every
+    connector on the site; re-enabling with ``enable()`` starts from a clean
+    slate — prior connectors and keys are not restored, and any existing
+    datasource / workbook connections that reference WIF stay broken until
+    each connector is re-created.
     """
 
     def __init__(self, server: "Server") -> None:
@@ -49,9 +81,9 @@ class AuthFederation(Endpoint):
     @api(version="3.30")
     def get(self) -> AuthFederationItem:
         """
-        Get the WIF admin config for the currently authenticated Tableau Cloud
-        site. A site that has never enabled WIF returns a default item with
-        enabled=False rather than raising a 404.
+        Get the WIF admin config for the currently authenticated site. A site
+        that has never enabled WIF returns a default item with
+        ``enabled=False`` rather than raising a 404.
 
         Returns
         -------
@@ -61,66 +93,64 @@ class AuthFederation(Endpoint):
         return AuthFederationItem.from_response(response.content, self.parent_srv.namespace)
 
     @api(version="3.30")
-    def enable(self, config: AuthFederationItem) -> AuthFederationItem:
+    def enable(self, token_lifetime_seconds: int | None = None) -> AuthFederationItem:
         """
-        Enable WIF for the currently authenticated Tableau Cloud site. The
-        operation is idempotent: calling enable on an already-enabled site
-        returns the current config. The request body must set enabled=True;
-        use delete() to turn WIF off.
+        Enable WIF for the currently authenticated site. Idempotent: calling
+        enable on an already-enabled site returns the current config.
 
         On first enable (not on subsequent idempotent calls), the server
-        auto-generates one active signing key and populates
-        ``active_key_id`` on the returned item, so a caller does not need
-        to immediately ``create_key`` + ``activate_key``.
+        auto-generates one active signing key and populates ``active_key_id``
+        on the returned item, so a caller does not need to immediately
+        ``create_key`` + ``activate_key``.
 
         Parameters
         ----------
-        config : AuthFederationItem
-            Must have enabled=True. ``token_lifetime_seconds`` is optional and
-            applied if provided. All other fields on the item are ignored on
-            enable (issuer_url and active_key_id are server-assigned).
+        token_lifetime_seconds : int | None
+            Optional JWT lifetime in seconds. ``None`` leaves the server
+            default in place (or, on an already-enabled site, keeps whatever
+            lifetime is currently configured).
 
         Returns
         -------
         AuthFederationItem
             The current WIF admin config.
         """
-        if not config.enabled:
-            raise ValueError("AuthFederation.enable requires config.enabled=True; use delete() to disable WIF.")
-        req = RequestFactory.AuthFederation.enable_req(config)
+        req = RequestFactory.AuthFederation.enable_req(token_lifetime_seconds=token_lifetime_seconds)
         response = self.put_request(self.baseurl, req)
         return AuthFederationItem.from_response(response.content, self.parent_srv.namespace)
 
     @api(version="3.30")
-    def update(self, config: AuthFederationItem) -> AuthFederationItem:
+    def update(self, token_lifetime_seconds: int | None = None) -> AuthFederationItem:
         """
         Merge-patch the mutable fields of the WIF admin config. Only
-        ``token_lifetime_seconds`` is mutable; any other fields set on the
-        item (``issuer_url``, ``active_key_id``, ``connectors``) are silently
-        ignored by the server. ``enabled`` is also silently dropped on the
-        wire — use ``enable()`` / ``delete()`` to change WIF state.
+        ``token_lifetime_seconds`` is mutable; ``enabled``, ``issuer_url``,
+        ``active_key_id``, and ``connectors`` are not — use ``enable()`` /
+        ``delete()`` to change WIF state and the connector / key endpoints
+        to manage those resources. Returns HTTP 404 if WIF has never been
+        enabled on the site.
 
         Parameters
         ----------
-        config : AuthFederationItem
-            Patch document. Fields set to None are not sent.
+        token_lifetime_seconds : int | None
+            New JWT lifetime in seconds. ``None`` sends an empty patch (no
+            fields changed) — rarely useful, but accepted by the server.
 
         Returns
         -------
         AuthFederationItem
             The updated WIF admin config.
         """
-        req = RequestFactory.AuthFederation.update_req(config)
+        req = RequestFactory.AuthFederation.update_req(token_lifetime_seconds=token_lifetime_seconds)
         response = self.patch_request(self.baseurl, req)
         return AuthFederationItem.from_response(response.content, self.parent_srv.namespace)
 
     @api(version="3.30")
     def delete(self) -> None:
         """
-        Delete the WIF admin config, all signing keys, and all connectors for
-        the currently authenticated site. Any datasource or workbook connections
-        on the site that reference a WIF connector will no longer be able to
-        authenticate until WIF is re-enabled.
+        Delete the WIF admin config, every signing key, and every connector
+        on the site. Any datasource or workbook connections that reference a
+        WIF connector will no longer be able to authenticate until WIF is
+        re-enabled; the removed connectors and keys are not restored.
         """
         self.delete_request(self.baseurl)
 
@@ -131,12 +161,17 @@ class AuthFederation(Endpoint):
         """
         Register a new WIF connector on the site. The server assigns the
         connector's LUID. Fails with 409 if a connector with the same
-        connector_class already exists on the site.
+        ``connector_class`` already exists on the site.
 
         Parameters
         ----------
         connector : AuthFederationConnectorItem
             ``connector_class`` and ``audience`` are required.
+            ``connector_class`` must equal the Tableau connection class
+            exactly — what ``ConnectionItem.connection_type`` reports for the
+            connector (e.g. ``"bigquery"``, ``"snowflake"``). Class names
+            are case-sensitive; use the exact lowercase class name of the
+            connector.
 
         Returns
         -------
@@ -179,7 +214,7 @@ class AuthFederation(Endpoint):
         -------
         AuthFederationConnectorItem
         """
-        target = getattr(connector, "luid", connector)
+        target = _coerce_uuid(getattr(connector, "luid", connector))
         url = f"{self.baseurl}/connectors/{target}"
         response = self.get_request(url)
         return AuthFederationConnectorItem.from_response(response.content, self.parent_srv.namespace)
@@ -187,9 +222,14 @@ class AuthFederation(Endpoint):
     @api(version="3.30")
     def delete_connector(self, connector: ConnectorIdentifier) -> None:
         """
-        Delete a WIF connector by LUID. Idempotent: returns normally even if
-        the connector does not exist. Existing site connections that reference
-        the removed connector are orphaned, not cascade-deleted.
+        Delete a WIF connector by LUID. Idempotent on an unknown but
+        well-formed LUID (the server returns 204 even if no such connector
+        exists) — but only when WIF is enabled on the site; otherwise the
+        server returns a WIF-not-enabled error. Client-side UUID validation
+        rejects a malformed id before any HTTP call.
+
+        Existing site connections that reference the removed connector are
+        orphaned, not cascade-deleted.
 
         Parameters
         ----------
@@ -197,7 +237,7 @@ class AuthFederation(Endpoint):
             The connector LUID, or an ``AuthFederationConnectorItem`` whose
             ``luid`` is set.
         """
-        target = getattr(connector, "luid", connector)
+        target = _coerce_uuid(getattr(connector, "luid", connector))
         url = f"{self.baseurl}/connectors/{target}"
         self.delete_request(url)
 
@@ -234,7 +274,7 @@ class AuthFederation(Endpoint):
             The key ID (``kid``), or an ``AuthFederationKeyItem`` whose ``kid``
             is set.
         """
-        target = getattr(key, "kid", key)
+        target = _coerce_uuid(getattr(key, "kid", key))
         url = f"{self.baseurl}/keys/{target}/activate"
         self.put_request(url)
 
@@ -251,7 +291,7 @@ class AuthFederation(Endpoint):
             The key ID (``kid``), or an ``AuthFederationKeyItem`` whose ``kid``
             is set.
         """
-        target = getattr(key, "kid", key)
+        target = _coerce_uuid(getattr(key, "kid", key))
         url = f"{self.baseurl}/keys/{target}/deactivate"
         self.put_request(url)
 
@@ -267,6 +307,6 @@ class AuthFederation(Endpoint):
             The key ID (``kid``), or an ``AuthFederationKeyItem`` whose ``kid``
             is set.
         """
-        target = getattr(key, "kid", key)
+        target = _coerce_uuid(getattr(key, "kid", key))
         url = f"{self.baseurl}/keys/{target}"
         self.delete_request(url)

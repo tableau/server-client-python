@@ -48,33 +48,37 @@ def test_auth_federation_get(server: TSC.Server) -> None:
 
 
 def test_auth_federation_get_defaults_when_never_enabled(server: TSC.Server) -> None:
+    # Server GET on a never-enabled site still returns ``issuerUrl`` and the
+    # default ``tokenLifetimeSeconds``; only ``activeKeyId`` and the
+    # ``<connectors>`` wrapper are absent.
     default_body = (
-        '<tsResponse xmlns="http://tableau.com/api">' '<authFederationAdmin enabled="false"/>' "</tsResponse>"
+        '<tsResponse xmlns="http://tableau.com/api">'
+        '<authFederationAdmin enabled="false" '
+        'issuerUrl="https://10ax.online.tableau.com/sites/mySite/auth-federation" '
+        'tokenLifetimeSeconds="3600"/>'
+        "</tsResponse>"
     )
     with requests_mock.mock() as m:
         m.get(server.auth_federation.baseurl, text=default_body)
         config = server.auth_federation.get()
 
     assert config.enabled is False
-    assert config.issuer_url is None
+    assert config.issuer_url == "https://10ax.online.tableau.com/sites/mySite/auth-federation"
     assert config.active_key_id is None
-    assert config.token_lifetime_seconds is None
+    assert config.token_lifetime_seconds == 3600
     assert config.connectors == []
 
 
 def test_auth_federation_enable(server: TSC.Server) -> None:
-    config_in = TSC.AuthFederationItem()
-    config_in.enabled = True
-    config_in.token_lifetime_seconds = 3600
-
     with requests_mock.mock() as m:
         m.put(server.auth_federation.baseurl, text=ENABLE.read_text())
-        config_out = server.auth_federation.enable(config_in)
+        config_out = server.auth_federation.enable(token_lifetime_seconds=3600)
         body = m.request_history[0].text
 
-    sent = fromstring(body)
-    elem = sent.find("authFederationAdmin")
-    assert elem is not None
+    # WIF admin controller binds the body as a bare AuthFederationConfigType;
+    # the request MUST NOT be wrapped in <tsRequest>.
+    elem = fromstring(body)
+    assert elem.tag == "authFederationAdmin"
     assert elem.get("enabled") == "true"
     assert elem.get("tokenLifetimeSeconds") == "3600"
     assert elem.find("connectors") is None
@@ -85,48 +89,50 @@ def test_auth_federation_enable(server: TSC.Server) -> None:
 
 
 def test_auth_federation_enable_without_token_lifetime(server: TSC.Server) -> None:
-    config_in = TSC.AuthFederationItem()
-    config_in.enabled = True
-
     with requests_mock.mock() as m:
         m.put(server.auth_federation.baseurl, text=ENABLE.read_text())
-        server.auth_federation.enable(config_in)
+        server.auth_federation.enable()
         body = m.request_history[0].text
 
-    elem = fromstring(body).find("authFederationAdmin")
-    assert elem is not None
+    elem = fromstring(body)
+    assert elem.tag == "authFederationAdmin"
     assert elem.get("enabled") == "true"
     assert "tokenLifetimeSeconds" not in elem.attrib
 
 
-def test_auth_federation_enable_rejects_disabled(server: TSC.Server) -> None:
-    config_in = TSC.AuthFederationItem()
-    config_in.enabled = False
-
-    with pytest.raises(ValueError, match="enabled=True"):
-        server.auth_federation.enable(config_in)
-
-
 def test_auth_federation_update(server: TSC.Server) -> None:
-    config_in = TSC.AuthFederationItem()
-    config_in.token_lifetime_seconds = 7200
-    config_in.issuer_url = "ignored-by-server"
-    config_in.active_key_id = "ignored-by-server"
-
     with requests_mock.mock() as m:
         m.patch(server.auth_federation.baseurl, text=UPDATE.read_text())
-        config_out = server.auth_federation.update(config_in)
+        config_out = server.auth_federation.update(token_lifetime_seconds=7200)
         body = m.request_history[0].text
 
-    elem = fromstring(body).find("authFederationAdmin")
-    assert elem is not None
+    elem = fromstring(body)
+    assert elem.tag == "authFederationAdmin"
     assert elem.get("tokenLifetimeSeconds") == "7200"
-    # Read-only fields must not be sent; the server would ignore them anyway,
-    # but we don't want the client to pretend they're mutable.
+    # ``enabled`` must never be sent on PATCH — the server rejects a merge
+    # patch that includes it.
+    assert "enabled" not in elem.attrib
+    # Read-only fields must not be sent either.
     assert "issuerUrl" not in elem.attrib
     assert "activeKeyId" not in elem.attrib
 
     assert config_out.token_lifetime_seconds == 7200
+
+
+def test_auth_federation_update_empty_patch(server: TSC.Server) -> None:
+    # This exercises the client wire shape only. Whether the server binds an
+    # empty ``<authFederationAdmin/>`` as a non-null ``AuthFederationConfigType``
+    # with every field null (a no-op merge-patch) or as a null body (400) must
+    # be covered by a server-side integration test — not here.
+    with requests_mock.mock() as m:
+        m.patch(server.auth_federation.baseurl, text=UPDATE.read_text())
+        server.auth_federation.update()
+        body = m.request_history[0].text
+
+    elem = fromstring(body)
+    assert elem.tag == "authFederationAdmin"
+    assert "enabled" not in elem.attrib
+    assert "tokenLifetimeSeconds" not in elem.attrib
 
 
 def test_auth_federation_delete(server: TSC.Server) -> None:
@@ -150,8 +156,8 @@ def test_auth_federation_create_connector(server: TSC.Server) -> None:
         connector_out = server.auth_federation.create_connector(connector_in)
         body = m.request_history[0].text
 
-    elem = fromstring(body).find("authFederationConnector")
-    assert elem is not None
+    elem = fromstring(body)
+    assert elem.tag == "authFederationConnector"
     assert elem.get("connectorClass") == "bigquery"
     assert elem.get("audience") == connector_in.audience
     assert "luid" not in elem.attrib
@@ -285,6 +291,17 @@ def test_auth_federation_deactivate_key(server: TSC.Server) -> None:
     assert m.called_once
 
 
+def test_auth_federation_deactivate_key_by_item(server: TSC.Server) -> None:
+    stub = TSC.AuthFederationKeyItem()
+    stub.kid = KEY_KID
+
+    with requests_mock.mock() as m:
+        m.put(f"{server.auth_federation.baseurl}/keys/{KEY_KID}/deactivate", status_code=204)
+        server.auth_federation.deactivate_key(stub)
+
+    assert m.called_once
+
+
 def test_auth_federation_delete_key(server: TSC.Server) -> None:
     with requests_mock.mock() as m:
         m.delete(f"{server.auth_federation.baseurl}/keys/{KEY_KID}", status_code=204)
@@ -293,7 +310,62 @@ def test_auth_federation_delete_key(server: TSC.Server) -> None:
     assert m.called_once
 
 
-def test_auth_federation_requires_server_version_3_30(server: TSC.Server) -> None:
+def test_auth_federation_delete_key_by_item(server: TSC.Server) -> None:
+    stub = TSC.AuthFederationKeyItem()
+    stub.kid = KEY_KID
+
+    with requests_mock.mock() as m:
+        m.delete(f"{server.auth_federation.baseurl}/keys/{KEY_KID}", status_code=204)
+        server.auth_federation.delete_key(stub)
+
+    assert m.called_once
+
+
+# -- UUID path-injection guard -------------------------------------------------
+
+_UUID_METHODS = [
+    "get_connector",
+    "delete_connector",
+    "activate_key",
+    "deactivate_key",
+    "delete_key",
+]
+
+
+@pytest.mark.parametrize("method_name", _UUID_METHODS)
+@pytest.mark.parametrize("bad_target", ["../../admin", "not-a-uuid", "a4b9c2d7", "", "d3a8e5b2-7c01-4e13-9c82"])
+def test_auth_federation_rejects_non_uuid_target(server: TSC.Server, method_name: str, bad_target: str) -> None:
+    method = getattr(server.auth_federation, method_name)
+    with requests_mock.mock() as m:
+        m.register_uri(requests_mock.ANY, requests_mock.ANY)
+        with pytest.raises(ValueError, match="Invalid UUID"):
+            method(bad_target)
+        assert not m.called  # must reject before any HTTP call
+
+
+# -- Version gate --------------------------------------------------------------
+
+_V3_30_METHODS = [
+    ("get", (), {}),
+    ("enable", (), {"token_lifetime_seconds": 3600}),
+    ("update", (), {"token_lifetime_seconds": 7200}),
+    ("delete", (), {}),
+    ("create_connector", (TSC.AuthFederationConnectorItem(),), {}),
+    ("list_connectors", (), {}),
+    ("get_connector", (CONNECTOR_LUID,), {}),
+    ("delete_connector", (CONNECTOR_LUID,), {}),
+    ("create_key", (), {}),
+    ("activate_key", (KEY_KID,), {}),
+    ("deactivate_key", (KEY_KID,), {}),
+    ("delete_key", (KEY_KID,), {}),
+]
+
+
+@pytest.mark.parametrize("method_name,args,kwargs", _V3_30_METHODS, ids=[m[0] for m in _V3_30_METHODS])
+def test_auth_federation_requires_server_version_3_30(
+    server: TSC.Server, method_name: str, args: tuple, kwargs: dict
+) -> None:
     server.version = "3.29"
+    method = getattr(server.auth_federation, method_name)
     with pytest.raises(EndpointUnavailableError):
-        server.auth_federation.get()
+        method(*args, **kwargs)

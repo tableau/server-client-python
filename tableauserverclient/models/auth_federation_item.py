@@ -1,5 +1,7 @@
 from defusedxml.ElementTree import fromstring
 
+from tableauserverclient.helpers.strings import nullable_str_to_bool, nullable_str_to_int
+
 
 class AuthFederationConnectorItem:
     def __init__(self) -> None:
@@ -37,7 +39,7 @@ class AuthFederationConnectorItem:
         root = fromstring(raw_xml)
         list_elem = root.find("t:authFederationConnectors", namespaces=ns)
         if list_elem is None:
-            return []
+            raise ValueError("No authFederationConnectors element found in the XML.")
         return [cls.from_element(c) for c in list_elem.findall("t:connector", namespaces=ns)]
 
 
@@ -51,7 +53,7 @@ class AuthFederationKeyItem:
         self.e: str | None = None
 
     def __str__(self) -> str:
-        return f"{self.__class__.__qualname__}(kid={self.kid}, kty={self.kty}, " f"alg={self.alg}, use={self.use})"
+        return f"{self.__class__.__qualname__}(kid={self.kid}, kty={self.kty}, alg={self.alg}, use={self.use})"
 
     def __repr__(self) -> str:
         return f"<{str(self)}>"
@@ -102,12 +104,10 @@ class AuthFederationItem:
         if elem is None:
             raise ValueError("No authFederationAdmin element found in the XML.")
         config = cls()
-        config.enabled = _str_to_bool(elem.get("enabled", "false"))
+        config.enabled = nullable_str_to_bool(elem.get("enabled")) or False
         config.issuer_url = elem.get("issuerUrl")
         config.active_key_id = elem.get("activeKeyId")
-        token_lifetime = elem.get("tokenLifetimeSeconds")
-        if token_lifetime is not None:
-            config.token_lifetime_seconds = int(token_lifetime)
+        config.token_lifetime_seconds = nullable_str_to_int(elem.get("tokenLifetimeSeconds"))
         connectors_elem = elem.find("t:connectors", namespaces=ns)
         if connectors_elem is not None:
             config.connectors = [
@@ -115,7 +115,3 @@ class AuthFederationItem:
                 for c in connectors_elem.findall("t:connector", namespaces=ns)
             ]
         return config
-
-
-def _str_to_bool(s: str) -> bool:
-    return s == "true"
