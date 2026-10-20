@@ -54,8 +54,8 @@ class OwnedItem(TableauItem, Protocol):
     """Structural interface for TSC items that carry an owner reference.
 
     Structurally satisfied by WorkbookItem, DatasourceItem, ViewItem,
-    FlowItem, ProjectItem, and MetricItem -- every item class that exposes
-    an ``owner_id`` attribute.  Extends ``TableauItem``.
+    FlowItem, ProjectItem, MetricItem, and VirtualConnectionItem -- every
+    item class that exposes an ``owner_id`` attribute.  Extends ``TableauItem``.
 
     No concrete class needs to explicitly inherit from OwnedItem.  Protocol
     structural subtyping means any class that exposes the required attribute
