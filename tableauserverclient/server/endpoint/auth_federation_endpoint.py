@@ -92,7 +92,8 @@ class AuthFederation(Endpoint):
         Merge-patch the mutable fields of the WIF admin config. Only
         ``token_lifetime_seconds`` is mutable; any other fields set on the
         item (``issuer_url``, ``active_key_id``, ``connectors``) are silently
-        ignored by the server.
+        ignored by the server. ``enabled`` is also silently dropped on the
+        wire — use ``enable()`` / ``delete()`` to change WIF state.
 
         Parameters
         ----------
