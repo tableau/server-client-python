@@ -15,6 +15,8 @@ GET_XML_CLOUD = TEST_ASSET_DIR / "subscription_get_cloud.xml"
 GET_XML_CLOUD_NO_FREQ_DETAILS = TEST_ASSET_DIR / "subscription_get_cloud_no_frequency_details.xml"
 GET_XML_CLOUD_EMPTY_INTERVALS = TEST_ASSET_DIR / "subscription_get_cloud_empty_intervals.xml"
 GET_XML_CLOUD_BAD_HOURS = TEST_ASSET_DIR / "subscription_get_cloud_bad_hours.xml"
+GET_XML_CLOUD_NO_START = TEST_ASSET_DIR / "subscription_get_cloud_no_start.xml"
+GET_XML_CLOUD_HOURLY = TEST_ASSET_DIR / "subscription_get_cloud_hourly.xml"
 
 
 @pytest.fixture(scope="function")
@@ -246,3 +248,29 @@ def test_get_subscriptions_cloud_empty_intervals(server: TSC.Server) -> None:
     assert "Daily" == subscription.schedule.frequency
     assert subscription.schedule.interval_item is not None
     assert () == tuple(subscription.schedule.interval_item.interval)
+
+
+def test_get_subscriptions_cloud_frequency_details_without_start(server: TSC.Server) -> None:
+    """``<frequencyDetails>`` with ``intervals`` but no ``start`` must not abort the page."""
+    with requests_mock.mock() as m:
+        m.get(server.subscriptions.baseurl, text=GET_XML_CLOUD_NO_START.read_text())
+        all_subscriptions, _ = server.subscriptions.get()
+
+    assert 1 == len(all_subscriptions)
+    schedule = all_subscriptions[0].schedule
+    assert schedule is not None
+    assert "Daily" == schedule.frequency
+    # DailyInterval requires a start time; the missing one degrades to None.
+    assert schedule.interval_item is None
+
+
+def test_get_subscriptions_cloud_hourly_hours_are_numeric(server: TSC.Server) -> None:
+    """Hourly ``hours="3"`` is invalid and must degrade to None; ``hours="2"`` parses."""
+    with requests_mock.mock() as m:
+        m.get(server.subscriptions.baseurl, text=GET_XML_CLOUD_HOURLY.read_text())
+        all_subscriptions, _ = server.subscriptions.get()
+
+    invalid, valid = all_subscriptions
+    assert invalid.schedule.interval_item is None
+    assert valid.schedule.interval_item is not None
+    assert 2 in valid.schedule.interval_item.interval

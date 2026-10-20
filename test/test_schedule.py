@@ -231,7 +231,7 @@ def test_create_hourly(server: TSC.Server) -> None:
     assert TSC.ScheduleItem.ExecutionOrder.Parallel == new_schedule.execution_order
     assert time(2, 30) == new_schedule.interval_item.start_time
     assert time(23) == new_schedule.interval_item.end_time  # type: ignore[union-attr]
-    assert ("8",) == new_schedule.interval_item.interval  # type: ignore[union-attr]
+    assert (8.0,) == new_schedule.interval_item.interval  # type: ignore[union-attr]
 
 
 def test_create_daily(server: TSC.Server) -> None:

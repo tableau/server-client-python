@@ -243,7 +243,7 @@ class ScheduleItem:
                 _,
                 updated_at,
                 _,
-                _,
+                frequency,
                 next_run_at,
                 end_schedule_at,
                 execution_order,
@@ -263,6 +263,7 @@ class ScheduleItem:
                 execution_order=execution_order,
                 priority=priority,
                 interval_item=interval_item,
+                frequency=frequency,
             )
 
         return self
@@ -404,7 +405,7 @@ class ScheduleItem:
                     if i[0] == IntervalItem.Occurrence.Minutes:
                         converted_intervals.append(float(i[1]) / 60)
                     elif i[0] == IntervalItem.Occurrence.Hours:
-                        converted_intervals.append(i[1])
+                        converted_intervals.append(float(i[1]))
                     else:
                         converted_intervals.append(i[1])
 
