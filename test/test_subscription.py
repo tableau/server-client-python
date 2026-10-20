@@ -132,6 +132,30 @@ def test_create_rejects_empty_schedule_id(server: TSC.Server) -> None:
         server.subscriptions.create(sub)
 
 
+def test_create_rejects_whitespace_only_schedule_id(server: TSC.Server) -> None:
+    """A whitespace-only schedule_id is the same failure mode as None/empty:
+    truthiness alone lets it through, but it would still serialize as
+    <schedule id="   "/> and hit the same confusing wire-layer error.
+    """
+    target = TSC.Target("view-id", "view")
+    sub = TSC.SubscriptionItem("subject", "   ", "user-id", target)
+    with pytest.raises(ValueError, match="on_extract_refresh"):
+        server.subscriptions.create(sub)
+
+
+def test_create_req_rejects_whitespace_only_schedule_id(server: TSC.Server) -> None:
+    """RequestFactory.Subscription.create_req must reject a whitespace-only
+    schedule_id too, for callers who bypass Subscriptions.create() and use
+    the factory directly.
+    """
+    from tableauserverclient.server.request_factory import RequestFactory
+
+    target = TSC.Target("view-id", "view")
+    sub = TSC.SubscriptionItem("subject", "   ", "user-id", target)
+    with pytest.raises(ValueError, match="schedule_id is required"):
+        RequestFactory.Subscription.create_req(sub)
+
+
 def test_subscription_defaults_refresh_extract_triggered_false(server: TSC.Server) -> None:
     """A default SubscriptionItem does not opt into extract-refresh triggering."""
     target = TSC.Target("view-id", "view")
@@ -219,6 +243,19 @@ def test_update_rejects_missing_schedule_id(server: TSC.Server) -> None:
     sub = TSC.SubscriptionItem("subject", "sched-id", "user-id", target)
     sub._id = "existing-sub-id"  # type: ignore[assignment]
     sub.schedule_id = None
+    with pytest.raises(ValueError, match="schedule_id is required"):
+        server.subscriptions.update(sub)
+
+
+def test_update_rejects_whitespace_only_schedule_id(server: TSC.Server) -> None:
+    """Same failure mode as None: a whitespace-only schedule_id would pass a
+    truthiness check and reach RequestFactory, still producing a confusing
+    wire-layer error. update() must reject it explicitly.
+    """
+    target = TSC.Target("view-id", "view")
+    sub = TSC.SubscriptionItem("subject", "sched-id", "user-id", target)
+    sub._id = "existing-sub-id"  # type: ignore[assignment]
+    sub.schedule_id = "   "
     with pytest.raises(ValueError, match="schedule_id is required"):
         server.subscriptions.update(sub)
 

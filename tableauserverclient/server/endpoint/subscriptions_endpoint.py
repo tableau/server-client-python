@@ -41,12 +41,15 @@ class Subscriptions(Endpoint):
     @api(version="2.3")
     def create(self, subscription_item: SubscriptionItem) -> SubscriptionItem:
         if not subscription_item:
-            error = "No Susbcription provided"
+            error = "No Subscription provided"
             raise ValueError(error)
-        if not subscription_item.schedule_id:
+        if not (subscription_item.schedule_id or "").strip():
             # See tableau/server-client-python#1658: users trying to create an
             # "On Extract Refresh" subscription pass schedule_id=None and hit
-            # a confusing wire-layer error. Point them at the factory.
+            # a confusing wire-layer error. A whitespace-only id is the same
+            # failure in disguise -- it would still serialize and hit the
+            # same wire-layer error -- so reject it here too, not just None.
+            # Point them at the factory.
             raise ValueError(
                 "schedule_id is required; for on-extract-refresh subscriptions "
                 "use SubscriptionItem.on_extract_refresh(...)"
@@ -84,7 +87,7 @@ class Subscriptions(Endpoint):
             schedule_id = subscription_item.schedule.id
             if schedule_id is not None:
                 subscription_item.schedule_id = schedule_id
-        if not schedule_id:
+        if not (schedule_id or "").strip():
             raise ValueError(
                 "schedule_id is required to update a subscription. On Tableau "
                 "Cloud, subscriptions parsed from a GET response may inline the "

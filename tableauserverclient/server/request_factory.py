@@ -1356,14 +1356,15 @@ class SubscriptionRequest:
         # actionable error rather than the TypeError ElementTree raises when
         # attrib["id"] is set to None, and so python -O doesn't strip the
         # check entirely.
-        if subscription_item.schedule_id is None:
+        schedule_id = subscription_item.schedule_id
+        if schedule_id is None or not schedule_id.strip():
             raise ValueError(
                 "schedule_id is required to build a subscription create "
                 "request; for on-extract-refresh subscriptions use "
                 "SubscriptionItem.on_extract_refresh(...)"
             )
         schedule_element = ET.SubElement(subscription_element, "schedule")
-        schedule_element.attrib["id"] = subscription_item.schedule_id
+        schedule_element.attrib["id"] = schedule_id
 
         # User element
         user_element = ET.SubElement(subscription_element, "user")
