@@ -68,6 +68,11 @@ class AuthFederation(Endpoint):
         returns the current config. The request body must set enabled=True;
         use delete() to turn WIF off.
 
+        On first enable (not on subsequent idempotent calls), the server
+        auto-generates one active signing key and populates
+        ``active_key_id`` on the returned item, so a caller does not need
+        to immediately ``create_key`` + ``activate_key``.
+
         Parameters
         ----------
         config : AuthFederationItem
@@ -147,7 +152,9 @@ class AuthFederation(Endpoint):
     def list_connectors(self) -> list[AuthFederationConnectorItem]:
         """
         List every WIF connector registered on the site. Returns an empty list
-        if WIF has no connectors (or is not enabled).
+        if WIF is enabled but has no connectors. If WIF is not enabled on the
+        site, the server raises a precondition error (surfaced as
+        ``ServerResponseError``) — call ``enable()`` first.
 
         Returns
         -------
@@ -201,7 +208,8 @@ class AuthFederation(Endpoint):
         """
         Generate a new WIF signing key. Keys are created in the inactive state;
         use ``activate_key`` to promote one to the site's active signing key.
-        Fails with 409 if the site is already at the maximum number of keys.
+        Fails with 400 (``ServerResponseError``) if the site is already at the
+        maximum number of keys.
 
         Returns
         -------
