@@ -4,6 +4,7 @@ from pathlib import Path
 import requests_mock
 import tempfile
 
+from defusedxml.ElementTree import fromstring
 import pytest
 
 import tableauserverclient as TSC
@@ -127,6 +128,42 @@ def test_populate_connections(server: TSC.Server) -> None:
     assert "http://tableauserver" == conn3.server_address
     assert "sally" == conn3.username
     assert conn3.embed_password is True
+
+
+def test_update_connection_wif(server: TSC.Server) -> None:
+    """Flow update_connection reaches the shared Connection.update_req builder,
+    so WIF fields on the ConnectionItem land on the <connection> payload. The
+    server-side handling of these attributes on flow connections is governed
+    by the flow endpoint and is not asserted here.
+    """
+    flow_id = "587daa37-b84d-4400-a9a2-aa90e0be7837"
+    connection_id = "405c1e4b-60c9-499f-9c47-a4ef1af69359"
+    response_xml = (
+        "<?xml version='1.0' encoding='UTF-8'?>"
+        '<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'
+        f'<connection id="{connection_id}" type="snowflake" '
+        'serverAddress="account.snowflakecomputing.com" userName="" embedPassword="false" '
+        'authenticationType="oauth" workgroupAuthMode="workload-identity-federation"/>'
+        "</tsResponse>"
+    )
+
+    with requests_mock.mock() as m:
+        m.put(f"{server.flows.baseurl}/{flow_id}/connections/{connection_id}", text=response_xml)
+        flow = TSC.FlowItem("test", "aa23f4ac-906f-11e9-86fb-3f0f71412e77")
+        flow._id = flow_id
+        connection = TSC.ConnectionItem()
+        connection._id = connection_id
+        connection.workgroup_auth_mode = TSC.ConnectionItem.WorkgroupAuthMode.WIF
+        updated = server.flows.update_connection(flow, connection)
+
+        request = m.request_history[0]
+
+    xml_connection = fromstring(request.body).find(".//connection")
+    assert xml_connection is not None
+    assert xml_connection.get("workgroupAuthMode") == "workload-identity-federation"
+    assert xml_connection.get("authFederationServiceAccount") is None
+    assert updated is not None
+    assert updated.workgroup_auth_mode == "workload-identity-federation"
 
 
 def test_populate_permissions(server: TSC.Server) -> None:

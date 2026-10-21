@@ -257,6 +257,8 @@ class DatasourceRequest:
         username: str | None = None,
         password: str | None = None,
         embed_password: bool | None = None,
+        workgroup_auth_mode: str | None = None,
+        auth_federation_service_account: str | None = None,
     ):
         conn_luids_elem = ET.SubElement(element, "connectionLUIDs")
         for luid in connection_luids:
@@ -274,6 +276,12 @@ class DatasourceRequest:
 
         if embed_password is not None:
             connection_elem.set("embedPassword", str(embed_password).lower())
+
+        if workgroup_auth_mode is not None:
+            connection_elem.set("workgroupAuthMode", workgroup_auth_mode)
+
+        if auth_federation_service_account is not None:
+            connection_elem.set("authFederationServiceAccount", auth_federation_service_account)
 
 
 class DQWRequest:
@@ -1184,6 +1192,8 @@ class WorkbookRequest:
         username: str | None = None,
         password: str | None = None,
         embed_password: bool | None = None,
+        workgroup_auth_mode: str | None = None,
+        auth_federation_service_account: str | None = None,
     ):
         conn_luids_elem = ET.SubElement(element, "connectionLUIDs")
         for luid in connection_luids:
@@ -1201,6 +1211,12 @@ class WorkbookRequest:
 
         if embed_password is not None:
             connection_elem.set("embedPassword", str(embed_password).lower())
+
+        if workgroup_auth_mode is not None:
+            connection_elem.set("workgroupAuthMode", workgroup_auth_mode)
+
+        if auth_federation_service_account is not None:
+            connection_elem.set("authFederationServiceAccount", auth_federation_service_account)
 
 
 class Connection:
@@ -1226,6 +1242,10 @@ class Connection:
             connection_element.attrib["embedPassword"] = str(connection_item.embed_password).lower()
         if connection_item.query_tagging is not None:
             connection_element.attrib["queryTaggingEnabled"] = str(connection_item.query_tagging).lower()
+        if connection_item.workgroup_auth_mode is not None:
+            connection_element.attrib["workgroupAuthMode"] = connection_item.workgroup_auth_mode
+        if connection_item.auth_federation_service_account is not None:
+            connection_element.attrib["authFederationServiceAccount"] = connection_item.auth_federation_service_account
 
 
 class TaskRequest:
