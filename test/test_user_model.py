@@ -171,6 +171,125 @@ def test_validate_usernames_file() -> None:
     assert valid == 5, f"Exactly 5 of the lines were valid, counted {valid + len(invalid)}"
 
 
+def _mask_present(records: list) -> bool:
+    combined = "\n".join(record.getMessage() for record in records)
+    return "PASS" in combined and "***" in combined
+
+
+def test_password_not_logged_at_debug(caplog: pytest.LogCaptureFixture) -> None:
+    """Regression test for #1829: passwords must not appear in DEBUG logs."""
+    secret = "hunter2SUPERSECRET"
+    line = f"jsmith,{secret},John Smith,creator,site,yes,jsmith@example.com"
+    with caplog.at_level(logging.DEBUG, logger=logger.name):
+        TSC.UserItem.CSVImport._validate_import_line_or_throw(line, logger)
+    combined = "\n".join(record.getMessage() for record in caplog.records)
+    assert secret not in combined, f"Password leaked into logs: {combined!r}"
+    # Positive assertion: something references the PASS column and something is
+    # masked as ***, so a "fix" that only removed the log line would not pass.
+    assert _mask_present(caplog.records), f"Expected masked PASS log line; got: {combined!r}"
+
+
+def test_password_not_logged_when_line_invalid(caplog: pytest.LogCaptureFixture) -> None:
+    """Regression test for #1829: passwords must not appear when a row fails to validate."""
+    secret = "hunter2SUPERSECRET"
+    line = f"jsmith,{secret},John Smith,not-a-real-license,site,yes,jsmith@example.com"
+    test_data = _mock_file_content([line])
+    with caplog.at_level(logging.DEBUG, logger=logger.name):
+        valid, invalid = TSC.UserItem.CSVImport.validate_file_for_import(test_data, logger)
+    assert valid == 0
+    assert len(invalid) == 1
+    assert secret not in invalid[0], f"Password leaked into returned invalid_lines: {invalid[0]!r}"
+    combined = "\n".join(record.getMessage() for record in caplog.records)
+    assert secret not in combined, f"Password leaked into logs on invalid row: {combined!r}"
+
+
+def test_password_with_comma_is_fully_redacted(caplog: pytest.LogCaptureFixture) -> None:
+    """A quoted comma in a password must not leak from invalid row output or logs."""
+    line = 'jsmith,"hunter2,SECRETTAIL",John Smith,not-a-real-license,site,yes,jsmith@example.com'
+    test_data = _mock_file_content([line])
+    with caplog.at_level(logging.DEBUG, logger=logger.name):
+        valid, invalid = TSC.UserItem.CSVImport.validate_file_for_import(test_data, logger)
+    assert valid == 0
+    assert len(invalid) == 1
+    assert "hunter2" not in invalid[0]
+    assert "SECRETTAIL" not in invalid[0]
+    combined = "\n".join(record.getMessage() for record in caplog.records)
+    assert "hunter2" not in combined
+    assert "SECRETTAIL" not in combined
+    assert _mask_present(caplog.records)
+
+
+def test_malformed_csv_row_is_not_returned_unredacted(caplog: pytest.LogCaptureFixture) -> None:
+    secret = "SECRETTAIL"
+    test_data = _mock_file_content([f'jsmith,"{secret}'])
+    with caplog.at_level(logging.DEBUG, logger=logger.name):
+        valid, invalid = TSC.UserItem.CSVImport.validate_file_for_import(test_data, logger)
+    assert valid == 0
+    assert invalid == ["<invalid CSV row redacted>"]
+    combined = "\n".join(record.getMessage() for record in caplog.records)
+    assert secret not in combined
+
+
+def test_password_not_in_validate_attribute_value_error(
+    caplog: pytest.LogCaptureFixture, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Regression test: _validate_import_line_or_throw must never call
+    _validate_attribute_value for the PASS column. Today PASS has an empty
+    allowlist so the validator returns early, but if a future PR adds
+    password-format checks (length, complexity, banned chars) the raw password
+    would leak through ValueError("Invalid value {item} for {column_type}").
+    Guarantee the invariant at the caller so it doesn't depend on the allowlist
+    staying empty."""
+    secret = "hunter2SUPERSECRET"
+    line = f"jsmith,{secret},John Smith,creator,site,yes,jsmith@example.com"
+
+    # Spy that records every call and simulates a future PR that added a
+    # non-empty allowlist to PASS (any value not in the allowlist raises).
+    calls: list[tuple] = []
+    original = TSC.UserItem.CSVImport._validate_attribute_value
+
+    def spy(item: str, possible_values: list, column_type) -> None:
+        calls.append((item, column_type))
+        if column_type == TSC.UserItem.CSVImport.ColumnType.PASS:
+            # Simulate a hypothetical password-format check.
+            raise ValueError(f"Invalid value {item} for {column_type}")
+        return original(item, possible_values, column_type)
+
+    monkeypatch.setattr(TSC.UserItem.CSVImport, "_validate_attribute_value", spy)
+
+    with caplog.at_level(logging.DEBUG, logger=logger.name):
+        # If PASS were passed to the validator, the spy would raise with the
+        # raw secret embedded in the ValueError. It must not raise.
+        TSC.UserItem.CSVImport._validate_import_line_or_throw(line, logger)
+
+    pass_calls = [c for c in calls if c[1] == TSC.UserItem.CSVImport.ColumnType.PASS]
+    assert not pass_calls, f"_validate_attribute_value was called for PASS: {pass_calls!r}"
+
+    combined = "\n".join(record.getMessage() for record in caplog.records)
+    assert secret not in combined, f"Password leaked into logs: {combined!r}"
+
+
+def test_redact_password_column_helper() -> None:
+    """Unit-level coverage for _redact_password_column across newline and edge cases."""
+    redact = TSC.UserItem.CSVImport._redact_password_column
+    # LF-terminated
+    assert redact("jsmith,hunter2,fname\n") == "jsmith,***,fname\n"
+    # CRLF-terminated (the \r rides with the last field, ending is preserved)
+    assert redact("jsmith,hunter2,fname\r\n") == "jsmith,***,fname\r\n"
+    # CRLF where password IS the last field: the \r must not be silently
+    # dropped when the password value is replaced.
+    assert redact("jsmith,hunter2\r\n") == "jsmith,***\r\n"
+    # No trailing newline
+    assert redact("jsmith,hunter2,fname") == "jsmith,***,fname"
+    # Empty password field: still replaced (unconditional mask)
+    assert redact("jsmith,,fname") == "jsmith,***,fname"
+    # Trailing comma with nothing after: column 1 exists as empty string, gets masked
+    assert redact("jsmith,") == "jsmith,***"
+    # Single column: no password to redact; return line unchanged
+    assert redact("jsmith") == "jsmith"
+    assert redact("jsmith\n") == "jsmith\n"
+
+
 def test_validate_mixed_case_license() -> None:
     # Regression: issue #1809 - 'Viewer' (capital V) was rejected by case-sensitive check
     TSC.UserItem.CSVImport._validate_import_line_or_throw("username, pword, fname, Viewer, None, no, email", logger)
@@ -197,6 +316,12 @@ def test_create_user_with_auth_column() -> None:
     user = TSC.UserItem.CSVImport.create_user_from_line("username, pword, fname, creator, none, yes, email, SAML")
     assert user is not None
     assert user.auth_setting == "SAML", f"Expected SAML, got {user.auth_setting}"
+
+
+def test_create_user_with_comma_in_password() -> None:
+    user = TSC.UserItem.CSVImport.create_user_from_line('username,"pass,word",fname,creator,none,yes,email')
+    assert user is not None
+    assert user.fullname == "fname"
 
 
 def test_too_many_columns_raises() -> None:
