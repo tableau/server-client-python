@@ -630,7 +630,7 @@ auth_federation.delete_key(key)
 
 Deletes a WIF signing key. Fails with HTTP 400 if the key is currently active.
 
-For safe rotation, call `create_key()`, then `activate_key(new_kid)`, then **retain** the old (now-inactive) key in the site's JWKS until every JWT it signed has expired (upper bound: the site's current `token_lifetime_seconds`, default 7200 s / 2 h), and only then `delete_key(old_kid)`. `activate_key` atomically deactivates the previously active key, so the site is never without an active signing key — but the inactive key stays published in the JWKS so verifiers can keep validating tokens it already signed. Deleting it before those tokens have expired removes it from the JWKS, and any verifier that fetches the key set afterwards will reject the still-unexpired tokens.
+Unlike `deactivate_key`, which keeps the (now-inactive) key published in the site's JWKS so already-issued JWTs can still be verified, `delete_key` removes the key from the JWKS entirely — any verifier that fetches the key set afterwards will reject still-unexpired tokens signed with it. For a safe rotation, keep the old key deactivated-but-published until every JWT it signed has expired (upper bound: the site's current `token_lifetime_seconds`, default 7200 s / 2 h), and only then delete it.
 
 **Version**
 
