@@ -48,18 +48,28 @@ class AuthFederation(Endpoint):
     connectors (BigQuery, Snowflake, ...) that each JWT is scoped to. Requires
     REST API version 3.30 (Tableau Server 2026.3) or later.
 
-    All methods require the caller to be a Site Administrator on the current
-    site; the server returns HTTP 403 (``ServerResponseError``) for non-admin
-    callers. Beyond ``get()`` and ``enable()``, every method also requires
-    WIF to be enabled on the site — call ``enable()`` first, otherwise the
-    server returns HTTP 404.
+    All methods require the WIF feature to be enabled on the site AND the
+    caller to be a Site Administrator; the server returns HTTP 403
+    (``ServerResponseError``) when either is missing — including on
+    ``get()``, so a site admin on a site where WIF has not been turned on
+    will see 403.
+
+    Once WIF is available on the site, ``get()`` works immediately (returns
+    a shell with ``enabled=False`` until the admin runs ``enable()``).
+    ``update()`` and the four connector methods return HTTP 404 until
+    ``enable()`` has run; ``delete()`` on a never-enabled site is a no-op.
+    ``create_key()`` is not gated by ``enable()`` and will create an orphan
+    key against the per-site key limit if called first;
+    ``activate_key``/``deactivate_key``/``delete_key`` return HTTP 404 only
+    if the ``kid`` does not exist on the site.
 
     The four key-management methods (``create_key``, ``activate_key``,
     ``deactivate_key``, ``delete_key``) are bound to ``OAuthScopes.NO_ACCESS``
-    server-side, which means every OAuth-scoped session is rejected
-    unconditionally — including every PAT session, regardless of granted
-    scopes. Authenticate with a username/password session to call them. The
-    config and connector methods accept the
+    server-side, which only rejects OAuth-scope-restricted sessions
+    (e.g. a connected-app JWT session) — the server returns HTTP 401,
+    surfaced by TSC as ``FailedSignInError``. Password sessions and
+    personal-access-token (PAT) sessions do not carry scopes and are
+    accepted. The config and connector methods additionally accept the
     ``tableau:connectivity_auth_federation:*`` OAuth scopes.
 
     ``delete()`` permanently removes the config, every signing key, and every
@@ -298,8 +308,14 @@ class AuthFederation(Endpoint):
     @api(version="3.30")
     def delete_key(self, key: KeyIdentifier) -> None:
         """
-        Delete a WIF signing key. Fails with 400 if the key is active;
-        deactivate it first.
+        Delete a WIF signing key. Fails with 400 if the key is active.
+
+        For rotation, call ``create_key()`` → ``activate_key(new_kid)`` →
+        ``delete_key(old_kid)``: ``activate_key`` atomically deactivates the
+        previously active key, so the site is never without an active signing
+        key. Calling ``deactivate_key`` on the active key before another is
+        activated leaves the site with no active key, and no new WIF tokens
+        can be minted until a replacement is activated.
 
         Parameters
         ----------

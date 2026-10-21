@@ -38,15 +38,18 @@
     `server.auth_federation.delete_key(id)` accept either a `kid` string
     or an `AuthFederationKeyItem` with `kid` set; `activate_key` is atomic
     and deactivates any previously active key. `delete_key` fails with 400
-    if the key is currently active — call `deactivate_key` first. The four
-    key-management methods are bound to `NO_ACCESS` server-side, which
-    rejects every OAuth-scoped session unconditionally (including every PAT
-    session, regardless of granted scopes); authenticate with a
-    username/password session.
+    if the key is currently active. Safe rotation is `create_key()` →
+    `activate_key(new_kid)` → `delete_key(old_kid)`; `deactivate_key` on
+    the active key with no replacement leaves the site unable to mint WIF
+    tokens. The four key-management methods are bound to `NO_ACCESS`
+    server-side, which only rejects OAuth-scope-restricted sessions
+    (e.g. connected-app JWT) with 401; password and personal-access-token
+    (PAT) sessions do not carry scopes and are accepted.
   Three new exports: `AuthFederationItem`, `AuthFederationConnectorItem`,
   `AuthFederationKeyItem`. Requires Tableau Server REST API 3.30+
-  (Tableau Server 2026.3) and the Site Administrator role on the current
-  site; non-admin callers receive HTTP 403.
+  (Tableau Server 2026.3), the WIF feature enabled on the site, and the
+  Site Administrator role on the current site; the server returns 403 if
+  any of those is missing (including on `get()`).
 * Added Workload Identity Federation (WIF) support to the connection update
   endpoints. `ConnectionItem` has two new string properties,
   `workgroup_auth_mode` and `auth_federation_service_account`, that are
