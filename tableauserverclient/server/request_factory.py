@@ -117,12 +117,11 @@ class AuthFederationRequest:
             elem.attrib["tokenLifetimeSeconds"] = str(token_lifetime_seconds)
         return ET.tostring(elem)
 
-    def update_req(self, token_lifetime_seconds: int | None = None) -> bytes:
+    def update_req(self, token_lifetime_seconds: int) -> bytes:
         # ``enabled`` must never be sent on PATCH — the server rejects a merge
         # patch with ``enabled`` present. Enable/disable goes through PUT/DELETE.
         elem = ET.Element("authFederationAdmin")
-        if token_lifetime_seconds is not None:
-            elem.attrib["tokenLifetimeSeconds"] = str(token_lifetime_seconds)
+        elem.attrib["tokenLifetimeSeconds"] = str(token_lifetime_seconds)
         return ET.tostring(elem)
 
     def create_connector_req(self, connector: "AuthFederationConnectorItem") -> bytes:

@@ -130,7 +130,7 @@ class AuthFederation(Endpoint):
         return AuthFederationItem.from_response(response.content, self.parent_srv.namespace)
 
     @api(version="3.30")
-    def update(self, token_lifetime_seconds: int | None = None) -> AuthFederationItem:
+    def update(self, token_lifetime_seconds: int) -> AuthFederationItem:
         """
         Merge-patch the mutable fields of the WIF admin config. Only
         ``token_lifetime_seconds`` is mutable; ``enabled``, ``issuer_url``,
@@ -141,9 +141,10 @@ class AuthFederation(Endpoint):
 
         Parameters
         ----------
-        token_lifetime_seconds : int | None
-            New JWT lifetime in seconds. ``None`` sends an empty patch (no
-            fields changed) — rarely useful, but accepted by the server.
+        token_lifetime_seconds : int
+            New JWT lifetime in seconds. Required — there is nothing else to
+            patch, so a call with no fields to change is not a meaningful
+            operation.
 
         Returns
         -------

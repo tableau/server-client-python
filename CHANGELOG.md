@@ -11,10 +11,10 @@
   - `server.auth_federation.enable(token_lifetime_seconds=None)` ->
     `AuthFederationItem` — idempotent PUT. Server auto-generates one active
     signing key on first enable.
-  - `server.auth_federation.update(token_lifetime_seconds=None)` ->
+  - `server.auth_federation.update(token_lifetime_seconds)` ->
     `AuthFederationItem` — merge-patch; only `token_lifetime_seconds` is
-    mutable. `enabled` is never sent on PATCH; use `enable()` / `delete()`
-    to change WIF state.
+    mutable (required), so `update()` always changes it. `enabled` is never
+    sent on PATCH; use `enable()` / `delete()` to change WIF state.
   - `server.auth_federation.delete()` — permanently deletes the WIF config
     along with every signing key and connector on the site. A subsequent
     `enable()` starts from a clean slate; prior connectors and keys are

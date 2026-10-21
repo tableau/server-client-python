@@ -50,12 +50,17 @@ def test_auth_federation_get(server: TSC.Server) -> None:
 def test_auth_federation_get_defaults_when_never_enabled(server: TSC.Server) -> None:
     # Server GET on a never-enabled site still returns ``issuerUrl`` and the
     # default ``tokenLifetimeSeconds``; only ``activeKeyId`` and the
-    # ``<connectors>`` wrapper are absent.
+    # ``<connectors>`` wrapper are absent. Values mirror the real server:
+    # DEFAULT_TOKEN_LIFETIME_SECONDS=7200 (AuthFederationService.java:86) and
+    # ``<base>/api/<version>/sites/<siteLuid>/auth-federation`` (:748-766).
+    default_issuer_url = (
+        "https://10ax.online.tableau.com/api/3.30/sites/" "dad65087-b08b-4603-af4e-2887b8aafc67/auth-federation"
+    )
     default_body = (
         '<tsResponse xmlns="http://tableau.com/api">'
         '<authFederationAdmin enabled="false" '
-        'issuerUrl="https://10ax.online.tableau.com/sites/mySite/auth-federation" '
-        'tokenLifetimeSeconds="3600"/>'
+        f'issuerUrl="{default_issuer_url}" '
+        'tokenLifetimeSeconds="7200"/>'
         "</tsResponse>"
     )
     with requests_mock.mock() as m:
@@ -63,9 +68,9 @@ def test_auth_federation_get_defaults_when_never_enabled(server: TSC.Server) -> 
         config = server.auth_federation.get()
 
     assert config.enabled is False
-    assert config.issuer_url == "https://10ax.online.tableau.com/sites/mySite/auth-federation"
+    assert config.issuer_url == default_issuer_url
     assert config.active_key_id is None
-    assert config.token_lifetime_seconds == 3600
+    assert config.token_lifetime_seconds == 7200
     assert config.connectors == []
 
 
@@ -117,22 +122,6 @@ def test_auth_federation_update(server: TSC.Server) -> None:
     assert "activeKeyId" not in elem.attrib
 
     assert config_out.token_lifetime_seconds == 7200
-
-
-def test_auth_federation_update_empty_patch(server: TSC.Server) -> None:
-    # This exercises the client wire shape only. Whether the server binds an
-    # empty ``<authFederationAdmin/>`` as a non-null ``AuthFederationConfigType``
-    # with every field null (a no-op merge-patch) or as a null body (400) must
-    # be covered by a server-side integration test — not here.
-    with requests_mock.mock() as m:
-        m.patch(server.auth_federation.baseurl, text=UPDATE.read_text())
-        server.auth_federation.update()
-        body = m.request_history[0].text
-
-    elem = fromstring(body)
-    assert elem.tag == "authFederationAdmin"
-    assert "enabled" not in elem.attrib
-    assert "tokenLifetimeSeconds" not in elem.attrib
 
 
 def test_auth_federation_delete(server: TSC.Server) -> None:
@@ -330,16 +319,36 @@ _UUID_METHODS = [
     "deactivate_key",
     "delete_key",
 ]
+_KEY_METHODS = {"activate_key", "deactivate_key", "delete_key"}
 
 
+@pytest.mark.parametrize("wrap_as_item", [False, True], ids=["raw", "item"])
 @pytest.mark.parametrize("method_name", _UUID_METHODS)
-@pytest.mark.parametrize("bad_target", ["../../admin", "not-a-uuid", "a4b9c2d7", "", "d3a8e5b2-7c01-4e13-9c82"])
-def test_auth_federation_rejects_non_uuid_target(server: TSC.Server, method_name: str, bad_target: str) -> None:
+@pytest.mark.parametrize(
+    "bad_target",
+    [None, "../../admin", "not-a-uuid", "a4b9c2d7", "", "d3a8e5b2-7c01-4e13-9c82"],
+    ids=["None", "path", "noise", "short", "empty", "truncated"],
+)
+def test_auth_federation_rejects_non_uuid_target(
+    server: TSC.Server, method_name: str, bad_target: object, wrap_as_item: bool
+) -> None:
+    if wrap_as_item:
+        if method_name in _KEY_METHODS:
+            item = TSC.AuthFederationKeyItem()
+            item.kid = bad_target  # type: ignore[assignment]
+            target: object = item
+        else:
+            connector = TSC.AuthFederationConnectorItem()
+            connector.luid = bad_target  # type: ignore[assignment]
+            target = connector
+    else:
+        target = bad_target
+
     method = getattr(server.auth_federation, method_name)
     with requests_mock.mock() as m:
         m.register_uri(requests_mock.ANY, requests_mock.ANY)
         with pytest.raises(ValueError, match="Invalid UUID"):
-            method(bad_target)
+            method(target)
         assert not m.called  # must reject before any HTTP call
 
 
