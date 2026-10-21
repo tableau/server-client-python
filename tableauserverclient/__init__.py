@@ -1,6 +1,9 @@
 from tableauserverclient.bin._version import get_versions
 from tableauserverclient.namespace import NEW_NAMESPACE as DEFAULT_NAMESPACE
 from tableauserverclient.models import (
+    AuthFederationConnectorItem,
+    AuthFederationItem,
+    AuthFederationKeyItem,
     BackgroundJobItem,
     CollectionItem,
     ColumnItem,
@@ -80,6 +83,9 @@ from tableauserverclient.server import (
 )
 
 __all__ = [
+    "AuthFederationConnectorItem",
+    "AuthFederationItem",
+    "AuthFederationKeyItem",
     "BackgroundJobItem",
     "CollectionItem",
     "ColumnItem",

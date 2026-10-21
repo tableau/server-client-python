@@ -104,6 +104,37 @@ class AuthRequest:
         return ET.tostring(xml_request)
 
 
+class AuthFederationRequest:
+    # The WIF admin controller binds the request body directly as
+    # ``AuthFederationConfigType`` / ``AuthFederationConnectorType`` — a bare
+    # element, not the usual ``<tsRequest>`` envelope. These methods therefore
+    # skip ``_tsrequest_wrapped`` and emit the bare root themselves.
+
+    def enable_req(self, token_lifetime_seconds: int | None = None) -> bytes:
+        elem = ET.Element("authFederationAdmin")
+        elem.attrib["enabled"] = "true"
+        if token_lifetime_seconds is not None:
+            elem.attrib["tokenLifetimeSeconds"] = str(token_lifetime_seconds)
+        return ET.tostring(elem)
+
+    def update_req(self, token_lifetime_seconds: int) -> bytes:
+        # ``enabled`` must never be sent on PATCH — the server rejects a merge
+        # patch with ``enabled`` present. Enable/disable goes through PUT/DELETE.
+        elem = ET.Element("authFederationAdmin")
+        elem.attrib["tokenLifetimeSeconds"] = str(token_lifetime_seconds)
+        return ET.tostring(elem)
+
+    def create_connector_req(self, connector: "AuthFederationConnectorItem") -> bytes:
+        if connector.connector_class is None:
+            raise ValueError(f"AuthFederationConnectorItem missing connector_class: {connector}")
+        if connector.audience is None:
+            raise ValueError(f"AuthFederationConnectorItem missing audience: {connector}")
+        elem = ET.Element("authFederationConnector")
+        elem.attrib["connectorClass"] = connector.connector_class
+        elem.attrib["audience"] = connector.audience
+        return ET.tostring(elem)
+
+
 class ColumnRequest:
     def update_req(self, column_item):
         xml_request = ET.Element("tsRequest")
@@ -1754,6 +1785,7 @@ class ExtensionsRequest:
 
 class RequestFactory:
     Auth = AuthRequest()
+    AuthFederation = AuthFederationRequest()
     Connection = Connection()
     Column = ColumnRequest()
     CustomView = CustomViewRequest()
