@@ -39,9 +39,13 @@
     or an `AuthFederationKeyItem` with `kid` set; `activate_key` is atomic
     and deactivates any previously active key. `delete_key` fails with 400
     if the key is currently active. Safe rotation is `create_key()` →
-    `activate_key(new_kid)` → `delete_key(old_kid)`; `deactivate_key` on
-    the active key with no replacement leaves the site unable to mint WIF
-    tokens. The four key-management methods are bound to `NO_ACCESS`
+    `activate_key(new_kid)`, then retain the old (now-inactive) key in the
+    site's JWKS until every JWT it signed has expired (upper bound: the
+    site's current `token_lifetime_seconds`), and only then
+    `delete_key(old_kid)` — deleting it earlier removes it from the JWKS
+    and any verifier fetching the key set afterwards will reject still-
+    unexpired tokens signed with it. `deactivate_key` on the active key
+    with no replacement leaves the site unable to mint WIF tokens. The four key-management methods are bound to `NO_ACCESS`
     server-side, which only rejects OAuth-scope-restricted sessions
     (e.g. connected-app JWT) with 401; password and personal-access-token
     (PAT) sessions do not carry scopes and are accepted.
