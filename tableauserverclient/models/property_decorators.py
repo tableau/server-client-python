@@ -120,12 +120,25 @@ def property_matches(regex_to_match, error):
 
 
 def property_is_datetime(func):
-    """Takes the following datetime format and turns it into a datetime object:
+    """Coerces the incoming value into a timezone-aware ``datetime`` object.
 
-    2016-08-18T18:25:36Z
+    ``parse_datetime`` (used on the read side) accepts two wire formats:
 
-    Because we return everything with Z as the timezone, we assume everything is in UTC and create
-    a timezone aware datetime.
+    * trailing-``Z`` UTC, e.g. ``2016-08-18T18:25:36Z``
+    * explicit ``%z`` offset, e.g. ``2026-09-01T10:00:00-0700`` (produced by
+      Tableau Cloud's inlined ``<schedule nextRunAt=...>``)
+
+    Regardless of which wire form was accepted, the resulting ``datetime`` is
+    always tz-aware with ``tzinfo == utc`` -- the Cloud branch converts the
+    wire's numeric offset to UTC on parse so downstream callers see one
+    uniform tzinfo across Server and Cloud responses.
+
+    Setter-side strictness lives here: ``parse_datetime`` is deliberately
+    lenient on the server-response side (unparseable -> ``None``). This
+    decorator instead raises ``ValueError`` when the input is a string that
+    matches neither format, so bad user input surfaces at the assignment site
+    with the offending value in the message rather than silently clearing the
+    attribute.
     """
 
     @wraps(func)
@@ -138,6 +151,11 @@ def property_is_datetime(func):
             )
 
         dt = parse_datetime(value)
+        if dt is None:
+            # ``value`` is a str (checked above) so a ``None`` result here can only
+            # mean "neither format matched" -- i.e. a genuine parse failure. Bubble
+            # it up so callers don't silently null out the attribute.
+            raise ValueError(f"Cannot parse {value!r} as a datetime, cannot update {func.__name__}")
         return func(self, dt)
 
     return wrapper
