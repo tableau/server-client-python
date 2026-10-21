@@ -60,10 +60,6 @@ def wif_site(server):
 
     yield server
 
-    # Let any ServerResponseError propagate: a failed teardown delete must
-    # surface as a pytest teardown error. Swallowing it would leave WIF
-    # enabled on the site, so the next run would skip (fixture guard above)
-    # and silently stop exercising the destructive paths.
     server.auth_federation.delete()
 
 
