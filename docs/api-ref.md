@@ -205,6 +205,455 @@ server.auth.switch_site(site)
 ---
 
 
+## Auth Federation
+<br>
+<br>
+Using the Tableau Server Client (TSC), a Site Administrator can enable Workload Identity Federation (WIF) on a Tableau Cloud / Tableau Server site, manage the signing keys that mint JWTs for cloud-provider federation, and register the connectors (for example, BigQuery or Snowflake) that each JWT is scoped to.
+
+The WIF admin resources are defined in the `AuthFederationItem`, `AuthFederationConnectorItem`, and `AuthFederationKeyItem` classes. These correspond to the admin resources exposed by the Tableau REST API: the per-site config, the connectors registered on it, and its JWT signing keys.
+
+Tableau WIF admin REST API endpoints are available in **REST API version 3.30** and later (Tableau Server release 26.3). All methods require the WIF feature to be enabled on the site AND the caller to be a Site Administrator; the server returns HTTP 403 (`ServerResponseError`) when either is missing, including on `get()`. Once WIF is available on the site, `get()` works immediately (returns a shell with `enabled=False` until the admin calls `enable()`). `update()` and the four connector methods return HTTP 404 until `enable()` has run; `delete()` on a never-enabled site is a no-op. `create_key()` is not gated by `enable()` and will create an orphan key against the per-site key limit if called first; `activate_key`, `deactivate_key`, and `delete_key` return HTTP 404 only if the key id does not exist on the site.
+
+The four key-management methods (`create_key`, `activate_key`, `deactivate_key`, `delete_key`) are bound to the server's `NO_ACCESS` scope, which only rejects OAuth-scope-restricted sessions (for example, a connected-app JWT session) — the server returns HTTP 401, surfaced by TSC as `FailedSignInError`. Password sessions and personal-access-token (PAT) sessions do not carry scopes and are accepted. The config and connector methods additionally accept the `tableau:connectivity_auth_federation:*` OAuth scopes.
+<br>
+<br>
+
+### AuthFederationItem class
+
+The `AuthFederationItem` represents the per-site WIF admin configuration on Tableau Server or Tableau Cloud.
+
+**Attributes**
+
+Name | Description
+:--- | :---
+`enabled` | `bool`. Whether WIF is enabled on the site. `False` on a shell returned from `get()` for a never-enabled site.
+`issuer_url` | `str` or `None`. The server-generated issuer URL for JWTs minted by this site. Read-only — the server derives it from the site identifier.
+`active_key_id` | `str` or `None`. The `kid` of the currently active signing key, or `None` if the site has no active key.
+`token_lifetime_seconds` | `int` or `None`. The JWT lifetime in seconds. The server default is 7200.
+`connectors` | `list[AuthFederationConnectorItem]`. The connectors registered on the site. Populated by `get()`; `list_connectors()` returns the same list directly.
+
+Source file: models/auth_federation_item.py
+
+<br>
+<br>
+
+### AuthFederationConnectorItem class
+
+The `AuthFederationConnectorItem` represents a single connector registered on a WIF-enabled site. Each connector binds a Tableau connection class to a cloud-provider audience; the per-site signing key mints JWTs with that audience as the `aud` claim.
+
+**Attributes**
+
+Name | Description
+:--- | :---
+`luid` | `str` or `None`. The server-assigned identifier for the connector. Populated by `create_connector()` and by response-parsing of `get_connector()` / `list_connectors()`.
+`connector_class` | `str` or `None`. The Tableau connection class the connector is bound to (for example, `"bigquery"` or `"snowflake"`). Must equal the exact lowercase connection class — what `ConnectionItem.connection_type` reports for the connector. Class names are case-sensitive.
+`audience` | `str` or `None`. The cloud-provider audience that scopes the minted JWT. For GCP, this is the full Workload Identity Pool provider resource name.
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+
+new_connector = TSC.AuthFederationConnectorItem()
+new_connector.connector_class = 'bigquery'
+new_connector.audience = (
+    '//iam.googleapis.com/projects/123456789/locations/global/'
+    'workloadIdentityPools/tableau-pool/providers/tableau-provider'
+)
+```
+
+Source file: models/auth_federation_item.py
+
+<br>
+<br>
+
+### AuthFederationKeyItem class
+
+The `AuthFederationKeyItem` represents the public JWK metadata for a signing key on a WIF-enabled site. The private key is never exposed by the REST API.
+
+**Attributes**
+
+Name | Description
+:--- | :---
+`kid` | `str` or `None`. The key identifier.
+`kty` | `str` or `None`. JWK key type (for example, `"RSA"`).
+`alg` | `str` or `None`. JWK signing algorithm (for example, `"RS256"`).
+`use` | `str` or `None`. JWK key use (for example, `"sig"`).
+`n` | `str` or `None`. The RSA public modulus, base64url-encoded.
+`e` | `str` or `None`. The RSA public exponent, base64url-encoded.
+
+Source file: models/auth_federation_item.py
+
+<br>
+<br>
+
+### Auth Federation methods
+
+The Tableau Server Client provides twelve methods for interacting with the WIF admin resources on a site: four for the per-site config, four for connectors, and four for signing keys.
+
+Each id-taking method (`get_connector`, `delete_connector`, `activate_key`, `deactivate_key`, `delete_key`) validates its target client-side before any HTTP call; `None`, empty strings, and non-UUID-shaped targets raise `ValueError`, preventing path injection.
+
+Source file: server/endpoint/auth_federation_endpoint.py
+
+<br>
+<br>
+
+#### auth_federation.get
+
+```py
+auth_federation.get()
+```
+
+Returns the WIF admin configuration for the currently authenticated site. A site that has never enabled WIF returns a default `AuthFederationItem` with `enabled=False` rather than raising an exception.
+
+**Version**
+
+Available with REST API 3.30 and later (Tableau Server release 26.3).
+
+**Returns**
+
+Returns an `AuthFederationItem`.
+
+**Example**
+
+```py
+with server.auth.sign_in(tableau_auth):
+    config = server.auth_federation.get()
+    print(f"WIF enabled: {config.enabled}, active key: {config.active_key_id}")
+```
+
+<br>
+<br>
+
+#### auth_federation.enable
+
+```py
+auth_federation.enable(token_lifetime_seconds=None)
+```
+
+Enables WIF on the currently authenticated site. Idempotent: calling `enable` on an already-enabled site returns the current config without changing it.
+
+On first enable (not on subsequent idempotent calls), the server auto-generates one active signing key and populates `active_key_id` on the returned item, so a caller does not need to immediately `create_key` and `activate_key`.
+
+**Version**
+
+Available with REST API 3.30 and later.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`token_lifetime_seconds` | (Optional) The JWT lifetime in seconds. `None` leaves the server default (7200 seconds) in place, or on an already-enabled site keeps whatever lifetime is currently configured.
+
+**Returns**
+
+Returns an `AuthFederationItem` with the current WIF admin config.
+
+**Example**
+
+```py
+with server.auth.sign_in(tableau_auth):
+    config = server.auth_federation.enable(token_lifetime_seconds=3600)
+    print(f"Active signing key auto-created: {config.active_key_id}")
+```
+
+<br>
+<br>
+
+#### auth_federation.update
+
+```py
+auth_federation.update(token_lifetime_seconds)
+```
+
+Merge-patches the mutable fields of the WIF admin config. Only `token_lifetime_seconds` is mutable; `enabled`, `issuer_url`, `active_key_id`, and `connectors` are not. Use `enable()` or `delete()` to change WIF state, and the connector / key endpoints to manage those resources. Returns HTTP 404 if WIF has never been enabled on the site.
+
+**Version**
+
+Available with REST API 3.30 and later.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`token_lifetime_seconds` | New JWT lifetime in seconds. Required — `token_lifetime_seconds` is the only mutable field, so a no-arg call would not be a meaningful operation.
+
+**Returns**
+
+Returns the updated `AuthFederationItem`.
+
+**Example**
+
+```py
+with server.auth.sign_in(tableau_auth):
+    config = server.auth_federation.update(token_lifetime_seconds=7200)
+```
+
+<br>
+<br>
+
+#### auth_federation.delete
+
+```py
+auth_federation.delete()
+```
+
+Deletes the WIF admin config, every signing key, and every connector on the site. Any datasource or workbook connections that reference a WIF connector will no longer be able to authenticate until WIF is re-enabled; the removed connectors and keys are not restored by a subsequent `enable()`. A `delete()` call on a site that has never enabled WIF is a no-op.
+
+**Version**
+
+Available with REST API 3.30 and later.
+
+**Example**
+
+```py
+with server.auth.sign_in(tableau_auth):
+    server.auth_federation.delete()
+```
+
+<br>
+<br>
+
+#### auth_federation.create_connector
+
+```py
+auth_federation.create_connector(connector)
+```
+
+Registers a new WIF connector on the site. The server assigns the connector LUID. Fails with HTTP 409 (`ServerResponseError`) if a connector with the same `connector_class` already exists on the site.
+
+**Version**
+
+Available with REST API 3.30 and later.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`connector` | An `AuthFederationConnectorItem` with `connector_class` and `audience` set. Both fields are validated client-side; a missing field raises `ValueError`. `connector_class` must equal the exact lowercase Tableau connection class — what `ConnectionItem.connection_type` reports for the connector (for example, `"bigquery"`, `"snowflake"`).
+
+**Returns**
+
+Returns the created `AuthFederationConnectorItem`, with the server-assigned `luid` populated.
+
+**Example**
+
+```py
+new_connector = TSC.AuthFederationConnectorItem()
+new_connector.connector_class = 'bigquery'
+new_connector.audience = (
+    '//iam.googleapis.com/projects/123456789/locations/global/'
+    'workloadIdentityPools/tableau-pool/providers/tableau-provider'
+)
+with server.auth.sign_in(tableau_auth):
+    created = server.auth_federation.create_connector(new_connector)
+    print(f"Connector LUID: {created.luid}")
+```
+
+<br>
+<br>
+
+#### auth_federation.list_connectors
+
+```py
+auth_federation.list_connectors()
+```
+
+Returns every WIF connector registered on the site. Returns an empty list if WIF is enabled but has no connectors. If WIF has not been enabled on the site, the server returns HTTP 404 (`ServerResponseError`) — call `enable()` first.
+
+**Version**
+
+Available with REST API 3.30 and later.
+
+**Returns**
+
+Returns `list[AuthFederationConnectorItem]`.
+
+**Example**
+
+```py
+with server.auth.sign_in(tableau_auth):
+    connectors = server.auth_federation.list_connectors()
+    for c in connectors:
+        print(f"{c.connector_class} -> {c.audience}")
+```
+
+<br>
+<br>
+
+#### auth_federation.get_connector
+
+```py
+auth_federation.get_connector(connector)
+```
+
+Returns a single WIF connector by LUID.
+
+**Version**
+
+Available with REST API 3.30 and later.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`connector` | The connector LUID (`str`), or an `AuthFederationConnectorItem` whose `luid` is set.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`Invalid UUID` | Raises `ValueError` if the target is not a well-formed UUID (including `None`, empty, or path-like strings).
+
+**Returns**
+
+Returns an `AuthFederationConnectorItem`.
+
+<br>
+<br>
+
+#### auth_federation.delete_connector
+
+```py
+auth_federation.delete_connector(connector)
+```
+
+Deletes a WIF connector by LUID. Idempotent on an unknown but well-formed LUID (the server returns 204 even if no such connector exists), but only when WIF is enabled on the site; otherwise the server returns a WIF-not-enabled error. Client-side UUID validation rejects a malformed id before any HTTP call.
+
+Existing site connections that reference the removed connector are orphaned, not cascade-deleted.
+
+**Version**
+
+Available with REST API 3.30 and later.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`connector` | The connector LUID (`str`), or an `AuthFederationConnectorItem` whose `luid` is set.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`Invalid UUID` | Raises `ValueError` if the target is not a well-formed UUID.
+
+<br>
+<br>
+
+#### auth_federation.create_key
+
+```py
+auth_federation.create_key()
+```
+
+Generates a new WIF signing key. Keys are created in the inactive state; use `activate_key` to promote one to the site's active signing key. Fails with HTTP 400 (`ServerResponseError`) if the site is already at the maximum number of keys.
+
+**Version**
+
+Available with REST API 3.30 and later.
+
+**Returns**
+
+Returns an `AuthFederationKeyItem` with the created key's JWK metadata (`kid`, `kty`, `alg`, `use`, `n`, `e`). The private key is never exposed by the REST API.
+
+**Example**
+
+```py
+with server.auth.sign_in(tableau_auth):
+    key = server.auth_federation.create_key()
+    print(f"New key id: {key.kid}")
+```
+
+<br>
+<br>
+
+#### auth_federation.activate_key
+
+```py
+auth_federation.activate_key(key)
+```
+
+Promotes the given key to the site's active signing key. Atomic: deactivates whichever key was previously active in the same operation, so the site is never without an active signing key during rotation.
+
+**Version**
+
+Available with REST API 3.30 and later.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`key` | The key id (`kid`), or an `AuthFederationKeyItem` whose `kid` is set.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`Invalid UUID` | Raises `ValueError` if the target is not a well-formed UUID.
+
+<br>
+<br>
+
+#### auth_federation.deactivate_key
+
+```py
+auth_federation.deactivate_key(key)
+```
+
+Deactivates the given key. A deactivated key stays on the site (and in the public JWKS) so already-issued JWTs can still be verified during their validity window, but no new JWTs will be signed with it. Calling `deactivate_key` on the active key without first activating a replacement leaves the site unable to mint WIF tokens until a replacement is activated.
+
+**Version**
+
+Available with REST API 3.30 and later.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`key` | The key id (`kid`), or an `AuthFederationKeyItem` whose `kid` is set.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`Invalid UUID` | Raises `ValueError` if the target is not a well-formed UUID.
+
+<br>
+<br>
+
+#### auth_federation.delete_key
+
+```py
+auth_federation.delete_key(key)
+```
+
+Deletes a WIF signing key. Fails with HTTP 400 if the key is currently active.
+
+Unlike `deactivate_key`, which keeps the (now-inactive) key published in the site's JWKS so already-issued JWTs can still be verified, `delete_key` removes the key from the JWKS entirely — any verifier that fetches the key set afterwards will reject still-unexpired tokens signed with it. For a safe rotation, keep the old key deactivated-but-published until every JWT it signed has expired (upper bound: the site's current `token_lifetime_seconds`, default 7200 s / 2 h), and only then delete it.
+
+**Version**
+
+Available with REST API 3.30 and later.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`key` | The key id (`kid`), or an `AuthFederationKeyItem` whose `kid` is set.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`Invalid UUID` | Raises `ValueError` if the target is not a well-formed UUID.
+
+<br>
+<br>
+
+---
+
+
 ## Connections
 
 The connections for Tableau Server data sources and workbooks are represented by a `ConnectionItem` class.  You can call data source and workbook methods to query or update the connection information.  The `ConnectionCredentials` class represents the connection information you can update.
