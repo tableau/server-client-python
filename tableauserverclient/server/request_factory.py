@@ -1,12 +1,9 @@
 import xml.etree.ElementTree as ET
-from typing import Any, Callable, TypeVar, TYPE_CHECKING
+from typing import Any, Callable, Concatenate, ParamSpec, TypeVar, TYPE_CHECKING
 from collections.abc import Iterable
-
-from typing_extensions import ParamSpec
 
 from requests.packages.urllib3.fields import RequestField
 from requests.packages.urllib3.filepost import encode_multipart_formdata
-from typing_extensions import Concatenate
 
 from tableauserverclient.models import *
 
@@ -105,6 +102,37 @@ class AuthRequest:
         site_element = ET.SubElement(xml_request, "site")
         site_element.attrib["contentUrl"] = site_content_url
         return ET.tostring(xml_request)
+
+
+class AuthFederationRequest:
+    # The WIF admin controller binds the request body directly as
+    # ``AuthFederationConfigType`` / ``AuthFederationConnectorType`` — a bare
+    # element, not the usual ``<tsRequest>`` envelope. These methods therefore
+    # skip ``_tsrequest_wrapped`` and emit the bare root themselves.
+
+    def enable_req(self, token_lifetime_seconds: int | None = None) -> bytes:
+        elem = ET.Element("authFederationAdmin")
+        elem.attrib["enabled"] = "true"
+        if token_lifetime_seconds is not None:
+            elem.attrib["tokenLifetimeSeconds"] = str(token_lifetime_seconds)
+        return ET.tostring(elem)
+
+    def update_req(self, token_lifetime_seconds: int) -> bytes:
+        # ``enabled`` must never be sent on PATCH — the server rejects a merge
+        # patch with ``enabled`` present. Enable/disable goes through PUT/DELETE.
+        elem = ET.Element("authFederationAdmin")
+        elem.attrib["tokenLifetimeSeconds"] = str(token_lifetime_seconds)
+        return ET.tostring(elem)
+
+    def create_connector_req(self, connector: "AuthFederationConnectorItem") -> bytes:
+        if connector.connector_class is None:
+            raise ValueError(f"AuthFederationConnectorItem missing connector_class: {connector}")
+        if connector.audience is None:
+            raise ValueError(f"AuthFederationConnectorItem missing audience: {connector}")
+        elem = ET.Element("authFederationConnector")
+        elem.attrib["connectorClass"] = connector.connector_class
+        elem.attrib["audience"] = connector.audience
+        return ET.tostring(elem)
 
 
 class ColumnRequest:
@@ -260,6 +288,8 @@ class DatasourceRequest:
         username: str | None = None,
         password: str | None = None,
         embed_password: bool | None = None,
+        workgroup_auth_mode: str | None = None,
+        auth_federation_service_account: str | None = None,
     ):
         conn_luids_elem = ET.SubElement(element, "connectionLUIDs")
         for luid in connection_luids:
@@ -277,6 +307,12 @@ class DatasourceRequest:
 
         if embed_password is not None:
             connection_elem.set("embedPassword", str(embed_password).lower())
+
+        if workgroup_auth_mode is not None:
+            connection_elem.set("workgroupAuthMode", workgroup_auth_mode)
+
+        if auth_federation_service_account is not None:
+            connection_elem.set("authFederationServiceAccount", auth_federation_service_account)
 
 
 class DQWRequest:
@@ -733,13 +769,13 @@ class SiteRequest:
                 site_item.custom_subscription_email_enabled
             ).lower()
         if site_item.custom_subscription_email is not None:
-            site_element.attrib["customSubscriptionEmail"] = str(site_item.custom_subscription_email).lower()
+            site_element.attrib["customSubscriptionEmail"] = str(site_item.custom_subscription_email)
         if site_item.custom_subscription_footer_enabled is not None:
             site_element.attrib["customSubscriptionFooterEnabled"] = str(
                 site_item.custom_subscription_footer_enabled
             ).lower()
         if site_item.custom_subscription_footer is not None:
-            site_element.attrib["customSubscriptionFooter"] = str(site_item.custom_subscription_footer).lower()
+            site_element.attrib["customSubscriptionFooter"] = str(site_item.custom_subscription_footer)
         if site_item.ask_data_mode is not None:
             site_element.attrib["askDataMode"] = str(site_item.ask_data_mode)
         if site_item.named_sharing_enabled is not None:
@@ -837,13 +873,13 @@ class SiteRequest:
                 site_item.custom_subscription_email_enabled
             ).lower()
         if site_item.custom_subscription_email is not None:
-            site_element.attrib["customSubscriptionEmail"] = str(site_item.custom_subscription_email).lower()
+            site_element.attrib["customSubscriptionEmail"] = str(site_item.custom_subscription_email)
         if site_item.custom_subscription_footer_enabled is not None:
             site_element.attrib["customSubscriptionFooterEnabled"] = str(
                 site_item.custom_subscription_footer_enabled
             ).lower()
         if site_item.custom_subscription_footer is not None:
-            site_element.attrib["customSubscriptionFooter"] = str(site_item.custom_subscription_footer).lower()
+            site_element.attrib["customSubscriptionFooter"] = str(site_item.custom_subscription_footer)
         if site_item.ask_data_mode is not None:
             site_element.attrib["askDataMode"] = str(site_item.ask_data_mode)
         if site_item.named_sharing_enabled is not None:
@@ -1187,6 +1223,8 @@ class WorkbookRequest:
         username: str | None = None,
         password: str | None = None,
         embed_password: bool | None = None,
+        workgroup_auth_mode: str | None = None,
+        auth_federation_service_account: str | None = None,
     ):
         conn_luids_elem = ET.SubElement(element, "connectionLUIDs")
         for luid in connection_luids:
@@ -1204,6 +1242,12 @@ class WorkbookRequest:
 
         if embed_password is not None:
             connection_elem.set("embedPassword", str(embed_password).lower())
+
+        if workgroup_auth_mode is not None:
+            connection_elem.set("workgroupAuthMode", workgroup_auth_mode)
+
+        if auth_federation_service_account is not None:
+            connection_elem.set("authFederationServiceAccount", auth_federation_service_account)
 
 
 class Connection:
@@ -1229,6 +1273,10 @@ class Connection:
             connection_element.attrib["embedPassword"] = str(connection_item.embed_password).lower()
         if connection_item.query_tagging is not None:
             connection_element.attrib["queryTaggingEnabled"] = str(connection_item.query_tagging).lower()
+        if connection_item.workgroup_auth_mode is not None:
+            connection_element.attrib["workgroupAuthMode"] = connection_item.workgroup_auth_mode
+        if connection_item.auth_federation_service_account is not None:
+            connection_element.attrib["authFederationServiceAccount"] = connection_item.auth_federation_service_account
 
 
 class TaskRequest:
@@ -1761,6 +1809,7 @@ class ExtensionsRequest:
 
 class RequestFactory:
     Auth = AuthRequest()
+    AuthFederation = AuthFederationRequest()
     Connection = Connection()
     Column = ColumnRequest()
     CustomView = CustomViewRequest()

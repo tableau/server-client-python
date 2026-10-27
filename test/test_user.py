@@ -405,7 +405,7 @@ def test_create_users_csv() -> None:
         "ServerAdministrator": "System",
     }
 
-    csv_columns = ["name", "password", "fullname", "license", "admin", "publish", "email"]
+    csv_columns = ["name", "password", "fullname", "license", "admin", "publish", "email", "auth"]
     csv_data = create_users_csv(users)
     csv_file = io.StringIO(csv_data.decode("utf-8"))
     csv_reader = csv.reader(csv_file)
@@ -417,8 +417,23 @@ def test_create_users_csv() -> None:
         assert (user.fullname or "") == csv_user["fullname"]
         assert (user.email or "") == csv_user["email"]
         assert license_map[site_role] == csv_user["license"]
-        assert admin_map.get(site_role, "") == csv_user["admin"]
+        assert admin_map.get(site_role, "None") == csv_user["admin"]
         assert publish_map[site_role] == int(csv_user["publish"])
+        assert (user.auth_setting or "") == csv_user["auth"]
+
+
+def test_decompose_unsupported_role_emits_invalid_license() -> None:
+    # UnlicensedWithPublish and ViewerWithPublish are in UserItem.Roles for
+    # historical reasons but the server-side CSV license parser has never
+    # accepted them. _decompose_site_role emits license="Invalid" for these
+    # (and any other unmapped role) so the server rejects the row with
+    # USER_CSV_INVALID_LICENSE, preserving the per-row error semantics
+    # callers of bulk_add had before this refactor.
+    for role in ("UnlicensedWithPublish", "ViewerWithPublish", "Guest", "SupportUser"):
+        license, admin, publish = TSC.UserItem.CSVImport._decompose_site_role(role)
+        assert license == "Invalid"
+        assert admin == "None"
+        assert publish == "0"
 
 
 def test_bulk_add(server: TSC.Server) -> None:
@@ -598,3 +613,24 @@ def test_remove_users_csv(server: TSC.Server) -> None:
             assert (
                 name == f"{user.domain_name}\\{user.name}"
             ), f"Name in csv does not match expected name: {user.domain_name}\\{user.name}"
+
+
+def test_from_xml_accepts_unknown_auth_setting() -> None:
+    # Regression: response parsing must not enforce the UserItem.Auth enum. If a
+    # future Tableau release adds a new auth type, TSC's `_set_values` used to
+    # route through the @property_is_enum(Auth) setter, which raised ValueError
+    # on any value outside {SAML, OpenID, TableauIDWithMFA, ServerDefault},
+    # breaking response parsing entirely. The CSV import path validates upstream
+    # against CSVImport._AUTH_CANONICAL, so the enum guard on _set_values was
+    # redundant there and harmful on server-parse paths.
+    ns = {"t": "http://tableau.com/api"}
+    xml = ET.fromstring(
+        b"<user xmlns='http://tableau.com/api' "
+        b"id='u1' name='alice' siteRole='Viewer' authSetting='FutureAuthType42' />"
+    )
+    item = TSC.UserItem.from_xml(xml, ns)
+    assert (
+        item.auth_setting == "FutureAuthType42"
+    ), "from_xml must preserve unknown auth values verbatim, not raise or drop them"
+    assert item.name == "alice"
+    assert item.site_role == "Viewer"

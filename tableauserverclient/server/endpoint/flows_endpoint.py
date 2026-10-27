@@ -264,6 +264,16 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem], DownloadableMixi
 
         REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#update_flow_connection
 
+        Setting ``connection_item.workgroup_auth_mode`` and
+        ``connection_item.auth_federation_service_account`` (see
+        ``ConnectionItem.WorkgroupAuthMode``) will forward the Workload
+        Identity Federation attributes to this endpoint via the shared
+        ``RequestFactory.Connection.update_req`` builder. Server-side
+        handling of these attributes on flow connections is governed by
+        the flow endpoint and may differ from the workbook / datasource
+        endpoints — review the REST reference for flow-specific semantics
+        before relying on it in production.
+
         Parameters
         ----------
         flow_item: FlowItem

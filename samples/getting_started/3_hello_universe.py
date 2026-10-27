@@ -40,7 +40,7 @@ def main():
             for project in projects:
                 print(project.name)
 
-        workbooks, pagination = server.datasources.get()
+        workbooks, pagination = server.workbooks.get()
         if workbooks:
             print(f"{pagination.total_available} workbooks")
             print(workbooks[0])
