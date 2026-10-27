@@ -5,42 +5,31 @@
 
 import argparse
 import logging
-import os.path
 
 import tableauserverclient as TSC
+
+from _shared import add_common_arguments, build_auth, resolve_credentials
 
 
 def main():
     parser = argparse.ArgumentParser(description="Explore extract functions supported by the Server API.")
-    # Common options; please keep those in sync across all samples
-    parser.add_argument("--server", "-s", help="server address")
-    parser.add_argument("--site", help="site name")
-    parser.add_argument("--token-name", "-tn", help="name of the personal access token used to sign into the server")
-    parser.add_argument("--token-value", "-tv", help="value of the personal access token used to sign into the server")
-    parser.add_argument(
-        "--logging-level",
-        "-l",
-        choices=["debug", "info", "error"],
-        default="error",
-        help="desired logging level (set to error by default)",
-    )
+    add_common_arguments(parser)
     # Options specific to this sample
     parser.add_argument("--create", action="store_true")
     parser.add_argument("--delete", action="store_true")
     parser.add_argument("--refresh", action="store_true")
-    parser.add_argument("--workbook", required=False)
-    parser.add_argument("--datasource", required=False)
+    # --workbook / --datasource are mutually exclusive; if neither is passed we
+    # fall back to picking the first workbook on the site (see below).
+    target = parser.add_mutually_exclusive_group()
+    target.add_argument("--workbook")
+    target.add_argument("--datasource")
     args = parser.parse_args()
 
-    # Set logging level based on user input, or error by default
-    logging_level = getattr(logging, args.logging_level.upper())
-    logging.basicConfig(level=logging_level)
+    resolve_credentials(args)
+    logging.basicConfig(level=getattr(logging, args.logging_level.upper()))
 
-    # SIGN IN
-    tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
-    server = TSC.Server(args.server, use_server_version=False)
-    server.add_http_options({"verify": False})
-    server.use_server_version()
+    tableau_auth = build_auth(args)
+    server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
         wb = None
         ds = None
@@ -53,19 +42,25 @@ def main():
             if ds is None:
                 raise ValueError(f"Datasource not found for id {args.datasource}")
         else:
-            # Gets all workbook items
-            all_workbooks, pagination_item = server.workbooks.get()
+            # Gets all workbook items. `.get()` returns only the first page,
+            # so we use TSC.Pager to iterate every page.
+            first_page, pagination_item = server.workbooks.get()
             print(f"\nThere are {pagination_item.total_available} workbooks on site: ")
+            all_workbooks = list(TSC.Pager(server.workbooks))
             print([workbook.name for workbook in all_workbooks])
 
             if all_workbooks:
-                # Pick one workbook from the list
-                wb = all_workbooks[3]
+                # Fall back to the first workbook on the site. For a real run,
+                # pass --workbook <id> for a workbook you know has an extract.
+                wb = all_workbooks[0]
 
         if args.create:
-            print("create extract on wb ", wb.name)
-            extract_job = server.workbooks.create_extract(wb, includeAll=True)
-            print(extract_job)
+            if wb is None:
+                print("no workbook selected to create an extract on")
+            else:
+                print(f"create extract on workbook {wb.name}")
+                extract_job = server.workbooks.create_extract(wb, includeAll=True)
+                print(extract_job)
 
         if args.refresh:
             extract_job = None
@@ -81,9 +76,12 @@ def main():
             print(extract_job)
 
         if args.delete:
-            print("delete extract on wb ", wb.name)
-            jj = server.workbooks.delete_extract(wb)
-            print(jj)
+            if wb is None:
+                print("no workbook selected to delete an extract from")
+            else:
+                print(f"delete extract on workbook {wb.name}")
+                jj = server.workbooks.delete_extract(wb)
+                print(jj)
 
 
 if __name__ == "__main__":
