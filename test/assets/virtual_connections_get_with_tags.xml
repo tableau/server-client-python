@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-2.3.xsd">
+  <pagination pageNumber="1" pageSize="2" totalAvailable="2" />
+  <virtualConnections>
+    <virtualConnection createdAt="2024-05-30T09:00:00Z" hasExtracts="false" id="8fd7cc02-bb55-4d15-b8b1-9650239efe79" isCertified="true" name="vconn_with_tags" updatedAt="2024-06-18T09:00:00Z" webpageUrl="https://test/#/site/site-name/virtualconnections/3">
+      <project id="f5d5ba60-8ca5-11ef-b6bc-bb13b785b995" name="Default"/>
+      <owner id="7fdad1f1-d521-46ff-a601-51f88e3296f0" name="jmoens"/>
+      <tags>
+        <tag label="finance"/>
+        <tag label="certified"/>
+      </tags>
+    </virtualConnection>
+    <virtualConnection createdAt="2024-03-04T21:51:02Z" hasExtracts="false" id="875228b6-a3dc-4035-bbc0-4a68ab231ca8" isCertified="false" name="vconn_no_tags" updatedAt="2024-03-04T21:52:01Z" webpageUrl="https://test/#/site/site-name/virtualconnections/4">
+      <project id="f5d5ba60-8ca5-11ef-b6bc-bb13b785b995" name="Default"/>
+      <owner id="e8954ef5-7132-476a-93af-89178639fa98" name="fcao"/>
+      <tags/>
+    </virtualConnection>
+  </virtualConnections>
+</tsResponse>
