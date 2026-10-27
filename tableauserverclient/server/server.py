@@ -19,6 +19,7 @@ from tableauserverclient.server.endpoint import (
     Datasources,
     Projects,
     Auth,
+    AuthFederation,
     Schedules,
     ServerInfo,
     Tasks,
@@ -232,6 +233,7 @@ class Server:
         self.tags = Tags(self)
         self.virtual_connections = VirtualConnections(self)
         self.oidc = OIDC(self)
+        self.auth_federation = AuthFederation(self)
         self.extensions = Extensions(self)
 
         self._http_options = dict()  # must set this before making a server call

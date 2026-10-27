@@ -40,6 +40,7 @@ UPDATE_XML = TEST_ASSET_DIR / "workbook_update.xml"
 UPDATE_PERMISSIONS = TEST_ASSET_DIR / "workbook_update_permissions.xml"
 UPDATE_CONNECTIONS_XML = TEST_ASSET_DIR / "workbook_update_connections.xml"
 UPDATE_CONNECTIONS_NO_AUTH_XML = TEST_ASSET_DIR / "workbook_update_connections_no_auth.xml"
+UPDATE_CONNECTION_WIF_XML = TEST_ASSET_DIR / "workbook_update_connection_wif.xml"
 
 
 @pytest.fixture(scope="function")
@@ -950,6 +951,8 @@ def test_synchronous_publish_timeout_error(server: TSC.Server) -> None:
 
 
 def test_async_publish_timeout_error(server: TSC.Server) -> None:
+    server.version = "3.0"
+
     with requests_mock.mock() as m:
         m.register_uri("POST", server.workbooks.baseurl, status_code=504)
 
@@ -1086,6 +1089,204 @@ def test_odata_connection(server: TSC.Server) -> None:
 
     assert xml_connection is not None
     assert xml_connection.get("serverAddress") == url
+
+
+@pytest.mark.parametrize(
+    "workgroup_auth_mode, service_account, expected_mode, expected_sa",
+    [
+        (TSC.ConnectionItem.WorkgroupAuthMode.WIF, None, "workload-identity-federation", None),
+        (
+            TSC.ConnectionItem.WorkgroupAuthMode.WIF_IMPERSONATION,
+            "sa@proj.iam.gserviceaccount.com",
+            "workload-identity-federation-impersonation",
+            "sa@proj.iam.gserviceaccount.com",
+        ),
+    ],
+    ids=["direct", "impersonation"],
+)
+def test_update_connection_wif(
+    server: TSC.Server,
+    workgroup_auth_mode: str,
+    service_account: str | None,
+    expected_mode: str,
+    expected_sa: str | None,
+) -> None:
+    workbook = TSC.WorkbookItem("project", "test")
+    workbook._id = "06b944d2-959d-4604-9305-12323c95e70e"
+    connection = TSC.ConnectionItem()
+    connection._id = "17376070-64d1-4d17-acb4-a56e4b5b1768"
+    connection.workgroup_auth_mode = workgroup_auth_mode
+    if service_account is not None:
+        connection.auth_federation_service_account = service_account
+    response_xml = UPDATE_CONNECTION_WIF_XML.read_text()
+
+    with requests_mock.mock() as m:
+        m.put(f"{server.workbooks.baseurl}/{workbook.id}/connections/{connection.id}", text=response_xml)
+        server.workbooks.update_connection(workbook, connection)
+
+        request = m.request_history[0]
+
+    xml_connection = fromstring(request.body).find(".//connection")
+    assert xml_connection is not None
+    assert xml_connection.get("workgroupAuthMode") == expected_mode
+    assert xml_connection.get("authFederationServiceAccount") == expected_sa
+
+
+def test_update_connection_wif_switch_from_oauth(server: TSC.Server) -> None:
+    """OAuth -> WIF: WIF attrs ride alongside the existing auth_type."""
+    workbook = TSC.WorkbookItem("project", "test")
+    workbook._id = "06b944d2-959d-4604-9305-12323c95e70e"
+    connection = TSC.ConnectionItem()
+    connection._id = "17376070-64d1-4d17-acb4-a56e4b5b1768"
+    connection.auth_type = "oauth"
+    connection.workgroup_auth_mode = TSC.ConnectionItem.WorkgroupAuthMode.WIF_IMPERSONATION
+    connection.auth_federation_service_account = "sa@proj.iam.gserviceaccount.com"
+    response_xml = UPDATE_CONNECTION_WIF_XML.read_text()
+
+    with requests_mock.mock() as m:
+        m.put(f"{server.workbooks.baseurl}/{workbook.id}/connections/{connection.id}", text=response_xml)
+        server.workbooks.update_connection(workbook, connection)
+
+        request = m.request_history[0]
+
+    xml_connection = fromstring(request.body).find(".//connection")
+    assert xml_connection is not None
+    assert xml_connection.get("authenticationType") == "oauth"
+    assert xml_connection.get("workgroupAuthMode") == "workload-identity-federation-impersonation"
+    assert xml_connection.get("authFederationServiceAccount") == "sa@proj.iam.gserviceaccount.com"
+
+
+def test_update_connection_wif_cleared_fields_omit_attrs(server: TSC.Server) -> None:
+    """With WIF fields unset, the request omits both WIF attributes.
+
+    Reverting an existing WIF connection to OAuth is a server-side decision
+    (REST reference: resend workgroupAuthMode on every WIF update); TSC
+    simply does not emit the attribute when the ConnectionItem field is
+    unset.
+    """
+    workbook = TSC.WorkbookItem("project", "test")
+    workbook._id = "06b944d2-959d-4604-9305-12323c95e70e"
+    connection = TSC.ConnectionItem()
+    connection._id = "17376070-64d1-4d17-acb4-a56e4b5b1768"
+    connection.auth_type = "oauth"
+    response_xml = UPDATE_CONNECTION_WIF_XML.read_text()
+
+    with requests_mock.mock() as m:
+        m.put(f"{server.workbooks.baseurl}/{workbook.id}/connections/{connection.id}", text=response_xml)
+        server.workbooks.update_connection(workbook, connection)
+
+        request = m.request_history[0]
+
+    xml_connection = fromstring(request.body).find(".//connection")
+    assert xml_connection is not None
+    assert xml_connection.get("authenticationType") == "oauth"
+    assert xml_connection.get("workgroupAuthMode") is None
+    assert xml_connection.get("authFederationServiceAccount") is None
+
+
+def test_update_connection_wif_service_account_without_mode(server: TSC.Server) -> None:
+    """TSC is permissive: a lone service account emits as-is and the server rejects it."""
+    workbook = TSC.WorkbookItem("project", "test")
+    workbook._id = "06b944d2-959d-4604-9305-12323c95e70e"
+    connection = TSC.ConnectionItem()
+    connection._id = "17376070-64d1-4d17-acb4-a56e4b5b1768"
+    connection.auth_federation_service_account = "sa@proj.iam.gserviceaccount.com"
+    response_xml = UPDATE_CONNECTION_WIF_XML.read_text()
+
+    with requests_mock.mock() as m:
+        m.put(f"{server.workbooks.baseurl}/{workbook.id}/connections/{connection.id}", text=response_xml)
+        server.workbooks.update_connection(workbook, connection)
+
+        request = m.request_history[0]
+
+    xml_connection = fromstring(request.body).find(".//connection")
+    assert xml_connection is not None
+    assert xml_connection.get("workgroupAuthMode") is None
+    assert xml_connection.get("authFederationServiceAccount") == "sa@proj.iam.gserviceaccount.com"
+
+
+def test_update_connection_wif_from_response(server: TSC.Server) -> None:
+    """If/when the server echoes WIF attrs, ConnectionItem.from_response surfaces them."""
+    workbook = TSC.WorkbookItem("project", "test")
+    workbook._id = "06b944d2-959d-4604-9305-12323c95e70e"
+    connection = TSC.ConnectionItem()
+    connection._id = "17376070-64d1-4d17-acb4-a56e4b5b1768"
+    response_xml = UPDATE_CONNECTION_WIF_XML.read_text()
+
+    with requests_mock.mock() as m:
+        m.put(f"{server.workbooks.baseurl}/{workbook.id}/connections/{connection.id}", text=response_xml)
+        updated = server.workbooks.update_connection(workbook, connection)
+
+    assert updated is not None
+    assert updated.workgroup_auth_mode == "workload-identity-federation"
+    assert updated.auth_federation_service_account is None
+
+
+def test_update_connection_wif_from_response_absent(server: TSC.Server) -> None:
+    """Older servers (REST < 3.30) don't echo WIF attrs; from_response parses them as None."""
+    workbook = TSC.WorkbookItem("project", "test")
+    workbook._id = "06b944d2-959d-4604-9305-12323c95e70e"
+    connection = TSC.ConnectionItem()
+    connection._id = "17376070-64d1-4d17-acb4-a56e4b5b1768"
+    response_xml = ODATA_XML.read_text()
+
+    with requests_mock.mock() as m:
+        m.put(f"{server.workbooks.baseurl}/{workbook.id}/connections/{connection.id}", text=response_xml)
+        updated = server.workbooks.update_connection(workbook, connection)
+
+    assert updated is not None
+    assert updated.workgroup_auth_mode is None
+    assert updated.auth_federation_service_account is None
+
+
+@pytest.mark.parametrize(
+    "workgroup_auth_mode, service_account, expected_mode, expected_sa",
+    [
+        (TSC.ConnectionItem.WorkgroupAuthMode.WIF, None, "workload-identity-federation", None),
+        (
+            TSC.ConnectionItem.WorkgroupAuthMode.WIF_IMPERSONATION,
+            "sa@proj.iam.gserviceaccount.com",
+            "workload-identity-federation-impersonation",
+            "sa@proj.iam.gserviceaccount.com",
+        ),
+    ],
+    ids=["direct", "impersonation"],
+)
+def test_update_workbook_connections_wif(
+    server: TSC.Server,
+    workgroup_auth_mode: str,
+    service_account: str | None,
+    expected_mode: str,
+    expected_sa: str | None,
+) -> None:
+    """Bulk update_connections forwards WIF kwargs onto the single <connection> payload."""
+    response_xml = UPDATE_CONNECTIONS_XML.read_text()
+
+    with requests_mock.Mocker() as m:
+        workbook_id = "1a2b3c4d-5e6f-7a8b-9c0d-112233445566"
+        connection_luids = ["abc12345-def6-7890-gh12-ijklmnopqrst", "1234abcd-5678-efgh-ijkl-0987654321mn"]
+
+        workbook = TSC.WorkbookItem(workbook_id)
+        workbook._id = workbook_id
+        server.version = "3.26"
+        m.put(
+            "http://test/api/3.26/sites/dad65087-b08b-4603-af4e-2887b8aafc67/workbooks/1a2b3c4d-5e6f-7a8b-9c0d-112233445566/connections",
+            text=response_xml,
+        )
+
+        server.workbooks.update_connections(
+            workbook_item=workbook,
+            connection_luids=connection_luids,
+            workgroup_auth_mode=workgroup_auth_mode,
+            auth_federation_service_account=service_account,
+        )
+
+        request = m.request_history[0]
+
+    xml_connection = fromstring(request.body).find(".//connection")
+    assert xml_connection is not None
+    assert xml_connection.get("workgroupAuthMode") == expected_mode
+    assert xml_connection.get("authFederationServiceAccount") == expected_sa
 
 
 def test_update_workbook_connections(server: TSC.Server) -> None:

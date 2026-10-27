@@ -1,3 +1,8 @@
+from tableauserverclient.models.auth_federation_item import (
+    AuthFederationConnectorItem,
+    AuthFederationItem,
+    AuthFederationKeyItem,
+)
 from tableauserverclient.models.collection_item import CollectionItem
 from tableauserverclient.models.column_item import ColumnItem
 from tableauserverclient.models.connection_credentials import ConnectionCredentials
@@ -55,6 +60,9 @@ from tableauserverclient.models.workbook_item import WorkbookItem
 from tableauserverclient.models.extract_item import ExtractItem
 
 __all__ = [
+    "AuthFederationConnectorItem",
+    "AuthFederationItem",
+    "AuthFederationKeyItem",
     "CollectionItem",
     "ColumnItem",
     "ConnectionCredentials",
