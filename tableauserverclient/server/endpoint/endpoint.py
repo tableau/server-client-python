@@ -2,7 +2,6 @@ from email.message import Message
 import io
 import os
 from contextlib import closing
-from typing_extensions import Concatenate, ParamSpec
 from urllib.parse import urljoin, urlparse
 from tableauserverclient import datetime_helpers as datetime
 
@@ -13,8 +12,10 @@ from xml.etree.ElementTree import ParseError
 from typing import (
     Any,
     Callable,
+    Concatenate,
     Generic,
     Optional,
+    ParamSpec,
     TYPE_CHECKING,
     TypeVar,
     Union,
@@ -580,6 +581,9 @@ class QuerysetEndpoint(Endpoint, Generic[T]):
         queryset = QuerySet(self)
         queryset.request_options.fields |= set(fields) | set(("_default_",))
         return queryset
+
+    def find_by_name(self, name: str) -> list[T]:
+        return list(self.filter(name=name))
 
     def only_fields(self: Self, *fields: str) -> QuerySet:
         """
