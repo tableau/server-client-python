@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, Callable, Literal, overload
 from .endpoint import Endpoint, api, parameter_added_in
 from .exceptions import MissingRequiredFieldError
 from tableauserverclient.server import RequestFactory
+from tableauserverclient.server.pager import Pager
 from tableauserverclient.models import PaginationItem, ScheduleItem, TaskItem, ExtractItem
 from tableauserverclient.models.schedule_item import parse_batch_schedule_state
 
@@ -18,7 +19,7 @@ OK = AddResponse(result=True, error=None, warnings=None, task_created=None)
 
 if TYPE_CHECKING:
     from ..request_options import RequestOptions
-    from ...models import DatasourceItem, WorkbookItem, FlowItem
+    from ...models import DatasourceItem, WorkbookItem, FlowItem, SubscriptionItem
 
 
 class Schedules(Endpoint):
@@ -281,6 +282,35 @@ class Schedules(Endpoint):
         extract_items = ExtractItem.from_response(server_response.content, self.parent_srv.namespace)
 
         return extract_items, pagination_item
+
+    @api(version="2.3")
+    def get_subscriptions_by_schedule(self, schedule_id: str) -> list["SubscriptionItem"]:
+        """
+        Returns the subscriptions that run on the specified server schedule.
+
+        Unlike extract refresh tasks, the REST API has no per-schedule
+        subscriptions endpoint, so this pages through the site's subscriptions
+        and keeps the ones whose schedule matches. On a site with many
+        subscriptions this issues one request per page.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_subscriptions.htm#query_subscriptions
+
+        Parameters
+        ----------
+        schedule_id : str
+            The ID of the schedule to list subscriptions for.
+
+        Returns
+        -------
+        list[SubscriptionItem]
+            The subscriptions attached to the given schedule.
+        """
+        if not schedule_id:
+            error = "Schedule ID undefined"
+            raise ValueError(error)
+
+        logger.info(f"Querying subscriptions for schedule (ID: {schedule_id})")
+        return [sub for sub in Pager(self.parent_srv.subscriptions) if sub.schedule_id == schedule_id]
 
     @overload
     def batch_update_state(
