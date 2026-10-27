@@ -8,10 +8,13 @@
   delete). Three new exports: `AuthFederationItem`,
   `AuthFederationConnectorItem`, `AuthFederationKeyItem`. All id-taking
   methods reject non-UUID targets client-side (raising `ValueError`) to
-  prevent path injection. Requires Tableau Server REST API 3.30+ (Tableau
-  Server 2026.3) and Site Administrator on the current site; the server
-  returns 403 if WIF is not enabled on the site or the caller is not an
-  admin (including on `get()`).
+  prevent path injection. Key management rejects connected-app JWT
+  sessions with 401; use a PAT or password session. Requires Tableau
+  Server REST API 3.30+ (Tableau Server 2026.3), the WIF feature available
+  on the site, and the Site Administrator role; the server returns 403
+  if WIF is not available or the caller is not an admin (including on
+  `get()`), and config/connector operations return 404 until `enable()`
+  has run.
 * Added Workload Identity Federation (WIF) support to the connection update
   endpoints. `ConnectionItem` has two new string properties,
   `workgroup_auth_mode` and `auth_federation_service_account`, emitted on
@@ -21,9 +24,12 @@
   e.g. Snowflake) or `WIF_IMPERSONATION` (e.g. BigQuery);
   `auth_federation_service_account` is only valid with the impersonation
   mode. Omitting `workgroup_auth_mode` on a subsequent update of a WIF
-  connection returns HTTP 400. Requires Tableau Server REST API 3.30+
-  (Tableau Server 2026.3) with WIF configured on the site; older servers
-  silently ignore unknown connection attributes.
+  connection returns HTTP 400. The server does not echo these attributes
+  on GET today, so values parsed from a response are typically `None`
+  even on a WIF-configured connection. Requires Tableau Server REST API
+  3.30+ (Tableau Server 2026.3) with the WIF feature available and
+  enabled on the site; older servers silently ignore unknown connection
+  attributes.
 * Bumped the urllib3 floor to 2.6.3 to pick up the fix for CVE-2026-21441
   (GHSA-38jv-5279-wg99, 8.9 High): urllib3's streaming decompression
   safeguards were bypassed when HTTP redirects were followed. TSC's manual
