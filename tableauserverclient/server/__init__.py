@@ -12,7 +12,14 @@ from tableauserverclient.server.filter import Filter
 from tableauserverclient.server.sort import Sort
 from tableauserverclient.server.server import Server
 from tableauserverclient.server.pager import Pager
-from tableauserverclient.server.endpoint.exceptions import FailedSignInError, NotSignedInError
+from tableauserverclient.server.endpoint.exceptions import (
+    FailedSignInError,
+    FlowRunCancelledException,
+    FlowRunFailedException,
+    JobCancelledException,
+    JobFailedException,
+    NotSignedInError,
+)
 
 from tableauserverclient.server.endpoint import (
     Auth,
@@ -60,6 +67,10 @@ __all__ = [
     "Server",
     "Pager",
     "FailedSignInError",
+    "FlowRunCancelledException",
+    "FlowRunFailedException",
+    "JobCancelledException",
+    "JobFailedException",
     "NotSignedInError",
     "Auth",
     "CustomViews",

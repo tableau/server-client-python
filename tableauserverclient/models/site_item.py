@@ -169,10 +169,10 @@ class SiteItem:
         auto_suspend_refresh_inactivity_window: int = 30,
         attribute_capture_enabled: bool | None = None,
     ):
-        self._admin_mode = None
+        self._admin_mode: str | None = None
         self._id: str | None = None
         self._num_users = None
-        self._state = None
+        self._state: str | None = None
         self._status_reason = None
         self._storage: str | None = None
         self.user_quota = user_quota

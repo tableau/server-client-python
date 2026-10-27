@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<tsResponse
+  xmlns="http://tableau.com/api"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://tableau.com/api https://help.tableau.com/samples/en-us/rest_api/ts-api_3_30.xsd">
+  <authFederationAdmin
+    enabled="true"
+    issuerUrl="https://10ax.online.tableau.com/sites/mySite/auth-federation"
+    activeKeyId="a4b9c2d7-ff81-45e8-9c3e-6b19d2a5c0ee"
+    tokenLifetimeSeconds="3600"/>
+</tsResponse>
