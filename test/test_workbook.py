@@ -938,6 +938,8 @@ def test_synchronous_publish_timeout_error(server: TSC.Server) -> None:
 
 
 def test_async_publish_timeout_error(server: TSC.Server) -> None:
+    server.version = "3.0"
+
     with requests_mock.mock() as m:
         m.register_uri("POST", server.workbooks.baseurl, status_code=504)
 

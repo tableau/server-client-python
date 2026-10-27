@@ -88,7 +88,7 @@ class ProjectItem:
         samples: bool | None = None,
         id: str | None = None,
     ) -> None:
-        self._content_permissions = None
+        self._content_permissions: str | None = None
         self._id: str | None = id
         self.description: str | None = description
         self.name: str = name

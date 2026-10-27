@@ -378,10 +378,10 @@ class _DataExportOptions(RequestOptionsBase):
           in August 2026. Examples below give the wire form (what the
           server sees after URL decoding) and the data value it matches.
           To match a value containing a literal comma, wire form
-          ``Rock\, Paper\, Scissors`` matches data value ``Rock, Paper,
+          ``Rock\\, Paper\\, Scissors`` matches data value ``Rock, Paper,
           Scissors`` (without escaping, the comma starts an OR-list). To
-          match a literal backslash, double it: wire form ``C:\\temp\\file``
-          matches data value ``C:\temp\file``.
+          match a literal backslash, double it: wire form ``C:\\\\temp\\\\file``
+          matches data value ``C:\\temp\\file``.
         - **Empty value** (``vf_<name>=``) is observed to override any
           workbook-embedded filter on that column, effectively widening it
           to all values. Not officially documented; behavior may change

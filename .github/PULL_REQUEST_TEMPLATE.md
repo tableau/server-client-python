@@ -19,7 +19,7 @@ prompted it.
 For users of the library or CLI: what changes in observable behavior?
 "None - refactor only" is a valid answer. If a public symbol, endpoint
 signature, exception type, or return value shape changes, call it out
-here and in the CHANGELOG so downstream code isn't surprised.
+here so downstream code isn't surprised.
 -->
 
 ## Test plan
