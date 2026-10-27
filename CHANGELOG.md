@@ -2,90 +2,28 @@
 ## Unreleased
 
 * Added Workload Identity Federation (WIF) admin REST API support
-  (`server.auth_federation`). Site admins can now manage the WIF config and
-  its signing keys and connectors from TSC. New endpoints:
-  - `server.auth_federation.get()` -> `AuthFederationItem` — read the
-    site's WIF admin config (enabled flag, issuer URL, active key id,
-    JWT lifetime, connectors). A never-enabled site returns a shell with
-    `enabled=False` rather than 404.
-  - `server.auth_federation.enable(token_lifetime_seconds=None)` ->
-    `AuthFederationItem` — idempotent PUT. Server auto-generates one active
-    signing key on first enable.
-  - `server.auth_federation.update(token_lifetime_seconds)` ->
-    `AuthFederationItem` — merge-patch; only `token_lifetime_seconds` is
-    mutable (required), so `update()` always changes it. `enabled` is never
-    sent on PATCH; use `enable()` / `delete()` to change WIF state.
-  - `server.auth_federation.delete()` — permanently deletes the WIF config
-    along with every signing key and connector on the site. A subsequent
-    `enable()` starts from a clean slate; prior connectors and keys are
-    not restored.
-  - `server.auth_federation.create_connector(connector)` ->
-    `AuthFederationConnectorItem`. `connector_class` must match a Tableau
-    connection type exactly (case-sensitive, e.g. `"bigquery"`,
-    `"snowflake"`). Fails with 409 if a connector with the same class
-    already exists on the site.
-  - `server.auth_federation.list_connectors()` -> `list[AuthFederationConnectorItem]`
-  - `server.auth_federation.get_connector(id)` and
-    `server.auth_federation.delete_connector(id)` accept either a connector
-    LUID string or an `AuthFederationConnectorItem` with `luid` set. All
-    id-taking methods reject `None`, empty strings, and non-UUID-shaped
-    targets client-side (raising `ValueError`) to prevent path injection.
-  - `server.auth_federation.create_key()` -> `AuthFederationKeyItem` —
-    generates a new (inactive) signing key; private key is never returned.
-    Fails with 400 if the site is already at the maximum number of keys.
-  - `server.auth_federation.activate_key(id)` /
-    `server.auth_federation.deactivate_key(id)` /
-    `server.auth_federation.delete_key(id)` accept either a `kid` string
-    or an `AuthFederationKeyItem` with `kid` set; `activate_key` is atomic
-    and deactivates any previously active key. `delete_key` fails with 400
-    if the key is currently active. Safe rotation is `create_key()` →
-    `activate_key(new_kid)`, then retain the old (now-inactive) key in the
-    site's JWKS until every JWT it signed has expired (upper bound: the
-    site's current `token_lifetime_seconds`), and only then
-    `delete_key(old_kid)` — deleting it earlier removes it from the JWKS
-    and any verifier fetching the key set afterwards will reject still-
-    unexpired tokens signed with it. `deactivate_key` on the active key
-    with no replacement leaves the site unable to mint WIF tokens. The four key-management methods are bound to `NO_ACCESS`
-    server-side, which only rejects OAuth-scope-restricted sessions
-    (e.g. connected-app JWT) with 401; password and personal-access-token
-    (PAT) sessions do not carry scopes and are accepted.
-  Three new exports: `AuthFederationItem`, `AuthFederationConnectorItem`,
-  `AuthFederationKeyItem`. Requires Tableau Server REST API 3.30+
-  (Tableau Server 2026.3), the WIF feature enabled on the site, and the
-  Site Administrator role on the current site; the server returns 403 if
-  any of those is missing (including on `get()`).
+  (`server.auth_federation`). Site admins can read, enable, update, and
+  delete the per-site WIF config and manage its connectors (BigQuery,
+  Snowflake, ...) and signing keys (create / activate / deactivate /
+  delete). Three new exports: `AuthFederationItem`,
+  `AuthFederationConnectorItem`, `AuthFederationKeyItem`. All id-taking
+  methods reject non-UUID targets client-side (raising `ValueError`) to
+  prevent path injection. Requires Tableau Server REST API 3.30+ (Tableau
+  Server 2026.3) and Site Administrator on the current site; the server
+  returns 403 if WIF is not enabled on the site or the caller is not an
+  admin (including on `get()`).
 * Added Workload Identity Federation (WIF) support to the connection update
   endpoints. `ConnectionItem` has two new string properties,
-  `workgroup_auth_mode` and `auth_federation_service_account`, that are
-  emitted on the `<connection>` payload by `workbooks.update_connection`,
-  `workbooks.update_connections`, `datasources.update_connection`,
-  `datasources.update_connections`, and `flows.update_connection`. The two
-  bulk endpoints also accept matching `workgroup_auth_mode` and
-  `auth_federation_service_account` keyword arguments and apply them to
-  every connection LUID in the request. Set `workgroup_auth_mode` to one of
-  the values on the new nested value set
-  `ConnectionItem.WorkgroupAuthMode`:
-  - `ConnectionItem.WorkgroupAuthMode.WIF` =
-    `"workload-identity-federation"` — direct WIF, e.g. Snowflake
-  - `ConnectionItem.WorkgroupAuthMode.WIF_IMPERSONATION` =
-    `"workload-identity-federation-impersonation"` — impersonation WIF,
-    e.g. Google BigQuery
-  Usage rules:
-  - Resend `workgroup_auth_mode` on every subsequent update of a WIF
-    connection; omitting it on a later update returns HTTP 400.
-  - Leave `auth_type` unset (or `"oauth"`) when sending a WIF mode; the
-    server derives the stored auth type from the mode.
-  - Set `auth_federation_service_account` only with `WIF_IMPERSONATION`.
-    The server rejects a service account with the direct `WIF` mode. TSC
-    does not validate this combination client-side.
-  - The server does not echo these attributes on GET responses today, so
-    `ConnectionItem.workgroup_auth_mode` and
-    `ConnectionItem.auth_federation_service_account` parsed from a response
-    will typically be `None` even when the connection is WIF-configured.
-  Requires Tableau Server REST API 3.30+ (Tableau Server 2026.3) with
-  WIF configured and enabled on the site. Older servers silently ignore
-  unknown connection attributes, so these fields are safe to leave unset on
-  pre-3.30 targets.
+  `workgroup_auth_mode` and `auth_federation_service_account`, emitted on
+  the `<connection>` payload by `workbooks.update_connection(s)`,
+  `datasources.update_connection(s)`, and `flows.update_connection`. Set
+  `workgroup_auth_mode` to `ConnectionItem.WorkgroupAuthMode.WIF` (direct,
+  e.g. Snowflake) or `WIF_IMPERSONATION` (e.g. BigQuery);
+  `auth_federation_service_account` is only valid with the impersonation
+  mode. Omitting `workgroup_auth_mode` on a subsequent update of a WIF
+  connection returns HTTP 400. Requires Tableau Server REST API 3.30+
+  (Tableau Server 2026.3) with WIF configured on the site; older servers
+  silently ignore unknown connection attributes.
 * Bumped the urllib3 floor to 2.6.3 to pick up the fix for CVE-2026-21441
   (GHSA-38jv-5279-wg99, 8.9 High): urllib3's streaming decompression
   safeguards were bypassed when HTTP redirects were followed. TSC's manual
