@@ -1382,6 +1382,13 @@ class SubscriptionRequest:
             subscription_element.attrib["pageOrientation"] = subscription_item.page_orientation
         if subscription_item.page_size_option is not None:
             subscription_element.attrib["pageSizeOption"] = subscription_item.page_size_option
+        # On create, only emit refreshExtractTriggered when True -- server default
+        # is False, and emitting the attribute unconditionally would surface as a
+        # payload change on servers that treat absence differently from an explicit
+        # False. update_req is asymmetric here: it must emit False to enable the
+        # True -> False transition on an existing subscription.
+        if subscription_item.refresh_extract_triggered:
+            subscription_element.attrib["refreshExtractTriggered"] = "true"
 
         # Content element
         content_element = ET.SubElement(subscription_element, "content")
@@ -1390,9 +1397,22 @@ class SubscriptionRequest:
         if subscription_item.send_if_view_empty is not None:
             content_element.attrib["sendIfViewEmpty"] = str(subscription_item.send_if_view_empty).lower()
 
-        # Schedule element
+        # Schedule element. schedule_id can be None on items parsed from
+        # inline-schedule responses; subscriptions.create() guards against
+        # that before we get here. Re-check explicitly with a raise (not
+        # assert) so callers importing RequestFactory directly get an
+        # actionable error rather than the TypeError ElementTree raises when
+        # attrib["id"] is set to None, and so python -O doesn't strip the
+        # check entirely.
+        schedule_id = subscription_item.schedule_id
+        if schedule_id is None or not schedule_id.strip():
+            raise ValueError(
+                "schedule_id is required to build a subscription create "
+                "request; for on-extract-refresh subscriptions use "
+                "SubscriptionItem.on_extract_refresh(...)"
+            )
         schedule_element = ET.SubElement(subscription_element, "schedule")
-        schedule_element.attrib["id"] = subscription_item.schedule_id
+        schedule_element.attrib["id"] = schedule_id
 
         # User element
         user_element = ET.SubElement(subscription_element, "user")
@@ -1416,6 +1436,10 @@ class SubscriptionRequest:
             subscription.attrib["pageSizeOption"] = subscription_item.page_size_option
         if subscription_item.suspended is not None:
             subscription.attrib["suspended"] = str(subscription_item.suspended).lower()
+        # update_req always emits the flag so callers can turn it off. The
+        # server retains the prior value when the attribute is absent, so
+        # omission would silently prevent True -> False transitions.
+        subscription.attrib["refreshExtractTriggered"] = str(subscription_item.refresh_extract_triggered).lower()
 
         # Schedule element
         schedule = ET.SubElement(subscription, "schedule")

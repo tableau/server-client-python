@@ -41,8 +41,19 @@ class Subscriptions(Endpoint):
     @api(version="2.3")
     def create(self, subscription_item: SubscriptionItem) -> SubscriptionItem:
         if not subscription_item:
-            error = "No Susbcription provided"
+            error = "No Subscription provided"
             raise ValueError(error)
+        if not (subscription_item.schedule_id or "").strip():
+            # See tableau/server-client-python#1658: users trying to create an
+            # "On Extract Refresh" subscription pass schedule_id=None and hit
+            # a confusing wire-layer error. A whitespace-only id is the same
+            # failure in disguise -- it would still serialize and hit the
+            # same wire-layer error -- so reject it here too, not just None.
+            # Point them at the factory.
+            raise ValueError(
+                "schedule_id is required; for on-extract-refresh subscriptions "
+                "use SubscriptionItem.on_extract_refresh(...)"
+            )
         logger.info(f"Creating a subscription ({subscription_item})")
         url = self.baseurl
         create_req = RequestFactory.Subscription.create_req(subscription_item)
@@ -63,6 +74,29 @@ class Subscriptions(Endpoint):
         if not subscription_item.id:
             error = "Subscription item missing ID. Subscription must be retrieved from server first."
             raise MissingRequiredFieldError(error)
+        # Cloud subscriptions parsed from a GET response can arrive with
+        # schedule_id=None when the server inlines a full <schedule> element
+        # in place of a bare <schedule id=...> reference. When the inlined
+        # element still carries an id attribute we can lift it into
+        # schedule_id so fetch-then-update works. When it does not carry an
+        # id (some Cloud responses inline the schedule with only name +
+        # frequencyDetails), no fallback is possible — the caller must
+        # supply schedule_id explicitly.
+        schedule_id = subscription_item.schedule_id
+        if schedule_id is None and subscription_item.schedule is not None:
+            schedule_id = subscription_item.schedule.id
+            if schedule_id is not None:
+                subscription_item.schedule_id = schedule_id
+        if not (schedule_id or "").strip():
+            raise ValueError(
+                "schedule_id is required to update a subscription. On Tableau "
+                "Cloud, subscriptions parsed from a GET response may inline the "
+                "referenced schedule without an id attribute; those subscriptions "
+                "cannot be updated via fetch-then-mutate-then-update because the "
+                "server did not return the schedule's id. Look up the schedule "
+                "separately (server.schedules.get(...)) and set schedule_id on "
+                "the SubscriptionItem before calling update()."
+            )
         url = f"{self.baseurl}/{subscription_item.id}"
         update_req = RequestFactory.Subscription.update_req(subscription_item)
         server_response = self.put_request(url, update_req)
