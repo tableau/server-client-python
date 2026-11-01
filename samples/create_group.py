@@ -80,7 +80,7 @@ def main():
                     if serverError.code == "409011":
                         print(f"user {user.name} is already a member of group {group.name}")
                     else:
-                        raise rError
+                        raise serverError
 
         for user in group.users:
             print(user.name)
