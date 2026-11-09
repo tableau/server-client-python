@@ -118,6 +118,21 @@ TSC does not define a `RequestOptions.Operator` value for `like`, and there are 
 `contains`, `startswith`, or `endswith` operators. A Django style filter such as
 `name__like="mark*"` raises a `ValueError`.
 
+### View filters follow different rules
+
+The rules above apply to the `filter` query parameter that `RequestOptions.filter` and the
+Django style filters build. View filters that you set with `vf()` on export options such as
+`CSVRequestOptions` or `PDFRequestOptions` are sent as `vf_<column>=<value>` parameters, and
+the server reads their values differently:
+
+- A comma separates alternatives, so `vf("Region", "East,West")` matches `East` or `West`.
+  To match a literal comma, escape it with a backslash: `vf("Name", "Rock\\, Paper")`.
+- `*` and `%` are literal characters, not wildcards.
+- Ampersands and other characters are passed through as data.
+
+For the server-side rules, see [Filter query views](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_filtering_and_sorting.htm#Filter-query-views)
+in the REST API documentation.
+
 ### Filtering example - RequestOptions
 
 The following code displays only the workbooks where the name equals Superstore:
