@@ -10,23 +10,13 @@ then pass the object to your endpoint as a parameter.
 
 ## Available endpoints and fields
 
-You can use the TSC library to filter and sort the following endpoints:
+You can use the TSC library to filter and sort the results of any endpoint whose `get`
+method accepts a `RequestOptions` object, and the endpoints that support the `.filter()` and
+`.order_by()` shorthand: custom views, data sources, flow runs, flows, groups, group sets,
+jobs, linked tasks, metrics, projects, users, views, virtual connections, and workbooks.
 
-* Users
-* Datasources
-* Workbooks
-* Views
-
-For the above endpoints, you can filter or sort on the following
-fields:
-
-* CreatedAt
-* LastLogin
-* Name
-* OwnerName
-* SiteRole
-* Tags
-* UpdatedAt
+The fields you can filter or sort on are the members of `RequestOptions.Field`, for example
+`CreatedAt`, `LastLogin`, `Name`, `OwnerName`, `SiteRole`, `Tags`, and `UpdatedAt`.
 
 **Important**: Not all of the fields are available for all endpoints. For more information, see the [REST
 API help](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_filtering_and_sorting.htm).
