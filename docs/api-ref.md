@@ -1240,7 +1240,7 @@ REST API: [Get Data Acceleration Report for a Site](https://help.tableau.com/cur
 
 Introduced in Tableau Server 2020.2 (REST API 3.8). Tableau deprecated data acceleration in Tableau Server 2022.1, when view acceleration was introduced, and retired it in Tableau Server 2026.2 (REST API 3.29). It was never available on Tableau Cloud.
 
-Calling this method against Tableau Cloud or Tableau Server 2026.2 and later returns an error from the server. TSC has no replacement for this method; view acceleration was retired at the same time.
+Tableau Cloud responds to this request with a 404 (Resource Not Found). The method is not supported on Tableau Server 2026.2 and later. TSC has no replacement for this method; view acceleration was retired at the same time.
 
 <br>
 <br>
