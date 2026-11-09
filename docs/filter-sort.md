@@ -86,8 +86,7 @@ pattern = wb_name.replace(",", "*").replace("&", "*")
 matches = [wb for wb in server.workbooks.filter(name=pattern) if wb.name == wb_name]
 ```
 
-Wildcard matching with `Equals` is not described in the REST API documentation (see
-[Wildcard searches](#wildcard-searches)), so test it against your server before you rely on it.
+This works because `Equals` treats `*` as a wildcard (see [Wildcard searches](#wildcard-searches)).
 
 ### Wildcard searches
 
@@ -95,6 +94,13 @@ The REST API supports wildcard searches (starts with, ends with, and contains) s
 Tableau Cloud May 2023 and Tableau Server 2022.1.14. The REST API documents these searches
 through its `like` operator, and only on selected name fields: user name, user
 friendlyName, group name, and group set name. Other fields support exact matches only.
+
+In practice, Tableau Cloud also treats `*` as a wildcard in the value of an `Equals` filter on
+other name fields. For example, `server.workbooks.filter(name="EPI*")` returns workbooks whose
+names start with `EPI`, `name="*360"` returns names that end with `360`, and `name="*IC *"`
+returns names that contain `IC `. This is not described in the REST API documentation, so
+confirm it on your Tableau Server version before you rely on it. The `like` operator is
+rejected on workbook names (`400 Bad Request`), as are `CaseInsensitiveEquals` and `Has`.
 
 For example, to search for the string `marketing-example`, the REST API documentation
 gives the following filter expressions:
