@@ -110,3 +110,10 @@ def test_delete(server):
     with requests_mock.mock() as m:
         m.delete(server.databases.baseurl + "/0448d2ed-590d-4fa0-b272-a2a8a24555b5", status_code=204)
         server.databases.delete("0448d2ed-590d-4fa0-b272-a2a8a24555b5")
+
+
+def test_populate_tables_not_supported(server):
+    database = TSC.DatabaseItem("test")
+    database._id = "23591f2c-4802-4d6a-9e28-574a8ea9bc4c"
+    with pytest.raises(NotImplementedError, match="Metadata API"):
+        server.databases.populate_tables(database)

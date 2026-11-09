@@ -10,7 +10,7 @@ from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldE
 from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
 from tableauserverclient.server.endpoint.resource_tagger import TaggingMixin
 from tableauserverclient.server import RequestFactory
-from tableauserverclient.models import DatabaseItem, TableItem, PaginationItem, Resource
+from tableauserverclient.models import DatabaseItem, PaginationItem, Resource
 
 from tableauserverclient.helpers.logging import logger
 
@@ -149,24 +149,26 @@ class Databases(Endpoint, TaggingMixin):
         updated_database = DatabaseItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return updated_database
 
-    # Not Implemented Yet
-    @api(version="99")
-    def populate_tables(self, database_item):
-        if not database_item.id:
-            error = "database item missing ID. database must be retrieved from server first."
-            raise MissingRequiredFieldError(error)
+    def populate_tables(self, database_item: DatabaseItem) -> None:
+        """
+        Not supported. The REST API has no endpoint that lists the tables of a
+        database.
 
-        def column_fetcher():
-            return self._get_tables_for_database(database_item)
+        To find the tables in a database, use the Metadata API with
+        ``server.metadata.query`` and a query such as
+        ``databases(filter: {luid: $luid}) { tables { luid name } }``, then
+        retrieve each table with ``server.tables.get_by_id``.
 
-        database_item._set_tables(column_fetcher)
-        logger.info(f"Populated tables for database (ID: {database_item.id}")
-
-    def _get_tables_for_database(self, database_item):
-        url = f"{self.baseurl}/{database_item.id}/tables"
-        server_response = self.get_request(url)
-        tables = TableItem.from_response(server_response.content, self.parent_srv.namespace)
-        return tables
+        Raises
+        ------
+        NotImplementedError
+            Always.
+        """
+        raise NotImplementedError(
+            "The REST API has no endpoint to list the tables of a database. Use the Metadata API "
+            "(server.metadata.query with databases(filter: {luid: $luid}) { tables { luid name } }) "
+            "to find the table LUIDs, then call server.tables.get_by_id."
+        )
 
     @api(version="3.5")
     def populate_permissions(self, item: DatabaseItem) -> None:

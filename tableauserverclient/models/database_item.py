@@ -42,7 +42,7 @@ class DatabaseItem:
 
         self._data_quality_warnings = None
 
-        self._tables = None  # Not implemented yet
+        self._tables = None
 
     def __str__(self):
         return f"<Database {self._id} '{self.name}'>"
@@ -177,9 +177,11 @@ class DatabaseItem:
     @property
     def tables(self):
         if self._tables is None:
-            error = "Database must be populated with tables first."
+            error = (
+                "Database tables are not available: the REST API cannot list the tables of a database. "
+                "Use the Metadata API to find them."
+            )
             raise UnpopulatedPropertyError(error)
-        #  Each call to `.tables` should create a new pager, this just runs the callable
         return self._tables()
 
     def _set_values(self, database_values):
