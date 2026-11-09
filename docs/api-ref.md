@@ -1966,7 +1966,7 @@ datasources.delete_dqw(datasource_item)
 
 Removes all data quality warnings from the specified data source.
 
-REST API: [Delete Quality Warning Triggers by Content](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#delete_dqw_triggers)
+REST API: [Delete Data Quality Warning by Content](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#delete_dqws)
 
 **Parameters**
 
