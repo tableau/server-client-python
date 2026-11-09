@@ -1,3 +1,4 @@
+import warnings
 from pathlib import Path
 
 import pytest
@@ -117,3 +118,35 @@ def test_populate_tables_not_supported(server):
     database._id = "23591f2c-4802-4d6a-9e28-574a8ea9bc4c"
     with pytest.raises(NotImplementedError, match="Metadata API"):
         server.databases.populate_tables(database)
+
+
+def _delete_table_default_permission_setup(server, m):
+    database = TSC.DatabaseItem("test")
+    database._id = "0448d2ed-590d-4fa0-b272-a2a8a24555b5"
+    rule = TSC.PermissionsRule(
+        grantee=TSC.GroupItem.as_reference("5e5e1978-71fa-11e4-87dd-7382f5c437af"),
+        capabilities={TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow},
+    )
+    url = (
+        f"{server.databases.baseurl}/{database.id}/default-permissions/tables/groups/"
+        "5e5e1978-71fa-11e4-87dd-7382f5c437af/Read/Allow"
+    )
+    m.delete(url, status_code=204)
+    return database, rule
+
+
+def test_delete_table_default_permissions(server):
+    with requests_mock.mock() as m, warnings.catch_warnings():
+        warnings.simplefilter("error")
+        database, rule = _delete_table_default_permission_setup(server, m)
+        server.databases.delete_table_default_permissions(database, rule)
+        assert m.call_count == 1
+
+
+def test_delete_table_default_permissions_swapped_arguments_warns(server):
+    with requests_mock.mock() as m:
+        database, rule = _delete_table_default_permission_setup(server, m)
+        with pytest.warns(DeprecationWarning, match="deprecated") as record:
+            server.databases.delete_table_default_permissions(rule, database)
+        assert m.call_count == 1
+    assert record[0].filename == __file__

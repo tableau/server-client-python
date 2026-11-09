@@ -1,4 +1,5 @@
 import logging
+import warnings
 from typing import TYPE_CHECKING
 from collections.abc import Iterable
 
@@ -193,7 +194,32 @@ class Databases(Endpoint, TaggingMixin):
         return self._default_permissions.update_default_permissions(item, rules, Resource.Table)
 
     @api(version="3.5")
-    def delete_table_default_permissions(self, rule: PermissionsRule, item: DatabaseItem) -> None:
+    def delete_table_default_permissions(self, item: DatabaseItem, rule: PermissionsRule) -> None:
+        """
+        Deletes the specified default table permission rule from the database.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission
+
+        Parameters
+        ----------
+        item : DatabaseItem
+            The database item to delete default table permissions from.
+
+        rule : PermissionsRule
+            The permissions rule to delete from the database.
+
+        Returns
+        -------
+        None
+        """
+        if isinstance(item, PermissionsRule) and isinstance(rule, DatabaseItem):
+            warnings.warn(
+                "delete_table_default_permissions(rule, item) is deprecated; pass (item, rule) like the other "
+                "permissions methods.",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+            item, rule = rule, item
         self._default_permissions.delete_default_permission(item, rule, Resource.Table)
 
     @api(version="3.5")
