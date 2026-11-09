@@ -1,10 +1,12 @@
 import warnings
 from pathlib import Path
+from xml.etree import ElementTree as ET
 
 import pytest
 import requests_mock
 
 import tableauserverclient as TSC
+from tableauserverclient.server.request_factory import RequestFactory
 
 TEST_ASSET_DIR = Path(__file__).parent / "assets"
 
@@ -150,3 +152,34 @@ def test_delete_table_default_permissions_swapped_arguments_warns(server):
             server.databases.delete_table_default_permissions(rule, database)
         assert m.call_count == 1
     assert record[0].filename == __file__
+
+
+def test_update_req_omits_unset_fields() -> None:
+    item = TSC.DatabaseItem("test")
+    xml = ET.fromstring(RequestFactory.Database.update_req(item))
+    assert xml.findall("database")[0].attrib == {}
+
+
+def test_update_req_sends_set_fields() -> None:
+    item = TSC.DatabaseItem("test")
+    item.certified = False
+    item.certification_note = "note"
+    item.description = "desc"
+    attrib = ET.fromstring(RequestFactory.Database.update_req(item)).findall("database")[0].attrib
+    assert attrib["isCertified"] == "false"
+    assert attrib["certificationNote"] == "note"
+    assert attrib["description"] == "desc"
+
+
+def test_update_req_empty_strings_clear_fields() -> None:
+    item = TSC.DatabaseItem("test")
+    item.certification_note = ""
+    item.description = ""
+    attrib = ET.fromstring(RequestFactory.Database.update_req(item)).findall("database")[0].attrib
+    assert attrib == {"certificationNote": "", "description": ""}
+
+
+def test_update_req_sends_content_permissions() -> None:
+    item = TSC.DatabaseItem("test", content_permissions=TSC.DatabaseItem.ContentPermissions.ManagedByOwner)
+    attrib = ET.fromstring(RequestFactory.Database.update_req(item)).findall("database")[0].attrib
+    assert attrib == {"contentPermissions": "ManagedByOwner"}

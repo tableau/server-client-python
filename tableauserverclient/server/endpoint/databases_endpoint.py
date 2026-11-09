@@ -119,7 +119,7 @@ class Databases(Endpoint, TaggingMixin):
     @api(version="3.5")
     def update(self, database_item: DatabaseItem) -> DatabaseItem:
         """
-        Update the database description, certify the database, set permissions,
+        Update the database description, certify the database, set content permissions,
         or assign a User as the database contact.
 
         REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#update_database
