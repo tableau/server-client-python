@@ -183,3 +183,18 @@ def test_update_req_sends_content_permissions() -> None:
     item = TSC.DatabaseItem("test", content_permissions=TSC.DatabaseItem.ContentPermissions.ManagedByOwner)
     attrib = ET.fromstring(RequestFactory.Database.update_req(item)).findall("database")[0].attrib
     assert attrib == {"contentPermissions": "ManagedByOwner"}
+
+
+def test_update_tags_not_supported(server) -> None:
+    server.version = "3.9"
+    item = TSC.DatabaseItem("test")
+    item._id = "10224773-ecee-42ac-b822-d786b0b8e4d9"
+    with pytest.raises(NotImplementedError, match="add_tags and delete_tags"):
+        server.databases.update_tags(item)
+
+
+def test_update_tags_checks_version(server) -> None:
+    server.version = "3.5"
+    item = TSC.DatabaseItem("test")
+    with pytest.raises(TSC.server.exceptions.EndpointUnavailableError):
+        server.databases.update_tags(item)

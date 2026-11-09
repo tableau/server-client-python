@@ -20,6 +20,12 @@ if TYPE_CHECKING:
     from tableauserverclient.server.request_options import RequestOptions
 
 
+_UPDATE_TAGS_MESSAGE = (
+    "update_tags is not supported for databases: the item does not track its tags. "
+    "Use add_tags and delete_tags with the item or its ID instead."
+)
+
+
 class Databases(Endpoint, TaggingMixin):
     def __init__(self, parent_srv):
         super().__init__(parent_srv)
@@ -247,5 +253,5 @@ class Databases(Endpoint, TaggingMixin):
         super().delete_tags(item, tags)
 
     @api(version="3.9")
-    def update_tags(self, item: DatabaseItem) -> None:
-        raise NotImplementedError("Update tags is not supported for databases.")
+    def update_tags(self, item: DatabaseItem) -> None:  # type: ignore[override]
+        raise NotImplementedError(_UPDATE_TAGS_MESSAGE)

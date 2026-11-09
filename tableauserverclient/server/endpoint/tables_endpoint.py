@@ -19,6 +19,12 @@ if TYPE_CHECKING:
     from tableauserverclient.models import DQWItem, PermissionsRule
 
 
+_UPDATE_TAGS_MESSAGE = (
+    "update_tags is not supported for tables: the item does not track its tags. "
+    "Use add_tags and delete_tags with the item or its ID instead."
+)
+
+
 class Tables(Endpoint, TaggingMixin[TableItem]):
     def __init__(self, parent_srv):
         super().__init__(parent_srv)
@@ -259,5 +265,6 @@ class Tables(Endpoint, TaggingMixin[TableItem]):
     def delete_tags(self, item: TableItem | str, tags: Iterable[str] | str) -> None:
         return super().delete_tags(item, tags)
 
-    def update_tags(self, item: TableItem) -> None:  # type: ignore
-        raise NotImplementedError("Update tags is not implemented for TableItem")
+    @api(version="3.9")
+    def update_tags(self, item: TableItem) -> None:  # type: ignore[override]
+        raise NotImplementedError(_UPDATE_TAGS_MESSAGE)

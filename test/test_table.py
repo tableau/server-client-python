@@ -90,3 +90,18 @@ def test_update_req_empty_strings_clear_fields() -> None:
     item.description = ""
     attrib = ET.fromstring(RequestFactory.Table.update_req(item)).findall("table")[0].attrib
     assert attrib == {"certificationNote": "", "description": ""}
+
+
+def test_update_tags_not_supported(server) -> None:
+    server.version = "3.9"
+    item = TSC.TableItem("test")
+    item._id = "10224773-ecee-42ac-b822-d786b0b8e4d9"
+    with pytest.raises(NotImplementedError, match="add_tags and delete_tags"):
+        server.tables.update_tags(item)
+
+
+def test_update_tags_checks_version(server) -> None:
+    server.version = "3.5"
+    item = TSC.TableItem("test")
+    with pytest.raises(TSC.server.exceptions.EndpointUnavailableError):
+        server.tables.update_tags(item)
