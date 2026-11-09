@@ -49,8 +49,11 @@ API help](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_conc
 
 ### Value criteria
 
-The value that you want to filter on. This can be any valid string. Field names, operator
-names, and values are case-sensitive; use `CaseInsensitiveEquals` where the field supports it.
+The value that you want to filter on. This can be any valid string. Field names and operator
+names are case-sensitive. Whether a value is case-sensitive depends on the field. In testing,
+`Equals` on the name of a workbook, data source, project, or user, and on a workbook's content
+URL, ignored case. `Equals` on a group name was case-sensitive on Tableau Server. Where the
+field supports it, use `CaseInsensitiveEquals` to ignore case regardless.
 
 Pass values as plain strings. For REST API version 3.7 and later, TSC URL-encodes the
 query string for you, so do not percent-encode values yourself.
