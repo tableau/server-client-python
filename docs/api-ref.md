@@ -1214,6 +1214,39 @@ for view in my_views:
 
 ---
 
+## Data Acceleration Report
+
+**DEPRECATED**
+
+Tableau has retired data acceleration and its REST API methods. TSC keeps this endpoint only for older Tableau Server versions and will remove it in a future release.
+
+The data acceleration report compared page load times for workbook sheets before and after data acceleration was enabled. Only sheets that were both accelerated and loaded by users appear in the report.
+
+<br>
+
+#### data_acceleration_report.get
+
+```py
+data_acceleration_report.get(req_options=None)
+```
+
+**DEPRECATED**
+
+Returns the data acceleration report for the current site as a `DataAccelerationReportItem`. Its `comparison_records` attribute is a list of records, each with `site`, `sheet_uri`, `unaccelerated_session_count`, `avg_non_accelerated_plt`, `accelerated_session_count` and `avg_accelerated_plt`. Only server administrators and site administrators can call this method.
+
+REST API: [Get Data Acceleration Report for a Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_site.htm#get_data_acceleration_report)
+
+**Version**
+
+Introduced in Tableau Server 2020.2 (REST API 3.8). Tableau deprecated data acceleration in Tableau Server 2022.1, when view acceleration was introduced, and retired it in Tableau Server 2026.2 (REST API 3.29). It was never available on Tableau Cloud.
+
+Calling this method against Tableau Cloud or Tableau Server 2026.2 and later returns an error from the server. TSC has no replacement for this method; view acceleration was retired at the same time.
+
+<br>
+<br>
+
+---
+
 ## Data Sources
 
 Using the TSC library, you can get all the data sources on a site, or get the data sources for a specific project.
