@@ -1,4 +1,5 @@
 import logging
+import warnings
 
 from .default_permissions_endpoint import _DefaultPermissionsEndpoint
 from .endpoint import api, Endpoint
@@ -21,6 +22,38 @@ class DataAccelerationReport(Endpoint):
 
     @api(version="3.8")
     def get(self, req_options=None):
+        """
+        Gets the data acceleration report for the current site, which compares
+        page load times for sheets before and after data acceleration.
+
+        Deprecated: this method will be removed in a future release of this
+        library. Tableau retired data acceleration and its REST API methods
+        in Tableau Server 2026.2, and it was never available on Tableau Cloud.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_site.htm#get_data_acceleration_report
+
+        Parameters
+        ----------
+        req_options : RequestOptions, optional
+            Options to pass to the request.
+
+        Returns
+        -------
+        DataAccelerationReportItem
+            The report, with one comparison record per accelerated sheet.
+
+        Warnings
+        --------
+        This method is deprecated. Tableau Cloud and Tableau Server 2026.2 and
+        later return an error for this request.
+        """
+        warnings.warn(
+            "DataAccelerationReport.get is deprecated and will be removed. Tableau retired data acceleration "
+            "in Tableau Server 2026.2.",
+            DeprecationWarning,
+            # 3, not 2: the @api wrapper adds a frame, and the warning should point at the caller.
+            stacklevel=3,
+        )
         logger.info("Querying data acceleration report")
         url = self.baseurl
         server_response = self.get_request(url, req_options)

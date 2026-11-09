@@ -26,8 +26,10 @@ def test_get_data_acceleration_report(server):
     response_xml = GET_XML.read_text()
     with requests_mock.mock() as m:
         m.get(server.data_acceleration_report.baseurl, text=response_xml)
-        data_acceleration_report = server.data_acceleration_report.get()
+        with pytest.warns(DeprecationWarning, match="deprecated and will be removed") as record:
+            data_acceleration_report = server.data_acceleration_report.get()
 
+    assert record[0].filename == __file__
     assert 2 == len(data_acceleration_report.comparison_records)
 
     assert "site-1" == data_acceleration_report.comparison_records[0].site
