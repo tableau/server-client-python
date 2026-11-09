@@ -45,3 +45,8 @@ def test_get_data_acceleration_report(server):
     assert "1.29" == data_acceleration_report.comparison_records[1].avg_non_accelerated_plt
     assert "3" == data_acceleration_report.comparison_records[1].accelerated_session_count
     assert "0.372" == data_acceleration_report.comparison_records[1].avg_accelerated_plt
+
+
+def test_data_acceleration_report_item_repr():
+    item = TSC.models.DataAccelerationReportItem([])
+    assert "records=0" in repr(item)

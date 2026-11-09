@@ -47,7 +47,7 @@ class DataAccelerationReportItem:
         self._comparison_records = comparison_records
 
     def __repr__(self):
-        return f"<(deprecated)DataAccelerationReportItem site={self.site} sheet={sheet_uri}>"
+        return f"<(deprecated)DataAccelerationReportItem records={len(self._comparison_records)}>"
 
     @property
     def comparison_records(self):
