@@ -35,7 +35,7 @@ API help](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_conc
 
 To filter on a field, you need to specify the field name, an operator criteria and a value criteria.
 
-**Note**: Ampersands and commas in filters are not supported by the REST API as they are used as delimiters.
+**Note**: Ampersands and commas in filter values are not supported by the REST API as they are used as delimiters. See [Special characters in filter values](#special-characters-in-filter-values) for a workaround.
 
 ### Operator criteria
 
@@ -50,10 +50,74 @@ The operator can be any of the following:
 * LessThanOrEqual
 * In
 * Has
+* CaseInsensitiveEquals
+
+Not every operator is supported on every field. In particular, the REST API supports
+`Has` (substring search) only for jobs, and `CaseInsensitiveEquals` only on user name,
+group name, and group set name. See the per-endpoint field tables in the [REST
+API help](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_filtering_and_sorting.htm).
 
 ### Value criteria
 
-The value that you want to filter on. This can be any valid string.
+The value that you want to filter on. This can be any valid string. Field names, operator
+names, and values are case-sensitive; use `CaseInsensitiveEquals` where the field supports it.
+
+Pass values as plain strings. For REST API version 3.7 and later, TSC URL-encodes the
+query string for you, so do not percent-encode values yourself.
+
+### Special characters in filter values
+
+The REST API does not accept ampersand (`&`) or comma (`,`) characters in a filter
+expression, because it uses them to separate expressions. This is true even if the
+characters are URL-encoded, and putting a backslash in front of a comma does not escape it.
+A filter value that contains either character fails with a `400065: Bad Request` error:
+
+```py
+# Fails: the workbook name contains a comma and an ampersand
+workbooks = server.workbooks.filter(name="T(L-F,SZ&V-MY) - PC")
+```
+
+To find an item whose name contains these characters, replace each one with an asterisk
+(`*`). The asterisk acts as a wildcard, so the following filter finds the workbook named
+`T(L-F,SZ&V-MY) - PC`:
+
+```py
+for workbook in server.workbooks.filter(name="T(L-F*SZ*V-MY) - PC"):
+    print(workbook.name, workbook.id)
+```
+
+Because a wildcard matches any character, the filter can return more than one item. In the
+example above, the same filter also returns a workbook named `T(L-F^SZ|V-MY) - PC`. Check
+the results on the client side if you need an exact match:
+
+```py
+wb_name = "T(L-F,SZ&V-MY) - PC"
+pattern = wb_name.replace(",", "*").replace("&", "*")
+matches = [wb for wb in server.workbooks.filter(name=pattern) if wb.name == wb_name]
+```
+
+Wildcard matching with `Equals` is not described in the REST API documentation (see
+[Wildcard searches](#wildcard-searches)), so test it against your server before you rely on it.
+
+### Wildcard searches
+
+The REST API supports wildcard searches (starts with, ends with, and contains) starting in
+Tableau Cloud May 2023 and Tableau Server 2022.1.14. The REST API documents these searches
+through its `like` operator, and only on selected name fields: user name, user
+friendlyName, group name, and group set name. Other fields support exact matches only.
+
+For example, to search for the string `marketing-example`, the REST API documentation
+gives the following filter expressions:
+
+| Search | REST API filter expression |
+| --- | --- |
+| Starts with | `name:like:mark*` |
+| Ends with | `name:like:*-ample` |
+| Contains | `name:like:mark*ex*` |
+
+TSC does not define a `RequestOptions.Operator` value for `like`, and there are no
+`contains`, `startswith`, or `endswith` operators. A Django style filter such as
+`name__like="mark*"` raises a `ValueError`.
 
 ### Filtering example - RequestOptions
 
@@ -219,3 +283,8 @@ print(len(flows))
 | LessThanOrEqual | lte |
 | In | in |
 | Has | has |
+| CaseInsensitiveEquals | cieq |
+
+For example, `server.users.filter(name__cieq="jsmith")` matches a user named `JSmith`.
+See [Special characters in filter values](#special-characters-in-filter-values) and
+[Wildcard searches](#wildcard-searches) for limits on filter values.

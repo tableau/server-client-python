@@ -3006,7 +3006,7 @@ Name | Description
 :--- | :---
 `Field` | Defined in the `RequestOptions.Field` class.
 `Operator` | Defined in the `RequestOptions.Operator` class
-`Value` | The value to compare with the specified field and operator.
+`Value` | The value to compare with the specified field and operator. Values cannot contain `&` or `,`; see [Special characters in filter values](filter-sort#special-characters-in-filter-values).
 
 
 
@@ -6163,6 +6163,8 @@ Operator  |  Description
 `LessThan` | Sets the operator to less than (same as `lt` in the REST API). `TSC.RequestOptions.Operator.LessThan`
 `LessThanOrEqual` | Sets the operator to less than or equal (same as `lte` in the REST API). `TSC.RequestOptions.Operator.LessThanOrEqual`
 `In` | Sets the operator to in (same as `in` in the REST API). `TSC.RequestOptions.Operator.In`
+`Has` | Sets the operator to has (same as `has` in the REST API). `TSC.RequestOptions.Operator.Has`
+`CaseInsensitiveEquals` | Sets the operator to case-insensitive equals (same as `cieq` in the REST API). `TSC.RequestOptions.Operator.CaseInsensitiveEquals`
 
 <br>
 <br>
