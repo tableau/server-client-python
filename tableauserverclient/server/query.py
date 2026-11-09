@@ -194,10 +194,9 @@ class QuerySet(Iterable[T], Sized):
         https://tableau.github.io/server-client-python/docs/filter-sort for
         the supported suffixes.
 
-        Special-character caveat: values containing ``,``, ``&``, ``:``, ``[``
-        or ``]`` cannot be matched exactly with ``Equals``; the REST filter
-        grammar treats them as delimiters and the server does not support
-        escaping. See ``Filter`` for details and the wildcard workaround.
+        Values that contain a comma fail with ``400065: Bad Request``, because
+        the server splits filters on commas and does not support escaping.
+        See ``Filter`` for details and the wildcard workaround.
         """
         if invalid:
             raise RuntimeError("Only accepts keyword arguments.")
