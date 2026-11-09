@@ -25,7 +25,7 @@ API help](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_conc
 
 To filter on a field, you need to specify the field name, an operator criteria and a value criteria.
 
-**Note**: Ampersands and commas in filter values are not supported by the REST API as they are used as delimiters. See [Special characters in filter values](#special-characters-in-filter-values) for a workaround.
+**Note**: Commas in filter values are not supported by the REST API, because it uses them to separate filter expressions. See [Special characters in filter values](#special-characters-in-filter-values) for a workaround.
 
 ### Operator criteria
 
@@ -57,32 +57,35 @@ query string for you, so do not percent-encode values yourself.
 
 ### Special characters in filter values
 
-The REST API does not accept ampersand (`&`) or comma (`,`) characters in a filter
-expression, because it uses them to separate expressions. This is true even if the
-characters are URL-encoded, and putting a backslash in front of a comma does not escape it.
-A filter value that contains either character fails with a `400065: Bad Request` error:
+The REST API does not accept a comma (`,`) in a filter value, because it uses commas to
+separate expressions. This is true even if the comma is URL-encoded, and putting a backslash
+in front of it does not escape it. A filter value that contains a comma fails with a
+`400065: Bad Request` error:
 
 ```py
-# Fails: the workbook name contains a comma and an ampersand
-workbooks = server.workbooks.filter(name="T(L-F,SZ&V-MY) - PC")
+# Fails: the workbook name contains a comma
+workbooks = server.workbooks.filter(name="Calculations, Groups & Sets")
 ```
 
-To find an item whose name contains these characters, replace each one with an asterisk
-(`*`). The asterisk acts as a wildcard, so the following filter finds the workbook named
-`T(L-F,SZ&V-MY) - PC`:
+An ampersand (`&`) works when you use TSC, because TSC URL-encodes the query string. If you
+build the request yourself, encode the ampersand as `%26`: a literal `&` ends the `filter`
+parameter and the server sees a truncated filter.
+
+To find an item whose name contains a comma, replace the comma with an asterisk (`*`). The
+asterisk acts as a wildcard, so the following filter finds the workbook named
+`Calculations, Groups & Sets`:
 
 ```py
-for workbook in server.workbooks.filter(name="T(L-F*SZ*V-MY) - PC"):
+for workbook in server.workbooks.filter(name="Calculations* Groups & Sets"):
     print(workbook.name, workbook.id)
 ```
 
-Because a wildcard matches any character, the filter can return more than one item. In the
-example above, the same filter also returns a workbook named `T(L-F^SZ|V-MY) - PC`. Check
+Because a wildcard matches any character, the filter can return more than one item. Check
 the results on the client side if you need an exact match:
 
 ```py
-wb_name = "T(L-F,SZ&V-MY) - PC"
-pattern = wb_name.replace(",", "*").replace("&", "*")
+wb_name = "Calculations, Groups & Sets"
+pattern = wb_name.replace(",", "*")
 matches = [wb for wb in server.workbooks.filter(name=pattern) if wb.name == wb_name]
 ```
 
