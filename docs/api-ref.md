@@ -10384,7 +10384,7 @@ print(workbook.name)
 #### workbooks.publish
 
 ```py
-workbooks.publish(workbook_item, file_path, publish_mode, connections, skip_connection_check, as_job)
+workbooks.publish(workbook_item, file, mode, connections=None, as_job=False, skip_connection_check=False, parameters=None)
 ```
 
 Publish a workbook to the specified site.
@@ -10405,7 +10405,7 @@ REST API: [Publish Workbook](https://help.tableau.com/current/api/rest_api/en-us
 Name | Description
 :--- | :---
 `workbook_item`  |  The `workbook_item` specifies the workbook you are publishing. When you are adding a workbook, you need to first create a new instance of a `workbook_item` that includes a `project_id` of an existing project. The name of the workbook will be the name of the file, unless you also specify a name for the new workbook when you create the instance. See [WorkbookItem](#workbookitem-class).
-`file`  |  The file path or file object of the workbook to publish. When providing a file object, you must also specifiy the name of the workbook in your instance of the `workbook_item``workbook_item` , as the name cannot be derived from the file name.
+`file`  |  The file path or file object of the workbook to publish. When providing a file object, you must also specifiy the name of the workbook in your instance of the `workbook_item`, as the name cannot be derived from the file name.
 `mode`     |  Specifies whether you are publishing a new workbook (`CreateNew`) or overwriting an existing workbook (`Overwrite`).  You cannot appending workbooks.  You can also use the publish mode attributes, for example: `TSC.Server.PublishMode.Overwrite`.
 `connections` | List of `ConnectionItems` objects that supply credentials for the connections embedded in the workbook. The `server_address` of each item is used to find the matching connection in the workbook file; it does not change the connection's server address. See the note below.
 `skip_connection_check` | (Optional) Set to `True` to skip connection check at time of upload. Publishing will succeed but unchecked connection issues may result in a non-functioning workbook. Defaults to `False`.
@@ -10872,7 +10872,7 @@ Name | Description
 
 **Returns**
 
-None. The connection information is updated with the information in the `ConnectionItem`.
+The updated `ConnectionItem`. The connection information on the server is updated with the information in the `ConnectionItem` you passed in.
 
 
 
