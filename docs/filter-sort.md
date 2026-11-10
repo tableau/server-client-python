@@ -164,7 +164,8 @@ matching_workbooks, pagination_item = server.workbooks.get(req_option)
 ```
 
 Names that contain spaces or ampersands work in a list. The server separates the entries with
-commas, so a value that contains a comma cannot be used in a list. See
+commas, so a value that contains a comma is split into separate entries and does not match
+the item it names. The request does not fail. See
 [Special characters in filter values](#special-characters-in-filter-values).
 
 The Django style equivalent is `server.workbooks.filter(name__in=['Superstore', 'Sales Dashboard'])`.
