@@ -10411,7 +10411,7 @@ Name | Description
 `skip_connection_check` | (Optional) Set to `True` to skip connection check at time of upload. Publishing will succeed but unchecked connection issues may result in a non-functioning workbook. Defaults to `False`.
 `as_job` | (Optional) Set to `True` to run the upload as a job (asynchronous upload). If set to `True` a job will start to perform the publishing process and a `Job` object is returned. Defaults to `False`.
 
-**Note:** When you publish, the `server_address` of each `ConnectionItem` in `connections` identifies which connection embedded in the workbook file the credentials belong to. It does not change the server address of that connection; the workbook is published with the server address saved in the file. If `server_address` does not match a connection in the file, the credentials are not applied and the publish typically fails with error `403007` (`failed to establish a connection to your datasource`). To point an embedded connection at a different server, publish the workbook first and then call [workbooks.update_connection](#workbooksupdate_connection). See the second example below.
+**Note:** When you publish, the `server_address` of each `ConnectionItem` in `connections` identifies which connection embedded in the workbook file the credentials belong to. It does not change the server address of that connection; the workbook is published with the server address saved in the file. If `server_address` does not match a connection in the file, the credentials are not applied. To point an embedded connection at a different server, publish the workbook first and then call [workbooks.update_connection](#workbooksupdate_connection). See the second example below.
 
 
 
