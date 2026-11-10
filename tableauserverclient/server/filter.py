@@ -22,9 +22,9 @@ class Filter:
     string. Earlier versions do not encode it, so ``&`` ends the filter.
 
     To find a name that contains a comma, replace the comma with ``*`` and
-    check the results client-side. Tableau Cloud treats ``*`` as a wildcard
-    in an ``Equals`` value on name fields, for example
-    ``name="Sales* Q1 & Q2"`` finds the workbook
+    check the results client-side. In testing, ``*`` acted as a wildcard in
+    an ``Equals`` value on workbook names (Tableau Cloud) and project names
+    (REST API 3.31), for example ``name="Sales* Q1 & Q2"`` finds the workbook
     ``Sales, Q1 & Q2``. The REST API documentation does not
     describe this behavior, so confirm it on your Tableau Server version.
 
