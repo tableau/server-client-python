@@ -131,7 +131,8 @@ the server reads their values differently:
 - A comma separates alternatives, so `vf("Region", "East,West")` matches `East` or `West`.
   To match a literal comma, escape it with a backslash: `vf("Name", "Rock\\, Paper")`.
 - `*` and `%` are literal characters, not wildcards.
-- Ampersands and other characters are passed through as data.
+- Ampersands and other characters are passed through as data. TSC URL-encodes the value, so
+  `vf("Client", "Smith & Sons")` sends the ampersand intact.
 
 For the server-side rules, see [Filter query views](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_filtering_and_sorting.htm#Filter-query-views)
 in the REST API documentation.
@@ -149,6 +150,24 @@ matching_workbooks, pagination_item = server.workbooks.get(req_option)
 
 print(matching_workbooks[0].owner_id)
 ```
+
+### Matching one of several values
+
+The `In` operator matches items whose field equals any value in a list:
+
+```py
+req_option = TSC.RequestOptions()
+req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name,
+                                 TSC.RequestOptions.Operator.In,
+                                 ['Superstore', 'Sales Dashboard']))
+matching_workbooks, pagination_item = server.workbooks.get(req_option)
+```
+
+Names that contain spaces or ampersands work in a list. The server separates the entries with
+commas, so a value that contains a comma cannot be used in a list. See
+[Special characters in filter values](#special-characters-in-filter-values).
+
+The Django style equivalent is `server.workbooks.filter(name__in=['Superstore', 'Sales Dashboard'])`.
 
 ## Sorting
 
