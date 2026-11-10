@@ -8676,6 +8676,8 @@ Adds users from a CSV file to the site. The CSV file format matches the format u
 The CSV file should have the following column format (header row optional):
 `Username, Password, Display Name, License Level, Admin Level, Publishing Access`
 
+The whole `Username` value becomes the `name` of the `UserItem`, and `domain_name` is not set. To add a user from an Active Directory domain, include the domain in the username (for example `example\Adam`).
+
 **Parameters**
 
 Name | Description
