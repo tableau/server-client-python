@@ -7,6 +7,9 @@ from tableauserverclient.bin._version import get_versions
 DEFAULT_NAMESPACE = "http://tableau.com/api"
 
 from tableauserverclient.models import (
+    AuthFederationConnectorItem,
+    AuthFederationItem,
+    AuthFederationKeyItem,
     BackgroundJobItem,
     CollectionItem,
     ColumnItem,
@@ -73,6 +76,10 @@ from tableauserverclient.server import (
     RequestOptions,
     MissingRequiredFieldError,
     FailedSignInError,
+    FlowRunCancelledException,
+    FlowRunFailedException,
+    JobCancelledException,
+    JobFailedException,
     NotSignedInError,
     ServerResponseError,
     Filter,
@@ -82,6 +89,9 @@ from tableauserverclient.server import (
 )
 
 __all__ = [
+    "AuthFederationConnectorItem",
+    "AuthFederationItem",
+    "AuthFederationKeyItem",
     "BackgroundJobItem",
     "CollectionItem",
     "ColumnItem",
@@ -104,6 +114,8 @@ __all__ = [
     "FileuploadItem",
     "Filter",
     "FlowItem",
+    "FlowRunCancelledException",
+    "FlowRunFailedException",
     "FlowRunItem",
     "get_versions",
     "GroupItem",
@@ -111,6 +123,8 @@ __all__ = [
     "HourlyInterval",
     "ImageRequestOptions",
     "IntervalItem",
+    "JobCancelledException",
+    "JobFailedException",
     "JobItem",
     "JWTAuth",
     "LinkedTaskFlowRunItem",

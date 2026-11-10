@@ -137,16 +137,16 @@ class WorkbookItem:
         self._created_at = None
         self._id: str | None = None
         self._initial_tags: set = set()
-        self._pdf = None
-        self._powerpoint = None
-        self._preview_image = None
+        self._pdf: Callable[[], bytes] | None = None
+        self._powerpoint: Callable[[], bytes] | None = None
+        self._preview_image: Callable[[], bytes] | None = None
         self._project_name = None
         self._revisions = None
         self._size = None
         self._updated_at = None
         self._views: Callable[[], list[ViewItem]] | None = None
         self.name = name
-        self._description = None
+        self._description: str | None = None
         self.owner_id: str | None = None
         # workaround for Personal Space workbooks without a project
         self.project_id: str | None = project_id or uuid.uuid4().__str__()

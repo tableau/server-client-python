@@ -293,6 +293,32 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         -------
         list[PermissionsRule]
             Returns the updated list of permissions rules.
+
+        Examples
+        --------
+        Assign a group as Project Leader on a project. ``ProjectLeader`` is
+        the capability that grants the group the ability to publish and
+        manage content in the project as if they were the project owner.
+
+        >>> import tableauserverclient as TSC
+        >>> server = TSC.Server('https://SERVERURL')
+        >>> # Login to the server
+
+        >>> project = next(p for p in TSC.Pager(server.projects) if p.name == 'Marketing')
+        >>> group = next(g for g in TSC.Pager(server.groups) if g.name == 'Marketing Leads')
+
+        >>> rule = TSC.PermissionsRule(
+        ...     grantee=group,
+        ...     capabilities={
+        ...         TSC.Permission.Capability.ProjectLeader: TSC.Permission.Mode.Allow,
+        ...     },
+        ... )
+        >>> server.projects.update_permissions(project, [rule])
+
+        Note: ``update_permissions`` REPLACES the full permissions list on the
+        project. Any existing rules not included in the call will be removed.
+        To preserve existing rules, call ``populate_permissions(project)``
+        first, then modify ``project.permissions`` and pass the full list.
         """
 
         return self._permissions.update(item, rules)

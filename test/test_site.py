@@ -205,6 +205,7 @@ def test_update_missing_id(server: TSC.Server) -> None:
         server.sites.update(single_site)
 
 
+@pytest.mark.filterwarnings("ignore:FlowsEnabled has been removed")
 def test_update_subscription_email_and_footer_preserve_case() -> None:
     # Regression for #1849: RequestFactory used to .lower() customSubscriptionEmail
     # and customSubscriptionFooter, silently mangling caller intent. Footer
@@ -221,6 +222,7 @@ def test_update_subscription_email_and_footer_preserve_case() -> None:
     )
 
 
+@pytest.mark.filterwarnings("ignore:FlowsEnabled has been removed")
 def test_create_subscription_email_and_footer_preserve_case() -> None:
     # Same regression for the create-site path.
     site = TSC.SiteItem(name="X", content_url="x")
@@ -348,7 +350,7 @@ def test_parsing_attr_capture(capture):
 
 
 @pytest.mark.filterwarnings("ignore:FlowsEnabled has been removed")
-@pytest.mark.parametrize("req, capture", product(["create_req", "update_req"], [True, False, None]))
+@pytest.mark.parametrize("req, capture", list(product(["create_req", "update_req"], [True, False, None])))
 def test_encoding_attr_capture(req, capture):
     site = TSC.SiteItem(
         content_url="test",

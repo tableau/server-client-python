@@ -186,6 +186,19 @@ class QuerySet(Iterable[T], Sized):
         return self._pagination_item.page_size or self.request_options.pagesize
 
     def filter(self: Self, *invalid, page_size: int | None = None, **kwargs) -> Self:
+        """Add filter clauses to the queryset.
+
+        Each keyword argument becomes one filter. Shorthand suffixes select
+        the operator (e.g. ``name__gt="A"`` -> operator ``GreaterThan``); a
+        bare keyword uses ``Equals``. See
+        https://tableau.github.io/server-client-python/docs/filter-sort for
+        the supported suffixes.
+
+        Special-character caveat: values containing ``,``, ``&``, ``:``, ``[``
+        or ``]`` cannot be matched exactly with ``Equals``; the REST filter
+        grammar treats them as delimiters and the server does not support
+        escaping. See ``Filter`` for details and the wildcard workaround.
+        """
         if invalid:
             raise RuntimeError("Only accepts keyword arguments.")
         for kwarg_key, value in kwargs.items():

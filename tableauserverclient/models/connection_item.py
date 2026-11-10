@@ -50,7 +50,49 @@ class ConnectionItem:
 
     database_name: str
         The name of the database for the connection.
+
+    workgroup_auth_mode: str
+        Workload Identity Federation (WIF) auth mode. Set to one of the
+        values on ``ConnectionItem.WorkgroupAuthMode`` to switch an existing
+        connection to WIF on an update. Requires Tableau Server 26.3 / REST
+        API 3.30+ with WIF configured and enabled on the site. See the
+        ``WorkgroupAuthMode`` nested class for usage notes. The server does
+        not echo this attribute on GET responses today, so values parsed
+        from a response are typically ``None``.
+
+    auth_federation_service_account: str
+        Service-account email required by the server for the
+        ``WorkgroupAuthMode.WIF_IMPERSONATION`` mode (e.g. Google BigQuery)
+        and rejected for the direct ``WorkgroupAuthMode.WIF`` mode (e.g.
+        Snowflake). Also requires REST API 3.30+. Not echoed on GET today,
+        so typically ``None`` when parsed from a response.
     """
+
+    class WorkgroupAuthMode:
+        """
+        Workload Identity Federation (WIF) auth-mode values for
+        :attr:`ConnectionItem.workgroup_auth_mode`.
+
+        Requires Tableau Server 26.3 / REST API 3.30+ with WIF configured
+        and enabled on the site. Older servers silently ignore unknown
+        connection attributes, so emitting these against an older server is
+        a no-op rather than an error.
+
+        Usage notes:
+
+        - Send ``workgroup_auth_mode`` on every subsequent update of a WIF
+          connection. Once a connection has been switched to WIF, omitting
+          the attribute on a later update returns HTTP 400.
+        - Leave :attr:`ConnectionItem.auth_type` unset (or ``"oauth"``) when
+          sending a WIF mode; the server derives the stored auth type from
+          the mode.
+        - Do not set :attr:`ConnectionItem.auth_federation_service_account`
+          with the direct ``WIF`` mode (the server rejects it). Set it only
+          with ``WIF_IMPERSONATION``.
+        """
+
+        WIF = "workload-identity-federation"
+        WIF_IMPERSONATION = "workload-identity-federation-impersonation"
 
     def __init__(self):
         self._datasource_id: str | None = None
@@ -66,6 +108,8 @@ class ConnectionItem:
         self._query_tagging: bool | None = None
         self._auth_type: str | None = None
         self._database_name: str | None = None
+        self._workgroup_auth_mode: str | None = None
+        self._auth_federation_service_account: str | None = None
 
     @property
     def datasource_id(self) -> str | None:
@@ -107,6 +151,22 @@ class ConnectionItem:
         self._auth_type = value
 
     @property
+    def workgroup_auth_mode(self) -> str | None:
+        return self._workgroup_auth_mode
+
+    @workgroup_auth_mode.setter
+    def workgroup_auth_mode(self, value: str | None):
+        self._workgroup_auth_mode = value
+
+    @property
+    def auth_federation_service_account(self) -> str | None:
+        return self._auth_federation_service_account
+
+    @auth_federation_service_account.setter
+    def auth_federation_service_account(self, value: str | None):
+        self._auth_federation_service_account = value
+
+    @property
     def database_name(self) -> str | None:
         return self._database_name
 
@@ -136,6 +196,8 @@ class ConnectionItem:
                 string_to_bool(s) if (s := connection_xml.get("queryTagging", None)) else None
             )
             connection_item._auth_type = connection_xml.get("authenticationType", None)
+            connection_item._workgroup_auth_mode = connection_xml.get("workgroupAuthMode", None)
+            connection_item._auth_federation_service_account = connection_xml.get("authFederationServiceAccount", None)
             # The REST API GET /connections response uses "dbName" for the database
             # name attribute.  This is different from the publish request body, which
             # uses "databaseName" (see _add_connections_element in request_factory.py).

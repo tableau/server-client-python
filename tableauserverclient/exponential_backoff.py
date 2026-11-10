@@ -7,12 +7,15 @@ ASYNC_POLL_BACKOFF_FACTOR = 1.4
 
 
 class ExponentialBackoffTimer:
+    """Timer for polling server-side events with exponential backoff between attempts."""
+
     def __init__(self, *, timeout=None):
         self.start_time = time.time()
         self.timeout = timeout
         self.current_sleep_interval = ASYNC_POLL_MIN_INTERVAL
 
     def sleep(self):
+        """Sleep for the next backoff interval, raising TimeoutError if the timeout deadline has passed."""
         max_sleep_time = ASYNC_POLL_MAX_INTERVAL
         if self.timeout is not None:
             elapsed = time.time() - self.start_time

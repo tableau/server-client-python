@@ -396,6 +396,8 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         username: str | None = None,
         password: str | None = None,
         embed_password: bool | None = None,
+        workgroup_auth_mode: str | None = None,
+        auth_federation_service_account: str | None = None,
     ) -> list[ConnectionItem]:
         """
         Bulk updates one or more datasource connections by LUID.
@@ -424,6 +426,20 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         embed_password : bool, optional
             Whether to embed the password.
 
+        workgroup_auth_mode : str, optional
+            Workload Identity Federation (WIF) auth mode. See
+            ``ConnectionItem.WorkgroupAuthMode`` for allowed values and
+            usage notes. Applied to every connection LUID in this call.
+            Requires Tableau Server REST API 3.30+ with WIF configured on
+            the site.
+
+        auth_federation_service_account : str, optional
+            Service-account email for WIF impersonation. Required with
+            ``ConnectionItem.WorkgroupAuthMode.WIF_IMPERSONATION`` and
+            rejected by the server with the direct
+            ``ConnectionItem.WorkgroupAuthMode.WIF`` mode. TSC does not
+            validate the combination client-side.
+
         Returns
         -------
         Iterable of str
@@ -438,6 +454,8 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
             username=username,
             password=password,
             embed_password=embed_password,
+            workgroup_auth_mode=workgroup_auth_mode,
+            auth_federation_service_account=auth_federation_service_account,
         )
         server_response = self.put_request(url, request_body)
         connection_items = ConnectionItem.from_response(server_response.content, self.parent_srv.namespace)
