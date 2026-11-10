@@ -106,8 +106,9 @@ fields, at the start, end, or middle of the value. In testing this worked for wo
 Tableau Cloud and for project names on a Tableau Server that supports REST API 3.31. For example,
 `server.workbooks.filter(name="Sales*")` returns workbooks whose names start with `Sales`,
 `name="*2026"` returns names that end with `2026`, and `name="*Q1 *"` returns names that contain
-`Q1 `. The match ignores letter case where `Equals` does. This is not described in the REST API
-documentation, so confirm it on your Tableau Server version and field before you rely on it. The
+`Q1 `. The match ignores letter case where `Equals` does. The REST API
+documentation does not describe this behavior or say which versions support it, so confirm it on
+your Tableau Server version and field before you rely on it. The
 `like` operator is rejected on workbook names (`400 Bad Request`), as are `CaseInsensitiveEquals`
 and `Has`.
 
