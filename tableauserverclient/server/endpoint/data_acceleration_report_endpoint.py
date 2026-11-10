@@ -28,7 +28,8 @@ class DataAccelerationReport(Endpoint):
 
         Deprecated: this method will be removed in a future release of this
         library. Tableau retired data acceleration and its REST API methods
-        in Tableau Server 2026.2, and it was never available on Tableau Cloud.
+        in Tableau Server 2026.2 (REST API 3.29). The method is not available
+        on Tableau Cloud.
 
         REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_site.htm#get_data_acceleration_report
 
@@ -45,7 +46,7 @@ class DataAccelerationReport(Endpoint):
         Warnings
         --------
         This method is deprecated. Tableau Cloud and Tableau Server 2026.2 and
-        later return an error for this request.
+        later respond to this request with a 404 (error code 404003).
         """
         warnings.warn(
             "DataAccelerationReport.get is deprecated and will be removed. Tableau retired data acceleration "
