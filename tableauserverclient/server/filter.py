@@ -25,8 +25,9 @@ class Filter:
     check the results client-side. In testing, ``*`` acted as a wildcard in
     an ``Equals`` value on workbook names (Tableau Cloud) and project names
     (REST API 3.31), for example ``name="Sales* Q1 & Q2"`` finds the workbook
-    ``Sales, Q1 & Q2``. The REST API documentation does not
-    describe this behavior, so confirm it on your Tableau Server version.
+    ``Sales, Q1 & Q2``. The REST API documentation does not describe this
+    behavior or say which versions support it, so confirm it on your Tableau
+    Server version.
 
     Parameters
     ----------
