@@ -248,9 +248,6 @@ class DatabaseItem:
     def _set_permissions(self, permissions):
         self._permissions = permissions
 
-    def _set_tables(self, tables):
-        self._tables = tables
-
     def _set_default_permissions(self, permissions, content_type):
         attr = f"_default_{content_type}_permissions"
         setattr(

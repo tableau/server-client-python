@@ -9,7 +9,7 @@ from tableauserverclient.server.endpoint.dqw_endpoint import _DataQualityWarning
 from tableauserverclient.server.endpoint.endpoint import api, Endpoint
 from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
 from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
-from tableauserverclient.server.endpoint.resource_tagger import TaggingMixin
+from tableauserverclient.server.endpoint.resource_tagger import TaggingMixin, UPDATE_TAGS_UNSUPPORTED_MESSAGE
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import DatabaseItem, PaginationItem, Resource
 
@@ -18,12 +18,6 @@ from tableauserverclient.helpers.logging import logger
 if TYPE_CHECKING:
     from tableauserverclient.models.dqw_item import DQWItem
     from tableauserverclient.server.request_options import RequestOptions
-
-
-_UPDATE_TAGS_MESSAGE = (
-    "update_tags is not supported for databases: the item does not track its tags. "
-    "Use add_tags and delete_tags with the item or its ID instead."
-)
 
 
 class Databases(Endpoint, TaggingMixin):
@@ -254,4 +248,4 @@ class Databases(Endpoint, TaggingMixin):
 
     @api(version="3.9")
     def update_tags(self, item: DatabaseItem) -> None:  # type: ignore[override]
-        raise NotImplementedError(_UPDATE_TAGS_MESSAGE)
+        raise NotImplementedError(UPDATE_TAGS_UNSUPPORTED_MESSAGE.format(kind="databases"))
