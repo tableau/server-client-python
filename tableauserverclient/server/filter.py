@@ -17,8 +17,9 @@ class Filter:
     The server splits the ``filter`` parameter on commas, so a value that
     contains a comma cannot be sent: the request fails with ``400065: Bad
     Request``. URL-encoding the comma or putting a backslash in front of it
-    does not help. Other characters, including ``&``, ``:``, ``[`` and ``]``,
-    are matched as written; TSC URL-encodes the query string for you.
+    does not help. From REST API 3.7, other characters, including ``&``, ``:``,
+    ``[`` and ``]``, are matched as written because TSC URL-encodes the query
+    string. Earlier versions do not encode it, so ``&`` ends the filter.
 
     To find a name that contains a comma, replace the comma with ``*`` and
     check the results client-side. Tableau Cloud treats ``*`` as a wildcard
