@@ -2473,9 +2473,9 @@ Name | Description
 `connection_type` | The connection type of the database, for example `sqlserver` or `hyper`. Read-only.
 `connector_url` | The connector URL of the database. Read-only.
 `contact_id` | The ID of the user who is the contact for the database. Settable; sent to the server by `databases.update`.
-`content_permissions` | The permission mode of the database, as returned by the server. Must be one of `DatabaseItem.ContentPermissions.LockedToProject` (value `"LockedToDatabase"`) or `DatabaseItem.ContentPermissions.ManagedByOwner` (value `"ManagedByOwner"`). Can be set on the object, but `databases.update` does not send it to the server.
+`content_permissions` | The permission mode of the database, as returned by the server. Must be one of `DatabaseItem.ContentPermissions.LockedToProject` (value `"LockedToDatabase"`) or `DatabaseItem.ContentPermissions.ManagedByOwner` (value `"ManagedByOwner"`). Can be set on the object, and `databases.update` sends it to the server.
 `default_table_permissions` | The default permissions for tables in the database, as a list of `PermissionsRule` objects. You must first call `databases.populate_table_default_permissions` to access this data.
-`description` | The description of the database. Settable; sent to the server by `databases.update` when it is not empty.
+`description` | The description of the database. Settable; sent to the server by `databases.update`. An empty string clears the description.
 `dqws` | The list of data quality warnings (`DQWItem`) for the database. You must first call `databases.populate_dqw` to access this data.
 `embedded` | `True` if the database is embedded in Tableau content. Read-only.
 `file_extension` | The file extension, for file-based databases. Read-only.
@@ -3173,7 +3173,7 @@ server.databases.delete_tags(database, 'quarterly')
 databases.update_tags(item)
 ```
 
-Not supported for databases. `DatabaseItem` does not track a tag set, so this method always raises `NotImplementedError`. Use `databases.add_tags` and `databases.delete_tags` instead.
+Not supported for databases. `DatabaseItem` does not track a tag set. On REST API 3.8 and earlier, this method raises `EndpointUnavailableError`. On later versions, it raises `NotImplementedError`. Use `databases.add_tags` and `databases.delete_tags` instead.
 
 **Version**
 
@@ -8577,7 +8577,7 @@ Name | Description
 `certified` | `True` if the table is certified. Settable (must be a boolean); sent to the server by `tables.update`.
 `columns` | The columns in the table, as an iterable of `ColumnItem` objects that fetches every page of columns from the server. You must first call `tables.populate_columns` to access this data.
 `contact_id` | The ID of the user who is the contact for the table. Settable; sent to the server by `tables.update`.
-`description` | The description of the table. Settable; sent to the server by `tables.update` when it is not empty.
+`description` | The description of the table. Settable; sent to the server by `tables.update`. An empty string clears the description.
 `dqws` | The list of data quality warnings (`DQWItem`) for the table. You must first call `tables.populate_dqw` to access this data.
 `id` | The identifier (LUID) of the table. Read-only.
 `name` | The name of the table. Must not be empty. `tables.update` does not send the name to the server.
