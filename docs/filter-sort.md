@@ -101,12 +101,15 @@ Tableau Cloud May 2023 and Tableau Server 2022.1.14. The REST API documents thes
 through its `like` operator, and only on selected name fields: user name, user
 friendlyName, group name, and group set name. Other fields support exact matches only.
 
-In practice, Tableau Cloud also treats `*` as a wildcard in the value of an `Equals` filter on
-other name fields. For example, `server.workbooks.filter(name="Sales*")` returns workbooks whose
-names start with `Sales`, `name="*2026"` returns names that end with `2026`, and `name="*Q1 *"`
-returns names that contain `Q1 `. This is not described in the REST API documentation, so
-confirm it on your Tableau Server version before you rely on it. The `like` operator is
-rejected on workbook names (`400 Bad Request`), as are `CaseInsensitiveEquals` and `Has`.
+In practice, `*` also acts as a wildcard in the value of an `Equals` filter on other name
+fields, at the start, end, or middle of the value. In testing this worked for workbook names on
+Tableau Cloud and for project names on a Tableau Server that supports REST API 3.31. For example,
+`server.workbooks.filter(name="Sales*")` returns workbooks whose names start with `Sales`,
+`name="*2026"` returns names that end with `2026`, and `name="*Q1 *"` returns names that contain
+`Q1 `. The match ignores letter case where `Equals` does. This is not described in the REST API
+documentation, so confirm it on your Tableau Server version and field before you rely on it. The
+`like` operator is rejected on workbook names (`400 Bad Request`), as are `CaseInsensitiveEquals`
+and `Has`.
 
 For example, to search for the string `marketing-example`, the REST API documentation
 gives the following filter expressions:
