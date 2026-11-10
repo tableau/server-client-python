@@ -86,9 +86,11 @@ def main():
             print_permissions(sample_database)
 
         result = server.metadata.query(DATABASE_TABLES_QUERY, {"luid": sample_database.id})
+        databases_data = (result.get("data") or {}).get("databases") or []
         if result.get("errors"):
             print(f"\nMetadata API returned errors: {result['errors']}")
-        databases_data = (result.get("data") or {}).get("databases") or []
+            if not databases_data:
+                return
         table_refs = databases_data[0]["tables"] if databases_data else []
         print(f"\nThere are {len(table_refs)} tables in database {sample_database.name}: ")
         print([table_ref["name"] for table_ref in table_refs])
@@ -107,8 +109,7 @@ def main():
         server.tables.populate_columns(sample_table)
         print(f"\nColumns in table {sample_table.name}: ")
         for column in sample_table.columns:
-            # ColumnItem.remote_type raises AttributeError when the server omits remoteType.
-            print(f"    {column.name} ({getattr(column, 'remote_type', None)})")
+            print(f"    {column.name} ({column.remote_type})")
 
         if args.permissions:
             server.tables.populate_permissions(sample_table)
