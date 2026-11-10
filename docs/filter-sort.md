@@ -67,7 +67,7 @@ in front of it does not escape it. A filter value that contains a comma fails wi
 
 ```py
 # Fails: the workbook name contains a comma
-workbooks = server.workbooks.filter(name="Calculations, Groups & Sets")
+workbooks = server.workbooks.filter(name="Sales, Q1 & Q2")
 ```
 
 An ampersand (`&`) works when you use TSC, because TSC URL-encodes the query string. If you
@@ -76,10 +76,10 @@ parameter and the server sees a truncated filter.
 
 To find an item whose name contains a comma, replace the comma with an asterisk (`*`). The
 asterisk acts as a wildcard, so the following filter finds the workbook named
-`Calculations, Groups & Sets`:
+`Sales, Q1 & Q2`:
 
 ```py
-for workbook in server.workbooks.filter(name="Calculations* Groups & Sets"):
+for workbook in server.workbooks.filter(name="Sales* Q1 & Q2"):
     print(workbook.name, workbook.id)
 ```
 
@@ -87,7 +87,7 @@ Because a wildcard matches any character, the filter can return more than one it
 the results on the client side if you need an exact match:
 
 ```py
-wb_name = "Calculations, Groups & Sets"
+wb_name = "Sales, Q1 & Q2"
 pattern = wb_name.replace(",", "*")
 matches = [wb for wb in server.workbooks.filter(name=pattern) if wb.name == wb_name]
 ```
@@ -102,9 +102,9 @@ through its `like` operator, and only on selected name fields: user name, user
 friendlyName, group name, and group set name. Other fields support exact matches only.
 
 In practice, Tableau Cloud also treats `*` as a wildcard in the value of an `Equals` filter on
-other name fields. For example, `server.workbooks.filter(name="EPI*")` returns workbooks whose
-names start with `EPI`, `name="*360"` returns names that end with `360`, and `name="*IC *"`
-returns names that contain `IC `. This is not described in the REST API documentation, so
+other name fields. For example, `server.workbooks.filter(name="Sales*")` returns workbooks whose
+names start with `Sales`, `name="*2026"` returns names that end with `2026`, and `name="*Q1 *"`
+returns names that contain `Q1 `. This is not described in the REST API documentation, so
 confirm it on your Tableau Server version before you rely on it. The `like` operator is
 rejected on workbook names (`400 Bad Request`), as are `CaseInsensitiveEquals` and `Has`.
 
