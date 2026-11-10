@@ -87,6 +87,7 @@ class QuerySet(Iterable[T], Sized):
                     # error and return to cleanly end the generator.
                     # (raise StopIteration would cause RuntimeError per PEP 479)
                     return
+                raise
             if len(self._result_cache) == 0:
                 return
             yield from self._result_cache

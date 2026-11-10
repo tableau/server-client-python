@@ -169,3 +169,19 @@ def test_queryset_400006_returns_cleanly() -> None:
     # Before the fix this raised: RuntimeError: generator raised StopIteration
     results = [x for x in qs]
     assert len(results) == 1
+
+
+def test_queryset_iteration_raises_other_server_errors() -> None:
+    """Iterating must surface server errors other than 400006, not yield nothing."""
+    from tableauserverclient.server.endpoint.exceptions import ServerResponseError
+    from tableauserverclient.server.query import QuerySet
+
+    class MockEndpoint:
+        def get(self, req_options=None):
+            raise ServerResponseError("400065", "Bad Request", "Error parsing filter query", "http://test")
+
+    qs: QuerySet[TSC.ProjectItem] = QuerySet(MockEndpoint())  # type: ignore[arg-type]
+
+    with pytest.raises(ServerResponseError) as excinfo:
+        [x for x in qs]
+    assert excinfo.value.code == "400065"
