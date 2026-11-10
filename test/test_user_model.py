@@ -197,37 +197,71 @@ def test_password_not_logged_when_line_invalid(caplog: pytest.LogCaptureFixture)
     with caplog.at_level(logging.DEBUG, logger=logger.name):
         valid, invalid = TSC.UserItem.CSVImport.validate_file_for_import(test_data, logger)
     assert valid == 0
-    assert len(invalid) == 1
-    assert secret not in invalid[0], f"Password leaked into returned invalid_lines: {invalid[0]!r}"
+    assert invalid == ["jsmith,***,***,not-a-real-license,site,yes,jsmith@example.com"]
     combined = "\n".join(record.getMessage() for record in caplog.records)
     assert secret not in combined, f"Password leaked into logs on invalid row: {combined!r}"
 
 
-def test_password_with_comma_is_fully_redacted(caplog: pytest.LogCaptureFixture) -> None:
-    """A quoted comma in a password must not leak from invalid row output or logs."""
+def test_quoted_comma_password_not_logged(caplog: pytest.LogCaptureFixture) -> None:
+    """A quoted comma in a password must not reach the logs; the invalid row is returned as written."""
     line = 'jsmith,"hunter2,SECRETTAIL",John Smith,not-a-real-license,site,yes,jsmith@example.com'
     test_data = _mock_file_content([line])
     with caplog.at_level(logging.DEBUG, logger=logger.name):
         valid, invalid = TSC.UserItem.CSVImport.validate_file_for_import(test_data, logger)
     assert valid == 0
-    assert len(invalid) == 1
-    assert "hunter2" not in invalid[0]
-    assert "SECRETTAIL" not in invalid[0]
+    assert invalid == ["jsmith,***,***,not-a-real-license,site,yes,jsmith@example.com"]
     combined = "\n".join(record.getMessage() for record in caplog.records)
     assert "hunter2" not in combined
     assert "SECRETTAIL" not in combined
     assert _mask_present(caplog.records)
 
 
-def test_malformed_csv_row_is_not_returned_unredacted(caplog: pytest.LogCaptureFixture) -> None:
-    secret = "SECRETTAIL"
-    test_data = _mock_file_content([f'jsmith,"{secret}'])
+def test_include_passwords_returns_invalid_lines_verbatim() -> None:
+    line = "jsmith,hunter2,John Smith,not-a-real-license,site,yes,jsmith@example.com\n"
+    valid, invalid = TSC.UserItem.CSVImport.validate_file_for_import(
+        _mock_file_content([line]), logger, include_passwords=True
+    )
+    assert valid == 0
+    assert invalid == [line]
+
+
+def test_mask_password_columns_helper() -> None:
+    mask = TSC.UserItem.CSVImport._mask_password_columns
+    assert mask("jsmith,hunter2,fname,creator\n") == "jsmith,***,***,creator\n"
+    assert mask("jsmith,hunter2,fname,creator\r\n") == "jsmith,***,***,creator\r\n"
+    assert mask("jsmith,hunter2,fname") == "jsmith,***,***"
+    assert mask("jsmith,hunter2\r\n") == "jsmith,***\r\n"
+    assert mask("jsmith,,fname") == "jsmith,***,***"
+    assert mask("jsmith,") == "jsmith,***"
+    assert mask('jsmith,"pass,word",fname,creator') == "jsmith,***,***,creator"
+    # No password column: returned unchanged
+    assert mask("jsmith") == "jsmith"
+    assert mask("jsmith\n") == "jsmith\n"
+
+
+def test_unmatched_quote_row_still_parses() -> None:
+    """A row that is not well-formed CSV is split on commas instead of aborting the import."""
+    user = TSC.UserItem.CSVImport.create_user_from_line('username,pa"ss,fname,creator,none,yes,email')
+    assert user is not None
+    assert user.fullname == "fname"
+    user = TSC.UserItem.CSVImport.create_user_from_line('username,"unterminated,fname,creator,none,yes,email')
+    assert user is not None
+    assert user.fullname == "fname"
+
+
+def test_shifted_password_fragment_not_logged(caplog: pytest.LogCaptureFixture) -> None:
+    """An unquoted comma shifts password fragments into later columns; they must not reach the logs."""
+    line = "jsmith,hunter2,SECRETTAIL,TAILFRAGMENT,site,yes,jsmith@example.com"
+    test_data = _mock_file_content([line])
     with caplog.at_level(logging.DEBUG, logger=logger.name):
         valid, invalid = TSC.UserItem.CSVImport.validate_file_for_import(test_data, logger)
     assert valid == 0
-    assert invalid == ["<invalid CSV row redacted>"]
-    combined = "\n".join(record.getMessage() for record in caplog.records)
-    assert secret not in combined
+    # Only two columns are masked, so a fragment past an unquoted second comma stays in the returned row.
+    assert invalid == ["jsmith,***,***,TAILFRAGMENT,site,yes,jsmith@example.com"]
+    combined = " ".join(record.getMessage() for record in caplog.records).lower()
+    assert "tailfragment" not in combined
+    assert "secrettail" not in combined
+    assert "column license" in combined
 
 
 def test_password_not_in_validate_attribute_value_error(
@@ -267,27 +301,6 @@ def test_password_not_in_validate_attribute_value_error(
 
     combined = "\n".join(record.getMessage() for record in caplog.records)
     assert secret not in combined, f"Password leaked into logs: {combined!r}"
-
-
-def test_redact_password_column_helper() -> None:
-    """Unit-level coverage for _redact_password_column across newline and edge cases."""
-    redact = TSC.UserItem.CSVImport._redact_password_column
-    # LF-terminated
-    assert redact("jsmith,hunter2,fname\n") == "jsmith,***,fname\n"
-    # CRLF-terminated (the \r rides with the last field, ending is preserved)
-    assert redact("jsmith,hunter2,fname\r\n") == "jsmith,***,fname\r\n"
-    # CRLF where password IS the last field: the \r must not be silently
-    # dropped when the password value is replaced.
-    assert redact("jsmith,hunter2\r\n") == "jsmith,***\r\n"
-    # No trailing newline
-    assert redact("jsmith,hunter2,fname") == "jsmith,***,fname"
-    # Empty password field: still replaced (unconditional mask)
-    assert redact("jsmith,,fname") == "jsmith,***,fname"
-    # Trailing comma with nothing after: column 1 exists as empty string, gets masked
-    assert redact("jsmith,") == "jsmith,***"
-    # Single column: no password to redact; return line unchanged
-    assert redact("jsmith") == "jsmith"
-    assert redact("jsmith\n") == "jsmith\n"
 
 
 def test_validate_mixed_case_license() -> None:

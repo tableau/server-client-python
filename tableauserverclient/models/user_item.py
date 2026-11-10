@@ -524,15 +524,25 @@ class UserItem:
 
         @staticmethod
         def _parse_csv_line(line: str) -> list[str]:
-            values = next(csv.reader([line], strict=True, skipinitialspace=True), [])
+            try:
+                values = next(csv.reader([line], strict=True, skipinitialspace=True), [])
+            except csv.Error:
+                # Not well-formed CSV (e.g. an unmatched quote in a password). Split on
+                # commas as unquoted files always have, so these rows keep importing.
+                values = line.strip().split(",")
             if not values:
                 values = [""]
             return list(map(str.strip, values))
 
         # Read through an entire CSV file meant for user import
-        # Return the number of valid lines and a list of all the invalid lines
+        # Return the number of valid lines and a list of all the invalid lines.
+        # Invalid lines have the password column and the column after it masked with "***"
+        # (a password containing one unquoted comma spills into the next column);
+        # pass include_passwords=True to get them exactly as they appear in the file.
         @staticmethod
-        def validate_file_for_import(csv_file: io.TextIOWrapper, logger) -> tuple[int, list[str]]:
+        def validate_file_for_import(
+            csv_file: io.TextIOWrapper, logger, include_passwords: bool = False
+        ) -> tuple[int, list[str]]:
             num_valid_lines = 0
             invalid_lines = []
             csv_file.seek(0)  # set to start of file in case it has been read earlier
@@ -546,43 +556,35 @@ class UserItem:
                     num_valid_lines += 1
                 except Exception as exc:
                     logger.debug(f"Error parsing user {username}: {exc}")
-                    invalid_lines.append(UserItem.CSVImport._redact_password_column(line))
+                    invalid_lines.append(line if include_passwords else UserItem.CSVImport._mask_password_columns(line))
                 line = csv_file.readline()
             return num_valid_lines, invalid_lines
 
-        # Single source of truth for "is this column (or, for a malformed row that
-        # shifted fields, anything at or after it) sensitive enough to mask before
-        # it reaches a log handler or an exposed invalid-lines entry." Both
-        # _redact_password_column (whole-line redaction) and
-        # _validate_import_line_or_throw (per-column debug logging) key off this
-        # instead of each re-deriving the PASS boundary independently.
+        # Number of columns masked in returned invalid lines, starting at the password column.
+        _MASKED_COLUMN_COUNT = 2
+
+        # Return the line with the password column and the one after it replaced by "***".
+        # Other fields are re-serialized (whitespace trimmed, quoting normalized); the line ending is kept.
+        @staticmethod
+        def _mask_password_columns(line: str) -> str:
+            body = line.rstrip("\r\n")
+            ending = line[len(body) :]
+            fields = UserItem.CSVImport._parse_csv_line(body)
+            first = UserItem.CSVImport.ColumnType.PASS.value
+            if len(fields) <= first:
+                return line
+            for i in range(first, min(first + UserItem.CSVImport._MASKED_COLUMN_COUNT, len(fields))):
+                fields[i] = "***"
+            output = io.StringIO()
+            csv.writer(output, lineterminator="").writerow(fields)
+            return output.getvalue() + ending
+
+        # True for the password column and every column after it. A row whose password
+        # contains an unquoted comma shifts password fragments into later columns, so
+        # all of them are kept out of log output.
         @staticmethod
         def _is_sensitive_column(column_index: int) -> bool:
             return column_index >= UserItem.CSVImport.ColumnType.PASS.value
-
-        # Return a copy of a raw CSV line with the password column replaced by "***".
-        # Callers that log or expose invalid rows will not disclose the credential.
-        # Preserves the original line ending (\r\n or \n) so log output and
-        # returned rows stay byte-identical apart from the redaction.
-        @staticmethod
-        def _redact_password_column(line: str) -> str:
-            if line.endswith("\r\n"):
-                body, ending = line[:-2], "\r\n"
-            elif line.endswith("\n"):
-                body, ending = line[:-1], "\n"
-            else:
-                body, ending = line, ""
-            try:
-                fields = UserItem.CSVImport._parse_csv_line(body)
-            except csv.Error:
-                return "<invalid CSV row redacted>" + ending
-            pass_index = UserItem.CSVImport.ColumnType.PASS.value
-            if len(fields) > pass_index:
-                fields[pass_index] = "***"
-                output = io.StringIO()
-                csv.writer(output, lineterminator="").writerow(fields)
-                return output.getvalue() + ending
-            return line
 
         # Some fields in the import file are restricted to specific values
         # Iterate through each field and validate the given value against hardcoded constraints
@@ -641,10 +643,13 @@ class UserItem:
                 # Never call _validate_attribute_value for PASS: its ValueError
                 # embeds the raw value, and a future PR that adds password-format
                 # checks to PASS's allowlist would leak the password through the
-                # exception message. Belt-and-braces even though PASS's allowlist
-                # is currently empty.
+                # exception message.
                 if not skip_validation and column != UserItem.CSVImport.ColumnType.PASS:
-                    UserItem.CSVImport._validate_attribute_value(value, valid, column)
+                    try:
+                        UserItem.CSVImport._validate_attribute_value(value, valid, column)
+                    except ValueError:
+                        # The rejected value may be a password fragment from a shifted row.
+                        raise ValueError(f"Invalid value in column {column.name}") from None
 
         # Given a restricted set of possible values, confirm the item is in that set
         @staticmethod
