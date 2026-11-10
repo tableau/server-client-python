@@ -3006,7 +3006,7 @@ Name | Description
 :--- | :---
 `Field` | Defined in the `RequestOptions.Field` class.
 `Operator` | Defined in the `RequestOptions.Operator` class
-`Value` | The value to compare with the specified field and operator. Values cannot contain `&` or `,`; see [Special characters in filter values](filter-sort#special-characters-in-filter-values).
+`Value` | The value to compare with the specified field and operator. Values cannot contain `,`; see [Special characters in filter values](filter-sort#special-characters-in-filter-values).
 
 
 

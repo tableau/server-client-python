@@ -70,9 +70,9 @@ in front of it does not escape it. A filter value that contains a comma fails wi
 workbooks = server.workbooks.filter(name="Sales, Q1 & Q2")
 ```
 
-An ampersand (`&`) works when you use TSC, because TSC URL-encodes the query string. If you
-build the request yourself, encode the ampersand as `%26`: a literal `&` ends the `filter`
-parameter and the server sees a truncated filter.
+From REST API 3.7, an ampersand (`&`) works when you use TSC, because TSC URL-encodes the query
+string. On earlier versions, or if you build the request yourself, encode the ampersand as `%26`:
+a literal `&` ends the `filter` parameter and the server sees a truncated filter.
 
 To find an item whose name contains a comma, replace the comma with an asterisk (`*`). The
 asterisk acts as a wildcard, so the following filter finds the workbook named
