@@ -1,3 +1,4 @@
+import csv
 import io
 import warnings
 import xml.etree.ElementTree as ET
@@ -471,7 +472,7 @@ class UserItem:
         def create_user_from_line(line: str):
             if line is None or line is False or line == "\n" or line == "":
                 return None
-            values: list[str] = list(map(str.strip, line.strip().split(",")))
+            values = UserItem.CSVImport._parse_csv_line(line)
             if len(values) > UserItem.CSVImport.COLUMN_COUNT:
                 raise ValueError("Too many attributes for user import")
             username = values[UserItem.CSVImport.ColumnType.USERNAME]
@@ -521,25 +522,69 @@ class UserItem:
                 )
             return user
 
-        # Read through an entire CSV file meant for user import
-        # Return the number of valid lines and a list of all the invalid lines
         @staticmethod
-        def validate_file_for_import(csv_file: io.TextIOWrapper, logger) -> tuple[int, list[str]]:
+        def _parse_csv_line(line: str) -> list[str]:
+            try:
+                values = next(csv.reader([line], strict=True, skipinitialspace=True), [])
+            except csv.Error:
+                # Not well-formed CSV (e.g. an unmatched quote in a password). Split on
+                # commas as unquoted files always have, so these rows keep importing.
+                values = line.strip().split(",")
+            if not values:
+                values = [""]
+            return list(map(str.strip, values))
+
+        # Read through an entire CSV file meant for user import
+        # Return the number of valid lines and a list of all the invalid lines.
+        # Invalid lines have the password column and the column after it masked with "***"
+        # (a password containing one unquoted comma spills into the next column);
+        # pass include_passwords=True to get them exactly as they appear in the file.
+        @staticmethod
+        def validate_file_for_import(
+            csv_file: io.TextIOWrapper, logger, include_passwords: bool = False
+        ) -> tuple[int, list[str]]:
             num_valid_lines = 0
             invalid_lines = []
             csv_file.seek(0)  # set to start of file in case it has been read earlier
             line: str = csv_file.readline()
             while line and line != "":
+                # Log only the username (column 0); the rest of the line contains the password (column 1) and other PII.
+                username = line.partition(",")[0].strip()
                 try:
-                    # do not print passwords
-                    logger.info(f"Reading user {line[:4]}")
+                    logger.debug(f"Reading user {username}")
                     UserItem.CSVImport._validate_import_line_or_throw(line, logger)
                     num_valid_lines += 1
                 except Exception as exc:
-                    logger.info(f"Error parsing {line[:4]}: {exc}")
-                    invalid_lines.append(line)
+                    logger.debug(f"Error parsing user {username}: {exc}")
+                    invalid_lines.append(line if include_passwords else UserItem.CSVImport._mask_password_columns(line))
                 line = csv_file.readline()
             return num_valid_lines, invalid_lines
+
+        # Number of columns masked in returned invalid lines, starting at the password column.
+        _MASKED_COLUMN_COUNT = 2
+
+        # Return the line with the password column and the one after it replaced by "***".
+        # Other fields are re-serialized (whitespace trimmed, quoting normalized); the line ending is kept.
+        @staticmethod
+        def _mask_password_columns(line: str) -> str:
+            body = line.rstrip("\r\n")
+            ending = line[len(body) :]
+            fields = UserItem.CSVImport._parse_csv_line(body)
+            first = UserItem.CSVImport.ColumnType.PASS.value
+            if len(fields) <= first:
+                return line
+            for i in range(first, min(first + UserItem.CSVImport._MASKED_COLUMN_COUNT, len(fields))):
+                fields[i] = "***"
+            output = io.StringIO()
+            csv.writer(output, lineterminator="").writerow(fields)
+            return output.getvalue() + ending
+
+        # True for the password column and every column after it. A row whose password
+        # contains an unquoted comma shifts password fragments into later columns, so
+        # all of them are kept out of log output.
+        @staticmethod
+        def _is_sensitive_column(column_index: int) -> bool:
+            return column_index >= UserItem.CSVImport.ColumnType.PASS.value
 
         # Some fields in the import file are restricted to specific values
         # Iterate through each field and validate the given value against hardcoded constraints
@@ -558,16 +603,16 @@ class UserItem:
                 list(UserItem.CSVImport._AUTH_CANONICAL.values()),  # auth - normalized before comparison
             ]
 
-            line = list(map(str.strip, incoming.split(",")))
+            line = UserItem.CSVImport._parse_csv_line(incoming)
             if len(line) > UserItem.CSVImport.COLUMN_COUNT:
                 raise ValueError("Too many attributes for user import")
             username = line[UserItem.CSVImport.ColumnType.USERNAME.value]
             logger.debug(f"> details - {username}")
             UserItem.validate_username_or_throw(username)
             for i in range(1, len(line)):
+                column = UserItem.CSVImport.ColumnType(i)
                 value = line[i]
                 valid = _valid_attributes[i]
-                column = UserItem.CSVImport.ColumnType(i)
                 # normalize case for fields with a restricted value set
                 skip_validation = False
                 if valid:
@@ -591,9 +636,20 @@ class UserItem:
                             skip_validation = True
                     else:
                         value = value.lower()
-                logger.debug(f"column {column.name}: {value}")
-                if not skip_validation:
-                    UserItem.CSVImport._validate_attribute_value(value, valid, column)
+                # A malformed row can shift password fragments into later columns;
+                # keep every field at or after PASS out of the logs.
+                safe_value = "***" if UserItem.CSVImport._is_sensitive_column(column.value) else value
+                logger.debug(f"column {column.name}: {safe_value}")
+                # Never call _validate_attribute_value for PASS: its ValueError
+                # embeds the raw value, and a future PR that adds password-format
+                # checks to PASS's allowlist would leak the password through the
+                # exception message.
+                if not skip_validation and column != UserItem.CSVImport.ColumnType.PASS:
+                    try:
+                        UserItem.CSVImport._validate_attribute_value(value, valid, column)
+                    except ValueError:
+                        # The rejected value may be a password fragment from a shifted row.
+                        raise ValueError(f"Invalid value in column {column.name}") from None
 
         # Given a restricted set of possible values, confirm the item is in that set
         @staticmethod
