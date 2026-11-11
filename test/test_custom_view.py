@@ -20,6 +20,7 @@ CUSTOM_VIEW_UPDATE_XML = TEST_ASSET_DIR / "custom_view_update.xml"
 CUSTOM_VIEW_POPULATE_PDF = TEST_ASSET_DIR / "populate_pdf.pdf"
 CUSTOM_VIEW_POPULATE_CSV = TEST_ASSET_DIR / "populate_csv.csv"
 CUSTOM_VIEW_DOWNLOAD = TEST_ASSET_DIR / "custom_view_download.json"
+DEFAULT_USERS_XML = TEST_ASSET_DIR / "custom_view_default_users.xml"
 FILE_UPLOAD_INIT = TEST_ASSET_DIR / "fileupload_initialize.xml"
 FILE_UPLOAD_APPEND = TEST_ASSET_DIR / "fileupload_append.xml"
 
@@ -388,3 +389,47 @@ def test_pdf_height(server: TSC.Server) -> None:
 
         server.custom_views.populate_pdf(custom_view, req_option)
         assert response == custom_view.pdf
+
+
+def test_get_default_users(server: TSC.Server) -> None:
+    view_id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
+    with requests_mock.mock() as m:
+        m.get(f"{server.custom_views.baseurl}/{view_id}/default/users", text=DEFAULT_USERS_XML.read_text())
+        users, pagination_item = server.custom_views.get_default_users(view_id)
+
+    assert 2 == pagination_item.total_available
+    assert ["5c9a81df-7ec0-4752-a057-82cd2bb22c44", "2a1d5dd2-6a64-4c3b-a4a9-2e5a8f8f0d11"] == [u.id for u in users]
+
+
+def test_get_default_users_accepts_view_item(server: TSC.Server) -> None:
+    view = TSC.CustomViewItem(id="d79634e1-6063-4ec9-95ff-50acbf609ff5")
+    with requests_mock.mock() as m:
+        m.get(f"{server.custom_views.baseurl}/{view.id}/default/users", text=DEFAULT_USERS_XML.read_text())
+        users, _ = server.custom_views.get_default_users(view)
+
+    assert 2 == len(users)
+
+
+def test_get_default_users_passes_pagination(server: TSC.Server) -> None:
+    view_id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
+    with requests_mock.mock() as m:
+        m.get(f"{server.custom_views.baseurl}/{view_id}/default/users", text=DEFAULT_USERS_XML.read_text())
+        server.custom_views.get_default_users(view_id, TSC.RequestOptions(pagesize=50, pagenumber=2))
+
+    assert "pagesize=50" in m.request_history[0].query
+    assert "pagenumber=2" in m.request_history[0].query
+
+
+def test_get_default_users_missing_id(server: TSC.Server) -> None:
+    with pytest.raises(TSC.MissingRequiredFieldError):
+        server.custom_views.get_default_users("")
+    with pytest.raises(TSC.MissingRequiredFieldError):
+        server.custom_views.get_default_users(TSC.CustomViewItem())
+
+
+def test_get_default_users_unavailable_before_3_21(server: TSC.Server) -> None:
+    server.version = "3.20"
+    with requests_mock.mock() as m:
+        with pytest.raises(TSC.server.exceptions.EndpointUnavailableError):
+            server.custom_views.get_default_users("d79634e1-6063-4ec9-95ff-50acbf609ff5")
+        assert m.call_count == 0

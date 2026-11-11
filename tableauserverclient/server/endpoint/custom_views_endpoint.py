@@ -10,7 +10,7 @@ from tableauserverclient.config import BYTES_PER_MB, config
 from tableauserverclient.filesys_helpers import get_file_object_size
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
 from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
-from tableauserverclient.models import CustomViewItem, PaginationItem
+from tableauserverclient.models import CustomViewItem, PaginationItem, UserItem
 from tableauserverclient.server import (
     RequestFactory,
     RequestOptions,
@@ -375,6 +375,50 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
 
         server_response = self.post_request(url, xml_request, content_type)
         return CustomViewItem.from_response(server_response.content, self.parent_srv.namespace)
+
+    @api(version="3.21")
+    def get_default_users(
+        self, view_item: CustomViewItem | str, req_options: "RequestOptions | None" = None
+    ) -> tuple[list[UserItem], PaginationItem]:
+        """
+        Get the users who have a custom view set as their default view. Only
+        users with an explicit default row for this custom view are returned.
+
+        This is separate from the workbook's default view (WorkbookItem.default_view_id),
+        which is one value per workbook and the same for every user.
+
+        Only Tableau administrators can call this method.
+
+        Rest API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#list_users_with_custom_view_as_default
+
+        Parameters
+        ----------
+        view_item : CustomViewItem | str
+            The custom view, or its ID.
+
+        req_options : RequestOptions, optional
+            Pagination options for the request, by default None
+
+        Returns
+        -------
+        tuple[list[UserItem], PaginationItem]
+            The users, each populated with only an ID, and the pagination details.
+
+        Raises
+        ------
+        MissingRequiredFieldError
+            If the custom view has no ID
+        """
+        view_id = view_item.id if isinstance(view_item, CustomViewItem) else view_item
+        if not view_id:
+            error = "Custom view item missing ID."
+            raise MissingRequiredFieldError(error)
+        logger.info(f"Querying users with custom view (ID: {view_id}) as default")
+        url = f"{self.baseurl}/{view_id}/default/users"
+        server_response = self.get_request(url, req_options)
+        pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
+        users = UserItem.from_response(server_response.content, self.parent_srv.namespace)
+        return users, pagination_item
 
     def filter(self, *invalid, page_size: int | None = None, **kwargs) -> "QuerySet[CustomViewItem]":
         """
