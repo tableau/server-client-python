@@ -10,6 +10,7 @@ import requests_mock
 import tableauserverclient as TSC
 from tableauserverclient.config import BYTES_PER_MB
 from tableauserverclient.datetime_helpers import format_datetime
+from tableauserverclient.server.endpoint.endpoint import Success_codes
 
 TEST_ASSET_DIR = Path(__file__).parent / "assets"
 
@@ -501,7 +502,7 @@ def test_set_as_default_for_users_strict_passes_when_all_succeed(server: TSC.Ser
 
 
 def test_set_as_default_for_users_accepts_200(server: TSC.Server) -> None:
-    # the REST docs list 200 for this call; the server implementation returns 207
+    # the REST docs list 200 for this call; the server source declares 207 (Multi-Status)
     with requests_mock.mock() as m:
         m.post(
             f"{server.custom_views.baseurl}/{VIEW_ID}/default/users",
@@ -511,6 +512,57 @@ def test_set_as_default_for_users_accepts_200(server: TSC.Server) -> None:
         results = server.custom_views.set_as_default_for_users(VIEW_ID, [USER_A, USER_B])
 
     assert 2 == len(results)
+
+
+@pytest.mark.parametrize("code", [199, 300, 400, 500])
+def test_non_2xx_status_is_not_success(code: int) -> None:
+    assert code not in Success_codes
+
+
+@pytest.mark.parametrize("code", [200, 201, 204, 207, 299])
+def test_2xx_status_is_success(code: int) -> None:
+    assert code in Success_codes
+
+
+def test_set_as_default_for_users_result_without_user_or_error_details(server: TSC.Server) -> None:
+    body = (
+        '<tsResponse xmlns="http://tableau.com/api"><customViewAsUserDefaultResults>'
+        '<customViewAsUserDefaultViewResult success="false" />'
+        "</customViewAsUserDefaultResults></tsResponse>"
+    )
+    with requests_mock.mock() as m:
+        m.post(f"{server.custom_views.baseurl}/{VIEW_ID}/default/users", text=body, status_code=207)
+        results = server.custom_views.set_as_default_for_users(VIEW_ID, [USER_A])
+        with pytest.raises(TSC.DefaultViewAssignmentError) as excinfo:
+            server.custom_views.set_as_default_for_users(VIEW_ID, [USER_A], strict=True)
+
+    assert [(None, False, None, None)] == [(r.user_id, r.success, r.error_code, r.summary) for r in results]
+    assert "unknown user: no error details" in str(excinfo.value)
+    assert "None" not in str(excinfo.value)
+
+
+def test_set_as_default_for_users_success_missing_attribute_is_failure(server: TSC.Server) -> None:
+    body = (
+        '<tsResponse xmlns="http://tableau.com/api"><customViewAsUserDefaultResults>'
+        f'<customViewAsUserDefaultViewResult><user id="{USER_A}" /></customViewAsUserDefaultViewResult>'
+        "</customViewAsUserDefaultResults></tsResponse>"
+    )
+    with requests_mock.mock() as m:
+        m.post(f"{server.custom_views.baseurl}/{VIEW_ID}/default/users", text=body, status_code=207)
+        results = server.custom_views.set_as_default_for_users(VIEW_ID, [USER_A])
+
+    assert [(USER_A, False)] == [(r.user_id, r.success) for r in results]
+
+
+def test_set_as_default_for_users_empty_results_warns(server: TSC.Server, caplog: pytest.LogCaptureFixture) -> None:
+    body = '<tsResponse xmlns="http://tableau.com/api"><customViewAsUserDefaultResults /></tsResponse>'
+    with requests_mock.mock() as m:
+        m.post(f"{server.custom_views.baseurl}/{VIEW_ID}/default/users", text=body, status_code=207)
+        with caplog.at_level("WARNING"):
+            results = server.custom_views.set_as_default_for_users(VIEW_ID, [USER_A, USER_B])
+
+    assert [] == results
+    assert "server reported 0 result(s)" in caplog.text
 
 
 def test_set_as_default_for_users_forbidden_raises_server_error(server: TSC.Server) -> None:
@@ -534,6 +586,8 @@ def test_set_as_default_for_users_validates_input(server: TSC.Server) -> None:
             server.custom_views.set_as_default_for_users(VIEW_ID, [f"user-{i}" for i in range(101)])
         with pytest.raises(ValueError):
             server.custom_views.set_as_default_for_users(VIEW_ID, [TSC.UserItem()])
+        with pytest.raises(TypeError):
+            server.custom_views.set_as_default_for_users(VIEW_ID, USER_A)
         assert m.call_count == 0
 
 

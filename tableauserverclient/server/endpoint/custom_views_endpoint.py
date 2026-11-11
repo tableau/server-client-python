@@ -459,6 +459,8 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
         ------
         MissingRequiredFieldError
             If the custom view has no ID
+        TypeError
+            If users is a single string rather than a collection
         ValueError
             If there are no users, more than 100 users, or a user without an ID
         DefaultViewAssignmentError
@@ -468,6 +470,8 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
         if not view_id:
             error = "Custom view item missing ID."
             raise MissingRequiredFieldError(error)
+        if isinstance(users, str):
+            raise TypeError("users must be a collection of user IDs or UserItems, not a single string.")
         user_list = list(users)
         if not user_list:
             raise ValueError("At least one user is required.")
@@ -478,6 +482,11 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
         request = RequestFactory.CustomView.set_as_default_for_users_req(user_list)
         server_response = self.post_request(url, request)
         results = UserDefaultViewAssignment.list_from_response(server_response.content, self.parent_srv.namespace)
+        if len(results) != len(user_list):
+            logger.warning(
+                f"Requested custom view (ID: {view_id}) as default for {len(user_list)} user(s) "
+                f"but the server reported {len(results)} result(s)"
+            )
         failures = [result for result in results if not result.success]
         logger.info(f"Set custom view (ID: {view_id}) as default for {len(results) - len(failures)} user(s)")
         if failures:

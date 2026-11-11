@@ -88,7 +88,10 @@ class DefaultViewAssignmentError(TableauError):
         super().__init__(str(self))
 
     def __str__(self):
-        lines = [f"\t{f.user_id}: {f.error_code} {f.summary}" for f in self.failures]
+        lines = [
+            f"\t{f.user_id or 'unknown user'}: {' '.join(part for part in (f.error_code, f.summary) if part) or 'no error details'}"
+            for f in self.failures
+        ]
         return "\n\nCould not set the custom view as default for {} user(s):\n{}".format(len(lines), "\n".join(lines))
 
 
