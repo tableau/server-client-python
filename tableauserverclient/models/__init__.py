@@ -41,6 +41,7 @@ from tableauserverclient.models.oidc_item import SiteOIDCConfiguration
 from tableauserverclient.models.pagination_item import PaginationItem
 from tableauserverclient.models.permissions_item import PermissionsRule, Permission
 from tableauserverclient.models.project_item import ProjectItem
+from tableauserverclient.models.recycle_bin_item import RecycleBinItem
 from tableauserverclient.models.revision_item import RevisionItem
 from tableauserverclient.models.schedule_item import ScheduleItem
 from tableauserverclient.models.server_info_item import ServerInfoItem
@@ -96,6 +97,7 @@ __all__ = [
     "Permission",
     "PermissionsRule",
     "ProjectItem",
+    "RecycleBinItem",
     "RevisionItem",
     "ScheduleItem",
     "ServerInfoItem",

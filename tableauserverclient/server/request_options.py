@@ -133,6 +133,7 @@ class RequestOptions(RequestOptionsBase):
         CreatedAt = "createdAt"
         DatabaseName = "databaseName"
         DatabaseUserName = "databaseUserName"
+        DeleterId = "deleterId"
         Description = "description"
         DisplayTabs = "displayTabs"
         DomainName = "domainName"
