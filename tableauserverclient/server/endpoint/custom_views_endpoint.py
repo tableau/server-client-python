@@ -4,13 +4,13 @@ import os
 from contextlib import closing
 from pathlib import Path
 from typing import TYPE_CHECKING
-from collections.abc import Iterator
+from collections.abc import Iterable, Iterator
 
 from tableauserverclient.config import BYTES_PER_MB, config
 from tableauserverclient.filesys_helpers import get_file_object_size
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
-from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
-from tableauserverclient.models import CustomViewItem, PaginationItem, UserItem
+from tableauserverclient.server.endpoint.exceptions import DefaultViewAssignmentError, MissingRequiredFieldError
+from tableauserverclient.models import UserDefaultViewAssignment, CustomViewItem, PaginationItem, UserItem
 from tableauserverclient.server import (
     RequestFactory,
     RequestOptions,
@@ -31,6 +31,8 @@ download an image of a custom view.
 Delete a custom view 
 update the name or owner of a custom view.
 """
+
+MAX_DEFAULT_USERS_PER_REQUEST = 100
 
 FilePath = str | os.PathLike
 FileObject = io.BufferedReader | io.BytesIO
@@ -377,7 +379,7 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
         return CustomViewItem.from_response(server_response.content, self.parent_srv.namespace)
 
     @api(version="3.21")
-    def get_default_users(
+    def get_users_with_default(
         self, view_item: CustomViewItem | str, req_options: "RequestOptions | None" = None
     ) -> tuple[list[UserItem], PaginationItem]:
         """
@@ -419,6 +421,70 @@ class CustomViews(QuerysetEndpoint[CustomViewItem]):
         pagination_item = PaginationItem.from_response(server_response.content, self.parent_srv.namespace)
         users = UserItem.from_response(server_response.content, self.parent_srv.namespace)
         return users, pagination_item
+
+    @api(version="3.21")
+    def set_as_default_for_users(
+        self, view_item: CustomViewItem | str, users: Iterable[UserItem | str], strict: bool = False
+    ) -> list[UserDefaultViewAssignment]:
+        """
+        Set a custom view as the default view for up to 100 users.
+
+        The server applies each user independently, so some users can succeed while others fail
+        (for example, a user without read permission on the custom view). The outcome for each user
+        is returned. A request that the server rejects outright, such as one made without administrator
+        permissions, raises ServerResponseError as usual.
+
+        Only Tableau administrators can call this method.
+
+        Rest API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#set_custom_view_as_default_for_users
+
+        Parameters
+        ----------
+        view_item : CustomViewItem | str
+            The custom view, or its ID.
+
+        users : Iterable[UserItem | str]
+            The users, or their IDs. At most 100.
+
+        strict : bool, optional
+            If True, raise DefaultViewAssignmentError after the request when any user failed.
+            Users that succeeded are still updated: the call is not all-or-nothing. By default
+            failures are only reported in the returned results.
+
+        Returns
+        -------
+        list[UserDefaultViewAssignment]
+
+        Raises
+        ------
+        MissingRequiredFieldError
+            If the custom view has no ID
+        ValueError
+            If there are no users, more than 100 users, or a user without an ID
+        DefaultViewAssignmentError
+            If strict is True and any user failed
+        """
+        view_id = view_item.id if isinstance(view_item, CustomViewItem) else view_item
+        if not view_id:
+            error = "Custom view item missing ID."
+            raise MissingRequiredFieldError(error)
+        user_list = list(users)
+        if not user_list:
+            raise ValueError("At least one user is required.")
+        if len(user_list) > MAX_DEFAULT_USERS_PER_REQUEST:
+            raise ValueError(f"At most {MAX_DEFAULT_USERS_PER_REQUEST} users can be set per request.")
+
+        url = f"{self.baseurl}/{view_id}/default/users"
+        request = RequestFactory.CustomView.set_as_default_for_users_req(user_list)
+        server_response = self.post_request(url, request)
+        results = UserDefaultViewAssignment.list_from_response(server_response.content, self.parent_srv.namespace)
+        failures = [result for result in results if not result.success]
+        logger.info(f"Set custom view (ID: {view_id}) as default for {len(results) - len(failures)} user(s)")
+        if failures:
+            logger.warning(f"Could not set custom view (ID: {view_id}) as default for {len(failures)} user(s)")
+            if strict:
+                raise DefaultViewAssignmentError(failures)
+        return results
 
     def filter(self, *invalid, page_size: int | None = None, **kwargs) -> "QuerySet[CustomViewItem]":
         """
