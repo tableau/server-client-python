@@ -6,6 +6,7 @@ from .property_decorators import property_not_empty
 class ColumnItem:
     def __init__(self, name, description=None):
         self._id = None
+        self._remote_type = None
         self.description = description
         self.name = name
 

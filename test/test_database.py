@@ -110,3 +110,8 @@ def test_delete(server):
     with requests_mock.mock() as m:
         m.delete(server.databases.baseurl + "/0448d2ed-590d-4fa0-b272-a2a8a24555b5", status_code=204)
         server.databases.delete("0448d2ed-590d-4fa0-b272-a2a8a24555b5")
+
+
+def test_column_item_remote_type_defaults_to_none() -> None:
+    column = TSC.ColumnItem("name")
+    assert column.remote_type is None
