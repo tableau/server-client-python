@@ -7,7 +7,7 @@ from tableauserverclient.models.collection_item import CollectionItem
 from tableauserverclient.models.column_item import ColumnItem
 from tableauserverclient.models.connection_credentials import ConnectionCredentials
 from tableauserverclient.models.connection_item import ConnectionItem
-from tableauserverclient.models.custom_view_item import CustomViewItem
+from tableauserverclient.models.custom_view_item import UserDefaultViewAssignment, CustomViewItem
 from tableauserverclient.models.data_acceleration_report_item import DataAccelerationReportItem
 from tableauserverclient.models.data_alert_item import DataAlertItem
 from tableauserverclient.models.database_item import DatabaseItem
@@ -68,6 +68,7 @@ __all__ = [
     "ConnectionCredentials",
     "ConnectionItem",
     "Credentials",
+    "UserDefaultViewAssignment",
     "CustomViewItem",
     "DataAccelerationReportItem",
     "DataAlertItem",

@@ -10,6 +10,7 @@ import requests_mock
 import tableauserverclient as TSC
 from tableauserverclient.config import BYTES_PER_MB
 from tableauserverclient.datetime_helpers import format_datetime
+from tableauserverclient.server.endpoint.endpoint import Success_codes
 
 TEST_ASSET_DIR = Path(__file__).parent / "assets"
 
@@ -20,6 +21,9 @@ CUSTOM_VIEW_UPDATE_XML = TEST_ASSET_DIR / "custom_view_update.xml"
 CUSTOM_VIEW_POPULATE_PDF = TEST_ASSET_DIR / "populate_pdf.pdf"
 CUSTOM_VIEW_POPULATE_CSV = TEST_ASSET_DIR / "populate_csv.csv"
 CUSTOM_VIEW_DOWNLOAD = TEST_ASSET_DIR / "custom_view_download.json"
+DEFAULT_USERS_XML = TEST_ASSET_DIR / "custom_view_default_users.xml"
+SET_AS_DEFAULT_FOR_USERS_XML = TEST_ASSET_DIR / "custom_view_set_as_default_for_users.xml"
+SET_AS_DEFAULT_FOR_USERS_PARTIAL_XML = TEST_ASSET_DIR / "custom_view_set_as_default_for_users_partial.xml"
 FILE_UPLOAD_INIT = TEST_ASSET_DIR / "fileupload_initialize.xml"
 FILE_UPLOAD_APPEND = TEST_ASSET_DIR / "fileupload_append.xml"
 
@@ -388,3 +392,220 @@ def test_pdf_height(server: TSC.Server) -> None:
 
         server.custom_views.populate_pdf(custom_view, req_option)
         assert response == custom_view.pdf
+
+
+def test_get_users_with_default(server: TSC.Server) -> None:
+    view_id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
+    with requests_mock.mock() as m:
+        m.get(f"{server.custom_views.baseurl}/{view_id}/default/users", text=DEFAULT_USERS_XML.read_text())
+        users, pagination_item = server.custom_views.get_users_with_default(view_id)
+
+    assert 2 == pagination_item.total_available
+    assert ["5c9a81df-7ec0-4752-a057-82cd2bb22c44", "2a1d5dd2-6a64-4c3b-a4a9-2e5a8f8f0d11"] == [u.id for u in users]
+
+
+def test_get_users_with_default_accepts_view_item(server: TSC.Server) -> None:
+    view = TSC.CustomViewItem(id="d79634e1-6063-4ec9-95ff-50acbf609ff5")
+    with requests_mock.mock() as m:
+        m.get(f"{server.custom_views.baseurl}/{view.id}/default/users", text=DEFAULT_USERS_XML.read_text())
+        users, _ = server.custom_views.get_users_with_default(view)
+
+    assert 2 == len(users)
+
+
+def test_get_users_with_default_passes_pagination(server: TSC.Server) -> None:
+    view_id = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
+    with requests_mock.mock() as m:
+        m.get(f"{server.custom_views.baseurl}/{view_id}/default/users", text=DEFAULT_USERS_XML.read_text())
+        server.custom_views.get_users_with_default(view_id, TSC.RequestOptions(pagesize=50, pagenumber=2))
+
+    assert "pagesize=50" in m.request_history[0].query
+    assert "pagenumber=2" in m.request_history[0].query
+
+
+def test_get_users_with_default_missing_id(server: TSC.Server) -> None:
+    with pytest.raises(TSC.MissingRequiredFieldError):
+        server.custom_views.get_users_with_default("")
+    with pytest.raises(TSC.MissingRequiredFieldError):
+        server.custom_views.get_users_with_default(TSC.CustomViewItem())
+
+
+def test_get_users_with_default_unavailable_before_3_21(server: TSC.Server) -> None:
+    server.version = "3.20"
+    with requests_mock.mock() as m:
+        with pytest.raises(TSC.server.exceptions.EndpointUnavailableError):
+            server.custom_views.get_users_with_default("d79634e1-6063-4ec9-95ff-50acbf609ff5")
+        assert m.call_count == 0
+
+
+VIEW_ID = "d79634e1-6063-4ec9-95ff-50acbf609ff5"
+USER_A = "5c9a81df-7ec0-4752-a057-82cd2bb22c44"
+USER_B = "2a1d5dd2-6a64-4c3b-a4a9-2e5a8f8f0d11"
+
+
+def test_set_as_default_for_users(server: TSC.Server) -> None:
+    user_b = TSC.UserItem()
+    user_b._id = USER_B
+    with requests_mock.mock() as m:
+        m.post(
+            f"{server.custom_views.baseurl}/{VIEW_ID}/default/users",
+            text=SET_AS_DEFAULT_FOR_USERS_XML.read_text(),
+            status_code=207,
+        )
+        results = server.custom_views.set_as_default_for_users(VIEW_ID, [USER_A, user_b])
+
+    assert f'<user id="{USER_A}" />' in m.request_history[0].text
+    assert f'<user id="{USER_B}" />' in m.request_history[0].text
+    assert [USER_A, USER_B] == [r.user_id for r in results]
+    assert all(r.success for r in results)
+    assert all(r.error_code is None and r.summary is None for r in results)
+
+
+def test_set_as_default_for_users_partial_failure_is_reported(server: TSC.Server) -> None:
+    with requests_mock.mock() as m:
+        m.post(
+            f"{server.custom_views.baseurl}/{VIEW_ID}/default/users",
+            text=SET_AS_DEFAULT_FOR_USERS_PARTIAL_XML.read_text(),
+            status_code=207,
+        )
+        results = server.custom_views.set_as_default_for_users(TSC.CustomViewItem(id=VIEW_ID), [USER_A, USER_B])
+
+    assert [True, False] == [r.success for r in results]
+    assert "403167" == results[1].error_code
+    assert results[1].summary is not None and "insufficient permission" in results[1].summary
+
+
+def test_set_as_default_for_users_strict_raises_on_failure(server: TSC.Server) -> None:
+    with requests_mock.mock() as m:
+        m.post(
+            f"{server.custom_views.baseurl}/{VIEW_ID}/default/users",
+            text=SET_AS_DEFAULT_FOR_USERS_PARTIAL_XML.read_text(),
+            status_code=207,
+        )
+        with pytest.raises(TSC.DefaultViewAssignmentError) as excinfo:
+            server.custom_views.set_as_default_for_users(VIEW_ID, [USER_A, USER_B], strict=True)
+
+    assert [USER_B] == [f.user_id for f in excinfo.value.failures]
+    assert "403167" in str(excinfo.value)
+
+
+def test_set_as_default_for_users_strict_passes_when_all_succeed(server: TSC.Server) -> None:
+    with requests_mock.mock() as m:
+        m.post(
+            f"{server.custom_views.baseurl}/{VIEW_ID}/default/users",
+            text=SET_AS_DEFAULT_FOR_USERS_XML.read_text(),
+            status_code=207,
+        )
+        results = server.custom_views.set_as_default_for_users(VIEW_ID, [USER_A, USER_B], strict=True)
+
+    assert 2 == len(results)
+
+
+def test_set_as_default_for_users_accepts_200(server: TSC.Server) -> None:
+    # the REST docs list 200 for this call; the server source declares 207 (Multi-Status)
+    with requests_mock.mock() as m:
+        m.post(
+            f"{server.custom_views.baseurl}/{VIEW_ID}/default/users",
+            text=SET_AS_DEFAULT_FOR_USERS_XML.read_text(),
+            status_code=200,
+        )
+        results = server.custom_views.set_as_default_for_users(VIEW_ID, [USER_A, USER_B])
+
+    assert 2 == len(results)
+
+
+@pytest.mark.parametrize("code", [199, 300, 400, 500])
+def test_non_2xx_status_is_not_success(code: int) -> None:
+    assert code not in Success_codes
+
+
+@pytest.mark.parametrize("code", [200, 201, 204, 207, 299])
+def test_2xx_status_is_success(code: int) -> None:
+    assert code in Success_codes
+
+
+def test_set_as_default_for_users_result_without_user_or_error_details(server: TSC.Server) -> None:
+    body = (
+        '<tsResponse xmlns="http://tableau.com/api"><customViewAsUserDefaultResults>'
+        '<customViewAsUserDefaultViewResult success="false" />'
+        "</customViewAsUserDefaultResults></tsResponse>"
+    )
+    with requests_mock.mock() as m:
+        m.post(f"{server.custom_views.baseurl}/{VIEW_ID}/default/users", text=body, status_code=207)
+        results = server.custom_views.set_as_default_for_users(VIEW_ID, [USER_A])
+        with pytest.raises(TSC.DefaultViewAssignmentError) as excinfo:
+            server.custom_views.set_as_default_for_users(VIEW_ID, [USER_A], strict=True)
+
+    assert [(None, False, None, None)] == [(r.user_id, r.success, r.error_code, r.summary) for r in results]
+    assert "unknown user: no error details" in str(excinfo.value)
+    assert "None" not in str(excinfo.value)
+
+
+def test_set_as_default_for_users_success_missing_attribute_is_failure(server: TSC.Server) -> None:
+    body = (
+        '<tsResponse xmlns="http://tableau.com/api"><customViewAsUserDefaultResults>'
+        f'<customViewAsUserDefaultViewResult><user id="{USER_A}" /></customViewAsUserDefaultViewResult>'
+        "</customViewAsUserDefaultResults></tsResponse>"
+    )
+    with requests_mock.mock() as m:
+        m.post(f"{server.custom_views.baseurl}/{VIEW_ID}/default/users", text=body, status_code=207)
+        results = server.custom_views.set_as_default_for_users(VIEW_ID, [USER_A])
+
+    assert [(USER_A, False)] == [(r.user_id, r.success) for r in results]
+
+
+def test_set_as_default_for_users_empty_results_warns(server: TSC.Server, caplog: pytest.LogCaptureFixture) -> None:
+    body = '<tsResponse xmlns="http://tableau.com/api"><customViewAsUserDefaultResults /></tsResponse>'
+    with requests_mock.mock() as m:
+        m.post(f"{server.custom_views.baseurl}/{VIEW_ID}/default/users", text=body, status_code=207)
+        with caplog.at_level("WARNING"):
+            results = server.custom_views.set_as_default_for_users(VIEW_ID, [USER_A, USER_B])
+
+    assert [] == results
+    assert "server reported 0 result(s)" in caplog.text
+
+
+def test_set_as_default_for_users_forbidden_raises_server_error(server: TSC.Server) -> None:
+    error_xml = (
+        '<tsResponse xmlns="http://tableau.com/api"><error code="403162">'
+        "<summary>Forbidden</summary><detail>Not an administrator.</detail></error></tsResponse>"
+    )
+    with requests_mock.mock() as m:
+        m.post(f"{server.custom_views.baseurl}/{VIEW_ID}/default/users", text=error_xml, status_code=403)
+        with pytest.raises(TSC.ServerResponseError):
+            server.custom_views.set_as_default_for_users(VIEW_ID, [USER_A])
+
+
+def test_set_as_default_for_users_validates_input(server: TSC.Server) -> None:
+    with requests_mock.mock() as m:
+        with pytest.raises(TSC.MissingRequiredFieldError):
+            server.custom_views.set_as_default_for_users("", [USER_A])
+        with pytest.raises(ValueError):
+            server.custom_views.set_as_default_for_users(VIEW_ID, [])
+        with pytest.raises(ValueError):
+            server.custom_views.set_as_default_for_users(VIEW_ID, [f"user-{i}" for i in range(101)])
+        with pytest.raises(ValueError):
+            server.custom_views.set_as_default_for_users(VIEW_ID, [TSC.UserItem()])
+        with pytest.raises(TypeError):
+            server.custom_views.set_as_default_for_users(VIEW_ID, USER_A)
+        assert m.call_count == 0
+
+
+def test_set_as_default_for_users_allows_100_users(server: TSC.Server) -> None:
+    with requests_mock.mock() as m:
+        m.post(
+            f"{server.custom_views.baseurl}/{VIEW_ID}/default/users",
+            text=SET_AS_DEFAULT_FOR_USERS_XML.read_text(),
+            status_code=207,
+        )
+        server.custom_views.set_as_default_for_users(VIEW_ID, [f"user-{i}" for i in range(100)])
+
+        assert m.call_count == 1
+
+
+def test_set_as_default_for_users_unavailable_before_3_21(server: TSC.Server) -> None:
+    server.version = "3.20"
+    with requests_mock.mock() as m:
+        with pytest.raises(TSC.server.exceptions.EndpointUnavailableError):
+            server.custom_views.set_as_default_for_users(VIEW_ID, [USER_A])
+        assert m.call_count == 0

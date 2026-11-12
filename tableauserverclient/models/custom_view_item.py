@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from datetime import datetime
 
 from defusedxml import ElementTree
@@ -10,6 +11,49 @@ from tableauserverclient.models.user_item import UserItem
 from tableauserverclient.models.view_item import ViewItem
 from tableauserverclient.models.workbook_item import WorkbookItem
 from tableauserverclient.datetime_helpers import parse_datetime
+
+
+@dataclass(frozen=True)
+class UserDefaultViewAssignment:
+    """
+    The outcome for one user from CustomViews.set_as_default_for_users.
+
+    Attributes
+    ----------
+    user_id : str | None
+        The ID of the user.
+
+    success : bool
+        Whether the custom view was set as the user's default.
+
+    error_code : str | None
+        The REST API error code, when success is False.
+
+    summary : str | None
+        The server's description of the failure, when success is False.
+    """
+
+    user_id: str | None
+    success: bool
+    error_code: str | None = None
+    summary: str | None = None
+
+    @classmethod
+    def list_from_response(cls, resp, ns) -> list["UserDefaultViewAssignment"]:
+        results = []
+        for result_xml in fromstring(resp).findall(".//t:customViewAsUserDefaultViewResult", namespaces=ns):
+            user_xml = result_xml.find("t:user", namespaces=ns)
+            error_xml = result_xml.find("t:error", namespaces=ns)
+            summary_xml = error_xml.find("t:summary", namespaces=ns) if error_xml is not None else None
+            results.append(
+                cls(
+                    user_id=user_xml.get("id") if user_xml is not None else None,
+                    success=result_xml.get("success", "").lower() == "true",
+                    error_code=error_xml.get("code") if error_xml is not None else None,
+                    summary=summary_xml.text if summary_xml is not None else None,
+                )
+            )
+        return results
 
 
 class CustomViewItem:

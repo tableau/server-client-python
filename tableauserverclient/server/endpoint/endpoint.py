@@ -46,7 +46,9 @@ if TYPE_CHECKING:
     from requests import Response
 
 
-Success_codes = [200, 201, 202, 204]
+# Any 2xx is a success. Some calls use less common codes, for example 207 from Set Custom View as
+# Default for Users, which reports success per user in the body.
+Success_codes = range(200, 300)
 
 # 301/302/303/307/308 all indicate the caller should re-request at a new URL.
 # `requests`' default handler converts POST -> GET on 301/302/303, which drops

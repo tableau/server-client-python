@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tableau.com/api http://tableau.com/api/ts-api-3.21.xsd">
+    <customViewAsUserDefaultResults>
+        <customViewAsUserDefaultViewResult success="true">
+            <user id="5c9a81df-7ec0-4752-a057-82cd2bb22c44" />
+        </customViewAsUserDefaultViewResult>
+        <customViewAsUserDefaultViewResult success="true">
+            <user id="2a1d5dd2-6a64-4c3b-a4a9-2e5a8f8f0d11" />
+        </customViewAsUserDefaultViewResult>
+    </customViewAsUserDefaultResults>
+</tsResponse>

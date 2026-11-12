@@ -71,6 +71,30 @@ class MissingRequiredFieldError(TableauError):
     pass
 
 
+class DefaultViewAssignmentError(TableauError):
+    """
+    Raised by CustomViews.set_as_default_for_users(strict=True) when the server could not set the
+    custom view as the default for one or more users. The server applies each user
+    independently, so users not listed in `failures` have already been updated.
+
+    Attributes
+    ----------
+    failures : list[UserDefaultViewAssignment]
+        The per-user results that were not successful.
+    """
+
+    def __init__(self, failures: list) -> None:
+        self.failures = failures
+        super().__init__(str(self))
+
+    def __str__(self):
+        lines = [
+            f"\t{f.user_id or 'unknown user'}: {' '.join(part for part in (f.error_code, f.summary) if part) or 'no error details'}"
+            for f in self.failures
+        ]
+        return "\n\nCould not set the custom view as default for {} user(s):\n{}".format(len(lines), "\n".join(lines))
+
+
 class NotSignedInError(TableauError):
     pass
 
