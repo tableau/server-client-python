@@ -1,9 +1,11 @@
 from pathlib import Path
+from xml.etree import ElementTree as ET
 
 import pytest
 import requests_mock
 
 import tableauserverclient as TSC
+from tableauserverclient.server.request_factory import RequestFactory
 
 TEST_ASSET_DIR = Path(__file__).parent / "assets"
 
@@ -63,3 +65,43 @@ def test_delete(server: TSC.Server) -> None:
     with requests_mock.mock() as m:
         m.delete(server.tables.baseurl + "/0448d2ed-590d-4fa0-b272-a2a8a24555b5", status_code=204)
         server.tables.delete("0448d2ed-590d-4fa0-b272-a2a8a24555b5")
+
+
+def test_update_req_omits_unset_fields() -> None:
+    item = TSC.TableItem("test")
+    xml = ET.fromstring(RequestFactory.Table.update_req(item))
+    assert xml.findall("table")[0].attrib == {}
+
+
+def test_update_req_sends_set_fields() -> None:
+    item = TSC.TableItem("test")
+    item.certified = False
+    item.certification_note = "note"
+    item.description = "desc"
+    attrib = ET.fromstring(RequestFactory.Table.update_req(item)).findall("table")[0].attrib
+    assert attrib["isCertified"] == "false"
+    assert attrib["certificationNote"] == "note"
+    assert attrib["description"] == "desc"
+
+
+def test_update_req_empty_strings_clear_fields() -> None:
+    item = TSC.TableItem("test")
+    item.certification_note = ""
+    item.description = ""
+    attrib = ET.fromstring(RequestFactory.Table.update_req(item)).findall("table")[0].attrib
+    assert attrib == {"certificationNote": "", "description": ""}
+
+
+def test_update_tags_not_supported(server) -> None:
+    server.version = "3.9"
+    item = TSC.TableItem("test")
+    item._id = "10224773-ecee-42ac-b822-d786b0b8e4d9"
+    with pytest.raises(NotImplementedError, match="add_tags and delete_tags"):
+        server.tables.update_tags(item)
+
+
+def test_update_tags_checks_version(server) -> None:
+    server.version = "3.5"
+    item = TSC.TableItem("test")
+    with pytest.raises(TSC.server.exceptions.EndpointUnavailableError):
+        server.tables.update_tags(item)
