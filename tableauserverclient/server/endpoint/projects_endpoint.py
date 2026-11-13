@@ -164,7 +164,9 @@ class Projects(QuerysetEndpoint[ProjectItem]):
     def get_by_id(self, project_id: str) -> ProjectItem:
         """
         Fetch a project by ID. This is a convenience method making up for a gap in the server API.
-        It uses the same endpoint as the update method, but without the ability to update the project.
+        It sends the same request as the update method with no project details set, so it does not
+        update the project. The request requires permission to update the project, so a user without
+        that permission gets an error.
         """
         if not project_id:
             error = "Project ID undefined."
