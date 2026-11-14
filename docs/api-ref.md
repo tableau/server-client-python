@@ -2490,7 +2490,7 @@ Name | Description
 `port` | The port of the database server, as an integer. Read-only.
 `provider` | The provider of the database. Read-only.
 `request_url` | The request URL of the database. Read-only.
-`tables` | The tables in the database. The tables are not available through `databases.populate_tables`, which is not supported (see [databases.populate_tables](#databasespopulate_tables)). Accessing this property raises `UnpopulatedPropertyError`.
+`tables` | The tables in the database. Reserved for `databases.populate_tables`, which is not currently enabled (see [databases.populate_tables](#databasespopulate_tables)). Accessing it raises `UnpopulatedPropertyError`.
 
 **Example**
 
@@ -2685,7 +2685,7 @@ database = server.databases.update(database)
 databases.populate_tables(database_item)
 ```
 
-This method is not supported. Calling it always raises `NotImplementedError`, because the REST API does not have an endpoint that lists the tables in a database.
+This method is not currently enabled. It is gated on a placeholder minimum version (`99`), so calling it raises `EndpointUnavailableError` on every Tableau Server and Tableau Cloud version. The REST API reference does not document an endpoint that lists the tables in a database.
 
 To find the tables in a database, query the Metadata API with [metadata.query](#metadataquery) and read the matching tables with `tables.get_by_id`. The `explore_databases_tables.py` sample shows this approach.
 
@@ -2905,10 +2905,10 @@ server.databases.update_table_default_permissions(database, [rule])
 #### databases.delete_table_default_permissions
 
 ```py
-databases.delete_table_default_permissions(item, rule)
+databases.delete_table_default_permissions(rule, item)
 ```
 
-Removes a default table permission rule from the specified database. Every capability in `rule.capabilities` is removed for `rule.grantee` with a separate request. Passing the arguments in the order `(rule, item)` still works but emits a `DeprecationWarning`.
+Removes a default table permission rule from the specified database. Every capability in `rule.capabilities` is removed for `rule.grantee` with a separate request. Note that this method takes the rule first and the database second, which is the reverse of the other permission methods.
 
 REST API: [Delete Default Database Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#delete_database_perms_default){:target="_blank"}
 
@@ -2920,8 +2920,8 @@ This endpoint is available with REST API version 3.5 and up.
 
 Name | Description
 :--- | :---
-`item` | The `DatabaseItem` to remove the default table permission from.
 `rule` | A single `PermissionsRule` to remove.
+`item` | The `DatabaseItem` to remove the default table permission from.
 
 **Returns**
 
@@ -2932,7 +2932,7 @@ None.
 ```py
 server.databases.populate_table_default_permissions(database)
 rule = database.default_table_permissions[0]
-server.databases.delete_table_default_permissions(database, rule)
+server.databases.delete_table_default_permissions(rule, database)
 ```
 
 <br>
