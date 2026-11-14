@@ -18,6 +18,7 @@ from tableauserverclient.server.endpoint import (
     Workbooks,
     Datasources,
     Projects,
+    RecycleBin,
     Auth,
     AuthFederation,
     Schedules,
@@ -235,6 +236,7 @@ class Server:
         self.oidc = OIDC(self)
         self.auth_federation = AuthFederation(self)
         self.extensions = Extensions(self)
+        self.recycle_bin = RecycleBin(self)
 
         self._http_options = dict()  # must set this before making a server call
         if http_options:

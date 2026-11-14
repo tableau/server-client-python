@@ -21,6 +21,7 @@ from tableauserverclient.server.endpoint.metadata_endpoint import Metadata
 from tableauserverclient.server.endpoint.metrics_endpoint import Metrics
 from tableauserverclient.server.endpoint.oidc_endpoint import OIDC
 from tableauserverclient.server.endpoint.projects_endpoint import Projects
+from tableauserverclient.server.endpoint.recycle_bin_endpoint import RecycleBin
 from tableauserverclient.server.endpoint.schedules_endpoint import Schedules
 from tableauserverclient.server.endpoint.server_info_endpoint import ServerInfo
 from tableauserverclient.server.endpoint.sites_endpoint import Sites
@@ -60,6 +61,7 @@ __all__ = [
     "Metrics",
     "OIDC",
     "Projects",
+    "RecycleBin",
     "Schedules",
     "ServerInfo",
     "ServerResponseError",
