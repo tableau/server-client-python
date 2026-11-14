@@ -8087,7 +8087,7 @@ The `UserItem` class contains the members or attributes for the view resources o
 
 Name | Description
 :--- | :---
-`auth_setting` | This is a required attribute and is only for Tableau Cloud. The new authentication type for the user - see **User Auth** below for values.
+`auth_setting` | Optional. The authentication type for the user - see **User Auth** below for values. If it is not set, TSC leaves `authSetting` out of the request and the server applies its default. Set only one of `auth_setting` or `idp_configuration_id`. If both are set, adding/updating the user will fail on sites with multiple-IdP support. Other sites will have indeterminate results depending on the IdP configuration.
 `domain_name`  |    On Tableau Server, the domain of the user: the name of the Active Directory domain, or `local` if the user uses local authentication. On Tableau Cloud, the authentication type of the user. `users.get` and `users.get_by_id` populate it. It is read-only, so a `UserItem` that you create yourself has no domain; include the domain in the `name` instead.
 `external_auth_user_id` |   Represents ID stored in Tableau's single sign-on (SSO) system. The `externalAuthUserId` value is returned for Tableau Cloud. For other server configurations, this field contains null.
 `id` |   The id of the user on the site.
@@ -8160,7 +8160,7 @@ users.add(user_item)
 
 Adds the user to the site.
 
-To add a new user to the site you need to first create a new `user_item` (from `UserItem` class). When you create a new user, you specify the name of the user and their site role. For Tableau Cloud, you also specify the `auth_setting` attribute in your request.  When you add user to Tableau Cloud, the name of the user must be the email address that is used to sign in to Tableau Cloud. After you add a user, Tableau Cloud sends the user an email invitation. The user can click the link in the invitation to sign in and update their full name and password.
+To add a new user to the site you need to first create a new `user_item` (from `UserItem` class). When you create a new user, you specify the name of the user and their site role. For Tableau Cloud, you can also specify the `auth_setting` attribute in your request.  When you add user to Tableau Cloud, the name of the user must be the email address that is used to sign in to Tableau Cloud. After you add a user, Tableau Cloud sends the user an email invitation. The user can click the link in the invitation to sign in and update their full name and password.
 
 REST API: [Add User to Site](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#add_user_to_site)
 
@@ -8219,7 +8219,7 @@ This endpoint is available with REST API version **3.27** and up.
 * `name` **required**. If using Active Directory and the username isn’t unique across domains, include the domain-qualified form (for example `example\\Adam` or `adam@example.com`). 
 * `fullname` is used as the user’s display name (TSC reads the display name from `fullname`).
 * `email` optional, but if provided it must be a valid email address; it is included in the REST payload as `email`. 
-* `auth_setting` optional. If not provided and `idp_configuration_id` is `None`, the default is `ServerDefault`. (REST supports `authSetting` and `idpConfigurationId` as user creation attributes.) 
+* `auth_setting` optional. If not provided, TSC does not send `authSetting`. If `idp_configuration_id` is also `None`, the default is `ServerDefault`. (REST supports `authSetting` and `idpConfigurationId` as user creation attributes.) 
 * `site_role` optional. If not provided, defaults to `Unlicensed`.
 * `password` optional and only used when the server is using **local authentication**; do not provide a password for other auth types.
 * Admin level and publishing capability are inferred from `site_role`.
