@@ -2700,7 +2700,9 @@ query tablesInDatabase($luid: String) {
 }
 """
 result = server.metadata.query(query, {'luid': database.id})
-for table_ref in result['data']['databases'][0]['tables']:
+databases = result['data']['databases']
+tables = (databases[0]['tables'] if databases else None) or []
+for table_ref in tables:
     table = server.tables.get_by_id(table_ref['luid'])
     print(table.name)
 ```
