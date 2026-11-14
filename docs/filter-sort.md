@@ -10,13 +10,23 @@ then pass the object to your endpoint as a parameter.
 
 ## Available endpoints and fields
 
-You can use the TSC library to filter and sort the results of any endpoint whose `get`
-method accepts a `RequestOptions` object, and the endpoints that support the `.filter()` and
-`.order_by()` shorthand: custom views, data sources, flow runs, flows, groups, group sets,
-jobs, linked tasks, metrics, projects, users, views, virtual connections, and workbooks.
+You can use the TSC library to filter and sort the following endpoints:
 
-The fields you can filter or sort on are the members of `RequestOptions.Field`, for example
-`CreatedAt`, `LastLogin`, `Name`, `OwnerName`, `SiteRole`, `Tags`, and `UpdatedAt`.
+* Users
+* Datasources
+* Workbooks
+* Views
+
+For the above endpoints, you can filter or sort on the following
+fields:
+
+* CreatedAt
+* LastLogin
+* Name
+* OwnerName
+* SiteRole
+* Tags
+* UpdatedAt
 
 **Important**: Not all of the fields are available for all endpoints. For more information, see the [REST
 API help](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_filtering_and_sorting.htm).
@@ -42,37 +52,25 @@ The operator can be any of the following:
 * Has
 * CaseInsensitiveEquals
 
-Not every operator is supported on every field. In particular, the REST API supports
-`Has` (substring search) only for jobs, and `CaseInsensitiveEquals` only on user name,
-group name, and group set name. See the per-endpoint field tables in the [REST
+Not every operator is supported on every field. See the per-endpoint field tables in the [REST
 API help](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_filtering_and_sorting.htm).
 
 ### Value criteria
 
-The value that you want to filter on. This can be any valid string. Field names and operator
-names are case-sensitive. Whether a value is case-sensitive depends on the field. In testing,
-`Equals` on the name of a workbook, data source, project, or user, and on a workbook's content
-URL, ignored case. `Equals` on a group name was case-sensitive on Tableau Server. Where the
-field supports it, use `CaseInsensitiveEquals` to ignore case regardless.
-
-Pass values as plain strings. For REST API version 3.7 and later, TSC URL-encodes the
-query string for you, so do not percent-encode values yourself.
+The value that you want to filter on. This can be any valid string.
 
 ### Special characters in filter values
 
 The REST API does not accept a comma (`,`) in a filter value, because it uses commas to
-separate expressions. This is true even if the comma is URL-encoded, and putting a backslash
-in front of it does not escape it. A filter value that contains a comma fails with a
-`400065: Bad Request` error:
+separate expressions. A filter value that contains a comma fails with a `400065` error.
+Percent-encoding the comma or putting a backslash in front of it does not help.
 
 ```py
 # Fails: the workbook name contains a comma
 workbooks = server.workbooks.filter(name="Sales, Q1 & Q2")
 ```
 
-From REST API 3.7, an ampersand (`&`) works when you use TSC, because TSC URL-encodes the query
-string. On earlier versions, or if you build the request yourself, encode the ampersand as `%26`:
-a literal `&` ends the `filter` parameter and the server sees a truncated filter.
+An ampersand (`&`) in a name is matched as typed.
 
 To find an item whose name contains a comma, replace the comma with an asterisk (`*`). The
 asterisk acts as a wildcard, so the following filter finds the workbook named
@@ -83,7 +81,7 @@ for workbook in server.workbooks.filter(name="Sales* Q1 & Q2"):
     print(workbook.name, workbook.id)
 ```
 
-Because a wildcard matches any character, the filter can return more than one item. Check
+Because `*` matches any run of characters, the filter can return more than one item. Check
 the results on the client side if you need an exact match:
 
 ```py
@@ -96,50 +94,10 @@ This works because `Equals` treats `*` as a wildcard (see [Wildcard searches](#w
 
 ### Wildcard searches
 
-The REST API supports wildcard searches (starts with, ends with, and contains) starting in
-Tableau Cloud May 2023 and Tableau Server 2022.1.14. The REST API documents these searches
-through its `like` operator, and only on selected name fields: user name, user
-friendlyName, group name, and group set name. Other fields support exact matches only.
-
-In practice, `*` also acts as a wildcard in the value of an `Equals` filter on other name
-fields, at the start, end, or middle of the value. In testing this worked for workbook names on
-Tableau Cloud and for project names on a Tableau Server that supports REST API 3.31. For example,
-`server.workbooks.filter(name="Sales*")` returns workbooks whose names start with `Sales`,
-`name="*2026"` returns names that end with `2026`, and `name="*Q1 *"` returns names that contain
-`Q1 `. The match ignores letter case where `Equals` does. The REST API
-documentation does not describe this behavior or say which versions support it, so confirm it on
-your Tableau Server version and field before you rely on it. The
-`like` operator is rejected on workbook names (`400 Bad Request`), as are `CaseInsensitiveEquals`
-and `Has`.
-
-For example, to search for the string `marketing-example`, the REST API documentation
-gives the following filter expressions:
-
-| Search | REST API filter expression |
-| --- | --- |
-| Starts with | `name:like:mark*` |
-| Ends with | `name:like:*-ample` |
-| Contains | `name:like:mark*ex*` |
-
-TSC does not define a `RequestOptions.Operator` value for `like`, and there are no
-`contains`, `startswith`, or `endswith` operators. A Django style filter such as
-`name__like="mark*"` raises a `ValueError`.
-
-### View filters follow different rules
-
-The rules above apply to the `filter` query parameter that `RequestOptions.filter` and the
-Django style filters build. View filters that you set with `vf()` on export options such as
-`CSVRequestOptions` or `PDFRequestOptions` are sent as `vf_<column>=<value>` parameters, and
-the server reads their values differently:
-
-- A comma separates alternatives, so `vf("Region", "East,West")` matches `East` or `West`.
-  To match a literal comma, escape it with a backslash: `vf("Name", "Rock\\, Paper")`.
-- `*` and `%` are literal characters, not wildcards.
-- Ampersands and other characters are passed through as data. TSC URL-encodes the value, so
-  `vf("Client", "Smith & Sons")` sends the ampersand intact.
-
-For the server-side rules, see [Filter query views](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_filtering_and_sorting.htm#Filter-query-views)
-in the REST API documentation.
+In a filter value, `*` matches any run of characters, including none. For example,
+`server.workbooks.filter(name="Sales*")` returns workbooks whose names start with `Sales`. This
+was tested for workbook names on Tableau Cloud. Confirm the behavior on your Tableau Server
+version before you rely on it for other fields.
 
 ### Filtering example - RequestOptions
 
@@ -154,25 +112,6 @@ matching_workbooks, pagination_item = server.workbooks.get(req_option)
 
 print(matching_workbooks[0].owner_id)
 ```
-
-### Matching one of several values
-
-The `In` operator matches items whose field equals any value in a list:
-
-```py
-req_option = TSC.RequestOptions()
-req_option.filter.add(TSC.Filter(TSC.RequestOptions.Field.Name,
-                                 TSC.RequestOptions.Operator.In,
-                                 ['Superstore', 'Sales Dashboard']))
-matching_workbooks, pagination_item = server.workbooks.get(req_option)
-```
-
-Names that contain spaces or ampersands work in a list. The server separates the entries with
-commas, so a value that contains a comma is split into separate entries and does not match
-the item it names. The request does not fail. See
-[Special characters in filter values](#special-characters-in-filter-values).
-
-The Django style equivalent is `server.workbooks.filter(name__in=['Superstore', 'Sales Dashboard'])`.
 
 ## Sorting
 
