@@ -679,7 +679,7 @@ Name   |  Description
 `username`     | The username for the connection (see ConnectionCredentials).
 `password`  |  The password used for the connection (see ConnectionCredentials).
 `embed_password`  |  (Boolean) Determines whether to embed the password (`True`) for the workbook or data source connection or not (`False`) (see ConnectionCredentials).
-`server_address`   |  The server address for the connection (host name for the Tableau Server).
+`server_address`   |  The server address for the connection (host name of the data source server). When publishing a workbook, this identifies which embedded connection the credentials apply to and does not change it; use `workbooks.update_connection` to change it after publishing.
 `server_port`   |  The port used for the connection.
 `connection_credentials` | The Connection Credentials object containing authentication details for the connection. Replaces username/password/embed_password when publishing a flow, document or workbook file in the request body.
 `workgroup_auth_mode` | (Optional) The Workload Identity Federation (WIF) auth mode for the connection. Set to one of the values on the `ConnectionItem.WorkgroupAuthMode` nested value set: `WIF` (`"workload-identity-federation"`, e.g. Snowflake direct WIF) or `WIF_IMPERSONATION` (`"workload-identity-federation-impersonation"`, e.g. Google BigQuery impersonation WIF). Requires REST API 3.30+ (Tableau Server release 26.3) with WIF configured on the site. Older servers silently ignore the attribute.
@@ -10386,7 +10386,7 @@ print(workbook.name)
 #### workbooks.publish
 
 ```py
-workbooks.publish(workbook_item, file_path, publish_mode, connections, skip_connection_check, as_job)
+workbooks.publish(workbook_item, file, mode, connections=None, as_job=False, skip_connection_check=False, parameters=None)
 ```
 
 Publish a workbook to the specified site.
@@ -10407,11 +10407,13 @@ REST API: [Publish Workbook](https://help.tableau.com/current/api/rest_api/en-us
 Name | Description
 :--- | :---
 `workbook_item`  |  The `workbook_item` specifies the workbook you are publishing. When you are adding a workbook, you need to first create a new instance of a `workbook_item` that includes a `project_id` of an existing project. The name of the workbook will be the name of the file, unless you also specify a name for the new workbook when you create the instance. See [WorkbookItem](#workbookitem-class).
-`file`  |  The file path or file object of the workbook to publish. When providing a file object, you must also specifiy the name of the workbook in your instance of the `workbook_item``workbook_item` , as the name cannot be derived from the file name.
+`file`  |  The file path or file object of the workbook to publish. When providing a file object, you must also specifiy the name of the workbook in your instance of the `workbook_item`, as the name cannot be derived from the file name.
 `mode`     |  Specifies whether you are publishing a new workbook (`CreateNew`) or overwriting an existing workbook (`Overwrite`).  You cannot appending workbooks.  You can also use the publish mode attributes, for example: `TSC.Server.PublishMode.Overwrite`.
-`connections` | List of `ConnectionItems` objects for the connections created within the workbook.
+`connections` | List of `ConnectionItems` objects that supply credentials for the connections embedded in the workbook. The `server_address` of each item is used to find the matching connection in the workbook file; it does not change the connection's server address. See the note below.
 `skip_connection_check` | (Optional) Set to `True` to skip connection check at time of upload. Publishing will succeed but unchecked connection issues may result in a non-functioning workbook. Defaults to `False`.
 `as_job` | (Optional) Set to `True` to run the upload as a job (asynchronous upload). If set to `True` a job will start to perform the publishing process and a `Job` object is returned. Defaults to `False`.
+
+**Note:** When you publish, the `server_address` of each `ConnectionItem` in `connections` identifies which connection embedded in the workbook file the credentials belong to. It does not change the server address of that connection; the workbook is published with the server address saved in the file. If `server_address` does not match a connection in the file, the credentials are not applied. To point an embedded connection at a different server, publish the workbook first and then call [workbooks.update_connection](#workbooksupdate_connection). See the second example below.
 
 
 
@@ -10446,6 +10448,25 @@ with server.auth.sign_in(tableau_auth):
     wb_item.hidden_views = ['Sheet1', 'Sheet2']
     # call the publish method with the workbook item
     wb_item = server.workbooks.publish(wb_item, 'SampleWB.twbx', 'Overwrite')
+```
+
+**Example: publish, then change the server address of an embedded connection**
+
+```py
+with server.auth.sign_in(tableau_auth):
+    wb_item = TSC.WorkbookItem(name='Sample', project_id='1f2f3e4e-5d6d-7c8c-9b0b-1a2a3f4f5e6e')
+
+    # server_address must match the server address saved in the workbook file
+    connection = TSC.ConnectionItem()
+    connection.server_address = 'dev-db.example.com'
+    connection.connection_credentials = TSC.ConnectionCredentials('db_user', 'db_password', embed=True)
+    wb_item = server.workbooks.publish(wb_item, 'SampleWB.twbx', 'CreateNew', connections=[connection])
+
+    # point the published connection at a different server
+    server.workbooks.populate_connections(wb_item)
+    conn = next(c for c in wb_item.connections if c.server_address == 'dev-db.example.com')
+    conn.server_address = 'prod-db.example.com'
+    server.workbooks.update_connection(wb_item, conn)
 ```
 
 <br>
@@ -10853,7 +10874,7 @@ Name | Description
 
 **Returns**
 
-None. The connection information is updated with the information in the `ConnectionItem`.
+The updated `ConnectionItem`. The connection information on the server is updated with the information in the `ConnectionItem` you passed in.
 
 
 
