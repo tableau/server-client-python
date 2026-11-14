@@ -10237,14 +10237,14 @@ The workbook resources for Tableau are defined in the `WorkbookItem` class. The 
 
 Name  |  Description
 :--- | :---
-`connections` |  The list of data connections (`ConnectionItem`) for the data sources used by the workbook. You must first call the [workbooks.populate_connections](#workbooks.populate_connections) method to access this data. See the [ConnectionItem class](#connectionitem-class).
+`connections` |  The list of data connections (`ConnectionItem`) for the data sources used by the workbook. You must first call the [workbooks.populate_connections](#workbookspopulate_connections) method to access this data. See the [ConnectionItem class](#connectionitem-class).
 `content_url` |  The name of the data source as it would appear in a URL.
 `created_at` |  The date and time when the data source was created.
 `description` | The user-defined description of the workbook
 `id` |  The identifier for the workbook. You need this value to query a specific workbook or to delete a workbook with the `get_by_id` and `delete` methods.
 `name` | The name of the workbook.
 `owner_id` | The ID of the owner.
-`preview_image`  | The thumbnail image for the view. You must first call the [workbooks.populate_preview_image](#workbooks.populate_preview_image) method to access this data.
+`preview_image`  | The thumbnail image for the view. You must first call the [workbooks.populate_preview_image](#workbookspopulate_preview_image) method to access this data.
 `project_id`  | The project id.
 `project_name` | The name of the project.
 `size` | The size of the workbook (in megabytes).
@@ -10252,7 +10252,7 @@ Name  |  Description
 `hidden_views` | (Optional) List of string names of views that need to be hidden when the workbook is published.
 `tags` |  The tags that have been added to the workbook.
 `updated_at` |  The date and time when the workbook was last updated.
-`views`   | The list of views (`ViewItem`) for the workbook. You must first call the [workbooks.populate_views](#workbooks.populate_views) method to access this data. See the [ViewItem class](#viewitem-class).
+`views`   | The list of views (`ViewItem`) for the workbook. You must first call the [workbooks.populate_views](#workbookspopulate_views) method to access this data. See the [ViewItem class](#viewitem-class).
 `webpage_url` | The full URL of the workbook.
 
 
@@ -10838,7 +10838,7 @@ workbooks.update_connection(workbook_item, connection_item)
 
 Updates a workbook connection information (server address, server port, user name, and password).
 
-The workbook connections must be populated before the strings can be updated. See [workbooks.populate_connections](#workbooks.populate_connections)
+The workbook connections must be populated before the strings can be updated. See [workbooks.populate_connections](#workbookspopulate_connections)
 
 REST API:  [Update Workbook Connection](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#update_workbook_connection)
 
