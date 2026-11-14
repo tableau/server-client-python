@@ -8087,7 +8087,7 @@ The `UserItem` class contains the members or attributes for the view resources o
 
 Name | Description
 :--- | :---
-`auth_setting` | Optional. The authentication type for the user - see **User Auth** below for values. If it is not set, TSC leaves `authSetting` out of the request and the server applies its default. Use `idp_configuration_id` or `auth_setting`, but not both.
+`auth_setting` | Optional. The authentication type for the user - see **User Auth** below for values. If it is not set, TSC leaves `authSetting` out of the request and the server applies its default. Set only one of `auth_setting` or `idp_configuration_id`. If both are set, adding/updating the user will fail on sites with multiple-IdP support. Other sites will have indeterminate results depending on the IdP configuration.
 `domain_name`  |    The name of the site.
 `external_auth_user_id` |   Represents ID stored in Tableau's single sign-on (SSO) system. The `externalAuthUserId` value is returned for Tableau Cloud. For other server configurations, this field contains null.
 `id` |   The id of the user on the site.
