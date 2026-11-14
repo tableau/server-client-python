@@ -1966,7 +1966,7 @@ datasources.delete_dqw(datasource_item)
 
 Removes all data quality warnings from the specified data source.
 
-REST API: [Delete Quality Warning Triggers by Content](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#delete_dqw_triggers)
+REST API: [Delete Data Quality Warning by Content](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#delete_dqws)
 
 **Parameters**
 
@@ -2447,6 +2447,742 @@ for ds in certified_ds:
 
 
 ---
+
+## Databases
+
+Using the TSC library, you can get information about the database assets on a site, update a database's description, certification, and contact, and manage its permissions, data quality warnings, and tags. Database assets are external assets that Tableau Catalog discovers from the connections used by published content. The database resources are defined in the `DatabaseItem` class, and the methods are based upon the database endpoints in the REST API.
+
+Database and table methods are available if your Tableau Cloud site or Tableau Server is licensed with Data Management. See the [Metadata Methods](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm){:target="_blank"} in the REST API reference.
+
+<br>
+
+### DatabaseItem class
+
+```py
+DatabaseItem(name, description=None, content_permissions=None)
+```
+
+The `DatabaseItem` represents a database asset on Tableau Server or Tableau Cloud. Database items are normally returned by the server from `databases.get` or `databases.get_by_id` rather than created directly.
+
+**Attributes**
+
+Name | Description
+:--- | :---
+`certification_note` | The certification note for the database. Settable; sent to the server by `databases.update`.
+`certified` | `True` if the database is certified. Settable (must be a boolean); sent to the server by `databases.update`.
+`connection_type` | The connection type of the database, for example `sqlserver` or `hyper`. Read-only.
+`connector_url` | The connector URL of the database. Read-only.
+`contact_id` | The ID of the user who is the contact for the database. Settable; sent to the server by `databases.update`.
+`content_permissions` | The permission mode of the database, as returned by the server. `databases.update` does not send this value.
+`default_table_permissions` | The default permissions for tables in the database, as a list of `PermissionsRule` objects. You must first call `databases.populate_table_default_permissions` to access this data.
+`description` | The description of the database. Settable; sent to the server by `databases.update` when it is not empty.
+`dqws` | The list of data quality warnings (`DQWItem`) for the database. You must first call `databases.populate_dqw` to access this data.
+`embedded` | `True` if the database is embedded in Tableau content. Read-only.
+`file_extension` | The file extension, for file-based databases. Read-only.
+`file_id` | The file ID, for file-based databases. Read-only.
+`file_path` | The file path, for file-based databases. Read-only.
+`host_name` | The host name of the database server. Read-only.
+`id` | The identifier (LUID) of the database. Read-only.
+`metadata_type` | The asset type of the database, from the `type` attribute in the server response. Read-only.
+`mime_type` | The MIME type, for file-based databases. Read-only.
+`name` | The name of the database. Must not be empty. `databases.update` does not send the name to the server.
+`permissions` | The permissions for the database, as a list of `PermissionsRule` objects. You must first call `databases.populate_permissions` to access this data.
+`port` | The port of the database server, as an integer. Read-only.
+`provider` | The provider of the database. Read-only.
+`request_url` | The request URL of the database. Read-only.
+`tables` | The tables in the database. Reserved for `databases.populate_tables`, which is not currently enabled (see [databases.populate_tables](#databasespopulate_tables)). Accessing it raises `UnpopulatedPropertyError`.
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+
+# sign in, etc.
+
+database = server.databases.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+print(database.name, database.connection_type, database.host_name, database.port)
+```
+
+Source file: models/database_item.py
+
+<br>
+<br>
+
+### Databases methods
+
+The Tableau Server Client provides several methods for interacting with database assets. These methods correspond to endpoints in the Tableau Server REST API.
+
+Source file: server/endpoint/databases_endpoint.py
+
+<br>
+<br>
+
+#### databases.get
+
+```py
+databases.get(req_options=None)
+```
+
+Returns one page of the database assets on the site. The server returns 100 items per page by default. To iterate over every database on the site, use `TSC.Pager(server.databases)`.
+
+REST API: [Query Databases](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#query_databases){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`req_options` | (Optional) A `RequestOptions` object to set the page size and page number of the request.
+
+**Returns**
+
+Returns a list of `DatabaseItem` objects and a `PaginationItem` object.
+
+**Example**
+
+```py
+all_databases, pagination_item = server.databases.get()
+print("There are {} databases on site.".format(pagination_item.total_available))
+print([database.name for database in all_databases])
+
+for database in TSC.Pager(server.databases):
+    print(database.id, database.name)
+```
+
+<br>
+<br>
+
+#### databases.get_by_id
+
+```py
+databases.get_by_id(database_id)
+```
+
+Returns the specified database asset.
+
+REST API: [Query Database](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#query_database){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`database_id` | The identifier (`id`) of the database to return.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`ValueError` | Raised if `database_id` is empty or `None`.
+
+**Returns**
+
+Returns a `DatabaseItem`.
+
+**Example**
+
+```py
+database = server.databases.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+print(database.name)
+```
+
+<br>
+<br>
+
+#### databases.delete
+
+```py
+databases.delete(database_id)
+```
+
+Permanently removes the specified database asset.
+
+REST API: [Remove Database](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#remove_database){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`database_id` | The identifier (`id`) of the database to remove.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`ValueError` | Raised if `database_id` is empty or `None`.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.databases.delete('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+```
+
+<br>
+<br>
+
+#### databases.update
+
+```py
+databases.update(database_item)
+```
+
+Updates the description, certification, certification note, and contact of the specified database.
+
+The request always includes the `certified` value, so set `database_item.certified` to `True` or `False` before you call this method. The `description` and `certification_note` values are sent only when they are not empty, so this method cannot clear them. The `name` and `content_permissions` values are not sent.
+
+REST API: [Update Database](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#update_database){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`database_item` | The `DatabaseItem` to update. It must have an `id`, so retrieve it from the server first.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`MissingRequiredFieldError` | Raised if `database_item` does not have an `id`.
+
+**Returns**
+
+Returns the updated `DatabaseItem`.
+
+**Example**
+
+```py
+database = server.databases.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+database.description = 'Sales data warehouse'
+database.certified = True
+database.certification_note = 'Reviewed by the data team'
+database = server.databases.update(database)
+```
+
+<br>
+<br>
+
+#### databases.populate_tables
+
+```py
+databases.populate_tables(database_item)
+```
+
+This method is not currently enabled. It is gated on a placeholder minimum version (`99`), so calling it raises `EndpointUnavailableError` on every Tableau Server and Tableau Cloud version. The REST API reference does not document an endpoint that lists the tables in a database.
+
+To find the tables in a database, query the Metadata API with [metadata.query](#metadataquery) and read the matching tables with `tables.get_by_id`.
+
+**Example**
+
+```py
+query = """
+query tablesInDatabase($luid: String) {
+    databases(filter: {luid: $luid}) {
+        tables { luid name }
+    }
+}
+"""
+result = server.metadata.query(query, {'luid': database.id})
+databases = result['data']['databases']
+tables = (databases[0]['tables'] if databases else None) or []
+for table_ref in tables:
+    table = server.tables.get_by_id(table_ref['luid'])
+    print(table.name)
+```
+
+<br>
+<br>
+
+#### databases.populate_permissions
+
+```py
+databases.populate_permissions(item)
+```
+
+Populates the permissions for the specified database. After calling this method, the permissions are available through `item.permissions`.
+
+REST API: [List Database Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#query_database_perms){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `DatabaseItem` to populate with permissions.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`MissingRequiredFieldError` | Raised if `item` does not have an `id`.
+
+**Returns**
+
+None. Permissions are populated on `item.permissions`.
+
+**Example**
+
+```py
+database = server.databases.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+server.databases.populate_permissions(database)
+for rule in database.permissions:
+    print(rule.grantee.tag_name, rule.grantee.id, rule.capabilities)
+```
+
+<br>
+<br>
+
+#### databases.update_permissions
+
+```py
+databases.update_permissions(item, rules)
+```
+
+Adds permissions to the specified database.
+
+REST API: [Add Database Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#add_database_perms){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `DatabaseItem` to add permissions to.
+`rules` | A list of `PermissionsRule` objects to add.
+
+**Returns**
+
+Returns the list of `PermissionsRule` objects in the server response.
+
+**Example**
+
+```py
+rule = TSC.PermissionsRule(
+    grantee=TSC.GroupItem.as_reference('9f9e9d9c-8b8a-8f8e-7d7c-7b7a6f6d6e6d'),
+    capabilities={TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow},
+)
+server.databases.update_permissions(database, [rule])
+```
+
+<br>
+<br>
+
+#### databases.delete_permission
+
+```py
+databases.delete_permission(item, rules)
+```
+
+Removes permissions from the specified database. For each rule, every capability in `rule.capabilities` is removed for `rule.grantee` with a separate request.
+
+REST API: [Delete Database Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#delete_database_perms){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `DatabaseItem` to remove permissions from.
+`rules` | A list of `PermissionsRule` objects to remove. A single `PermissionsRule` is also accepted.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.databases.populate_permissions(database)
+server.databases.delete_permission(database, database.permissions[:1])
+```
+
+<br>
+<br>
+
+#### databases.populate_table_default_permissions
+
+```py
+databases.populate_table_default_permissions(item)
+```
+
+Populates the default permissions that apply to tables in the specified database. After calling this method, the permissions are available through `item.default_table_permissions`.
+
+REST API: [List Default Database Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#query_database_perms_default){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `DatabaseItem` to populate with default table permissions.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`MissingRequiredFieldError` | Raised if `item` does not have an `id`.
+
+**Returns**
+
+None. Permissions are populated on `item.default_table_permissions`.
+
+**Example**
+
+```py
+server.databases.populate_table_default_permissions(database)
+for rule in database.default_table_permissions:
+    print(rule.grantee.tag_name, rule.grantee.id, rule.capabilities)
+```
+
+<br>
+<br>
+
+#### databases.update_table_default_permissions
+
+```py
+databases.update_table_default_permissions(item, rules)
+```
+
+Adds default permissions for tables in the specified database.
+
+REST API: [Add Default Database Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#add_database_perms_default){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `DatabaseItem` to add default table permissions to.
+`rules` | A list of `PermissionsRule` objects to add.
+
+**Returns**
+
+Returns the list of `PermissionsRule` objects in the server response.
+
+**Example**
+
+```py
+rule = TSC.PermissionsRule(
+    grantee=TSC.GroupItem.as_reference('9f9e9d9c-8b8a-8f8e-7d7c-7b7a6f6d6e6d'),
+    capabilities={TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow},
+)
+server.databases.update_table_default_permissions(database, [rule])
+```
+
+<br>
+<br>
+
+#### databases.delete_table_default_permissions
+
+```py
+databases.delete_table_default_permissions(rule, item)
+```
+
+Removes a default table permission rule from the specified database. Every capability in `rule.capabilities` is removed for `rule.grantee` with a separate request. Note that this method takes the rule first and the database second, which is the reverse of the other permission methods.
+
+REST API: [Delete Default Database Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#delete_database_perms_default){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`rule` | A single `PermissionsRule` to remove.
+`item` | The `DatabaseItem` to remove the default table permission from.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.databases.populate_table_default_permissions(database)
+rule = database.default_table_permissions[0]
+server.databases.delete_table_default_permissions(rule, database)
+```
+
+<br>
+<br>
+
+#### databases.populate_dqw
+
+```py
+databases.populate_dqw(item)
+```
+
+Populates the data quality warnings for the specified database. After calling this method, the warnings are available through `item.dqws`.
+
+REST API: [Query Data Quality Warning by Content](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#query_dqws){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `DatabaseItem` to populate with data quality warnings.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`MissingRequiredFieldError` | Raised if `item` does not have an `id`.
+
+**Returns**
+
+None. Warnings are populated on `item.dqws`.
+
+**Example**
+
+```py
+server.databases.populate_dqw(database)
+for dqw in database.dqws:
+    print(dqw.warning_type, dqw.message)
+```
+
+<br>
+<br>
+
+#### databases.add_dqw
+
+```py
+databases.add_dqw(item, warning)
+```
+
+Adds a data quality warning to the specified database.
+
+REST API: [Add Data Quality Warning](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#add_dqw){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `DatabaseItem` to add the warning to.
+`warning` | The `DQWItem` to add.
+
+**Returns**
+
+Returns the list of `DQWItem` objects in the server response.
+
+**Example**
+
+```py
+warning = TSC.DQWItem(warning_type=TSC.DQWItem.WarningType.MAINTENANCE, message='Scheduled maintenance this weekend')
+server.databases.add_dqw(database, warning)
+```
+
+<br>
+<br>
+
+#### databases.update_dqw
+
+```py
+databases.update_dqw(item, warning)
+```
+
+Updates the data quality warning on the specified database.
+
+The request is sent as a `PUT` to `/dataQualityWarnings/database/{database-id}`, using the ID of `item`. The `id` of `warning` is not used. The REST API reference documents Update Data Quality Warning as a `PUT` to `/dataQualityWarnings/{warning-id}`, so check the result against your server.
+
+REST API: [Update Data Quality Warning](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#update_dqw){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `DatabaseItem` whose warning to update.
+`warning` | The `DQWItem` with the updated values.
+
+**Returns**
+
+Returns the list of `DQWItem` objects in the server response.
+
+**Example**
+
+```py
+server.databases.populate_dqw(database)
+warning = database.dqws[0]
+warning.message = 'Maintenance complete'
+warning.active = False
+server.databases.update_dqw(database, warning)
+```
+
+<br>
+<br>
+
+#### databases.delete_dqw
+
+```py
+databases.delete_dqw(item)
+```
+
+Removes the data quality warnings from the specified database.
+
+REST API: [Delete Data Quality Warning by Content](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#delete_dqws){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `DatabaseItem` to remove the warnings from.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.databases.delete_dqw(database)
+```
+
+<br>
+<br>
+
+#### databases.add_tags
+
+```py
+databases.add_tags(item, tags)
+```
+
+Adds one or more tags to the specified database.
+
+REST API: [Add Tags to Database](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#add_tags_database){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.9 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `DatabaseItem` or database ID to add tags to.
+`tags` | A single tag string or an iterable of tag strings to add.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`ValueError` | Raised if `item` is not a database ID string and has no `id`.
+
+**Returns**
+
+Returns a `set[str]` of the tags in the server response.
+
+**Example**
+
+```py
+server.databases.add_tags(database, ['finance', 'quarterly'])
+```
+
+<br>
+<br>
+
+#### databases.delete_tags
+
+```py
+databases.delete_tags(item, tags)
+```
+
+Removes one or more tags from the specified database. Each tag is removed with a separate request.
+
+REST API: Delete Tag from Database, in the [Metadata Methods](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm){:target="_blank"} reference.
+
+**Version**
+
+This endpoint is available with REST API version 3.9 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `DatabaseItem` or database ID to remove tags from.
+`tags` | A single tag string or an iterable of tag strings to remove.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`ValueError` | Raised if `item` is not a database ID string and has no `id`.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.databases.delete_tags(database, 'quarterly')
+```
+
+<br>
+<br>
+
+#### databases.update_tags
+
+```py
+databases.update_tags(item)
+```
+
+Not supported for databases. `DatabaseItem` does not track a tag set. On REST API 3.8 and earlier, this method raises `EndpointUnavailableError`. On later versions, it raises `NotImplementedError`. Use `databases.add_tags` and `databases.delete_tags` instead.
+
+**Version**
+
+The method is gated on REST API version 3.9, so on earlier versions it raises `EndpointUnavailableError` instead.
+
+<br>
+<br>
 
 ## Favorites
 
@@ -7820,6 +8556,679 @@ print(new_sub.subject)
 <br>
 
 ---
+
+## Tables
+
+Using the TSC library, you can get information about the table assets on a site, update a table's description, certification, and contact, read and update its columns, and manage its permissions, data quality warnings, and tags. Table assets are external assets that Tableau Catalog discovers from the connections used by published content. The table resources are defined in the `TableItem` class, columns in the `ColumnItem` class, and the methods are based upon the table endpoints in the REST API.
+
+Table methods are available if your Tableau Cloud site or Tableau Server is licensed with Data Management. See the [Metadata Methods](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm){:target="_blank"} in the REST API reference.
+
+<br>
+
+### TableItem class
+
+```py
+TableItem(name, description=None)
+```
+
+The `TableItem` represents a table asset on Tableau Server or Tableau Cloud. Table items are normally returned by the server from `tables.get` or `tables.get_by_id` rather than created directly.
+
+**Attributes**
+
+Name | Description
+:--- | :---
+`certification_note` | The certification note for the table. Settable; sent to the server by `tables.update`.
+`certified` | `True` if the table is certified. Settable (must be a boolean); sent to the server by `tables.update`.
+`columns` | The columns in the table, as an iterable of `ColumnItem` objects that fetches every page of columns from the server. You must first call `tables.populate_columns` to access this data.
+`contact_id` | The ID of the user who is the contact for the table. Settable; sent to the server by `tables.update`.
+`description` | The description of the table. Settable; sent to the server by `tables.update` when it is not empty.
+`dqws` | The list of data quality warnings (`DQWItem`) for the table. You must first call `tables.populate_dqw` to access this data.
+`id` | The identifier (LUID) of the table. Read-only.
+`name` | The name of the table. Must not be empty. `tables.update` does not send the name to the server.
+`permissions` | The permissions for the table, as a list of `PermissionsRule` objects. You must first call `tables.populate_permissions` to access this data.
+`schema` | The name of the database schema that contains the table. Read-only.
+
+**Example**
+
+```py
+import tableauserverclient as TSC
+
+# sign in, etc.
+
+table = server.tables.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+print(table.name, table.schema, table.certified)
+```
+
+Source file: models/table_item.py
+
+<br>
+<br>
+
+### ColumnItem class
+
+```py
+ColumnItem(name, description=None)
+```
+
+The `ColumnItem` represents a column in a table asset. Column items are returned by the server when you iterate over `TableItem.columns` after calling `tables.populate_columns`.
+
+**Attributes**
+
+Name | Description
+:--- | :---
+`description` | The description of the column. Settable; sent to the server by `tables.update_column` when it is not empty.
+`id` | The identifier (LUID) of the column. Read-only.
+`name` | The name of the column. Must not be empty. `tables.update_column` does not send the name to the server.
+`remote_type` | The data type of the column in the source database, for example `I4` or `WSTR`. Read-only. If the server response does not include a type, reading this attribute raises `AttributeError`.
+
+Source file: models/column_item.py
+
+<br>
+<br>
+
+### Tables methods
+
+The Tableau Server Client provides several methods for interacting with table assets. These methods correspond to endpoints in the Tableau Server REST API.
+
+Source file: server/endpoint/tables_endpoint.py
+
+<br>
+<br>
+
+#### tables.get
+
+```py
+tables.get(req_options=None)
+```
+
+Returns one page of the table assets on the site. The server returns 100 items per page by default. To iterate over every table on the site, use `TSC.Pager(server.tables)`.
+
+REST API: [Query Tables](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#query_tables){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`req_options` | (Optional) A `RequestOptions` object to set the page size and page number of the request.
+
+**Returns**
+
+Returns a list of `TableItem` objects and a `PaginationItem` object.
+
+**Example**
+
+```py
+all_tables, pagination_item = server.tables.get()
+print("There are {} tables on site.".format(pagination_item.total_available))
+print([table.name for table in all_tables])
+
+for table in TSC.Pager(server.tables):
+    print(table.id, table.name)
+```
+
+<br>
+<br>
+
+#### tables.get_by_id
+
+```py
+tables.get_by_id(table_id)
+```
+
+Returns the specified table asset.
+
+REST API: [Query Table](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#query_table){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`table_id` | The identifier (`id`) of the table to return.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`ValueError` | Raised if `table_id` is empty or `None`.
+
+**Returns**
+
+Returns a `TableItem`.
+
+**Example**
+
+```py
+table = server.tables.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+print(table.name)
+```
+
+<br>
+<br>
+
+#### tables.delete
+
+```py
+tables.delete(table_id)
+```
+
+Permanently removes the specified table asset.
+
+REST API: [Remove Table](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#remove_table){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`table_id` | The identifier (`id`) of the table to remove.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`ValueError` | Raised if `table_id` is empty or `None`.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.tables.delete('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+```
+
+<br>
+<br>
+
+#### tables.update
+
+```py
+tables.update(table_item)
+```
+
+Updates the description, certification, certification note, and contact of the specified table.
+
+The request always includes the `certified` value, so set `table_item.certified` to `True` or `False` before you call this method. The `description` and `certification_note` values are sent only when they are not empty, so this method cannot clear them. The `name` value is not sent.
+
+REST API: [Update Table](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#update_table){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`table_item` | The `TableItem` to update. It must have an `id`, so retrieve it from the server first.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`MissingRequiredFieldError` | Raised if `table_item` does not have an `id`.
+
+**Returns**
+
+Returns the updated `TableItem`.
+
+**Example**
+
+```py
+table = server.tables.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+table.description = 'One row per order line'
+table.certified = True
+table = server.tables.update(table)
+```
+
+<br>
+<br>
+
+#### tables.populate_columns
+
+```py
+tables.populate_columns(table_item, req_options=None)
+```
+
+Populates the columns of the specified table. After calling this method, `table_item.columns` returns an iterable that requests every page of columns from the server each time you iterate over it.
+
+REST API: [Query Columns in a Table](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#query_columns){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`table_item` | The `TableItem` to populate with columns.
+`req_options` | (Optional) A `RequestOptions` object sent with each page request, for example to set the page size.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`MissingRequiredFieldError` | Raised if `table_item` does not have an `id`.
+
+**Returns**
+
+None. Columns are available through `table_item.columns`.
+
+**Example**
+
+```py
+table = server.tables.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+server.tables.populate_columns(table)
+for column in table.columns:
+    print(column.id, column.name, column.description)
+```
+
+<br>
+<br>
+
+#### tables.update_column
+
+```py
+tables.update_column(table_item, column_item)
+```
+
+Updates the description of a column in the specified table. Only the `description` is sent, and only when it is not empty.
+
+REST API: [Update Column](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#update_column){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`table_item` | The `TableItem` that contains the column.
+`column_item` | The `ColumnItem` to update, with the new `description` set.
+
+**Returns**
+
+Returns the updated `ColumnItem`.
+
+**Example**
+
+```py
+server.tables.populate_columns(table)
+column = next(iter(table.columns))
+column.description = 'Order date in UTC'
+column = server.tables.update_column(table, column)
+```
+
+<br>
+<br>
+
+#### tables.populate_permissions
+
+```py
+tables.populate_permissions(item)
+```
+
+Populates the permissions for the specified table. After calling this method, the permissions are available through `item.permissions`.
+
+REST API: [List Table Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#query_table_perms){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `TableItem` to populate with permissions.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`MissingRequiredFieldError` | Raised if `item` does not have an `id`.
+
+**Returns**
+
+None. Permissions are populated on `item.permissions`.
+
+**Example**
+
+```py
+table = server.tables.get_by_id('1a2a3b4b-5c6c-7d8d-9e0e-1f2f3a4a5b6b')
+server.tables.populate_permissions(table)
+for rule in table.permissions:
+    print(rule.grantee.tag_name, rule.grantee.id, rule.capabilities)
+```
+
+<br>
+<br>
+
+#### tables.update_permissions
+
+```py
+tables.update_permissions(item, rules)
+```
+
+Adds permissions to the specified table.
+
+REST API: [Add Table Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#add_table_perms){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `TableItem` to add permissions to.
+`rules` | A list of `PermissionsRule` objects to add.
+
+**Returns**
+
+Returns the list of `PermissionsRule` objects in the server response.
+
+**Example**
+
+```py
+rule = TSC.PermissionsRule(
+    grantee=TSC.GroupItem.as_reference('9f9e9d9c-8b8a-8f8e-7d7c-7b7a6f6d6e6d'),
+    capabilities={TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow},
+)
+server.tables.update_permissions(table, [rule])
+```
+
+<br>
+<br>
+
+#### tables.delete_permission
+
+```py
+tables.delete_permission(item, rules)
+```
+
+Removes permissions from the specified table. For each rule, every capability in `rule.capabilities` is removed for `rule.grantee` with a separate request.
+
+REST API: [Delete Table Permissions](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#delete_table_perms){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `TableItem` to remove permissions from.
+`rules` | A list of `PermissionsRule` objects to remove. A single `PermissionsRule` is also accepted.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.tables.populate_permissions(table)
+server.tables.delete_permission(table, table.permissions[:1])
+```
+
+<br>
+<br>
+
+#### tables.populate_dqw
+
+```py
+tables.populate_dqw(item)
+```
+
+Populates the data quality warnings for the specified table. After calling this method, the warnings are available through `item.dqws`.
+
+REST API: [Query Data Quality Warning by Content](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#query_dqws){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `TableItem` to populate with data quality warnings.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`MissingRequiredFieldError` | Raised if `item` does not have an `id`.
+
+**Returns**
+
+None. Warnings are populated on `item.dqws`.
+
+**Example**
+
+```py
+server.tables.populate_dqw(table)
+for dqw in table.dqws:
+    print(dqw.warning_type, dqw.message)
+```
+
+<br>
+<br>
+
+#### tables.add_dqw
+
+```py
+tables.add_dqw(item, warning)
+```
+
+Adds a data quality warning to the specified table.
+
+REST API: [Add Data Quality Warning](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#add_dqw){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `TableItem` to add the warning to.
+`warning` | The `DQWItem` to add.
+
+**Returns**
+
+Returns the list of `DQWItem` objects in the server response.
+
+**Example**
+
+```py
+warning = TSC.DQWItem(warning_type=TSC.DQWItem.WarningType.DEPRECATED, message='Use the orders_v2 table instead')
+server.tables.add_dqw(table, warning)
+```
+
+<br>
+<br>
+
+#### tables.update_dqw
+
+```py
+tables.update_dqw(item, warning)
+```
+
+Updates the data quality warning on the specified table.
+
+The request is sent as a `PUT` to `/dataQualityWarnings/table/{table-id}`, using the ID of `item`. The `id` of `warning` is not used. The REST API reference documents Update Data Quality Warning as a `PUT` to `/dataQualityWarnings/{warning-id}`, so check the result against your server.
+
+REST API: [Update Data Quality Warning](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#update_dqw){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `TableItem` whose warning to update.
+`warning` | The `DQWItem` with the updated values.
+
+**Returns**
+
+Returns the list of `DQWItem` objects in the server response.
+
+**Example**
+
+```py
+server.tables.populate_dqw(table)
+warning = table.dqws[0]
+warning.severe = True
+server.tables.update_dqw(table, warning)
+```
+
+<br>
+<br>
+
+#### tables.delete_dqw
+
+```py
+tables.delete_dqw(item)
+```
+
+Removes the data quality warnings from the specified table.
+
+REST API: [Delete Data Quality Warning by Content](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#delete_dqws){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.5 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `TableItem` to remove the warnings from.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.tables.delete_dqw(table)
+```
+
+<br>
+<br>
+
+#### tables.add_tags
+
+```py
+tables.add_tags(item, tags)
+```
+
+Adds one or more tags to the specified table.
+
+REST API: [Add Tags to Table](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#add_tags_table){:target="_blank"}
+
+**Version**
+
+This endpoint is available with REST API version 3.9 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `TableItem` or table ID to add tags to.
+`tags` | A single tag string or an iterable of tag strings to add.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`ValueError` | Raised if `item` is not a table ID string and has no `id`.
+
+**Returns**
+
+Returns a `set[str]` of the tags in the server response.
+
+**Example**
+
+```py
+server.tables.add_tags(table, ['finance', 'quarterly'])
+```
+
+<br>
+<br>
+
+#### tables.delete_tags
+
+```py
+tables.delete_tags(item, tags)
+```
+
+Removes one or more tags from the specified table. Each tag is removed with a separate request.
+
+REST API: Delete Tag from Table, in the [Metadata Methods](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm){:target="_blank"} reference.
+
+**Version**
+
+This endpoint is available with REST API version 3.9 and up.
+
+**Parameters**
+
+Name | Description
+:--- | :---
+`item` | The `TableItem` or table ID to remove tags from.
+`tags` | A single tag string or an iterable of tag strings to remove.
+
+**Exceptions**
+
+Error | Description
+:--- | :---
+`ValueError` | Raised if `item` is not a table ID string and has no `id`.
+
+**Returns**
+
+None.
+
+**Example**
+
+```py
+server.tables.delete_tags(table, 'quarterly')
+```
+
+<br>
+<br>
+
+#### tables.update_tags
+
+```py
+tables.update_tags(item)
+```
+
+Not supported for tables. `TableItem` does not track a tag set, so this method always raises `NotImplementedError`. Use `tables.add_tags` and `tables.delete_tags` instead.
+
+<br>
+<br>
 
 ## Tasks
 
