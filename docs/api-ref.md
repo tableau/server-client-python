@@ -8088,7 +8088,7 @@ The `UserItem` class contains the members or attributes for the view resources o
 Name | Description
 :--- | :---
 `auth_setting` | This is a required attribute and is only for Tableau Cloud. The new authentication type for the user - see **User Auth** below for values.
-`domain_name`  |    The name of the site.
+`domain_name`  |    On Tableau Server, the domain of the user: the name of the Active Directory domain, or `local` if the user uses local authentication. On Tableau Cloud, the authentication type of the user. `users.get` and `users.get_by_id` populate it. It is read-only, so a `UserItem` that you create yourself has no domain; include the domain in the `name` instead.
 `external_auth_user_id` |   Represents ID stored in Tableau's single sign-on (SSO) system. The `externalAuthUserId` value is returned for Tableau Cloud. For other server configurations, this field contains null.
 `id` |   The id of the user on the site.
 `last_login` | The date and time the user last logged in.
@@ -8239,15 +8239,13 @@ import tableauserverclient as TSC
 server = TSC.Server("http://localhost")
 # Sign in to the server
 
+# If needed (Active Directory / non-unique names across domains), use the domain-qualified
+# form of the name. `domain_name` is read-only, so it cannot be set on a UserItem.
 users = [
-    TSC.UserItem(name="user1", site_role="Unlicensed"),
-    TSC.UserItem(name="user2", site_role="Explorer"),
-    TSC.UserItem(name="user3", site_role="Creator"),
+    TSC.UserItem(name="example.com\\user1", site_role="Unlicensed"),
+    TSC.UserItem(name="example.com\\user2", site_role="Explorer"),
+    TSC.UserItem(name="example.com\\user3", site_role="Creator"),
 ]
-
-# If needed (Active Directory / non-unique names across domains), set the domain info
-for user in users:
-    user.domain_name = "example.com"
 
 job = server.users.bulk_add(users)
 ```
@@ -8272,7 +8270,7 @@ This endpoint is available with REST API version **3.27** and up.
 
 | Name    | Description                                                                                                          |
 | :------ | :------------------------------------------------------------------------------------------------------------------- |
-| `users` | An iterable of `UserItem` objects to remove from the site. Each `UserItem` should have `name` and `domain_name` set. |
+| `users` | An iterable of `UserItem` objects to remove from the site. Each `UserItem` should have `name` and `domain_name` set, as items returned by `users.get` or `users.filter` do. |
 
 **UserItem field notes**
 
@@ -8677,6 +8675,8 @@ Adds users from a CSV file to the site. The CSV file format matches the format u
 
 The CSV file should have the following column format (header row optional):
 `Username, Password, Display Name, License Level, Admin Level, Publishing Access`
+
+The whole `Username` value becomes the `name` of the `UserItem`, and `domain_name` is not set. To add a user from an Active Directory domain, include the domain in the username (for example `example\Adam`).
 
 **Parameters**
 
@@ -9092,7 +9092,7 @@ views.populate_excel(view_item, req_options=None)
 
 Populates the Excel content of the specified view.
 
-After calling this method, the Excel data is available through the view's `excel` property.
+After calling this method, the Excel data is available through the view's `excel` property. The property is a generator that yields the file in chunks, so join the chunks with `b''.join(view_item.excel)` to get the file content as bytes.
 
 REST API: [Download View Excel](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#download_view_excel){:target="_blank"}
 
@@ -9105,7 +9105,7 @@ Name | Description
 
 **Returns**
 
-None. The Excel content is added to the `view_item` and can be accessed by its `excel` field.
+None. The Excel content is added to the `view_item` and can be accessed by its `excel` field, which is a generator of `bytes` chunks.
 
 **Version**
 
@@ -9116,7 +9116,7 @@ Version 3.8 and later. See [REST API versions](https://help.tableau.com/current/
 ```py
 server.views.populate_excel(view_item)
 with open('./view_data.xlsx', 'wb') as f:
-    f.write(view_item.excel)
+    f.write(b''.join(view_item.excel))
 ```
 
 <br>
