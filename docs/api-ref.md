@@ -2475,7 +2475,7 @@ Name | Description
 `contact_id` | The ID of the user who is the contact for the database. Settable; sent to the server by `databases.update`.
 `content_permissions` | The permission mode of the database, as returned by the server. Must be one of `DatabaseItem.ContentPermissions.LockedToProject` (value `"LockedToDatabase"`) or `DatabaseItem.ContentPermissions.ManagedByOwner` (value `"ManagedByOwner"`). Can be set on the object, and `databases.update` sends it to the server.
 `default_table_permissions` | The default permissions for tables in the database, as a list of `PermissionsRule` objects. You must first call `databases.populate_table_default_permissions` to access this data.
-`description` | The description of the database. Settable; sent to the server by `databases.update`. An empty string clears the description.
+`description` | The description of the database. Settable; sent to the server by `databases.update` when it is not empty.
 `dqws` | The list of data quality warnings (`DQWItem`) for the database. You must first call `databases.populate_dqw` to access this data.
 `embedded` | `True` if the database is embedded in Tableau content. Read-only.
 `file_extension` | The file extension, for file-based databases. Read-only.
@@ -2642,7 +2642,7 @@ databases.update(database_item)
 
 Updates the description, certification, certification note, and contact of the specified database.
 
-Only the values that are set on `database_item` are sent. A value of `None` leaves the matching property unchanged on the server, and an empty string for `description` or `certification_note` clears it. The `certified`, `description`, `certification_note`, `content_permissions`, and `contact_id` values can be updated. The `name` value is not sent.
+The request always includes the `certified` value, so set `database_item.certified` to `True` or `False` before you call this method. The `description` and `certification_note` values are sent only when they are not empty, so this method cannot clear them. The `name` and `content_permissions` values are not sent.
 
 REST API: [Update Database](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#update_database){:target="_blank"}
 
@@ -8577,7 +8577,7 @@ Name | Description
 `certified` | `True` if the table is certified. Settable (must be a boolean); sent to the server by `tables.update`.
 `columns` | The columns in the table, as an iterable of `ColumnItem` objects that fetches every page of columns from the server. You must first call `tables.populate_columns` to access this data.
 `contact_id` | The ID of the user who is the contact for the table. Settable; sent to the server by `tables.update`.
-`description` | The description of the table. Settable; sent to the server by `tables.update`. An empty string clears the description.
+`description` | The description of the table. Settable; sent to the server by `tables.update` when it is not empty.
 `dqws` | The list of data quality warnings (`DQWItem`) for the table. You must first call `tables.populate_dqw` to access this data.
 `id` | The identifier (LUID) of the table. Read-only.
 `name` | The name of the table. Must not be empty. `tables.update` does not send the name to the server.
@@ -8756,7 +8756,7 @@ tables.update(table_item)
 
 Updates the description, certification, certification note, and contact of the specified table.
 
-Only the values that are set on `table_item` are sent. A value of `None` leaves the matching property unchanged on the server, and an empty string for `description` or `certification_note` clears it. The `certified`, `description`, `certification_note`, and `contact_id` values can be updated. The `name` value is not sent.
+The request always includes the `certified` value, so set `table_item.certified` to `True` or `False` before you call this method. The `description` and `certification_note` values are sent only when they are not empty, so this method cannot clear them. The `name` value is not sent.
 
 REST API: [Update Table](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#update_table){:target="_blank"}
 
