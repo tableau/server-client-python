@@ -35,7 +35,7 @@ API help](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_conc
 
 To filter on a field, you need to specify the field name, an operator criteria and a value criteria.
 
-**Note**: Ampersands and commas in filters are not supported by the REST API as they are used as delimiters.
+**Note**: Commas in filter values are not supported by the REST API, because it uses them to separate filter expressions. See [Special characters in filter values](#special-characters-in-filter-values) for a workaround.
 
 ### Operator criteria
 
@@ -50,10 +50,54 @@ The operator can be any of the following:
 * LessThanOrEqual
 * In
 * Has
+* CaseInsensitiveEquals
+
+Not every operator is supported on every field. See the per-endpoint field tables in the [REST
+API help](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_filtering_and_sorting.htm).
 
 ### Value criteria
 
 The value that you want to filter on. This can be any valid string.
+
+### Special characters in filter values
+
+The REST API does not accept a comma (`,`) in a filter value, because it uses commas to
+separate expressions. A filter value that contains a comma fails with a `400065` error.
+Percent-encoding the comma or putting a backslash in front of it does not help.
+
+```py
+# Fails: the workbook name contains a comma
+workbooks = server.workbooks.filter(name="Sales, Q1 & Q2")
+```
+
+An ampersand (`&`) in a name is matched as typed.
+
+To find an item whose name contains a comma, replace the comma with an asterisk (`*`). The
+asterisk acts as a wildcard, so the following filter finds the workbook named
+`Sales, Q1 & Q2`:
+
+```py
+for workbook in server.workbooks.filter(name="Sales* Q1 & Q2"):
+    print(workbook.name, workbook.id)
+```
+
+Because `*` matches any run of characters, the filter can return more than one item. Check
+the results on the client side if you need an exact match:
+
+```py
+wb_name = "Sales, Q1 & Q2"
+pattern = wb_name.replace(",", "*")
+matches = [wb for wb in server.workbooks.filter(name=pattern) if wb.name == wb_name]
+```
+
+This works because `Equals` treats `*` as a wildcard (see [Wildcard searches](#wildcard-searches)).
+
+### Wildcard searches
+
+In a filter value, `*` matches any run of characters, including none. For example,
+`server.workbooks.filter(name="Sales*")` returns workbooks whose names start with `Sales`. This
+was tested for workbook names on Tableau Cloud. Confirm the behavior on your Tableau Server
+version before you rely on it for other fields.
 
 ### Filtering example - RequestOptions
 
@@ -219,3 +263,8 @@ print(len(flows))
 | LessThanOrEqual | lte |
 | In | in |
 | Has | has |
+| CaseInsensitiveEquals | cieq |
+
+For example, `server.users.filter(name__cieq="jsmith")` matches a user named `JSmith`.
+See [Special characters in filter values](#special-characters-in-filter-values) and
+[Wildcard searches](#wildcard-searches) for limits on filter values.
