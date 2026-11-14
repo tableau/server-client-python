@@ -2473,7 +2473,7 @@ Name | Description
 `connection_type` | The connection type of the database, for example `sqlserver` or `hyper`. Read-only.
 `connector_url` | The connector URL of the database. Read-only.
 `contact_id` | The ID of the user who is the contact for the database. Settable; sent to the server by `databases.update`.
-`content_permissions` | The permission mode of the database, as returned by the server. Must be one of `DatabaseItem.ContentPermissions.LockedToProject` (value `"LockedToDatabase"`) or `DatabaseItem.ContentPermissions.ManagedByOwner` (value `"ManagedByOwner"`). Can be set on the object, and `databases.update` sends it to the server.
+`content_permissions` | The permission mode of the database, as returned by the server. `databases.update` does not send this value.
 `default_table_permissions` | The default permissions for tables in the database, as a list of `PermissionsRule` objects. You must first call `databases.populate_table_default_permissions` to access this data.
 `description` | The description of the database. Settable; sent to the server by `databases.update` when it is not empty.
 `dqws` | The list of data quality warnings (`DQWItem`) for the database. You must first call `databases.populate_dqw` to access this data.
@@ -2687,7 +2687,7 @@ databases.populate_tables(database_item)
 
 This method is not currently enabled. It is gated on a placeholder minimum version (`99`), so calling it raises `EndpointUnavailableError` on every Tableau Server and Tableau Cloud version. The REST API reference does not document an endpoint that lists the tables in a database.
 
-To find the tables in a database, query the Metadata API with [metadata.query](#metadataquery) and read the matching tables with `tables.get_by_id`. The `explore_databases_tables.py` sample shows this approach.
+To find the tables in a database, query the Metadata API with [metadata.query](#metadataquery) and read the matching tables with `tables.get_by_id`.
 
 **Example**
 
@@ -2700,7 +2700,9 @@ query tablesInDatabase($luid: String) {
 }
 """
 result = server.metadata.query(query, {'luid': database.id})
-for table_ref in result['data']['databases'][0]['tables']:
+databases = result['data']['databases']
+tables = (databases[0]['tables'] if databases else None) or []
+for table_ref in tables:
     table = server.tables.get_by_id(table_ref['luid'])
     print(table.name)
 ```

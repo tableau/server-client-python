@@ -46,7 +46,6 @@ The following list describes the samples available in the repository:
 * `create_project.py` Creates a project in a site.
 * `create_schedules.py` Creates schedules for extract refreshes and subscriptions.
 * `create_user.py` Creates a user on a site.
-* `explore_databases_tables.py` Queries databases, shows one database's details, lists its tables, then populates and lists the columns of one table. Optionally shows database and table permissions.
 * `explore_datasource.py` Queries datasources, selects a datasource, populates connections for the datasource, then updates the datasource.
 * `explore_favorites.py` Queries favorites and optionally add or delete favorites.
 * `explore_site.py` Interacts with sites (create, delete, and so on).
