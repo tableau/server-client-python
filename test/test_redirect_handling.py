@@ -355,6 +355,120 @@ def test_cross_host_redirect_followed(server: TSC.Server) -> None:
     assert server.auth_token is not None
 
 
+def _capture_into(seen: list, body: str):
+    def capture(request, context):
+        seen.append(request)
+        context.status_code = 200
+        return body
+
+    return capture
+
+
+def test_cross_host_redirect_drops_auth_header(signed_in_server: TSC.Server) -> None:
+    seen: list = []
+    with requests_mock.mock() as m:
+        m.get(
+            signed_in_server.workbooks.baseurl,
+            status_code=302,
+            headers={"Location": "http://other.test/api/3.10/sites/site-id/workbooks"},
+        )
+        m.get("http://other.test/api/3.10/sites/site-id/workbooks", text=_capture_into(seen, _workbooks_get_xml()))
+        signed_in_server.workbooks.get()
+    assert len(seen) == 1
+    assert "x-tableau-auth" not in seen[0].headers
+
+
+def test_cross_host_redirect_drops_credential_headers_and_cookies() -> None:
+    s = TSC.Server(
+        "http://test", False, http_options={"headers": {"Authorization": "Basic abc"}, "cookies": {"c": "1"}}
+    )
+    s.version = "3.10"
+    s._set_auth("site-id", "user-id", "auth-token", "")
+    seen: list = []
+    with requests_mock.mock() as m:
+        m.get(s.workbooks.baseurl, status_code=302, headers={"Location": "http://other.test/wb"})
+        m.get("http://other.test/wb", text=_capture_into(seen, _workbooks_get_xml()))
+        s.workbooks.get()
+    assert len(seen) == 1
+    assert "Authorization" not in seen[0].headers
+    assert "Cookie" not in seen[0].headers
+
+
+def test_cross_host_sign_in_redirect_keeps_body(server: TSC.Server) -> None:
+    seen: list = []
+    with requests_mock.mock() as m:
+        m.post(
+            server.auth.baseurl + "/signin",
+            status_code=307,
+            headers={"Location": "https://east.test/api/3.6/auth/signin"},
+        )
+        m.post("https://east.test/api/3.6/auth/signin", text=_capture_into(seen, _sign_in_xml()))
+        server.auth.sign_in(TSC.TableauAuth("u", "p"))
+    assert len(seen) == 1
+    assert b"<credentials" in seen[0].body
+    assert server.auth_token is not None
+
+
+def test_https_to_http_downgrade_rejected_on_same_host() -> None:
+    s = TSC.Server("https://secure.test", False)
+    with requests_mock.mock() as m:
+        m.post(s.auth.baseurl + "/signin", status_code=301, headers={"Location": "http://secure.test/signin"})
+        with pytest.raises(RedirectError, match="HTTPS -> HTTP"):
+            s.auth.sign_in(TSC.TableauAuth("u", "p"))
+
+
+def test_redirect_to_different_port_drops_auth_header() -> None:
+    s = TSC.Server("http://test:8000", False)
+    s.version = "3.10"
+    s._set_auth("site-id", "user-id", "auth-token", "")
+    seen: list = []
+    with requests_mock.mock() as m:
+        m.get(s.workbooks.baseurl, status_code=302, headers={"Location": "http://test:9000/wb"})
+        m.get("http://test:9000/wb", text=_capture_into(seen, _workbooks_get_xml()))
+        s.workbooks.get()
+    assert "x-tableau-auth" not in seen[0].headers
+
+
+def test_credentials_stay_dropped_after_returning_to_original_host(signed_in_server: TSC.Server) -> None:
+    seen: list = []
+    baseurl = signed_in_server.workbooks.baseurl
+    with requests_mock.mock() as m:
+        m.get(baseurl, status_code=302, headers={"Location": "http://other.test/wb"})
+        m.get("http://other.test/wb", status_code=302, headers={"Location": baseurl + "?back=1"})
+        m.get(baseurl + "?back=1", text=_capture_into(seen, _workbooks_get_xml()))
+        signed_in_server.workbooks.get()
+    assert "x-tableau-auth" not in seen[0].headers
+
+
+def test_same_host_redirect_keeps_auth_header_and_body(server: TSC.Server) -> None:
+    seen: list = []
+    with requests_mock.mock() as m:
+        m.post(server.auth.baseurl + "/signin", status_code=307, headers={"Location": "http://TEST/new"})
+        m.post("http://test/new", text=_capture_into(seen, _sign_in_xml()))
+        server.auth.sign_in(TSC.TableauAuth("u", "p"))
+    assert b"<credentials" in seen[0].body
+
+
+def test_same_host_https_upgrade_keeps_auth_header(signed_in_server: TSC.Server) -> None:
+    seen: list = []
+    with requests_mock.mock() as m:
+        m.get(signed_in_server.workbooks.baseurl, status_code=301, headers={"Location": "https://test/wb"})
+        m.get("https://test/wb", text=_capture_into(seen, _workbooks_get_xml()))
+        signed_in_server.workbooks.get()
+    assert seen[0].headers.get("x-tableau-auth") == "auth-token"
+
+
+def test_cross_host_redirect_does_not_mutate_http_options() -> None:
+    s = TSC.Server("http://test", False, http_options={"headers": {"Authorization": "Basic abc"}})
+    s.version = "3.10"
+    s._set_auth("site-id", "user-id", "auth-token", "")
+    with requests_mock.mock() as m:
+        m.get(s.workbooks.baseurl, status_code=302, headers={"Location": "http://other.test/wb"})
+        m.get("http://other.test/wb", text=_workbooks_get_xml())
+        s.workbooks.get()
+    assert s.http_options["headers"]["Authorization"] == "Basic abc"
+
+
 # --- Location edge cases ----------------------------------------------------
 
 
