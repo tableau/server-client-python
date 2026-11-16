@@ -72,7 +72,7 @@ Here's a quick checklist to follow when coding to ensure a good pull request
   issues before submitting your pull request. (Run black with the `--check` option if
   you want to check whether formatting is valid without changing any files.)
 - Ensure the Mypy static type checker is still passing by running
-  `mypy --show-error-codes --disable-error-code misc --disable-error-code import tableauserverclient test`.
+  `mypy --show-error-codes --disable-error-code misc --disable-error-code import --implicit-optional tableauserverclient test samples`.
 - Keep commit messages clean and descriptive.
 
 ### Use git pre-commit hook
@@ -100,7 +100,7 @@ then
    echo Running black format check
    black --check --line-length 120 tableauserverclient samples test
    echo Running mypy type checking
-   mypy --show-error-codes --disable-error-code misc --disable-error-code import tableauserverclient test
+   mypy --show-error-codes --disable-error-code misc --disable-error-code import --implicit-optional tableauserverclient test samples
 fi
 ```
 
