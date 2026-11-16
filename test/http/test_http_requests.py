@@ -1,3 +1,5 @@
+import warnings
+
 import pytest
 import tableauserverclient as TSC
 import requests
@@ -68,6 +70,13 @@ def test_http_options_skip_ssl_works():
     http_options = {"verify": False}
     server = TSC.Server("http://fake-url")
     server.add_http_options(http_options)
+
+
+def test_http_options_skip_ssl_leaves_warning_filters_alone():
+    filters_before = list(warnings.filters)
+    server = TSC.Server("http://fake-url")
+    server.add_http_options({"verify": False})
+    assert warnings.filters == filters_before
 
 
 def test_http_options_multiple_options_works():

@@ -2,7 +2,6 @@ from tableauserverclient.helpers.logging import logger
 
 import requests
 import threading
-import urllib3
 import ssl
 import weakref
 
@@ -260,10 +259,8 @@ class Server:
 
     def add_http_options(self, options_dict: dict):
         try:
+            options_dict.keys()  # reject non-mappings that dict.update would accept, such as lists of pairs
             self._http_options.update(options_dict)
-            if "verify" in options_dict.keys() and self._http_options.get("verify") is False:
-                urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-                # would be nice if you could turn them back on
         except Exception as be:
             # expected errors on invalid input:
             # 'set' object has no attribute 'keys', 'list' object has no attribute 'keys'

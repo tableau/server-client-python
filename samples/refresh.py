@@ -43,7 +43,7 @@ def main():
         incremental = True
 
     tableau_auth = TSC.PersonalAccessTokenAuth(args.token_name, args.token_value, site_id=args.site)
-    server = TSC.Server(args.server, use_server_version=True, http_options={"verify": False})
+    server = TSC.Server(args.server, use_server_version=True)
     with server.auth.sign_in(tableau_auth):
         if args.resource_type == "workbook":
             # Get the workbook by its Id to make sure it exists
