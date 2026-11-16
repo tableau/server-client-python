@@ -195,6 +195,10 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
 
         This method populates a PDF with image(s) of the view you specify.
 
+        To export several views of a workbook as one PDF, use
+        ``server.workbooks.populate_pdf`` instead of merging the PDFs of
+        individual views.
+
         REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_workbooks_and_views.htm#query_view_pdf
 
         Parameters

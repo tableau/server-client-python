@@ -13,25 +13,21 @@ class Filter:
     conditions.
 
     Special characters in filter values
-    ----------------------------------
-    The REST API's filter grammar treats several characters as delimiters. The
-    server does NOT support escaping them, so a value containing any of these
-    characters cannot be matched exactly with the `Equals` operator:
+    -----------------------------------
+    The server splits the ``filter`` parameter on commas, so a value that
+    contains a comma cannot be sent: the request fails with ``400065: Bad
+    Request``. URL-encoding the comma or putting a backslash in front of it
+    does not help. From REST API 3.7, other characters, including ``&``, ``:``,
+    ``[`` and ``]``, are matched as written because TSC URL-encodes the query
+    string. Earlier versions do not encode it, so ``&`` ends the filter.
 
-    - ``,`` -- separates values in an ``in`` list.
-    - ``&`` -- separates filter clauses.
-    - ``:`` -- separates field/operator/value.
-    - ``[`` and ``]`` -- bracket an ``in`` value list.
-
-    Workaround for names containing these characters: use the ``Equals``
-    operator with an asterisk substituted for the special character. Asterisk
-    behaves as a wildcard (starts-with, ends-with, and contains matching are
-    supported by the server; see the Tableau REST API docs for "Filtering
-    and Sorting"), so for example filtering a workbook named
-    ``T(L-F,SZ&V-MY) - PC`` can be found via ``name="T(L-F*SZ*V-MY) - PC"``.
-    Wildcard filtering requires Tableau Cloud May 2023 or Tableau Server
-    2022.1.14 or later. Post-filter the result client-side to disambiguate
-    if multiple names could match.
+    To find a name that contains a comma, replace the comma with ``*`` and
+    check the results client-side. In testing, ``*`` acted as a wildcard in
+    an ``Equals`` value on workbook names (Tableau Cloud) and project names
+    (REST API 3.31), for example ``name="Sales* Q1 & Q2"`` finds the workbook
+    ``Sales, Q1 & Q2``. The REST API documentation does not describe this
+    behavior or say which versions support it, so confirm it on your Tableau
+    Server version.
 
     Parameters
     ----------

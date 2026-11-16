@@ -607,6 +607,11 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem], Down
         This method populates a PDF with image(s) of the workbook view(s) you
         specify.
 
+        To export several views of a workbook as one PDF with a filter applied,
+        pass the filter with PDFRequestOptions.vf() (REST API 3.23 and later).
+        The server renders a single PDF, so you do not need to download a PDF
+        for each view and merge them yourself.
+
         REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm#download_workbook_pdf
 
         Parameters

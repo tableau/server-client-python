@@ -416,9 +416,10 @@ class Users(QuerysetEndpoint[UserItem]):
         When adding users in bulk, the server will return a job item that can be used to track the progress of the
         operation. This method will return the job item that was created when the users were added.
 
-        For each user, name is required, and other fields are optional. If connected to activte directory and
-        the user name is not unique across domains, then the domain attribute must be populated on
-        the UserItem.
+        For each user, name is required, and other fields are optional. If connected to Active Directory and
+        the user name is not unique across domains, include the domain in the name (for example
+        ``example.com\\user1``). UserItem.domain_name is read-only, so it cannot be set on a UserItem
+        that you create.
 
         The user's display name is read from the fullname attribute.
 
@@ -457,16 +458,13 @@ class Users(QuerysetEndpoint[UserItem]):
         >>> server = TSC.Server('http://localhost')
         >>> # Login to the server
 
-        >>> # Create a list of UserItem objects to add to the site
+        >>> # Create a list of UserItem objects to add to the site. The domain
+        >>> # goes in the name, because UserItem.domain_name is read-only.
         >>> users = [
-        >>>    TSC.UserItem(name="user1", site_role="Unlicensed"),
-        >>>    TSC.UserItem(name="user2", site_role="Explorer"),
-        >>>    TSC.UserItem(name="user3", site_role="Creator"),
+        >>>    TSC.UserItem(name="example.com\\\\user1", site_role="Unlicensed"),
+        >>>    TSC.UserItem(name="example.com\\\\user2", site_role="Explorer"),
+        >>>    TSC.UserItem(name="example.com\\\\user3", site_role="Creator"),
         >>> ]
-
-        >>> # Set the domain name for the users
-        >>> for user in users:
-        >>>     user.domain_name = "example.com"
 
         >>> # Add the users to the site
         >>> job = server.users.bulk_add(users)
