@@ -1,4 +1,5 @@
 import logging
+import warnings
 from typing import TYPE_CHECKING
 from collections.abc import Iterable
 
@@ -8,9 +9,9 @@ from tableauserverclient.server.endpoint.dqw_endpoint import _DataQualityWarning
 from tableauserverclient.server.endpoint.endpoint import api, Endpoint
 from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
 from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
-from tableauserverclient.server.endpoint.resource_tagger import TaggingMixin
+from tableauserverclient.server.endpoint.resource_tagger import TaggingMixin, UPDATE_TAGS_UNSUPPORTED_MESSAGE
 from tableauserverclient.server import RequestFactory
-from tableauserverclient.models import DatabaseItem, TableItem, PaginationItem, Resource
+from tableauserverclient.models import DatabaseItem, PaginationItem, Resource
 
 from tableauserverclient.helpers.logging import logger
 
@@ -118,7 +119,7 @@ class Databases(Endpoint, TaggingMixin):
     @api(version="3.5")
     def update(self, database_item: DatabaseItem) -> DatabaseItem:
         """
-        Update the database description, certify the database, set permissions,
+        Update the database description, certify the database, set content permissions,
         or assign a User as the database contact.
 
         REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_metadata.htm#update_database
@@ -149,24 +150,26 @@ class Databases(Endpoint, TaggingMixin):
         updated_database = DatabaseItem.from_response(server_response.content, self.parent_srv.namespace)[0]
         return updated_database
 
-    # Not Implemented Yet
-    @api(version="99")
-    def populate_tables(self, database_item):
-        if not database_item.id:
-            error = "database item missing ID. database must be retrieved from server first."
-            raise MissingRequiredFieldError(error)
+    def populate_tables(self, database_item: DatabaseItem) -> None:
+        """
+        Not supported. The REST API has no endpoint that lists the tables of a
+        database.
 
-        def column_fetcher():
-            return self._get_tables_for_database(database_item)
+        To find the tables in a database, use the Metadata API with
+        ``server.metadata.query`` and a query such as
+        ``databases(filter: {luid: $luid}) { tables { luid name } }``, then
+        retrieve each table with ``server.tables.get_by_id``.
 
-        database_item._set_tables(column_fetcher)
-        logger.info(f"Populated tables for database (ID: {database_item.id}")
-
-    def _get_tables_for_database(self, database_item):
-        url = f"{self.baseurl}/{database_item.id}/tables"
-        server_response = self.get_request(url)
-        tables = TableItem.from_response(server_response.content, self.parent_srv.namespace)
-        return tables
+        Raises
+        ------
+        NotImplementedError
+            Always.
+        """
+        raise NotImplementedError(
+            "The REST API has no endpoint to list the tables of a database. Use the Metadata API "
+            "(server.metadata.query with databases(filter: {luid: $luid}) { tables { luid name } }) "
+            "to find the table LUIDs, then call server.tables.get_by_id."
+        )
 
     @api(version="3.5")
     def populate_permissions(self, item: DatabaseItem) -> None:
@@ -191,7 +194,32 @@ class Databases(Endpoint, TaggingMixin):
         return self._default_permissions.update_default_permissions(item, rules, Resource.Table)
 
     @api(version="3.5")
-    def delete_table_default_permissions(self, rule: PermissionsRule, item: DatabaseItem) -> None:
+    def delete_table_default_permissions(self, item: DatabaseItem, rule: PermissionsRule) -> None:
+        """
+        Deletes the specified default table permission rule from the database.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission
+
+        Parameters
+        ----------
+        item : DatabaseItem
+            The database item to delete default table permissions from.
+
+        rule : PermissionsRule
+            The permissions rule to delete from the database.
+
+        Returns
+        -------
+        None
+        """
+        if isinstance(item, PermissionsRule) and isinstance(rule, DatabaseItem):
+            warnings.warn(
+                "delete_table_default_permissions(rule, item) is deprecated; pass (item, rule) like the other "
+                "permissions methods.",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+            item, rule = rule, item
         self._default_permissions.delete_default_permission(item, rule, Resource.Table)
 
     @api(version="3.5")
@@ -219,5 +247,5 @@ class Databases(Endpoint, TaggingMixin):
         super().delete_tags(item, tags)
 
     @api(version="3.9")
-    def update_tags(self, item: DatabaseItem) -> None:
-        raise NotImplementedError("Update tags is not supported for databases.")
+    def update_tags(self, item: DatabaseItem) -> None:  # type: ignore[override]
+        raise NotImplementedError(UPDATE_TAGS_UNSUPPORTED_MESSAGE.format(kind="databases"))

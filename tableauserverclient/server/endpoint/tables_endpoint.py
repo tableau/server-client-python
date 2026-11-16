@@ -7,7 +7,7 @@ from tableauserverclient.server.endpoint.dqw_endpoint import _DataQualityWarning
 from tableauserverclient.server.endpoint.endpoint import api, Endpoint
 from tableauserverclient.server.endpoint.exceptions import MissingRequiredFieldError
 from tableauserverclient.server.endpoint.permissions_endpoint import _PermissionsEndpoint
-from tableauserverclient.server.endpoint.resource_tagger import TaggingMixin
+from tableauserverclient.server.endpoint.resource_tagger import TaggingMixin, UPDATE_TAGS_UNSUPPORTED_MESSAGE
 from tableauserverclient.server import RequestFactory
 from tableauserverclient.models import TableItem, ColumnItem, PaginationItem
 from tableauserverclient.server.pager import Pager
@@ -259,5 +259,6 @@ class Tables(Endpoint, TaggingMixin[TableItem]):
     def delete_tags(self, item: TableItem | str, tags: Iterable[str] | str) -> None:
         return super().delete_tags(item, tags)
 
-    def update_tags(self, item: TableItem) -> None:  # type: ignore
-        raise NotImplementedError("Update tags is not implemented for TableItem")
+    @api(version="3.9")
+    def update_tags(self, item: TableItem) -> None:  # type: ignore[override]
+        raise NotImplementedError(UPDATE_TAGS_UNSUPPORTED_MESSAGE.format(kind="tables"))

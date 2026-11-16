@@ -179,13 +179,17 @@ class DatabaseRequest:
             contact_element = ET.SubElement(database_element, "contact")
             contact_element.attrib["id"] = database_item.contact_id
 
-        database_element.attrib["isCertified"] = str(database_item.certified).lower()
+        if database_item.certified is not None:
+            database_element.attrib["isCertified"] = str(database_item.certified).lower()
 
-        if database_item.certification_note:
+        if database_item.certification_note is not None:
             database_element.attrib["certificationNote"] = str(database_item.certification_note)
 
-        if database_item.description:
+        if database_item.description is not None:
             database_element.attrib["description"] = str(database_item.description)
+
+        if database_item.content_permissions is not None:
+            database_element.attrib["contentPermissions"] = str(database_item.content_permissions)
 
         return ET.tostring(xml_request)
 
@@ -945,12 +949,13 @@ class TableRequest:
             contact_element = ET.SubElement(table_element, "contact")
             contact_element.attrib["id"] = table_item.contact_id
 
-        table_element.attrib["isCertified"] = str(table_item.certified).lower()
+        if table_item.certified is not None:
+            table_element.attrib["isCertified"] = str(table_item.certified).lower()
 
-        if table_item.certification_note:
+        if table_item.certification_note is not None:
             table_element.attrib["certificationNote"] = str(table_item.certification_note)
 
-        if table_item.description:
+        if table_item.description is not None:
             table_element.attrib["description"] = str(table_item.description)
 
         return ET.tostring(xml_request)

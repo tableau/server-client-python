@@ -12,6 +12,11 @@ from tableauserverclient.models import TagItem
 
 from tableauserverclient.helpers.logging import logger
 
+UPDATE_TAGS_UNSUPPORTED_MESSAGE = (
+    "update_tags is not supported for {kind}: the item does not track its tags. "
+    "Use add_tags and delete_tags with the item or its ID instead."
+)
+
 if TYPE_CHECKING:
     from tableauserverclient.models.column_item import ColumnItem
     from tableauserverclient.models.database_item import DatabaseItem
