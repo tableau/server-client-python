@@ -6,7 +6,11 @@ from tableauserverclient.server.endpoint.data_alert_endpoint import DataAlerts
 from tableauserverclient.server.endpoint.databases_endpoint import Databases
 from tableauserverclient.server.endpoint.datasources_endpoint import Datasources
 from tableauserverclient.server.endpoint.endpoint import Endpoint, QuerysetEndpoint, DownloadableMixin
-from tableauserverclient.server.endpoint.exceptions import ServerResponseError, MissingRequiredFieldError
+from tableauserverclient.server.endpoint.exceptions import (
+    DefaultViewAssignmentError,
+    ServerResponseError,
+    MissingRequiredFieldError,
+)
 from tableauserverclient.server.endpoint.extensions_endpoint import Extensions
 from tableauserverclient.server.endpoint.favorites_endpoint import Favorites
 from tableauserverclient.server.endpoint.fileuploads_endpoint import Fileuploads
@@ -45,6 +49,7 @@ __all__ = [
     "DownloadableMixin",
     "QuerysetEndpoint",
     "MissingRequiredFieldError",
+    "DefaultViewAssignmentError",
     "Endpoint",
     "Extensions",
     "Favorites",

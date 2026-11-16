@@ -1520,6 +1520,16 @@ class CustomViewRequest:
 
         return ET.tostring(xml_request)
 
+    @_tsrequest_wrapped
+    def set_as_default_for_users_req(self, xml_request: ET.Element, users: Iterable[str | UserItem]) -> bytes:
+        users_element = ET.SubElement(xml_request, "users")
+        for user in users:
+            if not (user_id := user.id if isinstance(user, UserItem) else user):
+                raise ValueError("User ID must be populated")
+            ET.SubElement(users_element, "user", {"id": user_id})
+
+        return ET.tostring(xml_request)
+
     def publish_req_chunked(self, custom_view_item: CustomViewItem):
         xml_request = self._publish_xml(custom_view_item)
         parts = {"request_payload": ("", xml_request, "text/xml")}
