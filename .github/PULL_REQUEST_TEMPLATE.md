@@ -1,8 +1,7 @@
 <!--
 Delete sections that don't apply. The prompts are here to make review
 faster, not to add ceremony - one sentence per section is often enough.
-See contributing.md for background; add a bullet to CHANGELOG.md under
-Unreleased for any user-visible behavior change.
+See contributing.md for background.
 -->
 
 ## Motivation
