@@ -139,7 +139,8 @@ def main():
 
                 # export as image. Filters etc could be added here as usual
                 server.custom_views.populate_image(c)
-                filename = c.id + "-image-export.png"
+                safe_id = "".join(ch for ch in c.id if ch.isalnum() or ch in "-_")
+                filename = safe_id + "-image-export.png"
                 with open(filename, "wb") as f:
                     f.write(c.image)
                 print("saved to " + filename)

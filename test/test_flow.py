@@ -289,3 +289,14 @@ def test_bad_download_response(server: TSC.Server) -> None:
         )
         file_path = server.flows.download("9dbd2263-16b5-46e1-9c43-a76bb8ab65fb", td)
         assert os.path.exists(file_path) is True
+
+
+def test_download_default_name_replaces_unexpected_extension(server: TSC.Server, tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    with requests_mock.mock() as m:
+        m.get(
+            server.flows.baseurl + "/587daa37-b84d-4400-a9a2-aa90e0be7837/content",
+            headers={"Content-Disposition": 'name="tableau_flow"; filename="../usercustomize.py"'},
+        )
+        file_path = server.flows.download("587daa37-b84d-4400-a9a2-aa90e0be7837")
+    assert file_path == str(tmp_path / "usercustomize.tflx")

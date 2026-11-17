@@ -219,7 +219,7 @@ class Flows(QuerysetEndpoint[FlowItem], TaggingMixin[FlowItem], DownloadableMixi
             raise ValueError(error)
         url = f"{self.baseurl}/{flow_id}/content"
 
-        return_path = self._download_content(url, filepath)
+        return_path = self._download_content(url, filepath, ("tflx", "tfl"))
         logger.info(f"Downloaded flow to {return_path} (ID: {flow_id})")
         return return_path
 

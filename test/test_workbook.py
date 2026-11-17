@@ -1448,3 +1448,74 @@ def test_get_workbook_all_fields(server: TSC.Server) -> None:
     assert workbooks[2].owner.last_login == parse_datetime("2025-02-04T06:39:20Z")
     assert workbooks[2].owner.name == "bob@example.com"
     assert workbooks[2].owner.site_role == "SiteAdministratorCreator"
+
+
+WB_ID = "1f951daf-4061-451a-9df1-69a8062664f2"
+
+
+def _mock_default_download(m, server: TSC.Server, filename: str) -> None:
+    m.get(
+        server.workbooks.baseurl + f"/{WB_ID}/content",
+        headers={"Content-Disposition": f'name="tableau_workbook"; filename="{filename}"'},
+        content=b"new content",
+    )
+
+
+def test_download_default_name_strips_relative_path(server: TSC.Server, tmp_path: Path, monkeypatch) -> None:
+    work_dir = tmp_path / "work"
+    work_dir.mkdir()
+    monkeypatch.chdir(work_dir)
+    with requests_mock.mock() as m:
+        _mock_default_download(m, server, "../x.twbx")
+        file_path = server.workbooks.download(WB_ID)
+    assert file_path == str(work_dir / "x.twbx")
+    assert not (tmp_path / "x.twbx").exists()
+
+
+def test_download_default_name_strips_absolute_path(server: TSC.Server, tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    target = tmp_path / "elsewhere" / "abs.twbx"
+    with requests_mock.mock() as m:
+        _mock_default_download(m, server, target.as_posix())
+        file_path = server.workbooks.download(WB_ID)
+    assert file_path == str(tmp_path / "abs.twbx")
+    assert not target.exists()
+
+
+def test_download_default_name_does_not_overwrite(server: TSC.Server, tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    existing = tmp_path / "RESTAPISample.twbx"
+    existing.write_bytes(b"original")
+    with requests_mock.mock() as m:
+        _mock_default_download(m, server, "RESTAPISample.twbx")
+        file_path = server.workbooks.download(WB_ID)
+    assert existing.read_bytes() == b"original"
+    assert file_path == str(tmp_path / "RESTAPISample (1).twbx")
+    assert Path(file_path).read_bytes() == b"new content"
+
+
+def test_download_default_name_replaces_unexpected_extension(server: TSC.Server, tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    with requests_mock.mock() as m:
+        _mock_default_download(m, server, "sitecustomize.py")
+        file_path = server.workbooks.download(WB_ID)
+    assert file_path == str(tmp_path / "sitecustomize.twbx")
+    assert not (tmp_path / "sitecustomize.py").exists()
+
+
+def test_download_default_name_drops_leading_dots(server: TSC.Server, tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    with requests_mock.mock() as m:
+        _mock_default_download(m, server, ".env")
+        file_path = server.workbooks.download(WB_ID)
+    assert file_path == str(tmp_path / "env.twbx")
+
+
+def test_download_explicit_filepath_still_overwrites(server: TSC.Server, tmp_path: Path) -> None:
+    target = tmp_path / "out.twbx"
+    target.write_bytes(b"original")
+    with requests_mock.mock() as m:
+        _mock_default_download(m, server, "RESTAPISample.twbx")
+        file_path = server.workbooks.download(WB_ID, filepath=str(tmp_path / "out"))
+    assert file_path == str(target)
+    assert target.read_bytes() == b"new content"
