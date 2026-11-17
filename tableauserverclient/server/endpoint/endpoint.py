@@ -81,8 +81,7 @@ class Endpoint:
     def set_parameters(http_options, auth_token, content, content_type, parameters) -> dict[str, Any]:
         parameters = parameters or {}
         parameters.update(http_options)
-        if "headers" not in parameters:
-            parameters["headers"] = {}
+        parameters["headers"] = dict(parameters.get("headers") or {})
 
         if auth_token is not None:
             parameters["headers"][TABLEAU_AUTH_HEADER] = auth_token
