@@ -71,6 +71,31 @@ TABLEAU_AUTH_HEADER = "x-tableau-auth"
 USER_AGENT_HEADER = "User-Agent"
 
 
+_DEFAULT_PORTS = {"http": 80, "https": 443}
+_CREDENTIAL_HEADERS = {TABLEAU_AUTH_HEADER, "authorization", "cookie"}
+_CREDENTIAL_PARAMETERS = ("cookies", "auth")
+
+
+def _same_host(current_url: str, next_url: str) -> bool:
+    current = urlparse(current_url)
+    next_ = urlparse(next_url)
+    if (current.hostname or "").lower() != (next_.hostname or "").lower():
+        return False
+    if current.scheme != next_.scheme:
+        # http -> https on the same hostname, matching the server address promotion
+        # in Endpoint._follow_redirect_if_any
+        return True
+    return (current.port or _DEFAULT_PORTS.get(current.scheme)) == (next_.port or _DEFAULT_PORTS.get(next_.scheme))
+
+
+def _without_credentials(parameters: dict[str, Any]) -> dict[str, Any]:
+    stripped = {k: v for k, v in parameters.items() if k not in _CREDENTIAL_PARAMETERS}
+    stripped["headers"] = {
+        k: v for k, v in (parameters.get("headers") or {}).items() if k.lower() not in _CREDENTIAL_HEADERS
+    }
+    return stripped
+
+
 class Endpoint:
     def __init__(self, parent_srv: "Server"):
         self.parent_srv = parent_srv
@@ -266,27 +291,19 @@ class Endpoint:
                         new_address = f"https://{next_host}{port_suffix}"
                         self.parent_srv._server_address = new_address
                         logger.info(f"Server redirected to HTTPS; updated server address to {new_address}")
-            # Auth-material policy: the request `parameters` (headers, body,
-            # cookies) are forwarded to the redirect target unchanged. Two
-            # cases carry credentials:
-            #   1. Already-signed-in calls carry the issued token in the
-            #      X-Tableau-Auth header and session cookies.
-            #   2. sign_in itself has no token yet; the raw credentials
-            #      (username+password or PAT secret) travel in the POST
-            #      body of the signin request.
-            # Both are forwarded on redirect. This is intentional. TSC is a
-            # client library for a specific server the caller has already
-            # agreed to trust, and customers routinely deploy Tableau Server
-            # behind reverse proxies, load balancers, and SSO front-ends that
-            # redirect between hosts within their own infrastructure
-            # (e.g. tableau.corp.example -> east.tableau.corp.example, or
-            # an SSO IdP -> the auth-callback endpoint on a different
-            # subdomain). Stripping credentials on cross-host redirects
-            # would break sign-in against every such deployment.
-            # The HTTPS -> HTTP downgrade guard above (line 208) is the
-            # boundary that keeps this from becoming a security regression:
-            # once the caller connects over HTTPS, credentials never leave
-            # TLS to a downgraded target.
+            # Method and body follow every redirect, so a sign_in redirected to
+            # another host still sends its credentials there (over https only,
+            # given the downgrade check above). Session credentials (the
+            # X-Tableau-Auth token, Authorization and Cookie headers, cookies
+            # and auth options) are only sent while the redirect stays on the
+            # same host; once a hop leaves it they are dropped for the rest of
+            # the chain.
+            if not _same_host(current_url, next_url):
+                logger.warning(
+                    f"Following redirect from host {urlparse(current_url).netloc} to a different host "
+                    f"{urlparse(next_url).netloc}; not sending session credentials"
+                )
+                parameters = _without_credentials(parameters)
             logger.debug(f"Following {response.status_code} redirect: {current_url} -> {next_url}")
             history.append(response)
             current_url = next_url
