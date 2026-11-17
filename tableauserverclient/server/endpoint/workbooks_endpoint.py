@@ -1000,7 +1000,8 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem], Down
                 file_contents,
                 connections=connections,
             )
-        logger.debug(f"Request xml: {redact_xml(xml_request[:1000])} ")
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug(f"Request xml: {redact_xml(xml_request[:1000])} ")
 
         # Send the publishing request to server
         try:
