@@ -1136,7 +1136,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem], Down
         if not include_extract:
             url += "?includeExtract=False"
 
-        return_path = self._download_content(url, filepath)
+        return_path = self._download_content(url, filepath, ("twbx", "twb"))
         logger.info(f"Downloaded workbook revision {revision_number} to {return_path} (ID: {workbook_id})")
         return return_path
 

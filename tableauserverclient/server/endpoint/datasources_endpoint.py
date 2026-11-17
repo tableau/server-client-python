@@ -1073,7 +1073,7 @@ class Datasources(QuerysetEndpoint[DatasourceItem], TaggingMixin[DatasourceItem]
         if not include_extract:
             url += "?includeExtract=False"
 
-        return_path = self._download_content(url, filepath)
+        return_path = self._download_content(url, filepath, ("tdsx", "tds", "hyper"))
         logger.info(f"Downloaded datasource revision {revision_number} to {return_path} (ID: {datasource_id})")
         return return_path
 

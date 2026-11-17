@@ -1185,3 +1185,18 @@ def test_get_datasource_no_owner(server: TSC.Server) -> None:
     datasource = datasources[0]
     assert datasource.owner is None
     assert datasource.project is None
+
+
+def test_download_default_name_replaces_unexpected_extension(server, tmp_path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    existing = tmp_path / "evil.tdsx"
+    existing.write_bytes(b"original")
+    with requests_mock.mock() as m:
+        m.get(
+            server.datasources.baseurl + "/9dbd2263-16b5-46e1-9c43-a76bb8ab65fb/content",
+            headers={"Content-Disposition": 'name="tableau_datasource"; filename="..\\evil.bat"'},
+        )
+        file_path = server.datasources.download("9dbd2263-16b5-46e1-9c43-a76bb8ab65fb")
+    assert file_path == str(tmp_path / "evil (1).tdsx")
+    assert existing.read_bytes() == b"original"
+    assert not (tmp_path / "evil.bat").exists()

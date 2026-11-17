@@ -24,7 +24,7 @@ from typing_extensions import Self
 
 from tableauserverclient.models.pagination_item import PaginationItem
 from tableauserverclient.server.request_options import RequestOptions
-from tableauserverclient.filesys_helpers import to_filename, make_download_path
+from tableauserverclient.filesys_helpers import make_download_path, open_new_file, to_download_filename, to_filename
 
 from tableauserverclient.server.endpoint.exceptions import (
     FailedSignInError,
@@ -471,6 +471,7 @@ class DownloadableMixin:
         self,
         url: str,
         filepath: PathOrFileW | None,
+        allowed_extensions: tuple[str, ...],
     ) -> PathOrFileW:
         """Stream content at url to filepath and return the resolved path.
 
@@ -481,7 +482,12 @@ class DownloadableMixin:
         filepath : PathOrFileW | None
             Destination file path or writable file object.  When None the file
             is saved to the current working directory using the server-supplied
-            filename from the Content-Disposition header.
+            filename from the Content-Disposition header. An existing file is
+            not overwritten; " (1)", " (2)", ... is added to the name instead.
+        allowed_extensions : tuple[str, ...]
+            Extensions accepted from the server-supplied filename when filepath
+            is None, without the leading dot. Any other extension is replaced by
+            the first entry.
 
         Returns
         -------
@@ -497,9 +503,12 @@ class DownloadableMixin:
                     filepath.write(chunk)
                 return filepath
             else:
-                filename = to_filename(os.path.basename(filename))
-                download_path = make_download_path(filepath, filename)
-                with open(download_path, "wb") as f:
+                if filepath is None:
+                    f, download_path = open_new_file(to_download_filename(filename, allowed_extensions))
+                else:
+                    download_path = make_download_path(filepath, to_filename(os.path.basename(filename)))
+                    f = open(download_path, "wb")
+                with f:
                     for chunk in server_response.iter_content(1024):  # 1KB
                         f.write(chunk)
                 return os.path.abspath(download_path)

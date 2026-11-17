@@ -9,6 +9,35 @@ def to_filename(string_to_sanitize):
     return "".join(sanitized)
 
 
+def to_download_filename(server_filename, allowed_extensions):
+    """Reduce a server-provided file name to a bare name whose extension is in allowed_extensions.
+
+    The first entry of allowed_extensions replaces any other extension.
+    """
+    name = to_filename(os.path.basename(server_filename.replace("\\", "/"))).strip().lstrip(".")
+    stem, ext = os.path.splitext(name)
+    ext = ext.lstrip(".").lower()
+    if ext not in allowed_extensions:
+        ext = allowed_extensions[0]
+    stem = stem.strip().rstrip(".") or "download"
+    return f"{stem}.{ext}"
+
+
+def open_new_file(filename, max_attempts=1000):
+    """Open filename for exclusive binary writing, adding " (n)" before the extension if it already exists.
+
+    Returns the open file and the name used.
+    """
+    stem, ext = os.path.splitext(filename)
+    candidate = filename
+    for n in range(1, max_attempts + 1):
+        try:
+            return open(candidate, "xb"), candidate
+        except FileExistsError:
+            candidate = f"{stem} ({n}){ext}"
+    raise FileExistsError(f"Could not find an unused file name for {filename}")
+
+
 def make_download_path(filepath, filename):
     """Resolve a download destination path from an optional target filepath and the server-provided filename."""
     download_path = None
