@@ -82,3 +82,64 @@ def test_redact_password_really_not_xml():
     assert redacted.find("my_s per_secre>_passphrase_which_nobody_should_ever_see") == -1
     assert redacted.find("passphrase") == -1, redacted
     assert redacted.find("cookie") == -1, redacted
+
+
+def test_redact_personal_access_token_secret():
+    redacted = redact_xml(
+        b'<tsRequest><credentials personalAccessTokenName="my-token" personalAccessTokenSecret="PAT-SECRET-VALUE">'
+        b'<site contentUrl="mysite"/></credentials></tsRequest>'
+    )
+    assert redacted.find(b"PAT-SECRET-VALUE") == -1, redacted
+    assert redacted.find(b"my-token") > 0, redacted
+    assert redacted.find(b"mysite") > 0, redacted
+
+
+def test_redact_jwt():
+    redacted = redact_xml(
+        '<tsRequest><credentials jwt="eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1In0.c2lnbmF0dXJl" isUat="false">'
+        '<site contentUrl=""/></credentials></tsRequest>'
+    )
+    assert redacted.find("eyJhbGciOiJIUzI1NiJ9") == -1, redacted
+    assert redacted.find("isUat") > 0, redacted
+
+
+def test_redact_session_token_in_namespaced_response():
+    redacted = redact_xml(
+        '<tsResponse xmlns="http://tableau.com/api"><credentials token="SESSION-TOKEN-VALUE">'
+        '<site id="6b7179ba" contentUrl="Samples"/><user id="1a96d216"/></credentials></tsResponse>'
+    )
+    assert redacted.find("SESSION-TOKEN-VALUE") == -1, redacted
+    assert redacted.find("6b7179ba") > 0, redacted
+    assert redacted.find("1a96d216") > 0, redacted
+
+
+def test_redact_unknown_credentials_attribute():
+    redacted = redact_xml('<tsRequest><credentials name="u" newSecretField="UNKNOWN-SECRET"/></tsRequest>')
+    assert redacted.find("UNKNOWN-SECRET") == -1, redacted
+    assert redacted.find('name="u"') > 0, redacted
+
+
+def test_redact_client_secret():
+    redacted = redact_xml(
+        '<tsRequest><site><openIDConnect clientId="id" clientSecret="CLIENT-SECRET"/></site></tsRequest>'
+    )
+    assert redacted.find("CLIENT-SECRET") == -1, redacted
+    assert redacted.find('clientId="id"') > 0, redacted
+
+
+def test_redact_truncated_xml_does_not_return_secret():
+    body = (
+        b'<tsRequest><credentials personalAccessTokenName="n" personalAccessTokenSecret="PAT-SECRET-VALUE">'
+        b'<site contentUrl=""/></credentials></tsRequest>'
+    )
+    redacted = redact_xml(body[:110])
+    assert redacted.find(b"PAT-SECRET") == -1, redacted
+
+
+def test_redact_unparseable_without_password_returns_placeholder():
+    redacted = redact_xml(
+        "--boundary\r\nContent-Disposition: name=request_payload\r\n\r\n<tsRequest><workbook name='w'"
+    )
+    assert redacted.find("boundary") == -1, redacted
+    assert redacted.find("workbook") == -1, redacted
+    assert redacted == "[unparseable content redacted]", redacted

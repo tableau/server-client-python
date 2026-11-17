@@ -150,10 +150,9 @@ class Endpoint:
         parameters.setdefault("allow_redirects", False)
 
         logger.debug(f"request method {method.__name__}, url: {url}")
-        if content:
-            redacted = helpers.strings.redact_xml(content[:200])
-            # this needs to be under a trace or something, it's a LOT
-            # logger.debug("request content: {}".format(redacted))
+        # this needs to be under a trace or something, it's a LOT
+        # if content:
+        #     logger.debug("request content: {}".format(helpers.strings.redact_xml(content[:200])))
 
         # a request can, for stuff like publishing, spin for ages waiting for a response.
         # we need some user-facing activity so they know it's not dead.
@@ -175,11 +174,10 @@ class Endpoint:
         server_response, url = self._follow_redirect_if_any(method, url, parameters, server_response)
         self._check_status(server_response, url)
 
-        loggable_response = self.log_response_safely(server_response)
         logger.debug(f"Server response from {url}")
         # uncomment the following to log full responses in debug mode
         # BE CAREFUL WHEN SHARING THESE RESULTS - MAY CONTAIN YOUR SENSITIVE DATA
-        # logger.debug(loggable_response)
+        # logger.debug(self.log_response_safely(server_response))
 
         if content_type == "application/xml":
             self.parent_srv._namespace.detect(server_response.content)

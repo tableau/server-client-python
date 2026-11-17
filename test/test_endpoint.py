@@ -1,3 +1,5 @@
+import logging
+from unittest import mock
 from pathlib import Path
 import pytest
 import requests
@@ -159,3 +161,13 @@ def test_server_response_error_missing_summary_and_detail():
     assert err.code == "500001"
     assert err.summary == ""
     assert err.detail == ""
+
+
+def test_response_body_not_redacted_when_not_logged(server: TSC.Server, caplog: pytest.LogCaptureFixture) -> None:
+    url = "http://test/"
+    endpoint = Endpoint(server)
+    with caplog.at_level(logging.DEBUG, logger="TSC"), requests_mock.mock() as m:
+        m.get(url, text="<tsResponse/>", headers={"Content-Type": "application/xml; charset=utf-8"})
+        with mock.patch("tableauserverclient.helpers.strings.redact_xml") as redact:
+            endpoint.get_request(url)
+    redact.assert_not_called()
