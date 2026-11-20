@@ -66,6 +66,10 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+# sphinx-autoapi generated tree; path matches `autoapi_root` in docs/conf.py.
+# Rebuilt on every sphinx-build, must never be committed. Keep in sync if
+# autoapi_root is renamed.
+docs/reference/
 
 # PyBuilder
 target/
