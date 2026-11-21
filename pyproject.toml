@@ -70,6 +70,7 @@ testpaths = ["test"]
 addopts = "--junitxml=./test.junit.xml -n auto"
 markers = [
     "e2e: mark test as end-to-end (requires a real Tableau server)",
+    "e2e_admin: mark test as end-to-end requiring SiteAdmin credentials",
     "packaging: mark test as requiring a built wheel in dist/",
 ]
 
