@@ -51,28 +51,35 @@ class _DefaultPermissionsEndpoint(Endpoint):
         return permissions
 
     def delete_default_permission(
-        self, resource: BaseItem, rule: PermissionsRule, content_type: Resource | str
+        self,
+        resource: BaseItem,
+        rule: PermissionsRule | Sequence[PermissionsRule],
+        content_type: Resource | str,
     ) -> None:
-        for capability, mode in rule.capabilities.items():
-            # Made readability better but line is too long, will make this look better
-            url = (
-                "{baseurl}/{content_id}/default-permissions/"
-                "{content_type}/{grantee_type}/{grantee_id}/{cap}/{mode}".format(
-                    baseurl=self.owner_baseurl(),
-                    content_id=resource.id,
-                    content_type=plural_type(content_type),
-                    grantee_type=rule.grantee.tag_name + "s",
-                    grantee_id=rule.grantee.id,
-                    cap=capability,
-                    mode=mode,
+        # The REST API deletes one capability at a time. Accept a list here,
+        # the same way PermissionsEndpoint.delete does, so callers can remove
+        # every default rule they were given.
+        rules = [rule] if isinstance(rule, PermissionsRule) else list(rule)
+        for one_rule in rules:
+            for capability, mode in one_rule.capabilities.items():
+                url = (
+                    "{baseurl}/{content_id}/default-permissions/"
+                    "{content_type}/{grantee_type}/{grantee_id}/{cap}/{mode}".format(
+                        baseurl=self.owner_baseurl(),
+                        content_id=resource.id,
+                        content_type=plural_type(content_type),
+                        grantee_type=one_rule.grantee.tag_name + "s",
+                        grantee_id=one_rule.grantee.id,
+                        cap=capability,
+                        mode=mode,
+                    )
                 )
-            )
 
-            logger.debug(f"Removing {mode} permission for capability {capability}")
+                logger.debug(f"Removing {mode} permission for capability {capability}")
 
-            self.delete_request(url)
+                self.delete_request(url)
 
-        logger.info(f"Deleted permission for {rule.grantee.tag_name} {rule.grantee.id} item {resource.id}")
+            logger.info(f"Deleted permission for {one_rule.grantee.tag_name} {one_rule.grantee.id} item {resource.id}")
 
     def populate_default_permissions(self, item: BaseItem, content_type: Resource | str) -> None:
         if not item.id:

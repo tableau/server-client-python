@@ -344,6 +344,36 @@ def test_delete_workbook_default_permission(server: TSC.Server) -> None:
         server.projects.delete_workbook_default_permissions(item=single_project, rule=rules)
 
 
+def test_delete_workbook_default_permissions_accepts_a_list(server: TSC.Server) -> None:
+    project = TSC.ProjectItem("test", "1d0304cd-3796-429f-b815-7258370b9b74")
+    project._id = "9dbd2263-16b5-46e1-9c43-a76bb8ab65fb"
+    group_a = "c8f2773a-c83a-11e8-8c8f-33e6d787b506"
+    group_b = "d9e3884b-d94b-22f9-9d54-44f7e898c617"
+    rules = [
+        TSC.PermissionsRule(
+            grantee=TSC.GroupItem.as_reference(group_a),
+            capabilities={TSC.Permission.Capability.Read: TSC.Permission.Mode.Allow},
+        ),
+        TSC.PermissionsRule(
+            grantee=TSC.GroupItem.as_reference(group_b),
+            capabilities={TSC.Permission.Capability.Write: TSC.Permission.Mode.Deny},
+        ),
+    ]
+
+    with requests_mock.mock() as m:
+        m.delete(
+            f"{server.projects.baseurl}/{project.id}/default-permissions/workbooks/groups/{group_a}/Read/Allow",
+            status_code=204,
+        )
+        m.delete(
+            f"{server.projects.baseurl}/{project.id}/default-permissions/workbooks/groups/{group_b}/Write/Deny",
+            status_code=204,
+        )
+        server.projects.delete_workbook_default_permissions(project, rules)
+
+    assert m.call_count == 2
+
+
 def test_populate_virtualconnection_default_permissions(server: TSC.Server) -> None:
     response_xml = POPULATE_VIRTUALCONNECTION_DEFAULT_PERMISSIONS_XML.read_text()
 
