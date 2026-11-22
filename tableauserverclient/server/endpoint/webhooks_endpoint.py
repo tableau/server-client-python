@@ -2,7 +2,7 @@ import logging
 
 from .endpoint import Endpoint, api
 from tableauserverclient.server import RequestFactory
-from tableauserverclient.models import WebhookItem, PaginationItem
+from tableauserverclient.models import PaginationItem, WebhookItem, WebhookTestResultItem
 
 from tableauserverclient.helpers.logging import logger
 
@@ -119,7 +119,7 @@ class Webhooks(Endpoint):
         return new_webhook
 
     @api(version="3.6")
-    def test(self, webhook_id: str):
+    def test(self, webhook_id: str) -> WebhookTestResultItem:
         """
         Tests the specified webhook. Sends an empty payload to the configured
         destination URL of the webhook and returns the response from the server.
@@ -135,13 +135,15 @@ class Webhooks(Endpoint):
 
         Returns
         -------
-        XML Response
+        WebhookTestResultItem
+            The destination's status and body, parsed from webhookTestResult.
 
         """
         if not webhook_id:
             error = "Webhook ID undefined."
             raise ValueError(error)
         url = f"{self.baseurl}/{webhook_id}/test"
-        testOutcome = self.get_request(url)
-        logger.info(f"Testing webhook (ID: {webhook_id} returned {testOutcome})")
-        return testOutcome
+        server_response = self.get_request(url)
+        result = WebhookTestResultItem.from_response(server_response.content, self.parent_srv.namespace)
+        logger.info(f"Testing webhook (ID: {webhook_id}) returned status {result.status}")
+        return result

@@ -61,9 +61,21 @@ def test_delete_missing_id(server: TSC.Server) -> None:
 
 
 def test_test(server: TSC.Server) -> None:
+    response_xml = """<?xml version="1.0" encoding="UTF-8"?>
+    <tsResponse xmlns="http://tableau.com/api">
+      <webhookTestResult id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760" status="200">
+        <body>{"result": "success"}</body>
+      </webhookTestResult>
+    </tsResponse>
+    """
     with requests_mock.mock() as m:
-        m.get(server.webhooks.baseurl + "/ee8c6e70-43b6-11e6-af4f-f7b0d8e20760/test", status_code=200)
-        server.webhooks.test("ee8c6e70-43b6-11e6-af4f-f7b0d8e20760")
+        m.get(server.webhooks.baseurl + "/ee8c6e70-43b6-11e6-af4f-f7b0d8e20760/test", text=response_xml)
+        result = server.webhooks.test("ee8c6e70-43b6-11e6-af4f-f7b0d8e20760")
+
+    assert isinstance(result, TSC.WebhookTestResultItem)
+    assert result.id == "ee8c6e70-43b6-11e6-af4f-f7b0d8e20760"
+    assert result.status == "200"
+    assert result.body == '{"result": "success"}'
 
 
 def test_create(server: TSC.Server) -> None:

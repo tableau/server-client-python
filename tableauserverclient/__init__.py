@@ -57,6 +57,7 @@ from tableauserverclient.models import (
     ViewItem,
     VirtualConnectionItem,
     WebhookItem,
+    WebhookTestResultItem,
     WeeklyInterval,
     WorkbookItem,
 )
@@ -159,6 +160,7 @@ __all__ = [
     "ViewItem",
     "VirtualConnectionItem",
     "WebhookItem",
+    "WebhookTestResultItem",
     "WeeklyInterval",
     "WorkbookItem",
 ]

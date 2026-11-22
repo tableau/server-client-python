@@ -120,3 +120,32 @@ class WebhookItem:
 
     def __repr__(self) -> str:
         return f"<Webhook id={self.id} name={self.name} url={self.url} event={self.event}>"
+
+
+class WebhookTestResultItem:
+    """
+    The result of testing a webhook.
+
+    The Test Webhook method sends an empty payload to the webhook destination
+    and returns what that destination sent back. ``id`` is the webhook id,
+    ``status`` is the destination's HTTP status, and ``body`` is the
+    destination's response body.
+    """
+
+    def __init__(self, id: str | None, status: str | None, body: str | None) -> None:
+        self.id = id
+        self.status = status
+        self.body = body
+
+    def __repr__(self) -> str:
+        return f"<WebhookTestResult id={self.id} status={self.status}>"
+
+    @classmethod
+    def from_response(cls, resp: bytes | str, ns) -> "WebhookTestResultItem":
+        parsed = fromstring(resp)
+        element = parsed.find(".//t:webhookTestResult", namespaces=ns)
+        if element is None:
+            raise ValueError("Webhook test response did not include a webhookTestResult element")
+        body_element = element.find("t:body", namespaces=ns)
+        body = None if body_element is None else body_element.text
+        return cls(element.get("id"), element.get("status"), body)
