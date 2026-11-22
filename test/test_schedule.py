@@ -492,3 +492,78 @@ def test_batch_update_state_all(server: TSC.Server) -> None:
         history = m.request_history[0]
 
     assert history.text == "<tsRequest />"
+
+
+SUBSCRIPTIONS_XML = """<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api">
+  <pagination pageNumber="1" pageSize="100" totalAvailable="2"/>
+  <subscriptions>
+    <subscription id="sub-on-schedule" subject="On the schedule">
+      <content id="view-1" type="View"/>
+      <schedule id="sched-1" name="Nightly"/>
+      <user id="user-1" name="ada"/>
+    </subscription>
+    <subscription id="sub-cloud" subject="Cloud frequency">
+      <content id="view-2" type="View"/>
+      <schedule frequency="Weekly" nextRunAt="2023-06-08T17:05:00-0700"/>
+      <user id="user-1" name="ada"/>
+    </subscription>
+  </subscriptions>
+</tsResponse>
+"""
+
+FLOW_TASKS_XML = """<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api">
+  <pagination pageNumber="1" pageSize="100" totalAvailable="2"/>
+  <tasks>
+    <task>
+      <runFlow id="flow-task-1" type="RunFlowTask" priority="50">
+        <schedule id="sched-1" name="Nightly" type="Flow"/>
+        <flow id="flow-1"/>
+      </runFlow>
+    </task>
+    <task>
+      <runFlow id="flow-task-2" type="RunFlowTask" priority="40">
+        <schedule id="sched-other" name="Weekly" type="Flow"/>
+        <flow id="flow-2"/>
+      </runFlow>
+    </task>
+  </tasks>
+</tsResponse>
+"""
+
+FLOW_MISSING_XML = """<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api">
+  <error code="404001">
+    <summary>Resource Not Found</summary>
+    <detail>Method not found</detail>
+  </error>
+</tsResponse>
+"""
+
+
+def test_get_tasks_on_schedule(server: TSC.Server) -> None:
+    server.version = "3.10"
+    schedule_id = "sched-1"
+    with requests_mock.mock() as m:
+        m.get(f"{server.schedules.siteurl}/{schedule_id}/extracts", text=GET_EXTRACT_TASKS_XML.read_text())
+        m.get(f"{server.baseurl}/sites/{server.site_id}/subscriptions", text=SUBSCRIPTIONS_XML)
+        m.get(f"{server.baseurl}/sites/{server.site_id}/tasks/runFlow", text=FLOW_TASKS_XML)
+        tasks = server.schedules.get_tasks(schedule_id)
+
+    assert [item.id for item in tasks.extracts] == ["task1", "task2"]
+    assert [item.id for item in tasks.subscriptions] == ["sub-on-schedule"]
+    assert [item.id for item in tasks.flow_tasks] == ["flow-task-1"]
+    assert tasks.flow_tasks[0].target.id == "flow-1"
+    assert tasks.flow_tasks[0].target.type == "flow"
+
+
+def test_flow_tasks_missing_on_older_server(server: TSC.Server) -> None:
+    server.version = "3.10"
+    with requests_mock.mock() as m:
+        m.get(
+            f"{server.baseurl}/sites/{server.site_id}/tasks/runFlow",
+            status_code=404,
+            text=FLOW_MISSING_XML,
+        )
+        assert server.schedules.get_flow_tasks_by_schedule("sched-1") == []

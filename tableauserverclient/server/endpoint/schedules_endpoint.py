@@ -6,14 +6,17 @@ from collections import namedtuple
 from typing import TYPE_CHECKING, Any, Callable, Literal, overload
 
 from .endpoint import Endpoint, api, parameter_added_in
-from .exceptions import MissingRequiredFieldError
+from .exceptions import MissingRequiredFieldError, ServerResponseError
 from tableauserverclient.server import RequestFactory
-from tableauserverclient.models import PaginationItem, ScheduleItem, TaskItem, ExtractItem
+from tableauserverclient.server.pager import Pager
+from tableauserverclient.server.request_options import RequestOptions
+from tableauserverclient.models import ExtractItem, PaginationItem, ScheduleItem, SubscriptionItem, TaskItem
 from tableauserverclient.models.schedule_item import parse_batch_schedule_state
 
 from tableauserverclient.helpers.logging import logger
 
 AddResponse = namedtuple("AddResponse", ("result", "error", "warnings", "task_created"))
+ScheduleTasks = namedtuple("ScheduleTasks", ("extracts", "subscriptions", "flow_tasks"))
 OK = AddResponse(result=True, error=None, warnings=None, task_created=None)
 
 if TYPE_CHECKING:
@@ -281,6 +284,80 @@ class Schedules(Endpoint):
         extract_items = ExtractItem.from_response(server_response.content, self.parent_srv.namespace)
 
         return extract_items, pagination_item
+
+    def _collect_pages(self, fetch: Callable[..., tuple[list, PaginationItem]]) -> list:
+        options = RequestOptions(pagesize=1000)
+        collected: list = []
+        while True:
+            batch, pagination = fetch(options)
+            collected.extend(batch)
+            if (
+                not batch
+                or pagination.total_available is None
+                or pagination.page_number is None
+                or pagination.page_size is None
+                or pagination.page_size < 1
+                or pagination.page_number < 1
+                or pagination.page_size * pagination.page_number >= pagination.total_available
+            ):
+                return collected
+            options.pagenumber = pagination.page_number + 1
+            options.pagesize = pagination.page_size
+
+    @api(version="3.2")
+    def get_subscriptions_by_schedule(self, schedule_id: str) -> list[SubscriptionItem]:
+        """
+        Return the Tableau Server subscriptions on this schedule.
+
+        The REST API has no ``/schedules/{id}/subscriptions`` method. Subscriptions
+        are listed for the site, and each Tableau Server subscription carries the
+        schedule id. Tableau Cloud subscriptions use a frequency instead of a
+        server schedule id, so they are not included.
+        """
+        if not schedule_id:
+            raise ValueError("Schedule ID undefined")
+        matches = []
+        for subscription in Pager(self.parent_srv.subscriptions):
+            if subscription.schedule_id == schedule_id:
+                matches.append(subscription)
+        return matches
+
+    @api(version="3.3")
+    def get_flow_tasks_by_schedule(self, schedule_id: str) -> list[TaskItem]:
+        """
+        Return flow run tasks on this server schedule.
+
+        Flow tasks are listed for the site and kept when their schedule id
+        matches. A server that does not have the flow-task method yields an
+        empty list.
+        """
+        if not schedule_id:
+            raise ValueError("Schedule ID undefined")
+        try:
+            tasks = list(Pager(self.parent_srv.tasks.get, task_type=TaskItem.Type.RunFlow))
+        except ServerResponseError as error:
+            if str(error.code).startswith("404"):
+                logger.info("Flow tasks are not available on this server: %s", error.code)
+                return []
+            raise
+        return [task for task in tasks if task.schedule_id == schedule_id]
+
+    @api(version="2.3")
+    def get_tasks(self, schedule_id: str):
+        """
+        List the extract refreshes, subscriptions, and flow tasks on a schedule.
+
+        Extract refreshes come from ``GET .../schedules/{id}/extracts``.
+        Subscriptions and flow tasks are filtered from the site lists, because
+        those task types have no schedule-scoped query. Tableau Cloud
+        subscriptions, which have no server schedule id, are left out.
+        """
+        if not schedule_id:
+            raise ValueError("Schedule ID undefined")
+        extracts = self._collect_pages(lambda options: self.get_extract_refresh_tasks(schedule_id, options))
+        subscriptions = self.get_subscriptions_by_schedule(schedule_id)
+        flow_tasks = self.get_flow_tasks_by_schedule(schedule_id)
+        return ScheduleTasks(extracts, subscriptions, flow_tasks)
 
     @overload
     def batch_update_state(
