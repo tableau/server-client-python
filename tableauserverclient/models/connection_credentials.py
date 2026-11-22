@@ -10,8 +10,10 @@ class ConnectionCredentials:
 
     Parameters
     ----------
-    name: str
-        The username for the connection.
+    name: str | None
+        The username for the connection. Omit it (``None``) to send a password
+        without a name. The server then keeps the username already stored on
+        the connection. An empty string is sent as ``name=""`` and clears it.
 
     password: str
         The password used for the connection.

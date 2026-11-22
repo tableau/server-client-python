@@ -926,6 +926,43 @@ def test_publish_multi_connection_flat(server: TSC.Server) -> None:
     assert connection_results[1].find("connectionCredentials").get("password", None) == "secret"
 
 
+def test_publish_connection_password_without_a_name(server: TSC.Server) -> None:
+    new_workbook = TSC.WorkbookItem(name="Sample", show_tabs=False, project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760")
+    named = TSC.ConnectionItem()
+    named.server_address = "sql.test.com"
+    named.connection_credentials = TSC.ConnectionCredentials(None, "secret", True)
+    unnamed = TSC.ConnectionItem()
+    unnamed.server_address = "sql.test.com"
+    unnamed.password = "secret"
+    unnamed.embed_password = True
+
+    for connection in (named, unnamed):
+        response = RequestFactory.Workbook._generate_xml(new_workbook, connections=[connection])
+        credentials = fromstring(response).find(".//connectionCredentials")
+        assert credentials is not None
+        assert "name" not in credentials.attrib
+        assert credentials.get("password") == "secret"
+        assert credentials.get("embed") == "true"
+
+    blank = TSC.ConnectionItem()
+    blank.server_address = "sql.test.com"
+    blank.connection_credentials = TSC.ConnectionCredentials("", "secret", True)
+    response = RequestFactory.Workbook._generate_xml(new_workbook, connections=[blank])
+    credentials = fromstring(response).find(".//connectionCredentials")
+    assert credentials is not None
+    assert credentials.get("name") == ""
+
+
+def test_publish_connection_credentials_require_a_password(server: TSC.Server) -> None:
+    new_workbook = TSC.WorkbookItem(name="Sample", show_tabs=False, project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760")
+    connection = TSC.ConnectionItem()
+    connection.server_address = "sql.test.com"
+    connection.connection_credentials = TSC.ConnectionCredentials("test", None, True)
+
+    with pytest.raises(ValueError, match="must have a password"):
+        RequestFactory.Workbook._generate_xml(new_workbook, connections=[connection])
+
+
 def test_synchronous_publish_timeout_error(server: TSC.Server) -> None:
     with requests_mock.mock() as m:
         m.register_uri("POST", server.workbooks.baseurl, status_code=504)
