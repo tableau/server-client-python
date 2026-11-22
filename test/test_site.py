@@ -223,6 +223,49 @@ def test_update_subscription_email_and_footer_preserve_case() -> None:
 
 
 @pytest.mark.filterwarnings("ignore:FlowsEnabled has been removed")
+@pytest.mark.filterwarnings("ignore:In version 3.10 and earlier")
+def test_create_req_omits_attributes_the_server_version_does_not_have() -> None:
+    site = TSC.SiteItem("Tableau", "tableau")
+
+    old = TSC.Server("http://old", False)
+    old.version = "2.8"
+    old_elem = ET.fromstring(RequestFactory.Site.create_req(site, old)).find(".//site")
+    assert old_elem is not None
+    assert old_elem.attrib["name"] == "Tableau"
+    assert old_elem.attrib["disableSubscriptions"] == "false"
+    assert "commentingEnabled" not in old_elem.attrib
+    assert "guestAccessEnabled" not in old_elem.attrib
+    assert "cacheWarmupEnabled" not in old_elem.attrib
+    assert "tierCreatorCapacity" not in old_elem.attrib
+
+    current = TSC.Server("http://current", False)
+    current.version = "3.10"
+    current_elem = ET.fromstring(RequestFactory.Site.create_req(site, current)).find(".//site")
+    assert current_elem is not None
+    assert current_elem.attrib["commentingEnabled"] == "true"
+    assert current_elem.attrib["cacheWarmupEnabled"] == "true"
+
+    after_removal = TSC.Server("http://later", False)
+    after_removal.version = "3.19"
+    removed_elem = ET.fromstring(RequestFactory.Site.create_req(site, after_removal)).find(".//site")
+    assert removed_elem is not None
+    assert "cacheWarmupEnabled" not in removed_elem.attrib
+    assert removed_elem.attrib["commentingEnabled"] == "true"
+
+    site.attribute_capture_enabled = True
+    before_capture = TSC.Server("http://capture", False)
+    before_capture.version = "3.24"
+    before_elem = ET.fromstring(RequestFactory.Site.create_req(site, before_capture)).find(".//site")
+    assert before_elem is not None
+    assert "attributeCaptureEnabled" not in before_elem.attrib
+    supports_capture = TSC.Server("http://capture", False)
+    supports_capture.version = "3.25"
+    capture_elem = ET.fromstring(RequestFactory.Site.create_req(site, supports_capture)).find(".//site")
+    assert capture_elem is not None
+    assert capture_elem.attrib["attributeCaptureEnabled"] == "true"
+
+
+@pytest.mark.filterwarnings("ignore:FlowsEnabled has been removed")
 def test_create_subscription_email_and_footer_preserve_case() -> None:
     # Same regression for the create-site path.
     site = TSC.SiteItem(name="X", content_url="x")
