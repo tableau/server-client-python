@@ -9,6 +9,7 @@ from tableauserverclient.server.filter import Filter
 from tableauserverclient.models.permissions_item import PermissionsRule
 from tableauserverclient.models import ProjectItem, PaginationItem, Resource
 
+from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
 from tableauserverclient.server.query import QuerySet
@@ -731,9 +732,11 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         return self._default_permissions.update_default_permissions(item, rules, Resource.Table)
 
     @api(version="2.1")
-    def delete_workbook_default_permissions(self, item: ProjectItem, rule: PermissionsRule) -> None:
+    def delete_workbook_default_permissions(
+        self, item: ProjectItem, rule: PermissionsRule | Sequence[PermissionsRule]
+    ) -> None:
         """
-        Deletes the specified default permission rule from the project.
+        Deletes one default permission rule, or each rule in a list, from the project.
 
         REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission
 
@@ -752,9 +755,11 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         self._default_permissions.delete_default_permission(item, rule, Resource.Workbook)
 
     @api(version="2.1")
-    def delete_datasource_default_permissions(self, item: ProjectItem, rule: PermissionsRule) -> None:
+    def delete_datasource_default_permissions(
+        self, item: ProjectItem, rule: PermissionsRule | Sequence[PermissionsRule]
+    ) -> None:
         """
-        Deletes the specified default permission rule from the project.
+        Deletes one default permission rule, or each rule in a list, from the project.
 
         REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission
 
@@ -773,9 +778,11 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         self._default_permissions.delete_default_permission(item, rule, Resource.Datasource)
 
     @api(version="3.2")
-    def delete_metric_default_permissions(self, item: ProjectItem, rule: PermissionsRule) -> None:
+    def delete_metric_default_permissions(
+        self, item: ProjectItem, rule: PermissionsRule | Sequence[PermissionsRule]
+    ) -> None:
         """
-        Deletes the specified default permission rule from the project.
+        Deletes one default permission rule, or each rule in a list, from the project.
 
         REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission
 
@@ -794,9 +801,11 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         self._default_permissions.delete_default_permission(item, rule, Resource.Metric)
 
     @api(version="3.4")
-    def delete_datarole_default_permissions(self, item: ProjectItem, rule: PermissionsRule) -> None:
+    def delete_datarole_default_permissions(
+        self, item: ProjectItem, rule: PermissionsRule | Sequence[PermissionsRule]
+    ) -> None:
         """
-        Deletes the specified default permission rule from the project.
+        Deletes one default permission rule, or each rule in a list, from the project.
 
         REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission
 
@@ -815,9 +824,11 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         self._default_permissions.delete_default_permission(item, rule, Resource.Datarole)
 
     @api(version="3.4")
-    def delete_flow_default_permissions(self, item: ProjectItem, rule: PermissionsRule) -> None:
+    def delete_flow_default_permissions(
+        self, item: ProjectItem, rule: PermissionsRule | Sequence[PermissionsRule]
+    ) -> None:
         """
-        Deletes the specified default permission rule from the project.
+        Deletes one default permission rule, or each rule in a list, from the project.
 
         REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission
 
@@ -836,9 +847,11 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         self._default_permissions.delete_default_permission(item, rule, Resource.Flow)
 
     @api(version="3.4")
-    def delete_lens_default_permissions(self, item: ProjectItem, rule: PermissionsRule) -> None:
+    def delete_lens_default_permissions(
+        self, item: ProjectItem, rule: PermissionsRule | Sequence[PermissionsRule]
+    ) -> None:
         """
-        Deletes the specified default permission rule from the project.
+        Deletes one default permission rule, or each rule in a list, from the project.
 
         REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission
 
@@ -857,9 +870,11 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         self._default_permissions.delete_default_permission(item, rule, Resource.Lens)
 
     @api(version="3.23")
-    def delete_virtualconnection_default_permissions(self, item: ProjectItem, rule: PermissionsRule) -> None:
+    def delete_virtualconnection_default_permissions(
+        self, item: ProjectItem, rule: PermissionsRule | Sequence[PermissionsRule]
+    ) -> None:
         """
-        Deletes the specified default permission rule from the project.
+        Deletes one default permission rule, or each rule in a list, from the project.
 
         REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission
 
@@ -878,9 +893,11 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         self._default_permissions.delete_default_permission(item, rule, Resource.VirtualConnection)
 
     @api(version="3.23")
-    def delete_database_default_permissions(self, item: ProjectItem, rule: PermissionsRule) -> None:
+    def delete_database_default_permissions(
+        self, item: ProjectItem, rule: PermissionsRule | Sequence[PermissionsRule]
+    ) -> None:
         """
-        Deletes the specified default permission rule from the project.
+        Deletes one default permission rule, or each rule in a list, from the project.
 
         REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission
 
@@ -899,9 +916,11 @@ class Projects(QuerysetEndpoint[ProjectItem]):
         self._default_permissions.delete_default_permission(item, rule, Resource.Database)
 
     @api(version="3.23")
-    def delete_table_default_permissions(self, item: ProjectItem, rule: PermissionsRule) -> None:
+    def delete_table_default_permissions(
+        self, item: ProjectItem, rule: PermissionsRule | Sequence[PermissionsRule]
+    ) -> None:
         """
-        Deletes the specified default permission rule from the project.
+        Deletes one default permission rule, or each rule in a list, from the project.
 
         REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_permissions.htm#delete_default_permission
 

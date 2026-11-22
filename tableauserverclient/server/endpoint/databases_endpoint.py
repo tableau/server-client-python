@@ -1,6 +1,6 @@
 import logging
 from typing import TYPE_CHECKING
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 
 from tableauserverclient.models.permissions_item import PermissionsRule
 from tableauserverclient.server.endpoint.default_permissions_endpoint import _DefaultPermissionsEndpoint
@@ -191,7 +191,9 @@ class Databases(Endpoint, TaggingMixin):
         return self._default_permissions.update_default_permissions(item, rules, Resource.Table)
 
     @api(version="3.5")
-    def delete_table_default_permissions(self, rule: PermissionsRule, item: DatabaseItem) -> None:
+    def delete_table_default_permissions(
+        self, rule: PermissionsRule | Sequence[PermissionsRule], item: DatabaseItem
+    ) -> None:
         self._default_permissions.delete_default_permission(item, rule, Resource.Table)
 
     @api(version="3.5")
