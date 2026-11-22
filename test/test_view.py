@@ -582,3 +582,36 @@ def test_delete_view(server: TSC.Server, view: TSC.ViewItem | str) -> None:
         server.views.delete(view)
         assert m.called
         assert m.call_count == 1
+
+
+def _overview() -> TSC.ViewItem:
+    view = TSC.ViewItem()
+    view._content_url = "Superstore/sheets/Overview"
+    view._view_url_name = "Overview"
+    return view
+
+
+def test_embed_code_uses_the_legacy_share_snippet_before_2021_4(server: TSC.Server) -> None:
+    server._site_url = "Samples"
+    server.version = "3.2"
+    code = server.views.embed_code(_overview())
+    assert "javascripts/api/viz_v1.js" in code
+    assert "value='Superstore/Overview'" in code
+    assert "value='/t/Samples'" in code
+    assert "tableau.embedding" not in code
+
+
+def test_embed_code_uses_embedding_api_v3(server: TSC.Server) -> None:
+    server._site_url = ""
+    server.version = "3.13"
+    code = server.views.embed_code(_overview())
+    assert 'src="http://test/javascripts/api/tableau.embedding.3.latest.min.js"' in code
+    assert 'src="http://test/views/Superstore/Overview"' in code
+    assert "<tableau-viz" in code
+
+
+def test_embed_code_includes_the_site(server: TSC.Server) -> None:
+    server._site_url = "Samples"
+    server.version = "3.22"
+    code = server.views.embed_code(_overview())
+    assert 'src="http://test/t/Samples/views/Superstore/Overview"' in code

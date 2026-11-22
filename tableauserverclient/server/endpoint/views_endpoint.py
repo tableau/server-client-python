@@ -1,5 +1,7 @@
+import html
 import logging
 from contextlib import closing
+from urllib.parse import quote
 
 from tableauserverclient.models.permissions_item import PermissionsRule
 from tableauserverclient.server.endpoint.endpoint import QuerysetEndpoint, api
@@ -460,6 +462,58 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
         None
         """
         return super().update_tags(item)
+
+    def embed_code(self, view: ViewItem) -> str:
+        """
+        Build the Share-dialog embed snippet for a view.
+
+        The REST API does not return this HTML. The snippet is the one the
+        Share button copies: the Embedding API v3 web component on Tableau
+        2021.4 (REST API 3.13) and later, and the JavaScript API object embed
+        on older servers. ``src`` is the view URL for the signed-in site.
+        """
+        if not view.content_url:
+            raise MissingRequiredFieldError("View item missing content URL.")
+        parts = [part for part in view.content_url.split("/") if part]
+        if len(parts) < 2:
+            raise MissingRequiredFieldError("View content URL does not identify a workbook and a view.")
+        workbook = parts[0]
+        sheet = view.view_url_name or parts[-1]
+        server = self.parent_srv.server_address.rstrip("/")
+        site = self.parent_srv.site_url
+        view_path = f"{quote(workbook, safe='')}/{quote(sheet, safe='')}"
+        if site:
+            src = f"{server}/t/{quote(site, safe='')}/views/{view_path}"
+            site_root = f"/t/{site}"
+        else:
+            src = f"{server}/views/{view_path}"
+            site_root = ""
+        if self.parent_srv.check_at_least_version("3.13"):
+            script = f"{server}/javascripts/api/tableau.embedding.3.latest.min.js"
+            return (
+                f'<script type="module" src="{html.escape(script, quote=True)}"></script>\n'
+                f'<tableau-viz id="tableauViz" src="{html.escape(src, quote=True)}" '
+                f'toolbar="bottom" hide-tabs></tableau-viz>'
+            )
+        host = html.escape(server + "/", quote=True)
+        return (
+            "<div class='tableauPlaceholder' id='vizDIV' style='position: relative'>\n"
+            "<object class='tableauViz' style='display:none;'>\n"
+            f"<param name='host_url' value='{host}' />\n"
+            "<param name='embed_code_version' value='3' />\n"
+            f"<param name='site_root' value='{html.escape(site_root, quote=True)}' />\n"
+            f"<param name='name' value='{html.escape(workbook + '/' + sheet, quote=True)}' />\n"
+            "<param name='tabs' value='no' />\n"
+            "<param name='toolbar' value='yes' />\n"
+            "</object></div>\n"
+            "<script type='text/javascript'>\n"
+            "var divElement = document.getElementById('vizDIV');\n"
+            "var vizElement = divElement.getElementsByTagName('object')[0];\n"
+            "var scriptElement = document.createElement('script');\n"
+            f"scriptElement.src = '{html.escape(server, quote=True)}/javascripts/api/viz_v1.js';\n"
+            "vizElement.parentNode.insertBefore(scriptElement, vizElement);\n"
+            "</script>"
+        )
 
     def filter(self, *invalid, page_size: int | None = None, **kwargs) -> QuerySet[ViewItem]:
         """
