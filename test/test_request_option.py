@@ -414,6 +414,22 @@ def test_queryset_only_fields(server: TSC.Server) -> None:
     assert "_default_" not in loop.request_options.fields
 
 
+def test_queryset_chained_fields(server: TSC.Server) -> None:
+    # QuerySet.fields is the method reached when fields() follows filter(), order_by() or paginate()
+    loop = server.users.filter(name="alice").fields("id")
+    assert loop.request_options.fields == {"id", "_default_"}
+
+
+def test_queryset_chained_fields_query_string(server: TSC.Server) -> None:
+    with requests_mock.mock() as m:
+        m.get(server.views.baseurl, text=SLICING_QUERYSET_PAGE_1.read_text())
+        loop = server.views.order_by("name").fields("id", "name")
+        list(loop)
+        history = m.request_history[0]
+
+    assert history.qs.get("fields") == ["_default_,id,name"]
+
+
 def test_queryset_field_order(server: TSC.Server) -> None:
     with requests_mock.mock() as m:
         m.get(server.views.baseurl, text=SLICING_QUERYSET_PAGE_1.read_text())

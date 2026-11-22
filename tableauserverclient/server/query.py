@@ -237,7 +237,7 @@ class QuerySet(Iterable[T], Sized):
         -------
         QuerySet
         """
-        self.request_options.fields |= set(fields) | set(("_default_"))
+        self.request_options.fields |= set(fields) | {"_default_"}
         return self
 
     def only_fields(self: Self, *fields: str) -> Self:
