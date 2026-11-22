@@ -61,7 +61,10 @@ class WorkbookItem:
         User-defined description of the workbook.
 
     encrypt_extracts : bool | None
-        Indicates whether extracts are encrypted.
+        Set this before publishing to send ``encryptExtracts``. ``True`` encrypts
+        the workbook's extracts and ``False`` leaves them unencrypted. ``None``
+        omits the attribute, which is also what a workbook parsed from the
+        server uses when the response does not include it.
 
     has_extracts : bool | None
         Indicates whether the workbook has extracts.
@@ -356,6 +359,11 @@ class WorkbookItem:
     @property
     def encrypt_extracts(self) -> bool | None:
         return self._encrypt_extracts
+
+    @encrypt_extracts.setter
+    @property_is_boolean
+    def encrypt_extracts(self, value: bool) -> None:
+        self._encrypt_extracts = value
 
     @property
     def default_view_id(self) -> str | None:

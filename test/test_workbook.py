@@ -884,6 +884,20 @@ def test_publish_file_object_of_unknown_type_raises_exception(server: TSC.Server
             server.workbooks.publish(new_workbook, file_object, server.PublishMode.CreateNew)
 
 
+def test_publish_sends_encrypt_extracts_when_set(server: TSC.Server) -> None:
+    new_workbook = TSC.WorkbookItem(name="Sample", show_tabs=False, project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760")
+    omitted = RequestFactory.Workbook._generate_xml(new_workbook)
+    assert "encryptExtracts" not in fromstring(omitted).find("workbook").attrib
+
+    new_workbook.encrypt_extracts = True
+    encrypted = RequestFactory.Workbook._generate_xml(new_workbook)
+    assert fromstring(encrypted).find("workbook").get("encryptExtracts") == "true"
+
+    new_workbook.encrypt_extracts = False
+    plain = RequestFactory.Workbook._generate_xml(new_workbook)
+    assert fromstring(plain).find("workbook").get("encryptExtracts") == "false"
+
+
 def test_publish_multi_connection(server: TSC.Server) -> None:
     new_workbook = TSC.WorkbookItem(name="Sample", show_tabs=False, project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760")
     connection1 = TSC.ConnectionItem()
