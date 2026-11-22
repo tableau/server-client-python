@@ -1,5 +1,6 @@
 import logging
 from typing import TYPE_CHECKING
+from urllib.parse import urljoin, urlparse
 import warnings
 
 from defusedxml.ElementTree import fromstring
@@ -66,6 +67,7 @@ class Auth(Endpoint):
         >>> # call the sign-in method with the auth object
         >>> server.auth.sign_in(tableau_auth)
         """
+        self._use_https_if_the_server_requires_it()
         url = f"{self.baseurl}/signin"
         signin_req = RequestFactory.Auth.signin_req(auth_req)
         # Route through _make_request so signin gets the same redirect handling
@@ -90,6 +92,50 @@ class Auth(Endpoint):
         if self.parent_srv._use_server_version:
             self.parent_srv.use_server_version()
         return Auth.contextmgr(self.sign_out)
+
+    def _use_https_if_the_server_requires_it(self) -> None:
+        """Switch an http address to https before the sign-in POST.
+
+        An http sign-in against a server that requires https is rejected with
+        405, after the credentials have already been sent in cleartext. Probe
+        the unauthenticated serverInfo endpoint first. A redirect to https on
+        the same host, or an http refusal that succeeds over https, updates
+        the stored address. An http-only server is left unchanged.
+        """
+        address = self.parent_srv.server_address
+        parsed = urlparse(address)
+        if parsed.scheme != "http":
+            return
+        timeout = self.parent_srv.http_options.get("timeout")
+        verify = self.parent_srv.http_options.get("verify", True)
+        probe_url = f"{address}/api/{self.parent_srv.version}/serverInfo"
+        try:
+            response = self.parent_srv.session.get(probe_url, allow_redirects=False, timeout=timeout, verify=verify)
+        except Exception as exc:
+            logger.info("Could not probe %s before sign-in: %s", probe_url, exc)
+            return
+
+        https_address = "https://" + address[len("http://") :]
+        if response.is_redirect or response.status_code in (301, 302, 303, 307, 308):
+            location = response.headers.get("Location") or ""
+            target = urlparse(urljoin(probe_url, location))
+            if target.scheme == "https" and target.netloc == parsed.netloc:
+                self.parent_srv._server_address = https_address
+                logger.info("Server requires HTTPS; signing in at %s", https_address)
+            return
+        if response.status_code not in (400, 403, 405):
+            return
+        https_probe = f"{https_address}/api/{self.parent_srv.version}/serverInfo"
+        try:
+            https_response = self.parent_srv.session.get(
+                https_probe, allow_redirects=False, timeout=timeout, verify=verify
+            )
+        except Exception as exc:
+            logger.info("Could not probe %s before sign-in: %s", https_probe, exc)
+            return
+        if https_response.status_code == 200:
+            self.parent_srv._server_address = https_address
+            logger.info("Server requires HTTPS; signing in at %s", https_address)
 
     # We use the same request that username/password login uses for all auth types.
     # The distinct methods are mostly useful for explicitly showing api version support for each auth type
