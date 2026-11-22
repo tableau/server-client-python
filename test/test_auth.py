@@ -19,6 +19,63 @@ def server() -> TSC.Server:
     return server_instance
 
 
+def test_sign_in_switches_to_https_when_the_probe_redirects() -> None:
+    server = TSC.Server("http://tableau.example", False)
+    response_xml = SIGN_IN_XML.read_text()
+    with requests_mock.mock() as m:
+        m.get(
+            "http://tableau.example/api/2.4/serverInfo",
+            status_code=301,
+            headers={"Location": "https://tableau.example/api/2.4/serverInfo"},
+        )
+        m.post("https://tableau.example/api/2.4/auth/signin", text=response_xml)
+        server.auth.sign_in(TSC.TableauAuth("testuser", "password", site_id="Samples"))
+
+    assert server.server_address == "https://tableau.example"
+    assert [call.method for call in m.request_history] == ["GET", "POST"]
+    assert m.request_history[1].url.startswith("https://tableau.example/")
+
+
+def test_sign_in_stays_on_http_when_the_server_accepts_it() -> None:
+    server = TSC.Server("http://plain.example", False)
+    response_xml = SIGN_IN_XML.read_text()
+    info_xml = """<?xml version='1.0' encoding='utf-8'?>
+        <tsResponse xmlns="http://tableau.com/api">
+          <serverInfo>
+            <productVersion build="1">10.0.0</productVersion>
+            <restApiVersion>2.4</restApiVersion>
+          </serverInfo>
+        </tsResponse>"""
+    with requests_mock.mock() as m:
+        m.get("http://plain.example/api/2.4/serverInfo", text=info_xml)
+        m.post("http://plain.example/api/2.4/auth/signin", text=response_xml)
+        server.auth.sign_in(TSC.TableauAuth("testuser", "password"))
+
+    assert server.server_address == "http://plain.example"
+    assert m.request_history[1].url.startswith("http://plain.example/")
+
+
+def test_sign_in_switches_to_https_when_http_is_rejected() -> None:
+    server = TSC.Server("http://secure.example", False)
+    response_xml = SIGN_IN_XML.read_text()
+    info_xml = """<?xml version='1.0' encoding='utf-8'?>
+        <tsResponse xmlns="http://tableau.com/api">
+          <serverInfo>
+            <productVersion build="1">2024.1.0</productVersion>
+            <restApiVersion>3.22</restApiVersion>
+          </serverInfo>
+        </tsResponse>"""
+    with requests_mock.mock() as m:
+        m.get("http://secure.example/api/2.4/serverInfo", status_code=405)
+        m.get("https://secure.example/api/2.4/serverInfo", text=info_xml)
+        m.post("https://secure.example/api/2.4/auth/signin", text=response_xml)
+        server.auth.sign_in(TSC.TableauAuth("testuser", "password"))
+
+    assert server.server_address == "https://secure.example"
+    assert m.request_history[0].method == "GET"
+    assert m.request_history[-1].url.startswith("https://secure.example/")
+
+
 def test_sign_in(server: TSC.Server) -> None:
     with open(SIGN_IN_XML, "rb") as f:
         response_xml = f.read().decode("utf-8")
