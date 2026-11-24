@@ -15,7 +15,7 @@ readme = "README.md"
 dependencies = [
     'defusedxml>=0.7.1',  # latest as at 7/31/23
     'packaging>=23.1',   # latest as at 7/31/23
-    'requests>=2.32.4',  # released 6/9/25
+    'requests>=2.33.0',  # released 3/25/26
     'urllib3>=2.8.0,<3',  # latest as at 11/16/26
     'typing_extensions>=4.0',
 ]
