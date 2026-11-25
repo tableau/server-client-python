@@ -43,11 +43,11 @@ class WorkbookItem:
         Determines whether the workbook shows tabs for the view.
 
     bridge_refresh_embedded_files : bool | None, optional
-        Tableau Cloud only. Opts in to bridge refresh for file-based connections
-        embedded in the workbook. Sent only when the workbook is published, and
-        not read back from server responses. If None (the default), the setting
-        is not sent. Requires REST API 3.30 or later. Publishing with this set
-        raises EndpointUnavailableError on a lower REST version.
+        Intended for Tableau Cloud sites that use Bridge. Opts in to bridge refresh
+        for embedded extracts over file-based connections in the workbook. Sent only
+        when the workbook is published. If None (the default), the setting is not
+        sent. Requires REST API 3.30 or later. Publishing with this set raises
+        EndpointUnavailableError on a lower REST version.
 
     Attributes
     ----------
