@@ -32,6 +32,17 @@ def property_is_boolean(func):
     return wrapper
 
 
+def property_is_boolean_or_none(func):
+    @wraps(func)
+    def wrapper(self, value):
+        if value is not None and not isinstance(value, bool):
+            error = f"Boolean or None expected for {func.__name__} flag."
+            raise ValueError(error)
+        return func(self, value)
+
+    return wrapper
+
+
 def property_not_nullable(func):
     @wraps(func)
     def wrapper(self, value):

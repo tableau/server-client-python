@@ -12,6 +12,7 @@ import tableauserverclient as TSC
 from tableauserverclient.datetime_helpers import format_datetime, parse_datetime
 from tableauserverclient.models import UserItem, GroupItem, PermissionsRule
 from tableauserverclient.server.endpoint.exceptions import InternalServerError, UnsupportedAttributeError
+from tableauserverclient.server.exceptions import EndpointUnavailableError
 from tableauserverclient.server.request_factory import RequestFactory
 
 TEST_ASSET_DIR = Path(__file__).parent / "assets"
@@ -648,6 +649,51 @@ def test_publish_description_in_request_xml(server: TSC.Server) -> None:
         server.workbooks.publish(new_workbook, sample_workbook, server.PublishMode.CreateNew)
         request_body = m._adapter.request_history[0]._request.body
     assert re.search(b'description=\\"A great workbook\\"', request_body)
+
+
+def test_publish_sends_bridge_refresh_embedded_files(server: TSC.Server) -> None:
+    """The opt-in set on the WorkbookItem must reach the publish request body."""
+    server.version = "3.30"
+    response_xml = PUBLISH_XML.read_text()
+    with requests_mock.mock() as m:
+        m.post(server.workbooks.baseurl, text=response_xml)
+        new_workbook = TSC.WorkbookItem(
+            name="Sample",
+            show_tabs=False,
+            project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760",
+            bridge_refresh_embedded_files=True,
+        )
+        sample_workbook = os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")
+        server.workbooks.publish(new_workbook, sample_workbook, server.PublishMode.CreateNew)
+        request_body = m._adapter.request_history[0]._request.body
+    assert re.search(rb'<workbook[^>]*bridgeRefreshEmbeddedFiles="true"', request_body)
+
+
+def test_publish_bridge_refresh_embedded_files_requires_rest_3_30(server: TSC.Server) -> None:
+    """Setting the opt-in against an older REST version raises before any request is made."""
+    server.version = "3.29"
+    with requests_mock.mock() as m:
+        new_workbook = TSC.WorkbookItem(
+            name="Sample",
+            project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760",
+            bridge_refresh_embedded_files=False,
+        )
+        sample_workbook = os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")
+        with pytest.raises(EndpointUnavailableError, match="bridge_refresh_embedded_files"):
+            server.workbooks.publish(new_workbook, sample_workbook, server.PublishMode.CreateNew)
+        assert m.call_count == 0
+
+
+def test_publish_without_bridge_refresh_embedded_files_needs_no_version_check(server: TSC.Server) -> None:
+    """Leaving the opt-in unset must keep working on older REST versions."""
+    server.version = "3.29"
+    response_xml = PUBLISH_XML.read_text()
+    with requests_mock.mock() as m:
+        m.post(server.workbooks.baseurl, text=response_xml)
+        new_workbook = TSC.WorkbookItem(name="Sample", project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760")
+        sample_workbook = os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")
+        server.workbooks.publish(new_workbook, sample_workbook, server.PublishMode.CreateNew)
+        assert b"bridgeRefreshEmbeddedFiles" not in m._adapter.request_history[0]._request.body
 
 
 def test_publish_a_packaged_file_object(server: TSC.Server) -> None:

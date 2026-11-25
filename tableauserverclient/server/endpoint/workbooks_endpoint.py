@@ -911,11 +911,18 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem], Down
         ValueError
             Workbooks cannot be appended.
 
+        EndpointUnavailableError
+            If workbook_item.bridge_refresh_embedded_files is set and the server
+            REST API version is lower than 3.30.
+
         Returns
         -------
         WorkbookItem | JobItem
             The workbook item or job item that was published.
         """
+        if workbook_item.bridge_refresh_embedded_files is not None:
+            self.parent_srv.assert_at_least_version("3.30", "bridge_refresh_embedded_files")
+
         if isinstance(file, (str, os.PathLike)):
             if not os.path.isfile(file):
                 error = "File path does not lead to an existing file."

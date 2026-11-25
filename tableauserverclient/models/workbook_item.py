@@ -15,6 +15,7 @@ from .exceptions import UnpopulatedPropertyError
 from .permissions_item import PermissionsRule
 from .property_decorators import (
     property_is_boolean,
+    property_is_boolean_or_none,
     property_is_data_acceleration_config,
 )
 from .revision_item import RevisionItem
@@ -40,6 +41,13 @@ class WorkbookItem:
 
     show_tabs : bool, optional
         Determines whether the workbook shows tabs for the view.
+
+    bridge_refresh_embedded_files : bool | None, optional
+        Intended for Tableau Cloud sites that use Bridge. Opts in to bridge refresh
+        for embedded extracts over file-based connections in the workbook. Sent only
+        when the workbook is published. If None (the default), the setting is not
+        sent. Requires REST API 3.30 or later. Publishing with this set raises
+        EndpointUnavailableError on a lower REST version.
 
     Attributes
     ----------
@@ -130,6 +138,7 @@ class WorkbookItem:
         show_tabs: bool = False,
         thumbnails_user_id: str | None = None,
         thumbnails_group_id: str | None = None,
+        bridge_refresh_embedded_files: bool | None = None,
     ) -> None:
         self._connections = None
         self._content_url = None
@@ -151,6 +160,7 @@ class WorkbookItem:
         # workaround for Personal Space workbooks without a project
         self.project_id: str | None = project_id or uuid.uuid4().__str__()
         self.show_tabs = show_tabs
+        self.bridge_refresh_embedded_files = bridge_refresh_embedded_files
         self.hidden_views: list[str] | None = None
         self.tags: set[str] = set()
         self.data_acceleration_config = {
@@ -262,6 +272,15 @@ class WorkbookItem:
     @property_is_boolean
     def show_tabs(self, value: bool):
         self._show_tabs = value
+
+    @property
+    def bridge_refresh_embedded_files(self) -> bool | None:
+        return self._bridge_refresh_embedded_files
+
+    @bridge_refresh_embedded_files.setter
+    @property_is_boolean_or_none
+    def bridge_refresh_embedded_files(self, value: bool | None):
+        self._bridge_refresh_embedded_files = value
 
     @property
     def size(self):
