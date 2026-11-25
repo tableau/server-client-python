@@ -694,6 +694,40 @@ class ScheduleRequest:
 
 
 class SiteRequest:
+
+    def _site_version_allows(self, parent_srv, minimum: str | None = None, until: str | None = None) -> bool:
+        """Whether this API version accepts the site attribute.
+
+        A request with no server, or a ``Server`` whose version is still the
+        constructor default, keeps every attribute. The default ``"2.4"`` is
+        not a detected server version. Assigning ``server.version`` or calling
+        ``use_server_version()`` turns the gate on.
+
+        Thresholds, from the Tableau REST reference:
+
+        - Tier capacities (``tierCreatorCapacity`` and the other tier
+          attributes): REST API 3.7 and later. What's New for 3.7 and
+          https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_new_site_roles.htm
+        - ``dataAccelerationMode``: Tableau Server 2020.2 (API 3.8) through
+          2021.4, which the Site Methods page numbers as API 3.15, so it is
+          omitted from 3.16. The version table maps 2021.4 to 3.14 and 2022.1
+          to 3.15.
+          https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_site.htm
+        - The settings added for Tableau Server 2020.3: REST API 3.9, from the
+          version table. Create Site lists them without a per-attribute
+          version. TSC started sending them in #777.
+          https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm
+        - ``cacheWarmupEnabled``: removed in API 3.19 (Site Methods).
+        - ``attributeCaptureEnabled``: API 3.25 and later (Site Methods).
+        """
+        if parent_srv is None or not getattr(parent_srv, "_version_is_explicit", False):
+            return True
+        if minimum is not None and not parent_srv.check_at_least_version(minimum):
+            return False
+        if until is not None and parent_srv.check_at_least_version(until):
+            return False
+        return True
+
     def update_req(self, site_item: "SiteItem", parent_srv: "Server | None" = None):
         xml_request = ET.Element("tsRequest")
         site_element = ET.SubElement(xml_request, "site")
@@ -717,7 +751,7 @@ class SiteRequest:
             site_element.attrib["revisionLimit"] = str(site_item.revision_limit)
         if site_item.revision_history_enabled is not None:
             site_element.attrib["revisionHistoryEnabled"] = str(site_item.revision_history_enabled).lower()
-        if site_item.data_acceleration_mode is not None:
+        if site_item.data_acceleration_mode is not None and self._site_version_allows(parent_srv, "3.8", "3.16"):
             site_element.attrib["dataAccelerationMode"] = str(site_item.data_acceleration_mode).lower()
         if site_item.cataloging_enabled is not None:
             site_element.attrib["catalogingEnabled"] = str(site_item.cataloging_enabled).lower()
@@ -728,77 +762,79 @@ class SiteRequest:
 
         self.set_versioned_flow_attributes(flows_all, flows_edit, flows_schedule, parent_srv, site_element, site_item)
 
-        if site_item.allow_subscription_attachments is not None:
+        if site_item.allow_subscription_attachments is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["allowSubscriptionAttachments"] = str(site_item.allow_subscription_attachments).lower()
-        if site_item.guest_access_enabled is not None:
+        if site_item.guest_access_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["guestAccessEnabled"] = str(site_item.guest_access_enabled).lower()
-        if site_item.cache_warmup_enabled is not None:
+        if site_item.cache_warmup_enabled is not None and self._site_version_allows(parent_srv, "3.9", "3.19"):
             site_element.attrib["cacheWarmupEnabled"] = str(site_item.cache_warmup_enabled).lower()
-        if site_item.commenting_enabled is not None:
+        if site_item.commenting_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["commentingEnabled"] = str(site_item.commenting_enabled).lower()
-        if site_item.extract_encryption_mode is not None:
+        if site_item.extract_encryption_mode is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["extractEncryptionMode"] = str(site_item.extract_encryption_mode).lower()
-        if site_item.request_access_enabled is not None:
+        if site_item.request_access_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["requestAccessEnabled"] = str(site_item.request_access_enabled).lower()
-        if site_item.run_now_enabled is not None:
+        if site_item.run_now_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["runNowEnabled"] = str(site_item.run_now_enabled).lower()
-        if site_item.tier_creator_capacity is not None:
+        if site_item.tier_creator_capacity is not None and self._site_version_allows(parent_srv, "3.7"):
             site_element.attrib["tierCreatorCapacity"] = str(site_item.tier_creator_capacity).lower()
-        if site_item.tier_explorer_capacity is not None:
+        if site_item.tier_explorer_capacity is not None and self._site_version_allows(parent_srv, "3.7"):
             site_element.attrib["tierExplorerCapacity"] = str(site_item.tier_explorer_capacity).lower()
-        if site_item.tier_viewer_capacity is not None:
+        if site_item.tier_viewer_capacity is not None and self._site_version_allows(parent_srv, "3.7"):
             site_element.attrib["tierViewerCapacity"] = str(site_item.tier_viewer_capacity).lower()
-        if site_item.data_alerts_enabled is not None:
+        if site_item.data_alerts_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["dataAlertsEnabled"] = str(site_item.data_alerts_enabled)
-        if site_item.commenting_mentions_enabled is not None:
+        if site_item.commenting_mentions_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["commentingMentionsEnabled"] = str(site_item.commenting_mentions_enabled).lower()
-        if site_item.catalog_obfuscation_enabled is not None:
+        if site_item.catalog_obfuscation_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["catalogObfuscationEnabled"] = str(site_item.catalog_obfuscation_enabled).lower()
-        if site_item.flow_auto_save_enabled is not None:
+        if site_item.flow_auto_save_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["flowAutoSaveEnabled"] = str(site_item.flow_auto_save_enabled).lower()
-        if site_item.web_extraction_enabled is not None:
+        if site_item.web_extraction_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["webExtractionEnabled"] = str(site_item.web_extraction_enabled).lower()
-        if site_item.metrics_content_type_enabled is not None:
+        if site_item.metrics_content_type_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["metricsContentTypeEnabled"] = str(site_item.metrics_content_type_enabled).lower()
-        if site_item.notify_site_admins_on_throttle is not None:
+        if site_item.notify_site_admins_on_throttle is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["notifySiteAdminsOnThrottle"] = str(site_item.notify_site_admins_on_throttle).lower()
-        if site_item.authoring_enabled is not None:
+        if site_item.authoring_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["authoringEnabled"] = str(site_item.authoring_enabled).lower()
-        if site_item.custom_subscription_email_enabled is not None:
+        if site_item.custom_subscription_email_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["customSubscriptionEmailEnabled"] = str(
                 site_item.custom_subscription_email_enabled
             ).lower()
-        if site_item.custom_subscription_email is not None:
+        if site_item.custom_subscription_email is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["customSubscriptionEmail"] = str(site_item.custom_subscription_email)
-        if site_item.custom_subscription_footer_enabled is not None:
+        if site_item.custom_subscription_footer_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["customSubscriptionFooterEnabled"] = str(
                 site_item.custom_subscription_footer_enabled
             ).lower()
-        if site_item.custom_subscription_footer is not None:
+        if site_item.custom_subscription_footer is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["customSubscriptionFooter"] = str(site_item.custom_subscription_footer)
-        if site_item.ask_data_mode is not None:
+        if site_item.ask_data_mode is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["askDataMode"] = str(site_item.ask_data_mode)
-        if site_item.named_sharing_enabled is not None:
+        if site_item.named_sharing_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["namedSharingEnabled"] = str(site_item.named_sharing_enabled).lower()
-        if site_item.mobile_biometrics_enabled is not None:
+        if site_item.mobile_biometrics_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["mobileBiometricsEnabled"] = str(site_item.mobile_biometrics_enabled).lower()
-        if site_item.sheet_image_enabled is not None:
+        if site_item.sheet_image_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["sheetImageEnabled"] = str(site_item.sheet_image_enabled).lower()
-        if site_item.derived_permissions_enabled is not None:
+        if site_item.derived_permissions_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["derivedPermissionsEnabled"] = str(site_item.derived_permissions_enabled).lower()
-        if site_item.user_visibility_mode is not None:
+        if site_item.user_visibility_mode is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["userVisibilityMode"] = str(site_item.user_visibility_mode)
-        if site_item.use_default_time_zone is not None:
+        if site_item.use_default_time_zone is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["useDefaultTimeZone"] = str(site_item.use_default_time_zone).lower()
-        if site_item.time_zone is not None:
+        if site_item.time_zone is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["timeZone"] = str(site_item.time_zone)
-        if site_item.auto_suspend_refresh_enabled is not None:
+        if site_item.auto_suspend_refresh_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["autoSuspendRefreshEnabled"] = str(site_item.auto_suspend_refresh_enabled).lower()
-        if site_item.auto_suspend_refresh_inactivity_window is not None:
+        if site_item.auto_suspend_refresh_inactivity_window is not None and self._site_version_allows(
+            parent_srv, "3.9"
+        ):
             site_element.attrib["autoSuspendRefreshInactivityWindow"] = str(
                 site_item.auto_suspend_refresh_inactivity_window
             )
-        if site_item.attribute_capture_enabled is not None:
+        if site_item.attribute_capture_enabled is not None and self._site_version_allows(parent_srv, "3.25"):
             site_element.attrib["attributeCaptureEnabled"] = str(site_item.attribute_capture_enabled).lower()
 
         return ET.tostring(xml_request)
@@ -821,7 +857,7 @@ class SiteRequest:
             site_element.attrib["subscribeOthersEnabled"] = str(site_item.subscribe_others_enabled).lower()
         if site_item.revision_limit:
             site_element.attrib["revisionLimit"] = str(site_item.revision_limit)
-        if site_item.data_acceleration_mode is not None:
+        if site_item.data_acceleration_mode is not None and self._site_version_allows(parent_srv, "3.8", "3.16"):
             site_element.attrib["dataAccelerationMode"] = str(site_item.data_acceleration_mode).lower()
 
         flows_edit = str(site_item.editing_flows_enabled).lower()
@@ -830,81 +866,83 @@ class SiteRequest:
 
         self.set_versioned_flow_attributes(flows_all, flows_edit, flows_schedule, parent_srv, site_element, site_item)
 
-        if site_item.allow_subscription_attachments is not None:
+        if site_item.allow_subscription_attachments is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["allowSubscriptionAttachments"] = str(site_item.allow_subscription_attachments).lower()
-        if site_item.guest_access_enabled is not None:
+        if site_item.guest_access_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["guestAccessEnabled"] = str(site_item.guest_access_enabled).lower()
-        if site_item.cache_warmup_enabled is not None:
+        if site_item.cache_warmup_enabled is not None and self._site_version_allows(parent_srv, "3.9", "3.19"):
             site_element.attrib["cacheWarmupEnabled"] = str(site_item.cache_warmup_enabled).lower()
-        if site_item.commenting_enabled is not None:
+        if site_item.commenting_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["commentingEnabled"] = str(site_item.commenting_enabled).lower()
         if site_item.revision_history_enabled is not None:
             site_element.attrib["revisionHistoryEnabled"] = str(site_item.revision_history_enabled).lower()
-        if site_item.extract_encryption_mode is not None:
+        if site_item.extract_encryption_mode is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["extractEncryptionMode"] = str(site_item.extract_encryption_mode).lower()
-        if site_item.request_access_enabled is not None:
+        if site_item.request_access_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["requestAccessEnabled"] = str(site_item.request_access_enabled).lower()
-        if site_item.run_now_enabled is not None:
+        if site_item.run_now_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["runNowEnabled"] = str(site_item.run_now_enabled).lower()
-        if site_item.tier_creator_capacity is not None:
+        if site_item.tier_creator_capacity is not None and self._site_version_allows(parent_srv, "3.7"):
             site_element.attrib["tierCreatorCapacity"] = str(site_item.tier_creator_capacity).lower()
-        if site_item.tier_explorer_capacity is not None:
+        if site_item.tier_explorer_capacity is not None and self._site_version_allows(parent_srv, "3.7"):
             site_element.attrib["tierExplorerCapacity"] = str(site_item.tier_explorer_capacity).lower()
-        if site_item.tier_viewer_capacity is not None:
+        if site_item.tier_viewer_capacity is not None and self._site_version_allows(parent_srv, "3.7"):
             site_element.attrib["tierViewerCapacity"] = str(site_item.tier_viewer_capacity).lower()
-        if site_item.data_alerts_enabled is not None:
+        if site_item.data_alerts_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["dataAlertsEnabled"] = str(site_item.data_alerts_enabled).lower()
-        if site_item.commenting_mentions_enabled is not None:
+        if site_item.commenting_mentions_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["commentingMentionsEnabled"] = str(site_item.commenting_mentions_enabled).lower()
-        if site_item.catalog_obfuscation_enabled is not None:
+        if site_item.catalog_obfuscation_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["catalogObfuscationEnabled"] = str(site_item.catalog_obfuscation_enabled).lower()
-        if site_item.flow_auto_save_enabled is not None:
+        if site_item.flow_auto_save_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["flowAutoSaveEnabled"] = str(site_item.flow_auto_save_enabled).lower()
-        if site_item.web_extraction_enabled is not None:
+        if site_item.web_extraction_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["webExtractionEnabled"] = str(site_item.web_extraction_enabled).lower()
-        if site_item.metrics_content_type_enabled is not None:
+        if site_item.metrics_content_type_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["metricsContentTypeEnabled"] = str(site_item.metrics_content_type_enabled).lower()
-        if site_item.notify_site_admins_on_throttle is not None:
+        if site_item.notify_site_admins_on_throttle is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["notifySiteAdminsOnThrottle"] = str(site_item.notify_site_admins_on_throttle).lower()
-        if site_item.authoring_enabled is not None:
+        if site_item.authoring_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["authoringEnabled"] = str(site_item.authoring_enabled).lower()
-        if site_item.custom_subscription_email_enabled is not None:
+        if site_item.custom_subscription_email_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["customSubscriptionEmailEnabled"] = str(
                 site_item.custom_subscription_email_enabled
             ).lower()
-        if site_item.custom_subscription_email is not None:
+        if site_item.custom_subscription_email is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["customSubscriptionEmail"] = str(site_item.custom_subscription_email)
-        if site_item.custom_subscription_footer_enabled is not None:
+        if site_item.custom_subscription_footer_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["customSubscriptionFooterEnabled"] = str(
                 site_item.custom_subscription_footer_enabled
             ).lower()
-        if site_item.custom_subscription_footer is not None:
+        if site_item.custom_subscription_footer is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["customSubscriptionFooter"] = str(site_item.custom_subscription_footer)
-        if site_item.ask_data_mode is not None:
+        if site_item.ask_data_mode is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["askDataMode"] = str(site_item.ask_data_mode)
-        if site_item.named_sharing_enabled is not None:
+        if site_item.named_sharing_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["namedSharingEnabled"] = str(site_item.named_sharing_enabled).lower()
-        if site_item.mobile_biometrics_enabled is not None:
+        if site_item.mobile_biometrics_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["mobileBiometricsEnabled"] = str(site_item.mobile_biometrics_enabled).lower()
-        if site_item.sheet_image_enabled is not None:
+        if site_item.sheet_image_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["sheetImageEnabled"] = str(site_item.sheet_image_enabled).lower()
         if site_item.cataloging_enabled is not None:
             site_element.attrib["catalogingEnabled"] = str(site_item.cataloging_enabled).lower()
-        if site_item.derived_permissions_enabled is not None:
+        if site_item.derived_permissions_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["derivedPermissionsEnabled"] = str(site_item.derived_permissions_enabled).lower()
-        if site_item.user_visibility_mode is not None:
+        if site_item.user_visibility_mode is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["userVisibilityMode"] = str(site_item.user_visibility_mode)
-        if site_item.use_default_time_zone is not None:
+        if site_item.use_default_time_zone is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["useDefaultTimeZone"] = str(site_item.use_default_time_zone).lower()
-        if site_item.time_zone is not None:
+        if site_item.time_zone is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["timeZone"] = str(site_item.time_zone)
-        if site_item.auto_suspend_refresh_enabled is not None:
+        if site_item.auto_suspend_refresh_enabled is not None and self._site_version_allows(parent_srv, "3.9"):
             site_element.attrib["autoSuspendRefreshEnabled"] = str(site_item.auto_suspend_refresh_enabled).lower()
-        if site_item.auto_suspend_refresh_inactivity_window is not None:
+        if site_item.auto_suspend_refresh_inactivity_window is not None and self._site_version_allows(
+            parent_srv, "3.9"
+        ):
             site_element.attrib["autoSuspendRefreshInactivityWindow"] = str(
                 site_item.auto_suspend_refresh_inactivity_window
             )
-        if site_item.attribute_capture_enabled is not None:
+        if site_item.attribute_capture_enabled is not None and self._site_version_allows(parent_srv, "3.25"):
             site_element.attrib["attributeCaptureEnabled"] = str(site_item.attribute_capture_enabled).lower()
 
         return ET.tostring(xml_request)
