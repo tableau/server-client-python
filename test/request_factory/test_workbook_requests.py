@@ -2,6 +2,7 @@ import tableauserverclient as TSC
 import tableauserverclient.server.request_factory as TSC_RF
 from tableauserverclient.helpers.strings import redact_xml
 import pytest
+import re
 import sys
 
 
@@ -17,12 +18,16 @@ def test_generate_xml() -> None:
 
 
 @pytest.mark.parametrize(
-    "flag, expected", [(True, b'bridgeRefreshEmbeddedFiles="true"'), (False, b'bridgeRefreshEmbeddedFiles="false"')]
+    "flag, expected",
+    [
+        (True, rb'<workbook[^>]*bridgeRefreshEmbeddedFiles="true"'),
+        (False, rb'<workbook[^>]*bridgeRefreshEmbeddedFiles="false"'),
+    ],
 )
 def test_generate_xml_bridge_refresh_embedded_files(flag: bool, expected: bytes) -> None:
     workbook_item = TSC.WorkbookItem("project_id", name="name", bridge_refresh_embedded_files=flag)
     request = TSC_RF.RequestFactory.Workbook._generate_xml(workbook_item)
-    assert expected in request
+    assert re.search(expected, request)
 
 
 def test_generate_xml_omits_bridge_refresh_embedded_files_when_unset() -> None:

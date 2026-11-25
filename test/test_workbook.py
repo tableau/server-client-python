@@ -666,7 +666,7 @@ def test_publish_sends_bridge_refresh_embedded_files(server: TSC.Server) -> None
         sample_workbook = os.path.join(TEST_ASSET_DIR, "SampleWB.twbx")
         server.workbooks.publish(new_workbook, sample_workbook, server.PublishMode.CreateNew)
         request_body = m._adapter.request_history[0]._request.body
-    assert re.search(b'bridgeRefreshEmbeddedFiles=\\"true\\"', request_body)
+    assert re.search(rb'<workbook[^>]*bridgeRefreshEmbeddedFiles="true"', request_body)
 
 
 def test_publish_bridge_refresh_embedded_files_requires_rest_3_30(server: TSC.Server) -> None:
