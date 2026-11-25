@@ -28,10 +28,23 @@ def test_generate_xml_invalid_connection_credentials() -> None:
     conn = TSC.ConnectionItem()
     conn.server_address = "address"
     creds = TSC.ConnectionCredentials("username", "password")
-    creds.name = None
+    creds.password = None
     conn.connection_credentials = creds
     with pytest.raises(ValueError):
-        request = TSC_RF.RequestFactory.Workbook._generate_xml(workbook_item, connections=[conn])
+        TSC_RF.RequestFactory.Workbook._generate_xml(workbook_item, connections=[conn])
+
+
+def test_generate_xml_connection_credentials_without_a_name() -> None:
+    workbook_item: TSC.WorkbookItem = TSC.WorkbookItem("name", "project_id")
+    conn = TSC.ConnectionItem()
+    conn.server_address = "address"
+    creds = TSC.ConnectionCredentials("username", "password")
+    creds.name = None
+    conn.connection_credentials = creds
+    request = TSC_RF.RequestFactory.Workbook._generate_xml(workbook_item, connections=[conn])
+    credentials = request.decode().split("connectionCredentials", 1)[1]
+    assert "name=" not in credentials.split(">", 1)[0]
+    assert 'password="password"' in request.decode()
 
 
 def test_generate_xml_valid_connection_credentials() -> None:
