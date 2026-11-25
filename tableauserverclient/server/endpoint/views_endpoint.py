@@ -467,10 +467,33 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
         """
         Build the Share-dialog embed snippet for a view.
 
-        The REST API does not return this HTML. The snippet is the one the
-        Share button copies: the Embedding API v3 web component on Tableau
-        2021.4 (REST API 3.13) and later, and the JavaScript API object embed
-        on older servers. ``src`` is the view URL for the signed-in site.
+        The REST API does not return this HTML. It is built from the view
+        URL. Tableau Server hosts the Embedding API v3 library from 2021.4,
+        which the REST version table maps to API 3.14 (3.13 is Tableau
+        2021.3). Older servers get the JavaScript API object embed.
+
+        ``toolbar="bottom"`` and ``hide-tabs`` are fixed, and the older
+        snippet uses ``tabs=no`` and ``toolbar=yes``. Neither snippet sets a
+        width or height. Edit the returned HTML to change those.
+
+        Parameters
+        ----------
+        view : ViewItem
+            A view whose content URL names the workbook and the view. The
+            site comes from the signed-in server.
+
+        Returns
+        -------
+        str
+            The embed snippet.
+
+        Raises
+        ------
+        NotSignedInError
+            The server has no site URL yet.
+        MissingRequiredFieldError
+            The view has no content URL, or the content URL does not name
+            both a workbook and a view.
         """
         if not view.content_url:
             raise MissingRequiredFieldError("View item missing content URL.")
@@ -488,7 +511,7 @@ class Views(QuerysetEndpoint[ViewItem], TaggingMixin[ViewItem]):
         else:
             src = f"{server}/views/{view_path}"
             site_root = ""
-        if self.parent_srv.check_at_least_version("3.13"):
+        if self.parent_srv.check_at_least_version("3.14"):
             script = f"{server}/javascripts/api/tableau.embedding.3.latest.min.js"
             return (
                 f'<script type="module" src="{html.escape(script, quote=True)}"></script>\n'

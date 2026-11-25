@@ -601,9 +601,17 @@ def test_embed_code_uses_the_legacy_share_snippet_before_2021_4(server: TSC.Serv
     assert "tableau.embedding" not in code
 
 
-def test_embed_code_uses_embedding_api_v3(server: TSC.Server) -> None:
+def test_embed_code_uses_the_legacy_snippet_on_2021_3(server: TSC.Server) -> None:
     server._site_url = ""
     server.version = "3.13"
+    code = server.views.embed_code(_overview())
+    assert "javascripts/api/viz_v1.js" in code
+    assert "tableau.embedding" not in code
+
+
+def test_embed_code_uses_embedding_api_v3(server: TSC.Server) -> None:
+    server._site_url = ""
+    server.version = "3.14"
     code = server.views.embed_code(_overview())
     assert 'src="http://test/javascripts/api/tableau.embedding.3.latest.min.js"' in code
     assert 'src="http://test/views/Superstore/Overview"' in code
@@ -615,3 +623,33 @@ def test_embed_code_includes_the_site(server: TSC.Server) -> None:
     server.version = "3.22"
     code = server.views.embed_code(_overview())
     assert 'src="http://test/t/Samples/views/Superstore/Overview"' in code
+
+
+def test_embed_code_requires_a_signed_in_site_and_a_content_url(server: TSC.Server) -> None:
+    with pytest.raises(TSC.NotSignedInError):
+        server.views.embed_code(_overview())
+
+    server._site_url = "Samples"
+    missing = TSC.ViewItem()
+    with pytest.raises(TSC.MissingRequiredFieldError):
+        server.views.embed_code(missing)
+    missing._content_url = "Superstore"
+    with pytest.raises(TSC.MissingRequiredFieldError):
+        server.views.embed_code(missing)
+
+
+def test_embed_code_escapes_names(server: TSC.Server) -> None:
+    server._site_url = "A&B"
+    server.version = "3.13"
+    view = TSC.ViewItem()
+    view._content_url = "Rock&Roll/sheets/O'Hare"
+    view._view_url_name = "O'Hare"
+    legacy = server.views.embed_code(view)
+    assert "value='/t/A&amp;B'" in legacy
+    assert "value='Rock&amp;Roll/O&#x27;Hare'" in legacy
+
+    server.version = "3.14"
+    modern = server.views.embed_code(view)
+    assert "/t/A%26B/views/Rock%26Roll/O%27Hare" in modern
+    assert "A&B" not in modern
+    assert "O'Hare" not in modern
