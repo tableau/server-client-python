@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api">
+  <error code="404001">
+    <summary>Resource Not Found</summary>
+    <detail>Method not found</detail>
+  </error>
+</tsResponse>

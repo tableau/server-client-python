@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api">
+  <pagination pageNumber="1" pageSize="100" totalAvailable="2"/>
+  <subscriptions>
+    <subscription id="sub-on-schedule" subject="On the schedule">
+      <content id="view-1" type="View"/>
+      <schedule id="sched-1" name="Nightly"/>
+      <user id="user-1" name="ada"/>
+    </subscription>
+    <subscription id="sub-cloud" subject="Cloud frequency">
+      <content id="view-2" type="View"/>
+      <schedule frequency="Weekly" nextRunAt="2023-06-08T17:05:00-0700"/>
+      <user id="user-1" name="ada"/>
+    </subscription>
+  </subscriptions>
+</tsResponse>

@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api">
+  <pagination pageNumber="1" pageSize="100" totalAvailable="2"/>
+  <tasks>
+    <task>
+      <runFlow id="flow-task-1" type="RunFlowTask" priority="50">
+        <schedule id="sched-1" name="Nightly" type="Flow"/>
+        <flow id="flow-1"/>
+      </runFlow>
+    </task>
+    <task>
+      <runFlow id="flow-task-2" type="RunFlowTask" priority="40">
+        <schedule id="sched-other" name="Weekly" type="Flow"/>
+        <flow id="flow-2"/>
+      </runFlow>
+    </task>
+  </tasks>
+</tsResponse>

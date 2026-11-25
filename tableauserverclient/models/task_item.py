@@ -92,6 +92,7 @@ class TaskItem:
         last_run_at = None
         workbook_element = element.find(".//t:workbook", namespaces=ns)
         datasource_element = element.find(".//t:datasource", namespaces=ns)
+        flow_element = element.find(".//t:flow", namespaces=ns)
         last_run_at_element = element.find(".//t:lastRunAt", namespaces=ns)
 
         schedule_item_list = ScheduleItem.from_element(element, ns)
@@ -105,6 +106,8 @@ class TaskItem:
         if datasource_element is not None:
             datasource_id = datasource_element.get("id", None)
             target = Target(datasource_id, "datasource")
+        if flow_element is not None:
+            target = Target(flow_element.get("id", None), "flow")
         if last_run_at_element is not None:
             last_run_at = parse_datetime(last_run_at_element.text)
 
