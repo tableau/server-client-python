@@ -698,14 +698,29 @@ class SiteRequest:
     def _site_version_allows(self, parent_srv, minimum: str | None = None, until: str | None = None) -> bool:
         """Whether this API version accepts the site attribute.
 
-        Calls that do not pass a server keep the previous request body.
-        dataAccelerationMode is API 3.8 through 3.15. Tier capacities are
-        API 3.7 and later. The site settings added for Tableau Server 2020.3
-        (API 3.9) are omitted below that version, which is what made site
-        creation fail on older servers. cacheWarmupEnabled was removed in
-        API 3.19. attributeCaptureEnabled starts at API 3.25.
+        A request with no server, or a ``Server`` whose version is still the
+        constructor default, keeps every attribute. The default ``"2.4"`` is
+        not a detected server version. Assigning ``server.version`` or calling
+        ``use_server_version()`` turns the gate on.
+
+        Thresholds, from the Tableau REST reference:
+
+        - Tier capacities (``tierCreatorCapacity`` and the other tier
+          attributes): REST API 3.7 and later. What's New for 3.7 and
+          https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_new_site_roles.htm
+        - ``dataAccelerationMode``: Tableau Server 2020.2 (API 3.8) through
+          2021.4, which the Site Methods page numbers as API 3.15, so it is
+          omitted from 3.16. The version table maps 2021.4 to 3.14 and 2022.1
+          to 3.15.
+          https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_site.htm
+        - The settings added for Tableau Server 2020.3: REST API 3.9, from the
+          version table. Create Site lists them without a per-attribute
+          version. TSC started sending them in #777.
+          https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm
+        - ``cacheWarmupEnabled``: removed in API 3.19 (Site Methods).
+        - ``attributeCaptureEnabled``: API 3.25 and later (Site Methods).
         """
-        if parent_srv is None:
+        if parent_srv is None or not getattr(parent_srv, "_version_is_explicit", False):
             return True
         if minimum is not None and not parent_srv.check_at_least_version(minimum):
             return False

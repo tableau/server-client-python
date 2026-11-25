@@ -242,7 +242,11 @@ class Server:
 
         self.validate_connection_settings()  # does not make an actual outgoing request
 
-        self.version = default_server_version
+        # The constructor default is not a claim about the server. Site
+        # attributes are version-gated only after this is set explicitly or
+        # use_server_version() replaces it.
+        self._version = default_server_version
+        self._version_is_explicit = False
         self._use_server_version = use_server_version
 
     def validate_connection_settings(self):
@@ -364,6 +368,15 @@ class Server:
     def use_highest_version(self):
         self.use_server_version()
         logger.info("use use_server_version instead", DeprecationWarning)
+
+    @property
+    def version(self) -> str:
+        return self._version
+
+    @version.setter
+    def version(self, value: str) -> None:
+        self._version = value
+        self._version_is_explicit = True
 
     def check_at_least_version(self, target: str):
         server_version = Version(self.version or "2.4")

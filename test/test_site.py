@@ -224,45 +224,69 @@ def test_update_subscription_email_and_footer_preserve_case() -> None:
 
 @pytest.mark.filterwarnings("ignore:FlowsEnabled has been removed")
 @pytest.mark.filterwarnings("ignore:In version 3.10 and earlier")
-def test_create_req_omits_attributes_the_server_version_does_not_have() -> None:
+@pytest.mark.filterwarnings("ignore:Tiered license level is set")
+def test_default_server_version_still_sends_site_attributes() -> None:
     site = TSC.SiteItem("Tableau", "tableau")
+    site.commenting_enabled = False
+    site.tier_creator_capacity = 4
+    site.data_acceleration_mode = "disabled"
+    server = TSC.Server("http://x", False)
 
-    old = TSC.Server("http://old", False)
-    old.version = "2.8"
-    old_elem = ET.fromstring(RequestFactory.Site.create_req(site, old)).find(".//site")
-    assert old_elem is not None
-    assert old_elem.attrib["name"] == "Tableau"
-    assert old_elem.attrib["disableSubscriptions"] == "false"
-    assert "commentingEnabled" not in old_elem.attrib
-    assert "guestAccessEnabled" not in old_elem.attrib
-    assert "cacheWarmupEnabled" not in old_elem.attrib
-    assert "tierCreatorCapacity" not in old_elem.attrib
+    for build in (RequestFactory.Site.create_req, RequestFactory.Site.update_req):
+        element = ET.fromstring(build(site, server)).find(".//site")
+        assert element is not None
+        assert element.attrib["commentingEnabled"] == "false"
+        assert element.attrib["tierCreatorCapacity"] == "4"
+        assert element.attrib["dataAccelerationMode"] == "disabled"
 
-    current = TSC.Server("http://current", False)
-    current.version = "3.10"
-    current_elem = ET.fromstring(RequestFactory.Site.create_req(site, current)).find(".//site")
-    assert current_elem is not None
-    assert current_elem.attrib["commentingEnabled"] == "true"
-    assert current_elem.attrib["cacheWarmupEnabled"] == "true"
 
-    after_removal = TSC.Server("http://later", False)
-    after_removal.version = "3.19"
-    removed_elem = ET.fromstring(RequestFactory.Site.create_req(site, after_removal)).find(".//site")
-    assert removed_elem is not None
-    assert "cacheWarmupEnabled" not in removed_elem.attrib
-    assert removed_elem.attrib["commentingEnabled"] == "true"
+@pytest.mark.filterwarnings("ignore:Tiered license level is set")
+@pytest.mark.filterwarnings("ignore:FlowsEnabled has been removed")
+@pytest.mark.filterwarnings("ignore:In version 3.10 and earlier")
+@pytest.mark.parametrize("build", [RequestFactory.Site.create_req, RequestFactory.Site.update_req])
+def test_site_request_omits_attributes_the_server_version_does_not_have(build) -> None:
+    site = TSC.SiteItem("Tableau", "tableau")
+    site.tier_creator_capacity = 4
+    site.data_acceleration_mode = "disabled"
+
+    def element(version: str):
+        server = TSC.Server("http://host", False)
+        server.version = version
+        parsed = ET.fromstring(build(site, server)).find(".//site")
+        assert parsed is not None
+        return parsed
+
+    old = element("2.8")
+    assert old.attrib["name"] == "Tableau"
+    assert old.attrib["disableSubscriptions"] == "false"
+    assert "commentingEnabled" not in old.attrib
+    assert "guestAccessEnabled" not in old.attrib
+    assert "cacheWarmupEnabled" not in old.attrib
+    assert "tierCreatorCapacity" not in old.attrib
+    assert "dataAccelerationMode" not in old.attrib
+
+    before_tiers = element("3.6")
+    at_tiers = element("3.7")
+    assert "tierCreatorCapacity" not in before_tiers.attrib
+    assert at_tiers.attrib["tierCreatorCapacity"] == "4"
+    assert "dataAccelerationMode" not in at_tiers.attrib
+
+    at_acceleration = element("3.8")
+    assert at_acceleration.attrib["dataAccelerationMode"] == "disabled"
+    assert element("3.15").attrib["dataAccelerationMode"] == "disabled"
+    assert "dataAccelerationMode" not in element("3.16").attrib
+
+    current = element("3.10")
+    assert current.attrib["commentingEnabled"] == "true"
+    assert current.attrib["cacheWarmupEnabled"] == "true"
+
+    removed = element("3.19")
+    assert "cacheWarmupEnabled" not in removed.attrib
+    assert removed.attrib["commentingEnabled"] == "true"
 
     site.attribute_capture_enabled = True
-    before_capture = TSC.Server("http://capture", False)
-    before_capture.version = "3.24"
-    before_elem = ET.fromstring(RequestFactory.Site.create_req(site, before_capture)).find(".//site")
-    assert before_elem is not None
-    assert "attributeCaptureEnabled" not in before_elem.attrib
-    supports_capture = TSC.Server("http://capture", False)
-    supports_capture.version = "3.25"
-    capture_elem = ET.fromstring(RequestFactory.Site.create_req(site, supports_capture)).find(".//site")
-    assert capture_elem is not None
-    assert capture_elem.attrib["attributeCaptureEnabled"] == "true"
+    assert "attributeCaptureEnabled" not in element("3.24").attrib
+    assert element("3.25").attrib["attributeCaptureEnabled"] == "true"
 
 
 @pytest.mark.filterwarnings("ignore:FlowsEnabled has been removed")
