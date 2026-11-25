@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING, Any, Callable, Literal, overload
 from .endpoint import Endpoint, api, parameter_added_in
 from .exceptions import MissingRequiredFieldError, ServerResponseError
 from tableauserverclient.server import RequestFactory
+from tableauserverclient.server.exceptions import EndpointUnavailableError
 from tableauserverclient.server.pager import Pager
-from tableauserverclient.server.request_options import RequestOptions
 from tableauserverclient.models import ExtractItem, PaginationItem, ScheduleItem, SubscriptionItem, TaskItem
 from tableauserverclient.models.schedule_item import parse_batch_schedule_state
 
@@ -285,34 +285,26 @@ class Schedules(Endpoint):
 
         return extract_items, pagination_item
 
-    def _collect_pages(self, fetch: Callable[..., tuple[list, PaginationItem]]) -> list:
-        options = RequestOptions(pagesize=1000)
-        collected: list = []
-        while True:
-            batch, pagination = fetch(options)
-            collected.extend(batch)
-            if (
-                not batch
-                or pagination.total_available is None
-                or pagination.page_number is None
-                or pagination.page_size is None
-                or pagination.page_size < 1
-                or pagination.page_number < 1
-                or pagination.page_size * pagination.page_number >= pagination.total_available
-            ):
-                return collected
-            options.pagenumber = pagination.page_number + 1
-            options.pagesize = pagination.page_size
-
     @api(version="3.2")
     def get_subscriptions_by_schedule(self, schedule_id: str) -> list[SubscriptionItem]:
         """
         Return the Tableau Server subscriptions on this schedule.
 
-        The REST API has no ``/schedules/{id}/subscriptions`` method. Subscriptions
-        are listed for the site, and each Tableau Server subscription carries the
-        schedule id. Tableau Cloud subscriptions use a frequency instead of a
+        The REST API has no ``/schedules/{id}/subscriptions`` method. This
+        lists the site's subscriptions and keeps those whose schedule id
+        matches. Tableau Cloud subscriptions use a frequency instead of a
         server schedule id, so they are not included.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_subscriptions.htm#list_subscriptions
+
+        Parameters
+        ----------
+        schedule_id : str
+            The schedule to match.
+
+        Returns
+        -------
+        list[SubscriptionItem]
         """
         if not schedule_id:
             raise ValueError("Schedule ID undefined")
@@ -322,41 +314,76 @@ class Schedules(Endpoint):
                 matches.append(subscription)
         return matches
 
-    @api(version="3.3")
     def get_flow_tasks_by_schedule(self, schedule_id: str) -> list[TaskItem]:
         """
         Return flow run tasks on this server schedule.
 
         Flow tasks are listed for the site and kept when their schedule id
-        matches. A server that does not have the flow-task method yields an
-        empty list.
+        matches. There is no version gate: ``tasks.get`` raises
+        ``EndpointUnavailableError`` below REST API 2.6, and a server that
+        does not implement the method answers 404001. Both return an empty
+        list. Any other error is raised, including a 404 for a missing site.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#get_flow_run_tasks
+
+        Parameters
+        ----------
+        schedule_id : str
+            The schedule to match.
+
+        Returns
+        -------
+        list[TaskItem]
         """
         if not schedule_id:
             raise ValueError("Schedule ID undefined")
         try:
             tasks = list(Pager(self.parent_srv.tasks.get, task_type=TaskItem.Type.RunFlow))
+        except EndpointUnavailableError:
+            logger.info("Flow tasks are not available before REST API 2.6")
+            return []
         except ServerResponseError as error:
-            if str(error.code).startswith("404"):
+            if error.code == "404001":
                 logger.info("Flow tasks are not available on this server: %s", error.code)
                 return []
             raise
         return [task for task in tasks if task.schedule_id == schedule_id]
 
     @api(version="2.3")
-    def get_tasks(self, schedule_id: str):
+    def get_tasks(self, schedule_id: str) -> ScheduleTasks:
         """
         List the extract refreshes, subscriptions, and flow tasks on a schedule.
 
-        Extract refreshes come from ``GET .../schedules/{id}/extracts``.
-        Subscriptions and flow tasks are filtered from the site lists, because
-        those task types have no schedule-scoped query. Tableau Cloud
-        subscriptions, which have no server schedule id, are left out.
+        Extract refreshes come from the schedule. Subscriptions are included
+        from REST API 3.2 and flow tasks from 3.3; on an older server those
+        parts are empty and are not requested. Tableau Cloud subscriptions,
+        which have no server schedule id, are left out.
+
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_jobs_tasks_and_schedules.htm#list_extract_refresh_tasks
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_subscriptions.htm#list_subscriptions
+        REST API: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref_flow.htm#get_flow_run_tasks
+
+        Parameters
+        ----------
+        schedule_id : str
+            The schedule to list.
+
+        Returns
+        -------
+        ScheduleTasks
+            ``extracts``, ``subscriptions``, and ``flow_tasks``.
         """
         if not schedule_id:
             raise ValueError("Schedule ID undefined")
-        extracts = self._collect_pages(lambda options: self.get_extract_refresh_tasks(schedule_id, options))
-        subscriptions = self.get_subscriptions_by_schedule(schedule_id)
-        flow_tasks = self.get_flow_tasks_by_schedule(schedule_id)
+        extracts: list[ExtractItem] = list(
+            Pager(lambda options: self.get_extract_refresh_tasks(schedule_id, options))  # type: ignore[arg-type]
+        )
+        subscriptions = (
+            self.get_subscriptions_by_schedule(schedule_id) if self.parent_srv.check_at_least_version("3.2") else []
+        )
+        flow_tasks = (
+            self.get_flow_tasks_by_schedule(schedule_id) if self.parent_srv.check_at_least_version("3.3") else []
+        )
         return ScheduleTasks(extracts, subscriptions, flow_tasks)
 
     @overload

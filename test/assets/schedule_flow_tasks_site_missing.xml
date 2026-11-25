@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<tsResponse xmlns="http://tableau.com/api">
+  <error code="404000">
+    <summary>Site not found</summary>
+    <detail>The site ID in the URI doesn't correspond to an existing site.</detail>
+  </error>
+</tsResponse>

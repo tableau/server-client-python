@@ -27,6 +27,10 @@ ADD_WORKBOOK_TO_SCHEDULE_WITH_WARNINGS = TEST_ASSET_DIR / "schedule_add_workbook
 ADD_DATASOURCE_TO_SCHEDULE = TEST_ASSET_DIR / "schedule_add_datasource.xml"
 ADD_FLOW_TO_SCHEDULE = TEST_ASSET_DIR / "schedule_add_flow.xml"
 GET_EXTRACT_TASKS_XML = TEST_ASSET_DIR / "schedule_get_extract_refresh_tasks.xml"
+SUBSCRIPTIONS_XML = TEST_ASSET_DIR / "schedule_subscriptions.xml"
+FLOW_TASKS_XML = TEST_ASSET_DIR / "schedule_flow_tasks.xml"
+FLOW_MISSING_XML = TEST_ASSET_DIR / "schedule_flow_tasks_missing.xml"
+FLOW_OTHER_404_XML = TEST_ASSET_DIR / "schedule_flow_tasks_site_missing.xml"
 BATCH_UPDATE_STATE = TEST_ASSET_DIR / "schedule_batch_update_state.xml"
 
 WORKBOOK_GET_BY_ID_XML = TEST_ASSET_DIR / "workbook_get_by_id.xml"
@@ -494,61 +498,13 @@ def test_batch_update_state_all(server: TSC.Server) -> None:
     assert history.text == "<tsRequest />"
 
 
-SUBSCRIPTIONS_XML = """<?xml version='1.0' encoding='UTF-8'?>
-<tsResponse xmlns="http://tableau.com/api">
-  <pagination pageNumber="1" pageSize="100" totalAvailable="2"/>
-  <subscriptions>
-    <subscription id="sub-on-schedule" subject="On the schedule">
-      <content id="view-1" type="View"/>
-      <schedule id="sched-1" name="Nightly"/>
-      <user id="user-1" name="ada"/>
-    </subscription>
-    <subscription id="sub-cloud" subject="Cloud frequency">
-      <content id="view-2" type="View"/>
-      <schedule frequency="Weekly" nextRunAt="2023-06-08T17:05:00-0700"/>
-      <user id="user-1" name="ada"/>
-    </subscription>
-  </subscriptions>
-</tsResponse>
-"""
-
-FLOW_TASKS_XML = """<?xml version='1.0' encoding='UTF-8'?>
-<tsResponse xmlns="http://tableau.com/api">
-  <pagination pageNumber="1" pageSize="100" totalAvailable="2"/>
-  <tasks>
-    <task>
-      <runFlow id="flow-task-1" type="RunFlowTask" priority="50">
-        <schedule id="sched-1" name="Nightly" type="Flow"/>
-        <flow id="flow-1"/>
-      </runFlow>
-    </task>
-    <task>
-      <runFlow id="flow-task-2" type="RunFlowTask" priority="40">
-        <schedule id="sched-other" name="Weekly" type="Flow"/>
-        <flow id="flow-2"/>
-      </runFlow>
-    </task>
-  </tasks>
-</tsResponse>
-"""
-
-FLOW_MISSING_XML = """<?xml version='1.0' encoding='UTF-8'?>
-<tsResponse xmlns="http://tableau.com/api">
-  <error code="404001">
-    <summary>Resource Not Found</summary>
-    <detail>Method not found</detail>
-  </error>
-</tsResponse>
-"""
-
-
 def test_get_tasks_on_schedule(server: TSC.Server) -> None:
     server.version = "3.10"
     schedule_id = "sched-1"
     with requests_mock.mock() as m:
         m.get(f"{server.schedules.siteurl}/{schedule_id}/extracts", text=GET_EXTRACT_TASKS_XML.read_text())
-        m.get(f"{server.baseurl}/sites/{server.site_id}/subscriptions", text=SUBSCRIPTIONS_XML)
-        m.get(f"{server.baseurl}/sites/{server.site_id}/tasks/runFlow", text=FLOW_TASKS_XML)
+        m.get(f"{server.baseurl}/sites/{server.site_id}/subscriptions", text=SUBSCRIPTIONS_XML.read_text())
+        m.get(f"{server.baseurl}/sites/{server.site_id}/tasks/runFlow", text=FLOW_TASKS_XML.read_text())
         tasks = server.schedules.get_tasks(schedule_id)
 
     assert [item.id for item in tasks.extracts] == ["task1", "task2"]
@@ -558,12 +514,64 @@ def test_get_tasks_on_schedule(server: TSC.Server) -> None:
     assert tasks.flow_tasks[0].target.type == "flow"
 
 
+def test_get_tasks_skips_methods_the_server_version_does_not_have(server: TSC.Server) -> None:
+    schedule_id = "sched-1"
+    extracts = f"{server.schedules.siteurl}/{schedule_id}/extracts"
+    subscriptions = f"{server.baseurl}/sites/{server.site_id}/subscriptions"
+    flows = f"{server.baseurl}/sites/{server.site_id}/tasks/runFlow"
+
+    server.version = "2.4"
+    with requests_mock.mock() as m:
+        m.get(extracts, text=GET_EXTRACT_TASKS_XML.read_text())
+        m.get(subscriptions, text=SUBSCRIPTIONS_XML.read_text())
+        m.get(flows, text=FLOW_TASKS_XML.read_text())
+        tasks = server.schedules.get_tasks(schedule_id)
+    assert [item.id for item in tasks.extracts] == ["task1", "task2"]
+    assert tasks.subscriptions == []
+    assert tasks.flow_tasks == []
+    assert [call.path for call in m.request_history] == [
+        f"/api/2.4/sites/{server.site_id}/schedules/{schedule_id}/extracts"
+    ]
+
+    server.version = "3.2"
+    extracts = f"{server.schedules.siteurl}/{schedule_id}/extracts"
+    subscriptions = f"{server.baseurl}/sites/{server.site_id}/subscriptions"
+    flows = f"{server.baseurl}/sites/{server.site_id}/tasks/runFlow"
+    with requests_mock.mock() as m:
+        m.get(extracts, text=GET_EXTRACT_TASKS_XML.read_text())
+        m.get(subscriptions, text=SUBSCRIPTIONS_XML.read_text())
+        m.get(flows, text=FLOW_TASKS_XML.read_text())
+        tasks = server.schedules.get_tasks(schedule_id)
+    assert [item.id for item in tasks.subscriptions] == ["sub-on-schedule"]
+    assert tasks.flow_tasks == []
+    assert flows not in [call.url for call in m.request_history]
+
+
 def test_flow_tasks_missing_on_older_server(server: TSC.Server) -> None:
+    server.version = "2.4"
+    with requests_mock.mock() as m:
+        m.get(f"{server.baseurl}/sites/{server.site_id}/tasks/runFlow", text=FLOW_TASKS_XML.read_text())
+        assert server.schedules.get_flow_tasks_by_schedule("sched-1") == []
+        assert m.request_history == []
+
     server.version = "3.10"
     with requests_mock.mock() as m:
         m.get(
             f"{server.baseurl}/sites/{server.site_id}/tasks/runFlow",
             status_code=404,
-            text=FLOW_MISSING_XML,
+            text=FLOW_MISSING_XML.read_text(),
         )
         assert server.schedules.get_flow_tasks_by_schedule("sched-1") == []
+
+
+def test_flow_tasks_other_404_is_raised(server: TSC.Server) -> None:
+    server.version = "3.10"
+    with requests_mock.mock() as m:
+        m.get(
+            f"{server.baseurl}/sites/{server.site_id}/tasks/runFlow",
+            status_code=404,
+            text=FLOW_OTHER_404_XML.read_text(),
+        )
+        with pytest.raises(TSC.ServerResponseError) as raised:
+            server.schedules.get_flow_tasks_by_schedule("sched-1")
+    assert raised.value.code == "404000"
