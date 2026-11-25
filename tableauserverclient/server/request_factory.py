@@ -48,7 +48,7 @@ def _add_connections_element(connections_element, connection):
         connection_element.attrib["databaseName"] = connection.database_name
     if connection.connection_credentials:
         connection_credentials = connection.connection_credentials
-    elif connection.username is not None and connection.password is not None and connection.embed_password is not None:
+    elif connection.password is not None and connection.embed_password is not None:
         connection_credentials = ConnectionCredentials(
             connection.username, connection.password, embed=connection.embed_password
         )
@@ -70,10 +70,11 @@ def _add_view_element(views_element, view_id):
 
 
 def _add_credentials_element(parent_element, connection_credentials):
+    if connection_credentials.password is None:
+        raise ValueError("Connection Credentials must have a password")
     credentials_element = ET.SubElement(parent_element, "connectionCredentials")
-    if connection_credentials.password is None or connection_credentials.name is None:
-        raise ValueError("Connection Credentials must have a name and password")
-    credentials_element.attrib["name"] = connection_credentials.name
+    if connection_credentials.name is not None:
+        credentials_element.attrib["name"] = connection_credentials.name
     credentials_element.attrib["password"] = connection_credentials.password
     credentials_element.attrib["embed"] = "true" if connection_credentials.embed else "false"
     if connection_credentials.oauth:

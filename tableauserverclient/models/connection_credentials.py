@@ -10,8 +10,11 @@ class ConnectionCredentials:
 
     Parameters
     ----------
-    name: str
-        The username for the connection.
+    name: str | None
+        The username for the connection. ``None`` omits the ``name`` attribute.
+        An empty string is sent as ``name=""``. Publish Workbook and Publish
+        Data Source mark both ``name`` and ``password`` as optional. They do
+        not say what a server does when ``name`` is omitted or empty.
 
     password: str
         The password used for the connection.

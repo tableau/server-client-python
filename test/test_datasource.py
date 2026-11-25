@@ -941,6 +941,25 @@ def test_publish_multi_connection(server) -> None:
     assert connection_results[1].find("connectionCredentials").get("password", None) == "secret"
 
 
+def test_publish_connection_password_without_a_name(server) -> None:
+    new_datasource = TSC.DatasourceItem(name="Sample", project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760")
+    named = TSC.ConnectionItem()
+    named.server_address = "sql.test.com"
+    named.connection_credentials = TSC.ConnectionCredentials(None, "secret", True)
+    unnamed = TSC.ConnectionItem()
+    unnamed.server_address = "sql.test.com"
+    unnamed.password = "secret"
+    unnamed.embed_password = True
+
+    for connection in (named, unnamed):
+        response = RequestFactory.Datasource._generate_xml(new_datasource, connections=[connection])
+        credentials = fromstring(response).find(".//connectionCredentials")
+        assert credentials is not None
+        assert "name" not in credentials.attrib
+        assert credentials.get("password") == "secret"
+        assert credentials.get("embed") == "true"
+
+
 def test_publish_single_connection(server) -> None:
     new_datasource = TSC.DatasourceItem(name="Sample", project_id="ee8c6e70-43b6-11e6-af4f-f7b0d8e20760")
     connection_creds = TSC.ConnectionCredentials("test", "secret", True)
