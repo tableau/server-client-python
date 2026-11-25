@@ -1091,6 +1091,11 @@ class WorkbookRequest:
         elif workbook_item.thumbnails_group_id is not None:
             workbook_element.attrib["thumbnailsGroupId"] = workbook_item.thumbnails_group_id
 
+        if workbook_item.bridge_refresh_embedded_files is not None:
+            workbook_element.attrib["bridgeRefreshEmbeddedFiles"] = str(
+                workbook_item.bridge_refresh_embedded_files
+            ).lower()
+
         return ET.tostring(xml_request)
 
     def update_req(self, workbook_item, parent_srv: "Server | None" = None):
