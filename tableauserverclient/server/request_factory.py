@@ -1070,6 +1070,8 @@ class WorkbookRequest:
         workbook_element.attrib["name"] = workbook_item.name
         if workbook_item.show_tabs:
             workbook_element.attrib["showTabs"] = str(workbook_item.show_tabs).lower()
+        if workbook_item._encrypt_extracts_assigned and workbook_item.encrypt_extracts is not None:
+            workbook_element.attrib["encryptExtracts"] = str(workbook_item.encrypt_extracts).lower()
         project_element = ET.SubElement(workbook_element, "project")
         project_element.attrib["id"] = str(workbook_item.project_id)
 

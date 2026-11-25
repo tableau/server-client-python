@@ -61,7 +61,13 @@ class WorkbookItem:
         User-defined description of the workbook.
 
     encrypt_extracts : bool | None
-        Indicates whether extracts are encrypted.
+        Assign this before publishing to send ``encryptExtracts``. ``True``
+        encrypts the workbook's extracts and ``False`` leaves them unencrypted.
+        ``None`` omits the attribute. A value read from the server is kept on
+        the item but is not sent on publish until this property is assigned.
+        Assign ``None`` to omit it again after a previous assignment. The
+        server rejects ``false`` on a site that enforces encryption (409037)
+        and ``true`` on a site where encryption is disabled (409036).
 
     has_extracts : bool | None
         Indicates whether the workbook has extracts.
@@ -169,6 +175,7 @@ class WorkbookItem:
         self._owner: UserItem | None = None
         self._location: LocationItem | None = None
         self._encrypt_extracts: bool | None = None
+        self._encrypt_extracts_assigned = False
         self._default_view_id: str | None = None
         self._share_description: str | None = None
         self._last_published_at: datetime.datetime | None = None
@@ -356,6 +363,13 @@ class WorkbookItem:
     @property
     def encrypt_extracts(self) -> bool | None:
         return self._encrypt_extracts
+
+    @encrypt_extracts.setter
+    def encrypt_extracts(self, value: bool | None) -> None:
+        if value is not None and not isinstance(value, bool):
+            raise ValueError("Boolean expected for encrypt_extracts flag.")
+        self._encrypt_extracts = value
+        self._encrypt_extracts_assigned = True
 
     @property
     def default_view_id(self) -> str | None:
