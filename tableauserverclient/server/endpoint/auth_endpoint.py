@@ -152,7 +152,6 @@ class Auth(Endpoint):
                 return Auth.contextmgr(self.sign_out)
             else:
                 raise e
-        self.parent_srv._namespace.detect(server_response.content)
         self._check_status(server_response, url)
         parsed_response = fromstring(server_response.content)
         site_id = parsed_response.find(".//t:site", namespaces=self.parent_srv.namespace).get("id", None)

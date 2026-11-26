@@ -51,7 +51,6 @@ from tableauserverclient.server.exceptions import (
     EndpointUnavailableError,
 )
 from tableauserverclient.server.endpoint.exceptions import NotSignedInError
-from tableauserverclient.namespace import Namespace
 
 _PRODUCT_TO_REST_VERSION = {
     "10.0": "2.3",
@@ -63,6 +62,11 @@ _PRODUCT_TO_REST_VERSION = {
 
 minimum_supported_server_version = "2.3"
 default_server_version = "2.4"  # first version that dropped the legacy auth endpoint
+
+# The REST API has used the "http://tableau.com/api" XML namespace since Tableau
+# Server 8.3 (2015). Callers on older servers are unsupported.
+NAMESPACE = "http://tableau.com/api"
+_NAMESPACE_MAP = {"t": NAMESPACE}
 
 
 class _AuthState(NamedTuple):
@@ -224,7 +228,6 @@ class Server:
         self.data_acceleration_report = DataAccelerationReport(self)
         self.data_alerts = DataAlerts(self)
         self.fileuploads = Fileuploads(self)
-        self._namespace = Namespace()
         self.flow_runs = FlowRuns(self)
         self.metrics = Metrics(self)
         self.custom_views = CustomViews(self)
@@ -381,7 +384,7 @@ class Server:
 
     @property
     def namespace(self):
-        return self._namespace()
+        return dict(_NAMESPACE_MAP)
 
     @property
     def auth_token(self):
