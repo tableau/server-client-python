@@ -243,6 +243,19 @@ def test_update(server: TSC.Server) -> None:
     assert not single_workbook.data_acceleration_config["accelerate_now"]
 
 
+def test_update_excludes_data_acceleration_config_when_unset(server: TSC.Server) -> None:
+    """dataAccelerationConfig should be omitted from the update request XML when never set."""
+    response_xml = UPDATE_XML.read_text()
+    with requests_mock.mock() as m:
+        m.put(server.workbooks.baseurl + "/1f951daf-4061-451a-9df1-69a8062664f2", text=response_xml)
+        single_workbook = TSC.WorkbookItem("1d0304cd-3796-429f-b815-7258370b9b74", show_tabs=True)
+        single_workbook._id = "1f951daf-4061-451a-9df1-69a8062664f2"
+        server.workbooks.update(single_workbook)
+        request_body = m.request_history[0].body
+    xml_root = fromstring(request_body)
+    assert xml_root.find(".//dataAccelerationConfig") is None
+
+
 def test_update_description_in_request_xml(server: TSC.Server) -> None:
     """description should be included in the update request XML when server >= 3.21."""
     server.version = "3.21"
