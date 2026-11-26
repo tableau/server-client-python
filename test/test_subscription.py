@@ -1,3 +1,4 @@
+from datetime import time
 from pathlib import Path
 
 import pytest
@@ -100,3 +101,425 @@ def test_delete_subscription(server: TSC.Server) -> None:
     with requests_mock.mock() as m:
         m.delete(server.subscriptions.baseurl + "/78e9318d-2d29-4d67-b60f-3f2f5fd89ecc", status_code=204)
         server.subscriptions.delete("78e9318d-2d29-4d67-b60f-3f2f5fd89ecc")
+
+
+# -----------------------------------------------------------------
+# refresh_extract_triggered (aka "On Extract Refresh" subscriptions)
+# -----------------------------------------------------------------
+
+
+def test_create_rejects_none_schedule_id(server: TSC.Server) -> None:
+    """Regression for tableau/server-client-python#1658: users trying to create
+    an 'On Extract Refresh' subscription would pass schedule_id=None. Point them
+    at on_extract_refresh() instead of letting the failure surface deep in
+    the wire layer as a ServerResponseError. The check lives in create() (not
+    __init__) so parse can still build items from server responses that use
+    the inline-schedule form (no schedule id on the wire).
+    """
+    target = TSC.Target("view-id", "view")
+    sub = TSC.SubscriptionItem("subject", None, "user-id", target)
+    with pytest.raises(ValueError, match="on_extract_refresh"):
+        server.subscriptions.create(sub)
+
+
+def test_create_rejects_empty_schedule_id(server: TSC.Server) -> None:
+    """Same failure mode as None: an empty-string schedule_id would serialize
+    as <schedule id=""/> and hit a confusing server error.
+    """
+    target = TSC.Target("view-id", "view")
+    sub = TSC.SubscriptionItem("subject", "", "user-id", target)
+    with pytest.raises(ValueError, match="on_extract_refresh"):
+        server.subscriptions.create(sub)
+
+
+def test_create_rejects_whitespace_only_schedule_id(server: TSC.Server) -> None:
+    """A whitespace-only schedule_id is the same failure mode as None/empty:
+    truthiness alone lets it through, but it would still serialize as
+    <schedule id="   "/> and hit the same confusing wire-layer error.
+    """
+    target = TSC.Target("view-id", "view")
+    sub = TSC.SubscriptionItem("subject", "   ", "user-id", target)
+    with pytest.raises(ValueError, match="on_extract_refresh"):
+        server.subscriptions.create(sub)
+
+
+def test_create_req_rejects_whitespace_only_schedule_id(server: TSC.Server) -> None:
+    """RequestFactory.Subscription.create_req must reject a whitespace-only
+    schedule_id too, for callers who bypass Subscriptions.create() and use
+    the factory directly.
+    """
+    from tableauserverclient.server.request_factory import RequestFactory
+
+    target = TSC.Target("view-id", "view")
+    sub = TSC.SubscriptionItem("subject", "   ", "user-id", target)
+    with pytest.raises(ValueError, match="schedule_id is required"):
+        RequestFactory.Subscription.create_req(sub)
+
+
+def test_subscription_defaults_refresh_extract_triggered_false(server: TSC.Server) -> None:
+    """A default SubscriptionItem does not opt into extract-refresh triggering."""
+    target = TSC.Target("view-id", "view")
+    sub = TSC.SubscriptionItem("subject", "sched-id", "user-id", target)
+    assert sub.refresh_extract_triggered is False
+
+
+def test_on_extract_refresh_factory_sets_flag(server: TSC.Server) -> None:
+    """The on_extract_refresh factory produces a subscription with the flag set
+    and the extract-refresh schedule id in place -- server rejects a payload
+    that has the flag without a schedule reference, so both must be set together.
+    """
+    target = TSC.Target("view-id", "view")
+    sub = TSC.SubscriptionItem.on_extract_refresh(
+        subject="On refresh",
+        extract_refresh_schedule_id="refresh-sched-id",
+        user_id="user-id",
+        target=target,
+    )
+    assert sub.refresh_extract_triggered is True
+    assert sub.schedule_id == "refresh-sched-id"
+    assert sub.subject == "On refresh"
+    assert sub.user_id == "user-id"
+    assert sub.target is target
+
+
+def test_create_req_emits_refresh_extract_triggered_when_set(server: TSC.Server) -> None:
+    """When the flag is set, the outbound XML should carry
+    refreshExtractTriggered='true' on the <subscription> element.
+    """
+    from tableauserverclient.server.request_factory import RequestFactory
+
+    target = TSC.Target("view-id", "view")
+    sub = TSC.SubscriptionItem.on_extract_refresh(
+        subject="On refresh",
+        extract_refresh_schedule_id="refresh-sched-id",
+        user_id="user-id",
+        target=target,
+    )
+    body = RequestFactory.Subscription.create_req(sub).decode("utf-8")
+    assert 'refreshExtractTriggered="true"' in body
+
+
+def test_create_req_omits_refresh_extract_triggered_when_false(server: TSC.Server) -> None:
+    """A default subscription must not emit refreshExtractTriggered=false. Some
+    servers treat absence and False differently; we send only when the caller
+    has explicitly opted in.
+    """
+    from tableauserverclient.server.request_factory import RequestFactory
+
+    target = TSC.Target("view-id", "view")
+    sub = TSC.SubscriptionItem("subject", "sched-id", "user-id", target)
+    body = RequestFactory.Subscription.create_req(sub).decode("utf-8")
+    assert "refreshExtractTriggered" not in body
+
+
+def test_parse_response_reads_refresh_extract_triggered(server: TSC.Server) -> None:
+    """A subscription XML element carrying refreshExtractTriggered='true'
+    parses back into refresh_extract_triggered=True on the SubscriptionItem.
+    """
+    xml = (
+        b'<tsResponse xmlns="http://tableau.com/api">'
+        b"  <subscriptions>"
+        b'    <subscription id="sub-1" subject="On refresh" attachImage="true" attachPdf="false"'
+        b'                  suspended="false" refreshExtractTriggered="true">'
+        b'      <content id="view-1" type="View" sendIfViewEmpty="false" />'
+        b'      <schedule id="refresh-sched-1" name="Nightly refresh" />'
+        b'      <user id="user-1" />'
+        b"    </subscription>"
+        b"  </subscriptions>"
+        b"</tsResponse>"
+    )
+    subs = TSC.SubscriptionItem.from_response(xml, {"t": "http://tableau.com/api"})
+    assert len(subs) == 1
+    assert subs[0].refresh_extract_triggered is True
+    assert subs[0].schedule_id == "refresh-sched-1"
+
+
+def test_update_rejects_missing_schedule_id(server: TSC.Server) -> None:
+    """A subscription round-tripped from an inline-schedule response has
+    schedule_id=None. Calling update() on it would send <schedule/> with no id
+    and hit a confusing wire-layer error. Catch it at the endpoint instead.
+    """
+    target = TSC.Target("view-id", "view")
+    sub = TSC.SubscriptionItem("subject", "sched-id", "user-id", target)
+    sub._id = "existing-sub-id"  # type: ignore[assignment]
+    sub.schedule_id = None
+    with pytest.raises(ValueError, match="schedule_id is required"):
+        server.subscriptions.update(sub)
+
+
+def test_update_rejects_whitespace_only_schedule_id(server: TSC.Server) -> None:
+    """Same failure mode as None: a whitespace-only schedule_id would pass a
+    truthiness check and reach RequestFactory, still producing a confusing
+    wire-layer error. update() must reject it explicitly.
+    """
+    target = TSC.Target("view-id", "view")
+    sub = TSC.SubscriptionItem("subject", "sched-id", "user-id", target)
+    sub._id = "existing-sub-id"  # type: ignore[assignment]
+    sub.schedule_id = "   "
+    with pytest.raises(ValueError, match="schedule_id is required"):
+        server.subscriptions.update(sub)
+
+
+def test_update_req_emits_refresh_extract_triggered_when_true(server: TSC.Server) -> None:
+    """When the flag is True, update_req must emit refreshExtractTriggered='true'."""
+    from tableauserverclient.server.request_factory import RequestFactory
+
+    target = TSC.Target("view-id", "view")
+    sub = TSC.SubscriptionItem.on_extract_refresh(
+        subject="On refresh",
+        extract_refresh_schedule_id="refresh-sched-id",
+        user_id="user-id",
+        target=target,
+    )
+    body = RequestFactory.Subscription.update_req(sub).decode("utf-8")
+    assert 'refreshExtractTriggered="true"' in body
+
+
+def test_update_req_emits_refresh_extract_triggered_when_false(server: TSC.Server) -> None:
+    """update_req must emit refreshExtractTriggered='false' so callers can turn
+    the flag off. The server retains the prior value when the attribute is
+    absent, so omission would silently prevent True -> False transitions.
+    """
+    from tableauserverclient.server.request_factory import RequestFactory
+
+    target = TSC.Target("view-id", "view")
+    sub = TSC.SubscriptionItem("subject", "sched-id", "user-id", target)
+    assert sub.refresh_extract_triggered is False
+    body = RequestFactory.Subscription.update_req(sub).decode("utf-8")
+    assert 'refreshExtractTriggered="false"' in body
+
+
+def test_parse_response_with_inline_schedule_no_id(server: TSC.Server) -> None:
+    """Regression: on Cloud/TOL the server may return a <schedule> element with
+    no id attribute (the full schedule is inlined instead). Parse must handle
+    this without raising -- the constructor cannot demand a schedule_id here.
+    The parsed `.schedule` must be a single ScheduleItem instance so callers
+    can read `.id` directly (ScheduleItem.from_element returns a list; the
+    parser unwraps it for us).
+    """
+    xml = (
+        b'<tsResponse xmlns="http://tableau.com/api">'
+        b"  <subscriptions>"
+        b'    <subscription id="sub-3" subject="TOL sub" attachImage="true" attachPdf="false" suspended="false">'
+        b'      <content id="view-3" type="View" sendIfViewEmpty="false" />'
+        b'      <schedule name="Nightly refresh" frequency="Daily">'
+        b'        <frequencyDetails start="02:00:00" />'
+        b"      </schedule>"
+        b'      <user id="user-3" />'
+        b"    </subscription>"
+        b"  </subscriptions>"
+        b"</tsResponse>"
+    )
+    subs = TSC.SubscriptionItem.from_response(xml, {"t": "http://tableau.com/api"})
+    assert len(subs) == 1
+    assert subs[0].schedule_id is None
+    assert subs[0].schedule is not None
+    assert isinstance(subs[0].schedule, TSC.ScheduleItem)
+    assert subs[0].schedule.id is None  # inline-no-id case; the fallback in update() cannot recover this
+
+
+def test_update_raises_clear_error_when_inline_schedule_has_no_id(server: TSC.Server) -> None:
+    """Cloud inline-schedule WITHOUT id: fetch-then-update must raise a clear
+    ValueError. Both parser and endpoint agree there is no schedule id to send
+    back; the user has to look up the schedule separately.
+    """
+    get_xml = (
+        b'<tsResponse xmlns="http://tableau.com/api">'
+        b'  <subscription id="sub-inline-no-id" subject="Cloud sub" attachImage="true" '
+        b'                attachPdf="false" suspended="false">'
+        b'    <content id="view-2" type="View" sendIfViewEmpty="false" />'
+        b'    <schedule name="Nightly refresh" frequency="Daily">'
+        b'      <frequencyDetails start="02:00:00" />'
+        b"    </schedule>"
+        b'    <user id="user-2" />'
+        b"  </subscription>"
+        b"</tsResponse>"
+    )
+    subs = TSC.SubscriptionItem.from_response(get_xml, {"t": "http://tableau.com/api"})
+    sub = subs[0]
+    assert sub.schedule_id is None
+    assert sub.schedule is not None and sub.schedule.id is None
+
+    with pytest.raises(ValueError) as excinfo:
+        server.subscriptions.update(sub)
+    msg = str(excinfo.value)
+    assert "schedule_id is required" in msg
+    assert "server.schedules.get" in msg
+
+
+def test_update_manually_built_subscription_emits_flag_false(server: TSC.Server) -> None:
+    """Manual-build update() footgun coverage. A fresh SubscriptionItem
+    constructed locally, with _id assigned to point at an existing
+    subscription, must round-trip refresh_extract_triggered=False on the wire
+    when the caller has not touched the flag. This is the exact case the
+    property docstring warns callers away from -- pin the behavior so we
+    notice if the emit changes.
+    """
+    from tableauserverclient.server.request_factory import RequestFactory
+
+    response_xml = (
+        '<tsResponse xmlns="http://tableau.com/api">'
+        '  <subscription id="existing-sub-id" subject="Updated subject" attachImage="true" attachPdf="false"'
+        '                suspended="false" refreshExtractTriggered="false">'
+        '    <content id="view-id" type="View" sendIfViewEmpty="true" />'
+        '    <schedule id="sched-id" name="Weekly" />'
+        '    <user id="user-id" />'
+        "  </subscription>"
+        "</tsResponse>"
+    )
+    target = TSC.Target("view-id", "view")
+    sub = TSC.SubscriptionItem("Updated subject", "sched-id", "user-id", target)
+    sub._id = "existing-sub-id"  # type: ignore[assignment]
+
+    with requests_mock.mock() as m:
+        m.put(server.subscriptions.baseurl + "/existing-sub-id", text=response_xml)
+        server.subscriptions.update(sub)
+        body = m.last_request.text or ""
+
+    assert 'refreshExtractTriggered="false"' in body
+    # Sanity: also confirm update_req produces the same thing without a server
+    body_direct = RequestFactory.Subscription.update_req(sub).decode("utf-8")
+    assert 'refreshExtractTriggered="false"' in body_direct
+
+
+def test_update_manually_built_extract_refresh_subscription_emits_flag_true(server: TSC.Server) -> None:
+    """Manual-build update() coverage for the on_extract_refresh() variant. A
+    fresh SubscriptionItem constructed via on_extract_refresh(), with _id
+    assigned, must emit refreshExtractTriggered='true' when sent through
+    update().
+    """
+    response_xml = (
+        '<tsResponse xmlns="http://tableau.com/api">'
+        '  <subscription id="existing-sub-id" subject="On refresh" attachImage="true" attachPdf="false"'
+        '                suspended="false" refreshExtractTriggered="true">'
+        '    <content id="view-id" type="View" sendIfViewEmpty="true" />'
+        '    <schedule id="refresh-sched-id" name="Nightly refresh" />'
+        '    <user id="user-id" />'
+        "  </subscription>"
+        "</tsResponse>"
+    )
+    target = TSC.Target("view-id", "view")
+    sub = TSC.SubscriptionItem.on_extract_refresh(
+        subject="On refresh",
+        extract_refresh_schedule_id="refresh-sched-id",
+        user_id="user-id",
+        target=target,
+    )
+    sub._id = "existing-sub-id"  # type: ignore[assignment]
+
+    with requests_mock.mock() as m:
+        m.put(server.subscriptions.baseurl + "/existing-sub-id", text=response_xml)
+        server.subscriptions.update(sub)
+        body = m.last_request.text or ""
+
+    assert 'refreshExtractTriggered="true"' in body
+
+
+def test_update_round_trip_preserves_refresh_extract_triggered(server: TSC.Server) -> None:
+    """Fetch-then-mutate-then-update round-trip preserves the flag. Parse a
+    subscription XML with refreshExtractTriggered='true', mutate an unrelated
+    field (subject), send through update(), and confirm the emitted body
+    still carries refreshExtractTriggered='true'. This is the safe pattern
+    the property docstring recommends and it deserves an explicit test.
+    """
+    parsed = TSC.SubscriptionItem.from_response(
+        (
+            b'<tsResponse xmlns="http://tableau.com/api">'
+            b"  <subscriptions>"
+            b'    <subscription id="existing-sub-id" subject="Original subject"'
+            b'                  attachImage="true" attachPdf="false" suspended="false"'
+            b'                  refreshExtractTriggered="true">'
+            b'      <content id="view-id" type="View" sendIfViewEmpty="false" />'
+            b'      <schedule id="refresh-sched-id" name="Nightly refresh" />'
+            b'      <user id="user-id" />'
+            b"    </subscription>"
+            b"  </subscriptions>"
+            b"</tsResponse>"
+        ),
+        {"t": "http://tableau.com/api"},
+    )
+    assert len(parsed) == 1
+    sub = parsed[0]
+    assert sub.refresh_extract_triggered is True
+    sub.subject = "Mutated subject"
+
+    response_xml = (
+        '<tsResponse xmlns="http://tableau.com/api">'
+        '  <subscription id="existing-sub-id" subject="Mutated subject" attachImage="true" attachPdf="false"'
+        '                suspended="false" refreshExtractTriggered="true">'
+        '    <content id="view-id" type="View" sendIfViewEmpty="false" />'
+        '    <schedule id="refresh-sched-id" name="Nightly refresh" />'
+        '    <user id="user-id" />'
+        "  </subscription>"
+        "</tsResponse>"
+    )
+    with requests_mock.mock() as m:
+        m.put(server.subscriptions.baseurl + "/existing-sub-id", text=response_xml)
+        server.subscriptions.update(sub)
+        body = m.last_request.text or ""
+
+    assert 'refreshExtractTriggered="true"' in body
+    assert 'subject="Mutated subject"' in body
+
+
+def test_update_falls_back_to_schedule_object_id_on_cloud(server: TSC.Server) -> None:
+    """Cloud fetch-then-update guard. When a SubscriptionItem arrives with
+    schedule_id=None but a parsed schedule object whose id is populated
+    (a shape a future _parse_element could produce, or a shape a caller can
+    build directly), update() must fall back to schedule.id instead of
+    rejecting the item. This unblocks the fetch-then-update pattern the
+    refresh_extract_triggered property docstring recommends on Cloud.
+    """
+    target = TSC.Target("view-id", "view")
+    sub = TSC.SubscriptionItem("Cloud sub", None, "user-id", target)
+    sub._id = "existing-sub-id"  # type: ignore[assignment]
+    # Build a schedule object with an id but leave schedule_id None -- the
+    # Cloud inline-schedule case the endpoint fallback exists to handle.
+    schedule = TSC.ScheduleItem(
+        "Nightly refresh",
+        50,
+        TSC.ScheduleItem.Type.Extract,
+        "Parallel",
+        TSC.DailyInterval(time(2, 0)),
+    )
+    schedule._id = "inline-sched-id"
+    sub.schedule = schedule  # type: ignore[assignment]
+    assert sub.schedule_id is None
+    assert sub.schedule.id == "inline-sched-id"  # type: ignore[attr-defined]
+
+    response_xml = (
+        '<tsResponse xmlns="http://tableau.com/api">'
+        '  <subscription id="existing-sub-id" subject="Cloud sub" attachImage="true" attachPdf="false"'
+        '                suspended="false" refreshExtractTriggered="false">'
+        '    <content id="view-id" type="View" sendIfViewEmpty="true" />'
+        '    <schedule id="inline-sched-id" name="Nightly refresh" />'
+        '    <user id="user-id" />'
+        "  </subscription>"
+        "</tsResponse>"
+    )
+    with requests_mock.mock() as m:
+        m.put(server.subscriptions.baseurl + "/existing-sub-id", text=response_xml)
+        server.subscriptions.update(sub)
+        body = m.last_request.text or ""
+
+    assert 'id="inline-sched-id"' in body
+
+
+def test_parse_response_missing_refresh_extract_triggered_defaults_false(server: TSC.Server) -> None:
+    """Backward compatibility: a subscription XML element without the attribute
+    parses back to refresh_extract_triggered=False.
+    """
+    xml = (
+        b'<tsResponse xmlns="http://tableau.com/api">'
+        b"  <subscriptions>"
+        b'    <subscription id="sub-2" subject="Weekly" attachImage="true" attachPdf="false" suspended="false">'
+        b'      <content id="view-2" type="View" sendIfViewEmpty="false" />'
+        b'      <schedule id="weekly-sched" name="Weekly Monday" />'
+        b'      <user id="user-2" />'
+        b"    </subscription>"
+        b"  </subscriptions>"
+        b"</tsResponse>"
+    )
+    subs = TSC.SubscriptionItem.from_response(xml, {"t": "http://tableau.com/api"})
+    assert len(subs) == 1
+    assert subs[0].refresh_extract_triggered is False
