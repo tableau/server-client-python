@@ -17,7 +17,7 @@ def get_server() -> TSC.Server:
     # Fake sign in
     server._site_id = "dad65087-b08b-4603-af4e-2887b8aafc67"
     server._auth_token = "j80k54ll2lfMZ0tv97mlPvvSCRyD0DOM"
-    server.version = "3.28"
+    server.version = "3.30"  # min for virtual_connections.update_tags (v262 / 2026.2)
     return server
 
 
